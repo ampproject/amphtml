@@ -44,10 +44,7 @@ export function viralize(global, data) {
 
   const scriptUrl = addParamsToUrl(endpoint, queryParams);
 
-  loadScript(
-    global,
-    scriptUrl,
-    () => global.context.renderStart(),
-    () => global.context.noContentAvailable()
-  );
+  loadScript(global, scriptUrl,
+      () => global.context.renderStart(),
+      () => global.context.noContentAvailable());
 }

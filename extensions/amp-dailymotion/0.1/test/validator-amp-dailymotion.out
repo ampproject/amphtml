@@ -48,18 +48,18 @@ FAIL
 |  <!-- invalid: videoid bad -->
 |  <amp-dailymotion data-videoid="i don't think so" width="500" height="281"
 >> ^~~~~~~~~
-amp-dailymotion/0.1/test/validator-amp-dailymotion.html:48:0 The attribute 'data-videoid' in tag 'amp-dailymotion' is set to the invalid value 'i don't think so'. (see https://amp.dev/documentation/components/amp-dailymotion) [DISALLOWED_HTML]
+amp-dailymotion/0.1/test/validator-amp-dailymotion.html:48:0 The attribute 'data-videoid' in tag 'amp-dailymotion' is set to the invalid value 'i don't think so'. (see https://www.ampproject.org/docs/reference/components/amp-dailymotion) [DISALLOWED_HTML]
 |          layout="responsive"></amp-dailymotion>
 |
 |  <!-- invalid: videoid missing -->
 |  <amp-dailymotion width="500" height="281" layout="responsive"></amp-dailymotion>
 >> ^~~~~~~~~
-amp-dailymotion/0.1/test/validator-amp-dailymotion.html:52:0 The mandatory attribute 'data-videoid' is missing in tag 'amp-dailymotion'. (see https://amp.dev/documentation/components/amp-dailymotion) [AMP_TAG_PROBLEM]
+amp-dailymotion/0.1/test/validator-amp-dailymotion.html:52:0 The mandatory attribute 'data-videoid' is missing in tag 'amp-dailymotion'. (see https://www.ampproject.org/docs/reference/components/amp-dailymotion) [AMP_TAG_PROBLEM]
 |
 |  <!-- invalid: bad attr value -->
 |  <amp-dailymotion data-videoid="jx2m8pp" width="500" height="281" layout="responsive"
 >> ^~~~~~~~~
-amp-dailymotion/0.1/test/validator-amp-dailymotion.html:55:0 The attribute 'data-ui-highlight' in tag 'amp-dailymotion' is set to the invalid value 'blue'. (see https://amp.dev/documentation/components/amp-dailymotion) [DISALLOWED_HTML]
+amp-dailymotion/0.1/test/validator-amp-dailymotion.html:55:0 The attribute 'data-ui-highlight' in tag 'amp-dailymotion' is set to the invalid value 'blue'. (see https://www.ampproject.org/docs/reference/components/amp-dailymotion) [DISALLOWED_HTML]
 |                   data-ui-highlight="blue">
 |  </amp-dailymotion>
 |

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {isString} from './string';
+
 /**
  * Expects an object with pubId, widgetId, & productCode keys with string values
  *
@@ -27,7 +29,7 @@
  * @param {{pubId: string, widgetId: string, productCode: string}} _
  * @return {number} -1 indicates an error has occurred
  */
-export function getAddThisMode(_) {
+export const getAddThisMode = _ => {
   const {hasPubId, hasWidgetId, hasProductCode} = getAddThisModeObject(_);
   if (hasPubId) {
     if (hasWidgetId && !hasProductCode) {
@@ -39,7 +41,7 @@ export function getAddThisMode(_) {
     return 3;
   }
   return -1;
-}
+};
 
 /**
  * @param {{pubId: string, widgetId: string, productCode: string}} _
@@ -49,37 +51,24 @@ export function getAddThisMode(_) {
  * hasProductCode:boolean
  * }}
  */
-export function getAddThisModeObject({pubId, widgetId, productCode}) {
+export const getAddThisModeObject = ({pubId, widgetId, productCode}) => {
   const hasPubId = isPubId(pubId);
   // widget ids are 4-character strings with lower-case letters and numbers only
   const hasWidgetId = isWidgetId(widgetId);
   // product code is one of just a few values
-  const hasProductCode =
-    typeof productCode === 'string' &&
+  const hasProductCode = isString(productCode) &&
     (productCode === 'shin' || productCode === 'shfs');
   return {hasPubId, hasWidgetId, hasProductCode};
-}
+};
 
-/**
- * @param {*} candidate
- * @return {boolean}
- */
-export function isPubId(candidate) {
-  return typeof candidate === 'string' && candidate.length > 0;
-}
+export const isPubId = candidate => {
+  return isString(candidate) && candidate.length > 0;
+};
 
-/**
- * @param {*} candidate
- * @return {boolean}
- */
-export function isWidgetId(candidate) {
-  return typeof candidate === 'string' && candidate.length === 4;
-}
+export const isWidgetId = candidate => {
+  return isString(candidate) && candidate.length === 4;
+};
 
-/**
- * @param {*} candidate
- * @return {boolean}
- */
-export function isProductCode(candidate) {
+export const isProductCode = candidate => {
   return candidate === 'shin' || candidate === 'shfs';
-}
+};

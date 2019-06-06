@@ -49,8 +49,7 @@ export class AmpBindMacro extends AMP.BaseElement {
    * @private
    */
   getName_() {
-    return (
-      '<amp-bind-macro> ' + (this.element.getAttribute('id') || '<unknown id>')
-    );
+    return '<amp-bind-macro> ' +
+        (this.element.getAttribute('id') || '<unknown id>');
   }
 }

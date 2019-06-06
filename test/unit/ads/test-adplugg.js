@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {adplugg} from '../../../ads/adplugg';
+import {
+  adplugg,
+} from '../../../ads/adplugg';
 import {createIframePromise} from '../../../testing/iframe';
 
 describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
@@ -26,6 +28,7 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
    * Set up our test environment.
    */
   beforeEach(() => {
+
     // Set up our test sandbox.
     sandbox = sinon.sandbox;
     return createIframePromise(true).then(iframe => {
@@ -68,7 +71,9 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
   });
 
   describe('adplugg', () => {
+
     it('should create an AdPlugg ad tag', () => {
+
       // Call the function.
       adplugg(win, testData);
 
@@ -153,8 +158,8 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
     it('implement the noContentAvailable API', () => {
       // Set up mocks, spys, etc.
       const noContentAvailableSpy = sandbox.stub(
-        win.context,
-        'noContentAvailable'
+          win.context,
+          'noContentAvailable'
       );
       win.AdPlugg = {
         push: function() {},
@@ -194,5 +199,7 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
       // Assert that noContentAvailable API was called as expected
       expect(noContentAvailableSpy).to.be.calledOnce;
     });
+
   });
+
 });

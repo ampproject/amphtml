@@ -61,17 +61,17 @@ FAIL
 |    <amp-fx-flying-carpet height="300">
 |      <amp-ad data-multi-size="" height="300" type="foo"></amp-ad>
 >>     ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:61:4 The tag 'amp-ad with data-multi-size attribute' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://amp.dev/documentation/components/amp-ad) [AMP_TAG_PROBLEM]
+amp-ad/0.1/test/validator-amp-ad.html:61:4 The tag 'amp-ad with data-multi-size attribute' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
 |    </amp-fx-flying-carpet>
 |    <!-- Invalid: amp-ad in an amp ad container with data-multi-size attr -->
 |    <amp-fx-flying-carpet height="300">
 |      <amp-embed data-multi-size="" height="300" type="foo"></amp-ad>
 >>     ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:65:4 The tag 'amp-embed with data-multi-size attribute' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://amp.dev/documentation/components/amp-ad) [AMP_TAG_PROBLEM]
+amp-ad/0.1/test/validator-amp-ad.html:65:4 The tag 'amp-embed with data-multi-size attribute' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
 |    </amp-fx-flying-carpet>
 |    <!-- Invalid: amp-ad missing layout=fluid for fluid ad -->
 |    <amp-ad type=doubleclick width="100" height="fluid"></amp-ad>
 >>   ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:68:2 The attribute 'height' in tag 'amp-ad' is set to the invalid value 'fluid'. (see https://amp.dev/documentation/components/amp-ad) [AMP_LAYOUT_PROBLEM]
+amp-ad/0.1/test/validator-amp-ad.html:68:2 The attribute 'height' in tag 'amp-ad' is set to the invalid value 'fluid'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_LAYOUT_PROBLEM]
 |  </body>
 |  </html>

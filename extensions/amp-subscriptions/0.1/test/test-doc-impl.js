@@ -16,6 +16,7 @@
 
 import {DocImpl} from '../doc-impl';
 
+
 describes.realWin('DocImpl', {amp: true}, env => {
   let ampdoc;
   let configDoc;
@@ -28,9 +29,8 @@ describes.realWin('DocImpl', {amp: true}, env => {
   it('should proxy inteface to ampdoc', () => {
     expect(configDoc.getWin()).to.equal(ampdoc.win);
     expect(configDoc.getRootNode()).to.equal(ampdoc.getRootNode());
-    expect(configDoc.getRootElement()).to.equal(
-      ampdoc.getRootNode().documentElement
-    );
+    expect(configDoc.getRootElement())
+        .to.equal(ampdoc.getRootNode().documentElement);
     expect(configDoc.getHead()).to.equal(ampdoc.getHeadNode());
   });
 

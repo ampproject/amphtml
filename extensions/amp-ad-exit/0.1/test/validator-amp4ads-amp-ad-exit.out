@@ -53,7 +53,7 @@ FAIL
 |  <!-- Invalid: wrong layout -->
 |  <amp-ad-exit id="exit-api-layoutfill" layout="fill">
 >> ^~~~~~~~~
-amp-ad-exit/0.1/test/validator-amp4ads-amp-ad-exit.html:53:0 The specified layout 'FILL' is not supported by tag 'amp-ad-exit'. (see https://amp.dev/documentation/components/amp-ad-exit) [AMP_LAYOUT_PROBLEM]
+amp-ad-exit/0.1/test/validator-amp4ads-amp-ad-exit.html:53:0 The specified layout 'FILL' is not supported by tag 'amp-ad-exit'. (see https://www.ampproject.org/docs/reference/components/amp-ad-exit) [AMP_LAYOUT_PROBLEM]
 |  <script type="application/json">
 |  {"targets": {"target1": {"finalUrl": "http://example.com/"}}}
 |  </script>
@@ -61,13 +61,13 @@ amp-ad-exit/0.1/test/validator-amp4ads-amp-ad-exit.html:53:0 The specified layou
 |  <!-- Invalid: non-script children -->
 |  <amp-ad-exit id="exit-api-children">
 >> ^~~~~~~~~
-amp-ad-exit/0.1/test/validator-amp4ads-amp-ad-exit.html:59:0 Tag 'amp-ad-exit' must have 1 child tags - saw 2 child tags. (see https://amp.dev/documentation/components/amp-ad-exit) [AMP_TAG_PROBLEM]
+amp-ad-exit/0.1/test/validator-amp4ads-amp-ad-exit.html:59:0 Tag 'amp-ad-exit' must have 1 child tags - saw 2 child tags. (see https://www.ampproject.org/docs/reference/components/amp-ad-exit) [AMP_TAG_PROBLEM]
 |  <script type="application/json">
 |  {"targets": {"target1": {"finalUrl": "http://example.com/"}}}
 |  </script>
 |  <p>p</p>
 >> ^~~~~~~~~
-amp-ad-exit/0.1/test/validator-amp4ads-amp-ad-exit.html:63:0 Tag 'p' is disallowed as child of tag 'amp-ad-exit'. Child tag must be one of ['script']. (see https://amp.dev/documentation/components/amp-ad-exit) [AMP_TAG_PROBLEM]
+amp-ad-exit/0.1/test/validator-amp4ads-amp-ad-exit.html:63:0 Tag 'p' is disallowed as child of tag 'amp-ad-exit'. Child tag must be one of ['script']. (see https://www.ampproject.org/docs/reference/components/amp-ad-exit) [AMP_TAG_PROBLEM]
 |  </amp-ad-exit>
 |
 |  </amp-ad-exit>

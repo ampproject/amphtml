@@ -19,6 +19,7 @@ import {computeInMasterFrame} from './3p';
 import {dev, user, userAssert} from '../src/log';
 import {dict} from '../src/utils/object';
 
+
 /**
  * Returns the "master frame" for all widgets of a given type.
  * This frame should be used to e.g. fetch scripts that can
@@ -30,8 +31,8 @@ import {dict} from '../src/utils/object';
  */
 export function masterSelection(win, type) {
   type = type.toLowerCase();
-  const configType =
-    adConfig[type] && adConfig[type]['masterFrameAccessibleType'];
+  const configType = adConfig[type] &&
+      adConfig[type]['masterFrameAccessibleType'];
   // The master has a special name.
   const masterName = 'frame_' + (configType || type) + '_master';
   let master;
@@ -51,7 +52,9 @@ export function masterSelection(win, type) {
   return master;
 }
 
+
 export class IntegrationAmpContext extends AbstractAmpContext {
+
   /** @override */
   isAbstractImplementation_() {
     return false;
@@ -64,14 +67,13 @@ export class IntegrationAmpContext extends AbstractAmpContext {
   updateDimensionsEnabled_() {
     // Only make this available to selected embeds until the generic solution is
     // available.
-    return (
-      this.embedType_ === 'facebook' ||
-      this.embedType_ === 'twitter' ||
-      this.embedType_ === 'github' ||
-      this.embedType_ === 'mathml' ||
-      this.embedType_ === 'reddit' ||
-      this.embedType_ === 'yotpo' ||
-      this.embedType_ === 'embedly'
+    return (this.embedType_ === 'facebook'
+        || this.embedType_ === 'twitter'
+        || this.embedType_ === 'github'
+        || this.embedType_ === 'mathml'
+        || this.embedType_ === 'reddit'
+        || this.embedType_ === 'yotpo'
+        || this.embedType_ === 'embedly'
     );
   }
 
@@ -130,12 +132,9 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    * @param {string} entityId See comment above for content.
    */
   reportRenderedEntityIdentifier(entityId) {
-    this.client_.sendMessage(
-      'entity-id',
-      dict({
-        'id': user().assertString(entityId),
-      })
-    );
+    this.client_.sendMessage('entity-id', dict({
+      'id': user().assertString(entityId),
+    }));
   }
 
   /**

@@ -43,7 +43,7 @@ tags: {  # <amp-call-tracking>
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "A"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-call-tracking"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-call-tracking"
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: FILL

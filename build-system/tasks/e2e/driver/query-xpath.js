@@ -57,21 +57,16 @@ function queryXpath(xpathString, context) {
   // Add an ID to every element in the tree so we can reference them later.
   // This allows us to correlate nodes from the cloned tree to the
   // original tree.
-  for (const {item, index} of createIndexedInterator(
-    createElementIterator(context)
-  )) {
+  for (const {item, index} of
+    createIndexedInterator(createElementIterator(context))) {
     setData(item, index);
   }
 
   const fakeDocument = document.implementation.createDocument(
-    'http://www.w3.org/1999/xhtml',
-    'html',
-    null
-  );
+      'http://www.w3.org/1999/xhtml', 'html', null);
   try {
     fakeDocument.documentElement.appendChild(
-      context.cloneNode(/* deep */ true)
-    );
+        context.cloneNode(/* deep */ true));
   } catch (e) {
     // Appending the AMP `CustomElement`s to the new document throws errors
     // because the implementations expect the AmpDoc to be present and it
@@ -82,12 +77,11 @@ function queryXpath(xpathString, context) {
   // Map the xpath results from the fake tree to the corresponding nodes in
   // the test document tree.
   const xpathIterator = createXpathIterator(
-    evaluate(xpathString, fakeDocument, null, XPathResult.ANY_TYPE)
-  );
+      evaluate(xpathString, fakeDocument, null, XPathResult.ANY_TYPE));
   const elements = [...xpathIterator].map(node => {
     const testId = getData(node);
     const selector = `[${TEST_ID_ATTRIBUTE}="${testId}"]`;
-    return context./*OK*/ querySelector(selector);
+    return context./*OK*/querySelector(selector);
   });
 
   // Restore the DOM to the original state without the ID in the dataset.
@@ -132,9 +126,8 @@ function removeData(node) {
 function createElementIterator(element) {
   const document = element.ownerDocument;
   return createCommonIterator(
-    document.createNodeIterator(element, NodeFilter.SHOW_ELEMENT),
-    'nextNode'
-  );
+      document.createNodeIterator(element, NodeFilter.SHOW_ELEMENT),
+      'nextNode');
 }
 
 /**
@@ -155,7 +148,7 @@ function createXpathIterator(xpathResult) {
  */
 function* createCommonIterator(iterator, nextProperty) {
   let item;
-  while (Boolean((item = iterator[nextProperty]()))) {
+  while (Boolean(item = iterator[nextProperty]())) {
     yield item;
   }
 }
@@ -174,5 +167,6 @@ function* createIndexedInterator(iter) {
     index++;
   }
 }
+
 
 window.queryXpath = queryXpath;

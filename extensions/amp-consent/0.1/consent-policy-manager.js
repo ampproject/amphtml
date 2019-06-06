@@ -24,6 +24,8 @@ import {isFiniteNumber, isObject} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {user, userAssert} from '../../../src/log';
 
+
+
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
 
@@ -33,6 +35,7 @@ const WHITELIST_POLICY = {
   '_till_accepted': true,
   '_auto_reject': true,
 };
+
 
 export class ConsentPolicyManager {
   /**
@@ -50,10 +53,8 @@ export class ConsentPolicyManager {
     this.instances_ = map();
 
     /** @private {!Promise} */
-    this.ConsentStateManagerPromise_ = getServicePromiseForDoc(
-      this.ampdoc_,
-      CONSENT_STATE_MANAGER
-    );
+    this.ConsentStateManagerPromise_ =
+        getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
 
     /** @private {!Deferred} */
     this.consentPromptInitiated_ = new Deferred();
@@ -126,10 +127,8 @@ export class ConsentPolicyManager {
 
     const waitFor = Object.keys(config['waitFor'] || {});
     if (waitFor.length !== 1 || waitFor[0] !== this.consentInstanceIdDepr_) {
-      user().error(
-        TAG,
-        'invalid waitFor value, consent policy will never resolve'
-      );
+      user().error(TAG,
+          'invalid waitFor value, consent policy will never resolve');
       return;
     }
 
@@ -199,8 +198,8 @@ export class ConsentPolicyManager {
 
     if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
       const shouldOverwrite =
-        this.consentState_ != CONSENT_ITEM_STATE.ACCEPTED &&
-        this.consentState_ != CONSENT_ITEM_STATE.REJECTED;
+          this.consentState_ != CONSENT_ITEM_STATE.ACCEPTED &&
+          this.consentState_ != CONSENT_ITEM_STATE.REJECTED;
       // Ignore the consent item state and overwrite state value.
       if (shouldOverwrite) {
         this.consentState_ = CONSENT_ITEM_STATE.NOT_REQUIRED;
@@ -226,11 +225,8 @@ export class ConsentPolicyManager {
   whenPolicyResolved(policyId) {
     // If customized policy is not supported
     if (!WHITELIST_POLICY[policyId]) {
-      user().error(
-        TAG,
-        'can not find policy %s, only predefined policies are supported',
-        policyId
-      );
+      user().error(TAG, 'can not find policy %s, ' +
+        'only predefined policies are supported', policyId);
       return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
     }
     return this.whenPolicyInstanceRegistered_(policyId).then(() => {
@@ -248,11 +244,8 @@ export class ConsentPolicyManager {
   whenPolicyUnblock(policyId) {
     // If customized policy is not supported
     if (!WHITELIST_POLICY[policyId]) {
-      user().error(
-        TAG,
-        'can not find policy %s, only predefined policies are supported',
-        policyId
-      );
+      user().error(TAG, 'can not find policy %s, ' +
+        'only predefined policies are supported', policyId);
       return Promise.resolve(false);
     }
     return this.whenPolicyInstanceRegistered_(policyId).then(() => {
@@ -273,10 +266,10 @@ export class ConsentPolicyManager {
    */
   getMergedSharedData(policyId) {
     return this.whenPolicyResolved(policyId)
-      .then(() => this.ConsentStateManagerPromise_)
-      .then(manager => {
-        return manager.getConsentInstanceSharedData();
-      });
+        .then(() => this.ConsentStateManagerPromise_)
+        .then(manager => {
+          return manager.getConsentInstanceSharedData();
+        });
   }
 
   /**
@@ -303,8 +296,8 @@ export class ConsentPolicyManager {
     if (!this.policyInstancesDeferred_[policyId]) {
       this.policyInstancesDeferred_[policyId] = new Deferred();
     }
-    return /** @type {!Promise} */ (this.policyInstancesDeferred_[policyId]
-      .promise);
+    return /** @type {!Promise} */ (
+      this.policyInstancesDeferred_[policyId].promise);
   }
 }
 
@@ -329,10 +322,9 @@ export class ConsentPolicyInstance {
     this.status_ = CONSENT_POLICY_STATE.UNKNOWN;
 
     /** @private {!Array<CONSENT_POLICY_STATE>} */
-    this.unblockStateLists_ = config['unblockOn'] || [
-      CONSENT_POLICY_STATE.SUFFICIENT,
-      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
-    ];
+    this.unblockStateLists_ = config['unblockOn'] ||
+        [CONSENT_POLICY_STATE.SUFFICIENT,
+          CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED];
   }
 
   /**
@@ -353,30 +345,20 @@ export class ConsentPolicyInstance {
          *   "fallbackAction": "reject"
          * }
          */
-        if (
-          timeoutConfig['fallbackAction'] &&
-          timeoutConfig['fallbackAction'] == 'reject'
-        ) {
+        if (timeoutConfig['fallbackAction'] &&
+            timeoutConfig['fallbackAction'] == 'reject') {
           fallbackState = CONSENT_ITEM_STATE.REJECTED;
-        } else if (
-          timeoutConfig['fallbackAction'] &&
-          timeoutConfig['fallbackAction'] != 'dismiss'
-        ) {
-          user().error(
-            TAG,
-            'unsupported fallbackAction %s',
-            timeoutConfig['fallbackAction']
-          );
+        } else if (timeoutConfig['fallbackAction'] &&
+            timeoutConfig['fallbackAction'] != 'dismiss') {
+          user().error(TAG, 'unsupported fallbackAction %s',
+              timeoutConfig['fallbackAction']);
         }
         timeoutSecond = timeoutConfig['seconds'];
       } else {
         timeoutSecond = timeoutConfig;
       }
-      userAssert(
-        isFiniteNumber(timeoutSecond),
-        'invalid timeout value %s',
-        timeoutSecond
-      );
+      userAssert(isFiniteNumber(timeoutSecond),
+          'invalid timeout value %s', timeoutSecond);
     }
 
     if (timeoutSecond != null) {
@@ -386,6 +368,7 @@ export class ConsentPolicyInstance {
         this.evaluate(fallbackState, true);
       }, timeoutSecond * 1000);
     }
+
   }
 
   /**
@@ -444,6 +427,6 @@ export class ConsentPolicyInstance {
    * @return {boolean}
    */
   shouldUnblock() {
-    return this.unblockStateLists_.indexOf(this.status_) > -1;
+    return (this.unblockStateLists_.indexOf(this.status_) > -1);
   }
 }

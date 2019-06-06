@@ -24,15 +24,11 @@ export function dable(global, data) {
   // check required props
   validateData(data, ['widgetId']);
 
-  global.dable =
-    global.dable ||
-    function() {
-      (global.dable.q = global.dable.q || []).push(arguments);
-    };
-  global.dable(
-    'setService',
-    data['serviceName'] || global.window.context.location.hostname
-  );
+  (global.dable = global.dable || function() {
+    (global.dable.q = global.dable.q || []).push(arguments);
+  });
+  global.dable('setService', data['serviceName'] ||
+      global.window.context.location.hostname);
   global.dable('setURL', global.window.context.sourceUrl);
   global.dable('setRef', global.window.context.referrer);
 

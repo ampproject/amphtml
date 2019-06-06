@@ -19,11 +19,13 @@ import {dev, devAssert} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 import {toWin} from '../../../src/types';
 
+
 /**
  * Blacklisted properties. Used mainly fot testing.
  * @type {?Array<string>}
  */
 let blacklistedProperties = null;
+
 
 /**
  * @param {?Array<string>} properties
@@ -32,6 +34,7 @@ let blacklistedProperties = null;
 export function setBlacklistedPropertiesForTesting(properties) {
   blacklistedProperties = properties;
 }
+
 
 /**
  * Creates a proxy object `form.$p` that proxies all of the methods and
@@ -56,6 +59,7 @@ export function installFormProxy(form) {
   return proxy;
 }
 
+
 /**
  * @param {!Window} win
  * @return {function(new:Object, !HTMLFormElement)}
@@ -67,11 +71,13 @@ function getFormProxyConstr(win) {
   return win.FormProxy;
 }
 
+
 /**
  * @param {!Window} win
  * @return {function(new:Object, !HTMLFormElement)}
  */
 function createFormProxyConstr(win) {
+
   /**
    * @param {!HTMLFormElement} form
    * @constructor
@@ -88,7 +94,10 @@ function createFormProxyConstr(win) {
   // Hierarchy:
   //   Node  <==  Element <== HTMLElement <== HTMLFormElement
   //   EventTarget  <==  HTMLFormElement
-  const baseClasses = [win.HTMLFormElement, win.EventTarget];
+  const baseClasses = [
+    win.HTMLFormElement,
+    win.EventTarget,
+  ];
   const inheritance = baseClasses.reduce((all, klass) => {
     let proto = klass && klass.prototype;
     while (proto && proto !== ObjectProto) {
@@ -105,39 +114,34 @@ function createFormProxyConstr(win) {
   inheritance.forEach(proto => {
     for (const name in proto) {
       const property = win.Object.getOwnPropertyDescriptor(proto, name);
-      if (
-        !property ||
-        // Exclude constants.
-        name.toUpperCase() == name ||
-        // Exclude on-events.
-        startsWith(name, 'on') ||
-        // Exclude properties that already been created.
-        ObjectProto.hasOwnProperty.call(FormProxyProto, name) ||
-        // Exclude some properties. Currently only used for testing.
-        (blacklistedProperties && blacklistedProperties.includes(name))
-      ) {
+      if (!property ||
+          // Exclude constants.
+          name.toUpperCase() == name ||
+          // Exclude on-events.
+          startsWith(name, 'on') ||
+          // Exclude properties that already been created.
+          ObjectProto.hasOwnProperty.call(FormProxyProto, name) ||
+          // Exclude some properties. Currently only used for testing.
+          (blacklistedProperties && blacklistedProperties.includes(name))) {
         continue;
       }
       if (typeof property.value == 'function') {
         // A method call. Call the original prototype method via `call`.
         const method = property.value;
         FormProxyProto[name] = function() {
-          return method.apply(
-            /** @type {!FormProxy} */ (this).form_,
-            arguments
-          );
+          return method.apply(/** @type {!FormProxy} */(this).form_, arguments);
         };
       } else {
         // A read/write property. Call the original prototype getter/setter.
         const spec = {};
         if (property.get) {
           spec.get = function() {
-            return property.get.call(/** @type {!FormProxy} */ (this).form_);
+            return property.get.call(/** @type {!FormProxy} */(this).form_);
           };
         }
         if (property.set) {
           spec.set = function(v) {
-            return property.set.call(/** @type {!FormProxy} */ (this).form_, v);
+            return property.set.call(/** @type {!FormProxy} */(this).form_, v);
           };
         }
         win.Object.defineProperty(FormProxyProto, name, spec);
@@ -147,6 +151,7 @@ function createFormProxyConstr(win) {
 
   return FormProxy;
 }
+
 
 /**
  * This is a very heavy-handed way to support browsers that do not have
@@ -162,17 +167,13 @@ function createFormProxyConstr(win) {
 function setupLegacyProxy(form, proxy) {
   const win = form.ownerDocument.defaultView;
   const proto = win.HTMLFormElement.prototype.cloneNode.call(
-    form,
-    /* deep */ false
-  );
+      form, /* deep */ false);
   for (const name in proto) {
-    if (
-      name in proxy ||
-      // Exclude constants.
-      name.toUpperCase() == name ||
-      // Exclude on-events.
-      startsWith(name, 'on')
-    ) {
+    if (name in proxy ||
+        // Exclude constants.
+        name.toUpperCase() == name ||
+        // Exclude on-events.
+        startsWith(name, 'on')) {
       continue;
     }
     const desc = LEGACY_PROPS[name];
@@ -212,10 +213,10 @@ function setupLegacyProxy(form, proxy) {
               return desc.def;
             }
             if (desc.type == LegacyPropDataType.BOOL) {
-              return value === 'true';
+              return (value === 'true');
             }
             if (desc.type == LegacyPropDataType.TOGGLE) {
-              return value != null;
+              return (value != null);
             }
             if (desc.type == LegacyPropDataType.URL) {
               // URLs, e.g. in `action` attribute are resolved against the
@@ -257,6 +258,7 @@ function setupLegacyProxy(form, proxy) {
   }
 }
 
+
 /**
  * @enum {number}
  */
@@ -264,6 +266,7 @@ const LegacyPropAccessType = {
   ATTR: 1,
   READ_ONCE: 2,
 };
+
 
 /**
  * @enum {number}
@@ -273,6 +276,7 @@ const LegacyPropDataType = {
   BOOL: 2,
   TOGGLE: 3,
 };
+
 
 /**
  * @const {!Object<string, {

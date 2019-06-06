@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  LocalizedStringBundleDef,
-  LocalizedStringId,
-} from '../../../../src/localized-strings';
+import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+
 
 /**
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-const strings = {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
     string: 'Privacy settings',
   },
@@ -35,16 +33,16 @@ const strings = {
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
     string: 'Decline',
   },
-  [LocalizedStringId.DEPRECATED_AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
+  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
     string: 'Enable',
   },
-  [LocalizedStringId.DEPRECATED_AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
+  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
     string: 'Experiment enabled.  Please reload.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: ':(',
   },
-  [LocalizedStringId.DEPRECATED_AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
+  [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
     string: 'Share',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
@@ -57,10 +55,7 @@ const strings = {
     string: 'The page is best viewed in portrait mode',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string:
-      "We're sorry, it looks like your browser doesn't support " +
-      'this experience',
+    string: 'We\'re sorry, it looks like your browser doesn\'t support ' +
+        'this experience',
   },
-};
-
-export default strings;
+});

@@ -17,6 +17,7 @@
 import {isExperimentOn, toggleExperiment} from '../../../../../src/experiments';
 
 describe.skip('amp-fx-collection', function() {
+
   const css = `
     .spacer {
       height: 100vh;
@@ -34,6 +35,7 @@ describe.skip('amp-fx-collection', function() {
 
   const extensions = ['amp-fx-collection'];
 
+
   // Can't test a default `fly-in-left` animation as the
   // `data-fly-in-distance` and `data-duration` parameters differ/device.
   const bodyLeft = `
@@ -47,30 +49,27 @@ describe.skip('amp-fx-collection', function() {
     <div class="spacer"></div>
   `;
 
-  describes.integration(
-    "amp-fx='fly-in-left'",
-    {
-      body: bodyLeft,
-      css,
-      extensions,
-    },
-    env => {
-      let win;
-      beforeEach(() => {
-        win = env.win;
-        toggleExperiment(win, 'amp-fx-fly-in', true, false);
+  describes.integration("amp-fx='fly-in-left'", {
+    body: bodyLeft,
+    css,
+    extensions,
+  }, env => {
+
+    let win;
+    beforeEach(() => {
+      win = env.win;
+      toggleExperiment(win, 'amp-fx-fly-in', true, false);
+    });
+    //TODO(esth, #19392): Fails on Firefox 63.0.0
+    it.skip('runs fly-in-left animation with default parameters', () => {
+      expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
+      const initialLeft = getComputedLeft(win);
+      win.scrollTo(0, 0.5 * getViewportHeight(win));
+      return timeout(2000).then(() => {
+        expect(getComputedLeft(win)).to.be.above(initialLeft);
       });
-      //TODO(esth, #19392): Fails on Firefox 63.0.0
-      it.skip('runs fly-in-left animation with default parameters', () => {
-        expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
-        const initialLeft = getComputedLeft(win);
-        win.scrollTo(0, 0.5 * getViewportHeight(win));
-        return timeout(2000).then(() => {
-          expect(getComputedLeft(win)).to.be.above(initialLeft);
-        });
-      });
-    }
-  );
+    });
+  });
 
   // Can't test a default `fly-in-right` animation as the
   // `data-fly-in-distance` and `data-duration` parameters differ/device.
@@ -85,30 +84,27 @@ describe.skip('amp-fx-collection', function() {
     <div class="spacer"></div>
   `;
 
-  describes.integration(
-    "amp-fx='fly-in-right'",
-    {
-      body: bodyRight,
-      css,
-      extensions,
-    },
-    env => {
-      let win;
-      beforeEach(() => {
-        win = env.win;
-        toggleExperiment(win, 'amp-fx-fly-in', true, false);
+  describes.integration("amp-fx='fly-in-right'", {
+    body: bodyRight,
+    css,
+    extensions,
+  }, env => {
+
+    let win;
+    beforeEach(() => {
+      win = env.win;
+      toggleExperiment(win, 'amp-fx-fly-in', true, false);
+    });
+    //TODO(esth, #19392): Fails on Firefox 63.0.0
+    it.skip('runs fly-in-right animation with default parameters', () => {
+      expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
+      const initialLeft = getComputedLeft(win);
+      win.scrollTo(0, 0.5 * getViewportHeight(win));
+      return timeout(2000).then(() => {
+        expect(getComputedLeft(win)).to.be.below(initialLeft);
       });
-      //TODO(esth, #19392): Fails on Firefox 63.0.0
-      it.skip('runs fly-in-right animation with default parameters', () => {
-        expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
-        const initialLeft = getComputedLeft(win);
-        win.scrollTo(0, 0.5 * getViewportHeight(win));
-        return timeout(2000).then(() => {
-          expect(getComputedLeft(win)).to.be.below(initialLeft);
-        });
-      });
-    }
-  );
+    });
+  });
 
   // Can't test a default `fly-in-bottom` animation as the
   // `data-fly-in-distance` and `data-duration` parameters differ/device.
@@ -123,30 +119,27 @@ describe.skip('amp-fx-collection', function() {
     <div class="spacer"></div>
   `;
 
-  describes.integration(
-    "amp-fx='fly-in-bottom'",
-    {
-      body: bodyBottom,
-      css,
-      extensions,
-    },
-    env => {
-      let win;
-      beforeEach(() => {
-        win = env.win;
-        toggleExperiment(win, 'amp-fx-fly-in', true, false);
-      });
+  describes.integration("amp-fx='fly-in-bottom'", {
+    body: bodyBottom,
+    css,
+    extensions,
+  }, env => {
 
-      it('runs fly-in-bottom animation with default parameters', () => {
-        expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
-        const initialTop = getComputedTop(win);
-        win.scrollTo(0, 0.5 * getViewportHeight(win));
-        return timeout(2000).then(() => {
-          expect(getComputedTop(win)).to.be.below(initialTop);
-        });
+    let win;
+    beforeEach(() => {
+      win = env.win;
+      toggleExperiment(win, 'amp-fx-fly-in', true, false);
+    });
+
+    it('runs fly-in-bottom animation with default parameters', () => {
+      expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
+      const initialTop = getComputedTop(win);
+      win.scrollTo(0, 0.5 * getViewportHeight(win));
+      return timeout(2000).then(() => {
+        expect(getComputedTop(win)).to.be.below(initialTop);
       });
-    }
-  );
+    });
+  });
 });
 
 function getComputedTop(win) {

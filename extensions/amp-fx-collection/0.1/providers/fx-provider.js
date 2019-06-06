@@ -15,16 +15,16 @@
  */
 
 import {FxType} from '../fx-type'; // eslint-disable-line no-unused-vars
-import {PositionObserverFidelity} from '../../../../src/service/position-observer/position-observer-worker';
+import {
+  PositionObserverFidelity,
+} from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {
   ScrollToggleDispatch,
   ScrollTogglePosition, // eslint-disable-line no-unused-vars
   assertValidScrollToggleElement,
-  getScrollToggleFloatInOffset,
   getScrollTogglePosition,
-  installScrollToggleStyles,
-  scrollToggleFloatIn,
+  installScrollToggleFloatIn,
 } from '../scroll-toggle';
 import {Services} from '../../../../src/services';
 import {
@@ -38,7 +38,7 @@ import {
   defaultEasingValues,
   defaultFlyInDistanceValues,
   defaultMarginValues,
-  installStyles,
+  getDefaultStyles,
   resolvePercentageToNumber,
 } from './amp-fx-presets-utils';
 import {devAssert} from '../../../../src/log';
@@ -46,7 +46,10 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../../src/service';
-import {installPositionObserverServiceForDoc} from '../../../../src/service/position-observer/position-observer-impl';
+import {
+  installPositionObserverServiceForDoc,
+} from '../../../../src/service/position-observer/position-observer-impl';
+
 
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -54,11 +57,6 @@ import {installPositionObserverServiceForDoc} from '../../../../src/service/posi
  * @param {!FxType} type
  */
 export function installScrollToggledFx(ampdoc, element, type) {
-  // TODO(alanorozco): Surface FixedLayer APIs to make this work.
-  if (Services.viewerForDoc(element).isEmbedded()) {
-    return;
-  }
-
   const fxScrollDispatch = 'fx-scroll-dispatch';
 
   registerServiceBuilderForDoc(ampdoc, fxScrollDispatch, ScrollToggleDispatch);
@@ -67,57 +65,29 @@ export function installScrollToggledFx(ampdoc, element, type) {
   const dispatch = getServiceForDoc(ampdoc, fxScrollDispatch);
 
   let shouldMutate = true;
+  let position = ScrollTogglePosition.TOP;
 
   const measure = () => {
     const computed = computedStyle(ampdoc.win, element);
-    const position = getScrollTogglePosition(element, type, computed);
-    const isValid = assertValidScrollToggleElement(element, computed);
+    const isValid = assertValidScrollToggleElement(element, type, computed);
+
+    position = devAssert(getScrollTogglePosition(element, type, computed));
 
     if (!position || !isValid) {
       shouldMutate = false;
       return;
     }
-
-    dispatch.observe(isShown => {
-      scrollToggle(
-        element,
-        isShown,
-        /** @type {!ScrollTogglePosition} */ (devAssert(position))
-      );
-    });
   };
 
   const mutate = () => {
     if (!shouldMutate) {
       return;
     }
-    installScrollToggleStyles(element);
+    installStyles(element, type);
+    installScrollToggleFloatIn(dispatch, element, position);
   };
 
   resources.measureMutateElement(element, measure, mutate);
-}
-
-/**
- * @param {!Element} element
- * @param {boolean} isShown
- * @param {!ScrollTogglePosition} position
- */
-function scrollToggle(element, isShown, position) {
-  let offset = 0;
-
-  const measure = () => {
-    offset = getScrollToggleFloatInOffset(element, isShown, position);
-  };
-
-  const mutate = () => {
-    scrollToggleFloatIn(element, offset);
-  };
-
-  Services.resourcesForDoc(element).measureMutateElement(
-    element,
-    measure,
-    mutate
-  );
 }
 
 /**
@@ -128,7 +98,16 @@ function scrollToggle(element, isShown, position) {
 export function installPositionBoundFx(ampdoc, element, type) {
   installPositionObserverServiceForDoc(ampdoc);
   new FxElement(ampdoc, element, type);
-  setStyles(element, assertDoesNotContainDisplay(installStyles(element, type)));
+  installStyles(element, type);
+}
+
+/**
+ * @param {!Element} element
+ * @param {!FxType} type
+ */
+function installStyles(element, type) {
+  setStyles(element,
+      assertDoesNotContainDisplay(getDefaultStyles(element, type)));
 }
 
 /**
@@ -141,6 +120,7 @@ export class FxElement {
    * @param {!FxType} fxType
    */
   constructor(ampdoc, element, fxType) {
+
     /** @public @const  {!Window} */
     this.win = ampdoc.win;
 
@@ -174,33 +154,30 @@ export class FxElement {
     this.factor = parseFloat(element.getAttribute('data-parallax-factor'));
 
     /** @public @const {number} */
-    this.marginStart = element.hasAttribute('data-margin-start')
-      ? /** @type {number} */
-        (resolvePercentageToNumber(element.getAttribute('data-margin-start')))
-      : defaultMarginValues(fxType)['start'];
+    this.marginStart = element.hasAttribute('data-margin-start') ?
+      /** @type {number} */
+      (resolvePercentageToNumber(element.getAttribute('data-margin-start'))) :
+      defaultMarginValues(fxType)['start'];
 
     /** @public @const {number} */
-    this.marginEnd = element.hasAttribute('data-margin-end')
-      ? /** @type {number} */
-        (resolvePercentageToNumber(element.getAttribute('data-margin-end')))
-      : defaultMarginValues(fxType)['end'];
+    this.marginEnd = element.hasAttribute('data-margin-end') ?
+      /** @type {number} */
+      (resolvePercentageToNumber(element.getAttribute('data-margin-end'))) :
+      defaultMarginValues(fxType)['end'];
 
     /** @public @const {string} */
-    this.easing = convertEasingKeyword(
-      element.hasAttribute('data-easing')
-        ? element.getAttribute('data-easing')
-        : defaultEasingValues(fxType)
-    );
+    this.easing = convertEasingKeyword(element.hasAttribute('data-easing') ?
+      element.getAttribute('data-easing') : defaultEasingValues(fxType));
 
     /** @public @const {string} */
-    this.duration = element.hasAttribute('data-duration')
-      ? element.getAttribute('data-duration')
-      : defaultDurationValues(ampdoc, fxType);
+    this.duration = element.hasAttribute('data-duration') ?
+      element.getAttribute('data-duration') :
+      defaultDurationValues(ampdoc, fxType);
 
     /** @public @const {number} */
-    this.flyInDistance = element.hasAttribute('data-fly-in-distance')
-      ? parseFloat(element.getAttribute('data-fly-in-distance'))
-      : defaultFlyInDistanceValues(ampdoc, fxType);
+    this.flyInDistance = element.hasAttribute('data-fly-in-distance') ?
+      parseFloat(element.getAttribute('data-fly-in-distance')) :
+      defaultFlyInDistanceValues(ampdoc, fxType);
 
     /**
      * Boolean dictating whether or not the amp-fx preset has the `repeat`
@@ -229,10 +206,8 @@ export class FxElement {
    * @private
    */
   observePositionChanges_() {
-    this.positionObserver_.observe(
-      this.element,
-      PositionObserverFidelity.HIGH,
-      Presets[this.fxType_].update.bind(this)
+    this.positionObserver_.observe(this.element, PositionObserverFidelity.HIGH,
+        Presets[this.fxType_].update.bind(this)
     );
 
     this.viewport_.onResize(() => {
@@ -265,10 +240,10 @@ export class FxElement {
       const viewportHeight = this.viewport_.getHeight();
 
       let offsetTop = 0;
-      for (let node = this.element; node; node = node./*OK*/ offsetParent) {
-        offsetTop += node./*OK*/ offsetTop;
+      for (let node = this.element; node; node = node./*OK*/offsetParent) {
+        offsetTop += node./*OK*/offsetTop;
       }
-      const aboveTheFold = offsetTop < viewportHeight;
+      const aboveTheFold = (offsetTop < viewportHeight);
 
       return aboveTheFold ? offsetTop : viewportHeight;
     });

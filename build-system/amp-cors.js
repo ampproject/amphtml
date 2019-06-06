@@ -20,31 +20,20 @@
  *    https://goo.gl/F6uCAY
  * @type {RegExp}
  */
-const ORIGIN_REGEX = new RegExp(
-  '^https?://localhost:8000|' +
-    '^https?://.+.localhost:8000|' +
-    '^https?://.+.herokuapp.com'
-);
+const ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
+'^https?://.+\.herokuapp\.com');
 
 /**
- * In practice this would be the publishers origin.
- * Please see AMP CORS docs for more details:
- *    https://goo.gl/F6uCAY
- * @type {RegExp}
- */
-const SOURCE_ORIGIN_REGEX = new RegExp(
-  '^https?://localhost:8000|' +
-    '^https?://.+.localhost:8000|' +
-    '^https?://.+.herokuapp.com'
-);
+* In practice this would be the publishers origin.
+* Please see AMP CORS docs for more details:
+*    https://goo.gl/F6uCAY
+* @type {RegExp}
+*/
+const SOURCE_ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
+'^https?://.+\.herokuapp\.com');
 
-function assertCors(
-  req,
-  res,
-  opt_validMethods,
-  opt_exposeHeaders,
-  opt_ignoreMissingSourceOrigin
-) {
+function assertCors(req, res, opt_validMethods, opt_exposeHeaders,
+  opt_ignoreMissingSourceOrigin) {
   // Allow disable CORS check (iframe fixtures have origin 'about:srcdoc').
   if (req.query.cors == '0') {
     return;
@@ -71,10 +60,8 @@ function assertCors(
       throw invalidOrigin;
     }
 
-    if (
-      !opt_ignoreMissingSourceOrigin &&
-      !SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)
-    ) {
+    if (!opt_ignoreMissingSourceOrigin &&
+        !SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
       res.statusCode = 500;
       res.end(JSON.stringify({message: invalidSourceOrigin}));
       throw invalidSourceOrigin;
@@ -100,10 +87,13 @@ function enableCors(req, res, origin, opt_exposeHeaders) {
   if (origin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
-  res.setHeader(
-    'Access-Control-Expose-Headers',
-    (opt_exposeHeaders || []).join(', ')
-  );
+  res.setHeader('Access-Control-Expose-Headers',
+      ['AMP-Access-Control-Allow-Source-Origin']
+          .concat(opt_exposeHeaders || []).join(', '));
+  if (req.query.__amp_source_origin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+        req.query.__amp_source_origin);
+  }
 }
 
 function getUrlPrefix(req) {
@@ -111,6 +101,5 @@ function getUrlPrefix(req) {
 }
 
 module.exports = {
-  enableCors,
-  assertCors,
+  enableCors, assertCors,
 };

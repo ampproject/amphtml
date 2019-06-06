@@ -16,6 +16,7 @@
 
 import {createCustomEvent} from '../../../src/event-helper';
 
+
 /** @const {!Object<string, string>} */
 export const EventType = {
   // Triggered when the user mutes the story
@@ -43,11 +44,8 @@ export const EventType = {
   // warnings or errors).
   DEV_LOG_ENTRIES_AVAILABLE: 'ampstory:devlogentriesavailable',
 
-  // Triggered when user clicks on end 75% of the last page
-  NO_NEXT_PAGE: 'ampstory:nonextpage',
-
-  // Triggered when user clicks on start 25% of the first page
-  NO_PREVIOUS_PAGE: 'ampstory:nopreviouspage',
+  // Triggered when user clicks on left 25% of the first page
+  SHOW_NO_PREVIOUS_PAGE_HELP: 'ampstory:shownopreviouspagehelp',
 
   // Triggered when a story has loaded at least its initial set of pages.
   STORY_LOADED: 'ampstory:load',
@@ -66,13 +64,8 @@ export const EventType = {
  * @param {!JsonObject=} payload
  * @param {!CustomEventInit=} eventInit
  */
-export function dispatch(
-  win,
-  source,
-  eventName,
-  payload = undefined,
-  eventInit = undefined
-) {
+export function dispatch(win, source, eventName, payload = undefined,
+  eventInit = undefined) {
   const event = createCustomEvent(win, eventName, payload, eventInit);
   source.dispatchEvent(event);
 }

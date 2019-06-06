@@ -65,6 +65,7 @@ const DEFAULT_LANG_ = 'pt';
 let iframeCount_ = 0;
 
 export class AmpBysideContent extends AMP.BaseElement {
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -110,11 +111,9 @@ export class AmpBysideContent extends AMP.BaseElement {
 
     /** @const {function()} */
     this.boundUpdateSize_ = debounce(
-      this.win,
-      data => {
-        this.updateSize_(/** @type {Object} */ (data));
-      },
-      100
+        this.win, data => {
+          this.updateSize_(/** @type {Object} */ (data));
+        }, 100
     );
   }
 
@@ -136,28 +135,28 @@ export class AmpBysideContent extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.webcareId_ = userAssert(
-      this.element.getAttribute('data-webcare-id'),
-      'The data-webcare-id attribute is required for <%s> %s',
-      TAG_,
-      this.element
+        this.element.getAttribute('data-webcare-id'),
+        'The data-webcare-id attribute is required for <%s> %s',
+        TAG_,
+        this.element
     );
 
     this.label_ = userAssert(
-      this.element.getAttribute('data-label'),
-      'The data-label attribute is required for <%s> %s',
-      TAG_,
-      this.element
+        this.element.getAttribute('data-label'),
+        'The data-label attribute is required for <%s> %s',
+        TAG_,
+        this.element
     );
 
-    this.webcareZone_ =
-      this.element.getAttribute('data-webcare-zone') || DEFAULT_WEBCARE_ZONE_;
-    this.channel_ = this.element.getAttribute('data-channel') || '';
-    this.lang_ = this.element.getAttribute('data-lang') || DEFAULT_LANG_;
-    this.fid_ = this.element.getAttribute('data-fid') || '';
+    this.webcareZone_ = (this.element.getAttribute('data-webcare-zone') ||
+        DEFAULT_WEBCARE_ZONE_);
+    this.channel_ = (this.element.getAttribute('data-channel') || '');
+    this.lang_ = (this.element.getAttribute('data-lang') || DEFAULT_LANG_);
+    this.fid_ = (this.element.getAttribute('data-fid') || '');
 
     this.origin_ = this.composeOrigin_();
-    this.baseUrl_ =
-      this.origin_ + '/BWA' + encodeURIComponent(this.webcareId_) + '/amp/';
+    this.baseUrl_ = this.origin_ + '/BWA' +
+        encodeURIComponent(this.webcareId_) + '/amp/';
   }
 
   /** @override */
@@ -174,7 +173,7 @@ export class AmpBysideContent extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
-    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
+    this.iframe_ = iframe;
 
     iframe.name = 'amp_byside_content_iframe' + iframeCount_++;
 
@@ -184,8 +183,8 @@ export class AmpBysideContent extends AMP.BaseElement {
     iframe.setAttribute('allowtransparency', 'true');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.setAttribute(
-      'sandbox',
-      'allow-scripts allow-same-origin allow-popups'
+        'sandbox',
+        'allow-scripts allow-same-origin allow-popups'
     );
 
     setStyles(iframe, {
@@ -195,33 +194,30 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.element.appendChild(this.getOverflowElement_());
     this.applyFillContent(iframe);
 
-    return this.composeSrcUrl_()
-      .then(src => {
-        this.iframeSrc_ = assertHttpsUrl(src, this.element, this.getName_());
-        iframe.src = this.iframeSrc_;
+    return this.composeSrcUrl_().then(src => {
+      this.iframeSrc_ = assertHttpsUrl(src, this.element, this.getName_());
+      iframe.src = this.iframeSrc_;
 
-        const unlisten = listenFor(iframe, 'embed-size', this.boundUpdateSize_);
-        this.unlisteners_.push(unlisten);
+      const unlisten = listenFor(iframe, 'embed-size', this.boundUpdateSize_);
+      this.unlisteners_.push(unlisten);
 
-        this.element.appendChild(iframe);
+      this.element.appendChild(iframe);
 
-        return (this.iframePromise_ = this.loadPromise(iframe));
-      })
-      .then(() => {
-        this.getVsync().mutate(() => {
-          setStyles(iframe, {
-            'opacity': 1,
-          });
+      return (this.iframePromise_ = this.loadPromise(iframe));
+    }).then(() => {
+      this.getVsync().mutate(() => {
+        setStyles(iframe, {
+          'opacity': 1,
         });
       });
+    });
   }
 
   /** @private */
   composeOrigin_() {
-    const subDomain =
-      this.webcareZone_ === MAIN_WEBCARE_ZONE_
-        ? MAIN_WEBCARE_ZONE_SUBDOMAIN_
-        : this.webcareZone_;
+    const subDomain = this.webcareZone_ === MAIN_WEBCARE_ZONE_ ?
+      MAIN_WEBCARE_ZONE_SUBDOMAIN_ :
+      this.webcareZone_;
 
     return 'https://' + encodeURIComponent(subDomain) + '.' + BYSIDE_DOMAIN_;
   }
@@ -235,7 +231,7 @@ export class AmpBysideContent extends AMP.BaseElement {
       'bwch': this.channel_ || '',
       'lang': this.lang_ || '',
       'fid': this.fid_ || '',
-      'bwit': this.fid_ ? 'I' : 'A',
+      'bwit': (this.fid_ ? 'I' : 'A'),
       'tuid': 'CLIENT_ID(byside_webcare_tuid)',
       'suid': '',
       'puid': 'PAGE_VIEW_IDpTIMESTAMP',
@@ -276,28 +272,16 @@ export class AmpBysideContent extends AMP.BaseElement {
    */
   getOverflowElement_() {
     const doc = /** @type {!Document} */ (this.element.ownerDocument);
-    const overflow = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-overflow',
-        'overflow': '',
-      })
-    );
-    const overflowContent = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-overflow-content',
-      })
-    );
-    const arrow = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-arrow-down',
-      })
-    );
+    const overflow = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-overflow',
+      'overflow': '',
+    }));
+    const overflowContent = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-overflow-content',
+    }));
+    const arrow = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-arrow-down',
+    }));
     overflowContent.appendChild(arrow);
     overflow.appendChild(overflowContent);
 
@@ -307,20 +291,12 @@ export class AmpBysideContent extends AMP.BaseElement {
   /** @return {!Element} @private */
   createBySideLoader_() {
     const doc = /** @type {!Document} */ (this.element.ownerDocument);
-    const loadingContainer = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-loading-container',
-      })
-    );
-    const loadingAnimation = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-loading-animation',
-      })
-    );
+    const loadingContainer = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-loading-container',
+    }));
+    const loadingAnimation = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-loading-animation',
+    }));
     loadingContainer.appendChild(loadingAnimation);
 
     return loadingContainer;
@@ -340,41 +316,33 @@ export class AmpBysideContent extends AMP.BaseElement {
       const height = parseInt(data['height'], 10);
       if (!isNaN(height)) {
         newHeight = Math.max(
-          height +
-            (this.element./*OK*/ offsetHeight -
-              this.iframe_./*OK*/ offsetHeight),
-          height
-        );
+            height + (this.element./*OK*/offsetHeight
+            - this.iframe_./*OK*/offsetHeight),
+            height);
       }
 
       const width = parseInt(data['width'], 10);
       if (!isNaN(width)) {
         newWidth = Math.max(
-          width +
-            (this.element./*OK*/ offsetWidth - this.iframe_./*OK*/ offsetWidth),
-          width
-        );
+            width + (this.element./*OK*/offsetWidth
+              - this.iframe_./*OK*/offsetWidth),
+            width);
       }
 
       if (newHeight !== undefined || newWidth !== undefined) {
-        this.attemptChangeSize(newHeight, newWidth).then(
-          () => {
-            if (newHeight !== undefined) {
-              this.element.setAttribute('height', newHeight);
-            }
-            if (newWidth !== undefined) {
-              this.element.setAttribute('width', newWidth);
-            }
-          },
-          () => {}
-        );
+        this.attemptChangeSize(newHeight, newWidth).then(() => {
+          if (newHeight !== undefined) {
+            this.element.setAttribute('height', newHeight);
+          }
+          if (newWidth !== undefined) {
+            this.element.setAttribute('width', newWidth);
+          }
+        }, () => {});
       } else {
-        user().warn(
-          TAG_,
-          'Ignoring embed-size request because ' +
-            'no width or height value is provided',
-          this.element
-        );
+        user().warn(TAG_,
+            'Ignoring embed-size request because '
+            + 'no width or height value is provided',
+            this.element);
       }
     });
   }

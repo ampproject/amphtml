@@ -28,10 +28,10 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache-version.html:28:2 The extension 'amp-mustache' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://amp.dev/documentation/components/amp-mustache) [DEPRECATION]
+amp-mustache/0.1/test/validator-amp-mustache-version.html:28:2 The extension 'amp-mustache' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [DEPRECATION]
 |    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache-version.html:29:2 The tag 'amp-mustache extension .js script' appears more than once in the document. This will soon be an error. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache-version.html:29:2 The tag 'amp-mustache extension .js script' appears more than once in the document. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </head>
 |  <body>
 |  </body>

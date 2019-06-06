@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  IFRAME_TRANSPORTS,
-  IFRAME_TRANSPORTS_CANARY,
-} from './iframe-transport-vendors';
+import {IFRAME_TRANSPORTS} from './iframe-transport-vendors';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
-import {isCanary} from '../../../src/experiments';
 
 // Disable auto-sorting of imports from here on.
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
@@ -49,7 +45,6 @@ import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords';
 import {GTAG_CONFIG} from './vendors/gtag';
 import {GOOGLEANALYTICS_CONFIG} from './vendors/googleanalytics';
 import {KEEN_CONFIG} from './vendors/keen';
-import {KENSHOO_CONFIG} from './vendors/kenshoo';
 import {KRUX_CONFIG} from './vendors/krux';
 import {IPLABEL_CONFIG} from './vendors/iplabel';
 import {LOTAME_CONFIG} from './vendors/lotame';
@@ -62,7 +57,9 @@ import {MOBIFY_CONFIG} from './vendors/mobify';
 import {MPARTICLE_CONFIG} from './vendors/mparticle';
 import {NEWRELIC_CONFIG} from './vendors/newrelic';
 import {NIELSEN_CONFIG} from './vendors/nielsen';
-import {NIELSEN_MARKETING_CLOUD_CONFIG} from './vendors/nielsen-marketing-cloud';
+import {
+  NIELSEN_MARKETING_CLOUD_CONFIG,
+} from './vendors/nielsen-marketing-cloud';
 import {OEWADIRECT_CONFIG} from './vendors/oewadirect';
 import {OEWA_CONFIG} from './vendors/oewa';
 import {PARSELY_CONFIG} from './vendors/parsely';
@@ -74,7 +71,9 @@ import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
 import {RETARGETLY_CONFIG} from './vendors/retargetly';
 import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics';
-import {ADOBEANALYTICS_NATIVECONFIG_CONFIG} from './vendors/adobeanalytics_nativeConfig';
+import {
+  ADOBEANALYTICS_NATIVECONFIG_CONFIG,
+} from './vendors/adobeanalytics_nativeConfig';
 import {INFONLINE_CONFIG} from './vendors/infonline';
 import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SEGMENT_CONFIG} from './vendors/segment';
@@ -91,29 +90,31 @@ import {LINKPULSE_CONFIG} from './vendors/linkpulse';
 import {RAKAM_CONFIG} from './vendors/rakam';
 import {IBEATANALYTICS_CONFIG} from './vendors/ibeatanalytics';
 import {TOPMAILRU_CONFIG} from './vendors/topmailru';
-import {ORACLEINFINITYANALYTICS_CONFIG} from './vendors/oracleInfinityAnalytics';
+import {
+  ORACLEINFINITYANALYTICS_CONFIG,
+} from './vendors/oracleInfinityAnalytics';
 import {MOAT_CONFIG} from './vendors/moat';
 import {BG_CONFIG} from './vendors/bg';
 import {UPSCORE_CONFIG} from './vendors/upscore';
 import {REPPUBLIKA_CONFIG} from './vendors/reppublika';
-import {NAVEGG_CONFIG} from './vendors/navegg';
-import {VPONANALYTICS_CONFIG} from './vendors/vponanalytics';
 
 /**
  * @const {!JsonObject}
  */
 export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+
   // Default parent configuration applied to all amp-analytics tags.
   'default': {
     'transport': {'beacon': true, 'xhrpost': true, 'image': true},
     'vars': {
       'accessReaderId': 'ACCESS_READER_ID',
+      'adNavTiming': 'AD_NAV_TIMING', // only available in A4A embeds
+      'adNavType': 'AD_NAV_TYPE', // only available in A4A embeds
+      'adRedirectCount': 'AD_NAV_REDIRECT_COUNT', // only available in A4A
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
       'ampGeo': 'AMP_GEO',
-      'ampUserLocation': 'AMP_USER_LOCATION',
-      'ampUserLocationPoll': 'AMP_USER_LOCATION_POLL',
       'ampState': 'AMP_STATE',
       'ampVersion': 'AMP_VERSION',
       'ancestorOrigin': 'ANCESTOR_ORIGIN',
@@ -203,7 +204,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'infonline': INFONLINE_CONFIG,
   'iplabel': IPLABEL_CONFIG,
   'keen': KEEN_CONFIG,
-  'kenshoo': KENSHOO_CONFIG,
   'krux': KRUX_CONFIG,
   'linkpulse': LINKPULSE_CONFIG,
   'lotame': LOTAME_CONFIG,
@@ -216,7 +216,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'mobify': MOBIFY_CONFIG,
   'mparticle': MPARTICLE_CONFIG,
   'mpulse': MPULSE_CONFIG,
-  'navegg': NAVEGG_CONFIG,
   'newrelic': NEWRELIC_CONFIG,
   'nielsen': NIELSEN_CONFIG,
   'nielsen-marketing-cloud': NIELSEN_MARKETING_CLOUD_CONFIG,
@@ -244,7 +243,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'treasuredata': TREASUREDATA_CONFIG,
   'umenganalytics': UMENGANALYTICS_CONFIG,
   'upscore': UPSCORE_CONFIG,
-  'vponanalytics': VPONANALYTICS_CONFIG,
   'webtrekk': WEBTREKK_CONFIG,
   'webtrekk_v2': WEBTREKK_V2_CONFIG,
 });
@@ -253,18 +251,17 @@ if (getMode().test || getMode().localDev) {
   ANALYTICS_CONFIG['_fake_'] = _FAKE_;
 }
 
-ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframePing'] = true;
+ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
-ANALYTICS_CONFIG['adobeanalytics_nativeConfig']['triggers']['pageLoad'][
-  'iframePing'
-] = true;
+ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
+    ['triggers']['pageLoad']['iframe' +
+    /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
-ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframePing'] = true;
+ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
-mergeIframeTransportConfig(
-  ANALYTICS_CONFIG,
-  isCanary(self) ? IFRAME_TRANSPORTS_CANARY : IFRAME_TRANSPORTS
-);
+mergeIframeTransportConfig(ANALYTICS_CONFIG, IFRAME_TRANSPORTS);
 
 /**
  * Merges iframe transport config.
@@ -276,11 +273,8 @@ function mergeIframeTransportConfig(config, iframeTransportConfig) {
   for (const vendor in iframeTransportConfig) {
     if (hasOwn(iframeTransportConfig, vendor)) {
       const url = iframeTransportConfig[vendor];
-      config[vendor]['transport'] = Object.assign(
-        {},
-        config[vendor]['transport'],
-        {'iframe': url}
-      );
+      config[vendor]['transport'] =
+          Object.assign({}, config[vendor]['transport'], {'iframe': url});
     }
   }
 }

@@ -16,6 +16,7 @@
 
 import {stringHash32} from '../string';
 
+
 /**
  * Gets a string of concatenated element names and relative positions
  * of the DOM element and its parentElement's (up to 25).  Relative position
@@ -62,6 +63,7 @@ export function domFingerprintPlain(element) {
   return ids.join();
 }
 
+
 export class DomFingerprint {
   /**
    * Calculates ad slot DOM fingerprint.  This key is intended to
@@ -77,6 +79,7 @@ export class DomFingerprint {
     return stringHash32(domFingerprintPlain(element));
   }
 }
+
 
 /**
  * Gets a string showing the index of an element within

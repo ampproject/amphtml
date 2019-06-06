@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import {unruly} from '../../../ads/unruly';
+import {
+  unruly,
+} from '../../../ads/unruly';
 
 describe('unruly', () => {
+
   it('should set unruly publisher config on global', () => {
     const mockGlobal = {};
     const mockData = {
@@ -48,9 +51,7 @@ describe('unruly', () => {
     };
     unruly(mockGlobal, mockData, scriptLoader);
     expect(expectedGlobal).to.equal(mockGlobal);
-    expect(expectedUrl).to.equal(
-      'https://video.unrulymedia.com/native/native-loader.js'
-    );
+    expect(expectedUrl).to.equal('https://video.unrulymedia.com/native/native-loader.js');
   });
 
   it('should throw if siteId is not provided', () => {
@@ -59,8 +60,13 @@ describe('unruly', () => {
 
     const scriptLoader = () => {};
 
-    allowConsoleError(() => {
-      expect(() => unruly(mockGlobal, mockData, scriptLoader)).to.throw();
-    });
+    allowConsoleError(
+        () => {
+          expect(
+              () => unruly(mockGlobal, mockData, scriptLoader)
+          ).to.throw();
+        }
+    );
   });
+
 });

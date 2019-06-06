@@ -50,12 +50,11 @@ the edges. Below are instructions for Linux Ubuntu 14.
 
 Install these packages using apt-get:
 
-* `npm`
-* `openjdk-7-jre`
-* `protobuf-compiler`
-* `python2.7`
-
-Then use pip to `pip install protobuf`.
+* npm
+* openjdk-7-jre
+* protobuf-compiler
+* python-protobuf
+* python2.7
 
 In addition, install Node.js v4.4.2. E.g.,
   [by downloading](https://nodejs.org/en/download/) or

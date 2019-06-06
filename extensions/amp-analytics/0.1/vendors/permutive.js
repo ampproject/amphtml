@@ -19,19 +19,20 @@ export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
     'identity': '${clientId(_ga)}',
   },
   'requests': {
-    'track':
-      'https://${namespace}.amp.permutive.com/track' +
+    'track': 'https://${namespace}.amp.permutive.com/track' +
       '?k=${key}' +
       '&i=${identity}' +
       '&it=amp',
-    'pageview':
-      '${track}' +
+    'pageview': '${track}' +
       '&e=Pageview' +
       '&_ep_isp_info=%24ip_isp_info' +
       '&_ep_geo_info=%24ip_geo_info',
-    'engagement': '${track}&e=PageviewEngagement&_ep_engaged_time=5',
-    'completion': '${track}&e=PageviewEngagement&_ep_completion=0.25',
-    'custom': '${track}&e=${event}',
+    'engagement': '${track}' +
+      '&e=PageviewEngagement' +
+      '&_ep_engaged_time=5',
+    'completion': '${track}' +
+      '&e=PageviewEngagement' +
+      '&_ep_completion=0.25',
   },
   'triggers': {
     'trackPageview': {
@@ -39,7 +40,7 @@ export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
       'request': 'pageview',
     },
     'trackEngagement': {
-      'on': 'timer',
+      'on': 'visible',
       'timerSpec': {
         'interval': 5,
         'maxTimerLength': 600,

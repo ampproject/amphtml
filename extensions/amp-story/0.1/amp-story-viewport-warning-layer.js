@@ -15,18 +15,20 @@
  */
 
 import {CSS} from '../../../build/amp-story-viewport-warning-layer-0.1.css';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {StateProperty} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
+
 /**
  * CSS class indicating the format is landscape.
  * @const {string}
  */
 const LANDSCAPE_OVERLAY_CLASS = 'i-amphtml-story-landscape';
+
 
 /**
  * Full viewport layer advising the user to rotate his device. Mobile only.
@@ -35,8 +37,8 @@ const LANDSCAPE_OVERLAY_CLASS = 'i-amphtml-story-landscape';
 const LANDSCAPE_ORIENTATION_WARNING_TEMPLATE = {
   tag: 'div',
   attrs: dict({
-    'class': 'i-amphtml-story-no-rotation-overlay i-amphtml-story-system-reset',
-  }),
+    'class': 'i-amphtml-story-no-rotation-overlay ' +
+        'i-amphtml-story-system-reset'}),
   children: [
     {
       tag: 'div',
@@ -50,12 +52,13 @@ const LANDSCAPE_ORIENTATION_WARNING_TEMPLATE = {
           tag: 'div',
           attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
           localizedStringId:
-            LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT,
+              LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT,
         },
       ],
     },
   ],
 };
+
 
 /**
  * Full viewport layer advising the user to expand his window. Only displayed
@@ -65,8 +68,8 @@ const LANDSCAPE_ORIENTATION_WARNING_TEMPLATE = {
 const DESKTOP_SIZE_WARNING_TEMPLATE = {
   tag: 'div',
   attrs: dict({
-    'class': 'i-amphtml-story-no-rotation-overlay i-amphtml-story-system-reset',
-  }),
+    'class': 'i-amphtml-story-no-rotation-overlay ' +
+        'i-amphtml-story-system-reset'}),
   children: [
     {
       tag: 'div',
@@ -80,12 +83,14 @@ const DESKTOP_SIZE_WARNING_TEMPLATE = {
           tag: 'div',
           attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
           localizedStringId:
-            LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT,
+              LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT,
         },
       ],
     },
   ],
 };
+
+
 
 /**
  * Viewport warning layer UI.
@@ -131,17 +136,15 @@ export class ViewportWarningLayer {
     this.isBuilt_ = true;
 
     const root = this.win_.document.createElement('div');
-    this.overlayEl_ = renderAsElement(
-      this.win_.document,
-      this.getViewportWarningOverlayTemplate_()
-    );
+    this.overlayEl_ =
+        renderAsElement(
+            this.win_.document, this.getViewportWarningOverlayTemplate_());
 
     createShadowRootWithStyle(root, this.overlayEl_, CSS);
 
     // Initializes the desktop state now that the component is built.
     this.onDesktopStateUpdate_(
-      !!this.storeService_.get(StateProperty.DESKTOP_STATE)
-    );
+        !!this.storeService_.get(StateProperty.DESKTOP_STATE));
 
     this.vsync_.mutate(() => {
       this.storyElement_.insertBefore(root, this.storyElement_.firstChild);
@@ -160,21 +163,13 @@ export class ViewportWarningLayer {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(
-      StateProperty.DESKTOP_STATE,
-      isDesktop => {
-        this.onDesktopStateUpdate_(isDesktop);
-      },
-      true /** callToInitialize */
-    );
+    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
+      this.onDesktopStateUpdate_(isDesktop);
+    }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(
-      StateProperty.LANDSCAPE_STATE,
-      isLandscape => {
-        this.onLandscapeStateUpdate_(isLandscape);
-      },
-      true /** callToInitialize */
-    );
+    this.storeService_.subscribe(StateProperty.LANDSCAPE_STATE, isLandscape => {
+      this.onLandscapeStateUpdate_(isLandscape);
+    }, true /** callToInitialize */);
   }
 
   /**
@@ -196,10 +191,8 @@ export class ViewportWarningLayer {
     this.build();
 
     this.vsync_.mutate(() => {
-      this.overlayEl_.classList.toggle(
-        LANDSCAPE_OVERLAY_CLASS,
-        !isDesktop && isLandscape
-      );
+      this.overlayEl_
+          .classList.toggle(LANDSCAPE_OVERLAY_CLASS, !isDesktop && isLandscape);
     });
   }
 
@@ -214,9 +207,9 @@ export class ViewportWarningLayer {
     }
 
     this.vsync_.mutate(() => {
-      isDesktop
-        ? this.overlayEl_.setAttribute('desktop', '')
-        : this.overlayEl_.removeAttribute('desktop');
+      isDesktop ?
+        this.overlayEl_.setAttribute('desktop', '') :
+        this.overlayEl_.removeAttribute('desktop');
     });
   }
 
@@ -226,8 +219,8 @@ export class ViewportWarningLayer {
    * @private
    */
   getViewportWarningOverlayTemplate_() {
-    return this.platform_.isIos() || this.platform_.isAndroid()
-      ? LANDSCAPE_ORIENTATION_WARNING_TEMPLATE
-      : DESKTOP_SIZE_WARNING_TEMPLATE;
+    return (this.platform_.isIos() || this.platform_.isAndroid()) ?
+      LANDSCAPE_ORIENTATION_WARNING_TEMPLATE :
+      DESKTOP_SIZE_WARNING_TEMPLATE;
   }
 }

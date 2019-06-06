@@ -41,7 +41,7 @@ FAIL
 |
 |    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
 >>   ^~~~~~~~~
-feature_tests/stylesheet_in_body.html:41:2 The parent tag of tag 'link rel=stylesheet for fonts' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#custom-fonts) [DISALLOWED_HTML]
+feature_tests/stylesheet_in_body.html:41:2 The parent tag of tag 'link rel=stylesheet for fonts' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [DISALLOWED_HTML]
 |
 |  </body>
 |  </html>

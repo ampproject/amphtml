@@ -16,29 +16,25 @@ limitations under the License.
 
 # CA ProFit-X
 
-## Examples
+## Example
 
 ```html
 <amp-ad
   width="320"
-  heigth="100"
+  height="50"
   type="caprofitx"
-  data-mediaid="3752"
-  data-tag-places="10001">
+  data-tagid="15217"
+  data-placeid="0">
 </amp-ad>
 ```
 
-## Configurations
+## Configuration
+For configuration details, please email ca_profitx_support@cyberagent.co.jp.
 
-For details on the configuration semantics and to generate your tags,
-please email ca_profitx_support@cyberagent.co.jp.
+### Required parameters
 
-Supported parameters:
+- `data-tagid`
 
-| Parameter                | Required |
-|--------------------------|----------|
-| data-mediaid             | Yes      |
-| data-tag-places          | Yes      |
-| data-pageid              | No       |
-| data-additional-css-urls | No       |
-| data-device-ifa          | No       |
+### Optional parameters
+
+- `data-placeid`

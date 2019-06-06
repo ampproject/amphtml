@@ -43,6 +43,7 @@ export function assign(target, var_args) {
   return output;
 }
 
+
 /**
  * Sets the Object.assign polyfill if it does not exist.
  * @param {!Window} win

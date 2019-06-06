@@ -33,5 +33,5 @@ tags: {  # <amp-auto-ads>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-auto-ads"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-auto-ads"
 }

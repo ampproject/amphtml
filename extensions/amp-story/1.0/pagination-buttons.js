@@ -24,8 +24,10 @@ import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
+
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonStateDef;
+
 
 /** @const {!Object<string, !ButtonStateDef>} */
 const BackButtonStates = {
@@ -40,6 +42,7 @@ const BackButtonStates = {
     triggers: EventType.PREVIOUS_PAGE,
   },
 };
+
 
 /** @const {!Object<string, !ButtonStateDef>} */
 const ForwardButtonStates = {
@@ -59,6 +62,7 @@ const ForwardButtonStates = {
   },
 };
 
+
 /** @private @const {!./simple-template.ElementDef} */
 const BUTTON = {
   tag: 'div',
@@ -75,6 +79,7 @@ const BUTTON = {
   ],
 };
 
+
 /**
  * @param {!Element} hoverEl
  * @param {!Element} targetEl
@@ -88,6 +93,7 @@ function setClassOnHover(hoverEl, targetEl, className) {
     targetEl.classList.remove(className);
   });
 }
+
 
 /**
  * Desktop navigation buttons.
@@ -142,18 +148,11 @@ class PaginationButton {
     e.preventDefault();
 
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
-      AdvancementMode.MANUAL_ADVANCE
-    );
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
 
     if (this.state_.triggers) {
-      dispatch(
-        this.win_,
-        this.element,
-        devAssert(this.state_.triggers),
-        /* payload */ undefined,
-        {bubbles: true}
-      );
+      dispatch(this.win_, this.element, devAssert(this.state_.triggers),
+          /* payload */ undefined, {bubbles: true});
       return;
     }
     if (this.state_.action) {
@@ -162,6 +161,7 @@ class PaginationButton {
     }
   }
 }
+
 
 /** Pagination buttons layer. */
 export class PaginationButtons {
@@ -174,20 +174,14 @@ export class PaginationButtons {
     this.storeService_ = getStoreService(win);
 
     /** @private @const {!PaginationButton} */
-    this.forwardButton_ = new PaginationButton(
-      doc,
-      ForwardButtonStates.NEXT_PAGE,
-      this.storeService_,
-      win
-    );
+    this.forwardButton_ =
+        new PaginationButton(doc, ForwardButtonStates.NEXT_PAGE,
+            this.storeService_, win);
 
     /** @private @const {!PaginationButton} */
-    this.backButton_ = new PaginationButton(
-      doc,
-      BackButtonStates.HIDDEN,
-      this.storeService_,
-      win
-    );
+    this.backButton_ =
+        new PaginationButton(doc, BackButtonStates.HIDDEN,
+            this.storeService_, win);
 
     this.forwardButton_.element.classList.add('next-container');
     this.backButton_.element.classList.add('prev-container');
@@ -216,16 +210,10 @@ export class PaginationButtons {
   /** @param {!Element} element */
   attach(element) {
     setClassOnHover(
-      this.forwardButton_.element,
-      element,
-      'i-amphtml-story-next-hover'
-    );
+        this.forwardButton_.element, element, 'i-amphtml-story-next-hover');
 
     setClassOnHover(
-      this.backButton_.element,
-      element,
-      'i-amphtml-story-prev-hover'
-    );
+        this.backButton_.element, element, 'i-amphtml-story-prev-hover');
 
     element.appendChild(this.forwardButton_.element);
     element.appendChild(this.backButton_.element);
@@ -239,19 +227,15 @@ export class PaginationButtons {
       this.onBookendStateUpdate_(isActive);
     });
 
-    this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_INDEX,
-      pageIndex => {
-        this.onCurrentPageIndexUpdate_(pageIndex);
-      }
-    );
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX,
+        pageIndex => {
+          this.onCurrentPageIndexUpdate_(pageIndex);
+        });
 
-    this.storeService_.subscribe(
-      StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
-      isVisible => {
-        this.onSystemUiIsVisibleStateUpdate_(isVisible);
-      }
-    );
+    this.storeService_.subscribe(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+        isVisible => {
+          this.onSystemUiIsVisibleStateUpdate_(isVisible);
+        });
   }
 
   /**
@@ -273,7 +257,8 @@ export class PaginationButtons {
    * @private
    */
   onCurrentPageIndexUpdate_(pageIndex) {
-    const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
+    const totalPages =
+      /**@type {number}*/ (this.storeService_.get(StateProperty.PAGES_COUNT));
     const bookendActive = this.storeService_.get(StateProperty.BOOKEND_STATE);
 
     if (pageIndex === 0) {
@@ -308,16 +293,9 @@ export class PaginationButtons {
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (isVisible) {
-      this.backButton_.updateState(
-        /** @type {!ButtonStateDef} */ (devAssert(
-          this.backButtonStateToRestore_
-        ))
-      );
+      this.backButton_.updateState(devAssert(this.backButtonStateToRestore_));
       this.forwardButton_.updateState(
-        /** @type {!ButtonStateDef} */ (devAssert(
-          this.forwardButtonStateToRestore_
-        ))
-      );
+          devAssert(this.forwardButtonStateToRestore_));
     } else {
       this.backButtonStateToRestore_ = this.backButton_.getState();
       this.backButton_.updateState(BackButtonStates.HIDDEN);

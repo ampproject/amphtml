@@ -23,8 +23,10 @@ const Fuse = require('fuse.js');
 const path = require('path');
 const {getListing} = require('../util/listing');
 
+
 // Sitting on /build-system/app-index/api, so we go back thrice for the root.
 const root = path.join(__dirname, '../../../');
+
 
 function searchListing(fileSet, opt_searchQuery) {
   if (!opt_searchQuery) {
@@ -39,6 +41,7 @@ function searchListing(fileSet, opt_searchQuery) {
 
   return fuse.search(opt_searchQuery).map(i => fileSet[i]);
 }
+
 
 async function handleListingRequest({query: {path, search}}, res) {
   try {
@@ -55,8 +58,10 @@ async function handleListingRequest({query: {path, search}}, res) {
   }
 }
 
+
 function installExpressMiddleware(app) {
   app.get('/dashboard/api/listing', handleListingRequest);
 }
+
 
 module.exports = {installExpressMiddleware};

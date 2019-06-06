@@ -17,7 +17,9 @@
 import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {adConfig} from '../../ads/_config';
-import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
+import {
+  cidServiceForDocForTesting,
+} from '../../src/service/cid-impl';
 import {getAdCid} from '../../src/ad-cid';
 
 describes.realWin('ad-cid', {amp: true}, env => {
@@ -35,9 +37,7 @@ describes.realWin('ad-cid', {amp: true}, env => {
     win = env.win;
     sandbox = env.sandbox;
     clock = lolex.install({
-      target: win,
-      toFake: ['Date', 'setTimeout', 'clearTimeout'],
-    });
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     element = env.win.document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
     const {ampdoc} = env;

@@ -5,7 +5,6 @@ formats:
   - stories
 teaser:
   text: Displays a VR image.
-experimental: true
 ---
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.

@@ -21,6 +21,7 @@ import {dict} from '../../../src/utils/object';
  */
 export let StoryVariableDef;
 
+
 /** @enum {string} */
 const Variable = {
   STORY_PAGE_ID: 'storyPageId',
@@ -31,6 +32,7 @@ const Variable = {
   STORY_PREVIOUS_PAGE_ID: 'storyPreviousPageId',
   STORY_ADVANCEMENT_MODE: 'storyAdvancementMode',
 };
+
 
 /**
  * Variable service for amp-story.
@@ -59,13 +61,8 @@ export class AmpStoryVariableService {
   onNavigationStateChange(stateChangeEvent) {
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
-        const {
-          pageIndex,
-          pageId,
-          storyProgress,
-          totalPages,
-          previousPageId,
-        } = stateChangeEvent.value;
+        const {pageIndex, pageId, storyProgress, totalPages, previousPageId} =
+            stateChangeEvent.value;
         this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
         this.variables_[Variable.STORY_PAGE_ID] = pageId;
         this.variables_[Variable.STORY_PROGRESS] = storyProgress;

@@ -14,4 +14,5 @@
  * limitations under the License.
  */
 
-export const BG_CONFIG = /** @type {!JsonObject} */ ({});
+export const BG_CONFIG = /** @type {!JsonObject} */ ({
+});

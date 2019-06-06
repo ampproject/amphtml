@@ -30,11 +30,15 @@ import {
 } from '../../../src/layout';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
-import {computedStyle, setStyle} from '../../../src/style';
+import {
+  computedStyle,
+  setStyle,
+} from '../../../src/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAdCid} from '../../../src/ad-cid';
-import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
+import {getAdContainer, isAdPositionAllowed}
+  from '../../../src/ad-helper';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -60,6 +64,7 @@ const MIN_FULL_WIDTH_HEIGHT = 100;
 const MAX_FULL_WIDTH_HEIGHT = 500;
 
 export class AmpAd3PImpl extends AMP.BaseElement {
+
   /**
    * @param {!AmpElement} element
    */
@@ -153,7 +158,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
     // Otherwise the ad is good to go.
     const elementCheck = getAmpAdRenderOutsideViewport(this.element);
-    return elementCheck !== null ? elementCheck : super.renderOutsideViewport();
+    return elementCheck !== null ?
+      elementCheck : super.renderOutsideViewport();
   }
 
   /**
@@ -192,7 +198,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.fallback_ = this.getFallback();
 
     this.config = adConfig[this.type_];
-    userAssert(this.config, `Type "${this.type_}" is not supported in amp-ad`);
+    userAssert(
+        this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
 
@@ -212,18 +219,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (!hasFullWidth) {
       return false;
     }
-    userAssert(
-      this.element.getAttribute('width') == '100vw',
-      'Ad units with data-full-width must have width="100vw".'
-    );
-    userAssert(
-      !!this.config.fullWidthHeightRatio,
-      'Ad network does not support full width ads.'
-    );
-    dev().info(
-      TAG_3P_IMPL,
-      '#${this.getResource().getId()} Full width requested'
-    );
+    userAssert(this.element.getAttribute('width') == '100vw',
+        'Ad units with data-full-width must have width="100vw".');
+    userAssert(!!this.config.fullWidthHeightRatio,
+        'Ad network does not support full width ads.');
+    dev().info(TAG_3P_IMPL,
+        '#${this.getResource().getId()} Full width requested');
     return true;
   }
 
@@ -234,7 +235,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     // We always need the bootstrap.
-    preloadBootstrap(this.win, this.preconnect, this.config.remoteHTMLDisabled);
+    preloadBootstrap(
+        this.win, this.preconnect, this.config.remoteHTMLDisabled);
     if (typeof this.config.prefetch == 'string') {
       this.preconnect.preload(this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
@@ -279,23 +281,19 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       const layoutBox = this.getLayoutBox();
 
       // Nudge into the correct horizontal position by changing side margin.
-      this.getVsync().run(
-        {
-          measure: state => {
-            state.direction = computedStyle(this.win, this.element)[
-              'direction'
-            ];
-          },
-          mutate: state => {
-            if (state.direction == 'rtl') {
-              setStyle(this.element, 'marginRight', layoutBox.left, 'px');
-            } else {
-              setStyle(this.element, 'marginLeft', -layoutBox.left, 'px');
-            }
-          },
+      this.getVsync().run({
+        measure: state => {
+          state.direction =
+              computedStyle(this.win, this.element)['direction'];
         },
-        {direction: ''}
-      );
+        mutate: state => {
+          if (state.direction == 'rtl') {
+            setStyle(this.element, 'marginRight', layoutBox.left, 'px');
+          } else {
+            setStyle(this.element, 'marginLeft', -layoutBox.left, 'px');
+          }
+        },
+      }, {direction: ''});
     }
   }
 
@@ -305,9 +303,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   measureIframeLayoutBox_() {
     if (this.xOriginIframeHandler_ && this.xOriginIframeHandler_.iframe) {
-      const iframeBox = this.getViewport().getLayoutRect(
-        this.xOriginIframeHandler_.iframe
-      );
+      const iframeBox =
+          this.getViewport().getLayoutRect(this.xOriginIframeHandler_.iframe);
       const box = this.getLayoutBox();
       // Cache the iframe's relative position to the amp-ad. This is
       // necessary for fixed-position containers which "move" with the
@@ -328,9 +325,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.measureIframeLayoutBox_();
     }
 
-    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (devAssert(
-      this.iframeLayoutBox_
-    ));
+    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
+      devAssert(this.iframeLayoutBox_));
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
@@ -339,20 +335,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
-    userAssert(
-      !this.isInFixedContainer_,
-      '<amp-ad> is not allowed to be placed in elements with ' +
-        'position:fixed: %s',
-      this.element
-    );
+    userAssert(!this.isInFixedContainer_,
+        '<amp-ad> is not allowed to be placed in elements with ' +
+        'position:fixed: %s', this.element);
 
     const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
     const isConsentV2Experiment = isExperimentOn(this.win, 'amp-consent-v2');
-    const consentStringPromise =
-      consentPolicyId && isConsentV2Experiment
-        ? getConsentPolicyInfo(this.element, consentPolicyId)
-        : Promise.resolve(null);
+    const consentStringPromise = (consentPolicyId && isConsentV2Experiment)
+      ? getConsentPolicyInfo(this.element, consentPolicyId)
+      : Promise.resolve(null);
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
@@ -363,6 +355,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       sharedDataPromise,
       consentStringPromise,
     ]).then(consents => {
+
       // Use JsonObject to preserve field names so that ampContext can access
       // values with name
       // ampcontext.js and this file are compiled in different compilation unit
@@ -385,14 +378,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // because both happen inside a cross-domain iframe.  Separating them
       // here, though, allows us to measure the impact of ad throttling via
       // incrementLoadingAds().
-      const iframe = getIframe(
-        toWin(this.element.ownerDocument.defaultView),
-        this.element,
-        this.type_,
-        opt_context,
-        {disallowCustom: this.config.remoteHTMLDisabled}
-      );
-      this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+      const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
+          this.element, this.type_, opt_context,
+          {disallowCustom: this.config.remoteHTMLDisabled});
+      this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
+          this);
       return this.xOriginIframeHandler_.init(iframe);
     });
     incrementLoadingAds(this.win, this.layoutPromise_);
@@ -436,11 +426,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * Calculates and attempts to set the appropriate height & width for a
-   * responsive full width ad unit.
-   * @return {!Promise}
-   * @private
-   */
+  * Calculates and attempts to set the appropriate height & width for a
+  * responsive full width ad unit.
+  * @return {!Promise}
+  * @private
+  */
   attemptFullWidthSizeChange_() {
     const viewportSize = this.getViewport().getSize();
     const maxHeight = Math.min(MAX_FULL_WIDTH_HEIGHT, viewportSize.height);
@@ -451,12 +441,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // affect it.
 
     return this.attemptChangeSize(height, width).then(
-      () => {
-        dev().info(TAG_3P_IMPL, `Size change accepted: ${width}x${height}`);
-      },
-      () => {
-        dev().info(TAG_3P_IMPL, `Size change rejected: ${width}x${height}`);
-      }
+        () => {
+          dev().info(TAG_3P_IMPL, `Size change accepted: ${width}x${height}`);
+        },
+        () => {
+          dev().info(TAG_3P_IMPL, `Size change rejected: ${width}x${height}`);
+        }
     );
   }
 
@@ -472,14 +462,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // fast fetch.
     if (this.element.getAttribute('data-auto-format') === ADSENSE_MCRSPV_TAG) {
       return getMatchedContentResponsiveHeightAndUpdatePubParams(
-        width,
-        this.element
-      );
+          width, this.element);
     }
-    return clamp(
-      Math.round(width / this.config.fullWidthHeightRatio),
-      MIN_FULL_WIDTH_HEIGHT,
-      maxHeight
-    );
+    return clamp(Math.round(width / this.config.fullWidthHeightRatio),
+        MIN_FULL_WIDTH_HEIGHT, maxHeight);
   }
 }

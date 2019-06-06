@@ -132,7 +132,7 @@ function findHtmlFilesRelativeToTestdata() {
   const testFiles = [];
   for (const entry of testSubdirs) {
     for (const candidate of readdir(path.join(entry.root, entry.subdir))) {
-      if (candidate.match(/\.html$/)) {
+      if (candidate.match(/^.*.html/g)) {
         testFiles.push(path.join(entry.subdir, candidate));
       }
     }
@@ -407,8 +407,8 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:28:2 The author stylesheet ' +
        'specified in tag \'style amp-custom\' is too long - document ' +
        'contains 50001 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://amp.dev/documentation/guides-and-tutorials/' +
-       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+       '(see https://www.ampproject.org/docs/reference/spec' +
+       '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -428,28 +428,23 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:28:2 The author stylesheet ' +
        'specified in tag \'style amp-custom\' is too long - document ' +
        'contains 50002 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://amp.dev/documentation/guides-and-tutorials/' +
-       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+       '(see https://www.ampproject.org/docs/reference/spec' +
+       '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
-  it('fails on 0 bytes in author stylesheet and 50000 bytes in inline style',
-     () => {
-       const inlineStyle = Array(5001).join(validInlineStyleBlob);
-       assertStrictEqual(50000, inlineStyle.length);
-       const test = new ValidatorTestCase('feature_tests/css_length.html');
-       test.inlineOutput = false;
-       test.ampHtmlFileContents =
+  it('accepts 0 bytes in author stylesheet and 50000 bytes in inline style',
+      () => {
+        const inlineStyle = Array(5001).join(validInlineStyleBlob);
+        assertStrictEqual(50000, inlineStyle.length);
+        const test = new ValidatorTestCase('feature_tests/css_length.html');
+        test.inlineOutput = false;
+        test.ampHtmlFileContents =
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
-       test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:34:2 The inline style specified in ' +
-           'tag \'div\' is too long - it contains 50000 bytes whereas the ' +
-           'limit is 1000 bytes. (see https://amp.dev/documentation/guides' +
-           '-and-tutorials/learn/spec/amphtml#maximum-size) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
-       test.run();
-     });
+        test.expectedOutput = 'PASS';
+        test.run();
+      });
 
   it('will not accept 0 bytes in author stylesheet and 50001 bytes in ' +
      'inline style',
@@ -463,17 +458,12 @@ describe('ValidatorCssLength', () => {
            .replace('replace_inline_style', inlineStyle);
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:34:2 The inline style specified in ' +
-        'tag \'div\' is too long - it contains 50001 bytes whereas the ' +
-        'limit is 1000 bytes. (see https://amp.dev/documentation/guides' +
-        '-and-tutorials/learn/spec/amphtml#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]\n' +
-        'feature_tests/css_length.html:36:6 The author stylesheet ' +
-        'specified in tag \'style amp-custom\' and the combined inline ' +
-        'styles is too large - document contains 50001 bytes whereas the ' +
-        'limit is 50000 bytes. ' +
-        '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+       'feature_tests/css_length.html:36:6 The author stylesheet ' +
+       'specified in tag \'style amp-custom\' and the combined inline ' +
+       'styles is too large - document contains 50001 bytes whereas the ' +
+       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
+       '/author-develop/responsive/style_pages) ' +
+       '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -492,9 +482,9 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:5036:6 The author stylesheet ' +
        'specified in tag \'style amp-custom\' and the combined inline ' +
        'styles is too large - document contains 50014 bytes whereas the ' +
-       'limit is 50000 bytes. ' +
-       '(see https://amp.dev/documentation/guides-and-tutorials/' +
-       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
+       '/author-develop/responsive/style_pages) ' +
+       '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });
@@ -533,9 +523,9 @@ describe('ValidatorCssLengthWithUrls', () => {
     test.expectedOutput = 'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. ' +
-        '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -559,9 +549,9 @@ describe('ValidatorCssLengthWithUrls', () => {
     test.expectedOutput = 'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. ' +
-        '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -585,9 +575,9 @@ describe('ValidatorCssLengthWithUrls', () => {
     test.expectedOutput = 'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. ' +
-        '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });
@@ -673,9 +663,9 @@ describe('ValidatorTransformedAmpCssLengthWithUrls', () => {
         'transformed_feature_tests/css_length.html:29:2 The author ' +
         'stylesheet specified in tag \'style amp-custom (transformed)\' ' +
         'is too long - document contains 50010 bytes whereas the limit ' +
-        'is 50000 bytes. ' +
-        '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'is 50000 bytes. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });
@@ -1191,7 +1181,6 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-img': 0,
         'amp-layout': 0,
         'amp-lightbox': 0,
-        'amp-mraid': 0,
         'amp-mustache': 0,
         'amp-pixel': 0,
         'amp-position-observer': 0,
@@ -1215,7 +1204,6 @@ describe('ValidatorRulesMakeSense', () => {
       const whitelistedAmp4EmailExtensions = {
         'AMP-ACCORDION': 0,
         'AMP-ANIM': 0,
-        'AMP-BIND-MACRO': 0,
         'AMP-CAROUSEL': 0,
         'AMP-FIT-TEXT': 0,
         'AMP-IMG': 0,
@@ -1309,6 +1297,47 @@ describe('ValidatorRulesMakeSense', () => {
                   .toBe(true);
             });
       }
+      // TagSpecs with an ExtensionSpec are extensions. We have a few
+      // additional checks for these.
+      if (tagSpec.extensionSpec !== null) {
+        const {extensionSpec} = tagSpec;
+        it('extension must have a name field value', () => {
+          expect(extensionSpec.name).toBeDefined();
+        });
+        it('extension ' + extensionSpec.name + ' must have at least two ' +
+               'versions, latest and a numeric version, e.g `1.0`',
+        () => {
+          expect(extensionSpec.version).toBeGreaterThan(1);
+        });
+        it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
+               'or a numeric value',
+        () => {
+          for (const versionString of extensionSpec.version) {
+            expect(versionString).toMatch(/^(latest|[0-9.])$/);
+          }
+          for (const versionString of extensionSpec.deprecatedVersion) {
+            expect(versionString).toMatch(/^(latest|[0-9.])$/);
+          }
+        });
+        it('extension ' + extensionSpec.name + ' deprecated_version must be ' +
+               'subset of version',
+        () => {
+          const versions = {};
+          for (const versionString of extensionSpec.version) {
+            expect(versionString).toMatch(/^(latest|[0-9.])$/);
+          }
+          for (const versionString of extensionSpec.deprecatedVersion) {
+            expect(versions.hasOwnProperty(versionString)).toBe(true);
+          }
+        });
+        it('extension ' + extensionSpec.name + ' must include the ' +
+               'attr_list: "common-extension-attrs"` attr_list ',
+        () => {
+          expect(tagSpec.attrLists.length).toEqual(1);
+          expect(tagSpec.attrLists[0]).toEqual('common-extension-attrs');
+        });
+      }
+
       if (attrSpec.dispatchKey) {
         it('tag_spec ' + tagSpecName +
            ' can not have more than one dispatch_key', () => {
@@ -1316,51 +1345,6 @@ describe('ValidatorRulesMakeSense', () => {
           seenDispatchKey = true;
         });
       }
-    }
-
-    // TagSpecs with an ExtensionSpec are extensions. We have a few
-    // additional checks for these.
-    if (tagSpec.extensionSpec !== null) {
-      const {extensionSpec} = tagSpec;
-      const versionRegexp = /^(latest|[0-9]+[.][0-9]+)$/;
-      it('extension must have a name field value', () => {
-        expect(extensionSpec.name).toBeDefined();
-      });
-      it('extension ' + extensionSpec.name + ' must have at least two ' +
-             'versions, latest and a numeric version, e.g `1.0`',
-      () => {
-        expect(extensionSpec.version.length).toBeGreaterThan(1);
-      });
-      it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
-             'or a numeric value',
-      () => {
-        for (const versionString of extensionSpec.version) {
-          expect(versionString).toMatch(versionRegexp);
-        }
-        for (const versionString of extensionSpec.deprecatedVersion) {
-          expect(versionString).toMatch(versionRegexp);
-        }
-      });
-      it('extension ' + extensionSpec.name + ' deprecated_version must be ' +
-             'subset of version',
-      () => {
-        for (const versionString of extensionSpec.deprecatedVersion) {
-          expect(extensionSpec.version).toContain(versionString);
-        }
-      });
-      it('extension ' + extensionSpec.name + ' must include the ' +
-             'attr_list: "common-extension-attrs"` attr_list ',
-      () => {
-        expect(tagSpec.attrLists.length).toEqual(1);
-        // TODO: what we'd like to verify here is that this AttrList is named
-        // 'common-extension-attrs'.  Unfortunately that information isn't
-        // available to us: we just have an index into
-        // Context.rules_.parsedAttrSpecs_.parsedAttrSpecs_.
-        // getNameByAttrSpecId() looks like it would do what we want, but it's
-        // sufficiently wrapped in private context inside the validator that I
-        // don't see a way to call it.  For now just gold the current index.
-        expect(tagSpec.attrLists[0]).toEqual(18);
-      });
     }
 
     // cdata

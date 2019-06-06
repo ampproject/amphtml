@@ -23,6 +23,7 @@ import {validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function connatix(global, data) {
+
   validateData(data, ['connatix']);
 
   // Because 3p's loadScript does not allow for data attributes,
@@ -36,13 +37,9 @@ export function connatix(global, data) {
     }
   }
 
-  window.addEventListener(
-    'connatix_no_content',
-    function() {
-      window.context.noContentAvailable();
-    },
-    false
-  );
+  window.addEventListener('connatix_no_content', function() {
+    window.context.noContentAvailable();
+  }, false);
 
   script.onload = () => {
     global.context.renderStart();

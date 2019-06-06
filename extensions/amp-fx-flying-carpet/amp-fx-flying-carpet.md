@@ -36,9 +36,6 @@ A flying carpet wraps its children in a unique full-screen scrolling container. 
   </tr>
 </table>
 
-[tip type="note"]
-Check if your ad network permits use of flying carpets when implementing the `amp-fx-flying-carpet` to display adds. 
-[/tip]
 [TOC]
 
 ## Behavior

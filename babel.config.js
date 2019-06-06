@@ -25,11 +25,10 @@
 
 'use strict';
 
-const minimist = require('minimist');
 const {isTravisBuild} = require('./build-system/travis');
+const minimist = require('minimist');
 const argv = minimist(process.argv.slice(2));
 
-// eslint-disable-next-line amphtml-internal/no-module-exports
 module.exports = function(api) {
   api.cache(true);
   // Single pass builds do not use any of the default settings below.
@@ -38,18 +37,14 @@ module.exports = function(api) {
   }
   return {
     'presets': [
-      [
-        '@babel/env',
-        {
-          'modules': 'commonjs',
-          'loose': true,
-          'targets': {
-            'browsers': isTravisBuild()
-              ? ['Last 2 versions', 'safari >= 9']
-              : ['Last 2 versions'],
-          },
+      ['@babel/env', {
+        'modules': 'commonjs',
+        'loose': true,
+        'targets': {
+          'browsers': isTravisBuild() ?
+            ['Last 2 versions', 'safari >= 9'] : ['Last 2 versions'],
         },
-      ],
+      }],
     ],
     'compact': false,
     'sourceType': 'module',

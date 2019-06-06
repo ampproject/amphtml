@@ -16,7 +16,7 @@ limitations under the License.
 
 # Getting Started End-to-end
 
-This end-to-end guide will show you how to contribute code to the AMP open source project.  It covers everything from creating a GitHub account to getting your code reviewed and merged.
+This end-to-end guide will show you how to contribute code to the AMP Project.  It covers everything from creating a GitHub account to getting your code reviewed and merged.
 
 This guide is intended for people who don't know much about Git/GitHub and the tools we use to build/test AMP (Node.js, Gulp, etc.).  The guide may look long, but it includes a lot of explanation so you can get a better understanding of how things work.
 
@@ -35,7 +35,6 @@ If you do not yet have a specific code contribution project in mind as you go th
 - [Create a Git branch](#create-a-git-branch)
 - [Pull the latest changes from the amphtml repository](#pull-the-latest-changes-from-the-amphtml-repository)
 - [Edit files and commit them](#edit-files-and-commit-them)
-  * [Code quality and style](#code-quality-and-style)
 - [Testing your changes](#testing-your-changes)
   * [Running tests locally](#running-tests-locally)
   * [Running all the Travis CI checks locally](#running-all-the-travis-ci-checks-locally)
@@ -50,11 +49,11 @@ If you do not yet have a specific code contribution project in mind as you go th
 
 # How to get help
 
-If you have a question or are unsure about something while following this end-to-end guide, you can get help from the AMP open source community in many ways:
+If you have a question or are unsure about something while following this end-to-end guide, you can get help from the AMP Project community in many ways:
 
 * If you are tackling a [Good First Issue](https://github.com/ampproject/amphtml/labels/good%20first%20issue) or other GitHub issue you can ask a question as a comment on the issue directly.  This works particularly well if the question is about how to make progress on that specific issue.
 
-* The [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack is a place for new contributors getting up to speed in AMP to find help.  You should feel comfortable asking any question in there no matter how basic it may seem to you (e.g. problems getting Git set up, errors during a build, etc.).  We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.
+* The [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack is a place for new contributors getting up to speed in the AMP Project to find help.  You should feel comfortable asking any question in there no matter how basic it may seem to you (e.g. problems getting Git set up, errors during a build, etc.).  We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.
 
 * You can also ask questions on [amphtml-discuss@googlegroups.com](https://groups.google.com/forum/#!forum/amphtml-discuss).
 
@@ -64,15 +63,15 @@ People who have never used Git or GitHub before can find them intimidating--even
 
 Despite the similarity in names, Git & GitHub are different:
 
-* Git is a version control system.  You'll install the Git client locally and run Git commands to grab code from a Git repository, make changes and submit code.  You don't need to use GitHub to use Git, but the AMP's Git repository happens to be hosted on GitHub.
+* Git is a version control system.  You'll install the Git client locally and run Git commands to grab code from a Git repository, make changes and submit code.  You don't need to use GitHub to use Git, but the AMP Project's Git repository happens to be hosted on GitHub.
 
 * GitHub hosts Git repositories and provides other tools that make managing projects easier (like a GUI for code reviews, bug tracking, etc.).
 
-To contribute to AMP you'll use Git to grab a copy of the code from the [amphtml Git repository on GitHub](https://github.com/ampproject/amphtml), make changes locally and push your changes back up to your own Git repository on GitHub so you can get your code changes reviewed and merged into the amphtml codebase.
+To contribute to the AMP Project you'll use Git to grab a copy of the code from the [amphtml Git repository on GitHub](https://github.com/ampproject/amphtml), make changes locally and push your changes back up to your own Git repository on GitHub so you can get your code changes reviewed and merged into the amphtml codebase.
 
 # Set up your GitHub account and Git
 
-[Create a GitHub account](https://help.github.com/articles/signing-up-for-a-new-github-account/) if you don't already have one.  Because AMP is an open source project you can create a free GitHub account (i.e. click "Join GitHub for free" on the pricing page you end up on).  Once your account is created set up [two-factor authentication](https://help.github.com/articles/about-two-factor-authentication/) for your account.
+[Create a GitHub account](https://help.github.com/articles/signing-up-for-a-new-github-account/) if you don't already have one.  Because the AMP Project is an open source project you can create a free GitHub account (i.e. click "Join GitHub for free" on the pricing page you end up on).  Once your account is created set up [two-factor authentication](https://help.github.com/articles/about-two-factor-authentication/) for your account.
 
 After you are done setting up your GitHub account [install and set up Git](https://help.github.com/articles/set-up-git/).  You'll download and install Git, perform some basic configuration and then set up authentication for talking to GitHub.  Although the authentication instructions suggest HTTPS is recommended, **you should follow the "Connecting over SSH" instructions instead**.  SSH is required for two-factor authentication which we recommend you use.  (The rest of these instructions will assume you are using SSH.)
 
@@ -82,7 +81,7 @@ After you are done setting up your GitHub account [install and set up Git](https
 
 One of the central concepts of Git is the _repository_, where files are stored and kept track of.  You can browse [the amphtml repository](https://github.com/ampproject/amphtml) using the GitHub web UI.
 
-The process of getting the amphtml code, making changes, getting your changes reviewed and then having your changes become a part of AMP involves *three* repositories:
+The process of getting the amphtml code, making changes, getting your changes reviewed and then having your changes become a part of the AMP Project involves *three* repositories:
 
 * The first repository is the **amphtml repository** mentioned above.  When you want to fix a bug or add a feature to AMP your goal is to get your code to become part of this repository (_merged_ in Git terms).  The amphtml repository is an example of a *remote* repository because it's stored in a server that your Git client connects to.
 
@@ -100,7 +99,7 @@ If you are new to Git it may seem surprising that there are three different repo
 
 Note that each of these repositories has a complete copy of the entire amphtml codebase.  If your local repository is on your computer and you lose your internet connection you'll still be able to make changes to any file in your local repository.  Part of the workflow for Git that we'll go through is how you keep these three repositories in sync.
 
-One thing that might put your mind at ease:  if you aren't in a [role](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) that lets you make changes to the amphtml repository directly any changes you make will only affect you. So go ahead and try out different Git commands without worrying you're going to break things for other people!
+One thing that might put your mind at ease:  if you aren't currently a [core committer](../GOVERNANCE.md) to the amphtml project, you can't actually make changes to the amphtml repository directly. So go ahead and try out different Git commands without worrying you're going to break things for other people!
 
 ## Creating your GitHub fork and your local repository
 To create your fork on GitHub and your local copy of that fork:
@@ -294,9 +293,9 @@ The common workflow for making changes to files in Git is:
 
 * edit some files using your favorite editor
 
-* if your code requires a new dependency, run `yarn add --exact [--dev] <packagename>`, which will automatically update `package.json` and `yarn.lock`
+* if your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which will automatically update `package.json` and `yarn.lock`
 
-* if you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
+* if you manually edited `package.json`, run `yarn install` to install the dependency and generate an updated `yarn.lock` file
 
 * tell Git that you care about these changes by _staging_ them using the `git add` command
 
@@ -344,24 +343,13 @@ git commit -a -m "<a brief description of your commit>"
 
 Note that you *can* add changes into an existing commit but that opens up some additional Git concepts that you don't really need to make a contribution.
 
-## Code quality and style
-
-AMP uses [Eslint](https://eslint.org/) to ensure code quality and [Prettier](https://prettier.io/) to standardize code style. For easy development, here are two recommendations:
-- Use a code editor with Eslint support to make sure that your code satisfies all of AMP's quality and style rules. [Here](https://eslint.org/docs/user-guide/integrations#editors) is a list of editors with Eslint extension support.
-- Set your editor to automatically fix Eslint errors in your code on save.
-
-For example, if you use [Visual Studio Code](https://code.visualstudio.com/), you can install its [Eslint plugin](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint), and enable the `eslint.autoFixOnSave` setting.
-
-Alternatively, you can manually fix lint errors in your code by running:
-```
-gulp lint --local-changes --fix
-```
-
 # Testing your changes
 
 Before sending your code changes for review, please make sure that all of the affected tests are passing. You may be expected to add/modify some tests as well.
 
-Note: You can automatically run critical checks before `git push` by enabling our pre-push hook. To do so, run `./build-system/enable-git-pre-push.sh`.
+{% call callout('Note', type='note') %}
+Automatically run most checks on `git push` by enabling our pre-push hook. Run `./build-system/enable-git-pre-push.sh`
+{% endcall %}
 
 ## Running tests locally
 
@@ -456,7 +444,7 @@ Note that you *can* edit files in your branch directly on GitHub using the web U
 
 # Send a Pull Request (i.e. request a code review)
 
-In order for your changes to become part of the amphtml repository, you will need to get your [code reviewed](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) via a Pull Request (PR).  In fact you won't actually merge your code into the amphtml repository directly; after your code has been reviewed [someone with the permission to modify the amphtml repository](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) will handle the merge for you.
+In order for your changes to become part of the amphtml repository, you will need to get your code reviewed by one of the [core committers](../GOVERNANCE.md) via a Pull Request (PR).  In fact you won't actually merge your code into the amphtml repository directly; once a core committer approves it he or she will handle the merge for you.
 
 Once your code is ready for a review, go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and click on the "Compare & pull request" button on the "recently pushed branches" banner.  If that banner isn't visible, go to your GitHub fork at
 `https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.
@@ -467,13 +455,9 @@ On the "Open a pull request" page, you will see dropdowns at the top indicating 
 amproject/amphtml / master … <username>/amphtml / <branch name>
 ```
 
-Below this are text boxes where you can provide a title and description for your pull request.  Please follow the guidelines in the template for providing a good title and description.
+Below this are text boxes where you can provide a title and description for your pull request.  Please follow the guidelines in the template for providing a good title and description.  Make sure to refer to any Issues that you are fixing (by typing "Issue #" and selecting it from the autocomplete) so that people can see which issue you are fixing and people watching the issue will see that there's a PR for it.
 
-In your PR description or comments refer to any GitHub issues that your PR is addressing.  This will let people reviewing your PR know what issue your change is addressing and let anyone watching the issue know that there's a PR for it.  You can do this by including the text `issue #<your issue number>` in the description/comment.  If your PR completely fixes the issue, make this `fixes #<your issue number>` instead, which will also cause the issue to be closed once your PR is merged.
-
-You will need to find a [Reviewer and Owner](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) to review your code and approve it.  When you find someone to review your code, cc them on the Pull Request (by adding a line "/cc @username", e.g. "/cc @mrjoro").
-
-When you're new to contributing to AMP it can be tricky to figure out who should review your code.  In general if you've been working with someone in the community on your change, they can likely review your code or know who can review it.  The [people who previously changed the files you're changing](https://help.github.com/en/articles/tracking-changes-in-a-file) are also good candidates for reviewing your change.  If you aren't sure who to ask to review your code, the steps for [finding a guide](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#find-a-guide) can also work for finding a reviewer for your change.
+The reviewer should be one of the [core committers](../GOVERNANCE.md) and ideally someone who is familiar with the change you are making (e.g. someone you've been communicating with through an associated GitHub issue).
 
 When you're done click "Create pull request."  This will bring you to your Pull Request page where you can track progress, add comments, etc.
 
@@ -481,7 +465,7 @@ On the Pull Request page you can see that a few checks are running:
 
 * The tests are being run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests)
 
-* The system is verifying that you have signed a CLA (Contributor License Agreement).  If this is your first time submitting a Pull Request for AMP on GitHub you'll need to sign a CLA.  (Make sure the email address you use to sign the CLA is the same one that you configured Git with.)  See details in the [Contributing code](../CONTRIBUTING.md#contributing-code) documentation.
+* The system is verifying that you have signed a CLA (Contributor License Agreement).  If this is your first time submitting a Pull Request for the amphtml project you'll need to sign an agreement.  (Make sure the email address you use to sign the CLA is the same one that you configured Git with.)  See details in the [Contributing code](../CONTRIBUTING.md#contributing-code) documentation.
 
 * Your code is going through static analysis by [LGTM](https://lgtm.com/projects/g/ampproject/amphtml/).
 
@@ -534,21 +518,21 @@ You can see whether your change made it into a given build on the [amphtml Relea
 
 You can set your browser to use the Dev Channel build by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.  This will let you see how your changes will affect any AMP page before your changes are rolled out to all AMP pages.  Note that this only affects the browser in which you enable the experiment.
 
-You can verify the AMP version your browser is using for a given page by looking at your browser's developer console.  After loading an AMP page (e.g. [https://amp.dev](https://amp.dev)) the console will have a message like `Powered by AMP ⚡ HTML – Version <build number>`).  The `<build number>` will match one of the build numbers on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).
+You can verify the AMP version your browser is using for a given page by looking at your browser's developer console.  After loading an AMP page (e.g. [https://ampproject.org](https://ampproject.org)) the console will have a message like `Powered by AMP ⚡ HTML – Version <build number>`).  The `<build number>` will match one of the build numbers on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).
 
 The [Release Schedule](release-schedule.md) doc has more details on the release process.
 
 # ⚡⚡⚡... (Next steps)
 
-Now that you know the process for making changes to AMP you already have most of the heavy lifting done.  **We look forward to seeing your future [contributions](../CONTRIBUTING.md) to the project.** :)
+Now that you know the process for making changes to the AMP Project you already have most of the heavy lifting done.  **We look forward to seeing your future [contributions](../CONTRIBUTING.md) to the project.** :)
 
 If you're looking for ideas on your next contribution feel free to reach out to anyone you worked with on your first contribution or let us know in the [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack.  (We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.)
 
 # Other resources
 
-This end-to-end guide provided enough details to get a basic understanding of a typical workflow for contributing code to the AMP open source project.  If you find yourself wanting to know more there are a lot of resources available.  Here are a few:
+This end-to-end guide provided enough details to get a basic understanding of a typical workflow for contributing code to the AMP Project.  If you find yourself wanting to know more there are a lot of resources available.  Here are a few:
 
-* The ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/index.html) provides step-by-step instructions for a common type of code contribution to AMP.  Even if your project involves modifying an existing AMP component this codelab will give you an overview of how AMP components work.
+* The ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/index.html) provides step-by-step instructions for a common type of code contribution to the AMP Project.  Even if your project involves modifying an existing AMP component this codelab will give you an overview of how AMP components work.
 * GitHub has a lot of helpful introductory material, including:
    * a [Hello World tutorial](https://guides.github.com/activities/hello-world/) that's a bit less in depth than this guide, but it covers things like creating a new repository and merging in code after a pull request
    * the [Git cheat sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) from GitHub provides a quick reference to some common commands, including many we didn't cover in this guide (such as [diff](https://www.git-tower.com/learn/git/ebook/en/command-line/advanced-topics/diffs) and [log](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History))

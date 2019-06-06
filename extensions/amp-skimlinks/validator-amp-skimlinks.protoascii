@@ -23,9 +23,6 @@ tags: {  # amp-skimlinks
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
-  satisfies: "amp-skimlinks"
-  excludes: "amp-link-rewriter"
-  excludes: "amp-smartlinks"
 }
 
 tags: {  # <amp-skimlinks>

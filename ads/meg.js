@@ -34,15 +34,10 @@ export function meg(global, data) {
       global.context.noContentAvailable();
     },
   };
-  loadScript(
-    global,
-    url,
-    () => {
-      // Meg has been loaded
-    },
-    () => {
-      // Cannot load meg embed.js
-      global.context.noContentAvailable();
-    }
-  );
+  loadScript(global, url, () => {
+    // Meg has been loaded
+  }, () => {
+    // Cannot load meg embed.js
+    global.context.noContentAvailable();
+  });
 }

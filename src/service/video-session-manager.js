@@ -16,6 +16,7 @@
 
 import {Observable} from '../observable';
 
+
 export class VideoSessionManager {
   /**
    * Creates an instance of VideoSessionManager.

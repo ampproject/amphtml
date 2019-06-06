@@ -51,11 +51,10 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES = {
  * (e.g. [align-content], [align-items], ...)
  * @private @const {string}
  */
-const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR = Object.keys(
-  SUPPORTED_CSS_GRID_ATTRIBUTES
-)
-  .map(key => `[${key}]`)
-  .join(',');
+const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR =
+    Object.keys(SUPPORTED_CSS_GRID_ATTRIBUTES)
+        .map(key => `[${key}]`)
+        .join(',');
 
 /**
  * The attribute name for grid layer templates.
@@ -86,14 +85,14 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.prerenderAllowed_ = false;
   }
 
+
   /** @override */
   firstAttachedCallback() {
     // Only prerender if child of the first page.
-    this.prerenderAllowed_ = matches(
-      this.element,
-      'amp-story-page:first-of-type amp-story-grid-layer'
-    );
+    this.prerenderAllowed_ = matches(this.element,
+        'amp-story-page:first-of-type amp-story-grid-layer');
   }
+
 
   /** @override */
   buildCallback() {
@@ -103,10 +102,12 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.setDescendentCssGridStyles_();
   }
 
+
   /** @override */
   prerenderAllowed() {
     return this.prerenderAllowed_;
   }
+
 
   /**
    * Applies internal CSS class names for the template attribute, so that styles
@@ -123,16 +124,15 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     }
   }
 
+
   /**
    * Copies the whitelisted CSS grid styles for descendants of the
    * <amp-story-grid-layer> element.
    * @private
    */
   setDescendentCssGridStyles_() {
-    const elementsToUpgradeStyles = scopedQuerySelectorAll(
-      this.element,
-      SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR
-    );
+    const elementsToUpgradeStyles = scopedQuerySelectorAll(this.element,
+        SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR);
 
     Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
       this.setCssGridStyles_(element);
@@ -147,6 +147,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   setOwnCssGridStyles_() {
     this.setCssGridStyles_(this.element);
   }
+
 
   /**
    * Copies the values of an element's attributes to its styles, if the

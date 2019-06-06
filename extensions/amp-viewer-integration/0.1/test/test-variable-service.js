@@ -15,6 +15,7 @@
  */
 import {AmpViewerIntegrationVariableService} from '../variable-service';
 
+
 describes.fakeWin('amp-viewer-integration variable service', {}, () => {
   let variableService;
 
@@ -32,8 +33,7 @@ describes.fakeWin('amp-viewer-integration variable service', {}, () => {
 
   it('should return the first ancestorOrigin', () => {
     expect(variableService.get()['ancestorOrigin']()).to.equal(
-      'http://margarine-paradise.com'
-    );
+        'http://margarine-paradise.com');
   });
 
   it('should return the fragment param', () => {

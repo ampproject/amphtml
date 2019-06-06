@@ -16,6 +16,7 @@
 
 import {parseUrlDeprecated, resolveRelativeUrl} from '../src/url';
 
+
 /**
  * @typedef {{
  *   hidden: (boolean|undefined),
@@ -29,12 +30,15 @@ import {parseUrlDeprecated, resolveRelativeUrl} from '../src/url';
  */
 export let FakeWindowSpec;
 
+
 /** @extends {!Window} */
 export class FakeWindow {
+
   /**
    * @param {!FakeWindowSpec=} opt_spec
    */
   constructor(opt_spec) {
+
     const spec = opt_spec || {};
 
     /**
@@ -95,7 +99,7 @@ export class FakeWindow {
     let fontStatus = 'loaded';
     Object.defineProperty(this.document.fonts, 'status', {
       get: () => fontStatus,
-      set: val => (fontStatus = val),
+      set: val => fontStatus = val,
     });
 
     EventListeners.intercept(this.document);
@@ -115,8 +119,6 @@ export class FakeWindow {
 
     /** @private {!Array<string>} */
     this.cookie_ = [];
-    this.document.publicSuffixList = [];
-    this.document.lastSetCookieRaw; // used to verify cookie settings like expiration time etc
     Object.defineProperty(this.document, 'cookie', {
       get: () => {
         const cookie = [];
@@ -126,20 +128,8 @@ export class FakeWindow {
         return cookie.join(';');
       },
       set: value => {
-        this.document.lastSetCookieRaw = value;
-        let cookie = value.match(/^([^=]*)=([^;]*)/);
-        if (!cookie) {
-          // couldn't find the match. Treat cookie as single value.
-          cookie = [value, null];
-        }
+        const cookie = value.match(/^([^=]*)=([^;]*)/);
         const expiresMatch = value.match(/expires=([^;]*)(;|$)/);
-        const domainMatch = value.match(/domain=([^;]*)/);
-        const domain = domainMatch ? domainMatch[1] : '';
-        if (this.document.publicSuffixList.indexOf(domain) >= 0) {
-          // Can't set cookie to etld
-          this.document.lastSetCookieRaw = '';
-          return;
-        }
         const expires = expiresMatch ? Date.parse(expiresMatch[1]) : Infinity;
         let i = 0;
         for (; i < this.cookie_.length; i += 2) {
@@ -174,10 +164,8 @@ export class FakeWindow {
     // Location.
     /** @private @const {!FakeLocation} */
     this.location_ = new FakeLocation(
-      spec.location || window.location.href,
-      this,
-      this.history
-    );
+        spec.location || window.location.href,
+        this, this.history);
     Object.defineProperty(this, 'location', {
       get: () => this.location_,
       set: href => this.location_.assign(href),
@@ -186,16 +174,14 @@ export class FakeWindow {
     // Navigator.
     /** @const {!Navigator} */
     this.navigator = {
-      userAgent:
-        (spec.navigator && spec.navigator.userAgent) ||
-        window.navigator.userAgent,
+      userAgent: (spec.navigator && spec.navigator.userAgent) ||
+          window.navigator.userAgent,
     };
 
     // Storage.
     /** @const {!FakeStorage|undefined} */
-    this.localStorage = spec.localStorageOff
-      ? undefined
-      : new FakeStorage(this);
+    this.localStorage = spec.localStorageOff ?
+      undefined : new FakeStorage(this);
 
     // Timers and animation frames.
     /** @const */
@@ -221,8 +207,8 @@ export class FakeWindow {
       return window.clearInterval.apply(window, arguments);
     };
 
-    let raf =
-      window.requestAnimationFrame || window.webkitRequestAnimationFrame;
+    let raf = window.requestAnimationFrame
+        || window.webkitRequestAnimationFrame;
     if (raf) {
       raf = raf.bind(window);
     } else {
@@ -244,6 +230,7 @@ export class FakeWindow {
   removeEventListener() {}
 }
 
+
 /**
  * @typedef {{
  *   type: string,
@@ -254,10 +241,12 @@ export class FakeWindow {
  */
 export let EventListener;
 
+
 /**
  * Helper for testing event listeners.
  */
 class EventListeners {
+
   /**
    * @param {!EventTarget} target
    * @return {!EventListeners}
@@ -298,12 +287,9 @@ class EventListeners {
     return {
       type,
       handler,
-      capture:
-        typeof captureOrOpts == 'boolean'
-          ? captureOrOpts
-          : typeof captureOrOpts == 'object'
-          ? captureOrOpts.capture || false
-          : false,
+      capture: typeof captureOrOpts == 'boolean' ? captureOrOpts :
+        typeof captureOrOpts == 'object' ? captureOrOpts.capture || false :
+          false,
       options: typeof captureOrOpts == 'object' ? captureOrOpts : null,
     };
   }
@@ -327,11 +313,9 @@ class EventListeners {
     const toRemove = this.listener_(type, handler, captureOrOpts);
     for (let i = this.listeners.length - 1; i >= 0; i--) {
       const listener = this.listeners[i];
-      if (
-        listener.type == toRemove.type &&
-        listener.handler == toRemove.handler &&
-        listener.capture == toRemove.capture
-      ) {
+      if (listener.type == toRemove.type &&
+          listener.handler == toRemove.handler &&
+          listener.capture == toRemove.capture) {
         this.listeners.splice(i, 1);
       }
     }
@@ -363,6 +347,7 @@ class EventListeners {
   }
 }
 
+
 /**
  * @param {!EventTarget} target
  */
@@ -370,16 +355,19 @@ export function interceptEventListeners(target) {
   EventListeners.intercept(target);
 }
 
+
 /**
  * @extends {!Location}
  */
 export class FakeLocation {
+
   /**
    * @param {string} href
    * @param {!FakeWindow} win
    * @param {?History} history
    */
   constructor(href, win, history) {
+
     /** @const {!Window} */
     this.win = win;
 
@@ -398,16 +386,8 @@ export class FakeLocation {
       set: href => this.assign(href),
     });
 
-    const properties = [
-      'protocol',
-      'host',
-      'hostname',
-      'port',
-      'pathname',
-      'search',
-      'hash',
-      'origin',
-    ];
+    const properties = ['protocol', 'host', 'hostname', 'port', 'pathname',
+      'search', 'hash', 'origin'];
     properties.forEach(property => {
       Object.defineProperty(this, property, {
         get: () => this.url_[property],
@@ -415,12 +395,8 @@ export class FakeLocation {
     });
 
     if (this.history_) {
-      this.history_.replaceState(
-        null,
-        '',
-        this.url_.href,
-        /* fireEvent */ false
-      );
+      this.history_.replaceState(null, '', this.url_.href,
+          /* fireEvent */ false);
     }
   }
 
@@ -450,7 +426,8 @@ export class FakeLocation {
   assign(href) {
     this.set_(href);
     if (this.history_) {
-      this.history_.pushState(null, '', this.url_.href, /* fireEvent */ true);
+      this.history_.pushState(null, '', this.url_.href,
+          /* fireEvent */ true);
     }
     this.change_({assign: true});
   }
@@ -461,12 +438,8 @@ export class FakeLocation {
   replace(href) {
     this.set_(href);
     if (this.history_) {
-      this.history_.replaceState(
-        null,
-        '',
-        this.url_.href,
-        /* fireEvent */ true
-      );
+      this.history_.replaceState(null, '', this.url_.href,
+          /* fireEvent */ true);
     }
     this.change_({replace: true});
   }
@@ -488,10 +461,12 @@ export class FakeLocation {
   }
 }
 
+
 /**
  * @extends {!History}
  */
 export class FakeHistory {
+
   /** @param {!FakeWindow} win */
   constructor(win) {
     /** @const */
@@ -531,10 +506,10 @@ export class FakeHistory {
       return;
     }
     if (newIndex < 0) {
-      throw new Error("can't go back");
+      throw new Error('can\'t go back');
     }
     if (newIndex >= this.stack.length) {
-      throw new Error("can't go forward");
+      throw new Error('can\'t go forward');
     }
     this.index = newIndex;
     // Make sure to restore the location href before firing popstate to match
@@ -580,10 +555,12 @@ export class FakeHistory {
   }
 }
 
+
 /**
  * @extends {Storage}
  */
 export class FakeStorage {
+
   /** @param {!Window} win */
   constructor(win) {
     /** @const */
@@ -642,10 +619,12 @@ export class FakeStorage {
   }
 }
 
+
 /**
  * @extends {CustomElementRegistry}
  */
 export class FakeCustomElements {
+
   /** @param {!Window} win */
   constructor(win) {
     /** @const */
@@ -726,12 +705,13 @@ export class FakeMutationObserver {
     if (this.scheduled_) {
       return this.scheduled_;
     }
-    return (this.scheduled_ = Promise.resolve().then(() => {
+    return this.scheduled_ = Promise.resolve().then(() => {
       this.scheduled_ = null;
       this.callback_(this.takeRecords_());
-    }));
+    });
   }
 }
+
 
 /**
  * @param {!Object} obj

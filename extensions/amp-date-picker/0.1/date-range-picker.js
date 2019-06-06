@@ -25,14 +25,12 @@ import {wrap as withMaximumNights} from './wrappers/maximum-nights';
  * @return {function(new:React.Component, !JsonObject)} A date range picker component class
  */
 function createDateRangePickerBase() {
-  const constants = /** @type {JsonObject} */ (requireExternal(
-    'react-dates/constants'
-  ));
+  const constants = /** @type {JsonObject} */ (
+    requireExternal('react-dates/constants'));
   const DAY_SIZE = constants['DAY_SIZE'];
   const HORIZONTAL_ORIENTATION = constants['HORIZONTAL_ORIENTATION'];
-  const DayPickerRangeController = /** @type {function(new: React.Component, !JsonObject)} */ (requireExternal(
-    'react-dates'
-  )['DayPickerRangeController']);
+  const DayPickerRangeController = /** @type {function(new: React.Component, !JsonObject)} */ (
+    requireExternal('react-dates')['DayPickerRangeController']);
 
   const defaultProps = dict({
     'startDate': null, // TODO: use null
@@ -86,9 +84,8 @@ function createDateRangePickerBase() {
     'isRTL': false,
   });
 
-  const WrappedDayPickerRangeController = withDatePickerCommon(
-    withMaximumNights(DayPickerRangeController)
-  );
+  const WrappedDayPickerRangeController =
+      withDatePickerCommon(withMaximumNights(DayPickerRangeController));
   WrappedDayPickerRangeController['defaultProps'] = defaultProps;
 
   return WrappedDayPickerRangeController;

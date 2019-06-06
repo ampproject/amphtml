@@ -30,7 +30,7 @@ FAIL
 |    <!-- Invalid: custom-element value is case-sensitive -->
 |    <script async custom-element='Amp-Analytics'
 >>   ^~~~~~~~~
-feature_tests/custom_element_case.html:30:2 The attribute 'custom-element' may not appear in tag 'amp-analytics extension .js script'. (see https://amp.dev/documentation/components/amp-analytics) [DISALLOWED_HTML]
+feature_tests/custom_element_case.html:30:2 The attribute 'custom-element' may not appear in tag 'amp-analytics extension .js script'. (see https://www.ampproject.org/docs/reference/components/amp-analytics) [DISALLOWED_HTML]
 |       src='https://cdn.ampproject.org/v0/amp-analytics-0.1.js'></script>
 |
 |  </runhead>

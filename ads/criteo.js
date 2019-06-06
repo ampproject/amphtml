@@ -35,17 +35,11 @@ export function criteo(global, data) {
         integrationmode: 'amp',
       });
     } else if (data.tagtype === 'rta' || data.tagtype === 'standalone') {
-      dev().error(
-        TAG,
-        'You are using a deprecated Criteo integration',
-        data.tagtype
-      );
+      dev().error(TAG, 'You are using a deprecated Criteo integration',
+          data.tagtype);
     } else {
-      dev().error(
-        TAG,
-        'You are using an unknown Criteo integration',
-        data.tagtype
-      );
+      dev().error(TAG, 'You are using an unknown Criteo integration',
+          data.tagtype);
     }
   });
 }

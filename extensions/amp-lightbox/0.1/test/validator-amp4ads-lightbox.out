@@ -35,13 +35,13 @@ FAIL
 |    <!-- Invalid: close-button not present. -->
 |    <amp-lightbox layout="nodisplay">
 >>   ^~~~~~~~~
-amp-lightbox/0.1/test/validator-amp4ads-lightbox.html:35:2 The mandatory attribute 'close-button' is missing in tag 'amp-lightbox [AMP4ADS]'. (see https://amp.dev/documentation/components/amp-lightbox) [AMP_TAG_PROBLEM]
+amp-lightbox/0.1/test/validator-amp4ads-lightbox.html:35:2 The mandatory attribute 'close-button' is missing in tag 'amp-lightbox [AMP4ADS]'. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [AMP_TAG_PROBLEM]
 |    </amp-lightbox>
 |
 |    <!-- Invalid: scrollable present. -->
 |    <amp-lightbox layout="nodisplay" close-button scrollable>
 >>   ^~~~~~~~~
-amp-lightbox/0.1/test/validator-amp4ads-lightbox.html:39:2 The attribute 'scrollable' may not appear in tag 'amp-lightbox [AMP4ADS]'. (see https://amp.dev/documentation/components/amp-lightbox) [DISALLOWED_HTML]
+amp-lightbox/0.1/test/validator-amp4ads-lightbox.html:39:2 The attribute 'scrollable' may not appear in tag 'amp-lightbox [AMP4ADS]'. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [DISALLOWED_HTML]
 |    </amp-lightbox>
 |  </body>
 |  </html>

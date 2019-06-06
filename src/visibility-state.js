@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 /**
  * Visibility state of the AMP document.
  * @enum {string}
@@ -46,3 +47,4 @@ export const VisibilityState = {
    */
   INACTIVE: 'inactive',
 };
+

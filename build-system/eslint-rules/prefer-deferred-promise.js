@@ -38,12 +38,10 @@ module.exports = function(context) {
       }
 
       const {object, property} = callee;
-      if (
-        object.type !== 'Identifier' ||
-        object.name !== 'Promise' ||
-        property.type !== 'Identifier' ||
-        property.name !== 'resolve'
-      ) {
+      if (object.type !== 'Identifier' ||
+          object.name !== 'Promise' ||
+          property.type !== 'Identifier' ||
+          property.name !== 'resolve') {
         return;
       }
 
@@ -54,9 +52,8 @@ module.exports = function(context) {
 
       context.report({
         node,
-        message:
-          'Use the Promise constructor, or tryResolve in the ' +
-          'src/utils/promise.js module.',
+        message: 'Use the Promise constructor, or tryResolve in the ' +
+            'src/utils/promise.js module.',
       });
     },
 
@@ -67,7 +64,8 @@ module.exports = function(context) {
       }
 
       const {callee} = node;
-      if (callee.type !== 'Identifier' || callee.name !== 'Promise') {
+      if (callee.type !== 'Identifier' ||
+          callee.name !== 'Promise') {
         return;
       }
 
@@ -92,10 +90,8 @@ module.exports = function(context) {
       const {name} = resolve;
       let assigned = false;
 
-      if (
-        resolver.type === 'ArrowFunctionExpression' &&
-        resolver.expression === true
-      ) {
+      if (resolver.type === 'ArrowFunctionExpression' &&
+          resolver.expression === true) {
         const {body} = resolver;
         assigned = isAssignment(body, name);
       } else {

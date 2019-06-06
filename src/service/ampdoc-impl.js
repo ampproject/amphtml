@@ -17,14 +17,18 @@
 import {Deferred} from '../utils/promise';
 import {Signals} from '../utils/signals';
 import {dev, devAssert} from '../log';
-import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
+import {
+  getParentWindowFrameElement,
+  registerServiceBuilder,
+} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {isExperimentOn} from '../experiments';
-import {waitForBodyOpenPromise} from '../dom';
+import {waitForBodyPromise} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
+
 
 /**
  * This service helps locate an ampdoc (`AmpDoc` instance) for any node,
@@ -53,6 +57,11 @@ export class AmpDocService {
 
     /** @private @const */
     this.alwaysClosestAmpDoc_ = isExperimentOn(win, 'ampdoc-closest');
+
+    /** Guarded by 'ampdoc-shell' experiment
+     * @private {?AmpDocShell}
+     */
+    this.shellShadowDoc_ = null;
   }
 
   /**
@@ -62,6 +71,14 @@ export class AmpDocService {
    */
   isSingleDoc() {
     return !!this.singleDoc_;
+  }
+
+  /**
+   * Whether if an `AmpDocShell` has been installed for the runtime.
+   * @return {boolean}
+   */
+  hasAmpDocShell() {
+    return !!this.shellShadowDoc_;
   }
 
   /**
@@ -84,6 +101,16 @@ export class AmpDocService {
     // Single document: return it immediately.
     if (this.singleDoc_ && !closestAmpDoc && !this.alwaysClosestAmpDoc_) {
       return this.singleDoc_;
+    }
+
+    // Multiple documents and AmpDocShell requested
+    if (isExperimentOn(this.win, 'ampdoc-shell') &&
+        opt_node === this.win.document) {
+      if (this.shellShadowDoc_) {
+        return this.shellShadowDoc_;
+      } else {
+        throw dev().createError('Ampdoc for shell has not been installed');
+      }
     }
 
     // TODO(sparhami) Should we always require a node to be passed? This will
@@ -113,6 +140,10 @@ export class AmpDocService {
       // Shadow doc.
       const shadowRoot = getShadowRootNode(n);
       if (!shadowRoot) {
+        // If not inside a shadow root, it may belong to AmpDocShell
+        if (this.shellShadowDoc_) {
+          return this.shellShadowDoc_;
+        }
         break;
       }
 
@@ -152,10 +183,9 @@ export class AmpDocService {
     // See https://www.chromestatus.com/feature/5676110549352448.
     if (opt_node) {
       devAssert(
-        opt_node['isConnected'] === undefined ||
+          opt_node['isConnected'] === undefined ||
           opt_node['isConnected'] === true,
-        'The node must be attached to request ampdoc.'
-      );
+          'The node must be attached to request ampdoc.');
     }
 
     const ampdoc = this.getAmpDocIfAvailable(opt_node, opt_options);
@@ -174,15 +204,39 @@ export class AmpDocService {
    * @restricted
    */
   installShadowDoc(url, shadowRoot) {
-    devAssert(
-      !shadowRoot[AMPDOC_PROP],
-      'The shadow root already contains ampdoc'
-    );
+    devAssert(!shadowRoot[AMPDOC_PROP],
+        'The shadow root already contains ampdoc');
     const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
   }
+
+  /**
+   * Creates and installs an ampdoc for the shell in shadow-doc mode.
+   * `AmpDocShell` is a subclass of `AmpDocShadow` that is installed for
+   * `window.document` and allows to use AMP components as part of the shell,
+   * outside shadow roots
+   *
+   * Currently guarded by 'ampdoc-shell' experiment
+   *
+   * @return {!AmpDocShell}
+   * @restricted
+   */
+  installShellShadowDoc() {
+    devAssert(this.singleDoc_ === null,
+        'AmpDocShell cannot be installed in single-doc mode');
+    this.shellShadowDoc_ = new AmpDocShell(this.win);
+    this.win.document[AMPDOC_PROP] = this.shellShadowDoc_;
+
+    whenDocumentReady(this.win.document).then(document => {
+      this.shellShadowDoc_.setBody(dev().assertElement(document.body));
+      this.shellShadowDoc_.setReady();
+    });
+
+    return this.shellShadowDoc_;
+  }
 }
+
 
 /**
  * This class represents a single ampdoc. `AmpDocService` can contain only one
@@ -279,7 +333,7 @@ export class AmpDoc {
   /**
    * Returns the ampdoc's body. Requires the body to already be available.
    *
-   * See `isBodyAvailable` and `waitForBodyOpen`.
+   * See `isBodyAvailable` and `whenBodyAvailable`.
    *
    * @return {!Element}
    */
@@ -292,7 +346,7 @@ export class AmpDoc {
    * available.
    * @return {!Promise<!Element>}
    */
-  waitForBodyOpen() {
+  whenBodyAvailable() {
     return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
@@ -346,6 +400,7 @@ export class AmpDoc {
   }
 }
 
+
 /**
  * The version of `AmpDoc` in the single-doc mode that corresponds to the
  * global `window.document`.
@@ -359,9 +414,9 @@ export class AmpDocSingle extends AmpDoc {
     super(win);
 
     /** @private @const {!Promise<!Element>} */
-    this.bodyPromise_ = this.win.document.body
-      ? Promise.resolve(this.win.document.body)
-      : waitForBodyOpenPromise(this.win.document).then(() => this.getBody());
+    this.bodyPromise_ = this.win.document.body ?
+      Promise.resolve(this.win.document.body) :
+      waitForBodyPromise(this.win.document).then(() => this.getBody());
 
     /** @private @const {!Promise} */
     this.readyPromise_ = whenDocumentReady(this.win.document);
@@ -398,7 +453,7 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
-  waitForBodyOpen() {
+  whenBodyAvailable() {
     return this.bodyPromise_;
   }
 
@@ -412,6 +467,7 @@ export class AmpDocSingle extends AmpDoc {
     return this.readyPromise_;
   }
 }
+
 
 /**
  * The version of `AmpDoc` in the shadow-doc mode that is allocated for each
@@ -497,7 +553,7 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
-  waitForBodyOpen() {
+  whenBodyAvailable() {
     return this.bodyPromise_;
   }
 
@@ -523,6 +579,25 @@ export class AmpDocShadow extends AmpDoc {
   }
 }
 
+
+/**
+ * AmpDocShadow for the shell
+ * @package @visibleForTesting
+ */
+export class AmpDocShell extends AmpDocShadow {
+  // TODO(choumx): win.document is not a ShadowRoot, which is required by the
+  // super constructor.
+  // eslint-disable-next-line require-jsdoc
+  constructor(win) {
+    super(win, win.location.href, win.document);
+  }
+
+  /** @override */
+  getHeadNode() {
+    return dev().assertElement(this.win.document.head);
+  }
+}
+
 /**
  * Install the ampdoc service and immediately configure it for either a
  * single-doc or a shadow-doc mode. The mode cannot be changed after the
@@ -531,7 +606,10 @@ export class AmpDocShadow extends AmpDoc {
  * @param {boolean} isSingleDoc
  */
 export function installDocService(win, isSingleDoc) {
-  registerServiceBuilder(win, 'ampdoc', function() {
-    return new AmpDocService(win, isSingleDoc);
-  });
+  registerServiceBuilder(
+      win,
+      'ampdoc',
+      function() {
+        return new AmpDocService(win, isSingleDoc);
+      });
 }

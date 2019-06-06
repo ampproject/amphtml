@@ -44,19 +44,6 @@ moment.prototype.isAfter = function(other) {};
 moment.prototype.isBetween = function(first, second) {};
 
 /**
- * @param {!moment} other
- * @return {boolean}
- */
-moment.prototype.isSameOrAfter = function(other) {};
-
-/**
- * @param {!moment} other
- * @param {string} type
- * @return {number}
- */
-moment.prototype.diff = function(other, type) {};
-
-/**
  * @param {string} format
  * @return {string}
  */

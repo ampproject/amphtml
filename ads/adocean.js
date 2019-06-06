@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../src/consent-state';
-import {computeInMasterFrame, validateData, writeScript} from '../3p/3p';
+
 import {parseJson} from '../src/json';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @const {Object<string, string>}
  */
 const ADO_JS_PATHS = {
   'sync': '/files/js/ado.js',
-  'buffered': '/files/js/ado.FIF.test.js',
+  'buffered': '/files/js/ado.FIF.0.99.3.js',
 };
 
 /**
@@ -37,17 +37,15 @@ function isFalseString(str) {
 /**
  * @param {string} mode
  * @param {!Window} global
- * @param {boolean} consent
  */
-function setupAdoConfig(mode, global, consent) {
+function setupAdoConfig(mode, global) {
   if (global['ado']) {
     const config = {
-      mode: mode == 'sync' ? 'old' : 'new',
+      mode: (mode == 'sync') ? 'old' : 'new',
       protocol: 'https:',
       fif: {
         enabled: mode != 'sync',
       },
-      consent,
     };
 
     global['ado']['config'](config);
@@ -118,10 +116,9 @@ let runSyncCount = 0;
  */
 function runSync(global, cb) {
   global['__aoPrivFnct' + ++runSyncCount] = cb;
-  global.document.write(
-    // eslint-disable-next-line no-useless-concat
-    '<' + 'script>__aoPrivFnct' + runSyncCount + '();<' + '/script>'
-  );
+  /*eslint no-useless-concat: 0*/
+  global.document
+      .write('<' + 'script>__aoPrivFnct' + runSyncCount + '();<' + '/script>');
 }
 
 /**
@@ -168,185 +165,28 @@ function appendPlacement(mode, global, data) {
 }
 
 /**
- * @param {string} masterId
- * @param {!Object} data
- * @param {!Window} global
- * @param {Function} callback
- */
-function executeMaster(masterId, data, global, callback) {
-  const config = {
-    id: masterId,
-    server: data['aoEmitter'],
-    keys: buildKeys(data['aoKeys']),
-    vars: buildVars(data['aoVars']),
-    clusters: buildClusters(data['aoClusters']),
-  };
-
-  if (global['ado']) {
-    global['ado']['onEmit']((masterId, instanceId, codes) => {
-      callback(codes);
-    });
-
-    global['ado']['master'](config);
-  }
-}
-
-/**
- *
- * @param {string} masterId
- * @param {!Object} data
- * @param {!Window} global
- * @param {Function} callback
- */
-function requestCodes(masterId, data, global, callback) {
-  const slaveId = data['aoId'];
-
-  computeInMasterFrame(
-    global,
-    'ao-master-exec',
-    done => {
-      executeMaster(masterId, data, global, codes => done(codes));
-    },
-    codes => {
-      const creative = codes[slaveId];
-      if (codes[slaveId + '_second_phase']) {
-        creative['code'] += '\n' + codes[slaveId + '_second_phase']['code'];
-      }
-      callback(creative);
-    }
-  );
-}
-
-class AdoBuffer {
-  /**
-   *
-   * @param {Object} container
-   * @param {!Window} global
-   */
-  constructor(container, global) {
-    this.container = container;
-    this.global = global;
-    this.callback = null;
-  }
-
-  /**
-   *
-   * @param {Function} callback
-   */
-  render(callback) {
-    this.callback = callback;
-
-    if (this.global.document.readyState === 'loading') {
-      this.global.document.addEventListener(
-        'DOMContentLoaded',
-        this._init.bind(this)
-      );
-    } else {
-      this._init();
-    }
-  }
-
-  /**
-   */
-  _init() {
-    const ado = this.global['ado'];
-    const gao = this.global['gao'];
-
-    if (ado['busy'] || (typeof gao !== 'undefined' && gao['busy'])) {
-      ado['queue'].unshift(this._execute.bind(this));
-    } else {
-      this._execute();
-    }
-  }
-
-  /**
-   */
-  _execute() {
-    const adoElement = new this.global['AdoElement']({
-      'id': this.container.id,
-      'orgId': this.container.id,
-      'clearId': this.container.id,
-      '_isBuffer': true,
-    });
-    this.global['AdoElems'] = this.global['AdoElems'] || [];
-    this.global['AdoElems'].push(adoElement);
-    adoElement['getDOMElement']();
-    adoElement['initBuffor']();
-    this.global['ado']['elems'][this.container.id] = adoElement;
-
-    this.callback(adoElement);
-
-    adoElement['rewriteBuffor']();
-    adoElement['dispatch']();
-  }
-}
-
-/**
- *
- * @param {string} slaveId
- * @param {!Object} config
- * @param {!Window} global
- */
-function executeSlave(slaveId, config, global) {
-  const doc = global.document;
-  const placement = doc.createElement('div');
-  placement['id'] = slaveId;
-
-  const dom = doc.getElementById('c');
-  dom.appendChild(placement);
-
-  if (global['ado']) {
-    if (!config || config['isEmpty']) {
-      global.context.noContentAvailable();
-    } else {
-      const buffer = new AdoBuffer(placement, global);
-      buffer.render(() => {
-        new Function(config['sendHitsDef'] + config['code'])();
-      });
-    }
-  }
-}
-
-/**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adocean(global, data) {
-  validateData(
-    data,
-    ['aoEmitter', 'aoId'],
-    ['aoMode', 'aoPreview', 'aoKeys', 'aoVars', 'aoClusters', 'aoMaster']
-  );
+  validateData(data, [
+    'aoEmitter',
+    'aoId',
+  ], [
+    'aoMode',
+    'aoPreview',
+    'aoKeys',
+    'aoVars',
+    'aoClusters',
+  ]);
 
-  const masterId = data['aoMaster'];
-  const mode = data['aoMode'] !== 'sync' || masterId ? 'buffered' : 'sync';
+  const mode = (data['aoMode'] != 'sync') ? 'buffered' : 'sync';
   const adoUrl = 'https://' + data['aoEmitter'] + ADO_JS_PATHS[mode];
-  const ctx = global.context;
-
-  /*
-   * INSUFFICIENT and UNKNOWN should be treated as INSUFFICIENT
-   * not defined states should be treated as INSUFFICIENT
-   */
-  const consent =
-    ctx.initialConsentState === null /* tags without data-block-on-consent */ ||
-    ctx.initialConsentState === CONSENT_POLICY_STATE.SUFFICIENT ||
-    ctx.initialConsentState === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED;
 
   writeScript(global, adoUrl, () => {
-    setupAdoConfig(mode, global, consent);
+    setupAdoConfig(mode, global);
     setupPreview(global, data);
 
-    if (masterId) {
-      const ado = global['ado'];
-      if (ado && ado['features'] && ado['features']['passback']) {
-        ado['features']['passback'] = false;
-      }
-
-      requestCodes(masterId, data, global, codes => {
-        executeSlave(data['aoId'], codes, global);
-      });
-    } else {
-      appendPlacement(mode, global, data);
-    }
+    appendPlacement(mode, global, data);
   });
 }

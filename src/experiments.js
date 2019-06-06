@@ -60,9 +60,8 @@ export function isCanary(win) {
  * @return {string}
  */
 export function getBinaryType(win) {
-  return win.AMP_CONFIG && win.AMP_CONFIG.type
-    ? win.AMP_CONFIG.type
-    : 'unknown';
+  return win.AMP_CONFIG && win.AMP_CONFIG.type ?
+    win.AMP_CONFIG.type : 'unknown';
 }
 
 /**
@@ -88,13 +87,9 @@ export function isExperimentOn(win, experimentId) {
  *     Default: false (save durably).
  * @return {boolean} New state for experimentId.
  */
-export function toggleExperiment(
-  win,
-  experimentId,
-  opt_on,
-  opt_transientExperiment
-) {
-  const currentlyOn = isExperimentOn(win, /*OK*/ experimentId);
+export function toggleExperiment(win, experimentId, opt_on,
+  opt_transientExperiment) {
+  const currentlyOn = isExperimentOn(win, /*OK*/experimentId);
   const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
     const toggles = experimentToggles(win);
@@ -132,15 +127,12 @@ export function experimentToggles(win) {
     }
   }
   // Read document level override from meta tag.
-  if (
-    win.AMP_CONFIG &&
-    Array.isArray(win.AMP_CONFIG['allow-doc-opt-in']) &&
-    win.AMP_CONFIG['allow-doc-opt-in'].length > 0
-  ) {
+  if (win.AMP_CONFIG
+      && Array.isArray(win.AMP_CONFIG['allow-doc-opt-in'])
+      && win.AMP_CONFIG['allow-doc-opt-in'].length > 0) {
     const allowed = win.AMP_CONFIG['allow-doc-opt-in'];
-    const meta = win.document.head.querySelector(
-      'meta[name="amp-experiments-opt-in"]'
-    );
+    const meta =
+        win.document.head.querySelector('meta[name="amp-experiments-opt-in"]');
     if (meta) {
       const optedInExperiments = meta.getAttribute('content').split(',');
       for (let i = 0; i < optedInExperiments.length; i++) {
@@ -153,11 +145,9 @@ export function experimentToggles(win) {
 
   Object.assign(toggles, getExperimentTogglesFromCookie(win));
 
-  if (
-    win.AMP_CONFIG &&
-    Array.isArray(win.AMP_CONFIG['allow-url-opt-in']) &&
-    win.AMP_CONFIG['allow-url-opt-in'].length > 0
-  ) {
+  if (win.AMP_CONFIG
+      && Array.isArray(win.AMP_CONFIG['allow-url-opt-in'])
+      && win.AMP_CONFIG['allow-url-opt-in'].length > 0) {
     const allowed = win.AMP_CONFIG['allow-url-opt-in'];
     const hash = win.location.originalHash || win.location.hash;
     const params = parseQueryString(hash);
@@ -219,17 +209,12 @@ function saveExperimentTogglesToCookie(win, toggles) {
     experimentIds.push((toggles[experiment] === false ? '-' : '') + experiment);
   }
 
-  setCookie(
-    win,
-    COOKIE_NAME,
-    experimentIds.join(','),
-    Date.now() + COOKIE_EXPIRATION_INTERVAL,
-    {
-      // Set explicit domain, so the cookie gets send to sub domains.
-      domain: win.location.hostname,
-      allowOnProxyOrigin: true,
-    }
-  );
+  setCookie(win, COOKIE_NAME, experimentIds.join(','),
+      Date.now() + COOKIE_EXPIRATION_INTERVAL, {
+        // Set explicit domain, so the cookie gets send to sub domains.
+        domain: win.location.hostname,
+        allowOnProxyOrigin: true,
+      });
 }
 
 /**
@@ -318,14 +303,12 @@ export function randomlySelectUnsetExperiments(win, experiments) {
     }
     if (hasOwn(win.experimentBranches, experimentName)) {
       selectedExperiments[experimentName] =
-        win.experimentBranches[experimentName];
+          win.experimentBranches[experimentName];
       continue;
     }
 
-    if (
-      !experiments[experimentName].isTrafficEligible ||
-      !experiments[experimentName].isTrafficEligible(win)
-    ) {
+    if (!experiments[experimentName].isTrafficEligible ||
+        !experiments[experimentName].isTrafficEligible(win)) {
       win.experimentBranches[experimentName] = null;
       continue;
     }
@@ -333,14 +316,12 @@ export function randomlySelectUnsetExperiments(win, experiments) {
     // If we're in the experiment, but we haven't already forced a specific
     // experiment branch (e.g., via a test setup), then randomize the branch
     // choice.
-    if (
-      !win.experimentBranches[experimentName] &&
-      isExperimentOn(win, /*OK*/ experimentName)
-    ) {
+    if (!win.experimentBranches[experimentName] &&
+      isExperimentOn(win, /*OK*/experimentName)) {
       const {branches} = experiments[experimentName];
       win.experimentBranches[experimentName] = selectRandomItem(branches);
       selectedExperiments[experimentName] =
-        win.experimentBranches[experimentName];
+          win.experimentBranches[experimentName];
     }
   }
   return selectedExperiments;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ExpansionOptions, variableServiceForDoc} from './variables';
+import {ExpansionOptions, variableServiceFor} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
@@ -22,7 +22,6 @@ import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
-import {getHighestAvailableDomain} from '../../../src/cookies';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
@@ -33,6 +32,7 @@ const TAG = 'amp-analytics/linker-manager';
 const LINKER_CREATED = 'i-amphtml-linker-created';
 
 export class LinkerManager {
+
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} config
@@ -69,13 +69,8 @@ export class LinkerManager {
 
     /** @private {?UnlistenDef} */
     this.formSubmitUnlistener_ = null;
-
-    /** @const @private {!./variables.VariableService} */
-    this.variableService_ = variableServiceForDoc(this.ampdoc_);
-
-    /** @private {?string} */
-    this.highestAvailableDomain_ = null;
   }
+
 
   /**
    * Start resolving any macros that may exist in the linker configuration
@@ -88,11 +83,7 @@ export class LinkerManager {
       return;
     }
 
-    this.highestAvailableDomain_ = getHighestAvailableDomain(this.ampdoc_.win);
-
-    this.config_ = this.processConfig_(
-      /** @type {!JsonObject} */ (this.config_)
-    );
+    this.config_ = this.processConfig_(/** @type {!JsonObject} */(this.config_));
     // Each linker config has it's own set of macros to resolve.
     this.allLinkerPromises_ = Object.keys(this.config_).map(name => {
       const ids = this.config_[name]['ids'];
@@ -100,12 +91,11 @@ export class LinkerManager {
       const keys = Object.keys(ids);
       // Expand the value of each key value pair (if necessary).
       const valuePromises = keys.map(key => {
-        const expansionOptions = new ExpansionOptions(
-          this.vars_,
-          /* opt_iterations */ undefined,
-          /* opt_noencode */ true
-        );
-        return this.expandTemplateWithUrlParams_(ids[key], expansionOptions);
+        const expansionOptions = new ExpansionOptions(this.vars_,
+            /* opt_iterations */ undefined,
+            /* opt_noencode */ true);
+        return this.expandTemplateWithUrlParams_(ids[key],
+            expansionOptions);
       });
 
       return Promise.all(valuePromises).then(values => {
@@ -123,17 +113,10 @@ export class LinkerManager {
 
     if (this.allLinkerPromises_.length) {
       const navigation = Services.navigationForDoc(this.ampdoc_);
-      navigation.registerAnchorMutator((element, event) => {
-        if (!element.href || event.type !== 'click') {
-          return;
-        }
-        element.href = this.applyLinkers_(element.href);
-      }, Priority.ANALYTICS_LINKER);
-      navigation.registerNavigateToMutator(
-        url => this.applyLinkers_(url),
-        Priority.ANALYTICS_LINKER
-      );
+      navigation.registerAnchorMutator(
+          this.handleAnchorMutation_.bind(this), Priority.ANALYTICS_LINKER);
     }
+
 
     this.enableFormSupport_();
 
@@ -169,16 +152,15 @@ export class LinkerManager {
     });
 
     const location = WindowInterface.getLocation(this.ampdoc_.win);
-    const isProxyOrigin = this.urlService_.isProxyOrigin(location);
+    const isProxyOrigin =
+        this.urlService_.isProxyOrigin(location);
     linkerNames.forEach(name => {
-      const mergedConfig = Object.assign({}, defaultConfig, config[name]);
+      const mergedConfig =
+          Object.assign({}, defaultConfig, config[name]);
 
       if (mergedConfig['enabled'] !== true) {
-        user().info(
-          TAG,
-          'linker config for %s is not enabled and will be ignored.',
-          name
-        );
+        user().info(TAG, 'linker config for %s is not enabled and ' +
+            'will be ignored.', name);
         return;
       }
 
@@ -187,7 +169,8 @@ export class LinkerManager {
       }
 
       if (!mergedConfig['ids']) {
-        user().error(TAG, '"ids" is a required field for use of "linkers".');
+        user().error(TAG,
+            '"ids" is a required field for use of "linkers".');
         return;
       }
 
@@ -204,14 +187,14 @@ export class LinkerManager {
    * @return {!Promise<string>} expanded template.
    */
   expandTemplateWithUrlParams_(template, expansionOptions) {
-    const bindings = this.variableService_.getMacros();
-    return this.variableService_
-      .expandTemplate(template, expansionOptions)
-      .then(expanded => {
-        const urlReplacements = Services.urlReplacementsForDoc(this.element_);
-        return urlReplacements.expandUrlAsync(expanded, bindings);
-      });
+    return variableServiceFor(this.ampdoc_.win)
+        .expandTemplate(template, expansionOptions)
+        .then(expanded => {
+          const urlReplacements = Services.urlReplacementsForDoc(this.element_);
+          return urlReplacements.expandUrlAsync(expanded);
+        });
   }
+
 
   /**
    * If the document has existing cid meta tag they do not need to explicity
@@ -220,14 +203,10 @@ export class LinkerManager {
    * @private
    */
   isLegacyOptIn_() {
-    const optInMeta = this.ampdoc_.win.document.head./*OK*/ querySelector(
-      'meta[name="amp-google-client-id-api"][content="googleanalytics"]'
-    );
-    if (
-      !optInMeta ||
-      optInMeta.hasAttribute(LINKER_CREATED) ||
-      this.type_ !== 'googleanalytics'
-    ) {
+    const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
+        'meta[name="amp-google-client-id-api"][content="googleanalytics"]');
+    if (!optInMeta || optInMeta.hasAttribute(LINKER_CREATED) ||
+        this.type_ !== 'googleanalytics') {
       return false;
     }
 
@@ -242,79 +221,86 @@ export class LinkerManager {
    */
   isSafari12OrAbove_() {
     const platform = Services.platformFor(this.ampdoc_.win);
-    return platform.isSafari() && platform.getMajorVersion() >= 12;
+    return platform.isSafari() && (platform.getMajorVersion() >= 12);
   }
 
   /**
-   * Apply linkers to the given url. Linker params are appended if there
-   * are matching linker configs.
-   *
-   * @param {string} url
-   * @return {string}
+   * Called on click on any anchor element. Adds linker param if a match for
+   * given linker configuration.
+   * @param {!Element} element
+   * @param {!Event} event
    * @private
    */
-  applyLinkers_(url) {
+  handleAnchorMutation_(element, event) {
+    if (!element.href || event.type !== 'click') {
+      return;
+    }
+
     const linkerConfigs = this.config_;
     for (const linkerName in linkerConfigs) {
       // The linker param is created asynchronously. This callback should be
       // synchronous, so we skip if value is not there yet.
       if (this.resolvedIds_[linkerName]) {
-        url = this.maybeAppendLinker_(
-          url,
-          linkerName,
-          linkerConfigs[linkerName]
-        );
+        this.maybeAppendLinker_(element, linkerName, linkerConfigs[linkerName]);
       }
     }
-    return url;
   }
+
 
   /**
    * Appends the linker param if the given url falls within rules defined in
    * linker configuration.
-   * @param {string} url
+   * @param {!Element} el
    * @param {string} name
    * @param {!Object} config
-   * @return {string}
    * @private
    */
-  maybeAppendLinker_(url, name, config) {
+  maybeAppendLinker_(el, name, config) {
+    const {href, hostname} = el;
+
     const /** @type {Array} */ domains = config['destinationDomains'];
-    if (this.isDomainMatch_(url, name, domains)) {
-      const linkerValue = createLinker(
-        /* version */ '1',
-        this.resolvedIds_[name]
-      );
+
+    if (this.isDomainMatch_(hostname, name, domains)) {
+      const linkerValue = createLinker(/* version */ '1',
+          this.resolvedIds_[name]);
       if (linkerValue) {
         const params = dict();
         params[name] = linkerValue;
-        return addMissingParamsToUrl(url, params);
+        el.href = addMissingParamsToUrl(href, params);
       }
     }
-    return url;
   }
 
   /**
    * Check to see if the url is a match for the given set of domains.
-   * @param {string} url
+   * @param {string} hostname
    * @param {string} name Name given in linker config.
    * @param {?Array} domains
    */
-  isDomainMatch_(url, name, domains) {
-    const {hostname} = this.urlService_.parse(url);
+  isDomainMatch_(hostname, name, domains) {
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
       user().warn(TAG, '%s destinationDomains must be an array.', name);
       return false;
     }
 
-    // If destinationDomain is specified specifically, respect it.
+    // If domains are given we check for exact match or wildcard match.
     if (domains) {
-      return this.destinationDomainsMatch_(domains, hostname);
+      for (let i = 0; i < domains.length; i++) {
+        const domain = domains[i];
+        // Exact match.
+        if (domain === hostname) {
+          return true;
+        }
+        // Allow wildcard subdomain matching.
+        if (domain.indexOf('*') !== -1 && isWildCardMatch(hostname, domain)) {
+          return true;
+        }
+      }
+      return false;
     }
 
-    // Fallback to default behavior
-
+    // If no domains given, default to friendly domain matching.
     // Don't append linker for exact domain match, relative urls, or
     // fragments.
     const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
@@ -322,53 +308,15 @@ export class LinkerManager {
       return false;
     }
 
-    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.ampdoc_);
-    const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
-    const isFriendlyCanonicalOrigin = areFriendlyDomains(
-      canonicalOrigin,
-      hostname
-    );
-    // Default to all subdomains matching (if there's one) plus canonicalOrigin
-
-    if (this.highestAvailableDomain_) {
-      const destinationDomain = [
-        this.highestAvailableDomain_,
-        '*' + this.highestAvailableDomain_,
-      ];
-      return (
-        this.destinationDomainsMatch_(destinationDomain, hostname) ||
-        isFriendlyCanonicalOrigin
-      );
-    }
-
-    // In the case where highestAvailableDomain cannot be found.
-    // (proxyOrigin, no <meta name='amp-cookie-scope'> found)
-    // default to friendly domain matching.
+    const {sourceUrl, canonicalUrl} =
+        Services.documentInfoForDoc(this.ampdoc_);
     const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
-    return (
-      areFriendlyDomains(sourceOrigin, hostname) || isFriendlyCanonicalOrigin
-    );
-  }
-
-  /**
-   * Helper method to find out if hostname match the destinationDomain array.
-   * @param {Array<string>} domains
-   * @param {string} hostname
-   * @return {boolean}
-   */
-  destinationDomainsMatch_(domains, hostname) {
-    for (let i = 0; i < domains.length; i++) {
-      const domain = domains[i];
-      // Exact match.
-      if (domain === hostname) {
-        return true;
-      }
-      // Allow wildcard subdomain matching.
-      if (domain.indexOf('*') !== -1 && isWildCardMatch(hostname, domain)) {
-        return true;
-      }
+    const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
+    if (!areFriendlyDomains(sourceOrigin, hostname)
+        && !areFriendlyDomains(canonicalOrigin, hostname)) {
+      return false;
     }
-    return false;
+    return true;
   }
 
   /**
@@ -380,9 +328,8 @@ export class LinkerManager {
     }
 
     this.formSubmitService_.then(formService => {
-      this.formSubmitUnlistener_ = formService.beforeSubmit(
-        this.handleFormSubmit_.bind(this)
-      );
+      this.formSubmitUnlistener_ =
+          formService.beforeSubmit(this.handleFormSubmit_.bind(this));
     });
   }
 
@@ -398,14 +345,16 @@ export class LinkerManager {
       const config = this.config_[linkerName];
       const /** @type {Array} */ domains = config['destinationDomains'];
 
-      const url =
-        form.getAttribute('action-xhr') || form.getAttribute('action');
+      const url = form.getAttribute('action-xhr') ||
+          form.getAttribute('action');
+      const {hostname} = this.urlService_.parse(url);
 
-      if (this.isDomainMatch_(url, linkerName, domains)) {
+      if (this.isDomainMatch_(hostname, linkerName, domains)) {
         this.addDataToForm_(form, actionXhrMutator, linkerName);
       }
     }
   }
+
 
   /**
    * Add the linker data to form. If action-xhr is present we can update the
@@ -451,10 +400,8 @@ export class LinkerManager {
     });
 
     const inputEl = createElementWithAttributes(
-      /** @type {!Document} */ (form.ownerDocument),
-      'input',
-      attrs
-    );
+        /** @type {!Document} */ (form.ownerDocument),
+        'input', attrs);
     form.appendChild(inputEl);
   }
 }
@@ -496,15 +443,15 @@ function regexEscape(str) {
 }
 
 /**
- * Allows specified wildcard matching of domains.
- * Example:
- *    `*.foo.com` matches `amp.foo.com`
- *    `*.foo.com*` matches `amp.foo.com.uk`
- * @param {string} hostname
- * @param {string} domain
- * @return {boolean}
- * @visibleForTesting
- */
+   * Allows specified wildcard matching of domains.
+   * Example:
+   *    `*.foo.com` matches `amp.foo.com`
+   *    `*.foo.com*` matches `amp.foo.com.uk`
+   * @param {string} hostname
+   * @param {string} domain
+   * @return {boolean}
+   * @visibleForTesting
+   */
 export function isWildCardMatch(hostname, domain) {
   const escaped = regexEscape(domain);
   const regex = escaped.replace(/\*/g, '.*');

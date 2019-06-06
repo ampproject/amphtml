@@ -17,7 +17,9 @@
 import {Input} from '../../src/input';
 import {installTimerService} from '../../src/service/timer-impl.js';
 
+
 describe('Input', () => {
+
   let sandbox;
   let clock;
   let input;
@@ -143,9 +145,8 @@ describe('Input', () => {
     });
     expect(mouseDetected).to.equal(undefined);
 
-    const p = input.onMouseMove_({
-      sourceCapabilities: {firesTouchEvents: true},
-    });
+    const p = input.onMouseMove_(
+        {sourceCapabilities: {firesTouchEvents: true}});
     expect(p).to.be.undefined;
 
     expect(input.mouseConfirmAttemptCount_).to.equal(1);

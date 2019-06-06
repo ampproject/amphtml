@@ -18,9 +18,10 @@ import * as st from './style';
 import {assertNotDisplay, setStyle} from './style';
 import {getCurve} from './curve';
 
-export const NOOP = function(unusedTime) {
-  return null;
-};
+
+
+export const NOOP = function(unusedTime) {return null;};
+
 
 /**
  * Returns a transition that combines a number of other transitions and
@@ -36,6 +37,7 @@ export function all(transitions) {
     }
   };
 }
+
 
 /**
  * Returns a transition that combines the string result of other string-based
@@ -58,6 +60,7 @@ export function concat(transitions, opt_delimiter = ' ') {
   };
 }
 
+
 /**
  * Returns the specified transition with the time curved via specified curve
  * function.
@@ -73,6 +76,7 @@ export function withCurve(transition, curve) {
     return transition(complete ? 1 : curveFn(time), complete);
   };
 }
+
 
 /**
  * A transition that sets the CSS style of the specified element. The styles
@@ -90,6 +94,7 @@ export function setStyles(element, styles) {
   };
 }
 
+
 /**
  * A basic numeric interpolation.
  * @param {number} start
@@ -101,6 +106,7 @@ export function numeric(start, end) {
     return start + (end - start) * time;
   };
 }
+
 
 /**
  * Spring numeric interpolation.
@@ -120,9 +126,11 @@ export function spring(start, end, extended, threshold) {
     if (time < threshold) {
       return start + (extended - start) * (time / threshold);
     }
-    return extended + (end - extended) * ((time - threshold) / (1 - threshold));
+    return extended + (end - extended) * ((time - threshold) /
+        (1 - threshold));
   };
 }
+
 
 /**
  * Adds "px" units.
@@ -134,6 +142,7 @@ export function px(transition) {
     return transition(time) + 'px';
   };
 }
+
 
 /**
  * A transition for "translateX" of CSS "transform" property.
@@ -165,6 +174,7 @@ export function translateY(transition) {
   };
 }
 
+
 /**
  * A transition for "translate(x, y)" of CSS "transform" property.
  * @param {!TransitionDef<number|string>} transitionX
@@ -188,6 +198,7 @@ export function translate(transitionX, opt_transitionY) {
     return `translate(${x},${y})`;
   };
 }
+
 
 /**
  * A transition for "scale" of CSS "transform" property.

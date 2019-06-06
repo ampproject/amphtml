@@ -28,13 +28,17 @@ import {
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
 } from '../web-animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
+import {
+  assertDoesNotContainDisplay,
+  setStyles,
+} from '../../../../src/style';
 import {devAssert} from '../../../../src/log';
 import {getTotalDuration} from './utils';
 
 /**
  */
 export class NativeWebAnimationRunner extends AnimationRunner {
+
   /**
    * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests
    */
@@ -80,9 +84,11 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
-        setStyles(request.target, assertDoesNotContainDisplay(request.vars));
+        setStyles(request.target,
+            assertDoesNotContainDisplay(request.vars));
       }
-      const player = request.target.animate(request.keyframes, request.timing);
+      const player = request.target.animate(
+          request.keyframes, request.timing);
       player.pause();
       return player;
     });
@@ -134,10 +140,8 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.runningCount_ = 0;
     this.players_.forEach(player => {
-      if (
-        oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
-        player.playState == WebAnimationPlayState.PAUSED
-      ) {
+      if (oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
+          player.playState == WebAnimationPlayState.PAUSED) {
         player.play();
         this.runningCount_++;
       }
@@ -227,4 +231,5 @@ export class NativeWebAnimationRunner extends AnimationRunner {
   getTotalDuration_() {
     return getTotalDuration(this.requests_);
   }
+
 }

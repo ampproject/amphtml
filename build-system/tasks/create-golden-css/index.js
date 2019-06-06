@@ -15,9 +15,10 @@
  */
 'use strict';
 const fs = require('fs-extra');
+const gulp = require('gulp-help')(require('gulp'));
 const {transformCss} = require('../jsify-css');
 
-async function createGoldenCss() {
+function main() {
   return transformCss('./build-system/tasks/create-golden-css/css/main.css', {
     normalizeWhitespace: false,
     discardComments: false,
@@ -26,8 +27,5 @@ async function createGoldenCss() {
   });
 }
 
-module.exports = {
-  createGoldenCss,
-};
-
-createGoldenCss.description = 'Creates a golden file for untransformed css';
+gulp.task('create-golden-css', 'Creates a golden file for untransformed css',
+    main);

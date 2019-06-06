@@ -30,13 +30,16 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 const TAG = 'amp-ooyala-player';
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpOoyalaPlayer extends AMP.BaseElement {
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -61,6 +64,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
   }
 
   /**
@@ -76,22 +80,16 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     const {element: el} = this;
 
     this.embedCode_ = userAssert(
-      el.getAttribute('data-embedcode'),
-      'The data-embedcode attribute is required for %s',
-      el
-    );
+        el.getAttribute('data-embedcode'),
+        'The data-embedcode attribute is required for %s', el);
 
     this.pCode_ = userAssert(
-      el.getAttribute('data-pcode'),
-      'The data-pcode attribute is required for %s',
-      el
-    );
+        el.getAttribute('data-pcode'),
+        'The data-pcode attribute is required for %s', el);
 
     this.playerId_ = userAssert(
-      el.getAttribute('data-playerid'),
-      'The data-playerid attribute is required for %s',
-      el
-    );
+        el.getAttribute('data-playerid'),
+        'The data-playerid attribute is required for %s', el);
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -108,21 +106,16 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
     const playerVersion = el.getAttribute('data-playerversion') || '';
     if (playerVersion.toLowerCase() == 'v4') {
-      src =
-        'https://player.ooyala.com/static/v4/sandbox/amp_iframe/' +
-        'skin-plugin/amp_iframe.html?pcode=' +
-        encodeURIComponent(this.pCode_);
+      src = 'https://player.ooyala.com/static/v4/sandbox/amp_iframe/' +
+        'skin-plugin/amp_iframe.html?pcode=' + encodeURIComponent(this.pCode_);
       const configUrl = el.getAttribute('data-config');
       if (configUrl) {
         src += '&options[skin.config]=' + encodeURIComponent(configUrl);
       }
     }
 
-    src +=
-      '&ec=' +
-      encodeURIComponent(this.embedCode_) +
-      '&pbid=' +
-      encodeURIComponent(this.playerId_);
+    src += '&ec=' + encodeURIComponent(this.embedCode_) +
+      '&pbid=' + encodeURIComponent(this.playerId_);
 
     const iframe = createFrameFor(this, src);
 
@@ -204,7 +197,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   sendCommand_(command) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow./*OK*/ postMessage(command, '*');
+        this.iframe_.contentWindow./*OK*/postMessage(command, '*');
       }
     });
   }
@@ -242,10 +235,12 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  showControls() {}
+  showControls() {
+  }
 
   /** @override */
-  hideControls() {}
+  hideControls() {
+  }
 
   /**
    * @override
@@ -313,6 +308,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     this.user().error(TAG, '`seekTo` not supported.');
   }
 }
+
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpOoyalaPlayer);

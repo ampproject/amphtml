@@ -35,9 +35,8 @@ module.exports = {
 
         context.report({
           node,
-          message:
-            'Detected mixed use of "&&" with "||" without' +
-            ' parenthesizing "(a && b)".',
+          message: 'Detected mixed use of "&&" with "||" without' +
+              ' parenthesizing "(a && b)".',
           fix(fixer) {
             return [
               fixer.insertTextAfter(node, ')'),
@@ -45,7 +44,7 @@ module.exports = {
             ];
           },
         });
-      },
+      }
     };
   },
 };

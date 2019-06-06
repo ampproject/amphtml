@@ -17,6 +17,7 @@
 import * as tr from '../../src/transition';
 
 describe('Transition', () => {
+
   let sandbox;
 
   beforeEach(() => {
@@ -117,12 +118,8 @@ describe('Transition', () => {
   it('setStyles', () => {
     const element = document.createElement('div');
     const func = tr.setStyles(element, {
-      width: tr.px(function(n) {
-        return n * 100 + 1;
-      }),
-      height: tr.px(function(n) {
-        return n * 100 + 2;
-      }),
+      width: tr.px(function(n) {return n * 100 + 1;}),
+      height: tr.px(function(n) {return n * 100 + 2;}),
     });
 
     func(0);
@@ -193,9 +190,7 @@ describe('Transition', () => {
     expect(func(0.9)).to.equal('translateX(9px)');
     expect(func(1)).to.equal('translateX(10px)');
 
-    func = tr.translateX(() => {
-      return '101vw';
-    });
+    func = tr.translateX(() => {return '101vw';});
     expect(func(0)).to.equal('translateX(101vw)');
   });
 
@@ -207,14 +202,7 @@ describe('Transition', () => {
     expect(func(0.9)).to.equal('translate(9px,29px)');
     expect(func(1)).to.equal('translate(10px,30px)');
 
-    func = tr.translate(
-      () => {
-        return '101vw';
-      },
-      () => {
-        return '201em';
-      }
-    );
+    func = tr.translate(() => {return '101vw';}, () => {return '201em';});
     expect(func(0)).to.equal('translate(101vw,201em)');
   });
 
@@ -226,9 +214,7 @@ describe('Transition', () => {
     expect(func(0.9)).to.equal('translate(9px)');
     expect(func(1)).to.equal('translate(10px)');
 
-    func = tr.translate(() => {
-      return '101vw';
-    });
+    func = tr.translate(() => {return '101vw';});
     expect(func(0)).to.equal('translate(101vw)');
   });
 });

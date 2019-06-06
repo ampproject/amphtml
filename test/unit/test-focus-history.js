@@ -17,7 +17,9 @@
 import {FocusHistory} from '../../src/focus-history';
 import {installTimerService} from '../../src/service/timer-impl';
 
+
 describe('FocusHistory', () => {
+
   let sandbox;
   let clock;
   let testDoc;
@@ -153,8 +155,8 @@ describe('FocusHistory', () => {
 
     testDoc.activeElement = el0;
     expect(focusHistory.hasDescendantsOf(el0)).to.be.true;
-    expect(focusHistory.hasDescendantsOf(document.createElement('div'))).to.be
-      .false;
+    expect(focusHistory.hasDescendantsOf(document.createElement('div'))).to
+        .be.false;
 
     testDoc.activeElement = el01;
     expect(focusHistory.hasDescendantsOf(el0)).to.be.true;
@@ -167,7 +169,7 @@ describe('FocusHistory', () => {
     eventListeners['focus']({target: el01});
     expect(focusHistory.hasDescendantsOf(el0)).to.be.true;
     expect(focusHistory.hasDescendantsOf(el01)).to.be.true;
-    expect(focusHistory.hasDescendantsOf(document.createElement('div'))).to.be
-      .false;
+    expect(focusHistory.hasDescendantsOf(document.createElement('div'))).to
+        .be.false;
   });
 });

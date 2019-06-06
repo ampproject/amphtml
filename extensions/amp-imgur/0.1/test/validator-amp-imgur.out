@@ -34,6 +34,6 @@ FAIL
 |    <!-- Invalid: Missing mandatory data-imgur-id attribute -->
 |    <amp-imgur height="480" width="640" layout="responsive"></amp-imgur>
 >>   ^~~~~~~~~
-amp-imgur/0.1/test/validator-amp-imgur.html:34:2 The mandatory attribute 'data-imgur-id' is missing in tag 'amp-imgur'. (see https://amp.dev/documentation/components/amp-imgur) [AMP_TAG_PROBLEM]
+amp-imgur/0.1/test/validator-amp-imgur.html:34:2 The mandatory attribute 'data-imgur-id' is missing in tag 'amp-imgur'. (see https://www.ampproject.org/docs/reference/components/amp-imgur) [AMP_TAG_PROBLEM]
 |  </body>
 |  </html>

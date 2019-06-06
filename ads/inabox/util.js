@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 /**
  * Executes a "restricted" read/write vsync cycle.
  * This function exists mainly since the vsync service is not available for the
@@ -40,6 +41,7 @@ export function restrictedVsync(win, task, opt_state) {
     }
   });
 }
+
 
 /**
  * Executes a function after a certain time.

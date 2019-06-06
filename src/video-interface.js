@@ -31,6 +31,7 @@ export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
  * @interface
  */
 export class VideoInterface {
+
   /**
    * Whether the component supports video playback in the current platform.
    * If false, component will be not treated as a video component.
@@ -164,6 +165,7 @@ export class VideoInterface {
   seekTo(unusedTimeSeconds) {}
 }
 
+
 /**
  * Attributes
  *
@@ -221,6 +223,7 @@ export const VideoAttributes = {
    */
   NO_AUDIO: 'noaudio',
 };
+
 
 /**
  * Events
@@ -352,8 +355,6 @@ export const VideoEvents = {
   AD_END: 'ad_end',
 };
 
-/** @typedef {string} */
-export let PlayingStateDef;
 
 /**
  * Playing States
@@ -361,7 +362,7 @@ export let PlayingStateDef;
  * Internal playing states used to distinguish between video playing on user's
  * command and videos playing automatically
  *
- * @constant {!Object<string, PlayingStateDef>}
+ * @constant {!Object<string, string>}
  */
 export const PlayingStates = {
   /**
@@ -392,6 +393,7 @@ export const PlayingStates = {
    */
   PAUSED: 'paused',
 };
+
 
 /** @enum {string} */
 export const VideoAnalyticsEvents = {
@@ -469,6 +471,7 @@ export const VideoAnalyticsEvents = {
   PERCENTAGE_PLAYED: 'video-percentage-played',
 };
 
+
 /**
  * Helper union type to be used internally, so that the compiler treats
  * `VideoInterface` objects as `BaseElement`s, which they should be anyway.
@@ -480,6 +483,7 @@ export const VideoAnalyticsEvents = {
  */
 export let VideoOrBaseElementDef;
 
+
 /**
  * @param {!Element} element
  * @return {boolean}
@@ -488,16 +492,19 @@ export function isDockable(element) {
   return element.hasAttribute(VideoAttributes.DOCK);
 }
 
+
 /** @enum {string} */
 export const VideoServiceSignals = {
   USER_INTERACTED: 'user-interacted',
   AUTOPLAY_DELEGATED: 'autoplay-delegated',
 };
 
+
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function delegateAutoplay(video) {
   video.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);
 }
+
 
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function userInteractedWith(video) {

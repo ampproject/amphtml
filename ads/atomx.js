@@ -39,3 +39,4 @@ export function atomx(global, data) {
 
   writeScript(global, 'https://s.ato.mx/p.js#' + args.join('&'));
 }
+

@@ -54,19 +54,13 @@ describes.fakeWin('amp-story utils', {}, () => {
 
   describe('getRGBFromCssColorValue', () => {
     it('should accept rgb parameters', () => {
-      expect(getRGBFromCssColorValue('rgb(0, 10, 100)')).to.deep.equal({
-        r: 0,
-        g: 10,
-        b: 100,
-      });
+      expect(getRGBFromCssColorValue('rgb(0, 10, 100)'))
+          .to.deep.equal({r: 0, g: 10, b: 100});
     });
 
     it('should accept rgba parameters', () => {
-      expect(getRGBFromCssColorValue('rgba(0, 10, 100, 0.1)')).to.deep.equal({
-        r: 0,
-        g: 10,
-        b: 100,
-      });
+      expect(getRGBFromCssColorValue('rgba(0, 10, 100, 0.1)'))
+          .to.deep.equal({r: 0, g: 10, b: 100});
     });
 
     it('should throw an error if wrong parameters', () => {
@@ -77,11 +71,8 @@ describes.fakeWin('amp-story utils', {}, () => {
 
     it('should return a default value if wrong parameters', () => {
       allowConsoleError(() => {
-        expect(getRGBFromCssColorValue('who dis')).to.deep.equal({
-          r: 0,
-          g: 0,
-          b: 0,
-        });
+        expect(getRGBFromCssColorValue('who dis'))
+            .to.deep.equal({r: 0, g: 0, b: 0});
       });
     });
   });
@@ -96,3 +87,4 @@ describes.fakeWin('amp-story utils', {}, () => {
     });
   });
 });
+

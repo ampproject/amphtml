@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {
+  loadScript,
+  validateData,
+} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -23,11 +26,7 @@ import {loadScript, validateData} from '../3p/3p';
 export function baidu(global, data) {
   validateData(data, ['cproid']);
 
-  const id =
-    '_' +
-    Math.random()
-      .toString(36)
-      .slice(2);
+  const id = '_' + Math.random().toString(36).slice(2);
   const container = global.document.createElement('div');
   container.id = id;
   global.document.getElementById('c').appendChild(container);
@@ -45,15 +44,15 @@ export function baidu(global, data) {
   });
 
   loadScript(
-    global,
-    'https://dup.baidustatic.com/js/dm.js',
-    () => {},
-    () => {
-      // noContentAvailable should be called,
-      // if parent iframe receives no message.
-      // setTimeout can work, but it's not that reliable.
-      // So, only the faliure of JS loading is dealed with for now.
-      global.context.noContentAvailable();
-    }
+      global,
+      'https://dup.baidustatic.com/js/dm.js',
+      () => {},
+      () => {
+        // noContentAvailable should be called,
+        // if parent iframe receives no message.
+        // setTimeout can work, but it's not that reliable.
+        // So, only the faliure of JS loading is dealed with for now.
+        global.context.noContentAvailable();
+      }
   );
 }

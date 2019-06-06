@@ -47,7 +47,7 @@ FAIL
 |    <!-- Invalid: missing data-gistid attribute. -->
 |    <amp-gist
 >>   ^~~~~~~~~
-amp-gist/0.1/test/validator-amp-gist.html:47:2 The mandatory attribute 'data-gistid' is missing in tag 'amp-gist'. (see https://amp.dev/documentation/components/amp-gist) [AMP_TAG_PROBLEM]
+amp-gist/0.1/test/validator-amp-gist.html:47:2 The mandatory attribute 'data-gistid' is missing in tag 'amp-gist'. (see https://www.ampproject.org/docs/reference/components/amp-gist) [AMP_TAG_PROBLEM]
 |      layout="fixed-height"
 |      height="241">
 |    </amp-gist>
@@ -55,7 +55,7 @@ amp-gist/0.1/test/validator-amp-gist.html:47:2 The mandatory attribute 'data-gis
 |    <!-- Invalid: illegal layout. -->
 |    <amp-gist
 >>   ^~~~~~~~~
-amp-gist/0.1/test/validator-amp-gist.html:53:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-gist'. (see https://amp.dev/documentation/components/amp-gist) [AMP_LAYOUT_PROBLEM]
+amp-gist/0.1/test/validator-amp-gist.html:53:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-gist'. (see https://www.ampproject.org/docs/reference/components/amp-gist) [AMP_LAYOUT_PROBLEM]
 |      layout="responsive"
 |      height="241"
 |      data-gistid="b9bb35bc68df68259af94430f012425f">

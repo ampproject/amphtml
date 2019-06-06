@@ -22,6 +22,7 @@ import {
 } from '../amp-story-store-service';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
+
 describes.fakeWin('amp-story-store-service', {}, env => {
   let storeService;
 
@@ -243,10 +244,8 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
 
     storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action2);
 
-    expect(actionsListenerSpy).to.have.been.calledOnceWithExactly([
-      action1,
-      action2,
-    ]);
+    expect(actionsListenerSpy)
+        .to.have.been.calledOnceWithExactly([action1, action2]);
   });
 
   it('should add an array of actions to the whitelist', () => {
@@ -261,10 +260,7 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
 
     storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [action2, action3]);
 
-    expect(actionsListenerSpy).to.have.been.calledOnceWithExactly([
-      action1,
-      action2,
-      action3,
-    ]);
+    expect(actionsListenerSpy)
+        .to.have.been.calledOnceWithExactly([action1, action2, action3]);
   });
 });

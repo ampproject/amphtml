@@ -21,7 +21,7 @@ module.exports = {
   },
 
   'open attachment': async (page, name) => {
-    await page.tap('.i-amphtml-story-page-open-attachment-label');
+    await page.tap('.i-amphtml-story-page-open-attachment-text');
     await page.waitFor(410);
   },
  };

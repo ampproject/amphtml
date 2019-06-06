@@ -43,6 +43,7 @@ export function createLoginDialog(ampdoc, urlOrPromise) {
   return new WebLoginDialog(ampdoc.win, viewer, urlOrPromise);
 }
 
+
 /**
  * Opens the login dialog for the specified URL. If the login dialog succeeds,
  * the returned promised is resolved with the dialog's response. Otherwise, the
@@ -65,6 +66,7 @@ export function getLoginUrl(ampdoc, urlOrPromise) {
   return createLoginDialog(ampdoc, urlOrPromise).getLoginUrl();
 }
 
+
 /**
  * The implementation of the Login Dialog delegated via Viewer.
  */
@@ -82,8 +84,8 @@ class ViewerLoginDialog {
   }
 
   /**
-   * @return {!Promise<string>}
-   */
+  * @return {!Promise<string>}
+  */
   getLoginUrl() {
     let urlPromise;
     if (typeof this.urlOrPromise == 'string') {
@@ -96,6 +98,7 @@ class ViewerLoginDialog {
     });
   }
 
+
   /**
    * Opens the dialog. Returns the promise that will yield with the dialog's
    * result or will be rejected if dialog fails. The dialog's result is
@@ -105,15 +108,14 @@ class ViewerLoginDialog {
   open() {
     return this.getLoginUrl().then(loginUrl => {
       dev().fine(TAG, 'Open viewer dialog: ', loginUrl);
-      return this.viewer.sendMessageAwaitResponse(
-        'openDialog',
-        dict({
-          'url': loginUrl,
-        })
-      );
+      return this.viewer.sendMessageAwaitResponse('openDialog', dict({
+        'url': loginUrl,
+      }));
     });
   }
+
 }
+
 
 /**
  * Web-based implementation of the Login Dialog.
@@ -166,16 +168,13 @@ export class WebLoginDialog {
       this.reject_ = reject;
       // Must always be called synchronously.
       this.openInternal_();
-    }).then(
-      result => {
-        this.cleanup_();
-        return result;
-      },
-      error => {
-        this.cleanup_();
-        throw error;
-      }
-    );
+    }).then(result => {
+      this.cleanup_();
+      return result;
+    }, error => {
+      this.cleanup_();
+      throw error;
+    });
   }
 
   /** @private */
@@ -204,8 +203,8 @@ export class WebLoginDialog {
   }
 
   /**
-   * @return {!Promise<string>}
-   */
+  * @return {!Promise<string>}
+  */
   getLoginUrl() {
     let urlPromise;
     if (typeof this.urlOrPromise == 'string') {
@@ -241,28 +240,22 @@ export class WebLoginDialog {
       dev().fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);
       this.dialog_ = openWindowDialog(this.win, '', '_blank', options);
       if (this.dialog_) {
-        this.dialogReadyPromise_ = this.urlOrPromise.then(
-          url => {
-            const loginUrl = buildLoginUrl(url, returnUrl);
-            dev().fine(TAG, 'Set dialog url: ', loginUrl);
-            this.dialog_.location.replace(loginUrl);
-          },
-          error => {
-            throw new Error('failed to resolve url: ' + error);
-          }
-        );
+        this.dialogReadyPromise_ = this.urlOrPromise.then(url => {
+          const loginUrl = buildLoginUrl(url, returnUrl);
+          dev().fine(TAG, 'Set dialog url: ', loginUrl);
+          this.dialog_.location.replace(loginUrl);
+        }, error => {
+          throw new Error('failed to resolve url: ' + error);
+        });
       }
     }
 
     if (this.dialogReadyPromise_) {
-      this.dialogReadyPromise_.then(
-        () => {
-          this.setupDialog_(returnUrl);
-        },
-        error => {
-          this.loginDone_(/* result */ null, error);
-        }
-      );
+      this.dialogReadyPromise_.then(() => {
+        this.setupDialog_(returnUrl);
+      }, error => {
+        this.loginDone_(/* result */ null, error);
+      });
     } else {
       this.loginDone_(/* result */ null, new Error('failed to open dialog'));
     }
@@ -298,13 +291,10 @@ export class WebLoginDialog {
       dev().fine(TAG, 'Received message from dialog: ', getData(e));
       if (getData(e)['type'] == 'result') {
         if (this.dialog_) {
-          this.dialog_./*OK*/ postMessage(
-            dict({
-              'sentinel': 'amp',
-              'type': 'result-ack',
-            }),
-            returnOrigin
-          );
+          this.dialog_./*OK*/postMessage(dict({
+            'sentinel': 'amp',
+            'type': 'result-ack',
+          }), returnOrigin);
         }
         this.loginDone_(getData(e)['result']);
       }
@@ -338,17 +328,15 @@ export class WebLoginDialog {
     let returnUrl;
     if (getMode().localDev) {
       const loc = this.win.location;
-      returnUrl =
-        loc.protocol +
-        '//' +
-        loc.host +
-        '/extensions/amp-access/0.1/amp-login-done.html';
+      returnUrl = loc.protocol + '//' + loc.host +
+          '/extensions/amp-access/0.1/amp-login-done.html';
     } else {
       returnUrl = `${urls.cdn}/v0/amp-login-done-0.1.html`;
     }
     return returnUrl + '?url=' + encodeURIComponent(currentUrl);
   }
 }
+
 
 /**
  * @param {string} url
@@ -363,10 +351,7 @@ function buildLoginUrl(url, returnUrl) {
   if (RETURN_URL_REGEX.test(url)) {
     return url.replace(RETURN_URL_REGEX, encodeURIComponent(returnUrl));
   }
-  return (
-    url +
-    (url.indexOf('?') == -1 ? '?' : '&') +
-    'return=' +
-    encodeURIComponent(returnUrl)
-  );
+  return url +
+      (url.indexOf('?') == -1 ? '?' : '&') +
+      'return=' + encodeURIComponent(returnUrl);
 }

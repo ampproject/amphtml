@@ -20,35 +20,13 @@ import {startsWith} from './string';
 const excludedTags = ['script', 'style'];
 
 /** @type {!Array<string>} */
-const allowedAmpTags = [
-  'amp-accordion',
-  'amp-app-banner',
-  'amp-carousel',
-  'amp-fit-text',
-  'amp-form',
-  'amp-selector',
-  'amp-sidebar',
-];
+const allowedAmpTags = ['amp-accordion', 'amp-app-banner', 'amp-carousel',
+  'amp-fit-text', 'amp-form', 'amp-selector', 'amp-sidebar'];
 
 /** @type {!Array<string>} */
-const allowedAttributes = [
-  'action',
-  'alt',
-  'class',
-  'disabled',
-  'height',
-  'href',
-  'id',
-  'name',
-  'placeholder',
-  'readonly',
-  'src',
-  'tabindex',
-  'title',
-  'type',
-  'value',
-  'width',
-];
+const allowedAttributes = ['action', 'alt', 'class', 'disabled', 'height',
+  'href', 'id', 'name', 'placeholder', 'readonly', 'src', 'tabindex',
+  'title', 'type', 'value', 'width'];
 
 /**
  * Returns content of HTML node
@@ -98,6 +76,7 @@ function appendToResult(node, attrs, result) {
   }
 }
 
+
 /**
  *
  * @param {!Element} node
@@ -112,6 +91,7 @@ function isApplicableNode(node) {
     return !!(!excludedTags.includes(tagName) && node.textContent);
   }
 }
+
 
 /**
  *

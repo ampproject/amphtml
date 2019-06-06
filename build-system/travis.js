@@ -28,124 +28,84 @@ const {red, cyan} = colors;
  * Returns true if this is a Travis build.
  * @return {boolean}
  */
-function isTravisBuild() {
+exports.isTravisBuild = function() {
   return !!process.env.TRAVIS;
-}
+};
 
 /**
  * Returns true if this is a Travis PR build.
  * @return {boolean}
  */
-function isTravisPullRequestBuild() {
-  return isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'pull_request';
-}
+exports.isTravisPullRequestBuild = function() {
+  return exports.isTravisBuild() &&
+      process.env.TRAVIS_EVENT_TYPE === 'pull_request';
+};
 
 /**
  * Returns true if this is a Travis Push build.
  * @return {boolean}
  */
-function isTravisPushBuild() {
-  return isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'push';
-}
+exports.isTravisPushBuild = function() {
+  return exports.isTravisBuild() &&
+      process.env.TRAVIS_EVENT_TYPE === 'push';
+};
 
 /**
  * Returns the build number of the ongoing Travis build.
  * @return {string}
  */
-function travisBuildNumber() {
-  if (!isTravisBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis build. Cannot get',
-      cyan('process.env.TRAVIS_BUILD_NUMBER') + '.'
-    );
+exports.travisBuildNumber = function() {
+  if (!exports.isTravisBuild()) {
+    log(red('ERROR:'), 'This is not a Travis build. Cannot get',
+        cyan('process.env.TRAVIS_BUILD_NUMBER') + '.');
   }
   return process.env.TRAVIS_BUILD_NUMBER;
-}
+};
 
 /**
  * Returns the job number of the ongoing Travis build.
  * @return {string}
  */
-function travisJobNumber() {
-  if (!isTravisBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis build. Cannot get',
-      cyan('process.env.TRAVIS_JOB_NUMBER') + '.'
-    );
+exports.travisJobNumber = function() {
+  if (!exports.isTravisBuild()) {
+    log(red('ERROR:'), 'This is not a Travis build. Cannot get',
+        cyan('process.env.TRAVIS_JOB_NUMBER') + '.');
   }
   return process.env.TRAVIS_JOB_NUMBER;
-}
+};
 
 /**
  * Returns the repo slug associated with the ongoing Travis build.
  * @return {string}
  */
-function travisRepoSlug() {
-  if (!isTravisBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis build. Cannot get',
-      cyan('process.env.TRAVIS_REPO_SLUG') + '.'
-    );
+exports.travisRepoSlug = function() {
+  if (!exports.isTravisBuild()) {
+    log(red('ERROR:'), 'This is not a Travis build. Cannot get',
+        cyan('process.env.TRAVIS_REPO_SLUG') + '.');
   }
   return process.env.TRAVIS_REPO_SLUG;
-}
+};
 
 /**
  * Returns the commit SHA being tested by the ongoing Travis PR build.
  * @return {string}
  */
-function travisPullRequestSha() {
-  if (!isTravisPullRequestBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis PR build. Cannot get',
-      cyan('process.env.TRAVIS_PULL_REQUEST_SHA') + '.'
-    );
+exports.travisPullRequestSha = function() {
+  if (!exports.isTravisPullRequestBuild()) {
+    log(red('ERROR:'), 'This is not a Travis PR build. Cannot get',
+        cyan('process.env.TRAVIS_PULL_REQUEST_SHA') + '.');
   }
   return process.env.TRAVIS_PULL_REQUEST_SHA;
-}
+};
 
 /**
  * Returns the name of the branch being tested by the ongoing Travis PR build.
  * @return {string}
  */
-function travisPullRequestBranch() {
-  if (!isTravisPullRequestBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis PR build. Cannot get',
-      cyan('process.env.TRAVIS_PULL_REQUEST_BRANCH') + '.'
-    );
+exports.travisPullRequestBranch = function() {
+  if (!exports.isTravisPullRequestBuild()) {
+    log(red('ERROR:'), 'This is not a Travis PR build. Cannot get',
+        cyan('process.env.TRAVIS_PULL_REQUEST_BRANCH') + '.');
   }
   return process.env.TRAVIS_PULL_REQUEST_BRANCH;
-}
-
-/**
- * Returns the commit SHA being tested by the ongoing Travis build.
- * @return {string}
- */
-function travisCommitSha() {
-  if (!isTravisBuild()) {
-    log(
-      red('ERROR:'),
-      'This is not a Travis build. Cannot get',
-      cyan('process.env.TRAVIS_COMMIT') + '.'
-    );
-  }
-  return process.env.TRAVIS_COMMIT;
-}
-
-module.exports = {
-  isTravisBuild,
-  isTravisPullRequestBuild,
-  isTravisPushBuild,
-  travisBuildNumber,
-  travisCommitSha,
-  travisJobNumber,
-  travisPullRequestBranch,
-  travisPullRequestSha,
-  travisRepoSlug,
 };

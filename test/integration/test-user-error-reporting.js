@@ -16,20 +16,17 @@
 
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 
-const t = describe
-  .configure()
-  .skipSafari() // TODO(zhouyx, #11459): Unskip the test on safari.
-  .skipEdge()
-  .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+const t = describe.configure()
+    .skipSafari() // TODO(zhouyx, #11459): Unskip the test on safari.
+    .skipEdge()
+    .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
 
 t.run('user-error', function() {
-  describes.integration(
-    'user-error integration test',
-    {
-      extensions: ['amp-analytics'],
-      hash: 'log=0',
-      experiments: ['user-error-reporting'],
-      body: `
+  describes.integration('user-error integration test', {
+    extensions: ['amp-analytics'],
+    hash: 'log=0',
+    experiments: ['user-error-reporting'],
+    body: `
     <amp-analytics>
       <script type="application/json">
         {
@@ -49,27 +46,23 @@ t.run('user-error', function() {
     <amp-pixel src="https://foo.com/tracker/foo"
             referrerpolicy="fail-referrer">
             `,
-    },
-    env => {
-      beforeEach(() => {
-        const browser = new BrowserController(env.win);
-        return browser.waitForElementLayout('amp-analytics');
-      });
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
 
-      it('should ping correct host with amp-pixel user().assert err', () => {
-        return RequestBank.withdraw();
-      });
-    }
-  );
+    it('should ping correct host with amp-pixel user().assert err', () => {
+      return RequestBank.withdraw();
+    });
+  });
 
-  describes.integration(
-    'user-error integration test',
-    {
-      extensions: ['amp-analytics'],
-      hash: 'log=0',
-      experiments: ['user-error-reporting'],
+  describes.integration('user-error integration test', {
+    extensions: ['amp-analytics'],
+    hash: 'log=0',
+    experiments: ['user-error-reporting'],
 
-      body: `
+    body: `
     <amp-img
       src="../../examples/img/sea@1x.jpg"
       width="360" height="216" layout="responsive"
@@ -91,27 +84,23 @@ t.run('user-error', function() {
         }
       </script>
     </amp-analytics>`,
-    },
-    env => {
-      beforeEach(() => {
-        const browser = new BrowserController(env.win);
-        return browser.waitForElementLayout('amp-analytics, amp-img');
-      });
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics, amp-img');
+    });
 
-      it('should ping correct host with amp-img user().error err', () => {
-        return RequestBank.withdraw();
-      });
-    }
-  );
+    it('should ping correct host with amp-img user().error err', () => {
+      return RequestBank.withdraw();
+    });
+  });
 
-  describes.integration(
-    '3p user-error integration test',
-    {
-      extensions: ['amp-analytics', 'amp-ad'],
-      hash: 'log=0',
-      experiments: ['user-error-reporting'],
+  describes.integration('3p user-error integration test', {
+    extensions: ['amp-analytics', 'amp-ad'],
+    hash: 'log=0',
+    experiments: ['user-error-reporting'],
 
-      body: `
+    body: `
     <amp-ad width=300 height=250
         type="_ping_"
         data-url='not-exist'
@@ -134,16 +123,14 @@ t.run('user-error', function() {
         }
       </script>
     </amp-analytics>`,
-    },
-    env => {
-      beforeEach(() => {
-        const browser = new BrowserController(env.win);
-        return browser.waitForElementLayout('amp-analytics, amp-ad');
-      });
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics, amp-ad');
+    });
 
-      it('should ping correct host with 3p error message', () => {
-        return RequestBank.withdraw();
-      });
-    }
-  );
+    it('should ping correct host with 3p error message', () => {
+      return RequestBank.withdraw();
+    });
+  });
 });

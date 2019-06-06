@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-describes.realWin(
-  'amp-image-slider component',
-  {
-    amp: {
-      extensions: ['amp-image-slider'],
-    },
+describes.realWin('amp-image-slider component', {
+  amp: {
+    extensions: ['amp-image-slider'],
   },
-  () => {
-    it('should pass dummy test', () => {});
-  }
-);
+}, () => {
+  it('should pass dummy test', () => {
+  });
+});

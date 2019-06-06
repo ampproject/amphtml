@@ -18,10 +18,11 @@ import {AmpAdTemplateHelper} from '../amp-ad-template-helper';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {Xhr} from '../../../../src/service/xhr-impl';
 
+
 describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
-  const cdnUrl =
-    'https://adserver-com.cdn.ampproject.org/ad/s/' +
-    'adserver.com/amp_template_1';
+
+  const cdnUrl = 'https://adserver-com.cdn.ampproject.org/ad/s/' +
+      'adserver.com/amp_template_1';
   const canonicalUrl = 'https://adserver.com/amp_template_1';
 
   let win, doc;
@@ -38,22 +39,21 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
 
   it('should return a promise resolving to a string template', () => {
     const template = 'content not important here';
-    fetchTextMock
-      .withArgs(cdnUrl, {
-        mode: 'cors',
-        method: 'GET',
-        ampCors: false,
-        credentials: 'omit',
-      })
-      .returns(
-        Promise.resolve({
-          headers: {},
-          text: () => template,
+    fetchTextMock.withArgs(
+        cdnUrl,
+        {
+          mode: 'cors',
+          method: 'GET',
+          ampCors: false,
+          credentials: 'omit',
         })
-      );
-    return ampAdTemplateHelper
-      .fetch(canonicalUrl)
-      .then(fetchedTemplate => expect(fetchedTemplate).to.equal(template));
+        .returns(Promise.resolve(
+            {
+              headers: {},
+              text: () => template,
+            }));
+    return ampAdTemplateHelper.fetch(canonicalUrl)
+        .then(fetchedTemplate => expect(fetchedTemplate).to.equal(template));
   });
 
   it('should use CDN url if one is supplied', () => {
@@ -61,9 +61,8 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
   });
 
   it('should convert canonical to CDN', () => {
-    expect(ampAdTemplateHelper.getTemplateProxyUrl_(canonicalUrl)).to.equal(
-      cdnUrl
-    );
+    expect(ampAdTemplateHelper.getTemplateProxyUrl_(canonicalUrl))
+        .to.equal(cdnUrl);
   });
 
   it('should render a template with correct values', () => {
@@ -73,38 +72,35 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
   it('should render a template with correct values', () => {
     win.AMP.registerTemplate('amp-mustache', AmpMustache);
     const parentDiv = doc.createElement('div');
-    parentDiv./*OK*/ innerHTML =
-      '<template type="amp-mustache"><p>{{foo}}</p></template>';
+    parentDiv./*OK*/innerHTML =
+        '<template type="amp-mustache"><p>{{foo}}</p></template>';
     doc.body.appendChild(parentDiv);
     return ampAdTemplateHelper.render({foo: 'bar'}, parentDiv).then(result => {
       expect(result).to.not.be.null;
-      expect(result./*OK*/ innerHTML).to.equal('bar');
+      expect(result./*OK*/innerHTML).to.equal('bar');
     });
   });
 
   it('should insert analytics component', () => {
     const parentDiv = doc.createElement('div');
-    parentDiv./*OK*/ innerHTML = '<p>123</p>';
+    parentDiv./*OK*/innerHTML =
+        '<p>123</p>';
     doc.body.appendChild(parentDiv);
-    const analytics = [
-      {
-        'remote': 'remoteUrl',
-        'inline': {
-          'requests': 'r',
-        },
+    const analytics = [{
+      'remote': 'remoteUrl',
+      'inline': {
+        'requests': 'r',
       },
-      {
-        'type': 'googleanalytics',
-      },
-    ];
+    }, {
+      'type': 'googleanalytics',
+    }];
     ampAdTemplateHelper.insertAnalytics(parentDiv, analytics);
     expect(parentDiv.childNodes.length).to.equal(3);
-    expect(parentDiv.innerHTML).to.equal(
-      '<p>123</p>' +
+    expect(parentDiv.innerHTML).to.equal('<p>123</p>' +
         '<amp-analytics config="remoteUrl">' +
         '<script type="application/json">{"requests":"r"}</script>' +
         '</amp-analytics>' +
-        '<amp-analytics type="googleanalytics"></amp-analytics>'
-    );
+        '<amp-analytics type="googleanalytics"></amp-analytics>');
   });
 });
+

@@ -47,27 +47,27 @@ FAIL
 |    <!-- Invalid: element without src -->
 |    <amp-google-document-embed width="800" height="600">
 >>   ^~~~~~~~~
-amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:47:2 The mandatory attribute 'src' is missing in tag 'amp-google-document-embed'. (see https://amp.dev/documentation/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
+amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:47:2 The mandatory attribute 'src' is missing in tag 'amp-google-document-embed'. (see https://www.ampproject.org/docs/reference/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
 |    </amp-google-document-embed>
 |    <!-- Invalid: element with empty src -->
 |    <amp-google-document-embed src="" width="800" height="600">
 >>   ^~~~~~~~~
-amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:50:2 Missing URL for attribute 'src' in tag 'amp-google-document-embed'. (see https://amp.dev/documentation/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
+amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:50:2 Missing URL for attribute 'src' in tag 'amp-google-document-embed'. (see https://www.ampproject.org/docs/reference/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
 |    </amp-google-document-embed>
 |    <!-- Invalid: element with empty src but bind [src] -->
 |    <amp-google-document-embed src="" [src]="'https://www.example.com/document.pdf'" width="800" height="600">
 >>   ^~~~~~~~~
-amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:53:2 Missing URL for attribute 'src' in tag 'amp-google-document-embed'. (see https://amp.dev/documentation/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
+amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:53:2 Missing URL for attribute 'src' in tag 'amp-google-document-embed'. (see https://www.ampproject.org/docs/reference/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
 |    </amp-google-document-embed>
 |    <!-- Invalid: element with http src -->
 |    <amp-google-document-embed src="http://www.example.com/document.pdf" width="800" height="600">
 >>   ^~~~~~~~~
-amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:56:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-google-document-embed'. (see https://amp.dev/documentation/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
+amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:56:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-google-document-embed'. (see https://www.ampproject.org/docs/reference/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
 |    </amp-google-document-embed>
 |    <!-- Invalid: element with relative src -->
 |    <amp-google-document-embed src="document.pdf" width="800" height="600">
 >>   ^~~~~~~~~
-amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:59:2 The relative URL 'document.pdf' for attribute 'src' in tag 'amp-google-document-embed' is disallowed. (see https://amp.dev/documentation/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
+amp-google-document-embed/0.1/test/validator-amp-google-document-embed.html:59:2 The relative URL 'document.pdf' for attribute 'src' in tag 'amp-google-document-embed' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-google-document-embed) [AMP_TAG_PROBLEM]
 |    </amp-google-document-embed>
 |  </body>
 |  </html>

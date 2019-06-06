@@ -17,8 +17,10 @@
 /** @typedef {!Array<!Object<string, *>>} */
 export let KeyframesDef;
 
+
 /** @typedef {(function(StoryAnimationDimsDef):!KeyframesDef)|!KeyframesDef} */
 export let KeyframesOrFilterFnDef;
+
 
 /**
  * @typedef {{
@@ -32,6 +34,7 @@ export let KeyframesOrFilterFnDef;
  */
 export let StoryAnimationDimsDef;
 
+
 /**
  * @typedef {{
  *   duration: number,
@@ -40,6 +43,7 @@ export let StoryAnimationDimsDef;
  * }}
  */
 export let StoryAnimationPresetDef;
+
 
 /**
  * @typedef {{

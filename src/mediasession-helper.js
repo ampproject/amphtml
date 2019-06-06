@@ -33,7 +33,9 @@ export const EMPTY_METADATA = {
   'title': '',
   'artist': '',
   'album': '',
-  'artwork': [{'src': ''}],
+  'artwork': [
+    {'src': ''},
+  ],
 };
 
 /**
@@ -45,11 +47,7 @@ export const EMPTY_METADATA = {
  * @param {function()=} pauseHandler
  */
 export function setMediaSession(
-  element,
-  win,
-  metadata,
-  playHandler,
-  pauseHandler
+  element, win, metadata, playHandler, pauseHandler
 ) {
   const {navigator} = win;
   if ('mediaSession' in navigator && win.MediaMetadata) {
@@ -67,6 +65,7 @@ export function setMediaSession(
     // TODO(@wassgha) Implement seek & next/previous
   }
 }
+
 
 /**
  * Parses the schema.org json-ld formatted meta-data, looks for the page's
@@ -90,10 +89,8 @@ export function parseSchemaImage(doc) {
   if (typeof schemaJson['image'] === 'string') {
     // 1. "image": "http://..",
     return schemaJson['image'];
-  } else if (
-    schemaJson['image']['@list'] &&
-    typeof schemaJson['image']['@list'][0] === 'string'
-  ) {
+  } else if (schemaJson['image']['@list']
+      && typeof schemaJson['image']['@list'][0] === 'string') {
     // 2. "image": {.., "@list": ["http://.."], ..}
     return schemaJson['image']['@list'][0];
   } else if (typeof schemaJson['image']['url'] === 'string') {
@@ -127,9 +124,8 @@ export function parseOgImage(doc) {
  * @return {string|undefined}
  */
 export function parseFavicon(doc) {
-  const linkTag =
-    doc.querySelector('link[rel="shortcut icon"]') ||
-    doc.querySelector('link[rel="icon"]');
+  const linkTag = doc.querySelector('link[rel="shortcut icon"]')
+                  || doc.querySelector('link[rel="icon"]');
   if (linkTag) {
     return linkTag.getAttribute('href');
   } else {

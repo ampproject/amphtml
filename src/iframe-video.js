@@ -21,6 +21,7 @@ import {isArray, isObject} from './types';
 import {startsWith} from './string';
 import {tryParseJson} from './json';
 
+
 /** @enum {string} */
 export const SandboxOptions = {
   ALLOW_SCRIPTS: 'allow-scripts',
@@ -30,6 +31,7 @@ export const SandboxOptions = {
   ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION:
     'allow-top-navigation-by-user-activation',
 };
+
 
 /**
  * @param {!Event} event
@@ -46,6 +48,7 @@ export function originMatches(event, iframe, host) {
   }
   return host.test(event.origin);
 }
+
 
 /**
  * Re-dispatches an event received from postMessage as an event in the host
@@ -67,6 +70,7 @@ export function redispatch(element, event, events) {
   return true;
 }
 
+
 /**
  * @param {!./base-element.BaseElement} video
  * @param {string} src
@@ -76,9 +80,8 @@ export function redispatch(element, event, events) {
  */
 export function createFrameFor(video, src, opt_name, opt_sandbox) {
   const {element} = video;
-  const frame = htmlFor(
-    element
-  )`<iframe frameborder=0 allowfullscreen></iframe>`;
+  const frame =
+      htmlFor(element)`<iframe frameborder=0 allowfullscreen></iframe>`;
 
   if (opt_name) {
     frame.setAttribute('name', opt_name);
@@ -100,6 +103,7 @@ export function createFrameFor(video, src, opt_name, opt_sandbox) {
   return frame;
 }
 
+
 /**
  * @param {?} anything
  * @return {boolean}
@@ -108,10 +112,10 @@ export function isJsonOrObj(anything) {
   if (!anything) {
     return false;
   }
-  return (
-    isObject(anything) || startsWith(/** @type {string} */ (anything), '{')
-  );
+  return isObject(anything) ||
+    startsWith(/** @type {string} */ (anything), '{');
 }
+
 
 /**
  * @param {?JsonObject|string|undefined} objOrStr
@@ -124,6 +128,7 @@ export function objOrParseJson(objOrStr) {
   return tryParseJson(objOrStr);
 }
 
+
 /**
  * @param {boolean} isMuted
  * @return {string}
@@ -131,6 +136,7 @@ export function objOrParseJson(objOrStr) {
 export function mutedOrUnmutedEvent(isMuted) {
   return isMuted ? VideoEvents.MUTED : VideoEvents.UNMUTED;
 }
+
 
 /**
  * TEMPORARY workaround for M72-M74 user-activation breakage.

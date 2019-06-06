@@ -17,6 +17,7 @@
 import {assertLength, assertLengthOrPercent} from './layout';
 import {userAssert} from './log';
 
+
 /**
  * A single option within a SizeList.
  * @typedef {{
@@ -25,6 +26,7 @@ import {userAssert} from './log';
  * }}
  */
 let SizeListOptionDef;
+
 
 /**
  * Parses the text representation of "sizes" into SizeList object.
@@ -82,16 +84,10 @@ export function parseSizeList(s, opt_allowPercentAsLength) {
         div--;
         for (; div >= 0; div--) {
           const c = sSize.charAt(div);
-          if (
-            !(
-              c == '%' ||
-              c == '-' ||
-              c == '_' ||
-              (c >= 'a' && c <= 'z') ||
-              (c >= 'A' && c <= 'Z') ||
-              (c >= '0' && c <= '9')
-            )
-          ) {
+          if (!(c == '%' || c == '-' || c == '_' ||
+                (c >= 'a' && c <= 'z') ||
+                (c >= 'A' && c <= 'Z') ||
+                (c >= '0' && c <= '9'))) {
             break;
           }
         }
@@ -104,15 +100,10 @@ export function parseSizeList(s, opt_allowPercentAsLength) {
       div = sSize.length - 2;
       for (; div >= 0; div--) {
         const c = sSize.charAt(div);
-        if (
-          !(
-            c == '%' ||
-            c == '.' ||
-            (c >= 'a' && c <= 'z') ||
-            (c >= 'A' && c <= 'Z') ||
-            (c >= '0' && c <= '9')
-          )
-        ) {
+        if (!(c == '%' || c == '.' ||
+              (c >= 'a' && c <= 'z') ||
+              (c >= 'A' && c <= 'Z') ||
+              (c >= '0' && c <= '9'))) {
           break;
         }
       }
@@ -124,17 +115,15 @@ export function parseSizeList(s, opt_allowPercentAsLength) {
       sizeStr = sSize;
       mediaStr = undefined;
     }
-    sizes.push({
-      mediaQuery: mediaStr,
-      size: func
-        ? sizeStr
-        : opt_allowPercentAsLength
-        ? assertLengthOrPercent(sizeStr)
-        : assertLength(sizeStr),
-    });
+    sizes.push({mediaQuery: mediaStr,
+      size: func ? sizeStr :
+        opt_allowPercentAsLength ?
+          assertLengthOrPercent(sizeStr) :
+          assertLength(sizeStr)});
   });
   return new SizeList(sizes);
 }
+
 
 /**
  * A SizeList object contains one or more sizes as typically seen in "sizes"
@@ -159,15 +148,11 @@ export class SizeList {
     for (let i = 0; i < sizes.length; i++) {
       const option = sizes[i];
       if (i < sizes.length - 1) {
-        userAssert(
-          option.mediaQuery,
-          'All options except for the last must have a media condition'
-        );
+        userAssert(option.mediaQuery,
+            'All options except for the last must have a media condition');
       } else {
-        userAssert(
-          !option.mediaQuery,
-          'The last option must not have a media condition'
-        );
+        userAssert(!option.mediaQuery,
+            'The last option must not have a media condition');
       }
     }
   }
@@ -189,7 +174,7 @@ export class SizeList {
       const option = sizes[i];
       // Only the last item (which we don't iterate) has an undefined
       // mediaQuery.
-      const query = /** @type {string} */ (option.mediaQuery);
+      const query = /** @type {string} */(option.mediaQuery);
       if (win.matchMedia(query).matches) {
         return option.size;
       }

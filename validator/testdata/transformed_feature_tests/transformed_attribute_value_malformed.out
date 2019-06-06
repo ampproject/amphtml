@@ -22,7 +22,7 @@ FAIL
 |  <!doctype html>
 |  <html ⚡ transformed="google;v=1..3">
 >> ^~~~~~~~~
-transformed_feature_tests/transformed_attribute_value_malformed.html:22:0 The attribute 'transformed' in tag 'html' is set to the invalid value 'google;v=1..3'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
+transformed_feature_tests/transformed_attribute_value_malformed.html:22:0 The attribute 'transformed' in tag 'html' is set to the invalid value 'google;v=1..3'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
 |  <head>
 |    <meta charset="utf-8">
 |    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>

@@ -32,22 +32,17 @@ const POP_FOLLOW = `status=no,resizable=yes,scrollbars=yes,
  * @attr data-label: the text to display (user's full name)
  */
 export class FollowButton {
+
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    userAssert(
-      rootElement.getAttribute('data-href'),
-      'The data-href attribute is required for follow buttons'
-    );
-    userAssert(
-      rootElement.getAttribute('data-label'),
-      'The data-label attribute is required for follow buttons'
-    );
+    userAssert(rootElement.getAttribute('data-href'),
+        'The data-href attribute is required for follow buttons');
+    userAssert(rootElement.getAttribute('data-label'),
+        'The data-label attribute is required for follow buttons');
     this.element = rootElement;
     this.label = rootElement.getAttribute('data-label');
-    this.href = assertHttpsUrl(
-      rootElement.getAttribute('data-href'),
-      rootElement
-    );
+    this.href = assertHttpsUrl(rootElement.getAttribute('data-href'),
+        rootElement);
   }
 
   /**
@@ -56,7 +51,8 @@ export class FollowButton {
    */
   handleClick(event) {
     event.preventDefault();
-    openWindowDialog(window, this.href, 'pin' + Date.now(), POP_FOLLOW);
+    openWindowDialog(window, this.href, 'pin' + Date.now(),
+        POP_FOLLOW);
     Util.log(`&type=button_follow&href=${this.href}`);
   }
 
@@ -65,13 +61,11 @@ export class FollowButton {
    * @return {Element}
    */
   renderTemplate() {
-    const followButton = Util.make(this.element.ownerDocument, {
-      'a': {
-        class: '-amp-pinterest-follow-button',
-        href: this.href,
-        textContent: this.label,
-      },
-    });
+    const followButton = Util.make(this.element.ownerDocument, {'a': {
+      class: '-amp-pinterest-follow-button',
+      href: this.href,
+      textContent: this.label,
+    }});
     followButton.appendChild(Util.make(this.element.ownerDocument, {'i': {}}));
     followButton.onclick = this.handleClick.bind(this);
     return followButton;

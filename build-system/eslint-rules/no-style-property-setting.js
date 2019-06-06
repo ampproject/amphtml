@@ -23,7 +23,8 @@ module.exports = function(context) {
       const filePath = context.getFilename();
       const filename = path.basename(filePath);
       // Ignore specific js files.
-      if (/^(keyframes-extractor|fixed-layer|style)\.js/.test(filename)) {
+      if (/^(keyframes-extractor|fixed-layer|style)\.js/
+          .test(filename)) {
         return;
       }
       // Ignore tests.
@@ -40,10 +41,9 @@ module.exports = function(context) {
       if (node.property.name == 'style') {
         context.report({
           node,
-          message:
-            'The use of Element#style (CSSStyleDeclaration live ' +
-            'object) to style elements is forbidden. Use getStyle and ' +
-            'setStyle from style.js',
+          message: 'The use of Element#style (CSSStyleDeclaration live ' +
+              'object) to style elements is forbidden. Use getStyle and ' +
+              'setStyle from style.js',
         });
       }
     },

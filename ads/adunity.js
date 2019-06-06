@@ -24,31 +24,32 @@ import {startsWith} from '../src/string';
 export function adunity(global, data) {
   const doc = global.document;
 
-  validateData(
-    data,
-    ['auAccount', 'auSite'],
-    [
-      'auSection',
-      'auZone',
-      'auDemo',
-      'auIsdemo',
-      'auAd',
-      'auOrder',
-      'auSegment',
-      'auOptions',
-      'auSources',
-      'auAds',
-      'auTriggerFn',
-      'auTriggerVal',
-      'auCallbackVal',
-      'auCallbackFn',
-      'auPassbackFn',
-      'auPassbackVal',
-      'auClick',
-      'auDual',
-      'auImpression',
-      'auVideo',
-    ]
+  validateData(data, [
+    'auAccount',
+    'auSite',
+  ],
+  [
+    'auSection',
+    'auZone',
+    'auDemo',
+    'auIsdemo',
+    'auAd',
+    'auOrder',
+    'auSegment',
+    'auOptions',
+    'auSources',
+    'auAds',
+    'auTriggerFn',
+    'auTriggerVal',
+    'auCallbackVal',
+    'auCallbackFn',
+    'auPassbackFn',
+    'auPassbackVal',
+    'auClick',
+    'auDual',
+    'auImpression',
+    'auVideo',
+  ]
   );
 
   //prepare tag structure
@@ -72,7 +73,8 @@ export function adunity(global, data) {
       if (startsWith(key, 'au')) {
         if (key == 'auVideo') {
           tag.setAttribute('class', 'au-video');
-        } else {
+        }
+        else {
           const auKey = key.substring(2).toLowerCase();
           tag.setAttribute('data-au-' + auKey, data[key]);
         }
@@ -102,9 +104,7 @@ export function adunity(global, data) {
  * @param {!Object} data
  */
 function renderTags(global, data) {
-  if (data == null) {
-    return;
-  }
+  if (data == null) {return;}
 
   global.context.renderStart({
     width: data.width,

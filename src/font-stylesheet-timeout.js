@@ -63,10 +63,9 @@ function maybeTimeoutFonts(win) {
     // Find all stylesheets that aren't loaded from the AMP CDN (those are
     // critical if they are present).
     const styleLinkElements = win.document.querySelectorAll(
-      `link[rel~="stylesheet"]:not([href^="${escapeCssSelectorIdent(
-        urls.cdn
-      )}"])`
-    );
+        `link[rel~="stylesheet"]:not([href^="${
+          escapeCssSelectorIdent(urls.cdn)
+        }"])`);
     // Compare external sheets against elements of document.styleSheets.
     // They do not appear in this list until they have been loaded.
     const timedoutStyleSheets = [];

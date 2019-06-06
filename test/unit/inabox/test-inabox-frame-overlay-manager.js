@@ -20,9 +20,12 @@ import {
   stubExpandFrameForTesting,
 } from '../../../ads/inabox/frame-overlay-helper';
 
+
 const NOOP = () => {};
 
+
 describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
+
   let win;
   let addEventListenerSpy;
 
@@ -41,10 +44,8 @@ describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
   });
 
   it('should listen to window resize event', () => {
-    expect(addEventListenerSpy).to.have.been.calledWith(
-      'resize',
-      sinon.match.any
-    );
+    expect(addEventListenerSpy)
+        .to.have.been.calledWith('resize', sinon.match.any);
   });
 
   it('should expand frame and execute callback', () => {
@@ -84,12 +85,8 @@ describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
     manager.collapseFrame(iframe, callback);
 
     expect(callback).to.have.been.calledWith(remeasuredCollapsedRect);
-    expect(collapseFrame).to.have.been.calledWith(
-      win,
-      iframe,
-      sinon.match.any,
-      sinon.match.any
-    );
+    expect(collapseFrame)
+        .to.have.been.calledWith(win, iframe, sinon.match.any, sinon.match.any);
   });
 
   it('should collapse frame and execute callback with known box rect', () => {
@@ -106,18 +103,13 @@ describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
 
     stubCollapseFrameForTesting(collapseFrame);
     stubExpandFrameForTesting((win, iframe, onFinish) =>
-      onFinish(knownBoxRect, {})
-    );
+      onFinish(knownBoxRect, {}));
 
     manager.expandFrame(iframe, NOOP);
     manager.collapseFrame(iframe, callback);
 
     expect(callback).to.have.been.calledWith(knownBoxRect);
-    expect(collapseFrame).to.have.been.calledWith(
-      win,
-      iframe,
-      sinon.match.any,
-      sinon.match.any
-    );
+    expect(collapseFrame)
+        .to.have.been.calledWith(win, iframe, sinon.match.any, sinon.match.any);
   });
 });

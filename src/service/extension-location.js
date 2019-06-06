@@ -62,12 +62,8 @@ function getSinglePassExperimentPath() {
  * @param {boolean=} opt_isLocalDev
  * @return {string}
  */
-export function calculateExtensionScriptUrl(
-  location,
-  extensionId,
-  opt_extensionVersion,
-  opt_isLocalDev
-) {
+export function calculateExtensionScriptUrl(location, extensionId,
+  opt_extensionVersion, opt_isLocalDev) {
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   if (opt_extensionVersion == null) {
@@ -90,11 +86,7 @@ export function calculateExtensionScriptUrl(
  * @return {string}
  */
 export function calculateEntryPointScriptUrl(
-  location,
-  entryPoint,
-  isLocalDev,
-  opt_rtv
-) {
+  location, entryPoint, isLocalDev, opt_rtv) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
   if (opt_rtv) {
     const spPath = getSinglePassExperimentPath();

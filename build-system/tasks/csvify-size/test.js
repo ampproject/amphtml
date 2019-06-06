@@ -15,6 +15,7 @@
  */
 'use strict';
 
+
 const m = require('./');
 const test = require('ava');
 
@@ -49,7 +50,9 @@ test('sync - parse table typedef', t => {
   t.plan(1);
   const dateTimes = ['"0"', '"1"', '"2"'];
   const tables = [
-    [{name: '"v0.js"', size: '"5.5"', dateTime: '"0"'}],
+    [
+      {name: '"v0.js"', size: '"5.5"', dateTime: '"0"'},
+    ],
     [
       {name: '"v0.js"', size: '"8.5"', dateTime: '"1"'},
       {name: '"f.js"', size: '"70.11"', dateTime: '"1"'},

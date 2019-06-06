@@ -14,38 +14,11 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 const pubmineOptional = ['section', 'pt', 'ht'],
-  pubmineRequired = ['siteid'],
-  pubmineURL = 'https://s.pubmine.com/head.js';
-
-/**
- * @param {!Object} data
- * @param {!Window} global
- */
-function initMasterFrame(data, global) {
-  global['__ATA_PP'] = {
-    pt: data['pt'] || 1,
-    ht: data['ht'] || 1,
-    tn: 'amp',
-    amp: true,
-  };
-  global['__ATA'] = global['__ATA'] || {};
-  global['__ATA']['cmd'] = global['__ATA']['cmd'] || [];
-  loadScript(global, pubmineURL);
-}
-
-/**
- * @param {string} slotId
- * @param {!Window} global
- */
-function createSlot(slotId, global) {
-  const containerEl = global.document.getElementById('c');
-  const adSlot = global.document.createElement('div');
-  adSlot.setAttribute('id', slotId);
-  containerEl.appendChild(adSlot);
-}
+    pubmineRequired = ['siteid'],
+    pubmineURL = 'https://s.pubmine.com/head.js';
 
 /**
  * @param {!Window} global
@@ -54,25 +27,39 @@ function createSlot(slotId, global) {
 export function pubmine(global, data) {
   validateData(data, pubmineRequired, pubmineOptional);
 
-  const sectionId = data['siteid'] + (data['section'] || '1');
-
-  const slotConfig = {
-    sectionId,
-    height: data.height == 250 ? 250 : data.height - 15,
-    width: data.width,
-    window: global,
+  global.__ATA_PP = {
+    renderStartCallback: () => global.context.renderStart(),
+    pt: 'pt' in data ? data.pt : 1,
+    ht: 'ht' in data ? data.ht : 1,
+    tn: 'amp',
+    amp: true,
   };
 
-  const slotId = `atatags-${sectionId}`;
+  global.__ATA = global.__ATA || {};
+  global.__ATA.cmd = global.__ATA.cmd || [];
+  global.__ATA.criteo = global.__ATA.criteo || {};
+  global.__ATA.criteo.cmd = global.__ATA.criteo.cmd || [];
+  writeScript(global, pubmineURL);
 
-  createSlot(slotId, global);
-  const {isMaster} = global.context;
-  if (isMaster) {
-    initMasterFrame(data, global);
-  }
-  const master = isMaster ? global : global.context.master;
-  master['__ATA']['cmd']['push'](function() {
-    master['__ATA']['insertStyles'](global);
-    master['__ATA']['initSlot'](slotId, slotConfig);
-  });
+  const o = {
+        sectionId: data['siteid'] + ('section' in data ? data.section : '1'),
+        height: data.height == 250 ? 250 : data.height - 15,
+        width: data.width,
+      },
+      wr = global.document.write;
+
+  wr.call(global.document,
+      `<div id="atatags-${o.sectionId}">
+        <script type="text/javascript">
+          __ATA.cmd.push(function() {
+            __ATA.initSlot('atatags-${o.sectionId}', {
+              collapseEmpty: 'before',
+              sectionId: ${o.sectionId},
+              width: ${o.width},
+              height: ${o.height}
+            });
+          });
+        </script>
+      </div>`
+  );
 }

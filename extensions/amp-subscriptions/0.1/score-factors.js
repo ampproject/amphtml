@@ -29,4 +29,5 @@ export const SubscriptionsScoreFactor = {
  * All other score factors are ignored if not specifed in the publisher
  * config so adding a default here would be meaningless.
  */
-export const DEFAULT_SCORE_CONFIG = {};
+export const DEFAULT_SCORE_CONFIG = {
+};

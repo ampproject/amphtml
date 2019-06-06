@@ -125,7 +125,7 @@ amp-list/0.1/test/validator-amp-list.html:85:2 The attribute 'auto-resize' in ta
 |    <!-- Invalid: unsupported "binding" attribute value -->
 |    <amp-list width=10 height=10
 >>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:121:2 The attribute 'binding' in tag 'amp-list' is set to the invalid value 'this-is-an-error'. (see https://amp.dev/documentation/components/amp-list) [DISALLOWED_HTML]
+amp-list/0.1/test/validator-amp-list.html:121:2 The attribute 'binding' in tag 'amp-list' is set to the invalid value 'this-is-an-error'. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |              src="https://data.com/articles.json?ref=CANONICAL_URL"
 |              binding="this-is-an-error">
 |      <div></div>
@@ -133,34 +133,34 @@ amp-list/0.1/test/validator-amp-list.html:121:2 The attribute 'binding' in tag '
 |    <!-- Invalid: width is mistyped. -->
 |    <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL"
 >>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:127:2 The attribute 'wdith' may not appear in tag 'amp-list'. (see https://amp.dev/documentation/components/amp-list) [DISALLOWED_HTML]
+amp-list/0.1/test/validator-amp-list.html:127:2 The attribute 'wdith' may not appear in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |              wdith=10 height=10>
 |      <div></div>
 |    </amp-list>
 |    <!-- Invalid: missing at least src or [src]. -->
 |    <amp-list width=10 height=10>
 >>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:132:2 The tag 'amp-list' is missing a mandatory attribute - pick at least one of ['src','[src]']. (see https://amp.dev/documentation/components/amp-list) [AMP_TAG_PROBLEM]
+amp-list/0.1/test/validator-amp-list.html:132:2 The tag 'amp-list' is missing a mandatory attribute - pick at least one of ['src','[src]']. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_TAG_PROBLEM]
 |      <div></div>
 |    </amp-list>
 |    <!-- Invalid: width/height missing, so it's container layout
 |         which isn't supported. -->
 |    <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
 >>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:137:2 Incomplete layout attributes specified for tag 'amp-list'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-list) [AMP_LAYOUT_PROBLEM]
+amp-list/0.1/test/validator-amp-list.html:137:2 Incomplete layout attributes specified for tag 'amp-list'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_LAYOUT_PROBLEM]
 |      <div></div>
 |    </amp-list>
 |    <!-- Invalid amp-list with load-more attribute -->
 |    <amp-list width=10 height=10
 >>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:141:2 The attribute 'load-more' in tag 'amp-list' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-list) [DISALLOWED_HTML]
+amp-list/0.1/test/validator-amp-list.html:141:2 The attribute 'load-more' in tag 'amp-list' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |      src="https://data.com/articles.json?ref=CANONICAL_URL"
 |      load-more></amp-list>
 |    </amp-list>
 |    <!-- Invalid amp-list with bad load-more attribute -->
 |    <amp-list width=10 height=10
 >>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:146:2 The attribute 'load-more' in tag 'amp-list' is set to the invalid value 'gibberish'. (see https://amp.dev/documentation/components/amp-list) [DISALLOWED_HTML]
+amp-list/0.1/test/validator-amp-list.html:146:2 The attribute 'load-more' in tag 'amp-list' is set to the invalid value 'gibberish'. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |      src="https://data.com/articles.json?ref=CANONICAL_URL"
 |      load-more="gibberish"
 |      load-more-bookmark="next"></amp-list>
@@ -180,6 +180,6 @@ amp-list/0.1/test/validator-amp-list.html:154:2 The attribute 'load-more-failed'
 amp-list/0.1/test/validator-amp-list.html:155:2 The attribute 'load-more-end' may not appear in tag 'div'. [DISALLOWED_HTML]
 |    <amp-list-load-more></amp-list-load-more>
 >>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:156:2 The parent tag of tag 'amp-list-load-more' is 'body', but it can only be 'amp-list'. (see https://amp.dev/documentation/components/amp-list) [AMP_TAG_PROBLEM]
+amp-list/0.1/test/validator-amp-list.html:156:2 The parent tag of tag 'amp-list-load-more' is 'body', but it can only be 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_TAG_PROBLEM]
 |  </body>
 |  </html>

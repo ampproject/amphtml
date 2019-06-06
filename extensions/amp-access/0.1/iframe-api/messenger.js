@@ -22,9 +22,13 @@
  * Notice! As much as possible, keep this module dependency-free.
  */
 
+import {Deferred} from '../../../../src/utils/promise';
+
 const SENTINEL = '__AMP__';
 
+
 export class Messenger {
+
   /**
    * @param {!Window} win
    * @param {!Window|function():?Window} targetOrCallback
@@ -148,10 +152,10 @@ export class Messenger {
    */
   sendCommandRsvp(cmd, opt_payload) {
     const rsvpId = String(++this.requestId_);
-    let resolver = null;
-    const promise = new Promise(resolve => {
-      resolver = resolve;
-    });
+    const deferred = new Deferred();
+    const {promise, resolve: resolver} = deferred;
+
+
     this.waiting_[rsvpId] = {
       promise,
       resolver,
@@ -170,20 +174,15 @@ export class Messenger {
     const target = this.getTarget();
     // Only "connect" command is allowed to use `targetOrigin == '*'`
     const targetOrigin =
-      cmd == 'connect'
-        ? this.targetOrigin_ != null
-          ? this.targetOrigin_
-          : '*'
-        : this.getTargetOrigin();
-    target./*OK*/ postMessage(
-      /** @type {!JsonObject} */ ({
-        'sentinel': SENTINEL,
-        '_rsvp': rsvpId,
-        'cmd': cmd,
-        'payload': opt_payload || null,
-      }),
-      targetOrigin
-    );
+        cmd == 'connect' ?
+          (this.targetOrigin_ != null ? this.targetOrigin_ : '*') :
+          this.getTargetOrigin();
+    target./*OK*/postMessage(/** @type {!JsonObject} */ ({
+      'sentinel': SENTINEL,
+      '_rsvp': rsvpId,
+      'cmd': cmd,
+      'payload': opt_payload || null,
+    }), targetOrigin);
   }
 
   /**
@@ -216,18 +215,15 @@ export class Messenger {
     const rsvp = !!rsvpId && cmd != 'rsvp';
     const result = this.handleCommand_(rsvpId, cmd, payload);
     if (rsvp) {
-      Promise.resolve(result).then(
-        result => {
-          this.sendCommand_(rsvpId, 'rsvp', {
-            'result': result,
-          });
-        },
-        reason => {
-          this.sendCommand_(rsvpId, 'rsvp', {
-            'error': String(reason),
-          });
-        }
-      );
+      Promise.resolve(result).then(result => {
+        this.sendCommand_(rsvpId, 'rsvp', {
+          'result': result,
+        });
+      }, reason => {
+        this.sendCommand_(rsvpId, 'rsvp', {
+          'error': String(reason),
+        });
+      });
     }
   }
 

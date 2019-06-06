@@ -16,69 +16,62 @@
 
 import '../amp-embedly-card';
 
-describes.realWin(
-  'amp-embedly-card',
-  {
-    amp: {
-      extensions: ['amp-embedly-card'],
-    },
+describes.realWin('amp-embedly-card', {
+  amp: {
+    extensions: ['amp-embedly-card'],
   },
-  env => {
-    let win;
-    let element;
+}, env => {
 
-    beforeEach(() => {
-      win = env.win;
-      element = win.document.createElement('amp-embedly-card');
-      win.document.body.appendChild(element);
-    });
+  let win;
+  let element;
 
-    function createEmbedlyCard(dataUrl) {
-      const element = win.document.createElement('amp-embedly-card');
+  beforeEach(() => {
+    win = env.win;
+    element = win.document.createElement('amp-embedly-card');
+    win.document.body.appendChild(element);
+  });
 
-      element.setAttribute('data-url', dataUrl);
-      element.setAttribute('height', '100');
+  function createEmbedlyCard(dataUrl) {
+    const element = win.document.createElement('amp-embedly-card');
 
-      win.document.body.appendChild(element);
+    element.setAttribute('data-url', dataUrl);
+    element.setAttribute('height', '100');
 
-      return element
-        .build()
+    win.document.body.appendChild(element);
+
+    return element.build()
         .then(() => element.layoutCallback())
         .then(() => element);
-    }
-
-    it('renders responsively', () => {
-      return createEmbedlyCard(
-        'https://twitter.com/AMPhtml/status/986750295077040128'
-      ).then(element => {
-        const iframe = element.querySelector('iframe');
-
-        expect(iframe).to.not.be.null;
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
-    });
-
-    it('throws when data-url is not given', () => {
-      allowConsoleError(() =>
-        expect(createEmbedlyCard('')).to.be.rejectedWith(
-          /The data-url attribute is required for/
-        )
-      );
-    });
-
-    it('removes iframe after unlayoutCallback', () => {
-      return createEmbedlyCard('https://twitter.com/AMPhtml').then(element => {
-        const iframe = element.querySelector('iframe');
-
-        expect(iframe).to.not.be.null;
-
-        const instance = element.implementation_;
-
-        instance.unlayoutCallback();
-
-        expect(element.querySelector('iframe')).to.be.null;
-        expect(instance.iframe_).to.be.null;
-      });
-    });
   }
-);
+
+  it('renders responsively', () => {
+    return createEmbedlyCard('https://twitter.com/AMPhtml/status/986750295077040128')
+        .then(element => {
+          const iframe = element.querySelector('iframe');
+
+          expect(iframe).to.not.be.null;
+          expect(iframe.className).to.match(/i-amphtml-fill-content/);
+        });
+  });
+
+  it('throws when data-url is not given', () => {
+    allowConsoleError(() => expect(createEmbedlyCard('')).to.be.rejectedWith(
+        /The data-url attribute is required for/
+    ));
+  });
+
+  it('removes iframe after unlayoutCallback', () => {
+    return createEmbedlyCard('https://twitter.com/AMPhtml').then(element => {
+      const iframe = element.querySelector('iframe');
+
+      expect(iframe).to.not.be.null;
+
+      const instance = element.implementation_;
+
+      instance.unlayoutCallback();
+
+      expect(element.querySelector('iframe')).to.be.null;
+      expect(instance.iframe_).to.be.null;
+    });
+  });
+});

@@ -40,10 +40,11 @@ module.exports = function(context) {
       fixable: 'code',
     },
     Program: function() {
-      const comments = /** @type {!Array<!EslintNodeDef>} */ (sourceCode.getAllComments());
+      const comments =
+        /** @type {!Array<!EslintNodeDef>} */ (sourceCode.getAllComments());
       comments
-        .map(node => parseClosureComments(context, node))
-        .forEach(comment => checkClosureComments(context, comment));
+          .map(node => parseClosureComments(context, node))
+          .forEach(comment => checkClosureComments(context, comment));
     },
   };
 };
@@ -107,7 +108,12 @@ function checkClosureComments(context, closureComment) {
 }
 
 /** @enum {string} */
-const PRIMITIVE_WRAPPER_NAMES = ['Boolean', 'Number', 'String', 'Symbol'];
+const PRIMITIVE_WRAPPER_NAMES = [
+  'Boolean',
+  'Number',
+  'String',
+  'Symbol',
+];
 
 /**
  * Disallowed primitives wrappers, from
@@ -173,7 +179,12 @@ function checkNonNullableNodes(context, node, astNode) {
  * so we don't add them to this list.
  * @enum {string}
  */
-const NON_NULLABLE_PRIMITIVE_NAMES = ['boolean', 'number', 'string', 'symbol'];
+const NON_NULLABLE_PRIMITIVE_NAMES = [
+  'boolean',
+  'number',
+  'string',
+  'symbol',
+];
 
 /**
  * True if the given name matches a primitive type
@@ -209,3 +220,4 @@ function reportNonNullablePrimitive(context, node, name) {
     },
   });
 }
+

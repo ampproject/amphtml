@@ -17,7 +17,6 @@
 
 const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
-const {reportTestFinished} = require('./report-test-status');
 const {symbols} = require('./karma.conf').mochaReporter;
 
 /**
@@ -47,13 +46,10 @@ function ciReporter(runner) {
 
   function epilogue() {
     const {failures, stats} = self;
-    reportTestFinished(stats.passes, stats.failures);
-
     Base.list(failures);
     process.stdout.write(
-      `Executed ${stats.failures + stats.passes} of ${stats.tests} ` +
-        `(Skipped ${stats.pending}) `
-    );
+        `Executed ${stats.failures + stats.passes} of ${stats.tests} ` +
+        `(Skipped ${stats.pending}) `);
     if (stats.failures == 0) {
       process.stdout.write(Base.color('green', 'SUCCESS \n'));
     } else {

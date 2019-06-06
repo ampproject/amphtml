@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 import {dashToUnderline} from '../../../src/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
@@ -24,6 +25,7 @@ import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
 class AmpFacebookComments extends AMP.BaseElement {
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -32,9 +34,9 @@ class AmpFacebookComments extends AMP.BaseElement {
     this.iframe_ = null;
 
     /** @private @const {string} */
-    this.dataLocale_ = element.hasAttribute('data-locale')
-      ? element.getAttribute('data-locale')
-      : dashToUnderline(window.navigator.language);
+    this.dataLocale_ = element.hasAttribute('data-locale') ?
+      element.getAttribute('data-locale') :
+      dashToUnderline(window.navigator.language);
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -56,9 +58,7 @@ class AmpFacebookComments extends AMP.BaseElement {
     this.preconnect.url('https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
     this.preconnect.preload(
-      'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js',
-      'script'
-    );
+        'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js', 'script');
     preloadBootstrap(this.win, this.preconnect);
   }
 
@@ -72,18 +72,13 @@ class AmpFacebookComments extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'facebook');
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
-    listenFor(
-      iframe,
-      'embed-size',
-      data => {
-        this./*OK*/ changeHeight(data['height']);
-      },
-      /* opt_is3P */ true
-    );
+    listenFor(iframe, 'embed-size', data => {
+      this./*OK*/changeHeight(data['height']);
+    }, /* opt_is3P */true);
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.handleFacebookMessages_.bind(this)
+        this.win,
+        'message',
+        this.handleFacebookMessages_.bind(this)
     );
     this.toggleLoading(true);
     this.element.appendChild(iframe);
@@ -104,9 +99,8 @@ class AmpFacebookComments extends AMP.BaseElement {
       return;
     }
 
-    const parsedEventData = isObject(eventData)
-      ? eventData
-      : tryParseJson(eventData);
+    const parsedEventData = isObject(eventData) ?
+      eventData : tryParseJson(eventData);
     if (!parsedEventData) {
       return;
     }
@@ -127,6 +121,7 @@ class AmpFacebookComments extends AMP.BaseElement {
     return true;
   }
 }
+
 
 AMP.extension('amp-facebook-comments', '0.1', AMP => {
   AMP.registerElement('amp-facebook-comments', AmpFacebookComments);

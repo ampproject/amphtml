@@ -21,18 +21,12 @@ import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 
+
 /** @const {string} */
 const TAG = 'amp-viewer-assistance';
 
 /** @const {string} */
 const GSI_TOKEN_PROVIDER = 'actions-on-google-gsi';
-
-/** @const {!Array<string>} */
-const ACTION_STATUS_WHITELIST = [
-  'ACTIVE_ACTION_STATUS',
-  'FAILED_ACTION_STATUS',
-  'COMPLETED_ACTION_STATUS',
-];
 
 export class AmpViewerAssistance {
   /**
@@ -56,8 +50,7 @@ export class AmpViewerAssistance {
     /** @const @private {JsonObject|null|undefined} */
     this.configJson_ = tryParseJson(this.assistanceElement_.textContent, e => {
       throw user().createError(
-        'Failed to parse "amp-viewer-assistance" JSON: ' + e
-      );
+          'Failed to parse "amp-viewer-assistance" JSON: ' + e);
     });
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
@@ -77,23 +70,14 @@ export class AmpViewerAssistance {
    */
   actionHandler_(invocation) {
     const {method, args} = invocation;
-    if (method == 'updateActionState') {
-      // "updateActionState" requires a low-trust event.
-      if (invocation.satisfiesTrust(ActionTrust.LOW)) {
-        this.validateAndTransformUpdateArgs_(args)
-          .then(args => {
-            return this.viewer_./*OK*/ sendMessageAwaitResponse(method, args);
-          })
-          .catch(err => {
-            user().error(TAG, err.toString());
-          });
-      }
+    if (method == 'updateActionState' && !!args) {
+      this.viewer_./*OK*/sendMessageAwaitResponse(method, args).catch(error => {
+        user().error(TAG, error.toString());
+      });
     } else if (method == 'signIn') {
-      // "signIn" requires a high-trust event.
-      if (invocation.satisfiesTrust(ActionTrust.HIGH)) {
-        this.requestSignIn_();
-      }
+      this.requestSignIn_();
     }
+
     return null;
   }
 
@@ -108,31 +92,23 @@ export class AmpViewerAssistance {
       return this;
     }
     return this.viewer_.isTrustedViewer().then(isTrustedViewer => {
-      if (
-        !isTrustedViewer &&
-        !isExperimentOn(this.ampdoc_.win, 'amp-viewer-assistance-untrusted')
-      ) {
+      if (!isTrustedViewer &&
+         !isExperimentOn(this.ampdoc_.win, 'amp-viewer-assistance-untrusted')) {
         this.enabled_ = false;
-        user().error(
-          TAG,
-          'amp-viewer-assistance is currently only supported on trusted' +
-            ' viewers.'
-        );
+        user().error(TAG,
+            'amp-viewer-assistance is currently only supported on trusted'
+            + ' viewers.');
         return this;
       }
       this.action_.installActionHandler(
-        this.assistanceElement_,
-        this.actionHandler_.bind(this)
-      );
+          this.assistanceElement_, this.actionHandler_.bind(this),
+          ActionTrust.HIGH);
 
       this.getIdTokenPromise();
 
-      this.viewer_./*OK*/ sendMessage(
-        'viewerAssistanceConfig',
-        dict({
-          'config': this.configJson_,
-        })
-      );
+      this.viewer_./*OK*/sendMessage('viewerAssistanceConfig',dict({
+        'config': this.configJson_,
+      }));
       return this;
     });
   }
@@ -141,106 +117,35 @@ export class AmpViewerAssistance {
    * @return {!Promise<undefined>}
    */
   getIdTokenPromise() {
-    return this.viewer_
-      ./*OK*/ sendMessageAwaitResponse(
-        'getAccessTokenPassive',
+    return this.viewer_./*OK*/sendMessageAwaitResponse('getAccessTokenPassive',
         dict({
           // For now there's only 1 provider option, so we just hard code it
           'providers': [GSI_TOKEN_PROVIDER],
-        })
-      )
-      .then(token => {
-        this.setIdTokenStatus_(Boolean(!!token));
-        return token;
-      })
-      .catch(() => {
-        this.setIdTokenStatus_(/*available=*/ false);
-      });
+        }))
+        .then(token => {
+          this.setIdTokenStatus_(Boolean(!!token));
+          return token;
+        }).catch(() => {
+          this.setIdTokenStatus_(/*available=*/false);
+        });
   }
 
   /**
    * @private
    */
   requestSignIn_() {
-    this.viewer_
-      ./*OK*/ sendMessageAwaitResponse(
-        'requestSignIn',
-        dict({
-          'providers': [GSI_TOKEN_PROVIDER],
-        })
-      )
-      .then(token => {
-        user().info(TAG, 'Token: ' + token);
-        if (token) {
-          this.setIdTokenStatus_(/*available=*/ true);
-          this.action_.trigger(
-            this.assistanceElement_,
-            'signedIn',
-            null,
-            ActionTrust.HIGH
-          );
-        } else {
-          this.setIdTokenStatus_(/*available=*/ false);
-        }
-      });
-  }
-
-  /**
-   * Checks the arguments of 'updateActionState' to have either a valid
-   * 'update' or 'error' parameter.
-   * @private
-   * @param {?JsonObject} args
-   * @return {!Promise<!JsonObject>}
-   */
-  validateAndTransformUpdateArgs_(args) {
-    if (!args) {
-      return Promise.reject(
-        '"updateActionState" was called with no arguments!"'
-      );
-    }
-
-    const update = args['update'];
-    const error = args['error'];
-    if (error && update) {
-      return Promise.reject(
-        '"updateActionState" must have only one of' +
-          ' the parameters "error" and "update".'
-      );
-    } else if (error) {
-      // Must transform 'error' Response object
-      if (error && typeof error.text === 'function') {
-        return error.text().then(errorMessage => {
-          return dict({
-            'update': {
-              'actionStatus': 'FAILED_ACTION_STATUS',
-              'result': {
-                'code': error.status,
-                'message': errorMessage,
-              },
-            },
-          });
-        });
+    this.viewer_./*OK*/sendMessageAwaitResponse('requestSignIn', dict({
+      'providers': [GSI_TOKEN_PROVIDER],
+    })).then(token => {
+      user().info(TAG, 'Token: ' + token);
+      if (token) {
+        this.setIdTokenStatus_(/*available=*/true);
+        this.action_.trigger(
+            this.assistanceElement_, 'signedIn', null, ActionTrust.HIGH);
       } else {
-        return Promise.reject(
-          '"updateActionState" action "error" parameter' +
-            ' must contain a valid "response" object.'
-        );
+        this.setIdTokenStatus_(/*available=*/false);
       }
-    } else if (update) {
-      const actionStatus = update && update['actionStatus'];
-      if (!actionStatus || !ACTION_STATUS_WHITELIST.includes(actionStatus)) {
-        return Promise.reject(
-          '"updateActionState" action "update" parameter' +
-            ' must contain a valid "actionStatus" field.'
-        );
-      }
-      return Promise.resolve(args);
-    } else {
-      return Promise.reject(
-        '"updateActionState" action must have an' +
-          ' "update" or "error" parameter.'
-      );
-    }
+    });
   }
 
   /**
@@ -249,7 +154,8 @@ export class AmpViewerAssistance {
    * @param {boolean} available
    */
   setIdTokenStatus_(available) {
-    this.toggleTopClass_('amp-viewer-assistance-identity-available', available);
+    this.toggleTopClass_(
+        'amp-viewer-assistance-identity-available', available);
   }
 
   /**
@@ -272,6 +178,7 @@ export class AmpViewerAssistance {
     this.vsync_.mutate(() => {
       this.getRootElement_().classList.toggle(className, on);
     });
+
   }
 }
 

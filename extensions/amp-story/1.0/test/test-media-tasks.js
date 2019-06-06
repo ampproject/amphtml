@@ -18,7 +18,7 @@ import {
   MuteTask,
   PauseTask,
   PlayTask,
-  SetCurrentTimeTask,
+  RewindTask,
   SwapIntoDomTask,
   SwapOutOfDomTask,
   UnmuteTask,
@@ -40,9 +40,8 @@ describes.realWin('media-tasks', {}, () => {
     vsyncApi = {
       mutatePromise: () => {},
     };
-    sandbox.stub(vsyncApi, 'mutatePromise').resolves(callback => {
-      callback();
-    });
+    sandbox.stub(vsyncApi, 'mutatePromise').resolves(callback => {callback();});
+
   });
 
   describe('PauseTask', () => {
@@ -106,23 +105,14 @@ describes.realWin('media-tasks', {}, () => {
     });
   });
 
-  describe('SetCurrentTimeTask', () => {
-    it('should set currentTime to 0 by default', () => {
+  describe('RewindTask', () => {
+    it('should set currentTime to 0', () => {
       el.currentTime = 1;
       expect(el.currentTime).to.equal(1);
 
-      const task = new SetCurrentTimeTask();
+      const task = new RewindTask();
       task.execute(el);
       expect(el.currentTime).to.equal(0);
-    });
-
-    it('should set currentTime to the passed value', () => {
-      el.currentTime = 1;
-      expect(el.currentTime).to.equal(1);
-
-      const task = new SetCurrentTimeTask({currentTime: 2});
-      task.execute(el);
-      expect(el.currentTime).to.equal(2);
     });
   });
 

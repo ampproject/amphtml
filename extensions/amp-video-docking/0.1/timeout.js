@@ -16,6 +16,7 @@
 
 import {Services} from '../../../src/services';
 
+
 /** Timeout that can be postponed, repeated or cancelled. */
 export class Timeout {
   /**

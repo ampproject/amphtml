@@ -16,6 +16,7 @@
 
 import {Services} from '../../../src/services';
 
+
 /**
  * Strips everything but the domain from referrer string.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -82,6 +83,7 @@ function normalizedReferrers(ampdoc) {
   return referrers_(referrer);
 }
 
+
 /**
  * Adds CSS classes onto the HTML element.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -91,9 +93,11 @@ function addDynamicCssClasses(ampdoc, classes) {
   if (ampdoc.isBodyAvailable()) {
     addCssClassesToBody(ampdoc.getBody(), classes);
   } else {
-    ampdoc.waitForBodyOpen().then(body => addCssClassesToBody(body, classes));
+    ampdoc.whenBodyAvailable().then(
+        body => addCssClassesToBody(body, classes));
   }
 }
+
 
 /**
  * @param {!Element} body
@@ -105,6 +109,7 @@ function addCssClassesToBody(body, classes) {
     classList.add(classes[i]);
   }
 }
+
 
 /**
  * Adds dynamic css classes based on the referrer, with a separate class for
@@ -122,6 +127,7 @@ function addReferrerClasses(ampdoc) {
   });
 }
 
+
 /**
  * Adds a dynamic css class `amp-viewer` if this document is inside a viewer.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -135,6 +141,7 @@ function addViewerClass(ampdoc) {
   }
 }
 
+
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
@@ -143,27 +150,13 @@ function addRuntimeClasses(ampdoc) {
   addViewerClass(ampdoc);
 }
 
-/** @implements {../../../src/render-delaying-services.RenderDelayingService} */
-class AmpDynamicCssClasses {
-  /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   */
-  constructor(ampdoc) {
-    addRuntimeClasses(ampdoc);
-  }
-
-  /**
-   * Function to return a promise for when
-   * it is finished delaying render, and is ready.
-   * Implemented from RenderDelayingService
-   * @return {!Promise}
-   */
-  whenReady() {
-    return Promise.resolve();
-  }
-}
 
 // Register doc-service factory.
 AMP.extension('amp-dynamic-css-classes', '0.1', AMP => {
-  AMP.registerServiceForDoc('amp-dynamic-css-classes', AmpDynamicCssClasses);
+  AMP.registerServiceForDoc(
+      'amp-dynamic-css-classes',
+      function(ampdoc) {
+        addRuntimeClasses(ampdoc);
+        return {};
+      });
 });

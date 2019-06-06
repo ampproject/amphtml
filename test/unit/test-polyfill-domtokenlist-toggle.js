@@ -17,103 +17,96 @@
 import {install} from '../../src/polyfills/domtokenlist-toggle';
 import {toArray} from '../../src/types';
 
-describes.fakeWin(
-  'DOMTokenList.toggle on non-IE',
-  {
-    win: {
-      navigator: {
-        userAgent: 'Chrome',
-      },
+
+describes.fakeWin('DOMTokenList.toggle on non-IE', {
+  win: {
+    navigator: {
+      userAgent: 'Chrome',
     },
   },
-  env => {
-    let sandbox;
-    let originalToggle;
-    let element;
+}, env => {
 
-    beforeEach(() => {
-      originalToggle = env.win.DOMTokenList.prototype.toggle;
-      sandbox = sinon.sandbox;
+  let sandbox;
+  let originalToggle;
+  let element;
 
-      element = env.win.document.createElement('div');
-      env.win.document.body.appendChild(element);
-    });
+  beforeEach(() => {
+    originalToggle = env.win.DOMTokenList.prototype.toggle;
+    sandbox = sinon.sandbox;
 
-    afterEach(() => {
-      env.win.DOMTokenList.prototype.toggle = originalToggle;
-      if (element.parentNode) {
-        element.parentNode.removeChild(element);
-      }
-      sandbox.restore();
-    });
+    element = env.win.document.createElement('div');
+    env.win.document.body.appendChild(element);
+  });
 
-    it('should NOT override in non-IE browsers', () => {
-      env.win.DOMTokenList = window.DOMTokenList;
-      install(env.win);
-      const newToggle = env.win.DOMTokenList.prototype.toggle;
-      expect(newToggle).to.equal(originalToggle);
-    });
-  }
-);
+  afterEach(() => {
+    env.win.DOMTokenList.prototype.toggle = originalToggle;
+    if (element.parentNode) {
+      element.parentNode.removeChild(element);
+    }
+    sandbox.restore();
+  });
 
-describes.fakeWin(
-  'DOMTokenList.toggle On IE',
-  {
-    win: {
-      navigator: {
-        userAgent: 'MSIE',
-      },
+  it('should NOT override in non-IE browsers', () => {
+    env.win.DOMTokenList = window.DOMTokenList;
+    install(env.win);
+    const newToggle = env.win.DOMTokenList.prototype.toggle;
+    expect(newToggle).to.equal(originalToggle);
+  });
+
+});
+
+describes.fakeWin('DOMTokenList.toggle On IE', {
+  win: {
+    navigator: {
+      userAgent: 'MSIE',
     },
   },
-  env => {
-    let sandbox;
-    let originalToggle;
-    let element;
+}, env => {
 
-    beforeEach(() => {
-      originalToggle = env.win.DOMTokenList.prototype.toggle;
-      sandbox = sinon.sandbox;
+  let sandbox;
+  let originalToggle;
+  let element;
 
-      element = env.win.document.createElement('div');
-      env.win.document.body.appendChild(element);
-    });
+  beforeEach(() => {
+    originalToggle = env.win.DOMTokenList.prototype.toggle;
+    sandbox = sinon.sandbox;
 
-    afterEach(() => {
-      env.win.DOMTokenList.prototype.toggle = originalToggle;
-      if (element.parentNode) {
-        element.parentNode.removeChild(element);
-      }
-      sandbox.restore();
-    });
+    element = env.win.document.createElement('div');
+    env.win.document.body.appendChild(element);
+  });
 
-    it('should polyfill DOMTokenList.toggle API', () => {
-      env.win.DOMTokenList = window.DOMTokenList;
-      install(env.win);
-      const polyfillToggle = env.win.DOMTokenList.prototype.toggle;
+  afterEach(() => {
+    env.win.DOMTokenList.prototype.toggle = originalToggle;
+    if (element.parentNode) {
+      element.parentNode.removeChild(element);
+    }
+    sandbox.restore();
+  });
 
-      expect(polyfillToggle).to.be.ok;
-      expect(polyfillToggle).to.not.equal(originalToggle);
+  it('should polyfill DOMTokenList.toggle API', () => {
+    env.win.DOMTokenList = window.DOMTokenList;
+    install(env.win);
+    const polyfillToggle = env.win.DOMTokenList.prototype.toggle;
 
-      expect(toArray(element.classList)).to.not.contain('first');
-      expect(polyfillToggle.call(element.classList, 'first')).to.be.true;
-      expect(toArray(element.classList)).to.contain('first');
-      expect(polyfillToggle.call(element.classList, 'first')).to.be.false;
-      expect(toArray(element.classList)).to.not.contain('first');
-      expect(polyfillToggle.call(element.classList, 'first')).to.be.true;
-      expect(toArray(element.classList)).to.contain('first');
-      expect(polyfillToggle.call(element.classList, 'first', true)).to.be.true;
-      expect(toArray(element.classList)).to.contain('first');
-      expect(polyfillToggle.call(element.classList, 'first', true)).to.be.true;
-      expect(toArray(element.classList)).to.contain('first');
-      expect(polyfillToggle.call(element.classList, 'first', false)).to.be
-        .false;
-      expect(toArray(element.classList)).to.not.contain('first');
-      expect(polyfillToggle.call(element.classList, 'first', false)).to.be
-        .false;
-      expect(toArray(element.classList)).to.not.contain('first');
-      expect(polyfillToggle.call(element.classList, 'first', false)).to.be
-        .false;
-      expect(toArray(element.classList)).to.not.contain('first');
-    });
-  }
-);
+    expect(polyfillToggle).to.be.ok;
+    expect(polyfillToggle).to.not.equal(originalToggle);
+
+    expect(toArray(element.classList)).to.not.contain('first');
+    expect(polyfillToggle.call(element.classList, 'first')).to.be.true;
+    expect(toArray(element.classList)).to.contain('first');
+    expect(polyfillToggle.call(element.classList, 'first')).to.be.false;
+    expect(toArray(element.classList)).to.not.contain('first');
+    expect(polyfillToggle.call(element.classList, 'first')).to.be.true;
+    expect(toArray(element.classList)).to.contain('first');
+    expect(polyfillToggle.call(element.classList, 'first', true)).to.be.true;
+    expect(toArray(element.classList)).to.contain('first');
+    expect(polyfillToggle.call(element.classList, 'first', true)).to.be.true;
+    expect(toArray(element.classList)).to.contain('first');
+    expect(polyfillToggle.call(element.classList, 'first', false)).to.be.false;
+    expect(toArray(element.classList)).to.not.contain('first');
+    expect(polyfillToggle.call(element.classList, 'first', false)).to.be.false;
+    expect(toArray(element.classList)).to.not.contain('first');
+    expect(polyfillToggle.call(element.classList, 'first', false)).to.be.false;
+    expect(toArray(element.classList)).to.not.contain('first');
+  });
+});

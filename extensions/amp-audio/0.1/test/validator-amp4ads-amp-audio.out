@@ -41,7 +41,7 @@ FAIL
 |    <!-- Invalid: autoplay present. -->
 |    <amp-audio width="400" height="300" autoplay src="https://yourhost.com/audios/myaudio.mp3">
 >>   ^~~~~~~~~
-amp-audio/0.1/test/validator-amp4ads-amp-audio.html:41:2 The attribute 'autoplay' may not appear in tag 'amp-audio (A4A)'. (see https://amp.dev/documentation/components/amp-audio) [DISALLOWED_HTML]
+amp-audio/0.1/test/validator-amp4ads-amp-audio.html:41:2 The attribute 'autoplay' may not appear in tag 'amp-audio (A4A)'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
 |      <div fallback>
 |        <p>Your browser doesn’t support HTML5 audio</p>
 |      </div>

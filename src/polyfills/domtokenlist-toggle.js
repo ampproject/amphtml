@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 /**
  * Polyfill for `DOMTokenList.prototype.toggle(token, opt_force)` method. This
  * is specially important because IE does not support `opt_force` attribute. See
@@ -34,6 +35,7 @@ function domTokenListTogglePolyfill(token, opt_force) {
   }
 }
 
+
 /**
  * Polyfills `DOMTokenList.prototype.toggle` API in IE.
  * @param {!Window} win
@@ -48,6 +50,7 @@ export function install(win) {
     });
   }
 }
+
 
 /**
  * Whether the current browser is a IE browser.

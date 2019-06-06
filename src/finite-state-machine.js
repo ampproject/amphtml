@@ -20,6 +20,7 @@ import {devAssert} from './log';
  * @template STATE
  */
 export class FiniteStateMachine {
+
   /**
    * Constructs a FSM using the bits defined in initialState as changeable
    * states.
@@ -50,8 +51,8 @@ export class FiniteStateMachine {
   addTransition(oldState, newState, callback) {
     const transition = this.statesToTransition_(oldState, newState);
     devAssert(
-      !this.transitions_[transition],
-      'cannot define a duplicate transition callback'
+        !this.transitions_[transition],
+        'cannot define a duplicate transition callback'
     );
     this.transitions_[transition] = callback;
   }

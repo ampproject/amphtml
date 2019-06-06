@@ -21,6 +21,7 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function postquare(global, data) {
+
   validateData(data, ['widgetids']);
 
   global._postquare = global._postquare || {

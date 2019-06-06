@@ -20,6 +20,7 @@ import {extensionScriptsInNode} from '../element-service';
 import {reportError} from '../error';
 import {userAssert} from '../log';
 
+
 /**
  * @param {!Window} win
  * @return {!Object<string, function(new:../base-element.BaseElement, !Element)>}
@@ -30,6 +31,7 @@ function getExtendedElements(win) {
   }
   return win.ampExtendedElements;
 }
+
 
 /**
  * Registers an element. Upgrades it if has previously been stubbed.
@@ -47,13 +49,9 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     // Already registered this instance.
     return;
   }
-  userAssert(
-    knownElements[name] == ElementStub,
-    '%s is already registered. The script tag for ' +
-      '%s is likely included twice in the page.',
-    name,
-    name
-  );
+  userAssert(knownElements[name] == ElementStub,
+      '%s is already registered. The script tag for ' +
+      '%s is likely included twice in the page.', name, name);
   knownElements[name] = toClass;
   for (let i = 0; i < stubbedElements.length; i++) {
     const stub = stubbedElements[i];
@@ -66,16 +64,15 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
     const {element} = stub;
-    if (
-      element.tagName.toLowerCase() == name &&
-      element.ownerDocument.defaultView == win
-    ) {
+    if (element.tagName.toLowerCase() == name &&
+            element.ownerDocument.defaultView == win) {
       tryUpgradeElementNoInline(element, toClass);
       // Remove element from array.
       stubbedElements.splice(i--, 1);
     }
   }
 }
+
 
 /**
  * This method should not be inlined to prevent TryCatch deoptimization.
@@ -93,6 +90,7 @@ function tryUpgradeElementNoInline(element, toClass) {
   }
 }
 
+
 /**
  * Stub extended elements missing an implementation. It can be called multiple
  * times and on partial document in order to start stubbing as early as
@@ -107,6 +105,7 @@ export function stubElementsForDoc(ampdoc) {
   });
 }
 
+
 /**
  * Stub element if not yet known.
  * @param {!Window} win
@@ -118,6 +117,7 @@ export function stubElementIfNotKnown(win, name) {
     registerElement(win, name, ElementStub);
   }
 }
+
 
 /**
  * Copies the specified element to child window (friendly iframe). This way
@@ -131,6 +131,7 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
   const toClass = getExtendedElements(parentWin)[name];
   registerElement(childWin, name, toClass || ElementStub);
 }
+
 
 /**
  * Registers a new custom element with its implementation class.
@@ -153,6 +154,7 @@ export function registerElement(win, name, implementationClass) {
   }
 }
 
+
 /**
  * In order to provide better error messages we only allow to retrieve
  * services from other elements if those elements are loaded in the page.
@@ -168,6 +170,7 @@ export function markElementScheduledForTesting(win, elementName) {
   }
 }
 
+
 /**
  * Resets our scheduled elements.
  * @param {!Window} win
@@ -179,6 +182,7 @@ export function resetScheduledElementForTesting(win, elementName) {
     delete win.ampExtendedElements[elementName];
   }
 }
+
 
 /**
  * Returns a currently registered element class.

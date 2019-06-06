@@ -33,7 +33,7 @@ tags: {  # <amp-gist>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-gist"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-gist"
   amp_layout: {
     supported_layouts: FIXED_HEIGHT
   }

@@ -13,42 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  LocalizedStringBundleDef,
-  LocalizedStringId,
-} from '../../../../src/localized-strings';
+import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+
 
 /**
- * Localized string bundle used for tr strings.
+ * Localized string bundle used for Turkish strings.
  * @const {!LocalizedStringBundleDef}
  */
-const strings = {
-  [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
-    string: 'Ses kapalı',
-  },
-  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
-    string: 'Bu sayfada ses yok',
-  },
-  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
-    string: 'Ses açık',
-  },
-  [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
-    string: 'Okuyabileceğiniz diğer makaleler',
-  },
-  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
-    string: 'Veri gizlilik ayarlarını değiştir',
-  },
-  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
-    string: 'Gizlilik ayarları',
-  },
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
-    string: 'Kabul et',
+    string: 'Kabul ediyorum',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
-    string: 'Reddet',
-  },
-  [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
-    string: 'Yine de Devam Et',
+    string: 'Reddediyorum',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
     string: 'Orijinal alanda görüntüle:',
@@ -57,22 +34,16 @@ const strings = {
     string: 'AMP sonuçları hakkında daha fazla bilgi',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: "Sonraki'ye dokunun",
+    string: 'İleri düğmesine dokunun',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: "Geri'ye dokunun",
-  },
-  [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Yukarı kaydır',
-  },
-  [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
-    string: 'Videoyu oynat',
+    string: 'Geri düğmesine dokunun',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'Bağlantı panoya kopyalanamadı :(',
+    string: 'Link panoya kopyalanamadı :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Bağlantı kopyalandı!',
+    string: 'Link kopyalandı :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
     string: 'E-posta',
@@ -83,11 +54,8 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
-  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
-    string: 'Line',
-  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Bağlantıyı Al',
+    string: 'Linki kopyala',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
@@ -98,6 +66,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS]: {
     string: 'SMS',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM]: {
+    string: 'Daha',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR]: {
     string: 'Tumblr',
   },
@@ -107,31 +78,17 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
     string: 'WhatsApp',
   },
-  [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
-    string: "Tweet'i genişlet",
-  },
-  [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Bu deneyimi görebilmek için pencerenizin yüksekliğini artırın',
-  },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string:
-      'Bu deneyimi görebilmek için pencerenizin hem yüksekliğini hem ' +
-      'de genişliğini artırın',
-  },
-  [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Bu deneyimi görebilmek için pencerenizin genişliğini artırın',
+    fallback: 'Bu deneyimi görebilmek için pencerenizi genişletiniz.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string:
-      'Bu içeriği görebilmek için amp hikayesi deneyimini ' +
-      'etkinleştirmeniz gerekir.',
+    string: 'Bu görünümü açabilmek için amp-story deneyini ' +
+        'etkinleştirmelisiniz.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'Sayfa en iyi dikey modda görüntülenir',
+    string: 'Bu sayfa portre modunda en iyi görüntülenir.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Maalesef tarayıcınız bu deneyimi desteklemiyor gibi görünüyor',
+    string: 'Üzgünüz, tarayıcınız bu deneyimi desteklemiyor gibi görünüyor.',
   },
-};
-
-export default strings;
+});

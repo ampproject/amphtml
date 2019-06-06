@@ -45,15 +45,11 @@ tags: {
         "|date-yyyy-mm-dd"
         ")"
   }
-  attrs: {
-    name: "mask-trim-zeros"
-    value_regex: "\\d+"
-  }
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
   attrs: { name: "[type]" }
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
 
 tags: {
@@ -70,7 +66,7 @@ tags: {
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
 
 tags: {
@@ -87,7 +83,7 @@ tags: {
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
 
 tags: {
@@ -104,7 +100,7 @@ tags: {
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
 
 tags: {
@@ -121,7 +117,7 @@ tags: {
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
 
 tags: {
@@ -138,7 +134,7 @@ tags: {
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }
 
 attr_lists: {

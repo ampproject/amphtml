@@ -58,18 +58,18 @@ FAIL
 |    <!-- Invalid because missing `height` and `width` attributes for `layout="fixed"` -->
 |    <amp-bodymovin-animation layout="fixed" src="https://nainar.github.io/loader.json">
 >>   ^~~~~~~~~
-amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:58:2 The mandatory attribute 'height' is missing in tag 'amp-bodymovin-animation'. (see https://amp.dev/documentation/components/amp-bodymovin-animation) [AMP_LAYOUT_PROBLEM]
+amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:58:2 The mandatory attribute 'height' is missing in tag 'amp-bodymovin-animation'. (see https://www.ampproject.org/docs/reference/components/amp-bodymovin-animation) [AMP_LAYOUT_PROBLEM]
 |    </amp-bodymovin-animation>
 |
 |    <!-- Invalid becuase `loop`is set to an invalid value. -->
 |    <amp-bodymovin-animation layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json" loop='nope'>
 >>   ^~~~~~~~~
-amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:62:2 The attribute 'loop' in tag 'amp-bodymovin-animation' is set to the invalid value 'nope'. (see https://amp.dev/documentation/components/amp-bodymovin-animation) [DISALLOWED_HTML]
+amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:62:2 The attribute 'loop' in tag 'amp-bodymovin-animation' is set to the invalid value 'nope'. (see https://www.ampproject.org/docs/reference/components/amp-bodymovin-animation) [DISALLOWED_HTML]
 |    </amp-bodymovin-animation>
 |
 |    <!-- Invalid becuase `autoplay`attribute isn't allowed on `<amp-bodymovin-animation>`. -->
 |    <amp-bodymovin-animation layout="responsive" width="200" height="200" src="https://nainar.github.io/loader.json" loop='true' autoplay>
 >>   ^~~~~~~~~
-amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:66:2 The attribute 'autoplay' may not appear in tag 'amp-bodymovin-animation'. (see https://amp.dev/documentation/components/amp-bodymovin-animation) [DISALLOWED_HTML]
+amp-bodymovin-animation/0.1/test/validator-amp-bodymovin-animation.html:66:2 The attribute 'autoplay' may not appear in tag 'amp-bodymovin-animation'. (see https://www.ampproject.org/docs/reference/components/amp-bodymovin-animation) [DISALLOWED_HTML]
 |    </amp-bodymovin-animation>
 |  </html>

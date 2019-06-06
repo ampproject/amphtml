@@ -40,14 +40,13 @@ const GMOSSP_BASE_A4A_URL_ = 'https://amp.sp.gmossp-sp.jp/_a4a/';
  * the cloudflare signing key.
  */
 export class AmpAdNetworkGmosspImpl extends AmpA4A {
+
   /** @override */
   isValidElement() {
     const src = this.element.getAttribute('src') || '';
-    return (
-      this.isAmpAdElement() &&
-      (startsWith(src, GMOSSP_BASE_URL_) ||
-        startsWith(src, GMOSSP_BASE_A4A_URL_))
-    );
+    return this.isAmpAdElement() &&
+        (startsWith(src, GMOSSP_BASE_URL_) ||
+         startsWith(src, GMOSSP_BASE_A4A_URL_));
   }
 
   /** @override */
@@ -57,12 +56,14 @@ export class AmpAdNetworkGmosspImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    return this.element
-      .getAttribute('src')
-      .replace(GMOSSP_BASE_URL_, GMOSSP_BASE_A4A_URL_);
+    return this.element.getAttribute('src').replace(GMOSSP_BASE_URL_,
+        GMOSSP_BASE_A4A_URL_);
   }
+
 }
 
+
 AMP.extension('amp-ad-network-gmossp-impl', '0.1', AMP => {
-  AMP.registerElement('amp-ad-network-gmossp-impl', AmpAdNetworkGmosspImpl);
+  AMP.registerElement('amp-ad-network-gmossp-impl',
+      AmpAdNetworkGmosspImpl);
 });

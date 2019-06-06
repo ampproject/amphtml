@@ -15,8 +15,12 @@
  */
 
 import * as lolex from 'lolex';
-import {PositionObserver} from '../../src/service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '../../src/service/position-observer/position-observer-worker';
+import {
+  PositionObserver,
+} from '../../src/service/position-observer/position-observer-impl';
+import {
+  PositionObserverFidelity,
+} from '../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../src/services';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {macroTask} from '../../testing/yield';
@@ -92,7 +96,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
           return Promise.resolve(layoutRectLtwh(0, top, 0, 0));
         });
       });
-      it('should update new position with scroll event', function*() {
+      it('should update new position with scroll event', function* () {
         const spy = sandbox.spy();
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
         clock.tick(2);
@@ -118,7 +122,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         expect(spy).to.not.be.called;
       });
 
-      it('should not update if element position does not change', function*() {
+      it('should not update if element position does not change', function* () {
         const spy = sandbox.spy();
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
         yield macroTask();
@@ -138,7 +142,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         });
       });
 
-      it('overlap with viewport', function*() {
+      it('overlap with viewport', function* () {
         const viewport = Services.viewportForDoc(ampdoc);
         const sizes = viewport.getSize();
         const spy = sandbox.spy();
@@ -170,7 +174,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         });
       });
 
-      it('out of viewport', function*() {
+      it('out of viewport', function* () {
         setStyles(elem, {
           'position': 'absolute',
           'top': '1px',

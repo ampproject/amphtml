@@ -24,7 +24,10 @@ import {
 import {dev, user, userAssert} from '../log';
 import {dict} from '../utils/object';
 import {escapeCssSelectorIdent} from '../css';
-import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
+import {
+  getExtraParamsUrl,
+  shouldAppendExtraParams,
+} from '../impression';
 import {getMode} from '../mode';
 import {
   installServiceInEmbedScope,
@@ -62,11 +65,10 @@ export const Priority = {
  */
 export function installGlobalNavigationHandlerForDoc(ampdoc) {
   registerServiceBuilderForDoc(
-    ampdoc,
-    TAG,
-    Navigation,
-    /* opt_instantiate */ true
-  );
+      ampdoc,
+      TAG,
+      Navigation,
+      /* opt_instantiate */ true);
 }
 
 /**
@@ -113,7 +115,7 @@ export class Navigation {
 
     /** @private @const {boolean} */
     this.isIframed_ =
-      isIframed(this.ampdoc.win) && this.viewer_.isOvertakeHistory();
+        isIframed(this.ampdoc.win) && this.viewer_.isOvertakeHistory();
 
     /** @private @const {boolean} */
     this.isEmbed_ = this.rootNode_ != this.ampdoc.getRootNode();
@@ -125,11 +127,11 @@ export class Navigation {
      * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
      * @private @const {!Element|!ShadowRoot}
      */
-    this.serviceContext_ =
-      /** @type {!Element|!ShadowRoot} */ (this.rootNode_.nodeType ==
-      Node.DOCUMENT_NODE
+    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (
+      (this.rootNode_.nodeType == Node.DOCUMENT_NODE)
         ? this.rootNode_.documentElement
-        : this.rootNode_);
+        : this.rootNode_
+    );
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
@@ -153,13 +155,6 @@ export class Navigation {
      * @const
      */
     this.anchorMutators_ = new PriorityQueue();
-
-    /**
-     * @type {!PriorityQueue<function(string)>}
-     * @private
-     * @const
-     */
-    this.navigateToMutators_ = new PriorityQueue();
   }
 
   /**
@@ -169,24 +164,14 @@ export class Navigation {
    * @param {!Window} win
    */
   static installAnchorClickInterceptor(ampdoc, win) {
-    win.document.documentElement.addEventListener(
-      'click',
-      maybeExpandUrlParams.bind(null, ampdoc),
-      /* capture */ true
-    );
+    win.document.documentElement.addEventListener('click',
+        maybeExpandUrlParams.bind(null, ampdoc), /* capture */ true);
   }
 
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
+  /** @override @nocollapse */
   static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      TAG,
-      new Navigation(ampdoc, embedWin.document)
-    );
+    installServiceInEmbedScope(embedWin, TAG,
+        new Navigation(ampdoc, embedWin.document));
   }
 
   /**
@@ -196,9 +181,7 @@ export class Navigation {
     if (this.boundHandle_) {
       this.rootNode_.removeEventListener(EVENT_TYPE_CLICK, this.boundHandle_);
       this.rootNode_.removeEventListener(
-        EVENT_TYPE_CONTEXT_MENU,
-        this.boundHandle_
-      );
+          EVENT_TYPE_CONTEXT_MENU, this.boundHandle_);
     }
   }
 
@@ -244,12 +227,7 @@ export class Navigation {
    * }=} opt_options
    */
   navigateTo(
-    win,
-    url,
-    opt_requestedBy,
-    {target = '_top', opener = false} = {}
-  ) {
-    url = this.applyNavigateToMutators_(url);
+    win, url, opt_requestedBy, {target = '_top', opener = false} = {}) {
     const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
@@ -257,9 +235,7 @@ export class Navigation {
     }
 
     userAssert(
-      VALID_TARGETS.includes(target),
-      `Target '${target}' not supported.`
-    );
+        VALID_TARGETS.includes(target), `Target '${target}' not supported.`);
 
     // If we have a target of "_blank", we will want to open a new window. A
     // target of "_top" should behave like it would on an anchor tag and
@@ -298,13 +274,10 @@ export class Navigation {
    */
   navigateToAmpUrl(url, requestedBy) {
     if (this.viewer_.hasCapability('a2a')) {
-      this.viewer_.sendMessage(
-        'a2aNavigate',
-        dict({
-          'url': url,
-          'requestedBy': requestedBy,
-        })
-      );
+      this.viewer_.sendMessage('a2aNavigate', dict({
+        'url': url,
+        'requestedBy': requestedBy,
+      }));
       return true;
     }
     return false;
@@ -316,13 +289,9 @@ export class Navigation {
    */
   queryA2AFeatures_() {
     const meta = this.rootNode_.querySelector(
-      'meta[name="amp-to-amp-navigation"]'
-    );
+        'meta[name="amp-to-amp-navigation"]');
     if (meta && meta.hasAttribute('content')) {
-      return meta
-        .getAttribute('content')
-        .split(',')
-        .map(s => s.trim());
+      return meta.getAttribute('content').split(',').map(s => s.trim());
     }
     return [];
   }
@@ -374,7 +343,7 @@ export class Navigation {
       return;
     }
 
-    this.applyAnchorMutators_(target, e);
+    this.anchorMutatorHandlers_(target, e);
     location = this.parseUrl_(target.href);
 
     // Finally, handle normal click-navigation behavior.
@@ -395,30 +364,18 @@ export class Navigation {
     // TODO(alabiaga): investigate fix for handling A2A and custom link
     // protocols.
     this.expandVarsForAnchor_(target);
-    this.applyAnchorMutators_(target, e);
+    this.anchorMutatorHandlers_(target, e);
   }
 
   /**
-   * Apply anchor transformations.
+   * Handle anchor transformations.
    * @param {!Element} target
    * @param {!Event} e
    */
-  applyAnchorMutators_(target, e) {
+  anchorMutatorHandlers_(target, e) {
     this.anchorMutators_.forEach(anchorMutator => {
       anchorMutator(target, e);
     });
-  }
-
-  /**
-   * Apply URL transformations for AMP.navigateTo.
-   * @param {string} url
-   * @return {string}
-   */
-  applyNavigateToMutators_(url) {
-    this.navigateToMutators_.forEach(mutator => {
-      url = mutator(url);
-    });
-    return url;
   }
 
   /**
@@ -494,10 +451,7 @@ export class Navigation {
     if (!target.hasAttribute('rel')) {
       return false;
     }
-    const relations = target
-      .getAttribute('rel')
-      .split(' ')
-      .map(s => s.trim());
+    const relations = target.getAttribute('rel').split(' ').map(s => s.trim());
     if (!relations.includes('amphtml')) {
       return false;
     }
@@ -509,6 +463,7 @@ export class Navigation {
     return false;
   }
 
+
   /**
    * Handles clicking on a link with hash navigation.
    * @param {!Event} e
@@ -519,8 +474,9 @@ export class Navigation {
   handleNavClick_(e, target, tgtLoc) {
     // In test mode, we're not able to properly fix the anchor tag's base URL.
     // So, we have to use the (mocked) window's location instead.
-    const baseHref =
-      getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
+    const baseHref = getMode().test && !this.isEmbed_
+      ? this.ampdoc.win.location.href
+      : '';
     const curLoc = this.parseUrl_(baseHref);
     const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
     const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
@@ -549,9 +505,7 @@ export class Navigation {
         const internalTargetElmId = tgtLoc.hash.substring(1);
         const internalElm = this.ampdoc.getElementById(internalTargetElmId);
         if (internalElm) {
-          if (
-            !/^(?:a|select|input|button|textarea)$/i.test(internalElm.tagName)
-          ) {
+          if (!(/^(?:a|select|input|button|textarea)$/i.test(internalElm.tagName))) {
             internalElm.tabIndex = -1;
           }
           tryFocus(internalElm);
@@ -576,11 +530,10 @@ export class Navigation {
     let elem = null;
     if (hash) {
       const escapedHash = escapeCssSelectorIdent(hash);
-      elem =
-        this.rootNode_.getElementById(hash) ||
-        // Fallback to anchor[name] if element with id is not found.
-        // Linking to an anchor element with name is obsolete in html5.
-        this.rootNode_./*OK*/ querySelector(`a[name="${escapedHash}"]`);
+      elem = (this.rootNode_.getElementById(hash) ||
+          // Fallback to anchor[name] if element with id is not found.
+          // Linking to an anchor element with name is obsolete in html5.
+          this.rootNode_./*OK*/querySelector(`a[name="${escapedHash}"]`));
     }
 
     // If possible do update the URL with the hash. As explained above
@@ -604,14 +557,6 @@ export class Navigation {
   }
 
   /**
-   * @param {function(string)} callback
-   * @param {number} priority
-   */
-  registerNavigateToMutator(callback, priority) {
-    this.navigateToMutators_.enqueue(callback, priority);
-  }
-
-  /**
    * Scrolls the page to the given element.
    * @param {?Element} elem
    * @param {string} hash
@@ -628,16 +573,12 @@ export class Navigation {
       // failing to calculate the new jumped offset. Without the first call
       // there will be a visual jump due to browser scroll. See
       // https://github.com/ampproject/amphtml/issues/5334 for more details.
-      this.viewport_./*OK*/ scrollIntoView(elem);
-      Services.timerFor(this.ampdoc.win).delay(
-        () => this.viewport_./*OK*/ scrollIntoView(dev().assertElement(elem)),
-        1
-      );
+      this.viewport_./*OK*/scrollIntoView(elem);
+      Services.timerFor(this.ampdoc.win).delay(() =>
+        this.viewport_./*OK*/scrollIntoView(dev().assertElement(elem)), 1);
     } else {
-      dev().warn(
-        TAG,
-        `failed to find element with id=${hash} or a[name=${hash}]`
-      );
+      dev().warn(TAG,
+          `failed to find element with id=${hash} or a[name=${hash}]`);
     }
   }
 
@@ -659,16 +600,14 @@ export class Navigation {
  * @param {!Event} e
  */
 function maybeExpandUrlParams(ampdoc, e) {
-  const target = closestAncestorElementBySelector(
-    dev().assertElement(e.target),
-    'A'
-  );
+  const target =
+    closestAncestorElementBySelector(dev().assertElement(e.target), 'A');
   if (!target || !target.href) {
     // Not a click on a link.
     return;
   }
   const hrefToExpand =
-    target.getAttribute(ORIG_HREF_ATTRIBUTE) || target.getAttribute('href');
+      target.getAttribute(ORIG_HREF_ATTRIBUTE) || target.getAttribute('href');
   if (!hrefToExpand) {
     return;
   }
@@ -681,17 +620,13 @@ function maybeExpandUrlParams(ampdoc, e) {
     },
   };
   const newHref = Services.urlReplacementsForDoc(target).expandUrlSync(
-    hrefToExpand,
-    vars,
-    undefined,
-    /* opt_whitelist */ {
-      // For now we only allow to replace the click location vars
-      // and nothing else.
-      // NOTE: Addition to this whitelist requires additional review.
-      'CLICK_X': true,
-      'CLICK_Y': true,
-    }
-  );
+      hrefToExpand, vars, undefined, /* opt_whitelist */ {
+        // For now we only allow to replace the click location vars
+        // and nothing else.
+        // NOTE: Addition to this whitelist requires additional review.
+        'CLICK_X': true,
+        'CLICK_Y': true,
+      });
   if (newHref != hrefToExpand) {
     // Store original value so that later clicks can be processed with
     // freshest values.

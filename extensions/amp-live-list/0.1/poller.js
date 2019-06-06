@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+
 import {Services} from '../../../src/services';
-import {
-  exponentialBackoffClock,
-  getJitter,
-} from '../../../src/exponential-backoff';
+import {exponentialBackoffClock, getJitter}
+  from '../../../src/exponential-backoff';
+
 
 /**
  * Poller with backoff functionality.
  */
 export class Poller {
+
   /**
    * Creates an instance of Poller.
    * @param {!Window} win
@@ -126,31 +127,28 @@ export class Poller {
 
     const work = () => {
       this.lastWorkPromise_ = this.work_()
-        .then(() => {
-          if (this.backoffClock_) {
-            this.backoffClock_ = null;
-          }
-          this.poll_();
-        })
-        .catch(err => {
-          if (err.retriable) {
-            if (!this.backoffClock_) {
-              this.backoffClock_ = exponentialBackoffClock();
+          .then(() => {
+            if (this.backoffClock_) {
+              this.backoffClock_ = null;
             }
             this.poll_();
-          } else {
-            throw err;
-          }
-        });
+          }).catch(err => {
+            if (err.retriable) {
+              if (!this.backoffClock_) {
+                this.backoffClock_ = exponentialBackoffClock();
+              }
+              this.poll_();
+            } else {
+              throw err;
+            }
+          });
     };
 
     if (opt_immediate) {
       work();
     } else {
-      this.lastTimeoutId_ = Services.timerFor(this.win).delay(
-        work,
-        this.getTimeout_()
-      );
+      this.lastTimeoutId_ =
+          Services.timerFor(this.win).delay(work, this.getTimeout_());
     }
   }
 }

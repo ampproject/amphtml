@@ -16,7 +16,7 @@
 
 import {AmpStoryHint} from '../amp-story-hint';
 import {AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '../../../../src/service/localization';
+import {LocalizationService} from '../localization';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -36,12 +36,10 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
 
-    sandbox
-      .stub(Services, 'vsyncFor')
-      .callsFake(() => ({mutate: task => task()}));
-    sandbox
-      .stub(Services, 'timerFor')
-      .callsFake(() => ({delay: NOOP, cancel: NOOP}));
+    sandbox.stub(Services, 'vsyncFor').callsFake(
+        () => ({mutate: task => task()}));
+    sandbox.stub(Services, 'timerFor').callsFake(
+        () => ({delay: NOOP, cancel: NOOP}));
 
     host = win.document.createElement('div');
     ampStoryHint = new AmpStoryHint(win, host);
@@ -52,9 +50,8 @@ describes.fakeWin('amp-story hint layer', {}, env => {
   });
 
   it('should be able to show navigation help overlay', () => {
-    const hideAfterTimeoutStub = sandbox
-      .stub(ampStoryHint, 'hideAfterTimeout')
-      .callsFake(NOOP);
+    const hideAfterTimeoutStub =
+        sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
 
     ampStoryHint.showNavigationOverlay();
 
@@ -67,9 +64,8 @@ describes.fakeWin('amp-story hint layer', {}, env => {
   });
 
   it('should be able to show no previous page help overlay', () => {
-    const hideAfterTimeoutStub = sandbox
-      .stub(ampStoryHint, 'hideAfterTimeout')
-      .callsFake(NOOP);
+    const hideAfterTimeoutStub =
+        sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
 
     ampStoryHint.showFirstPageHintOverlay();
 

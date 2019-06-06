@@ -16,6 +16,7 @@
 import {AmpStoryAnalytics} from '../analytics';
 import {StateChangeType} from '../navigation-state';
 
+
 describes.fakeWin('amp-story analytics', {}, env => {
   let analytics;
   let rootEl;

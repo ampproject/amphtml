@@ -50,17 +50,14 @@ module.exports = function(context) {
    * @return {boolean}
    */
   function isThisMemberExpression(node) {
-    return (
-      node.type == 'MemberExpression' && node.object.type == 'ThisExpression'
-    );
+    return node.type == 'MemberExpression' &&
+        node.object.type == 'ThisExpression';
   }
   return {
     MethodDefinition: function(node) {
-      if (
-        hasPrivateAnnotation(node.leadingComments) &&
-        !hasExplicitNoInline(node.key.name) &&
-        !hasTrailingUnderscore(node.key.name)
-      ) {
+      if (hasPrivateAnnotation(node.leadingComments) &&
+            !hasExplicitNoInline(node.key.name) &&
+            !hasTrailingUnderscore(node.key.name)) {
         context.report({
           node,
           message: 'Method marked as private but has no trailing underscore.',
@@ -68,13 +65,11 @@ module.exports = function(context) {
       }
     },
     AssignmentExpression: function(node) {
-      if (
-        node.parent.type == 'ExpressionStatement' &&
-        hasPrivateAnnotation(node.parent.leadingComments) &&
-        isThisMemberExpression(node.left) &&
-        !hasExplicitNoInline(node.left.property.name) &&
-        !hasTrailingUnderscore(node.left.property.name)
-      ) {
+      if (node.parent.type == 'ExpressionStatement' &&
+            hasPrivateAnnotation(node.parent.leadingComments) &&
+            isThisMemberExpression(node.left) &&
+            !hasExplicitNoInline(node.left.property.name) &&
+            !hasTrailingUnderscore(node.left.property.name)) {
         context.report({
           node,
           message: 'Property marked as private but has no trailing underscore.',

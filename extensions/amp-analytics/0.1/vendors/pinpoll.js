@@ -16,8 +16,7 @@
 
 export const PINPOLL_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
-    'pageview':
-      '${protocol}://${host}/${version}?' +
+    'pageview': '${protocol}://${host}/${version}?' +
       'url=${sourceUrl}&' +
       'sourceHost=${sourceHost}&' +
       'sourceHostname=${sourceHostname}&' +

@@ -21,6 +21,7 @@ import {user} from '../../../src/log';
 /** @const */
 const TAG = 'amp-auto-ads';
 
+
 /**
  * Structure for defining contraints about the placement of ads.
  *
@@ -49,7 +50,9 @@ const TAG = 'amp-auto-ads';
  */
 export let AdConstraints;
 
+
 export class AdTracker {
+
   /**
    * @param {!Array<!Element>} ads
    * @param {!AdConstraints} adConstraints
@@ -62,11 +65,10 @@ export class AdTracker {
     this.initialMinSpacing_ = adConstraints.initialMinSpacing;
 
     /** @type {!Array<!{adCount: number, spacing: number}>} */
-    this.subsequentMinSpacing_ = adConstraints.subsequentMinSpacing
-      .slice(0)
-      .sort((a, b) => {
-        return a.adCount - b.adCount;
-      });
+    this.subsequentMinSpacing_ = adConstraints.subsequentMinSpacing.slice(0)
+        .sort((a, b) => {
+          return a.adCount - b.adCount;
+        });
 
     /** @type {number} */
     this.maxAdCount_ = adConstraints.maxAdCount;
@@ -117,14 +119,13 @@ export class AdTracker {
     if (adIndex >= this.ads_.length) {
       return Promise.resolve(false);
     }
-    return this.getDistanceFromAd_(yPosition, this.ads_[adIndex]).then(
-      distance => {
-        if (distance < this.minAdSpacing_) {
-          return true;
-        }
-        return this.isWithinMinDistanceOfAd_(yPosition, adIndex + 1);
-      }
-    );
+    return this.getDistanceFromAd_(yPosition, this.ads_[adIndex])
+        .then(distance => {
+          if (distance < this.minAdSpacing_) {
+            return true;
+          }
+          return this.isWithinMinDistanceOfAd_(yPosition, adIndex + 1);
+        });
   }
 
   /**
@@ -135,18 +136,14 @@ export class AdTracker {
    * @private
    */
   getDistanceFromAd_(yPosition, ad) {
-    return Services.resourcesForDoc(ad)
-      .getElementLayoutBox(ad)
-      .then(box => {
-        if (yPosition >= box.top && yPosition <= box.bottom) {
-          return 0;
-        } else {
-          return Math.min(
-            Math.abs(yPosition - box.top),
-            Math.abs(yPosition - box.bottom)
-          );
-        }
-      });
+    return Services.resourcesForDoc(ad).getElementLayoutBox(ad).then(box => {
+      if (yPosition >= box.top && yPosition <= box.bottom) {
+        return 0;
+      } else {
+        return Math.min(Math.abs(yPosition - box.top),
+            Math.abs(yPosition - box.bottom));
+      }
+    });
   }
 
   /**
@@ -171,15 +168,14 @@ export class AdTracker {
  * @return {!Array<!Element>}
  */
 export function getExistingAds(ampdoc) {
-  return [].slice
-    .call(ampdoc.getRootNode().querySelectorAll('AMP-AD'))
-    .filter(ad => {
-      // Filters out AMP-STICKY-AD.
-      if (ad.parentElement && ad.parentElement.tagName == 'AMP-STICKY-AD') {
-        return false;
-      }
-      return true;
-    });
+  return [].slice.call(ampdoc.getRootNode().getElementsByTagName('AMP-AD'))
+      .filter(ad => {
+        // Filters out AMP-STICKY-AD.
+        if (ad.parentElement && ad.parentElement.tagName == 'AMP-STICKY-AD') {
+          return false;
+        }
+        return true;
+      });
 }
 
 /**
@@ -195,10 +191,8 @@ export function getAdConstraintsFromConfigObj(ampdoc, configObj) {
 
   const viewportHeight = Services.viewportForDoc(ampdoc).getHeight();
 
-  const initialMinSpacing = getValueFromString(
-    obj['initialMinSpacing'],
-    viewportHeight
-  );
+  const initialMinSpacing =
+      getValueFromString(obj['initialMinSpacing'], viewportHeight);
   if (initialMinSpacing == null) {
     user().warn(TAG, 'Invalid initial min spacing');
     return null;

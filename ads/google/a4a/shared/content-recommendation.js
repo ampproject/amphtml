@@ -130,11 +130,10 @@ const LAYOUT_AD_WIDTH_MAP = {
 
 const PUB_CONTROL_LAYOUT_PREFIX = 'pub_control_';
 
-const PUB_CONTROL_EXAMPLE =
-  '\n ' +
-  'data-matched-content-rows-num="4,2"\n' +
-  'data-matched-content-columns-num="1,6"\n' +
-  'data-matched-content-ui-type="image_stacked,image_card_sidebyside"';
+const PUB_CONTROL_EXAMPLE = '\n ' +
+  'data-matched-content-rows-num=\"4,2\"\n' +
+  'data-matched-content-columns-num=\"1,6\"\n' +
+  'data-matched-content-ui-type=\"image_stacked,image_card_sidebyside\"';
 
 /**
  * Configuration of content recommendation unit for current slot. This is the
@@ -142,8 +141,7 @@ const PUB_CONTROL_EXAMPLE =
  * will be used in ad request.
  * @record
  */
-export class CoReConfig {
-  // eslint-disable-line no-unused-vars
+export class CoReConfig { // eslint-disable-line no-unused-vars
   /** see comment on class */
   constructor() {
     /** @const {number} */
@@ -197,11 +195,7 @@ export function getAutoConfig(availableWidth, isMobile) {
       const numColumns = 1;
       const numRows = 12;
       const slotSize = getLargerAdOneColumnSidebysideSize(
-        availableWidth,
-        layoutType,
-        numColumns,
-        numRows
-      );
+          availableWidth, layoutType, numColumns, numRows);
       return {
         slotWidth: slotSize.width,
         slotHeight: slotSize.height,
@@ -266,10 +260,8 @@ export function getPubControlConfig(availableWidth, rawPubControlParams) {
   }
 
   let index;
-  if (
-    pubParams.layoutTypes.length === 2 &&
-    availableWidth >= MIN_PUB_CONTROL_WIDTH_OF_DESKTOP
-  ) {
+  if (pubParams.layoutTypes.length === 2 &&
+    availableWidth >= MIN_PUB_CONTROL_WIDTH_OF_DESKTOP) {
     // Publisher provided settings for both mobile and desktop and screen is
     // wide - use desktop.
     index = 1;
@@ -281,18 +273,11 @@ export function getPubControlConfig(availableWidth, rawPubControlParams) {
 
   const layout = convertToPubControlLayoutType(pubParams.layoutTypes[index]);
   const numColumns = getOptimizedNumColumns(
-    availableWidth,
-    pubParams.numberOfColumns[index],
-    layout
-  );
+      availableWidth, pubParams.numberOfColumns[index], layout);
   const numRows = pubParams.numberOfRows[index];
 
-  const slotSize = getPubControlSlotSize(
-    availableWidth,
-    numColumns,
-    numRows,
-    layout
-  );
+  const slotSize =
+    getPubControlSlotSize(availableWidth, numColumns, numRows, layout);
   if (slotSize.sizeError) {
     return {
       slotWidth: 0,
@@ -338,28 +323,24 @@ function validateAndParsePubControlParams(params) {
   if (numberOfPubControlParams < 3) {
     return {
       validationError: `Tags ${ExternalCorePubVars.UI_TYPE}, ${
-        ExternalCorePubVars.COLUMNS_NUM
-      } and ${ExternalCorePubVars.ROWS_NUM} should be set together.`,
+        ExternalCorePubVars.COLUMNS_NUM} and ${
+        ExternalCorePubVars.ROWS_NUM} should be set together.`,
     };
   }
 
   const /** !Array<!LayoutType> */ layoutTypes = params.layoutType.split(',');
   const /** !Array<string> */ numberOfRows = params.numberOfRows.split(',');
-  const /** !Array<string> */ numberOfColumns = params.numberOfColumns.split(
-      ','
-    );
+  const /** !Array<string> */ numberOfColumns =
+    params.numberOfColumns.split(',');
 
   // Check all params have same length.
-  if (
-    layoutTypes.length !== numberOfRows.length ||
-    layoutTypes.length !== numberOfColumns.length
-  ) {
+  if (layoutTypes.length !== numberOfRows.length ||
+    layoutTypes.length !== numberOfColumns.length) {
     return {
       validationError: `Lengths of parameters ${ExternalCorePubVars.UI_TYPE}, ${
-        ExternalCorePubVars.COLUMNS_NUM
-      } and ${
-        ExternalCorePubVars.ROWS_NUM
-      } must match. Example: ${PUB_CONTROL_EXAMPLE}`,
+        ExternalCorePubVars.COLUMNS_NUM} and ${
+        ExternalCorePubVars.ROWS_NUM} must match. Example: ${
+        PUB_CONTROL_EXAMPLE}`,
     };
   }
 
@@ -367,14 +348,12 @@ function validateAndParsePubControlParams(params) {
     return {
       validationError:
         `The parameter length of attribute ${ExternalCorePubVars.UI_TYPE}, ${
-          ExternalCorePubVars.COLUMNS_NUM
-        } and ${
-          ExternalCorePubVars.ROWS_NUM
-        } is too long. At most 2 parameters for each ` +
+          ExternalCorePubVars.COLUMNS_NUM} and ${
+          ExternalCorePubVars
+              .ROWS_NUM} is too long. At most 2 parameters for each ` +
         'attribute are needed: one for mobile and one for desktop, while ' +
-        `you are providing ${
-          layoutTypes.length
-        } parameters. Example: ${PUB_CONTROL_EXAMPLE}.`,
+        `you are providing ${layoutTypes.length} parameters. Example: ${
+          PUB_CONTROL_EXAMPLE}.`,
     };
   }
 
@@ -385,8 +364,7 @@ function validateAndParsePubControlParams(params) {
     if (isNaN(row) || row === 0) {
       return {
         validationError: `Wrong value '${numberOfRows[i]}' for ${
-          ExternalCorePubVars.ROWS_NUM
-        }.`,
+          ExternalCorePubVars.ROWS_NUM}.`,
       };
     }
     numberOfRowsAsNumbers.push(row);
@@ -394,8 +372,7 @@ function validateAndParsePubControlParams(params) {
     if (isNaN(col) || col === 0) {
       return {
         validationError: `Wrong value '${numberOfColumns[i]}' for ${
-          ExternalCorePubVars.COLUMNS_NUM
-        }.`,
+          ExternalCorePubVars.COLUMNS_NUM}.`,
       };
     }
     numberOfColumnsAsNumbers.push(col);
@@ -432,9 +409,8 @@ function getAutoSlotSize(availableWidth) {
  * @return {number}
  */
 function getAdHeight(adWidth, layout) {
-  return (
-    adWidth * LAYOUT_ASPECT_RATIO_MAP[layout] + LAYOUT_TEXT_HEIGHT_MAP[layout]
-  );
+  return adWidth * LAYOUT_ASPECT_RATIO_MAP[layout] +
+    LAYOUT_TEXT_HEIGHT_MAP[layout];
 }
 
 /**
@@ -494,6 +470,7 @@ function getPubControlSlotSize(slotWidth, numColumns, numRows, layout) {
   return {width: slotWidth, height: slotHeight};
 }
 
+
 /**
  * @param {number} availableWidth
  * @param {!LayoutType} layoutType
@@ -502,11 +479,7 @@ function getPubControlSlotSize(slotWidth, numColumns, numRows, layout) {
  * @return {{width: number, height: number}}
  */
 function getLargerAdOneColumnSidebysideSize(
-  availableWidth,
-  layoutType,
-  numColumns,
-  numRows
-) {
+  availableWidth, layoutType, numColumns, numRows) {
   const adWidth = getAdWidth(availableWidth, numColumns);
   // The title height of first ad slot 70px, should be consistent with what we
   // define in rendering js.
@@ -525,9 +498,9 @@ function getLargerAdOneColumnSidebysideSize(
  * @return {!LayoutType} the new layout name with 'pub_control_' prefix.
  */
 function convertToPubControlLayoutType(layout) {
-  return layout.indexOf(PUB_CONTROL_LAYOUT_PREFIX) === 0
-    ? layout
-    : /** @type {!LayoutType} */ (PUB_CONTROL_LAYOUT_PREFIX + layout);
+  return layout.indexOf(PUB_CONTROL_LAYOUT_PREFIX) === 0 ?
+    layout :
+    /** @type {!LayoutType} */ (PUB_CONTROL_LAYOUT_PREFIX + layout);
 }
 
 /**
@@ -544,10 +517,8 @@ function convertToPubControlLayoutType(layout) {
 function getOptimizedNumColumns(availableWidth, numColumns, layout) {
   const minWidth = LAYOUT_AD_WIDTH_MAP[layout];
   let optimizedNumColumns = numColumns;
-  while (
-    availableWidth / optimizedNumColumns < minWidth &&
-    optimizedNumColumns > 1
-  ) {
+  while (availableWidth / optimizedNumColumns < minWidth &&
+  optimizedNumColumns > 1) {
     optimizedNumColumns--;
   }
   return optimizedNumColumns;

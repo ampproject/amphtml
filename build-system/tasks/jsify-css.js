@@ -15,6 +15,7 @@
  */
 'use strict';
 
+
 const autoprefixer = require('autoprefixer');
 const colors = require('ansi-colors');
 const cssnano = require('cssnano');
@@ -60,15 +61,12 @@ const cssNanoDefaultOptions = {
  * @return {!Promise<string>} that resolves with the css content after
  *    processing
  */
-function transformCss(filename, opt_cssnano) {
+const transformCss = exports.transformCss = function(filename, opt_cssnano) {
   opt_cssnano = opt_cssnano || Object.create(null);
   // See http://cssnano.co/optimisations/ for full list.
   // We try and turn off any optimization that is marked unsafe.
-  const cssnanoOptions = Object.assign(
-    Object.create(null),
-    cssNanoDefaultOptions,
-    opt_cssnano
-  );
+  const cssnanoOptions = Object.assign(Object.create(null),
+      cssNanoDefaultOptions, opt_cssnano);
   const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
 
   const css = fs.readFileSync(filename, 'utf8');
@@ -76,7 +74,7 @@ function transformCss(filename, opt_cssnano) {
   return postcss(transformers).process(css.toString(), {
     'from': filename,
   });
-}
+};
 
 /**
  * 'Jsify' a CSS file - Adds vendor specific css prefixes to the css file,
@@ -87,7 +85,7 @@ function transformCss(filename, opt_cssnano) {
  * @return {!Promise<string>} that resolves with the css content after
  *    processing
  */
-function jsifyCssAsync(filename) {
+exports.jsifyCssAsync = function(filename) {
   return transformCss(filename).then(function(result) {
     result.warnings().forEach(function(warn) {
       log(colors.red(warn.toString()));
@@ -95,9 +93,4 @@ function jsifyCssAsync(filename) {
     const {css} = result;
     return css + '\n/*# sourceURL=/' + filename + '*/';
   });
-}
-
-module.exports = {
-  jsifyCssAsync,
-  transformCss,
 };

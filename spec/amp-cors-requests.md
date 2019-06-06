@@ -140,12 +140,14 @@ When your endpoint receives a CORS request:
 <span id="verify-cors-header"></span>
 
 CORS endpoints receive the requesting origin via the `Origin` HTTP header.
-Endpoints should only allow requests from: (1) the publisher's own origin; and
-(2) every `cacheDomain` origin listed in <https://cdn.ampproject.org/caches.json>. 
+Endpoints should restrict requests to allow only the following origins:
 
-For example, endpoints should allow requests from:
-  *  Google AMP Cache subdomain: `https://<publisher's domain>.cdn.ampproject.org` <br>(for example, `https://nytimes-com.cdn.ampproject.org`)
-  *  Cloudflare AMP Cache: `https://<publisher's domain>.amp.cloudflare.com`
+*  From AMP caches:
+      *  Google AMP Cache subdomain: `https://<publisher's domain>.cdn.ampproject.org` <br>(for example, `https://nytimes-com.cdn.ampproject.org`)
+      *  Google AMP Cache (legacy): `https://cdn.ampproject.org`
+      *  Cloudflare AMP Cache: `https://<publisher's domain>.amp.cloudflare.com`
+*  From the publisher’s own origins
+
 
 {% call callout('Read on', type='read') %}
 For information on AMP Cache URL formats, see these resources:

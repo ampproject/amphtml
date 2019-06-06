@@ -24,6 +24,7 @@ import {
 } from '../../3p/3p';
 
 describe('3p', () => {
+
   let sandbox;
   let clock;
 
@@ -38,6 +39,7 @@ describe('3p', () => {
   });
 
   describe('validateSrcPrefix()', () => {
+
     it('should throw when a string prefix does not match', () => {
       expect(() => {
         validateSrcPrefix('https:', 'http://example.org');
@@ -71,129 +73,93 @@ describe('3p', () => {
   });
 
   describe('validateData', () => {
+
     it('should check mandatory fields', () => {
-      validateData(
-        {
-          width: '',
-          height: false,
-          type: 'taboola',
-          referrer: true,
-          canonicalUrl: true,
-          pageViewId: true,
-          location: true,
-          mode: true,
-        },
-        []
-      );
+      validateData({
+        width: '',
+        height: false,
+        type: 'taboola',
+        referrer: true,
+        canonicalUrl: true,
+        pageViewId: true,
+        location: true,
+        mode: true,
+      }, []);
       clock.tick(1);
 
-      validateData(
-        {
+      validateData({
+        width: '',
+        type: 'taboola',
+        foo: true,
+        bar: true,
+      }, ['foo', 'bar']);
+      clock.tick(1);
+
+      allowConsoleError(() => { expect(() => {
+        validateData({
           width: '',
-          type: 'taboola',
+          type: 'xxxxxx',
           foo: true,
           bar: true,
-        },
-        ['foo', 'bar']
-      );
-      clock.tick(1);
+        }, ['foo', 'bar', 'persika']);
+      }).to.throw(/Missing attribute for xxxxxx: persika./); });
 
-      allowConsoleError(() => {
-        expect(() => {
-          validateData(
-            {
-              width: '',
-              type: 'xxxxxx',
-              foo: true,
-              bar: true,
-            },
-            ['foo', 'bar', 'persika']
-          );
-        }).to.throw(/Missing attribute for xxxxxx: persika./);
-      });
-
-      allowConsoleError(() => {
-        expect(() => {
-          validateData(
-            {
-              width: '',
-              type: 'xxxxxx',
-              foo: true,
-              bar: true,
-            },
-            [['red', 'green', 'blue']]
-          );
-        }).to.throw(
-          /xxxxxx must contain exactly one of attributes: red, green, blue./
-        );
+      allowConsoleError(() => { expect(() => {
+        validateData({
+          width: '',
+          type: 'xxxxxx',
+          foo: true,
+          bar: true,
+        }, [['red', 'green', 'blue']]);
+      }).to.throw(
+          /xxxxxx must contain exactly one of attributes: red, green, blue./);
       });
     });
 
     it('should check mandatory fields with alternative options', () => {
-      validateData(
-        {
-          width: '',
-          type: 'taboola',
-          foo: true,
-          bar: true,
-        },
-        [['foo', 'day', 'night']]
-      );
+      validateData({
+        width: '',
+        type: 'taboola',
+        foo: true,
+        bar: true,
+      }, [['foo', 'day', 'night']]);
       clock.tick(1);
     });
 
     it('should check optional fields', () => {
-      validateData(
-        {
-          width: '',
-          height: false,
-          type: true,
-          referrer: true,
-          canonicalUrl: true,
-          pageViewId: true,
-          location: true,
-          mode: true,
-        },
-        /* mandatory */ [],
-        /* optional */ []
-      );
+      validateData({
+        width: '',
+        height: false,
+        type: true,
+        referrer: true,
+        canonicalUrl: true,
+        pageViewId: true,
+        location: true,
+        mode: true,
+      }, /* mandatory */[], /* optional */[]);
 
-      validateData(
-        {
-          width: '',
+      validateData({
+        width: '',
+        foo: true,
+        bar: true,
+      }, /* mandatory */[], ['foo', 'bar']);
+
+      allowConsoleError(() => { expect(() => {
+        validateData({
+          type: 'TEST',
           foo: true,
-          bar: true,
-        },
-        /* mandatory */ [],
-        ['foo', 'bar']
-      );
-
-      allowConsoleError(() => {
-        expect(() => {
-          validateData(
-            {
-              type: 'TEST',
-              foo: true,
-              'not-whitelisted': true,
-            },
-            [],
-            ['foo']
-          );
-        }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
-      });
+          'not-whitelisted': true,
+        }, [], ['foo']);
+      }).to.throw(/Unknown attribute for TEST: not-whitelisted./); });
     });
 
     it('should check mandatory and optional fields', () => {
-      validateData(
-        {
-          width: '',
-          foo: true,
-          bar: true,
-          halo: 'world',
-        },
-        [['foo', 'fo'], 'bar'],
-        ['halo']
-      );
+      validateData({
+        width: '',
+        foo: true,
+        bar: true,
+        halo: 'world',
+      }, [['foo', 'fo'], 'bar'], ['halo']);
     });
   });
 
@@ -209,16 +175,13 @@ describe('3p', () => {
 
   it('should run in next tick (setTimeout)', () => {
     let called = 0;
-    nextTick(
-      {
-        setTimeout: fn => {
-          fn();
-        },
+    nextTick({
+      setTimeout: fn => {
+        fn();
       },
-      () => {
-        called++;
-      }
-    );
+    }, () => {
+      called++;
+    });
     expect(called).to.equal(1);
   });
 
@@ -274,6 +237,7 @@ describe('3p', () => {
   });
 
   describe('loadScript', () => {
+
     it('should add <script /> with url to the body', () => {
       const url = 'http://test.com/example.js';
       let s = window.document.body.querySelector(`script[src="${url}"]`);
@@ -284,29 +248,20 @@ describe('3p', () => {
     });
 
     it('should handle onSuccess callback', done => {
-      loadScript(
-        window,
-        'http://localhost:9876/test/unit/test-3p.js',
-        () => {
-          done();
-        },
-        () => {
-          done('onError should not be called!');
-        }
-      );
+      loadScript(window, 'http://localhost:9876/test/unit/test-3p.js', () => {
+        done();
+      }, () => {
+        done('onError should not be called!');
+      });
     });
 
     it('should handle onFailure callback', done => {
-      loadScript(
-        window,
-        'http://localhost:9876/404',
-        () => {
-          done('onSuccess should not be called');
-        },
-        () => {
-          done();
-        }
-      );
+      loadScript(window, 'http://localhost:9876/404', () => {
+        done('onSuccess should not be called');
+      }, () => {
+        done();
+      });
     });
   });
+
 });

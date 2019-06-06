@@ -23,24 +23,34 @@
 
 const colors = require('ansi-colors');
 const {
+  areValidBuildTargets,
+  determineBuildTargets} = require('./build-targets');
+const {
+  isYarnLockFileInSync,
+  isYarnLockFileProperlyUpdated} = require('./yarn-checks');
+const {
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
-  uploadBuildOutput,
-} = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
+  uploadBuildOutput} = require('./utils');
 const {isTravisPullRequestBuild} = require('../travis');
-const {runYarnChecks} = require('./yarn-checks');
-
 const FILENAME = 'build.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie =
+  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  if (!runYarnChecks(FILENAME)) {
+  // Make sure package.json and yarn.lock are in sync and up-to-date.
+  if (!isYarnLockFileInSync(FILENAME) ||
+      !isYarnLockFileProperlyUpdated(FILENAME)) {
+    process.exitCode = 1;
+    return;
+  }
+
+  const buildTargets = determineBuildTargets();
+  if (!areValidBuildTargets(buildTargets, FILENAME)) {
     stopTimer(FILENAME, FILENAME, startTime);
     process.exitCode = 1;
     return;
@@ -52,29 +62,20 @@ function main() {
     uploadBuildOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
-    const buildTargets = new Set();
-    if (!determineBuildTargets(buildTargets, FILENAME)) {
-      stopTimer(FILENAME, FILENAME, startTime);
-      process.exitCode = 1;
-      return;
-    }
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('UNIT_TEST') ||
+        buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('FLAG_CONFIG') ||
+        buildTargets.has('VISUAL_DIFF')) {
 
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('UNIT_TEST')
-    ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp build --fortesting');
       uploadBuildOutput(FILENAME);
     } else {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Build'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or integration tests.'
-      );
+      console.log(`${FILELOGPREFIX} Skipping ` + colors.cyan('Build ') +
+          'because this commit does not affect the runtime, build system, ' +
+          'test files, or visual diff files');
     }
   }
 

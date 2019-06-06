@@ -40,7 +40,7 @@ FAIL
 |
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 >>   ^~~~~~~~~
-feature_tests/runtime_in_body.html:40:2 The parent tag of tag 'amphtml engine v0.js script' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/runtime_in_body.html:40:2 The parent tag of tag 'amphtml engine v0.js script' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |
 |  </body>
 |  </html>

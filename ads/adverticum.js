@@ -39,4 +39,5 @@ export function adverticum(global, data) {
     document.getElementById(zoneid).appendChild(v);
   }
   writeScript(global, '//ad.adverticum.net/g3.js');
+
 }

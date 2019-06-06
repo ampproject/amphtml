@@ -22,7 +22,3 @@ const {Key} = require('selenium-webdriver');
 global.describes = describes;
 global.expect = expect;
 global.Key = Key;
-
-module.exports = {
-  describes,
-};

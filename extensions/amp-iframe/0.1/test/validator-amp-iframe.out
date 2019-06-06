@@ -44,7 +44,7 @@ FAIL
 |    <!-- Invalid: We do not allow to bind to the src attribute, and also specify a srcdoc value -->
 |    <amp-iframe width="200" height="200" srcdoc="<p>Hello World</p>" [src]="iframeurl"></amp-iframe>
 >>   ^~~~~~~~~
-amp-iframe/0.1/test/validator-amp-iframe.html:44:2 The attribute 'src' in tag 'amp-iframe' is missing or incorrect, but required by attribute '[src]'. (see https://amp.dev/documentation/components/amp-iframe) [DISALLOWED_HTML]
+amp-iframe/0.1/test/validator-amp-iframe.html:44:2 The attribute 'src' in tag 'amp-iframe' is missing or incorrect, but required by attribute '[src]'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [DISALLOWED_HTML]
 |
 |
 |    <!-- Mandatory amp-state to avoid amp-bind validator errors -->

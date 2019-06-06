@@ -22,6 +22,7 @@
 # Polymer project, and unlike for the parent directory there's no
 # particular benefit to using Python.
 
+import glob
 import logging
 import os
 import platform
@@ -157,7 +158,7 @@ def Main():
   logging.basicConfig(
       format='[[%(filename)s %(funcName)s]] - %(message)s',
       level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
-  GetNodeJsCmd()
+  nodejs_cmd = GetNodeJsCmd()
   CheckPrereqs()
   InstallNodeDependencies()
   SetupOutDir(out_dir='dist')

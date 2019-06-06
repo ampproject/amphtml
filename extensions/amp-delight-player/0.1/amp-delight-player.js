@@ -17,9 +17,15 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {createFrameFor, objOrParseJson} from '../../../src/iframe-video';
-import {getData, listen, listenOncePromise} from '../../../src/event-helper';
+import {
+  getData,
+  listen,
+  listenOncePromise,
+} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
@@ -64,6 +70,7 @@ const DelightEvent = {
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpDelightPlayer extends AMP.BaseElement {
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -130,8 +137,8 @@ class AmpDelightPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.contentID_ = userAssert(
-      this.element.getAttribute('data-content-id'),
-      'The data-content-id attribute is required'
+        this.element.getAttribute('data-content-id'),
+        'The data-content-id attribute is required'
     );
 
     const deferred = new Deferred();
@@ -191,15 +198,14 @@ class AmpDelightPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const html = htmlFor(this.element);
-    const placeholder = html`
-      <div placeholder><amp-img layout="fill"></amp-img></div>
-    `;
+    const placeholder =
+        html`<div placeholder><amp-img layout=fill></amp-img></div>`;
 
     const src = `${this.baseURL_}/poster/${this.contentID_}`;
 
     placeholder.firstElementChild.setAttribute('src', src);
 
-    this.placeholderEl_ = /** @type {HTMLElement} */ (placeholder);
+    this.placeholderEl_ = placeholder;
 
     return placeholder;
   }
@@ -251,16 +257,11 @@ class AmpDelightPlayer extends AMP.BaseElement {
       case DelightEvent.PING: {
         const guid = data['guid'];
         if (guid) {
-          this.iframe_.contentWindow./*OK*/ postMessage(
-            JSON.stringify(
-              /** @type {JsonObject} */ ({
-                type: DelightEvent.PONG,
-                guid,
-                idx: 0,
-              })
-            ),
-            '*'
-          );
+          this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(/** @type {JsonObject} */ ({
+            type: DelightEvent.PONG,
+            guid,
+            idx: 0,
+          })), '*');
         }
         break;
       }
@@ -328,9 +329,8 @@ class AmpDelightPlayer extends AMP.BaseElement {
   sendCommand_(type, payload = {}) {
     this.playerReadyPromise_.then(iframe => {
       if (iframe && iframe.contentWindow) {
-        iframe.contentWindow./*OK*/ postMessage(
-          JSON.stringify(/** @type {JsonObject} */ ({type, payload})),
-          '*'
+        iframe.contentWindow./*OK*/postMessage(
+            JSON.stringify(/** @type {JsonObject} */ ({type, payload})), '*'
         );
       }
     });
@@ -358,10 +358,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
    */
   registerEventHandlers_() {
     const dispatchScreenOrientationChangeEvents = () => {
-      const orientation =
-        window.screen.orientation ||
-        window.screen.mozOrientation ||
-        window.screen.msOrientation;
+      const orientation = window.screen.orientation ||
+                          window.screen.mozOrientation ||
+                          window.screen.msOrientation;
       this.sendCommand_(DelightEvent.SCREEN_CHANGE, {
         orientation: {
           angle: orientation.angle,
@@ -406,39 +405,38 @@ class AmpDelightPlayer extends AMP.BaseElement {
       });
     };
     if (window.screen) {
-      const screen =
-        window.screen.orientation ||
-        window.screen.mozOrientation ||
-        window.screen.msOrientation;
+      const screen = window.screen.orientation ||
+                     window.screen.mozOrientation ||
+                     window.screen.msOrientation;
       if (screen && screen.addEventListener) {
         this.unlistenScreenOrientationChange_ = listen(
-          screen,
-          'change',
-          dispatchScreenOrientationChangeEvents
+            screen,
+            'change',
+            dispatchScreenOrientationChangeEvents
         );
       } else {
         this.unlistenOrientationChange_ = listen(
-          this.win,
-          'orientationchange',
-          dispatchOrientationChangeEvents
+            this.win,
+            'orientationchange',
+            dispatchOrientationChangeEvents
         );
       }
     } else {
       this.unlistenOrientationChange_ = listen(
-        this.win,
-        'orientationchange',
-        dispatchOrientationChangeEvents
+          this.win,
+          'orientationchange',
+          dispatchOrientationChangeEvents
       );
     }
     this.unlistenDeviceOrientation_ = listen(
-      this.win,
-      'deviceorientation',
-      dispatchDeviceOrientationEvents
+        this.win,
+        'deviceorientation',
+        dispatchDeviceOrientationEvents
     );
     this.unlistenDeviceMotion_ = listen(
-      this.win,
-      'devicemotion',
-      dispatchDeviceMotionEvents
+        this.win,
+        'devicemotion',
+        dispatchDeviceMotionEvents
     );
   }
 
@@ -549,7 +547,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   getPlayedRanges() {
-    return /** @type {!Array<Array<number>>} */ (this.playedRanges_);
+    return this.playedRanges_;
   }
 
   /** @override */

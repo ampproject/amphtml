@@ -46,22 +46,22 @@ FAIL
 |      <!-- Invalid: no default value-->
 |      <amp-base-carousel width="4" height="3" auto-advance="(min-width: 800px) true">
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:46:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) true'. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:46:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) true'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |      <!-- Invalid: no value -->
 |      <amp-base-carousel width="4" height="3" auto-advance>
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:49:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:49:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |      <!-- Invalid: incorrect value -->
 |      <amp-base-carousel width="4" height="3" auto-advance="5">
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:52:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '5'. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:52:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '5'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |      <!-- Invalid: incorrect in media query -->
 |      <amp-base-carousel width="4" height="3" auto-advance="(min-width: 800px) true, (max-height: 1000px) 5, false">
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:55:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) true, (max-height: 1000px) 5, false'. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:55:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) true, (max-height: 1000px) 5, false'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |    </section>
 |
@@ -82,22 +82,22 @@ amp-base-carousel/0.1/test/validator-amp-base-carousel.html:55:4 The attribute '
 |      <!-- Invalid: no default value-->
 |      <amp-base-carousel width="4" height="3" advance-count="(min-width: 800px) 3">
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:74:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) 3'. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:74:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) 3'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |      <!-- Invalid: no value -->
 |      <amp-base-carousel width="4" height="3" advance-count>
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:77:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:77:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |      <!-- Invalid: floating point value -->
 |      <amp-base-carousel width="4" height="3" advance-count="3.2">
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:80:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value '3.2'. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:80:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value '3.2'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |      <!-- Invalid: floating point value in media query -->
 |      <amp-base-carousel width="4" height="3" advance-count="(min-width: 800px) -3, (max-height: 1000px) 3.2, 1">
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:83:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) -3, (max-height: 1000px) 3.2, 1'. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:83:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) -3, (max-height: 1000px) 3.2, 1'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |    </section>
 |
@@ -118,27 +118,27 @@ amp-base-carousel/0.1/test/validator-amp-base-carousel.html:83:4 The attribute '
 |      <!-- Invalid: negative integer value -->
 |      <amp-base-carousel width="4" height="3" visible-count="-2">
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:102:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value '-2'. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:102:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value '-2'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |      <!-- Invalid: no default value-->
 |      <amp-base-carousel width="4" height="3" visible-count="(min-width: 800px) 3">
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:105:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) 3'. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:105:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) 3'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |      <!-- Invalid: no value -->
 |      <amp-base-carousel width="4" height="3" visible-count>
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:108:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:108:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |      <!-- Invalid: string value -->
 |      <amp-base-carousel width="4" height="3" visible-count="foo">
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:111:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value 'foo'. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:111:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value 'foo'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |      <!-- Invalid: negative value in media query -->
 |      <amp-base-carousel width="4" height="3" visible-count="(min-width: 800px) -3, (max-height: 1000px) 3, 1">
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:114:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) -3, (max-height: 1000px) 3, 1'. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:114:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) -3, (max-height: 1000px) 3, 1'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |    </section>
 |
@@ -153,7 +153,7 @@ amp-base-carousel/0.1/test/validator-amp-base-carousel.html:114:4 The attribute 
 |      <!-- Invalid: no space between media query and value -->
 |      <amp-base-carousel width="4" height="3" auto-advance="(min-width: 800px)true, false">
 >>     ^~~~~~~~~
-amp-base-carousel/0.1/test/validator-amp-base-carousel.html:127:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px)true, false'. (see https://amp.dev/documentation/components/amp-base-carousel) [DISALLOWED_HTML]
+amp-base-carousel/0.1/test/validator-amp-base-carousel.html:127:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px)true, false'. (see https://www.ampproject.org/docs/reference/components/amp-base-carousel) [DISALLOWED_HTML]
 |      </amp-base-carousel>
 |    </section>
 |  </body>

@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
+import {
+  AdSenseAmpAutoAdsResponsiveBranches,
+  getAdSenseAmpAutoAdsResponsiveExperimentBranch,
+} from '../../../ads/google/adsense-amp-auto-ads-responsive';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {parseUrlDeprecated} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
+
 
 /** @typedef {{width: (number|undefined), height: (number|undefined)}} */
 export let SizeInfoDef;
@@ -30,6 +35,7 @@ export let SizeInfoDef;
  * @interface
  */
 class AdNetworkConfigDef {
+
   /**
    * Indicates whether amp-auto-ads should be enabled on this pageview.
    * @param {!Window} unusedWin
@@ -39,9 +45,10 @@ class AdNetworkConfigDef {
 
   /**
    * Indicates whether amp-auto-ads should be displayed at full-width.
+   * @param {!Window} unusedWin
    * @return {boolean} true if amp-auto-ads full-width responsive is enabled.
    */
-  isResponsiveEnabled() {}
+  isResponsiveEnabled(unusedWin) {}
 
   /**
    * @return {string}
@@ -114,12 +121,8 @@ class PingNetworkConfig {
 
   /** @override */
   getConfigUrl() {
-    return buildUrl(
-      '//lh3.googleusercontent.com/' +
-        'pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n',
-      {},
-      4096
-    );
+    return buildUrl('//lh3.googleusercontent.com/' +
+      'pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n', {}, 4096);
   }
 
   /** @override */
@@ -131,9 +134,8 @@ class PingNetworkConfig {
 
   /** @override */
   getDefaultAdConstraints() {
-    const viewportHeight = Services.viewportForDoc(
-      this.autoAmpAdsElement_
-    ).getSize().height;
+    const viewportHeight =
+      Services.viewportForDoc(this.autoAmpAdsElement_).getSize().height;
     return {
       initialMinSpacing: viewportHeight,
       subsequentMinSpacing: [
@@ -148,7 +150,9 @@ class PingNetworkConfig {
   getSizing() {
     return {};
   }
+
 }
+
 
 /**
  * @implements {AdNetworkConfigDef}
@@ -167,46 +171,37 @@ class AdSenseNetworkConfig {
   }
 
   /**
-   * True if responsive is enabled for auto-ads
+   * @param {!Window} win
    */
-  isResponsiveEnabled() {
-    return true;
+  isResponsiveEnabled(win) {
+    const branch = getAdSenseAmpAutoAdsResponsiveExperimentBranch(win);
+    return branch != AdSenseAmpAutoAdsResponsiveBranches.CONTROL;
   }
 
   /** @override */
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
     const canonicalHostname = parseUrlDeprecated(docInfo.canonicalUrl).hostname;
-    return buildUrl(
-      '//pagead2.googlesyndication.com/getconfig/ama',
-      {
-        'client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
-        'plah': canonicalHostname,
-        'ama_t': 'amp',
-        'url': docInfo.canonicalUrl,
-      },
-      4096
-    );
+    return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', {
+      'client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+      'plah': canonicalHostname,
+      'ama_t': 'amp',
+      'url': docInfo.canonicalUrl,
+    }, 4096);
   }
 
   /** @override */
   getAttributes() {
-    const attributesObj = dict({
+    return dict({
       'type': 'adsense',
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
     });
-    const dataAdHost = this.autoAmpAdsElement_.getAttribute('data-ad-host');
-    if (dataAdHost) {
-      attributesObj['data-ad-host'] = dataAdHost;
-    }
-    return attributesObj;
   }
 
   /** @override */
   getDefaultAdConstraints() {
-    const viewportHeight = Services.viewportForDoc(
-      this.autoAmpAdsElement_
-    ).getSize().height;
+    const viewportHeight =
+        Services.viewportForDoc(this.autoAmpAdsElement_).getSize().height;
     return {
       initialMinSpacing: viewportHeight,
       subsequentMinSpacing: [
@@ -222,6 +217,7 @@ class AdSenseNetworkConfig {
     return {};
   }
 }
+
 
 /**
  * @implements {AdNetworkConfigDef}
@@ -242,9 +238,9 @@ class DoubleclickNetworkConfig {
   }
 
   /**
-   * True if responsive is enabled for auto-ads
+   * @param {!Window} unusedWin
    */
-  isResponsiveEnabled() {
+  isResponsiveEnabled(unusedWin) {
     return false;
   }
 
@@ -252,16 +248,12 @@ class DoubleclickNetworkConfig {
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
     const canonicalHostname = parseUrlDeprecated(docInfo.canonicalUrl).hostname;
-    return buildUrl(
-      '//pagead2.googlesyndication.com/getconfig/ama',
-      {
-        'client': this.autoAmpAdsElement_.getAttribute('data-ad-legacy-client'),
-        'plah': canonicalHostname,
-        'ama_t': 'amp',
-        'url': docInfo.canonicalUrl,
-      },
-      4096
-    );
+    return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', {
+      'client': this.autoAmpAdsElement_.getAttribute('data-ad-legacy-client'),
+      'plah': canonicalHostname,
+      'ama_t': 'amp',
+      'url': docInfo.canonicalUrl,
+    }, 4096);
   }
 
   /** @override */
@@ -276,9 +268,8 @@ class DoubleclickNetworkConfig {
 
   /** @override */
   getDefaultAdConstraints() {
-    const viewportHeight = Services.viewportForDoc(
-      this.autoAmpAdsElement_
-    ).getSize().height;
+    const viewportHeight =
+        Services.viewportForDoc(this.autoAmpAdsElement_).getSize().height;
     return {
       initialMinSpacing: viewportHeight,
       subsequentMinSpacing: [
@@ -292,16 +283,13 @@ class DoubleclickNetworkConfig {
   /** @override */
   getSizing() {
     const experimentJson = tryParseJson(
-      this.autoAmpAdsElement_.getAttribute('data-experiment')
-    );
+        this.autoAmpAdsElement_.getAttribute('data-experiment'));
     if (experimentJson) {
       return {
-        height: experimentJson['height']
-          ? Number(experimentJson['height'])
-          : 250,
-        width: experimentJson['width']
-          ? Number(experimentJson['width'])
-          : undefined,
+        height: experimentJson['height'] ?
+          Number(experimentJson['height']) : 250,
+        width: experimentJson['width'] ?
+          Number(experimentJson['width']) : undefined,
       };
     }
     return {};

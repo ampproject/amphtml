@@ -22,134 +22,165 @@ import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 
-describes.fakeWin(
-  'video-manager-impl#AnalyticsPercentageTracker',
-  {
-    amp: false,
-  },
-  env => {
-    const interval = PERCENTAGE_INTERVAL;
+describes.fakeWin('video-manager-impl#AnalyticsPercentageTracker', {
+  amp: false,
+}, env => {
 
-    let mockTimer;
-    let mockTimerCallback;
-    let mockEntry;
+  const interval = PERCENTAGE_INTERVAL;
 
-    let tracker;
+  let mockTimer;
+  let mockTimerCallback;
+  let mockEntry;
 
-    function createFakeVideo() {
-      const element = env.win.document.createElement('div');
-      return {
-        element,
-        getCurrentTime() {
-          return NaN;
-        },
-        getDuration() {
-          return NaN;
-        },
-      };
-    }
+  let tracker;
 
-    function setDuration(video, durationSeconds) {
-      video.getDuration = () => durationSeconds;
-    }
+  function createFakeVideo() {
+    const element = env.win.document.createElement('div');
+    return {
+      element,
+      getCurrentTime() {
+        return NaN;
+      },
+      getDuration() {
+        return NaN;
+      },
+    };
+  }
 
-    function setCurrentTime(video, currentTimeSeconds) {
-      video.getCurrentTime = () => currentTimeSeconds;
-    }
 
-    function setPlayingState(entry, playingState) {
-      entry.getPlayingState = () => playingState;
-    }
+  function setDuration(video, durationSeconds) {
+    video.getDuration = () => durationSeconds;
+  }
 
-    function dispatchCustom(element, eventType) {
-      element.dispatchEvent(
-        createCustomEvent(env.win, eventType, /* detail */ null)
-      );
-    }
+  function setCurrentTime(video, currentTimeSeconds) {
+    video.getCurrentTime = () => currentTimeSeconds;
+  }
 
-    function dispatchLoadedMetadata(element) {
-      dispatchCustom(element, VideoEvents.LOADEDMETADATA);
-    }
+  function setPlayingState(entry, playingState) {
+    entry.getPlayingState = () => playingState;
+  }
 
-    function mockTrigger(tracker) {
-      return env.sandbox.stub(tracker, 'analyticsEventForTesting_');
-    }
+  function dispatchCustom(element, eventType) {
+    element.dispatchEvent(
+        createCustomEvent(env.win, eventType, /* detail */ null));
+  }
 
-    beforeEach(() => {
-      const {win, sandbox} = env;
+  function dispatchLoadedMetadata(element) {
+    dispatchCustom(element, VideoEvents.LOADEDMETADATA);
+  }
 
-      mockTimer = {
-        delay: sandbox.stub().callsFake(fn => {
-          mockTimerCallback = fn;
-        }),
-      };
+  function mockTrigger(tracker) {
+    return env.sandbox.stub(tracker, 'analyticsEventForTesting_');
+  }
 
-      mockEntry = {
-        video: createFakeVideo(),
-        getPlayingState() {
-          return PlayingStates.PAUSED;
-        },
-      };
+  beforeEach(() => {
+    const {win, sandbox} = env;
 
-      sandbox.stub(Services, 'timerFor').returns(mockTimer);
+    mockTimer = {
+      delay: sandbox.stub().callsFake(fn => {
+        mockTimerCallback = fn;
+      }),
+    };
 
-      tracker = new AnalyticsPercentageTracker(win, mockEntry);
+    mockEntry = {
+      video: createFakeVideo(),
+      getPlayingState() {
+        return PlayingStates.PAUSED;
+      },
+    };
+
+    sandbox.stub(Services, 'timerFor').returns(mockTimer);
+
+    tracker = new AnalyticsPercentageTracker(win, mockEntry);
+  });
+
+  describe('#start', () => {
+
+    it('waits for LOADEDMETADATA', () => {
+      const {video} = mockEntry;
+      const {element} = video;
+
+      tracker.start();
+
+      expect(mockTimer.delay).to.not.have.been.called;
+
+      const validDurationSeconds = 10;
+      const validCurrentTimeSeconds = 0;
+
+      setDuration(video, validDurationSeconds);
+      setCurrentTime(video, validCurrentTimeSeconds);
+
+      dispatchLoadedMetadata(element);
+
+      expect(mockTimer.delay).to.have.been.calledOnce;
     });
 
-    describe('#start', () => {
-      it('waits for LOADEDMETADATA', () => {
+    [0, NaN, -1, undefined, null].forEach(invalidDuration => {
+      it(`aborts if duration is invalid (${invalidDuration})`, () => {
         const {video} = mockEntry;
         const {element} = video;
 
         tracker.start();
+
+        setDuration(video, invalidDuration);
+        dispatchLoadedMetadata(element);
 
         expect(mockTimer.delay).to.not.have.been.called;
-
-        const validDurationSeconds = 10;
-        const validCurrentTimeSeconds = 0;
-
-        setDuration(video, validDurationSeconds);
-        setCurrentTime(video, validCurrentTimeSeconds);
-
-        dispatchLoadedMetadata(element);
-
-        expect(mockTimer.delay).to.have.been.calledOnce;
       });
+    });
 
-      [0, NaN, -1, undefined, null].forEach(invalidDuration => {
-        it(`aborts if duration is invalid (${invalidDuration})`, () => {
-          const {video} = mockEntry;
-          const {element} = video;
+    it('does not trigger if the video is paused', () => {
+      const {video} = mockEntry;
+      const {element} = video;
 
-          tracker.start();
+      tracker.start();
 
-          setDuration(video, invalidDuration);
-          dispatchLoadedMetadata(element);
+      const triggerMock = mockTrigger(tracker);
 
-          expect(mockTimer.delay).to.not.have.been.called;
-        });
-      });
+      const validDurationSeconds = 10;
+      const validCurrentTimeSeconds = 0;
 
-      it('does not trigger if the video is paused', () => {
-        const {video} = mockEntry;
-        const {element} = video;
+      setDuration(video, validDurationSeconds);
+      setCurrentTime(video, validCurrentTimeSeconds);
 
-        tracker.start();
+      dispatchLoadedMetadata(element);
 
-        const triggerMock = mockTrigger(tracker);
+      expect(triggerMock).to.not.have.been.called;
+    });
 
-        const validDurationSeconds = 10;
-        const validCurrentTimeSeconds = 0;
+    it(`does not trigger if percentage < ${interval}%`, () => {
+      const {video} = mockEntry;
+      const {element} = video;
 
-        setDuration(video, validDurationSeconds);
-        setCurrentTime(video, validCurrentTimeSeconds);
+      tracker.start();
 
-        dispatchLoadedMetadata(element);
+      const triggerMock = mockTrigger(tracker);
 
+      const validDurationSeconds = 10;
+      setDuration(video, validDurationSeconds);
+      setCurrentTime(video, 0);
+
+      dispatchLoadedMetadata(element);
+
+      setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
+
+      const cutoff = (validDurationSeconds / 100) * interval;
+
+      for (let currentTimeSeconds = 0;
+        currentTimeSeconds < cutoff;
+        currentTimeSeconds += 0.1) {
+
+        setCurrentTime(video, currentTimeSeconds);
         expect(triggerMock).to.not.have.been.called;
-      });
+        mockTimerCallback();
+      }
+    });
 
-      it(`does not trigger if percentage < ${interval}%`, () => {
+    for (let startTimeSeconds = 0;
+      startTimeSeconds < 100;
+      startTimeSeconds += 2) {
+
+      it(`triggers every ${interval}% starting on ${startTimeSeconds}s`, () => {
         const {video} = mockEntry;
         const {element} = video;
 
@@ -157,124 +188,83 @@ describes.fakeWin(
 
         const triggerMock = mockTrigger(tracker);
 
-        const validDurationSeconds = 10;
+        const validDurationSeconds = 100;
+
         setDuration(video, validDurationSeconds);
-        setCurrentTime(video, 0);
+        setCurrentTime(video, startTimeSeconds);
 
         dispatchLoadedMetadata(element);
 
         setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
 
-        const cutoff = (validDurationSeconds / 100) * interval;
+        for (let timeSeconds = startTimeSeconds;
+          timeSeconds < validDurationSeconds;
+          timeSeconds += 1) {
 
-        for (
-          let currentTimeSeconds = 0;
-          currentTimeSeconds < cutoff;
-          currentTimeSeconds += 0.1
-        ) {
-          setCurrentTime(video, currentTimeSeconds);
-          expect(triggerMock).to.not.have.been.called;
+          setCurrentTime(video, timeSeconds);
           mockTimerCallback();
         }
+
+        for (let percentage = Math.max(interval,
+            Math.ceil(startTimeSeconds / interval) * interval);
+          percentage < 100;
+          percentage += interval) {
+
+          expect(triggerMock.withArgs(percentage),
+              `triggerMock.withArgs(${percentage}%)`).to.have.been.calledOnce;
+        }
       });
+    }
 
-      for (
-        let startTimeSeconds = 0;
-        startTimeSeconds < 100;
-        startTimeSeconds += 2
-      ) {
-        it(`triggers every ${interval}% starting on ${startTimeSeconds}s`, () => {
-          const {video} = mockEntry;
-          const {element} = video;
+    it('triggers 100% on ended', () => {
+      const {video} = mockEntry;
+      const {element} = video;
+      const triggerMock = mockTrigger(tracker);
 
-          tracker.start();
+      const startTimeSeconds = 0;
+      const validDurationSeconds = 100;
 
-          const triggerMock = mockTrigger(tracker);
+      setDuration(video, validDurationSeconds);
+      setCurrentTime(video, startTimeSeconds);
 
-          const validDurationSeconds = 100;
+      setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
 
-          setDuration(video, validDurationSeconds);
-          setCurrentTime(video, startTimeSeconds);
+      tracker.start();
 
-          dispatchLoadedMetadata(element);
+      dispatchLoadedMetadata(element);
 
-          setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
+      mockTimerCallback();
+      dispatchCustom(element, VideoEvents.ENDED);
 
-          for (
-            let timeSeconds = startTimeSeconds;
-            timeSeconds < validDurationSeconds;
-            timeSeconds += 1
-          ) {
-            setCurrentTime(video, timeSeconds);
-            mockTimerCallback();
-          }
-
-          for (
-            let percentage = Math.max(
-              interval,
-              Math.ceil(startTimeSeconds / interval) * interval
-            );
-            percentage < 100;
-            percentage += interval
-          ) {
-            expect(
-              triggerMock.withArgs(percentage),
-              `triggerMock.withArgs(${percentage}%)`
-            ).to.have.been.calledOnce;
-          }
-        });
-      }
-
-      it('triggers 100% on ended', () => {
-        const {video} = mockEntry;
-        const {element} = video;
-        const triggerMock = mockTrigger(tracker);
-
-        const startTimeSeconds = 0;
-        const validDurationSeconds = 100;
-
-        setDuration(video, validDurationSeconds);
-        setCurrentTime(video, startTimeSeconds);
-
-        setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
-
-        tracker.start();
-
-        dispatchLoadedMetadata(element);
-
-        mockTimerCallback();
-        dispatchCustom(element, VideoEvents.ENDED);
-
-        expect(triggerMock.withArgs(100)).to.have.been.calledOnce;
-      });
+      expect(triggerMock.withArgs(100)).to.have.been.calledOnce;
     });
+  });
 
-    describe('#stop', () => {
-      it('cancels upcoming events', () => {
-        const {video} = mockEntry;
-        const {element} = video;
+  describe('#stop', () => {
+    it('cancels upcoming events', () => {
+      const {video} = mockEntry;
+      const {element} = video;
 
-        const triggerMock = mockTrigger(tracker);
+      const triggerMock = mockTrigger(tracker);
 
-        const startTimeSeconds = 0;
-        const validDurationSeconds = 100;
+      const startTimeSeconds = 0;
+      const validDurationSeconds = 100;
 
-        setDuration(video, validDurationSeconds);
-        setCurrentTime(video, startTimeSeconds);
+      setDuration(video, validDurationSeconds);
+      setCurrentTime(video, startTimeSeconds);
 
-        setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
+      setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
 
-        tracker.start();
+      tracker.start();
 
-        dispatchLoadedMetadata(element);
+      dispatchLoadedMetadata(element);
 
-        tracker.stop();
+      tracker.stop();
 
-        mockTimerCallback();
-        dispatchCustom(element, VideoEvents.ENDED);
+      mockTimerCallback();
+      dispatchCustom(element, VideoEvents.ENDED);
 
-        expect(triggerMock).to.not.have.been.called;
-      });
+      expect(triggerMock).to.not.have.been.called;
     });
-  }
-);
+  });
+});

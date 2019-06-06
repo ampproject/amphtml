@@ -20,6 +20,7 @@ import {listenParent} from '../../../3p/messaging';
 import {postMessage} from '../../../src/iframe-helper';
 
 describe('3p messaging', () => {
+
   let testWin;
   let iframe;
   const timer = Services.timerFor(window);
@@ -126,12 +127,9 @@ describe('3p messaging', () => {
     });
     postMessage(iframe, 'test', {s: 'a'}, '*', true);
     postMessage(iframe, 'test', {s: 'd'}, '*', true);
-    return timer
-      .promise(10)
-      .catch(() => {})
-      .then(() => {
-        window.onError = origOnError;
-        expect(progress).to.equal('ad');
-      });
+    return timer.promise(10).catch(() => {}).then(() => {
+      window.onError = origOnError;
+      expect(progress).to.equal('ad');
+    });
   });
 });

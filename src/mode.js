@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {internalRuntimeVersion} from './internal-version';
 import {parseQueryString_} from './url-parse-query-string';
 
 /**
@@ -35,6 +34,9 @@ import {parseQueryString_} from './url-parse-query-string';
  */
 export let ModeDef;
 
+/** @type {string} */
+const version = '$internalRuntimeVersion$';
+
 /**
  * `rtvVersion` is the prefixed version we serve off of the cdn.
  * The prefix denotes canary(00) or prod(01) or an experiment version ( > 01).
@@ -52,7 +54,7 @@ export function getMode(opt_win) {
   if (win.AMP_MODE) {
     return win.AMP_MODE;
   }
-  return (win.AMP_MODE = getMode_(win));
+  return win.AMP_MODE = getMode_(win);
 }
 
 /**
@@ -72,15 +74,13 @@ function getMode_(win) {
   const IS_MINIFIED = false;
 
   const localDevEnabled = !!AMP_CONFIG.localDev;
-  const runningTests =
-    !!AMP_CONFIG.test || (IS_DEV && !!(win.AMP_TEST || win.__karma__));
-  const runningTestsOnIe = win.__karma__ && win.__karma__.config.amp.testOnIe;
+  const runningTests = (!!AMP_CONFIG.test) || (
+    IS_DEV && !!(win.AMP_TEST || win.__karma__));
   const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
   const hashQuery = parseQueryString_(
-    // location.originalHash is set by the viewer when it removes the fragment
-    // from the URL.
-    win.location.originalHash || win.location.hash
-  );
+      // location.originalHash is set by the viewer when it removes the fragment
+      // from the URL.
+      win.location.originalHash || win.location.hash);
   const singlePassType = AMP_CONFIG.spt;
 
   const searchQuery = parseQueryString_(win.location.search);
@@ -105,16 +105,13 @@ function getMode_(win) {
     filter: hashQuery['filter'],
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
-    // amp-user-location override
-    userLocationOverride: hashQuery['amp-user-location'],
     minified: IS_MINIFIED,
     // Whether document is in an amp-lite viewer. It signal that the user
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
-    testIe: runningTestsOnIe,
     log: hashQuery['log'],
-    version: internalRuntimeVersion(),
+    version,
     rtvVersion,
     singlePassType,
   };
@@ -132,20 +129,21 @@ function getRtvVersion(win, isLocalDev) {
   // If it's local dev then we won't actually have a full version so
   // just use the version.
   if (isLocalDev) {
-    return internalRuntimeVersion();
+    return version;
   }
 
   if (win.AMP_CONFIG && win.AMP_CONFIG.v) {
     return win.AMP_CONFIG.v;
   }
 
-  // Currently `internalRuntimeVersion` and thus `mode.version` contain only
+  // Currently `$internalRuntimeVersion$` and thus `mode.version` contain only
   // major version. The full version however must also carry the minor version.
   // We will default to production default `01` minor version for now.
-  // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
+  // TODO(erwinmombay): decide whether $internalRuntimeVersion$ should contain
   // minor version.
-  return `01${internalRuntimeVersion()}`;
+  return `01${version}`;
 }
+
 
 /**
  * @param {!Window} win
@@ -156,6 +154,7 @@ function getRtvVersion(win, isLocalDev) {
 export function getRtvVersionForTesting(win, isLocalDev) {
   return getRtvVersion(win, isLocalDev);
 }
+
 
 /** @visibleForTesting */
 export function resetRtvVersionForTesting() {

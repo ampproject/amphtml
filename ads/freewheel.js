@@ -27,25 +27,11 @@ export function freewheel(global, data) {
   };
 
   validateData(
-    data,
-    ['zone'],
-    [
-      'zone',
-      'gdpr',
-      'gdpr_consent',
-      'useCMP',
-      'zIndex',
-      'blurDisplay',
-      'timeline',
-      'soundButton',
-      'defaultMute',
-      'onOver',
-      'closeAction',
-      'errorAction',
-      'pauseRatio',
-      'label',
-      'vastUrlParams',
-    ]
+      data,
+      ['zone'],
+      ['zone','gdpr','gdpr_consent','useCMP','zIndex','blurDisplay',
+        'timeline','soundButton','defaultMute','onOver','closeAction',
+        'errorAction','pauseRatio','label','vastUrlParams']
   );
 
   loadScript(global, 'https://cdn.stickyadstv.com/prime-time/fw-amp.min.js');

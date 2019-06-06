@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 /**
  * @param {number} containerWidth
  * @param {number} itemWidth
@@ -25,10 +26,11 @@ function calculateJustified(
   containerWidth,
   itemWidth,
   itemMargin,
-  directedStep
-) {
+  directedStep) {
+
   return directedStep * (containerWidth - itemWidth - itemMargin * 2);
 }
+
 
 /**
  * @param {number} containerWidth
@@ -41,10 +43,11 @@ export function calculateRightJustifiedX(
   containerWidth,
   itemWidth,
   itemMargin,
-  step
-) {
+  step) {
+
   return calculateJustified(containerWidth, itemWidth, itemMargin, step);
 }
+
 
 /**
  * @param {number} containerWidth
@@ -57,7 +60,7 @@ export function calculateLeftJustifiedX(
   containerWidth,
   itemWidth,
   itemMargin,
-  step
-) {
+  step) {
+
   return calculateJustified(containerWidth, itemWidth, itemMargin, -step);
 }

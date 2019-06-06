@@ -15,6 +15,7 @@
  */
 'use strict';
 
+
 const selector = 'AssignmentExpression Identifier[name=IS_AMP_ALT]';
 module.exports = function(context) {
   return {
@@ -23,6 +24,6 @@ module.exports = function(context) {
         node,
         message: 'No Assignment to IS_AMP_ALT global property allowed',
       });
-    },
+    }
   };
 };

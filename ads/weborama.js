@@ -83,8 +83,5 @@ export function weboramaDisplay(global, data) {
     weak_encoding: data.wbo_weak_encoding,
   };
 
-  writeScript(
-    global,
-    'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js'
-  );
+  writeScript(global, 'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js');
 }

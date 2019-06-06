@@ -60,36 +60,26 @@ function intersectionRatio(smaller, larger) {
  * @private
  */
 export function getIntersectionChangeEntry(element, owner, viewport) {
-  devAssert(
-    element.width >= 0 && element.height >= 0,
-    'Negative dimensions in element.'
-  );
+  devAssert(element.width >= 0 && element.height >= 0,
+      'Negative dimensions in element.');
   // Building an IntersectionObserverEntry.
 
   let intersectionRect = element;
   if (owner) {
-    intersectionRect =
-      rectIntersection(owner, element) ||
+    intersectionRect = rectIntersection(owner, element) ||
+        // No intersection.
+        layoutRectLtwh(0, 0, 0, 0);
+  }
+  intersectionRect = rectIntersection(viewport, intersectionRect) ||
       // No intersection.
       layoutRectLtwh(0, 0, 0, 0);
-  }
-  intersectionRect =
-    rectIntersection(viewport, intersectionRect) ||
-    // No intersection.
-    layoutRectLtwh(0, 0, 0, 0);
 
   // The element is relative to (0, 0), while the viewport moves. So, we must
   // adjust.
-  const boundingClientRect = moveLayoutRect(
-    element,
-    -viewport.left,
-    -viewport.top
-  );
-  intersectionRect = moveLayoutRect(
-    intersectionRect,
-    -viewport.left,
-    -viewport.top
-  );
+  const boundingClientRect = moveLayoutRect(element, -viewport.left,
+      -viewport.top);
+  intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
+      -viewport.top);
   // Now, move the viewport to (0, 0)
   const rootBounds = moveLayoutRect(viewport, -viewport.left, -viewport.top);
 
@@ -154,13 +144,10 @@ export class IntersectionObserver {
      * @private {!SubscriptionApi}
      */
     this.postMessageApi_ = new SubscriptionApi(
-      iframe,
-      'send-intersections',
-      opt_is3p || false,
-      // Each time someone subscribes we make sure that they
-      // get an update.
-      () => this.startSendingIntersectionChanges_()
-    );
+        iframe, 'send-intersections', opt_is3p || false,
+        // Each time someone subscribes we make sure that they
+        // get an update.
+        () => this.startSendingIntersectionChanges_());
 
     /** @private {?Function} */
     this.unlistenViewportChanges_ = null;
@@ -243,10 +230,9 @@ export class IntersectionObserver {
       return;
     }
     const change = this.baseElement_.element.getIntersectionChangeEntry();
-    if (
-      this.pendingChanges_.length > 0 &&
-      this.pendingChanges_[this.pendingChanges_.length - 1].time == change.time
-    ) {
+    if (this.pendingChanges_.length > 0 &&
+        this.pendingChanges_[this.pendingChanges_.length - 1].time
+        == change.time) {
       return;
     }
     this.pendingChanges_.push(change);
@@ -268,12 +254,9 @@ export class IntersectionObserver {
       return;
     }
     // Note that SubscribeApi multicasts the update to all interested windows.
-    this.postMessageApi_.send(
-      'intersection',
-      dict({
-        'changes': this.pendingChanges_,
-      })
-    );
+    this.postMessageApi_.send('intersection', dict({
+      'changes': this.pendingChanges_,
+    }));
     this.pendingChanges_.length = 0;
   }
 

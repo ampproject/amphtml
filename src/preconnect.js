@@ -19,6 +19,7 @@
  * connection before the real request can be made.
  */
 
+
 import {Services} from './services';
 import {dev} from './log';
 import {getService, registerServiceBuilder} from './service';
@@ -29,6 +30,7 @@ import {toWin} from './types';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
+
 
 /**
  * @typedef {{
@@ -64,6 +66,7 @@ function getPreconnectFeatures(win) {
   return preconnectFeatures;
 }
 
+
 /**
  * @param {?PreconnectFeaturesDef} features
  */
@@ -71,7 +74,9 @@ export function setPreconnectFeaturesForTesting(features) {
   preconnectFeatures = features;
 }
 
+
 class PreconnectService {
+
   /**
    * @param {!Window} win
    */
@@ -227,8 +232,8 @@ class PreconnectService {
    * @private
    */
   performPreload_(url) {
-    const preload = htmlFor(this.document_)`
-        <link rel="preload" referrerpolicy="origin" />`;
+    const html = htmlFor(this.document_);
+    const preload = html`<link rel="preload" referrerpolicy="origin" />`;
     preload.setAttribute('href', url);
     // Do not set 'as' attribute to correct value for now, for 2 reasons
     // - document value is not yet supported and dropped
@@ -283,10 +288,8 @@ class PreconnectService {
     // Unfortunately there is no reliable way to feature detect whether
     // preconnect is supported, so we do this only in Safari, which is
     // the most important browser without support for it.
-    if (
-      this.features_.preconnect ||
-      !(this.platform_.isSafari() || this.platform_.isIos())
-    ) {
+    if (this.features_.preconnect ||
+        !(this.platform_.isSafari() || this.platform_.isIos())) {
       return;
     }
 
@@ -304,10 +307,9 @@ class PreconnectService {
     // entropy as seen by servers and thus allows reverse proxies
     // (read CDNs) to respond more efficiently.
     const cacheBust = now - (now % ACTIVE_CONNECTION_TIMEOUT_MS);
-    const url =
-      origin +
-      '/robots.txt?_AMP_safari_preconnect_polyfill_cachebust=' +
-      cacheBust;
+    const url = origin +
+        '/amp_preconnect_polyfill_404_or_other_error_expected.' +
+        '_Do_not_worry_about_it?' + cacheBust;
     const xhr = new XMLHttpRequest();
     xhr.open('HEAD', url, true);
     // We only support credentialed preconnect for now.
@@ -316,6 +318,7 @@ class PreconnectService {
     xhr.send();
   }
 }
+
 
 export class Preconnect {
   /**

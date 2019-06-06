@@ -17,7 +17,9 @@
 import * as lolex from 'lolex';
 import {JankMeter} from '../../src/service/jank-meter';
 
+
 describes.realWin('jank-meter', {}, env => {
+
   let win;
   let clock;
   let meter;
@@ -25,9 +27,7 @@ describes.realWin('jank-meter', {}, env => {
   beforeEach(() => {
     win = env.win;
     clock = lolex.install({
-      target: win,
-      toFake: ['Date', 'setTimeout', 'clearTimeout'],
-    });
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
 
     meter = new JankMeter(win);
     meter.perf_ = {
@@ -41,7 +41,8 @@ describes.realWin('jank-meter', {}, env => {
     clock.uninstall();
   });
 
-  it('should use first schedule time when scheduled multiple times ', () => {
+  it('should use first schedule time when scheduled ' +
+      'multiple times ', () => {
     meter.onScheduled();
     clock.tick(5);
     meter.onScheduled();

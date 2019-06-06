@@ -57,7 +57,10 @@ const helpersFactory = env => {
     },
 
     createTrackingWithStubAnalytics(skimOptions) {
-      skimOptions = Object.assign({}, DEFAULT_SKIM_OPTIONS, skimOptions);
+      skimOptions = Object.assign({},
+          DEFAULT_SKIM_OPTIONS,
+          skimOptions
+      );
       this.stubCustomEventReporterBuilder();
 
       return new Tracking(env, skimOptions, 'my-page-referrer');

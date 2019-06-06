@@ -35,7 +35,7 @@ tags: {  # amp-next-page: json config
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/components/amp-next-page"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
 }
 tags: {
   html_format: AMP
@@ -62,7 +62,7 @@ tags: {  # <amp-next-page>
     mandatory: true
     unique: true
   }
-  spec_url: "https://amp.dev/documentation/components/amp-next-page"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
 }
 tags: {  # <amp-next-page src>
   html_format: AMP
@@ -83,7 +83,7 @@ tags: {  # <amp-next-page src>
     tag_spec_name: "AMP-NEXT-PAGE > [separator]"
     unique: true
   }
-  spec_url: "https://amp.dev/documentation/components/amp-next-page"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
 }
 tags: {  # <amp-next-page type="adsense">
   html_format: AMP
@@ -108,5 +108,5 @@ tags: {  # <amp-next-page type="adsense">
     tag_spec_name: "AMP-NEXT-PAGE > [separator]"
     unique: true
   }
-  spec_url: "https://amp.dev/documentation/components/amp-next-page"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
 }

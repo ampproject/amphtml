@@ -85,8 +85,7 @@ export function reddit(global, data) {
 
   global.addEventListener('resize', event => {
     global.context.updateDimensions(
-      event.target.outerWidth,
-      event.target.outerHeight
-    );
+        event.target.outerWidth,
+        event.target.outerHeight);
   });
 }

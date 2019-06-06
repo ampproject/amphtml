@@ -130,9 +130,34 @@ class CSSSupportsRule {
   }
 }
 
-// JS externs for CSSKeyframeRule and CSSKeyframesRule have since been added to
-// closure compiler with https://github.com/google/closure-compiler/commit/de33b2e79,
-// so they can be removed from this file.
+
+/**
+ * @extends {CSSRule}
+ * @see https://www.w3.org/TR/2009/WD-css3-animations-20090320/#DOM-CSSKeyframesRule
+ */
+class CSSKeyframesRule {
+  constructor() {
+    /** @type {string} */
+    this.name;
+    /** @type {!CSSRuleList} */
+    this.cssRules;
+  }
+}
+
+
+/**
+ * @extends {CSSRule}
+ * @see https://www.w3.org/TR/2009/WD-css3-animations-20090320/#DOM-CSSKeyframeRule
+ */
+class CSSKeyframeRule {
+  constructor() {
+    /** @type {string} */
+    this.keyText;
+    /** @type {!CSSStyleDeclaration} */
+    this.style;
+  }
+}
+
 
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/Element/animate

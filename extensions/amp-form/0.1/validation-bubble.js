@@ -22,6 +22,7 @@ import {setStyles, toggle} from '../../../src/style';
 const OBJ_PROP = '__BUBBLE_OBJ';
 
 export class ValidationBubble {
+
   /**
    * Creates a bubble component to display messages in.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -75,15 +76,12 @@ export class ValidationBubble {
     this.currentTargetElement_ = null;
     this.currentMessage_ = '';
 
-    this.vsync_.run(
-      {
-        measure: undefined,
-        mutate: hideBubble,
-      },
-      {
-        bubbleElement: this.bubbleElement_,
-      }
-    );
+    this.vsync_.run({
+      measure: undefined,
+      mutate: hideBubble,
+    }, {
+      bubbleElement: this.bubbleElement_,
+    });
   }
 
   /**
@@ -106,15 +104,13 @@ export class ValidationBubble {
       viewport: this.viewport_,
       id: this.id_,
     };
-    this.vsync_.run(
-      {
-        measure: measureTargetElement,
-        mutate: showBubbleElement,
-      },
-      state
-    );
+    this.vsync_.run({
+      measure: measureTargetElement,
+      mutate: showBubbleElement,
+    }, state);
   }
 }
+
 
 /**
  * Hides the bubble element passed through state object.
@@ -128,6 +124,7 @@ function hideBubble(state) {
   toggle(state.bubbleElement, false);
 }
 
+
 /**
  * Measures the layout for the target element passed through state object.
  * @param {!Object} state
@@ -136,6 +133,7 @@ function hideBubble(state) {
 function measureTargetElement(state) {
   state.targetRect = state.viewport.getLayoutRect(state.targetElement);
 }
+
 
 /**
  * Updates text content, positions and displays the bubble.

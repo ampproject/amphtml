@@ -17,7 +17,9 @@
 import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 import {dev, devAssert} from '../../../src/log';
 import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils';
-import {isInManualExperiment} from '../../../ads/google/a4a/traffic-experiments';
+import {
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {isObject} from '../../../src/types';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Encode} from '../../../src/utils/bytes';
@@ -33,25 +35,14 @@ export const TFCD = 'tagForChildDirectedTreatment';
 
 /** @private {!Array<function(!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>):?Object<string,string>>} */
 const SRA_JOINERS = [
-  combineInventoryUnits,
-  getCookieOptOut,
-  getAdks,
-  getSizes,
-  getTfcd,
-  isAdTest,
-  getTargetingAndExclusions,
-  getExperimentIds,
-  getIdentity,
-  getForceSafeframe,
-  getPageOffsets,
-  getContainers,
-  getIsFluid,
-];
+  combineInventoryUnits, getCookieOptOut, getAdks, getSizes, getTfcd, isAdTest,
+  getTargetingAndExclusions, getExperimentIds, getIdentity, getForceSafeframe,
+  getPageOffsets, getContainers, getIsFluid];
 
 /**
- * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {!Object<string, *>}
- */
+  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
+  * @return {!Object<string, *>}
+  */
 export function constructSRABlockParameters(impls) {
   const parameters = {'output': 'ldjh', 'impl': 'fifs'};
   SRA_JOINERS.forEach(joiner => Object.assign(parameters, joiner(impls)));
@@ -104,7 +95,7 @@ export function combineInventoryUnits(impls) {
       let index = uniqueIuNames[componentNames[i]];
       if (index == undefined) {
         iuNamesOutput.push(componentNames[i]);
-        uniqueIuNames[componentNames[i]] = index = uniqueIuNamesCount++;
+        uniqueIuNames[componentNames[i]] = (index = uniqueIuNamesCount++);
       }
       encodedNames.push(index);
     }
@@ -125,10 +116,8 @@ export function combineInventoryUnits(impls) {
  */
 export function getCookieOptOut(impls) {
   return getFirstInstanceValue_(impls, impl =>
-    impl.jsonTargeting && impl.jsonTargeting['cookieOptOut']
-      ? {'co': '1'}
-      : null
-  );
+    impl.jsonTargeting &&
+         impl.jsonTargeting['cookieOptOut'] ? {'co': '1'} : null);
 }
 
 /**
@@ -138,7 +127,7 @@ export function getCookieOptOut(impls) {
  * @visibleForTesting
  */
 export function getAdks(impls) {
-  return {'adks': impls.map(impl => devAssert(impl.adKey)).join()};
+  return ({'adks': impls.map(impl => devAssert(impl.adKey)).join()});
 }
 
 /**
@@ -148,9 +137,8 @@ export function getAdks(impls) {
  * @visibleForTesting
  */
 export function getSizes(impls) {
-  return {
-    'prev_iu_szs': impls.map(impl => devAssert(impl.parameterSize)).join(),
-  };
+  return ({'prev_iu_szs': impls.map(impl =>
+    devAssert(impl.parameterSize)).join()});
 }
 
 /**
@@ -162,10 +150,8 @@ export function getSizes(impls) {
  */
 export function getTfcd(impls) {
   return getFirstInstanceValue_(impls, impl =>
-    impl.jsonTargeting && impl.jsonTargeting[TFCD]
-      ? {'tfcd': impl.jsonTargeting[TFCD]}
-      : null
-  );
+    impl.jsonTargeting && impl.jsonTargeting[TFCD] ?
+      {'tfcd': impl.jsonTargeting[TFCD]} : null);
 }
 
 /**
@@ -177,8 +163,7 @@ export function getTfcd(impls) {
  */
 export function isAdTest(impls) {
   return getFirstInstanceValue_(impls, impl =>
-    isInManualExperiment(impl.element) ? {'adtest': 'on'} : null
-  );
+    isInManualExperiment(impl.element) ? {'adtest': 'on'} : null);
 }
 
 /**
@@ -190,57 +175,20 @@ export function isAdTest(impls) {
  * @visibleForTesting
  */
 export function getTargetingAndExclusions(impls) {
-  let commonKVs = null;
-  // Find common key/values.
-  for (let i = 0; i < impls.length; i++) {
-    const impl = impls[i];
-    if (!impl.jsonTargeting || !impl.jsonTargeting['targeting']) {
-      commonKVs = null;
-      break;
-    }
-    if (commonKVs) {
-      Object.keys(commonKVs).map(key => {
-        if (commonKVs[key] != impl.jsonTargeting['targeting'][key]) {
-          delete commonKVs[key];
-        }
-      });
-    } else {
-      // Need to create a copy otherwise later delete operations will modify
-      // first slot's targeting.
-      commonKVs = Object.assign({}, impl.jsonTargeting['targeting']);
-    }
-  }
   let hasScp = false;
   const scps = [];
-  const hasTargeting = impl =>
-    impl.jsonTargeting &&
-    (impl.jsonTargeting['targeting'] ||
-      impl.jsonTargeting['categoryExclusions']);
   impls.forEach(impl => {
-    if (hasTargeting(impl)) {
+    if (impl.jsonTargeting && (impl.jsonTargeting['targeting'] ||
+       impl.jsonTargeting['categoryExclusions'])) {
       hasScp = true;
-      scps.push(
-        serializeTargeting(
+      scps.push(serializeTargeting(
           impl.jsonTargeting['targeting'] || null,
-          impl.jsonTargeting['categoryExclusions'] || null,
-          commonKVs
-        )
-      );
+          impl.jsonTargeting['categoryExclusions'] || null));
     } else {
       scps.push('');
     }
   });
-  if (!commonKVs && !hasScp) {
-    return null;
-  }
-  const result = {};
-  if (commonKVs && Object.keys(commonKVs).length) {
-    result['csp'] = serializeTargeting(commonKVs, null, null);
-  }
-  if (hasScp) {
-    result['prev_scp'] = scps.join('|');
-  }
-  return result;
+  return hasScp ? {'prev_scp': scps.join('|')} : null;
 }
 
 /**
@@ -254,12 +202,10 @@ export function getTargetingAndExclusions(impls) {
  */
 export function getExperimentIds(impls) {
   const eids = {};
-  const deid =
-    (impls.length &&
-      /(?:#|,)deid=([\d,]+)/i.exec(impls[0].win.location.hash)) ||
-    [];
+  const deid = (impls.length &&
+     /(?:#|,)deid=([\d,]+)/i.exec(impls[0].win.location.hash)) || [];
   (deid[1] || '').split(',').forEach(eid => eid && (eids[eid] = 1));
-  impls.forEach(impl => impl.experimentIds.forEach(eid => (eids[eid] = 1)));
+  impls.forEach(impl => impl.experimentIds.forEach(eid => eids[eid] = 1));
   const eidKeys = Object.keys(eids).join();
   return eidKeys ? {'eid': eidKeys} : null;
 }
@@ -353,19 +299,12 @@ export function getIsFluid(impls) {
 /**
  * @param {?Object<string, (!Array<string>|string)>} targeting
  * @param {?(!Array<string>|string)} categoryExclusions
- * @param {?Object<string, (!Array<string>|string)>} commonTargeting
  * @return {?string}
  */
-export function serializeTargeting(
-  targeting,
-  categoryExclusions,
-  commonTargeting
-) {
-  const serialized = targeting
-    ? Object.keys(targeting)
-        .filter(key => !commonTargeting || commonTargeting[key] === undefined)
-        .map(key => serializeItem_(key, targeting[key]))
-    : [];
+export function serializeTargeting(targeting, categoryExclusions) {
+  const serialized = targeting ?
+    Object.keys(targeting).map(key => serializeItem_(key, targeting[key])) :
+    [];
   if (categoryExclusions) {
     serialized.push(serializeItem_('excl_cat', categoryExclusions));
   }
@@ -379,9 +318,8 @@ export function serializeTargeting(
  * @private
  */
 function serializeItem_(key, value) {
-  const serializedValue = (Array.isArray(value) ? value : [value])
-    .map(encodeURIComponent)
-    .join();
+  const serializedValue =
+    (Array.isArray(value) ? value : [value]).map(encodeURIComponent).join();
   return `${encodeURIComponent(key)}=${serializedValue}`;
 }
 
@@ -399,46 +337,45 @@ function serializeItem_(key, value) {
  * @param {string} sraUrl url of SRA request for error reporting
  */
 export function sraBlockCallbackHandler(
-  creative,
-  headersObj,
-  done,
-  sraRequestAdUrlResolvers,
-  sraUrl
-) {
+  creative, headersObj, done, sraRequestAdUrlResolvers, sraUrl) {
   const headerNames = Object.keys(headersObj);
-  if (headerNames.length == 1 && isObject(headersObj[headerNames[0]])) {
+  if (headerNames.length == 1 &&
+      isObject(headersObj[headerNames[0]])) {
     // TODO(keithwrightbos) - fix upstream so response does
     // not improperly place headers under key.
-    headersObj = /** @type {!Object} */ (headersObj)[headerNames[0]];
-    headersObj = Object.keys(headersObj).reduce((newObj, key) => {
-      newObj[key.toLowerCase()] = headersObj[key];
-      return newObj;
-    }, {});
+    headersObj =
+      /** @type {!Object} */(headersObj)[headerNames[0]];
+    headersObj = Object.keys(headersObj).reduce(
+        (newObj, key) => {
+          newObj[key.toLowerCase()] = headersObj[key];
+          return newObj;
+        }, {});
   }
   // Force safeframe rendering method.
-  headersObj[RENDERING_TYPE_HEADER.toLowerCase()] = XORIGIN_MODE.SAFEFRAME;
+  headersObj[RENDERING_TYPE_HEADER.toLowerCase()] =
+      XORIGIN_MODE.SAFEFRAME;
   // Construct pseudo fetch response to be passed down the A4A
   // promise chain for this block.
   const headers =
-    /** @type {?Headers} */
-    ({
-      get: name => {
-        // TODO(keithwrightbos) - fix upstream so response writes
-        // all metadata values as strings.
-        let header = headersObj[name.toLowerCase()];
-        if (header && typeof header != 'string') {
-          header = JSON.stringify(header);
-        }
-        return header;
-      },
-      has: name => !!headersObj[name.toLowerCase()],
-    });
+/** @type {?Headers} */
+({
+  get: name => {
+    // TODO(keithwrightbos) - fix upstream so response writes
+    // all metadata values as strings.
+    let header = headersObj[name.toLowerCase()];
+    if (header && typeof header != 'string') {
+      header = JSON.stringify(header);
+    }
+    return header;
+  },
+  has: name => !!headersObj[name.toLowerCase()],
+});
   const fetchResponse =
-    /** @type {?Response} */
-    ({
-      headers,
-      arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
-    });
+/** @type {?Response} */
+({
+  headers,
+  arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
+});
   // Pop head off of the array of resolvers as the response
   // should match the order of blocks declared in the ad url.
   // This allows the block to start rendering while the SRA
@@ -447,11 +384,7 @@ export function sraBlockCallbackHandler(
   // If done, expect array to be empty (ensures ad response
   // included data for all slots).
   if (done && sraRequestAdUrlResolvers.length) {
-    dev().warn(
-      TAG,
-      'Premature end of SRA response',
-      sraRequestAdUrlResolvers.length,
-      sraUrl
-    );
+    dev().warn(TAG, 'Premature end of SRA response',
+        sraRequestAdUrlResolvers.length, sraUrl);
   }
 }

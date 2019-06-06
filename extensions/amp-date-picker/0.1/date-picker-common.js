@@ -17,6 +17,7 @@
 import {dict, omit} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
 
+
 /**
  * A higher-order component that wraps a specific date-picker implmentation
  * with common functionality.
@@ -25,7 +26,7 @@ import {requireExternal} from '../../../src/module';
  */
 export function withDatePickerCommon(WrappedComponent) {
   const reactDates = requireExternal('react-dates');
-  const isSameDay = reactDates['isSameDay'];
+
   const isInclusivelyAfterDay = reactDates['isInclusivelyAfterDay'];
   const isInclusivelyBeforeDay = reactDates['isInclusivelyBeforeDay'];
   const React = requireExternal('react');
@@ -56,9 +57,8 @@ export function withDatePickerCommon(WrappedComponent) {
    * @return {boolean}
    */
   function isInclusivelyBetween(date, min, max) {
-    return (
-      isInclusivelyAfterDay(date, min) && isInclusivelyBeforeDay(date, max)
-    );
+    return isInclusivelyAfterDay(date, min) &&
+        isInclusivelyBeforeDay(date, max);
   }
 
   /**
@@ -94,33 +94,12 @@ export function withDatePickerCommon(WrappedComponent) {
   }
 
   const defaultProps = dict({
-    'allowBlockedEndDate': false,
     'blocked': null,
     'highlighted': null,
     'initialVisibleMonth': '',
     'max': '',
     'min': '',
   });
-
-  /**
-   * Detect if a date is a blocked date. This is aware of the
-   * `allow-blocked-end-date` attribute to allow the user to select the first
-   * blocked date after their selected start date.
-   * @param {!./dates-list.DatesList} list
-   * @param {?moment} startDate
-   * @param {?moment} endDate
-   * @param {boolean} allowBlockedEndDate
-   * @param {!moment} day
-   */
-  function isDayBlocked(list, startDate, endDate, allowBlockedEndDate, day) {
-    const isBlocked = datesListContains(list, day);
-
-    if (startDate && !endDate && allowBlockedEndDate) {
-      return isBlocked && !isSameDay(day, list.firstDateAfter(startDate));
-    }
-
-    return isBlocked;
-  }
 
   /**
    * @struct
@@ -136,21 +115,12 @@ export function withDatePickerCommon(WrappedComponent) {
       /** @type {!JsonObject} */
       this.props;
 
-      const allowBlockedEndDate = props['allowBlockedEndDate'];
       const blocked = props['blocked'];
-      const endDate = props['endDate'];
       const highlighted = props['highlighted'];
-      const max = props['max'];
       const min = props['min'];
-      const startDate = props['startDate'];
+      const max = props['max'];
 
-      this.isDayBlocked = isDayBlocked.bind(
-        null,
-        blocked,
-        startDate,
-        endDate,
-        allowBlockedEndDate
-      );
+      this.isDayBlocked = datesListContains.bind(null, blocked);
       this.isDayHighlighted = datesListContains.bind(null, highlighted);
       this.isOutsideRange = isOutsideRange.bind(null, min, max);
     }
@@ -164,31 +134,16 @@ export function withDatePickerCommon(WrappedComponent) {
 
     /** @override */
     componentWillReceiveProps(nextProps) {
-      const allowBlockedEndDate = nextProps['allowBlockedEndDate'];
-      const blocked = nextProps['blocked'];
-      const endDate = nextProps['endDate'];
-      const highlighted = nextProps['highlighted'];
       const max = nextProps['max'];
       const min = nextProps['min'];
-      const startDate = nextProps['startDate'];
-
+      const blocked = nextProps['blocked'];
+      const highlighted = nextProps['highlighted'];
       if (min != this.props['min'] || max != this.props['max']) {
         this.isOutsideRange = isOutsideRange.bind(null, min, max);
       }
 
-      if (
-        blocked != this.props['blocked'] ||
-        allowBlockedEndDate != this.props['allowBlockedEndDate'] ||
-        startDate != this.props['startDate'] ||
-        endDate != this.props['endDate']
-      ) {
-        this.isDayBlocked = isDayBlocked.bind(
-          null,
-          blocked,
-          startDate,
-          endDate,
-          allowBlockedEndDate
-        );
+      if (blocked != this.props['blocked']) {
+        this.isDayBlocked = datesListContains.bind(null, blocked);
       }
 
       if (highlighted != this.props['highlighted']) {
@@ -198,10 +153,8 @@ export function withDatePickerCommon(WrappedComponent) {
 
     /** @override */
     render() {
-      const props = /** @type {!JsonObject} */ (omit(
-        this.props,
-        Object.keys(defaultProps)
-      ));
+      const props = /** @type {!JsonObject} */ (
+        omit(this.props, Object.keys(defaultProps)));
 
       const date = props['date'];
       const daySize = props['daySize'];
@@ -210,22 +163,16 @@ export function withDatePickerCommon(WrappedComponent) {
       const startDate = props['startDate'];
 
       const initialDate =
-        initialVisibleMonth || date || startDate || endDate || undefined;
+          initialVisibleMonth || date || startDate || endDate || undefined;
       props['initialVisibleMonth'] = () => moment(initialDate);
 
-      return React.createElement(
-        WrappedComponent,
-        Object.assign(
-          {},
-          props,
+      return React.createElement(WrappedComponent, Object.assign({}, props,
           dict({
             'daySize': Number(daySize),
             'isDayBlocked': this.isDayBlocked,
             'isDayHighlighted': this.isDayHighlighted,
             'isOutsideRange': this.isOutsideRange,
-          })
-        )
-      );
+          })));
     }
   }
 

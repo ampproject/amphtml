@@ -37,18 +37,18 @@ FAIL
 |    <!-- Invalid: data-media-hashed-id missing. -->
 |    <amp-wistia-player
 >>   ^~~~~~~~~
-amp-wistia-player/0.1/test/validator-amp-wistia-player.html:37:2 The mandatory attribute 'data-media-hashed-id' is missing in tag 'amp-wistia-player'. (see https://amp.dev/documentation/components/amp-wistia-player) [AMP_TAG_PROBLEM]
+amp-wistia-player/0.1/test/validator-amp-wistia-player.html:37:2 The mandatory attribute 'data-media-hashed-id' is missing in tag 'amp-wistia-player'. (see https://www.ampproject.org/docs/reference/components/amp-wistia-player) [AMP_TAG_PROBLEM]
 |      width="512" height="360"></amp-wistia-player>
 |    <!-- Invalid: data-media-hashed-id illegal characters. -->
 |    <amp-wistia-player
 >>   ^~~~~~~~~
-amp-wistia-player/0.1/test/validator-amp-wistia-player.html:40:2 The attribute 'data-media-hashed-id' in tag 'amp-wistia-player' is set to the invalid value 'illegal value'. (see https://amp.dev/documentation/components/amp-wistia-player) [DISALLOWED_HTML]
+amp-wistia-player/0.1/test/validator-amp-wistia-player.html:40:2 The attribute 'data-media-hashed-id' in tag 'amp-wistia-player' is set to the invalid value 'illegal value'. (see https://www.ampproject.org/docs/reference/components/amp-wistia-player) [DISALLOWED_HTML]
 |      data-media-hashed-id="illegal value"
 |      width="512" height="360"></amp-wistia-player>
 |    <!-- Invalid: missing layout attributes. -->
 |    <amp-wistia-player
 >>   ^~~~~~~~~
-amp-wistia-player/0.1/test/validator-amp-wistia-player.html:44:2 Incomplete layout attributes specified for tag 'amp-wistia-player'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-wistia-player) [AMP_LAYOUT_PROBLEM]
+amp-wistia-player/0.1/test/validator-amp-wistia-player.html:44:2 Incomplete layout attributes specified for tag 'amp-wistia-player'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-wistia-player) [AMP_LAYOUT_PROBLEM]
 |      data-media-hashed-id="u8p9wq6mq8"></amp-wistia-player>
 |  </body>
 |  </html>

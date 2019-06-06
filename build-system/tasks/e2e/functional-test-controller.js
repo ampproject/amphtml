@@ -40,24 +40,9 @@ class ElementHandle {
    * @package
    */
   getElement() {
-    return this.element_;
+  	return this.element_;
   }
 }
-
-/**
- * Key to send to the FunctionalTestController#type method to trigger
- * actions instead of text.
- * @enum {string}
- */
-const Key = {
-  'ArrowDown': 'ArrowDown',
-  'ArrowLeft': 'ArrowLeft',
-  'ArrowRight': 'ArrowRight',
-  'ArrowUp': 'ArrowUp',
-  'Enter': 'Enter',
-  'Escape': 'Escape',
-  'Tab': 'Tab',
-};
 
 /**
  * Allow expectations to await the expected value. Duck-type a real Promise.
@@ -75,10 +60,9 @@ class ControllerPromise {
    * @param {function(TYPE,function(TYPE): ?TYPE): !Promise=} opt_waitForValue
    */
   constructor(executorOrPromise, opt_waitForValue) {
-    this.promise_ =
-      typeof executorOrPromise == 'function'
-        ? new Promise(executorOrPromise)
-        : executorOrPromise;
+    this.promise_ = typeof executorOrPromise == 'function' ?
+      new Promise(executorOrPromise) :
+      executorOrPromise;
 
     /**
      * Returns a Promise that resolves when the given expected value fulfills
@@ -92,17 +76,15 @@ class ControllerPromise {
   /** @override */
   catch(onRejected) {
     return new ControllerPromise(
-      this.promise_.catch(onRejected),
-      this.waitForValue
-    );
+        this.promise_.catch(onRejected),
+        this.waitForValue);
   }
 
-  /** @override */
+ 	/** @override */
   finally(onFinally) {
     return new ControllerPromise(
-      this.promise_.finally(onFinally),
-      this.waitForValue
-    );
+        this.promise_.finally(onFinally),
+        this.waitForValue);
   }
 
   /** @override */
@@ -114,15 +96,13 @@ class ControllerPromise {
       wrappedWait = (condition, opt_mutate) => {
         opt_mutate = opt_mutate || (x => x);
         return this.waitForValue(condition, value =>
-          opt_mutate(opt_onFulfilled(value))
-        );
+          opt_mutate(opt_onFulfilled(value)));
       };
     }
 
     return new ControllerPromise(
-      this.promise_.then(opt_onFulfilled, opt_onRejected),
-      wrappedWait
-    );
+        this.promise_.then(opt_onFulfilled, opt_onRejected),
+        wrappedWait);
   }
 }
 
@@ -152,6 +132,18 @@ class FunctionalTestController {
    * @return {!ControllerPromise<string>}
    */
   async getTitle() {}
+
+  /**
+   * Selects the current top-level browsing context or a child browsing context
+   * of the current browsing context to use as the current browsing context for
+   * subsequent commands.
+   * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
+   *
+   * @param {!ElementHandle} unusedHandle
+   * @param {function():(!Promise|undefined)} unusedFn
+   * @return {!Promise}
+   */
+  async usingFrame(unusedHandle, unusedFn) {}
 
   /**
    * Selects the current top-level browsing context or a child browsing context
@@ -202,12 +194,6 @@ class FunctionalTestController {
    * @return {!ControllerPromise<!ElementHandle>}
    */
   async getActiveElement() {}
-
-  /**
-   * Gets the root of the current document, for use in scrolling e.g.
-   * @return {!Promise<!ElementHandle>}
-   */
-  async getDocumentElement() {}
 
   /**
    * The Find Element command is used to find the first element matching the
@@ -351,8 +337,7 @@ class FunctionalTestController {
 
   /**
    * The Get Element Rect command returns the dimensions and coordinates of
-   * the given web element. Unlike the webdriver version, this also returns
-   * the left, right, top and bottom properties.
+   * the given web element.
    * {@link https://www.w3.org/TR/webdriver1/#get-element-rect}
    *
    * @param {!ElementHandle} unusedHandle
@@ -416,7 +401,7 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#element-send-keys}
    *
    * @param {?ElementHandle} unusedHandle
-   * @param {string|Key} unusedKeys
+   * @param {string} unusedKeys
    * @return {!Promise}
    */
   async type(unusedHandle, unusedKeys) {}
@@ -442,34 +427,25 @@ class FunctionalTestController {
    * @package
    */
   async evaluate(unusedFn, ...unusedArgs) {}
-
-  /**
-   * Cleanup any resources
-   * @return {!Promise}
-   */
-  async dispose() {}
 }
+
 
 /**
  * @typedef {{
  *   width: number,
  *   height: number
  * }} WindowRectDef
- */
+*/
 let WindowRectDef;
 
 /**
  * @typedef {{
  *   x: number,
  *   y: number,
- *   top: number,
- *   bottom: number,
- *   left: number,
- *   right: number,
  *   width: number,
  *   height: number
  * }}
- */
+*/
 let DOMRectDef;
 
 /** @enum {string} */
@@ -491,7 +467,6 @@ module.exports = {
   ElementHandle,
   ControllerPromise,
   FunctionalTestController,
-  Key,
   WindowRectDef,
   DOMRectDef,
   ScrollToOptionsDef,

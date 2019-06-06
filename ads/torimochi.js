@@ -22,6 +22,7 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function torimochi(global, data) {
+
   validateData(data, ['area', 'adtype']);
 
   if (data.width < global.width) {
@@ -35,8 +36,7 @@ export function torimochi(global, data) {
   global.extra = parseJson(data['extra'] || '{}');
   global.context.renderStart({width: global.width, height: global.height});
 
-  const url =
-    'https://asset.torimochi-ad.net/js/torimochi_ad_amp.min.js?v=' + Date.now();
+  const url = 'https://asset.torimochi-ad.net/js/torimochi_ad_amp.min.js?v=' + Date.now();
 
   writeScript(global, url);
 }

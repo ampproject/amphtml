@@ -41,6 +41,6 @@ FAIL
 |    <!-- invalid example: data-partner is missing -->
 |    <amp-kaltura-player width="480" height="270"></amp-kaltura-player>
 >>   ^~~~~~~~~
-amp-kaltura-player/0.1/test/validator-amp-kaltura-player.html:41:2 The mandatory attribute 'data-partner' is missing in tag 'amp-kaltura-player'. (see https://amp.dev/documentation/components/amp-kaltura-player) [AMP_TAG_PROBLEM]
+amp-kaltura-player/0.1/test/validator-amp-kaltura-player.html:41:2 The mandatory attribute 'data-partner' is missing in tag 'amp-kaltura-player'. (see https://www.ampproject.org/docs/reference/components/amp-kaltura-player) [AMP_TAG_PROBLEM]
 |  </body>
 |  </html>

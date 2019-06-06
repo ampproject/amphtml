@@ -11,7 +11,6 @@ import com.google.javascript.jscomp.CompilerPass;
 import com.google.javascript.jscomp.CompilerTestCase;
 import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
-import org.junit.Test;
 
 
 /**
@@ -19,11 +18,10 @@ import org.junit.Test;
  */
 public class AmpPassTest extends CompilerTestCase {
 
-  ImmutableSet<String> suffixTypes = ImmutableSet.of(
-      "dev$$module$src$log().assert()",
-      "dev$$module$src$log().fine()",
-      "devAssert$$module$src$log()"
-      );
+  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
+      "module$src$log.dev",
+          ImmutableSet.of("assert", "fine", "assertElement", "assertString", "assertNumber"),
+      "module$src$log.user", ImmutableSet.of("fine"));
 
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
       "IS_MINIFIED",
@@ -35,7 +33,7 @@ public class AmpPassTest extends CompilerTestCase {
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
     return new AmpPass(compiler, /* isProd */ true, suffixTypes, assignmentReplacements,
-        prodAssignmentReplacements, "123");
+        prodAssignmentReplacements);
   }
 
   @Override protected int getNumRepetitions() {
@@ -43,55 +41,35 @@ public class AmpPassTest extends CompilerTestCase {
     return 1;
   }
 
-  @Test public void testDevFineRemoval() throws Exception {
+  public void testDevFineRemoval() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
-             "  dev$$module$src$log().fine('hello world');",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
+             "  module$src$log.dev().fine('hello world');",
              "  console.log('this is preserved');",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
              "  'hello world';",
              "  console.log('this is preserved');",
             "})()"));
     test(
         LINE_JOINER.join(
              "(function() {",
-             "  dev$$module$src$log().fine();",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
+             "  module$src$log.dev().fine();",
              "  console.log('this is preserved');",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
              "  console.log('this is preserved');",
             "})()"));
   }
 
-  @Test public void testDevAssertRemoval() throws Exception {
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "  devAssert$$module$src$log('hello world');",
-             "  console.log('this is preserved');",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "  'hello world';",
-             "  console.log('this is preserved');",
-            "})()"));
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "  devAssert$$module$src$log();",
-             "  console.log('this is preserved');",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "  console.log('this is preserved');",
-            "})()"));
-  }
-
-  @Test public void testDevErrorPreserve() throws Exception {
+  public void testDevErrorPreserve() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -107,40 +85,46 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  @Test public void testDevAssertExpressionRemoval() throws Exception {
+  public void testDevAssertExpressionRemoval() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
-             "  dev$$module$src$log().assert('hello world');",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  module$src$log.dev().assert('hello world');",
              "  console.log('this is preserved');",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
              "  \"hello world\";",
              "  console.log('this is preserved');",
             "})()"));
     test(
         LINE_JOINER.join(
              "(function() {",
-             "  var someValue = dev$$module$src$log().assert();",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert();",
              "  console.log('this is preserved', someValue);",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
              "  var someValue;",
              "  console.log('this is preserved', someValue);",
             "})()"));
   }
 
-  @Test public void testDevAssertPreserveFirstArg() throws Exception {
+  public void testDevAssertPreserveFirstArg() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
-             "  var someValue = dev$$module$src$log().assert(true, 'This is an error');",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert(true, 'This is an error');",
              "  console.log('this is preserved', someValue);",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
              "  var someValue = true;",
              "  console.log('this is preserved', someValue);",
             "})()"));
@@ -149,33 +133,37 @@ public class AmpPassTest extends CompilerTestCase {
         LINE_JOINER.join(
              "(function() {",
              "  function add(a, b) { return a + b; }",
-             "  var someValue = add(dev$$module$src$log().assert(3), dev$$module$src$log().assert(3));",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = add(module$src$log.dev().assert(3), module$src$log.dev().assert(3));",
              "  console.log('this is preserved', someValue);",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
              "  function add(a, b) { return a + b; }",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
              "  var someValue = add(3, 3);",
              "  console.log('this is preserved', someValue);",
             "})()"));
   }
 
-  @Test public void testShouldPreserveNoneCalls() throws Exception {
+  public void testShouldPreserveNoneCalls() throws Exception {
     test(
         // Does reliasing
         LINE_JOINER.join(
              "(function() {",
-             "  var someValue = dev$$module$src$log().assert;",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert;",
              "  console.log('this is preserved', someValue);",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
-             "  var someValue = dev$$module$src$log().assert;",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert;",
              "  console.log('this is preserved', someValue);",
             "})()"));
   }
 
-  @Test public void testGetModeLocalDevPropertyReplacement() throws Exception {
+  public void testGetModeLocalDevPropertyReplacement() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -195,7 +183,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  @Test public void testGetModeTestPropertyReplacement() throws Exception {
+  public void testGetModeTestPropertyReplacement() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -215,7 +203,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  @Test public void testGetModeMinifiedPropertyReplacement() throws Exception {
+  public void testGetModeMinifiedPropertyReplacement() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -235,7 +223,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  @Test public void testGetModeWinTestPropertyReplacement() throws Exception {
+  public void testGetModeWinTestPropertyReplacement() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -257,7 +245,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  @Test public void testGetModeWinMinifiedPropertyReplacement() throws Exception {
+  public void testGetModeWinMinifiedPropertyReplacement() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -279,7 +267,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  @Test public void testGetModePreserve() throws Exception {
+  public void testGetModePreserve() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -316,7 +304,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  @Test public void testOptimizeGetModeFunction() throws Exception {
+  public void testOptimizeGetModeFunction() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -332,7 +320,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  @Test public void testRemoveAmpAddExtensionCallWithExplicitContext() throws Exception {
+  public void testRemoveAmpAddExtensionCallWithExplicitContext() throws Exception {
     test(
         LINE_JOINER.join(
             "var a = 'hello';",
@@ -350,7 +338,7 @@ public class AmpPassTest extends CompilerTestCase {
             "console.log(a);"));
   }
 
-  @Test public void testRemoveAmpAddExtensionCallWithNoContext() throws Exception {
+  public void testRemoveAmpAddExtensionCallWithNoContext() throws Exception {
     test(
         LINE_JOINER.join(
             "var a = 'hello';",
@@ -366,17 +354,5 @@ public class AmpPassTest extends CompilerTestCase {
             "  console.log(a);",
             "})(self.AMP);",
             "console.log(a);"));
-  }
-
-  @Test public void testAmpVersionReplacement() throws Exception {
-    test(
-        LINE_JOINER.join(
-            "var a = `test${internalRuntimeVersion$$module$src$internal_version()}ing`;",
-            "var b = 'test' + internalRuntimeVersion$$module$src$internal_version() + 'ing';",
-            "var c = internalRuntimeVersion$$module$src$internal_version();"),
-        LINE_JOINER.join(
-            "var a = `test${'123'}ing`;",
-            "var b = 'test' + '123' + 'ing';",
-            "var c = '123';"));
   }
 }

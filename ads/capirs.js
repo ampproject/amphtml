@@ -61,9 +61,7 @@ export function capirs(global, data) {
         const reportId = 'capirs-' + banner['banner_id'];
         global.context.reportRenderedEntityIdentifier(reportId);
       },
-      unexist: function() {
-        global.context.noContentAvailable();
-      },
+      unexist: function() { global.context.noContentAvailable(); },
     },
   };
 
@@ -80,8 +78,8 @@ function getWidth(global, banner) {
 
   if (isResponsiveAd(banner)) {
     width = Math.max(
-      global.document.documentElement./*OK*/ clientWidth,
-      global.window./*OK*/ innerWidth || 0
+        global.document.documentElement./*OK*/clientWidth,
+        global.window./*OK*/innerWidth || 0
     );
   } else {
     width = banner.width;

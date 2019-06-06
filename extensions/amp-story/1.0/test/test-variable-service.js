@@ -17,6 +17,7 @@ import {AdvancementMode} from '../story-analytics';
 import {AmpStoryVariableService} from '../variable-service';
 import {StateChangeType} from '../navigation-state';
 
+
 describes.fakeWin('amp-story variable service', {}, () => {
   let variableService;
 
@@ -39,9 +40,8 @@ describes.fakeWin('amp-story variable service', {}, () => {
   });
 
   it('should update storyAdvancementMode on change', () => {
-    variableService.onAdvancementModeStateChange(
-      AdvancementMode.MANUAL_ADVANCE
-    );
+    variableService
+        .onAdvancementModeStateChange(AdvancementMode.MANUAL_ADVANCE);
 
     const variables = variableService.get();
     expect(variables['storyAdvancementMode']).to.equal('manualAdvance');

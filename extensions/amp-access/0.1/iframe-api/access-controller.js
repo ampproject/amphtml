@@ -15,6 +15,7 @@
  */
 /*eslint no-unused-vars: 0*/
 
+
 /**
  * The controller that the iframe must implement in order to provide
  * the access features.
@@ -22,6 +23,7 @@
  * @interface
  */
 export class AccessController {
+
   /**
    * Check origin, protocol and configuration and initialize controller.
    * @param {string} origin

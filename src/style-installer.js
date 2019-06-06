@@ -16,7 +16,7 @@
 
 import {Services} from './services';
 import {dev, devAssert, rethrowAsync} from './log';
-import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
+import {insertAfterOrAtStart, waitForBodyPromise} from './dom';
 import {map} from './utils/object';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
@@ -43,19 +43,13 @@ const STYLE_MAP_PROP = '__AMP_CSS_SM';
  * @return {!Element}
  */
 export function installStylesForDoc(
-  ampdoc,
-  cssText,
-  cb,
-  opt_isRuntimeCss,
-  opt_ext
-) {
+  ampdoc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   const cssRoot = ampdoc.getHeadNode();
   const style = insertStyleElement(
-    cssRoot,
-    maybeTransform(cssRoot, cssText),
-    opt_isRuntimeCss || false,
-    opt_ext || null
-  );
+      cssRoot,
+      maybeTransform(cssRoot, cssText),
+      opt_isRuntimeCss || false,
+      opt_ext || null);
 
   if (cb) {
     const rootNode = ampdoc.getRootNode();
@@ -79,6 +73,7 @@ export function installStylesForDoc(
   return style;
 }
 
+
 /**
  * Adds the given css text to the given document.
  * TODO(dvoytenko, #10705): Remove this method once FIE/ampdoc migration is
@@ -96,18 +91,12 @@ export function installStylesForDoc(
  * @return {!Element}
  */
 export function installStylesLegacy(
-  doc,
-  cssText,
-  cb,
-  opt_isRuntimeCss,
-  opt_ext
-) {
+  doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   const style = insertStyleElement(
-    dev().assertElement(doc.head),
-    cssText,
-    opt_isRuntimeCss || false,
-    opt_ext || null
-  );
+      dev().assertElement(doc.head),
+      cssText,
+      opt_isRuntimeCss || false,
+      opt_ext || null);
 
   if (cb) {
     // Styles aren't always available synchronously. E.g. if there is a
@@ -130,6 +119,7 @@ export function installStylesLegacy(
   return style;
 }
 
+
 /**
  * Creates the properly configured style element.
  * @param {!Element|!ShadowRoot} cssRoot
@@ -144,13 +134,11 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
     styleMap = cssRoot[STYLE_MAP_PROP] = map();
   }
 
-  const isExtCss =
-    !isRuntimeCss && (ext && ext != 'amp-custom' && ext != 'amp-keyframes');
-  const key = isRuntimeCss
-    ? 'amp-runtime'
-    : isExtCss
-    ? `amp-extension=${ext}`
-    : null;
+  const isExtCss = !isRuntimeCss &&
+      (ext && ext != 'amp-custom' && ext != 'amp-keyframes');
+  const key =
+      isRuntimeCss ? 'amp-runtime' :
+        isExtCss ? `amp-extension=${ext}` : null;
 
   // Check if it has already been created or discovered.
   if (key) {
@@ -164,9 +152,9 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   }
 
   // Create the new style element and append to cssRoot.
-  const doc = cssRoot.ownerDocument || cssRoot;
+  const doc = (cssRoot.ownerDocument || cssRoot);
   const style = doc.createElement('style');
-  style./*OK*/ textContent = cssText;
+  style./*OK*/textContent = cssText;
   let afterElement = null;
   // Make sure that we place style tags after the main runtime CSS. Otherwise
   // the order is random.
@@ -174,9 +162,8 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
     style.setAttribute('amp-runtime', '');
   } else if (isExtCss) {
     style.setAttribute('amp-extension', ext || '');
-    afterElement = dev().assertElement(
-      getExistingStyleElement(cssRoot, styleMap, 'amp-runtime')
-    );
+    afterElement = dev().assertElement(getExistingStyleElement(
+        cssRoot, styleMap, 'amp-runtime'));
   } else {
     if (ext) {
       style.setAttribute(ext, '');
@@ -190,6 +177,7 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   return style;
 }
 
+
 /**
  * @param {!Element|!ShadowRoot} cssRoot
  * @param {!Object<string, !Element>} styleMap
@@ -202,7 +190,7 @@ function getExistingStyleElement(cssRoot, styleMap, key) {
     return styleMap[key];
   }
   // Check if the style has already been added by the server layout.
-  const existing = cssRoot./*OK*/ querySelector(`style[${key}]`);
+  const existing = cssRoot./*OK*/querySelector(`style[${key}]`);
   if (existing) {
     styleMap[key] = existing;
     return existing;
@@ -210,6 +198,7 @@ function getExistingStyleElement(cssRoot, styleMap, key) {
   // Nothing found.
   return null;
 }
+
 
 /**
  * Applies a transformer to the CSS text if it has been registered.
@@ -219,6 +208,7 @@ function getExistingStyleElement(cssRoot, styleMap, key) {
 export function installCssTransformer(cssRoot, transformer) {
   cssRoot[TRANSFORMER_PROP] = transformer;
 }
+
 
 /**
  * Applies a transformer to the CSS text if it has been registered.
@@ -231,6 +221,7 @@ function maybeTransform(cssRoot, cssText) {
   return transformer ? transformer(cssText) : cssText;
 }
 
+
 /** @private {boolean} */
 let bodyMadeVisible = false;
 
@@ -241,6 +232,7 @@ let bodyMadeVisible = false;
 export function setBodyMadeVisibleForTesting(value) {
   bodyMadeVisible = value;
 }
+
 
 /**
  * Sets the document's body opacity to 1.
@@ -257,27 +249,26 @@ export function makeBodyVisible(doc) {
     renderStartedNoInline(doc);
   };
 
-  waitForBodyOpenPromise(doc)
-    .then(() => {
-      return waitForServices(win);
-    })
-    .catch(reason => {
-      rethrowAsync(reason);
-      return [];
-    })
-    .then(services => {
-      set();
-      if (services.length > 0) {
-        const resources = Services.resourcesForDoc(doc.documentElement);
-        resources./*OK*/ schedulePass(1, /* relayoutAll */ true);
-      }
-      try {
-        const perf = Services.performanceFor(win);
-        perf.tick('mbv');
-        perf.flush();
-      } catch (e) {}
-    });
+  waitForBodyPromise(doc)
+      .then(() => {
+        return waitForServices(win);
+      }).catch(reason => {
+        rethrowAsync(reason);
+        return [];
+      }).then(services => {
+        set();
+        if (services.length > 0) {
+          const resources = Services.resourcesForDoc(doc.documentElement);
+          resources./*OK*/schedulePass(1, /* relayoutAll */ true);
+        }
+        try {
+          const perf = Services.performanceFor(win);
+          perf.tick('mbv');
+          perf.flush();
+        } catch (e) {}
+      });
 }
+
 
 /**
  * Set the document's body opacity to 1. Called in error cases.
@@ -292,6 +283,7 @@ export function makeBodyVisibleRecovery(doc) {
   setBodyVisibleStyles(doc);
 }
 
+
 /**
  * Make sure that body exists, and make it visible.
  * @param {!Document} doc
@@ -303,6 +295,7 @@ function setBodyVisibleStyles(doc) {
     'animation': 'none',
   });
 }
+
 
 /**
  * @param {!Document} doc
@@ -317,6 +310,7 @@ function renderStartedNoInline(doc) {
   }
 }
 
+
 /**
  * Indicates that the body is always visible. For instance, in case of PWA.
  * This check is on a module level variable, and could be problematic if you are
@@ -326,6 +320,7 @@ function renderStartedNoInline(doc) {
 export function bodyAlwaysVisible(unusedWin) {
   bodyMadeVisible = true;
 }
+
 
 /**
  * Checks whether a style element was registered in the DOM.

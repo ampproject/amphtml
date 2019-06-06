@@ -21,12 +21,15 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
+
 import {devAssert, rethrowAsync, userAssert} from '../src/log';
 import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
 
+
 /** @typedef {function(!Window, !Object)}  */
 let ThirdPartyFunctionDef;
+
 
 /**
  * @const {!Object<ThirdPartyFunctionDef>}
@@ -79,10 +82,9 @@ export function run(id, win, data) {
  * @param {function()=} opt_cb
  */
 export function writeScript(win, url, opt_cb) {
-  win.document.write(
-    // eslint-disable-next-line no-useless-concat
-    '<' + 'script src="' + encodeURI(url) + '"><' + '/script>'
-  );
+  /*eslint no-useless-concat: 0*/
+  win.document
+      .write('<' + 'script src="' + encodeURI(url) + '"><' + '/script>');
   if (opt_cb) {
     executeAfterWriteScript(win, opt_cb);
   }
@@ -118,7 +120,7 @@ export function loadScript(win, url, opt_cb, opt_errorCb) {
 export function nextTick(win, fn) {
   const P = win.Promise;
   if (P) {
-    P.resolve()./*OK*/ then(fn);
+    P.resolve().then/*OK*/(fn);
   } else {
     win.setTimeout(fn, 0);
   }
@@ -133,7 +135,6 @@ export function nextTick(win, fn) {
 function executeAfterWriteScript(win, fn) {
   const index = syncScriptLoads++;
   win['__runScript' + index] = fn;
-  // eslint-disable-next-line no-useless-concat
   win.document.write('<' + 'script>__runScript' + index + '()<' + '/script>');
 }
 
@@ -230,12 +231,8 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
       validateExactlyOne(data, field);
       allowedFields = allowedFields.concat(field);
     } else {
-      userAssert(
-        data[field],
-        'Missing attribute for %s: %s.',
-        data.type,
-        field
-      );
+      userAssert(data[field],
+          'Missing attribute for %s: %s.', data.type, field);
       allowedFields.push(field);
     }
   }
@@ -251,12 +248,10 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
  * @param {!Array<string>} alternativeFields
  */
 function validateExactlyOne(data, alternativeFields) {
-  userAssert(
-    alternativeFields.filter(field => data[field]).length === 1,
-    '%s must contain exactly one of attributes: %s.',
-    data.type,
-    alternativeFields.join(', ')
-  );
+  userAssert(alternativeFields.filter(field => data[field]).length === 1,
+      '%s must contain exactly one of attributes: %s.',
+      data.type,
+      alternativeFields.join(', '));
 }
 
 /**

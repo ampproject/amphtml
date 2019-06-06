@@ -21,7 +21,6 @@ const log = require('fancy-log');
 const path = require('path');
 const ts = require('typescript');
 const tsickle = require('tsickle');
-const {endBuildStep} = require('./tasks/helpers');
 
 /**
  * Given a file path `foo/bar.js`, transpiles the TypeScript entry point of
@@ -29,18 +28,13 @@ const {endBuildStep} = require('./tasks/helpers');
  *
  * @param {string} srcDir
  * @param {string} srcFilename
- * @return {!Promise}
  */
 exports.transpileTs = function(srcDir, srcFilename) {
-  const startTime = Date.now();
   const tsEntry = path.join(srcDir, srcFilename).replace(/\.js$/, '.ts');
-  const tsConfig = ts.convertCompilerOptionsFromJson(
-    {
-      'module': 'ES6',
-      'target': 'ES6',
-    },
-    srcDir
-  );
+  const tsConfig = ts.convertCompilerOptionsFromJson({
+    'module': 'ES6',
+    'target': 'ES6',
+  }, srcDir);
   const tsOptions = tsConfig.options;
   if (tsConfig.errors.length) {
     log(colors.red('TSickle:'), tsickle.formatDiagnostics(tsConfig.errors));
@@ -67,24 +61,14 @@ exports.transpileTs = function(srcDir, srcFilename) {
     shouldSkipTsickleProcessing: () => false,
     transformTypesToClosure: true,
   };
-  return tsickle
-    .emitWithTsickle(
-      program,
-      transformerHost,
-      compilerHost,
-      tsOptions,
-      undefined,
-      (filePath, contents) => {
+  const emitResult = tsickle.emitWithTsickle(program, transformerHost,
+      compilerHost, tsOptions, undefined, (filePath, contents) => {
         fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
-      }
-    )
-    .then(emitResult => {
-      const diagnostics = ts
-        .getPreEmitDiagnostics(program)
-        .concat(emitResult.diagnostics);
-      if (diagnostics.length) {
-        log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
-      }
-      endBuildStep('Transpiled', srcFilename, startTime);
-    });
+      });
+
+  const diagnostics =
+      ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+  if (diagnostics.length) {
+    log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
+  }
 };

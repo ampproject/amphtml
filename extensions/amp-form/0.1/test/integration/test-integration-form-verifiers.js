@@ -17,10 +17,7 @@ import {poll} from '../../../../../testing/iframe';
 
 const RENDER_TIMEOUT = 15000;
 
-const describeChrome = describe
-  .configure()
-  .ifChrome()
-  .skipSinglePass();
+const describeChrome = describe.configure().ifChrome().skipSinglePass();
 
 // TODO(cvializ, #19647): Broken on SL Chrome 71.
 describeChrome.skip('amp-form verifiers', function() {
@@ -29,11 +26,9 @@ describeChrome.skip('amp-form verifiers', function() {
 
   this.timeout(RENDER_TIMEOUT);
 
-  describes.integration(
-    'verify-error template',
-    {
-      extensions: ['amp-form', 'amp-mustache'],
-      body: `
+  describes.integration('verify-error template', {
+    extensions: ['amp-form', 'amp-mustache'],
+    body: `
 <form
   target="_top"
   method="POST"
@@ -50,38 +45,30 @@ describeChrome.skip('amp-form verifiers', function() {
   </div>
 </form>
 `,
-    },
-    env => {
-      let win, doc;
+  }, env => {
 
-      beforeEach(() => {
-        win = env.win;
-        doc = win.document;
-      });
+    let win, doc;
 
-      it('should render when the verifier runs', function() {
-        const email = doc.getElementById('email');
-        email.value = 'x@x';
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+    });
 
-        const waitForMessage = poll(
-          'message to be rendered',
-          () => doc.getElementById('message'),
-          undefined,
-          RENDER_TIMEOUT,
-          win
-        );
-        email.dispatchEvent(new Event('change', {bubbles: true}));
+    it('should render when the verifier runs', function() {
+      const email = doc.getElementById('email');
+      email.value = 'x@x';
 
-        return waitForMessage;
-      });
-    }
-  );
+      const waitForMessage = poll('message to be rendered',
+          () => doc.getElementById('message'), undefined, RENDER_TIMEOUT, win);
+      email.dispatchEvent(new Event('change', {bubbles: true}));
 
-  describes.integration(
-    'verify-error action',
-    {
-      extensions: ['amp-form'],
-      body: `
+      return waitForMessage;
+    });
+  });
+
+  describes.integration('verify-error action', {
+    extensions: ['amp-form'],
+    body: `
 <form
   target="_top"
   method="POST"
@@ -95,33 +82,26 @@ describeChrome.skip('amp-form verifiers', function() {
 </form>
 <span id="message" hidden>Mistakes were triggered</span>
 `,
-    },
-    env => {
-      this.timeout(RENDER_TIMEOUT);
+  }, env => {
+    this.timeout(RENDER_TIMEOUT);
 
-      let win, doc;
+    let win, doc;
 
-      beforeEach(() => {
-        win = env.win;
-        doc = win.document;
-      });
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+    });
 
-      it('should trigger when the verifier runs', function() {
-        const email = doc.getElementById('email');
-        const message = doc.getElementById('message');
-        const waitForMessage = poll(
-          'message to be shown',
-          () => !message.hidden,
-          undefined,
-          RENDER_TIMEOUT,
-          win
-        );
+    it('should trigger when the verifier runs', function() {
+      const email = doc.getElementById('email');
+      const message = doc.getElementById('message');
+      const waitForMessage = poll('message to be shown',
+          () => !message.hidden, undefined, RENDER_TIMEOUT, win);
 
-        email.value = 'x@x';
-        email.dispatchEvent(new Event('change', {bubbles: true}));
+      email.value = 'x@x';
+      email.dispatchEvent(new Event('change', {bubbles: true}));
 
-        return waitForMessage;
-      });
-    }
-  );
+      return waitForMessage;
+    });
+  });
 });

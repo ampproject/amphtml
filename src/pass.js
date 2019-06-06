@@ -16,12 +16,14 @@
 
 import {Services} from './services';
 
+
 /**
  * Pass class helps to manage single-pass process. A pass is scheduled using
  * delay method. Only one pass can be pending at a time. If no pass is pending
  * the process is considered to be "idle".
  */
 export class Pass {
+
   /**
    * Creates a new Pass instance.
    * @param {!Window} win

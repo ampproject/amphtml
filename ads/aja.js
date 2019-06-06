@@ -21,15 +21,21 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function aja(global, data) {
-  validateData(data, ['asi']);
 
-  const {document} = global;
-  const asi = data['asi'];
+  // ensure we have valid widgetIds value
+  validateData(data, ['widgetids']);
 
-  const d = document.createElement('div');
-  d.dataset['ajaAd'] = '';
-  d.dataset['ajaAsi'] = asi;
-  document.getElementById('c').appendChild(d);
+  (global._aja = global._aja || {
+    viewId: global.context.pageViewId,
+    widgetIds: data['widgetids'],
+    htmlURL: data['htmlurl'] || global.context.canonicalUrl,
+    ampURL: data['ampurl'] || global.context.sourceUrl,
+    fbk: data['fbk'] || '',
+    testMode: data['testmode'] || 'false',
+    styleFile: data['stylefile'] || '',
+    referrer: data['referrer'] || global.context.referrer,
+  });
 
-  loadScript(global, 'https://cdn.as.amanad.adtdp.com/sdk/asot-amp.js');
+  // load the Aja AMP JS file
+  loadScript(global, 'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js');
 }

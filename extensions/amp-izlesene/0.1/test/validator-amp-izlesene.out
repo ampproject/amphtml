@@ -42,11 +42,11 @@ FAIL
 |    <!-- Invalid: bad data-videoid. -->
 |    <amp-izlesene data-videoid="something else" width="480" height="270" layout="responsive"></amp-izlesene>
 >>   ^~~~~~~~~
-amp-izlesene/0.1/test/validator-amp-izlesene.html:42:2 The attribute 'data-videoid' in tag 'amp-izlesene' is set to the invalid value 'something else'. (see https://amp.dev/documentation/components/amp-izlesene) [DISALLOWED_HTML]
+amp-izlesene/0.1/test/validator-amp-izlesene.html:42:2 The attribute 'data-videoid' in tag 'amp-izlesene' is set to the invalid value 'something else'. (see https://www.ampproject.org/docs/reference/components/amp-izlesene) [DISALLOWED_HTML]
 |
 |    <!-- Invalid: data-videoid missing. -->
 |    <amp-izlesene width="480" height="270" layout="responsive"></amp-izlesene>
 >>   ^~~~~~~~~
-amp-izlesene/0.1/test/validator-amp-izlesene.html:45:2 The mandatory attribute 'data-videoid' is missing in tag 'amp-izlesene'. (see https://amp.dev/documentation/components/amp-izlesene) [AMP_TAG_PROBLEM]
+amp-izlesene/0.1/test/validator-amp-izlesene.html:45:2 The mandatory attribute 'data-videoid' is missing in tag 'amp-izlesene'. (see https://www.ampproject.org/docs/reference/components/amp-izlesene) [AMP_TAG_PROBLEM]
 |  </body>
 |  </html>

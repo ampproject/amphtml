@@ -16,6 +16,7 @@
 
 import {Signals} from '../../../src/utils/signals';
 
+
 describes.sandboxed('Signals', {}, () => {
   let clock;
   let signals;
@@ -93,18 +94,15 @@ describes.sandboxed('Signals', {}, () => {
     expect(signals.promiseMap_['sig'].promise).to.equal(promise);
     const error = new Error();
     signals.rejectSignal('sig', error);
-    return promise.then(
-      () => {
-        throw new Error('should have failed');
-      },
-      reason => {
-        expect(reason).to.equal(error);
-        expect(signals.promiseMap_['sig'].promise).to.equal(promise);
-        expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
-        expect(signals.promiseMap_['sig'].reject).to.be.undefined;
-        expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
-      }
-    );
+    return promise.then(() => {
+      throw new Error('should have failed');
+    }, reason => {
+      expect(reason).to.equal(error);
+      expect(signals.promiseMap_['sig'].promise).to.equal(promise);
+      expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
+      expect(signals.promiseMap_['sig'].reject).to.be.undefined;
+      expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
+    });
   });
 
   it('should reject signal before it was requested', () => {
@@ -112,18 +110,15 @@ describes.sandboxed('Signals', {}, () => {
     signals.rejectSignal('sig', error);
     const promise = signals.whenSignal('sig');
     expect(signals.promiseMap_['sig'].promise).to.equal(promise);
-    return promise.then(
-      () => {
-        throw new Error('should have failed');
-      },
-      reason => {
-        expect(reason).to.equal(error);
-        expect(signals.promiseMap_['sig'].promise).to.equal(promise);
-        expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
-        expect(signals.promiseMap_['sig'].reject).to.be.undefined;
-        expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
-      }
-    );
+    return promise.then(() => {
+      throw new Error('should have failed');
+    }, reason => {
+      expect(reason).to.equal(error);
+      expect(signals.promiseMap_['sig'].promise).to.equal(promise);
+      expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
+      expect(signals.promiseMap_['sig'].reject).to.be.undefined;
+      expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
+    });
   });
 
   it('should reset signal before it was triggered', () => {

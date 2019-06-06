@@ -18,6 +18,7 @@ import * as types from '../../src/types';
 
 describe('Types', () => {
   describe('toArray', () => {
+
     it('should return empty array if null is passed', () => {
       expect(types.toArray(null).length).to.equal(0);
       expect(types.toArray(undefined).length).to.equal(0);
@@ -60,6 +61,7 @@ describe('Types', () => {
   });
 
   describe('isFiniteNumber', () => {
+
     it('should yield false for non-numbers', () => {
       expect(types.isFiniteNumber(null)).to.be.false;
       expect(types.isFiniteNumber(undefined)).to.be.false;
@@ -90,28 +92,17 @@ describe('Types', () => {
 
     it('should return true for valid enum values', () => {
       ['x', 'y', 'z'].forEach(value => {
-        expect(types.isEnumValue(enumObj, value), 'enum value = ' + value).to.be
-          .true;
+        expect(types.isEnumValue(enumObj, value),
+            'enum value = ' + value).to.be.true;
       });
     });
 
     it('should return false for non-enum values', () => {
-      [
-        'a',
-        'X',
-        'Z',
-        {'x': 'x'},
-        ['y'],
-        null,
-        undefined,
-        [],
-        /x/,
-        /y/,
-        42,
-      ].forEach(value => {
-        expect(types.isEnumValue(enumObj, value), 'enum value = ' + value).to.be
-          .false;
-      });
+      ['a', 'X', 'Z', {'x': 'x'}, ['y'], null, undefined, [], /x/, /y/, 42]
+          .forEach(value => {
+            expect(types.isEnumValue(enumObj, value),
+                'enum value = ' + value).to.be.false;
+          });
     });
   });
 });

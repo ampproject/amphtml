@@ -40,6 +40,7 @@ import {AmpStoryBaseLayer} from './amp-story-base-layer';
  * while the user is looking.
  */
 export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
+
   /** @override */
   buildCallback() {
     super.buildCallback();

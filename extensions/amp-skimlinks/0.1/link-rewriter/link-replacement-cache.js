@@ -24,6 +24,7 @@ export class LinkReplacementCache {
    * Constructor
    */
   constructor() {
+
     /** @private {!Array<!HTMLElement>} */
     this.anchorList_ = [];
 
@@ -43,7 +44,7 @@ export class LinkReplacementCache {
     // Warning: This step needs to be done before updating this.anchorList_
     // since getReplacementUrlForAnchor relies on it.
     this.replacementList_ = newAnchorList.map(
-      this.getReplacementUrlForAnchor.bind(this)
+        this.getReplacementUrlForAnchor.bind(this)
     );
 
     this.anchorList_ = newAnchorList;

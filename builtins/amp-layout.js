@@ -19,9 +19,11 @@ import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
 
 class AmpLayout extends BaseElement {
+
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
+    return layout == Layout.CONTAINER ||
+        isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -50,3 +52,5 @@ class AmpLayout extends BaseElement {
 export function installLayout(win) {
   registerElement(win, 'amp-layout', AmpLayout);
 }
+
+

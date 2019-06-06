@@ -55,6 +55,7 @@ export let HostServiceError;
  * rejectXXXServiceForDoc() when there is a failure.
  */
 export class HostServices {
+
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {boolean}
@@ -69,10 +70,8 @@ export class HostServices {
    * @return {!Promise<!VisibilityInterface>}
    */
   static visibilityForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!VisibilityInterface>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
-      ServiceNames.VISIBILITY
-    ));
+    return /** @type {!Promise<!VisibilityInterface>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.VISIBILITY));
   }
 
   /**
@@ -80,12 +79,8 @@ export class HostServices {
    * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installVisibilityServiceForDoc(elementOrAmpDoc, impl) {
-    registerServiceBuilderForDoc(
-      elementOrAmpDoc,
-      ServiceNames.VISIBILITY,
-      impl,
-      /* opt_instantiate */ true
-    );
+    registerServiceBuilderForDoc(elementOrAmpDoc,
+        ServiceNames.VISIBILITY, impl, /* opt_instantiate */ true);
   }
 
   /**
@@ -101,10 +96,8 @@ export class HostServices {
    * @return {!Promise<!FullscreenInterface>}
    */
   static fullscreenForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!FullscreenInterface>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
-      ServiceNames.FULLSCREEN
-    ));
+    return /** @type {!Promise<!FullscreenInterface>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.FULLSCREEN));
   }
 
   /**
@@ -112,12 +105,8 @@ export class HostServices {
    * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installFullscreenServiceForDoc(elementOrAmpDoc, impl) {
-    registerServiceBuilderForDoc(
-      elementOrAmpDoc,
-      ServiceNames.FULLSCREEN,
-      impl,
-      /* opt_instantiate */ true
-    );
+    registerServiceBuilderForDoc(elementOrAmpDoc,
+        ServiceNames.FULLSCREEN, impl, /* opt_instantiate */ true);
   }
 
   /**
@@ -133,10 +122,8 @@ export class HostServices {
    * @return {!Promise<!ExitInterface>}
    */
   static exitForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!ExitInterface>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
-      ServiceNames.EXIT
-    ));
+    return /** @type {!Promise<!ExitInterface>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.EXIT));
   }
 
   /**
@@ -144,12 +131,8 @@ export class HostServices {
    * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installExitServiceForDoc(elementOrAmpDoc, impl) {
-    registerServiceBuilderForDoc(
-      elementOrAmpDoc,
-      ServiceNames.EXIT,
-      impl,
-      /* opt_instantiate */ true
-    );
+    registerServiceBuilderForDoc(elementOrAmpDoc,
+        ServiceNames.EXIT, impl, /* opt_instantiate */ true);
   }
 
   /**
@@ -168,12 +151,14 @@ export class HostServices {
  * @interface
  */
 export class VisibilityInterface {
+
   /**
    * Register a callback for visibility change events.
    *
    * @param {function(!VisibilityDataDef)} unusedCallback
    */
-  onVisibilityChange(unusedCallback) {}
+  onVisibilityChange(unusedCallback) {
+  }
 }
 
 /**
@@ -187,6 +172,7 @@ export class VisibilityInterface {
  */
 export let VisibilityDataDef;
 
+
 /**
  * FullscreenInterface defines interface provided by host to enable/disable
  * fullscreen mode.
@@ -194,6 +180,7 @@ export let VisibilityDataDef;
  * @interface
  */
 export class FullscreenInterface {
+
   /**
    * Request to expand the given element to fullscreen overlay.
    *
@@ -201,7 +188,8 @@ export class FullscreenInterface {
    * @return {!Promise<boolean>} promise resolves to a boolean
    *     indicating if the request was fulfilled
    */
-  enterFullscreenOverlay(unusedTargetElement) {}
+  enterFullscreenOverlay(unusedTargetElement) {
+  }
 
   /**
    * Request to exit from fullscreen overlay.
@@ -210,7 +198,8 @@ export class FullscreenInterface {
    * @return {!Promise<boolean>} promise resolves to a boolean
    *     indicating if the request was fulfilled
    */
-  exitFullscreenOverlay(unusedTargetElement) {}
+  exitFullscreenOverlay(unusedTargetElement) {
+  }
 }
 
 /**
@@ -219,6 +208,7 @@ export class FullscreenInterface {
  * @interface
  */
 export class ExitInterface {
+
   /**
    * Request to navigate to URL.
    *
@@ -226,5 +216,6 @@ export class ExitInterface {
    * @return {!Promise<boolean>} promise resolves to a boolean
    *     indicating if the request was fulfilled
    */
-  openUrl(unusedUrl) {}
+  openUrl(unusedUrl) {
+  }
 }

@@ -30,6 +30,7 @@
  * @interface
  */
 export class AsyncInput {
+
   /**
    * Called to get the asynchronous value of an
    * AsyncInput field.
@@ -54,9 +55,10 @@ export const AsyncInputAttributes = {
    * Required attribute that must be asserted by every async-input
    * Element. This is used by AMP form to add the key
    * for the form submission request
-   */
+  */
   NAME: 'name',
 };
+
 
 /**
  * Classes
@@ -78,3 +80,4 @@ export const AsyncInputClasses = {
    */
   'ASYNC_INPUT': 'i-amphtml-async-input',
 };
+

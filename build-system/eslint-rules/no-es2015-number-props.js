@@ -34,15 +34,12 @@ function isInvalidProperty(property) {
 module.exports = function(context) {
   return {
     MemberExpression: function(node) {
-      if (
-        node.object.name == 'Number' &&
-        isInvalidProperty(node.property.name)
-      ) {
+      if (node.object.name == 'Number' &&
+              isInvalidProperty(node.property.name)) {
         context.report({
           node,
-          message:
-            'no ES2015 "Number" methods and properties allowed to be ' +
-            'used.',
+          message: 'no ES2015 "Number" methods and properties allowed to be ' +
+              'used.',
         });
       }
     },

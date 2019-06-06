@@ -34,10 +34,7 @@ export class AmpInputmaskService {
 
     /** @const */
     this.domUpdateUnlistener_ = listen(
-      this.ampdoc.getRootNode(),
-      AmpEvents.DOM_UPDATE,
-      () => this.install()
-    );
+        this.ampdoc.getRootNode(), AmpEvents.DOM_UPDATE, () => this.install());
   }
 
   /**

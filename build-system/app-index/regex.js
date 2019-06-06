@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 function* matchIterator(regex, subject) {
   let match = regex.exec(subject);
   while (match != null) {
@@ -21,5 +22,6 @@ function* matchIterator(regex, subject) {
     match = regex.exec(subject);
   }
 }
+
 
 module.exports = {matchIterator};

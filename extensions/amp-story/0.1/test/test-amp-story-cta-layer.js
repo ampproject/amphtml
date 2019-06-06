@@ -16,55 +16,51 @@
 
 import {AmpStoryCtaLayer} from '../amp-story-cta-layer';
 
-describes.realWin(
-  'amp-story-cta-layer',
-  {
-    amp: {
-      runtimeOn: true,
-      extensions: ['amp-story'],
-    },
+describes.realWin('amp-story-cta-layer', {
+  amp: {
+    runtimeOn: true,
+    extensions: ['amp-story'],
   },
-  env => {
-    let win;
-    let ampStoryCtaLayer;
+}, env => {
+  let win;
+  let ampStoryCtaLayer;
 
-    beforeEach(() => {
-      win = env.win;
-      const ampStoryCtaLayerEl = win.document.createElement(
-        'amp-story-cta-layer'
-      );
-      win.document.body.appendChild(ampStoryCtaLayerEl);
-      ampStoryCtaLayer = new AmpStoryCtaLayer(ampStoryCtaLayerEl);
+  beforeEach(() => {
+    win = env.win;
+    const ampStoryCtaLayerEl =
+      win.document.createElement('amp-story-cta-layer');
+    win.document.body.appendChild(ampStoryCtaLayerEl);
+    ampStoryCtaLayer = new AmpStoryCtaLayer(ampStoryCtaLayerEl);
+  });
+
+  it('should build the cta layer', () => {
+    ampStoryCtaLayer.buildCallback();
+    return ampStoryCtaLayer.layoutCallback().then(() => {
+      expect(ampStoryCtaLayer.element).to.have.class('i-amphtml-story-layer');
     });
+  });
 
-    it('should build the cta layer', () => {
-      ampStoryCtaLayer.buildCallback();
-      return ampStoryCtaLayer.layoutCallback().then(() => {
-        expect(ampStoryCtaLayer.element).to.have.class('i-amphtml-story-layer');
-      });
+  it('should add or overwrite target attribute to links', () => {
+    const ctaLink = win.document.createElement('a');
+    expect(ctaLink).to.not.have.attribute('target');
+
+    ampStoryCtaLayer.element.appendChild(ctaLink);
+    ampStoryCtaLayer.buildCallback();
+
+    return ampStoryCtaLayer.layoutCallback().then(() => {
+      expect(ctaLink).to.have.attribute('target');
+      expect(ctaLink.getAttribute('target')).to.equal('_blank');
     });
+  });
 
-    it('should add or overwrite target attribute to links', () => {
-      const ctaLink = win.document.createElement('a');
-      expect(ctaLink).to.not.have.attribute('target');
+  it('should not add target attribute to other elements', () => {
+    const elem = win.document.createElement('span');
+    ampStoryCtaLayer.element.appendChild(elem);
+    ampStoryCtaLayer.buildCallback();
 
-      ampStoryCtaLayer.element.appendChild(ctaLink);
-      ampStoryCtaLayer.buildCallback();
-
-      return ampStoryCtaLayer.layoutCallback().then(() => {
-        expect(ctaLink).to.have.attribute('target');
-        expect(ctaLink.getAttribute('target')).to.equal('_blank');
-      });
+    return ampStoryCtaLayer.layoutCallback().then(() => {
+      expect(elem).to.not.have.attribute('target');
     });
+  });
 
-    it('should not add target attribute to other elements', () => {
-      const elem = win.document.createElement('span');
-      ampStoryCtaLayer.element.appendChild(elem);
-      ampStoryCtaLayer.buildCallback();
-
-      return ampStoryCtaLayer.layoutCallback().then(() => {
-        expect(elem).to.not.have.attribute('target');
-      });
-    });
-  }
-);
+});

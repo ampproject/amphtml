@@ -20,9 +20,12 @@ import {
   getVideoJs,
 } from '../../src/video-iframe-integration';
 
+
 const NOOP = () => {};
 
+
 describes.realWin('video-iframe-integration', {amp: false}, env => {
+
   let sandbox;
 
   beforeEach(() => {
@@ -75,8 +78,8 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
 
         dummySpy(integration.getMetadata());
 
-        expect(dummySpy.withArgs(sinon.match(metadata))).to.have.been
-          .calledOnce;
+        expect(dummySpy.withArgs(sinon.match(metadata)))
+            .to.have.been.calledOnce;
       });
     });
 
@@ -116,9 +119,8 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
 
         invalidMethods.forEach(method => {
           const spy = sandbox.spy();
-          expect(() => integration.method(method, spy)).to.throw(
-            /Invalid method/
-          );
+          expect(() => integration.method(method, spy))
+              .to.throw(/Invalid method/);
         });
 
         expect(listenToOnce).to.not.have.been.called;
@@ -153,8 +155,8 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
         for (let i = 0; i < validEvents.length; i++) {
           const event = validEvents[i];
           integration.postEvent(event);
-          expect(postToParent.withArgs(sinon.match({event}))).to.have.been
-            .calledOnce;
+          expect(postToParent.withArgs(sinon.match({event})))
+              .to.have.been.calledOnce;
         }
       });
     });
@@ -162,14 +164,15 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
     describe('#getIntersection', () => {
       it('should request and receive intersection', () => {
         const integration = new AmpVideoIntegration();
-        const postToParent = sandbox.spy(integration, 'postToParent_');
+        const postToParent =
+            sandbox.spy(integration, 'postToParent_');
 
         const callback = sandbox.spy();
 
         const id = integration.getIntersectionForTesting_(callback);
 
         expect(postToParent.withArgs(sinon.match({method: 'getIntersection'})))
-          .to.have.been.calledOnce;
+            .to.have.been.calledOnce;
 
         const mockedIntersection = {tacos: 'al pastor'};
 
@@ -222,13 +225,13 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
           integration.listenTo('jwplayer', player);
 
           expectedEvents.forEach(event => {
-            expect(player.on.withArgs(event, sinon.match.any)).to.have.been
-              .calledOnce;
+            expect(player.on.withArgs(event, sinon.match.any))
+                .to.have.been.calledOnce;
           });
 
           expectedMethods.forEach(method => {
-            expect(methodSpy.withArgs(method, sinon.match.any)).to.have.been
-              .calledOnce;
+            expect(methodSpy.withArgs(method, sinon.match.any))
+                .to.have.been.calledOnce;
           });
 
           expect(listenToOnce.callCount).to.equal(expectedMethods.length);
@@ -249,6 +252,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
 
       describe('video.js', () => {
         it('registers all methods', () => {
+
           const expectedMethods = [
             'play',
             'pause',
@@ -269,14 +273,13 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
           const dummyElement = env.win.document.createElement('video');
 
           integration.listenTo(
-            'videojs',
-            dummyElement,
-            /* initializer */ () => player
-          );
+              'videojs',
+              dummyElement,
+              /* initializer */ () => player);
 
           expectedMethods.forEach(method => {
-            expect(methodSpy.withArgs(method, sinon.match.any)).to.have.been
-              .calledOnce;
+            expect(methodSpy.withArgs(method, sinon.match.any))
+                .to.have.been.calledOnce;
           });
 
           expect(listenToOnce.callCount).to.equal(expectedMethods.length);
@@ -288,15 +291,15 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
             const win = {
               videojs: initializer,
             };
-            expect(getVideoJs(win).toString()).to.equal(initializer.toString());
+            expect(getVideoJs(win).toString())
+                .to.equal(initializer.toString());
           });
 
           it('returns initializer if provided', () => {
             const win = {};
             const initializer = NOOP;
-            expect(getVideoJs(win, initializer).toString()).to.equal(
-              initializer.toString()
-            );
+            expect(getVideoJs(win, initializer).toString())
+                .to.equal(initializer.toString());
           });
 
           it('fails if no initializer provided or Video.JS not present', () => {

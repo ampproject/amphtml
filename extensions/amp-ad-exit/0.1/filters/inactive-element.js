@@ -29,7 +29,8 @@ export class InactiveElementFilter extends Filter {
    */
   constructor(name, spec) {
     super(name, spec.type);
-    userAssert(isValidInactiveElementSpec(spec), 'Invalid InactiveElementspec');
+    userAssert(isValidInactiveElementSpec(spec),
+        'Invalid InactiveElementspec');
 
     /** @private {string} */
     this.selector_ = spec.selector;
@@ -47,9 +48,8 @@ export class InactiveElementFilter extends Filter {
  * @return {boolean} Whether the config defines a InactiveElement filter.
  */
 function isValidInactiveElementSpec(spec) {
-  return (
-    spec.type == FilterType.INACTIVE_ELEMENT && typeof spec.selector == 'string'
-  );
+  return spec.type == FilterType.INACTIVE_ELEMENT &&
+      typeof spec.selector == 'string';
 }
 
 /**

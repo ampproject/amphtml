@@ -15,11 +15,11 @@
  */
 
 import {Services} from '../services';
-import {devAssert, user, userAssert} from '../log';
+import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from './object';
 import {fromIterator} from './array';
-import {
-  getCorsUrl,
+import {getCorsUrl,
+  getSourceOrigin,
   getWinOrigin,
   isProxyOrigin,
   parseUrlDeprecated,
@@ -31,6 +31,9 @@ import {isFormDataWrapper} from '../form-data-wrapper';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
+
+/** @private @const {string} */
+const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
 
 /** @private @const {!Array<function(*):boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
@@ -81,7 +84,7 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
 export function toStructuredCloneable(input, init) {
   const newInit = Object.assign({}, init);
   if (isFormDataWrapper(init.body)) {
-    const wrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
+    const wrapper = /** @type {!FormDataWrapperInterface} **/ (init.body);
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
     newInit.body = fromIterator(wrapper.entries());
   }
@@ -157,9 +160,8 @@ export function fromStructuredCloneable(response, responseType) {
       init.headers.forEach(entry => {
         const headerName = entry[0];
         const headerValue = entry[1];
-        lowercasedHeaders[String(headerName).toLowerCase()] = String(
-          headerValue
-        );
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+            String(headerValue);
       });
     }
     if (init.status) {
@@ -208,26 +210,24 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   if (!docOptedIn) {
     return whenFirstVisible;
   }
-  return whenFirstVisible
-    .then(() => {
-      return viewer.isTrustedViewer();
-    })
-    .then(viewerTrusted => {
-      const isDevMode = getMode(win).development;
-      if (!viewerTrusted && !isDevMode) {
-        return;
-      }
-      const messagePayload = dict({
-        'originalRequest': toStructuredCloneable(input, init),
-      });
-      return viewer
-        .sendMessageAwaitResponse('xhr', messagePayload)
-        .then(response => fromStructuredCloneable(response, init.responseType));
+  return whenFirstVisible.then(() => {
+    return viewer.isTrustedViewer();
+  }).then(viewerTrusted => {
+    const isDevMode = getMode(win).development;
+    if (!viewerTrusted && !isDevMode) {
+      return;
+    }
+    const messagePayload = dict({
+      'originalRequest': toStructuredCloneable(input, init),
     });
+    return viewer.sendMessageAwaitResponse('xhr', messagePayload)
+        .then(response =>
+          fromStructuredCloneable(response, init.responseType));
+  });
 }
 
 /**
- * Sets up URL based on ampCors
+ * Setsup URL based on ampCors
  * @param {!Window} win
  * @param {string} input
  * @param {!FetchInitDef} init The options of the XHR which may get
@@ -255,10 +255,8 @@ export function setupInit(opt_init, opt_accept) {
   // `credentials`.
   const creds = init.credentials;
   devAssert(
-    creds === undefined || creds == 'include' || creds == 'omit',
-    'Only credentials=include|omit support: %s',
-    creds
-  );
+      creds === undefined || creds == 'include' || creds == 'omit',
+      'Only credentials=include|omit support: %s', creds);
 
   init.method = normalizeMethod_(init.method);
   init.headers = init.headers || dict({});
@@ -281,7 +279,17 @@ export function setupInit(opt_init, opt_accept) {
  * @return {!FetchInitDef}
  */
 export function setupAMPCors(win, input, init) {
-  init = init || {};
+  // Do not append __amp_source_origin if explicitly disabled.
+  if (init.ampCors === false) {
+    init.requireAmpResponseSourceOrigin = false;
+  }
+  if (init.requireAmpResponseSourceOrigin === true) {
+    dev().error('XHR',
+        'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
+  }
+  if (init.requireAmpResponseSourceOrigin === undefined) {
+    init.requireAmpResponseSourceOrigin = true;
+  }
   // For some same origin requests, add AMP-Same-Origin: true header to allow
   // publishers to validate that this request came from their own origin.
   const currentOrigin = getWinOrigin(win);
@@ -290,6 +298,7 @@ export function setupAMPCors(win, input, init) {
     init['headers'] = init['headers'] || {};
     init['headers']['AMP-Same-Origin'] = 'true';
   }
+
   return init;
 }
 
@@ -303,24 +312,21 @@ export function setupJsonFetchInit(init) {
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
     devAssert(
-      allowedJsonBodyTypes_.some(test => test(fetchInit.body)),
-      'body must be of type object or array. %s',
-      fetchInit.body
+        allowedJsonBodyTypes_.some(test => test(fetchInit.body)),
+        'body must be of type object or array. %s',
+        fetchInit.body
     );
 
     // Content should be 'text/plain' to avoid CORS preflight.
-    fetchInit.headers['Content-Type'] =
-      fetchInit.headers['Content-Type'] || 'text/plain;charset=utf-8';
+    fetchInit.headers['Content-Type'] = fetchInit.headers['Content-Type'] ||
+        'text/plain;charset=utf-8';
     const headerContentType = fetchInit.headers['Content-Type'];
     // Cast is valid, because we checked that it is not form data above.
     if (headerContentType === 'application/x-www-form-urlencoded') {
-      fetchInit.body = serializeQueryString(
-        /** @type {!JsonObject} */ (fetchInit.body)
-      );
+      fetchInit.body =
+        serializeQueryString(/** @type {!JsonObject} */ (fetchInit.body));
     } else {
-      fetchInit.body = JSON.stringify(
-        /** @type {!JsonObject} */ (fetchInit.body)
-      );
+      fetchInit.body = JSON.stringify(/** @type {!JsonObject} */ (fetchInit.body));
     }
   }
   return fetchInit;
@@ -338,12 +344,39 @@ function normalizeMethod_(method) {
   }
   method = method.toUpperCase();
   devAssert(
-    allowedMethods_.includes(method),
-    'Only one of %s is currently allowed. Got %s',
-    allowedMethods_.join(', '),
-    method
+      allowedMethods_.includes(method),
+      'Only one of %s is currently allowed. Got %s',
+      allowedMethods_.join(', '),
+      method
   );
   return method;
+}
+
+/**
+ * Verifies if response has the correct headers
+ * @param {!Window} win
+ * @param {!Response} response
+ * @param {!FetchInitDef=} init
+ * @return {!Response}
+ */
+export function verifyAmpCORSHeaders(win, response, init) {
+  const allowSourceOriginHeader = response.headers.get(
+      ALLOW_SOURCE_ORIGIN_HEADER);
+  if (allowSourceOriginHeader) {
+    const sourceOrigin = getSourceOrigin(win.location.href);
+    // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
+    // ensure that it's equal to the current source origin.
+    userAssert(allowSourceOriginHeader == sourceOrigin,
+        `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
+          ` equal to the current: ${allowSourceOriginHeader}` +
+          ` vs ${sourceOrigin}`);
+  } else if (init.requireAmpResponseSourceOrigin) {
+    // If the `AMP-Access-Control-Allow-Source-Origin` header is not
+    // returned but required, return error.
+    userAssert(false, 'Response must contain the' +
+        ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
+  }
+  return response;
 }
 
 /**
@@ -374,36 +407,4 @@ export function assertSuccess(response) {
     err.response = response;
     throw err;
   });
-}
-
-/**
- * Returns a promise resolving to a string identity token if the element
- * contains the 'crossorigin' attribute and the amp-viewer-assistance extension
- * is present. Resolves to undefined otherwise.
- * @param {!Element} element
- * @return {!Promise<undefined>}
- */
-export function getViewerAuthTokenIfAvailable(element) {
-  const crossOriginAttr = element.getAttribute('crossorigin');
-  if (
-    crossOriginAttr &&
-    crossOriginAttr.trim() === 'amp-viewer-auth-token-via-post'
-  ) {
-    return (
-      Services.viewerAssistanceForDocOrNull(element)
-        .then(va => {
-          userAssert(
-            va,
-            'crossorigin="amp-viewer-auth-token-post" ' +
-              'requires amp-viewer-assistance extension.'
-          );
-          return va.getIdTokenPromise();
-        })
-        // If crossorigin attr is present, resolve with token or empty string.
-        .then(token => token || '')
-        .catch(() => '')
-    );
-  }
-  // If crossorigin attribute is missing, always resolve with undefined.
-  return Promise.resolve(undefined);
 }

@@ -32,9 +32,7 @@ describes.fakeWin('consent', {amp: true}, env => {
     it('block by tagName', () => {
       doc.head.appendChild(meta);
       const element = doc.createElement('amp-test');
-      element.getAmpDoc = () => {
-        return env.ampdoc;
-      };
+      element.getAmpDoc = () => {return env.ampdoc;};
       doc.body.appendChild(element);
       expect(shouldBlockOnConsentByMeta(element)).to.be.true;
     });
@@ -42,9 +40,7 @@ describes.fakeWin('consent', {amp: true}, env => {
     it('block by lowercase tagName', () => {
       head.appendChild(meta);
       const element = doc.createElement('amp-ad');
-      element.getAmpDoc = () => {
-        return env.ampdoc;
-      };
+      element.getAmpDoc = () => {return env.ampdoc;};
       doc.body.appendChild(element);
       expect(shouldBlockOnConsentByMeta(element)).to.be.true;
     });
@@ -52,9 +48,7 @@ describes.fakeWin('consent', {amp: true}, env => {
     it('not block unspecified element', () => {
       head.appendChild(meta);
       const element = doc.createElement('amp-not-exist');
-      element.getAmpDoc = () => {
-        return env.ampdoc;
-      };
+      element.getAmpDoc = () => {return env.ampdoc;};
       doc.body.appendChild(element);
       expect(shouldBlockOnConsentByMeta(element)).to.be.false;
     });
@@ -65,9 +59,7 @@ describes.fakeWin('consent', {amp: true}, env => {
       meta.setAttribute('content', ' amp-this,    amp-that  ');
       head.appendChild(meta);
       const element = doc.createElement('amp-that');
-      element.getAmpDoc = () => {
-        return env.ampdoc;
-      };
+      element.getAmpDoc = () => {return env.ampdoc;};
       doc.body.appendChild(element);
       expect(shouldBlockOnConsentByMeta(element)).to.be.true;
     });
@@ -78,9 +70,7 @@ describes.fakeWin('consent', {amp: true}, env => {
       meta.setAttribute('content', 'amp-this:name,amp-this[name]');
       head.appendChild(meta);
       const element = doc.createElement('amp-this');
-      element.getAmpDoc = () => {
-        return env.ampdoc;
-      };
+      element.getAmpDoc = () => {return env.ampdoc;};
       doc.body.appendChild(element);
       expect(shouldBlockOnConsentByMeta(element)).to.be.false;
     });

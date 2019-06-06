@@ -28,14 +28,14 @@ FAIL
 |     <script async src="https://cdn.ampproject.org/v0.js"></script>
 |     <script async src="https://example.com/v0-not-allowed.js"></script>
 >>    ^~~~~~~~~
-feature_tests/no_custom_js.html:28:3 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/no_custom_js.html:28:3 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |     <script async custom-element="amp-foo" src="https://example.com/v0/not-allowed.js"></script>
 >>    ^~~~~~~~~
-feature_tests/no_custom_js.html:29:3 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/no_custom_js.html:29:3 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |   </head>
 |   <body>
 |    <script>alert('Hello World!')</script>
 >>   ^~~~~~~~~
-feature_tests/no_custom_js.html:32:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/no_custom_js.html:32:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |   </body>
 |  </html>

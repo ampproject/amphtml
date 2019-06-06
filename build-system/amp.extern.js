@@ -33,7 +33,8 @@
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
- *   ampCors: (boolean|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
  * }}
  */
 var FetchInitDef;
@@ -44,13 +45,17 @@ var FetchInitDef;
  */
 var FetchRequestDef;
 
-/** @constructor */
+/** @constructor **/
 var FormDataWrapperInterface = function() {};
 
 FormDataWrapperInterface.prototype.entries = function() {};
 FormDataWrapperInterface.prototype.getFormData = function() {};
 
 FormData.prototype.entries = function () {};
+/**
+ * @param {string} unusedName
+ */
+FormData.prototype.delete = function (unusedName) {};
 
 /**
  * A type for Objects that can be JSON serialized or that come from

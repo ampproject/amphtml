@@ -23,6 +23,7 @@ import {isExperimentOn} from '../experiments';
 const NTH_FRAME = 200;
 
 export class JankMeter {
+
   /**
    * @param {!Window} win
    */
@@ -97,13 +98,9 @@ export class JankMeter {
         this.longTaskObserver_ = null;
       }
       let batteryDrop = 0;
-      if (this.batteryManager_ && this.batteryLevelStart_ != null) {
-        batteryDrop = this.win_.Math.max(
-          0,
-          this.win_.Math.floor(
-            this.batteryManager_.level * 100 - this.batteryLevelStart_
-          )
-        );
+      if (this.batteryManager_ && (this.batteryLevelStart_ != null)) {
+        batteryDrop = this.win_.Math.max(0, this.win_.Math.floor(
+            this.batteryManager_.level * 100 - this.batteryLevelStart_));
         // bd: Battery Drop
         this.perf_.tickDelta('bd', batteryDrop);
       }
@@ -120,12 +117,10 @@ export class JankMeter {
    * @return {?boolean}
    */
   isEnabled_() {
-    return (
-      isJankMeterEnabled(this.win_) ||
-      (this.perf_ &&
-        this.perf_.isPerformanceTrackingOn() &&
-        this.totalFrameCnt_ < NTH_FRAME)
-    );
+    return isJankMeterEnabled(this.win_)
+        || (this.perf_
+            && this.perf_.isPerformanceTrackingOn()
+            && this.totalFrameCnt_ < NTH_FRAME);
   }
 
   /**
@@ -134,11 +129,11 @@ export class JankMeter {
    */
   displayMeterDisplay_(batteryDrop) {
     const doc = this.win_.document;
-    const display = htmlFor(doc)`
-      <div class="i-amphtml-jank-meter"></div>`;
+    const html = htmlFor(doc);
+    const display = html`<div class="i-amphtml-jank-meter"></div>`;
     display.textContent =
-      `bf:${this.badFrameCnt_}, lts: ${this.longTaskSelf_}, ` +
-      `ltc:${this.longTaskChild_}, bd:${batteryDrop}`;
+        `bf:${this.badFrameCnt_}, lts: ${this.longTaskSelf_}, ` +
+        `ltc:${this.longTaskChild_}, bd:${batteryDrop}`;
     doc.body.appendChild(display);
   }
 
@@ -149,8 +144,7 @@ export class JankMeter {
    */
   calculateGfp_() {
     return this.win_.Math.floor(
-      ((this.totalFrameCnt_ - this.badFrameCnt_) / this.totalFrameCnt_) * 100
-    );
+        (this.totalFrameCnt_ - this.badFrameCnt_) / this.totalFrameCnt_ * 100);
   }
 
   /**
@@ -170,9 +164,7 @@ export class JankMeter {
           if (entries[i].name == 'cross-origin-descendant') {
             this.longTaskChild_ += span;
             user().info(
-              'LONGTASK',
-              `from child frame ${entries[i].duration}ms`
-            );
+                'LONGTASK', `from child frame ${entries[i].duration}ms`);
           } else {
             this.longTaskSelf_ += span;
             dev().info('LONGTASK', `from self frame ${entries[i].duration}ms`);
@@ -209,11 +201,9 @@ function isJankMeterEnabled(win) {
  * @return {boolean}
  */
 export function isLongTaskApiSupported(win) {
-  return (
-    !!win.PerformanceObserver &&
-    !!win['TaskAttributionTiming'] &&
-    'containerName' in win['TaskAttributionTiming'].prototype
-  );
+  return !!win.PerformanceObserver
+      && !!win['TaskAttributionTiming']
+      && ('containerName' in win['TaskAttributionTiming'].prototype);
 }
 
 /**

@@ -16,7 +16,9 @@
 
 import {CustomEventTracker} from '../events';
 
-import {InstrumentationService} from '../instrumentation.js';
+import {
+  InstrumentationService,
+} from '../instrumentation.js';
 
 describes.realWin('InstrumentationService', {amp: 1}, env => {
   let win;
@@ -75,50 +77,48 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
   });
 });
 
-describes.realWin(
-  'InstrumentationService in FIE',
-  {
-    amp: {ampdoc: 'fie'},
-  },
-  env => {
-    let win;
-    let embed;
-    let ampdoc;
-    let service;
-    let root;
-    let analyticsElement;
-    let target;
 
-    beforeEach(() => {
-      win = env.win;
-      embed = env.embed;
-      ampdoc = env.ampdoc;
-      service = new InstrumentationService(ampdoc);
-      root = service.ampdocRoot_;
+describes.realWin('InstrumentationService in FIE', {
+  amp: {ampdoc: 'fie'},
+}, env => {
+  let win;
+  let embed;
+  let ampdoc;
+  let service;
+  let root;
+  let analyticsElement;
+  let target;
 
-      analyticsElement = win.document.createElement('amp-analytics');
-      win.document.body.appendChild(analyticsElement);
+  beforeEach(() => {
+    win = env.win;
+    embed = env.embed;
+    ampdoc = env.ampdoc;
+    service = new InstrumentationService(ampdoc);
+    root = service.ampdocRoot_;
 
-      target = win.document.createElement('div');
-      win.document.body.appendChild(target);
-    });
+    analyticsElement = win.document.createElement('amp-analytics');
+    win.document.body.appendChild(analyticsElement);
 
-    it('should create and reuse embed root', () => {
-      expect(root.ampdoc).to.equal(ampdoc);
-      expect(root.parent).to.be.null;
+    target = win.document.createElement('div');
+    win.document.body.appendChild(target);
+  });
 
-      const group1 = service.createAnalyticsGroup(analyticsElement);
-      const embedRoot = group1.root_;
-      expect(embedRoot).to.not.equal(root);
-      expect(embedRoot.parent).to.equal(root);
-      expect(embedRoot.ampdoc).to.equal(ampdoc);
-      expect(embedRoot.embed).to.equal(embed);
+  it('should create and reuse embed root', () => {
+    expect(root.ampdoc).to.equal(ampdoc);
+    expect(root.parent).to.be.null;
 
-      // Reuse the previously created instance.
-      const analyticsElement2 = win.document.createElement('amp-analytics');
-      win.document.body.appendChild(analyticsElement2);
-      const group2 = service.createAnalyticsGroup(analyticsElement2);
-      expect(group2.root_).to.equal(embedRoot);
-    });
-  }
-);
+    const group1 = service.createAnalyticsGroup(analyticsElement);
+    const embedRoot = group1.root_;
+    expect(embedRoot).to.not.equal(root);
+    expect(embedRoot.parent).to.equal(root);
+    expect(embedRoot.ampdoc).to.equal(ampdoc);
+    expect(embedRoot.embed).to.equal(embed);
+
+    // Reuse the previously created instance.
+    const analyticsElement2 = win.document.createElement('amp-analytics');
+    win.document.body.appendChild(analyticsElement2);
+    const group2 = service.createAnalyticsGroup(analyticsElement2);
+    expect(group2.root_).to.equal(embedRoot);
+  });
+});
+
