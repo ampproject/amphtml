@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as variant from '../variant';
 import * as mutation from '../mutation-parser';
+import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -199,7 +199,7 @@ describes.realWin(
 
         // Stub parsing mutation records
         sandbox.stub(mutation, 'parseMutation').returns({
-          mutations: new Array(10).fill(() => {})
+          mutations: new Array(10).fill(() => {}),
         });
 
         expectAsyncConsoleError(/Max number of mutations/);
