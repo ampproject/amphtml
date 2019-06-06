@@ -35,6 +35,9 @@ class RuntimeTestConfig {
     this.testType = testType;
 
     Object.assign(this, karmaConfig);
+    this.browsers = this.getBrowsersObject().browsers;
+    this.files = this.getFiles();
+    this.reporters = this.getReporters();
     this.singleRun = !argv.watch && !argv.w;
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
@@ -93,10 +96,6 @@ class RuntimeTestConfig {
 
       this.browserify.transform = [['babelify', {plugins: [plugin]}]];
     }
-
-    this.browsers = this.getBrowsersObject().browsers;
-    this.files = this.getFiles();
-    this.reporters = this.getReporters();
   }
 
   getBrowsersObject() {
