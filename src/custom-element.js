@@ -30,7 +30,8 @@ import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
-import {createLoaderElement} from '../src/loader';
+import {createLegacyLoaderElement} from '../src/loader-legacy';
+import {createNewLoaderElement} from '../src/loader-new';
 import {dev, devAssert, rethrowAsync, user} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
@@ -1674,15 +1675,24 @@ function createBaseCustomElementClass(win) {
             <div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
 
-        const element = createLoaderElement(
-          /** @type {!Document} */ (doc),
-          this.elementName()
-        );
-        container.appendChild(element);
+        let loadingElement;
+        if (isExperimentOn(win, 'new-loaders')) {
+          loadingElement = createNewLoaderElement(
+            /** @type {!Document} */ (doc),
+            container,
+            this);
+        } else {
+          loadingElement = createLegacyLoaderElement(
+            /** @type {!Document} */ (doc),
+            this.elementName()
+          );
+        }
+
+        container.appendChild(loadingElement);
 
         this.appendChild(container);
         this.loadingContainer_ = container;
-        this.loadingElement_ = element;
+        this.loadingElement_ = loadingElement;
       }
     }
 

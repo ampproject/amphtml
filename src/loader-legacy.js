@@ -28,7 +28,7 @@ const LINE_LOADER_ELEMENTS = {
  * @param {string} elementName
  * @return {!Element}
  */
-export function createLoaderElement(doc, elementName) {
+export function createLegacyLoaderElement(doc, elementName) {
   if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
     return htmlFor(doc)`<div class="i-amphtml-loader-line">
           <div class="i-amphtml-loader-moving-line"></div>
