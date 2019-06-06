@@ -422,12 +422,12 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
+   * @return {?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService}
    */
-  static storyVariableServiceForOrNull(win) {
+  static storyVariableService(win) {
     return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
-      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', true))
+      /** @type {?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService} */
+      (getExistingServiceOrNull(win, 'story-variable'))
     );
   }
 
@@ -494,17 +494,6 @@ export class Services {
    */
   static localizationService(win) {
     return getService(win, 'localization');
-  }
-
-  /**
-   * @param {!Window} win
-   * @return {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>}
-   */
-  static storyAnalyticsServiceForOrNull(win) {
-    return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>} */
-      (getElementServiceIfAvailable(win, 'story-analytics', 'amp-story', true))
-    );
   }
 
   /**

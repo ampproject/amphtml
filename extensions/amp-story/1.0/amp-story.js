@@ -37,7 +37,11 @@ import {
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
-import {AdvancementMode, getAnalyticsService} from './story-analytics';
+import {
+  AdvancementMode,
+  AnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
 import {AmpEvents} from '../../../src/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBackground} from './background';
@@ -50,7 +54,7 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
-import {AmpStoryVariableService} from './variable-service';
+import {AmpStoryVariableService, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
@@ -289,10 +293,7 @@ export class AmpStory extends AMP.BaseElement {
     this.storyNavigationPath_ = [];
 
     /** @const @private {!AmpStoryVariableService} */
-    this.variableService_ = new AmpStoryVariableService();
-    registerServiceBuilder(this.win, 'story-variable', () =>
-      this.variableService_.get()
-    );
+    this.variableService_ = getVariableService(this.win);
 
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
@@ -636,7 +637,9 @@ export class AmpStory extends AMP.BaseElement {
       isMuted => {
         // We do not want to trigger an analytics event for the initialization of
         // the muted state.
-        this.analyticsService_.onMutedStateChange(isMuted);
+        this.analyticsService_.triggerEvent(
+          isMuted ? AnalyticsEvent.STORY_MUTED : AnalyticsEvent.STORY_UNMUTED
+        );
       },
       false /** callToInitialize */
     );
