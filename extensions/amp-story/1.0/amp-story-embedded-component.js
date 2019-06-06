@@ -22,7 +22,11 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
+import {
+  AdvancementMode,
+  StoryEventType,
+  getAnalyticsService,
+} from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -320,6 +324,9 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private {EmbeddedComponentState} */
     this.state_ = EmbeddedComponentState.HIDDEN;
+
+    /** @private {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win_, this.storyEl_);
   }
 
   /**
@@ -526,6 +533,7 @@ export class AmpStoryEmbeddedComponent {
           this.focusedStateOverlay_.classList.toggle('i-amphtml-hidden', true);
         }
       );
+      this.analyticsService_.triggerEvent(StoryEventType.TOOLTIP_CLOSED);
       return;
     }
 
@@ -562,6 +570,8 @@ export class AmpStoryEmbeddedComponent {
         this.focusedStateOverlay_.classList.toggle('i-amphtml-hidden', false);
       }
     );
+
+    this.analyticsService_.triggerEvent(StoryEventType.TOOLTIP_OPENED);
   }
 
   /**
