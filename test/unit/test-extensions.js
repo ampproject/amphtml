@@ -1015,7 +1015,6 @@ describes.sandboxed('Extensions', {}, () => {
       expect(standardActions.constructor.installInEmbedWindow).to.be.called;
       expect(navigation.constructor.installInEmbedWindow).to.be.called;
 
-      // QQQQQ
       expect(getService(iframeWin, 'timer')).to.exist;
     });
 
