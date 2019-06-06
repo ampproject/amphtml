@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/experiments';
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
@@ -266,12 +265,10 @@ class AmpCarousel extends AMP.BaseElement {
           <div
             tabindex="0"
             class="amp-carousel-button amp-carousel-button-prev"
-            aria-label="Previous item in carousel"
           ></div>
           <div
             tabindex="0"
             class="amp-carousel-button amp-carousel-button-next"
-            aria-label="Next item in carousel"
           ></div>
         </div>
       </div>
@@ -313,6 +310,108 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * @param {?number} currentIndex
+   * @return {?number} The previous index that would be navigated to, or null
+   *    if at the start and not looping.
+   * @private
+   */
+  getPrevIndex_(currentIndex) {
+    return currentIndex - 1 >= 0
+      ? currentIndex - 1
+      : this.element.hasAttribute('loop')
+      ? this.slides_.length - 1
+      : null;
+  }
+
+  /**
+   * @param {?number} currentIndex
+   * @return {?number} The next index that would be navigated to, or null if at
+   *    the end and not looping.
+   * @private
+   */
+  getNextIndex_(currentIndex) {
+    return currentIndex + 1 < this.slides_.length
+      ? currentIndex + 1
+      : this.element.hasAttribute('loop')
+      ? 0
+      : null;
+  }
+
+  /**
+   * @return {string} The title to use for the next button.
+   * @private
+   */
+  getNextButtonTitlePrefix_() {
+    return (
+      this.element.getAttribute('data-next-button-aria-label') ||
+      'Next item in carousel'
+    );
+  }
+
+  /**
+   * @return {string} The title to use for the pevious button.
+   * @private
+   */
+  getPrevButtonTitlePrefix_() {
+    return (
+      this.element.getAttribute('data-prev-button-aria-label') ||
+      'Previous item in carousel'
+    );
+  }
+
+  /**
+   * A format string for the button label. Should be a string, containing two
+   * placeholders of "%s", where the index and total count will go.
+   * @return {string}
+   * @private
+   */
+  getButtonSuffixFormat_() {
+    return (
+      this.element.getAttribute('data-button-count-format') || '(%s of %s)'
+    );
+  }
+
+  /**
+   * @param {number} buttonIndex The index that the button will take the user
+   *    to.
+   * @return {string} The formatted suffix for the button title.
+   */
+  getButtonTitleSuffix_(buttonIndex) {
+    const index = String(buttonIndex + 1);
+    const count = String(this.slides_.length);
+    return (
+      ' ' +
+      this.getButtonSuffixFormat_()
+        .replace('%s', index)
+        .replace('%s', count)
+    );
+  }
+
+  /**
+   * @param {number} index
+   * @private
+   */
+  getPrevButtonTitle_(index) {
+    const prevIndex = this.getPrevIndex_(index);
+    const labelIndex = prevIndex == null ? 0 : prevIndex;
+    return (
+      this.getPrevButtonTitlePrefix_() + this.getButtonTitleSuffix_(labelIndex)
+    );
+  }
+
+  /**
+   * @param {number} index
+   * @private
+   */
+  getNextButtonTitle_(index) {
+    const nextIndex = this.getNextIndex_(index);
+    const labelIndex = nextIndex == null ? this.slides_.length - 1 : nextIndex;
+    return (
+      this.getNextButtonTitlePrefix_() + this.getButtonTitleSuffix_(labelIndex)
+    );
+  }
+
+  /**
    * Updates the UI of the <amp-carousel> itself, but not the internal
    * implementation.
    * @private
@@ -328,8 +427,10 @@ class AmpCarousel extends AMP.BaseElement {
 
     this.prevButton_.classList.toggle('amp-disabled', prevDisabled);
     this.prevButton_.setAttribute('aria-disabled', prevDisabled);
+    this.prevButton_.title = this.getPrevButtonTitle_(index);
     this.nextButton_.classList.toggle('amp-disabled', nextDisabled);
     this.nextButton_.setAttribute('aria-disabled', nextDisabled);
+    this.nextButton_.title = this.getNextButtonTitle_(index);
   }
 
   /**
