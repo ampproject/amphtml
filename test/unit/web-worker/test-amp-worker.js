@@ -20,6 +20,7 @@ import {
   invokeWebWorker,
 } from '../../../src/web-worker/amp-worker';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {installXhrService} from '../../../src/service/xhr-impl';
 
 describe('invokeWebWorker', () => {
@@ -81,6 +82,7 @@ describe('invokeWebWorker', () => {
   it('should send and receive a message', () => {
     // Sending.
     const invokePromise = invokeWebWorker(fakeWin, 'foo', ['bar', 123]);
+    getMode(fakeWin).bypassInterceptorForDev = true;
 
     return workerReadyPromise.then(() => {
       expect(postMessageStub).to.have.been.calledWithMatch({
@@ -93,7 +95,7 @@ describe('invokeWebWorker', () => {
         'http://localhost:9876/dist/ww.js',
         {
           ampCors: false,
-          bypassInterceptor: true,
+          bypassInterceptorForDev: true,
         }
       );
 

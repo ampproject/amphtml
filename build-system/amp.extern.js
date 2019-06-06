@@ -35,7 +35,7 @@
  *   method: (string|undefined),
  *   requireAmpResponseSourceOrigin: (boolean|undefined),
  *   ampCors: (boolean|undefined),
- *   bypassInterceptor: (boolean|undefined)
+ *   bypassInterceptorForDev: (boolean|undefined)
  * }}
  */
 var FetchInitDef;

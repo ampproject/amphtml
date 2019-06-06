@@ -208,7 +208,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   if (
     isProxyOrigin(input) ||
     !viewer.hasCapability('xhrInterceptor') ||
-    !!init.bypassInterceptor
+    (init.bypassInterceptorForDev && getMode(win).localDev)
   ) {
     return whenFirstVisible;
   }
@@ -222,8 +222,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
       return viewer.isTrustedViewer();
     })
     .then(viewerTrusted => {
-      const isDevMode = getMode(win).development;
-      if (!viewerTrusted && !isDevMode) {
+      if (!viewerTrusted && !getMode(win).development) {
         return;
       }
       const messagePayload = dict({
