@@ -30,6 +30,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {closest, isAmpElement} from '../../../src/dom';
 import {dev} from '../../../src/log';
+import {getAnalyticsService} from './story-analytics';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
 import {listen} from '../../../src/event-helper';
@@ -98,6 +99,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     /** @private {!Array<!Element>} AMP components within the attachment. */
     this.ampComponents_ = [];
+
+    /** @private {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
     /** @private {?Element} */
     this.containerEl_ = null;
@@ -536,6 +540,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     });
 
     this.historyService_.push(() => this.closeInternal_(), historyState);
+    this.analyticsService_.onPageAttachmentStateChange(true /** isOpen */);
   }
 
   /**
@@ -588,5 +593,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     });
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
+
+    this.analyticsService_.onPageAttachmentStateChange(false /** isOpen */);
   }
 }
