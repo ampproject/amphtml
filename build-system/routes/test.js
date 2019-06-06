@@ -17,10 +17,6 @@
 const router = require('express').Router();
 
 router.use('/form/post/success', function(req, res) {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   delete req.query.__amp_source_origin;
   res.json({
     name: 'John Miller',
