@@ -44,6 +44,7 @@ import {installLayout} from '../../builtins/amp-layout';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
+import {installTimerInEmbedWindow} from './timer-impl';
 import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {startsWith} from '../string';
@@ -469,7 +470,7 @@ export class Extensions {
     }
 
     // Install embeddable standard services.
-    installStandardServicesInEmbed(childWin, parentWin);
+    installStandardServicesInEmbed(childWin);
 
     // Install built-ins and legacy elements.
     copyBuiltinElementsToChildWindow(topWin, childWin);
@@ -726,10 +727,9 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
 /**
  * Adopt predefined core services for the child window (friendly iframe).
  * @param {!Window} childWin
- * @param {!Window} parentWin
  * @visibleForTesting
  */
-export function installStandardServicesInEmbed(childWin, parentWin) {
+export function installStandardServicesInEmbed(childWin) {
   const frameElement = dev().assertElement(
     childWin.frameElement,
     'frameElement not found for embed'
@@ -740,13 +740,13 @@ export function installStandardServicesInEmbed(childWin, parentWin) {
     Services.actionServiceForDoc(frameElement),
     Services.standardActionsForDoc(frameElement),
     Services.navigationForDoc(frameElement),
-    Services.timerFor(parentWin),
   ];
   const ampdoc = getAmpdoc(frameElement);
   standardServices.forEach(service => {
     // Static functions must be invoked on the class, not the instance.
     service.constructor.installInEmbedWindow(childWin, ampdoc);
   });
+  installTimerInEmbedWindow(childWin);
 }
 
 /**
