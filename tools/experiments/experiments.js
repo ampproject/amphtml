@@ -125,6 +125,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
+    id: 'ampdoc-fie',
+    name: 'Install AmpDoc on FIE level',
+    spec: 'https://github.com/ampproject/amphtml/issues/22734',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22733',
+  },
+  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
