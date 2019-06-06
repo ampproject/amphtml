@@ -303,7 +303,10 @@ export class AmpSidebar extends AMP.BaseElement {
     const children = this.getRealChildren();
     this.scheduleLayout(children);
     this.scheduleResume(children);
-    tryFocus(this.element);
+    // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
+    if (!Services.platformFor(this.win).isIos()) {
+      tryFocus(this.element);
+    }
     this.triggerEvent_(SidebarEvents.OPEN);
   }
 
@@ -368,7 +371,10 @@ export class AmpSidebar extends AMP.BaseElement {
       this.historyId_ = -1;
     }
     if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
-      tryFocus(this.openerElement_);
+      // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
+      if (!Services.platformFor(this.win).isIos()) {
+        tryFocus(this.openerElement_);
+      }
     }
     return true;
   }
