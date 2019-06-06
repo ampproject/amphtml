@@ -53,7 +53,7 @@ const cssEntryPoints = [
   {
     path: 'video-autoplay.css',
     outJs: 'video-autoplay.css.js',
-    outCss: 'video-autoplay.css',
+    outCss: 'video-autoplay-out.css',
   },
 ];
 
