@@ -394,7 +394,6 @@ async function createKarmaServer(
     resolver = resolverIn;
   });
 
-  console.log(configBatch.browsers);
   const karmaServer = new Server(configBatch, exitCode => {
     maybePrintCoverageMessage();
     resolver(exitCode);
