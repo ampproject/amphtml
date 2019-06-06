@@ -73,7 +73,7 @@ export class StoryAnalyticsService {
     /** @private @const {!Element} */
     this.element_ = element;
 
-    /** @const @private {!AmpStoryVariableService} */
+    /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(win);
   }
 

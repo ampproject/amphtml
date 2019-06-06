@@ -292,7 +292,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {Array<string>} */
     this.storyNavigationPath_ = [];
 
-    /** @const @private {!AmpStoryVariableService} */
+    /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
 
     /** @private {?./amp-story-page.AmpStoryPage} */

@@ -421,6 +421,18 @@ export class Services {
   }
 
   /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
+   */
+  static storyVariableServiceForOrNull(win) {
+    return (
+      /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', true))
+    );
+  }
+
+  /**
    * @param {!Window} win
    * @return {?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService}
    */
@@ -494,6 +506,18 @@ export class Services {
    */
   static localizationService(win) {
     return getService(win, 'localization');
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>}
+   */
+  static storyAnalyticsServiceForOrNull(win) {
+    return (
+      /** @type {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>} */
+      (getElementServiceIfAvailable(win, 'story-analytics', 'amp-story', true))
+    );
   }
 
   /**
