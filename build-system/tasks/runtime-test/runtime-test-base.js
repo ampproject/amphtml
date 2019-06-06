@@ -224,10 +224,9 @@ class RuntimeTestRunner {
 
     if (argv.saucelabs) {
       this.exitCode = await runTestInBatches(this.config);
-      return;
+    } else {
+      this.exitCode = await createKarmaServer(this.config);
     }
-
-    this.exitCode = await createKarmaServer(this.config);
   }
 
   async teardown() {

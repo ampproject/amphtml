@@ -26,6 +26,7 @@ const webserver = require('gulp-webserver');
 const {
   reportTestErrored,
   reportTestFinished,
+  reportTestRunComplete,
 } = require('../report-test-status');
 const {app} = require('../../test-server');
 const {exec} = require('../../exec');
@@ -196,6 +197,7 @@ function maybePrintCoverageMessage() {
 
 function karmaBrowserComplete(browser) {
   const result = browser.lastResult;
+  result.total = result.success + result.failed + result.skipped;
   // Prevent cases where Karma detects zero tests and still passes. #16851.
   if (result.total == 0) {
     log(red('ERROR: Zero tests detected by Karma.'));
@@ -224,14 +226,6 @@ function karmaBrowserComplete(browser) {
 function karmaBrowsersReady() {
   console./*OK*/ log('\n');
   log(green('Done. Running tests...'));
-}
-
-function karmaRunComplete(results) {
-  if (results.error) {
-    reportTestErrored();
-  } else {
-    reportTestFinished(results.success, results.failed);
-  }
 }
 
 function karmaRunStart() {
@@ -274,13 +268,32 @@ async function runTestInBatches(config) {
       browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable'
     ].push(browserId);
   }
+
+  let errored = false;
+  let totalStableSuccess = 0;
+  let totalStableFailed = 0;
+  const partialTestRunCompleteFn = async (browsers, results) => {
+    if (results.error) {
+      errored = true;
+    } else {
+      totalStableSuccess += results.success;
+      totalStableFailed += results.failed;
+    }
+  };
+
   if (browsers.stable.length) {
     const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
       'stable',
       browsers.stable,
-      config
+      config,
+      partialTestRunCompleteFn
     );
-    if (allBatchesExitCodes) {
+    if (errored) {
+      await reportTestErrored();
+    } else {
+      await reportTestFinished(totalStableSuccess, totalStableFailed);
+    }
+    if (allBatchesExitCodes || errored) {
       log(
         yellow('Some tests have failed on'),
         cyan('stable'),
@@ -288,14 +301,16 @@ async function runTestInBatches(config) {
         cyan('beta'),
         yellow('browsers.')
       );
-      return allBatchesExitCodes;
+      return allBatchesExitCodes || Number(errored);
     }
   }
 
   if (browsers.beta.length) {
     const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
       'beta',
-      browsers.beta
+      browsers.beta,
+      config,
+      /* runCompleteFn */ () => {}
     );
     if (allBatchesExitCodes) {
       log(
@@ -319,11 +334,19 @@ async function runTestInBatches(config) {
  *
  * @param {string} batchName a human readable name for the batch.
  * @param {!Array{string}} browsers list of SauceLabs browsers as
- *     customLaunchers IDs.
+ *     customLaunchers IDs. *
  * @param {Object} config karma config
+ * @param {!Function} runCompleteFn a function to execute on the
+ *     `run_complete` event. It should take two arguments, (browser, results),
+ *     and return nothing.
  * @return {number} processExitCode
  */
-async function runTestInBatchesWithBrowsers(batchName, browsers, config) {
+async function runTestInBatchesWithBrowsers(
+  batchName,
+  browsers,
+  config,
+  runCompleteFn
+) {
   let batch = 1;
   let startIndex = 0;
   let endIndex = BATCHSIZE;
@@ -345,7 +368,7 @@ async function runTestInBatchesWithBrowsers(batchName, browsers, config) {
       cyan(configBatch.browsers.length),
       green('Sauce Labs browser(s)...')
     );
-    batchExitCodes.push(await createKarmaServer(configBatch));
+    batchExitCodes.push(await createKarmaServer(configBatch, runCompleteFn));
     startIndex = batch * BATCHSIZE;
     batch++;
     endIndex = Math.min(batch * BATCHSIZE, browsers.length);
@@ -354,13 +377,25 @@ async function runTestInBatchesWithBrowsers(batchName, browsers, config) {
   return batchExitCodes.every(exitCode => exitCode == 0) ? 0 : 1;
 }
 
-async function createKarmaServer(config) {
+/**
+ * Creates and starts karma server
+ * @param {!Object} configBatch
+ * @param {!Function} runCompleteFn a function to execute on the
+ *     `run_complete` event. It should take two arguments, (browser, results),
+ *     and return nothing.
+ * @return {!Promise<number>}
+ */
+async function createKarmaServer(
+  configBatch,
+  runCompleteFn = reportTestRunComplete
+) {
   let resolver;
   const deferred = new Promise(resolverIn => {
     resolver = resolverIn;
   });
 
-  const karmaServer = new Server(config, exitCode => {
+  console.log(configBatch.browsers);
+  const karmaServer = new Server(configBatch, exitCode => {
     maybePrintCoverageMessage();
     resolver(exitCode);
   });
@@ -369,7 +404,7 @@ async function createKarmaServer(config) {
     .on('run_start', () => karmaRunStart())
     .on('browsers_ready', () => karmaBrowsersReady())
     .on('browser_complete', browser => karmaBrowserComplete(browser))
-    .on('run_complete', (unusedBrowsers, results) => karmaRunComplete(results));
+    .on('run_complete', runCompleteFn);
 
   karmaServer.start();
 
