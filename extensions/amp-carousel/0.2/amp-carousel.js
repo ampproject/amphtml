@@ -26,6 +26,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /**
  * @enum {string}
@@ -70,6 +71,9 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {!Array<!Element>} */
     this.slides_ = [];
+
+    /** @private {?number} */
+    this.currentIndex_ = null;
 
     /** @private {string} */
     this.type_ = 'carousel';
@@ -438,9 +442,9 @@ class AmpCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('role', buttonRole);
     this.nextButton_.setAttribute('role', buttonRole);
 
-    // Do some manual "slot" distribution
-
     this.slides_ = slides.map(slide => {
+      slide.classList.add('amp-carousel-slide');
+
       if (isSlides) {
         const wrapper = document.createElement('div');
         wrapper.className = 'i-amphtml-carousel-slotted';
@@ -455,9 +459,7 @@ class AmpCarousel extends AMP.BaseElement {
 
       if (isSlides) {
         slide.classList.add('i-amphtml-carousel-slide-item');
-        slide.firstElementChild.classList.add('amp-carousel-slide');
       } else {
-        slide.classList.add('amp-carousel-slide');
         slide.classList.add('amp-scrollable-carousel-slide');
       }
     });
@@ -469,6 +471,9 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {number} index
    */
   updateCurrentIndex_(index) {
+    const prevIndex = this.currentIndex_;
+    this.currentIndex_ = index;
+
     this.slides_.forEach((slide, i) => {
       if (i == index) {
         this.scheduleResume(slide);
@@ -476,6 +481,48 @@ class AmpCarousel extends AMP.BaseElement {
         this.schedulePause(slide);
       }
     });
+    this.triggerAnalyticsEvent_(index, prevIndex);
+  }
+
+  /**
+   *
+   * @param {number} index
+   */
+  getSlideId_(index) {
+    if (index == null) {
+      return 'null';
+    }
+
+    return this.slides_[index].getAttribute('data-slide-id') || String(index);
+  }
+
+  /**
+   * @param {number?} prevIndex
+   * @param {number} newIndex
+   * @private
+   */
+  triggerAnalyticsEvent_(prevIndex, newIndex) {
+    const delta = newIndex - prevIndex;
+    const total = this.slides_.length;
+    // Note this is approximate, we do not get index change events if the user
+    // is quickly moving through the carousel, so we approximate by checking if
+    // they moved less than half the distance when looping. We could change the
+    // logic to check on every scroll for the index to change, if this is a
+    // problem in practuce.
+    const isNext = this.carousel_.getLoop()
+      ? (delta > 0 && delta / total < 0.5) ||
+        (delta < 0 && delta / total < -0.5)
+      : delta > 0;
+    const directionEventName = isNext
+      ? 'amp-carousel-next'
+      : 'amp-carousel-prev';
+
+    const vars = dict({
+      'fromSlide': this.getSlideId_(prevIndex),
+      'toSlide': this.getSlideId_(newIndex),
+    });
+    triggerAnalyticsEvent(this.element, 'amp-carousel-change', vars);
+    triggerAnalyticsEvent(this.element, directionEventName, vars);
   }
 
   /**
@@ -506,6 +553,12 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {!Event} event
    */
   onIndexChanged_(event) {
+    this.updateUi_();
+
+    if (this.type_ == CarouselType.CAROUSEL) {
+      return;
+    }
+
     const detail = getDetail(event);
     const index = detail['index'];
     const actionSource = detail['actionSource'];
@@ -518,7 +571,6 @@ class AmpCarousel extends AMP.BaseElement {
     this.action_.trigger(this.element, name, action, trust);
     this.element.dispatchCustomEvent(name, data);
     this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
-    this.updateUi_();
     this.updateCurrentIndex_(index);
   }
 }
