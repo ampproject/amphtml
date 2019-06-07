@@ -54,6 +54,7 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
+import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
@@ -109,7 +110,6 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
-import {getVariableService} from './variable-service';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
@@ -627,7 +627,10 @@ export class AmpStory extends AMP.BaseElement {
       StateProperty.MUTED_STATE,
       isMuted => {
         this.onMutedStateUpdate_(isMuted);
-        this.variableService_.onMutedStateChange(isMuted);
+        this.variableService_.onVariableUpdate(
+          AnalyticsVariable.STORY_IS_MUTED,
+          isMuted
+        );
       },
       true /** callToInitialize */
     );
@@ -652,7 +655,10 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(StateProperty.ADVANCEMENT_MODE, mode => {
-      this.variableService_.onAdvancementModeStateChange(mode);
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_ADVANCEMENT_MODE,
+        mode
+      );
     });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {

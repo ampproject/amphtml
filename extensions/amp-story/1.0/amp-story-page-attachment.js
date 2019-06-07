@@ -29,7 +29,6 @@ import {
 } from './utils';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {StoryEventType, getAnalyticsService} from './story-analytics';
 import {closest, isAmpElement} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getState} from '../../../src/history';
@@ -595,10 +594,6 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
 
-<<<<<<< HEAD
     this.analyticsService_.triggerEvent(AnalyticsEvent.PAGE_ATTACHMENT_EXIT);
-=======
-    this.analyticsService_.triggerEvent(StoryEventType.PAGE_ATTACHMENT_EXIT);
->>>>>>> analytics for tooltip
   }
 }

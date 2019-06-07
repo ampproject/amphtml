@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {AdvancementMode} from '../story-analytics';
-import {AmpStoryVariableService} from '../variable-service';
+import {AmpStoryVariableService, AnalyticsVariable} from '../variable-service';
 import {StateChangeType} from '../navigation-state';
 
 describes.fakeWin('amp-story variable service', {}, () => {
@@ -39,7 +39,8 @@ describes.fakeWin('amp-story variable service', {}, () => {
   });
 
   it('should update storyAdvancementMode on change', () => {
-    variableService.onAdvancementModeStateChange(
+    variableService.onVariableUpdate(
+      AnalyticsVariable.STORY_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
     );
 

@@ -24,9 +24,10 @@ import {
 } from './amp-story-store-service';
 import {
   AdvancementMode,
-  StoryEventType,
+  AnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
+import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -313,6 +314,9 @@ export class AmpStoryEmbeddedComponent {
     this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
 
     /** @private */
+    this.linkClickedHandler_ = this.onLinkClicked_.bind(this);
+
+    /** @private */
     this.embedsToBePaused_ = [];
 
     this.storeService_.subscribe(
@@ -327,6 +331,9 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win_, this.storyEl_);
+
+    /** @const @private {!./variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(this.win_);
   }
 
   /**
@@ -533,7 +540,7 @@ export class AmpStoryEmbeddedComponent {
           this.focusedStateOverlay_.classList.toggle('i-amphtml-hidden', true);
         }
       );
-      this.analyticsService_.triggerEvent(StoryEventType.TOOLTIP_CLOSED);
+      this.analyticsService_.triggerEvent(AnalyticsEvent.TOOLTIP_EXIT);
       return;
     }
 
@@ -571,7 +578,7 @@ export class AmpStoryEmbeddedComponent {
       }
     );
 
-    this.analyticsService_.triggerEvent(StoryEventType.TOOLTIP_OPENED);
+    this.analyticsService_.triggerEvent(AnalyticsEvent.TOOLTIP_ENTER);
   }
 
   /**
@@ -657,6 +664,7 @@ export class AmpStoryEmbeddedComponent {
         dev().assertElement(this.tooltip_),
         dict({'href': this.getElementHref_(target)})
       );
+      this.tooltip_.addEventListener('click', this.linkClickedHandler_, true);
       return;
     }
 
@@ -678,10 +686,31 @@ export class AmpStoryEmbeddedComponent {
     event.preventDefault();
     event.stopPropagation();
 
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.TOOLTIP_TRIGGER,
+      this.triggeringTarget_
+    );
+
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       state: EmbeddedComponentState.EXPANDED,
       element: this.triggeringTarget_,
     });
+  }
+
+  /**
+   * Listens to when a link was clicked in the tooltip.
+   * @private
+   */
+  onLinkClicked_() {
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.TOOLTIP_TRIGGER,
+      this.getElementHref_(
+        dev().assertElement(
+          this.triggeringTarget_,
+          `No tooltip triggering element found.`
+        )
+      )
+    );
   }
 
   /**
@@ -1085,6 +1114,13 @@ export class AmpStoryEmbeddedComponent {
         this.expandComponentHandler_,
         true
       );
+
+      this.tooltip_.removeEventListener(
+        'click',
+        this.linkClickedHandler_,
+        true
+      );
+
       this.tooltip_.removeAttribute('href');
     });
   }

@@ -28,8 +28,8 @@ export const AnalyticsEvent = {
   PAGE_VISIBLE: 'story-page-visible',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
-  TOOLTIP_CLOSED: 'story-tooltip-closed',
-  TOOLTIP_OPENED: 'story-tooltip-opened',
+  TOOLTIP_ENTER: 'story-tooltip-enter',
+  TOOLTIP_EXIT: 'story-tooltip-exit',
 };
 
 /** @enum {string} */
