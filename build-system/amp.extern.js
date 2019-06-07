@@ -34,6 +34,7 @@
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
  *   ampCors: (boolean|undefined),
+ *   bypassInterceptorForDev: (boolean|undefined)
  * }}
  */
 var FetchInitDef;

@@ -200,7 +200,11 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   }
   const viewer = Services.viewerForDoc(ampdocSingle);
   const whenFirstVisible = viewer.whenFirstVisible();
-  if (isProxyOrigin(input) || !viewer.hasCapability('xhrInterceptor')) {
+  if (
+    isProxyOrigin(input) ||
+    !viewer.hasCapability('xhrInterceptor') ||
+    (init.bypassInterceptorForDev && getMode(win).localDev)
+  ) {
     return whenFirstVisible;
   }
   const htmlElement = ampdocSingle.getRootNode().documentElement;
@@ -213,8 +217,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
       return viewer.isTrustedViewer();
     })
     .then(viewerTrusted => {
-      const isDevMode = getMode(win).development;
-      if (!viewerTrusted && !isDevMode) {
+      if (!viewerTrusted && !getMode(win).development) {
         return;
       }
       const messagePayload = dict({
