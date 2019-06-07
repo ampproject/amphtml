@@ -477,8 +477,9 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   isIosWebView_() {
-    return this.isIos_ &&
-        Services.viewerForDoc(this.element).isWebviewEmbedded();
+    // Don't use isWebviewEmbedded() because it assumes there's no parent
+    // iframe, but this is not necessarily true for all UIWebView embeds.
+    return this.isIos_ && Services.viewerForDoc(this.element).isEmbedded();
   }
 }
 
