@@ -631,6 +631,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     it('should not rewrite url if href is fragment', () => {
       const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
       return lm.init().then(() => {
+        // Using a real anchor el here because of a.href getter will actually
+        // return the full url, not just the fragment.
         const a = doc.createElement('a');
         a.href = '#hello';
         a.hostname = 'amp.source.com';
