@@ -528,6 +528,6 @@ amp-accordion > section > :last-child {
 }
 
 /* Expand content when needed. */
-amp-accordion > section[expanded]:not([expanded=false]) > :last-child {
+amp-accordion > section[expanded] > :last-child {
   display: block !important;
 }
