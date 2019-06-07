@@ -303,7 +303,10 @@ export class AmpSidebar extends AMP.BaseElement {
     const children = this.getRealChildren();
     this.scheduleLayout(children);
     this.scheduleResume(children);
-    tryFocus(this.element);
+    // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
+    if (!this.isIosWebView_()) {
+      tryFocus(this.element);
+    }
     this.triggerEvent_(SidebarEvents.OPEN);
   }
 
@@ -368,7 +371,10 @@ export class AmpSidebar extends AMP.BaseElement {
       this.historyId_ = -1;
     }
     if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
-      tryFocus(this.openerElement_);
+      // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
+      if (!this.isIosWebView_()) {
+        tryFocus(this.openerElement_);
+      }
     }
     return true;
   }
@@ -464,6 +470,16 @@ export class AmpSidebar extends AMP.BaseElement {
   triggerEvent_(name) {
     const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isIosWebView_() {
+    // Don't use isWebviewEmbedded() because it assumes there's no parent
+    // iframe, but this is not necessarily true for all UIWebView embeds.
+    return this.isIos_ && Services.viewerForDoc(this.element).isEmbedded();
   }
 }
 
