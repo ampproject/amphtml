@@ -623,7 +623,7 @@ class AmpAccordion extends AMP.BaseElement {
       if (mutation.attributeName === 'expanded') {
         const sectionEl = dev().assertElement(mutation.target);
         const toExpand = sectionEl.getAttribute('expanded');
-        if (toExpand === 'false') {
+        if (toExpand === false) {
           sectionEl.removeAttribute('expanded');
         }
       }
