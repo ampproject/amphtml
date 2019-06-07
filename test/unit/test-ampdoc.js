@@ -25,6 +25,7 @@ import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowDomSupported,
+  setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {toggleExperiment} from '../../src/experiments';
@@ -81,6 +82,7 @@ describe('AmpDocService', () => {
       beforeEach(() => {
         content = document.createElement('span');
         host = document.createElement('div');
+        setShadowDomSupportedVersionForTesting(undefined);
         if (isShadowDomSupported()) {
           if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
             shadowRoot = host.attachShadow({mode: 'open'});
@@ -147,6 +149,7 @@ describe('AmpDocService', () => {
       service = new AmpDocService(window, /* isSingleDoc */ false);
       content = document.createElement('span');
       host = document.createElement('div');
+      setShadowDomSupportedVersionForTesting(undefined);
       if (isShadowDomSupported()) {
         if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
           shadowRoot = host.attachShadow({mode: 'open'});

@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {dict} from '../../../src/utils/object';
+import {registerServiceBuilder} from '../../../src/service';
 
 /**
  * @typedef {!JsonObject}
@@ -30,6 +32,24 @@ const Variable = {
   STORY_PROGRESS: 'storyProgress',
   STORY_PREVIOUS_PAGE_ID: 'storyPreviousPageId',
   STORY_ADVANCEMENT_MODE: 'storyAdvancementMode',
+};
+
+/**
+ * Util function to retrieve the variable service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param {!Window} win
+ * @return {!AmpStoryVariableService}
+ */
+export const getVariableService = win => {
+  let service = Services.storyVariableService(win);
+
+  if (!service) {
+    service = new AmpStoryVariableService();
+    registerServiceBuilder(win, 'story-variable', () => service);
+  }
+
+  return service;
 };
 
 /**

@@ -92,7 +92,7 @@ async function prCheck(cb) {
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-    runCheck('gulp test --unit --local-changes --headless');
+    runCheck('gulp unit --local_changes --headless');
   }
 
   if (

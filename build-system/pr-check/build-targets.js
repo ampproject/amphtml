@@ -109,7 +109,7 @@ const targetMatchers = [
     targets: ['UNIT_TEST'],
     func: file => {
       return (
-        file.startsWith('build-system/tasks/runtime-test/') ||
+        file.startsWith('build-system/tasks/unit/') ||
         config.unitTestPaths.some(pattern => {
           return minimatch(file, pattern);
         })

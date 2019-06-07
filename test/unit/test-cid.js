@@ -28,8 +28,8 @@ import {getCookie, setCookie} from '../../src/cookies';
 import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
 import {installExtensionsService} from '../../src/service/extensions-impl';
+import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
@@ -104,7 +104,7 @@ describe('cid', () => {
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
-    installDocumentStateService(fakeWin);
+    installGlobalDocumentStateService(fakeWin);
     ampdoc = Services.ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
