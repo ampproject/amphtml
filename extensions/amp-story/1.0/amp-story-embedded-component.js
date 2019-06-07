@@ -65,6 +65,7 @@ export const EXPANDABLE_COMPONENTS = {
     actionIcon: ActionIcon.EXPAND,
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
+    dataIdAttribute: 'data-tweetid',
   },
 };
 
@@ -686,9 +687,16 @@ export class AmpStoryEmbeddedComponent {
     event.preventDefault();
     event.stopPropagation();
 
+    const embedConfig = this.getEmbedConfigFor_(
+      dev().assertElement(
+        this.triggeringTarget_,
+        `No tooltip triggering element found.`
+      )
+    );
+
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.TOOLTIP_TRIGGER,
-      this.triggeringTarget_
+      this.triggeringTarget_.getAttribute(embedConfig.dataIdAttribute)
     );
 
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
