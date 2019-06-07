@@ -250,14 +250,6 @@ export class Services {
 
   /**
    * @param {!Window} window
-   * @return {!./service/document-state.DocumentState}
-   */
-  static documentStateFor(window) {
-    return getService(window, 'documentState');
-  }
-
-  /**
-   * @param {!Window} window
    * @return {!./service/extensions-impl.Extensions}
    */
   static extensionsFor(window) {
@@ -278,6 +270,15 @@ export class Services {
       elementOrAmpDoc,
       'form-submit-service'
     ));
+  }
+
+  /**
+   * @param {!Window} window
+   * @return {!./service/document-state.DocumentState}
+   * @restricted  Only to be used for global document services, such as vsync.
+   */
+  static globalDocumentStateFor(window) {
+    return getService(window, 'documentState');
   }
 
   /**
@@ -418,6 +419,7 @@ export class Services {
   }
 
   /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
    * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
    */
@@ -425,6 +427,17 @@ export class Services {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
       (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', true))
+    );
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService}
+   */
+  static storyVariableService(win) {
+    return (
+      /** @type {?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService} */
+      (getExistingServiceOrNull(win, 'story-variable'))
     );
   }
 
@@ -494,6 +507,7 @@ export class Services {
   }
 
   /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
    * @return {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>}
    */

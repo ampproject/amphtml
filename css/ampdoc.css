@@ -62,8 +62,8 @@ html.i-amphtml-inabox-preserve-height-auto body {
 
 /** These properties can be overriden by user stylesheets. */
 body {
-  /* Text adjust is set to 100% to avoid iOS Safari bugs where the font-size is
-     sometimes not restored during orientation. See #449. */
+  /* Text adjust is set to 100% to avoid iOS Safari bugs in Viewer where
+     the font-size is sometimes not restored during orientation. See #449. */
   text-size-adjust: 100%;
 }
 
@@ -172,18 +172,20 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   border-top: 1px solid transparent !important;
 }
 
-
 /**
- * Most transferred fixed elements are hidden when a lightbox is opened. This
- * prevents fixed elements from being displayed on top of lightboxes.
+ * Hide the fixed layer when a lightbox is opened. This prevents buggy UX where
+ * fixed elements are displayed on top of lightboxes...
  */
+#i-amphtml-wrapper + body {
+  visibility: visible;
+}
 #i-amphtml-wrapper + body[i-amphtml-lightbox] {
   visibility: hidden;
 }
 /**
- * The exception to the above is descendants of lightboxes, which we only
- * want to display when a lightbox is open (the opposite behavior!).
- * See fixed-layer.js#enterLightbox() for details.
+ * ...except for fixed-position descendants of lightboxes, which we only want
+ * to show when a lightbox is open. Note this is the opposite visibility of
+ * the fixed layer itself! See fixed-layer.js#enterLightbox() for details.
  */
 #i-amphtml-wrapper + body .i-amphtml-lightbox-element {
   visibility: hidden;
@@ -213,195 +215,6 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
 }
 
 
-.i-amphtml-element {
-  display: inline-block;
-}
-
-
-.i-amphtml-blurry-placeholder {
-  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-}
-
-/* layout=nodisplay are automatically hidden until JS initializes. */
-[layout=nodisplay]:not(.i-amphtml-element) {
-  display: none !important;
-}
-
-/* Initialized layout=nodisplay contain [hidden] */
-.i-amphtml-layout-nodisplay[hidden],
-[layout=nodisplay][hidden]:not(.i-amphtml-layout-nodisplay)
-{
-  /* Display is set/reset via the hidden attribute */
-}
-.i-amphtml-layout-nodisplay:not([hidden]),
-[layout=nodisplay]:not(.i-amphtml-layout-nodisplay[hidden])
-{
-  /* Display is set/reset via the hidden attribute */
-}
-
-.i-amphtml-layout-fixed,
-[layout=fixed][width][height]:not(.i-amphtml-layout-fixed)
-{
-  display: inline-block;
-  position: relative;
-}
-
-.i-amphtml-layout-responsive,
-[layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
-[width][height][sizes]:not(.i-amphtml-layout-responsive)
-{
-  display: block;
-  position: relative;
-}
-
-.i-amphtml-layout-intrinsic
-{
-  display: inline-block;
-  position: relative;
-  max-width: 100%;
-}
-
-.i-amphtml-intrinsic-sizer {
-  max-width: 100%;
-  display: block !important;
-}
-
-.i-amphtml-layout-fixed-height,
-[layout=fixed-height][height]
-{
-  display: block;
-  position: relative;
-}
-
-.i-amphtml-layout-container,
-[layout=container]
-{
-  display: block;
-  position: relative;
-}
-
-.i-amphtml-layout-fill,
-[layout=fill]:not(.i-amphtml-layout-fill)
-{
-  display: block;
-  overflow: hidden !important;
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-}
-
-.i-amphtml-layout-flex-item,
-[layout=flex-item]:not(.i-amphtml-layout-flex-item)
-{
-  display: block;
-  position: relative;
-  flex: 1 1 auto;
-}
-
-.i-amphtml-layout-fluid {
-  position: relative;
-}
-
-.i-amphtml-layout-size-defined {
-  overflow: hidden !important;
-}
-
-.i-amphtml-layout-awaiting-size {
-  position: absolute !important;
-  top: auto !important;
-  bottom: auto !important;
-}
-
-i-amphtml-sizer {
-  display: block !important;
-}
-
-.i-amphtml-fill-content,
-.i-amphtml-blurry-placeholder {
-  display: block;
-  /* These lines are a work around to this issue in iOS:     */
-  /* https://bugs.webkit.org/show_bug.cgi?id=155198          */
-  /* And: https://github.com/ampproject/amphtml/issues/11133 */
-  height: 0;
-  max-height: 100%;
-  max-width: 100%;
-  min-height: 100%;
-  min-width: 100%;
-  width: 0;
-  margin: auto;
-}
-
-.i-amphtml-layout-size-defined .i-amphtml-fill-content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-}
-
-.i-amphtml-layout-intrinsic .i-amphtml-sizer {
-  max-width: 100%;
-}
-
-.i-amphtml-replaced-content {
-  padding: 0 !important;
-  border: none !important;
-  /* TODO(dvoytenko): explore adding here object-fit. */
-}
-
-/**
- * Makes elements visually invisible but still accessible to screen-readers.
- *
- * This Css has been carefully tested to ensure screen-readers can read and
- * activate (in case of links and buttons) the elements with this class. Please
- * use caution when changing anything, even seemingly safe ones. For example
- * changing width from 1 to 0 would prevent TalkBack from activating (clicking)
- * buttons despite TalkBack reading them just fine. This is because
- * element needs to have a defined size and be on viewport otherwise TalkBack
- * does not allow activation of buttons.
- */
-.i-amphtml-screen-reader {
-  position: fixed !important;
-  /* keep it on viewport */
-  top: 0px !important;
-  left: 0px !important;
-  /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
-     before allowing buttons to be activated. */
-  width: 4px !important;
-  height: 4px !important;
-  /* visually hide it with overflow and opacity */
-  opacity: 0 !important;
-  overflow: hidden !important;
-  /* remove any margin or padding */
-  border: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  /* ensure no other style sets display to none */
-  display: block !important;
-  visibility: visible !important;
-}
-
-.i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
-  left: 8px !important;
-}
-.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
-  left: 12px !important;
-}
-.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
-  left: 16px !important;
-}
-
-/* For author styling. */
-.amp-unresolved {
-}
-
-.i-amphtml-unresolved {
-  position: relative;
-  overflow: hidden !important;
-}
-
 .i-amphtml-scroll-disabled {
   overflow-x: hidden !important;
   overflow-y: hidden !important;
@@ -410,261 +223,6 @@ i-amphtml-sizer {
 #i-amphtml-wrapper.i-amphtml-scroll-disabled {
   overflow-x: hidden !important;
   overflow-y: hidden !important;
-}
-
-.i-amphtml-select-disabled {
-  user-select: none !important;
-}
-
-/* "notbuild" classes are set as soon as an element is created and removed
-   as soon as the element is built. */
-
-.amp-notbuilt {
-  /* For author styling. */
-}
-
-.i-amphtml-notbuilt,
-[layout]:not(.i-amphtml-element)
-{
-  position: relative;
-  overflow: hidden !important;
-  color: transparent !important;
-}
-
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
-[layout]:not([layout=container]):not(.i-amphtml-element) > *
-{
-  display: none;
-}
-
-.i-amphtml-ghost {
-  visibility: hidden !important;
-}
-
-.i-amphtml-layout {
-  /* Just state. */
-}
-
-.i-amphtml-error {
-  /* Just state. */
-}
-
-.i-amphtml-element > [placeholder],
-[layout]:not(.i-amphtml-element) > [placeholder] {
-  display: block;
-}
-
-.i-amphtml-element > [placeholder].hidden,
-.i-amphtml-element > [placeholder].amp-hidden {
-  visibility: hidden;
-}
-/* Placeholder, by design, expands layout=container unlike other layouts where
-   it is position:absolute and overlays the layout box.
-   However, when it goes away it should no longer expand the parent, so instead
-   of visibility:hidden it must be display:none */
-.i-amphtml-layout-container > [placeholder].hidden,
-.i-amphtml-layout-container > [placeholder].amp-hidden {
-  display: none;
-}
-
-.i-amphtml-element:not(.amp-notsupported) > [fallback] {
-  display: none;
-}
-
-.i-amphtml-layout-size-defined > [placeholder],
-.i-amphtml-layout-size-defined > [fallback] {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  z-index: 1;
-}
-
-.i-amphtml-notbuilt > [placeholder] {
-  display: block !important;
-}
-
-.i-amphtml-hidden-by-media-query {
-  display: none !important;
-}
-
-.i-amphtml-element-error {
-  background: red !important;
-  color: white !important;
-  position: relative !important;
-}
-
-.i-amphtml-element-error::before {
-  content: attr(error-message);
-}
-
-/**
- * Wraps an element to make the contents scrollable. This is
- * used to wrap iframes which in iOS always behave as if they had the
- * seamless attribute.
- * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
- */
-i-amphtml-scroll-container, i-amp-scroll-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: block;
-}
-
-/**
- * Overflow:auto will be set with delay due to iOS bug where iframe is not
- * rendered.
- * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
- */
-i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.i-amphtml-loading-container {
-  display: block !important;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.i-amphtml-notbuilt > .i-amphtml-loading-container {
-  display: block !important;
-}
-
-/**
- * `i-amphtml-loading-container`, `i-amphtml-loader` and `i-amphtml-loader-dot` all support
- * a "loading indicator" usecase. `i-amphtml-loading-container` is mostly responsible
- * for aligning the loading indicator, while `i-amphtml-loader` and
- * `i-amphtml-loader-dot` are an implementation for a default loading indicator. The
- * default implementation includes the three-dot layout and animation.
- */
-.i-amphtml-loading-container.amp-hidden {
-  visibility: hidden;
-}
-
-.i-amphtml-loader-line {
-  position: absolute;
-  top:0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  overflow: hidden !important;
-  background-color:rgba(151, 151, 151, 0.2);
-  display: block;
-}
-
-.i-amphtml-loader-moving-line {
-  display: block;
-  position: absolute;
-  width: 100%;
-  height: 100% !important;
-  background-color: rgba(151, 151, 151, 0.65);
-  z-index: 2;
-}
-
-@keyframes i-amphtml-loader-line-moving {
-  0% {transform: translateX(-100%);}
-  100% {transform: translateX(100%);}
-}
-
-.i-amphtml-loader-line.amp-active .i-amphtml-loader-moving-line {
-  animation: i-amphtml-loader-line-moving 4s ease infinite;
-}
-
-.i-amphtml-loader {
-  position: absolute;
-  display: block;
-  height: 10px;
-  top: 50%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-50%);
-  transform-origin: 50% 50%;
-  white-space: nowrap;
-}
-
-.i-amphtml-loader.amp-active .i-amphtml-loader-dot {
-  animation: i-amphtml-loader-dots 2s infinite;
-}
-
-.i-amphtml-loader-dot {
-  position: relative;
-  display: inline-block;
-
-  height: 10px;
-  width: 10px;
-  margin: 2px;
-  border-radius: 100%;
-  background-color: rgba(0, 0, 0, .3);
-
-  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
-  will-change: transform;
-}
-
-.i-amphtml-loader .i-amphtml-loader-dot:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.i-amphtml-loader .i-amphtml-loader-dot:nth-child(2) {
-  animation-delay: .1s;
-}
-
-.i-amphtml-loader .i-amphtml-loader-dot:nth-child(3) {
-  animation-delay: .2s;
-}
-
-@keyframes i-amphtml-loader-dots {
-  0%, 100% {
-    transform: scale(.7);
-    background-color: rgba(0, 0, 0, .3);
-  }
-
-  50% {
-    transform: scale(.8);
-    background-color: rgba(0, 0, 0, .5);
-  }
-}
-
-
-/**
- * "overflow" element is an element shown when more content is available but
- * not currently visible. Typically tapping on this element shows the full
- * content.
- */
-.i-amphtml-element > [overflow] {
-  cursor: pointer;
-  /* position:relative is critical to ensure that [overflow] is displayed
-     above an iframe; z-index is not enough. */
-  position: relative;
-  z-index: 2;
-  visibility: hidden;
-}
-
-.i-amphtml-element > [overflow].amp-visible {
-  visibility: visible;
-}
-
-/* Polyfill for IE and any other browser that don't understand templates. */
-template {
-  display: none !important;
-}
-
-/**
- * Authors can set this class on their html tags to provide `border-box` box-sizing
- * to every element in their document. Individual elements can override as necessary.
- */
-.amp-border-box,
-.amp-border-box *,
-.amp-border-box *:before,
-.amp-border-box *:after {
-  box-sizing: border-box;
-}
-
-/* amp-pixel is always non-displayed. */
-amp-pixel {
-  display: none !important;
 }
 
 /**
@@ -681,27 +239,6 @@ amp-pixel {
 amp-instagram {
   padding: 64px 0px 0px 0px !important;
   background-color: white;
-}
-
-
-/**
- * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
- */
-amp-analytics, amp-story-auto-ads {
-  /* Fixed to make position independent of page other elements. */
-  position: fixed !important;
-  top: 0 !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-  visibility: hidden;
-}
-
-html.i-amphtml-fie > amp-analytics {
-  /* Remove position fixed if it's in iframe.
-  * So runtime can measure layoutBox correctly
-  */
-  position: initial !important;
 }
 
 /**
@@ -733,22 +270,6 @@ body:not(.i-amphtml-subs-ready) [subscriptions-action],
 
 
 /**
- * Forms error/success messaging containers should be hidden at first.
- */
-form [submitting],
-form [submit-success],
-form [submit-error] {
-  display: none;
-}
-
-/**
- * Form validation error messages should be hidden at first.
- */
-[visible-when-invalid]:not(.visible) {
-  display: none;
-}
-
-/**
  * Hide the update reference point of amp-live-list by default. This is
  * reset by the `amp-live-list > .amp-active[update]` selector.
  */
@@ -774,53 +295,6 @@ amp-experiment, amp-share-tracking {
   padding: 5px;
 }
 
-/**
- * amp-accordion to avoid FOUC.
- */
-
-/* Non-overridable properties */
-amp-accordion {
-  display: block !important;
-}
-
-/* Make sections non-floatable */
-amp-accordion > section {
-  float: none !important;
-}
-
-/*  Display the first 2 elements (heading and content) */
-amp-accordion > section > * {
-  float: none !important;
-  display: block !important;
-  overflow: hidden !important; /* clearfix */
-  position: relative !important;
-}
-
-amp-accordion,
-amp-accordion > section,
-.i-amphtml-accordion-header,
-.i-amphtml-accordion-content {
-  margin: 0;
-}
-
-/* heading element*/
-.i-amphtml-accordion-header {
-  cursor: pointer;
-  background-color: #efefef;
-  padding-right: 20px;
-  border: solid 1px #dfdfdf;
-}
-
-/* Collapse content by default. */
-amp-accordion > section > :last-child {
-  display: none !important;
-}
-
-/* Expand content when needed. */
-amp-accordion > section[expanded] > :last-child {
-  display: block !important;
-}
-
 /* amp-list CSS to avoid FOUC */
 
 /**
@@ -828,7 +302,7 @@ amp-accordion > section[expanded] > :last-child {
  * where amp-list becomes a container via the resizable-children attribute, the
  * loader should be fully hidden and not take up space.
  */
- amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
+amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
   display: none !important;
 }
 

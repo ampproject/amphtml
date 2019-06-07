@@ -98,6 +98,23 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     expect(localSubscriptionPlatform.getBaseScore()).to.be.equal(99);
   });
 
+  it('should default to single entitlement pingback', () => {
+    expect(localSubscriptionPlatform.pingbackReturnsAllEntitlements()).to.be
+      .false;
+  });
+
+  it('pingbackReturnsAllEntitlements should "pingbackAllEntitlements" config value', () => {
+    const testConfig = Object.assign({}, serviceConfig.services[0], {
+      'pingbackAllEntitlements': true,
+    });
+    const testLocalPlatform = localSubscriptionPlatformFactory(
+      ampdoc,
+      testConfig,
+      serviceAdapter
+    );
+    expect(testLocalPlatform.pingbackReturnsAllEntitlements()).to.be.true;
+  });
+
   it('Should not allow prerender', () => {
     expect(localSubscriptionPlatform.isPrerenderSafe()).to.be.false;
   });

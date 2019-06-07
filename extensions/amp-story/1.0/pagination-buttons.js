@@ -273,9 +273,7 @@ export class PaginationButtons {
    * @private
    */
   onCurrentPageIndexUpdate_(pageIndex) {
-    const totalPages = /**@type {number}*/ (this.storeService_.get(
-      StateProperty.PAGES_COUNT
-    ));
+    const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
     const bookendActive = this.storeService_.get(StateProperty.BOOKEND_STATE);
 
     if (pageIndex === 0) {

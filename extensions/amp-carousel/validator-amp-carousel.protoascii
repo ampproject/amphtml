@@ -32,19 +32,23 @@ tags: {  # amp-carousel
 attr_lists: {
   name: "amp-carousel-common"
   attrs: {
+    disabled_by: "amp4email"
     name: "arrows"
     value: ""
   }
   attrs: {
+    disabled_by: "amp4email"
     name: "autoplay"
     value_regex: "(|[0-9]+)"
   }
   attrs: { name: "controls" }
   attrs: {
+    disabled_by: "amp4email"
     name: "delay"
     value_regex: "[0-9]+"
   }
   attrs: {
+    disabled_by: "amp4email"
     name: "dots"
     value: ""
   }
@@ -168,9 +172,6 @@ tags: {  # <amp-carousel lightbox type=carousel>
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-CAROUSEL lightbox [lightbox-exclude]"
   attrs: {
@@ -180,9 +181,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-CAROUSEL lightbox [child]"
   attrs: {

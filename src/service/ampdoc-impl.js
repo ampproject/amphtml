@@ -53,11 +53,6 @@ export class AmpDocService {
 
     /** @private @const */
     this.alwaysClosestAmpDoc_ = isExperimentOn(win, 'ampdoc-closest');
-
-    /** Guarded by 'ampdoc-shell' experiment
-     * @private {?AmpDocShell}
-     */
-    this.shellShadowDoc_ = null;
   }
 
   /**
@@ -67,14 +62,6 @@ export class AmpDocService {
    */
   isSingleDoc() {
     return !!this.singleDoc_;
-  }
-
-  /**
-   * Whether if an `AmpDocShell` has been installed for the runtime.
-   * @return {boolean}
-   */
-  hasAmpDocShell() {
-    return !!this.shellShadowDoc_;
   }
 
   /**
@@ -97,18 +84,6 @@ export class AmpDocService {
     // Single document: return it immediately.
     if (this.singleDoc_ && !closestAmpDoc && !this.alwaysClosestAmpDoc_) {
       return this.singleDoc_;
-    }
-
-    // Multiple documents and AmpDocShell requested
-    if (
-      isExperimentOn(this.win, 'ampdoc-shell') &&
-      opt_node === this.win.document
-    ) {
-      if (this.shellShadowDoc_) {
-        return this.shellShadowDoc_;
-      } else {
-        throw dev().createError('Ampdoc for shell has not been installed');
-      }
     }
 
     // TODO(sparhami) Should we always require a node to be passed? This will
@@ -138,10 +113,6 @@ export class AmpDocService {
       // Shadow doc.
       const shadowRoot = getShadowRootNode(n);
       if (!shadowRoot) {
-        // If not inside a shadow root, it may belong to AmpDocShell
-        if (this.shellShadowDoc_) {
-          return this.shellShadowDoc_;
-        }
         break;
       }
 
@@ -210,33 +181,6 @@ export class AmpDocService {
     const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
-  }
-
-  /**
-   * Creates and installs an ampdoc for the shell in shadow-doc mode.
-   * `AmpDocShell` is a subclass of `AmpDocShadow` that is installed for
-   * `window.document` and allows to use AMP components as part of the shell,
-   * outside shadow roots
-   *
-   * Currently guarded by 'ampdoc-shell' experiment
-   *
-   * @return {!AmpDocShell}
-   * @restricted
-   */
-  installShellShadowDoc() {
-    devAssert(
-      this.singleDoc_ === null,
-      'AmpDocShell cannot be installed in single-doc mode'
-    );
-    this.shellShadowDoc_ = new AmpDocShell(this.win);
-    this.win.document[AMPDOC_PROP] = this.shellShadowDoc_;
-
-    whenDocumentReady(this.win.document).then(document => {
-      this.shellShadowDoc_.setBody(dev().assertElement(document.body));
-      this.shellShadowDoc_.setReady();
-    });
-
-    return this.shellShadowDoc_;
   }
 }
 
@@ -576,24 +520,6 @@ export class AmpDocShadow extends AmpDoc {
   /** @override */
   whenReady() {
     return this.readyPromise_;
-  }
-}
-
-/**
- * AmpDocShadow for the shell
- * @package @visibleForTesting
- */
-export class AmpDocShell extends AmpDocShadow {
-  // TODO(choumx): win.document is not a ShadowRoot, which is required by the
-  // super constructor.
-  // eslint-disable-next-line require-jsdoc
-  constructor(win) {
-    super(win, win.location.href, win.document);
-  }
-
-  /** @override */
-  getHeadNode() {
-    return dev().assertElement(this.win.document.head);
   }
 }
 

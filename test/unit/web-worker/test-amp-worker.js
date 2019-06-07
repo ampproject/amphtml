@@ -20,6 +20,7 @@ import {
   invokeWebWorker,
 } from '../../../src/web-worker/amp-worker';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {installXhrService} from '../../../src/service/xhr-impl';
 
 describe('invokeWebWorker', () => {
@@ -29,6 +30,7 @@ describe('invokeWebWorker', () => {
   let ampWorker;
   let postMessageStub;
   let fakeWorker;
+  let fetchTextCallStub;
   let workerReadyPromise;
 
   beforeEach(() => {
@@ -52,13 +54,15 @@ describe('invokeWebWorker', () => {
 
     // Stub xhr.fetchText() to return a resolved promise.
     installXhrService(fakeWin);
-    sandbox.stub(Services.xhrFor(fakeWin), 'fetchText').callsFake(() =>
-      Promise.resolve({
-        text() {
-          return Promise.resolve();
-        },
-      })
-    );
+    fetchTextCallStub = sandbox
+      .stub(Services.xhrFor(fakeWin), 'fetchText')
+      .callsFake(() =>
+        Promise.resolve({
+          text() {
+            return Promise.resolve();
+          },
+        })
+      );
 
     ampWorker = ampWorkerForTesting(fakeWin);
     workerReadyPromise = ampWorker.fetchPromiseForTesting();
@@ -78,6 +82,7 @@ describe('invokeWebWorker', () => {
   it('should send and receive a message', () => {
     // Sending.
     const invokePromise = invokeWebWorker(fakeWin, 'foo', ['bar', 123]);
+    getMode(fakeWin).bypassInterceptorForDev = true;
 
     return workerReadyPromise.then(() => {
       expect(postMessageStub).to.have.been.calledWithMatch({
@@ -85,6 +90,14 @@ describe('invokeWebWorker', () => {
         args: sinon.match(['bar', 123]),
         id: 0,
       });
+
+      expect(fetchTextCallStub).to.have.been.calledWithMatch(
+        'http://localhost:9876/dist/ww.js',
+        {
+          ampCors: false,
+          bypassInterceptorForDev: true,
+        }
+      );
 
       // Receiving.
       const data = {
