@@ -263,10 +263,20 @@ export class LiveListManager {
    * @param {!./amp-live-list.AmpLiveList} liveList
    */
   register(id, liveList) {
-    const isNotRegistered = !(id in this.liveLists_);
-    if (isNotRegistered) {
-      this.liveLists_[id] = liveList;
-      this.intervals_.push(liveList.getInterval());
+    if (id in this.liveLists_) {
+      return;
+    }
+    this.liveLists_[id] = liveList;
+    this.intervals_.push(liveList.getInterval());
+
+    // Polling may not be started yet if no live lists were registered by
+    // doc ready in LiveListManager's constructor.
+    if (
+      liveList.isEnabled() &&
+      this.ampdoc.isReady() &&
+      this.viewer_.isVisible()
+    ) {
+      this.poller_.start();
     }
   }
 
