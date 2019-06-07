@@ -66,6 +66,11 @@ class AmpAccordion extends AMP.BaseElement {
 
     /** @private {number|string} */
     this.prefix_ = element.id ? element.id : Math.floor(Math.random() * 100);
+
+    /** @private {!MutationObserver} */
+    this.mutationObserver_ = new this.win.MutationObserver(mutations => {
+      this.toggleMutations_(mutations);
+    });
   }
 
   /** @override */
@@ -150,6 +155,9 @@ class AmpAccordion extends AMP.BaseElement {
             this.collapse_(this.sections_[i]);
           }
         }
+      });
+      this.mutationObserver_.observe(section, {
+        attributes: true,
       });
 
       if (this.currentState_[contentId]) {
@@ -335,6 +343,10 @@ class AmpAccordion extends AMP.BaseElement {
     }
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
+
+    // Take the records to clear them out. This prevents mutations from
+    // the truncation from invoking the observer's callback.
+    this.mutationObserver_.takeRecords();
   }
 
   /**
@@ -600,6 +612,22 @@ class AmpAccordion extends AMP.BaseElement {
       const newFocusHeader = this.headers_[newFocusIndex];
       tryFocus(newFocusHeader);
     }
+  }
+
+  /**
+   * Callback function to execute when mutations are observed.
+   * @param {!Array<!MutationRecord>} mutations
+   */
+  toggleMutations_(mutations) {
+    mutations.forEach(mutation => {
+      if (mutation.attributeName === 'expanded') {
+        const sectionEl = dev().assertElement(mutation.target);
+        const toExpand = sectionEl.getAttribute('expanded');
+        if (toExpand === 'false') {
+          sectionEl.removeAttribute('expanded');
+        }
+      }
+    });
   }
 }
 

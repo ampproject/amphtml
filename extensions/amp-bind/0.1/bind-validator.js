@@ -406,6 +406,9 @@ function createElementRules_() {
       'disabled': null,
       'label': null,
     },
+    'SECTION': {
+      'expanded': null,
+    },
     'SELECT': {
       'autofocus': null,
       'disabled': null,

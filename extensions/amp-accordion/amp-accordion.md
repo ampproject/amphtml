@@ -120,7 +120,7 @@ The events below will be triggered on `section`s of `accordion`.
   </tr>
   <tr>
     <td width="40%"><strong><code>expanded</code></strong></td>
-    <td>Set this attribute on a <code>&lt;section&gt;</code> to display the section as expanded on page load.</td>
+    <td>Set this attribute or bind to <code>[expanded]</code> on a <code>&lt;section&gt;</code> to display the section as expanded on page load.</td>
   </tr>
   <tr>
     <td width="40%"><strong><code>expand-single-section</code></strong></td>
