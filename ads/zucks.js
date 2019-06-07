@@ -46,5 +46,4 @@ export function zucks(global, data) {
   } else {
     writeScript(global, `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`);
   }
-
 }
