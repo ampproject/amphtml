@@ -217,7 +217,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
       return viewer.isTrustedViewer();
     })
     .then(viewerTrusted => {
-      if (!viewerTrusted && !getMode(win).development) {
+      if (!viewerTrusted) {
         return;
       }
       const messagePayload = dict({
