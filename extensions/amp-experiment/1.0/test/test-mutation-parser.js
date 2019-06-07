@@ -186,10 +186,22 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
       }
     });
 
-    it('should allow all class changes', () => {
-      const mutation = getAttributeMutation('class', 'any-class-is-fine');
+    it('should allow class changes', () => {
+      const mutation = getAttributeMutation('class', 'this-class-is-fine');
       const mutationOperation = parseMutation(mutation, doc);
       expect(mutationOperation).to.be.ok;
+    });
+
+    it('should error when unallowed class changes', () => {
+      const mutation = getAttributeMutation(
+        'class',
+        'i-amphtml-this-class-is-bad'
+      );
+      allowConsoleError(() => {
+        expect(() => {
+          parseMutation(mutation, doc);
+        }).to.throw(/value/);
+      });
     });
 
     it('should error when unallowed style', () => {

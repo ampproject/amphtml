@@ -15,8 +15,8 @@
  */
 
 import {
-  AllowedAttributeMutationEntry,
   DefaultAllowedURLAttributeMutationEntry,
+  DefaultClassAllowedAttributeMutationEntry,
   DefaultStyleAllowedAttributeMutationEntry,
 } from './allowed-attribute-mutation-entry';
 import {user, userAssert} from '../../../../src/log';
@@ -70,7 +70,7 @@ export const attributeMutationAllowList = {
     '*': new DefaultStyleAllowedAttributeMutationEntry(),
   },
   'class': {
-    '*': new AllowedAttributeMutationEntry(),
+    '*': new DefaultClassAllowedAttributeMutationEntry(),
   },
   'src': {
     '*': new DefaultAllowedURLAttributeMutationEntry(),
