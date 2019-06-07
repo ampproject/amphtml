@@ -296,6 +296,55 @@ describes.repeated(
             });
           });
 
+          it('should error if template is not of type Element', () => {
+            sandbox.spy(xhrUtils, 'setupInput');
+            sandbox.spy(xhrUtils, 'setupAMPCors');
+            sandbox.stub(xhrUtils, 'fromStructuredCloneable');
+
+            return getSsrAmpFormPromise.then(ampForm => {
+              const form = ampForm.form_;
+              const template = createElement('template');
+              template.setAttribute('type', 'amp-mustache');
+              template.content.appendChild(createTextNode('Some {{template}}'));
+              form.id = 'registration';
+              const event = {
+                stopImmediatePropagation: sandbox.spy(),
+                target: form,
+                preventDefault: sandbox.spy(),
+              };
+              const successTemplateContainer = createElement('div');
+              successTemplateContainer.setAttribute('submit-success', '');
+              successTemplateContainer.appendChild(template);
+
+              form.appendChild(successTemplateContainer);
+
+              form.xhrAction_ = 'https://www.xhr-action.org';
+
+              sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse').returns(
+                Promise.resolve({
+                  data: null,
+                })
+              );
+
+              sandbox
+                .stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
+                .returns(template);
+
+              const renderTemplate = sandbox.stub(
+                ampForm.ssrTemplateHelper_,
+                'renderTemplate'
+              );
+
+              // Given the returned template is null.
+              renderTemplate.onFirstCall().returns(Promise.resolve(null));
+
+              return ampForm.handleSubmitEvent_(event).then(() => {
+                expect(ampForm.renderTemplatePromiseForTesting()).to.eventually
+                  .be.rejected;
+              });
+            });
+          });
+
           it('should set html bypassing mustache rendering', () => {
             sandbox.spy(xhrUtils, 'setupInput');
             sandbox.spy(xhrUtils, 'setupAMPCors');
