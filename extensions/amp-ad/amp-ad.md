@@ -230,6 +230,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AdReactor](../../ads/adreactor.md)
 - [AdSense](../../ads/google/adsense.md)
 - [AdSensor](../../ads/adsensor.md)
+- [AdsLoom](../../ads/adsloom.md)
 - [AdsNative](../../ads/adsnative.md)
 - [AdSpeed](../../ads/adspeed.md)
 - [AdSpirit](../../ads/adspirit.md)
@@ -399,6 +400,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 ## Supported embed types
 
 - [24smi](../../ads/24smi.md)
+- [AdsLoom](../../ads/adsloom.md)
 - [Bringhub](../../ads/bringhub.md)
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
