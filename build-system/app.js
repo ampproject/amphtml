@@ -31,7 +31,6 @@ const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
 const request = require('request');
-const {appTestEndpoints} = require('./app-test');
 const pc = process;
 const runVideoTestBench = require('./app-video-testbench');
 const {
@@ -50,6 +49,7 @@ app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
 app.use('/user-location/', require('./routes/user-location'));
+app.use('/test', require('./routes/test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -91,10 +91,6 @@ if (!global.AMP_TESTING) {
 // e.g. /serve_mode_change?mode=(default|compiled|cdn)
 // (See ./app-index/settings.js)
 app.get('/serve_mode_change', (req, res) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   const {mode} = req.query;
   if (isValidServeMode(mode)) {
     setServeMode(mode);
@@ -243,10 +239,6 @@ app.use('/api/dont-show', (req, res) => {
 });
 
 app.use('/api/echo/query', (req, res) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   res.json(JSON.parse(req.query.data));
 });
 
@@ -449,10 +441,6 @@ app.use('/form/verify-search-json/post', (req, res) => {
 });
 
 app.use('/share-tracking/get-outgoing-fragment', (req, res) => {
-  res.setHeader(
-    'AMP-Access-Control-Allow-Source-Origin',
-    req.protocol + '://' + req.headers.host
-  );
   res.json({
     fragment: '54321',
   });
@@ -880,22 +868,6 @@ app.use('/inabox/:version/', (req, res) => {
   });
 });
 
-app.use('/examples/analytics.config.json', (req, res, next) => {
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
-  next();
-});
-
-app.use(
-  ['/examples/*', '/extensions/*', '/test/manual/*'],
-  (req, res, next) => {
-    const sourceOrigin = req.query['__amp_source_origin'];
-    if (sourceOrigin) {
-      res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-    }
-    next();
-  }
-);
-
 /**
  * Append ?sleep=5 to any included JS file in examples to emulate delay in
  * loading that file. This allows you to test issues with your extension being
@@ -1002,8 +974,6 @@ app.get(
       });
   }
 );
-
-appTestEndpoints(app);
 
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

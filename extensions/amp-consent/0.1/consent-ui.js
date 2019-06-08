@@ -24,6 +24,7 @@ import {
   insertAfterOrAtStart,
   isAmpElement,
   removeElement,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
@@ -228,7 +229,13 @@ export class ConsentUI {
       // If the UI is an AMP Element, wait until it's built before showing it,
       // to avoid race conditions where the UI would be hidden by the runtime
       // at build time. (see #18841).
-      isAmpElement(this.ui_) ? this.ui_.whenBuilt().then(() => show()) : show();
+      if (isAmpElement(this.ui_)) {
+        whenUpgradedToCustomElement(this.ui_)
+          .then(() => this.ui_.whenBuilt())
+          .then(() => show());
+      } else {
+        show();
+      }
     }
 
     this.isVisible_ = true;

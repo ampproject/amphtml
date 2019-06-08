@@ -37,7 +37,11 @@ import {
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
-import {AdvancementMode, getAnalyticsService} from './story-analytics';
+import {
+  AdvancementMode,
+  AnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
 import {AmpEvents} from '../../../src/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBackground} from './background';
@@ -50,7 +54,6 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
-import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
@@ -106,6 +109,7 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
+import {getVariableService} from './variable-service';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
@@ -288,11 +292,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {Array<string>} */
     this.storyNavigationPath_ = [];
 
-    /** @const @private {!AmpStoryVariableService} */
-    this.variableService_ = new AmpStoryVariableService();
-    registerServiceBuilder(this.win, 'story-variable', () =>
-      this.variableService_.get()
-    );
+    /** @const @private {!./variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(this.win);
 
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
@@ -426,6 +427,11 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListenersForDev_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
+
+    // Disables the bookend entirely if the story is within a group of stories.
+    if (this.viewer_.hasCapability('swipe')) {
+      this.storeService_.dispatch(Action.TOGGLE_CAN_SHOW_BOOKEND, false);
+    }
 
     this.navigationState_.observe(stateChangeEvent => {
       this.variableService_.onNavigationStateChange(stateChangeEvent);
@@ -631,7 +637,9 @@ export class AmpStory extends AMP.BaseElement {
       isMuted => {
         // We do not want to trigger an analytics event for the initialization of
         // the muted state.
-        this.analyticsService_.onMutedStateChange(isMuted);
+        this.analyticsService_.triggerEvent(
+          isMuted ? AnalyticsEvent.STORY_MUTED : AnalyticsEvent.STORY_UNMUTED
+        );
       },
       false /** callToInitialize */
     );
@@ -676,10 +684,12 @@ export class AmpStory extends AMP.BaseElement {
       this.replay_();
     });
 
-    this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
-      if (this.storeService_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
-        this.ampStoryHint_.showFirstPageHintOverlay();
-      }
+    this.element.addEventListener(EventType.NO_NEXT_PAGE, () => {
+      this.onNoNextPage_();
+    });
+
+    this.element.addEventListener(EventType.NO_PREVIOUS_PAGE, () => {
+      this.onNoPreviousPage_();
     });
 
     this.advancement_.addOnTapNavigationListener(direction => {
@@ -1223,21 +1233,24 @@ export class AmpStory extends AMP.BaseElement {
       this.activePage_,
       'No active page set when navigating to next page.'
     );
+    activePage.next(opt_isAutomaticAdvance);
+  }
 
-    const lastPage = this.pages_[this.getPageCount() - 1];
-    if (
-      activePage.element.hasAttribute(Attributes.ADVANCE_TO) ||
-      activePage.element.hasAttribute(Attributes.PUBLIC_ADVANCE_TO) ||
-      activePage !== lastPage
-    ) {
-      activePage.next(opt_isAutomaticAdvance);
-    } else {
-      this.hasBookend_().then(hasBookend => {
-        if (hasBookend) {
-          this.showBookend_();
-        }
-      });
+  /**
+   * Handles EventType.NO_NEXT_PAGE events.
+   * @private
+   */
+  onNoNextPage_() {
+    if (this.viewer_.hasCapability('swipe')) {
+      this.viewer_./*OK*/ sendMessage('selectDocument', dict({'next': true}));
+      return;
     }
+
+    this.hasBookend_().then(hasBookend => {
+      if (hasBookend) {
+        this.showBookend_();
+      }
+    });
   }
 
   /**
@@ -1250,6 +1263,24 @@ export class AmpStory extends AMP.BaseElement {
       'No active page set when navigating to previous page.'
     );
     activePage.previous();
+  }
+
+  /**
+   * Handles EventType.NO_PREVIOUS_PAGE events.
+   * @private
+   */
+  onNoPreviousPage_() {
+    if (this.viewer_.hasCapability('swipe')) {
+      this.viewer_./*OK*/ sendMessage(
+        'selectDocument',
+        dict({'previous': true})
+      );
+      return;
+    }
+
+    if (this.storeService_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
+      this.ampStoryHint_.showFirstPageHintOverlay();
+    }
   }
 
   /**
@@ -2253,7 +2284,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   maybePreloadBookend_() {
-    if (!this.activePage_) {
+    if (
+      !this.activePage_ ||
+      !this.storeService_.get(StateProperty.CAN_SHOW_BOOKEND)
+    ) {
       return;
     }
 

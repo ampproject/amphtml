@@ -63,6 +63,7 @@ describes.fakeWin('Viewport', {}, env => {
 
     windowApi = env.win;
     windowApi.requestAnimationFrame = fn => window.setTimeout(fn, 16);
+    windowApi.scrollY = windowApi.pageYOffset = 17;
 
     viewerViewportHandler = undefined;
     viewerScrollDocHandler = undefined;
@@ -1191,9 +1192,11 @@ describes.fakeWin('Viewport', {}, env => {
       windowApi.scrollTo = originalScrollTo;
     });
 
-    it('should not override scrollTo if not requested', () => {
+    it('should not override scrollTo/pageYOffset if not requested', () => {
       new Viewport(ampdoc, binding, viewer);
       expect(windowApi.scrollTo).to.equal(originalScrollTo);
+      expect(windowApi.scrollY).to.equal(17);
+      expect(windowApi.pageYOffset).to.equal(17);
     });
 
     it('should override scrollTo when requested', () => {
@@ -1205,6 +1208,15 @@ describes.fakeWin('Viewport', {}, env => {
       expect(setScrollTopStub).to.be.calledOnce.calledWith(11);
     });
 
+    it('should override scrollY/pageYOffset when requested', () => {
+      sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
+      viewport = new Viewport(ampdoc, binding, viewer);
+      const stub = sandbox.stub(viewport, 'getScrollTop').callsFake(() => 19);
+      expect(windowApi.scrollY).to.equal(19);
+      expect(windowApi.pageYOffset).to.equal(19);
+      expect(stub).to.be.calledTwice;
+    });
+
     it('should tolerate scrollTo override failures', () => {
       Object.defineProperty(windowApi, 'scrollTo', {
         value: originalScrollTo,
@@ -1214,6 +1226,17 @@ describes.fakeWin('Viewport', {}, env => {
       sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
       new Viewport(ampdoc, binding, viewer);
       expect(windowApi.scrollTo).to.equal(originalScrollTo);
+    });
+
+    it('should tolerate scrollY override failures', () => {
+      Object.defineProperty(windowApi, 'scrollY', {
+        value: 21,
+        writable: false,
+        configurable: false,
+      });
+      sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
+      new Viewport(ampdoc, binding, viewer);
+      expect(windowApi.scrollY).to.equal(21);
     });
   });
 });

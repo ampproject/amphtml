@@ -106,7 +106,6 @@ describes.realWin(
         return {
           fetchJson: (url, init) => {
             jsonRequestConfigs[url] = init;
-            expect(init.requireAmpResponseSourceOrigin).to.be.false;
             if (configWithCredentials) {
               expect(init.credentials).to.equal('include');
             } else {

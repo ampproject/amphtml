@@ -133,6 +133,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.activeElement_ = null;
 
     /**
+     * The element id if present or random number.
+     * @private {number|string}
+     */
+    this.prefix_ = element.id ? element.id : Math.floor(Math.random() * 100);
+
+    /**
      * The reference to the <div> that contains template-rendered children.
      * @private {?Element}
      */
@@ -203,7 +209,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
     }
     this.inputElement_.setAttribute('dir', 'auto');
-    this.inputElement_.setAttribute('aria-autocomplete', 'list');
+    this.inputElement_.setAttribute('aria-autocomplete', 'both');
     this.inputElement_.setAttribute('role', 'combobox');
 
     userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
@@ -876,6 +882,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.resetActiveElement_();
         newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
         newActiveElement.setAttribute('aria-selected', 'true');
+        let elementId = newActiveElement.getAttribute('id');
+        if (!elementId) {
+          // To ensure that we pass Accessibility audits -
+          // we need to make sure that each item element has a unique ID.
+          // In case the autocomplete doesn't have an ID we use a
+          // random number to ensure uniqueness.
+          elementId = this.prefix_ + '_AMP_content_' + activeIndex;
+          newActiveElement.setAttribute('id', elementId);
+        }
+        this.inputElement_.setAttribute('aria-activedescendant', elementId);
         this.activeIndex_ = activeIndex;
         this.activeElement_ = newActiveElement;
       }
@@ -916,6 +932,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
       false
     );
     this.activeElement_.removeAttribute('aria-selected');
+    if (this.activeElement_.getAttribute('id') === 'autocomplete-selected') {
+      this.activeElement_.removeAttribute('id');
+    }
+    this.inputElement_.removeAttribute('aria-activedescendent');
     this.activeElement_ = null;
     this.activeIndex_ = -1;
   }
