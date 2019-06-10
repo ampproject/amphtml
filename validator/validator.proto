@@ -318,7 +318,7 @@ message AncestorMarker {
   enum Marker {
     UNKNOWN = 0;
     // Set by <amp-sidebar> tags to allow autoscroll attributes on descendants.
-    // See https://github.com/ampproject/amphtml/20524 for more context.
+    // See https://github.com/ampproject/amphtml/pull/20524 for more context.
     AUTOSCROLL = 1;
   }
   repeated Marker marker = 1;
