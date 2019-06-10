@@ -417,7 +417,7 @@ describe('AmpDocService', () => {
         childWin.document.body.appendChild(content);
         const ampDoc = service.getAmpDoc(content);
         expect(ampDoc).to.equal(newAmpDoc);
-        expect(ampDoc.getEmbedder()).to.equal(service.singleDoc_);
+        expect(ampDoc.getParent()).to.equal(service.singleDoc_);
         expect(childWin.document['__AMPDOC']).to.equal(ampDoc);
       });
     });
@@ -651,14 +651,14 @@ describes.realWin('AmpDocFie', {}, env => {
 
   let service;
   let childWin;
-  let embedder;
+  let parent;
   let ampdoc;
 
   beforeEach(() => {
     service = new AmpDocService(window, /* isSingleDoc */ true);
     childWin = env.win;
-    embedder = service.singleDoc_;
-    ampdoc = new AmpDocFie(childWin, URL, embedder);
+    parent = service.singleDoc_;
+    ampdoc = new AmpDocFie(childWin, URL, parent);
   });
 
   it('should create AmpDocFie', () => {
@@ -666,14 +666,14 @@ describes.realWin('AmpDocFie', {}, env => {
     expect(ampdoc.win).to.equal(childWin);
     expect(ampdoc.isSingleDoc()).to.be.false;
     expect(ampdoc.getUrl()).to.equal(URL);
-    expect(ampdoc.getEmbedder()).to.equal(embedder);
+    expect(ampdoc.getParent()).to.equal(parent);
   });
 
   it('should return window', () => {
     expect(ampdoc.win).to.equal(childWin);
     expect(ampdoc.isSingleDoc()).to.be.false;
     expect(ampdoc.getUrl()).to.equal(URL);
-    expect(ampdoc.getEmbedder()).to.equal(embedder);
+    expect(ampdoc.getParent()).to.equal(parent);
   });
 
   it('should return document as root', () => {

@@ -281,7 +281,7 @@ export class AmpDoc {
   /**
    * @return {?AmpDoc}
    */
-  getEmbedder() {
+  getParent() {
     return null;
   }
 
@@ -443,7 +443,7 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
-  getEmbedder() {
+  getParent() {
     return null;
   }
 
@@ -535,7 +535,7 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
-  getEmbedder() {
+  getParent() {
     return null;
   }
 
@@ -611,16 +611,16 @@ export class AmpDocFie extends AmpDoc {
   /**
    * @param {!Window} win
    * @param {string} url
-   * @param {!AmpDoc} embedder
+   * @param {!AmpDoc} parent
    */
-  constructor(win, url, embedder) {
+  constructor(win, url, parent) {
     super(win);
 
     /** @private @const {string} */
     this.url_ = url;
 
     /** @private @const {!AmpDoc} */
-    this.embedder_ = embedder;
+    this.parent_ = parent;
 
     /** @private @const {!Promise<!Element>} */
     this.bodyPromise_ = this.win.document.body
@@ -643,8 +643,8 @@ export class AmpDocFie extends AmpDoc {
   }
 
   /** @override */
-  getEmbedder() {
-    return this.embedder_;
+  getParent() {
+    return this.parent_;
   }
 
   /** @override */

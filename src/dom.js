@@ -214,6 +214,7 @@ export function rootNodeFor(node) {
     return node.getRootNode() || node;
   }
   let n;
+  // Check isShadowRoot() is only needed for the polyfill case.
   for (n = node; !!n.parentNode && !isShadowRoot(n); n = n.parentNode) {}
   return n;
 }

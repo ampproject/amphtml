@@ -134,9 +134,9 @@ export function installFriendlyIframeEmbed(
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
-  const ampdocExperimentOn = isExperimentOn(win, 'ampdoc-fie');
+  const ampdocFieExperimentOn = isExperimentOn(win, 'ampdoc-fie');
   /** @const {?./service/ampdoc-impl.AmpDocService} */
-  const ampdocService = ampdocExperimentOn
+  const ampdocService = ampdocFieExperimentOn
     ? Services.ampdocServiceFor(win)
     : null;
 
@@ -218,14 +218,14 @@ export function installFriendlyIframeEmbed(
 
   return readyPromise.then(() => {
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
-    const ampdoc = ampdocExperimentOn
+    const ampdoc = ampdocFieExperimentOn && ampdocService
       ? ampdocService.installFieDoc(spec.url, childWin)
       : null;
     const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise, ampdoc);
     iframe[EMBED_PROP] = embed;
 
     // Add extensions.
-    if (ampdocExperimentOn) {
+    if (ampdocFieExperimentOn) {
       extensions.installExtensionsInFie(
         ampdoc,
         spec.extensionIds || [],
