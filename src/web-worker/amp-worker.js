@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {ModeDef, getMode} from '../mode';
 import {Services} from '../services';
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev, devAssert} from '../log';
-import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 
 const TAG = 'web-worker';
@@ -99,6 +99,7 @@ class AmpWorker {
     this.fetchPromise_ = this.xhr_
       .fetchText(url, {
         ampCors: false,
+        bypassInterceptorForDev: getMode().localDev,
       })
       .then(res => res.text())
       .then(text => {
