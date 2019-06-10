@@ -53,6 +53,7 @@ describes.realWin(
       }
 
       await userLocation.build();
+      await userLocation.layoutCallback();
       return userLocation;
     }
 
@@ -74,13 +75,21 @@ describes.realWin(
     });
 
     it('should parse config when built, if present', async () => {
+      const DEFAULT_CONFIG = {
+        fallback: undefined,
+        maximumAge: undefined,
+        precision: undefined,
+        timeout: undefined,
+      };
       const elementNoConfig = await newUserLocation();
       const implNoConfig = await elementNoConfig.getImpl();
-      expect(implNoConfig.config_).to.be.null;
+      const noConfig = await implNoConfig.getConfig_();
+      expect(noConfig).to.deep.equal(DEFAULT_CONFIG);
 
       const elementWithConfig = await newUserLocation({});
       const implWithConfig = await elementWithConfig.getImpl();
-      expect(implWithConfig.config_).to.not.be.null;
+      const config = await implWithConfig.getConfig_();
+      expect(config).to.deep.equal(DEFAULT_CONFIG);
     });
 
     it('should error with invalid config', () => {
@@ -106,12 +115,13 @@ describes.realWin(
 
       const element = await newUserLocation(testConfig);
       const impl = await element.getImpl();
-      expect(impl.config_).to.deep.include({
+      const config = await impl.getConfig_();
+      expect(config).to.deep.include({
         fallback: {lat: 40, lon: -22},
         maximumAge: 60000,
         timeout: 10000,
       });
-      expect(impl.config_).to.not.have.property('doNotExpose');
+      expect(config).to.not.have.property('doNotExpose');
     });
 
     it('should trigger the "approve" event if user approves geolocation', async () => {
