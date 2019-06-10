@@ -79,22 +79,21 @@ Command                                                                 | Descri
 `gulp pr-check`                                                         | Runs all the Travis CI checks locally.
 `gulp pr-check --nobuild`                                               | Runs all the Travis CI checks locally, but skips the `gulp build` step.
 `gulp pr-check --files=<test-files-path-glob>`                          | Runs all the Travis CI checks locally, and restricts tests to the files provided.
-`gulp test --unit`                                                      | Runs the unit tests in Chrome (doesn't require the AMP library to be built).
-`gulp test --unit --files=<test-files-path-glob>`                       | Runs the unit tests from the specified files in Chrome.
-`gulp test --local-changes`                                             | Runs the unit tests directly affected by the files changed in the local branch in Chrome.
-`gulp test --integration`                                               | Runs the integration tests in Chrome (requires the AMP library to be built).
-`gulp test --integration --files=<test-files-path-glob>`                | Runs the integration tests from the specified files in Chrome.
-`gulp test [--unit\|--integration] --verbose`                           | Runs tests in Chrome with logging enabled.
-`gulp test [--unit\|--integration] --nobuild`                           | Runs tests without re-build.
-`gulp test [--unit\|--integration] --coverage`                          | Runs code coverage tests. After running, the report will be available at test/coverage/index.html
-`gulp test [--unit\|--integration] --watch`                             | Watches for changes in files, runs corresponding test(s) in Chrome.
-`gulp test [--unit\|--integration] --watch --verbose`                   | Same as `watch`, with logging enabled.
-`gulp test [--integration] --saucelabs`                                 | Runs integration tests on saucelabs (requires [setup](#testing-on-sauce-labs)).
-`gulp test [--unit] --saucelabs_lite`                                   | Runs unit tests on a subset of saucelabs browsers (requires [setup](#testing-on-sauce-labs)).
-`gulp test [--unit\|--integration] --safari`                            | Runs tests in Safari.
-`gulp test [--unit\|--integration] --firefox`                           | Runs tests in Firefox.
-`gulp test [--unit\|--integration] --files=<test-files-path-glob>`      | Runs specific test files.
-`gulp test [--unit\|--integration] --testnames`                         | Lists the name of each test being run, and prints a summary at the end.
+`gulp unit`                                                             | Runs the unit tests in Chrome (doesn't require the AMP library to be built).
+`gulp unit --local_changes`                                             | Runs the unit tests directly affected by the files changed in the local branch in Chrome.
+`gulp integration`                                                      | Runs the integration tests in Chrome (requires the AMP library to be built).
+`gulp [unit|integration] --verbose`                                    | Runs tests in Chrome with logging enabled.
+`gulp [unit|integration] --nobuild`                                    | Runs tests without re-build.
+`gulp [unit|integration] --coverage`                                   | Runs code coverage tests. After running, the report will be available at test/coverage/index.html
+`gulp [unit|integration] --watch`                                      | Watches for changes in files, runs corresponding test(s) in Chrome.
+`gulp [unit|integration] --watch --verbose`                            | Same as `watch`, with logging enabled.
+`gulp [unit|integration] --saucelabs`                                  | Runs tests on saucelabs browsers (requires [setup](#testing-on-sauce-labs)).
+`gulp [unit|integration] --safari`                                     | Runs tests in Safari.
+`gulp [unit|integration] --firefox`                                    | Runs tests in Firefox.
+`gulp [unit|integration] --edge`                                       | Runs tests in Edge.
+`gulp [unit|integration] --ie`                                         | Runs tests in Internet Explorer.
+`gulp [unit|integration] --files=<test-files-path-glob>`               | Runs specific test files.
+`gulp [unit|integration] --testnames`                                  | Lists the name of each test being run, and prints a summary at the end.
 `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default.
 `gulp serve --quiet`                                                    | Same as `serve`, with logging silenced.
 `gulp serve --port 9000`                                                | Same as `serve`, but uses a port number other than the default of 8000.
@@ -208,7 +207,7 @@ For testing documents on arbitrary URLs with your current local version of the A
 
 ## Testing on Sauce Labs
 
-We use [Sauce Labs](https://saucelabs.com) to perform cross-browser testing (thanks Sauce Labs!). In general local testing (i.e. gulp test) and the automatic test run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests) that happens when you send a pull request are sufficient, but if you want to run your tests across multiple environments/browsers before sending your PR we recommend using Sauce Labs as well.
+We use [Sauce Labs](https://saucelabs.com) to perform cross-browser testing (thanks Sauce Labs!). In general local testing (i.e. gulp [unit|integration]) and the automatic test run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests) that happens when you send a pull request are sufficient, but if you want to run your tests across multiple environments/browsers before sending your PR we recommend using Sauce Labs as well.
 
 To run the tests on Sauce Labs:
 
@@ -228,13 +227,13 @@ To run the tests on Sauce Labs:
    sc
 
    # after seeing the "Sauce Connect is up" msg, run the tests
-   gulp test --saucelabs
+   gulp [unit|integration] --saucelabs
    ```
 * It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
 ## Visual Diff Tests
 
-In addition to building the AMP runtime and running `gulp test`, the automatic test run on Travis includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
+In addition to building the AMP runtime and running `gulp [unit|integration]`, the automatic test run on Travis includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
 
 The technology stack used is:
 
