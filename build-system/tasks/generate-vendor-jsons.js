@@ -14,50 +14,99 @@
  * limitations under the License.
  */
 
-const gulp = require('gulp');
+// TODO: @jonathantyng cleanup #22757
+
+const del = require('del');
 const file = require('gulp-file');
-const {endBuildStep, toPromise} = require('./helpers');
-const {ANALYTICS_CONFIG} = require('../../extensions/amp-analytics/0.1/vendors');
+const gulp = require('gulp');
+const {endBuildStep, toPromise, compileJs} = require('./helpers');
 
 /**
  * Generate all the vendor config JSONs from their respective JS files
  * @return {!Promise}
  */
 function generateVendorJsons() {
-  const promises = [];
-  const destPath = 'extensions/amp-analytics/0.1/vendors/';
-
   const startTime = Date.now();
 
-  // iterate over each vendor config and write to JSON file
-  Object.keys(ANALYTICS_CONFIG).forEach(vendorName => {
-    if (vendorName === 'default') {
-      return;
-    }
+  const srcDir = 'extensions/amp-analytics/0.1';
+  const srcFile = 'vendors.js';
+  const tempPath = 'dist/temp-analytics/';
+  const destPath = 'extensions/amp-analytics/0.1/vendors/';
+  const compileOptions = {
+    browserifyOptions: {
+      // allow gulp to import this file after compile
+      standalone: 'analyticsVendors',
+      // need to stub self since we are not running this in the browser
+      insertGlobalVars: {
+        self: function() {
+          return '{ location: {} }';
+        },
+      },
+    },
+  };
 
-    // convert object to JSON string with indentation of 4 spaces
-    const configString = JSON.stringify(ANALYTICS_CONFIG[vendorName], null, 4);
-    const fileName = vendorName + '.json';
+  return compileJs(srcDir, srcFile, tempPath, compileOptions).then(() => {
+    const promises = [];
+    const {ANALYTICS_CONFIG} = require('../../dist/temp-analytics/vendors.js');
 
-    promises.push(
-      toPromise(
-        file(fileName, configString, { src: true })
-          .pipe(gulp.dest(destPath))
-      )
-    );
+    // iterate over each vendor config and write to JSON file
+    Object.keys(ANALYTICS_CONFIG).forEach(vendorName => {
+      if (vendorName === 'default') {
+        return;
+      }
+
+      // convert object to JSON string with indentation of 4 spaces
+      const configString = JSON.stringify(
+        ANALYTICS_CONFIG[vendorName],
+        null,
+        4
+      );
+      const fileName = vendorName + '.json';
+
+      promises.push(
+        toPromise(
+          file(fileName, configString, {src: true}).pipe(gulp.dest(destPath))
+        )
+      );
+    });
+
+    promises.push(generateCanaryVendorJsons_(ANALYTICS_CONFIG, destPath));
+
+    return Promise.all(promises)
+      .then(() => {
+        // cleanup temp directory
+        return del([tempPath]);
+      })
+      .then(() => {
+        endBuildStep(
+          'Generated all analytics vendor config JSONs into ',
+          destPath,
+          startTime
+        );
+      });
   });
+}
 
-  return Promise.all(promises).then(() => {
-    endBuildStep(
-      'Generated all analytics vendor config JSONs into ',
-      destPath,
-      startTime
-    );
+function generateCanaryVendorJsons_(analyticsConfig, destPath) {
+  // generate separate canary JSON file for Bolt Guard (BG)
+  const bgCanaryConfig = Object.assign({}, analyticsConfig['bg'], {
+    'transport': {
+      'iframe':
+        'https://tpc.googlesyndication.com/b4a/experimental/b4a-runner.html',
+    },
   });
+  const bgCanaryConfigStr = JSON.stringify(bgCanaryConfig, null, 4);
+
+  return toPromise(
+    file('bg.canary.json', bgCanaryConfigStr, {src: true}).pipe(
+      gulp.dest(destPath)
+    )
+  );
 }
 
 module.exports = {
   generateVendorJsons,
 };
 
-vendorConfigs.description = 'Generate analytics vendor JSON files from their respective JS files';
+generateVendorJsons.description =
+  'Generate analytics vendor JSON files from their respective JS files';

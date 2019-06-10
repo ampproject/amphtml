@@ -23,6 +23,9 @@ const {
   compileCssExpr,
 } = require('./build-system/tasks/compile-expr');
 const {
+  generateVendorJsons,
+} = require('./build-system/tasks/generate-vendor-jsons');
+const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
@@ -46,7 +49,6 @@ const {devDashboardTests} = require('./build-system/tasks/dev-dashboard-tests');
 const {dist} = require('./build-system/tasks/dist');
 const {e2e} = require('./build-system/tasks/e2e');
 const {firebase} = require('./build-system/tasks/firebase');
-const {generateVendorJsons} = require('./build-system/tasks/generate-vendor-jsons');
 const {getZindex} = require('./build-system/tasks/get-zindex');
 const {integration} = require('./build-system/tasks/integration');
 const {lint} = require('./build-system/tasks/lint');
