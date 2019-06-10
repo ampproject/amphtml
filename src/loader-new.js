@@ -28,16 +28,84 @@ import {htmlFor} from './static-template';
  * @return {!Element}
  */
 export function createLoaderElement(doc, container, element) {
-
   const loader = new LoaderBuilder();
-  loader.addSpinner(color);
-  loader.addLogo(logo);
+  return loader.build();
+}
 
+class LoaderBuilder {
+  /**
+   *
+   */
+  constructor() {
+    this.loaderDom_;
+  }
 
+  /**
+   *
+   */
+  build() {
+    this.buildBase();
+    this.addSpinner();
+    this.maybeAddLogo();
+    this.maybeAddBackgroundShim();
+    return this.loaderDom_;
+  }
 
-  return htmlFor(doc)`<div class="i-amphtml-loader">
-        <div class="i-amphtml-loader-dot"></div>
-        <div class="i-amphtml-loader-dot"></div>
-        <div class="i-amphtml-loader-dot"></div>
-      </div>`;
+  /**
+   * Add a spinner based on host element's size and a few special cases
+   */
+  addSpinner() {
+    // Ads always get the default spinner regardless of the host size
+    if (this.isAd(element)) {
+      return this.addDefaultSpinner();
+    }
+
+    // Other than Ads, small spinner is always used if host element is small.
+    if (this.isSmall(element)) {
+      return this.addSmallSpinner();
+    }
+
+    // If host is not small, default size spinner is normally used
+    // unless due to branding guidelines (e.g. Instagram) a larger spinner is
+    // required.
+    if (this.requiresLargeSpinner(element)) {
+      return this.addLargeSpinner();
+    }
+    return this.addDefaultSpinner();
+  }
+
+  /**
+   *
+   */
+  maybeAddLogo() {
+    // Ads always get the logo regardless of size
+    if (this.isAd(element)) {
+      return this.addLogo(AD_LOGO);
+    }
+
+    // Small hosts do not get a logo
+    if (this.isSmall(element)) {
+      return;
+    }
+
+    const logo = this.getCustomLogo(element);
+    if (logo) {
+     return this.addLogo(logo);
+    }
+
+    return this.addLogo(DEFAULT_LOGO);
+  }
+
+  /**
+   *
+   */
+  maybeAddBackgroundShim() {
+    if(!this.hasImagePlaceholder()) {
+      return;
+    }
+
+    // Add shim
+
+    return;
+  }
 }
