@@ -144,7 +144,38 @@ tags: { # amp-list-load-more
     name: "load-more-end"
     value: ""
     mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  },
+}
+
+# The button element variant allowed in amp-list-load-more.
+tags: {
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  requires_extension: "amp-list"
+  tag_name: "BUTTON"
+  spec_name: "amp-list-load-more button[load-more-clickable]"
+  mandatory_parent: "AMP-LIST-LOAD-MORE"
+  attrs: {
+    name: "disabled"
+    value: ""
   }
+  attrs: {
+    name: "load-more-clickable"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+    value: ""
+  }
+  attrs: {
+    name: "role"
+    implicit: true
+  }
+  attrs: {
+    name: "tabindex"
+    implicit: true
+  }
+  attrs: { name: "type" }
+  attrs: { name: "value" }
+  attr_lists: "name-attr"
 }
 
 # AMP4EMAIL disallows mustache in src attribute.
