@@ -104,7 +104,7 @@ async function prCheck(cb) {
       runCheck('gulp clean');
       runCheck('gulp dist --fortesting');
     }
-    runCheck('gulp test --nobuild --compiled --integration --headless');
+    runCheck('gulp integration --nobuild --compiled --headless');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {

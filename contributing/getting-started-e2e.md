@@ -368,10 +368,10 @@ Note: You can automatically run critical checks before `git push` by enabling ou
 To run the tests that are affected by the changes on your feature branch:
 
 ```
-gulp test --local-changes
+gulp unit --local_changes
 ```
 
-By default, all tests are run on Chrome. Pass `--firefox` or `--safari` to run tests in Firefox and Safari, respectively.
+By default, all tests are run on Chrome. Pass one of the following flags to run tests on a different browser: `--firefox`, `--safari`, `--edge`, `--ie`.
 
 If you need help with fixing failing tests, please ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
 
@@ -396,16 +396,22 @@ The `amphtml` testing framework uses the [Mocha](https://mochajs.org/), [Chai](h
 
 Existing components will usually have existing tests that you can follow as an example. For example, the [amp-video](../extensions/amp-video/amp-video.md) component has tests in [test/test-amp-video.js](../extensions/amp-video/0.1/test/test-amp-video.js).
 
-To run tests in a single file, use `gulp test --files=<path>`:
+To run tests in a single file, use `gulp unit --files=<path>`:
 
 ```
-gulp test --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
+gulp unit --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
+```
+
+To run tests in multiple files, use `gulp unit --files=<path-1> --files=<path-2>`:
+
+```
+gulp unit --files=extensions/amp-story/1.0/test/test-amp-story-embedded-component.js --files=extensions/amp-story/1.0/test/test-amp-story-hint.js
 ```
 
 Testing tips:
 
 - Use Mocha's [`.only()`](https://mochajs.org/#exclusive-tests) feature to exclusively run certain test-cases or suites.
-- Add `--watch` to your `gulp test` command to automatically re-run tests on code changes.
+- Add `--watch` to your `gulp unit` command to automatically re-run tests on code changes.
 
 For more help, see [How to get help](#how-to-get-help).
 
