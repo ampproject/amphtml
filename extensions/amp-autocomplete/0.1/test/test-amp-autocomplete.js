@@ -16,7 +16,6 @@
 
 import '../amp-autocomplete';
 import {Keys} from '../../../../src/utils/key-codes';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-autocomplete unit tests',
@@ -31,7 +30,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'amp-autocomplete', true);
 
       const form = doc.createElement('form');
       const ampAutocomplete = doc.createElement('amp-autocomplete');
