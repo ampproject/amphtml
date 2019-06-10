@@ -271,11 +271,7 @@ export class LiveListManager {
 
     // Polling may not be started yet if no live lists were registered by
     // doc ready in LiveListManager's constructor.
-    if (
-      liveList.isEnabled() &&
-      this.ampdoc.isReady() &&
-      this.viewer_.isVisible()
-    ) {
+    if (liveList.isEnabled() && this.poller_ && this.viewer_.isVisible()) {
       this.poller_.start();
     }
   }
