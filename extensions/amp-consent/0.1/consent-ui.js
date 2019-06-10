@@ -356,13 +356,13 @@ export class ConsentUI {
    */
   createPromptIframeFromSrc_(promptUISrc) {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
-    let sandbox = 'allow-scripts';
+    const sandbox = ['allow-scripts', 'allow-popups'];
     iframe.src = assertHttpsUrl(promptUISrc, this.parent_);
     const allowSameOrigin = this.allowSameOrigin_(iframe.src);
     if (allowSameOrigin) {
-      sandbox = 'allow-scripts allow-same-origin';
+      sandbox.push('allow-same-origin');
     }
-    iframe.setAttribute('sandbox', sandbox);
+    iframe.setAttribute('sandbox', sandbox.join(' '));
     const {classList} = iframe;
     classList.add(consentUiClasses.fill);
     // Append iframe lazily to save resources.
