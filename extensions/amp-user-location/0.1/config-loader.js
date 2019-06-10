@@ -194,6 +194,6 @@ export class ConfigLoader {
  * @param {!JsonObject|!Array<!JsonObject>} configJson
  */
 function assertIsObject(configJson) {
-  user().assert(isObject(configJson), 'expected configuration to be object');
+  userAssert(isObject(configJson), 'expected configuration to be object');
   return /** @type {!JsonObject} */ (configJson);
 }
