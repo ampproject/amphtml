@@ -58,7 +58,7 @@ function inferTestType() {
   }
 
   if (IS_LOCAL_CHANGES) {
-    return `${type}/local_changes`;
+    return `${type}/local-changes`;
   }
 
   if (IS_SAUCELABS) {
