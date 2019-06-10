@@ -336,7 +336,7 @@ async function runTestInBatches(config) {
  * @param {!Array{string}} browsers list of SauceLabs browsers as
  *     customLaunchers IDs. *
  * @param {Object} config karma config
- * @param {!Function} runCompleteFn a function to execute on the
+ * @param {function()} runCompleteFn a function to execute on the
  *     `run_complete` event. It should take two arguments, (browser, results),
  *     and return nothing.
  * @return {number} processExitCode
@@ -380,7 +380,7 @@ async function runTestInBatchesWithBrowsers(
 /**
  * Creates and starts karma server
  * @param {!Object} configBatch
- * @param {!Function} runCompleteFn a function to execute on the
+ * @param {function()} runCompleteFn a function to execute on the
  *     `run_complete` event. It should take two arguments, (browser, results),
  *     and return nothing.
  * @return {!Promise<number>}

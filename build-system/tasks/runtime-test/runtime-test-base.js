@@ -161,9 +161,9 @@ class RuntimeTestConfig {
       })
       .set('safari', {browsers: ['Safari']});
 
-    for (const key of Array.from(options.keys())) {
-      if (argv[key]) {
-        return options.get(key);
+    for (const [key, value] of options) {
+      if (argv.hasOwnProperty(key)) {
+        return value;
       }
     }
 
