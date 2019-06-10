@@ -4,7 +4,6 @@ formats:
  - websites
 teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
-experimental: true
 ---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
@@ -24,8 +23,6 @@ limitations under the License.
 
 # `amp-autocomplete`
 
-**This feature is experimental and activated by the `amp-autocomplete` experiment.**
-
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -33,7 +30,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-     <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+     <td>Launched</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -69,7 +66,7 @@ Example:
 
 <table>
   <tr>
-    <td width="40%"><strong>filter [required]</strong></td>
+    <td width="40%"><strong>filter (required)</strong></td>
     <td>The filtering mechanism applied to source data to produce filtered results for user input. In all cases the filtered results will be displayed in array order of data retrieved. If filtering is being done (<code>filter != none</code>), it is done client side. The following are supported values:
     <ul>
       <li><strong>substring</strong>: if the user input is a substring of an item, then the item is suggested</li>
@@ -81,40 +78,48 @@ Example:
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>filter-expr [optional]</strong></td>
+    <td width="40%"><strong>src (optional)</strong></td>
+    <td>The URL of the remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This must be a CORS HTTP service and the URL's protocol must be HTTPS. The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests?referrer=ampproject.org">CORS Requests in AMP</a> spec.
+
+    The src attribute may be omitted if the <code>[src]</code> attribute exists.
+
+    If fetching the data at the src URL fails, the <amp-autocomplete> triggers a fallback.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>filter-expr (optional)</strong></td>
     <td>Required if <code>filter==custom</code></td>
   </tr>
   <tr>
-    <td width="40%"><strong>filter-value [optional]</strong></td>
+    <td width="40%"><strong>filter-value (optional)</strong></td>
     <td>If data is an array of JsonObjects, the filter-value is the property name that will be accessed for client side filtering. This attribute is unnecessary if filter is none. Defaults to "value".</td>
   </tr>
   <tr>
-    <td width="40%"><strong>min-characters [optional]</strong></td>
+    <td width="40%"><strong>min-characters (optional)</strong></td>
     <td>
       The min character length of a user input to provide results, default 1
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>max-entries [optional]</strong></td>
+    <td width="40%"><strong>max-entries (optional)</strong></td>
     <td>
       The max specified number of items to suggest at once based on a user input, displays all if unspecified
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>suggest-first [optional]</strong></td>
+    <td width="40%"><strong>suggest-first (optional)</strong></td>
     <td>
       Suggest the first entry in the list of results by marking it active; only possible if <code>filter==prefix</code> (does nothing otherwise)
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>submit-on-enter [optional]</strong></td>
+    <td width="40%"><strong>submit-on-enter (optional)</strong></td>
     <td>
       The enter key is primarily used for selecting suggestions in autocomplete, so it shouldn’t also submit the form unless the developer explicitly sets it to do so (for search fields/one field forms, et cetera).
       The user flow is as follows: If <code>submit-on-enter</code> is <code>true</code>, pressing <code>Enter</code> will select any currently active item and engage in default behavior, including submitting the form if applicable. If <code>submit-on-enter</code> is <code>false</code>, pressing <code>Enter</code> <em>while suggestions are displaying</em> will select any currently active item only and prevent any other default behavior. If suggestions are not displaying, autocomplete allows default behavior. <strong>Defaults to false.</strong>
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>highlight-user-entry [optional]</strong></td>
+    <td width="40%"><strong>highlight-user-entry (optional)</strong></td>
     <td>If present, exposes the <code>autocomplete-partial</code> class on the substring within the suggested item that resulted in its match with the user input. This can be used to stylize the corresponding match to stand out to the user. <strong>Defaults to false.</strong>
     </td>
   </tr>
