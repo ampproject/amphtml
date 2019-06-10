@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'using strict';
+'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
 const testConfig = require('../config');
@@ -27,7 +27,6 @@ const {
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {css} = require('./css');
-const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
 
 class Config extends RuntimeTestConfig {
   constructor(testType) {
@@ -36,23 +35,7 @@ class Config extends RuntimeTestConfig {
 
   /** @override */
   getFiles() {
-    const files = testConfig.commonUnitTestPaths.concat(
-      testConfig.chaiAsPromised
-    );
-
-    if (argv.files) {
-      return files.concat(argv.files);
-    }
-
-    if (argv.saucelabs) {
-      return files.concat(testConfig.unitTestOnSaucePaths);
-    }
-
-    if (argv.local_changes) {
-      return files.concat(getUnitTestsToRun(testConfig.unitTestPaths));
-    }
-
-    return files.concat(testConfig.unitTestPaths);
+    return testConfig.chaiAsPromised.concat(testConfig.a4aTestPaths);
   }
 }
 
@@ -71,18 +54,15 @@ class Runner extends RuntimeTestRunner {
   }
 }
 
-async function unit() {
-  if (
-    shouldNotRun() ||
-    (argv.local_changes && !getUnitTestsToRun(testConfig.unitTestPaths))
-  ) {
+async function a4a() {
+  if (shouldNotRun()) {
     return;
   }
 
   maybePrintArgvMessages();
   refreshKarmaWdCache();
 
-  const config = new Config('unit');
+  const config = new Config('a4a');
   const runner = new Runner(config);
 
   await runner.setup();
@@ -91,26 +71,5 @@ async function unit() {
 }
 
 module.exports = {
-  unit,
-};
-
-unit.description = 'Runs unit tests';
-//TODO(estherkim): fill this out
-unit.flags = {
-  'local_changes': '',
-  'saucelabs': '',
-  'chrome_canary': '',
-  'chrome_flags': '',
-  'coverage': '',
-  'firefox': '',
-  'files': '',
-  'grep': '',
-  'headless': '',
-  'ie': '',
-  'nobuild': '',
-  'nohelp': '',
-  'safari': '',
-  'testnames': '',
-  'verbose': '',
-  'watch': '',
+  a4a,
 };
