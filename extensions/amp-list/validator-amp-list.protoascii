@@ -162,7 +162,7 @@ tags: {
   attrs: {
     name: "load-more-clickable"
     mandatory: true
-    dispatch_key: NAME_VALUE_DISPATCH
+    dispatch_key: NAME_DISPATCH
     value: ""
   }
   attrs: {
