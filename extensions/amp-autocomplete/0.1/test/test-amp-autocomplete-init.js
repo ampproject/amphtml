@@ -15,7 +15,6 @@
  */
 
 import '../amp-autocomplete';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-autocomplete init',
@@ -30,7 +29,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'amp-autocomplete', true);
     });
 
     function setupAutocomplete(
@@ -83,7 +81,7 @@ describes.realWin(
       return ampAutocomplete.build().then(() => ampAutocomplete);
     }
 
-    it('should layout with experiment on', () => {
+    it('should layout', () => {
       let impl, filterAndRenderSpy, clearAllSpy, filterSpy, renderSpy;
       return getAutocomplete({
         'filter': 'substring',
@@ -110,7 +108,7 @@ describes.realWin(
         });
     });
 
-    it('should render with experiment on', () => {
+    it('should render', () => {
       let impl, filterAndRenderSpy, clearAllSpy, filterSpy, renderSpy;
       return getAutocomplete({
         'filter': 'substring',
@@ -171,15 +169,6 @@ describes.realWin(
         'max-entries': '10',
       }).then(ampAutocomplete => {
         expect(ampAutocomplete.implementation_.maxEntries_).to.equal(10);
-      });
-    });
-
-    it('should not render with experiment off', () => {
-      toggleExperiment(win, 'amp-autocomplete', false);
-      return allowConsoleError(() => {
-        return expect(getAutocomplete({})).to.be.rejectedWith(
-          'Experiment amp-autocomplete is not turned on.'
-        );
       });
     });
 
