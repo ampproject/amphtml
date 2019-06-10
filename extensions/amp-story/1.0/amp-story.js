@@ -575,15 +575,19 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateViewportSizeStyles_() {
-    if (!this.activePage_ || !this.isStandalone_()) {
+    const pageEl =
+      (this.activePage_ && this.activePage_.element) ||
+      this.element.querySelector('amp-story-page');
+
+    if (!pageEl || !this.isStandalone_()) {
       return;
     }
 
     return this.vsync_.runPromise(
       {
         measure: state => {
-          state.vh = this.activePage_.element./*OK*/ clientHeight / 100;
-          state.vw = this.activePage_.element./*OK*/ clientWidth / 100;
+          state.vh = pageEl./*OK*/ clientHeight / 100;
+          state.vw = pageEl./*OK*/ clientWidth / 100;
           state.vmin = Math.min(state.vh, state.vw);
           state.vmax = Math.max(state.vh, state.vw);
         },
@@ -983,9 +987,12 @@ export class AmpStory extends AMP.BaseElement {
     // page is built. Other pages will only build if the document becomes
     // visible.
     if (!this.viewer_.hasBeenVisible()) {
-      return whenUpgradedToCustomElement(firstPageEl).then(() =>
-        firstPageEl.whenBuilt()
-      );
+      return whenUpgradedToCustomElement(firstPageEl).then(() => {
+        return Promise.all([
+          firstPageEl.whenBuilt(),
+          this.updateViewportSizeStyles_(),
+        ]);
+      });
     }
 
     // Will resolve when all pages are built.
