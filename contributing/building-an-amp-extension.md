@@ -784,7 +784,7 @@ For faster testing during development, consider using --files argument
 to only run your extensions' tests.
 
 ```shell
-$ gulp test --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
+$ gulp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
 ## Type checking
