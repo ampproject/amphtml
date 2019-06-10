@@ -53,6 +53,11 @@ const cssEntryPoints = [
   {
     path: 'video-autoplay.css',
     outJs: 'video-autoplay.css.js',
+    // When the .css.js files are imported, the .js extension is omitted
+    // e.g. '../../build/file.css' attempts to load 'build/file.css.js'
+    // but if a file which matches without the .js extension, it will
+    // be preferred. We should rename the out.css to have a different name
+    // than the JS file to avoid loading CSS as JS
     outCss: 'video-autoplay-out.css',
   },
 ];
