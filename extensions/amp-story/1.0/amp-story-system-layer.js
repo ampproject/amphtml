@@ -82,15 +82,37 @@ const TEMPLATE = {
   children: [
     {
       tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
+      attrs: dict({
+        'class': 'i-amphtml-story-has-new-page-notification-container',
+      }),
       children: [
         {
           tag: 'div',
           attrs: dict({
-            'class': 'i-amphtml-story-has-new-page-text',
+            'class': 'i-amphtml-story-has-new-page-text-wrapper',
           }),
-          localizedStringId: LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
+          children: [
+            {
+              tag: 'span',
+              attrs: dict({
+                'class': 'i-amphtml-story-has-new-page-circle-icon',
+              }),
+            },
+            {
+              tag: 'div',
+              attrs: dict({
+                'class': 'i-amphtml-story-has-new-page-text',
+              }),
+              localizedStringId: LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
+            },
+          ],
         },
+      ],
+    },
+    {
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
+      children: [
         {
           tag: 'div',
           attrs: dict({

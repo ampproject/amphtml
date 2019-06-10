@@ -57,7 +57,7 @@ const strings = {
     string: 'More about AMP results',
   },
   [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
-    string: 'Story updated',
+    string: 'Updated',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: ':(',
