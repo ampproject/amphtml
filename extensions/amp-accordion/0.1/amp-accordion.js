@@ -67,7 +67,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {number|string} */
     this.prefix_ = element.id ? element.id : Math.floor(Math.random() * 100);
 
-    /** @private {!MutationObserver} */
+    /** @const @private {!MutationObserver} */
     this.mutationObserver_ = new this.win.MutationObserver(mutations => {
       this.toggleMutations_(mutations);
     });
@@ -343,10 +343,6 @@ class AmpAccordion extends AMP.BaseElement {
     }
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
-
-    // Take the records to clear them out. This prevents mutations from
-    // the truncation from invoking the observer's callback.
-    this.mutationObserver_.takeRecords();
   }
 
   /**
@@ -623,6 +619,8 @@ class AmpAccordion extends AMP.BaseElement {
       if (mutation.attributeName === 'expanded') {
         const sectionEl = dev().assertElement(mutation.target);
         const toExpand = sectionEl.getAttribute('expanded');
+        // Check for 'false' instead of false (boolean) since
+        // getAttribute always returns string type.
         if (toExpand === 'false') {
           sectionEl.removeAttribute('expanded');
         }
