@@ -218,9 +218,10 @@ export function installFriendlyIframeEmbed(
 
   return readyPromise.then(() => {
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
-    const ampdoc = ampdocFieExperimentOn && ampdocService
-      ? ampdocService.installFieDoc(spec.url, childWin)
-      : null;
+    const ampdoc =
+      ampdocFieExperimentOn && ampdocService
+        ? ampdocService.installFieDoc(spec.url, childWin)
+        : null;
     const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise, ampdoc);
     iframe[EMBED_PROP] = embed;
 
