@@ -26,7 +26,7 @@ import {adoptShadowMode} from './runtime';
 import {bodyAlwaysVisible} from './style-installer';
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
-import {installBuiltinElements, installRuntimeServices} from './core-services';
+import {installBuiltinElements, installRuntimeServices} from './service/core-services';
 import {installDocService} from './service/ampdoc-impl';
 import {internalRuntimeVersion} from './internal-version';
 
