@@ -409,6 +409,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [PubExchange](../../ads/pubexchange.md)
 - [Smi2](../../ads/smi2.md)
 - [SVK-Native](../../ads/svknative.md)
+- [Strossle](../../ads/strossle.md)
 - [Taboola](../../ads/taboola.md)
 - [Zen](../../ads/zen.md)
 - [ZergNet](../../ads/zergnet.md)
