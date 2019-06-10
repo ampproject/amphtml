@@ -903,6 +903,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'strossle': {
+    preconnect: [
+      'https://amp.spklw.com',
+      'https://widgets.sprinklecontent.com',
+      'https://images.sprinklecontent.com',
+    ],
+  },
+
   'sunmedia': {
     prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
     preconnect: 'https://static.addevweb.com',
