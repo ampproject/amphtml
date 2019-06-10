@@ -34,7 +34,7 @@ const IS_SINGLE_PASS = !!argv.single_pass;
 
 const TEST_TYPE_SUBTYPES = new Map([
   ['integration', ['local', 'single-pass', 'saucelabs']],
-  ['unit', ['local', 'local_changes', 'saucelabs']],
+  ['unit', ['local', 'local-changes', 'saucelabs']],
   ['e2e', ['local']],
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
