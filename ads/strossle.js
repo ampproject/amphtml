@@ -38,7 +38,7 @@ export function strossle(global, data) {
 
 /**
  * @param {!Window} global
- * @param {string} data
+ * @param {!Object} data
  */
 function createContainer(global, data) {
   const d = global.document.createElement('div');
