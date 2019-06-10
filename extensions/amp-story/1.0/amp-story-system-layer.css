@@ -269,7 +269,7 @@
   justify-content: center !important;
   align-items: center !important;
   padding: 4px 8px !important;
-  border-radius: 5% !important;
+  border-radius: 5px !important;
 }
 
 .i-amphtml-story-has-new-page-text {
@@ -277,6 +277,7 @@
   font-size: 16px !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   font-weight: 700 !important;
+  margin-right: 8px !important;
 }
 
 .i-amphtml-story-has-new-page-circle-icon {
@@ -285,7 +286,7 @@
 	height: 6px !important;
 	width: 6px !important;
   position: relative !important;
-  box-shadow: 0 0 0 4px rgba(3, 255, 160, 0.80) !important;
+  box-shadow: 0 0 0 2px rgba(3, 255, 160, 0.80) !important;
   margin: 0px 10px !important;
 }
 
