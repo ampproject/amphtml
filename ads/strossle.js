@@ -43,6 +43,6 @@ export function strossle(global, data) {
 function createContainer(global, data) {
   const d = global.document.createElement('div');
   d.className = renderTo;
-  d.setAttribute('data-spklw-widget', data.widgetid);
+  d.setAttribute('data-spklw-widget', data['widgetid']);
   global.document.getElementById('c').appendChild(d);
 }
