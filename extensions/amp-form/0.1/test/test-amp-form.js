@@ -28,6 +28,7 @@ import {
   AsyncInputAttributes,
   AsyncInputClasses,
 } from '../../../../src/async-input';
+import {DIRTINESS_INDICATOR_CLASS} from '../form-dirtiness';
 import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
 import {
@@ -2893,6 +2894,57 @@ describes.repeated(
               });
             }
           );
+        });
+
+        describe('Form Dirtiness State', () => {
+          let form, ampForm, input;
+
+          beforeEach(async () => {
+            form = getForm();
+            ampForm = await getAmpForm(form);
+            input = form.querySelector('input[name=name]');
+          });
+
+          function changeInput(element, value) {
+            element.value = value;
+            const event = new Event('input', {bubbles: true});
+            element.dispatchEvent(event);
+          }
+
+          it('adds dirtiness class when a field changes', () => {
+            changeInput(input, 'Another Name');
+            expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+          });
+
+          it('clears dirtiness class when submitted successfully without XHR', async () => {
+            ampForm.method_ = 'GET';
+            ampForm.xhrAction_ = null;
+
+            changeInput(input, 'Another Name');
+            await ampForm.submit_(ActionTrust.HIGH);
+
+            expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+          });
+
+          it('clears dirtiness class when submitted successfully with XHR', async () => {
+            sandbox
+              .stub(ampForm.xhr_, 'fetch')
+              .returns(Promise.resolve({json: async () => {}}));
+
+            changeInput(input, 'Another Name');
+            await ampForm.submit_(ActionTrust.HIGH);
+
+            expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+          });
+
+          it('does not clear dirtiness class when submission XHR fails', async () => {
+            sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.reject({}));
+
+            changeInput(input, 'Another Name');
+            await ampForm.submit_(ActionTrust.HIGH);
+
+            expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+          });
         });
       }
     );
