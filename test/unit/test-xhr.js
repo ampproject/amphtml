@@ -751,7 +751,7 @@ describe
           .then(() => expect(sendMessageStub).to.not.have.been.called);
       });
 
-      it('should intercept if viewer untrusted but dev mode', () => {
+      it('should intercept if viewer untrusted but in local dev mode', () => {
         sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
         interceptionEnabledWin.AMP_DEV_MODE = true;
 
