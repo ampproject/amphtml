@@ -371,7 +371,7 @@ To run the tests that are affected by the changes on your feature branch:
 gulp unit --local_changes
 ```
 
-By default, all tests are run on Chrome. Pass `--firefox`, `--safari`, `--edge`, or `--ie` to run tests on other browsers.
+By default, all tests are run on Chrome. Pass one of the following flags to run tests on a different browser: `--firefox`, `--safari`, `--edge`, `--ie`.
 
 If you need help with fixing failing tests, please ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
 
@@ -400,6 +400,12 @@ To run tests in a single file, use `gulp unit --files=<path>`:
 
 ```
 gulp unit --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
+```
+
+To run tests in multiple files, use `gulp unit --files=<path-1> --files=<path-2>`:
+
+```
+gulp unit --files=extensions/amp-story/1.0/test/test-amp-story-embedded-component.js --files=extensions/amp-story/1.0/test/test-amp-story-hint.js
 ```
 
 Testing tips:
