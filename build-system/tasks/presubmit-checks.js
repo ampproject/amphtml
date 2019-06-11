@@ -455,6 +455,7 @@ const forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'src/experiments.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/fake-dom.js',
