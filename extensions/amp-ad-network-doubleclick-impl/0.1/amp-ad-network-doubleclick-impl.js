@@ -1679,5 +1679,3 @@ export function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
 export function resetTokensToInstancesMap() {
   tokensToInstances = {};
 }
-
-
