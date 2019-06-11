@@ -23,6 +23,7 @@ const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
+const tempy = require('tempy');
 const {
   gulpClosureCompile,
   handleCompilerError,
@@ -37,6 +38,7 @@ const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
+const tmpDir = tempy.directory();
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
@@ -89,6 +91,7 @@ function cleanupBuildDir() {
 exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
+  console.log('tmpDir', tmpDir);
   const hideWarningsFor = [
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
@@ -340,6 +343,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         'build/patched-module/',
         'build/fake-module/',
         'build/fake-polyfills/',
+        tmpDir,
       ],
       entry_point: entryModuleFilenames,
       module_resolution: 'NODE',
