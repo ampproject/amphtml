@@ -56,6 +56,7 @@
   "layers": 1,
   "linker-form": 1,
   "linker-meta-opt-in": 1,
+  "margin-bottom-in-content-height": 1,
   "no-initial-intersection": 1,
   "no-sync-xhr-in-ads": 1,
   "pump-early-frame": 1,
