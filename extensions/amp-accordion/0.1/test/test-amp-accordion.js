@@ -15,7 +15,7 @@
  */
 
 import '../amp-accordion';
-import {Keys} from '../../../../src/utils/key-codes';
+import {KeyCodes, Keys} from '../../../../src/utils/key-codes';
 import {computedStyle} from '../../../../src/style';
 import {poll} from '../../../../testing/iframe';
 import {tryFocus} from '../../../../src/dom';
@@ -419,7 +419,7 @@ describes.realWin(
         expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
           'true'
         );
-        expect(clickEvent.preventDefault.called).to.be.true;
+        expect(clickEvent.preventDefault.called).not.to.be.true;
       });
     });
 
@@ -439,7 +439,7 @@ describes.realWin(
         ampAccordion.implementation_.onHeaderPicked_(clickEvent);
         expect(header.parentNode.hasAttribute('expanded')).to.be.true;
         expect(header.getAttribute('aria-expanded')).to.equal('true');
-        expect(clickEvent.preventDefault).to.have.been.called;
+        expect(clickEvent.preventDefault).not.to.have.been.called;
       });
     });
 
@@ -462,7 +462,7 @@ describes.realWin(
         expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
           'false'
         );
-        expect(clickEvent.preventDefault).to.have.been.called;
+        expect(clickEvent.preventDefault).not.to.have.been.called;
       });
     });
 
@@ -491,6 +491,7 @@ describes.realWin(
           );
           const keyDownEvent = {
             key: Keys.SPACE,
+            keyCode: KeyCodes.SPACE,
             target: headerElements[0],
             currentTarget: headerElements[0],
             preventDefault: sandbox.spy(),
@@ -568,7 +569,7 @@ describes.realWin(
           expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
             'false'
           );
-          expect(keyDownEvent.preventDefault.called).to.be.true;
+          expect(keyDownEvent.preventDefault.called).not.to.be.true;
         });
       }
     );

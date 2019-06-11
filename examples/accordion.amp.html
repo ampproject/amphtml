@@ -36,9 +36,11 @@
     <nav>
       <ul>
         <li>
+            <p id="foo">text</p>
+            <button type="button" on="tap:foo.toggleVisibility">Toggle text</button>
           <amp-accordion id="ac1" animate>
             <section id="item1" on="expand:ac2.collapse(section='item2')">
-              <h1>Item 1 (Expanding it closes Item 2)</h1>
+              <h1 on="tap:foo.toggleVisibility">Item 1 (Expanding it closes Item 2), Toggle text</h1>
               <div>
                 <p>1A</p>
                 <p>1B</p>
