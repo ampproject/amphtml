@@ -647,13 +647,10 @@ async function runTests() {
   }
 }
 
-//TODO(estherkim): delete this file by the end of the week
+//TODO(estherkim): delete this file at some point
 function deprecateTaskWarning() {
-  log(
-    cyan(
-      '~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ *'
-    )
-  );
+  const pattern = '~ * ';
+  log(cyan(pattern.repeat(27)));
   log(red('Attention Please!'));
   log(
     cyan('gulp test [--unit | --integration]'),
@@ -675,11 +672,7 @@ function deprecateTaskWarning() {
     'All other flags remain the same and our documentation has been updated to reflect these changes.'
   );
   log('Thanks!', red('<3'), '@ampproject/wg-infra');
-  log(
-    cyan(
-      '~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ * ~ *'
-    )
-  );
+  log(cyan(pattern.repeat(27)));
 }
 
 async function test() {
