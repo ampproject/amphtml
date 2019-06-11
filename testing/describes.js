@@ -90,23 +90,21 @@ import {
 import {RequestBank, stubService} from './test-helper';
 import {Services} from '../src/services';
 import {addParamsToUrl} from '../src/url';
-import {
-  adopt,
-  adoptShadowMode,
-  installAmpdocServices,
-  installRuntimeServices,
-} from '../src/runtime';
+import {adopt, adoptShadowMode} from '../src/runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {createAmpElementForTesting} from '../src/custom-element';
 import {createElementWithAttributes} from '../src/dom';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
+  installAmpdocServices,
   installBuiltinElements,
-  installExtensionsService,
-} from '../src/service/extensions-impl';
+  installRuntimeServices,
+} from '../src/service/core-services';
+
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
+import {installExtensionsService} from '../src/service/extensions-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {maybeTrackImpression} from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';

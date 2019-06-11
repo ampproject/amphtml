@@ -20,11 +20,11 @@ import * as describes from '../testing/describes';
 import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
+import {adopt} from '../src/runtime';
 import {
-  adopt,
   installAmpdocServices,
   installRuntimeServices,
-} from '../src/runtime';
+} from '../src/service/core-services';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installYieldIt} from '../testing/yield';
 import {removeElement} from '../src/dom';

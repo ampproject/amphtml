@@ -22,7 +22,10 @@ import {Services} from '../src/services';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
-import {installAmpdocServices, installRuntimeServices} from '../src/runtime';
+import {
+  installAmpdocServices,
+  installRuntimeServices,
+} from '../src/service/core-services';
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
