@@ -91,7 +91,6 @@ function cleanupBuildDir() {
 exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
-  console.log('tmpDir', tmpDir);
   const hideWarningsFor = [
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
@@ -434,4 +433,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .on('end', resolve);
     }
   });
+}
+
+function transferSrcToTempDir() {
 }
