@@ -39,7 +39,8 @@ function generateVendorJsons() {
       // need to stub self since we are not running this in the browser
       insertGlobalVars: {
         self: function() {
-          return '{ location: {} }';
+          // use test=true to generate _fake_.json for test-vendors.js to work
+          return '{ location: {}, AMP_CONFIG: {test: true} }';
         },
       },
     },
