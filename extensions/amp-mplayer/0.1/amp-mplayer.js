@@ -14,20 +14,28 @@
  * limitations under the License.
  */
 
-//import {Layout} from '../../../src/layout';
+
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {createFrameFor} from '../../../src/iframe-video';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
+import {installVideoManagerForDoc}
+  from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-mplayer';
 
 /** @implements {../../../src/video-interface.VideoInterface} */
-export class AmpMPlayer extends AMP.BaseElement {
+class AmpMPlayer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -74,12 +82,28 @@ export class AmpMPlayer extends AMP.BaseElement {
     // Get attributes, assertions of values, assign instance variables.
     // Build lightweight DOM and append to this.element.
 
+    const {element} = this;
+    this.contentId_ = (element.getAttribute('data-content-id') || '');
+    this.scannedElement_ = (element.getAttribute('data-scanned-element') || '');
+    this.tags_ = (element.getAttribute('data-tags') || '');
+    this.minimumDateFactor_ =
+      (element.getAttribute('data-minimum-date-factor') || '');
+    console.log(element.getAttribute('data-scanned-element-type'));
+    this.scannedElementType_ =
+    (element.getAttribute('data-scanned-element-type') || '');
+
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
+
+    installVideoManagerForDoc(this.element);
+
     // Warn if the player does not have video interface support
     this.readyTimeout_ = /** @type {number} */ (
-      Services.timerFor(window).delay(() => {
+      Services.timerFor(window).delay(function() {
         user().warn(TAG,
-            'Did not receive ready callback from player %s.' +
-          ' Ensure it has the videojs-amp-support plugin.', this.playerId_);
+            'Did not receive ready callback from player, ' +
+          'ensure it has the videojs-amp-support plugin.');
       }, 3000));
   }
 
@@ -98,27 +122,23 @@ export class AmpMPlayer extends AMP.BaseElement {
    * @private
    */
   iframeSource_() {
-    const element = this;
-    this.contentId_ = (element.getAttribute('data-content-id') || '');
-    this.scannedElement_ = (element.getAttribute('data-scanned-element') || '');
-    this.tags_ = (element.getAttribute('data-tags') || '');
-    this.minimumDateFactor_ =
-      (element.getAttribute('data-minimum-date-factor') || '');
-    this.scannedElementType_ =
-      (element.getAttribute('data-scanned-element-type') || '');
-
-    const source = '/Users/ofirshlifer/Downloads/mplayer.html' +
+    const {element} = this;
+    const source = 'https://s3-us-west-2.amazonaws.com/syringe/dev/amp/mplayer.html' +
       ((this.contentId_ !== '') ?
         '?content_id=' +
         `${encodeURIComponent(this.contentId_)}` :
-        ('?scanned_element=' +
-          `${encodeURIComponent(this.scannedElement_)}` +
-          '&tags=' +
-          `${encodeURIComponent(this.tags_)}` +
-          '&minimum_date_factor=' +
-          `${encodeURIComponent(this.minimumDateFactor_)}` +
-          '&scanned_element_type=' +
-          `${encodeURIComponent(this.scannedElementType_)}`));
+        (((this.scannedElement_ != '') ?
+          '?scanned_element=' +
+          `${encodeURIComponent(this.scannedElement_)}` : '?') +
+          ((this.tags_ != '') ?
+            '&tags=' +
+          `${encodeURIComponent(this.tags_)}` : '') +
+          ((this.minimumDateFactor_ != '') ?
+            '&minimum_date_factor=' +
+          `${encodeURIComponent(this.minimumDateFactor_)}` : '') +
+          ((this.scannedElementType_) ?
+            '&scanned_element_type=' +
+          `${encodeURIComponent(this.scannedElementType_)}` : '')));
 
     const moreQueryParams = dict({
       'player_id': (element.getAttribute('data-player-id') || undefined),
@@ -130,11 +150,11 @@ export class AmpMPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // Actually load your resource or render more expensive resources.
+    console.log('THE IFRAME SOURCE IS ------------------->');
+    console.log(this.iframeSource_() + '\n');
 
-    const iframe = createFrameFor(this, this.iframeSource_());
-    this.iframe = iframe;
-    return this.loadPromise(iframe);
+    const frame = createFrameFor(this, this.iframeSource_());
+    this.iframe_ = frame;
   }
 
   /** @override */
@@ -143,8 +163,224 @@ export class AmpMPlayer extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true; // Call layoutCallback again.
   }
+
+  /**
+   * Sends a command to the player through postMessage.
+   * @param {string} message
+   * @private
+   */
+  sendCommand_(message) {
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+      }
+    });
+  }
+
+  // VideoInterface Implementation. See ../src/video-interface.VideoInterface
+
+  /**
+   * Whether the component supports video playback in the current platform.
+   * If false, component will be not treated as a video component.
+   * @return {boolean}
+   */
+  /** @override */
+  supportsPlatform() {
+    return true;
+  }
+
+  /**
+   * Whether users can interact with the video such as pausing it.
+   * Example of non-interactive videos include design background videos where
+   * all controls are hidden from the user.
+   *
+   * @return {boolean}
+   */
+  /** @override */
+  isInteractive() {
+    return true;
+  }
+
+  /**
+   * Current playback time in seconds at time of trigger
+   * @return {number}
+   */
+  /** @override */
+  getCurrentTime() {
+    if (this.info_) {
+      return this.info_.currentTime;
+    }
+    return NaN;
+  }
+
+  /**
+   * Total duration of the video in seconds
+   * @return {number}
+   */
+  /** @override */
+  getDuration() {
+    if (this.info_) {
+      return this.info_.duration;
+    }
+    // Not supported.
+    return NaN;
+  }
+
+  /**
+   * Get a 2d array of start and stop times that the user has watched.
+   * @return {!Array<Array<number>>}
+   */
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
+  }
+
+  /**
+   * Plays the video..
+   *
+   * @param {boolean} unusedIsAutoplay Whether the call to the `play` method is
+   * triggered by the autoplay functionality. Video players can use this hint
+   * to make decisions such as not playing pre-roll video ads.
+   */
+  /** @override */
+  play(unusedIsAutoplay) {
+    this.sendCommand_('play');
+  }
+
+  /**
+   * Pauses the video.
+   */
+  /** @override */
+  pause() {
+    this.sendCommand_('pause');
+  }
+
+  /**
+   * Mutes the video.
+   */
+  /** @override */
+  mute() {
+    this.sendCommand_('mute'); // setMute?????
+  }
+
+  /**
+   * Unmutes the video.
+   */
+  /** @override */
+  unmute() {
+    this.sendCommand_('unMute'); // setMute?????
+  }
+
+  /**
+   * Makes the video UI controls visible.
+   *
+   * AMP will not call this method if `controls` attribute is not set.
+   */
+  /** @override */
+  showControls() {} // Not supported.
+
+  /**
+   * Hides the video UI controls.
+   *
+   * AMP will not call this method if `controls` attribute is not set.
+   */
+  /** @override */
+  hideControls() {} // Not supported.
+
+  /**
+   * Returns video's meta data (artwork, title, artist, album, etc.) for use
+   * with the Media Session API
+   * artwork (Array): URL to the poster image (preferably a 512x512 PNG)
+   * title (string): Name of the video
+   * artist (string): Name of the video's author/artist
+   * album (string): Name of the video's album if it exists
+   * @return {!./mediasession-helper.MetadataDef|undefined} metadata
+   */
+  /** @override */
+  getMetadata() {} // Not supported.
+
+  /**
+   * If this returns true then it will be assumed that the player implements
+   * a feature to enter fullscreen on device rotation internally, so that the
+   * video manager does not override it. If not, the video manager will
+   * implement this feature automatically for videos with the attribute
+   * `rotate-to-fullscreen`.
+   *
+   * @return {boolean}
+   */
+  /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /**
+   * If this returns true then it will be assumed that the player implements
+   * the MediaSession API internally so that the video manager does not override
+   * it. If not, the video manager will use the metadata variable as well as
+   * inferred meta-data to update the video's Media Session notification.
+   *
+   * @return {boolean}
+   */
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /**
+   * Enables fullscreen on the internal video element
+   * NOTE: While implementing, keep in mind that Safari/iOS do not allow taking
+   * any element other than <video> to fullscreen, if the player has an internal
+   * implementation of fullscreen (flash for example) then check
+   * if Services.platformFor(this.win).isSafari is true and use the internal
+   * implementation instead. If not, it is recommended to take the iframe
+   * to fullscreen using fullscreenEnter from dom.js
+   */
+  /** @override */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * Quits fullscreen mode
+   */
+  /** @override */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * Returns whether the video is currently in fullscreen mode or not
+   * @return {boolean}
+   */
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * Seeks the video to a specified time.
+   * @param {number} unusedTimeSeconds
+   */
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
+
 }
 
 AMP.extension(TAG, '0.1', AMP => {

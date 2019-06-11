@@ -5,28 +5,39 @@
   <title>amp-mplayer example</title>
   <link rel="canonical" href="amps.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  <style amp-custom>
-    amp-mplayer {
-      color: red;
-    }
-  </style>
-  <script async custom-element="amp-mplayer" src="https://s3-us-west-2.amazonaws.com/syringe/dev/amp/amp-mplayer.js"></script>
+  <script async custom-element="amp-mplayer" src="http://localhost:8000/dist/v0/amp-mplayer-0.1.max.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+
+    body {
+      max-width: 550px;
+    }
+
+    .space-between-videos {
+      height: 7px;
+    }
+
+  </style>
 </head>
 <body>
-<h1>MPlayer AMP Examples</h1>
 
-<h2>Specific Video</h2>
-  <amp-mplayer
-    data-content-id="fSkmeWKF"
-    layout="responsive" width="150" height="80"></amp-mplayer>
+  <h1>MPlayer AMP Examples</h1>
 
-<h2>Semantic</h2>
-  <amp-mplayer
-    data-minimum-date-factor="10"
-    data-scanned-element-type="id"
-    layout="responsive" width="150" height="80"></amp-mplayer>
+  <div class="space-between-videos"></div>
+
+  <h2>Specific Video</h2>
+    <amp-mplayer
+      data-content-id="fSkmeWKF"
+      width="500" height="334"
+      layout="responsive"></amp-mplayer>
+
+  <div class="space-between-videos"></div>
+
+  <h2>Semantic</h2>
+    <amp-mplayer
+      data-minimum-date-factor="10"
+      data-scanned-element-type="id"
+      layout="responsive" width="9" height="6"></amp-mplayer>
 
 </body>
 </html>
