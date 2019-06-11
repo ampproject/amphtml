@@ -62,9 +62,9 @@ export function installScrollToggledFx(ampdoc, element, type) {
   const fxScrollDispatch = 'fx-scroll-dispatch';
 
   registerServiceBuilderForDoc(ampdoc, fxScrollDispatch, ScrollToggleDispatch);
+  const dispatch = getServiceForDoc(ampdoc, fxScrollDispatch);
 
   const resources = Services.resourcesForDoc(element);
-  const dispatch = getServiceForDoc(ampdoc, fxScrollDispatch);
 
   let shouldMutate = true;
 
@@ -145,7 +145,7 @@ export class FxElement {
     this.win = ampdoc.win;
 
     /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
-    this.positionObserver_ = getServiceForDoc(ampdoc, 'position-observer');
+    this.positionObserver_ = Services.positionObserverForDoc(element);
 
     /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(element);

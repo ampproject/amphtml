@@ -48,6 +48,7 @@ describes.realWin(
       itemsSlot.setAttribute('items', '');
       elem.appendChild(updateSlot);
       elem.appendChild(itemsSlot);
+      ampdoc.getBody().appendChild(elem);
       dftAttrs = {
         'id': 'my-list',
         'data-poll-interval': 2000,

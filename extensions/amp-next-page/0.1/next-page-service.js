@@ -20,7 +20,7 @@ import {PositionObserverFidelity} from '../../../src/service/position-observer/p
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getAmpdoc, getServiceForDoc} from '../../../src/service';
+import {getAmpdoc} from '../../../src/service';
 import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
@@ -161,7 +161,7 @@ export class NextPageService {
     this.history_ = Services.historyForDoc(ampDoc);
 
     installPositionObserverServiceForDoc(ampDoc);
-    this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
+    this.positionObserver_ = Services.positionObserverForDoc(element);
 
     const {canonicalUrl} = Services.documentInfoForDoc(ampDoc);
     const documentRef = createDocumentRef(
