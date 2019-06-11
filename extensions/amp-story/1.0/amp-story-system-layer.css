@@ -268,12 +268,9 @@
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  padding-top: 4px !important;
-  padding-bottom: 4px !important;
-  padding-right: 10px !important;
+  padding: 4px 10px 4px 0 !important;
   border-radius: 5px !important;
 }
-
 
 [dir=rtl] .i-amphtml-story-has-new-page-text-wrapper {
   padding-right: 0 !important;
