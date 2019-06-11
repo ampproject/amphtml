@@ -312,7 +312,7 @@ export class Log {
    *   native displays of things like HTML elements.
    *
    * NOTE: for an explanation of the tempate R implementation see
-   * https://github.com/google/closure-library/blob/master/closure/goog/asserts/asserts.js#L192-L213
+   * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
    *
    * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
    *     not evaluate to true.
@@ -733,7 +733,7 @@ export function isFromEmbed(win, opt_element) {
  *   native displays of things like HTML elements.
  *
  * NOTE: for an explanation of the tempate R implementation see
- * https://github.com/google/closure-library/blob/master/closure/goog/asserts/asserts.js#L192-L213
+ * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
  *
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
@@ -804,7 +804,7 @@ export function devAssert(
  *   native displays of things like HTML elements.
  *
  * NOTE: for an explanation of the tempate R implementation see
- * https://github.com/google/closure-library/blob/master/closure/goog/asserts/asserts.js#L192-L213
+ * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
  *
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
