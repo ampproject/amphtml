@@ -76,7 +76,7 @@ const CHANNELS = [
       'https://github.com/ampproject/amphtml/blob/master/' +
       'contributing/release-schedule.md#amp-release-candidate-rc-channel',
   },
-]
+];
 
 /** @const {!Array<!ExperimentDef>} */
 const EXPERIMENTS = [
