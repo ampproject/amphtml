@@ -436,6 +436,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/8929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
   },
+  {
+    id: 'margin-bottom-in-content-height',
+    name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
+    spec: 'https://github.com/ampproject/amphtml/issues/22718',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
+  },
 ];
 
 if (getMode().localDev) {

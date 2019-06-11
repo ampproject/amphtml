@@ -16,7 +16,10 @@
 
 import {Observable} from '../../observable';
 import {Services} from '../../services';
-import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from './viewport-binding-def';
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
@@ -205,19 +208,28 @@ export class ViewportBindingNatural_ {
     // document_height)` (we only want the latter), and it doesn't account
     // for margins. Also, don't use documentElement's rect height because
     // there's no workable analog for either ios-embed-* modes.
-    const scrollingElement = this.getScrollingElement();
-    const rect = scrollingElement./*OK*/ getBoundingClientRect();
-    const style = computedStyle(this.win, scrollingElement);
-    // The Y-position of any element can be offset by the vertical margin
+    const content = this.getScrollingElement();
+    const rect = content./*OK*/ getBoundingClientRect();
+
+    // The Y-position of `content` can be offset by the vertical margin
     // of its first child, and this is _not_ accounted for in `rect.height`.
-    // This "top gap" causes smaller than expected contentHeight, so calculate
-    // and add it manually. Note that the "top gap" includes any padding-top
-    // on ancestor elements, and the "bottom gap" remains unaddressed.
-    const topGapPlusPadding = rect.top + this.getScrollTop();
+    // This causes smaller than expected content height, so add it manually.
+    // Note this "top" value already includes padding-top of ancestor elements
+    // and getBorderTop().
+    const top = rect.top + this.getScrollTop();
+
+    // As of Safari 12.1.1, the getBoundingClientRect().height does not include
+    // the bottom margin of children and there's no other API that does.
+    const childMarginBottom = Services.platformFor(this.win).isSafari()
+      ? marginBottomOfLastChild(this.win, content)
+      : 0;
+
+    const style = computedStyle(this.win, content);
     return (
-      rect.height +
-      topGapPlusPadding +
+      top +
       parseInt(style.marginTop, 10) +
+      rect.height +
+      childMarginBottom +
       parseInt(style.marginBottom, 10)
     );
   }

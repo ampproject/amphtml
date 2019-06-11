@@ -16,7 +16,10 @@
 
 import {Observable} from '../../observable';
 import {Services} from '../../services';
-import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from './viewport-binding-def';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -400,20 +403,29 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     // Don't use scrollHeight, since it returns `MAX(viewport_height,
     // document_height)` (we only want the latter), and it doesn't account
     // for margins.
-    const bodyWrapper = this.wrapper_;
-    const rect = bodyWrapper./*OK*/ getBoundingClientRect();
-    const style = computedStyle(this.win, bodyWrapper);
-    // The Y-position of any element can be offset by the vertical margin
+    const content = this.wrapper_;
+    const rect = content./*OK*/ getBoundingClientRect();
+
+    // The Y-position of `content` can be offset by the vertical margin
     // of its first child, and this is _not_ accounted for in `rect.height`.
-    // This "top gap" causes smaller than expected contentHeight, so calculate
-    // and add it manually. Note that the "top gap" includes any padding-top
-    // on ancestor elements and the scroller's border-top. The "bottom gap"
-    // remains unaddressed.
-    const topGapPlusPaddingAndBorder = rect.top + this.getScrollTop();
+    // This causes smaller than expected content height, so add it manually.
+    // Note this "top" value already includes padding-top of ancestor elements
+    // and getBorderTop().
+    const top = rect.top + this.getScrollTop();
+
+    // As of Safari 12.1.1, the getBoundingClientRect().height does not include
+    // the bottom margin of children and there's no other API that does.
+    const childMarginBottom = marginBottomOfLastChild(
+      this.win,
+      this.win.document.body
+    );
+
+    const style = computedStyle(this.win, content);
     return (
-      rect.height +
-      topGapPlusPaddingAndBorder +
+      top +
       parseInt(style.marginTop, 10) +
+      rect.height +
+      childMarginBottom +
       parseInt(style.marginBottom, 10)
     );
   }
