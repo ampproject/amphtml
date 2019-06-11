@@ -435,7 +435,7 @@ export class Extensions {
    * but before the first extension is installed.
    * @param {!./ampdoc-impl.AmpDocFie} ampdoc
    * @param {!Array<string>} extensionIds
-   * @param {function(!Window, ?./ampdoc-impl.AmpDoc)=} opt_preinstallCallback
+   * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
    * @return {!Promise}
    * @restricted
    */
@@ -452,7 +452,7 @@ export class Extensions {
    * but before the first extension is installed.
    * @param {!Window} childWin
    * @param {!Array<string>} extensionIds
-   * @param {function(!Window)=} opt_preinstallCallback
+   * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
    * @return {!Promise}
    * @restricted
    */

@@ -121,7 +121,7 @@ export function getFriendlyIframeEmbedOptional(iframe) {
  * @param {!HTMLIFrameElement} iframe
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
- * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc)=} opt_preinstallCallback
+ * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(
@@ -226,7 +226,7 @@ export function installFriendlyIframeEmbed(
     iframe[EMBED_PROP] = embed;
 
     // Add extensions.
-    if (ampdocFieExperimentOn) {
+    if (ampdoc && ampdocFieExperimentOn) {
       extensions.installExtensionsInFie(
         ampdoc,
         spec.extensionIds || [],

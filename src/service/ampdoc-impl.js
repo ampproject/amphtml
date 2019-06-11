@@ -239,7 +239,9 @@ export class AmpDocService {
   installFieDoc(url, childWin) {
     const doc = childWin.document;
     devAssert(!doc[AMPDOC_PROP], 'The fie already contains ampdoc');
-    const frameElement = getParentWindowFrameElement(doc, this.win);
+    const frameElement = /** @type {!Node} */ (devAssert(
+      getParentWindowFrameElement(doc, this.win)
+    ));
     const ampdoc = new AmpDocFie(childWin, url, this.getAmpDoc(frameElement));
     doc[AMPDOC_PROP] = ampdoc;
     return ampdoc;
