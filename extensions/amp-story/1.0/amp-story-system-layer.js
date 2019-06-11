@@ -626,9 +626,12 @@ export class SystemLayer {
     this.vsync_.mutate(() => {
       const lastIndex =
         this.storeService_.get(StateProperty.PAGE_IDS).length - 1;
-      this.getShadowRoot().classList.toggle('first-page-active', index === 0);
       this.getShadowRoot().classList.toggle(
-        'last-page-active',
+        'i-amphtml-first-page-active',
+        index === 0
+      );
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-last-page-active',
         index === lastIndex
       );
     });
