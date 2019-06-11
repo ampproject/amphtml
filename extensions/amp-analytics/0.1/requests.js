@@ -26,7 +26,6 @@ import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';
-import {parseUrlWithA} from '../../../src/url';
 
 const BATCH_INTERVAL_MIN = 200;
 
@@ -68,6 +67,9 @@ export class RequestHandler {
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
+
+    /** @private {!../../../src/service/url-impl.Url} */
+    this.urlService_ = Services.urlForDoc(element);
 
     /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
@@ -261,7 +263,7 @@ export class RequestHandler {
       Promise.all(segmentPromises),
       requestOriginPromise,
     ]).then(results => {
-      const requestUrl = composeRequestUrl_(results[0], results[2]);
+      const requestUrl = this.composeRequestUrl_(results[0], results[2]);
 
       const batchSegments = results[1];
       if (batchSegments.length === 0) {
@@ -367,6 +369,25 @@ export class RequestHandler {
       this.refreshBatchInterval_();
     }, interval);
   }
+
+  /**
+   * Composes a request URL given a base and requestOrigin
+   * @private
+   * @param {string} baseUrl
+   * @param {string=} opt_requestOrigin
+   * @return {string}
+   */
+  composeRequestUrl_(baseUrl, opt_requestOrigin) {
+    if (opt_requestOrigin) {
+      // parse can handle relative request origins and will use the
+      // current page's origin if so. However, we only want to accept absolute
+      // URLs for request origin to keep our URL composition rules simple
+      const requestOriginInfo = this.urlService_.parse(opt_requestOrigin);
+      return requestOriginInfo.origin + baseUrl;
+    }
+
+    return baseUrl;
+  }
 }
 
 /**
@@ -469,26 +490,4 @@ function expandExtraUrlParams(
   Object.keys(params).forEach(key => expandObject(params, key));
 
   return Promise.all(requestPromises).then(() => params);
-}
-
-/**
- * Composes a request URL given a base and requestOrigin
- * @private
- * @param {string} baseUrl
- * @param {string=} opt_requestOrigin
- * @return {string}
- */
-function composeRequestUrl_(baseUrl, opt_requestOrigin) {
-  if (opt_requestOrigin) {
-    const a = /** @type {!HTMLAnchorElement} */ (self.document.createElement(
-      'a'
-    ));
-    // parseUrlWithA can handle relative request origins and will use the
-    // current page's origin if so. However, we only want to accept absolute
-    // URLs for request origin to keep our URL composition rules simple
-    const requestOriginInfo = parseUrlWithA(a, opt_requestOrigin);
-    return requestOriginInfo.origin + baseUrl;
-  }
-
-  return baseUrl;
 }
