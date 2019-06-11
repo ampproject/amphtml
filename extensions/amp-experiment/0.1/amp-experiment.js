@@ -72,9 +72,7 @@ export class AmpExperiment extends AMP.BaseElement {
         '<script type="application/json"> child.'
     );
 
-    return /** @type {!JsonObject} */ (devAssert(
-      parseJson(children[0].textContent)
-    ));
+    return devAssert(parseJson(children[0].textContent));
   }
 
   /**
