@@ -26,12 +26,12 @@ import {
   iterateCursor,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
+import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {findIndex, remove} from '../../../src/utils/array';
-import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
@@ -1156,6 +1156,14 @@ export class Bind {
         // will schedule a pass after a short delay anyways.
         this.resources_./*OK*/ changeSize(element, height, width);
       }
+
+      const mutateEvent = createCustomEvent(
+        this.win_,
+        BindEvents.MUTATE,
+        /* detail */ null,
+        {bubbles: true}
+      );
+      element.dispatchEvent(mutateEvent);
 
       if (typeof element.mutatedAttributesCallback === 'function') {
         // Prevent an exception in the callback from interrupting execution,

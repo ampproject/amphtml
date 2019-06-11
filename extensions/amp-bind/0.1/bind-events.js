@@ -20,6 +20,7 @@
  */
 export const BindEvents = {
   INITIALIZE: 'amp:bind:initialize',
+  MUTATE: 'amp:bind:mutate',
   RESCAN_TEMPLATE: 'amp:bind:rescan-template',
   SET_STATE: 'amp:bind:setState',
 };

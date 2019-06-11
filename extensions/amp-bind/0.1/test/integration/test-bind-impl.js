@@ -512,6 +512,19 @@ describe
           });
         });
 
+        it('should dispatch a MUTATE event after applying the binding', () => {
+          const element = createElement(env, container, '[text]="foo"');
+          const spy = sandbox.spy(element, 'dispatchEvent');
+
+          return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
+            expect(spy).to.have.been.calledOnce;
+            expect(spy).calledWithMatch({
+              type: BindEvents.MUTATE,
+              bubbles: true,
+            });
+          });
+        });
+
         it('should support binding to string attributes', () => {
           const element = createElement(env, container, '[text]="1+1"');
           expect(element.textContent).to.equal('');
