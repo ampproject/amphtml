@@ -558,7 +558,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
-            null
+            null,
+          null
         ),
         'spsa': this.isSinglePageStoryAd
           ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
@@ -1204,27 +1205,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   handleResize_(width, height) {
     const pWidth = this.element.getAttribute('width');
     const pHeight = this.element.getAttribute('height');
-    const isFluidRequestAndFixedResponse = !!(
-      this.isFluidRequest_ &&
-      width &&
-      height
-    );
-    const returnedSizeDifferent = width != pWidth || height != pHeight;
-    const heightNotIncreased = height <= pHeight;
+    // We want to resize only if neither returned dimension is larger than its
+    // primary counterpart, and if at least one of the returned dimensions
+    // differ from its primary counterpart.
     if (
-      isFluidRequestAndFixedResponse ||
-      (returnedSizeDifferent && heightNotIncreased)
+      (this.isFluidRequest_ && width && height) ||
+      ((width != pWidth || height != pHeight) &&
+        (width <= pWidth && height <= pHeight))
     ) {
-      if (height == pHeight) {
-        // If we're only changing the width, then we call changeSize which
-        // should allow us to resize the element even if it's in the viewport.
-        this.mutateElement(() => {
-          this.element.getResources()
-              ./*OK*/changeSize(this.element, height, width);
-        });
-      } else {
-        this.attemptChangeSize(height, width).catch(() => {});
-      }
+      this.attemptChangeSize(height, width).catch(() => {});
     }
   }
 
