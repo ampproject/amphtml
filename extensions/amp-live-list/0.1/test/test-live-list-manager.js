@@ -17,7 +17,6 @@
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
-  liveListManagerForDoc,
 } from '../live-list-manager';
 import {Services} from '../../../../src/services';
 
@@ -40,16 +39,18 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    const docReadyPromise = new Promise(resolve => {
-      ready = resolve;
-    });
-    sandbox
-      .stub(LiveListManager.prototype, 'whenDocReady_')
-      .returns(docReadyPromise);
+
     clock = sandbox.useFakeTimers();
     xhrs = setUpMockXhrs(sandbox);
     viewer = Services.viewerForDoc(ampdoc);
-    manager = liveListManagerForDoc(ampdoc);
+
+    manager = new LiveListManager(ampdoc);
+    const docReadyPromise = new Promise(resolve => {
+      ready = resolve;
+    });
+    sandbox.stub(manager, 'whenDocReady_').returns(docReadyPromise);
+    sandbox.stub(LiveListManager, 'forDoc').returns(Promise.resolve(manager));
+
     liveList = getLiveList({'data-sort-time': '1111'});
     sandbox.stub(liveList, 'getInterval').callsFake(() => 5000);
   });
@@ -79,9 +80,8 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     }
 
     buildCallback() {
-      this.manager_ = liveListManagerForDoc(ampdoc);
+      manager.register(this.element.getAttribute('id'), this);
       this.updateTime_ = Number(this.element.getAttribute('data-sort-time'));
-      this.manager_.register(this.element.getAttribute('id'), this);
     }
 
     getInterval() {
@@ -698,7 +698,8 @@ describes.realWin(
       doc = win.document;
       ampdoc = env.ampdoc;
       extensions = env.extensions;
-      manager = liveListManagerForDoc(ampdoc);
+      manager = new LiveListManager(ampdoc);
+      sandbox.stub(LiveListManager, 'forDoc').returns(Promise.resolve(manager));
     });
 
     it('should install newly discovered script tags on xhr doc', () => {
