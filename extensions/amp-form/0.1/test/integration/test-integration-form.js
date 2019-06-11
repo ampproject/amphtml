@@ -54,9 +54,11 @@ describes.realWin(
       sandbox = env.sandbox;
       doc = env.win.document;
 
-      sandbox.stub(Services, 'formSubmitForDoc').returns(() => {
-        fire: () => {};
-      });
+      sandbox.stub(Services, 'formSubmitForDoc').returns(
+        Promise.resolve(() => {
+          fire: () => {};
+        })
+      );
 
       const mustache = document.createElement('script');
       mustache.setAttribute('custom-template', 'amp-mustache');

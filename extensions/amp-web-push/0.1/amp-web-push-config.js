@@ -14,11 +14,11 @@
  * the License.
  */
 
-import {CONFIG_TAG, SERVICE_TAG, TAG} from './vars';
+import {CONFIG_TAG, TAG} from './vars';
 import {dev, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {getServiceForDoc} from '../../../src/service';
 import {parseUrlDeprecated} from '../../../src/url';
+import {webPushServiceForDoc} from './web-push-service';
 
 /** @enum {string} */
 export const WebPushConfigAttributes = {
@@ -150,8 +150,10 @@ export class WebPushConfig extends AMP.BaseElement {
   buildCallback() {
     this.validate();
     const config = this.parseConfig();
-    const webPushService = getServiceForDoc(this.getAmpDoc(), SERVICE_TAG);
-    webPushService.start(config).catch(() => {});
+
+    webPushServiceForDoc(this.element).then(service => {
+      service.start(config).catch(() => {});
+    });
 
     this.registerAction(
       WebPushWidgetActions.SUBSCRIBE,
@@ -204,16 +206,18 @@ export class WebPushConfig extends AMP.BaseElement {
     const widget = dev().assertElement(invocation.event.target);
 
     this.setWidgetDisabled_(widget, true);
-    const webPushService = getServiceForDoc(this.getAmpDoc(), SERVICE_TAG);
-    webPushService
-      .subscribe(() => {
-        // On popup closed
-        this.setWidgetDisabled_(widget, false);
-      })
-      .then(() => {
-        // On browser notification permission granted, denied, or dismissed
-        this.setWidgetDisabled_(widget, false);
-      });
+
+    webPushServiceForDoc(this.element).then(service => {
+      service
+        .subscribe(() => {
+          // On popup closed
+          this.setWidgetDisabled_(widget, false);
+        })
+        .then(() => {
+          // On browser notification permission granted, denied, or dismissed
+          this.setWidgetDisabled_(widget, false);
+        });
+    });
   }
 
   /**
@@ -234,9 +238,11 @@ export class WebPushConfig extends AMP.BaseElement {
     const widget = dev().assertElement(invocation.event.target);
 
     this.setWidgetDisabled_(widget, true);
-    const webPushService = getServiceForDoc(this.getAmpDoc(), SERVICE_TAG);
-    webPushService.unsubscribe().then(() => {
-      this.setWidgetDisabled_(widget, false);
+
+    webPushServiceForDoc(this.element).then(service => {
+      service.unsubscribe().then(() => {
+        this.setWidgetDisabled_(widget, false);
+      });
     });
   }
 

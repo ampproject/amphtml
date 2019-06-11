@@ -49,7 +49,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     windowInterface = mockWindowInterface(sandbox);
 
     beforeSubmitStub = sandbox.stub();
-    sandbox.stub(Services, 'formSubmitPromiseForDoc').resolves({
+    sandbox.stub(Services, 'formSubmitForDoc').resolves({
       beforeSubmit: beforeSubmitStub,
     });
 
