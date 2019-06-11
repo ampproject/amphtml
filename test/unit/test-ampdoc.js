@@ -657,6 +657,7 @@ describes.realWin('AmpDocFie', {}, env => {
   beforeEach(() => {
     service = new AmpDocService(window, /* isSingleDoc */ true);
     childWin = env.win;
+    setParentWindow(childWin, window);
     parent = service.singleDoc_;
     ampdoc = new AmpDocFie(childWin, URL, parent);
   });
