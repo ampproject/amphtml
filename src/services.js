@@ -260,27 +260,12 @@ export class Services {
   }
 
   /**
-   * TODO(#22414): Remove this in favor of the async API.
-   * Returns a service to register callbacks we wish to execute when an
-   * amp-form is submitted. This is the sync version used by amp-form only, all
-   * other extensions should use `formSubmitPromiseForDoc` below.
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {../extensions/amp-form/0.1/form-submit-service.FormSubmitService}
-   */
-  static formSubmitForDoc(elementOrAmpDoc) {
-    return /** @type {!../extensions/amp-form/0.1/form-submit-service.FormSubmitService} */ (getServiceForDoc(
-      elementOrAmpDoc,
-      'form-submit-service'
-    ));
-  }
-
-  /**
    * Returns a service to register callbacks we wish to execute when an
    * amp-form is submitted.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>}
    */
-  static formSubmitPromiseForDoc(elementOrAmpDoc) {
+  static formSubmitForDoc(elementOrAmpDoc) {
     return /** @type {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'form-submit-service'
@@ -382,6 +367,19 @@ export class Services {
     return /** @type {!./service/platform-impl.Platform} */ (getService(
       window,
       'platform'
+    ));
+  }
+
+  /**
+   * Not installed by default; must be installed in extension code before use.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/position-observer/position-observer-impl.PositionObserver}
+   * @throws If the service is not installed.
+   */
+  static positionObserverForDoc(element) {
+    return /** @type {!./service/position-observer/position-observer-impl.PositionObserver} */ (getServiceForDoc(
+      element,
+      'position-observer'
     ));
   }
 
