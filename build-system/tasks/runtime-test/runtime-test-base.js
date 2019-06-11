@@ -155,7 +155,10 @@ function getFiles(testType) {
  * @param {!RuntimeTestConfig} config
  */
 function updateReporters(config) {
-  if (argv.testnames || argv.local_changes || argv.files) {
+  if (
+    (argv.testnames || argv.local_changes || argv.files) &&
+    !isTravisBuild()
+  ) {
     config.reporters = ['mocha'];
   }
 
