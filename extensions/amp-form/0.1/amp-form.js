@@ -61,7 +61,7 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {toArray, toWin} from '../../../src/types';
+import {isArray, toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -1103,6 +1103,13 @@ export class AmpForm {
    * @private
    */
   renderTemplate_(data) {
+    if (isArray(data)) {
+      data = dict();
+      user().warn(
+        TAG,
+        `Unexpected data type: ${data}. Expected non JSON array.`
+      );
+    }
     const container = this.form_./*OK*/ querySelector(`[${this.state_}]`);
     let p = Promise.resolve();
     if (container) {
@@ -1114,11 +1121,6 @@ export class AmpForm {
         p = this.ssrTemplateHelper_
           .renderTemplate(devAssert(container), data)
           .then(rendered => {
-            userAssert(
-              rendered && rendered.nodeType == /** Node.ELEMENT_NODE */ 1,
-              'Rendered element: %s is not of type Element',
-              rendered
-            );
             rendered.id = messageId;
             rendered.setAttribute('i-amphtml-rendered', '');
             return this.resources_.mutateElement(
