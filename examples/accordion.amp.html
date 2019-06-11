@@ -33,7 +33,11 @@
 </head>
 <body>
   <button on="tap:AMP.setState({expandAc1: ''})">Expand item 1</button>
-  <button on="tap:AMP.setState({expandAc1: false})">Collapse item 1</button>
+  <button on="tap:AMP.setState({expandAc1: 'collapse'})">Collapse item 1</button>
+
+
+  <button on="tap:AMP.setState({expandAc2: ''})">Expand section 1</button>
+  <button on="tap:AMP.setState({expandAc2: 'collapse'})">Collapse section 1</button>
   <header class="menu">
     <h3>MENU</h3>
     <nav>
@@ -65,7 +69,7 @@
   </header>
 
   <amp-accordion expand-single-section>
-    <section>
+    <section [expanded]="expandAc2" on="collapse:AMP.setState({expandAc2: false})">
       <h2>Section 1</h2>
       <p>Bunch of awesome content</p>
     </section>

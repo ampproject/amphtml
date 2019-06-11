@@ -615,17 +615,23 @@ class AmpAccordion extends AMP.BaseElement {
    * @param {!Array<!MutationRecord>} mutations
    */
   toggleMutations_(mutations) {
-    mutations.forEach(mutation => {
-      if (mutation.attributeName === 'expanded') {
-        const sectionEl = dev().assertElement(mutation.target);
-        const toExpand = sectionEl.getAttribute('expanded');
-        // Check for 'false' instead of false (boolean) since
-        // getAttribute always returns string type.
-        if (toExpand === 'false') {
-          sectionEl.removeAttribute('expanded');
-        }
-      }
-    });
+    if (mutations.length > 1) {
+      return;
+    }
+    const mutation = mutations[0];
+    if (mutation.attributeName !== 'expanded') {
+      return;
+    }
+    const sectionEl = dev().assertElement(mutation.target);
+    if (!sectionEl.hasAttribute('[expanded]')) {
+      return;
+    }
+    const toExpand = sectionEl.getAttribute('expanded') !== 'collapse';
+    if (toExpand) {
+      // toggle_ does not expand if attribute is already present on element.
+      sectionEl.removeAttribute('expanded');
+    }
+    this.toggle_(sectionEl, toExpand);
   }
 }
 
