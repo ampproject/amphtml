@@ -22,13 +22,12 @@ import {
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {devAssert, user, userAssert} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {extractDomain} from '../../../src/url';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';
+import {parseUrlWithA} from '../../../src/url';
 
-const TAG = 'amp-analytics/requests';
 const BATCH_INTERVAL_MIN = 200;
 
 export class RequestHandler {
@@ -480,23 +479,15 @@ function expandExtraUrlParams(
  * @return {string}
  */
 function composeRequestUrl_(baseUrl, opt_requestOrigin) {
-  if (opt_requestOrigin === '') {
-    user().error(TAG, 'Request Origin cannot be an empty string');
-    return '';
-  }
-  // prepend requestOrigin if available
-  else if (opt_requestOrigin) {
-    const domain = extractDomain(opt_requestOrigin);
-
-    if (!domain) {
-      user().error(
-        TAG,
-        'Unable to extract domain from requestOrigin: ' + opt_requestOrigin
-      );
-      return '';
-    }
-
-    return domain + baseUrl;
+  if (opt_requestOrigin) {
+    const a = /** @type {!HTMLAnchorElement} */ (self.document.createElement(
+      'a'
+    ));
+    // parseUrlWithA can handle relative request origins and will use the
+    // current page's origin if so. However, we only want to accept absolute
+    // URLs for request origin to keep our URL composition rules simple
+    const requestOriginInfo = parseUrlWithA(a, opt_requestOrigin);
+    return requestOriginInfo.origin + baseUrl;
   }
 
   return baseUrl;

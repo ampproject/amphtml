@@ -649,18 +649,3 @@ export function checkCorsUrl(url) {
 export function tryDecodeUriComponent(component, opt_fallback) {
   return tryDecodeUriComponent_(component, opt_fallback);
 }
-
-/**
- * Extract and return the domain from the given url string via regex
- * Ex.  'http://google.com?test' -> 'http://google.com'
- *      'https://google.com/test1/test2' -> 'https://google.com'
- *      'http://localhost:8000/test' -> 'http://localhost:8000'
- * @param {string} url
- * @return {string|undefined}
- */
-export function extractDomain(url) {
-  // regex adapted from https://stackoverflow.com/a/8498629
-  const matches = url.match(/(^https?\:\/\/[^\/?#]+)(?:[\/:?#]|$)/i);
-
-  return matches ? matches[1] : undefined;
-}
