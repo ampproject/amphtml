@@ -107,7 +107,6 @@ function cleanupBuildDir() {
 exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
-  console.log('tmpDir', tmpDir);
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -392,4 +391,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .on('end', resolve);
     }
   });
+}
+
+function transferSrcToTempDir() {
 }
