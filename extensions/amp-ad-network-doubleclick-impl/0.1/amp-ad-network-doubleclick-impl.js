@@ -50,10 +50,7 @@ import {
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {
-  DUMMY_FLUID_SIZE,
-  getMultiSizeDimensions,
-} from '../../../ads/google/utils';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
@@ -129,6 +126,8 @@ const FLEXIBLE_AD_SLOTS_BRANCHES = {
   CONTROL: '21063173',
   EXPERIMENT: '21063174',
 };
+
+const DUMMY_FLUID_SIZE = '320x50';
 
 /**
  * Map of pageview tokens to the instances they belong to.
@@ -559,8 +558,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
-            null,
-          null
+            null
         ),
         'spsa': this.isSinglePageStoryAd
           ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
@@ -594,28 +592,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.adKey = this.generateAdKey_(
       `${this.initialSize_.width}x${this.initialSize_.height}`
     );
-    this.parameterSize = this.isFluidPrimaryRequest_
-      ? DUMMY_FLUID_SIZE
-      : `${this.initialSize_.width}x${this.initialSize_.height}`;
-    const multiSizeDataStr = this.element.getAttribute('data-multi-size');
-    if (multiSizeDataStr) {
-      const multiSizeValidation =
-        this.element.getAttribute('data-multi-size-validation') || 'true';
-      // The following call will check all specified multi-size dimensions,
-      // verify that they meet all requirements, and then return all the valid
-      // dimensions in an array.
-      const dimensions = getMultiSizeDimensions(
-        multiSizeDataStr,
-        this.initialSize_.width,
-        this.initialSize_.height,
-        multiSizeValidation == 'true',
-        this.isFluidPrimaryRequest_
-      );
-      if (dimensions.length) {
-        this.parameterSize +=
-          '|' + dimensions.map(dimension => dimension.join('x')).join('|');
-      }
-    }
+    this.parameterSize = this.getParameterSize_();
   }
 
   /** @override */
@@ -891,11 +868,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return size;
   }
 
-  /** @override */
-  sandboxHTMLCreativeFrame() {
-    return this.shouldSandbox_;
-  }
-
   /**
    * Returns the width and height of the slot as defined by the width and height
    * attributes, or the dimensions as computed by
@@ -909,6 +881,44 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       ? {width, height}
       : // width/height could be 'auto' in which case we fallback to measured.
         this.getIntersectionElementLayoutBox();
+  }
+
+  /**
+   * @return {string} The size parameter.
+   * @private
+   */
+  getParameterSize_() {
+    let sz = this.isFluidRequest_
+        ? DUMMY_FLUID_SIZE
+        : '';
+    if (!this.isFluidPrimaryRequest_) {
+      sz += (sz.length ? '|' : '') +
+          `${this.initialSize_.width}x${this.initialSize_.height}`;
+    }
+    const multiSizeDataStr = this.element.getAttribute('data-multi-size');
+    if (multiSizeDataStr) {
+      const multiSizeValidation =
+        this.element.getAttribute('data-multi-size-validation') || 'true';
+      // The following call will check all specified multi-size dimensions,
+      // verify that they meet all requirements, and then return all the valid
+      // dimensions in an array.
+      const dimensions = getMultiSizeDimensions(
+        multiSizeDataStr,
+        this.initialSize_.width,
+        this.initialSize_.height,
+        multiSizeValidation == 'true',
+        this.isFluidPrimaryRequest_
+      );
+      if (dimensions.length) {
+        sz += '|' + dimensions.map(dimension => dimension.join('x')).join('|');
+      }
+    }
+    return sz;
+  }
+
+  /** @override */
+  sandboxHTMLCreativeFrame() {
+    return this.shouldSandbox_;
   }
 
   /** @override */
@@ -1194,15 +1204,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   handleResize_(width, height) {
     const pWidth = this.element.getAttribute('width');
     const pHeight = this.element.getAttribute('height');
-    // We want to resize only if neither returned dimension is larger than its
-    // primary counterpart, and if at least one of the returned dimensions
-    // differ from its primary counterpart.
+    const isFluidRequestAndFixedResponse = !!(
+      this.isFluidRequest_ &&
+      width &&
+      height
+    );
+    const returnedSizeDifferent = width != pWidth || height != pHeight;
+    const heightNotIncreased = height <= pHeight;
     if (
-      (this.isFluidRequest_ && width && height) ||
-      ((width != pWidth || height != pHeight) &&
-        (width <= pWidth && height <= pHeight))
+      isFluidRequestAndFixedResponse ||
+      (returnedSizeDifferent && heightNotIncreased)
     ) {
-      this.attemptChangeSize(height, width).catch(() => {});
+      if (height == pHeight) {
+        // If we're only changing the width, then we call changeSize which
+        // should allow us to resize the element even if it's in the viewport.
+        this.mutateElement(() => {
+          this.element.getResources()
+              ./*OK*/changeSize(this.element, height, width);
+        });
+      } else {
+        this.attemptChangeSize(height, width).catch(() => {});
+      }
     }
   }
 
@@ -1668,3 +1690,5 @@ export function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
 export function resetTokensToInstancesMap() {
   tokensToInstances = {};
 }
+
+
