@@ -139,7 +139,7 @@ describe('#getMultiSizeDimensions', () => {
         300,
         /* useLowerBound */ false
       )
-    ).to.deep.equal([[300, 300]]);
+    ).to.deep.equal([[320, 50], [300, 300]]);
   });
 });
 
