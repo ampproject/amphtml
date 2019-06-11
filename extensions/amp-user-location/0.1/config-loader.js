@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {dict} from '../../../src/utils/object';
+import {isArray, isObject} from '../../../src/types';
 import {isJsonScriptTag} from '../../../src/dom';
-import {isObject} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {user, userAssert} from '../../../src/log';
-
-const TAG = 'amp-user-location';
 
 /**
  * ConfigLoader unifies configuration parsing logic for local and remote
@@ -73,9 +70,24 @@ export class ConfigLoader {
       return this.getScriptConfig_();
     }
 
+    // Prefer the fetchConfig if it's ready, and if not use the script config.
     if (this.hasScriptConfig_() && this.hasRemoteConfig_()) {
-      // Prefer the fetchConfig if it's ready, and if not use the script config.
-      return Promise.race([this.fetchConfig(), this.getScriptConfig_()]);
+      // We chain the Promises passed to `Promise.race` because `race` handles
+      // already-resolved promises differently if they have a then block
+      // e.g.
+      // await Promise.race([Promise.resolve(1 + 1), Promise.resolve(0)]); // => 2
+      // await Promise.race([
+      //   Promise.resolve(1).then(x => x + 1),
+      //   Promise.resolve(0),
+      // ]); // => 0 💩
+      // await Promise.race([
+      //   Promise.resolve().then(() => Promise.resolve(1).then(x => x + 1)),
+      //   Promise.resolve().then(() => Promise.resolve(0)),
+      // ]); // => 2 😄
+      return Promise.race([
+        Promise.resolve().then(() => this.fetchConfig()),
+        Promise.resolve().then(() => this.getScriptConfig_()),
+      ]);
     }
 
     // this.hasScriptConfig_() must have returned false by this point
@@ -117,29 +129,35 @@ export class ConfigLoader {
       return this.scriptConfigPromise_;
     }
 
-    const {children} = this.element_;
+    const {children, tagName: TAG} = this.element_;
     userAssert(
       children.length == 1,
-      'amp-user-location may only have one configuration json <script> tag'
+      '%s may only have one configuration json <script> tag',
+      TAG
     );
 
     const firstChild = children[0];
     if (!isJsonScriptTag(firstChild)) {
       user().error(
         TAG,
-        'amp-user-location config should be in a <script> tag ' +
-          'with type="application/json".'
+        'config should be in a <script> tag with type="application/json".'
       );
-      return Promise.resolve(dict()); // TODO(cvializ): error handling is hard : (
+      return Promise.resolve(dict());
     }
 
-    const {promise, resolve, reject} = new Deferred();
-    const json = tryParseJson(firstChild.textContent, e => {
-      // Rejects synchronously, so if an error occurs,
-      // the resolve below will have no effect
-      reject(e);
+    const promise = new Promise((resolve, reject) => {
+      const json = tryParseJson(firstChild.textContent, e => {
+        // Rejects synchronously, so if an error occurs,
+        // the resolve below will have no effect
+        reject(e);
+      });
+
+      if (!json) {
+        return resolve(dict());
+      }
+
+      resolve(this.assertIsObject_(json));
     });
-    resolve(assertIsObject(json));
 
     return (this.scriptConfigPromise_ = promise);
   }
@@ -170,7 +188,9 @@ export class ConfigLoader {
    */
   getRemoteConfig_() {
     const policy = UrlReplacementPolicy.ALL;
-    return this.fetch_(this.ampdoc_, this.element_, '.', policy);
+    return this.fetch_(this.ampdoc_, this.element_, '.', policy).then(json =>
+      this.assertIsObject_(json)
+    );
   }
 
   /**
@@ -179,21 +199,24 @@ export class ConfigLoader {
    * @param {!Element} element
    * @param {string} token
    * @param {!UrlReplacementPolicy} policy
-   * @return {!Promise<!JsonObject>}
-   * @private
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
+   * @private visible for testing
    */
   fetch_(ampdoc, element, token, policy) {
-    return batchFetchJsonFor(ampdoc, element, token, policy).then(
-      assertIsObject
-    );
+    return batchFetchJsonFor(ampdoc, element, token, policy);
   }
-}
 
-/**
- * Ensure that the configuration object is not an array or scalar type.
- * @param {!JsonObject|!Array<!JsonObject>} configJson
- */
-function assertIsObject(configJson) {
-  userAssert(isObject(configJson), 'expected configuration to be object');
-  return /** @type {!JsonObject} */ (configJson);
+  /**
+   * Ensure that the configuration object is not an array or scalar type.
+   * @param {!JsonObject|!Array<!JsonObject>} configJson
+   * @return {!JsonObject}
+   */
+  assertIsObject_(configJson) {
+    userAssert(
+      !isArray(configJson) && isObject(configJson),
+      'expected %s configuration to be object',
+      this.element_.tagName
+    );
+    return /** @type {!JsonObject} */ (configJson);
+  }
 }

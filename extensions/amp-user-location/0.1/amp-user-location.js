@@ -136,12 +136,12 @@ export class AmpUserLocation extends AMP.BaseElement {
     return this.configLoader_
       .getConfig()
       .then(config => this.normalizeConfig_(config))
-      .catch(e => {
-        this.user().error(
-          TAG,
-          'Failed to parse amp-user-location config. Is it valid JSON?',
-          e
+      .catch(() => {
+        const error = new Error(
+          'Failed to parse amp-user-location config. Is it valid JSON?'
         );
+        this.user().error(TAG, error);
+        throw error;
       });
   }
 

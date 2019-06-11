@@ -70,29 +70,25 @@ describes.fakeWin(
         expect(config).to.deep.equal(EMPTY_CONFIG);
       });
 
-      it('should error with invalid config', async () => {
+      it('should error with unparseable script tag config', async () => {
         const invalidElement = newFakeUserLocation('this is not valid json');
         const invalidConfigLoader = new ConfigLoader(
           fakeAmpdoc,
           invalidElement
         );
-        await allowConsoleError(async () => {
-          try {
-            await invalidConfigLoader.getConfig();
-          } catch (err) {
-            expect(err.message).to.include('expected configuration');
-          }
-        });
+        await expect(
+          invalidConfigLoader.getConfig()
+        ).to.eventually.be.rejectedWith(/unexpected token/i);
+      });
+
+      it('should error with array script tag config', async () => {
+        expectAsyncConsoleError(/expected .+ configuration/, 1);
 
         const arrayElement = newFakeUserLocation('[]');
         const arrayConfigLoader = new ConfigLoader(fakeAmpdoc, arrayElement);
-        await allowConsoleError(async () => {
-          try {
-            await arrayConfigLoader.getConfig();
-          } catch (err) {
-            expect(err.message).to.include('expected configuration');
-          }
-        });
+        await expect(
+          arrayConfigLoader.getConfig()
+        ).to.eventually.be.rejectedWith(/expected .+ configuration/);
       });
 
       it('should parse all fields in the config', async () => {
@@ -145,7 +141,8 @@ describes.fakeWin(
         expect(config).to.deep.equal(testConfig);
       });
 
-      it('should error with invalid config', async () => {
+      it('should error with invalid remote config', async () => {
+        expectAsyncConsoleError(/expected .+ configuration/);
         const testConfig = [
           {
             fallback: '40,-22',
@@ -162,13 +159,9 @@ describes.fakeWin(
         sandbox.stub(ConfigLoader.prototype, 'fetch_').resolves(testConfig);
 
         const arrayConfigLoader = new ConfigLoader(fakeAmpdoc, element);
-        await allowConsoleError(async () => {
-          try {
-            await arrayConfigLoader.getConfig();
-          } catch (err) {
-            expect(err.message).to.include('expected configuration');
-          }
-        });
+        await expect(
+          arrayConfigLoader.getConfig()
+        ).to.eventually.be.rejectedWith(/expected .+ configuration/);
       });
     });
 
