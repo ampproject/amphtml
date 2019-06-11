@@ -50,7 +50,6 @@ import {
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
@@ -76,6 +75,7 @@ import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {getMode} from '../../../src/mode';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
   incrementLoadingAds,
@@ -889,12 +889,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   getParameterSize_() {
-    let sz = this.isFluidRequest_
-        ? DUMMY_FLUID_SIZE
-        : '';
+    let sz = this.isFluidRequest_ ? DUMMY_FLUID_SIZE : '';
     if (!this.isFluidPrimaryRequest_) {
-      sz += (sz.length ? '|' : '') +
-          `${this.initialSize_.width}x${this.initialSize_.height}`;
+      sz +=
+        (sz.length ? '|' : '') +
+        `${this.initialSize_.width}x${this.initialSize_.height}`;
     }
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
