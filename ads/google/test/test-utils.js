@@ -111,12 +111,6 @@ describe('#getMultiSizeDimensions', () => {
     verifyArray(actual, 0, multiSizes.length);
   });
 
-  it('should add dummy size for fluid', () => {
-    expect(
-      getMultiSizeDimensions('fluid', 300, 300, /* useLowerBound */ false)
-    ).to.deep.equal([[320, 50]]);
-  });
-
   it('should not add dummy size for fluid if fluid is primary size', () => {
     expect(
       getMultiSizeDimensions(
@@ -145,7 +139,7 @@ describe('#getMultiSizeDimensions', () => {
         300,
         /* useLowerBound */ false
       )
-    ).to.deep.equal([[300, 300], [320, 50]]);
+    ).to.deep.equal([[300, 300]]);
   });
 });
 
