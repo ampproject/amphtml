@@ -15,11 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {
-  BaseTemplate,
-  installTemplatesService,
-  registerExtendedTemplate,
-} from './service/template-impl';
+import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
@@ -48,42 +44,21 @@ import {
 import {disposeServicesForDoc} from './service';
 import {getMode} from './mode';
 import {hasRenderDelayingServices} from './render-delaying-services';
-import {installActionServiceForDoc} from './service/action-impl';
-import {installBatchedXhrService} from './service/batched-xhr-impl';
 import {
-  installBuiltinElements,
+  installAmpdocServices,
+  installRuntimeServices,
+} from './service/core-services';
+import {
   installExtensionsService,
   stubLegacyElements,
 } from './service/extensions-impl';
-import {installCidService} from './service/cid-impl';
-import {installCryptoService} from './service/crypto-impl';
-import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
-import {installGlobalDocumentStateService} from './service/document-state';
-import {installGlobalNavigationHandlerForDoc} from './service/navigation';
-import {installGlobalSubmitListenerForDoc} from './document-submit';
-import {installHiddenObserverForDoc} from './service/hidden-observer-impl';
-import {installHistoryServiceForDoc} from './service/history-impl';
-import {installInputService} from './input';
-import {installPlatformService} from './service/platform-impl';
-import {installResourcesServiceForDoc} from './service/resources-impl';
-import {installStandardActionsForDoc} from './service/standard-actions-impl';
-import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStylesForDoc} from './style-installer';
-import {installTimerService} from './service/timer-impl';
-import {installUrlForDoc} from './service/url-impl';
-import {installUrlReplacementsServiceForDoc} from './service/url-replacements-impl';
-import {
-  installViewerServiceForDoc,
-  setViewerVisibilityState,
-} from './service/viewer-impl';
-import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
-import {installVsyncService} from './service/vsync-impl';
-import {installXhrService} from './service/xhr-impl';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
 import {setStyle} from './style';
+import {setViewerVisibilityState} from './service/viewer-impl';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 
@@ -92,52 +67,6 @@ setReportError(reportErrorForWin.bind(null, self));
 
 /** @const @private {string} */
 const TAG = 'runtime';
-
-/**
- * Install runtime-level services.
- * @param {!Window} global Global scope to adopt.
- */
-export function installRuntimeServices(global) {
-  installCryptoService(global);
-  installBatchedXhrService(global);
-  installGlobalDocumentStateService(global);
-  installPlatformService(global);
-  installTemplatesService(global);
-  installTimerService(global);
-  installVsyncService(global);
-  installXhrService(global);
-  installInputService(global);
-}
-
-/**
- * Install ampdoc-level services.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Object<string, string>=} opt_initParams
- */
-export function installAmpdocServices(ampdoc, opt_initParams) {
-  installUrlForDoc(ampdoc);
-  installCidService(ampdoc);
-  installDocumentInfoServiceForDoc(ampdoc);
-  installViewerServiceForDoc(ampdoc, opt_initParams);
-  installViewportServiceForDoc(ampdoc);
-  installHiddenObserverForDoc(ampdoc);
-  installHistoryServiceForDoc(ampdoc);
-  installResourcesServiceForDoc(ampdoc);
-  installUrlReplacementsServiceForDoc(ampdoc);
-  installActionServiceForDoc(ampdoc);
-  installStandardActionsForDoc(ampdoc);
-  installStorageServiceForDoc(ampdoc);
-  installGlobalNavigationHandlerForDoc(ampdoc);
-  installGlobalSubmitListenerForDoc(ampdoc);
-}
-
-/**
- * Install builtins.
- * @param {!Window} global Global scope to adopt.
- */
-export function installBuiltins(global) {
-  installBuiltinElements(global);
-}
 
 /**
  * Applies the runtime to a given global scope for a single-doc mode. Multi
