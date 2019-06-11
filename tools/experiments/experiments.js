@@ -59,7 +59,7 @@ const AMP_CANARY_COOKIE = {
 };
 
 /** @const {!Array<!ExperimentDef>} */
-const EXPERIMENTS = [
+const CHANNELS = [
   // Canary (Dev Channel)
   {
     id: CANARY_EXPERIMENT_ID,
@@ -76,6 +76,10 @@ const EXPERIMENTS = [
       'https://github.com/ampproject/amphtml/blob/master/' +
       'contributing/release-schedule.md#amp-release-candidate-rc-channel',
   },
+]
+
+/** @const {!Array<!ExperimentDef>} */
+const EXPERIMENTS = [
   {
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
@@ -451,14 +455,22 @@ if (getMode().localDev) {
  * Builds the expriments tbale.
  */
 function build() {
-  const table = document.getElementById('experiments-table');
+  const subdomain = document.getElementById('subdomain');
+  subdomain.textContent = window.location.host;
+
+  const channelsTable = document.getElementById('channels-table');
+  CHANNELS.forEach(function(experiment) {
+    channelsTable.appendChild(buildExperimentRow(experiment));
+  });
+
+  const experimentsTable = document.getElementById('experiments-table');
   EXPERIMENTS.forEach(function(experiment) {
-    table.appendChild(buildExperimentRow(experiment));
+    experimentsTable.appendChild(buildExperimentRow(experiment));
   });
 }
 
 /**
- * Builds one row of the experiments table.
+ * Builds one row in the channel or experiments table.
  * @param {!ExperimentDef} experiment
  */
 function buildExperimentRow(experiment) {
@@ -526,7 +538,7 @@ function buildLinkMaybe(text, link) {
  * Updates states of all experiments in the table.
  */
 function update() {
-  EXPERIMENTS.forEach(function(experiment) {
+  CHANNELS.concat(EXPERIMENTS).forEach(function(experiment) {
     updateExperimentRow(experiment);
   });
 }
