@@ -55,11 +55,31 @@ const {maybeUpdatePackages} = require('./update-packages');
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
+
+const deglob = require('globs-to-files');
+const babel = require("@babel/core");
+
+const allJsSrcsGlob = [
+  '3p/**/*.js',
+  'ads/**/*.js',
+  'extensions/**/*.js',
+  'src/**/*.js',
+];
+
+function tranferSrcsToTempDir() {
+  console.log('transferSrcToTempDir');
+  const files = deglob.sync(allJsSrcsGlob);
+  files.forEach(file => {
+    console.log(transferSrcToTempDir);
+  });
+}
+
 /**
  * Dist Build
  * @return {!Promise}
  */
 async function dist() {
+  transferSrcsToTempDir();
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
