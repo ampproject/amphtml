@@ -38,20 +38,6 @@ export const ADSENSE_RSPV_TAG = 'rspv';
 export const ADSENSE_MCRSPV_TAG = 'mcrspv';
 
 /**
- * Required size to be sent with fluid requests.
- * @const {string}
- */
-export const DUMMY_FLUID_SIZE = '320x50';
-
-/**
- * Required size to be sent with fluid requests in array format.
- * @const {!Array<number>}
- */
-const DUMMY_FLUID_SIZE_ARR = DUMMY_FLUID_SIZE.split('x').map(dim =>
-  Number(dim)
-);
-
-/**
  * Given the amp-ad data attribute containing the multi-size dimensions, and a
  * set of primary dimensions, this function will return all valid multi-size
  * [width, height] pairs in an array.
@@ -80,11 +66,8 @@ export function getMultiSizeDimensions(
   for (let i = 0; i < arrayOfSizeStrs.length; i++) {
     const sizeStr = arrayOfSizeStrs[i];
     if (sizeStr.toLowerCase() == 'fluid') {
-      if (!isFluidPrimary) {
-        // If the primary size is fluid, then the dummy size will already be
-        // be included.
-        dimensions.push(DUMMY_FLUID_SIZE_ARR);
-      }
+      // Fluid dummy sizes should be appended to the front of the request
+      // parameter, so they must be handled elsewhere.
       continue;
     }
     const size = sizeStr.split('x');
