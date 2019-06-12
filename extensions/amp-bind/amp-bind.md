@@ -400,7 +400,7 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Changes the width and/or height of the AMP element.</td>
   </tr>
   <tr>
-    <td>Acessibility states and properties</td>
+    <td>Accessibility states and properties</td>
     <td><code>[aria-hidden]</code><br><code>[aria-label]</code><br>etc.</td>
     <td>Used for dynamically updating information available to assistive technologies like screen readers.</td>
   </tr>
