@@ -92,7 +92,7 @@ async function prCheck(cb) {
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-    runCheck('gulp test --unit --local-changes --headless');
+    runCheck('gulp unit --local_changes --headless');
   }
 
   if (
@@ -104,7 +104,7 @@ async function prCheck(cb) {
       runCheck('gulp clean');
       runCheck('gulp dist --fortesting');
     }
-    runCheck('gulp test --nobuild --compiled --integration --headless');
+    runCheck('gulp integration --nobuild --compiled --headless');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {

@@ -20,7 +20,7 @@ import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {ElementStub} from '../../src/element-stub';
 import {Services} from '../../src/services';
-import {adopt, adoptShadowMode, installAmpdocServices} from '../../src/runtime';
+import {adopt, adoptShadowMode} from '../../src/runtime';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {deactivateChunking, runChunksForTesting} from '../../src/chunk';
 import {
@@ -28,7 +28,8 @@ import {
   getServicePromise,
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
-import {installDocumentStateService} from '../../src/service/document-state';
+import {installAmpdocServices} from '../../src/service/core-services';
+import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {toggleExperiment} from '../../src/experiments';
@@ -62,7 +63,7 @@ describes.fakeWin(
       };
       const ampdoc = new AmpDocSingle(win);
       ampdocService.getAmpDoc = () => ampdoc;
-      installDocumentStateService(win);
+      installGlobalDocumentStateService(win);
       installPlatformService(win);
       installTimerService(win);
       vsyncForTesting(win);

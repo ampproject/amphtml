@@ -22,15 +22,15 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {Services} from './services';
-import {
-  adopt,
-  installAmpdocServices,
-  installBuiltins,
-  installRuntimeServices,
-} from './runtime';
+import {adopt} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampElementCss} from '../build/ampelement.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {
+  installAmpdocServices,
+  installBuiltinElements,
+  installRuntimeServices,
+} from './service/core-services';
 import {installAutoLightboxExtension} from './auto-lightbox';
 import {installDocService} from './service/ampdoc-impl';
 import {installErrorReporting} from './error';
@@ -102,7 +102,7 @@ if (shouldMainBootstrapRun) {
     perf.tick('is');
     installStylesForDoc(
       ampdoc,
-      ampDocCss + ampElementCss,
+      ampDocCss + ampSharedCss,
       () => {
         startupChunk(self.document, function services() {
           // Core services.
@@ -117,7 +117,7 @@ if (shouldMainBootstrapRun) {
         });
         startupChunk(self.document, function builtins() {
           // Builtins.
-          installBuiltins(self);
+          installBuiltinElements(self);
         });
         startupChunk(self.document, function stub() {
           // Pre-stub already known elements.

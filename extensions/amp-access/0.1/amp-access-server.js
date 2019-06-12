@@ -165,7 +165,6 @@ export class AccessServerAdapter {
             headers: dict({
               'Content-Type': 'application/x-www-form-urlencoded',
             }),
-            requireAmpResponseSourceOrigin: false,
           })
         );
       })

@@ -398,24 +398,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
   },
   {
-    id: 'fixed-elements-in-lightbox',
-    name: 'Transfer fixed elements in lightboxes for smooth iOS scrolling',
-    spec: 'https://github.com/ampproject/amphtml/issues/20964',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20965',
-  },
-  {
     id: 'amp-img-auto-sizes',
     name: 'Automatically generates sizes for amp-img if not given',
     spec: 'https://github.com/ampproject/amphtml/issues/19513',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
-  },
-  {
-    id: 'amp-autocomplete',
-    name:
-      'AMP Autocomplete provides a set of suggestions to' +
-      ' complete a user query in an input field.',
-    spec: 'https://github.com/ampproject/amphtml/issues/9785',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21021',
   },
   {
     id: 'inabox-viewport-friendly',
@@ -449,6 +435,12 @@ const EXPERIMENTS = [
       'access after user interaction and approval',
     spec: 'https://github.com/ampproject/amphtml/issues/8929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
+  },
+  {
+    id: 'margin-bottom-in-content-height',
+    name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
+    spec: 'https://github.com/ampproject/amphtml/issues/22718',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
   },
 ];
 

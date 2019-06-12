@@ -30,12 +30,10 @@ import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toggle} from '../../../src/style';
 import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
-const EXPERIMENT = 'amp-autocomplete';
 const TAG = 'amp-autocomplete';
 
 /**
@@ -99,6 +97,28 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.submitOnEnter_ = false;
 
     /**
+     * If the "suggest-first" attribute is present on <autocomplete>
+     * and the filter type is "prefix".
+     */
+    this.suggestFirst_ = false;
+
+    /**
+     * Whether or not the "Backspace" key has recently been fired.
+     * Only used when "suggest-first" is present on amp-autocomplete.
+     *
+     * This is used in conjunction between the "keydown" and "input" events
+     * on the input element. The reason the inputHandler_() does not alone
+     * read the "inputType" on the "input" to make the same discernment is
+     * because that event property is not compatible in all browsers.
+     */
+    this.detectBackspace_ = false;
+
+    /**
+     * If the "highlight-user-entry" attribute is present on <autocomplete>.
+     */
+    this.highlightUserEntry_ = false;
+
+    /**
      * The index of the active suggested item.
      * @private {number}
      */
@@ -109,6 +129,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * @private {?Element}
      */
     this.activeElement_ = null;
+
+    /**
+     * The element id if present or random number.
+     * @private {number|string}
+     */
+    this.prefix_ = element.id ? element.id : Math.floor(Math.random() * 100);
 
     /**
      * The reference to the <div> that contains template-rendered children.
@@ -146,11 +172,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(
-      isExperimentOn(this.win, 'amp-autocomplete'),
-      `Experiment ${EXPERIMENT} is not turned on.`
-    );
-
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
 
@@ -181,7 +202,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
     }
     this.inputElement_.setAttribute('dir', 'auto');
-    this.inputElement_.setAttribute('aria-autocomplete', 'list');
+    this.inputElement_.setAttribute('aria-autocomplete', 'both');
     this.inputElement_.setAttribute('role', 'combobox');
 
     userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
@@ -227,6 +248,24 @@ export class AmpAutocomplete extends AMP.BaseElement {
       ? parseInt(this.element.getAttribute('max-entries'), 10)
       : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
+    if (this.element.hasAttribute('suggest-first')) {
+      if (this.filter_ === FilterType.PREFIX) {
+        this.suggestFirst_ = true;
+      } else {
+        user().error(
+          TAG,
+          '"suggest-first" requires "filter" to be prefix.' +
+            ' Unexpected "filter" type: ' +
+            this.filter_
+        );
+      }
+    }
+    this.suggestFirst_ =
+      this.element.hasAttribute('suggest-first') &&
+      this.filter_ === FilterType.PREFIX;
+    this.highlightUserEntry_ = this.element.hasAttribute(
+      'highlight-user-entry'
+    );
 
     // Set accessibility attributes
     this.element.setAttribute('aria-haspopup', 'listbox');
@@ -367,16 +406,39 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Create and return <div> element from given plan-text item.
    * @param {string} item
+   * @param {string=} substring
    * @return {!Element}
    * @private
    */
-  createElementFromItem_(item) {
+  createElementFromItem_(item, substring = '') {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'option');
     element.setAttribute('data-value', item);
     element.setAttribute('dir', 'auto');
     element.textContent = item;
+    const text = element.childNodes[0];
+    const lowerCaseItem = item.toLocaleLowerCase();
+    const lowerCaseSubstring = substring.toLocaleLowerCase();
+    if (
+      this.highlightUserEntry_ &&
+      substring &&
+      substring.length <= item.length &&
+      includes(lowerCaseItem, lowerCaseSubstring)
+    ) {
+      const loc = lowerCaseItem.indexOf(lowerCaseSubstring);
+      const span = this.element.ownerDocument.createElement('span');
+      span.classList.add('autocomplete-partial');
+      span.appendChild(
+        this.element.ownerDocument.createTextNode(
+          // Preserve any capitalization from the original item.
+          item.slice(loc, loc + substring.length)
+        )
+      );
+      const textToRemove = text.splitText(loc);
+      textToRemove.splitText(substring.length);
+      element.replaceChild(span, textToRemove);
+    }
     return element;
   }
 
@@ -386,10 +448,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   inputHandler_() {
+    // If the input is the first entry in the field.
+    const firstEntry =
+      this.userInput_.length === 0 && this.inputElement_.value.length === 1;
     this.userInput_ = this.inputElement_.value;
     return this.mutateElement(() => {
       this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
       this.toggleResults_(true);
+      if (this.suggestFirst_) {
+        if (!this.detectBackspace_ || firstEntry) {
+          this.updateActiveItem_(1);
+        }
+        // Reset flag.
+        this.detectBackspace_ = false;
+      }
     });
   }
 
@@ -426,7 +498,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const filteredData = this.filterData_(sourceData, opt_input);
     return this.renderResults_(
       filteredData,
-      dev().assertElement(this.container_)
+      dev().assertElement(this.container_),
+      opt_input
     );
   }
 
@@ -434,10 +507,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * Render the given data into item elements in the given container element.
    * @param {!Array<!JsonObject|string>} filteredData
    * @param {!Element} container
+   * @param {string} input
    * @return {!Promise}
    * @private
    */
-  renderResults_(filteredData, container) {
+  renderResults_(filteredData, container, input) {
     let renderPromise = Promise.resolve();
     this.resetActiveElement_();
     if (this.templateElement_) {
@@ -460,7 +534,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           `${TAG} data must provide template for non-string items.`
         );
         container.appendChild(
-          this.createElementFromItem_(/** @type {string} */ (item))
+          this.createElementFromItem_(/** @type {string} */ (item), input)
         );
       });
     }
@@ -771,6 +845,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const newActiveElement = enabledElements[activeIndex];
     this.inputElement_.value = newActiveElement.getAttribute('data-value');
 
+    // Highlight if suggest-first is present.
+    if (this.suggestFirst_) {
+      this.inputElement_.setSelectionRange(
+        this.userInput_.length,
+        this.inputElement_.value.length
+      );
+    }
+
     // Element visibility logic
     let shouldScroll, newTop;
 
@@ -793,6 +875,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.resetActiveElement_();
         newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
         newActiveElement.setAttribute('aria-selected', 'true');
+        let elementId = newActiveElement.getAttribute('id');
+        if (!elementId) {
+          // To ensure that we pass Accessibility audits -
+          // we need to make sure that each item element has a unique ID.
+          // In case the autocomplete doesn't have an ID we use a
+          // random number to ensure uniqueness.
+          elementId = this.prefix_ + '_AMP_content_' + activeIndex;
+          newActiveElement.setAttribute('id', elementId);
+        }
+        this.inputElement_.setAttribute('aria-activedescendant', elementId);
         this.activeIndex_ = activeIndex;
         this.activeElement_ = newActiveElement;
       }
@@ -833,6 +925,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
       false
     );
     this.activeElement_.removeAttribute('aria-selected');
+    if (this.activeElement_.getAttribute('id') === 'autocomplete-selected') {
+      this.activeElement_.removeAttribute('id');
+    }
+    this.inputElement_.removeAttribute('aria-activedescendent');
     this.activeElement_ = null;
     this.activeIndex_ = -1;
   }
@@ -880,13 +976,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
         if (this.resultsShowing_() && !this.submitOnEnter_) {
           event.preventDefault();
         }
-        if (this.activeElement_) {
-          return this.mutateElement(() => {
+        if (this.suggestFirst_) {
+          const inputLength = this.inputElement_.value.length;
+          this.inputElement_.setSelectionRange(inputLength, inputLength);
+        }
+        return this.mutateElement(() => {
+          if (this.activeElement_) {
             this.selectItem_(this.activeElement_);
             this.resetActiveElement_();
-          });
-        }
-        return Promise.resolve();
+          } else {
+            this.toggleResults_(false);
+          }
+        });
       case Keys.ESCAPE:
         // Select user's partial input and hide results.
         return this.mutateElement(() => {
@@ -899,6 +1000,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
         if (this.activeElement_) {
           this.userInput_ = this.inputElement_.value;
           this.fireSelectEvent_(this.userInput_);
+        }
+        return Promise.resolve();
+      case Keys.BACKSPACE:
+        if (this.suggestFirst_) {
+          this.detectBackspace_ = true;
         }
         return Promise.resolve();
       default:

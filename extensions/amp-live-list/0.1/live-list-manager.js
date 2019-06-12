@@ -19,15 +19,13 @@ import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
-import {
-  getServiceForDoc,
-  registerServiceBuilderForDoc,
-} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
-const SERVICE_ID = 'liveListManager';
+/** @const {string} */
+export const SERVICE_ID = 'liveListManager';
 
 const TRANSFORMED_PREFIX = 'google;v=';
 
@@ -122,6 +120,17 @@ export class LiveListManager {
   }
 
   /**
+   * @param {!Element} element
+   * @return {!Promise<!LiveListManager>}
+   */
+  static forDoc(element) {
+    return /** @type {!Promise<!LiveListManager>} */ (getServicePromiseForDoc(
+      element,
+      SERVICE_ID
+    ));
+  }
+
+  /**
    * Checks if any of the registered amp-live-list components is active/
    *
    * @return {boolean}
@@ -154,9 +163,9 @@ export class LiveListManager {
     }
 
     // TODO(erwinm): add update time here when possible.
-    return fetchDocument(this.ampdoc.win, url, {
-      requireAmpResponseSourceOrigin: false,
-    }).then(this.updateLiveLists_.bind(this));
+    return fetchDocument(this.ampdoc.win, url, {}).then(
+      this.updateLiveLists_.bind(this)
+    );
   }
 
   /**
@@ -254,10 +263,16 @@ export class LiveListManager {
    * @param {!./amp-live-list.AmpLiveList} liveList
    */
   register(id, liveList) {
-    const isNotRegistered = !(id in this.liveLists_);
-    if (isNotRegistered) {
-      this.liveLists_[id] = liveList;
-      this.intervals_.push(liveList.getInterval());
+    if (id in this.liveLists_) {
+      return;
+    }
+    this.liveLists_[id] = liveList;
+    this.intervals_.push(liveList.getInterval());
+
+    // Polling may not be started yet if no live lists were registered by
+    // doc ready in LiveListManager's constructor.
+    if (liveList.isEnabled() && this.poller_ && this.viewer_.isVisible()) {
+      this.poller_.start();
     }
   }
 
@@ -337,25 +352,4 @@ function isDocTransformed(root) {
   const {documentElement} = root.ownerDocument;
   const transformed = documentElement.getAttribute('transformed');
   return Boolean(transformed) && startsWith(transformed, TRANSFORMED_PREFIX);
-}
-
-/**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- */
-function installLiveListManager(ampdoc) {
-  registerServiceBuilderForDoc(
-    ampdoc,
-    SERVICE_ID,
-    LiveListManager,
-    /* instantiate */ true
-  );
-}
-
-/**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!LiveListManager}
- */
-export function liveListManagerForDoc(ampdoc) {
-  installLiveListManager(ampdoc);
-  return getServiceForDoc(ampdoc, SERVICE_ID);
 }

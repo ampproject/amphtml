@@ -72,6 +72,7 @@ exports.extensionBundles = [
     name: 'amp-accordion',
     version: '0.1',
     latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {
@@ -793,10 +794,19 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-truncate-text',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {
+      hasCss: true,
+      cssBinaries: ['amp-truncate-text', 'amp-truncate-text-shadow'],
+    },
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-twitter',
     version: '0.1',
     latestVersion: '0.1',
-    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {

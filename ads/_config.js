@@ -146,6 +146,8 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  'adop': {},
+
   'adpicker': {
     renderStartImplemented: true,
   },
@@ -899,6 +901,14 @@ export const adConfig = {
   'spotx': {
     preconnect: 'https://js.spotx.tv',
     renderStartImplemented: true,
+  },
+
+  'strossle': {
+    preconnect: [
+      'https://amp.spklw.com',
+      'https://widgets.sprinklecontent.com',
+      'https://images.sprinklecontent.com',
+    ],
   },
 
   'sunmedia': {

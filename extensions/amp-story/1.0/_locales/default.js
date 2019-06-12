@@ -56,6 +56,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
     string: 'More about AMP results',
   },
+  [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
+    string: 'Updated',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: ':(',
   },

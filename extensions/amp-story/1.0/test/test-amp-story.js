@@ -26,6 +26,7 @@ import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
+import {CommonSignals} from '../../../../src/common-signals';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
@@ -33,6 +34,7 @@ import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {poll} from '../../../../testing/iframe';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -85,16 +87,30 @@ describes.realWin(
       return eventObj;
     }
 
+    function waitFor(callback, errorMessage) {
+      return poll(
+        errorMessage,
+        () => {
+          return callback();
+        },
+        undefined /** opt_onError */,
+        200 /** opt_timeout */
+      );
+    }
+
     beforeEach(() => {
       win = env.win;
 
       replaceStateStub = sandbox.stub(win.history, 'replaceState');
+      // Required by the bookend code.
+      win.document.title = 'Story';
 
       const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox
         .stub(viewer, 'hasCapability')
         .withArgs('swipe')
         .returns(hasSwipeCapability);
+      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);
@@ -687,9 +703,9 @@ describes.realWin(
       it('should pause the story when tab becomes inactive', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.documentState_, 'isHidden').returns(true);
+        sandbox.stub(story.viewer_, 'isVisible').returns(false);
         const onVisibilityChangedStub = sandbox.stub(
-          story.documentState_,
+          story.viewer_,
           'onVisibilityChanged'
         );
 
@@ -709,9 +725,9 @@ describes.realWin(
       it('should play the story when tab becomes active', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.documentState_, 'isHidden').returns(false);
+        sandbox.stub(story.viewer_, 'isVisible').returns(true);
         const onVisibilityChangedStub = sandbox.stub(
-          story.documentState_,
+          story.viewer_,
           'onVisibilityChanged'
         );
 
@@ -939,13 +955,19 @@ describes.realWin(
           .resolves();
 
         createPages(story.element, 2, ['cover', 'page-1']);
-
-        return story.layoutCallback().then(() => {
-          expect(story.backgroundAudioEl_).to.exist;
-          expect(story.backgroundAudioEl_.src).to.equal(src);
-          expect(registerStub).to.have.been.calledOnce;
-          expect(preloadStub).to.have.been.calledOnce;
-        });
+        story
+          .layoutCallback()
+          .then(() =>
+            story.activePage_.element
+              .signals()
+              .whenSignal(CommonSignals.LOAD_END)
+          )
+          .then(() => {
+            expect(story.backgroundAudioEl_).to.exist;
+            expect(story.backgroundAudioEl_.src).to.equal(src);
+            expect(registerStub).to.have.been.calledOnce;
+            expect(preloadStub).to.have.been.calledOnce;
+          });
       });
 
       it('should bless the media on unmute', () => {
@@ -1105,6 +1127,96 @@ describes.realWin(
             [MediaType.VIDEO]: 8,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+        });
+      });
+    });
+
+    describe('amp-story NO_NEXT_PAGE', () => {
+      describe('without #cap=swipe', () => {
+        it('should open the bookend when tapping on the last page', () => {
+          createPages(story.element, 1, ['cover']);
+
+          return story.layoutCallback().then(() => {
+            // Click on right side of the screen to trigger page advancement.
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            story.activePage_.element.dispatchEvent(clickEvent);
+            return waitFor(() => {
+              return !!story.storeService_.get(StateProperty.BOOKEND_STATE);
+            }, 'BOOKEND_STATE should be true');
+          });
+        });
+      });
+
+      describe('with #cap=swipe', () => {
+        before(() => (hasSwipeCapability = true));
+        after(() => (hasSwipeCapability = false));
+
+        it('should send a message when tapping on last page in viewer', () => {
+          createPages(story.element, 1, ['cover']);
+          const sendMessageStub = sandbox.stub(story.viewer_, 'sendMessage');
+
+          return story.layoutCallback().then(() => {
+            // Click on right side of the screen to trigger page advancement.
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            story.activePage_.element.dispatchEvent(clickEvent);
+            return waitFor(() => {
+              if (sendMessageStub.calledOnce) {
+                expect(sendMessageStub).to.be.calledWithExactly(
+                  'selectDocument',
+                  {next: true}
+                );
+                return true;
+              }
+              return false;
+            }, 'sendMessageStub should be called');
+          });
+        });
+      });
+    });
+
+    describe('amp-story NO_PREVIOUS_PAGE', () => {
+      describe('without #cap=swipe', () => {
+        it('should open the bookend when tapping on the last page', () => {
+          createPages(story.element, 1, ['cover']);
+          const showPageHintStub = sandbox.stub(
+            story.ampStoryHint_,
+            'showFirstPageHintOverlay'
+          );
+
+          return story.layoutCallback().then(() => {
+            // Click on left side of the screen to trigger page advancement.
+            const clickEvent = new MouseEvent('click', {clientX: 10});
+            story.activePage_.element.dispatchEvent(clickEvent);
+            return waitFor(() => {
+              return showPageHintStub.calledOnce;
+            }, 'showPageHintStub should be called');
+          });
+        });
+      });
+
+      describe('with #cap=swipe', () => {
+        before(() => (hasSwipeCapability = true));
+        after(() => (hasSwipeCapability = false));
+
+        it('should send a message when tapping on last page in viewer', () => {
+          createPages(story.element, 1, ['cover']);
+          const sendMessageStub = sandbox.stub(story.viewer_, 'sendMessage');
+
+          return story.layoutCallback().then(() => {
+            // Click on left side of the screen to trigger page advancement.
+            const clickEvent = new MouseEvent('click', {clientX: 10});
+            story.activePage_.element.dispatchEvent(clickEvent);
+            return waitFor(() => {
+              if (sendMessageStub.calledOnce) {
+                expect(sendMessageStub).to.be.calledWithExactly(
+                  'selectDocument',
+                  {previous: true}
+                );
+                return true;
+              }
+              return false;
+            }, 'sendMessageStub should be called');
+          });
         });
       });
     });
