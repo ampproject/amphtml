@@ -23,8 +23,10 @@ import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
+import {parseUrlDeprecated, tryDecodeUriComponent} from '../../src/url';
 //TODO(@cramforce): For type. Replace with forward declaration.
 import {reportError} from '../../src/error';
+import {startsWith} from '../../src/string';
 
 initLogConstructor();
 setReportError(reportError);
@@ -460,13 +462,14 @@ function build() {
   const subdomain = document.getElementById('subdomain');
   subdomain.textContent = host;
 
+  // #redirect contains UI that generates a subdomain experiments page link
+  // given a "google.com/amp/..." viewer URL.
   const redirect = document.getElementById('redirect');
   const input = redirect.querySelector('input');
   const button = redirect.querySelector('button');
   const anchor = redirect.querySelector('a');
   button.addEventListener('click', function() {
-    const viewerUrl = new URL(input.value);
-    const ampUrl = viewerToAmpUrl(viewerUrl);
+    const ampUrl = viewerToAmpUrl(input.value);
     if (ampUrl) {
       const subdomain = ampUrl.hostname.replace(/\./g, '-');
       const href = `https://${subdomain}.cdn.ampproject.org/experiments.html`;
@@ -496,25 +499,27 @@ function build() {
 
 /**
  * Based off of cs/extractAmpUrlFromStandaloneUrl.
- * @param {!URL} viewerUrl
+ * @param {string} viewerUrlString
+ * @return {!URL}
  */
-function viewerToAmpUrl(viewerUrl) {
-  if (!viewerUrl) {
+function viewerToAmpUrl(viewerUrlString) {
+  if (!viewerUrlString) {
     return null;
   }
+  const viewerUrl = parseUrlDeprecated(viewerUrlString);
   const {origin, pathname} = viewerUrl;
   if (origin !== 'https://www.google.com') {
     return null;
   }
   let ampUrlString;
-  const path = decodeURIComponent(pathname);
-  if (path.indexOf('/amp/a/') === 0 || path.indexOf('/amp/s/') === 0) {
+  const path = tryDecodeUriComponent(pathname);
+  if (startsWith(path, '/amp/a/') || startsWith(path, '/amp/s/')) {
     ampUrlString = 'https://' + path.substr(7);
-  } else if (path.indexOf('/amp/') === 0) {
+  } else if (startsWith(path, '/amp/')) {
     ampUrlString = 'http://' + path.substr(5);
   }
   if (ampUrlString) {
-    return new URL(ampUrlString);
+    return parseUrlDeprecated(ampUrlString);
   }
   return null;
 }
