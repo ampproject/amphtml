@@ -27,9 +27,21 @@
 <body>
   <!-- Valid: amp-user-location with id -->
   <amp-user-location id="location" layout="nodisplay"></amp-user-location>
+  <!-- Valid: amp-user-location with script config -->
+  <amp-user-location id="location" layout="nodisplay">
+    <script type="application/json">{}</script>
+  </amp-user-location>
+  <!-- Valid: amp-user-location with src config -->
+  <amp-user-location id="location" layout="nodisplay" src="https://www.example.com/location">
+  </amp-user-location>
+  <!-- Valid: amp-user-location with script config and src config -->
+  <amp-user-location id="location" layout="nodisplay" src="https://www.example.com/location">
+    <script type="application/json">{}</script>
+  </amp-user-location>
   <!-- Invalid: amp-user-location without id -->
   <amp-user-location layout="nodisplay"></amp-user-location>
   <!-- Invalid: amp-user-location with layout responsive -->
   <amp-user-location id="location" layout="responsive"></amp-user-location>
+
 </body>
 </html>

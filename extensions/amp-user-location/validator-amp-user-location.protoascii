@@ -33,6 +33,13 @@ tags: {  # <amp-user-location>
   amp_layout: {
     supported_layouts: NODISPLAY
   }
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "https"
+      allow_relative: true
+    }
+  }
   attr_lists: "mandatory-id-attr"
 }
 tags: {  # amp-user-location (json)
