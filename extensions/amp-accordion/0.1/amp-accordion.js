@@ -152,7 +152,7 @@ class AmpAccordion extends AMP.BaseElement {
         }
       });
 
-      // Listen for mutations on the 'expanded' attribute.
+      // Listen for mutations on the 'data-expand' attribute.
       const expandObserver = new this.win.MutationObserver(mutations => {
         this.toggleExpandMutations_(mutations);
       });
