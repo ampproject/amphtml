@@ -312,9 +312,8 @@ class Chunks {
     /** @private @const {!PriorityQueue<Task>} */
     this.tasks_ = new PriorityQueue();
     /** @private @const {function(?IdleDeadline)} */
-    this.execute_ = this.execute_.bind(this);
-    /** @private @const {function()} */
-    this.schedule_ = this.schedule_.bind(this);
+    this.boundExecute_ = this.execute_.bind(this);
+
     /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
     this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
     /** @private {number} */
@@ -354,7 +353,9 @@ class Chunks {
    */
   enqueueTask_(task, priority) {
     this.tasks_.enqueue(task, priority);
-    resolved.then(() => this.schedule_);
+    resolved.then(() => {
+      this.schedule_();
+    });
   }
 
   /**
@@ -393,7 +394,9 @@ class Chunks {
     const before = Date.now();
     this.timeSinceLastExecution_ = before;
     t.runTask_(idleDeadline);
-    resolved.then(() => this.schedule_);
+    resolved.then(() => {
+      this.schedule_();
+    });
     dev().fine(TAG, t.getName_(), 'Chunk duration', Date.now() - before);
     return true;
   }
@@ -407,11 +410,16 @@ class Chunks {
     // If we've spent over 5 millseconds executing the
     // last instruction yeild back to the main thread.
     // 5 milliseconds is a magic number.
-    if (Date.now() - this.timeSinceLastExecution_ > 5) {
+    if (
+      this.timeSinceLastExecution_ !== 0 &&
+      Date.now() - this.timeSinceLastExecution_ > 5
+    ) {
       this.requestMacroTask_();
       return;
     }
-    resolved.then(() => this.execute_(idleDeadline));
+    resolved.then(() => {
+      this.boundExecute_(idleDeadline);
+    });
   }
 
   /**
@@ -421,6 +429,7 @@ class Chunks {
   schedule_() {
     const nextTask = this.nextTask_();
     if (!nextTask) {
+      this.timeSinceLastExecution_ = 0;
       return;
     }
     if (nextTask.immediateTriggerCondition_()) {
@@ -440,7 +449,7 @@ class Chunks {
         // real processing is done between frames.
         15 /* minimumTimeRemaining */,
         2000 /* timeout */,
-        this.execute_
+        this.boundExecute_
       );
       return;
     }
