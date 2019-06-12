@@ -82,18 +82,18 @@ Command                                                                 | Descri
 `gulp unit`                                                             | Runs the unit tests in Chrome (doesn't require the AMP library to be built).
 `gulp unit --local_changes`                                             | Runs the unit tests directly affected by the files changed in the local branch in Chrome.
 `gulp integration`                                                      | Runs the integration tests in Chrome (requires the AMP library to be built).
-`gulp [unit|integration] --verbose`                                    | Runs tests in Chrome with logging enabled.
-`gulp [unit|integration] --nobuild`                                    | Runs tests without re-build.
-`gulp [unit|integration] --coverage`                                   | Runs code coverage tests. After running, the report will be available at test/coverage/index.html
-`gulp [unit|integration] --watch`                                      | Watches for changes in files, runs corresponding test(s) in Chrome.
-`gulp [unit|integration] --watch --verbose`                            | Same as `watch`, with logging enabled.
-`gulp [unit|integration] --saucelabs`                                  | Runs tests on saucelabs browsers (requires [setup](#testing-on-sauce-labs)).
-`gulp [unit|integration] --safari`                                     | Runs tests in Safari.
-`gulp [unit|integration] --firefox`                                    | Runs tests in Firefox.
-`gulp [unit|integration] --edge`                                       | Runs tests in Edge.
-`gulp [unit|integration] --ie`                                         | Runs tests in Internet Explorer.
-`gulp [unit|integration] --files=<test-files-path-glob>`               | Runs specific test files.
-`gulp [unit|integration] --testnames`                                  | Lists the name of each test being run, and prints a summary at the end.
+`gulp [unit\|integration] --verbose`                                    | Runs tests in Chrome with logging enabled.
+`gulp [unit\|integration] --nobuild`                                    | Runs tests without re-build.
+`gulp [unit\|integration] --coverage`                                   | Runs code coverage tests. After running, the report will be available at test/coverage/index.html
+`gulp [unit\|integration] --watch`                                      | Watches for changes in files, runs corresponding test(s) in Chrome.
+`gulp [unit\|integration] --watch --verbose`                            | Same as `watch`, with logging enabled.
+`gulp [unit\|integration] --saucelabs`                                  | Runs tests on saucelabs browsers (requires [setup](#testing-on-sauce-labs)).
+`gulp [unit\|integration] --safari`                                     | Runs tests in Safari.
+`gulp [unit\|integration] --firefox`                                    | Runs tests in Firefox.
+`gulp [unit\|integration] --edge`                                       | Runs tests in Edge.
+`gulp [unit\|integration] --ie`                                         | Runs tests in Internet Explorer.
+`gulp [unit\|integration] --files=<test-files-path-glob>`               | Runs specific test files.
+`gulp [unit\|integration] --testnames`                                  | Lists the name of each test being run, and prints a summary at the end.
 `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default.
 `gulp serve --quiet`                                                    | Same as `serve`, with logging silenced.
 `gulp serve --port 9000`                                                | Same as `serve`, but uses a port number other than the default of 8000.
