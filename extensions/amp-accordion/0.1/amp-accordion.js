@@ -153,10 +153,10 @@ class AmpAccordion extends AMP.BaseElement {
       });
 
       // Listen for mutations on the 'expanded' attribute.
-      const expandedObserver = new this.win.MutationObserver(mutations => {
-        this.toggleMutations_(mutations);
+      const expandObserver = new this.win.MutationObserver(mutations => {
+        this.toggleExpandMutations_(mutations);
       });
-      expandedObserver.observe(section, {
+      expandObserver.observe(section, {
         attributeFilter: ['data-expand'],
       });
 
@@ -611,10 +611,10 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
-   * Callback function to execute when mutations are observed.
+   * Callback function to execute when mutations are observed on "data-expand".
    * @param {!Array<!MutationRecord>} mutations
    */
-  toggleMutations_(mutations) {
+  toggleExpandMutations_(mutations) {
     mutations.forEach(mutation => {
       const sectionEl = dev().assertElement(mutation.target);
       const toExpand = sectionEl.hasAttribute('data-expand');

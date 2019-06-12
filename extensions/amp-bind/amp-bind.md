@@ -536,7 +536,7 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;section&gt;</code></td>
-    <td><code>[expanded]</code></td>
+    <td><code>[data-expand]</code></td>
     <td>Changes the expansion of a <code>section</code> in an <a href="https://amp.dev/documentation/components/amp-accordion">amp-accordion</a>.</td>
   </tr>
   <tr>

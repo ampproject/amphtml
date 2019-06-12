@@ -63,7 +63,7 @@ tags: {  # <amp-accordion> > <section>
   attrs: { name: "expanded" value: "" }
   # amp-bind
   attrs: {
-    name: "[expanded]"
+    name: "[data-expand]"
   }
   child_tags: {
     mandatory_num_child_tags: 2
