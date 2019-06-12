@@ -66,6 +66,14 @@ The `story-audio-muted` trigger is fired when the user initiates an interaction 
 
 The `story-audio-unmuted` trigger is fired when the user initiates an interaction to unmute the audio for the current story.
 
+### Page attachment enter trigger (`"on": "story-page-attachment-enter"`)
+
+The `story-page-attachment-enter` trigger is fired when a page attachment is opened by the user.
+
+### Page attachment exit trigger (`"on": "story-page-attachment-exit"`)
+
+The `story-page-attachment-exit` trigger is fired when a page attachment is dismissed by the user.
+
 ## Story variables
 
 AMP story contributes the following URL substitutions:
