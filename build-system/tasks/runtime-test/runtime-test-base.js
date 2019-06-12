@@ -19,6 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const babelify = require('babelify');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
+const testConfig = require('../../config');
 const {
   createKarmaServer,
   getAdTypes,
@@ -29,15 +30,155 @@ const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {reportTestStarted} = require('.././report-test-status');
+const {unitTestsToRun} = require('./helpers-unit');
+
+/**
+ * Updates the browsers based off of the test type
+ * being run (unit, integration, a4a) and test settings.
+ * Keeps the default spec as is if no matching settings are found.
+ * @param {!RuntimeTestConfig} config
+ */
+function updateBrowsers(config) {
+  if (argv.saucelabs) {
+    if (config.testType == 'unit') {
+      Object.assign(config, {browsers: ['SL_Safari_12', 'SL_Firefox']});
+      return;
+    }
+
+    if (config.testType == 'integration') {
+      Object.assign(config, {
+        browsers: [
+          'SL_Chrome',
+          'SL_Firefox',
+          'SL_Edge_17',
+          'SL_Safari_12',
+          'SL_IE_11',
+          // TODO(amp-infra): Evaluate and add more platforms here.
+          //'SL_Chrome_Android_7',
+          //'SL_iOS_11',
+          //'SL_iOS_12',
+          'SL_Chrome_Beta',
+          'SL_Firefox_Beta',
+        ],
+      });
+      return;
+    }
+
+    throw new Error(
+      'The --saucelabs flag is valid only for `gulp unit` and `gulp integration`.'
+    );
+  }
+
+  const chromeFlags = [];
+  if (argv.chrome_flags) {
+    argv.chrome_flags.split(',').forEach(flag => {
+      chromeFlags.push('--'.concat(flag));
+    });
+  }
+
+  const options = new Map();
+  options
+    .set('chrome_canary', {browsers: ['ChromeCanary']})
+    .set('chrome_flags', {
+      browsers: ['Chrome_flags'],
+      customLaunchers: {
+        // eslint-disable-next-line
+        Chrome_flags: {
+          base: 'Chrome',
+          flags: chromeFlags,
+        },
+      },
+    })
+    .set('edge', {browsers: ['Edge']})
+    .set('firefox', {browsers: ['Firefox']})
+    .set('headless', {browsers: ['Chrome_no_extensions_headless']})
+    .set('ie', {
+      browsers: ['IE'],
+      customLaunchers: {
+        IeNoAddOns: {
+          base: 'IE',
+          flags: ['-extoff'],
+        },
+      },
+    })
+    .set('safari', {browsers: ['Safari']});
+
+  for (const [key, value] of options) {
+    if (argv.hasOwnProperty(key)) {
+      Object.assign(config, value);
+      return;
+    }
+  }
+}
+
+/**
+ * Get the appropriate files based off of the test type
+ * being run (unit, integration, a4a) and test settings.
+ * @param {string} testType
+ * @return {!Array<string>}
+ */
+function getFiles(testType) {
+  let files;
+
+  switch (testType) {
+    case 'unit':
+      files = testConfig.commonUnitTestPaths.concat(testConfig.chaiAsPromised);
+      if (argv.files) {
+        return files.concat(argv.files);
+      }
+      if (argv.saucelabs) {
+        return files.concat(testConfig.unitTestOnSaucePaths);
+      }
+      if (argv.local_changes) {
+        return files.concat(unitTestsToRun(testConfig.unitTestPaths));
+      }
+      return files.concat(testConfig.unitTestPaths);
+
+    case 'integration':
+      files = testConfig.commonIntegrationTestPaths;
+      if (argv.files) {
+        return files.concat(argv.files);
+      }
+      return files.concat(testConfig.integrationTestPaths);
+
+    case 'a4a':
+      return testConfig.chaiAsPromised.concat(testConfig.a4aTestPaths);
+
+    default:
+      throw new Error(`Test type ${testType} was not recognized`);
+  }
+}
+
+/**
+ * Adds reporters to the default karma spec per test settings.
+ * Overrides default reporters for verbose settings.
+ * @param {!RuntimeTestConfig} config
+ */
+function updateReporters(config) {
+  if (
+    (argv.testnames || argv.local_changes || argv.files) &&
+    !isTravisBuild()
+  ) {
+    config.reporters = ['mocha'];
+  }
+
+  if (argv.coverage) {
+    config.reporters.push('coverage-istanbul');
+  }
+
+  if (argv.saucelabs) {
+    config.reporters.push('saucelabs');
+  }
+}
 
 class RuntimeTestConfig {
   constructor(testType) {
     this.testType = testType;
 
     Object.assign(this, karmaConfig);
-    this.browsers = this.getBrowsersObject().browsers;
-    this.files = this.getFiles();
-    this.reporters = this.getReporters();
+    updateBrowsers(this);
+    updateReporters(this);
+    this.files = getFiles(this.testType);
     this.singleRun = !argv.watch && !argv.w;
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
@@ -96,100 +237,6 @@ class RuntimeTestConfig {
 
       this.browserify.transform = [['babelify', {plugins: [plugin]}]];
     }
-  }
-
-  getBrowsersObject() {
-    if (argv.saucelabs) {
-      if (this.testType == 'unit') {
-        return {browsers: ['SL_Safari_12', 'SL_Firefox']};
-      }
-
-      if (this.testType == 'integration') {
-        return {
-          browsers: [
-            'SL_Chrome',
-            'SL_Firefox',
-            'SL_Edge_17',
-            'SL_Safari_12',
-            'SL_IE_11',
-            // TODO(amp-infra): Evaluate and add more platforms here.
-            //'SL_Chrome_Android_7',
-            //'SL_iOS_11',
-            //'SL_iOS_12',
-            'SL_Chrome_Beta',
-            'SL_Firefox_Beta',
-          ],
-        };
-      }
-
-      throw new Error(
-        'The --saucelabs flag is valid only for `gulp unit` and `gulp integration`.'
-      );
-    }
-
-    const chromeFlags = [];
-    if (argv.chrome_flags) {
-      argv.chrome_flags.split(',').forEach(flag => {
-        chromeFlags.push('--'.concat(flag));
-      });
-    }
-
-    const options = new Map();
-    options
-      .set('chrome_canary', {browsers: ['ChromeCanary']})
-      .set('chrome_flags', {
-        browsers: ['Chrome_flags'],
-        customLaunchers: {
-          // eslint-disable-next-line
-          Chrome_flags: {
-            base: 'Chrome',
-            flags: chromeFlags,
-          },
-        },
-      })
-      .set('edge', {browsers: ['Edge']})
-      .set('firefox', {browsers: ['Firefox']})
-      .set('headless', {browsers: ['Chrome_no_extensions_headless']})
-      .set('ie', {
-        browsers: ['IE'],
-        customLaunchers: {
-          IeNoAddOns: {
-            base: 'IE',
-            flags: ['-extoff'],
-          },
-        },
-      })
-      .set('safari', {browsers: ['Safari']});
-
-    for (const [key, value] of options) {
-      if (argv.hasOwnProperty(key)) {
-        return value;
-      }
-    }
-
-    return {browsers: this.browsers};
-  }
-
-  getFiles() {
-    throw new Error('Karma files config must be overridden');
-  }
-
-  getReporters() {
-    let {reporters} = this;
-
-    if (argv.testnames || argv.local_changes || argv.files) {
-      reporters = ['mocha'];
-    }
-
-    if (argv.coverage) {
-      reporters.push('coverage-istanbul');
-    }
-
-    if (argv.saucelabs) {
-      reporters.push('saucelabs');
-    }
-
-    return reporters;
   }
 }
 

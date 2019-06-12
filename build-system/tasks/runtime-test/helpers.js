@@ -106,7 +106,7 @@ function refreshKarmaWdCache() {
  * Prints help messages for args if tests are being run for local development.
  */
 function maybePrintArgvMessages() {
-  if (argv.nohelp) {
+  if (argv.nohelp || isTravisBuild()) {
     return;
   }
 
@@ -115,7 +115,8 @@ function maybePrintArgvMessages() {
     firefox: 'Running tests on Firefox.',
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
-    'chrome_canary': 'Running tests on Chrome Canary.',
+    // eslint-disable-next-line
+    chrome_canary: 'Running tests on Chrome Canary.',
     saucelabs: 'Running tests on Sauce Labs browsers.',
     nobuild: 'Skipping build.',
     watch:
@@ -124,11 +125,6 @@ function maybePrintArgvMessages() {
     verbose: 'Enabling verbose mode. Expect lots of output!',
     testnames: 'Listing the names of all tests being run.',
     files: 'Running tests in the file(s): ' + cyan(argv.files),
-    integration:
-      'Running only the integration tests. Prerequisite: ' +
-      cyan('gulp dist --fortesting'),
-    unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
-    a4a: 'Running only A4A tests.',
     compiled: 'Running tests against minified code.',
     grep:
       'Only running tests that match the pattern "' + cyan(argv.grep) + '".',
@@ -147,42 +143,41 @@ function maybePrintArgvMessages() {
       cyan(chromeFlags)
     );
   }
-  if (!isTravisBuild()) {
-    log(
-      green('Run'),
-      cyan('gulp help'),
-      green('to see a list of all test flags.')
-    );
-    log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));
+
+  log(
+    green('Run'),
+    cyan('gulp help'),
+    green('to see a list of all test flags.')
+  );
+  log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));
+  log(
+    green('⤷ Use'),
+    cyan('--local_changes'),
+    green('to run unit tests from files commited to the local branch.')
+  );
+  if (!argv.testnames && !argv.files && !argv.local_changes) {
     log(
       green('⤷ Use'),
-      cyan('--local_changes'),
-      green('to run unit tests from files commited to the local branch.')
+      cyan('--testnames'),
+      green('to see the names of all tests being run.')
     );
-    if (!argv.testnames && !argv.files && !argv.local_changes) {
-      log(
-        green('⤷ Use'),
-        cyan('--testnames'),
-        green('to see the names of all tests being run.')
-      );
-    }
-    if (!argv.headless) {
-      log(
-        green('⤷ Use'),
-        cyan('--headless'),
-        green('to run tests in a headless Chrome window.')
-      );
-    }
-    if (!argv.compiled) {
-      log(green('Running tests against unminified code.'));
-    }
-    Object.keys(argv).forEach(arg => {
-      const message = argvMessages[arg];
-      if (message) {
-        log(yellow(`--${arg}:`), green(message));
-      }
-    });
   }
+  if (!argv.headless) {
+    log(
+      green('⤷ Use'),
+      cyan('--headless'),
+      green('to run tests in a headless Chrome window.')
+    );
+  }
+  if (!argv.compiled) {
+    log(green('Running tests against unminified code.'));
+  }
+  Object.keys(argv).forEach(arg => {
+    const message = argvMessages[arg];
+    if (message) {
+      log(yellow(`--${arg}:`), green(message));
+    }
+  });
 }
 
 function maybePrintCoverageMessage() {

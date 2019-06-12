@@ -21,6 +21,7 @@ const fs = require('fs');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
+const testConfig = require('../../config');
 
 const {gitDiffNameOnlyMaster} = require('../../git');
 const {green, cyan} = require('ansi-colors');
@@ -126,7 +127,9 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
   return jsFiles;
 }
 
-function getUnitTestsToRun(unitTestPaths) {
+function getUnitTestsToRun() {
+  log(green('INFO:'), 'Determining which unit tests to run...');
+
   if (isLargeRefactor()) {
     log(
       green('INFO:'),
@@ -136,7 +139,7 @@ function getUnitTestsToRun(unitTestPaths) {
     return;
   }
 
-  const tests = unitTestsToRun(unitTestPaths);
+  const tests = unitTestsToRun();
   if (tests.length == 0) {
     log(
       green('INFO:'),
@@ -161,7 +164,7 @@ function getUnitTestsToRun(unitTestPaths) {
  * @param {!Array<string>} unitTestPaths
  * @return {!Array<string>}
  */
-function unitTestsToRun(unitTestPaths) {
+function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
   const cssJsFileMap = extractCssJsFileMap();
   const filesChanged = gitDiffNameOnlyMaster();
   const testsToRun = [];
@@ -208,7 +211,6 @@ function unitTestsToRun(unitTestPaths) {
   });
 
   if (srcFiles.length > 0) {
-    log(green('INFO:'), 'Determining which unit tests to run...');
     const moreTestsToRun = getTestsFor(srcFiles);
     moreTestsToRun.forEach(test => {
       if (!testsToRun.includes(test)) {
