@@ -16,7 +16,6 @@
 'using strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const testConfig = require('../config');
 const {
   maybePrintArgvMessages,
   refreshKarmaWdCache,
@@ -28,23 +27,6 @@ const {
 } = require('./runtime-test/runtime-test-base');
 const {clean} = require('./clean');
 const {dist} = require('./dist');
-
-class Config extends RuntimeTestConfig {
-  constructor(testType) {
-    super(testType);
-  }
-
-  /** @override */
-  getFiles() {
-    const files = testConfig.commonIntegrationTestPaths;
-
-    if (argv.files) {
-      return files.concat(argv.files);
-    }
-
-    return files.concat(testConfig.integrationTestPaths);
-  }
-}
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -71,7 +53,7 @@ async function integration() {
   maybePrintArgvMessages();
   refreshKarmaWdCache();
 
-  const config = new Config('integration');
+  const config = new RuntimeTestConfig('integration');
   const runner = new Runner(config);
 
   await runner.setup();
@@ -84,5 +66,22 @@ module.exports = {
 };
 
 integration.description = 'Runs integration tests';
-//TODO(estherkim): fill this out
-integration.flags = {};
+integration.flags = {
+  'chrome_canary': '  Runs tests on Chrome Canary',
+  'chrome_flags': '  Uses the given flags to launch Chrome',
+  'compiled':
+    '  Changes integration tests to use production JS binaries for execution',
+  'coverage': '  Run tests in code coverage mode',
+  'firefox': '  Runs tests on Firefox',
+  'files': '  Runs tests for specific files',
+  'grep': '  Runs tests that match the pattern',
+  'headless': '  Run tests in a headless Chrome window',
+  'ie': '  Runs tests on IE',
+  'nobuild': '  Skips build step',
+  'nohelp': '  Silence help messages that are printed prior to test run',
+  'safari': '  Runs tests on Safari',
+  'saucelabs': '  Runs tests on saucelabs (requires setup)',
+  'testnames': '  Lists the name of each test being run',
+  'verbose': '  With logging enabled',
+  'watch': '  Watches for changes in files, runs corresponding test(s)',
+};

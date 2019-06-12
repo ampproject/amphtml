@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const testConfig = require('../config');
 const {
   maybePrintArgvMessages,
   refreshKarmaWdCache,
@@ -27,17 +26,6 @@ const {
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {css} = require('./css');
-
-class Config extends RuntimeTestConfig {
-  constructor(testType) {
-    super(testType);
-  }
-
-  /** @override */
-  getFiles() {
-    return testConfig.chaiAsPromised.concat(testConfig.a4aTestPaths);
-  }
-}
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -62,7 +50,7 @@ async function a4a() {
   maybePrintArgvMessages();
   refreshKarmaWdCache();
 
-  const config = new Config('a4a');
+  const config = new RuntimeTestConfig('a4a');
   const runner = new Runner(config);
 
   await runner.setup();
@@ -72,4 +60,21 @@ async function a4a() {
 
 module.exports = {
   a4a,
+};
+
+a4a.description = 'Runs a4a tests';
+a4a.flags = {
+  'chrome_canary': '  Runs tests on Chrome Canary',
+  'chrome_flags': '  Uses the given flags to launch Chrome',
+  'firefox': '  Runs tests on Firefox',
+  'files': '  Runs tests for specific files',
+  'grep': '  Runs tests that match the pattern',
+  'headless': '  Run tests in a headless Chrome window',
+  'ie': '  Runs tests on IE',
+  'nobuild': '  Skips build step',
+  'nohelp': '  Silence help messages that are printed prior to test run',
+  'safari': '  Runs tests on Safari',
+  'testnames': '  Lists the name of each test being run',
+  'verbose': '  With logging enabled',
+  'watch': '  Watches for changes in files, runs corresponding test(s)',
 };
