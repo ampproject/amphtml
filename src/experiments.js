@@ -23,6 +23,7 @@
 
 import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
+import {user} from './log';
 
 /** @const {string} */
 const LOCAL_STORAGE_KEY = 'amp-experiment-toggles';
@@ -97,6 +98,13 @@ export function toggleExperiment(
       const storedToggles = getExperimentToggles(win);
       storedToggles[experimentId] = on;
       saveExperimentToggles(win, storedToggles);
+      user().warn(
+        'EXPERIMENTS',
+        '"%s" experiment %s for the domain "%s". See: https://amp.dev/documentation/guides-and-tutorials/learn/experimental',
+        experimentId,
+        on ? 'enabled' : 'disabled',
+        win.location.hostname
+      );
     }
   }
   return on;
