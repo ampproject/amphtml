@@ -28,18 +28,7 @@ import {macroTask} from '../../../../testing/yield';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
-// const AnalyticsConfig = Object.assign({}, ANALYTICS_CONFIG);
-const AnalyticsConfig = getAnalyticsConfigs_(Object.keys(VENDOR_REQUESTS));
-
-function getAnalyticsConfigs_(vendorNames) {
-  const analyticsConfig = {};
-  vendorNames.forEach(vendor => {
-    const vendorConfig = require('../vendors/' + vendor + '.json');
-    analyticsConfig[vendor] = vendorConfig;
-  });
-
-  return analyticsConfig;
-}
+const AnalyticsConfig = Object.assign({}, ANALYTICS_CONFIG);
 
 describe('iframe transport', () => {
   it('Should not contain iframe transport if not whitelisted', () => {

@@ -15,6 +15,7 @@
  */
 
 import {ANALYTICS_CONFIG} from './vendors';
+import {RtvExperiment} from './rtvExperimentConfig';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
@@ -41,7 +42,9 @@ export class AnalyticsConfig {
      * @const {!JsonObject} Copied here for tests.
      * @private
      */
-    this.predefinedConfig_ = dict(); //ANALYTICS_CONFIG;
+    this.predefinedConfig_ = RtvExperiment.ANALYTICS_VENDOR_SPLIT
+      ? dict()
+      : ANALYTICS_CONFIG;
 
     /**
      * @private {JsonObject}
@@ -64,7 +67,11 @@ export class AnalyticsConfig {
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
 
-    return Promise.all([this.fetchRemoteConfig_(), this.fetchVendorConfig_()])
+    const fetchVendorConfigPromise = RtvExperiment.ANALYTICS_VENDOR_SPLIT
+      ? this.fetchVendorConfig_()
+      : Promise.resolve();
+
+    return Promise.all([this.fetchRemoteConfig_(), fetchVendorConfigPromise])
       .then(this.processConfigs_.bind(this))
       .then(() => this.config_);
   }
@@ -86,7 +93,7 @@ export class AnalyticsConfig {
     };
 
     const baseUrl = getMode().localDev ? '/dist' : 'https://cdn.ampproject.org';
-    const vendorUrl =  baseUrl + '/v0/analytics-vendors/' + type + '.json';
+    const vendorUrl = baseUrl + '/v0/analytics-vendors/' + type + '.json';
 
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching vendor config', vendorUrl);
