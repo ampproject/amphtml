@@ -455,8 +455,25 @@ if (getMode().localDev) {
  * Builds the expriments tbale.
  */
 function build() {
+  const {host} = window.location;
+
   const subdomain = document.getElementById('subdomain');
-  subdomain.textContent = window.location.host;
+  subdomain.textContent = host;
+
+  const redirect = document.getElementById('redirect');
+  const input = redirect.querySelector('input');
+  const button = redirect.querySelector('button');
+  const anchor = redirect.querySelector('a');
+  button.addEventListener('click', function() {
+    const viewerUrl = new URL(input.value);
+    const ampUrl = viewerToAmpUrl(viewerUrl);
+    if (ampUrl) {
+      const subdomain = ampUrl.hostname.replace(/\./g, '-');
+      const href = `https://${subdomain}.cdn.ampproject.org/experiments.html`;
+      anchor.href = href;
+      anchor.textContent = href;
+    }
+  });
 
   const channelsTable = document.getElementById('channels-table');
   CHANNELS.forEach(function(experiment) {
@@ -467,6 +484,39 @@ function build() {
   EXPERIMENTS.forEach(function(experiment) {
     experimentsTable.appendChild(buildExperimentRow(experiment));
   });
+
+  if (host === 'cdn.ampproject.org') {
+    const experimentsDesc = document.getElementById('experiments-desc');
+    experimentsDesc.setAttribute('hidden', '');
+    experimentsTable.setAttribute('hidden', '');
+  } else {
+    redirect.setAttribute('hidden', '');
+  }
+}
+
+/**
+ * Based off of cs/extractAmpUrlFromStandaloneUrl.
+ * @param {!URL} viewerUrl
+ */
+function viewerToAmpUrl(viewerUrl) {
+  if (!viewerUrl) {
+    return null;
+  }
+  const {origin, pathname} = viewerUrl;
+  if (origin !== 'https://www.google.com') {
+    return null;
+  }
+  let ampUrlString;
+  const path = decodeURIComponent(pathname);
+  if (path.indexOf('/amp/a/') === 0 || path.indexOf('/amp/s/') === 0) {
+    ampUrlString = 'https://' + path.substr(7);
+  } else if (path.indexOf('/amp/') === 0) {
+    ampUrlString = 'http://' + path.substr(5);
+  }
+  if (ampUrlString) {
+    return new URL(ampUrlString);
+  }
+  return null;
 }
 
 /**

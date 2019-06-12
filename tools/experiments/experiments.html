@@ -13,6 +13,10 @@
       font-family: Roboto, verdana, arial, sans-serif;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
     .header-title {
       color: #1b1464;
       font-family: Roboto, verdana, arial, sans-serif;
@@ -103,6 +107,23 @@
       display: block;
     }
 
+    #redirect > input {
+      border: solid 1px gray;
+      width: calc(100% - 20px);
+      padding: 10px;
+    }
+
+    #redirect > button {
+      border: solid 1px gray;
+      padding: 5px 15px;
+      margin: 5px;
+    }
+
+    #redirect > h4 {
+      border: inset;
+      padding: 10px;
+    }
+
     .popup-graypane {
       position: fixed;
       top: 0;
@@ -180,8 +201,29 @@
     <table id="channels-table" border=1></table>
   </section>
 
-  <section class="desc">
+  <!-- Only displayed on top-level cdn.ampproject.org. -->
+  <section class="desc" id="redirect">
     <h2>Experiments</h2>
+
+    <p>
+      Experiments can no longer be enabled on the top-level <strong>cdn.ampproject.org</strong> domain.
+      They must be toggled on the specific subdomain e.g. <strong>www-example-com.cdn.ampproject.org</strong>.
+    </p>
+
+    <p>
+      Use the tool below to find the experiments page for a given google.com AMP viewer URL:
+    </p>
+
+    <input type="text" placeholder="Paste a google.com viewer URL here.">
+    <button>Get experiments page link</button>
+
+    <h4><a href="#"></a></h4>
+  </section>
+
+  <!-- Only displayed on subdomains of cdn.ampproject.org. -->
+  <section class="desc" id="experiments-desc">
+    <h2>Experiments</h2>
+
     <p>
       These switches toggle experiments for documents served at the <em>current subdomain</em>
       of the <a href="https://developers.google.com/amp/cache/">Google AMP Cache</a>:
@@ -204,7 +246,7 @@
       to find out more about experiments, and how to activate them outside of
       the Google AMP Cache (including in local development).
     </p>
-    </section>
+  </section>
 
   <section class="content">
     <table id="experiments-table" border=1></table>
