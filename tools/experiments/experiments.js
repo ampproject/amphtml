@@ -404,14 +404,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
   },
   {
-    id: 'amp-autocomplete',
-    name:
-      'AMP Autocomplete provides a set of suggestions to' +
-      ' complete a user query in an input field.',
-    spec: 'https://github.com/ampproject/amphtml/issues/9785',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21021',
-  },
-  {
     id: 'inabox-viewport-friendly',
     name:
       'Inabox viewport measures the host window directly if ' +
@@ -443,6 +435,12 @@ const EXPERIMENTS = [
       'access after user interaction and approval',
     spec: 'https://github.com/ampproject/amphtml/issues/8929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
+  },
+  {
+    id: 'margin-bottom-in-content-height',
+    name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
+    spec: 'https://github.com/ampproject/amphtml/issues/22718',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
   },
 ];
 

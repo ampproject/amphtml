@@ -49,7 +49,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     windowInterface = mockWindowInterface(sandbox);
 
     beforeSubmitStub = sandbox.stub();
-    sandbox.stub(Services, 'formSubmitPromiseForDoc').resolves({
+    sandbox.stub(Services, 'formSubmitForDoc').resolves({
       beforeSubmit: beforeSubmitStub,
     });
 
@@ -625,6 +625,30 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         };
         anchorClickHandlers.forEach(handler => handler(a, {type: 'click'}));
         expect(a.href).to.not.contain('testLinker');
+      });
+    });
+
+    it('should not rewrite url if href is fragment', () => {
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
+        // Using a real anchor el here because of a.href getter will actually
+        // return the full url, not just the fragment.
+        const a = doc.createElement('a');
+        a.href = '#hello';
+        a.hostname = 'amp.source.com';
+
+        const setterSpy = sandbox.spy();
+        const aProxy = new Proxy(a, {
+          get: (obj, prop) => {
+            return obj[prop];
+          },
+          set: setterSpy,
+        });
+
+        anchorClickHandlers.forEach(handler =>
+          handler(aProxy, {type: 'click'})
+        );
+        expect(setterSpy.notCalled).to.be.true;
       });
     });
 
