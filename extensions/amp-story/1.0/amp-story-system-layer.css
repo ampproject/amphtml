@@ -126,12 +126,12 @@
   transform-origin: right !important;
 }
 
-.first-page-active[info] .i-amphtml-message-container {
+.i-amphtml-first-page-active[info] .i-amphtml-message-container {
   /* 48px for info button, add width to padding for additional story buttons. */
   padding-right: 48px !important;
 }
 
-.first-page-active[info][dir=rtl] .i-amphtml-message-container {
+.i-amphtml-first-page-active[info][dir=rtl] .i-amphtml-message-container {
   /* 48px for info button, add width to padding for additional story buttons. */
   padding-right: auto !important;
   padding-left: 48px !important;
@@ -162,6 +162,16 @@
   opacity: 0 !important;
 }
 
+[i-amphtml-story-has-new-page="noshow"] .i-amphtml-story-has-new-page-notification-container {
+  transition: opacity 1.5s !important;
+  opacity: 0 !important;
+}
+
+.i-amphtml-last-page-active[i-amphtml-story-has-new-page="show"] .i-amphtml-story-has-new-page-notification-container {
+  transition: opacity 1.5s !important;
+  opacity: 1 !important;
+}
+
 [dir=rtl][i-amphtml-story-messagedisplay="noshow"] .i-amphtml-message-container {
   transform: translateX(-10px) !important;
 }
@@ -190,8 +200,7 @@
 .i-amphtml-story-mute-text,
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text,
-.i-amphtml-story-sidebar-control,
-.i-amphtml-story-new-page-control   {
+.i-amphtml-story-sidebar-control {
   display: none !important;
 }
 
@@ -243,16 +252,53 @@
   display: none !important;
 }
 
-.i-amphtml-story-new-page-control {
-  /* TODO(enriqe): this is a placehoder, replace when new icon is ready. */
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M22 34h4V22h-4v12zm2-30C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm-2-22h4v-4h-4v4z"/></svg>') !important;
+.i-amphtml-story-has-new-page-notification-container {
+  display: flex !important;
+  position: absolute !important;
+  justify-content: center !important;
+  z-index: 100002 !important; /* On top of the progress bar. */
+  top: 32px !important;
+  right: 0 !important;
+  left: 0 !important;
+  opacity: 0 !important;
 }
 
-[i-amphtml-story-has-new-page] .i-amphtml-story-new-page-control {
-  display: block !important;
+.i-amphtml-story-has-new-page-text-wrapper {
+  background-color: rgba(32, 33, 37, 0.8) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 4px 10px 4px 0 !important;
+  border-radius: 5px !important;
 }
 
-.i-amphtml-embedded.first-page-active .i-amphtml-story-info-control {
+[dir=rtl] .i-amphtml-story-has-new-page-text-wrapper {
+  padding-right: 0 !important;
+  padding-left: 10px !important;
+}
+
+.i-amphtml-story-has-new-page-text {
+  color: #fff !important;
+  font-size: 16px !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+  font-weight: 700 !important;
+}
+
+.i-amphtml-story-has-new-page-circle-icon {
+  background: rgba(3, 255, 160, 1) !important;
+  border-radius: 50% !important;
+  height: 6px !important;
+  width: 6px !important;
+  position: relative !important;
+  box-shadow: 0 0 0 2px rgba(3, 255, 160, 0.5) !important;
+  margin: 0px 10px !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-has-new-page-notification-container {
+  top: 0 !important;
+}
+
+.i-amphtml-embedded.i-amphtml-first-page-active .i-amphtml-story-info-control {
   display: block !important;
 }
 
