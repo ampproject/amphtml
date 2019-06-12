@@ -737,7 +737,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.onLayoutMeasure();
       return impl
         .getAdUrl()
-        .then(url => expect(url).to.match(/sz=300x250%7C320x50&/));
+        .then(url => expect(url).to.match(/sz=320x50%7C300x250&/));
     });
     it('should have the correct ifi numbers - no refresh', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
