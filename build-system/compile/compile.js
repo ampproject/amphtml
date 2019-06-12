@@ -392,6 +392,3 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
   });
 }
-
-function transferSrcToTempDir() {
-}
