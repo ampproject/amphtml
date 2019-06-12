@@ -21,6 +21,7 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
+import {getMode} from './mode';
 import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
 import {user} from './log';
@@ -98,13 +99,16 @@ export function toggleExperiment(
       const storedToggles = getExperimentToggles(win);
       storedToggles[experimentId] = on;
       saveExperimentToggles(win, storedToggles);
-      user().warn(
-        'EXPERIMENTS',
-        '"%s" experiment %s for the domain "%s". See: https://amp.dev/documentation/guides-and-tutorials/learn/experimental',
-        experimentId,
-        on ? 'enabled' : 'disabled',
-        win.location.hostname
-      );
+      // Avoid affecting tests that spy/stub warn().
+      if (!getMode().test) {
+        user().warn(
+          'EXPERIMENTS',
+          '"%s" experiment %s for the domain "%s". See: https://amp.dev/documentation/guides-and-tutorials/learn/experimental',
+          experimentId,
+          on ? 'enabled' : 'disabled',
+          win.location.hostname
+        );
+      }
     }
   }
   return on;
