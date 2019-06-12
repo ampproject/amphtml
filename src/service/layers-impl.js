@@ -1206,7 +1206,11 @@ export class LayoutElement {
   remeasure_() {
     this.updateScrollPosition_();
     this.needsRemeasure_ = false;
-    const element = this.element_;
+    const {
+      element_: element,
+      size_: prevSize,
+      position_: prevPosition,
+    } = this;
 
     // We need a relative box to measure our offset. Importantly, this box must
     // be negatively offset by its scroll position, to account for the fact
@@ -1240,11 +1244,15 @@ export class LayoutElement {
 
     // Now, recursively measure all child nodes, to since they've probably been
     // invalidated by the parent changing.
+    // TODO(jridgewell): When do children need to be remeasured? Could we skip
+    // for only size changes? Or only position changes?
     const children = this.children_;
-    if (children.length) {
+    if (
+      children.length > 0 &&
+      (sizeChanged(prevSize, this.size_) ||
+        positionChanged(prevPosition, this.position_))
+    ) {
       for (let i = 0; i < children.length; i++) {
-        // TODO(jridgewell): We can probably optimize this if this layer
-        // didn't change at all.
         children[i].remeasure_();
       }
     }
@@ -1286,6 +1294,24 @@ export class LayoutElement {
       position.top - this.getScrollTop()
     );
   }
+}
+
+/**
+ * @param {!SizeDef} previous
+ * @param {!SizeDef} current
+ * @return {boolean}
+ */
+function sizeChanged(previous, current) {
+  return previous.width !== current.width || previous.height !== current.height;
+}
+
+/**
+ * @param {!PositionDef} previous
+ * @param {!PositionDef} current
+ * @return {boolean}
+ */
+function positionChanged(previous, current) {
+  return previous.left !== current.left || previous.top !== current.top;
 }
 
 /**
