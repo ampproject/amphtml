@@ -66,11 +66,6 @@ class AmpAccordion extends AMP.BaseElement {
 
     /** @private {number|string} */
     this.prefix_ = element.id ? element.id : Math.floor(Math.random() * 100);
-
-    /** @const @private {!MutationObserver} */
-    this.mutationObserver_ = new this.win.MutationObserver(mutations => {
-      this.toggleMutations_(mutations);
-    });
   }
 
   /** @override */
@@ -156,8 +151,13 @@ class AmpAccordion extends AMP.BaseElement {
           }
         }
       });
-      this.mutationObserver_.observe(section, {
-        attributes: true,
+
+      // Listen for mutations on the 'expanded' attribute.
+      const expandedObserver = new this.win.MutationObserver(mutations => {
+        this.toggleMutations_(mutations);
+      });
+      expandedObserver.observe(section, {
+        attributeFilter: ['data-expand'],
       });
 
       if (this.currentState_[contentId]) {
@@ -615,23 +615,14 @@ class AmpAccordion extends AMP.BaseElement {
    * @param {!Array<!MutationRecord>} mutations
    */
   toggleMutations_(mutations) {
-    if (mutations.length > 1) {
-      return;
-    }
-    const mutation = mutations[0];
-    if (mutation.attributeName !== 'expanded') {
-      return;
-    }
-    const sectionEl = dev().assertElement(mutation.target);
-    if (!sectionEl.hasAttribute('[expanded]')) {
-      return;
-    }
-    const toExpand = sectionEl.getAttribute('expanded') !== 'collapse';
-    if (toExpand) {
-      // toggle_ does not expand if attribute is already present on element.
-      sectionEl.removeAttribute('expanded');
-    }
-    this.toggle_(sectionEl, toExpand);
+    mutations.forEach(mutation => {
+      const sectionEl = dev().assertElement(mutation.target);
+      const toExpand = sectionEl.hasAttribute('data-expand');
+      const isExpanded = sectionEl.hasAttribute('expanded');
+      if (isExpanded !== toExpand) {
+        this.toggle_(sectionEl, toExpand);
+      }
+    });
   }
 }
 

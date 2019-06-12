@@ -407,7 +407,7 @@ function createElementRules_() {
       'label': null,
     },
     'SECTION': {
-      'expanded': null,
+      'data-expand': null,
     },
     'SELECT': {
       'autofocus': null,

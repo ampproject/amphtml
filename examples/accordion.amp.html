@@ -32,19 +32,18 @@
   </style>
 </head>
 <body>
-  <button on="tap:AMP.setState({expandAc1: ''})">Expand item 1</button>
-  <button on="tap:AMP.setState({expandAc1: 'collapse'})">Collapse item 1</button>
+  <button on="tap:AMP.setState({expandAc1: true})">Expand item 1</button>
+  <button on="tap:AMP.setState({expandAc1: false})">Collapse item 1</button>
 
-
-  <button on="tap:AMP.setState({expandAc2: ''})">Expand section 1</button>
-  <button on="tap:AMP.setState({expandAc2: 'collapse'})">Collapse section 1</button>
+  <button on="tap:AMP.setState({expandAc2: true})">Expand section 1</button>
+  <button on="tap:AMP.setState({expandAc2: false})">Collapse section 1</button>
   <header class="menu">
     <h3>MENU</h3>
     <nav>
       <ul>
         <li>
           <amp-accordion id="ac1" animate>
-            <section id="item1" on="expand:ac2.collapse(section='item2'),AMP.setState({expandAc1: ''});collapse:AMP.setState({expandAc1: false})" [expanded]="expandAc1">
+            <section id="item1" on="expand:ac2.collapse(section='item2'),AMP.setState({expandAc1: true});collapse:AMP.setState({expandAc1: false})" [data-expand]="expandAc1">
               <h1>Item 1 (Expanding it closes Item 2)</h1>
               <div>
                 <p>1A</p>
@@ -69,7 +68,7 @@
   </header>
 
   <amp-accordion expand-single-section>
-    <section [expanded]="expandAc2" on="collapse:AMP.setState({expandAc2: false})">
+    <section [data-expand]="expandAc2" on="expand:AMP.setState({expandAc2: true});collapse:AMP.setState({expandAc2: false})">
       <h2>Section 1</h2>
       <p>Bunch of awesome content</p>
     </section>
