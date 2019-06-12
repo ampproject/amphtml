@@ -323,9 +323,10 @@ export class ViewportBindingInabox {
   /** @private */
   remeasureAllElements_() {
     const resources = this.getChildResources();
-    // Force remeasurements.
-    resources.schedulePass(0, /* opt_relayoutAll */ true);
-    // And remeasure everything.
+    // First, request a remeasurement on every resource.
+    resources.forEach(resource => resource.requestMeasure());
+    // After, actually remeasure everything. This is done after requesting all
+    // remeasures to avoid an n^2 behavior.
     resources.forEach(resource => resource.measure());
   }
 

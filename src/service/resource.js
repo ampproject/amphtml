@@ -594,6 +594,10 @@ export class Resource {
    */
   requestMeasure() {
     this.isMeasureRequested_ = true;
+    if (this.useLayers_) {
+      const {element} = this;
+      element.getLayers().dirty(element);
+    }
   }
 
   /**
