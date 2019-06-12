@@ -96,6 +96,7 @@ tags: {  # <amp-carousel type=carousel>
     name: "type"
     value: "carousel"
     mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
