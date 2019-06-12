@@ -277,7 +277,7 @@ describes.repeated(
                 .onFirstCall()
                 .returns(Promise.resolve({html: '<div>much success</div>'}))
                 .onSecondCall()
-                .returns(Promise.resolve({html: '<div>mushc success</div>'}));
+                .returns(Promise.resolve({html: '<div>much success</div>'}));
 
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
@@ -353,6 +353,66 @@ describes.repeated(
                 return handleSubmitEventPromise;
               });
             });
+          });
+        });
+
+        it('should render template even for unsupported data type', () => {
+          return getAmpForm(getForm()).then(ampForm => {
+            const form = ampForm.form_;
+
+            const successTemplate = createElement('template');
+            successTemplate.id = 'successTemplate';
+            successTemplate.setAttribute('type', 'amp-mustache');
+            successTemplate.content.appendChild(
+              createTextNode('Hello, {{name}}')
+            );
+            form.appendChild(successTemplate);
+
+            const messageContainer = createElement('div');
+            messageContainer.id = 'message';
+            messageContainer.setAttribute('submit-success', '');
+            messageContainer.setAttribute('template', 'successTemplate');
+            form.appendChild(messageContainer);
+            // Given an unsupported JSON array response.
+            sandbox.stub(ampForm.xhr_, 'fetch').returns(
+              Promise.resolve({
+                json: () => {
+                  return Promise.resolve([]);
+                },
+              })
+            );
+            const renderedTemplate = createElement('div');
+            renderedTemplate.innerText = 'Hello,';
+            sandbox
+              .stub(ampForm.templates_, 'findAndRenderTemplate')
+              .returns(Promise.resolve(renderedTemplate));
+            const event = {
+              stopImmediatePropagation: sandbox.spy(),
+              target: form,
+              preventDefault: sandbox.spy(),
+            };
+
+            const submitEventPromise = ampForm.handleSubmitEvent_(event);
+
+            return whenCalled(ampForm.templates_.findAndRenderTemplate)
+              .then(() => {
+                return ampForm.renderTemplatePromiseForTesting();
+              })
+              .then(() => {
+                expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
+                // Expect the template service to render the template with
+                // an empty JSON data set.
+                expect(
+                  ampForm.templates_.findAndRenderTemplate.calledWith(
+                    messageContainer,
+                    {}
+                  )
+                ).to.be.true;
+                expect(mutateElementStub).to.have.been.calledOnce;
+                expect(messageContainer.firstChild).to.equal(renderedTemplate);
+
+                return submitEventPromise;
+              });
           });
         });
 
