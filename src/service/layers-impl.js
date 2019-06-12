@@ -800,7 +800,7 @@ export class LayoutElement {
     this.needsScrollRemeasure_ = true;
 
     // Transfer all children elements into this new coordinate system
-    const parent = this.getParentLayer();
+    const parent = this.parentLayer_;
     if (parent) {
       parent.transfer_(this);
     }
