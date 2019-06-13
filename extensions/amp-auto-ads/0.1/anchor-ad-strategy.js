@@ -20,8 +20,18 @@ import {user} from '../../../src/log';
 
 const TAG = 'amp-auto-ads';
 const STICKY_AD_TAG = 'amp-sticky-ad';
-const OPT_IN_STATUS_ANCHOR_ADS = 2;
-const OPT_IN_STATUS_NO_FILL_ANCHOR_ADS = 4;
+
+/**
+ * Indicates Opt in status of the publisher for different ad formats.
+ * @enum {number}
+ */
+const OptInStatus = {
+  UNKNOWN: 0,
+  OPT_IN_STATUS_BANNER_ADS: 1,
+  OPT_IN_STATUS_ANCHOR_ADS: 2,
+  OPT_IN_STATUS_NATIVE_IN_ARTICLE_ADS: 3,
+  OPT_IN_STATUS_NO_FILL_ANCHOR_ADS: 4,
+};
 
 export class AnchorAdStrategy {
   /**
@@ -78,15 +88,11 @@ export class AnchorAdStrategy {
     if (!optInStatus) {
       return false;
     }
-    for (let i = 0; i < optInStatus.length; i++) {
-      if (
-        optInStatus[i] == OPT_IN_STATUS_ANCHOR_ADS ||
-        optInStatus[i] == OPT_IN_STATUS_NO_FILL_ANCHOR_ADS
-      ) {
-        return true;
-      }
-    }
-    return false;
+    return optInStatus.some(
+      status =>
+        status == OptInStatus.OPT_IN_STATUS_ANCHOR_ADS ||
+        status == OptInStatus.OPT_IN_STATUS_NO_FILL_ANCHOR_ADS
+    );
   }
 
   /**
@@ -98,12 +104,9 @@ export class AnchorAdStrategy {
     if (!optInStatus) {
       return false;
     }
-    for (let i = 0; i < optInStatus.length; i++) {
-      if (optInStatus[i] == OPT_IN_STATUS_NO_FILL_ANCHOR_ADS) {
-        return true;
-      }
-    }
-    return false;
+    return optInStatus.some(
+      status => status == OptInStatus.OPT_IN_STATUS_NO_FILL_ANCHOR_ADS
+    );
   }
 
   /**
