@@ -59,7 +59,10 @@ export class AnchorAdStrategy {
       return Promise.resolve(false);
     }
     if (this.hasExistingStickyAd_()) {
-      user().warn(TAG, 'exists <amp-sticky-ad>');
+      user().warn(
+        TAG,
+        'Unable to create an anchor ad because already exists <amp-sticky-ad>'
+      );
       return Promise.resolve(false);
     }
     Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
