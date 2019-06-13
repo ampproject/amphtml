@@ -46,7 +46,8 @@ describe('amp-analytics', function() {
           "extraUrlParams": {
             "a": 1,
             "b": "\${title}",
-            "cid": "\${clientId(_cid)}"
+            "cid": "\${clientId(_cid)}",
+            "loadend": "\${navTiming(loadEventEnd)}"
           }
         }
         </script>
@@ -61,7 +62,11 @@ describe('amp-analytics', function() {
 
       it('should send request', () => {
         return RequestBank.withdraw().then(req => {
-          expect(req.url).to.equal('/?a=2&b=AMP%20TEST&cid=amp-12345');
+          const q = parseQueryString(req.url.substr(1));
+          expect(q['a']).to.equal('2');
+          expect(q['b']).to.equal('AMP TEST');
+          expect(q['cid']).to.equal('amp-12345');
+          expect(q['loadend']).to.not.equal('0');
           expect(
             req.headers.referer,
             'should keep referrer if no referrerpolicy specified'

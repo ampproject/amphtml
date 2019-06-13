@@ -970,6 +970,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
           delete eventListeners[eventType];
         }
       };
+      const timerMock = {
+        promise: () => {
+          return Promise.resolve();
+        },
+      };
+      registerServiceBuilder(win, 'timer', function() {
+        return timerMock;
+      });
     });
 
     it('is replaced if timing info is not available', () => {
