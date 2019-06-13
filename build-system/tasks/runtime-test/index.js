@@ -38,7 +38,7 @@ const {clean} = require('../clean');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {css} = require('../css');
 const {dist} = require('../dist');
-const {getAdTypes, refreshKarmaWdCache} = require('./helpers');
+const {getAdTypes} = require('./helpers');
 const {isLargeRefactor, unitTestsToRun} = require('./helpers-unit');
 const {isTravisBuild} = require('../../travis');
 
@@ -423,9 +423,6 @@ async function runTests() {
 
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
-
-  // Avoid Karma startup errors
-  refreshKarmaWdCache();
 
   // Notify the test-status bot that the tests are running.
   reportTestStarted();
