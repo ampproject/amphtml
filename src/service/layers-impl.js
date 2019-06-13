@@ -751,6 +751,9 @@ export class LayoutElement {
     // This might lead to a double tracking.
     if (!this.children_.includes(child)) {
       this.children_.push(child);
+      if (child.isLayer()) {
+        this.transfer_(child);
+      }
     }
   }
 
