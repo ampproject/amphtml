@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../services';
+import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -125,6 +126,7 @@ export class Performance {
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
+    this.onViewerVisibilityChange_ = this.onViewerVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
@@ -185,6 +187,8 @@ export class Performance {
           this.boundTickLayoutJankScore_
         );
       }
+
+      this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
     }
 
     // We don't check `isPerformanceTrackingOn` here since there are some
@@ -316,6 +320,16 @@ export class Performance {
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
+      this.tickLayoutJankScore_();
+    }
+  }
+
+  /**
+   * When the viewer visibility state of the document changes to inactive,
+   * send the layout jank score.
+   */
+  onViewerVisibilityChange_() {
+    if (this.viewer_.getVisibilityState() === VisibilityState.INACTIVE) {
       this.tickLayoutJankScore_();
     }
   }
