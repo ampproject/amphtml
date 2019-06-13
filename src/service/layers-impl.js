@@ -1209,11 +1209,7 @@ export class LayoutElement {
   remeasure_() {
     this.updateScrollPosition_();
     this.needsRemeasure_ = false;
-    const {
-      element_: element,
-      size_: prevSize,
-      position_: prevPosition,
-    } = this;
+    const {element_: element, size_: prevSize, position_: prevPosition} = this;
 
     // We need a relative box to measure our offset. Importantly, this box must
     // be negatively offset by its scroll position, to account for the fact
