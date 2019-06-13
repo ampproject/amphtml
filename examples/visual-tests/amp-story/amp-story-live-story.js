@@ -15,19 +15,15 @@
  */
 'use strict';
 
-const {verifySelectorsVisible, verifySelectorsInvisible} = require('../../../build-system/tasks/visual-diff/helpers');
-
 module.exports = {
   'Inserting a new page should show a notification in the last page.': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
+    await page.tap('amp-story-page#cover');
     await page.waitFor('amp-story-page#page-1[active]');
     await page.$eval('.i-amphtml-story-system-layer', e => e.setAttribute('i-amphtml-story-has-new-page', 'show'));
     await page.waitFor(2000); // For animations to finish.
     await page.waitForSelector('.i-amphtml-story-has-new-page-notification-container', {opacity: 1});
   },
   'Inserting a new page should not show a notification if not in the last page.': async (page, name) => {
-    const screen = page.touchscreen;
     await page.$eval('.i-amphtml-story-system-layer', e => e.setAttribute('i-amphtml-story-has-new-page', 'show'));
     await page.waitForSelector('.i-amphtml-story-has-new-page-notification-container', {opacity: 0});
   },
