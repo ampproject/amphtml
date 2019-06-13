@@ -89,15 +89,14 @@ export class ExpansionOptions {
 }
 
 /**
- * @param {*} value
+ * @param {string} value
  * @param {string} s
  * @param {string=} opt_l
  * @return {string}
  */
 function substrMacro(value, s, opt_l) {
   const start = Number(s);
-  const str = value.toString();
-  let {length} = str;
+  let {length} = value;
   userAssert(
     isFiniteNumber(start),
     'Start index ' + start + 'in substr macro should be a number'
@@ -110,7 +109,7 @@ function substrMacro(value, s, opt_l) {
     );
   }
 
-  return str.substr(start, length);
+  return value.substr(start, length);
 }
 
 /**
@@ -120,7 +119,7 @@ function substrMacro(value, s, opt_l) {
  */
 function defaultMacro(value, defaultValue) {
   if (!value || !value.length) {
-    return user().assertString(defaultValue);
+    return defaultValue;
   }
   return value;
 }
