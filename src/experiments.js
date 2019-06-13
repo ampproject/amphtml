@@ -21,10 +21,13 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
+import {dev, user} from './log';
 import {getMode} from './mode';
 import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
-import {user} from './log';
+
+/** @const {string} */
+const TAG = 'EXPERIMENTS';
 
 /** @const {string} */
 const LOCAL_STORAGE_KEY = 'amp-experiment-toggles';
@@ -102,7 +105,7 @@ export function toggleExperiment(
       // Avoid affecting tests that spy/stub warn().
       if (!getMode().test) {
         user().warn(
-          'EXPERIMENTS',
+          TAG,
           '"%s" experiment %s for the domain "%s". See: https://amp.dev/documentation/guides-and-tutorials/learn/experimental',
           experimentId,
           on ? 'enabled' : 'disabled',
@@ -195,8 +198,14 @@ export function experimentTogglesOrNull(win) {
  * @return {!Object<string, boolean>}
  */
 function getExperimentToggles(win) {
-  const experimentsString =
-    'localStorage' in win ? win.localStorage.getItem(LOCAL_STORAGE_KEY) : '';
+  let experimentsString = '';
+  if ('localStorage' in win) {
+    try {
+      experimentsString = win.localStorage.getItem(LOCAL_STORAGE_KEY);
+    } catch (e) {
+      dev().expectedError(TAG, 'localStorage not supported.');
+    }
+  }
   const tokens = experimentsString ? experimentsString.split(/\s*,\s*/g) : [];
 
   const toggles = Object.create(null);
@@ -224,7 +233,11 @@ function saveExperimentToggles(win, toggles) {
     experimentIds.push((toggles[experiment] === false ? '-' : '') + experiment);
   }
   if ('localStorage' in win) {
-    win.localStorage.setItem(LOCAL_STORAGE_KEY, experimentIds.join(','));
+    try {
+      win.localStorage.setItem(LOCAL_STORAGE_KEY, experimentIds.join(','));
+    } catch (e) {
+      user().error(TAG, 'Failed to save experiments to localStorage.');
+    }
   }
 }
 

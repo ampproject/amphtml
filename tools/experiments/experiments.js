@@ -469,9 +469,15 @@ function build() {
   const button = redirect.querySelector('button');
   const anchor = redirect.querySelector('a');
   button.addEventListener('click', function() {
-    const ampUrl = viewerToAmpUrl(input.value);
-    if (ampUrl) {
-      const subdomain = ampUrl.hostname.replace(/\./g, '-');
+    let urlString = input.value.trim();
+    // Avoid protocol-less urlString from being parsed as a relative URL.
+    const hasProtocol = /^https?:\/\//.test(urlString);
+    if (!hasProtocol) {
+      urlString = 'https://' + urlString;
+    }
+    const url = parseUrlDeprecated(fromStandaloneUrl(urlString));
+    if (url) {
+      const subdomain = url.hostname.replace(/\./g, '-');
       const href = `https://${subdomain}.cdn.ampproject.org/experiments.html`;
       anchor.href = href;
       anchor.textContent = href;
@@ -499,29 +505,25 @@ function build() {
 
 /**
  * Based off of cs/extractAmpUrlFromStandaloneUrl.
- * @param {string} viewerUrlString
- * @return {!URL}
+ * @param {string} urlString
+ * @return {string}
  */
-function viewerToAmpUrl(viewerUrlString) {
-  if (!viewerUrlString) {
+function fromStandaloneUrl(urlString) {
+  if (!urlString) {
     return null;
   }
-  const viewerUrl = parseUrlDeprecated(viewerUrlString);
-  const {origin, pathname} = viewerUrl;
-  if (origin !== 'https://www.google.com') {
-    return null;
+  const url = parseUrlDeprecated(urlString);
+  const {hostname, pathname} = url;
+  // Remove the viewer prefix, if there is one.
+  if (hostname === 'www.google.com') {
+    const path = tryDecodeUriComponent(pathname);
+    if (startsWith(path, '/amp/a/') || startsWith(path, '/amp/s/')) {
+      urlString = 'https://' + path.substr(7);
+    } else if (startsWith(path, '/amp/')) {
+      urlString = 'http://' + path.substr(5);
+    }
   }
-  let ampUrlString;
-  const path = tryDecodeUriComponent(pathname);
-  if (startsWith(path, '/amp/a/') || startsWith(path, '/amp/s/')) {
-    ampUrlString = 'https://' + path.substr(7);
-  } else if (startsWith(path, '/amp/')) {
-    ampUrlString = 'http://' + path.substr(5);
-  }
-  if (ampUrlString) {
-    return parseUrlDeprecated(ampUrlString);
-  }
-  return null;
+  return urlString;
 }
 
 /**
