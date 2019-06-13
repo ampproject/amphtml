@@ -123,6 +123,8 @@ const chaiMethodsAndProperties = [
   {name: 'oneOf', type: ChaiType.METHOD},
   {name: 'ownProperty', type: ChaiType.METHOD},
   {name: 'ownPropertyDescriptor', type: ChaiType.METHOD},
+  // 'property' is implemented as ChaiType:METHOD in Chai
+  // but doing so here causes assertion errors. See #22811
   {name: 'property', type: ChaiType.CHAINABLE_METHOD},
   {name: 'respondsTo', type: ChaiType.METHOD},
   {name: 'respondTo', type: ChaiType.METHOD},
