@@ -29,10 +29,10 @@ import {
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
-  getContainerWidth,
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
+  getFlexibleAdSlotRequestParams,
   getIdentityToken,
   googleAdUrl,
   googleBlockParameters,
@@ -526,11 +526,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     let psz = null;
     let msz = null;
     if (this.sendFlexibleAdSlotParams_) {
-      const parentWidth = getContainerWidth(
+      const parentWidth = getFlexibleAdSlotRequestParams(
         this.win,
         this.element.parentElement
       );
-      let slotWidth = getContainerWidth(
+      let slotWidth = getFlexibleAdSlotRequestParams(
         this.win,
         this.element,
         1 /* maxDepth */

@@ -26,10 +26,10 @@ import {
   extractAmpAnalyticsConfig,
   extractHost,
   getAmpRuntimeTypeParameter,
-  getContainerWidth,
   getCorrelator,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
+  getFlexibleAdSlotRequestParams,
   getIdentityToken,
   getIdentityTokenRequestUrl,
   googleAdUrl,
@@ -1125,7 +1125,7 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
   });
 });
 
-describes.realWin('#getContainerWidth', {amp: true}, env => {
+describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
   let doc, win;
   beforeEach(() => {
     win = env.win;
@@ -1146,36 +1146,36 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
 
   it('should return the fixed width for FIXED layout', () => {
     const element = createResource({width: 300, height: 250}, 'fixed');
-    expect(getContainerWidth(win, element)).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(300);
   });
 
   it('should return 0 for FIXED layout and invalid width', () => {
     allowConsoleError(() => {
       const element = createResource({width: 'auto', height: 250}, 'fixed');
-      expect(getContainerWidth(win, element)).to.equal(0);
+      expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(0);
     });
   });
 
   it('should return 0 for NODISPLAY layout', () => {
     const element = createResource({width: 500}, 'nodisplay');
-    expect(getContainerWidth(win, element)).to.equal(0);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(0);
   });
 
   it('should return 0 for FLEX_ITEM layout', () => {
     const element = createResource({width: 500}, 'flex-item');
-    expect(getContainerWidth(win, element)).to.equal(0);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(0);
   });
 
   it('should return 0 for invalid layout', () => {
     allowConsoleError(() => {
       const element = createResource({width: 500}, 'qwerty');
-      expect(getContainerWidth(win, element)).to.equal(0);
+      expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(0);
     });
   });
 
   it('should return the max-width, if present, for FILL layout', () => {
     const element = createResource({maxWidth: 300}, 'fill');
-    expect(getContainerWidth(win, element)).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(300);
   });
 
   it("should return parent's fixed width for FILL layout", () => {
@@ -1184,13 +1184,13 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     parent.setAttribute('layout', 'fixed');
     doc.body.appendChild(parent);
     const element = createResource({} /* config */, 'fill', 'amp-ad', parent);
-    expect(getContainerWidth(win, element)).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(300);
   });
 
   it('should return the max-width, if present, for FIXED_HEIGHT layout', () => {
     const element = createResource({height: 300}, 'fixed-height');
     element.style.maxWidth = '250px';
-    expect(getContainerWidth(win, element)).to.equal(250);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(250);
   });
 
   it("should return parent's fixed width for FIXED_HEIGHT layout", () => {
@@ -1204,13 +1204,13 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
       'amp-ad',
       parent
     );
-    expect(getContainerWidth(win, element)).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(300);
   });
 
   it('should return the max-width, if present, for FLUID layout', () => {
     const element = createResource({height: 300}, 'fluid');
     element.style.maxWidth = '250px';
-    expect(getContainerWidth(win, element)).to.equal(250);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(250);
   });
 
   it("should return parent's fixed width for FLUID layout", () => {
@@ -1219,13 +1219,13 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     parent.setAttribute('layout', 'fixed');
     doc.body.appendChild(parent);
     const element = createResource({height: 250}, 'fluid', 'amp-ad', parent);
-    expect(getContainerWidth(win, element)).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(300);
   });
 
   it('should return the max-width, if present, for RESPONSIVE layout', () => {
     const element = createResource({height: 200, width: 200}, 'responsive');
     element.style.maxWidth = '250px';
-    expect(getContainerWidth(win, element)).to.equal(250);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(250);
   });
 
   it("should return parent's fixed width for RESPONSIVE layout", () => {
@@ -1239,7 +1239,7 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
       'amp-ad',
       parent
     );
-    expect(getContainerWidth(win, element)).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(300);
   });
 
   it('should return the viewport width for CONTAINER layout', () => {
@@ -1247,7 +1247,7 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     sandbox
       .stub(Services.viewportForDoc(element), 'getSize')
       .returns({width: 300});
-    expect(getContainerWidth(win, element)).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).psz).to.equal(300);
   });
 
   it('should return -1 width for non-fixed layouts, maxDepth = 1', () => {
@@ -1257,7 +1257,7 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
       parent.setAttribute('layout', 'fixed');
       doc.body.appendChild(parent);
       const element = createResource({height: 250}, layout, 'amp-ad', parent);
-      expect(getContainerWidth(win, element, 1)).to.equal(-1);
+      expect(getFlexibleAdSlotRequestParams(win, element).msz).to.equal(-1);
     });
   });
 });
