@@ -16,15 +16,17 @@
 'use strict';
 
 module.exports = {
-  'Inserting a new page should show a notification in the last page.': async (page, name) => {
-    await page.tap('amp-story-page#cover');
-    await page.waitFor('amp-story-page#page-1[active]');
+  'should show the notification.': async page => {
+    await page.waitFor('amp-story-page#cover[active]');
     await page.$eval('.i-amphtml-story-system-layer', e => e.setAttribute('i-amphtml-story-has-new-page', 'show'));
     await page.waitFor(2000); // For animations to finish.
     await page.waitForSelector('.i-amphtml-story-has-new-page-notification-container', {opacity: 1});
   },
-  'Inserting a new page should not show a notification if not in the last page.': async (page, name) => {
+  '[RTL] should show the notification.': async page => {
+    await page.$eval('body', e => e.setAttribute('dir', 'rtl'));
+    await page.waitFor('amp-story-page#cover[active]');
     await page.$eval('.i-amphtml-story-system-layer', e => e.setAttribute('i-amphtml-story-has-new-page', 'show'));
-    await page.waitForSelector('.i-amphtml-story-has-new-page-notification-container', {opacity: 0});
+    await page.waitFor(2000); // For animations to finish.
+    await page.waitForSelector('.i-amphtml-story-has-new-page-notification-container', {opacity: 1});
   },
  };
