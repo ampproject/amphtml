@@ -735,13 +735,13 @@ export class MultidocManager {
             dev().fine(TAG, '- set title: ', shadowRoot.AMP.title);
             break;
           case 'META':
-            shadowRoot.AMP.meta = shadowRoot.AMP.meta || [];
             if (n.hasAttribute('charset')) {
               // Ignore.
             } else if (name == 'viewport') {
               // Ignore.
             } else {
-              shadowRoot.AMP.meta.push(n);
+              // TODO(dvoytenko): copy other meta tags.
+              dev().warn(TAG, 'meta ignored: ', n);
             }
             break;
           case 'LINK':
