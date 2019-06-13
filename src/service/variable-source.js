@@ -20,10 +20,10 @@ import {loadPromise} from '../event-helper';
 /** @typedef {string|number|boolean|undefined|null} */
 export let ResolverReturnDef;
 
-/** @typedef {function(...*):ResolverReturnDef} */
+/** @typedef {function(...string):ResolverReturnDef} */
 export let SyncResolverDef;
 
-/** @typedef {function(...*):!Promise<ResolverReturnDef>} */
+/** @typedef {function(...string):!Promise<ResolverReturnDef>} */
 export let AsyncResolverDef;
 
 /** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
