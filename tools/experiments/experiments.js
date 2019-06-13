@@ -23,10 +23,9 @@ import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
-import {parseUrlDeprecated, tryDecodeUriComponent} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url';
 //TODO(@cramforce): For type. Replace with forward declaration.
 import {reportError} from '../../src/error';
-import {startsWith} from '../../src/string';
 
 initLogConstructor();
 setReportError(reportError);
@@ -475,7 +474,7 @@ function build() {
     if (!hasProtocol) {
       urlString = 'https://' + urlString;
     }
-    const url = parseUrlDeprecated(fromStandaloneUrl(urlString));
+    const url = parseUrlDeprecated(urlString);
     if (url) {
       const subdomain = url.hostname.replace(/\./g, '-');
       const href = `https://${subdomain}.cdn.ampproject.org/experiments.html`;
@@ -501,29 +500,6 @@ function build() {
   } else {
     redirect.setAttribute('hidden', '');
   }
-}
-
-/**
- * Based off of cs/extractAmpUrlFromStandaloneUrl.
- * @param {string} urlString
- * @return {string}
- */
-function fromStandaloneUrl(urlString) {
-  if (!urlString) {
-    return null;
-  }
-  const url = parseUrlDeprecated(urlString);
-  const {hostname, pathname} = url;
-  // Remove the viewer prefix, if there is one.
-  if (hostname === 'www.google.com') {
-    const path = tryDecodeUriComponent(pathname);
-    if (startsWith(path, '/amp/a/') || startsWith(path, '/amp/s/')) {
-      urlString = 'https://' + path.substr(7);
-    } else if (startsWith(path, '/amp/')) {
-      urlString = 'http://' + path.substr(5);
-    }
-  }
-  return urlString;
 }
 
 /**
