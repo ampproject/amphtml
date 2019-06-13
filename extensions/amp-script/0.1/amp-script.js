@@ -248,10 +248,24 @@ export class SanitizerImpl {
 
     /** @private {!Object<string, boolean>} */
     this.allowedTags_ = getAllowedTags();
-    // For now, only allow built-in AMP components.
+
+    // TODO(choumx): Support opt-in for variable substitutions and forms.
+    // For now, only allow built-in AMP components except amp-pixel...
     this.allowedTags_['amp-img'] = true;
     this.allowedTags_['amp-layout'] = true;
-    this.allowedTags_['amp-pixel'] = true;
+    // ...and other elements that support variable substitutions, including
+    // form elements (tags included in HTMLFormElement.elements).
+    const formElements = [
+      'form',
+      'button',
+      'fieldset',
+      'input',
+      'object',
+      'output',
+      'select',
+      'textarea',
+    ];
+    formElements.forEach(fe => delete this.allowedTags_[fe]);
 
     /** @const @private {!Element} */
     this.wrapper_ = win.document.createElement('div');
