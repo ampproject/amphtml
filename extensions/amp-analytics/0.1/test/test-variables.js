@@ -23,6 +23,7 @@ import {
   variableServiceForDoc,
 } from '../variables';
 import {Services} from '../../../../src/services';
+import {getCookie} from '../../../../src/cookies';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
@@ -361,6 +362,23 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         'LINKER_PARAM(gl, cid)&LINKER_PARAM(gl, gclid)',
         'a1b2c3&123'
       );
+    });
+
+    it('COOKIE read cookie value', () => {
+      doc.cookie = 'test=123';
+      return check('COOKIE(test)', '123');
+    });
+
+    it('COOKIE cookie cannot found', () => {
+      doc.cookie = '';
+      expect(getCookie(win, 'test')).to.be.null;
+      return check('COOKIE(test)', '');
+    });
+
+    it('COOKIE on proxy origin', () => {
+      win.location = 'https://foo-bar.cdn.ampproject.org/c/foo.bar.com';
+      doc.cookie = 'test=123';
+      return check('COOKIE(test)', '');
     });
   });
 
