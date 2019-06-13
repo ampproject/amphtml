@@ -20,6 +20,7 @@ import {
 } from '../../src/service/variable-source';
 
 import {createElementWithAttributes} from '../../src/dom';
+import {registerServiceBuilder} from '../../src/service';
 
 describes.fakeWin(
   'VariableSource',
@@ -191,6 +192,14 @@ describes.fakeWin(
             loadEventStart: 0,
           },
         };
+        const timerMock = {
+          promise: () => {
+            return Promise.resolve();
+          },
+        };
+        registerServiceBuilder(win, 'timer', function() {
+          return timerMock;
+        });
       });
 
       it('should wait for load event', () => {

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from '../services';
 import {devAssert} from '../log';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
@@ -41,9 +42,18 @@ let ReplacementDef;
  * @return {!Promise<ResolverReturnDef>}
  */
 export function getTimingDataAsync(win, startEvent, endEvent) {
-  return loadPromise(win).then(() => {
-    return getTimingDataSync(win, startEvent, endEvent);
-  });
+  const timer = Services.timerFor(win);
+  return (
+    loadPromise(win)
+      // performance.timing.loadEventEnd returns 0 before the load event handler
+      // has terminated, that's when the load event is completed.
+      // To wait for the event handler to terminate, wait 1 ms and defer to the
+      // event loop.
+      .then(() => timer.promise(1))
+      .then(() => {
+        return getTimingDataSync(win, startEvent, endEvent);
+      })
+  );
 }
 
 /**
