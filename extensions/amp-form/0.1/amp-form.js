@@ -28,6 +28,7 @@ import {
   FORM_VERIFY_PARAM,
   getFormVerifier,
 } from './form-verifiers';
+import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
 import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
@@ -61,7 +62,7 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {toArray, toWin} from '../../../src/types';
+import {isArray, toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -195,6 +196,9 @@ export class AmpForm {
       );
     }
 
+    /** @const @private {!./form-dirtiness.FormDirtiness} */
+    this.dirtinessHandler_ = new FormDirtiness(this.form_, this.win_);
+
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
@@ -214,8 +218,11 @@ export class AmpForm {
     /** @private {?Promise} */
     this.renderTemplatePromise_ = null;
 
-    /** @private {./form-submit-service.FormSubmitService} */
-    this.formSubmitService_ = Services.formSubmitForDoc(element);
+    /** @private {?./form-submit-service.FormSubmitService} */
+    this.formSubmitService_ = null;
+    Services.formSubmitForDoc(element).then(service => {
+      this.formSubmitService_ = service;
+    });
   }
 
   /**
@@ -525,7 +532,7 @@ export class AmpForm {
         form: this.form_,
         actionXhrMutator: this.setXhrAction.bind(this),
       };
-      this.formSubmitService_.fire(event);
+      devAssert(this.formSubmitService_).fire(event);
     } catch (e) {
       dev().error(TAG, 'Form submit service failed: %s', e);
     }
@@ -535,6 +542,8 @@ export class AmpForm {
     const asyncInputs = this.form_.getElementsByClassName(
       AsyncInputClasses.ASYNC_INPUT
     );
+
+    this.dirtinessHandler_.onSubmitting();
 
     // Do any assertions we may need to do
     // For NonXhrGET
@@ -557,6 +566,7 @@ export class AmpForm {
         const shouldSubmitFormElement = !event;
 
         this.handleNonXhrGet_(shouldSubmitFormElement);
+        this.dirtinessHandler_.onSubmitSuccess();
         return Promise.resolve();
       }
 
@@ -884,6 +894,7 @@ export class AmpForm {
         this.setState_(FormState.SUBMIT_SUCCESS);
         this.renderTemplate_(json || {}).then(() => {
           this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
+          this.dirtinessHandler_.onSubmitSuccess();
         });
       },
       error => {
@@ -925,6 +936,7 @@ export class AmpForm {
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
         this.triggerAction_(FormEvents.SUBMIT_ERROR, json);
+        this.dirtinessHandler_.onSubmitError();
       });
     });
   }
@@ -1103,6 +1115,13 @@ export class AmpForm {
    * @private
    */
   renderTemplate_(data) {
+    if (isArray(data)) {
+      data = dict();
+      user().warn(
+        TAG,
+        `Unexpected data type: ${data}. Expected non JSON array.`
+      );
+    }
     const container = this.form_./*OK*/ querySelector(`[${this.state_}]`);
     let p = Promise.resolve();
     if (container) {

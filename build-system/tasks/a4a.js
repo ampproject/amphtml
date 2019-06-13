@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'using strict';
+'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
@@ -25,8 +25,7 @@ const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {clean} = require('./clean');
-const {dist} = require('./dist');
+const {css} = require('./css');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -38,14 +37,12 @@ class Runner extends RuntimeTestRunner {
     if (argv.nobuild) {
       return;
     }
-    argv.fortesting = true;
-    argv.compiled = true;
-    await clean();
-    await dist();
+
+    await css();
   }
 }
 
-async function integration() {
+async function a4a() {
   if (shouldNotRun()) {
     return;
   }
@@ -53,7 +50,7 @@ async function integration() {
   maybePrintArgvMessages();
   refreshKarmaWdCache();
 
-  const config = new RuntimeTestConfig('integration');
+  const config = new RuntimeTestConfig('a4a');
   const runner = new Runner(config);
 
   await runner.setup();
@@ -62,16 +59,13 @@ async function integration() {
 }
 
 module.exports = {
-  integration,
+  a4a,
 };
 
-integration.description = 'Runs integration tests';
-integration.flags = {
+a4a.description = 'Runs a4a tests';
+a4a.flags = {
   'chrome_canary': '  Runs tests on Chrome Canary',
   'chrome_flags': '  Uses the given flags to launch Chrome',
-  'compiled':
-    '  Changes integration tests to use production JS binaries for execution',
-  'coverage': '  Run tests in code coverage mode',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',
@@ -80,7 +74,6 @@ integration.flags = {
   'nobuild': '  Skips build step',
   'nohelp': '  Silence help messages that are printed prior to test run',
   'safari': '  Runs tests on Safari',
-  'saucelabs': '  Runs tests on saucelabs (requires setup)',
   'testnames': '  Lists the name of each test being run',
   'verbose': '  With logging enabled',
   'watch': '  Watches for changes in files, runs corresponding test(s)',
