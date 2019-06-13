@@ -30,7 +30,6 @@ export class AmpStoryBlingLink extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    // Declare instance variables with type annotations.
   }
 
   /** @override */
@@ -39,20 +38,23 @@ export class AmpStoryBlingLink extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
-    // Get attributes, assertions of values, assign instance variables.
-    // Build lightweight DOM and append to this.element.
-  }
-
-  /** @override */
   layoutCallback() {
-    this.element.classList.add(PULSE_CLASS);
+    addPulseAnimation(this.element);
     setClassOnHover(this.element);
   }
 }
 
 /**
- * @param {!Element} el
+ * Adds pulse class that starts animation
+ * @param {!AmpStoryBlingLink} el 
+ */
+function addPulseAnimation(el){
+  el.classList.add(PULSE_CLASS);
+}
+
+/**
+ * Sets hover class and stops animation on hover
+ * @param {!AmpStoryBlingLink} el
  */
 function setClassOnHover(el) {
   el.addEventListener('mouseenter', () => {
