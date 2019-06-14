@@ -773,7 +773,7 @@ This attribute accepts any value accepted by the `object-position` CSS property.
 
 Example:
 
-<amp-img alt="Custom crop on amp-img and amp-video assets" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-background-position.gif" width="600" height="689">
+<amp-img alt="Custom crop on amp-img and amp-video assets" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-object-position.gif" width="600" height="689">
   <noscript>
     <img alt="Custom crop on amp-img and amp-video assets" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-background-position.gif" />
   </noscript>
