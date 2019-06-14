@@ -450,7 +450,36 @@ describes.realWin(
       });
 
       describe('touch keyboard suppression', () => {
-        it('should add and remove the readonly property on focus', () => {
+        it(
+          'should add and remove the readonly property on focus' +
+            ' for touch devices',
+          () => {
+            const {element, picker} = createDatePicker({
+              'mode': 'overlay',
+              'input-selector': '#date',
+            });
+            const input = document.createElement('input');
+            input.id = 'date';
+            element.appendChild(input);
+            sandbox.stub(picker.input_, 'isTouchDetected').returns(true);
+
+            return picker
+              .buildCallback()
+              .then(() => {
+                expect(input).to.have.attribute('data-i-amphtml-readonly');
+                return picker.layoutCallback();
+              })
+              .then(() => {
+                const fakeEvent = {target: input};
+                picker.addTouchReadonly_(fakeEvent);
+                expect(input.readOnly).to.be.true;
+                picker.removeTouchReadonly_(fakeEvent);
+                expect(input.readOnly).to.be.false;
+              });
+          }
+        );
+
+        it('should not add and remove the readonly property on desktop', () => {
           const {element, picker} = createDatePicker({
             'mode': 'overlay',
             'input-selector': '#date',
@@ -458,18 +487,18 @@ describes.realWin(
           const input = document.createElement('input');
           input.id = 'date';
           element.appendChild(input);
-          sandbox.stub(picker.input_, 'isTouchDetected').returns(true);
+          sandbox.stub(picker.input_, 'isTouchDetected').returns(false);
 
           return picker
             .buildCallback()
             .then(() => {
-              expect(input).to.have.attribute('data-i-amphtml-readonly');
+              expect(input).to.not.have.attribute('data-i-amphtml-readonly');
               return picker.layoutCallback();
             })
             .then(() => {
               const fakeEvent = {target: input};
               picker.addTouchReadonly_(fakeEvent);
-              expect(input.readOnly).to.be.true;
+              expect(input.readOnly).to.be.false;
               picker.removeTouchReadonly_(fakeEvent);
               expect(input.readOnly).to.be.false;
             });
