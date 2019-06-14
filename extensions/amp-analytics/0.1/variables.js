@@ -167,7 +167,7 @@ export class VariableService {
     this.register_('$BASE64', value => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
     this.register_('$IF', (value, thenValue, elseValue) =>
-      value ? thenValue : elseValue
+      stringToBool_(value) ? thenValue : elseValue
     );
     this.register_('$REPLACE', replaceMacro);
     this.register_(
@@ -342,4 +342,20 @@ export function getConsentStateStr(element) {
     }
     return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
   });
+}
+
+/**
+ * Converts string to boolean
+ * @param {string} str
+ * @return {bool}
+ */
+function stringToBool_(str) {
+  console.log(str);
+  return (
+    str !== 'false' &&
+    str !== '' &&
+    str !== '0' &&
+    str !== 'null' &&
+    str !== 'undefined'
+  );
 }
