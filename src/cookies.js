@@ -125,7 +125,7 @@ export function getHighestAvailableDomain(win) {
     // Verify the validness of the amp-cookie-scope meta value
     const sourceOrigin = getSourceOrigin(win.location.href);
     // Verify the meta tag content value is valid
-    if (sourceOrigin.endsWith('.' + cookieScope)) {
+    if (endsWith(sourceOrigin, '.' + cookieScope)) {
       return cookieScope;
     } else {
       // When the amp-cookie-scope value is invalid, fallback to the exact origin
