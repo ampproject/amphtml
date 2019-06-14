@@ -30,6 +30,7 @@ import {
   isRTL,
   iterateCursor,
   scopedQuerySelector,
+  tryFocus,
 } from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, listen} from '../../../src/event-helper';
@@ -885,7 +886,7 @@ export class AmpDatePicker extends AMP.BaseElement {
         this.mode_ == DatePickerMode.OVERLAY &&
         input.isTouchDetected()
       ) {
-        existingField.readOnly = true;
+        setNonValidationReadonly(existingField, true);
       }
       return existingField;
     }
@@ -949,6 +950,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.listen_(root, 'input', this.handleInput_.bind(this));
     // TODO(cvializ): Add aria message to use down arrow to trigger calendar.
     this.listen_(root, 'focusin', this.handleFocus_.bind(this));
+    this.listen_(root, 'focusout', this.removeTouchReadonly_.bind(this));
     this.listen_(root, 'keydown', this.handleKeydown_.bind(this));
   }
 
@@ -983,11 +985,48 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
+   * Handle mousedown to prevent the mobile keyboard
+   * @param {!Event} e
+   * @private
+   */
+  addTouchReadonly_(e) {
+    const target = dev().assertElement(e.target);
+
+    if (this.isDateField_(target) && isNonValidationReadonly(target)) {
+      if (!target.readOnly) {
+        target.readOnly = true;
+        target.dataset[AMP_DATE_BLUR_DATA_ATTR] = true; // Prevent an infinite loop between focus and blur
+        target.blur(); // Blur to close the keyboard
+        tryFocus(target); // Focus to return the input to focus
+      }
+      delete target.dataset[AMP_DATE_BLUR_DATA_ATTR]; // cleanup
+    }
+  }
+
+  /**
+   * Handle mouseup to prevent the mobile keyboard
+   * @param {!Event} e
+   * @private
+   */
+  removeTouchReadonly_(e) {
+    const target = dev().assertElement(e.target);
+
+    if (
+      this.isDateField_(target) &&
+      isNonValidationReadonly(target) &&
+      !target.dataset[AMP_DATE_BLUR_DATA_ATTR]
+    ) {
+      target.readOnly = false;
+    }
+  }
+
+  /**
    * Handle focus events in the document.
    * @param {!Event} e
    * @private
    */
   handleFocus_(e) {
+    this.addTouchReadonly_(e);
     this.maybeTransitionWithFocusChange_(dev().assertElement(e.target));
   }
 
@@ -1920,6 +1959,33 @@ export class AmpDatePicker extends AMP.BaseElement {
       });
     });
   }
+}
+
+const AMP_READONLY_DATA_ATTR = 'iAmphtmlReadonly';
+
+const AMP_DATE_BLUR_DATA_ATTR = 'iAmphtmlDateBlur';
+
+/**
+ *
+ * @param {!Element} element
+ * @param {boolean} toggle
+ */
+function setNonValidationReadonly(element, toggle) {
+  if (!toggle) {
+    delete element.dataset[AMP_READONLY_DATA_ATTR];
+    return;
+  }
+
+  element.dataset[AMP_READONLY_DATA_ATTR] = true;
+}
+
+/**
+ *
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function isNonValidationReadonly(element) {
+  return Boolean(element.dataset[AMP_READONLY_DATA_ATTR]);
 }
 
 AMP.extension(TAG, '0.1', AMP => {
