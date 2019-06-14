@@ -6,7 +6,8 @@
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
     "linker-meta-opt-in",
-    "inabox-remove-height-auto"
+    "inabox-remove-height-auto",
+    "inabox-css-cleanup"
   ],
   "allow-url-opt-in": [
     "pump-early-frame",
