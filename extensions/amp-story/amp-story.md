@@ -735,6 +735,26 @@ An `amp-story-grid-layer` can contain any of the following elements:
 
 #### Optional customization
 
+##### Crop `amp-img` and `amp-video` assets using `object-position`
+
+The `object-position` attribute can be used on `<amp-img>` and `<amp-video>` elements to specify the alignment of the asset within its container (crop).
+By default these assets are centered and, depending on the viewport ratio, have their edges are cropped out of the container. Because the zone of interest of an asset is not always its center, the `object-position` allows specifying what part of the image has to remain visible.
+This attribute accepts any value accepted by the `object-position` CSS property.
+
+Example:
+
+<amp-img alt="Custom crop on amp-img and amp-video assets" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-background-position.gif" width="600" height="689">
+  <noscript>
+    <img alt="Custom crop on amp-img and amp-video assets" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-background-position.gif" />
+  </noscript>
+</amp-img>
+
+This same image can be used for both mobile portrait and landscape desktop using the `object-position` this way:
+
+```html
+<amp-img src="cat.jpg" object-position="75% 40%"></amp-img>
+```
+
 ##### `data-text-background-color`
 
 The `data-text-background-color` attribute highlights the text of the element with a specified color. To highlight the entire block, add this attribute directly to the text element. To only highlight the text, add the attribute and text to an inner <span>. Note that works anywhere inside an `<amp-story-page>`, not just in `<amp-story-grid-layer>`.
