@@ -362,7 +362,6 @@ export function getConsentStateStr(element) {
  * @return {bool}
  */
 function stringToBool_(str) {
-  console.log(str);
   return (
     str !== 'false' &&
     str !== '' &&
