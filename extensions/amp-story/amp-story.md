@@ -733,6 +733,36 @@ An `amp-story-grid-layer` can contain any of the following elements:
   </tr>
 </table>
 
+#### Pre templated UI
+
+##### Landscape half-half UI
+
+The landscape half-half pre templated UI will resize the `<amp-story-grid-layer>` element to take half of the screen rather than the full screen, and be positioned either on the half left or half right of the viewport. This attribute only affects landscape viewports, and is ignored on portrait viewports.
+This template makes it easier to design full bleed landscape stories: splitting the screen in two halves gives each half a portrait ratio on most devices, allowing re-using the portrait assets, design, and templates already built for portrait stories.
+
+The `position` attribute on the `<amp-story-grid-layer>` element accepts two values: `landscape-half-left` or `landscape-half-right`.
+
+Note: your story needs to enable the `supports-landscape` mode to use this template.
+
+Example:
+
+<amp-img alt="Landscape half-half UI template" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" width="600" height="287">
+  <noscript>
+    <img alt="Landscape half-half UI template" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" />
+  </noscript>
+</amp-img>
+
+```html
+<amp-story-page id="foo">
+  <amp-story-grid-layer template="fill" position="landscape-half-left">
+    <amp-img src="cat.jpg"></amp-img>
+  </amp-story-grid-layer>
+  <amp-story-grid-layer template="vertical" position="landscape-half-right">
+    <h2>Cat ipsum dolor sit amet...</h2>
+  </amp-story-grid-layer>
+</amp-story-page>
+```
+
 #### Optional customization
 
 ##### Crop `amp-img` and `amp-video` assets using `object-position`
