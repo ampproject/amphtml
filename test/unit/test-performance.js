@@ -16,6 +16,7 @@
 
 import * as lolex from 'lolex';
 import {Services} from '../../src/services';
+import {VisibilityState} from '../../src/visibility-state';
 import {getMode} from '../../src/mode';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {installRuntimeServices} from '../../src/service/core-services';
@@ -1024,6 +1025,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
     let fakeWin;
     let windowEventListeners;
     let performanceObserver;
+    let viewerVisibilityState;
 
     beforeEach(() => {
       // Fake window to fake `document.visibilityState`.
@@ -1075,6 +1077,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         onVisibilityChanged: () => {},
         whenFirstVisible: () => unresolvedPromise,
         whenMessagingReady: () => {},
+        getVisibilityState: () => viewerVisibilityState,
       });
       sandbox.stub(Services, 'resourcesForDoc').returns({
         getResourcesInRect: () => unresolvedPromise,
@@ -1180,6 +1183,31 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       // Note: Don't fire visibilitychange (not supported in this case).
       fakeWin.document.visibilityState = 'hidden';
       fireEvent('beforeunload');
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'lj',
+        delta: 0.55,
+      });
+    });
+
+    it('forwards layout jank metric on viewer visibility change to inactive', () => {
+      // Specify an Android Chrome user agent.
+      sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
+
+      // Fake layoutJank that occured before the Performance service is started.
+      fakeWin.performance.getEntriesByType
+        .withArgs('layoutJank')
+        .returns([
+          {entryType: 'layoutJank', fraction: 0.25},
+          {entryType: 'layoutJank', fraction: 0.3},
+        ]);
+      const perf = getPerformance();
+      perf.coreServicesAvailable();
+      viewerVisibilityState = VisibilityState.INACTIVE;
+      perf.onViewerVisibilityChange_();
 
       expect(perf.events_.length).to.equal(1);
       expect(perf.events_[0]).to.be.jsonEqual({
