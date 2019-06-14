@@ -42,10 +42,14 @@ describe('amp-accordion', function() {
         iframe.width = 300;
       });
 
-      it('should respect the media attribute', () => {
+      it('should hide the media attribute', () => {
         const accordion = doc.getElementById('media-accordion');
         expect(iframe.clientWidth).to.equal(300);
         expect(accordion.className).to.match(/i-amphtml-hidden-by-media-query/);
+      });
+
+      it('should show the media attribute', () => {
+        const accordion = doc.getElementById('media-accordion');
         iframe.width = 600;
         expect(iframe.clientWidth).to.equal(600);
         return timeout(200).then(() => {
