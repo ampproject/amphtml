@@ -1139,8 +1139,8 @@ describe
           expect(foo.textContent).to.not.equal('bar');
         });
 
-        describe('AmpEvents.VALUE_CHANGE', () => {
-          it('should dispatch VALUE_CHANGE on <input [value]> changes', () => {
+        describe('AmpEvents.FORM_VALUE_CHANGE', () => {
+          it('should dispatch FORM_VALUE_CHANGE on <input [value]> changes', () => {
             const element = createElement(
               env,
               container,
@@ -1152,13 +1152,13 @@ describe
             return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
               expect(spy).to.have.been.calledOnce;
               expect(spy).calledWithMatch({
-                type: AmpEvents.VALUE_CHANGE,
+                type: AmpEvents.FORM_VALUE_CHANGE,
                 bubbles: true,
               });
             });
           });
 
-          it('should dispatch VALUE_CHANGE on <input [checked]> changes', () => {
+          it('should dispatch FORM_VALUE_CHANGE on <input [checked]> changes', () => {
             const element = createElement(
               env,
               container,
@@ -1171,14 +1171,14 @@ describe
               () => {
                 expect(spy).to.have.been.calledOnce;
                 expect(spy).calledWithMatch({
-                  type: AmpEvents.VALUE_CHANGE,
+                  type: AmpEvents.FORM_VALUE_CHANGE,
                   bubbles: true,
                 });
               }
             );
           });
 
-          it('should dispatch VALUE_CHANGE on <option [selected]> changes', () => {
+          it('should dispatch FORM_VALUE_CHANGE on <option [selected]> changes', () => {
             const element = createElement(
               env,
               container,
@@ -1191,14 +1191,14 @@ describe
               () => {
                 expect(spy).to.have.been.calledOnce;
                 expect(spy).calledWithMatch({
-                  type: AmpEvents.VALUE_CHANGE,
+                  type: AmpEvents.FORM_VALUE_CHANGE,
                   bubbles: true,
                 });
               }
             );
           });
 
-          it('should dispatch VALUE_CHANGE on <textarea [text]> changes', () => {
+          it('should dispatch FORM_VALUE_CHANGE on <textarea [text]> changes', () => {
             const element = createElement(
               env,
               container,
@@ -1210,13 +1210,13 @@ describe
             return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
               expect(spy).to.have.been.calledOnce;
               expect(spy).calledWithMatch({
-                type: AmpEvents.VALUE_CHANGE,
+                type: AmpEvents.FORM_VALUE_CHANGE,
                 bubbles: true,
               });
             });
           });
 
-          it('should NOT dispatch VALUE_CHANGE on other attributes changes', () => {
+          it('should NOT dispatch FORM_VALUE_CHANGE on other attributes changes', () => {
             const element = createElement(
               env,
               container,
@@ -1230,7 +1230,7 @@ describe
             });
           });
 
-          it('should NOT dispatch VALUE_CHANGE on other element changes', () => {
+          it('should NOT dispatch FORM_VALUE_CHANGE on other element changes', () => {
             const element = createElement(env, container, '[text]="foo"', 'p');
             const spy = sandbox.spy(element, 'dispatchEvent');
 

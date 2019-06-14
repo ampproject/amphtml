@@ -1151,7 +1151,7 @@ export class Bind {
         }
 
         if (isPropertyAFormValue(element.tagName, property)) {
-          dispatchAmpValueChangeEvent(this.localWin_, element);
+          dispatchAmpFormValueChangeEvent(this.localWin_, element);
         }
       });
 
@@ -1673,14 +1673,14 @@ function isPropertyAFormValue(tagName, property) {
 }
 
 /**
- * Dispatches an `AmpEvents.VALUE_CHANGE` event at the given element.
+ * Dispatches an `AmpEvents.FORM_VALUE_CHANGE` event at the given element.
  * @param {!Window} win
  * @param {!Element} element
  */
-function dispatchAmpValueChangeEvent(win, element) {
+function dispatchAmpFormValueChangeEvent(win, element) {
   const ampValueChangeEvent = createCustomEvent(
     win,
-    AmpEvents.VALUE_CHANGE,
+    AmpEvents.FORM_VALUE_CHANGE,
     /* detail */ null,
     {bubbles: true}
   );
