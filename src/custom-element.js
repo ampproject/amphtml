@@ -828,7 +828,9 @@ function createBaseCustomElementClass(win) {
           // Resources can now be initialized since the ampdoc is now available.
           this.layers_ = Services.layersForDoc(this.ampdoc_);
         }
-        this.getLayers().add(this);
+        const layers = this.getLayers();
+        layers.add(this);
+        layers.declareLayer(this);
       }
       this.getResources().add(this);
 
