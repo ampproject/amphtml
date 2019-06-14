@@ -236,10 +236,10 @@ export class LiveListManager {
    */
   updateLiveList_(liveList) {
     // amp-live-list elements can be appended dynamically by another
-    // component using the [dynamic-live-list] attribute.
-    const id = liveList.hasAttribute('dynamic-live-list')
-      ? liveList.getAttribute('dynamic-live-list')
-      : liveList.getAttribute('id');
+    // component using the dynamic-list suffix.
+    const dynamicId = liveList.id + 'dynamic-list';
+    const id =
+      dynamicId in this.liveLists_ ? dynamicId : liveList.getAttribute('id');
     userAssert(id, 'amp-live-list must have an id.');
     userAssert(
       id in this.liveLists_,
