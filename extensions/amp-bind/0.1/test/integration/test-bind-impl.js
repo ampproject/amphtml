@@ -1138,6 +1138,109 @@ describe
           yield onBindReadyAndSetState(env, bind, {foo: 'bar'});
           expect(foo.textContent).to.not.equal('bar');
         });
+
+        describe('AmpEvents.VALUE_CHANGE dispatches', () => {
+          it('should dispatch on <input [value]> changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[value]="foo"',
+              'input'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
+              expect(spy).to.have.been.calledOnce;
+              expect(spy).calledWithMatch({
+                type: AmpEvents.VALUE_CHANGE,
+                bubbles: true,
+              });
+            });
+          });
+
+          it('should dispatch on <input [checked]> changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[checked]="foo"',
+              'input'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'checked'}).then(
+              () => {
+                expect(spy).to.have.been.calledOnce;
+                expect(spy).calledWithMatch({
+                  type: AmpEvents.VALUE_CHANGE,
+                  bubbles: true,
+                });
+              }
+            );
+          });
+
+          it('should dispatch on <option [selected]> changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[selected]="foo"',
+              'option'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'selected'}).then(
+              () => {
+                expect(spy).to.have.been.calledOnce;
+                expect(spy).calledWithMatch({
+                  type: AmpEvents.VALUE_CHANGE,
+                  bubbles: true,
+                });
+              }
+            );
+          });
+
+          it('should dispatch on <textarea [text]> changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[text]="foo"',
+              'textarea'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
+              expect(spy).to.have.been.calledOnce;
+              expect(spy).calledWithMatch({
+                type: AmpEvents.VALUE_CHANGE,
+                bubbles: true,
+              });
+            });
+          });
+
+          it('should NOT dispatch on other attributes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[name]="foo"',
+              'input'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'name'}).then(() => {
+              expect(spy).to.not.have.been.called;
+            });
+          });
+
+          it('should NOT dispatch on other elements', () => {
+            const element = createElement(env, container, '[text]="foo"', 'p');
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'selected'}).then(
+              () => {
+                expect(spy).to.not.have.been.called;
+              }
+            );
+          });
+        });
       }
     ); // in single ampdoc
   });

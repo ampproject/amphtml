@@ -26,12 +26,12 @@ import {
   iterateCursor,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
+import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {findIndex, remove} from '../../../src/utils/array';
-import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
@@ -1138,15 +1138,20 @@ export class Bind {
 
       updates.forEach(update => {
         const {boundProperty, newValue} = update;
+        const {property} = boundProperty;
         const mutation = this.applyBinding_(boundProperty, element, newValue);
+
         if (mutation) {
           mutations[mutation.name] = mutation.value;
-          const {property} = boundProperty;
           if (property == 'width') {
             width = isFiniteNumber(newValue) ? Number(newValue) : width;
           } else if (property == 'height') {
             height = isFiniteNumber(newValue) ? Number(newValue) : height;
           }
+        }
+
+        if (isPropertyAFormValue(element.tagName, property)) {
+          dispatchAmpValueChangeEvent(this.localWin_, element);
         }
       });
 
@@ -1645,4 +1650,39 @@ export class Bind {
       this.localWin_.dispatchEvent(event);
     }
   }
+}
+
+/**
+ * Returns whether the element's property represents the value of a form field.
+ * @param {string} tagName
+ * @param {string} property
+ * @return {boolean}
+ */
+function isPropertyAFormValue(tagName, property) {
+  switch (property) {
+    case 'checked':
+    case 'value':
+      return tagName === 'INPUT';
+    case 'selected':
+      return tagName === 'OPTION';
+    case 'text':
+      return tagName === 'TEXTAREA';
+    default:
+      return false;
+  }
+}
+
+/**
+ * Dispatches an `AmpEvents.VALUE_CHANGE` event at the given element.
+ * @param {!Window} win
+ * @param {!Element} element
+ */
+function dispatchAmpValueChangeEvent(win, element) {
+  const ampValueChangeEvent = createCustomEvent(
+    win,
+    AmpEvents.VALUE_CHANGE,
+    /* detail */ null,
+    {bubbles: true}
+  );
+  element.dispatchEvent(ampValueChangeEvent);
 }
