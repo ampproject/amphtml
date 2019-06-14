@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-describe('amp-accordion', function() {
+describe.skipEdge().run('amp-accordion', function() {
   this.timeout(10000);
   const extensions = ['amp-accordion'];
   const body = `
@@ -42,14 +42,10 @@ describe('amp-accordion', function() {
         iframe.width = 300;
       });
 
-      it('should hide the media attribute', () => {
+      it('should respect the media attribute', () => {
         const accordion = doc.getElementById('media-accordion');
         expect(iframe.clientWidth).to.equal(300);
         expect(accordion.className).to.match(/i-amphtml-hidden-by-media-query/);
-      });
-
-      it('should show the media attribute', () => {
-        const accordion = doc.getElementById('media-accordion');
         iframe.width = 600;
         expect(iframe.clientWidth).to.equal(600);
         return timeout(200).then(() => {
