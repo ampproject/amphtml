@@ -442,6 +442,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/22718',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
   },
+  {
+    id: 'new-loaders',
+    name: 'New default loaders',
+    spec: 'https://github.com/ampproject/amphtml/issues/20237',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
+  },
 ];
 
 if (getMode().localDev) {

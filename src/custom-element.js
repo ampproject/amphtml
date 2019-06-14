@@ -15,6 +15,7 @@
  */
 
 import * as dom from './dom';
+import * as newLoader from '../src/loader-new';
 import {AmpEvents} from './amp-events';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
@@ -550,6 +551,14 @@ function createBaseCustomElementClass(win) {
             const placeholder = this.createPlaceholder();
             if (placeholder) {
               this.appendChild(placeholder);
+            } else {
+              const win = toWin(this.ownerDocument.defaultView);
+              if (newLoader.isNewLoaderExperimentEnabled(win)) {
+                const defaultPlaceholder = newLoader.getDefaultPlaceholder(
+                  this.ownerDocument
+                );
+                this.appendChild(defaultPlaceholder);
+              }
             }
           }
         },
@@ -1641,6 +1650,16 @@ function createBaseCustomElementClass(win) {
       ) {
         return false;
       }
+
+      // Additional eligibility logic for new loaders
+      const win = toWin(this.ownerDocument.defaultView);
+      if (
+        newLoader.isNewLoaderExperimentEnabled(win) &&
+        newLoader.isLoaderIneligible(this)
+      ) {
+        return false;
+      }
+
       return true;
     }
 
@@ -1669,6 +1688,7 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.loadingContainer_) {
         const doc = this.ownerDocument;
+        const win = toWin(doc.defaultView);
         devAssert(doc);
 
         const container = htmlFor(/** @type {!Document} */ (doc))`
@@ -1676,11 +1696,11 @@ function createBaseCustomElementClass(win) {
               amp-hidden"></div>`;
 
         let loadingElement;
-        if (isExperimentOn(win, 'new-loaders')) {
-          loadingElement = createNewLoaderElement(
+        if (newLoader.isNewLoaderExperimentEnabled(win)) {
+          loadingElement = newLoader.createLoaderElement(
             /** @type {!Document} */ (doc),
-            container,
-            this);
+            this
+          );
         } else {
           loadingElement = createLegacyLoaderElement(
             /** @type {!Document} */ (doc),
