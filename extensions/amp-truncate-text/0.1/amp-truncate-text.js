@@ -63,13 +63,13 @@ export class AmpTruncateText extends AMP.BaseElement {
     this.content_ = null;
 
     /** @private {?Element} */
-    this.persistentSlot_ = null;
-
-    /** @private {?Element} */
     this.collapsedSlot_ = null;
 
     /** @private {?Element} */
     this.expandedSlot_ = null;
+
+    /** @private {?Element} */
+    this.persistentSlot_ = null;
 
     /** @private {boolean} */
     this.useShadow_ = false;
@@ -115,34 +115,35 @@ export class AmpTruncateText extends AMP.BaseElement {
     this.content_ = html`
       <div class="i-amphtml-truncate-content">
         <span class="i-amphtml-default-slot"></span>
+        <span class="i-amphtml-truncate-collapsed-slot" name="collapsed"></span>
+        <span class="i-amphtml-truncate-expanded-slot" name="expanded"></span>
         <span
           class="i-amphtml-truncate-persistent-slot"
           name="persistent"
         ></span>
-        <span class="i-amphtml-truncate-collapsed-slot" name="collapsed"></span>
-        <span class="i-amphtml-truncate-expanded-slot" name="expanded"></span>
       </div>
     `;
 
     const defaultSlot = this.content_.querySelector('.i-amphtml-default-slot');
-    this.persistentSlot_ = this.content_.querySelector(
-      '.i-amphtml-truncate-persistent-slot'
-    );
+
     this.collapsedSlot_ = this.content_.querySelector(
       '.i-amphtml-truncate-collapsed-slot'
     );
     this.expandedSlot_ = this.content_.querySelector(
       '.i-amphtml-truncate-expanded-slot'
     );
+    this.persistentSlot_ = this.content_.querySelector(
+      '.i-amphtml-truncate-persistent-slot'
+    );
 
-    iterateCursor(this.element.querySelectorAll('[slot="persistent"]'), el => {
-      this.persistentSlot_.appendChild(el);
-    });
     iterateCursor(this.element.querySelectorAll('[slot="collapsed"]'), el => {
       this.collapsedSlot_.appendChild(el);
     });
     iterateCursor(this.element.querySelectorAll('[slot="expanded"]'), el => {
       this.expandedSlot_.appendChild(el);
+    });
+    iterateCursor(this.element.querySelectorAll('[slot="persistent"]'), el => {
+      this.persistentSlot_.appendChild(el);
     });
     this.getRealChildNodes().forEach(node => {
       defaultSlot.appendChild(node);
@@ -162,17 +163,17 @@ export class AmpTruncateText extends AMP.BaseElement {
       html`
         <div class="content">
           <slot></slot>
-          <slot class="persistent-slot" name="persistent"></slot>
           <slot class="collapsed-slot" name="collapsed"></slot>
           <slot class="expanded-slot" name="expanded"></slot>
+          <slot class="persistent-slot" name="persistent"></slot>
         </div>
       `
     );
 
     this.content_ = null;
-    this.persistentSlot_ = sr.querySelector('.persistent-slot');
     this.collapsedSlot_ = sr.querySelector('.collapsed-slot');
     this.expandedSlot_ = sr.querySelector('.expanded-slot');
+    this.persistentSlot_ = sr.querySelector('.persistent-slot');
   }
 
   /** @override */
