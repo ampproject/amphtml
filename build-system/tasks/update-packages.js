@@ -119,8 +119,8 @@ function patchRegisterElement() {
 }
 
 /**
- * Adding browserify.transform in package.json of dependencies doesn't work
- * on subdirectories of dist/, and I can't figure out which option enables it.
+ * transformEs6Packages() doesn't work on subdirectories of dist/,
+ * and I can't figure out which option enables it.
  * Just move "dist/amp/main.mjs" to "dist/amp.main.mjs" as a workaround.
  */
 function moveWorkerDom() {
