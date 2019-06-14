@@ -100,8 +100,11 @@ const DatePickerMode = {
   OVERLAY: 'overlay',
 };
 
-/** @enum {string} */
-const DatePickerState = {
+/**
+ * @enum {string}
+ * @private visible for testing
+ */
+export const DatePickerState = {
   OVERLAY_CLOSED: 'overlay-closed',
   OVERLAY_OPEN_INPUT: 'overlay-open-input',
   OVERLAY_OPEN_PICKER: 'overlay-open-picker',
@@ -343,7 +346,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
 
-    /** @private {?FiniteStateMachine} */
+    /** @private {?FiniteStateMachine} visible for testing */
     this.stateMachine_ = null;
 
     /** @private */

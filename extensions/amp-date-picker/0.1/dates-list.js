@@ -70,16 +70,17 @@ export class DatesList {
    */
   firstDateAfter(date) {
     const m = this.moment_(date);
+    const mDate = m.toDate();
 
     const firstDatesAfter = [];
     for (let i = 0; i < this.dates_.length; i++) {
-      if (this.dates_[i].toDate() >= date) {
+      if (this.dates_[i].toDate() >= mDate) {
         firstDatesAfter.push(this.dates_[i]);
         break;
       }
     }
     const rruleDates = this.rrulestrs_
-      .map(rrule => rrule.after(m.toDate()))
+      .map(rrule => rrule.after(mDate))
       .filter(Boolean);
     firstDatesAfter.concat(rruleDates);
 
