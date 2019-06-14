@@ -126,6 +126,11 @@ amp-story[standalone] {
   min-width: initial !important;
 }
 
+amp-story[standalone].amp-notbuilt {
+  /* Ensures amp-story has a height and is prerendered. */
+  min-height: 1px !important;
+}
+
 amp-story[standalone]:-webkit-full-screen {
   height: 100vh !important;
   max-height: none !important;
