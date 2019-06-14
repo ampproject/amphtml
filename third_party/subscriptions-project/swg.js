@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.51 */
+/** Version: 0.1.22.55 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -1853,12 +1853,15 @@ var activityPorts_12 = activityPorts.isAbortError;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /** @enum {number} */
 const AnalyticsEvent = {
   UNKNOWN: 0,
   IMPRESSION_PAYWALL: 1,
   IMPRESSION_AD: 2,
   IMPRESSION_OFFERS: 3,
+  IMPRESSION_SUBSCRIBE_BUTTON: 4,
+  IMPRESSION_SMARTBOX: 5,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -1869,7 +1872,18 @@ const AnalyticsEvent = {
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
 };
+/** @enum {number} */
+const EventOriginator = {
+  UNKNOWN_CLIENT: 0,
+  SWG_CLIENT: 1,
+  AMP_CLIENT: 2,
+  PROPENSITY_CLIENT: 3,
+  SWG_SERVER: 4,
+};
 
+/**
+ * @implements {Message}
+ */
 class AnalyticsContext {
  /**
   * @param {!Array=} data
@@ -2032,10 +2046,11 @@ class AnalyticsContext {
 
   /**
    * @return {!Array}
+   * @override
    */
   toArray() {
     return [
-      'AnalyticsContext',  // message type
+      this.label(),  // message label
       this.embedderOrigin_,  // field 1 - embedder_origin
       this.transactionId_,  // field 2 - transaction_id
       this.referringOrigin_,  // field 3 - referring_origin
@@ -2047,9 +2062,19 @@ class AnalyticsContext {
       this.label_,  // field 9 - label
     ];
   }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsContext';
+  }
 }
 
-
+/**
+ * @implements {Message}
+ */
 class AnalyticsEventMeta {
  /**
   * @param {!Array=} data
@@ -2093,17 +2118,28 @@ class AnalyticsEventMeta {
 
   /**
    * @return {!Array}
+   * @override
    */
   toArray() {
     return [
-      'AnalyticsEventMeta',  // message type
+      this.label(),  // message label
       this.eventOriginator_,  // field 1 - event_originator
       this.isFromUserAction_,  // field 2 - is_from_user_action
     ];
   }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsEventMeta';
+  }
 }
 
-
+/**
+ * @implements {Message}
+ */
 class AnalyticsRequest {
  /**
   * @param {!Array=} data
@@ -2120,6 +2156,10 @@ class AnalyticsRequest {
     /** @private {?AnalyticsEventMeta} */
     this.meta_ = (data[3] == null || data[3] == undefined) ? null : new
         AnalyticsEventMeta(data[3]);
+
+    /** @private {?EventParams} */
+    this.params_ = (data[4] == null || data[4] == undefined) ? null : new
+        EventParams(data[4]);
   }
 
   /**
@@ -2165,15 +2205,86 @@ class AnalyticsRequest {
   }
 
   /**
+   * @return {?EventParams}
+   */
+  getParams() {
+    return this.params_;
+  }
+
+  /**
+   * @param {!EventParams} value
+   */
+  setParams(value) {
+    this.params_ = value;
+  }
+
+  /**
    * @return {!Array}
+   * @override
    */
   toArray() {
     return [
-      'AnalyticsRequest',  // message type
+      this.label(),  // message label
       this.context_ ? this.context_.toArray() : [], // field 1 - context
       this.event_,  // field 2 - event
       this.meta_ ? this.meta_.toArray() : [], // field 3 - meta
+      this.params_ ? this.params_.toArray() : [], // field 4 - params
     ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class EventParams {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.smartboxMessage_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSmartboxMessage() {
+    return this.smartboxMessage_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSmartboxMessage(value) {
+    this.smartboxMessage_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.smartboxMessage_,  // field 1 - smartbox_message
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EventParams';
   }
 }
 
@@ -2699,7 +2810,7 @@ function removeChildren(parent) {
 
 /**
  * Injects the provided styles in the HEAD section of the document.
- * @param {*} doc The document object.
+ * @param {!../model/doc.Doc} doc The document object.
  * @param {string} styleText The style string.
  * @return {!Element}
  */
@@ -2817,6 +2928,39 @@ function toString$1(value) {
  */
 function isObject(value) {
   return toString$1(value) === '[object Object]';
+}
+
+/**
+ * Checks whether `s` is a valid value of `enumObj`.
+ *
+ * @param {!Object<T>} enumObj
+ * @param {T} s
+ * @return {boolean}
+ * @template T
+ */
+function isEnumValue(enumObj, s) {
+  for (const k in enumObj) {
+    if (enumObj[k] === s) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * True if the value is a function.
+ * @param {*} value
+ */
+function isFunction(value) {
+  return value !== null && typeof value === 'function';
+}
+
+/**
+ * True if the value is either true or false.
+ * @param {?*} value
+ */
+function isBoolean(value) {
+  return value === true || value === false;
 }
 
 /**
@@ -3058,7 +3202,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.51',
+    '_client': 'SwG 0.1.22.55',
   });
 }
 
@@ -3116,13 +3260,13 @@ const Theme = {
  */
 class SmartSubscriptionButtonApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {!Element} button
-   * @param {*} options
+   * @param {!../api/subscriptions.ButtonOptions} options
    * @param {function()=} callback
    */
   constructor(deps, button, options, callback) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -3142,7 +3286,7 @@ class SmartSubscriptionButtonApi {
     /** @private @const {!Element} */
     this.button_ = button;
 
-    /** @private {*} */
+    /** @private {!../api/subscriptions.ButtonOptions} */
     this.options_ = options;
 
     /** @private const {function()=} */
@@ -3257,10 +3401,10 @@ const TITLE_LANG_MAP = {
 class ButtonApi {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    */
   constructor(doc) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
   }
 
@@ -3287,7 +3431,7 @@ class ButtonApi {
   }
 
   /**
-   * @param {*)} optionsOrCallback
+   * @param {!../api/subscriptions.ButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {!Element}
    */
@@ -3298,7 +3442,7 @@ class ButtonApi {
 
   /**
    * @param {!Element} button
-   * @param {*)} optionsOrCallback
+   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {!Element}
    */
@@ -3319,13 +3463,13 @@ class ButtonApi {
 
   /**
    *
-   * @param {*)} optionsOrCallback
-   * @return {*}
+   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
+   * @return {!../api/subscriptions.ButtonOptions}
    * @private
    */
   getOptions_(optionsOrCallback) {
-    const options = /** @type {*} */
-        (typeof optionsOrCallback != 'function' ?
+    const options = /** @type {!../api/subscriptions.ButtonOptions} */
+        (optionsOrCallback && typeof optionsOrCallback != 'function' ?
         optionsOrCallback : {'theme': Theme.LIGHT});
 
     const theme = options['theme'];
@@ -3337,7 +3481,7 @@ class ButtonApi {
 
   /**
    *
-   * @param {*)} optionsOrCallback
+   * @param {?../api/subscriptions.ButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {function()|function(Event):boolean}
    * @private
@@ -3350,9 +3494,9 @@ class ButtonApi {
   }
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {!Element} button
-   * @param {*)} optionsOrCallback
+   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {!Element}
    */
@@ -3416,14 +3560,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise<*>)} callback
+   * @param {function(!Promise<!../api/entitlements.Entitlements>)} callback
    */
   setOnEntitlementsResponse(callback) {
     this.setCallback_(CallbackId.ENTITLEMENTS, callback);
   }
 
   /**
-   * @param {!Promise<*>} promise
+   * @param {!Promise<!../api/entitlements.Entitlements>} promise
    */
   triggerEntitlementsResponse(promise) {
     return this.trigger_(
@@ -3439,14 +3583,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(*)} callback
+   * @param {function(!../api/subscriptions.LoginRequest)} callback
    */
   setOnLoginRequest(callback) {
     this.setCallback_(CallbackId.LOGIN_REQUEST, callback);
   }
 
   /**
-   * @param {*} request
+   * @param {!../api/subscriptions.LoginRequest} request
    * @return {boolean} Whether the callback has been found.
    */
   triggerLoginRequest(request) {
@@ -3516,21 +3660,21 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise<*>)} callback
+   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
    */
   setOnSubscribeResponse(callback) {
     this.setCallback_(CallbackId.SUBSCRIBE_RESPONSE, callback);
   }
 
   /**
-   * @param {function(!Promise<*>)} callback
+   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
    */
   setOnContributionResponse(callback) {
     this.setCallback_(CallbackId.CONTRIBUTION_RESPONSE, callback);
   }
 
   /**
-   * @param {!Promise<*>} responsePromise
+   * @param {!Promise<!../api/subscribe-response.SubscribeResponse>} responsePromise
    * @return {boolean} Whether the callback has been found.
    */
   triggerSubscribeResponse(responsePromise) {
@@ -3540,7 +3684,7 @@ class Callbacks {
   }
 
   /**
-   * @param {!Promise<*>} responsePromise
+   * @param {!Promise<!../api/subscribe-response.SubscribeResponse>} responsePromise
    * @return {boolean} Whether the callback has been found.
    */
   triggerContributionResponse(responsePromise) {
@@ -3691,7 +3835,7 @@ class View {
   getElement() {}
 
   /**
-   * @param {*} unusedDialog
+   * @param {!./dialog.Dialog} unusedDialog
    * @return {!Promise}
    * @abstract
    */
@@ -3935,7 +4079,7 @@ class ActivityIframeView extends View {
 
   /**
    * @param {!web-activities/activity-ports.ActivityIframePort} port
-   * @param {*} dialog
+   * @param {!../components/dialog.Dialog} dialog
    * @return {!Promise}
    */
   onOpenIframeResponse_(port, dialog) {
@@ -4825,40 +4969,66 @@ const Event = {
    * IMPRESSION_PAYWALL event.
    * User hits a paywall.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * If the user has run out of metering, and that’s why was shown
    * a paywall, that would be a passive impression of the paywall.
-   * For example; {‘is_active’: false}
+   * For example:
+   * const propensityEvent = {
+   *  name: 'paywall',
+   *  active: false,
+   * }
    */
   IMPRESSION_PAYWALL: 'paywall',
   /**
    * IMPRESSION_AD event.
    * User has been shown a subscription ad.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * The JSON block can provide the name of the subscription ad
    * creative or campaign. Ad impressions are usually passive.
-   * For example; {'name': 'fall_ad', 'is_active': false}
+   * const propensityEvent = {
+   *   name: 'ad_shown',
+   *   active: false,
+   *   data: {'ad_name': 'fall_ad'}
+   * }
    */
   IMPRESSION_AD: 'ad_shown',
   /**
    * IMPRESSION_OFFERS event.
    * User has been shown a list of available offers for subscription.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * The JSON block can provide a list of products displayed,
    * and the source to indicate why the user was shown the offer.
    * Note: source is not the same as referrer.
    * In the cases below, the user took action before seeing the offers,
    * and therefore considered active impression.
-   * For example; {'offers': ['basic-monthly', 'premium-weekly'],
-   *               'source': 'ad-click',
-                  ‘is_active’: true}
-   * For example; {‘offers’: [‘basic-monthly’, ‘premium-weekly’],
-   *              ‘source’: ‘navigate-to-offers-page’,
-   *              ‘is_active’: true}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: true,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': 'ad-click'}
+   * }
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: true,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': ‘navigate-to-offers-page’}
+   * }
    * If the user was shown the offers as a result of paywall metering
    * expiration, it is considered a passive impression.
-   * For example; {‘offers’: [‘basic-monthly’],
-   *               ‘source’: ‘paywall-metering-expired’,
-   *               ‘is_active’: false}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: false,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': ‘paywall-metering-expired’}
+   * }
    */
   IMPRESSION_OFFERS: 'offers_shown',
   /**
@@ -4879,17 +5049,30 @@ const Event = {
    *   or ACTION_PAYMENT_FLOW_STARTED depending on if that button
    *   took the user to a checkout page on the publishers site or
    *   directly started the payment flow).
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block with this event can provide additional information
    * such as the source, indicating what caused the user to navigate
    * to this page.
-   * For example; {‘source’: ‘marketing_via_email’}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'subscriptions_landing_page',
+   *   active: true,
+   *   data: {'source': 'marketing_via_email'}
+   * }
    */
   ACTION_SUBSCRIPTIONS_LANDING_PAGE: 'subscriptions_landing_page',
   /**
    * ACTION_OFFER_SELECTED event.
    * User has selected an offer.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product selected.
-   * For example; {'product': 'basic-monthly'}
+   * For example: {
+   *   name: 'offer_selected',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    * When offer selection starts the payment flow directly,
    * use the next event ACTION_PAYMENT_FLOW_STARTED instead.
    */
@@ -4897,21 +5080,46 @@ const Event = {
   /**
    * ACTION_PAYMENT_FLOW_STARTED event.
    * User has started payment flow.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product selected.
-   * For example; {'product': 'basic-monthly'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'payment_flow_started',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    */
   ACTION_PAYMENT_FLOW_STARTED: 'payment_flow_start',
   /**
    * ACTION_PAYMENT_COMPLETED.
    * User has made the payment for a subscription.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product user paid for.
-   * For example; {'product': 'basic-monthly'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'payment_complete',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    */
   ACTION_PAYMENT_COMPLETED: 'payment_complete',
   /**
    * EVENT_CUSTOM: custom publisher event.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false depending on if the event
+   * was generated as a result of a user action.
    * The JSON block can provide the event name for the custom event.
-   * For example; {'name': 'email_signup'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'custom',
+   *   active: true,
+   *   data: {
+   *     'event_name': 'social_share',
+   *     'platform_used': 'whatsapp'
+   *   }
+   *  }
    */
   EVENT_CUSTOM: 'custom',
 };
@@ -5037,27 +5245,27 @@ const ReplaceSkuProrationModeMapping = {
  */
 class PayStartFlow {
   /**
-   * @param {*} deps
-   * @param {*} skuOrSubscriptionRequest
-   * @param {*} productType
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.SubscriptionRequest|string} skuOrSubscriptionRequest
+   * @param {!../api/subscriptions.ProductType} productType
    */
   constructor(
         deps,
         skuOrSubscriptionRequest,
         productType = ProductType.SUBSCRIPTION) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!./pay-client.PayClient} */
     this.payClient_ = deps.payClient();
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = deps.pageConfig();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.SubscriptionRequest} */
     this.subscriptionRequest_ =
         typeof skuOrSubscriptionRequest == 'string' ?
             {'skuId': skuOrSubscriptionRequest} : skuOrSubscriptionRequest;
@@ -5065,7 +5273,7 @@ class PayStartFlow {
     /**@private @const {!ProductType} */
     this.productType_ = productType;
 
-    /** @private @const {*} */
+    /** @private @const {!../runtime/analytics-service.AnalyticsService} */
     this.analyticsService_ = deps.analytics();
   }
 
@@ -5118,7 +5326,7 @@ class PayStartFlow {
 class PayCompleteFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
     deps.payClient().onResponse(payPromise => {
@@ -5142,19 +5350,19 @@ class PayCompleteFlow {
   }
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?ActivityIframeView} */
@@ -5166,7 +5374,7 @@ class PayCompleteFlow {
     /** @private {?Promise} */
     this.readyPromise_ = null;
 
-    /** @private @const {*} */
+    /** @private @const {!../runtime/analytics-service.AnalyticsService} */
     this.analyticsService_ = deps.analytics();
   }
 
@@ -5241,7 +5449,7 @@ class PayCompleteFlow {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {!Promise<!Object>} payPromise
  * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
@@ -5262,7 +5470,7 @@ function validatePayResponse(deps, payPromise, completeHandler) {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {*} data
  * @param {function():!Promise} completeHandler
  * @return {!SubscribeResponse}
@@ -5339,9 +5547,9 @@ function parseUserData(swgData) {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {!Object} swgData
- * @return {*}
+ * @return {?../api/entitlements.Entitlements}
  * @package Visible for testing.
  */
 function parseEntitlements(deps, swgData) {
@@ -5384,14 +5592,14 @@ function parseSkuFromPurchaseDataSafe(purchaseData) {
 class ContributionsFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
    */
   constructor(deps, options) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
     this.options_ = options;
 
     /** @private @const {!Window} */
@@ -5400,7 +5608,7 @@ class ContributionsFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     const isClosable = (options && options.isClosable) || true;
@@ -5480,11 +5688,11 @@ class ContributionsFlow {
 class DeferredAccountFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {?../api/deferred-account-creation.DeferredAccountCreationRequest} options
    */
   constructor(deps, options) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -5493,7 +5701,7 @@ class DeferredAccountFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?ActivityIframeView} */
@@ -5502,12 +5710,12 @@ class DeferredAccountFlow {
     /** @private {?Promise} */
     this.openPromise_ = null;
 
-    /** @type {*} */
+    /** @type {!../api/deferred-account-creation.DeferredAccountCreationRequest} */
     const defaultOptions = {
       entitlements: null,
       consent: true,
     };
-    /** @private @const {*} */
+    /** @private @const {!../api/deferred-account-creation.DeferredAccountCreationRequest} */
     this.options_ = Object.assign(defaultOptions, options || {});
   }
 
@@ -5858,11 +6066,11 @@ function transition(el, props, durationMillis, curve) {
 class Graypane {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    * @param {number} zIndex
    */
   constructor(doc, zIndex) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private @const {!Element} */
@@ -6200,12 +6408,12 @@ class Dialog {
 
   /**
    * Create a dialog for the provided doc.
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    * @param {!Object<string, string|number>=} importantStyles
    * @param {!Object<string, string|number>=} styles
    */
   constructor(doc, importantStyles = {}, styles = {}) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private @const {!FriendlyIframe} */
@@ -6228,7 +6436,7 @@ class Dialog {
     /** @private {?Element} */
     this.container_ = null;  // Depends on constructed document inside iframe.
 
-    /** @private {*} */
+    /** @private {?./view.View} */
     this.view_ = null;
 
     /** @private {?Promise} */
@@ -6237,7 +6445,7 @@ class Dialog {
     /** @private {boolean} */
     this.hidden_ = false;
 
-    /** @private {*} */
+    /** @private {?./view.View} */
     this.previousProgressView_ = null;
   }
 
@@ -6376,14 +6584,14 @@ class Dialog {
     }
   }
 
-  /** @return {*} */
+  /** @return {?./view.View} */
   getCurrentView() {
     return this.view_;
   }
 
   /**
    * Opens the given view and removes existing view from the DOM if any.
-   * @param {*} view
+   * @param {!./view.View} view
    * @return {!Promise}
    */
   openView(view) {
@@ -6434,7 +6642,7 @@ class Dialog {
 
   /**
    * Resizes the dialog container.
-   * @param {*} view
+   * @param {!./view.View} view
    * @param {number} height
    * @param {boolean=} animated
    * @return {?Promise}
@@ -6620,10 +6828,10 @@ const POPUP_Z_INDEX = 2147483647;
 class DialogManager {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    */
   constructor(doc) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private {?Dialog} */
@@ -6662,7 +6870,7 @@ class DialogManager {
   }
 
   /**
-   * @param {*} view
+   * @param {!./view.View} view
    * @param {boolean=} hidden
    * @return {!Promise}
    */
@@ -6679,7 +6887,7 @@ class DialogManager {
   }
 
   /**
-   * @param {*} view
+   * @param {?./view.View} view
    */
   completeView(view) {
     // Give a small amount of time for another view to take over the dialog.
@@ -6765,13 +6973,13 @@ const iframeAttributes$2 = {
 class Toast {
 
   /**
-   * @param {*} deps
+   * @param {!../runtime/deps.DepsDef} deps
    * @param {string} src
    * @param {!Object<string, ?>} args
    */
   constructor(deps, src, args) {
 
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
@@ -6915,24 +7123,24 @@ class EntitlementsManager {
 
   /**
    * @param {!Window} win
-   * @param {*} pageConfig
-   * @param {*} fetcher
-   * @param {*} deps
+   * @param {!../model/page-config.PageConfig} pageConfig
+   * @param {!./fetcher.Fetcher} fetcher
+   * @param {!./deps.DepsDef} deps
    */
   constructor(win, pageConfig, fetcher, deps) {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = pageConfig;
 
     /** @private @const {string} */
     this.publicationId_ = this.pageConfig_.getPublicationId();
 
-    /** @private @const {*} */
+    /** @private @const {!./fetcher.Fetcher} */
     this.fetcher_ = fetcher;
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!JwtHelper} */
@@ -6947,13 +7155,13 @@ class EntitlementsManager {
     /** @private {boolean} */
     this.blockNextNotification_ = false;
 
-    /** @private @const {*} */
+    /** @private @const {!./storage.Storage} */
     this.storage_ = deps.storage();
 
-    /** @private @const {*} */
+    /** @private @const {!../runtime/analytics-service.AnalyticsService} */
     this.analyticsService_ = deps.analytics();
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.Config} */
     this.config_ = deps.config();
   }
 
@@ -7369,6 +7577,18 @@ const ExperimentFlags = {
    * Enables the Smartbox feature.
    */
   SMARTBOX: 'smartbox',
+
+  /**
+   * Enables logging events logged through the propensity API to the analytics
+   * server.
+   */
+  LOG_PROPENSITY_TO_SWG: 'log-propensity-to-swg',
+
+  /**
+   * Enables logging user events generated by the SwG and AMP clients to the
+   * publishers propensity server.
+   */
+  LOG_SWG_TO_PROPENSITY: 'log_swg_to_propensity',
 };
 
 /**
@@ -7776,7 +7996,7 @@ class XhrFetcher {
 
   /** @override */
   fetchCredentialedJson(url) {
-    const init = /** @type {*} */ ({
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       headers: {'Accept': 'text/plain, application/json'},
       credentials: 'include',
@@ -7807,10 +8027,10 @@ class XhrFetcher {
 class JsError {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    */
   constructor(doc) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private @const {!Promise} */
@@ -7917,19 +8137,19 @@ const LINK_REQUEST_ID = 'swg-link';
 class LinkbackFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = deps.pageConfig();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
   }
 
@@ -7960,7 +8180,7 @@ class LinkbackFlow {
 class LinkCompleteFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
     /**
@@ -7988,7 +8208,7 @@ class LinkCompleteFlow {
   }
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {?Object} response
    */
   constructor(deps, response) {
@@ -7998,13 +8218,13 @@ class LinkCompleteFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {*} */
+    /** @private @const {!./entitlements-manager.EntitlementsManager} */
     this.entitlementsManager_ = deps.entitlementsManager();
 
-    /** @private @const {*} */
+    /** @private @const {!./callbacks.Callbacks} */
     this.callbacks_ = deps.callbacks();
 
     const index = response && response['index'] || '0';
@@ -8080,26 +8300,26 @@ class LinkCompleteFlow {
 class LinkSaveFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} callback
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.SaveSubscriptionRequestCallback} callback
    */
   constructor(deps, callback) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private {*} */
+    /** @private {!../api/subscriptions.SaveSubscriptionRequestCallback} */
     this.callback_ = callback;
 
-    /** @private {?Promise<*>} */
+    /** @private {?Promise<!../api/subscriptions.SaveSubscriptionRequest>} */
     this.requestPromise_ = null;
 
     /** @private {?Promise} */
@@ -8110,7 +8330,7 @@ class LinkSaveFlow {
   }
 
   /**
-   * @return {?Promise<*>}
+   * @return {?Promise<!../api/subscriptions.SaveSubscriptionRequest>}
    * @package Visible for testing.
    */
   getRequestPromise() {
@@ -8243,10 +8463,10 @@ class LinkSaveFlow {
 
 class LoginPromptApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -8255,7 +8475,7 @@ class LoginPromptApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -8322,10 +8542,10 @@ class LoginPromptApi {
 
 class LoginNotificationApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -8334,7 +8554,7 @@ class LoginNotificationApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -11573,7 +11793,7 @@ class PayClient {
   /**
    * @param {!Window} win
    * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
-   * @param {*} dialogManager
+   * @param {!../components/dialog-manager.DialogManager} dialogManager
    */
   constructor(win, activityPorts, dialogManager) {
     /** @const @private {!PayClientBindingDef} */
@@ -11584,7 +11804,7 @@ class PayClient {
   }
 
   /**
-   * @param {*} pre
+   * @param {!../utils/preconnect.Preconnect} pre
    */
   preconnect(pre) {
     pre.prefetch(payUrl());
@@ -11628,14 +11848,14 @@ class PayClientBindingSwg {
   /**
    * @param {!Window} win
    * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
-   * @param {*} dialogManager
+   * @param {!../components/dialog-manager.DialogManager} dialogManager
    */
   constructor(win, activityPorts, dialogManager) {
     /** @private @const {!Window} */
     this.win_ = win;
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = activityPorts;
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = dialogManager;
   }
 
@@ -11681,7 +11901,7 @@ class PayClientBindingSwg {
         // Data is supplied as an encrypted blob.
         const xhr = new Xhr(this.win_);
         const url = payDecryptUrl();
-        const init = /** @type {*} */ ({
+        const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
           method: 'post',
           headers: {'Accept': 'text/plain, application/json'},
           credentials: 'include',
@@ -12020,11 +12240,11 @@ function setInternalParam(paymentRequest, param, value) {
 
 class WaitForSubscriptionLookupApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {?Promise} accountPromise
    */
   constructor(deps, accountPromise) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -12033,7 +12253,7 @@ class WaitForSubscriptionLookupApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -12095,20 +12315,20 @@ class WaitForSubscriptionLookupApi {
 class OffersApi {
 
   /**
-   * @param {*} config
-   * @param {*} fetcher
+   * @param {!../model/page-config.PageConfig} config
+   * @param {!./fetcher.Fetcher} fetcher
    */
   constructor(config, fetcher) {
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.config_ = config;
 
-    /** @private @const {*} */
+    /** @private @const {!./fetcher.Fetcher} */
     this.fetcher_ = fetcher;
   }
 
   /**
    * @param {string=} opt_productId
-   * @return {!Promise<!Array<*>>}
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
    */
   getOffers(opt_productId) {
     const productId = opt_productId || this.config_.getProductId();
@@ -12120,7 +12340,7 @@ class OffersApi {
 
   /**
    * @param {string} productId
-   * @return {!Promise<!Array<*>>}
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
    * @private
    */
   fetch_(productId) {
@@ -12164,11 +12384,11 @@ const OFFERS_VIEW_CLOSABLE = true;
 class OffersFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
    */
   constructor(deps, options) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -12177,7 +12397,7 @@ class OffersFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     let isClosable = options && options.isClosable;
@@ -12247,21 +12467,21 @@ class OffersFlow {
 class SubscribeOptionFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
    */
   constructor(deps, options) {
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
     this.options_ = options;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!ActivityIframeView} */
@@ -12327,15 +12547,15 @@ class SubscribeOptionFlow {
 class AbbrvOfferFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest=} options
    */
   constructor(deps, options = {}) {
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
     this.options_ = options;
 
     /** @private @const {!Window} */
@@ -12344,7 +12564,7 @@ class AbbrvOfferFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!ActivityIframeView} */
@@ -12682,11 +12902,11 @@ const iframeStyles = {
 
 class AnalyticsService {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
 
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
@@ -12721,6 +12941,18 @@ class AnalyticsService {
 
     /** @private {?Promise} */
     this.lastAction_ = null;
+
+    /** @private @const {!../api/client-event-manager-api.ClientEventManagerApi} */
+    this.eventManager_ = deps.eventManager();
+    this.eventManager_.registerEventListener(
+        this.handleClientEvent_.bind(this));
+
+    /** @private @const {!boolean} */
+    this.logPropensityExperiment_ = isExperimentOn(deps.win(),
+        ExperimentFlags.LOG_PROPENSITY_TO_SWG);
+
+    /** @private {!boolean} */
+    this.logPropensityConfig_ = false;
   }
 
   /**
@@ -12841,22 +13073,37 @@ class AnalyticsService {
   }
 
   /**
-   * @param {*} event
+   * @param {!../api/client-event-manager-api.ClientEvent} event
    * @return {!AnalyticsRequest}
    */
   createLogRequest_(event) {
+    //ignore event.additionalParameters.  It may have data we shouldn't log
+    const meta = new AnalyticsEventMeta();
+    meta.setEventOriginator(event.eventOriginator);
+    meta.setIsFromUserAction(event.isFromUserAction);
+
     const request = new AnalyticsRequest();
-    request.setEvent(event);
+    request.setEvent(event.eventType);
     request.setContext(this.context_);
+    request.setMeta(meta);
     return request;
   }
 
   /**
-   * @param {*} event
+   * This function can be used to log a buy-flow event from SwG.
+   * It exists as a helper and to ensure backwards compatability,
+   * you have additional parameters available if you call eventManager.logEvent
+   * directly.
+   * @param {!../proto/api_messages.AnalyticsEvent} eventTypeIn
+   * @param {!boolean=} isFromUserActionIn
    */
-  logEvent(event) {
-    this.lastAction_ = this.start_().then(port => {
-      port.message({'buf': this.createLogRequest_(event).toArray()});
+  logEvent(eventTypeIn, isFromUserActionIn) {
+    this.eventManager_.logEvent({
+      eventType: eventTypeIn,
+      eventOriginator: EventOriginator.SWG_CLIENT,
+      isFromUserAction: /** @type {?boolean} */
+          (isBoolean(isFromUserActionIn) ? isFromUserActionIn : null),
+      additionalParameters: null,
     });
   }
 
@@ -12868,6 +13115,24 @@ class AnalyticsService {
     this.lastAction_ = this.start_().then(port => {
       port.onMessage(callback);
     });
+  }
+
+  /**
+   *  Listens for new events from the events manager and handles logging
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   */
+  handleClientEvent_(event) {
+    if (!(this.logPropensityExperiment_ && this.logPropensityConfig_)
+        && event.eventOriginator === EventOriginator.PROPENSITY_CLIENT) {
+      return;
+    }
+    this.lastAction_ = this.start_().then(port => {
+      port.message({'buf': this.createLogRequest_(event).toArray()});
+    });
+  }
+
+  enableLoggingForPropensity() {
+    this.logPropensityConfig_ = true;
   }
 }
 
@@ -12887,6 +13152,77 @@ class AnalyticsService {
  * limitations under the License.
  */
 
+/** @const {!Object<string,AnalyticsEvent>} */
+const PropensityEventToAnalyticsEvent = {
+  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
+  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
+  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
+  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+      AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
+  [Event.ACTION_PAYMENT_FLOW_STARTED]:
+      AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
+  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
+  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
+};
+
+/** @const {!Object<number,?Event>} */
+const AnalyticsEventToPropensityEvent = {
+  [AnalyticsEvent.UNKNOWN]: null,
+  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
+  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
+  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
+  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
+  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
+  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
+  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
+  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+      Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
+      Event.ACTION_PAYMENT_FLOW_STARTED,
+  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
+  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
+  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
+};
+
+/**
+ * Converts a propensity event enum into an analytics event enum.
+ * @param {!Event|string} propensityEvent
+ * @returns {!AnalyticsEvent}
+ */
+function propensityEventToAnalyticsEvent(propensityEvent) {
+  return PropensityEventToAnalyticsEvent[propensityEvent];
+}
+/**
+ * Converts an analytics event enum into a propensity event enum.
+ * @param {!AnalyticsEvent} analyticsEvent
+ * @returns {?Event}
+ */
+function analyticsEventToPropensityEvent(analyticsEvent) {
+  return AnalyticsEventToPropensityEvent[analyticsEvent];
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
 /**
  * Implements interface to Propensity server
  */
@@ -12896,8 +13232,9 @@ class PropensityServer {
    * is available, publication ID is therefore used
    * in constructor for the server interface.
    * @param {string} publicationId
+   * @param {!../api/client-event-manager-api.ClientEventManagerApi} eventManager
    */
-  constructor(win, publicationId) {
+  constructor(win, publicationId, eventManager) {
     /** @private @const {!Window} */
     this.win_ = win;
     /** @private @const {string} */
@@ -12910,6 +13247,16 @@ class PropensityServer {
     this.xhr_ = new Xhr(win);
     /** @private @const {number} */
     this.version_ = 1;
+
+    eventManager.registerEventListener(this.handleClientEvent_.bind(this));
+
+    // TODO(mborof): b/133519525
+    /** @private @const {!boolean} */
+    this.logSwgEventsExperiment_ = isExperimentOn(win,
+        ExperimentFlags.LOG_SWG_TO_PROPENSITY);
+
+    /** @private {!boolean} */
+    this.logSwgEventsConfig_ = false;
   }
 
   /**
@@ -12955,7 +13302,7 @@ class PropensityServer {
    * @param {?string} entitlements
    */
   sendSubscriptionState(state, entitlements) {
-    const init = /** @type {*} */ ({
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       credentials: 'include',
     });
@@ -12976,9 +13323,10 @@ class PropensityServer {
   /**
    * @param {string} event
    * @param {?string} context
+   * @private
    */
-  sendEvent(event, context) {
-    const init = /** @type {*} */ ({
+  sendEvent_(event, context) {
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       credentials: 'include',
     });
@@ -12997,15 +13345,40 @@ class PropensityServer {
   }
 
   /**
+   *
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   */
+  handleClientEvent_(event) {
+    const propEvent = analyticsEventToPropensityEvent(event.eventType);
+    if (propEvent == null) {
+      return;
+    }
+    if (!(this.logSwgEventsExperiment_ && this.logSwgEventsConfig_)
+        && event.eventOriginator !== EventOriginator.PROPENSITY_CLIENT) {
+      return;
+    }
+    let additionalParameters = event.additionalParameters;
+
+    if (isBoolean(event.isFromUserAction)) {
+      if (!isObject(additionalParameters)) {
+        additionalParameters = {};
+      }
+      additionalParameters['is_active'] = event.isFromUserAction;
+    }
+    this.sendEvent_(propEvent,
+        JSON.stringify(/** @type {?JsonObject} */ (additionalParameters)));
+  }
+
+  /**
    * @param {JsonObject} response
-   * @return {*}
+   * @return {!../api/propensity-api.PropensityScore}
    */
   parsePropensityResponse_(response) {
     let defaultScore =
-        /** @type {*} */ ({});
+        /** @type {!../api/propensity-api.PropensityScore} */ ({});
     if (!response['header']) {
       defaultScore =
-        /** @type {*} */ ({
+        /** @type {!../api/propensity-api.PropensityScore} */ ({
           header: {ok: false},
           body: {result: 'No valid response'},
         });
@@ -13026,7 +13399,7 @@ class PropensityServer {
             value = result['error_message'];
           }
           defaultScore =
-            /** @type {*} */ ({
+            /** @type {!../api/propensity-api.PropensityScore} */ ({
               header: {ok: scoreStatus},
               body: {result: value},
             });
@@ -13035,14 +13408,14 @@ class PropensityServer {
       }
       if (!found) {
         const errorMessage = 'No score available for ' + this.publicationId_;
-        defaultScore = /** @type {*} */ ({
+        defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
           header: {ok: false},
           body: {result: errorMessage},
         });
       }
     } else {
       const errorMessage = response['error'];
-      defaultScore = /** @type {*} */ ({
+      defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
         header: {ok: false},
         body: {result: errorMessage},
       });
@@ -13056,7 +13429,7 @@ class PropensityServer {
    */
   getPropensity(referrer, type) {
     const clientId = this.getClientId_();
-    const init = /** @type {*} */ ({
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       credentials: 'include',
     });
@@ -13071,6 +13444,10 @@ class PropensityServer {
         .then(response => {
           return this.parsePropensityResponse_(response);
         });
+  }
+
+  enableLoggingSwgEvents() {
+    this.logSwgEventsConfig_ = true;
   }
 }
 
@@ -13097,14 +13474,18 @@ class Propensity {
 
   /**
    * @param {!Window} win
-   * @param {*} pageConfig
+   * @param {!../model/page-config.PageConfig} pageConfig
+   * @param {!../api/client-event-manager-api.ClientEventManagerApi} eventManager
    */
-  constructor(win, pageConfig) {
+  constructor(win, pageConfig, eventManager) {
     /** @private @const {!Window} */
     this.win_ = win;
     /** @private {PropensityServer} */
     this.propensityServer_ = new PropensityServer(win,
-        pageConfig.getPublicationId());
+        pageConfig.getPublicationId(), eventManager);
+
+    /** @private @const {!../api/client-event-manager-api.ClientEventManagerApi} */
+    this.eventManager_ = eventManager;
   }
 
   /** @override */
@@ -13142,19 +13523,241 @@ class Propensity {
 
   /** @override */
   sendEvent(userEvent) {
-    if (!Object.values(Event).includes(userEvent.name)) {
-      throw new Error('Invalid user event provided');
+    const analyticsEvent = propensityEventToAnalyticsEvent(userEvent.name);
+    let data = null;
+    if (!isEnumValue(Event, userEvent.name)
+        || !analyticsEvent) {
+      throw new Error('Invalid user event provided(' + userEvent.name + ')');
     }
-    if (userEvent.data && !isObject(userEvent.data)) {
-      throw new Error('Event data must be an Object');
-    }
-    // TODO(sohanirao, mborof): Idenfity the new interface with event
-    // manager and update the lines below to adhere to that interface
-    let paramString = null;
+
     if (userEvent.data) {
-      paramString = JSON.stringify(userEvent.data);
+      if (!isObject(userEvent.data)) {
+        throw new Error('Event data must be an Object(' + userEvent.data + ')');
+      } else {
+        data = {};
+        Object.assign(data, userEvent.data);
+      }
     }
-    this.propensityServer_.sendEvent(userEvent.name, paramString);
+
+    if (isBoolean(userEvent.active)) {
+      if (!data) {
+        data = {};
+      }
+      Object.assign(data, {'is_active': userEvent.active});
+    } else if (userEvent.active != null) {
+      throw new Error('Event active must be a boolean');
+    }
+
+    this.eventManager_.logEvent({
+      eventType: analyticsEvent,
+      eventOriginator: EventOriginator.PROPENSITY_CLIENT,
+      isFromUserAction: userEvent.active,
+      additionalParameters: data,
+    });
+  }
+
+  /**
+   * Enables logging events generated by the Subscribe with Google codebase
+   * to the Propensity to Subscribe server.
+   */
+  enableLoggingSwgEvents() {
+    this.propensityServer_.enableLoggingSwgEvents();
+  }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number}  */
+const FilterResult = {
+  /** The event is allowed to proceed to the listeners. */
+  PROCESS_EVENT: 0,
+  /** The event is canceled and the listeners are not informed about it. */
+  CANCEL_EVENT: 1,
+};
+
+/**
+ * Defines a client event in SwG
+ * Properties:
+ * - eventType: Required. The AnalyticsEvent type that occurred.
+ * - eventOriginator: Required.  The codebase that initiated the event.
+ * - isFromUserAction: Optional.  True if the user took an action to generate
+ *   the event.
+ * - additionalParameters: Optional.  A JSON object to store generic data.
+ *
+ *  @typedef {{
+ *    eventType: !AnalyticsEvent,
+ *    eventOriginator: !EventOriginator,
+ *    isFromUserAction: ?boolean,
+ *    additionalParameters: ?Object,
+ * }}
+ */
+let ClientEvent;
+
+/**
+ * @interface
+ */
+class ClientEventManagerApi {
+  /**
+   * Call this function to log an event. The registered listeners will be
+   * invoked unless the event is filtered.
+   * @param {!function(!ClientEvent)} listener
+   */
+  registerEventListener(listener) { }
+
+  /**
+   * Register a filterer for events if you need to potentially prevent the
+   * listeners from hearing about it.  A filterer should return
+   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
+   * event.
+   * @param {!function(!ClientEvent):FilterResult} filterer
+   */
+  registerEventFilterer(filterer) { }
+
+  /**
+   * Call this function to log an event.  It will immediately throw an error if
+   * the event is invalid.  It will then asynchronously call the filterers and
+   * stop the event if a filterer cancels it.  After that, it will call each
+   * listener asynchronously.
+   * @param {!ClientEvent} event
+   */
+  logEvent(event) { }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Helper function to describe an issue with an event object
+ * @param {!string} valueName
+ * @param {?*} value
+ * @returns {!string}
+ */
+function createEventErrorMessage(valueName, value) {
+  return 'Event has an invalid ' + valueName + '(' + value + ')';
+}
+
+/**
+ * Throws an error if the event is invalid.
+ * @param {!../api/client-event-manager-api.ClientEvent} event
+ */
+function validateEvent(event) {
+  if (!isObject(event)) {
+    throw new Error('Event must be a valid object');
+  }
+
+  if (!isEnumValue(AnalyticsEvent, event.eventType)) {
+    throw new Error(createEventErrorMessage('eventType', event.eventType));
+  }
+
+  if (!isEnumValue(EventOriginator, event.eventOriginator)) {
+    throw new Error(createEventErrorMessage('eventOriginator',
+        event.eventOriginator));
+  }
+
+  if (!isObject(event.additionalParameters)
+      && event.additionalParameters != null) {
+    throw new Error(createEventErrorMessage('additionalParameters',
+        event.additionalParameters));
+  }
+
+  if (event.isFromUserAction != null && !isBoolean(event.isFromUserAction)) {
+    throw new Error(createEventErrorMessage('isFromUserAction',
+        event.isFromUserAction));
+  }
+}
+
+/** @implements {../api/client-event-manager-api.ClientEventManagerApi} */
+class ClientEventManager {
+  constructor() {
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent)>} */
+    this.listeners_ = [];
+
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent):!FilterResult>} */
+    this.filterers_ = [];
+
+    /** @private {?Promise} */
+    this.lastAction_ = null;
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventListener(listener) {
+    if (!isFunction(listener)) {
+      throw new Error('Event manager listeners must be a function');
+    }
+    this.listeners_.push(listener);
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventFilterer(filterer) {
+    if (!isFunction(filterer)) {
+      throw new Error('Event manager filterers must be a function');
+    }
+    this.filterers_.push(filterer);
+  }
+
+
+  /**
+   * @overrides
+   */
+  logEvent(event) {
+    validateEvent(event);
+    this.lastAction_ = new Promise(resolve => {
+      for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
+        if (this.filterers_[filterer](event) === FilterResult.CANCEL_EVENT) {
+          resolve();
+          return;
+        }
+      }
+      for (let listener = 0; listener < this.listeners_.length; listener++) {
+        this.listeners_[listener](event);
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * This function exists for the sole purpose of allowing the code to be
+   * presubmitted.  It can be removed once there is code generating a real
+   * event object somewhere.
+   */
+  useValidateEventForCompilationPurposes() {
+    validateEvent({
+      eventType: AnalyticsEvent.UNKNOWN,
+      eventOriginator: EventOriginator.UNKNOWN_CLIENT,
+      isFromUserAction: null,
+      additionalParameters: {},
+    });
   }
 }
 
@@ -13182,20 +13785,23 @@ class ConfiguredRuntime {
 
   /**
    * @param {!Window|!Document|!Doc} winOrDoc
-   * @param {*} pageConfig
+   * @param {!../model/page-config.PageConfig} pageConfig
    * @param {{
    *     fetcher: (!Fetcher|undefined),
    *   }=} opt_integr
-   * @param {*} opt_config
+   * @param {!../api/subscriptions.Config=} opt_config
    */
   constructor(winOrDoc, pageConfig, opt_integr, opt_config) {
+    /** @private @const {!ClientEventManager} */
+    this.eventManager_ = new ClientEventManager();
+
     /** @private @const {!Doc} */
     this.doc_ = resolveDoc(winOrDoc);
 
     /** @private @const {!Window} */
     this.win_ = this.doc_.getWin();
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.Config} */
     this.config_ = defaultConfig();
     if (isEdgeBrowser$1(this.win_)) {
       // TODO(dvoytenko, b/120607343): Find a way to remove this restriction
@@ -13206,7 +13812,7 @@ class ConfiguredRuntime {
       this.configure_(opt_config);
     }
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = pageConfig;
 
     /** @private @const {!Promise} */
@@ -13250,7 +13856,7 @@ class ConfiguredRuntime {
 
     /** @private @const {!Propensity} */
     this.propensityModule_ = new Propensity(this.win_,
-      this.pageConfig_);
+        this.pageConfig_, this.eventManager_);
 
     const preconnect = new Preconnect(this.win_.document);
 
@@ -13336,7 +13942,7 @@ class ConfiguredRuntime {
   }
 
   /**
-   * @param {*} config
+   * @param {!../api/subscriptions.Config} config
    * @private
    */
   configure_(config) {
@@ -13570,6 +14176,11 @@ class ConfiguredRuntime {
   getPropensityModule() {
     return Promise.resolve(this.propensityModule_);
   }
+
+  /** @override */
+  eventManager() {
+    return this.eventManager_;
+  }
 }
 
 /**
@@ -13588,11 +14199,15 @@ class ConfiguredRuntime {
  * limitations under the License.
  */
 
-
 export {
   ConfiguredRuntime,
   Entitlements,
   Entitlement,
   Fetcher,
   SubscribeResponse,
+  ClientEventManagerApi,
+  ClientEvent,
+  FilterResult,
+  AnalyticsEvent,
+  EventOriginator,
 };

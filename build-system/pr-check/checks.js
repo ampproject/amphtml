@@ -30,7 +30,7 @@ const {
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
-const {reportAllExpectedTests} = require('../tasks/runtime-test/status-report');
+const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runYarnChecks} = require('./yarn-checks');
 
 const FILENAME = 'checks.js';

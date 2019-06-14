@@ -103,7 +103,8 @@ export let InteractiveComponentDef;
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
- *    pagesCount: number,
+ *    pageIds: !Array<string>,
+ *    newPageAvailableId: string,
  * }}
  */
 export let State;
@@ -146,20 +147,22 @@ export const StateProperty = {
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
-  PAGES_COUNT: 'pagesCount',
   ADVANCEMENT_MODE: 'advancementMode',
+  PAGE_IDS: 'pageIds',
+  NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
 };
 
 /** @private @const @enum {string} */
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
+  ADD_TO_PAGE_IDS: 'addToPageIds',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
-  SET_PAGES_COUNT: 'setPagesCount',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
+  TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
@@ -175,6 +178,7 @@ export const Action = {
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
+  ADD_NEW_PAGE_ID: 'addNewPageId',
 };
 
 /**
@@ -183,6 +187,7 @@ export const Action = {
  * @private @const {!Object<string, !function(*, *):boolean>}
  */
 const stateComparisonFunctions = {
+  [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
   [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
   [StateProperty.INTERACTIVE_COMPONENT_STATE]:
     /**
@@ -201,6 +206,10 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    case Action.ADD_NEW_PAGE_ID:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
+      }));
     case Action.ADD_TO_ACTIONS_WHITELIST:
       const newActionsWhitelist = [].concat(
         state[StateProperty.ACTIONS_WHITELIST],
@@ -208,6 +217,11 @@ const actions = (state, action, data) => {
       );
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
+      }));
+    case Action.ADD_TO_PAGE_IDS:
+      const newPageIds = [].concat(state[StateProperty.PAGE_IDS], data);
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAGE_IDS]: newPageIds,
       }));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
@@ -233,6 +247,10 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.BOOKEND_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
+      }));
+    case Action.TOGGLE_CAN_SHOW_BOOKEND:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.CAN_SHOW_BOOKEND]: !!data,
       }));
     case Action.TOGGLE_INTERACTIVE_COMPONENT:
       data = /** @type {InteractiveComponentDef} */ (data);
@@ -321,10 +339,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.CURRENT_PAGE_ID]: data.id,
         [StateProperty.CURRENT_PAGE_INDEX]: data.index,
-      }));
-    case Action.SET_PAGES_COUNT:
-      return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.PAGES_COUNT]: data,
       }));
     case Action.SET_ADVANCEMENT_MODE:
       return /** @type {!State} */ (Object.assign({}, state, {
@@ -458,8 +472,9 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
-      [StateProperty.PAGES_COUNT]: 0,
       [StateProperty.ADVANCEMENT_MODE]: '',
+      [StateProperty.PAGE_IDS]: [],
+      [StateProperty.NEW_PAGE_AVAILABLE_ID]: '',
     });
   }
 

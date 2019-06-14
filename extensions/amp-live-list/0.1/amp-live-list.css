@@ -22,7 +22,7 @@ amp-live-list > [update] {
   z-index: 1000;
 }
 
-/* Reset the `display: none` set in amp.css */
+/* Reset the `display: none` set in ampdoc.css */
 amp-live-list > .amp-active[update] {
   display: block;
 }

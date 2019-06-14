@@ -41,6 +41,11 @@ export class LocalSubscriptionBasePlatform {
     /** @protected {!JsonObject} */
     this.serviceConfig_ = platformConfig;
 
+    /** @private @const {boolean} */
+    this.pingbackAllEntitlements_ = !!this.serviceConfig_[
+      'pingbackAllEntitlements'
+    ];
+
     /** @protected @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
 
@@ -183,17 +188,25 @@ export class LocalSubscriptionBasePlatform {
   }
 
   /**
-   * @abstract @override
+   * @override
    * @return {!Promise<?./entitlement.Entitlement>}
    */
   getEntitlements() {}
 
   /**
-   * @abstract @override
+   * @override
    * @param {?./entitlement.Entitlement} unusedEntitlement
    * @return {!Promise|undefined}
    */
   pingback(unusedEntitlement) {}
+
+  /**
+   * @override
+   * @return {boolean}
+   */
+  pingbackReturnsAllEntitlements() {
+    return this.pingbackAllEntitlements_;
+  }
 
   /** @override */
   isPingbackEnabled() {

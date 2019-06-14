@@ -255,6 +255,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Client ID](#client-id) | `CLIENT_ID` | `${clientId}` |
 | [Extra URL Parameters](#extra-url-parameters) | N/A | `${extraUrlParams}` |
 | [Geolocation](#geolocation) | `AMP_GEO` | `${ampGeo}` |
+| [User Location](#user-location) | `AMP_USER_LOCATION` | `${ampUserLocation}` |
 | [Page View ID](#page-view-id) | `PAGE_VIEW_ID` | `${pageViewId}` |
 | [Query Parameter](#query-parameter) | `QUERY_PARAM` | `${queryParam}` |
 | [Random](#random) | `RANDOM` | `${random}` |
@@ -649,6 +650,38 @@ Provides the approximate, country level, location of the user provided by the [`
 * **amp-analytics variable**: `${ampGeo}`
   * Example value: `ca`
 
+#### User Location
+
+`AMP_USER_LOCATION` and `AMP_USER_LOCATION_POLL` provide the latitude and longitude coordinates exposed by [`amp-user-location`](../extensions/amp-user-location/amp-user-location.md#variable-substitution) extension. Note that this data is `undefined` until the user has approved location access. The `POLL` variant will not resolve until the user has interacted with a UI element that requests their location.
+
+* **platform variable**: `AMP_USER_LOCATION`
+  *  Example: <br>
+  ```html
+   <!--
+     When the user encounters the pixel, the location will be sent
+     if the user has approved through the amp-user-location component.
+     If the user has not approved, the pixel will send the request
+     with the location as the empty string.
+    -->
+   <amp-pixel src="https://foo.com/pixel?location=AMP_USER_LOCATION"></amp-pixel>
+  ```
+* **platform variable**: `AMP_USER_LOCATION_POLL`
+*  Example: <br>
+```html
+  <!--
+    When the user encounters the pixel, the location will not be sent
+    until the user has requested their location  through the amp-user-location
+    component. If the user does not approve, the pixel will not send the
+    request. If the user denies, the pixel will send the empty string.
+  -->
+  <amp-pixel src="https://foo.com/pixel?location=AMP_USER_LOCATION_POLL"></amp-pixel>
+```
+* **amp-analytics variable**: `${ampUserLocation}`
+  * Example value: `40.712776,-74.005974`
+* **amp-analytics variable**: `${ampUserLocationPoll}`
+  * Example value: `40.712776,-74.005974`
+
+
 #### Horizontal Scroll Boundary
 
 Provides the horizontal scroll boundary that triggered a scroll event. This variable is only available in a `trigger` of type `scroll`. The value of the boundary may be rounded based on the precision supported by the extension. For example, a boundary with value `1` and precision of `5` will result in value of var to be 0.
@@ -687,7 +720,7 @@ requested attribute names and the object values are the elements' values for tho
 
 #### Initial Scroll Depth
 
-Provides the scroll depth at the time the element was loaded, relative to the target. The value returned will be top/inside/bottom, indicating whether the target was scrolled inside the viewport, was offscreen above the top of the viewport, or was offscreen below the bottom of the viewport. 
+Provides the scroll depth at the time the element was loaded, relative to the target. The value returned will be top/inside/bottom, indicating whether the target was scrolled inside the viewport, was offscreen above the top of the viewport, or was offscreen below the bottom of the viewport.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${initialScrollDepth}`

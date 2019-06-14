@@ -398,24 +398,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
   },
   {
-    id: 'fixed-elements-in-lightbox',
-    name: 'Transfer fixed elements in lightboxes for smooth iOS scrolling',
-    spec: 'https://github.com/ampproject/amphtml/issues/20964',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20965',
-  },
-  {
     id: 'amp-img-auto-sizes',
     name: 'Automatically generates sizes for amp-img if not given',
     spec: 'https://github.com/ampproject/amphtml/issues/19513',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
-  },
-  {
-    id: 'amp-autocomplete',
-    name:
-      'AMP Autocomplete provides a set of suggestions to' +
-      ' complete a user query in an input field.',
-    spec: 'https://github.com/ampproject/amphtml/issues/9785',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21021',
   },
   {
     id: 'inabox-viewport-friendly',
@@ -435,12 +421,42 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
+    id: 'fie-css-cleanup',
+    name:
+      'Experiment to prevent regression after a major CSS clean up' +
+      ' for AMPHTML Ads in FIE rendering mode',
+    spec: 'https://github.com/ampproject/amphtml/issues/22418',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
+  },
+  {
+    id: 'inabox-css-cleanup',
+    name:
+      'Experiment to prevent regression after a major CSS clean up' +
+      ' for AMPHTML Ads in inabox rendering mode',
+    spec: 'https://github.com/ampproject/amphtml/issues/22418',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
+  },
+  {
     id: 'amp-force-prerender-visible-elements',
     name:
       'Force builds the AMP elements that are visible and in the viewport ' +
       'during prerendering, beyond the 20 elements limit.',
     spec: 'https://github.com/ampproject/amphtml/issues/21791',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21792',
+  },
+  {
+    id: 'amp-user-location',
+    name:
+      'Expose the browser geolocation API for latitude and longitude ' +
+      'access after user interaction and approval',
+    spec: 'https://github.com/ampproject/amphtml/issues/8929',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
+  },
+  {
+    id: 'margin-bottom-in-content-height',
+    name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
+    spec: 'https://github.com/ampproject/amphtml/issues/22718',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
   },
 ];
 

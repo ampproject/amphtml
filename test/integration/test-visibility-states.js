@@ -110,7 +110,7 @@ t.run('Viewer Visibility State', () => {
         return Services.viewerPromiseForDoc(win.document)
           .then(v => {
             viewer = v;
-            const docState = Services.documentStateFor(win);
+            const docState = Services.globalDocumentStateFor(win);
             docHidden = sandbox.stub(docState, 'isHidden').returns(false);
 
             resources = Services.resourcesForDoc(win.document);

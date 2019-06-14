@@ -37,13 +37,12 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
-import {getServiceForDoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isFiniteNumber} from '../../../src/types';
 import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
 import {layoutRectLtwh, moveLayoutRect} from '../../../src/layout-rect';
-import {mapRange} from '../../../src/utils/math';
+import {magnitude, mapRange} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
 import {
   px,
@@ -571,12 +570,7 @@ export class VideoDocking {
     }
 
     installPositionObserverServiceForDoc(this.ampdoc_);
-
-    // No getter in services.js.
-    return /** @type {!PositionObserver} */ (getServiceForDoc(
-      this.ampdoc_,
-      'position-observer'
-    ));
+    return Services.positionObserverForDoc(this.ampdoc_.getHeadNode());
   }
 
   /**
@@ -1515,7 +1509,7 @@ export class VideoDocking {
     offset.y = 0;
 
     // Prevents dragging misfires.
-    const offsetDist = Math.sqrt(Math.pow(offset.x, 2) + Math.pow(offset.y, 2));
+    const offsetDist = magnitude(offset.x, offset.y);
     if (offsetDist <= 10) {
       return;
     }

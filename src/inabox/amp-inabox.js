@@ -21,16 +21,17 @@
 import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
-import {
-  adopt,
-  installAmpdocServices,
-  installBuiltins,
-  installRuntimeServices,
-} from '../runtime';
-import {cssText} from '../../build/css';
+import {adopt} from '../runtime';
+import {cssText as ampDocCss} from '../../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../../build/ampshared.css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
+import {
+  installAmpdocServices,
+  installBuiltinElements,
+  installRuntimeServices,
+} from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
@@ -43,6 +44,7 @@ import {
 } from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {internalRuntimeVersion} from '../internal-version';
+import {isExperimentOn} from '../experiments';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
 import {startupChunk} from '../chunk';
@@ -81,7 +83,9 @@ startupChunk(self.document, function initial() {
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
   const fullCss =
-    cssText +
+    (isExperimentOn(self, 'inabox-css-cleanup')
+      ? ampSharedCss
+      : ampDocCss + ampSharedCss) +
     'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
   installStylesForDoc(
     ampdoc,
@@ -104,7 +108,7 @@ startupChunk(self.document, function initial() {
       });
       startupChunk(self.document, function builtins() {
         // Builtins.
-        installBuiltins(self);
+        installBuiltinElements(self);
       });
       startupChunk(self.document, function adoptWindow() {
         adopt(self);

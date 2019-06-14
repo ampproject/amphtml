@@ -135,7 +135,8 @@ function setPercyTargetCommit() {
  */
 async function launchWebServer() {
   webServerProcess_ = execScriptAsync(
-    `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
+    `gulp serve --compiled --host ${HOST} --port ${PORT} ` +
+      `${process.env.WEBSERVER_QUIET}`,
     {
       stdio: argv.webserver_debug
         ? ['ignore', process.stdout, process.stderr]
@@ -826,20 +827,21 @@ async function performVisualTests() {
 async function ensureOrBuildAmpRuntimeInTestMode_() {
   if (argv.nobuild) {
     const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":true\b/.test(
-      fs.readFileSync('dist/amp.js', 'utf8')
+      fs.readFileSync('dist/v0.js', 'utf8')
     );
     if (!isInTestMode) {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        colors.cyan('gulp build --fortesting'),
+        colors.cyan('gulp dist --fortesting'),
         'or remove the',
         colors.cyan('--nobuild'),
         'option from this command'
       );
     }
   } else {
-    execOrDie('gulp build --fortesting');
+    execOrDie('gulp clean');
+    execOrDie('gulp dist --fortesting');
   }
 }
 

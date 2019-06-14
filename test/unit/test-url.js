@@ -692,15 +692,17 @@ describe('isLocalhostOrigin', () => {
 
 describe('isProtocolValid', () => {
   function testProtocolValid(href, bool) {
-    it(
-      'should return that ' +
-        href +
-        (bool ? ' is' : ' is not') +
-        ' a valid protocol',
-      () => {
-        expect(isProtocolValid(href)).to.equal(bool);
-      }
-    );
+    it.configure()
+      .skipFirefox()
+      .run(
+        'should return that ' +
+          href +
+          (bool ? ' is' : ' is not') +
+          ' a valid protocol',
+        () => {
+          expect(isProtocolValid(href)).to.equal(bool);
+        }
+      );
   }
 
   testProtocolValid('http://foo.com', true);
@@ -888,22 +890,24 @@ describe('getSourceOrigin/Url', () => {
 
 describe('resolveRelativeUrl', () => {
   function testRelUrl(href, baseHref, resolvedHref) {
-    it(
-      'should return the resolved rel url from ' +
-        href +
-        ' with base ' +
-        baseHref,
-      () => {
-        expect(resolveRelativeUrl(href, baseHref)).to.equal(
-          resolvedHref,
-          'native or fallback'
-        );
-        expect(resolveRelativeUrlFallback_(href, baseHref)).to.equal(
-          resolvedHref,
-          'fallback'
-        );
-      }
-    );
+    it.configure()
+      .skipFirefox()
+      .run(
+        'should return the resolved rel url from ' +
+          href +
+          ' with base ' +
+          baseHref,
+        () => {
+          expect(resolveRelativeUrl(href, baseHref)).to.equal(
+            resolvedHref,
+            'native or fallback'
+          );
+          expect(resolveRelativeUrlFallback_(href, baseHref)).to.equal(
+            resolvedHref,
+            'fallback'
+          );
+        }
+      );
   }
 
   // Absolute URL.

@@ -15,12 +15,13 @@
  */
 
 /**
- * @fileoverview Embeds a story
+ * @fileoverview Embeds a single page in a story
  *
  * Example:
  * <code>
  * <amp-story-page>
- * </amp-story>
+ *   ...
+ * </amp-story-page>
  * </code>
  */
 import {
@@ -226,14 +227,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
 
-    /** @private @const {!Promise} */
-    this.mediaLayoutPromise_ = this.waitForMediaLayout_();
-
-    /** @private @const {!Promise} */
-    this.pageLoadPromise_ = this.mediaLayoutPromise_.then(() => {
-      this.markPageAsLoaded_();
-    });
-
     const deferred = new Deferred();
 
     /** @private @const {!Promise<!MediaPool>} */
@@ -382,7 +375,11 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.state_ = state;
         break;
       case PageState.PAUSED:
-        this.advancement_.stop(true /** canResume */);
+        // canResume keeps the time advancement timer if set to true, and resets
+        // it when set to false. If the bookend if open, reset the timer. If
+        // user is long pressing, don't reset it.
+        const canResume = !this.storeService_.get(StateProperty.BOOKEND_STATE);
+        this.advancement_.stop(canResume);
         this.pauseAllMedia_(false /** rewindToBeginning */);
         if (this.animationManager_) {
           this.animationManager_.pauseAll();
@@ -448,7 +445,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     return Promise.all([
       this.beforeVisible(),
-      this.mediaLayoutPromise_,
+      this.waitForMediaLayout_(),
       this.mediaPoolPromise_,
     ]);
   }
@@ -502,8 +499,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.addEventListener('error', resolve, true /* useCapture */);
       });
     });
-
-    return Promise.all(mediaPromises);
+    return Promise.all(mediaPromises).then(() => this.markPageAsLoaded_());
   }
 
   /**
@@ -565,11 +561,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         debouncePrepareForAnimation(el, null /* unlisten */);
       }
     });
-  }
-
-  /** @return {!Promise} */
-  whenLoaded() {
-    return this.pageLoadPromise_;
   }
 
   /** @private */
@@ -1091,20 +1082,20 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Navigates to the previous page in the story.
    */
   previous() {
-    const targetPageId = this.getPreviousPageId();
+    const pageId = this.getPreviousPageId();
 
-    if (targetPageId === null) {
+    if (pageId === null) {
       dispatch(
         this.win,
         this.element,
-        EventType.SHOW_NO_PREVIOUS_PAGE_HELP,
+        EventType.NO_PREVIOUS_PAGE,
         /* payload */ undefined,
         {bubbles: true}
       );
       return;
     }
 
-    this.switchTo_(targetPageId, NavigationDirection.PREVIOUS);
+    this.switchTo_(pageId, NavigationDirection.PREVIOUS);
   }
 
   /**
@@ -1116,6 +1107,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     const pageId = this.getNextPageId(isAutomaticAdvance);
 
     if (!pageId) {
+      dispatch(
+        this.win,
+        this.element,
+        EventType.NO_NEXT_PAGE,
+        /* payload */ undefined,
+        {bubbles: true}
+      );
       return;
     }
 

@@ -278,10 +278,10 @@ export class GlobalVariableSource extends VariableSource {
         if (!clientIds) {
           return null;
         }
-        return clientIds[dev().assertString(scope)];
+        return clientIds[scope];
       },
       (scope, opt_userNotificationId, opt_cookieName) => {
-        user().assertString(
+        userAssert(
           scope,
           'The first argument to CLIENT_ID, the fallback' +
             /*OK*/ ' Cookie name, is required'
@@ -308,7 +308,7 @@ export class GlobalVariableSource extends VariableSource {
           .then(cid => {
             return cid.get(
               {
-                scope: dev().assertString(scope),
+                /** @type {string} */ scope,
                 createCookieIfNotPresent: true,
                 cookieName: opt_cookieName,
               },
@@ -393,6 +393,36 @@ export class GlobalVariableSource extends VariableSource {
             GEO_DELIM
           ));
         }, 'AMP_GEO');
+      })
+    );
+
+    // Attempt to returns user location data if available, otherwise null.
+    this.setAsync(
+      'AMP_USER_LOCATION',
+      /** @type {AsyncResolverDef} */ (type => {
+        // Type may be "","lat","lon", and undefined
+        return this.getUserLocation_(userLocationService => {
+          return userLocationService.getReplacementLocation(
+            'AMP_USER_LOCATION',
+            type
+          );
+        }, 'AMP_USER_LOCATION');
+      })
+    );
+
+    // Returns user location data only if available,
+    // and waits for the user to approve.
+    this.setAsync(
+      'AMP_USER_LOCATION_POLL',
+      /** @type {AsyncResolverDef} */ (type => {
+        // Type may be "","lat","lon", and undefined
+        return this.getUserLocation_(userLocationService => {
+          return userLocationService.getReplacementLocation(
+            'AMP_USER_LOCATION_POLL',
+            type,
+            /*opt_poll*/ true
+          );
+        }, 'AMP_USER_LOCATION_POLL');
       })
     );
 
@@ -743,7 +773,7 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Return the QUERY_PARAM from the current location href
-   * @param {*} param
+   * @param {string} param
    * @param {string} defaultValue
    * @return {string}
    * @private
@@ -758,13 +788,12 @@ export class GlobalVariableSource extends VariableSource {
       removeAmpJsParamsFromUrl(this.ampdoc.win.location.href)
     );
     const params = parseQueryString(url.search);
-    const key = user().assertString(param);
     const {replaceParams} = this.getDocInfo_();
-    if (typeof params[key] !== 'undefined') {
-      return params[key];
+    if (typeof params[param] !== 'undefined') {
+      return params[param];
     }
-    if (replaceParams && typeof replaceParams[key] !== 'undefined') {
-      return /** @type {string} */ (replaceParams[key]);
+    if (replaceParams && typeof replaceParams[param] !== 'undefined') {
+      return /** @type {string} */ (replaceParams[param]);
     }
     return defaultValue;
   }
@@ -804,6 +833,28 @@ export class GlobalVariableSource extends VariableSource {
       userAssert(geo, 'To use variable %s, amp-geo should be configured', expr);
       return getter(geo);
     });
+  }
+
+  /**
+   * Resolves the value via the user location service.
+   * @param {function(Object<string, string>)} getter
+   * @param {string} expr
+   * @return {!Promise<Object<string,(string|Array<string>)>>}
+   * @template T
+   * @private
+   */
+  getUserLocation_(getter, expr) {
+    const element = this.ampdoc.getHeadNode();
+    return Services.userLocationForDocOrNull(element).then(
+      userLocationService => {
+        userAssert(
+          userLocationService,
+          'To use variable %s, amp-user-location should be configured',
+          expr
+        );
+        return getter(userLocationService);
+      }
+    );
   }
 
   /**

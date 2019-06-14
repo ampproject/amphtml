@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
+import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -64,9 +65,7 @@ class AmpAccordion extends AMP.BaseElement {
     this.action_ = null;
 
     /** @private {number|string} */
-    this.suffix_ = element.id
-      ? element.id
-      : Math.floor(Math.random() * Math.floor(100));
+    this.prefix_ = element.id ? element.id : Math.floor(Math.random() * 100);
   }
 
   /** @override */
@@ -109,7 +108,7 @@ class AmpAccordion extends AMP.BaseElement {
         // we need to make sure that each accordion has a unique ID.
         // In case the accordion doesn't have an ID we use a
         // random number to ensure uniqueness.
-        contentId = this.suffix_ + '_AMP_content_' + index;
+        contentId = this.prefix_ + '_AMP_content_' + index;
         content.setAttribute('id', contentId);
       }
 
@@ -384,6 +383,9 @@ class AmpAccordion extends AMP.BaseElement {
           () => {
             setStyles(section, {
               'overflow': 'hidden',
+              // Set the height of the section immediately, so it is correct
+              // until the animation below starts (on the next frame).
+              'height': `${headerHeight}px`,
             });
             setStyles(sectionChild, {
               'position': '',
@@ -602,5 +604,5 @@ class AmpAccordion extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpAccordion);
+  AMP.registerElement(TAG, AmpAccordion, CSS);
 });

@@ -842,34 +842,36 @@ describe('friendly-iframe-embed', () => {
       });
     });
 
-    it('resizes body and fixed container when entering', function*() {
-      const bodyElementMock = document.createElement('div');
-      const fie = createFie(bodyElementMock);
+    it.configure()
+      .skipFirefox()
+      .run('resizes body and fixed container when entering', function*() {
+        const bodyElementMock = document.createElement('div');
+        const fie = createFie(bodyElementMock);
 
-      const scrollTop = 45;
-      stubViewportScrollTop(scrollTop);
+        const scrollTop = 45;
+        stubViewportScrollTop(scrollTop);
 
-      yield fie.enterFullOverlayMode();
+        yield fie.enterFullOverlayMode();
 
-      expect(bodyElementMock.style.background).to.equal('transparent');
-      expect(bodyElementMock.style.position).to.equal('absolute');
-      expect(bodyElementMock.style.width).to.equal(`${w}px`);
-      expect(bodyElementMock.style.height).to.equal(`${h}px`);
-      expect(bodyElementMock.style.top).to.equal(`${y - scrollTop}px`);
-      expect(bodyElementMock.style.left).to.equal(`${x}px`);
-      expect(bodyElementMock.style.right).to.equal('auto');
-      expect(bodyElementMock.style.bottom).to.equal('auto');
+        expect(bodyElementMock.style.background).to.equal('transparent');
+        expect(bodyElementMock.style.position).to.equal('absolute');
+        expect(bodyElementMock.style.width).to.equal(`${w}px`);
+        expect(bodyElementMock.style.height).to.equal(`${h}px`);
+        expect(bodyElementMock.style.top).to.equal(`${y - scrollTop}px`);
+        expect(bodyElementMock.style.left).to.equal(`${x}px`);
+        expect(bodyElementMock.style.right).to.equal('auto');
+        expect(bodyElementMock.style.bottom).to.equal('auto');
 
-      const {iframe} = fie;
+        const {iframe} = fie;
 
-      expect(iframe.style.position).to.equal('fixed');
-      expect(iframe.style.left).to.equal('0px');
-      expect(iframe.style.right).to.equal('0px');
-      expect(iframe.style.top).to.equal('0px');
-      expect(iframe.style.bottom).to.equal('0px');
-      expect(iframe.style.width).to.equal('100vw');
-      expect(iframe.style.height).to.equal('100vh');
-    });
+        expect(iframe.style.position).to.equal('fixed');
+        expect(iframe.style.left).to.equal('0px');
+        expect(iframe.style.right).to.equal('0px');
+        expect(iframe.style.top).to.equal('0px');
+        expect(iframe.style.bottom).to.equal('0px');
+        expect(iframe.style.width).to.equal('100vw');
+        expect(iframe.style.height).to.equal('100vh');
+      });
 
     it('should reset body and fixed container when leaving', function*() {
       const bodyElementMock = document.createElement('div');

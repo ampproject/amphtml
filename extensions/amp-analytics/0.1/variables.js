@@ -21,6 +21,7 @@ import {dict} from '../../../src/utils/object';
 import {getConsentPolicyState} from '../../../src/consent';
 import {
   getServiceForDoc,
+  getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
@@ -88,14 +89,14 @@ export class ExpansionOptions {
 }
 
 /**
- * @param {string} str
+ * @param {string} value
  * @param {string} s
  * @param {string=} opt_l
  * @return {string}
  */
-function substrMacro(str, s, opt_l) {
+function substrMacro(value, s, opt_l) {
   const start = Number(s);
-  let {length} = str;
+  let {length} = value;
   userAssert(
     isFiniteNumber(start),
     'Start index ' + start + 'in substr macro should be a number'
@@ -108,7 +109,7 @@ function substrMacro(str, s, opt_l) {
     );
   }
 
-  return str.substr(start, length);
+  return value.substr(start, length);
 }
 
 /**
@@ -118,7 +119,7 @@ function substrMacro(str, s, opt_l) {
  */
 function defaultMacro(value, defaultValue) {
   if (!value || !value.length) {
-    return user().assertString(defaultValue);
+    return defaultValue;
   }
   return value;
 }
@@ -319,6 +320,17 @@ export function installVariableServiceForTesting(ampdoc) {
  */
 export function variableServiceForDoc(elementOrAmpDoc) {
   return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-variables');
+}
+
+/**
+ * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!Promise<!VariableService>}
+ */
+export function variableServicePromiseForDoc(elementOrAmpDoc) {
+  return /** @type {!Promise<!VariableService>} */ (getServicePromiseForDoc(
+    elementOrAmpDoc,
+    'amp-analytics-variables'
+  ));
 }
 
 /**

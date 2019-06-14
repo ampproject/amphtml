@@ -849,6 +849,29 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       });
     });
 
+    it('should send pingback with all entitlements if "pingbackAllEntitlements" is set', () => {
+      const entitlementData = {
+        source: 'local',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+      };
+      const entitlement = Entitlement.parseFromJson(entitlementData);
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+      const platform = new SubscriptionPlatform();
+      platform.isPingbackEnabled = () => true;
+      platform.pingbackReturnsAllEntitlements = () => true;
+      subscriptionService.platformStore_.resolvePlatform('local', platform);
+      const entitlementStub = sandbox
+        .stub(subscriptionService.platformStore_, 'getAllPlatformsEntitlements')
+        .callsFake(() => Promise.resolve([entitlement]));
+      const pingbackStub = sandbox.stub(platform, 'pingback');
+      return subscriptionService.performPingback_().then(() => {
+        expect(entitlementStub).to.be.called;
+        expect(pingbackStub).to.be.calledWith([entitlement]);
+      });
+    });
+
     it('should send empty pingback if resolved entitlement is null', () => {
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.platformStore_ = new PlatformStore(['local']);

@@ -28,8 +28,8 @@ const shellFlag = process.platform == 'win32' ? '/C' : '-c';
  * Spawns the given command in a child process with the given options.
  *
  * @param {string} cmd
- * @param {<Object>} options
- * @return {<Object>} Process info.
+ * @param {?Object} options
+ * @return {!Object}
  */
 function spawnProcess(cmd, options) {
   return childProcess.spawnSync(shellCmd, [shellFlag, cmd], options);
@@ -39,49 +39,50 @@ function spawnProcess(cmd, options) {
  * Executes the provided command with the given options, returning the process
  * object.
  *
- * @param {string} cmd Command line to execute.
- * @param {<Object>} options
- * @return {<Object>} Process info.
+ * @param {string} cmd
+ * @param {?Object} options
+ * @return {!Object}
  */
-exports.exec = function(cmd, options) {
+function exec(cmd, options) {
   options = options || {'stdio': 'inherit'};
   return spawnProcess(cmd, options);
-};
+}
 
 /**
  * Executes the provided shell script in an asynchronous process.
  *
  * @param {string} script
- * @param {<Object>} options
+ * @param {?Object} options
  */
-exports.execScriptAsync = function(script, options) {
+function execScriptAsync(script, options) {
   return childProcess.spawn(shellCmd, [shellFlag, script], options);
-};
+}
 
 /**
  * Executes the provided command, and terminates the program in case of failure.
  *
- * @param {string} cmd Command line to execute.
- * @param {<Object>} options Extra options to send to the process.
+ * @param {string} cmd
+ * @param {?Object} options
  */
-exports.execOrDie = function(cmd, options) {
-  const p = exports.exec(cmd, options);
+function execOrDie(cmd, options) {
+  const p = exec(cmd, options);
   if (p.status != 0) {
     process.exit(p.status);
   }
-};
+}
 
 /**
  * Executes the provided command, returning the process object.
  * @param {string} cmd
+ * @param {?Object} options
  * @return {!Object}
  */
-function getOutput(cmd) {
+function getOutput(cmd, options = {}) {
   const p = spawnProcess(cmd, {
-    'cwd': process.cwd(),
-    'env': process.env,
-    'stdio': 'pipe',
-    'encoding': 'utf-8',
+    'cwd': options.cwd || process.cwd(),
+    'env': options.env || process.env,
+    'stdio': options.stdio || 'pipe',
+    'encoding': options.encoding || 'utf-8',
   });
   return p;
 }
@@ -89,17 +90,27 @@ function getOutput(cmd) {
 /**
  * Executes the provided command, returning its stdout.
  * @param {string} cmd
+ * @param {?Object} options
  * @return {string}
  */
-exports.getStdout = function(cmd) {
-  return getOutput(cmd).stdout;
-};
+function getStdout(cmd, options) {
+  return getOutput(cmd, options).stdout;
+}
 
 /**
  * Executes the provided command, returning its stderr.
  * @param {string} cmd
+ * @param {?Object} options
  * @return {string}
  */
-exports.getStderr = function(cmd) {
-  return getOutput(cmd).stderr;
+function getStderr(cmd, options) {
+  return getOutput(cmd, options).stderr;
+}
+
+module.exports = {
+  exec,
+  execOrDie,
+  execScriptAsync,
+  getStderr,
+  getStdout,
 };

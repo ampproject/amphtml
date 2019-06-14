@@ -18,11 +18,6 @@
 
 const gulp = require('gulp-help')(require('gulp'));
 const {
-  buildExperiments,
-  buildLoginDone,
-  dist,
-} = require('./build-system/tasks/dist');
-const {
   compileAccessExpr,
   compileBindExpr,
   compileCssExpr,
@@ -33,6 +28,7 @@ const {
 const {
   processGithubIssues,
 } = require('./build-system/tasks/process-github-issues');
+const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
 const {build, defaultTask, watch} = require('./build-system/tasks/build');
@@ -42,14 +38,17 @@ const {changelog, changelogUpdate} = require('./build-system/tasks/changelog');
 const {checkLinks} = require('./build-system/tasks/check-links');
 const {checkTypes} = require('./build-system/tasks/check-types');
 const {clean} = require('./build-system/tasks/clean');
+const {codecovUpload} = require('./build-system/tasks/codecov-upload');
 const {createGoldenCss} = require('./build-system/tasks/create-golden-css');
 const {css} = require('./build-system/tasks/css');
 const {csvifySize} = require('./build-system/tasks/csvify-size');
 const {depCheck} = require('./build-system/tasks/dep-check');
 const {devDashboardTests} = require('./build-system/tasks/dev-dashboard-tests');
+const {dist} = require('./build-system/tasks/dist');
 const {e2e} = require('./build-system/tasks/e2e');
 const {firebase} = require('./build-system/tasks/firebase');
 const {getZindex} = require('./build-system/tasks/get-zindex');
+const {integration} = require('./build-system/tasks/integration');
 const {lint} = require('./build-system/tasks/lint');
 const {makeExtension} = require('./build-system/tasks/extension-generator');
 const {nailgunStart, nailgunStop} = require('./build-system/tasks/nailgun');
@@ -61,16 +60,16 @@ const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
 const {test} = require('./build-system/tasks/runtime-test');
 const {todosFindClosed} = require('./build-system/tasks/todos');
+const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
 const {validator, validatorWebui} = require('./build-system/tasks/validator');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
 
 // Keep this list alphabetized.
+gulp.task('a4a', a4a);
 gulp.task('ava', ava);
 gulp.task('babel-plugin-tests', babelPluginTests);
 gulp.task('build', build);
-gulp.task('build-experiments', buildExperiments);
-gulp.task('build-login-done', buildLoginDone);
 gulp.task('bundle-size', bundleSize);
 gulp.task('caches-json', cachesJson);
 gulp.task('changelog', changelog);
@@ -78,6 +77,7 @@ gulp.task('changelog:update', changelogUpdate);
 gulp.task('check-links', checkLinks);
 gulp.task('check-types', checkTypes);
 gulp.task('clean', clean);
+gulp.task('codecov-upload', codecovUpload);
 gulp.task('compile-access-expr', compileAccessExpr);
 gulp.task('compile-bind-expr', compileBindExpr);
 gulp.task('compile-css-expr', compileCssExpr);
@@ -91,6 +91,7 @@ gulp.task('dist', dist);
 gulp.task('e2e', e2e);
 gulp.task('firebase', firebase);
 gulp.task('get-zindex', getZindex);
+gulp.task('integration', integration);
 gulp.task('json-syntax', jsonSyntax);
 gulp.task('lint', lint);
 gulp.task('make-extension', makeExtension);
@@ -106,6 +107,7 @@ gulp.task('test', test);
 gulp.task('serve', serve);
 gulp.task('size', size);
 gulp.task('todos:find-closed', todosFindClosed);
+gulp.task('unit', unit);
 gulp.task('update-packages', updatePackages);
 gulp.task('validator', validator);
 gulp.task('validator-webui', validatorWebui);

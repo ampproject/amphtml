@@ -194,6 +194,7 @@ export function parseLength(s) {
  * Asserts that the supplied value is a non-percent CSS Length value.
  * @param {!LengthDef|string|null|undefined} length
  * @return {!LengthDef}
+ * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertLength(length) {
   userAssert(
@@ -209,6 +210,7 @@ export function assertLength(length) {
  * (including percent unit).
  * @param {!LengthDef|string} length
  * @return {!LengthDef}
+ * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertLengthOrPercent(length) {
   userAssert(

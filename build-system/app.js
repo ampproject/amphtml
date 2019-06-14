@@ -31,7 +31,6 @@ const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
 const request = require('request');
-const {appTestEndpoints} = require('./app-test');
 const pc = process;
 const runVideoTestBench = require('./app-video-testbench');
 const {
@@ -49,6 +48,8 @@ app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
+app.use('/user-location/', require('./routes/user-location'));
+app.use('/test', require('./routes/test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -90,10 +91,6 @@ if (!global.AMP_TESTING) {
 // e.g. /serve_mode_change?mode=(default|compiled|cdn)
 // (See ./app-index/settings.js)
 app.get('/serve_mode_change', (req, res) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   const {mode} = req.query;
   if (isValidServeMode(mode)) {
     setServeMode(mode);
@@ -242,10 +239,6 @@ app.use('/api/dont-show', (req, res) => {
 });
 
 app.use('/api/echo/query', (req, res) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   res.json(JSON.parse(req.query.data));
 });
 
@@ -284,7 +277,24 @@ app.use('/form/redirect-to/post', (req, res) => {
 app.use('/form/echo-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
+  const fields = Object.create(null);
+  form.on('field', function(name, value) {
+    if (!(name in fields)) {
+      fields[name] = value;
+      return;
+    }
+
+    const realName = name;
+    if (realName in fields) {
+      if (!Array.isArray(fields[realName])) {
+        fields[realName] = [fields[realName]];
+      }
+    } else {
+      fields[realName] = [];
+    }
+    fields[realName].push(value);
+  });
+  form.parse(req, unusedErr => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
@@ -385,68 +395,8 @@ app.use('/form/autocomplete/query', (req, res) => {
   }
 });
 
-const autosuggestLanguages = [
-  'ActionScript',
-  'AppleScript',
-  'Asp',
-  'BASIC',
-  'C',
-  'C++',
-  'Clojure',
-  'COBOL',
-  'ColdFusion',
-  'Erlang',
-  'Fortran',
-  'Go',
-  'Groovy',
-  'Haskell',
-  'Java',
-  'JavaScript',
-  'Lisp',
-  'Perl',
-  'PHP',
-  'Python',
-  'Ruby',
-  'Scala',
-  'Scheme',
-];
-
-app.use('/form/autosuggest/query', (req, res) => {
-  cors.assertCors(req, res, ['GET']);
-  const MAX_RESULTS = 4;
-  const query = req.query.q;
-  if (!query) {
-    res.json({
-      items: [
-        {
-          results: autosuggestLanguages.slice(0, MAX_RESULTS),
-        },
-      ],
-    });
-  } else {
-    const lowerCaseQuery = query.toLowerCase();
-    const filtered = autosuggestLanguages.filter(l =>
-      l.toLowerCase().includes(lowerCaseQuery)
-    );
-    res.json({
-      items: [
-        {
-          results: filtered.slice(0, MAX_RESULTS),
-        },
-      ],
-    });
-  }
-});
-
-app.use('/form/autosuggest/search', (req, res) => {
-  cors.assertCors(req, res, ['POST']);
-  const form = new formidable.IncomingForm();
-  form.parse(req, function(err, fields) {
-    res.json({
-      query: fields.query,
-      results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
-    });
-  });
+app.use('/form/autocomplete/error', (req, res) => {
+  res(500);
 });
 
 app.use('/form/verify-search-json/post', (req, res) => {
@@ -491,10 +441,6 @@ app.use('/form/verify-search-json/post', (req, res) => {
 });
 
 app.use('/share-tracking/get-outgoing-fragment', (req, res) => {
-  res.setHeader(
-    'AMP-Access-Control-Allow-Source-Origin',
-    req.protocol + '://' + req.headers.host
-  );
   res.json({
     fragment: '54321',
   });
@@ -922,22 +868,6 @@ app.use('/inabox/:version/', (req, res) => {
   });
 });
 
-app.use('/examples/analytics.config.json', (req, res, next) => {
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
-  next();
-});
-
-app.use(
-  ['/examples/*', '/extensions/*', '/test/manual/*'],
-  (req, res, next) => {
-    const sourceOrigin = req.query['__amp_source_origin'];
-    if (sourceOrigin) {
-      res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-    }
-    next();
-  }
-);
-
 /**
  * Append ?sleep=5 to any included JS file in examples to emulate delay in
  * loading that file. This allows you to test issues with your extension being
@@ -1045,8 +975,6 @@ app.get(
   }
 );
 
-appTestEndpoints(app);
-
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -1132,12 +1060,6 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
-/*
-//TODO(chenshay): Accept '?crypto=bla'
-implement authorizer here.
-this is for local testing.
-*/
-
 // Simulated subscription entitlement
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
@@ -1148,6 +1070,7 @@ app.use('/subscription/:id/entitlements', (req, res) => {
     data: {
       login: true,
     },
+    decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
   });
 });
 
@@ -1458,6 +1381,23 @@ function generateInfo(filePath) {
     'Change to COMPILED mode (minified JS)</a></h3>' +
     '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>'
   );
+}
+
+function decryptDocumentKey(encryptedDocumentKey) {
+  if (!encryptedDocumentKey) {
+    return null;
+  }
+  const cryptoStart = 'ENCRYPT(';
+  if (!encryptedDocumentKey.includes(cryptoStart, 0)) {
+    return null;
+  }
+  let jsonString = encryptedDocumentKey.replace(cryptoStart, '');
+  jsonString = jsonString.substring(0, jsonString.length - 1);
+  const parsedJson = JSON.parse(jsonString);
+  if (!parsedJson) {
+    return null;
+  }
+  return parsedJson.key;
 }
 
 module.exports = app;
