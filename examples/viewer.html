@@ -168,6 +168,16 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="8"] #container8 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+    viewer[data-show-container="8"] #show-container8-anchor {
+      text-decoration: underline;
+    }
+
     viewer[data-show-container="dynamic"] #container-dynamic {
       visibility: visible;
       -webkit-transform: none;
@@ -475,9 +485,24 @@
         case 'replaceHistory':
         case 'visibilitychange':
           return Promise.resolve();
+        case 'xhr':
+          return this.handleXhrIntercept_();
         default:
           return Promise.reject('request not supported: ', name);
       }
+    };
+
+    Viewer.prototype.handleXhrIntercept_ = function(data) {
+    // Mocked response.
+    return Promise.resolve({
+        "body" : '{"items": [{"title": "Intercepted response", "url": "http://ampdev.org"}]}',
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json",
+          },
+          "type": 'application/json',
+        },
+      });
     };
 
     // TODO(alabiaga): We mock the template but don't verify the data
@@ -677,6 +702,14 @@
           false).start();
       addShowContainer('7');
 
+      new Viewer(
+          'container8',
+          '8',
+          './xhr-intercept.html?amp_js_v=0.1',
+          false,
+          'xhrInterceptor').start();
+      addShowContainer('8');
+
       if (href) {
         new Viewer(
             'container-dynamic',
@@ -691,8 +724,6 @@
         showContainer('1');
       }
     }
-
-
 
     function addShowContainer(id) {
       var anchor = document.getElementById('show-container' + id + '-anchor');
@@ -735,6 +766,7 @@
       <a class="show-container-anchor" id="show-container5-anchor">Five</a>
       <a class="show-container-anchor" id="show-container6-anchor">Six</a>
       <a class="show-container-anchor" id="show-container7-anchor">Seven</a>
+      <a class="show-container-anchor" id="show-container8-anchor">Eight</a>
       <a class="show-container-anchor" id="show-containerdynamic-anchor" hidden>Dynamic</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
@@ -778,6 +810,11 @@
     <div class="wait">
       Please wait, the AMP doc will appear here...
     </div>
+    </container>
+    <container id="container8">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
     </container>
   </viewer>
 </body>
