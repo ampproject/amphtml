@@ -15,6 +15,7 @@
  */
 
 import {ANALYTICS_CONFIG} from './vendors';
+import {RtvExperiment} from './rtvExperimentConfig';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
@@ -41,7 +42,9 @@ export class AnalyticsConfig {
      * @const {!JsonObject} Copied here for tests.
      * @private
      */
-    this.predefinedConfig_ = ANALYTICS_CONFIG;
+     this.predefinedConfig_ = RtvExperiment.ANALYTICS_VENDOR_SPLIT
+       ? dict()
+       : ANALYTICS_CONFIG;
 
     /**
      * @private {JsonObject}
@@ -63,10 +66,50 @@ export class AnalyticsConfig {
   loadConfig() {
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
+    console.log(RtvExperiment.ANALYTICS_VENDOR_SPLIT);
+    const fetchVendorConfigPromise = RtvExperiment.ANALYTICS_VENDOR_SPLIT
+      ? this.fetchVendorConfig_()
+      : Promise.resolve();
 
-    return this.fetchRemoteConfig_()
+    return Promise.all([this.fetchRemoteConfig_(), fetchVendorConfigPromise])
       .then(this.processConfigs_.bind(this))
       .then(() => this.config_);
+  }
+
+  /**
+   * Returns a promise that resolves when vendor config is ready (or
+   * immediately if no vendor config is specified)
+   * @private
+   * @return {!Promise<undefined>}
+   */
+  fetchVendorConfig_() {
+    const type = this.element_.getAttribute('type');
+    if (!type) {
+      return Promise.resolve();
+    }
+
+    const fetchConfig = {
+      requireAmpResponseSourceOrigin: false,
+    };
+
+    const baseUrl = getMode().localDev ? '/dist' : 'https://cdn.ampproject.org';
+    const vendorUrl = baseUrl + '/v0/analytics-vendors/' + type + '.json';
+
+    const TAG = this.getName_();
+    dev().fine(TAG, 'Fetching vendor config', vendorUrl);
+
+    return Services.xhrFor(toWin(this.win_))
+      .fetchJson(vendorUrl, fetchConfig)
+      .then(res => res.json())
+      .then(
+        jsonValue => {
+          this.predefinedConfig_[type] = jsonValue;
+          dev().fine(TAG, 'Vendor config loaded for ' + type, jsonValue);
+        },
+        err => {
+          user().error(TAG, 'Error loading vendor config: ', vendorUrl, err);
+        }
+      );
   }
 
   /**
