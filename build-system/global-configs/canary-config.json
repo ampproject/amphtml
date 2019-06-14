@@ -5,6 +5,7 @@
     "amp-next-page",
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
+    "inabox-css-cleanup",
     "linker-meta-opt-in"
   ],
   "allow-url-opt-in": [
