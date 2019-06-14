@@ -184,6 +184,10 @@ const FULLSCREEN_CSS = 'i-amphtml-date-picker-fullscreen';
 
 const MIN_PICKER_YEAR = 1900;
 
+const AMP_READONLY_DATA_ATTR = 'iAmphtmlReadonly';
+
+const AMP_DATE_BLUR_DATA_ATTR = 'iAmphtmlDateBlur';
+
 export class AmpDatePicker extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -226,6 +230,9 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     /** @private @const */
     this.templates_ = Services.templatesFor(this.win);
+
+    /** @private @const */
+    this.input_ = Services.inputFor(this.win);
 
     /** @const */
     this.onDateChange = this.onDateChange.bind(this);
@@ -875,7 +882,6 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @return {?Element}
    */
   setupDateField_(type) {
-    const input = Services.inputFor(this.win);
     const fieldSelector = this.element.getAttribute(`${type}-selector`);
     const existingField = this.getAmpDoc()
       .getRootNode()
@@ -884,7 +890,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       if (
         !this.element.hasAttribute('touch-keyboard-editable') &&
         this.mode_ == DatePickerMode.OVERLAY &&
-        input.isTouchDetected()
+        this.input_.isTouchDetected()
       ) {
         setNonValidationReadonly(existingField, true);
       }
@@ -985,39 +991,68 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
-   * Handle mousedown to prevent the mobile keyboard
+   * Suppress the mobile keyboard on focus.
+   * The `readonly` property on input elements prevents the mobile keyboard from
+   * appearing when the input receives focus.
+   * However, `readonly` also prevents form validation from triggering.
+   * To suppress the mobile keyboard and also allow validation to occur, this
+   * method adds `readonly` when focus occurs, and removes it on blur.
    * @param {!Event} e
    * @private
    */
   addTouchReadonly_(e) {
     const target = dev().assertElement(e.target);
 
-    if (this.isDateField_(target) && isNonValidationReadonly(target)) {
-      if (!target.readOnly) {
-        target.readOnly = true;
-        target.dataset[AMP_DATE_BLUR_DATA_ATTR] = true; // Prevent an infinite loop between focus and blur
-        target.blur(); // Blur to close the keyboard
-        tryFocus(target); // Focus to return the input to focus
-      }
-      delete target.dataset[AMP_DATE_BLUR_DATA_ATTR]; // cleanup
+    if (!this.isDateField_(target)) {
+      return;
     }
+
+    if (!isNonValidationReadonly(target)) {
+      return;
+    }
+
+    if (target.readOnly) {
+      return;
+    }
+
+    target.readOnly = true;
+    // This data-attribute prevents an infinite loop between blur and focus
+    target.dataset[AMP_DATE_BLUR_DATA_ATTR] = true;
+
+    // Force blur to close the keyboard. When focus returns, the field will
+    // have `readonly` set and the mobile keyboard will not open.
+    target.blur();
+
+    // Return focus to the field
+    tryFocus(target);
+
+    // Clean this up since it isn't needed after this point.
+    delete target.dataset[AMP_DATE_BLUR_DATA_ATTR];
   }
 
   /**
-   * Handle mouseup to prevent the mobile keyboard
+   * Remove the behavior added by `addTouchReadonly`.
    * @param {!Event} e
    * @private
    */
   removeTouchReadonly_(e) {
     const target = dev().assertElement(e.target);
 
-    if (
-      this.isDateField_(target) &&
-      isNonValidationReadonly(target) &&
-      !target.dataset[AMP_DATE_BLUR_DATA_ATTR]
-    ) {
-      target.readOnly = false;
+    if (!this.isDateField_(target)) {
+      return;
     }
+
+    if (!isNonValidationReadonly(target)) {
+      return;
+    }
+
+    // If the blur was caused by the forced blur in addTouchReadonly_,
+    // don't remove readonly yet. We want to wait until the user navigates away.
+    if (target.dataset[AMP_DATE_BLUR_DATA_ATTR]) {
+      return;
+    }
+
+    target.readOnly = false;
   }
 
   /**
@@ -1961,12 +1996,9 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 }
 
-const AMP_READONLY_DATA_ATTR = 'iAmphtmlReadonly';
-
-const AMP_DATE_BLUR_DATA_ATTR = 'iAmphtmlDateBlur';
-
 /**
- *
+ * Mark an element to receive the `readonly` property on focus.
+ * That will prevent the mobile keyboard from appearing when it is not desired.
  * @param {!Element} element
  * @param {boolean} toggle
  */
@@ -1980,7 +2012,8 @@ function setNonValidationReadonly(element, toggle) {
 }
 
 /**
- *
+ * Detect if an element has been marked to receive the
+ * `readonly` property on focus.
  * @param {!Element} element
  * @return {boolean}
  */
