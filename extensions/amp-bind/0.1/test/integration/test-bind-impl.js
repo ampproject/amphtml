@@ -1178,14 +1178,16 @@ describe
             );
           });
 
-          it('should dispatch FORM_VALUE_CHANGE on <option [selected]> changes', () => {
-            const element = createElement(
-              env,
-              container,
-              '[selected]="foo"',
-              'option'
-            );
-            const spy = sandbox.spy(element, 'dispatchEvent');
+          it('should dispatch FORM_VALUE_CHANGE at parent <select> on <option [selected]> changes', () => {
+            const select = env.win.document.createElement('select');
+            select.innerHTML = `
+              <optgroup>
+                <option [selected]="foo"></option>
+              </optgroup>
+            `;
+            container.appendChild(select);
+
+            const spy = sandbox.spy(select, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'selected'}).then(
               () => {

@@ -1151,7 +1151,12 @@ export class Bind {
         }
 
         if (isPropertyAFormValue(element.tagName, property)) {
-          dispatchAmpFormValueChangeEvent(this.localWin_, element);
+          const dispatchAt =
+            element.tagName === 'OPTION' ? element.closest('SELECT') : element;
+
+          if (dispatchAt) {
+            dispatchAmpFormValueChangeEvent(this.localWin_, dispatchAt);
+          }
         }
       });
 
