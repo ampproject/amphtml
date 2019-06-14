@@ -359,7 +359,7 @@ export function getConsentStateStr(element) {
 /**
  * Converts string to boolean
  * @param {string} str
- * @return {bool}
+ * @return {boolean}
  */
 function stringToBool_(str) {
   return (
