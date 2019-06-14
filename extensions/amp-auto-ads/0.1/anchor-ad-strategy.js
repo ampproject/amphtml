@@ -51,7 +51,7 @@ export class AnchorAdStrategy {
       if (noFillAnchorEnabled) {
         user().warn(
           TAG,
-          'Auto Ads is unable to crawl because of already existing <amp-sticky-ad>.'
+          'Auto ads may not work because of already existing <amp-sticky-ad>.'
         );
       } else {
         user().warn(
