@@ -13,3 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// Since we no longer pass the process_common_js_modules flag to closure
+// compiler, we must now tranform these common JS node_modules to ESM before
+// passing them to closure.
+// TODO(rsimha, erwinmombay): Derive this list programmatically if possible.
+const commonJsModules = [
+  'node_modules/dompurify/',
+  'node_modules/promise-pjs/',
+  'node_modules/set-dom/',
+];
+
+/**
+ * Returns true if the file is known to be a common JS module.
+ * @param {string} file
+ */
+exports.isCommonJsModule = function(file) {
+  return commonJsModules.some(function(module) {
+    return file.startsWith(module);
+  });
+}

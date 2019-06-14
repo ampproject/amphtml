@@ -23,7 +23,6 @@ const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
-const tempy = require('tempy');
 const {
   gulpClosureCompile,
   handleCompilerError,
@@ -282,7 +281,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         'build/patched-module/',
         'build/fake-module/',
         'build/fake-polyfills/',
-        tmpDir,
+        process.env.AMP_TMP_DIR,
       ],
       entry_point: entryModuleFilenames,
       module_resolution: 'NODE',

@@ -98,7 +98,6 @@ function transferSrcsToTempDir() {
  * @return {!Promise}
  */
 async function dist() {
-  transferSrcsToTempDir();
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
