@@ -51,6 +51,9 @@ const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
+const tempy = require('tempy');
+const conf = require('../build.conf');
+const {isCommonJsModule} = require('../compile/compile-utils');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -66,12 +69,25 @@ const allJsSrcsGlob = [
   'src/**/*.js',
 ];
 
-function tranferSrcsToTempDir() {
-  console.log('transferSrcToTempDir');
+function transferSrcsToTempDir() {
+  const tmp = `${tempy.directory()}/amphtml`;
+  process.env.AMP_TMP_DIR = tmp;
+  console.log('new tmp dir', tmp);
   const files = deglob.sync(allJsSrcsGlob);
+  console.log('Executing babel transforms');
   files.forEach(file => {
-    console.log(transferSrcToTempDir);
+    const {code} = babel.transformFileSync(file, {
+      plugins: conf.plugins({
+        isEsmBuild: argv.esm,
+        isCommonJsModule: isCommonJsModule(file),
+        isForTesting: argv.fortesting,
+      }),
+      retainLines: true,
+    });
+    const name = `${tmp}${file.replace(process.cwd(), '')}`;
+    fs.outputFileSync(name, code);
   });
+  console.log('babel transforms done!');
 }
 
 /**
@@ -79,8 +95,8 @@ function tranferSrcsToTempDir() {
  * @return {!Promise}
  */
 async function dist() {
-  transferSrcsToTempDir();
   maybeUpdatePackages();
+  transferSrcsToTempDir();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
   printNobuildHelp();
