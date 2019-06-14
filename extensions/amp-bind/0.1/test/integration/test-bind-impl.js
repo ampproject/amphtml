@@ -1139,8 +1139,8 @@ describe
           expect(foo.textContent).to.not.equal('bar');
         });
 
-        describe('AmpEvents.VALUE_CHANGE dispatches', () => {
-          it('should dispatch on <input [value]> changes', () => {
+        describe('AmpEvents.VALUE_CHANGE', () => {
+          it('should dispatch VALUE_CHANGE on <input [value]> changes', () => {
             const element = createElement(
               env,
               container,
@@ -1158,7 +1158,7 @@ describe
             });
           });
 
-          it('should dispatch on <input [checked]> changes', () => {
+          it('should dispatch VALUE_CHANGE on <input [checked]> changes', () => {
             const element = createElement(
               env,
               container,
@@ -1178,7 +1178,7 @@ describe
             );
           });
 
-          it('should dispatch on <option [selected]> changes', () => {
+          it('should dispatch VALUE_CHANGE on <option [selected]> changes', () => {
             const element = createElement(
               env,
               container,
@@ -1198,7 +1198,7 @@ describe
             );
           });
 
-          it('should dispatch on <textarea [text]> changes', () => {
+          it('should dispatch VALUE_CHANGE on <textarea [text]> changes', () => {
             const element = createElement(
               env,
               container,
@@ -1216,7 +1216,7 @@ describe
             });
           });
 
-          it('should NOT dispatch on other attributes', () => {
+          it('should NOT dispatch VALUE_CHANGE on other attributes changes', () => {
             const element = createElement(
               env,
               container,
@@ -1230,7 +1230,7 @@ describe
             });
           });
 
-          it('should NOT dispatch on other elements', () => {
+          it('should NOT dispatch VALUE_CHANGE on other element changes', () => {
             const element = createElement(env, container, '[text]="foo"', 'p');
             const spy = sandbox.spy(element, 'dispatchEvent');
 
