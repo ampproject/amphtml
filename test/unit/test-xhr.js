@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as mode from '../../src/mode';
 import {Services} from '../../src/services';
 import {assertSuccess} from '../../src/utils/xhr-utils';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
@@ -751,9 +752,9 @@ describe
           .then(() => expect(sendMessageStub).to.not.have.been.called);
       });
 
-      it('should intercept if viewer untrusted but dev mode', () => {
+      it('should intercept if viewer untrusted but in local dev mode', () => {
         sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
-        interceptionEnabledWin.AMP_DEV_MODE = true;
+        sandbox.stub(mode, 'getMode').returns({localDev: true});
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
