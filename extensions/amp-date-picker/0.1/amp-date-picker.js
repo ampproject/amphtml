@@ -892,7 +892,7 @@ export class AmpDatePicker extends AMP.BaseElement {
         this.mode_ == DatePickerMode.OVERLAY &&
         this.input_.isTouchDetected()
       ) {
-        setNonValidationReadonly(existingField, true);
+        setTouchNonValidationReadonly(existingField, true);
       }
       return existingField;
     }
@@ -991,11 +991,11 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
-   * Suppress the mobile keyboard on focus.
-   * The `readonly` property on input elements prevents the mobile keyboard from
+   * Suppress the touch keyboard on focus.
+   * The `readonly` property on input elements prevents the touch keyboard from
    * appearing when the input receives focus.
    * However, `readonly` also prevents form validation from triggering.
-   * To suppress the mobile keyboard and also allow validation to occur, this
+   * To suppress the touch keyboard and also allow validation to occur, this
    * method adds `readonly` when focus occurs, and removes it on blur.
    * @param {!Event} e
    * @private
@@ -1007,7 +1007,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       return;
     }
 
-    if (!isNonValidationReadonly(target)) {
+    if (!isTouchNonValidationReadonly(target)) {
       return;
     }
 
@@ -1042,7 +1042,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       return;
     }
 
-    if (!isNonValidationReadonly(target)) {
+    if (!isTouchNonValidationReadonly(target)) {
       return;
     }
 
@@ -1998,11 +1998,11 @@ export class AmpDatePicker extends AMP.BaseElement {
 
 /**
  * Mark an element to receive the `readonly` property on focus.
- * That will prevent the mobile keyboard from appearing when it is not desired.
+ * That will prevent the touch keyboard from appearing when it is not desired.
  * @param {!Element} element
  * @param {boolean} toggle
  */
-function setNonValidationReadonly(element, toggle) {
+function setTouchNonValidationReadonly(element, toggle) {
   if (!toggle) {
     delete element.dataset[AMP_READONLY_DATA_ATTR];
     return;
@@ -2017,7 +2017,7 @@ function setNonValidationReadonly(element, toggle) {
  * @param {!Element} element
  * @return {boolean}
  */
-function isNonValidationReadonly(element) {
+function isTouchNonValidationReadonly(element) {
   return Boolean(element.dataset[AMP_READONLY_DATA_ATTR]);
 }
 
