@@ -16,7 +16,6 @@
 'using strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const testConfig = require('../config');
 const {
   maybePrintArgvMessages,
   refreshKarmaWdCache,
@@ -28,33 +27,6 @@ const {
 } = require('./runtime-test/runtime-test-base');
 const {css} = require('./css');
 const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
-
-class Config extends RuntimeTestConfig {
-  constructor(testType) {
-    super(testType);
-  }
-
-  /** @override */
-  getFiles() {
-    const files = testConfig.commonUnitTestPaths.concat(
-      testConfig.chaiAsPromised
-    );
-
-    if (argv.files) {
-      return files.concat(argv.files);
-    }
-
-    if (argv.saucelabs) {
-      return files.concat(testConfig.unitTestOnSaucePaths);
-    }
-
-    if (argv.local_changes) {
-      return files.concat(getUnitTestsToRun(testConfig.unitTestPaths));
-    }
-
-    return files.concat(testConfig.unitTestPaths);
-  }
-}
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -72,17 +44,18 @@ class Runner extends RuntimeTestRunner {
 }
 
 async function unit() {
-  if (
-    shouldNotRun() ||
-    (argv.local_changes && !getUnitTestsToRun(testConfig.unitTestPaths))
-  ) {
+  if (shouldNotRun()) {
     return;
   }
 
   maybePrintArgvMessages();
   refreshKarmaWdCache();
 
-  const config = new Config('unit');
+  if (argv.local_changes && !getUnitTestsToRun()) {
+    return;
+  }
+
+  const config = new RuntimeTestConfig('unit');
   const runner = new Runner(config);
 
   await runner.setup();
@@ -95,22 +68,22 @@ module.exports = {
 };
 
 unit.description = 'Runs unit tests';
-//TODO(estherkim): fill this out
 unit.flags = {
-  'local_changes': '',
-  'saucelabs': '',
-  'chrome_canary': '',
-  'chrome_flags': '',
-  'coverage': '',
-  'firefox': '',
-  'files': '',
-  'grep': '',
-  'headless': '',
-  'ie': '',
-  'nobuild': '',
-  'nohelp': '',
-  'safari': '',
-  'testnames': '',
-  'verbose': '',
-  'watch': '',
+  'chrome_canary': '  Runs tests on Chrome Canary',
+  'chrome_flags': '  Uses the given flags to launch Chrome',
+  'coverage': '  Run tests in code coverage mode',
+  'firefox': '  Runs tests on Firefox',
+  'files': '  Runs tests for specific files',
+  'grep': '  Runs tests that match the pattern',
+  'headless': '  Run tests in a headless Chrome window',
+  'ie': '  Runs tests on IE',
+  'local_changes':
+    '  Run unit tests directly affected by the files changed in the local branch',
+  'nobuild': '  Skips build step',
+  'nohelp': '  Silence help messages that are printed prior to test run',
+  'safari': '  Runs tests on Safari',
+  'saucelabs': '  Runs tests on saucelabs (requires setup)',
+  'testnames': '  Lists the name of each test being run',
+  'verbose': '  With logging enabled',
+  'watch': '  Watches for changes in files, runs corresponding test(s)',
 };
