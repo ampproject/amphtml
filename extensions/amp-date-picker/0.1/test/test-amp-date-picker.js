@@ -433,21 +433,75 @@ describes.realWin(
 
       describe('src attribute', () => {
         it('should set highlighted and blocked dates', () => {
-          const {element} = createDatePicker({
+          const {picker} = createDatePicker({
             src: 'http://localhost:9876/date-picker/src-data/get',
           });
 
-          const impl = element.implementation_;
-
-          sandbox.stub(impl, 'fetchSrc_').resolves({
+          sandbox.stub(picker, 'fetchSrc_').resolves({
             blocked: ['2018-01-03'],
             highlighted: ['2018-01-04'],
           });
 
-          return impl.setupSrcAttributes_().then(() => {
-            expect(impl.blocked_.contains('2018-01-03')).to.be.true;
-            expect(impl.highlighted_.contains('2018-01-04')).to.be.true;
+          return picker.setupSrcAttributes_().then(() => {
+            expect(picker.blocked_.contains('2018-01-03')).to.be.true;
+            expect(picker.highlighted_.contains('2018-01-04')).to.be.true;
           });
+        });
+      });
+
+      describe('touch keyboard suppression', () => {
+        it(
+          'should add and remove the readonly property on focus' +
+            ' for touch devices',
+          () => {
+            const {element, picker} = createDatePicker({
+              'mode': 'overlay',
+              'input-selector': '#date',
+            });
+            const input = document.createElement('input');
+            input.id = 'date';
+            element.appendChild(input);
+            sandbox.stub(picker.input_, 'isTouchDetected').returns(true);
+
+            return picker
+              .buildCallback()
+              .then(() => {
+                expect(input).to.have.attribute('data-i-amphtml-readonly');
+                return picker.layoutCallback();
+              })
+              .then(() => {
+                const fakeEvent = {target: input};
+                picker.addTouchReadonly_(fakeEvent);
+                expect(input.readOnly).to.be.true;
+                picker.removeTouchReadonly_(fakeEvent);
+                expect(input.readOnly).to.be.false;
+              });
+          }
+        );
+
+        it('should not add and remove the readonly property on desktop', () => {
+          const {element, picker} = createDatePicker({
+            'mode': 'overlay',
+            'input-selector': '#date',
+          });
+          const input = document.createElement('input');
+          input.id = 'date';
+          element.appendChild(input);
+          sandbox.stub(picker.input_, 'isTouchDetected').returns(false);
+
+          return picker
+            .buildCallback()
+            .then(() => {
+              expect(input).to.not.have.attribute('data-i-amphtml-readonly');
+              return picker.layoutCallback();
+            })
+            .then(() => {
+              const fakeEvent = {target: input};
+              picker.addTouchReadonly_(fakeEvent);
+              expect(input.readOnly).to.be.false;
+              picker.removeTouchReadonly_(fakeEvent);
+              expect(input.readOnly).to.be.false;
+            });
         });
       });
     });
