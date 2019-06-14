@@ -738,7 +738,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
 ##### Crop `amp-img` and `amp-video` assets using `object-position`
 
 The `object-position` attribute can be used on `<amp-img>` and `<amp-video>` elements to specify the alignment of the asset within its container (crop).
-By default these assets are centered and, depending on the viewport ratio, have their edges are cropped out of the container. Because the zone of interest an asset is not always its center, the `object-position` allows specifying what part of the image has to remain visible.
+By default these assets are centered and, depending on the viewport ratio, have their edges are cropped out of the container. Because the zone of interest of an asset is not always its center, the `object-position` allows specifying what part of the image has to remain visible.
 This attribute accepts any value accepted by the `object-position` CSS property.
 
 Example:
