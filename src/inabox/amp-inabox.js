@@ -21,17 +21,17 @@
 import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
-import {
-  adopt,
-  installAmpdocServices,
-  installBuiltins,
-  installRuntimeServices,
-} from '../runtime';
+import {adopt} from '../runtime';
 import {cssText as ampDocCss} from '../../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
+import {
+  installAmpdocServices,
+  installBuiltinElements,
+  installRuntimeServices,
+} from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
@@ -107,7 +107,7 @@ startupChunk(self.document, function initial() {
       });
       startupChunk(self.document, function builtins() {
         // Builtins.
-        installBuiltins(self);
+        installBuiltinElements(self);
       });
       startupChunk(self.document, function adoptWindow() {
         adopt(self);

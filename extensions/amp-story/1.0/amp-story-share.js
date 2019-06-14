@@ -294,9 +294,7 @@ export class ShareWidget {
    * @private
    */
   getAmpDoc_() {
-    return /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (devAssert(
-      this.ampdoc_
-    ));
+    return devAssert(this.ampdoc_);
   }
 
   /** @private */

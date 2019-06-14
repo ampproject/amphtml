@@ -16,7 +16,10 @@
 
 import {Observable} from '../../observable';
 import {Services} from '../../services';
-import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from './viewport-binding-def';
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
@@ -246,19 +249,24 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getContentHeight() {
-    // Don't use scrollHeight, since it returns `MAX(viewport_height,
-    // document_height)` (we only want the latter), and it doesn't account
-    // for margins.
-    const scrollingElement = this.win.document.body;
-    const rect = scrollingElement./*OK*/ getBoundingClientRect();
-    const style = computedStyle(this.win, scrollingElement);
-    // Note: unlike viewport-binding-natural.js, there's no need to calculate
-    // the "top gap" since the wrapped body _does_ account for child margins.
-    // However, the parent's paddingTop still needs to be added.
+    // The wrapped body, not this.wrapper_ itself, will have the correct height.
+    const content = this.win.document.body;
+    const {height} = content./*OK*/ getBoundingClientRect();
+
+    // Unlike other viewport bindings, there's no need to include the
+    // rect top since the wrapped body accounts for the top margin of children.
+    // However, the parent's padding-top (this.paddingTop_) must be added.
+
+    // As of Safari 12.1.1, the getBoundingClientRect().height does not include
+    // the bottom margin of children and there's no other API that does.
+    const childMarginBottom = marginBottomOfLastChild(this.win, content);
+
+    const style = computedStyle(this.win, content);
     return (
-      rect.height +
-      this.paddingTop_ +
       parseInt(style.marginTop, 10) +
+      this.paddingTop_ +
+      height +
+      childMarginBottom +
       parseInt(style.marginBottom, 10)
     );
   }

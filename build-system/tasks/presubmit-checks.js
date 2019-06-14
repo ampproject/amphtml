@@ -175,9 +175,10 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/inabox/amp-inabox-lite.js',
-      'src/service/action-impl.js',
-      'src/service/standard-actions-impl.js',
       'src/runtime.js',
+      'src/service/action-impl.js',
+      'src/service/core-services.js',
+      'src/service/standard-actions-impl.js',
     ],
   },
   'installActionHandler': {
@@ -202,11 +203,19 @@ const forbiddenTerms = {
   },
   'installCryptoService': {
     message: privateServiceFactory,
-    whitelist: ['src/service/crypto-impl.js', 'src/runtime.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/crypto-impl.js',
+    ],
   },
   'installGlobalDocumentStateService': {
     message: privateServiceFactory,
-    whitelist: ['src/service/document-state.js', 'src/runtime.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/document-state.js',
+    ],
   },
   'installDocService': {
     message: privateServiceFactory,
@@ -235,18 +244,24 @@ const forbiddenTerms = {
     whitelist: [
       'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
+      'src/service/core-services.js',
       'src/service/storage-impl.js',
     ],
   },
   'installTemplatesService': {
     message: privateServiceFactory,
-    whitelist: ['src/runtime.js', 'src/service/template-impl.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/template-impl.js',
+    ],
   },
   'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
+      'src/service/core-services.js',
       'src/service/url-replacements-impl.js',
     ],
   },
@@ -256,21 +271,31 @@ const forbiddenTerms = {
       'src/runtime.js',
       'src/inabox/amp-inabox.js',
       'src/inabox/amp-inabox-lite.js',
+      'src/service/core-services.js',
       'src/service/viewer-impl.js',
     ],
   },
   'setViewerVisibilityState': {
     message: privateServiceFactory,
-    whitelist: ['src/runtime.js', 'src/service/viewer-impl.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/viewer-impl.js',
+    ],
   },
   'installViewportServiceForDoc': {
     message: privateServiceFactory,
-    whitelist: ['src/runtime.js', 'src/service/viewport/viewport-impl.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/viewport/viewport-impl.js',
+    ],
   },
   'installVsyncService': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
+      'src/service/core-services.js',
       'src/service/resources-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/vsync-impl.js',
@@ -281,13 +306,18 @@ const forbiddenTerms = {
     whitelist: [
       'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
+      'src/service/core-services.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
     ],
   },
   'installXhrService': {
     message: privateServiceFactory,
-    whitelist: ['src/runtime.js', 'src/service/xhr-impl.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/xhr-impl.js',
+    ],
   },
   'installPositionObserverServiceForDoc': {
     message: privateServiceFactory,
@@ -305,7 +335,7 @@ const forbiddenTerms = {
   },
   'getServiceForDoc': {
     message:
-      'Synchronous access to element services is unreliable. ' +
+      'Synchronous access to element services is unreliable (#22414). ' +
       'Use getServicePromiseForDoc() instead.',
     whitelist: [
       // Do not whitelist additional "extensions/*" paths.
@@ -313,13 +343,6 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
-      'extensions/amp-live-list/0.1/live-list-manager.js',
-      'extensions/amp-next-page/0.1/next-page-service.js',
-      'extensions/amp-position-observer/0.1/amp-position-observer.js',
-      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
-      'extensions/amp-user-notification/0.1/test/test-amp-user-notification.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js',
-      'extensions/amp-web-push/0.1/amp-web-push-config.js',
       'src/chunk.js',
       'src/service.js',
       'src/service/cid-impl.js',
