@@ -174,9 +174,9 @@ describes.realWin(
       });
 
       expect(root.innerHTML).to.equal(
-        '<div>text in <span style="background-color: rgb(255, 150, 50); ' +
+        '<div>text in <span style="background-color: rgb(252, 255, 0); ' +
           'color: rgb(0, 0, 0);">amp</span> doc</div><div>' +
-          '<span style="background-color: rgb(255, 150, 50); color: ' +
+          '<span style="background-color: rgb(252, 255, 0); color: ' +
           'rgb(0, 0, 0);">highlight</span>ed text</div>'
       );
 
