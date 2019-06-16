@@ -223,6 +223,10 @@ class AmpYoutube extends AMP.BaseElement {
       params['playsinline'] = '1';
     }
 
+    if ('loop' in params && params['loop'] == '1' && !('playlist' in params)) {
+      params['playlist'] = dev().assertString(this.videoid_);
+    }
+
     src = addParamsToUrl(src, params);
     return (this.videoIframeSrc_ = src);
   }
