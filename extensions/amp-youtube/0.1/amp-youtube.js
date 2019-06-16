@@ -223,6 +223,9 @@ class AmpYoutube extends AMP.BaseElement {
       params['playsinline'] = '1';
     }
 
+    // Fixes issue with the Youtube AS3 player that requires
+    // `data-param-playlist` to be set whenever the `data-param-loop` is set
+    // See https://developers.google.com/youtube/player_parameters#loop
     if ('loop' in params && params['loop'] == '1' && !('playlist' in params)) {
       params['playlist'] = dev().assertString(this.videoid_);
     }
