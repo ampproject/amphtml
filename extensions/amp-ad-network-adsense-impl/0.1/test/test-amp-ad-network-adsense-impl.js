@@ -525,16 +525,16 @@ describes.realWin(
         });
       });
 
-      it('should contain aanf if sticky ad', () => {
+      it('should contain aanf if sticky ad has no fill attribue', () => {
         const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
           'layout': 'nodisplay',
+          'no-fill': 'true',
         });
-        element.setAttribute('data-no-fill', 'true');
         ampStickyAd.appendChild(element);
         doc.body.appendChild(ampStickyAd);
-        return impl.getAdUrl().then(adUrl => {
-          expect(adUrl).to.contain('aanf=true');
-        });
+        return expect(impl.getAdUrl()).to.eventually.match(
+          /(\?|&)aanf=true(&|$)/
+        );
       });
 
       it('formats client properly', () => {

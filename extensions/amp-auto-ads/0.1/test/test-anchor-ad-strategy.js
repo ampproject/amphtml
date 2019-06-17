@@ -142,7 +142,7 @@ describes.realWin(
         return Promise.all([strategyPromise, expectPromise]);
       });
 
-      it('should set data-no-fill to false if opted in for anchor ads', () => {
+      it('should set no-fill to false if opted in for anchor ads', () => {
         configObj['optInStatus'].push(2);
 
         const anchorAdStrategy = new AnchorAdStrategy(
@@ -163,8 +163,7 @@ describes.realWin(
             },
             () => {
               const stickyAd = env.win.document.body.firstChild;
-              const ampAd = stickyAd.firstChild;
-              expect(ampAd.getAttribute('data-no-fill')).to.equal('false');
+              expect(stickyAd.getAttribute('no-fill')).to.equal('false');
               resolve();
             }
           );
@@ -173,7 +172,7 @@ describes.realWin(
         return Promise.all([strategyPromise, expectPromise]);
       });
 
-      it('should set data-no-fill to true if opted in only for no fill anchor ads', () => {
+      it('should set no-fill to true if opted in only for no fill anchor ads', () => {
         configObj['optInStatus'].push(4);
 
         const anchorAdStrategy = new AnchorAdStrategy(
@@ -194,8 +193,7 @@ describes.realWin(
             },
             () => {
               const stickyAd = env.win.document.body.firstChild;
-              const ampAd = stickyAd.firstChild;
-              expect(ampAd.getAttribute('data-no-fill')).to.equal('true');
+              expect(stickyAd.getAttribute('no-fill')).to.equal('true');
               resolve();
             }
           );
@@ -204,7 +202,7 @@ describes.realWin(
         return Promise.all([strategyPromise, expectPromise]);
       });
 
-      it('should set data-no-fill to false if opted in for both filled anchor ads and no fill anchor ads', () => {
+      it('should set no-fill to false if opted in for both filled anchor ads and no fill anchor ads', () => {
         configObj['optInStatus'].push(2);
         configObj['optInStatus'].push(4);
 
@@ -226,8 +224,7 @@ describes.realWin(
             },
             () => {
               const stickyAd = env.win.document.body.firstChild;
-              const ampAd = stickyAd.firstChild;
-              expect(ampAd.getAttribute('data-no-fill')).to.equal('false');
+              expect(stickyAd.getAttribute('no-fill')).to.equal('false');
               resolve();
             }
           );
