@@ -525,6 +525,18 @@ describes.realWin(
         });
       });
 
+      it('should contain aanf if sticky ad', () => {
+        const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
+          'layout': 'nodisplay',
+        });
+        element.setAttribute('data-no-fill', 'true');
+        ampStickyAd.appendChild(element);
+        doc.body.appendChild(ampStickyAd);
+        return impl.getAdUrl().then(adUrl => {
+          expect(adUrl).to.contain('aanf=true');
+        });
+      });
+
       it('formats client properly', () => {
         element.setAttribute('data-ad-client', 'SoMeClient');
         return impl.getAdUrl().then(url => {

@@ -163,8 +163,8 @@ describes.realWin(
             },
             () => {
               const stickyAd = env.win.document.body.firstChild;
-              expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
-              expect(stickyAd.getAttribute('data-no-fill')).to.equal('false');
+              const ampAd = stickyAd.firstChild;
+              expect(ampAd.getAttribute('data-no-fill')).to.equal('false');
               resolve();
             }
           );
@@ -194,8 +194,8 @@ describes.realWin(
             },
             () => {
               const stickyAd = env.win.document.body.firstChild;
-              expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
-              expect(stickyAd.getAttribute('data-no-fill')).to.equal('true');
+              const ampAd = stickyAd.firstChild;
+              expect(ampAd.getAttribute('data-no-fill')).to.equal('true');
               resolve();
             }
           );
@@ -226,8 +226,8 @@ describes.realWin(
             },
             () => {
               const stickyAd = env.win.document.body.firstChild;
-              expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
-              expect(stickyAd.getAttribute('data-no-fill')).to.equal('false');
+              const ampAd = stickyAd.firstChild;
+              expect(ampAd.getAttribute('data-no-fill')).to.equal('false');
               resolve();
             }
           );

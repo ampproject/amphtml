@@ -115,6 +115,7 @@ export class AnchorAdStrategy {
       dict({
         'width': String(viewportWidth),
         'height': '100',
+        'data-no-fill': String(noFill),
       })
     ));
     const doc = this.ampdoc.win.document;
@@ -124,7 +125,6 @@ export class AnchorAdStrategy {
       'amp-sticky-ad',
       dict({
         'layout': 'nodisplay',
-        'data-no-fill': String(noFill),
       })
     );
     stickyAd.appendChild(ampAd);
