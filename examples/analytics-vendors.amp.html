@@ -109,6 +109,7 @@
       <option>umenganalytics</option>
       <option>upscore</option>
       <option>vponanalytics</option>
+      <option>webengage</option>
       <option>webtrekk</option>
       <option>webtrekk_v2</option>
     </select>
@@ -1598,6 +1599,30 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- Vpon Analytics example -->
+
+<!-- start WebEngage Analytics example -->
+<amp-analytics type="webengage" id="webengage" >
+  <script type="application/json">
+    {
+      "vars": {
+        "licenseCode": "~134105385"
+      },
+      "requests": {
+        "weClick": {
+          "baseUrl": "${base}&eventName=Element Clicked&element=test1"
+        }
+      },
+      "triggers": {
+        "weClickTrigger": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "weClick"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- end WebEngage Analytics example -->
 </div>
 
 <div class="logo"></div>
