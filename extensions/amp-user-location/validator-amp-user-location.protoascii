@@ -37,7 +37,7 @@ tags: {  # <amp-user-location>
     name: "src"
     value_url: {
       protocol: "https"
-      allow_relative: true
+      allow_relative: false
     }
   }
   attr_lists: "mandatory-id-attr"
