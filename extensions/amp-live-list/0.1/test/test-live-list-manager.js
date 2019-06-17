@@ -173,7 +173,6 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     () => {
       const customSlot = document.createElement('div');
       customSlot.setAttribute('id', 'custom-slot');
-      customSlot.setAttribute('dynamic-live-list', 'custom-list');
 
       const fromServer = doc.createElement('div');
       fromServer.appendChild(customSlot);
@@ -191,7 +190,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
           'disable-pagination': '',
           'auto-insert': '',
         },
-        'custom-list'
+        'i-amphtml-custom-slot-dynamic-list'
       );
       clientLiveList.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID] = customSlot.id;
       clientLiveList.buildCallback();
