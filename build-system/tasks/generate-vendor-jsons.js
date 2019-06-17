@@ -56,11 +56,11 @@ function generateVendorJsons() {
         return;
       }
 
-      // convert object to JSON string with indentation of 4 spaces
+      // convert object to JSON string with indentation of 2 spaces
       const configString = JSON.stringify(
         ANALYTICS_CONFIG[vendorName],
         null,
-        4
+        2
       );
       const fileName = vendorName + '.json';
 
@@ -97,7 +97,7 @@ function generateCanaryBgJson_(analyticsConfig, destPath) {
         'https://tpc.googlesyndication.com/b4a/experimental/b4a-runner.html',
     },
   });
-  const bgCanaryConfigStr = JSON.stringify(bgCanaryConfig, null, 4);
+  const bgCanaryConfigStr = JSON.stringify(bgCanaryConfig, null, 2);
 
   return toPromise(
     file('bg.canary.json', bgCanaryConfigStr, {src: true}).pipe(
@@ -111,7 +111,7 @@ function generateCanaryMoatJson_(analyticsConfig, destPath) {
   const moatCanaryConfig = Object.assign({}, analyticsConfig['moat']);
   delete moatCanaryConfig['transport'];
 
-  const moatCanaryConfigStr = JSON.stringify(moatCanaryConfig, null, 4);
+  const moatCanaryConfigStr = JSON.stringify(moatCanaryConfig, null, 2);
 
   return toPromise(
     file('moat.canary.json', moatCanaryConfigStr, {src: true}).pipe(
