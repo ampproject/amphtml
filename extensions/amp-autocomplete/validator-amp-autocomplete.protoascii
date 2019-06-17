@@ -96,16 +96,13 @@ tags: {  # amp-autocomplete JSON
   spec_name: "amp-autocomplete JSON"
   requires_extension: "amp-autocomplete"
   mandatory_parent: "AMP-AUTOCOMPLETE"
-  attrs: { 
-    name: "nonce" 
-    disabled_by: "transformed"
-  }
   attrs: {
     name: "type"
     mandatory: true
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
+  attr_lists: "nonce-attr"
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"

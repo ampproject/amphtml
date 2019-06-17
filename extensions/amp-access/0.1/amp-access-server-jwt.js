@@ -344,7 +344,6 @@ export class AccessServerJwtAdapter {
             headers: dict({
               'Content-Type': 'application/x-www-form-urlencoded',
             }),
-            requireAmpResponseSourceOrigin: false,
           })
         )
         .then(response => {

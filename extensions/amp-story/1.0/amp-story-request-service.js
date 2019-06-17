@@ -91,7 +91,6 @@ export class AmpStoryRequestService {
    */
   loadJsonFromAttribute_(rawUrl, credentials) {
     const opts = {};
-    opts.requireAmpResponseSourceOrigin = false;
 
     if (!isProtocolValid(rawUrl)) {
       user().error(TAG, 'Invalid config url.');
