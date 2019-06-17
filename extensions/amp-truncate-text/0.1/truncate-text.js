@@ -172,10 +172,10 @@ function getOverflowY(element) {
  *
  * @param {{
  *   container: !Element,
- *   overflowElements: !Array<!Element>,
+ *   overflowNodes: !Array<!Node>,
  * }} config
  */
-export function truncateText({container, overflowElements} = {}) {
+export function truncateText({container, overflowNodes} = {}) {
   clearTruncated(container);
 
   // If everything fits while the overflow button is hidden, we are done.
@@ -189,7 +189,7 @@ export function truncateText({container, overflowElements} = {}) {
   // Set the container as truncateed, so we show the overflow element and we can
   // truncate taking the size into account.
   setTruncated(container);
-  runTruncation(container, containerRect, overflowElements);
+  runTruncation(container, containerRect, overflowNodes);
 }
 
 /**
@@ -214,12 +214,12 @@ function getAllNodes(root, filter, nodes = []) {
  * truncation and truncating it.
  * @param {!Element} container The Element to do truncation for.
  * @param {!ClientRect} containerRect The rect for `container`.
- * @param {!Array<!Element>} overflowElements Any elements that should be
- *    be showing when there is overflow.
+ * @param {!Array<!Node>} overflowNodes Any nodes that should be showing
+ *    when there is overflow.
  */
-function runTruncation(container, containerRect, overflowElements) {
+function runTruncation(container, containerRect, overflowNodes) {
   const nodes = getAllNodes(container, node => {
-    return !overflowElements.includes(node);
+    return !overflowNodes.includes(node);
   });
 
   // Work backwards, truncating nodes from the end until we find one that can

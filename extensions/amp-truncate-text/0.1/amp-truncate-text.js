@@ -204,9 +204,9 @@ export class AmpTruncateText extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Array<!Element>} The elements to show when overflowing.
+   * @return {!Array<!Node>} The nodes to show when overflowing.
    */
-  getElementsForOverflow_() {
+  getNodesForOverflow_() {
     if (this.useShadow_) {
       return toArray(
         this.element.querySelectorAll('[slot="persistent"], [slot="collapsed"]')
@@ -228,11 +228,11 @@ export class AmpTruncateText extends AMP.BaseElement {
     const container = dev().assertElement(
       this.useShadow_ ? this.element : this.content_
     );
-    const overflowElements = this.getElementsForOverflow_();
+    const overflowNodes = this.getNodesForOverflow_();
 
     truncateText({
       container,
-      overflowElements,
+      overflowNodes,
     });
     // Take the records to clear them out. This prevents mutations from
     // the truncation from invoking the observer's callback.
