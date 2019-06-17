@@ -85,7 +85,7 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const img = dev().assertElement(this.img_);
-    this.propagateAttributes(LAYOUT_ATTRIBUTES, img);
+    this.propagateAttributes(LAYOUT_ATTRIBUTES, img, true);
     guaranteeSrcForSrcsetUnsupportedBrowsers(img);
     return this.loadPromise(img);
   }
