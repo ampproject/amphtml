@@ -79,9 +79,32 @@ describes.realWin(
 
       impl.unlayoutCallback();
       expect(img.getAttribute('src')).to.equal(SRC_PLACEHOLDER);
+      expect(img.getAttribute('srcset')).to.equal(SRC_PLACEHOLDER);
 
       impl.layoutCallback();
       expect(img.getAttribute('src')).to.equal('test.jpg');
+      expect(img.getAttribute('srcset')).to.equal(EXAMPLE_SRCSET);
+    });
+
+    it('should clear srcset if missing on relayout', () => {
+      const el = env.win.document.createElement('amp-anim');
+      el.setAttribute('src', 'test.jpg');
+      el.setAttribute('width', 100);
+      el.setAttribute('height', 100);
+
+      const impl = new AmpAnim(el);
+      impl.buildCallback();
+      impl.layoutCallback();
+      const img = el.querySelector('img');
+      expect(img.getAttribute('src')).to.equal('test.jpg');
+
+      impl.unlayoutCallback();
+      expect(img.getAttribute('src')).to.equal(SRC_PLACEHOLDER);
+      expect(img.getAttribute('srcset')).to.equal(SRC_PLACEHOLDER);
+
+      impl.layoutCallback();
+      expect(img.getAttribute('src')).to.equal('test.jpg');
+      expect(img.getAttribute('srcset')).to.equal(null);
     });
 
     it('should propagate the object-fit attribute', () => {
