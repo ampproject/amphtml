@@ -141,6 +141,7 @@ export class LinkerManager {
   }
 
   /**
+   * TODO: Revisit this logic after #22787 is complete.
    * Applys any matching linkers to the elements href. If no linkers exist,
    * will not set href.
    * @param {!Element} element
