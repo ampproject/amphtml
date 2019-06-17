@@ -15,12 +15,9 @@
  */
 
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {DomAncestorVisitor} from './dom-ancestor-visitor';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {buildUrl} from './shared/url-builder';
-import {computedStyle} from '../../../src/style';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -1047,57 +1044,4 @@ function getBrowserCapabilitiesBitmap(win) {
 export function getAmpRuntimeTypeParameter(win) {
   const art = getBinaryTypeNumericalCode(getBinaryType(win));
   return isCdnProxy(win) && art != '0' ? art : null;
-}
-
-/**
- * Returns the fixed size of the given element, or the fixed size of its nearest
- * ancestor that has a fixed size, if the given element has none.
- * @param {!Window} win
- * @param {?Element} element
- * @return {number} The width of the given element, or of the nearest ancestor
- *    with a fixed size, if the given element has none.
- */
-export function getFlexibleAdSlotRequestParams(win, element) {
-  const sizeFn = (el, style, completeTaskWithResult) => {
-    const layout = el.getAttribute('layout');
-    switch (layout) {
-      case Layout.FIXED:
-        completeTaskWithResult(parseInt(el.getAttribute('width'), 10) || 0);
-        break;
-      case Layout.RESPONSIVE:
-      case Layout.FILL:
-      case Layout.FIXED_HEIGHT:
-      case Layout.FLUID:
-        // The above layouts determine the width of the element by the
-        // containing element, or by CSS max-width property.
-        const maxWidth = parseInt(style.maxWidth, 10);
-        if (maxWidth || maxWidth == 0) {
-          completeTaskWithResult(maxWidth);
-        }
-        el = el.parentElement;
-        break;
-      case Layout.CONTAINER:
-        // Container layout allows the container's size to be determined by
-        // the children within it, so in principle we can grow as large as the
-        // viewport.
-        const viewport = Services.viewportForDoc(dev().assertElement(element));
-        completeTaskWithResult(viewport.getSize().width);
-        break;
-      case Layout.NODISPLAY:
-      case Layout.FLEX_ITEM:
-        completeTaskWithResult(0);
-        break;
-      default:
-        // If no layout is provided, we must use getComputedStyle.
-        completeTaskWithResult(parseInt(style.width, 10) || 0);
-    }
-  };
-  const ancestorVisitor = new DomAncestorVisitor(win)
-      .addTask('psz', sizeFn, 100 /* maxDepth */)
-      .addTask('msz', sizeFn, 1 /* maxDepth */)
-      .visitAncestorsStartingFrom(element);
-  return {
-    psz: ancestorVisitor.getResultForOrDefault('psz', -1),
-    msz: ancestorVisitor.getResultForOrDefault('msz', -1)
-  };
 }

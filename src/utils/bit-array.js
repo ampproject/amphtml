@@ -16,10 +16,10 @@
 
 import {devAssert} from '../log';
 
-/**
- * Utility class for 52-bit bit array.
- */
 export class BitArray {
+  /**
+   * Utility class for 52-bit bit array.
+   */
   constructor() {
     this.bits_ = [];
   }
@@ -35,7 +35,10 @@ export class BitArray {
     this.bits_[index] = value;
   }
 
-  /** @return {boolean} */
+  /**
+   * @param {number} index
+   * @return {boolean}
+   */
   get(index) {
     return !!this.bits_[index];
   }
@@ -46,7 +49,9 @@ export class BitArray {
    */
   getIntValue() {
     return this.bits_.reduce((accumulator, currentValue, currentIndex) => {
-      return currentValue ? accumulator + Math.pow(2, currentIndex) : accumulator;
+      return currentValue
+        ? accumulator + Math.pow(2, currentIndex)
+        : accumulator;
     }, 0);
   }
 }

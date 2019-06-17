@@ -32,7 +32,6 @@ import {
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
-  getFlexibleAdSlotRequestParams,
   getIdentityToken,
   googleAdUrl,
   googleBlockParameters,
@@ -74,6 +73,7 @@ import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {getFlexibleAdSlotRequestParams} from './flexible-ad-slot-utils';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';

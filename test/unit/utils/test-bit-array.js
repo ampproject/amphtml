@@ -16,7 +16,6 @@
 import {BitArray} from '../../../src/utils/bit-array.js';
 
 describe('BitArray', () => {
-
   let bitArray;
 
   beforeEach(() => {
@@ -68,17 +67,17 @@ describe('BitArray', () => {
 
   describe('getIntValue', () => {
     it('should have value 1 + 2 + 4 = 7', () => {
-      bitArray.set(0);  // 1
-      bitArray.set(1);  // 2
-      bitArray.set(2);  // 4
+      bitArray.set(0); // 1
+      bitArray.set(1); // 2
+      bitArray.set(2); // 4
       expect(bitArray.getIntValue()).to.equal(7);
     });
 
     it('should respect modifications', () => {
-      bitArray.set(0);  // 1
-      bitArray.set(1);  // 2
+      bitArray.set(0); // 1
+      bitArray.set(1); // 2
       expect(bitArray.getIntValue()).to.equal(3);
-      bitArray.set(2);  // 4
+      bitArray.set(2); // 4
       expect(bitArray.getIntValue()).to.equal(7);
     });
 
