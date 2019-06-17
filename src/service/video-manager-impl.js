@@ -1341,15 +1341,17 @@ export class AnalyticsPercentageTracker {
     // will never fire, so we check if it's already available here.
     if (this.hasDuration_()) {
       this.calculate_(this.triggerId_);
+    } else {
+      this.unlisteners_.push(
+        listenOnce(element, VideoEvents.LOADEDMETADATA, () => {
+          if (this.hasDuration_()) {
+            this.calculate_(this.triggerId_);
+          }
+        })
+      );
     }
 
     this.unlisteners_.push(
-      listenOnce(element, VideoEvents.LOADEDMETADATA, () => {
-        if (this.hasDuration_()) {
-          this.calculate_(this.triggerId_);
-        }
-      }),
-
       listen(element, VideoEvents.ENDED, () => {
         if (this.hasDuration_()) {
           this.maybeTrigger_(/* normalizedPercentage */ 100);
