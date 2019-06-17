@@ -68,19 +68,19 @@ export class DatesList {
    * @param {!moment|string} date
    * @return {!moment}
    */
-  firstDateAfter(date) {
-    const m = this.moment_(date);
-    const mDate = m.toDate();
+  firstDateAfter(momentOrString) {
+    const m = this.moment_(momentOrString);
+    const date = m.toDate();
 
     const firstDatesAfter = [];
     for (let i = 0; i < this.dates_.length; i++) {
-      if (this.dates_[i].toDate() >= mDate) {
+      if (this.dates_[i].toDate() >= date) {
         firstDatesAfter.push(this.dates_[i]);
         break;
       }
     }
     const rruleDates = this.rrulestrs_
-      .map(rrule => rrule.after(mDate))
+      .map(rrule => rrule.after(date))
       .filter(Boolean);
     firstDatesAfter.concat(rruleDates);
 
