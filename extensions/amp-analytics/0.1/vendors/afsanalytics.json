@@ -1,0 +1,25 @@
+{
+  "vars": {
+    "server": "www",
+    "websiteid": "xxxxxxxx",
+    "event": "click",
+    "clicklabel": "clicked from AMP page"
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  },
+  "requests": {
+    "host": "//${server}.afsanalytics.com",
+    "base": "${host}/cgi_bin/",
+    "pageview": "${base}connect.cgi?usr=${websiteid}Pauto&js=1&amp=1&title=${title}&url=${canonicalUrl}&refer=${documentReferrer}&resolution=${screenWidth}x${screenHeight}&color=${screenColorDepth}&Tips=${random}",
+    "click": "${base}click.cgi?usr=${websiteid}&event=${event}&exit=${clicklabel}"
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  }
+}

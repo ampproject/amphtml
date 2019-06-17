@@ -1,0 +1,16 @@
+{
+  "requests": {
+    "pageview": "${protocol}://${host}/${version}?url=${sourceUrl}&sourceHost=${sourceHost}&sourceHostname=${sourceHostname}&sourcePath=${sourcePath}&canonicalUrl=${canonicalUrl}&platform=AMP&title=${title}&referrer=${documentReferrer}&screenHeight=${screenHeight}&screenWidth=${screenWidth}&screenColorDepth=${screenColorDepth}&ua=${userAgent}&clientId=${clientId(pinpoll)}"
+  },
+  "triggers": {
+    "pageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  },
+  "vars": {
+    "version": "v1",
+    "protocol": "https",
+    "host": "pa.pinpoll.com"
+  }
+}
