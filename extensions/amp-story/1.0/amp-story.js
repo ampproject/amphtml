@@ -1004,7 +1004,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   initializeLiveStory_() {
-    if (this.element.hasAttribute('dynamic-live-list')) {
+    if (this.element.hasAttribute('live-story')) {
       this.liveStoryManager_ = new LiveStoryManager(this);
       this.liveStoryManager_.build();
 
