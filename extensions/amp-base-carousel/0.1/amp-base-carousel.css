@@ -90,7 +90,7 @@ amp-base-carousel[i-amphtml-carousel-hide-buttons] .i-amphtml-carousel-arrow-nex
   background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path  d="M10,7.4 L14.6,12 L10,16.6" fill="none" stroke="#fff" stroke-width="2px" stroke-linejoin="round" stroke-linecap="round" /></svg>');
 }
 
-.i-amphtml-carousel-slotted > .i-amphtml-replaced-content {
+amp-base-carousel .i-amphtml-carousel-slotted > .i-amphtml-replaced-content {
   /*
    * Apply contain object-fit to all replaced content to avoid distorted ratios.
    */

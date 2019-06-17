@@ -185,11 +185,15 @@ class AmpCarousel extends AMP.BaseElement {
     this.element.addEventListener('indexchange', event => {
       this.onIndexChanged_(event);
     });
-    this.prevArrowSlot_.addEventListener('click', () => {
-      this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
+    this.prevArrowSlot_.addEventListener('click', event => {
+      if (event.target != event.currentTarget) {
+        this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
+      }
     });
-    this.nextArrowSlot_.addEventListener('click', () => {
-      this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
+    this.nextArrowSlot_.addEventListener('click', event => {
+      if (event.target != event.currentTarget) {
+        this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
+      }
     });
 
     this.carousel_.updateSlides(this.slides_);
@@ -352,7 +356,7 @@ class AmpCarousel extends AMP.BaseElement {
    */
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
-    const loop = this.carousel_.getLoop();
+    const loop = this.carousel_.isLooping();
     // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
     // instead.
     iterateCursor(this.prevArrowSlot_.children, child => {

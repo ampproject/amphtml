@@ -22,7 +22,10 @@ const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
 /**
  * @typedef {{
- *   advance: function(number, !ActionSource=),
+ *   advance: function(number, {
+ *     actionSource: (!ActionSource|undefined),
+ *     allowWrap: (boolean|undefined),
+ *   }),
  * }}
  */
 let AdvanceDef;
@@ -219,7 +222,10 @@ export class AutoAdvance {
       return;
     }
 
-    this.advanceable_.advance(this.autoAdvanceCount_, ActionSource.AUTOPLAY);
+    this.advanceable_.advance(this.autoAdvanceCount_, {
+      actionSource: ActionSource.AUTOPLAY,
+      allowWrap: true,
+    });
     this.advances_ += this.autoAdvanceCount_;
   }
 
