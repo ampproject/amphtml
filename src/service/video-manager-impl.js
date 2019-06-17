@@ -1337,6 +1337,14 @@ export class AnalyticsPercentageTracker {
 
     this.unlisteners_ = this.unlisteners_ || [];
 
+    this.unlisteners_.push();
+
+    // If the video has already emitted LOADEDMETADATA, the event below
+    // will never fire, so we check if it's already available here.
+    if (this.hasDuration_()) {
+      this.calculate_(this.triggerId_);
+    }
+
     this.unlisteners_.push(
       listenOnce(element, VideoEvents.LOADEDMETADATA, () => {
         if (this.hasDuration_()) {
