@@ -276,7 +276,7 @@ class AmpYoutube extends AMP.BaseElement {
       this.unlistenLooping_ = listen(
         this.element,
         VideoEvents.ENDED,
-        this.play.bind(this)
+        () => this.play(false /* unusedIsAutoplay */)
       );
     }
 
