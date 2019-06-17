@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {
   maybePrintArgvMessages,
-  refreshKarmaWdCache,
   shouldNotRun,
 } = require('./runtime-test/helpers');
 const {
@@ -51,7 +50,6 @@ async function integration() {
   }
 
   maybePrintArgvMessages();
-  refreshKarmaWdCache();
 
   const config = new RuntimeTestConfig('integration');
   const runner = new Runner(config);
