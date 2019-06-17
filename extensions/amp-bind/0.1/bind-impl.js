@@ -56,6 +56,13 @@ const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
  */
 const MAX_MERGE_DEPTH = 10;
 
+/** @const {!Object<string, !Array<string>>} */
+const FORM_VALUE_PROPERTIES = {
+  'INPUT': ['checked', 'value'],
+  'OPTION': ['selected'],
+  'TEXTAREA': ['text'],
+};
+
 /**
  * A bound property, e.g. [property]="expression".
  * `previousResult` is the result of this expression during the last evaluation.
@@ -1185,7 +1192,8 @@ export class Bind {
    * @param {string} property
    */
   dispatchFormValueChangeEventIfNecessary_(element, property) {
-    if (!isPropertyAFormValue(element.tagName, property)) {
+    const props = FORM_VALUE_PROPERTIES[element.tagName];
+    if (!props || !props.includes(property)) {
       return;
     }
 
@@ -1676,25 +1684,5 @@ export class Bind {
       }
       this.localWin_.dispatchEvent(event);
     }
-  }
-}
-
-/**
- * Returns whether the element's property represents the value of a form field.
- * @param {string} tagName
- * @param {string} property
- * @return {boolean}
- */
-function isPropertyAFormValue(tagName, property) {
-  switch (property) {
-    case 'checked':
-    case 'value':
-      return tagName === 'INPUT';
-    case 'selected':
-      return tagName === 'OPTION';
-    case 'text':
-      return tagName === 'TEXTAREA';
-    default:
-      return false;
   }
 }
