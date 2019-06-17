@@ -30,6 +30,7 @@ import {installVariableServiceForTesting} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 import {toggleExperiment} from '../../../../src/experiments';
 
+// TODO(ccordry): Refactor all these tests with async/await.
 describes.realWin('Linker Manager', {amp: true}, env => {
   let sandbox;
   let ampdoc;
@@ -628,28 +629,21 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       });
     });
 
-    it('should not rewrite url if href is fragment', () => {
+    it('should not rewrite url if href is fragment', async () => {
       const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
-      return lm.init().then(() => {
-        // Using a real anchor el here because of a.href getter will actually
-        // return the full url, not just the fragment.
-        const a = doc.createElement('a');
-        a.href = '#hello';
-        a.hostname = 'amp.source.com';
+      await lm.init();
+      // Using a real anchor el here because of a.href getter will actually
+      // return the full url, not just the fragment.
+      const a = doc.createElement('a');
+      a.href = '#hello';
+      a.hostname = 'amp.source.com';
 
-        const setterSpy = sandbox.spy();
-        const aProxy = new Proxy(a, {
-          get: (obj, prop) => {
-            return obj[prop];
-          },
-          set: setterSpy,
-        });
+      const get = (obj, prop) => obj[prop];
+      const set = sandbox.spy();
+      const aProxy = new Proxy(a, {get, set});
 
-        anchorClickHandlers.forEach(handler =>
-          handler(aProxy, {type: 'click'})
-        );
-        expect(setterSpy.notCalled).to.be.true;
-      });
+      anchorClickHandlers.forEach(handler => handler(aProxy, {type: 'click'}));
+      expect(set, 'set on a[href=#fragment]').not.to.have.been.called;
     });
 
     it('should not add linker if href is relative', () => {
