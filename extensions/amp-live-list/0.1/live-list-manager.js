@@ -253,7 +253,10 @@ export class LiveListManager {
     );
 
     const inClientDomLiveList = this.liveLists_[id];
-    inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
+    inClientDomLiveList.toggle(
+      !liveList.hasAttribute('disabled') &&
+        !liveList.hasAttribute('live-story-disabled')
+    );
 
     if (inClientDomLiveList.isEnabled()) {
       return inClientDomLiveList.update(liveList);
