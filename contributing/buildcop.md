@@ -2,7 +2,9 @@
 
 The AMP buildcop is responsible for ensuring that the [master build](https://travis-ci.org/ampproject/amphtml/branches) remains green.  The AMP buildcop responsibility rotates between members of the community.
 
-If the build has been red for some time, please send a note to the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack if the issue is not already reported.
+Make sure you are a member of the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack while you are buildcop.
+- If the build has been red for some time, please send a note to the #contributing channel if the issue is not already reported.
+- Pay attention for reports of issues with the build that the community may send to this channel.  (You may want to enable notifications for this channel while you are buildcop to make this easier.)
 
 ## Buildcop Tasks
 
