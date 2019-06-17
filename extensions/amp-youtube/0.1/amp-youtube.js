@@ -98,6 +98,9 @@ class AmpYoutube extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private {?Function} */
+    this.unlistenLooping_ = null;
   }
 
   /**
@@ -223,11 +226,22 @@ class AmpYoutube extends AMP.BaseElement {
       params['playsinline'] = '1';
     }
 
-    // Fixes issue with the Youtube AS3 player that requires
-    // `data-param-playlist` to be set whenever the `data-param-loop` is set
-    // See https://developers.google.com/youtube/player_parameters#loop
-    if ('loop' in params && params['loop'] == '1' && !('playlist' in params)) {
-      params['playlist'] = dev().assertString(this.videoid_);
+    if ('loop' in params) {
+      // Loop is managed by the amp-youtube extension, don't pass it as data.
+      delete params['loop'];
+      this.user().error(
+        'AMP-YOUTUBE',
+        'Use loop attribute instead of data-param-loop'
+      );
+    }
+
+    // In the case of a playlist, looping is delegated to the Youtube player
+    // instead of AMP manually looping the video through the Youtube API
+    const hasLoop = element.hasAttribute('loop');
+    if (hasLoop) {
+      if ('playlist' in params) {
+        params['loop'] = '1';
+      }
     }
 
     src = addParamsToUrl(src, params);
@@ -255,6 +269,17 @@ class AmpYoutube extends AMP.BaseElement {
       this.handleYoutubeMessage_.bind(this)
     );
 
+    const hasLoop = this.element.hasAttribute('loop');
+    const params = getDataParamsFromAttributes(this.element);
+    const isPlaylist = 'playlist' in params;
+    if (hasLoop && !isPlaylist) {
+      this.unlistenLooping_ = listen(
+        this.element,
+        VideoEvents.ENDED,
+        this.play.bind(this)
+      );
+    }
+
     const loaded = this.loadPromise(this.iframe_)
       // Make sure the YT player is ready for this. For some reason YT player
       // would send couple of messages but then stop. Waiting for a bit before
@@ -279,8 +304,13 @@ class AmpYoutube extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
+    }
+
+    if (this.unlistenLooping_) {
+      this.unlistenLooping_();
     }
 
     const deferred = new Deferred();
