@@ -116,6 +116,24 @@ describes.fakeWin(
         expect(mockTimer.delay).to.have.been.calledOnce;
       });
 
+      it('works if LOADEDMETADATA fires before the tracker starts', () => {
+        const {video} = mockEntry;
+        const {element} = video;
+
+        dispatchLoadedMetadata(element);
+
+        const validDurationSeconds = 10;
+        const validCurrentTimeSeconds = 0;
+        setDuration(video, validDurationSeconds);
+        setCurrentTime(video, validCurrentTimeSeconds);
+
+        expect(mockTimer.delay).to.not.have.been.called;
+
+        tracker.start();
+
+        expect(mockTimer.delay).to.have.been.calledOnce;
+      });
+
       [0, NaN, -1, undefined, null].forEach(invalidDuration => {
         it(`aborts if duration is invalid (${invalidDuration})`, () => {
           const {video} = mockEntry;
