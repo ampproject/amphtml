@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,43 +14,54 @@
  * limitations under the License.
  */
 
- amp-story-grid-layer amp-story-bling-link {
-    margin: 10px;
-    background: rgba(255, 255, 255, 1);
-    border-radius: 50%;    
- }
+amp-story-grid-layer amp-story-bling-link {
+  margin: 10px !important;
+  background: rgba(255, 255, 255, 1) !important;
+  border-radius: 50% !important;
+  text-align: center !important;
+  line-height: 75px !important;
+  width: 75px !important;
+  height: 75px !important;
+}
 
- amp-story-bling-link.pulse {
-    animation: pulse 4s infinite;
- }
+amp-story-bling-link.pulse {
+  animation: pulse 4s infinite !important;
+}
 
- @-webkit-keyframes pulse {
-   0% {
-      -webkit-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-   }
-   70% {
-      -webkit-box-shadow: 0 0 0 15px rgba(255, 255, 255, 0.4);
-   }
-   100% {
-      -webkit-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-   }
- }
- @keyframes pulse {
-   0% {
-     -moz-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-     box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-   }
-   70% {
-       -moz-box-shadow: 0 0 0 15px rgba(255, 255, 255, 0.4);
-       box-shadow: 0 0 0 15px rgba(255, 255, 255, 0.4);
-   }
-   100% {
-       -moz-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-       box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-   }
- }
+@-webkit-keyframes pulse {
+  0% {
+    -webkit-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  70% {
+    -webkit-box-shadow: 0 0 0 15px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    -webkit-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+}
 
- .i-amphtml-story-bling-link-hover {
-   background: rgba(255, 255, 255, 0.4);
-   cursor: pointer;
+@keyframes pulse {
+  0% {
+    -moz-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  70% {
+      -moz-box-shadow: 0 0 0 15px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 0 15px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+      -moz-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+}
+
+.i-amphtml-story-bling-link-hover {
+  background: rgba(255, 255, 255, 0.4) !important;
+  cursor: pointer !important;
+}
+
+.i-amphtml-story-bling-link-icon {
+  font-size: 36px !important;
+  line-height: inherit !important;
+  color: rgba(0, 0, 0, 0.54) !important;
 }

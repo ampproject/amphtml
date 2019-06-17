@@ -26,6 +26,12 @@ const HOVER_CLASS = 'i-amphtml-story-bling-link-hover';
 /** @const */
 const PULSE_CLASS = 'pulse';
 
+/** @const */
+const MATERIAL_ICON_CLASS = 'material-icons';
+
+/** @const */
+const ICON_CLASS = 'i-amphtml-story-bling-link-icon';
+
 export class AmpStoryBlingLink extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -34,21 +40,34 @@ export class AmpStoryBlingLink extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED;
+    return layout == Layout.CONTAINER;
   }
 
   /** @override */
   layoutCallback() {
+    addIconElement(this.element, this.win);
     addPulseAnimation(this.element);
     setClassOnHover(this.element);
   }
 }
 
 /**
- * Adds pulse class that starts animation
- * @param {!AmpStoryBlingLink} el 
+ * Adds icon class
+ * @param {!AmpStoryBlingLink} el
+ * @param {!Window} win
  */
-function addPulseAnimation(el){
+function addIconElement(el, win) {
+  const iconEl = win.document.createElement('i');
+  iconEl.classList.add(MATERIAL_ICON_CLASS, ICON_CLASS);
+  iconEl.textContent = 'shopping_cart';
+  el.appendChild(iconEl);
+}
+
+/**
+ * Adds pulse class that starts animation
+ * @param {!AmpStoryBlingLink} el
+ */
+function addPulseAnimation(el) {
   el.classList.add(PULSE_CLASS);
 }
 
