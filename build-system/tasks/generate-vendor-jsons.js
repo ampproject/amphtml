@@ -71,7 +71,8 @@ function generateVendorJsons() {
       );
     });
 
-    promises.push(generateCanaryVendorJsons_(ANALYTICS_CONFIG, destPath));
+    promises.push(generateCanaryBgJson_(ANALYTICS_CONFIG, destPath));
+    promises.push(generateCanaryMoatJson_(ANALYTICS_CONFIG, destPath));
 
     return Promise.all(promises)
       .then(() => {
@@ -88,7 +89,7 @@ function generateVendorJsons() {
   });
 }
 
-function generateCanaryVendorJsons_(analyticsConfig, destPath) {
+function generateCanaryBgJson_(analyticsConfig, destPath) {
   // generate separate canary JSON file for Bolt Guard (BG)
   const bgCanaryConfig = Object.assign({}, analyticsConfig['bg'], {
     'transport': {
@@ -100,6 +101,20 @@ function generateCanaryVendorJsons_(analyticsConfig, destPath) {
 
   return toPromise(
     file('bg.canary.json', bgCanaryConfigStr, {src: true}).pipe(
+      gulp.dest(destPath)
+    )
+  );
+}
+
+function generateCanaryMoatJson_(analyticsConfig, destPath) {
+  // generate separate canary JSON file for Moat
+  const moatCanaryConfig = Object.assign({}, analyticsConfig['moat']);
+  delete moatCanaryConfig['transport'];
+
+  const moatCanaryConfigStr = JSON.stringify(moatCanaryConfig, null, 4);
+
+  return toPromise(
+    file('moat.canary.json', moatCanaryConfigStr, {src: true}).pipe(
       gulp.dest(destPath)
     )
   );
