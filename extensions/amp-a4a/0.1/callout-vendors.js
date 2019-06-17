@@ -128,6 +128,11 @@ export const RTC_VENDORS = {
     disableKeyAppend: true,
     macros: ['PLACEMENT_ID', '_DIVIDER_'],
   },
+  yieldlab: {
+    url: 'https://ad.yieldlab.net/yp/ADSLOT_ID?content=amp&t=amp%3D1',
+    macros: ['ADSLOT_ID'],
+    disableKeyAppend: true,
+  },
 };
 
 // DO NOT MODIFY: Setup for tests

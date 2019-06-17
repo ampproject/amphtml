@@ -133,6 +133,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 *   Rubicon
 *   Salesforce
 *   Yieldbot
+*   Yieldlab
 
 ### RTC Callout Request Specification
 

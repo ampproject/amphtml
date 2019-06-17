@@ -32,6 +32,7 @@ To use RTC, you must meet the following requirements:
 *   Rubicon
 *   Salesforce
 *   Yieldbot
+*   Yieldlab
 
 ### Overview
 
