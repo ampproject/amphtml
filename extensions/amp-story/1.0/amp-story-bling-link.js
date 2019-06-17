@@ -48,12 +48,13 @@ export class AmpStoryBlingLink extends AMP.BaseElement {
     addIconElement(this.element, this.win);
     addPulseAnimation(this.element);
     setClassOnHover(this.element);
+    return Promise.resolve();
   }
 }
 
 /**
  * Adds icon class
- * @param {!AmpStoryBlingLink} el
+ * @param {!Element} el
  * @param {!Window} win
  */
 function addIconElement(el, win) {
@@ -73,7 +74,7 @@ function addPulseAnimation(el) {
 
 /**
  * Sets hover class and stops animation on hover
- * @param {!AmpStoryBlingLink} el
+ * @param {!Element} el
  */
 function setClassOnHover(el) {
   el.addEventListener('mouseenter', () => {
