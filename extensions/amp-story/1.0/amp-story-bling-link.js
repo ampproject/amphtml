@@ -21,15 +21,6 @@
 import {Layout} from '../../../src/layout';
 
 /** @const */
-const HOVER_CLASS = 'i-amphtml-story-bling-link-hover';
-
-/** @const */
-const PULSE_CLASS = 'pulse';
-
-/** @const */
-const MATERIAL_ICON_CLASS = 'material-icons';
-
-/** @const */
 const ICON_CLASS = 'i-amphtml-story-bling-link-icon';
 
 export class AmpStoryBlingLink extends AMP.BaseElement {
@@ -40,15 +31,12 @@ export class AmpStoryBlingLink extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout.FIXED;
   }
 
   /** @override */
-  layoutCallback() {
+  buildCallback() {
     addIconElement(this.element, this.win);
-    addPulseAnimation(this.element);
-    setClassOnHover(this.element);
-    return Promise.resolve();
   }
 }
 
@@ -59,30 +47,6 @@ export class AmpStoryBlingLink extends AMP.BaseElement {
  */
 function addIconElement(el, win) {
   const iconEl = win.document.createElement('i');
-  iconEl.classList.add(MATERIAL_ICON_CLASS, ICON_CLASS);
-  iconEl.textContent = 'shopping_cart';
+  iconEl.classList.add(ICON_CLASS, 'shopping-cart');
   el.appendChild(iconEl);
-}
-
-/**
- * Adds pulse class that starts animation
- * @param {!AmpStoryBlingLink} el
- */
-function addPulseAnimation(el) {
-  el.classList.add(PULSE_CLASS);
-}
-
-/**
- * Sets hover class and stops animation on hover
- * @param {!Element} el
- */
-function setClassOnHover(el) {
-  el.addEventListener('mouseenter', () => {
-    el.classList.add(HOVER_CLASS);
-    el.classList.remove(PULSE_CLASS);
-  });
-  el.addEventListener('mouseleave', () => {
-    el.classList.remove(HOVER_CLASS);
-    el.classList.add(PULSE_CLASS);
-  });
 }

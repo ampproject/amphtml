@@ -454,8 +454,6 @@ export class AmpStory extends AMP.BaseElement {
         }
       });
     }
-
-    this.getBlingLinkIcons_();
   }
 
   /** @override */
@@ -2696,23 +2694,6 @@ export class AmpStory extends AMP.BaseElement {
     return Boolean(
       win.CSS && win.CSS.supports && win.CSS.supports('display', 'grid')
     );
-  }
-
-  /**
-   * Downloads Material Icons if bling links are present in the story
-   */
-  getBlingLinkIcons_() {
-    const blingLinks = this.win.document.querySelector('amp-story-bling-link');
-    if (!blingLinks) {
-      return;
-    }
-    const fontsEl = this.win.document.createElement('link');
-    fontsEl.setAttribute(
-      'href',
-      'https://fonts.googleapis.com/icon?family=Material+Icons'
-    );
-    fontsEl.setAttribute('rel', 'stylesheet');
-    this.win.document.head.appendChild(fontsEl);
   }
 }
 
