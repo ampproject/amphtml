@@ -17,7 +17,7 @@ import {FormEvents} from './form-events';
 import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {iterateCursor} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 
@@ -291,19 +291,14 @@ export class AbstractCustomValidator extends FormValidator {
 
   /**
    * @param {!Element} input
-   * @param {string=} invalidType
+   * @param {string=} inputInvalidType
    * @return {?Element}
    */
-  getValidationFor(input, invalidType) {
+  getValidationFor(input, inputInvalidType = undefined) {
     if (!input.id) {
       return null;
     }
-    // <textarea> only supports `pattern` matching. But, it's implemented via
-    // setCustomValidity(), which results in the 'customError' validity state.
-    if (input.tagName === 'TEXTAREA') {
-      devAssert(invalidType === 'customError');
-      invalidType = 'patternMismatch';
-    }
+    const invalidType = this.getInvalidType_(input, inputInvalidType);
     const property = VALIDATION_CACHE_PREFIX + invalidType;
     if (!(property in input)) {
       const selector =
@@ -312,6 +307,28 @@ export class AbstractCustomValidator extends FormValidator {
       input[property] = this.root.querySelector(selector);
     }
     return input[property];
+  }
+
+  /**
+   * Wraps the validity type for inputs to support pattern on <textarea>
+   * @param {!Element} input
+   * @param {string=} inputInvalidType
+   */
+  getInvalidType_(input, inputInvalidType = undefined) {
+    const {tagName, validationMessage} = input;
+
+    // <textarea> only supports `pattern` and `valueMissing`.
+    // `pattern` is implemented via setCustomValidity(),
+    // which results in the 'customError' validity state.
+    if (
+      tagName === 'TEXTAREA' &&
+      inputInvalidType === 'customError' &&
+      validationMessage === CUSTOM_PATTERN_ERROR
+    ) {
+      return 'patternMismatch';
+    }
+
+    return inputInvalidType;
   }
 
   /**
