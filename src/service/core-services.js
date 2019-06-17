@@ -73,15 +73,19 @@ export function installRuntimeServices(global) {
  * Install ampdoc-level services.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
+ * @param {boolean=} opt_inabox
  * @restricted
  */
-export function installAmpdocServices(ampdoc, opt_initParams) {
+export function installAmpdocServices(ampdoc, opt_initParams, opt_inabox) {
   // Order is important!
   installUrlForDoc(ampdoc);
   installCidService(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
-  installViewerServiceForDoc(ampdoc, opt_initParams);
-  installViewportServiceForDoc(ampdoc);
+  if (!opt_inabox) {
+    // viewer & viewport were installed in amp-inabox.js
+    installViewerServiceForDoc(ampdoc, opt_initParams);
+    installViewportServiceForDoc(ampdoc);
+  }
   installHiddenObserverForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
