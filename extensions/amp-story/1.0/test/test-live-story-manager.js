@@ -70,7 +70,9 @@ describes.realWin('LiveStoryManager', {amp: true}, env => {
     liveStoryManager.build();
     const liveListEl = ampStory.element.querySelector('amp-live-list');
 
-    expect(liveListEl.id).to.equal(ampStory.element.id + 'dynamic-list');
+    expect(liveListEl.id).to.equal(
+      'i-amphtml-' + ampStory.element.id + '-dynamic-list'
+    );
   });
 
   it('should throw if no story id is set', () => {

@@ -50,7 +50,7 @@ export class LiveStoryManager {
       this.ampStory_.win.document,
       'amp-live-list',
       dict({
-        'id': this.storyEl_.id + 'dynamic-list',
+        'id': 'i-amphtml-' + this.storyEl_.id + '-dynamic-list',
         'data-poll-interval':
           this.storyEl_.getAttribute('data-poll-interval') || 15000,
         'sort': 'ascending',

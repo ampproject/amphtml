@@ -190,7 +190,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
           'disable-pagination': '',
           'auto-insert': '',
         },
-        'myList1dynamic-list'
+        'i-amphtml-custom-slot-dynamic-list'
       );
       clientLiveList.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID] = customSlot.id;
       clientLiveList.buildCallback();

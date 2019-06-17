@@ -236,12 +236,13 @@ export class LiveListManager {
    */
   updateLiveList_(liveList) {
     // amp-live-list elements can be appended dynamically in the client by
-    // another component using the `other-component-id` + `dynamic-list` suffix
-    // as the ID of the amp-live-list.
+    // another component using the `i-amphtml-` + `other-component-id` +
+    // `-dynamic-list` combination as the ID of the amp-live-list.
+    //
     // The fact that we know how this ID is built allows us to find the
     // amp-live-list element in the server document. See live-story-manager.js
     // for an example.
-    const dynamicId = liveList.id + 'dynamic-list';
+    const dynamicId = 'i-amphtml-' + liveList.id + '-dynamic-list';
     const id =
       dynamicId in this.liveLists_ ? dynamicId : liveList.getAttribute('id');
     userAssert(id, 'amp-live-list must have an id.');
