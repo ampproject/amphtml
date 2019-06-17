@@ -29,7 +29,6 @@ const {
   reportTestRunComplete,
 } = require('../report-test-status');
 const {app} = require('../../test-server');
-const {exec} = require('../../exec');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {Server} = require('karma');
@@ -92,14 +91,6 @@ function getAdTypes() {
     }
   }
   return adTypes;
-}
-
-/**
- * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
- * by refreshing the wd cache so that Karma can launch without an error.
- */
-function refreshKarmaWdCache() {
-  exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
 }
 
 /**
@@ -409,7 +400,6 @@ module.exports = {
   createKarmaServer,
   getAdTypes,
   maybePrintArgvMessages,
-  refreshKarmaWdCache,
   runTestInBatches,
   shouldNotRun,
   startTestServer,
