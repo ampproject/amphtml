@@ -328,7 +328,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
     // TODO(ccordry): Move all this to use store service. We would like to
-    // eventually depricate navigationState.
+    // eventually deprecate navigationState.
     this.navigationState_ = this.ampStory_.getNavigationState();
     this.navigationState_.observe(this.handleStateChange_.bind(this));
 

@@ -27,14 +27,14 @@ import {macroTask} from '../../../../testing/yield';
 
 const NOOP = () => {};
 
-function addStoryAutoAdsConfig(document, autoAdsEl) {
+function addStoryAutoAdsConfig(doc, autoAdsEl) {
   const config = {
     'ad-attributes': {
       type: 'doubleclick',
       'data-slot': '/30497360/a4a/fake_ad_unit',
     },
   };
-  const child = document.createElement('script');
+  const child = doc.createElement('script');
   child.setAttribute('type', 'application/json');
   child.innerText = JSON.stringify(config);
   autoAdsEl.append(child);
@@ -140,7 +140,7 @@ describes.realWin(
         await autoAds.layoutCallback();
       });
 
-      it('should propigate the ad-showing attribute', async () => {
+      it('should propigate the ad-showing attribute', () => {
         expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(
           Attributes.AD_SHOWING
         );
@@ -150,7 +150,7 @@ describes.realWin(
         );
       });
 
-      it('should propigate the desktop-panels attribute', async () => {
+      it('should propigate the desktop-panels attribute', () => {
         expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(
           Attributes.DESKTOP_PANELS
         );
@@ -160,7 +160,7 @@ describes.realWin(
         );
       });
 
-      it('should propigate the dir=rtl attribute', async () => {
+      it('should propigate the dir=rtl attribute', () => {
         expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(Attributes.DIR);
         storeService.dispatch(Action.TOGGLE_RTL, true);
         expect(autoAds.getAdBadgeRoot()).to.have.attribute(
