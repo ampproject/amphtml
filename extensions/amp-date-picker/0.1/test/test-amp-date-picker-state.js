@@ -29,7 +29,6 @@ describes.realWin(
   env => {
     // const moment = requireExternal('moment');
     let clock;
-    let win;
     let document;
 
     const DEFAULT_ATTRS = {
@@ -63,7 +62,6 @@ describes.realWin(
     }
 
     beforeEach(() => {
-      win = env.win;
       document = env.win.document;
       clock = lolex.install({
         // Use the global window and not env.win. There is no way to inject the

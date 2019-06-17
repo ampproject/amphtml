@@ -65,7 +65,7 @@ export class DatesList {
 
   /**
    * Gets the first date in the date list after the given date.
-   * @param {!moment|string} date
+   * @param {!moment|string} momentOrString
    * @return {!moment}
    */
   firstDateAfter(momentOrString) {
