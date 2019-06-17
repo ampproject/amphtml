@@ -84,10 +84,11 @@ const TIMEOUT_LIMIT = 10000; // 10 seconds
 /** @const */
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
-/** @private @enum {string} */
-const Attributes = {
+/** @enum {string} */
+export const Attributes = {
   AD_SHOWING: 'ad-showing',
   DESKTOP_PANELS: 'desktop-panels',
+  DIR: 'dir',
   IFRAME_BODY_VISIBLE: 'amp-story-visible',
   LOADING: 'i-amphtml-loading',
   NEXT_PAGE_NO_AD: 'next-page-no-ad',
@@ -241,6 +242,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.pendingAdView_ = false;
+
+    /** @private {?Element} */
+    this.adBadgeContainer_ = null;
 
     /**
      * Version of the story store service depends on which version of amp-story
@@ -396,8 +400,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   onRtlStateUpdate_(rtlState) {
     this.mutateElement(() => {
       rtlState
-        ? this.adBadgeContainer_.setAttribute('dir', 'rtl')
-        : this.adBadgeContainer_.removeAttribute('rtl');
+        ? this.adBadgeContainer_.setAttribute(Attributes.DIR, 'rtl')
+        : this.adBadgeContainer_.removeAttribute(Attributes.DIR);
     });
   }
 
@@ -418,6 +422,14 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         root.setAttribute(DESKTOP_PANELS, '');
       }
     });
+  }
+
+  /**
+   * @visibleForTesting
+   * @return {Element}
+   */
+  getAdBadgeRoot() {
+    return this.adBadgeContainer_;
   }
 
   /**
