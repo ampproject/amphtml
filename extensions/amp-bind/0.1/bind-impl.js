@@ -1150,14 +1150,7 @@ export class Bind {
           }
         }
 
-        if (isPropertyAFormValue(element.tagName, property)) {
-          const dispatchAt =
-            element.tagName === 'OPTION' ? element.closest('SELECT') : element;
-
-          if (dispatchAt) {
-            dispatchAmpFormValueChangeEvent(this.localWin_, dispatchAt);
-          }
-        }
+        this.dispatchFormValueChangeEventIfNecessary_(element, property);
       });
 
       if (width !== undefined || height !== undefined) {
@@ -1183,6 +1176,35 @@ export class Bind {
         }
       }
     });
+  }
+
+  /**
+   * Dispatches an `AmpEvents.FORM_VALUE_CHANGE` if the element's changed
+   * property represents the value of a form field.
+   * @param {!Element} element
+   * @param {string} property
+   */
+  dispatchFormValueChangeEventIfNecessary_(element, property) {
+    if (!isPropertyAFormValue(element.tagName, property)) {
+      return;
+    }
+
+    // The native `InputEvent` is dispatched at the parent `<select>` when its
+    // selected `<option>` changes.
+    const dispatchAt =
+      element.tagName === 'OPTION'
+        ? closestAncestorElementBySelector(element, 'SELECT')
+        : element;
+
+    if (dispatchAt) {
+      const ampValueChangeEvent = createCustomEvent(
+        this.localWin_,
+        AmpEvents.FORM_VALUE_CHANGE,
+        /* detail */ null,
+        {bubbles: true}
+      );
+      dispatchAt.dispatchEvent(ampValueChangeEvent);
+    }
   }
 
   /**
@@ -1675,19 +1697,4 @@ function isPropertyAFormValue(tagName, property) {
     default:
       return false;
   }
-}
-
-/**
- * Dispatches an `AmpEvents.FORM_VALUE_CHANGE` event at the given element.
- * @param {!Window} win
- * @param {!Element} element
- */
-function dispatchAmpFormValueChangeEvent(win, element) {
-  const ampValueChangeEvent = createCustomEvent(
-    win,
-    AmpEvents.FORM_VALUE_CHANGE,
-    /* detail */ null,
-    {bubbles: true}
-  );
-  element.dispatchEvent(ampValueChangeEvent);
 }
