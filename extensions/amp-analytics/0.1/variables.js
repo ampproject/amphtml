@@ -168,7 +168,7 @@ export class VariableService {
     this.register_('$BASE64', value => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
     this.register_('$IF', (value, thenValue, elseValue) =>
-      stringToBool_(value) ? thenValue : elseValue
+      stringToBool(value) ? thenValue : elseValue
     );
     this.register_('$REPLACE', replaceMacro);
     this.register_(
@@ -361,12 +361,13 @@ export function getConsentStateStr(element) {
  * @param {string} str
  * @return {boolean}
  */
-function stringToBool_(str) {
+export function stringToBool(str) {
   return (
     str !== 'false' &&
     str !== '' &&
     str !== '0' &&
     str !== 'null' &&
+    str !== 'NaN' &&
     str !== 'undefined'
   );
 }
