@@ -141,6 +141,11 @@ function waitForEvent(env, name) {
   });
 }
 
+const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
+  type: AmpEvents.FORM_VALUE_CHANGE,
+  bubbles: true,
+};
+
 describe
   .configure()
   .ifChrome()
@@ -1151,10 +1156,7 @@ describe
 
             return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
               expect(spy).to.have.been.calledOnce;
-              expect(spy).calledWithMatch({
-                type: AmpEvents.FORM_VALUE_CHANGE,
-                bubbles: true,
-              });
+              expect(spy).calledWithMatch(FORM_VALUE_CHANGE_EVENT_ARGUMENTS);
             });
           });
 
@@ -1170,10 +1172,7 @@ describe
             return onBindReadyAndSetState(env, bind, {foo: 'checked'}).then(
               () => {
                 expect(spy).to.have.been.calledOnce;
-                expect(spy).calledWithMatch({
-                  type: AmpEvents.FORM_VALUE_CHANGE,
-                  bubbles: true,
-                });
+                expect(spy).calledWithMatch(FORM_VALUE_CHANGE_EVENT_ARGUMENTS);
               }
             );
           });
