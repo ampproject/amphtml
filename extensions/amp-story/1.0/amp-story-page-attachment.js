@@ -20,6 +20,7 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {AnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {CSS} from '../../../build/amp-story-page-attachment-header-1.0.css';
 import {
   HistoryState,
@@ -98,6 +99,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     /** @private {!Array<!Element>} AMP components within the attachment. */
     this.ampComponents_ = [];
+
+    /** @private {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
     /** @private {?Element} */
     this.containerEl_ = null;
@@ -536,6 +540,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     });
 
     this.historyService_.push(() => this.closeInternal_(), historyState);
+    this.analyticsService_.triggerEvent(AnalyticsEvent.PAGE_ATTACHMENT_ENTER);
   }
 
   /**
@@ -588,5 +593,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     });
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
+
+    this.analyticsService_.triggerEvent(AnalyticsEvent.PAGE_ATTACHMENT_EXIT);
   }
 }

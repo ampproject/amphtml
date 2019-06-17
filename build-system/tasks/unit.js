@@ -16,179 +16,31 @@
 'using strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const babelify = require('babelify');
-const defaultConfig = require('./karma.conf');
-const log = require('fancy-log');
-const testConfig = require('../config');
 const {
-  createKarmaServer,
-  getAdTypes,
-  getBrowserConfig,
   maybePrintArgvMessages,
-  maybeSetCoverageConfig,
   refreshKarmaWdCache,
-  runTestInBatches,
-  startTestServer,
+  shouldNotRun,
 } = require('./runtime-test/helpers');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {
+  RuntimeTestRunner,
+  RuntimeTestConfig,
+} = require('./runtime-test/runtime-test-base');
 const {css} = require('./css');
 const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
-const {green, yellow, cyan, red} = require('ansi-colors');
-const {isTravisBuild} = require('../travis');
-const {reportTestStarted} = require('./report-test-status');
 
-function shouldNotRun() {
-  if (argv.local_changes && !getUnitTestsToRun(testConfig.unitTestPaths)) {
-    return true;
+class Runner extends RuntimeTestRunner {
+  constructor(config) {
+    super(config);
   }
 
-  if (argv.saucelabs) {
-    if (!process.env.SAUCE_USERNAME) {
-      throw new Error('Missing SAUCE_USERNAME Env variable');
+  /** @override */
+  async maybeBuild() {
+    if (argv.nobuild) {
+      return;
     }
-    if (!process.env.SAUCE_ACCESS_KEY) {
-      throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
-    }
+
+    await css();
   }
-
-  return false;
-}
-
-function maybeBuild() {
-  if (argv.nobuild) {
-    return;
-  }
-
-  return css();
-}
-
-function setConfigOverrides(config) {
-  config.singleRun = !argv.watch && !argv.w;
-  config.client.mocha.grep = !!argv.grep;
-  config.client.verboseLogging = !!argv.verbose || !!argv.v;
-  config.client.captureConsole =
-    !!argv.verbose || !!argv.v || !!argv.local_changes;
-
-  config.browserify.configure = function(bundle) {
-    bundle.on('prebundle', function() {
-      log(green('Transforming tests with'), cyan('browserify') + green('...'));
-    });
-    bundle.on('transform', function(tr) {
-      if (tr instanceof babelify) {
-        tr.once('babelify', function() {
-          process.stdout.write('.');
-        });
-      }
-    });
-  };
-
-  // config.client is available in test browser via window.parent.karma.config
-  config.client.amp = {
-    useCompiledJs: false, // never compiled for unit tests
-    saucelabs: !!argv.saucelabs,
-    singlePass: false, // never single pass for unit tests
-    adTypes: getAdTypes(),
-    mochaTimeout: defaultConfig.client.mocha.timeout,
-    propertiesObfuscated: false, // never single pass for unit tests
-    testServerPort: defaultConfig.client.testServerPort,
-    testOnIe:
-      config.browsers.includes('IE') || config.browsers.includes('SL_IE_11'),
-  };
-}
-
-function getFileConfig() {
-  const files = testConfig.commonUnitTestPaths.concat(
-    testConfig.chaiAsPromised
-  );
-
-  if (argv.files) {
-    return {'files': files.concat(argv.files)};
-  }
-
-  if (argv.saucelabs) {
-    return {'files': files.concat(testConfig.unitTestOnSaucePaths)};
-  }
-
-  if (argv.local_changes) {
-    return {'files': files.concat(getUnitTestsToRun(testConfig.unitTestPaths))};
-  }
-
-  return {'files': files.concat(testConfig.unitTestPaths)};
-}
-
-function getReporterConfig() {
-  let {reporters} = defaultConfig;
-
-  if (
-    (!isTravisBuild() && (argv.testnames || argv.local_changes)) ||
-    (argv.files && !argv.saucelabs)
-  ) {
-    reporters = ['mocha'];
-  }
-
-  if (argv.coverage) {
-    reporters.push('coverage-istanbul');
-  }
-
-  if (argv.saucelabs) {
-    reporters.push('saucelabs');
-  }
-
-  return {'reporters': reporters};
-}
-
-function getTestConfig() {
-  const browsers = getBrowserConfig();
-  const files = getFileConfig();
-  const reporters = getReporterConfig();
-  const config = Object.assign({}, defaultConfig, browsers, files, reporters);
-
-  maybeSetCoverageConfig(config, 'lcov-unit.info');
-  setConfigOverrides(config);
-
-  return config;
-}
-
-function setup(config) {
-  // Avoid Karma startup errors
-  refreshKarmaWdCache();
-
-  const testServer = startTestServer(config.client.testServerPort);
-  const handlerProcess = createCtrlcHandler('gulp unit');
-
-  return new Map()
-    .set('handlerProcess', handlerProcess)
-    .set('testServer', testServer);
-}
-
-function teardown(env) {
-  const exitCode = env.get('exitCode');
-
-  // Exit tests
-  // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
-  if (isTravisBuild()) {
-    setTimeout(() => {
-      process.exit(exitCode);
-    }, 5000);
-  }
-
-  env.get('testServer').emit('kill');
-  exitCtrlcHandler(env.get('handlerProcess'));
-
-  if (exitCode != 0) {
-    log(red('ERROR:'), yellow(`Karma test failed with exit code ${exitCode}`));
-    process.exitCode = exitCode;
-  }
-}
-
-function runUnitTests(config) {
-  reportTestStarted();
-
-  if (argv.saucelabs) {
-    return runTestInBatches(config);
-  }
-
-  return createKarmaServer(config);
 }
 
 async function unit() {
@@ -196,20 +48,19 @@ async function unit() {
     return;
   }
 
-  // TODO(alanorozco): Come up with a more elegant check?
-  global.AMP_TESTING = true;
-  process.env.SERVE_MODE = 'default';
+  maybePrintArgvMessages();
+  refreshKarmaWdCache();
 
-  await maybeBuild();
-  await maybePrintArgvMessages();
+  if (argv.local_changes && !getUnitTestsToRun()) {
+    return;
+  }
 
-  const config = getTestConfig();
-  const env = setup(config);
+  const config = new RuntimeTestConfig('unit');
+  const runner = new Runner(config);
 
-  const exitCode = await runUnitTests(config);
-
-  env.set('exitCode', exitCode);
-  teardown(env);
+  await runner.setup();
+  await runner.run();
+  await runner.teardown();
 }
 
 module.exports = {
@@ -217,22 +68,22 @@ module.exports = {
 };
 
 unit.description = 'Runs unit tests';
-//TODO(estherkim): fill this out
 unit.flags = {
-  'local_changes': '',
-  'saucelabs': '',
-  'chrome_canary': '',
-  'chrome_flags': '',
-  'coverage': '',
-  'firefox': '',
-  'files': '',
-  'grep': '',
-  'headless': '',
-  'ie': '',
-  'nobuild': '',
-  'nohelp': '',
-  'safari': '',
-  'testnames': '',
-  'verbose': '',
-  'watch': '',
+  'chrome_canary': '  Runs tests on Chrome Canary',
+  'chrome_flags': '  Uses the given flags to launch Chrome',
+  'coverage': '  Run tests in code coverage mode',
+  'firefox': '  Runs tests on Firefox',
+  'files': '  Runs tests for specific files',
+  'grep': '  Runs tests that match the pattern',
+  'headless': '  Run tests in a headless Chrome window',
+  'ie': '  Runs tests on IE',
+  'local_changes':
+    '  Run unit tests directly affected by the files changed in the local branch',
+  'nobuild': '  Skips build step',
+  'nohelp': '  Silence help messages that are printed prior to test run',
+  'safari': '  Runs tests on Safari',
+  'saucelabs': '  Runs tests on saucelabs (requires setup)',
+  'testnames': '  Lists the name of each test being run',
+  'verbose': '  With logging enabled',
+  'watch': '  Watches for changes in files, runs corresponding test(s)',
 };

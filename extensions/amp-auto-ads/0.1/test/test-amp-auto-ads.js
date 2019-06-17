@@ -298,7 +298,6 @@ describes.realWin(
             mode: 'cors',
             method: 'GET',
             credentials: 'omit',
-            requireAmpResponseSourceOrigin: false,
           }
         );
         expect(xhr.fetchJson).to.be.calledOnce;

@@ -18,14 +18,14 @@ The AMP JS library is distributed via its major version only. The major version 
 
 ### AMP extensions
 
-Each AMP extension is versioned independently. Publishers of AMP documents can choose the major and minor version of an extension; they cannot choose the patch version. 
+Each AMP extension is versioned independently. Publishers of AMP documents can choose the major and minor version of an extension; they cannot choose the patch version.
 
 - Extension minor versions may be changed for breaking behavior changes *without* breaking API changes.
 - Extension major versions *must* be changed for any breaking API changes.
 
 ## Breaking changes
 
-Breaking changes must be implemented in a new major or minor version of an extension or (more rarely) the AMP JS library, except in rare cases<sup>1</sup>. 
+Breaking changes must be implemented in a new major or minor version of an extension or (more rarely) the AMP JS library, except in rare cases<sup>1</sup>.
 
 Breaking changes are defined as:
 
@@ -39,7 +39,7 @@ The following are **not** considered breaking changes:
 - Changes to elements and their children including their CSS if the element name starts with `i-`.
 - Changes to attribute and class names starting with `i-` (but this doesn't mean that CSS backward compatibility may be broken with this mechanism, which would be considered a breaking change).
 
-<sup>1</sup>The following exceptions may be implemented without a new version: 
+<sup>1</sup>The following exceptions may be implemented without a new version:
 
 - Changes required to maintain the security of AMP pages.
 - Changes that affect fewer than 0.1% of crawler-accessible AMP pages.
@@ -47,7 +47,7 @@ The following are **not** considered breaking changes:
 
 ## Deprecations
 
-In rare cases, the AMP project may decide that an existing feature or API must be removed. Such breaking changes must follow the AMP deprecation process prior to removal.
+In rare cases, it may be necessary to remove an existing feature or API. Such breaking changes must follow the following AMP deprecation process prior to removal.
 
 Deprecations must be publicly discussed and provide significant user benefit that justifies additional work for page developers.
 

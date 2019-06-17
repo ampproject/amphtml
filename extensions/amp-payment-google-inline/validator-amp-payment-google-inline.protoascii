@@ -30,16 +30,13 @@ tags: {  # <amp-payment-google-inline> (json)
   requires_extension: "amp-payment-google-inline"
   mandatory_parent: "AMP-PAYMENT-GOOGLE-INLINE"
   attrs: {
-    disabled_by: "transformed"
-    name: "nonce"
-  }
-  attrs: {
     name: "type"
     mandatory: true
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   attr_lists: "name-attr"
+  attr_lists: "nonce-attr"
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"

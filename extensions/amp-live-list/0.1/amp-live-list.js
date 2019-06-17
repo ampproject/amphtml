@@ -17,7 +17,7 @@
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
-  liveListManagerForDoc,
+  SERVICE_ID,
 } from './live-list-manager';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
@@ -193,7 +193,10 @@ export class AmpLiveList extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
 
-    this.manager_ = liveListManagerForDoc(this.getAmpDoc());
+    LiveListManager.forDoc(this.element).then(manager => {
+      this.manager_ = manager;
+      this.manager_.register(this.liveListId_, this);
+    });
 
     this.customSlotId_ = this.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
 
@@ -240,8 +243,6 @@ export class AmpLiveList extends AMP.BaseElement {
     if (isExperimentOn(this.win, 'amp-live-list-sorting')) {
       this.isReverseOrder_ = this.element.getAttribute('sort') === 'ascending';
     }
-
-    this.manager_.register(this.liveListId_, this);
 
     // Make sure we hide the button
     this.toggleUpdateButton_(false);
@@ -1041,4 +1042,5 @@ export class AmpLiveList extends AMP.BaseElement {
 
 AMP.extension('amp-live-list', '0.1', function(AMP) {
   AMP.registerElement('amp-live-list', AmpLiveList, CSS);
+  AMP.registerServiceForDoc(SERVICE_ID, LiveListManager);
 });

@@ -147,7 +147,7 @@ amp4email_feature_tests/amp_list.html:121:0 Missing URL for attribute 'src' in t
 |
 |  <amp-state src="">
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:129:0 Missing URL for attribute 'src' in tag 'amp-state (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-bind) [AMP_TAG_PROBLEM]
+amp4email_feature_tests/amp_list.html:129:0 The attribute 'src' may not appear in tag 'amp-state (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-bind) [DISALLOWED_HTML]
 |    <template type="amp-mustache">
 |      <div>
 |      </div>
@@ -169,7 +169,7 @@ amp4email_feature_tests/amp_list.html:139:0 Invalid URL protocol 'http:' for att
 |
 |  <amp-state id="123"
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:147:0 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-state (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-bind) [AMP_TAG_PROBLEM]
+amp4email_feature_tests/amp_list.html:147:0 The attribute 'src' may not appear in tag 'amp-state (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-bind) [DISALLOWED_HTML]
 |    src="http://somelink.com">
 |    <template type="amp-mustache">
 |      <div>
