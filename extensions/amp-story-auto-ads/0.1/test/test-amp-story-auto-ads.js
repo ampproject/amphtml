@@ -14,11 +14,31 @@
  * limitations under the License.
  */
 import * as analytics from '../../../../src/analytics';
-import {AmpStoryAutoAds} from '../amp-story-auto-ads';
+import {
+  Action,
+  UIType,
+  getStoreService,
+} from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpStory} from '../../../amp-story/1.0/amp-story';
+import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
+import {CommonSignals} from '../../../../src/common-signals';
 import {Services} from '../../../../src/services';
 import {macroTask} from '../../../../testing/yield';
 
 const NOOP = () => {};
+
+function addStoryAutoAdsConfig(doc, autoAdsEl) {
+  const config = {
+    'ad-attributes': {
+      type: 'doubleclick',
+      'data-slot': '/30497360/a4a/fake_ad_unit',
+    },
+  };
+  const child = doc.createElement('script');
+  child.setAttribute('type', 'application/json');
+  child.innerText = JSON.stringify(config);
+  autoAdsEl.append(child);
+}
 
 describes.realWin(
   'amp-story-auto-ads',
@@ -32,6 +52,7 @@ describes.realWin(
     let adElement;
     let storyElement;
     let autoAds;
+    let story;
 
     beforeEach(() => {
       win = env.win;
@@ -41,11 +62,12 @@ describes.realWin(
       storyElement = win.document.createElement('amp-story');
       win.document.body.appendChild(storyElement);
       storyElement.appendChild(adElement);
+      story = new AmpStory(storyElement);
       autoAds = new AmpStoryAutoAds(adElement);
       autoAds.config_ = {
         'ad-attributes': {
           type: 'doubleclick',
-          'data-slot': '/30497360/samfrank_native_v2_a4a',
+          'data-slot': '/30497360/a4a/fake_ad_unit',
         },
       };
     });
@@ -99,6 +121,52 @@ describes.realWin(
           /* pageId */ 'non-ad-page'
         );
         expect(removeVisibleStub.calledOnce).to.be.true;
+      });
+    });
+
+    describe('ad badge', () => {
+      let storeService;
+
+      beforeEach(async () => {
+        // Force sync mutateElement.
+        sandbox.stub(autoAds, 'mutateElement').callsArg(0);
+        addStoryAutoAdsConfig(win.document, adElement);
+        storeService = getStoreService(win);
+        await story.buildCallback();
+        // Fire these events so that story ads thinks the parent story is ready.
+        story.signals().signal(CommonSignals.BUILT);
+        story.signals().signal(CommonSignals.INI_LOAD);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+      });
+
+      it('should propigate the ad-showing attribute', () => {
+        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(
+          Attributes.AD_SHOWING
+        );
+        storeService.dispatch(Action.TOGGLE_AD, true);
+        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
+          Attributes.AD_SHOWING
+        );
+      });
+
+      it('should propigate the desktop-panels attribute', () => {
+        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(
+          Attributes.DESKTOP_PANELS
+        );
+        storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
+        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
+          Attributes.DESKTOP_PANELS
+        );
+      });
+
+      it('should propigate the dir=rtl attribute', () => {
+        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(Attributes.DIR);
+        storeService.dispatch(Action.TOGGLE_RTL, true);
+        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
+          Attributes.DIR,
+          'rtl'
+        );
       });
     });
 
