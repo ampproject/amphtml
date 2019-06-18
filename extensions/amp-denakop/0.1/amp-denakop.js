@@ -76,9 +76,9 @@ export class AmpDenakop extends AMP.BaseElement {
               const extraUrlParams = utils.getExtraUrlParams(publisherId, tagId,
                   configObj, adUnit);
               const adAnalyticsAuthorizedConfig =
-                /** @type {!JsonObject} */ utils.getAmpAdAnalyticsAuthorizedConfig(extraUrlParams);
+                utils.getAmpAdAnalyticsAuthorizedConfig(extraUrlParams);
               const adAnalyticsViewConfig =
-                /** @type {!JsonObject} */ utils.getAmpAdAnalyticsViewConfig(extraUrlParams);
+                utils.getAmpAdAnalyticsViewConfig(extraUrlParams);
 
               ampStickyAd.appendChild(ampAd);
               body.insertBefore(ampStickyAd, body.firstChild);
