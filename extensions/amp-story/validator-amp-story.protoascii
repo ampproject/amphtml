@@ -104,7 +104,7 @@ tags: {  # <amp-story>
     value: ""
   }
   attrs: {
-    name: "disabled"
+    name: "live-story-disabled"
     value: ""
   }
   siblings_disallowed: true
