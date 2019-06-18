@@ -60,6 +60,7 @@ import {yotpo} from './yotpo';
 import {_ping_} from '../ads/_ping_';
 
 // 3P Ad Networks - please keep in alphabetic order
+import {_1wo} from '../ads/1wo';
 import {_24smi} from '../ads/24smi';
 import {a8} from '../ads/a8';
 import {a9} from '../ads/a9';
@@ -268,6 +269,7 @@ import {zucks} from '../ads/zucks';
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
+  '1wo': true,
   '24smi': true,
   bringhub: true,
   dable: true,
@@ -302,6 +304,7 @@ if (getMode().test || getMode().localDev) {
 }
 
 // Keep the list in alphabetic order
+register('1wo', _1wo);
 register('24smi', _24smi);
 register('3d-gltf', gltfViewer);
 register('a8', a8);
