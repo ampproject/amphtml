@@ -168,9 +168,13 @@ export class VariableService {
     this.register_('$BASE64', value => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
     this.register_('$IF', (value, thenValue, elseValue) =>
-      value ? thenValue : elseValue
+      stringToBool(value) ? thenValue : elseValue
     );
     this.register_('$REPLACE', replaceMacro);
+    this.register_(
+      '$EQUALS',
+      (firstValue, secValue) => firstValue === secValue
+    );
     // TODO(ccordry): Make sure this stays a window level service when this
     // VariableService is migrated to document level.
     this.register_('LINKER_PARAM', (name, id) =>
@@ -350,4 +354,20 @@ export function getConsentStateStr(element) {
     }
     return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
   });
+}
+
+/**
+ * Converts string to boolean
+ * @param {string} str
+ * @return {boolean}
+ */
+export function stringToBool(str) {
+  return (
+    str !== 'false' &&
+    str !== '' &&
+    str !== '0' &&
+    str !== 'null' &&
+    str !== 'NaN' &&
+    str !== 'undefined'
+  );
 }
