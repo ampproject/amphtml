@@ -14,46 +14,49 @@
  * limitations under the License.
  */
 
-amp-story-grid-layer amp-story-bling-link {
+.i-amphtml-story-bling-link-wrapper {
+  position: relative;
+}
+
+amp-story-bling-link {
   margin: 10px !important;
   background: rgba(255, 255, 255, 1) !important;
   border-radius: 50% !important;
+  position: absolute !important;
 }
 
-amp-story-page[active] amp-story-bling-link {
-  animation: pulse 4s infinite !important;
-}
-
-@-webkit-keyframes pulse {
-  0% {
-    -webkit-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-  }
-  70% {
-    -webkit-box-shadow: 0 0 0 15px rgba(255, 255, 255, 0.4);
-  }
-  100% {
-    -webkit-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-  }
+amp-story-page[active] .i-amphtml-story-bling-link-pulse {
+  width: 75px; /* set somewhere else */
+  height: 75px;  
+  margin: 10px !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  border-radius: 50% !important;
+  position: absolute !important;
+  animation-name: pulse !important;
+  animation-duration: 1.5s !important;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  animation-delay: 0 !important;
+  animation-direction: alternate !important;
+  animation-iteration-count: infinite !important;
+  animation-fill-mode: none !important;
+  animation-play-state: running !important;
 }
 
 @keyframes pulse {
   0% {
-    -moz-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-  }
-  70% {
-      -moz-box-shadow: 0 0 0 15px rgba(255, 255, 255, 0.4);
-      box-shadow: 0 0 0 15px rgba(255, 255, 255, 0.4);
+    transform: scale(1);    
   }
   100% {
-      -moz-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    transform: scale(1.25);    
   }
 }
 
-amp-story-grid-layer amp-story-bling-link:hover {
+amp-story-bling-link:hover {
   background: rgba(255, 255, 255, 0.4) !important;
   cursor: pointer !important;
+}
+
+amp-story-bling-link-pulse:hover {
   animation: none !important;
 }
 

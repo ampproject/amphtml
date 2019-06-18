@@ -39,17 +39,27 @@ export class AmpStoryBlingLink extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    addIconElement(this.element, this.win);
+    //this.addPulse_();
+    this.addIconElement_();
   }
-}
 
-/**
- * Adds icon class
- * @param {!Element} el
- * @param {!Window} win
- */
-function addIconElement(el, win) {
-  const iconEl = win.document.createElement('i');
-  iconEl.classList.add(ICON_CLASS, SHOPPING_CART_ICON_CLASS);
-  el.appendChild(iconEl);
+  /**
+   * Adds pulse as a child element of <amp-story-bling-link>
+   * @private
+   */
+  addPulse_() {
+    const pulseEl = this.win.document.createElement('i');
+    pulseEl.classList.add('i-amphtml-story-bling-link-pulse');
+    this.element.appendChild(pulseEl);
+  }
+
+  /**
+   * Adds icon as a child element of <amp-story-bling-link>
+   * @private
+   */
+  addIconElement_() {
+    const iconEl = this.win.document.createElement('i');
+    iconEl.classList.add(ICON_CLASS, SHOPPING_CART_ICON_CLASS);
+    this.element.appendChild(iconEl);
+  }
 }
