@@ -21,16 +21,16 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function invibes(global, data) {
-  global._invibes_amp = {
-    allowed_data: ['adCateg', 'pid'],
-    mandatory_data: [],
+  global.invibesAmp = {
+    allowedData: ['adCateg', 'pid'],
+    mandatoryData: [],
     data,
   };
 
   validateData(
     data,
-    global._invibes_amp.mandatory_data,
-    global._invibes_amp.allowed_data
+    global.invibesAmp.mandatoryData,
+    global.invibesAmp.allowedData
   );
 
   let url = 'https://k.r66net.com/GetAmpLink';

@@ -526,7 +526,7 @@ export const adConfig = {
     prefetch: 'https://k.r66net.com/GetAmpLink',
     preconnect: 'https://k.r66net.com',
     renderStartImplemented: true,
-    consentHandlingOverride: true
+    consentHandlingOverride: true,
   },
 
   'ix': {
