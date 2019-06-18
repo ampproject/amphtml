@@ -1,6 +1,6 @@
 import {CommonSignals} from '../../../src/common-signals';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {hasOwn} from './../../../src/utils/object';
+import {dict} from './../../../src/utils/object';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 
 /**
@@ -21,21 +21,6 @@ import {insertAnalyticsElement} from '../../../src/extension-analytics';
 
 const ANALYTICS_URL = 'https://v2.denakop.com/api.php?';
 const API_URL = 'https://v2.denakop.com/api.js';
-
-/**
- * @param {JsonObject} obj
- * @param {JsonObject} src
- *
- * @return {JsonObject}
- */
-function extend_(obj, src) {
-  for (const key in src) {
-    if (hasOwn(src, key)) {
-      obj[key] = src[key];
-    }
-  }
-  return obj;
-}
 
 /**
  * Determines if the element is valid.
@@ -72,8 +57,8 @@ export function rand() {
 
 /**
  * @param {!Element} ampAd
- * @param {JsonObject} adAnalyticsAuthorizedConfig
- * @param {JsonObject} adAnalyticsViewConfig
+ * @param {!JsonObject} adAnalyticsAuthorizedConfig
+ * @param {!JsonObject} adAnalyticsViewConfig
  */
 export function analyticAd(
   ampAd,
@@ -95,17 +80,10 @@ export function analyticAd(
 }
 
 /**
- * @param {JsonObject} attributes
- *
- * @return {JsonObject}
+ * @return {!JsonObject}
  */
-export function getStickyAdAttributes(
-  attributes = {}
-) {
-  return extend_(
-      {layout: 'nodisplay'},
-      attributes
-  );
+export function getStickyAdAttributes() {
+  return dict({'layout': 'nodisplay'});
 }
 
 /**
@@ -126,22 +104,19 @@ export function getAdAttributes(adUnit) {
       });
 
   const widthHeightH = wH[0].split('x');
+  const obj = dict();
 
-  /** @type {JsonObject} */
-  const obj = {
-    width: widthHeightH[0],
-    height: widthHeightH[1],
-    layout: 'fixed',
-    type: 'doubleclick',
-    'data-slot': adUnit['adUnitCode'],
-    'data-multi-size': wH.join(','),
-    'data-multi-size-validation': 'false',
-    // eslint-disable-next-line max-len
-    'rtc-config':
-      '{"vendors": {"prebidappnexus": {"PLACEMENT_ID": "15348791"}}}',
-  };
+  obj['width'] = widthHeightH[0];
+  obj['height'] = widthHeightH[1];
+  obj['layout'] = 'fixed';
+  obj['type'] = 'doubleclick';
+  obj['data-slot'] = adUnit['adUnitCode'];
+  obj['data-multi-size'] = wH.join(',');
+  obj['data-multi-size-validation'] = 'false';
+  obj['rtc-config'] =
+    '{"vendors": {"prebidappnexus": {"PLACEMENT_ID": "15348791"}}}';
 
-  if (obj['reload']) {
+  if (adUnit['reload']) {
     obj['data-enable-refresh'] = '45';
   }
 
@@ -151,10 +126,10 @@ export function getAdAttributes(adUnit) {
 /**
  * @param {string|number} publisherId
  * @param {string|number} tagId
- * @param {JsonObject} config
- * @param {JsonObject} adUnit
+ * @param {!Object} config
+ * @param {!Object} adUnit
  *
- * @return {JsonObject}
+ * @return {!Object}
  */
 export function getExtraUrlParams(publisherId, tagId, config, adUnit) {
   const wS = (window.screen.width || 0) + 'x' + (window.screen.height || 0);
@@ -185,12 +160,12 @@ export function getExtraUrlParams(publisherId, tagId, config, adUnit) {
 }
 
 /**
- * @param {JsonObject} extraUrlParams
+ * @param {!Object} extraUrlParams
  *
- * @return {JsonObject}
+ * @return {!JsonObject}
  */
 export function getAmpAdAnalyticsAuthorizedConfig(extraUrlParams) {
-  return {
+  return dict({
     'requests': {
       'denakop': ANALYTICS_URL,
     },
@@ -209,53 +184,53 @@ export function getAmpAdAnalyticsAuthorizedConfig(extraUrlParams) {
       },
     },
     'extraUrlParams': extraUrlParams,
-  };
+  });
 }
 
 /**
- * @param {JsonObject} extraUrlParams
+ * @param {!Object} extraUrlParams
  *
- * @return {JsonObject}
+ * @return {!JsonObject}
  */
 export function getAmpAdAnalyticsViewConfig(extraUrlParams) {
-  return {
-    requests: {
-      denakop: ANALYTICS_URL,
+  return dict({
+    'requests': {
+      'denakop': ANALYTICS_URL,
     },
-    transport: {
-      beacon: false,
-      xhrpost: false,
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
     },
-    triggers: {
-      continuousVisible: {
-        on: 'visible',
-        visibilitySpec: {
-          selector: 'amp-ad',
-          selectionMethod: 'closest',
-          visiblePercentageMin: 50,
-          continuousTimeMin: 1000,
+    'triggers': {
+      'continuousVisible': {
+        'on': 'visible',
+        'visibilitySpec': {
+          'selector': 'amp-ad',
+          'selectionMethod': 'closest',
+          'visiblePercentageMin': 50,
+          'continuousTimeMin': 1000,
         },
-        extraUrlParams: {
-          action: 'view',
-          firstLoad: 'true',
+        'extraUrlParams': {
+          'action': 'view',
+          'firstLoad': 'true',
         },
-        request: 'denakop',
+        'request': 'denakop',
       },
-      adRefresh: {
-        on: 'ad-refresh',
-        visibilitySpec: {
-          selector: 'amp-ad',
-          selectionMethod: 'closest',
-          visiblePercentageMin: 50,
-          continuousTimeMin: 1000,
+      'adRefresh': {
+        'on': 'ad-refresh',
+        'visibilitySpec': {
+          'selector': 'amp-ad',
+          'selectionMethod': 'closest',
+          'visiblePercentageMin': 50,
+          'continuousTimeMin': 1000,
         },
-        extraUrlParams: {
-          action: 'view',
-          firstLoad: 'false',
+        'extraUrlParams': {
+          'action': 'view',
+          'firstLoad': 'false',
         },
-        request: 'denakop',
+        'request': 'denakop',
       },
     },
-    extraUrlParams,
-  };
+    'extraUrlParams': extraUrlParams,
+  });
 }

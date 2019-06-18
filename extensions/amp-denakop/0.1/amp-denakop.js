@@ -17,6 +17,7 @@
 import * as utils from './utils';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
+import {dict} from './../../../src/utils/object';
 import {getCookie, setCookie} from '../../../src/cookies';
 import {userAssert} from '../../../src/log';
 
@@ -96,20 +97,13 @@ export class AmpDenakop extends AMP.BaseElement {
                   configObj,
                   adUnit
               );
-              const adAnalyticsAuthorizedConfig = utils
-                  .getAmpAdAnalyticsAuthorizedConfig(
-                      extraUrlParams
-                  );
-              const adAnalyticsViewConfig = utils.getAmpAdAnalyticsViewConfig(
-                  extraUrlParams
-              );
 
               ampStickyAd.appendChild(ampAd);
               body.insertBefore(ampStickyAd, body.firstChild);
               utils.analyticAd(
                   ampAd,
-                  adAnalyticsAuthorizedConfig,
-                  adAnalyticsViewConfig
+                  utils.getAmpAdAnalyticsAuthorizedConfig(extraUrlParams),
+                  utils.getAmpAdAnalyticsViewConfig(extraUrlParams)
               );
             });
           }
@@ -128,15 +122,17 @@ export class AmpDenakop extends AMP.BaseElement {
    * @private
    */
   getConfig_(configUrl) {
+    const xhrInit = {
+      method: 'GET',
+      credentials: 'include',
+      headers: dict({
+        'Accept': 'text/plain',
+        'Content-Type': 'text/plain',
+      }),
+    };
+
     return Services.xhrFor(this.win)
-        .fetch(configUrl, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Accept': 'text/plain',
-            'Content-Type': 'text/plain',
-          },
-        })
+        .fetch(configUrl, xhrInit)
         .then(res => res.json())
         .catch(reason => {
           this.user().error(TAG, 'amp-denakop config xhr failed: ' + reason);
