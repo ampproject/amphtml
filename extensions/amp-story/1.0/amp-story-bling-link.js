@@ -21,10 +21,19 @@
 import {Layout} from '../../../src/layout';
 
 /** @const */
-const ICON_CLASS = 'i-amphtml-story-bling-link-icon';
+const CLASS_PREFIX = 'i-amphtml-story-bling-link';
 
 /** @const */
-const SHOPPING_CART_ICON_CLASS = 'i-amphtml-story-shopping-cart';
+const BUTTON_CLASS = `${CLASS_PREFIX}-button`;
+
+/** @const */
+const ICON_CLASS = `${CLASS_PREFIX}-icon`;
+
+/** @const */
+const SHOPPING_CART_ICON_CLASS = `${CLASS_PREFIX}-shopping-cart`;
+
+/** @const */
+const PULSE_CLASS = `${CLASS_PREFIX}-pulse`;
 
 export class AmpStoryBlingLink extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -39,18 +48,8 @@ export class AmpStoryBlingLink extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    //this.addPulse_();
-    //this.addIconElement_();
-  }
-
-  /**
-   * Adds pulse as a child element of <amp-story-bling-link>
-   * @private
-   */
-  addPulse_() {
-    const pulseEl = this.win.document.createElement('i');
-    pulseEl.classList.add('i-amphtml-story-bling-link-pulse');
-    this.element.appendChild(pulseEl);
+    this.addPulseElement_();
+    this.addIconElement_();
   }
 
   /**
@@ -58,8 +57,23 @@ export class AmpStoryBlingLink extends AMP.BaseElement {
    * @private
    */
   addIconElement_() {
+    const buttonEl = this.win.document.createElement('div');
+    buttonEl.classList.add(BUTTON_CLASS);
+
     const iconEl = this.win.document.createElement('i');
     iconEl.classList.add(ICON_CLASS, SHOPPING_CART_ICON_CLASS);
-    this.element.appendChild(iconEl);
+
+    buttonEl.appendChild(iconEl);
+    this.element.appendChild(buttonEl);
+  }
+
+  /**
+   * Adds pulse as a child element of <amp-story-bling-link>
+   * @private
+   */
+  addPulseElement_() {
+    const pulseEl = this.win.document.createElement('div');
+    pulseEl.classList.add(PULSE_CLASS);
+    this.element.appendChild(pulseEl);
   }
 }
