@@ -86,6 +86,7 @@ import {
   childElement,
   childElementByTag,
   childElements,
+  childNodes,
   closest,
   createElementWithAttributes,
   isRTL,
@@ -443,7 +444,8 @@ export class AmpStory extends AMP.BaseElement {
     this.element.removeAttribute('title');
 
     // Remove text nodes which would be shown outside of the amp-story
-    const textNodes = Array.from(this.element.childNodes).filter(
+    const textNodes = childNodes(
+      this.element,
       node => node.nodeType === Node.TEXT_NODE
     );
     textNodes.forEach(node => {
