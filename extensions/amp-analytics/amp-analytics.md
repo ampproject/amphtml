@@ -41,7 +41,7 @@ Capture analytics data from an AMP document.
 
 ## Sending analytics to a vendor or in-house?
 
-Before you start using AMP analytics on your site, you need to decide whether you will you use third-party analytics tools to analyze user engagement, or your own in-house solution.
+Before you start using AMP analytics on your site, you need to decide whether you will use third-party analytics tools to analyze user engagement, or your own in-house solution.
 
 {% call callout('Read on', type='read') %}
 Learn all about AMP analytics in the [Configure Analytics](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/) guide.
