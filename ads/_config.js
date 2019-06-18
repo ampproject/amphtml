@@ -544,7 +544,12 @@ export const adConfig = {
   'kuadio': {},
 
   'lentainform': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    prefetch: [
+        'https://jsc.lentainform.com',
+        'https://servicer.lentainform.com',
+        'https://s-img.lentainform.com',
+    ],
   },
 
   'ligatus': {
