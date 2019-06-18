@@ -21,6 +21,7 @@ import {insertAnalyticsElement} from '../../../src/extension-analytics';
 const ANALYTICS_URL = 'https://v2.denakop.com/api.php?';
 const API_URL = 'https://v2.denakop.com/api.js';
 import {hasOwn} from './../../../src/utils/object';
+import {tryDecodeUriComponent} from './../../../src/url';
 
 /**
  * @param {JsonObject} obj
@@ -77,7 +78,7 @@ export function rand() {
  */
 export function setCookie(cname, cvalue, domain, exyears) {
   const d = new Date();
-  d.setTime(d.getTime() + (exyears * 31536000000));
+  d.setTime(d.now() + (exyears * 31536000000));
 
   document.cookie = cname + '=' + cvalue + ';' +
     'domain=.' + domain + ';' +
@@ -117,7 +118,7 @@ export function analyticAd(ampAd, adAnalyticsAuthorizedConfig,
  */
 export function getCookie(cname) {
   const name = cname + '=';
-  const decodedCookie = decodeURIComponent(document.cookie);
+  const decodedCookie = tryDecodeUriComponent(document.cookie);
   const ca = decodedCookie.split(';');
 
   for (let i = 0; i < ca.length; i++) {
@@ -206,7 +207,7 @@ export function getExtraUrlParams(publisherId, tagId, config, adUnit) {
     'city': config['user']['location']['city'],
     'state': config['user']['location']['stateprov'],
     'isp': config['user']['location']['isp_name'],
-    'tz': (new Date()).getTime(),
+    'tz': Date.now(),
     'format': adUnit['format'],
     'cid': adUnit['cid'],
     'cpm': adUnit['cpm'],
