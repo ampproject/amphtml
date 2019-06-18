@@ -683,7 +683,7 @@ export class FixedLayer {
     // "double top-offset" (#22860).
     const removals = [];
     for (let i = 0; i < elements.length; i++) {
-      const el = elements[i];
+      const el = elements[i].element;
       if (el === element) {
         break;
       }

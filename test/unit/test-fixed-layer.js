@@ -324,6 +324,16 @@ describes.sandboxed('FixedLayer', {}, () => {
         }
         return Node.DOCUMENT_POSITION_PRECEDING;
       },
+      contains(elem) {
+        let el = elem;
+        while (el) {
+          if (el === this) {
+            return true;
+          }
+          el = el.parentElement;
+        }
+        return false;
+      },
       hasAttribute(name) {
         for (let i = 0; i < this.attributes.length; i++) {
           if (this.attributes[i].name === name) {
