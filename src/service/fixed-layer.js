@@ -678,15 +678,21 @@ export class FixedLayer {
     }
 
     const elements = this.elements_;
-    let removals = [];
+
+    // Avoid ancestor-descendant relationships in tracked elements to prevent
+    // "double top-offset" (#22860).
+    const removals = [];
     for (let i = 0; i < elements.length; i++) {
       const el = elements[i];
       if (el === element) {
         break;
       }
+      // Early exit if element is a child of an already-tracked element...
       if (el.contains(element)) {
         return false;
       }
+      // Remove the already-tracked element if it is a child of the new
+      // element...
       if (element.contains(el)) {
         removals.push(el);
       }
