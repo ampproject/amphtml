@@ -16,7 +16,6 @@
 
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
-import {cookieReader} from './cookie-reader';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getConsentPolicyState} from '../../../src/consent';
@@ -181,8 +180,6 @@ export class VariableService {
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
-
-    this.register_('COOKIE', name => cookieReader(this.ampdoc_.win, name));
   }
 
   /**
