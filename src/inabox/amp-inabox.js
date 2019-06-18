@@ -47,6 +47,7 @@ import {internalRuntimeVersion} from '../internal-version';
 import {isExperimentOn} from '../experiments';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
+import {rejectServicePromiseForDoc} from '../service';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
@@ -92,6 +93,10 @@ startupChunk(self.document, function initial() {
     fullCss,
     () => {
       startupChunk(self.document, function services() {
+        // For security, storage and CLIENT_ID are not supported in inabox.
+        // Fail early with console errors for any attempt of access.
+        unsupportedService(ampdoc, 'storage');
+        unsupportedService(ampdoc, 'cid');
         // Core services.
         installRuntimeServices(self);
         fontStylesheetTimeout(self);
@@ -149,3 +154,15 @@ self.document.documentElement.setAttribute(
   'amp-version',
   internalRuntimeVersion()
 );
+
+/**
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} name
+ */
+function unsupportedService(ampdoc, name) {
+  rejectServicePromiseForDoc(
+    ampdoc,
+    name,
+    new Error('Un-supported service: ' + name)
+  );
+}
