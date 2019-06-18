@@ -26,12 +26,12 @@ import {
   iterateCursor,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
+import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {findIndex, remove} from '../../../src/utils/array';
-import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
@@ -55,6 +55,20 @@ const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
  * @type {number}
  */
 const MAX_MERGE_DEPTH = 10;
+
+/** @const {!Object<string, !Object<string, boolean>>} */
+const FORM_VALUE_PROPERTIES = {
+  'INPUT': {
+    'checked': true,
+    'value': true,
+  },
+  'OPTION': {
+    'selected': true,
+  },
+  'TEXTAREA': {
+    'text': true,
+  },
+};
 
 /**
  * A bound property, e.g. [property]="expression".
@@ -1138,16 +1152,19 @@ export class Bind {
 
       updates.forEach(update => {
         const {boundProperty, newValue} = update;
+        const {property} = boundProperty;
         const mutation = this.applyBinding_(boundProperty, element, newValue);
+
         if (mutation) {
           mutations[mutation.name] = mutation.value;
-          const {property} = boundProperty;
           if (property == 'width') {
             width = isFiniteNumber(newValue) ? Number(newValue) : width;
           } else if (property == 'height') {
             height = isFiniteNumber(newValue) ? Number(newValue) : height;
           }
         }
+
+        this.dispatchFormValueChangeEventIfNecessary_(element, property);
       });
 
       if (width !== undefined || height !== undefined) {
@@ -1173,6 +1190,36 @@ export class Bind {
         }
       }
     });
+  }
+
+  /**
+   * Dispatches an `AmpEvents.FORM_VALUE_CHANGE` if the element's changed
+   * property represents the value of a form field.
+   * @param {!Element} element
+   * @param {string} property
+   */
+  dispatchFormValueChangeEventIfNecessary_(element, property) {
+    const isPropertyAFormValue = FORM_VALUE_PROPERTIES[element.tagName];
+    if (!isPropertyAFormValue || !isPropertyAFormValue[property]) {
+      return;
+    }
+
+    // The native `InputEvent` is dispatched at the parent `<select>` when its
+    // selected `<option>` changes.
+    const dispatchAt =
+      element.tagName === 'OPTION'
+        ? closestAncestorElementBySelector(element, 'SELECT')
+        : element;
+
+    if (dispatchAt) {
+      const ampValueChangeEvent = createCustomEvent(
+        this.localWin_,
+        AmpEvents.FORM_VALUE_CHANGE,
+        /* detail */ null,
+        {bubbles: true}
+      );
+      dispatchAt.dispatchEvent(ampValueChangeEvent);
+    }
   }
 
   /**
