@@ -18,25 +18,37 @@ import '../amp-denakop';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {denakopElementIsValid} from '../utils';
 
-describes.realWin('amp-denakop', {
-  amp: {
-    extensions: ['amp-ad', 'amp-sticky-ad', 'amp-iframe', 'amp-analytics',
-      'amp-denakop'],
-  },
-}, env => {
-  let doc;
+describes.realWin(
+    'amp-denakop',
+    {
+      amp: {
+        extensions: [
+          'amp-ad',
+          'amp-sticky-ad',
+          'amp-iframe',
+          'amp-analytics',
+          'amp-denakop',
+        ],
+      },
+    },
+    env => {
+      let doc;
 
-  beforeEach(() => {
-    doc = env.win.document;
-  });
+      beforeEach(() => {
+        doc = env.win.document;
+      });
 
-  it('There is no `data-tag-id` or `data-publisher-id` attribute in ' +
-    '`amp-denakop` element.', () => {
-    const el = createElementWithAttributes(doc, 'amp-denakop', {
-      'data-tag-id': '2819896d-f724',
-      'data-publisher-id': '22',
-    });
+      it(
+          'There is no `data-tag-id` or `data-publisher-id` attribute in ' +
+      '`amp-denakop` element.',
+          () => {
+            const el = createElementWithAttributes(doc, 'amp-denakop', {
+              'data-tag-id': '2819896d-f724',
+              'data-publisher-id': '22',
+            });
 
-    expect(denakopElementIsValid(el)).to.be.true;
-  });
-});
+            expect(denakopElementIsValid(el)).to.be.true;
+          },
+      );
+    },
+);

@@ -1,5 +1,6 @@
 import {CommonSignals} from '../../../src/common-signals';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
+import {hasOwn} from './../../../src/utils/object';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 
 /**
@@ -20,7 +21,6 @@ import {insertAnalyticsElement} from '../../../src/extension-analytics';
 
 const ANALYTICS_URL = 'https://v2.denakop.com/api.php?';
 const API_URL = 'https://v2.denakop.com/api.js';
-import {hasOwn} from './../../../src/utils/object';
 
 /**
  * @param {JsonObject} obj
@@ -47,8 +47,11 @@ export function denakopElementIsValid(el) {
   const tagId = el.getAttribute('data-tag-id');
   const publisherId = el.getAttribute('data-publisher-id');
 
-  return !((tagId === null || tagId === '') ||
-    (publisherId === null || publisherId === ''));
+  return !(
+    tagId === null ||
+    tagId === '' ||
+    publisherId === null || publisherId === ''
+  );
 }
 
 /**
@@ -72,13 +75,16 @@ export function rand() {
  * @param {JsonObject} adAnalyticsAuthorizedConfig
  * @param {JsonObject} adAnalyticsViewConfig
  */
-export function analyticAd(ampAd, adAnalyticsAuthorizedConfig,
-  adAnalyticsViewConfig) {
+export function analyticAd(
+  ampAd,
+  adAnalyticsAuthorizedConfig,
+  adAnalyticsViewConfig
+) {
   insertAnalyticsElement(ampAd, adAnalyticsAuthorizedConfig, false);
 
   /**
-   * Wait for the ad render
-   */
+     * Wait for the ad render
+     */
   const signals = ampAd.signals();
   Promise.race([
     signals.whenSignal(CommonSignals.RENDER_START),
@@ -93,37 +99,46 @@ export function analyticAd(ampAd, adAnalyticsAuthorizedConfig,
  *
  * @return {JsonObject}
  */
-export function getStickyAdAttributes(attributes = /** @type {JsonObject} */ {}) {
-  return extend_(/** @type {JsonObject} */{'layout': 'nodisplay'}, attributes);
+export function getStickyAdAttributes(
+  attributes = {}
+) {
+  return extend_(
+      {layout: 'nodisplay'},
+      attributes
+  );
 }
 
 /**
  * @param {JsonObject} adUnit
  *
- * @return {JsonObject}
+ * @return {!JsonObject}
  */
 export function getAdAttributes(adUnit) {
   /**
    * Ad unit sizes ordered by sizes
    */
-  const wH = adUnit['adUnitSizes'].map(function(v) {
-    return v.join('x');
-  }).sort(function(a, b) {
-    return b - a;
-  });
+  const wH = adUnit['adUnitSizes']
+      .map(function(v) {
+        return v.join('x');
+      })
+      .sort(function(a, b) {
+        return b - a;
+      });
 
   const widthHeightH = wH[0].split('x');
 
+  /** @type {JsonObject} */
   const obj = {
-    'width': widthHeightH[0],
-    'height': widthHeightH[1],
-    'layout': 'fixed',
-    'type': 'doubleclick',
+    width: widthHeightH[0],
+    height: widthHeightH[1],
+    layout: 'fixed',
+    type: 'doubleclick',
     'data-slot': adUnit['adUnitCode'],
     'data-multi-size': wH.join(','),
     'data-multi-size-validation': 'false',
     // eslint-disable-next-line max-len
-    'rtc-config': '{"vendors": {"prebidappnexus": {"PLACEMENT_ID": "15348791"}}}',
+    'rtc-config':
+      '{"vendors": {"prebidappnexus": {"PLACEMENT_ID": "15348791"}}}',
   };
 
   if (obj['reload']) {
@@ -204,43 +219,43 @@ export function getAmpAdAnalyticsAuthorizedConfig(extraUrlParams) {
  */
 export function getAmpAdAnalyticsViewConfig(extraUrlParams) {
   return {
-    'requests': {
-      'denakop': ANALYTICS_URL,
+    requests: {
+      denakop: ANALYTICS_URL,
     },
-    'transport': {
-      'beacon': false,
-      'xhrpost': false,
+    transport: {
+      beacon: false,
+      xhrpost: false,
     },
-    'triggers': {
-      'continuousVisible': {
-        'on': 'visible',
-        'visibilitySpec': {
-          'selector': 'amp-ad',
-          'selectionMethod': 'closest',
-          'visiblePercentageMin': 50,
-          'continuousTimeMin': 1000,
+    triggers: {
+      continuousVisible: {
+        on: 'visible',
+        visibilitySpec: {
+          selector: 'amp-ad',
+          selectionMethod: 'closest',
+          visiblePercentageMin: 50,
+          continuousTimeMin: 1000,
         },
-        'extraUrlParams': {
-          'action': 'view',
-          'firstLoad': 'true',
+        extraUrlParams: {
+          action: 'view',
+          firstLoad: 'true',
         },
-        'request': 'denakop',
+        request: 'denakop',
       },
-      'adRefresh': {
-        'on': 'ad-refresh',
-        'visibilitySpec': {
-          'selector': 'amp-ad',
-          'selectionMethod': 'closest',
-          'visiblePercentageMin': 50,
-          'continuousTimeMin': 1000,
+      adRefresh: {
+        on: 'ad-refresh',
+        visibilitySpec: {
+          selector: 'amp-ad',
+          selectionMethod: 'closest',
+          visiblePercentageMin: 50,
+          continuousTimeMin: 1000,
         },
-        'extraUrlParams': {
-          'action': 'view',
-          'firstLoad': 'false',
+        extraUrlParams: {
+          action: 'view',
+          firstLoad: 'false',
         },
-        'request': 'denakop',
+        request: 'denakop',
       },
     },
-    'extraUrlParams': extraUrlParams,
+    extraUrlParams,
   };
 }

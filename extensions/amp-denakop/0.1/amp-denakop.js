@@ -33,14 +33,19 @@ export class AmpDenakop extends AMP.BaseElement {
     userAssert(publisherId, 'Missing publisher id attribute');
 
     const ampdoc = this.getAmpDoc();
-    Services.extensionsFor(this.win)
-        .installExtensionForDoc(ampdoc, 'amp-ad');
-    Services.extensionsFor(this.win)
-        .installExtensionForDoc(ampdoc, 'amp-sticky-ad');
-    Services.extensionsFor(this.win)
-        .installExtensionForDoc(ampdoc, 'amp-iframe');
-    Services.extensionsFor(this.win)
-        .installExtensionForDoc(ampdoc, 'amp-analytics');
+    Services.extensionsFor(this.win).installExtensionForDoc(ampdoc, 'amp-ad');
+    Services.extensionsFor(this.win).installExtensionForDoc(
+        ampdoc,
+        'amp-sticky-ad'
+    );
+    Services.extensionsFor(this.win).installExtensionForDoc(
+        ampdoc,
+        'amp-iframe'
+    );
+    Services.extensionsFor(this.win).installExtensionForDoc(
+        ampdoc,
+        'amp-analytics'
+    );
 
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     const whenVisible = viewer.whenFirstVisible();
@@ -48,12 +53,14 @@ export class AmpDenakop extends AMP.BaseElement {
 
     whenVisible
         .then(() => {
-          return this.getConfig_(utils.getConfigUrl({
-            t: tagId,
-            p: publisherId,
-            tz: utils.rand(),
-            uxid,
-          }));
+          return this.getConfig_(
+              utils.getConfigUrl({
+                t: tagId,
+                p: publisherId,
+                tz: utils.rand(),
+                uxid,
+              })
+          );
         })
         .then(configObj => {
           if (!configObj) {
@@ -63,27 +70,47 @@ export class AmpDenakop extends AMP.BaseElement {
           const doc = ampdoc.win.document;
           const body = ampdoc.getBody();
 
-          setCookie(this.win, 'uxid', configObj['user']['uxid'],
+          setCookie(
+              this.win,
+              'uxid',
+              configObj['user']['uxid'],
               Date.now() + 315360000000,
-              {domain: configObj['settings']['topDomain']});
+              {domain: configObj['settings']['topDomain']}
+          );
 
           if (configObj['adUnits'].length !== 0) {
             configObj['adUnits'].forEach(function(adUnit) {
-              const ampAd = createElementWithAttributes(doc, 'amp-ad',
-                  utils.getAdAttributes(adUnit));
-              const ampStickyAd = createElementWithAttributes(doc,
-                  'amp-sticky-ad', utils.getStickyAdAttributes());
-              const extraUrlParams = utils.getExtraUrlParams(publisherId, tagId,
-                  configObj, adUnit);
-              const adAnalyticsAuthorizedConfig =
-                utils.getAmpAdAnalyticsAuthorizedConfig(extraUrlParams);
-              const adAnalyticsViewConfig =
-                utils.getAmpAdAnalyticsViewConfig(extraUrlParams);
+              const ampAd = createElementWithAttributes(
+                  doc,
+                  'amp-ad',
+                  utils.getAdAttributes(adUnit)
+              );
+              const ampStickyAd = createElementWithAttributes(
+                  doc,
+                  'amp-sticky-ad',
+                  utils.getStickyAdAttributes()
+              );
+              const extraUrlParams = utils.getExtraUrlParams(
+                  publisherId,
+                  tagId,
+                  configObj,
+                  adUnit
+              );
+              const adAnalyticsAuthorizedConfig = utils
+                  .getAmpAdAnalyticsAuthorizedConfig(
+                      extraUrlParams
+                  );
+              const adAnalyticsViewConfig = utils.getAmpAdAnalyticsViewConfig(
+                  extraUrlParams
+              );
 
               ampStickyAd.appendChild(ampAd);
               body.insertBefore(ampStickyAd, body.firstChild);
-              utils.analyticAd(ampAd, adAnalyticsAuthorizedConfig,
-                  adAnalyticsViewConfig);
+              utils.analyticAd(
+                  ampAd,
+                  adAnalyticsAuthorizedConfig,
+                  adAnalyticsViewConfig
+              );
             });
           }
         });
