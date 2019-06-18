@@ -35,11 +35,6 @@ module.exports = function(context) {
               });
             });
         }
-      } else if (node.specifiers) {
-        context.report({
-          node,
-          message: 'Side-effect linting not implemented',
-        });
       }
     },
   };
