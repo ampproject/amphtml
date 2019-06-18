@@ -17,6 +17,7 @@ import '../../../../third_party/react-dates/bundle';
 import * as lolex from 'lolex';
 import {AmpDatePicker, DatePickerState} from '../amp-date-picker';
 import {createElementWithAttributes} from '../../../../src/dom.js';
+import {requireExternal} from '../../../../src/module';
 
 describes.realWin(
   'amp-date-picker',
@@ -27,13 +28,9 @@ describes.realWin(
     },
   },
   env => {
+    const moment = requireExternal('moment');
     let clock;
     let document;
-
-    const DEFAULT_ATTRS = {
-      layout: 'fixed-height',
-      height: '360',
-    };
 
     /**
      * @param {!JsonObject<string, string>=} opt_attrs
@@ -46,18 +43,41 @@ describes.realWin(
      * }}
      */
     function createDatePicker(opt_attrs = {}, opt_parent = document.body) {
-      const attrs = Object.assign({}, DEFAULT_ATTRS, opt_attrs);
+      const attrs = Object.assign({}, opt_attrs);
+      let input = null;
+      let endInput = null;
+      if (attrs['mode'] === 'overlay') {
+        input = document.createElement('input');
+        input.id = 'date';
+
+        if (attrs['type'] === 'range') {
+          endInput = document.createElement('input');
+          endInput.id = 'endDate';
+          attrs['start-input-selector'] = '#date';
+          attrs['end-input-selector'] = '#endDate';
+        } else {
+          attrs['input-selector'] = '#date';
+        }
+      }
       const element = createElementWithAttributes(
         document,
         'amp-date-picker',
         attrs
       );
 
+      if (input) {
+        element.appendChild(input);
+      }
+      if (endInput) {
+        element.appendChild(endInput);
+      }
       opt_parent.appendChild(element);
       const picker = new AmpDatePicker(element);
 
       return {
         element,
+        input,
+        endInput,
         picker,
         async buildCallback() {
           await picker.buildCallback();
@@ -83,291 +103,415 @@ describes.realWin(
       clock.uninstall();
     });
 
-    describe('static states', () => {
-      it('should start in the static state', async () => {
-        const {picker, layoutCallback} = createDatePicker({
-          'layout': 'fixed-height',
-          'height': '360',
+    describes.repeated(
+      'picker type',
+      {
+        'range picker': {type: 'range'},
+        'single picker': {type: 'single'},
+      },
+      (name, variant) => {
+        describe('static states', () => {
+          it('should start in the static state', async () => {
+            const {picker, layoutCallback} = createDatePicker({
+              'layout': 'fixed-height',
+              'height': '360',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.STATIC
+            );
+          });
+
+          it('should remain in the static state after a transition', async () => {
+            const {element, picker, layoutCallback} = createDatePicker({
+              'layout': 'fixed-height',
+              'height': '360',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.STATIC
+            );
+
+            const fakeEscEvent = {
+              target: element,
+              key: 'Escape',
+              preventDefault() {},
+            };
+            picker.handleKeydown_(fakeEscEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.STATIC
+            );
+
+            picker.transitionTo_(DatePickerState.OVERLAY_OPEN_PICKER);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.STATIC
+            );
+          });
         });
 
-        await layoutCallback();
-        expect(picker.stateMachine_.state_).to.equal(DatePickerState.STATIC);
-      });
-    });
+        describe('overlay states', () => {
+          it('should start in the unopened state', async () => {
+            const {picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
 
-    describe('overlay states', () => {
-      it('should start in the unopened state', async () => {
-        const {element, picker, layoutCallback} = createDatePicker({
-          'mode': 'overlay',
-          'input-selector': '#date',
+            await layoutCallback();
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_CLOSED
+            );
+          });
+
+          it('should transition to the opened state on focus', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            const fakeEvent = {target: input};
+            picker.handleFocus_(fakeEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+          });
+
+          it('should transition to the closed state on blur', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            const fakeFocusEvent = {target: input};
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+
+            const fakeBlurEvent = {target: document.body};
+            picker.handleFocus_(fakeBlurEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_CLOSED
+            );
+          });
+
+          it('should transition to the closed state on esc', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            const fakeFocusEvent = {target: input};
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+
+            const fakeEscEvent = {
+              target: input,
+              key: 'Escape',
+              preventDefault() {},
+            };
+            picker.handleKeydown_(fakeEscEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_CLOSED
+            );
+          });
+
+          it('should transition to picker state on arrow', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            const fakeFocusEvent = {target: input};
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+
+            const fakeKeydownEvent = {
+              target: input,
+              key: 'ArrowDown',
+              preventDefault() {},
+            };
+            picker.handleKeydown_(fakeKeydownEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_PICKER
+            );
+          });
+
+          it('should transition directly to picker state on arrow from closed', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_CLOSED
+            );
+
+            const fakeKeydownEvent = {
+              target: input,
+              key: 'ArrowDown',
+              preventDefault() {},
+            };
+            picker.handleKeydown_(fakeKeydownEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_PICKER
+            );
+          });
+
+          it('should transition to closed state from picker on esc', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+            await layoutCallback();
+            const fakeFocusEvent = {target: input};
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+
+            const fakeKeydownEvent = {
+              target: input,
+              key: 'ArrowDown',
+              preventDefault() {},
+            };
+            picker.handleKeydown_(fakeKeydownEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_PICKER
+            );
+
+            const fakeEscEvent = {
+              target: input,
+              key: 'Escape',
+              preventDefault() {},
+            };
+            picker.handleKeydown_(fakeEscEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_CLOSED
+            );
+          });
+
+          it('should transition to closed state from picker on document click', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            const fakeFocusEvent = {target: input};
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+
+            const fakeKeydownEvent = {
+              target: input,
+              key: 'ArrowDown',
+              preventDefault() {},
+            };
+            picker.handleKeydown_(fakeKeydownEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_PICKER
+            );
+
+            const fakeClickEvent = {
+              target: document.documentElement,
+            };
+            picker.handleClick_(fakeClickEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_CLOSED
+            );
+          });
+
+          it('should remain in picker state on click in picker', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            const fakeFocusEvent = {target: input};
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+
+            const fakeKeydownEvent = {
+              target: input,
+              key: 'ArrowDown',
+              preventDefault() {},
+            };
+            picker.handleKeydown_(fakeKeydownEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_PICKER
+            );
+
+            const fakeClickEvent = {
+              target: input,
+            };
+            picker.handleClick_(fakeClickEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_PICKER
+            );
+          });
+
+          it('should transition to input state from picker on focus', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            const fakeFocusEvent = {target: input};
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+
+            const fakeKeydownEvent = {
+              target: input,
+              key: 'ArrowDown',
+              preventDefault() {},
+            };
+            picker.handleKeydown_(fakeKeydownEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_PICKER
+            );
+
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+          });
+
+          it('should remain in open picker on clear', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            const fakeFocusEvent = {target: input};
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+
+            const fakeKeydownEvent = {
+              target: input,
+              key: 'ArrowDown',
+              preventDefault() {},
+            };
+            picker.handleKeydown_(fakeKeydownEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_PICKER
+            );
+
+            picker.handleClear_();
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_PICKER
+            );
+          });
+
+          it('should transition from open picker to open input on clear with open-after-clear', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            const fakeFocusEvent = {target: input};
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+
+            const fakeKeydownEvent = {
+              target: input,
+              key: 'ArrowDown',
+              preventDefault() {},
+            };
+            picker.handleKeydown_(fakeKeydownEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_PICKER
+            );
+
+            picker.handleClear_();
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_PICKER
+            );
+          });
+
+          it('should transition to closed after date change', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            const fakeFocusEvent = {target: input};
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+
+            picker.onDateChange(moment('2018-03-01'));
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_CLOSED
+            );
+          });
+
+          it('should not transition to closed with open-after-select', async () => {
+            const {input, picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'open-after-select': '',
+              'type': variant.type,
+            });
+
+            await layoutCallback();
+            const fakeFocusEvent = {target: input};
+            picker.handleFocus_(fakeFocusEvent);
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+
+            picker.onDateChange(moment('2018-03-01'));
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+          });
+
+          it('should transition from closed to open input in on clear with open-after-clear', async () => {
+            const {picker, layoutCallback} = createDatePicker({
+              'mode': 'overlay',
+              'type': variant.type,
+              'open-after-clear': '',
+            });
+
+            await layoutCallback();
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_CLOSED
+            );
+
+            picker.handleClear_();
+            expect(picker.stateMachine_.state_).to.equal(
+              DatePickerState.OVERLAY_OPEN_INPUT
+            );
+          });
         });
-        const input = document.createElement('input');
-        input.id = 'date';
-        element.appendChild(input);
-
-        await layoutCallback();
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_CLOSED
-        );
-      });
-
-      it('should transition to the opened state on focus', async () => {
-        const {element, picker, layoutCallback} = createDatePicker({
-          'mode': 'overlay',
-          'input-selector': '#date',
-        });
-        const input = document.createElement('input');
-        input.id = 'date';
-        element.appendChild(input);
-
-        await layoutCallback();
-        const fakeEvent = {target: input};
-        picker.handleFocus_(fakeEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_INPUT
-        );
-      });
-
-      it('should transition to the closed state on blur', async () => {
-        const {element, picker, layoutCallback} = createDatePicker({
-          'mode': 'overlay',
-          'input-selector': '#date',
-        });
-        const input = document.createElement('input');
-        input.id = 'date';
-        element.appendChild(input);
-
-        await layoutCallback();
-        const fakeFocusEvent = {target: input};
-        picker.handleFocus_(fakeFocusEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_INPUT
-        );
-
-        const fakeBlurEvent = {target: document.body};
-        picker.handleFocus_(fakeBlurEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_CLOSED
-        );
-      });
-
-      it('should transition to the closed state on esc', async () => {
-        const {element, picker, layoutCallback} = createDatePicker({
-          'mode': 'overlay',
-          'input-selector': '#date',
-        });
-        const input = document.createElement('input');
-        input.id = 'date';
-        element.appendChild(input);
-
-        await layoutCallback();
-        const fakeFocusEvent = {target: input};
-        picker.handleFocus_(fakeFocusEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_INPUT
-        );
-
-        const fakeEscEvent = {
-          target: input,
-          key: 'Escape',
-          preventDefault() {},
-        };
-        picker.handleKeydown_(fakeEscEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_CLOSED
-        );
-      });
-
-      it('should transition to picker state on arrow', async () => {
-        const {element, picker, layoutCallback} = createDatePicker({
-          'mode': 'overlay',
-          'input-selector': '#date',
-        });
-        const input = document.createElement('input');
-        input.id = 'date';
-        element.appendChild(input);
-
-        await layoutCallback();
-        const fakeFocusEvent = {target: input};
-        picker.handleFocus_(fakeFocusEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_INPUT
-        );
-
-        const fakeKeydownEvent = {
-          target: input,
-          key: 'ArrowDown',
-          preventDefault() {},
-        };
-        picker.handleKeydown_(fakeKeydownEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_PICKER
-        );
-      });
-
-      it('should transition directly to picker state on arrow from closed', async () => {
-        const {element, picker, layoutCallback} = createDatePicker({
-          'mode': 'overlay',
-          'input-selector': '#date',
-        });
-        const input = document.createElement('input');
-        input.id = 'date';
-        element.appendChild(input);
-
-        await layoutCallback();
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_CLOSED
-        );
-
-        const fakeKeydownEvent = {
-          target: input,
-          key: 'ArrowDown',
-          preventDefault() {},
-        };
-        picker.handleKeydown_(fakeKeydownEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_PICKER
-        );
-      });
-
-      it('should transition to closed state from picker on esc', async () => {
-        const {element, picker, layoutCallback} = createDatePicker({
-          'mode': 'overlay',
-          'input-selector': '#date',
-        });
-        const input = document.createElement('input');
-        input.id = 'date';
-        element.appendChild(input);
-
-        await layoutCallback();
-        const fakeFocusEvent = {target: input};
-        picker.handleFocus_(fakeFocusEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_INPUT
-        );
-
-        const fakeKeydownEvent = {
-          target: input,
-          key: 'ArrowDown',
-          preventDefault() {},
-        };
-        picker.handleKeydown_(fakeKeydownEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_PICKER
-        );
-
-        const fakeEscEvent = {
-          target: input,
-          key: 'Escape',
-          preventDefault() {},
-        };
-        picker.handleKeydown_(fakeEscEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_CLOSED
-        );
-      });
-
-      it('should transition to closed state from picker on document click', async () => {
-        const {element, picker, layoutCallback} = createDatePicker({
-          'mode': 'overlay',
-          'input-selector': '#date',
-        });
-        const input = document.createElement('input');
-        input.id = 'date';
-        element.appendChild(input);
-
-        await layoutCallback();
-        const fakeFocusEvent = {target: input};
-        picker.handleFocus_(fakeFocusEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_INPUT
-        );
-
-        const fakeKeydownEvent = {
-          target: input,
-          key: 'ArrowDown',
-          preventDefault() {},
-        };
-        picker.handleKeydown_(fakeKeydownEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_PICKER
-        );
-
-        const fakeClickEvent = {
-          target: document.documentElement,
-        };
-        picker.handleClick_(fakeClickEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_CLOSED
-        );
-      });
-
-      it('should remain in picker state on click in picker', async () => {
-        const {element, picker, layoutCallback} = createDatePicker({
-          'mode': 'overlay',
-          'input-selector': '#date',
-        });
-        const input = document.createElement('input');
-        input.id = 'date';
-        element.appendChild(input);
-
-        await layoutCallback();
-        const fakeFocusEvent = {target: input};
-        picker.handleFocus_(fakeFocusEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_INPUT
-        );
-
-        const fakeKeydownEvent = {
-          target: input,
-          key: 'ArrowDown',
-          preventDefault() {},
-        };
-        picker.handleKeydown_(fakeKeydownEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_PICKER
-        );
-
-        const fakeClickEvent = {
-          target: input,
-        };
-        picker.handleClick_(fakeClickEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_PICKER
-        );
-      });
-
-      it('should transition to input state from picker on focus', async () => {
-        const {element, picker, layoutCallback} = createDatePicker({
-          'mode': 'overlay',
-          'input-selector': '#date',
-        });
-        const input = document.createElement('input');
-        input.id = 'date';
-        element.appendChild(input);
-
-        await layoutCallback();
-        const fakeFocusEvent = {target: input};
-        picker.handleFocus_(fakeFocusEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_INPUT
-        );
-
-        const fakeKeydownEvent = {
-          target: input,
-          key: 'ArrowDown',
-          preventDefault() {},
-        };
-        picker.handleKeydown_(fakeKeydownEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_PICKER
-        );
-
-        picker.handleFocus_(fakeFocusEvent);
-        expect(picker.stateMachine_.state_).to.equal(
-          DatePickerState.OVERLAY_OPEN_INPUT
-        );
-      });
-    });
+      }
+    );
   }
 );
