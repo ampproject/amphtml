@@ -67,16 +67,12 @@ export class AmpDenakop extends AMP.BaseElement {
               Date.now() + 315360000000,
               {domain: configObj['settings']['topDomain']});
 
-          const stickyAdAttributes = utils.getStickyAdAttributes();
-
           if (configObj['adUnits'].length !== 0) {
             configObj['adUnits'].forEach(function(adUnit) {
-
-              const adAttributes = utils.getAdAttributes(adUnit);
               const ampAd = createElementWithAttributes(doc, 'amp-ad',
-                  adAttributes);
+                  utils.getAdAttributes(adUnit));
               const ampStickyAd = createElementWithAttributes(doc,
-                  'amp-sticky-ad', stickyAdAttributes);
+                  'amp-sticky-ad', utils.getStickyAdAttributes());
               const extraUrlParams = utils.getExtraUrlParams(publisherId, tagId,
                   configObj, adUnit);
               const adAnalyticsAuthorizedConfig =
