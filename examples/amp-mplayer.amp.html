@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async custom-element="amp-mplayer" src="http://localhost:8000/dist/v0/amp-mplayer-0.1.max.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
   <style amp-custom>
 
     body {
@@ -15,6 +16,10 @@
 
     .space-between-videos {
       height: 7px;
+    }
+
+    .end-of-page-space {
+      height: 100vh;
     }
 
   </style>
@@ -26,18 +31,26 @@
   <div class="space-between-videos"></div>
 
   <h2>Specific Video</h2>
-    <amp-mplayer
-      data-content-id="fSkmeWKF"
-      width="500" height="334"
-      layout="responsive"></amp-mplayer>
+  <amp-mplayer
+    autoplay
+    data-content-type="curated"
+    data-content-id="fSkmeWKF"
+    width="500" height="334"
+    layout="flex-item"></amp-mplayer>
 
   <div class="space-between-videos"></div>
 
   <h2>Semantic</h2>
     <amp-mplayer
+      dock
+      data-content-type="semantic"
       data-minimum-date-factor="10"
-      data-scanned-element-type="id"
+      data-scanned-element-type="tag"
+      data-scanned-element="post-body"
+      data-tags="ofir"
       layout="responsive" width="9" height="6"></amp-mplayer>
+
+  <div class="end-of-page-space"></div>
 
 </body>
 </html>

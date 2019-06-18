@@ -17,9 +17,10 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
-import {createFrameFor} from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {createFrameFor, isJsonOrObj, objOrParseJson, originMatches, redispatch} from '../../../src/iframe-video';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -27,6 +28,7 @@ import {
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc}
   from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -45,14 +47,14 @@ class AmpMPlayer extends AMP.BaseElement {
     /** @private {Element} */
     this.iframe_ = null;
 
+    /** @private {string} */
+    this.contentType_ = null;
+
     /** @private {?string} */
     this.playerId_ = null;
 
     /** @private {?string} */
     this.contentId_ = '';
-
-    /** @private {?string} */
-    this.montiId_ = null;
 
     /** @private {?string} */
     this.scannedElement_ = '';
@@ -65,6 +67,15 @@ class AmpMPlayer extends AMP.BaseElement {
 
     /** @private {?string} */
     this.scannedElementType_ = '';
+
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
+
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
+
+    /** @private {?number} */
+    this.readyTimeout_ = null;
   }
 
   /**
@@ -83,23 +94,30 @@ class AmpMPlayer extends AMP.BaseElement {
     // Build lightweight DOM and append to this.element.
 
     const {element} = this;
-    this.contentId_ = (element.getAttribute('data-content-id') || '');
-    this.scannedElement_ = (element.getAttribute('data-scanned-element') || '');
-    this.tags_ = (element.getAttribute('data-tags') || '');
-    this.minimumDateFactor_ =
-      (element.getAttribute('data-minimum-date-factor') || '');
-    console.log(element.getAttribute('data-scanned-element-type'));
-    this.scannedElementType_ =
-    (element.getAttribute('data-scanned-element-type') || '');
+
+    this.contentType_ = userAssert(element.getAttribute('data-content-type'),
+        'The data-content-type must be specified for <amp-mplayer> %s',
+        element);
+
+    this.contentId_ =
+      (this.contentType_ != 'semantic') ?
+        (userAssert(element.getAttribute('data-content-id'),
+            'The data-content-id must be specified for %s ' +
+            'data-content-type in <amp-mplayer> %s',
+            this.contentType_, element)) : '';
+
+    this.initSemanticFields_();
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
+
     installVideoManagerForDoc(this.element);
+    Services.videoManagerForDoc(this.element).register(this);
 
     // Warn if the player does not have video interface support
-    this.readyTimeout_ = /** @type {number} */ (
+    this.readyTimeout_ = /** @type {number} */ (/******************************* NECESSARY?? *******************************/
       Services.timerFor(window).delay(function() {
         user().warn(TAG,
             'Did not receive ready callback from player, ' +
@@ -117,19 +135,69 @@ class AmpMPlayer extends AMP.BaseElement {
   }
 
   /**
+   * Init Semantic params
+   * @private
+   */
+  initSemanticFields_() {
+    const {element} = this;
+    this.scannedElement_ = (element.getAttribute('data-scanned-element') || '');
+    this.tags_ = (element.getAttribute('data-tags') || '');
+    this.minimumDateFactor_ =
+      (element.getAttribute('data-minimum-date-factor') || '');
+    //console.log(element.getAttribute('data-scanned-element-type'));
+    this.scannedElementType_ =
+      (element.getAttribute('data-scanned-element-type') || '');
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  handleMPlayerMessage_(event) {
+    if (!originMatches(event, this.iframe_, 'https://syringe.s3-us-west-2.amazonaws.com')) {
+      return;
+    }
+    const eventData = getData(event);
+    if (!isJsonOrObj(eventData)) {
+      return;
+    }
+    const data = objOrParseJson(eventData);
+    //console.log(data); DONT GET HERE
+    if (data === undefined) {
+      return; // We only process valid JSON.
+    }
+
+    const eventType = data['event'];
+    //console.log(eventType);
+    if (eventType == 'ready') { /******************************* NECESSARY?? *******************************/
+      Services.timerFor(this.win).cancel(this.readyTimeout_);
+    }
+    redispatch(this.element, eventType, {
+      'playing': VideoEvents.PLAYING,
+      'paused': VideoEvents.PAUSE,
+      'muted': VideoEvents.MUTED,
+      'unmuted': VideoEvents.UNMUTED,
+      'ended': [VideoEvents.ENDED, VideoEvents.PAUSE],
+      'ads-ad-started': VideoEvents.AD_START,
+      'ads-ad-ended': VideoEvents.AD_END,
+    });
+  }
+
+  /**
    * Build Iframe source
    * @return {string}
    * @private
    */
   iframeSource_() {
     const {element} = this;
-    const source = 'https://s3-us-west-2.amazonaws.com/syringe/dev/amp/mplayer.html' +
+    const source = 'https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html' +
+      `?content_type=${encodeURIComponent(this.contentType_)}` +
       ((this.contentId_ !== '') ?
-        '?content_id=' +
+        '&content_id=' +
         `${encodeURIComponent(this.contentId_)}` :
         (((this.scannedElement_ != '') ?
-          '?scanned_element=' +
-          `${encodeURIComponent(this.scannedElement_)}` : '?') +
+          '&scanned_element=' +
+          `${encodeURIComponent(this.scannedElement_)}` : '') +
           ((this.tags_ != '') ?
             '&tags=' +
           `${encodeURIComponent(this.tags_)}` : '') +
@@ -142,7 +210,6 @@ class AmpMPlayer extends AMP.BaseElement {
 
     const moreQueryParams = dict({
       'player_id': (element.getAttribute('data-player-id') || undefined),
-      'monti_id': (element.getAttribute('data-monti-id') || undefined),
     });
 
     return addParamsToUrl(source, moreQueryParams);
@@ -153,8 +220,17 @@ class AmpMPlayer extends AMP.BaseElement {
     console.log('THE IFRAME SOURCE IS ------------------->');
     console.log(this.iframeSource_() + '\n');
 
-    const frame = createFrameFor(this, this.iframeSource_());
-    this.iframe_ = frame;
+    const iframe = createFrameFor(this, this.iframeSource_());
+    this.iframe_ = iframe;
+
+    //Services.videoManagerForDoc(this.element).register(this);
+    this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleMPlayerMessage_.bind(this)
+    );
+    return this.loadPromise(iframe)
+        .then(() => this.playerReadyPromise_);
   }
 
   /** @override */
