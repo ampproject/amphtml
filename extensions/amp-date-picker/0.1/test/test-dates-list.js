@@ -60,4 +60,20 @@ describes.sandboxed('DatesList', {}, () => {
     expect(datesList.contains(invalidDate)).to.be.false;
     expect(datesList.contains(invalidString)).to.be.false;
   });
+
+  it('should return the first date after a given date in the list', () => {
+    const containedDate = '09/04/1998';
+    const dateBefore = '01/01/1998';
+    // const notContainedDate = '09/03/1998';
+    const containedRrule =
+      'FREQ=WEEKLY;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
+    // const matchesRrule = '01/02/2018';
+    const datesList = new DatesList([containedDate, containedRrule]);
+
+    const result = datesList.firstDateAfter(dateBefore);
+
+    expect(Number(result.toDate())).to.equal(
+      Number(moment('09/04/1998').toDate())
+    );
+  });
 });
