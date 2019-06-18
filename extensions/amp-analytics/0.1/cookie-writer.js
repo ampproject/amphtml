@@ -89,7 +89,6 @@ export class CookieWriter {
   init_() {
     // TODO: Need the consider the case for shadow doc.
     if (!isCookieAllowed(this.win_, this.element_)) {
-      console.log("cookie not allowed");
       // Note: It's important to check origin here so that setCookie doesn't
       // throw error "should not attempt ot set cookie on proxy origin"
       return Promise.resolve();
