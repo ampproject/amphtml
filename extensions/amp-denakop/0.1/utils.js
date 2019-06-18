@@ -127,7 +127,7 @@ export function getAdAttributes(adUnit) {
   };
 
   if (obj['reload']) {
-    obj['data-enable-refresh'] = 45;
+    obj['data-enable-refresh'] = '45';
   }
 
   return /** @type {JsonObject} */ obj;
