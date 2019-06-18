@@ -186,7 +186,11 @@ app.use('/request-bank/:bid/teardown/', (req, res) => {
  */
 app.get('/a4a/:bid', (req, res) => {
   const {bid} = req.params;
-  const body = `
+  const preSet = `
+  <script>{
+    document.cookie = 'test-cookie=test';
+  }</script>`;
+  const body = preSet + `
   <a href=https://ampbyexample.com target=_blank>
     <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
   </a>
@@ -211,7 +215,8 @@ app.get('/a4a/:bid', (req, res) => {
             "navTiming": "\${navTiming(requestStart,requestStart)}",
             "navType": "\${navType}",
             "navRedirectCount": "\${navRedirectCount}",
-            "sourceUrl": "\${sourceUrl}"
+            "sourceUrl": "\${sourceUrl}",
+            "cookie": "COOKIE(test-cookie)"
           }
         }
       }
