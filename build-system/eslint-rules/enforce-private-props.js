@@ -15,7 +15,6 @@
  */
 'use strict';
 
-/** Enforces naming rules for private properties. */
 module.exports = function(context) {
   /**
    * @param {!Array<!Node>|undefined} commentLines
