@@ -466,11 +466,11 @@ function buildExtensionJs(path, name, version, latestVersion, options) {
   ).then(() => {
     // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
     if (name === 'amp-script') {
-      // TODO(choumx): Compile this when worker-dom externs are available.
-      const dir = 'node_modules/@ampproject/worker-dom/dist/';
+      const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
       const file = `dist/v0/amp-script-worker-${version}`;
-      fs.copyFileSync(dir + 'worker.safe.js', `${file}.js`);
-      fs.copyFileSync(dir + 'unminified.worker.safe.js', `${file}.max.js`);
+      // TODO(choumx): Minified amp-script worker binary?
+      fs.copyFileSync(dir + 'worker.mjs', `${file}.js`);
+      fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
     }
   });
 }
