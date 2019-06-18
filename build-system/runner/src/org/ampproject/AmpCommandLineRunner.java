@@ -94,9 +94,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setRemoveUnusedPrototypeProperties(false);
     options.setInlineProperties(false);
     options.setComputeFunctionSideEffects(false);
-    // Since we are not computing function side effects, at least let the
-    // compiler remove calls to functions with `@nosideeffects`.
-    options.setMarkNoSideEffectCalls(true);
     // Property renaming. Relies on AmpCodingConvention to be safe.
     options.setRenamingPolicy(VariableRenamingPolicy.ALL,
         PropertyRenamingPolicy.ALL_UNQUOTED);

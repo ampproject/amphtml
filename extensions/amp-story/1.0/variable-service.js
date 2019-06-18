@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {dict} from '../../../src/utils/object';
+import {registerServiceBuilder} from '../../../src/service';
 
 /**
  * @typedef {!JsonObject}
  */
 export let StoryVariableDef;
-
 
 /** @enum {string} */
 const Variable = {
@@ -33,6 +34,23 @@ const Variable = {
   STORY_ADVANCEMENT_MODE: 'storyAdvancementMode',
 };
 
+/**
+ * Util function to retrieve the variable service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param {!Window} win
+ * @return {!AmpStoryVariableService}
+ */
+export const getVariableService = win => {
+  let service = Services.storyVariableService(win);
+
+  if (!service) {
+    service = new AmpStoryVariableService();
+    registerServiceBuilder(win, 'story-variable', () => service);
+  }
+
+  return service;
+};
 
 /**
  * Variable service for amp-story.
@@ -61,8 +79,13 @@ export class AmpStoryVariableService {
   onNavigationStateChange(stateChangeEvent) {
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
-        const {pageIndex, pageId, storyProgress, totalPages, previousPageId} =
-            stateChangeEvent.value;
+        const {
+          pageIndex,
+          pageId,
+          storyProgress,
+          totalPages,
+          previousPageId,
+        } = stateChangeEvent.value;
         this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
         this.variables_[Variable.STORY_PAGE_ID] = pageId;
         this.variables_[Variable.STORY_PROGRESS] = storyProgress;

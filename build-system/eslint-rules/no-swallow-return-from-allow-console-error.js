@@ -42,8 +42,10 @@ module.exports = {
         }
 
         const {callee} = parent;
-        if (callee.type !== 'Identifier' ||
-            callee.name !== 'allowConsoleError') {
+        if (
+          callee.type !== 'Identifier' ||
+          callee.name !== 'allowConsoleError'
+        ) {
           return;
         }
 
@@ -54,12 +56,13 @@ module.exports = {
 
         context.report({
           node: parent,
-          message: 'Must return allowConsoleError if callback contains a return',
+          message:
+            'Must return allowConsoleError if callback contains a return',
           fix(fixer) {
             return fixer.insertTextBefore(parent, 'return ');
           },
         });
-      }
+      },
     };
   },
 };

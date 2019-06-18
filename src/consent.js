@@ -28,14 +28,14 @@ import {user} from './log';
  * @return {!Promise<?CONSENT_POLICY_STATE>}
  */
 export function getConsentPolicyState(element, policyId = 'default') {
-  return Services.consentPolicyServiceForDocOrNull(element)
-      .then(consentPolicy => {
-        if (!consentPolicy) {
-          return null;
-        }
-        return consentPolicy.whenPolicyResolved(
-            /** @type {string} */ (policyId));
-      });
+  return Services.consentPolicyServiceForDocOrNull(element).then(
+    consentPolicy => {
+      if (!consentPolicy) {
+        return null;
+      }
+      return consentPolicy.whenPolicyResolved(/** @type {string} */ (policyId));
+    }
+  );
 }
 
 /**
@@ -46,14 +46,16 @@ export function getConsentPolicyState(element, policyId = 'default') {
  * @return {!Promise<?Object>}
  */
 export function getConsentPolicySharedData(element, policyId) {
-  return Services.consentPolicyServiceForDocOrNull(element)
-      .then(consentPolicy => {
-        if (!consentPolicy) {
-          return null;
-        }
-        return consentPolicy.getMergedSharedData(
-            /** @type {string} */ (policyId));
-      });
+  return Services.consentPolicyServiceForDocOrNull(element).then(
+    consentPolicy => {
+      if (!consentPolicy) {
+        return null;
+      }
+      return consentPolicy.getMergedSharedData(
+        /** @type {string} */ (policyId)
+      );
+    }
+  );
 }
 
 /**
@@ -65,14 +67,16 @@ export function getConsentPolicySharedData(element, policyId) {
  */
 export function getConsentPolicyInfo(element, policyId) {
   // Return the stored consent string.
-  return Services.consentPolicyServiceForDocOrNull(element)
-      .then(consentPolicy => {
-        if (!consentPolicy) {
-          return null;
-        }
-        return consentPolicy.getConsentStringInfo(
-            /** @type {string} */ (policyId));
-      });
+  return Services.consentPolicyServiceForDocOrNull(element).then(
+    consentPolicy => {
+      if (!consentPolicy) {
+        return null;
+      }
+      return consentPolicy.getConsentStringInfo(
+        /** @type {string} */ (policyId)
+      );
+    }
+  );
 }
 
 /**
@@ -82,8 +86,9 @@ export function getConsentPolicyInfo(element, policyId) {
  */
 export function shouldBlockOnConsentByMeta(element) {
   const ampdoc = element.getAmpDoc();
-  let content =
-      Services.documentInfoForDoc(ampdoc).metaTags['amp-consent-blocking'];
+  let content = Services.documentInfoForDoc(ampdoc).metaTags[
+    'amp-consent-blocking'
+  ];
 
   if (!content) {
     return false;
@@ -92,13 +97,18 @@ export function shouldBlockOnConsentByMeta(element) {
   // validator enforce uniqueness of <meta name='amp-consent-blocking'>
   // content will not be an array.
   if (typeof content !== 'string') {
-    user().error('CONSENT',
-        'Invalid amp-consent-blocking value, ignore meta tag');
+    user().error(
+      'CONSENT',
+      'Invalid amp-consent-blocking value, ignore meta tag'
+    );
     return false;
   }
 
   // Handles whitespace
-  content = content.toUpperCase().replace(/\s/g, '').split(',');
+  content = content
+    .toUpperCase()
+    .replace(/\s/g, '')
+    .split(',');
 
   if (content.includes(element.tagName)) {
     return true;

@@ -21,10 +21,8 @@ import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 
-
 /** @type {string} */
 const TAG = 'amp-story';
-
 
 /**
  * Util function to retrieve the store service. Ensures we can retrieve the
@@ -43,7 +41,6 @@ export const getStoreService = win => {
 
   return service;
 };
-
 
 /**
  * Different UI experiences to display the story.
@@ -106,11 +103,11 @@ export let InteractiveComponentDef;
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
- *    pagesCount: number,
+ *    pageIds: !Array<string>,
+ *    newPageAvailableId: string,
  * }}
  */
 export let State;
-
 
 /** @private @const @enum {string} */
 export const StateProperty = {
@@ -150,21 +147,22 @@ export const StateProperty = {
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
-  PAGES_COUNT: 'pagesCount',
   ADVANCEMENT_MODE: 'advancementMode',
+  PAGE_IDS: 'pageIds',
+  NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
 };
-
 
 /** @private @const @enum {string} */
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
+  ADD_TO_PAGE_IDS: 'addToPageIds',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
-  SET_PAGES_COUNT: 'setPagesCount',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
+  TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
@@ -180,8 +178,8 @@ export const Action = {
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
+  ADD_NEW_PAGE_ID: 'addNewPageId',
 };
-
 
 /**
  * Functions to compare a data structure from the previous to the new state and
@@ -189,15 +187,15 @@ export const Action = {
  * @private @const {!Object<string, !function(*, *):boolean>}
  */
 const stateComparisonFunctions = {
+  [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
   [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
   [StateProperty.INTERACTIVE_COMPONENT_STATE]:
-      /**
-       * @param {InteractiveComponentDef} old
-       * @param {InteractiveComponentDef} curr
-       */
-      (old, curr) => old.element !== curr.element || old.state !== curr.state,
+    /**
+     * @param {InteractiveComponentDef} old
+     * @param {InteractiveComponentDef} curr
+     */
+    (old, curr) => old.element !== curr.element || old.state !== curr.state,
 };
-
 
 /**
  * Returns the new sate.
@@ -208,11 +206,23 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    case Action.ADD_NEW_PAGE_ID:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
+      }));
     case Action.ADD_TO_ACTIONS_WHITELIST:
-      const newActionsWhitelist =
-          [].concat(state[StateProperty.ACTIONS_WHITELIST], data);
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist}));
+      const newActionsWhitelist = [].concat(
+        state[StateProperty.ACTIONS_WHITELIST],
+        data
+      );
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
+      }));
+    case Action.ADD_TO_PAGE_IDS:
+      const newPageIds = [].concat(state[StateProperty.PAGE_IDS], data);
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAGE_IDS]: newPageIds,
+      }));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
       // Don't change the PAUSED_STATE if ACCESS_STATE is not changed.
@@ -220,120 +230,125 @@ const actions = (state, action, data) => {
         return state;
       }
 
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.ACCESS_STATE]: !!data,
-            [StateProperty.PAUSED_STATE]: !!data,
-          }));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.ACCESS_STATE]: !!data,
+        [StateProperty.PAUSED_STATE]: !!data,
+      }));
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.AD_STATE]: !!data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.AD_STATE]: !!data,
+      }));
     // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
       if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
         return state;
       }
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.BOOKEND_STATE]: !!data,
-            [StateProperty.PAUSED_STATE]: !!data,
-          }));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.BOOKEND_STATE]: !!data,
+        [StateProperty.PAUSED_STATE]: !!data,
+      }));
+    case Action.TOGGLE_CAN_SHOW_BOOKEND:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.CAN_SHOW_BOOKEND]: !!data,
+      }));
     case Action.TOGGLE_INTERACTIVE_COMPONENT:
       data = /** @type {InteractiveComponentDef} */ (data);
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.PAUSED_STATE]:
-              data.state === EmbeddedComponentState.EXPANDED ||
-              data.state === EmbeddedComponentState.FOCUSED,
-            [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]:
-              data.state !== EmbeddedComponentState.EXPANDED ||
-              state.uiState === UIType.DESKTOP_PANELS,
-            [StateProperty.INTERACTIVE_COMPONENT_STATE]: data,
-          }));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAUSED_STATE]:
+          data.state === EmbeddedComponentState.EXPANDED ||
+          data.state === EmbeddedComponentState.FOCUSED,
+        [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]:
+          data.state !== EmbeddedComponentState.EXPANDED ||
+          state.uiState === UIType.DESKTOP_PANELS,
+        [StateProperty.INTERACTIVE_COMPONENT_STATE]: data,
+      }));
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.INFO_DIALOG_STATE]: !!data,
-            [StateProperty.PAUSED_STATE]: !!data,
-          }));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.INFO_DIALOG_STATE]: !!data,
+        [StateProperty.PAUSED_STATE]: !!data,
+      }));
     // Shows or hides the audio controls.
     case Action.TOGGLE_STORY_HAS_AUDIO:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.STORY_HAS_AUDIO_STATE]: !!data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.STORY_HAS_AUDIO_STATE]: !!data,
+      }));
     case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
-      return /** @type {!State} */ (Object.assign({}, state,
-          {[StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
+      }));
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.MUTED_STATE]: !!data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.MUTED_STATE]: !!data,
+      }));
     case Action.TOGGLE_PAGE_HAS_AUDIO:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.PAGE_HAS_AUDIO_STATE]: !!data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAGE_HAS_AUDIO_STATE]: !!data,
+      }));
     case Action.TOGGLE_PAUSED:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.PAUSED_STATE]: !!data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAUSED_STATE]: !!data,
+      }));
     case Action.TOGGLE_RTL:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.RTL_STATE]: !!data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.RTL_STATE]: !!data,
+      }));
     case Action.TOGGLE_SIDEBAR:
       // Don't change the PAUSED_STATE if SIDEBAR_STATE is not changed.
       if (state[StateProperty.SIDEBAR_STATE] === data) {
         return state;
       }
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.PAUSED_STATE]: !!data,
-            [StateProperty.SIDEBAR_STATE]: !!data,
-          }));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAUSED_STATE]: !!data,
+        [StateProperty.SIDEBAR_STATE]: !!data,
+      }));
     case Action.TOGGLE_HAS_SIDEBAR:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.HAS_SIDEBAR_STATE]: !!data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.HAS_SIDEBAR_STATE]: !!data,
+      }));
     case Action.TOGGLE_SUPPORTED_BROWSER:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.SUPPORTED_BROWSER_STATE]: !!data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.SUPPORTED_BROWSER_STATE]: !!data,
+      }));
     case Action.TOGGLE_SHARE_MENU:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.PAUSED_STATE]: !!data,
-            [StateProperty.SHARE_MENU_STATE]: !!data,
-          }));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAUSED_STATE]: !!data,
+        [StateProperty.SHARE_MENU_STATE]: !!data,
+      }));
     case Action.TOGGLE_SYSTEM_UI_IS_VISIBLE:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data,
+      }));
     case Action.TOGGLE_UI:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            // Keep DESKTOP_STATE for compatiblity with v0.1.
-            [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
-            [StateProperty.UI_STATE]: data,
-          }));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        // Keep DESKTOP_STATE for compatiblity with v0.1.
+        [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
+        [StateProperty.UI_STATE]: data,
+      }));
     case Action.TOGGLE_VIEWPORT_WARNING:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.VIEWPORT_WARNING_STATE]: !!data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.VIEWPORT_WARNING_STATE]: !!data,
+      }));
     case Action.SET_CONSENT_ID:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.CONSENT_ID]: data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.CONSENT_ID]: data,
+      }));
     case Action.CHANGE_PAGE:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.CURRENT_PAGE_ID]: data.id,
-            [StateProperty.CURRENT_PAGE_INDEX]: data.index,
-          }));
-    case Action.SET_PAGES_COUNT:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.PAGES_COUNT]: data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.CURRENT_PAGE_ID]: data.id,
+        [StateProperty.CURRENT_PAGE_INDEX]: data.index,
+      }));
     case Action.SET_ADVANCEMENT_MODE:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.ADVANCEMENT_MODE]: data}));
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.ADVANCEMENT_MODE]: data,
+      }));
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
   }
 };
-
 
 /**
  * Store service.
@@ -351,7 +366,10 @@ export class AmpStoryStoreService {
 
     /** @private {!State} */
     this.state_ = /** @type {!State} */ (Object.assign(
-        {}, this.getDefaultState_(), this.getEmbedOverrides_()));
+      {},
+      this.getDefaultState_(),
+      this.getEmbedOverrides_()
+    ));
   }
 
   /**
@@ -376,7 +394,7 @@ export class AmpStoryStoreService {
    */
   subscribe(key, listener, callToInitialize = false) {
     if (!hasOwn(this.state_, key)) {
-      dev().error(TAG, 'Can\'t subscribe to unknown state %s.', key);
+      dev().error(TAG, "Can't subscribe to unknown state %s.", key);
       return;
     }
     if (!this.listeners_[key]) {
@@ -402,9 +420,11 @@ export class AmpStoryStoreService {
     let comparisonFn;
     Object.keys(this.listeners_).forEach(key => {
       comparisonFn = stateComparisonFunctions[key];
-      if (comparisonFn ?
-        comparisonFn(oldState[key], this.state_[key]) :
-        oldState[key] !== this.state_[key]) {
+      if (
+        comparisonFn
+          ? comparisonFn(oldState[key], this.state_[key])
+          : oldState[key] !== this.state_[key]
+      ) {
         this.listeners_[key].fire(this.state_[key]);
       }
     });
@@ -452,8 +472,9 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
-      [StateProperty.PAGES_COUNT]: 0,
       [StateProperty.ADVANCEMENT_MODE]: '',
+      [StateProperty.PAGE_IDS]: [],
+      [StateProperty.NEW_PAGE_AVAILABLE_ID]: '',
     });
   }
 

@@ -20,7 +20,6 @@
  * See test-helper.js#mockWindowInterface
  */
 export class WindowInterface {
-
   /**
    * @static
    * @param {!Window} win

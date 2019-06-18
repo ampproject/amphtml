@@ -1,3 +1,11 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - ads
+teaser:
+  text: Run Narrativ's Linkmate process inside your AMP page
+---
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -33,7 +41,7 @@ limitations under the License.
 
 ## Overview
 
- At [Narrativ](https://narrativ.com/), we transform static commerce links into dynamic, multimerchant nodes. With a library of millions of products matched to expert reviews from top commerce publishers, we lift publisher revenue through real-time bidding and data solutions.
+At [Narrativ](https://narrativ.com/), we transform static commerce links into dynamic, multimerchant nodes. With a library of millions of products matched to expert reviews from top commerce publishers, we lift publisher revenue through real-time bidding and data solutions.
 
 This AMP extension is our Linkmate service in AMP. See the full documentation for Linkmate [here](http://docs.narrativ.com/en/stable/linkmate.html).
 

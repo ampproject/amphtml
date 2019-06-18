@@ -15,23 +15,25 @@
  */
 
 /**
-  * Changes the values of IS_DEV to false and IS_MINIFIED to true.
-  * The above said variables are in src/mode.js file.
-  * @param {Object} babelTypes
-  */
+ * Changes the values of IS_DEV to false and IS_MINIFIED to true.
+ * The above said variables are in src/mode.js file.
+ * @param {Object} babelTypes
+ */
 module.exports = function(babelTypes) {
   const {types: t} = babelTypes;
   return {
     visitor: {
       VariableDeclarator(path) {
         const {id, init} = path.node;
-        if (t.isIdentifier(id, {name: 'IS_MINIFIED'})
-            && t.isBooleanLiteral(init, {value: false})) {
+        if (
+          t.isIdentifier(id, {name: 'IS_MINIFIED'}) &&
+          t.isBooleanLiteral(init, {value: false})
+        ) {
           path.replaceWith(
-              t.variableDeclarator(
-                  t.identifier('IS_MINIFIED'),
-                  t.booleanLiteral(true)
-              )
+            t.variableDeclarator(
+              t.identifier('IS_MINIFIED'),
+              t.booleanLiteral(true)
+            )
           );
         }
       },

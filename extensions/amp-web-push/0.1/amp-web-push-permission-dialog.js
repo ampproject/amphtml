@@ -68,8 +68,7 @@ export class AmpWebPushPermissionDialog {
    * @return {boolean}
    */
   isCurrentDialogPopup() {
-    return !!this.window_.opener &&
-      this.window_.opener !== this.window_;
+    return !!this.window_.opener && this.window_.opener !== this.window_;
   }
 
   /**
@@ -119,7 +118,9 @@ export class AmpWebPushPermissionDialog {
     const closeIcon = this.window_.document.querySelector('#close');
 
     if (closeIcon) {
-      closeIcon.addEventListener('click', () => { this.closeDialog(); });
+      closeIcon.addEventListener('click', () => {
+        this.closeDialog();
+      });
     }
   }
 
@@ -144,18 +145,19 @@ export class AmpWebPushPermissionDialog {
 
   /** @private */
   onPermissionDenied_() {
-    navigator.permissions.query({name: 'notifications'})
-        .then(permissionStatus => {
-          permissionStatus.onchange = () => {
-            this.storeNotificationPermission_();
-            switch (this.window_.Notification.permission) {
-              case NotificationPermission.DEFAULT:
-              case NotificationPermission.GRANTED:
-                this.onPermissionDefaultOrGranted_();
-                break;
-            }
-          };
-        });
+    navigator.permissions
+      .query({name: 'notifications'})
+      .then(permissionStatus => {
+        permissionStatus.onchange = () => {
+          this.storeNotificationPermission_();
+          switch (this.window_.Notification.permission) {
+            case NotificationPermission.DEFAULT:
+            case NotificationPermission.GRANTED:
+              this.onPermissionDefaultOrGranted_();
+              break;
+          }
+        };
+      });
   }
 
   /**
@@ -165,8 +167,8 @@ export class AmpWebPushPermissionDialog {
    */
   storeNotificationPermission_() {
     this.window_.localStorage.setItem(
-        StorageKeys.NOTIFICATION_PERMISSION,
-        this.window_.Notification.permission
+      StorageKeys.NOTIFICATION_PERMISSION,
+      this.window_.Notification.permission
     );
   }
 
@@ -181,9 +183,9 @@ export class AmpWebPushPermissionDialog {
 
     // Show the section that matches the current permission
     const section = this.window_.document.querySelector(
-        `[permission=${escapeCssSelectorIdent(
-            this.window_.Notification.permission
-        )}]`
+      `[permission=${escapeCssSelectorIdent(
+        this.window_.Notification.permission
+      )}]`
     );
 
     if (section) {
@@ -233,16 +235,17 @@ export class AmpWebPushPermissionDialog {
       if (this.isCurrentDialogPopup()) {
         this.ampMessenger_.connect(opener, '*');
 
-        return this.ampMessenger_.send(
+        return this.ampMessenger_
+          .send(
             WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
             permission
-        )
-            .then(result => {
-              const message = result[0];
-              if (message && message.closeFrame) {
-                this.closeDialog();
-              }
-            });
+          )
+          .then(result => {
+            const message = result[0];
+            if (message && message.closeFrame) {
+              this.closeDialog();
+            }
+          });
       } else {
         this.closeDialog();
       }
@@ -258,11 +261,9 @@ export class AmpWebPushPermissionDialog {
    */
   redirectToUrl(url) {
     const parsedUrl = parseUrlDeprecated(url);
-    if (parsedUrl &&
-      (
-        parsedUrl.protocol === 'http:' ||
-        parsedUrl.protocol === 'https:'
-      )
+    if (
+      parsedUrl &&
+      (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:')
     ) {
       this.window_.location.href = url;
     }

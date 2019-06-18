@@ -83,7 +83,7 @@ const skipCharRe = /[,.\s\u2022()]/;
  */
 function canonicalizeChar(c) {
   if (c == '\u2019' || c == '\u2018') {
-    return '\'';
+    return "'";
   }
   if (c == '\u201c' || c == '\u201d') {
     return '"';
@@ -202,8 +202,11 @@ function concatContinuousRanges(ranges) {
   let prev = null;
   for (let i = 0; i < ranges.length; i++) {
     const r = ranges[i];
-    if (prev && prev.end.node == r.start.node &&
-        prev.end.offset == r.start.offset) {
+    if (
+      prev &&
+      prev.end.node == r.start.node &&
+      prev.end.offset == r.start.offset
+    ) {
       prev.end = r.end;
       continue;
     }
@@ -249,7 +252,12 @@ function markTextRange(win, start, end, ranges, idx, marked) {
   while (true) {
     if (start.node == end.node) {
       const newText = markSingleTextNode(
-          win, start.node, start.offset, end.offset, marked);
+        win,
+        start.node,
+        start.offset,
+        end.offset,
+        marked
+      );
       if (newText) {
         fixTextRangesWithRemovedText(end, newText, idx + 1, ranges);
       }
@@ -257,7 +265,12 @@ function markTextRange(win, start, end, ranges, idx, marked) {
     }
     const next = nextTextNode(win, start.node);
     markSingleTextNode(
-        win, start.node, start.offset, start.node.wholeText.length, marked);
+      win,
+      start.node,
+      start.offset,
+      start.node.wholeText.length,
+      marked
+    );
     if (!next) {
       break;
     }
@@ -393,8 +406,8 @@ export class TextScanner {
         return pos;
       }
       const sibling = this.child_.node_.nextSibling;
-      this.child_ = sibling != null ?
-        new TextScanner(this.win_, sibling) : null;
+      this.child_ =
+        sibling != null ? new TextScanner(this.win_, sibling) : null;
     }
     return null;
   }
@@ -407,7 +420,7 @@ export class TextScanner {
     while (this.textIdx_ < text.length) {
       const idx = this.textIdx_;
       this.textIdx_++;
-      return {node: /**@type{!Text}*/(this.node_), offset: idx};
+      return {node: /**@type {!Text}*/ (this.node_), offset: idx};
     }
     return null;
   }

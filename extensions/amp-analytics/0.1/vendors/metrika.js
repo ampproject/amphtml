@@ -18,16 +18,18 @@ export const METRIKA_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {'beacon': true, 'xhrpost': true, 'image': false},
   'requests': {
     'pageview': '${_watch}?browser-info=${_brInfo}&${_siteInfo}&${_suffix}',
-    'notBounce': '${_watch}?browser-info=ar%3A1%3Anb%3A1%3A${_brInfo}' +
-      '&${_suffix}',
+    'notBounce':
+      '${_watch}?browser-info=ar%3A1%3Anb%3A1%3A${_brInfo}&${_suffix}',
     'externalLink': '${_watch}?browser-info=ln%3A1%3A${_brInfo}&${_suffix}',
-    'reachGoal': '${_watch}?browser-info=ar%3A1%3A${_brInfo}&${_siteInfo}' +
+    'reachGoal':
+      '${_watch}?browser-info=ar%3A1%3A${_brInfo}&${_siteInfo}' +
       '&${_goalSuffix}',
     '_domain': 'https://mc.yandex.ru',
     '_watch': '${_domain}/watch/${counterId}',
     '_suffix': 'page-url=${sourceUrl}&page-ref=${documentReferrer}',
-    '_goalSuffix': 'page-url=goal%3A%2F%2F${sourceHost}%2F${goalId}' +
-    '&page-ref=${sourceUrl}',
+    '_goalSuffix':
+      'page-url=goal%3A%2F%2F${sourceHost}%2F${goalId}' +
+      '&page-ref=${sourceUrl}',
     '_techInfo': [
       'amp%3A1%3Az%3A${timezone}%3Ai%3A${timestamp}%3Arn%3A${random}',
       'la%3A${browserLanguage}%3Aen%3A${documentCharset}',

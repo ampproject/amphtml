@@ -29,12 +29,6 @@ function setCorsHeaders(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.query.__amp_source_origin) {
-    res.setHeader('Access-Control-Expose-Headers',
-        'AMP-Access-Control-Allow-Source-Origin');
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        req.query.__amp_source_origin);
-  }
   next();
 }
 app.use(setCorsHeaders);
@@ -50,7 +44,6 @@ app.use('/redirect-to', function(req, res) {
   res.redirect(302, req.query.url);
 });
 
-
 app.use('/status/404', function(req, res) {
   res.status(404).end();
 });
@@ -62,7 +55,7 @@ app.use('/status/500', function(req, res) {
 app.use('/cookies/set', function(req, res) {
   delete req.query.__amp_source_origin;
   for (const name in req.query) {
-    res./*OK*/cookie(name, req.query[name]);
+    res./*OK*/ cookie(name, req.query[name]);
   }
   res.json({
     cookies: req.cookies || {},
@@ -88,11 +81,7 @@ app.use('/form/post/success', function(req, res) {
   delete req.query.__amp_source_origin;
   res.json({
     name: 'John Miller',
-    interests: [
-      {title: 'Football'},
-      {title: 'Basketball'},
-      {title: 'Writing'},
-    ],
+    interests: [{title: 'Football'}, {title: 'Basketball'}, {title: 'Writing'}],
   });
 });
 
@@ -117,6 +106,5 @@ app.use('/form/verify-error', function(req, res) {
     verifyErrors: [{name: 'email', message: 'That email is already taken.'}],
   });
 });
-
 
 exports.app = app;

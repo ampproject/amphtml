@@ -85,7 +85,8 @@ function hasCustomElements(win) {
     customElements &&
     customElements.define &&
     customElements.get &&
-    customElements.whenDefined);
+    customElements.whenDefined
+  );
 }
 
 /**
@@ -105,7 +106,7 @@ function isPatched(win) {
  * @param {!Error} error
  */
 function rethrowAsync(error) {
-  new /*OK*/Promise(() => {
+  new /*OK*/ Promise(() => {
     throw error;
   });
 }
@@ -192,7 +193,7 @@ class CustomElementRegistry {
     }
 
     let resolve;
-    const promise = new /*OK*/Promise(res => resolve = res);
+    const promise = new /*OK*/ Promise(res => (resolve = res));
     pending[name] = {
       promise,
       resolve,
@@ -332,8 +333,7 @@ class Registry {
 
     assertValidName(SyntaxError, name);
 
-    if (this.getByName(name) ||
-        this.getByConstructor(ctor)) {
+    if (this.getByName(name) || this.getByConstructor(ctor)) {
       throw new Error(`duplicate definition "${name}"`);
     }
 
@@ -388,7 +388,7 @@ class Registry {
       return;
     }
 
-    this.upgradeSelf_(/** @type {!Element} */(node), def);
+    this.upgradeSelf_(/** @type {!Element} */ (node), def);
   }
 
   /**
@@ -428,7 +428,8 @@ class Registry {
 
       if (el !== node) {
         throw new this.win_.Error(
-            'Constructor illegally returned a different instance.');
+          'Constructor illegally returned a different instance.'
+        );
       }
     } catch (e) {
       rethrowAsync(e);
@@ -447,7 +448,7 @@ class Registry {
     if (!def) {
       return;
     }
-    this.upgradeSelf_(/** @type {!Element} */(node), def);
+    this.upgradeSelf_(/** @type {!Element} */ (node), def);
     // TODO(jridgewell): It may be appropriate to adoptCallback, if the node
     // used to be in another doc.
     // TODO(jridgewell): I should be calling the definitions connectedCallback
@@ -694,9 +695,9 @@ function polyfill(win) {
   const {attachShadow, createShadowRoot} = elProto;
   if (attachShadow) {
     /**
-    * @param {!{mode: string}} unused
-    * @return {!ShadowRoot}
-    */
+     * @param {!{mode: string}} unused
+     * @return {!ShadowRoot}
+     */
     elProto.attachShadow = function(unused) {
       const shadow = attachShadow.apply(this, arguments);
       registry.observe(shadow);
@@ -709,8 +710,8 @@ function polyfill(win) {
   }
   if (createShadowRoot) {
     /**
-    * @return {!ShadowRoot}
-    */
+     * @return {!ShadowRoot}
+     */
     elProto.createShadowRoot = function() {
       const shadow = createShadowRoot.apply(this, arguments);
       registry.observe(shadow);
@@ -721,7 +722,6 @@ function polyfill(win) {
       return createShadowRoot.toString();
     };
   }
-
 
   /**
    * You can't use the real HTMLElement constructor, because you can't subclass
@@ -858,7 +858,6 @@ export function install(win, opt_ctor) {
       // Let's find out if we can wrap HTMLElement and avoid a full patch.
       installWrapper = !!(Reflect && Reflect.construct);
     } catch (e) {
-
       // The ctor threw when we constructed is via ES5, so it's a real class.
       // We're ok to not install the polyfill.
       install = false;

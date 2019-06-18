@@ -21,7 +21,6 @@ import {user, userAssert} from '../../../src/log';
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
-
   /**
    * @param {!Element} element
    */
@@ -31,8 +30,11 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   buildCallback() {
-    userAssert(this.element.hasAttribute('src'),
-        'Attribute src required for <amp-ad type="fake">: %s', this.element);
+    userAssert(
+      this.element.hasAttribute('src'),
+      'Attribute src required for <amp-ad type="fake">: %s',
+      this.element
+    );
     super.buildCallback();
   }
 
@@ -60,17 +62,22 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       if (!response) {
         return null;
       }
-      const {status, headers} =
-      /** @type {{status: number, headers: !Headers}} */ (response);
+      const {
+        status,
+        headers,
+      } = /** @type {{status: number, headers: !Headers}} */ (response);
 
       // In the convert creative mode the content is the plain AMP HTML.
       // This mode is primarily used for A4A Envelop for testing.
       // See DEVELOPING.md for more info.
       if (this.element.getAttribute('a4a-conversion') == 'true') {
         return response.text().then(
-            responseText => new Response(
-                this.transformCreative_(responseText),
-                {status, headers}));
+          responseText =>
+            new Response(this.transformCreative_(responseText), {
+              status,
+              headers,
+            })
+        );
       }
 
       // Normal mode: Expect the creative is written in AMP4ADS doc.
@@ -119,7 +126,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       style.parentNode.removeChild(style);
     }
 
-    let creative = root./*OK*/outerHTML;
+    let creative = root./*OK*/ outerHTML;
 
     // Metadata
     creative += '<script type="application/json" amp-ad-metadata>';
@@ -151,8 +158,6 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   }
 }
 
-
 AMP.extension('amp-ad-network-fake-impl', '0.1', AMP => {
-  AMP.registerElement(
-      'amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
+  AMP.registerElement('amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
 });

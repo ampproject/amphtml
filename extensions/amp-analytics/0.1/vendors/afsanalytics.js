@@ -25,7 +25,8 @@ export const AFSANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': '//${server}.afsanalytics.com',
     'base': '${host}/cgi_bin/',
-    'pageview': '${base}connect.cgi?usr=${websiteid}Pauto' +
+    'pageview':
+      '${base}connect.cgi?usr=${websiteid}Pauto' +
       '&js=1' +
       '&amp=1' +
       '&title=${title}' +
@@ -34,7 +35,8 @@ export const AFSANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       '&resolution=${screenWidth}x${screenHeight}' +
       '&color=${screenColorDepth}' +
       '&Tips=${random}',
-    'click': '${base}click.cgi?usr=${websiteid}' +
+    'click':
+      '${base}click.cgi?usr=${websiteid}' +
       '&event=${event}' +
       '&exit=${clicklabel}',
   },

@@ -21,10 +21,7 @@
  * @see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/106812/
  */
 
-import {
-  LayoutRectDef,
-  layoutRectLtwh,
-} from './layout-rect';
+import {LayoutRectDef, layoutRectLtwh} from './layout-rect';
 import {isConnectedNode} from './dom';
 
 /**
@@ -59,7 +56,7 @@ function shouldInstall(win) {
 
   try {
     const div = win.document.createElement('div');
-    const rect = div./*OK*/getBoundingClientRect();
+    const rect = div./*OK*/ getBoundingClientRect();
     return rect.top !== 0;
   } catch (e) {
     // IE 10 or less

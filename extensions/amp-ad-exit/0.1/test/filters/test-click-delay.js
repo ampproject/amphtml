@@ -24,14 +24,15 @@ describe('click-delay', () => {
     startTimingEvent: 'navigationStart',
   };
   let sandbox;
-  beforeEach(() => sandbox = sinon.sandbox);
+  beforeEach(() => (sandbox = sinon.sandbox));
   afterEach(() => sandbox.restore());
 
   it('should use performance timing', () => {
     const win = {performance: {timing: {'navigationStart': 456}}};
     sandbox.stub(Date, 'now').returns(123);
-    expect(new ClickDelayFilter('foo', DEFAULT_CONFIG, win).intervalStart)
-        .to.equal(456);
+    expect(
+      new ClickDelayFilter('foo', DEFAULT_CONFIG, win).intervalStart
+    ).to.equal(456);
   });
 
   describe('spec validation', () => {
@@ -48,34 +49,41 @@ describe('click-delay', () => {
       {config: DEFAULT_CONFIG, win: {performance: {timing: {}}}},
     ];
     tests.forEach(test => {
-      it(`should properly handle ${JSON.stringify(test.config)} and win ` +
+      it(
+        `should properly handle ${JSON.stringify(test.config)} and win ` +
           `${JSON.stringify(test.win)}`,
-      () => {
-        if (test.err) {
-          allowConsoleError(() =>
-            expect(() => new ClickDelayFilter('foo', test.config, test.win))
-                .to.throw(win.err));
-        } else {
-          sandbox.stub(Date, 'now').returns(123);
-          expect(new ClickDelayFilter(
-              'foo', test.config, test.win).intervalStart).to.equal(123);
+        () => {
+          if (test.err) {
+            allowConsoleError(() =>
+              expect(
+                () => new ClickDelayFilter('foo', test.config, test.win)
+              ).to.throw(win.err)
+            );
+          } else {
+            sandbox.stub(Date, 'now').returns(123);
+            expect(
+              new ClickDelayFilter('foo', test.config, test.win).intervalStart
+            ).to.equal(123);
+          }
         }
-      });
+      );
     });
   });
 
   describe('#filter', () => {
     it('should filter based on timing event', () => {
-      const filter = new ClickDelayFilter(
-          'foo', DEFAULT_CONFIG, {performance: {timing: {navigationStart: 1}}});
+      const filter = new ClickDelayFilter('foo', DEFAULT_CONFIG, {
+        performance: {timing: {navigationStart: 1}},
+      });
       const nowStub = sandbox.stub(Date, 'now');
       nowStub.onFirstCall().returns(1001);
       expect(filter.filter()).to.be.true;
     });
 
     it('should filter based on timing event, second call', () => {
-      const filter = new ClickDelayFilter(
-          'foo', DEFAULT_CONFIG, {performance: {timing: {navigationStart: 1}}});
+      const filter = new ClickDelayFilter('foo', DEFAULT_CONFIG, {
+        performance: {timing: {navigationStart: 1}},
+      });
       const nowStub = sandbox.stub(Date, 'now');
       nowStub.onFirstCall().returns(1);
       nowStub.onSecondCall().returns(125);

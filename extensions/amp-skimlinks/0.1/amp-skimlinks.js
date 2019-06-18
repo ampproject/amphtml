@@ -84,12 +84,13 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.linkRewriterService_ = new LinkRewriterManager(this.ampDoc_);
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
 
-    return this.ampDoc_.whenBodyAvailable()
-        .then(() => this.viewer_.getReferrerUrl())
-        .then(referrer => {
-          this.referrer_ = referrer;
-          this.startSkimcore_();
-        });
+    return this.ampDoc_
+      .waitForBodyOpen()
+      .then(() => this.viewer_.getReferrerUrl())
+      .then(referrer => {
+        this.referrer_ = referrer;
+        this.startSkimcore_();
+      });
   }
 
   /**
@@ -98,17 +99,17 @@ export class AmpSkimlinks extends AMP.BaseElement {
   startSkimcore_() {
     this.trackingService_ = this.initTracking_();
     this.waypoint_ = new Waypoint(
-        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
-        (this.ampDoc_),
-        this.skimOptions_,
-        this.trackingService_,
-        /** @type {string} */ (this.referrer_)
+      /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
+      (this.ampDoc_),
+      this.skimOptions_,
+      this.trackingService_,
+      /** @type {string} */ (this.referrer_)
     );
     this.affiliateLinkResolver_ = new AffiliateLinkResolver(
-        /** @type {!../../../src/service/xhr-impl.Xhr} */
-        (this.xhr_),
-        this.skimOptions_,
-        this.waypoint_
+      /** @type {!../../../src/service/xhr-impl.Xhr} */
+      (this.xhr_),
+      this.skimOptions_,
+      this.waypoint_
     );
 
     this.skimlinksLinkRewriter_ = this.initSkimlinksLinkRewriter_();
@@ -123,8 +124,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
     // Update tracking service with extra info.
     this.trackingService_.setTrackingInfo({guid: beaconData['guid']});
     const viewer = Services.viewerForDoc(
-        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
-        (this.ampDoc_)
+      /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
+      (this.ampDoc_)
     );
     /*
       WARNING: Up to here, the code may have been executed during page
@@ -133,7 +134,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     */
     viewer.whenFirstVisible().then(() => {
       this.trackingService_.sendImpressionTracking(
-          this.skimlinksLinkRewriter_.getAnchorReplacementList()
+        this.skimlinksLinkRewriter_.getAnchorReplacementList()
       );
     });
   }
@@ -148,9 +149,10 @@ export class AmpSkimlinks extends AMP.BaseElement {
   onPageScanned_() {
     // .firstRequest may be null if the page doesn't have any non-excluded
     // links.
-    const beaconApiPromise = this.affiliateLinkResolver_.firstRequest ||
-        // If it's the case, fallback with manual call.
-        this.affiliateLinkResolver_.fetchDomainResolverApi([]);
+    const beaconApiPromise =
+      this.affiliateLinkResolver_.firstRequest ||
+      // If it's the case, fallback with manual call.
+      this.affiliateLinkResolver_.fetchDomainResolverApi([]);
 
     return beaconApiPromise.then(this.sendImpressionTracking_.bind(this));
   }
@@ -166,11 +168,11 @@ export class AmpSkimlinks extends AMP.BaseElement {
     };
 
     const linkRewriter = this.linkRewriterService_.registerLinkRewriter(
-        SKIMLINKS_REWRITER_ID,
-        anchorList => {
-          return this.affiliateLinkResolver_.resolveUnknownAnchors(anchorList);
-        },
-        options
+      SKIMLINKS_REWRITER_ID,
+      anchorList => {
+        return this.affiliateLinkResolver_.resolveUnknownAnchors(anchorList);
+      },
+      options
     );
 
     const eventHandlers = {
@@ -202,9 +204,9 @@ export class AmpSkimlinks extends AMP.BaseElement {
     // We need to call it manually to have CustomEventReporterBuilder working.
     this.signals().signal(CommonSignals.LOAD_START);
     return new Tracking(
-        this.element,
-        this.skimOptions_,
-        /** @type {string} */ (this.referrer_)
+      this.element,
+      this.skimOptions_,
+      /** @type {string} */ (this.referrer_)
     );
   }
 
@@ -215,15 +217,14 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * @private
    */
   onClick_(eventData) {
-    const doClickTracking = (
+    const doClickTracking =
       // Test two scenarios:
       //  - Link hasn't been replaced at all: eventData.linkRewriterId === null.
       //  - Link has been replaced but not by Skimlinks:
       //    E.g: eventData.linkRewriterId === "awin".
       eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID &&
       // Also, context menu click should not send tracking
-      eventData.clickType !== 'contextmenu'
-    );
+      eventData.clickType !== 'contextmenu';
 
     if (doClickTracking) {
       this.trackingService_.sendNaClickTracking(eventData.anchor);

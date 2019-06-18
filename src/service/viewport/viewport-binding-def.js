@@ -1,3 +1,6 @@
+import {computedStyle} from '../../style';
+import {isExperimentOn} from '../../experiments';
+
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
@@ -20,7 +23,6 @@
  * @interface
  */
 export class ViewportBindingDef {
-
   /**
    * Called before a first AMP element is added to resources. The final
    * preparations must be completed here. Called in the mutate context.
@@ -200,4 +202,28 @@ export class ViewportBindingDef {
    * @return {boolean}
    */
   getScrollingElementScrollsLikeViewport() {}
+}
+
+/**
+ * Returns the margin-bottom of the last child of `element` with non-zero
+ * height, if any. Otherwise, returns 0.
+ *
+ * @param {!Window} win
+ * @param {!Element} element
+ * @return {number}
+ */
+export function marginBottomOfLastChild(win, element) {
+  if (!isExperimentOn(win, 'margin-bottom-in-content-height')) {
+    return 0;
+  }
+  let n = element.lastElementChild;
+  while (n) {
+    const r = n./*OK*/ getBoundingClientRect();
+    if (r.height > 0) {
+      break;
+    } else {
+      n = n.previousElementSibling;
+    }
+  }
+  return n ? parseInt(computedStyle(win, n).marginBottom, 10) : 0;
 }

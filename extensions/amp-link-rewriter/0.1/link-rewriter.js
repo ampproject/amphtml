@@ -19,12 +19,7 @@ import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getScopeElements} from './scope';
 
-const WL_ANCHOR_ATTR = [
-  'href',
-  'id',
-  'rel',
-  'rev',
-];
+const WL_ANCHOR_ATTR = ['href', 'id', 'rel', 'rev'];
 const PREFIX_DATA_ATTR = /^vars(.+)/;
 const REG_DOMAIN_URL = /^(?:https?:)?(?:\/\/)?([^\/?]+)/i;
 const PAGE_PROP_WHITELIST = {
@@ -75,16 +70,20 @@ export class LinkRewriter {
     if (!this.isListed_(anchor)) {
       return;
     }
-    const sourceTrimmedDomain = Services
-        .documentInfoForDoc(this.ampDoc_)
-        .sourceUrl.match(REG_DOMAIN_URL)[1];
+    const sourceTrimmedDomain = Services.documentInfoForDoc(
+      this.ampDoc_
+    ).sourceUrl.match(REG_DOMAIN_URL)[1];
 
-    const canonicalTrimmedDomain = Services
-        .documentInfoForDoc(this.ampDoc_)
-        .canonicalUrl.match(REG_DOMAIN_URL)[1];
+    const canonicalTrimmedDomain = Services.documentInfoForDoc(
+      this.ampDoc_
+    ).canonicalUrl.match(REG_DOMAIN_URL)[1];
 
-    if (this.isInternalLink_(anchor,
-        [sourceTrimmedDomain, canonicalTrimmedDomain])) {
+    if (
+      this.isInternalLink_(anchor, [
+        sourceTrimmedDomain,
+        canonicalTrimmedDomain,
+      ])
+    ) {
       return;
     }
 
@@ -98,8 +97,10 @@ export class LinkRewriter {
    * @private
    */
   isRewritten_(anchor) {
-    return anchor.href.match(REG_DOMAIN_URL)[1] ===
-      this.rewrittenUrl_.match(REG_DOMAIN_URL)[1];
+    return (
+      anchor.href.match(REG_DOMAIN_URL)[1] ===
+      this.rewrittenUrl_.match(REG_DOMAIN_URL)[1]
+    );
   }
 
   /**
@@ -157,14 +158,13 @@ export class LinkRewriter {
    * @return {string}
    */
   replacePageProp_() {
-    return this.urlReplacementService_
-        .expandUrlSync(
-            this.rewrittenUrl_,
-            /** expandUrlSync doesn't fill DOCUMENT_REFERRER so we pass it*/
-            {DOCUMENT_REFERRER: this.referrer_},
-            undefined,
-            PAGE_PROP_WHITELIST
-        );
+    return this.urlReplacementService_.expandUrlSync(
+      this.rewrittenUrl_,
+      /** expandUrlSync doesn't fill DOCUMENT_REFERRER so we pass it*/
+      {DOCUMENT_REFERRER: this.referrer_},
+      undefined,
+      PAGE_PROP_WHITELIST
+    );
   }
 
   /**
@@ -189,14 +189,17 @@ export class LinkRewriter {
      * overwrite 'vars config values'
      */
     const dataset = getDataParamsFromAttributes(
-        htmlElement,
-        /* computeParamNameFunc */ undefined,
-        PREFIX_DATA_ATTR);
+      htmlElement,
+      /* computeParamNameFunc */ undefined,
+      PREFIX_DATA_ATTR
+    );
 
     Object.assign(vars, dataset);
 
     /** add a random value to be use in the output pattern */
-    vars['random'] = Math.random().toString(32).substr(2);
+    vars['random'] = Math.random()
+      .toString(32)
+      .substr(2);
 
     /**
      * Replace placeholders for properties of the document, anchor attributes
@@ -205,8 +208,9 @@ export class LinkRewriter {
     Object.keys(vars).forEach(key => {
       if (vars[key]) {
         this.rewrittenUrl_ = this.rewrittenUrl_.replace(
-            '${' + key + '}',
-            encodeURIComponent(vars[key]));
+          '${' + key + '}',
+          encodeURIComponent(vars[key])
+        );
       }
     });
 
@@ -214,10 +218,9 @@ export class LinkRewriter {
      * Finally to clean up we leave empty all placeholders that
      * were not replace in previous steps
      */
-    this.rewrittenUrl_ = this.rewrittenUrl_
-        .replace(/\${[A-Za-z0-9]+}+/, () => {
-          return '';
-        });
+    this.rewrittenUrl_ = this.rewrittenUrl_.replace(/\${[A-Za-z0-9]+}+/, () => {
+      return '';
+    });
     return this.rewrittenUrl_;
   }
 }

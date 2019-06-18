@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Lấy liên kết',
   },
@@ -123,8 +126,9 @@ const strings = {
     string: 'Trang này được xem tốt nhất ở chế độ chân dung',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Rất tiếc, có vẻ như trình duyệt của bạn không hỗ trợ trải ' +
-        'nghiệm này',
+    string:
+      'Rất tiếc, có vẻ như trình duyệt của bạn không hỗ trợ trải ' +
+      'nghiệm này',
   },
 };
 

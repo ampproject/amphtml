@@ -21,7 +21,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
 
 class AmpKaltura extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -37,9 +36,9 @@ class AmpKaltura extends AMP.BaseElement {
   }
 
   /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
     this.preconnect.url('https://cdnapisec.kaltura.com', opt_onLayout);
   }
@@ -52,21 +51,36 @@ class AmpKaltura extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.partnerId_ = userAssert(
-        this.element.getAttribute('data-partner'),
-        'The data-partner attribute is required for <amp-kaltura-player> %s',
-        this.element);
+      this.element.getAttribute('data-partner'),
+      'The data-partner attribute is required for <amp-kaltura-player> %s',
+      this.element
+    );
 
     this.entryId_ = this.element.getAttribute('data-entryid') || 'default';
   }
 
   /** @override */
   layoutCallback() {
-    const uiconfId = this.element.getAttribute('data-uiconf') ||
-        this.element.getAttribute('data-uiconf-id') || 'default';
+    const uiconfId =
+      this.element.getAttribute('data-uiconf') ||
+      this.element.getAttribute('data-uiconf-id') ||
+      'default';
     const iframe = this.element.ownerDocument.createElement('iframe');
-    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(this.partnerId_)}/sp/${encodeURIComponent(this.partnerId_)}00/embedIframeJs/uiconf_id/${encodeURIComponent(uiconfId)}/partner_id/${encodeURIComponent(this.partnerId_)}?iframeembed=true&playerId=kaltura_player_amp&entry_id=${encodeURIComponent(this.entryId_)}`;
+    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(
+      this.partnerId_
+    )}/sp/${encodeURIComponent(
+      this.partnerId_
+    )}00/embedIframeJs/uiconf_id/${encodeURIComponent(
+      uiconfId
+    )}/partner_id/${encodeURIComponent(
+      this.partnerId_
+    )}?iframeembed=true&playerId=kaltura_player_amp&entry_id=${encodeURIComponent(
+      this.entryId_
+    )}`;
     const params = getDataParamsFromAttributes(
-        this.element, key => `flashvars[${key}]`);
+      this.element,
+      key => `flashvars[${key}]`
+    );
     src = addParamsToUrl(src, params);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
@@ -83,7 +97,9 @@ class AmpKaltura extends AMP.BaseElement {
     this.propagateAttributes(['aria-label'], placeholder);
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(this.partnerId_)}/thumbnail/entry_id/${encodeURIComponent(this.entryId_)}`;
+    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(
+      this.partnerId_
+    )}/thumbnail/entry_id/${encodeURIComponent(this.entryId_)}`;
     if (width) {
       src += `/width/${width}`;
     }
@@ -95,8 +111,9 @@ class AmpKaltura extends AMP.BaseElement {
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {
-      placeholder.setAttribute('alt',
-          'Loading video - ' + placeholder.getAttribute('aria-label')
+      placeholder.setAttribute(
+        'alt',
+        'Loading video - ' + placeholder.getAttribute('aria-label')
       );
     } else {
       placeholder.setAttribute('alt', 'Loading video');
@@ -107,14 +124,18 @@ class AmpKaltura extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
-        'method': 'pause' ,
-        'value': '' ,
-      })) , '*');
+      this.iframe_.contentWindow./*OK*/ postMessage(
+        JSON.stringify(
+          dict({
+            'method': 'pause',
+            'value': '',
+          })
+        ),
+        '*'
+      );
     }
   }
 }
-
 
 AMP.extension('amp-kaltura-player', '0.1', AMP => {
   AMP.registerElement('amp-kaltura-player', AmpKaltura);

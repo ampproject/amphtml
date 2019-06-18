@@ -125,28 +125,12 @@ export const WHITELISTED_ATTRS = [
  * @const {!Object<string, !Array<string>>}
  */
 export const WHITELISTED_ATTRS_BY_TAGS = {
-  'a': [
-    'rel',
-    'target',
-  ],
-  'div': [
-    'template',
-  ],
-  'form': [
-    'action-xhr',
-    'verify-xhr',
-    'custom-validation-reporting',
-    'target',
-  ],
-  'input': [
-    'mask-output',
-  ],
-  'template': [
-    'type',
-  ],
-  'textarea': [
-    'autoexpand',
-  ],
+  'a': ['rel', 'target'],
+  'div': ['template'],
+  'form': ['action-xhr', 'verify-xhr', 'custom-validation-reporting', 'target'],
+  'input': ['mask-output'],
+  'template': ['type'],
+  'textarea': ['autoexpand'],
 };
 
 /** @const {!Array<string>} */
@@ -211,8 +195,7 @@ const BLACKLISTED_AMP4EMAIL_TAG_SPECIFIC_ATTRS = dict({
  *
  * @const {!RegExp}
  */
-const INVALID_INLINE_STYLE_REGEX =
-    /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
+const INVALID_INLINE_STYLE_REGEX = /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
 /**
  * Whether the attribute/value is valid.
@@ -225,7 +208,12 @@ const INVALID_INLINE_STYLE_REGEX =
  * @return {boolean}
  */
 export function isValidAttr(
-  tagName, attrName, attrValue, doc, opt_purify = false) {
+  tagName,
+  attrName,
+  attrValue,
+  doc,
+  opt_purify = false
+) {
   if (!opt_purify) {
     // "on*" attributes are not allowed.
     if (startsWith(attrName, 'on') && attrName != 'on') {
@@ -261,8 +249,7 @@ export function isValidAttr(
   // Remove blacklisted attributes from specific tags e.g. input[formaction].
   let attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName] || [];
   if (isAmp4Email(doc)) {
-    attrBlacklist =
-        BLACKLISTED_AMP4EMAIL_TAG_SPECIFIC_ATTRS[tagName] || [];
+    attrBlacklist = BLACKLISTED_AMP4EMAIL_TAG_SPECIFIC_ATTRS[tagName] || [];
   }
   if (attrBlacklist.indexOf(attrName) != -1) {
     return false;
@@ -270,16 +257,16 @@ export function isValidAttr(
 
   // Remove blacklisted values for specific attributes for specific tags
   // e.g. input[type=image].
-  let attrValueBlacklist =
-      BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  let attrValueBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
   if (isAmp4Email(doc)) {
-    attrValueBlacklist =
-        EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+    attrValueBlacklist = EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
   }
   if (attrValueBlacklist) {
     const blacklistedValuesRegex = attrValueBlacklist[attrName];
-    if (blacklistedValuesRegex &&
-        attrValue.search(blacklistedValuesRegex) != -1) {
+    if (
+      blacklistedValuesRegex &&
+      attrValue.search(blacklistedValuesRegex) != -1
+    ) {
       return false;
     }
   }
@@ -295,8 +282,7 @@ export function isValidAttr(
  */
 function isAmpFormatType(formats, doc) {
   const html = doc.documentElement;
-  const isFormatType =
-      formats.some(format => html.hasAttribute(format));
+  const isFormatType = formats.some(format => html.hasAttribute(format));
   return isFormatType;
 }
 
@@ -307,4 +293,3 @@ function isAmpFormatType(formats, doc) {
 export function isAmp4Email(doc) {
   return isAmpFormatType(['⚡4email', 'amp4email'], doc);
 }
-

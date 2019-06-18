@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-import {
-  pemToBytes,
-} from '../../../src/utils/pem';
+import {pemToBytes} from '../../../src/utils/pem';
 
 describe('pemToBytes', () => {
   const PLAIN_TEXT =
-        'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd'
-        + 'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs'
-        + 'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D'
-        + 'o2kQ+X5xK9cipRgEKwIDAQAB';
-  const PEM = '-----BEGIN PUBLIC KEY-----\n'
-        + 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd\n'
-        + 'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs\n'
-        + 'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D\n'
-        + 'o2kQ+X5xK9cipRgEKwIDAQAB\n'
-        + '-----END PUBLIC KEY-----';
+    'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd' +
+    'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs' +
+    'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D' +
+    'o2kQ+X5xK9cipRgEKwIDAQAB';
+  const PEM =
+    '-----BEGIN PUBLIC KEY-----\n' +
+    'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd\n' +
+    'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs\n' +
+    'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D\n' +
+    'o2kQ+X5xK9cipRgEKwIDAQAB\n' +
+    '-----END PUBLIC KEY-----';
 
   it('should convert a valid key', () => {
     const binary = pemToBytes(PEM);
@@ -54,8 +53,9 @@ describe('pemToBytes', () => {
   });
 
   it('should convert without line breaks', () => {
-    const binary = pemToBytes('-----BEGIN PUBLIC KEY-----' + PLAIN_TEXT
-                              + '-----END PUBLIC KEY-----');
+    const binary = pemToBytes(
+      '-----BEGIN PUBLIC KEY-----' + PLAIN_TEXT + '-----END PUBLIC KEY-----'
+    );
     const plain = atob(PLAIN_TEXT);
     const len = plain.length;
     expect(binary.byteLength).to.equal(len);

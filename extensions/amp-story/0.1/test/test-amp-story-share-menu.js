@@ -25,7 +25,6 @@ import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
 import {registerServiceBuilder} from '../../../../src/service';
 
-
 describes.realWin('amp-story-share-menu', {amp: true}, env => {
   let isSystemShareSupported;
   let parentEl;
@@ -81,9 +80,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
   it('should build the share widget when building the component', () => {
     shareWidgetMock
-        .expects('build')
-        .once()
-        .returns(win.document.createElement('div'));
+      .expects('build')
+      .once()
+      .returns(win.document.createElement('div'));
 
     shareMenu.build();
 

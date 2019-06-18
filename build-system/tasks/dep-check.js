@@ -15,7 +15,6 @@
  */
 'use strict';
 
-
 const babelify = require('babelify');
 const BBPromise = require('bluebird');
 const browserify = require('browserify');
@@ -30,6 +29,7 @@ const source = require('vinyl-source-stream');
 const through = require('through2');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {css} = require('./css');
+const {isTravisBuild} = require('../travis');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
@@ -104,8 +104,9 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
     return [];
   }
 
-  const isFilenameMatch = this.filesMatching_
-      .some(x => minimatch(moduleName, x));
+  const isFilenameMatch = this.filesMatching_.some(x =>
+    minimatch(moduleName, x)
+  );
   if (!isFilenameMatch) {
     return [];
   }
@@ -116,7 +117,6 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
   deps.forEach(dep => {
     this.mustNotDependOn_.forEach(badDepPattern => {
       if (minimatch(dep, badDepPattern)) {
-
         // Allow extension files to depend on their own code.
         const dir = path.dirname(dep);
         if (dir.startsWith('extensions/')) {
@@ -139,8 +139,10 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
         if (inWhitelist) {
           return;
         }
-        mustNotDependErrors.push(`${moduleName} must not depend on ${dep}. ` +
-            `Rule: ${JSON.stringify(this.config_)}.`);
+        mustNotDependErrors.push(
+          `${moduleName} must not depend on ${dep}. ` +
+            `Rule: ${JSON.stringify(this.config_)}.`
+        );
       }
     });
   });
@@ -158,24 +160,34 @@ const rules = depCheckConfig.rules.map(config => new Rule(config));
  * @return {!Promise<!Array<string>>}
  */
 function getSrcs() {
-  return fs.readdirAsync('extensions').then(dirItems => {
-    // Look for extension entry points
-    return flatten(dirItems
-        .map(x => `extensions/${x}`)
-        .filter(x => fs.statSync(x).isDirectory())
-        .map(getEntryModule)
-        // Concat the core binary and integration binary as entry points.
-        .concat('src/amp.js', '3p/integration.js'));
-  }).then(files => {
-    // Write all the entry modules into a single file so they can be processed
-    // together.
-    fs.mkdirpSync('./.amp-build');
-    const filename = './.amp-build/gulp-dep-check-collection.js';
-    fs.writeFileSync(filename, files.map(file => {
-      return `import '../${file}';`;
-    }).join('\n'));
-    return [filename];
-  });
+  return fs
+    .readdirAsync('extensions')
+    .then(dirItems => {
+      // Look for extension entry points
+      return flatten(
+        dirItems
+          .map(x => `extensions/${x}`)
+          .filter(x => fs.statSync(x).isDirectory())
+          .map(getEntryModule)
+          // Concat the core binary and integration binary as entry points.
+          .concat('src/amp.js', '3p/integration.js')
+      );
+    })
+    .then(files => {
+      // Write all the entry modules into a single file so they can be processed
+      // together.
+      fs.mkdirpSync('./.amp-build');
+      const filename = './.amp-build/gulp-dep-check-collection.js';
+      fs.writeFileSync(
+        filename,
+        files
+          .map(file => {
+            return `import '../${file}';`;
+          })
+          .join('\n')
+      );
+      return [filename];
+    });
 }
 
 /**
@@ -193,29 +205,31 @@ function getGraph(entryModule) {
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  const bundler = browserify(entryModule, {debug: true})
-      .transform(babelify, {
-        compact: false,
-        // Transform files in node_modules since deps use ES6 export.
-        // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
-        global: true,
-      });
+  const bundler = browserify(entryModule, {debug: true}).transform(babelify, {
+    compact: false,
+    // Transform files in node_modules since deps use ES6 export.
+    // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
+    global: true,
+  });
 
-  bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
-    module.deps.push({
-      name: row.file.replace(absPathRegExp, ''),
-      deps: row.deps,
-    });
-    this.push(row);
-    next();
-  }));
-  bundler.bundle()
-      .pipe(source(entryModule))
-      // Unfortunately we need to write the files out.
-      .pipe(gulp.dest('./.amp-build'))
-      .on('end', () => {
-        resolve(module);
+  bundler.pipeline.get('deps').push(
+    through.obj(function(row, enc, next) {
+      module.deps.push({
+        name: row.file.replace(absPathRegExp, ''),
+        deps: row.deps,
       });
+      this.push(row);
+      next();
+    })
+  );
+  bundler
+    .bundle()
+    .pipe(source(entryModule))
+    // Unfortunately we need to write the files out.
+    .pipe(gulp.dest('./.amp-build'))
+    .on('end', () => {
+      resolve(module);
+    });
   return promise;
 }
 
@@ -225,12 +239,13 @@ function getGraph(entryModule) {
  */
 function getEntryModule(extensionFolder) {
   const extension = path.basename(extensionFolder);
-  return fs.readdirSync(extensionFolder)
-      .map(x => `${extensionFolder}/${x}`)
-      .filter(x => fs.statSync(x).isDirectory())
-      .map(x => `${x}/${extension}.js`)
-      .filter(x => fs.existsSync(x))
-      .filter(x => fs.statSync(x).isFile());
+  return fs
+    .readdirSync(extensionFolder)
+    .map(x => `${extensionFolder}/${x}`)
+    .filter(x => fs.statSync(x).isDirectory())
+    .map(x => `${x}/${extension}.js`)
+    .filter(x => fs.existsSync(x))
+    .filter(x => fs.statSync(x).isFile());
 }
 
 /**
@@ -247,16 +262,15 @@ function flattenGraph(entryPoints) {
   // the entry points.
   entryPoints = entryPoints.map(entryPoint => entryPoint.deps);
   // Now make the graph have unique entries
-  return flatten(entryPoints)
-      .reduce((acc, cur) => {
-        const {name} = cur;
-        if (!acc[name]) {
-          acc[name] = Object.keys(cur.deps)
-              // Get rid of the absolute path for minimatch'ing
-              .map(x => cur.deps[x].replace(absPathRegExp, ''));
-        }
-        return acc;
-      }, Object.create(null));
+  return flatten(entryPoints).reduce((acc, cur) => {
+    const {name} = cur;
+    if (!acc[name]) {
+      acc[name] = Object.keys(cur.deps)
+        // Get rid of the absolute path for minimatch'ing
+        .map(x => cur.deps[x].replace(absPathRegExp, ''));
+    }
+    return acc;
+  }, Object.create(null));
 }
 
 /**
@@ -281,18 +295,26 @@ function runRules(modules) {
 }
 
 async function depCheck() {
-  await css();
   const handlerProcess = createCtrlcHandler('dep-check');
-  return getSrcs().then(entryPoints => {
-    // This check is for extension folders that actually dont have
-    // an extension entry point module yet.
-    entryPoints = entryPoints.filter(x => fs.existsSync(x));
-    return BBPromise.all(entryPoints.map(getGraph));
-  }).then(flattenGraph).then(runRules).then(errorsFound => {
-    if (errorsFound) {
-      process.exit(1);
-    }
-  }).then(() => exitCtrlcHandler(handlerProcess));
+  await css();
+  if (!isTravisBuild()) {
+    log('Checking dependencies...');
+  }
+  return getSrcs()
+    .then(entryPoints => {
+      // This check is for extension folders that actually dont have
+      // an extension entry point module yet.
+      entryPoints = entryPoints.filter(x => fs.existsSync(x));
+      return BBPromise.all(entryPoints.map(getGraph));
+    })
+    .then(flattenGraph)
+    .then(runRules)
+    .then(errorsFound => {
+      if (errorsFound) {
+        process.exit(1);
+      }
+    })
+    .then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**

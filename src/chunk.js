@@ -17,10 +17,7 @@
 import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
-import {
-  getServiceForDoc,
-  registerServiceBuilderForDoc,
-} from './service';
+import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
@@ -298,8 +295,7 @@ class StartupTask extends Task {
       return false;
     }
     // Viewers send a URL param if we are not visible.
-    return !(/visibilityState=(hidden|prerender)/.test(
-        this.win_.location.hash));
+    return !/visibilityState=(hidden|prerender)/.test(this.win_.location.hash);
   }
 }
 
@@ -429,20 +425,22 @@ class Chunks {
     // If requestIdleCallback exists, schedule a task with it, but
     // do not wait longer than two seconds.
     if (nextTask.useRequestIdleCallback_() && this.win_.requestIdleCallback) {
-      onIdle(this.win_,
-          // Wait until we have a budget of at least 15ms.
-          // 15ms is a magic number. Budgets are higher when the user
-          // is completely idle (around 40), but that occurs too
-          // rarely to be usable. 15ms budgets can happen during scrolling
-          // but only if the device is doing super, super well, and no
-          // real processing is done between frames.
-          15 /* minimumTimeRemaining */,
-          2000 /* timeout */,
-          this.boundExecute_);
+      onIdle(
+        this.win_,
+        // Wait until we have a budget of at least 15ms.
+        // 15ms is a magic number. Budgets are higher when the user
+        // is completely idle (around 40), but that occurs too
+        // rarely to be usable. 15ms budgets can happen during scrolling
+        // but only if the device is doing super, super well, and no
+        // real processing is done between frames.
+        15 /* minimumTimeRemaining */,
+        2000 /* timeout */,
+        this.boundExecute_
+      );
       return;
     }
     // The message doesn't actually matter.
-    this.win_.postMessage/*OK*/('amp-macro-task', '*');
+    this.win_./*OK*/ postMessage('amp-macro-task', '*');
   }
 }
 
@@ -468,8 +466,12 @@ export function onIdle(win, minimumTimeRemaining, timeout, fn) {
         dev().fine(TAG, 'Timed out', timeout, info.didTimeout);
         fn(info);
       } else {
-        dev().fine(TAG, 'Rescheduling with', remainingTimeout,
-            info.timeRemaining());
+        dev().fine(
+          TAG,
+          'Rescheduling with',
+          remainingTimeout,
+          info.timeRemaining()
+        );
         win.requestIdleCallback(rIC, {timeout: remainingTimeout});
       }
     } else {

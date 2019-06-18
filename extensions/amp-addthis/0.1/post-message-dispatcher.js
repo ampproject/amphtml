@@ -87,9 +87,10 @@ export class PostMessageDispatcher {
     switch (data.event) {
       case CONFIGURATION_EVENT: {
         this.emit_(
-            CONFIGURATION_EVENT,
-            /** @type {!JsonObject} */ (
-              Object.assign({}, data, {'source': event.source}))
+          CONFIGURATION_EVENT,
+          /** @type {!JsonObject} */ (Object.assign({}, data, {
+            'source': event.source,
+          }))
         );
         break;
       }

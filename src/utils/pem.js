@@ -16,7 +16,6 @@
 
 import {base64DecodeToBytes} from './base64';
 
-
 /**
  * Converts a text in PEM format into a binary array buffer.
  * @param {string} pem

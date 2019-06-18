@@ -4,6 +4,7 @@ formats:
   - websites
 teaser:
   text: Dynamically loads more documents recommended for the user.
+experimental: true
 ---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -28,7 +29,7 @@ Dynamically loads more documents recommended for the user.
 <table>
   <tr>
     <td><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a> <a href="https://github.com/ampproject/amphtml/blob/3a06c99f259b66998b61935a5ee5f0075481bfd2/tools/experiments/README.md#enable-an-experiment-for-a-particular-document"> (Document opt-in allowed)</a></td>
+    <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a> <a href="https://github.com/ampproject/amphtml/blob/3a06c99f259b66998b61935a5ee5f0075481bfd2/tools/experiments/README.md#enable-an-experiment-for-a-particular-document"> (Document opt-in allowed)</a></td>
   </tr>
   <tr>
     <td><strong>Required Script</strong></td>

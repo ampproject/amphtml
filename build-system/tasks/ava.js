@@ -23,12 +23,19 @@ const {isTravisBuild} = require('../travis');
  * Runs ava tests.
  */
 function ava() {
-  return gulp.src([
-    require.resolve('./csvify-size/test.js'),
-    require.resolve('./get-zindex/test.js'),
-    require.resolve('./prepend-global/test.js'),
-  ])
-      .pipe(gulpAva({silent: isTravisBuild()}));
+  return gulp
+    .src([
+      require.resolve('./csvify-size/test.js'),
+      require.resolve('./get-zindex/test.js'),
+      require.resolve('./prepend-global/test.js'),
+    ])
+    .pipe(
+      gulpAva({
+        'concurrency': 5,
+        'failFast': true,
+        'silent': isTravisBuild(),
+      })
+    );
 }
 
 module.exports = {

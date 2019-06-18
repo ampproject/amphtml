@@ -17,7 +17,8 @@
 export const OEWADIRECT_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
   'requests': {
-    'pageview': 'https://${s}.oewabox.at/j0=,,,r=${canonicalUrl};+,amp=1+cp=${cp}+ssl=1+hn=${canonicalHost};;;?lt=${pageViewId}&x=${screenWidth}x${screenHeight}x24&c=CLIENT_ID(oewa)',
+    'pageview':
+      'https://${s}.oewabox.at/j0=,,,r=${canonicalUrl};+,amp=1+cp=${cp}+ssl=1+hn=${canonicalHost};;;?lt=${pageViewId}&x=${screenWidth}x${screenHeight}x24&c=CLIENT_ID(oewa)',
   },
   'triggers': {
     'pageview': {

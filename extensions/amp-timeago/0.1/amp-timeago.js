@@ -19,7 +19,6 @@ import {timeago} from '../../../third_party/timeagojs/timeago';
 import {userAssert} from '../../../src/log';
 
 export class AmpTimeAgo extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -42,11 +41,15 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(this.element.textContent.length > 0,
-        'Content cannot be empty. Found in: %s', this.element);
+    userAssert(
+      this.element.textContent.length > 0,
+      'Content cannot be empty. Found in: %s',
+      this.element
+    );
 
     this.datetime_ = this.element.getAttribute('datetime');
-    this.locale_ = this.element.getAttribute('locale') ||
+    this.locale_ =
+      this.element.getAttribute('locale') ||
       this.win.document.documentElement.lang;
     this.title_ = this.element.textContent.trim();
 

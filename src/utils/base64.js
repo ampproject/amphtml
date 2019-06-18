@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  bytesToString,
-  stringToBytes,
-  utf8Decode,
-  utf8Encode,
-} from './bytes';
+import {bytesToString, stringToBytes, utf8Decode, utf8Encode} from './bytes';
 
 /**
  * Character mapping from base64url to base64.

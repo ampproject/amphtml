@@ -192,15 +192,15 @@ export class BaseElement {
   }
 
   /**
-  * This is the priority of loading elements (layoutCallback). Used only to
-  * determine layout timing and preloading priority. Does not affect build time,
-  * etc.
-  *
-  * The lower the number, the higher the priority.
-  *
-  * The default priority for base elements is LayoutPriority.CONTENT.
-  * @return {number}
-  */
+   * This is the priority of loading elements (layoutCallback). Used only to
+   * determine layout timing and preloading priority. Does not affect build time,
+   * etc.
+   *
+   * The lower the number, the higher the priority.
+   *
+   * The default priority for base elements is LayoutPriority.CONTENT.
+   * @return {number}
+   */
   getLayoutPriority() {
     return LayoutPriority.CONTENT;
   }
@@ -217,8 +217,9 @@ export class BaseElement {
    * @restricted
    */
   updateLayoutPriority(newLayoutPriority) {
-    this.element.getResources().updateLayoutPriority(
-        this.element, newLayoutPriority);
+    this.element
+      .getResources()
+      .updateLayoutPriority(this.element, newLayoutPriority);
   }
 
   /** @return {!Layout} */
@@ -289,7 +290,7 @@ export class BaseElement {
     let policyId = null;
     if (this.element.hasAttribute('data-block-on-consent')) {
       policyId =
-          this.element.getAttribute('data-block-on-consent') || 'default';
+        this.element.getAttribute('data-block-on-consent') || 'default';
     }
     return policyId;
   }
@@ -498,24 +499,21 @@ export class BaseElement {
    * viewport. Intended to be implemented by actual components.
    * @param {boolean} unusedInViewport
    */
-  viewportCallback(unusedInViewport) {
-  }
+  viewportCallback(unusedInViewport) {}
 
   /**
    * Requests the element to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
    */
-  pauseCallback() {
-  }
+  pauseCallback() {}
 
   /**
    * Requests the element to resume its activity when the document returns from
    * an inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content may be resumed.
    */
-  resumeCallback() {
-  }
+  resumeCallback() {}
 
   /**
    * Requests the element to unload any expensive resources when the element
@@ -561,8 +559,7 @@ export class BaseElement {
    * user event. Intended to be implemented by actual components.
    * @param {!./service/action-impl.ActionInvocation} unusedInvocation
    */
-  activate(unusedInvocation) {
-  }
+  activate(unusedInvocation) {}
 
   /**
    * Minimum event trust required for activate().
@@ -615,9 +612,15 @@ export class BaseElement {
    * @public
    */
   registerDefaultAction(
-    handler, alias = DEFAULT_ACTION, minTrust = ActionTrust.HIGH) {
-    devAssert(!this.defaultActionAlias_,
-        'Default action "%s" already registered.', this.defaultActionAlias_);
+    handler,
+    alias = DEFAULT_ACTION,
+    minTrust = ActionTrust.HIGH
+  ) {
+    devAssert(
+      !this.defaultActionAlias_,
+      'Default action "%s" already registered.',
+      this.defaultActionAlias_
+    );
     this.registerAction(alias, handler, minTrust);
     this.defaultActionAlias_ = alias;
   }
@@ -698,7 +701,8 @@ export class BaseElement {
     const unlisteners = (isArray(events) ? events : [events]).map(eventType =>
       listen(element, eventType, event => {
         this.element.dispatchCustomEvent(eventType, getData(event) || {});
-      }));
+      })
+    );
 
     return () => unlisteners.forEach(unlisten => unlisten());
   }
@@ -878,7 +882,7 @@ export class BaseElement {
    * @public
    */
   scheduleUnlayout(elements) {
-    this.element.getResources()./*OK*/scheduleUnlayout(this.element, elements);
+    this.element.getResources()./*OK*/ scheduleUnlayout(this.element, elements);
   }
 
   /**
@@ -890,8 +894,9 @@ export class BaseElement {
    * @public
    */
   updateInViewport(elements, inLocalViewport) {
-    this.element.getResources().updateInViewport(
-        this.element, elements, inLocalViewport);
+    this.element
+      .getResources()
+      .updateInViewport(this.element, elements, inLocalViewport);
   }
 
   /**
@@ -902,8 +907,9 @@ export class BaseElement {
    * @public
    */
   changeHeight(newHeight) {
-    this.element.getResources()./*OK*/changeSize(
-        this.element, newHeight, /* newWidth */ undefined);
+    this.element
+      .getResources()
+      ./*OK*/ changeSize(this.element, newHeight, /* newWidth */ undefined);
   }
 
   /**
@@ -923,7 +929,6 @@ export class BaseElement {
     return this.element.getResources().attemptCollapse(this.element);
   }
 
-
   /**
    * Return a promise that requests the runtime to update
    * the height of this element to the specified value.
@@ -939,28 +944,30 @@ export class BaseElement {
    * @public
    */
   attemptChangeHeight(newHeight) {
-    return this.element.getResources().attemptChangeSize(
-        this.element, newHeight, /* newWidth */ undefined);
+    return this.element
+      .getResources()
+      .attemptChangeSize(this.element, newHeight, /* newWidth */ undefined);
   }
 
   /**
-  * Return a promise that requests the runtime to update
-  * the size of this element to the specified value.
-  * The runtime will schedule this request and attempt to process it
-  * as soon as possible. However, unlike in {@link changeSize}, the runtime
-  * may refuse to make a change in which case it will show the element's
-  * overflow element if provided, which is supposed to provide the reader with
-  * the necessary user action. (The overflow element is shown only if the
-  * requested height is greater than 0.)
-  * The promise is resolved if the height is successfully updated.
-  * @param {number|undefined} newHeight
-  * @param {number|undefined} newWidth
-  * @return {!Promise}
-  * @public
-  */
+   * Return a promise that requests the runtime to update
+   * the size of this element to the specified value.
+   * The runtime will schedule this request and attempt to process it
+   * as soon as possible. However, unlike in {@link changeSize}, the runtime
+   * may refuse to make a change in which case it will show the element's
+   * overflow element if provided, which is supposed to provide the reader with
+   * the necessary user action. (The overflow element is shown only if the
+   * requested height is greater than 0.)
+   * The promise is resolved if the height is successfully updated.
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
+   * @return {!Promise}
+   * @public
+   */
   attemptChangeSize(newHeight, newWidth) {
-    return this.element.getResources().attemptChangeSize(
-        this.element, newHeight, newWidth);
+    return this.element
+      .getResources()
+      .attemptChangeSize(this.element, newHeight, newWidth);
   }
 
   /**
@@ -1009,8 +1016,9 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureMutateElement(measurer, mutator, opt_element) {
-    return this.element.getResources().measureMutateElement(
-        opt_element || this.element, measurer, mutator);
+    return this.element
+      .getResources()
+      .measureMutateElement(opt_element || this.element, measurer, mutator);
   }
 
   /**
@@ -1082,12 +1090,13 @@ export class BaseElement {
    * @param {!Element=} opt_element
    */
   declareLayer(opt_element) {
-    devAssert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
-        ' to declare layer.');
+    devAssert(
+      isExperimentOn(this.win, 'layers'),
+      'Layers must be enabled to declare layer.'
+    );
     if (opt_element) {
       devAssert(this.element.contains(opt_element));
     }
     return this.element.getLayers().declareLayer(opt_element || this.element);
   }
-
 }

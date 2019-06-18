@@ -4,6 +4,7 @@ formats:
   - websites
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis or vertical axis.
+experimental: true
 ---
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
@@ -121,7 +122,7 @@ The media queries are evaluated from left to right, with the first matching medi
   <tr>
     <td width="40%"><strong><code>snap-by</code></strong></td>
     <td>A number, defaults to <code>1</code>. This determines the granularity of snapping and is useful when using
-    <code>visible-count</code>. This 
+    <code>visible-count</code>. This
   </tr>
 </table>
 
@@ -219,6 +220,18 @@ If you want more customization for the arrow buttons, you can use the `next` and
 ```
 
 ## Usage Notes
+
+### RTL
+
+`<amp-base-carousel>` currently requires that you let it know when it is in an right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will generally work without this, there may be a few bugs. You can let the carousel know that it should operate as `rtl` as follows:
+
+```html
+<amp-base-carousel dir="rtl" …>
+  …
+</amp-base-carousel>
+```
+
+If the carousel is in a RTL context, and you want the carousel to operate as LTR, you can explicitly set the `dir="ltr"` on the carousel.
 
 ### Slide layout
 
