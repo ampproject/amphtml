@@ -1793,6 +1793,7 @@ describes.realWin('marginBottomOfLastChild', {}, env => {
     secondChild.style.position = 'relative';
     expect(marginBottomOfLastChild(win, element)).to.equal(22);
 
+    secondChild.style.position = '-webkit-sticky'; // Still needed on Safari 12!
     secondChild.style.position = 'sticky';
     expect(marginBottomOfLastChild(win, element)).to.equal(11);
   });
