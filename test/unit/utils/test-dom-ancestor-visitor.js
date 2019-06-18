@@ -13,27 +13,89 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {createElementWithAttributes} from '../../../../src/dom';
-import {getFlexibleAdSlotRequestParams} from '../flexible-ad-slot-utils';
+import {DomAncestorVisitor} from '../../../src/utils/dom-ancestor-visitor';
 
-
-describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
+describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
   let doc, win;
+  let domAncestorVisitor;
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    domAncestorVisitor = new DomAncestorVisitor(win);
   });
 
-  function createResource(
-    config,
-    layout,
-    tagName = 'amp-ad',
-    parent = doc.body
-  ) {
-    config['layout'] = layout;
-    const element = createElementWithAttributes(doc, tagName, config);
-    parent.appendChild(element);
-    return element;
-  }
-});
+  it('should return empty object when no visitors given', () => {
+    expect(domAncestorVisitor.getAllResults()).to.deep.equal({});
+  });
 
+  it('should respect maxAncestorsToVisit', () => {
+    const parent = doc.createElement('div');
+    const child = doc.createElement('div');
+    parent.appendChild(child);
+    parent.id = 'parent';
+
+    const callback = el => {
+      if (el.id == 'parent') {
+        return true;
+      }
+    };
+    domAncestorVisitor
+      .addVisitor('vis1', callback, 1)
+      .addVisitor('vis2', callback, 2)
+      .visitAncestorsStartingFrom(child);
+    expect(domAncestorVisitor.getResultFor('vis1')).to.be.undefined;
+    expect(domAncestorVisitor.getResultFor('vis2')).to.be.true;
+  });
+
+  it('should not re-run completed visitors', () => {
+    const parent = doc.createElement('div');
+    const child = doc.createElement('div');
+    parent.appendChild(child);
+
+    const callback = el => {
+      if (el.id == 'parent') {
+        return true;
+      }
+    };
+
+    domAncestorVisitor
+      .addVisitor('vis1', callback)
+      .visitAncestorsStartingFrom(child);
+    expect(domAncestorVisitor.getResultFor('vis1')).to.be.undefined;
+
+    parent.id = 'parent';
+
+    domAncestorVisitor
+      .addVisitor('vis2', callback)
+      .visitAncestorsStartingFrom(child);
+    expect(domAncestorVisitor.getResultFor('vis1')).to.be.undefined;
+    expect(domAncestorVisitor.getResultFor('vis2')).to.be.true;
+  });
+
+  it('should cease visiting once visitor returns', () => {
+    const elements = [doc.createElement('div')];
+    elements[0].id = '0';
+    for (let i = 1; i < 100; i++) {
+      const el = doc.createElement('div');
+      el.id = String(i);
+      elements[i - 1].appendChild(el);
+      elements.push(el);
+    }
+    domAncestorVisitor
+      .addVisitor('vis1', el => {
+        el.classList.add('visited');
+        if (el.id == '50') {
+          return true;
+        }
+      })
+      .visitAncestorsStartingFrom(elements[elements.length - 1]);
+    expect(domAncestorVisitor.getResultFor('vis1')).to.be.true;
+    elements.forEach((element, index) => {
+      if (index >= 50) {
+        expect(element.classList.contains('visited')).to.be.true;
+      } else {
+        expect(element.classList.contains('visited')).to.be.false;
+      }
+    });
+  });
+});

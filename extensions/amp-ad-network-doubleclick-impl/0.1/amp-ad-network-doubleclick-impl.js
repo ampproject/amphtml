@@ -527,8 +527,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     let psz = null;
     let fws = null;
     if (this.sendFlexibleAdSlotParams_) {
-      const {fwSignal, slotWidth, parentWidth} =
-          getFlexibleAdSlotRequestParams(this.win, this.element.parentElement);
+      const {fwSignal, slotWidth, parentWidth} = getFlexibleAdSlotRequestParams(
+        this.win,
+        this.element.parentElement
+      );
       // If slotWidth were undefined, that means its layout was fluid, and thus
       // its available width depends on its parent element, and so should have
       // the same value as parentWidth.

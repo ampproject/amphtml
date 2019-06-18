@@ -17,7 +17,6 @@ import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {getFlexibleAdSlotRequestParams} from '../flexible-ad-slot-utils';
 
-
 describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
   let doc, win;
   beforeEach(() => {
@@ -39,36 +38,48 @@ describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
 
   it('should return the fixed width for FIXED layout', () => {
     const element = createResource({width: 300, height: 250}, 'fixed');
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      300
+    );
   });
 
   it('should return 0 for FIXED layout and invalid width', () => {
     allowConsoleError(() => {
       const element = createResource({width: 'auto', height: 250}, 'fixed');
-      expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(0);
+      expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+        0
+      );
     });
   });
 
   it('should return 0 for NODISPLAY layout', () => {
     const element = createResource({width: 500}, 'nodisplay');
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(0);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      0
+    );
   });
 
   it('should return 0 for FLEX_ITEM layout', () => {
     const element = createResource({width: 500}, 'flex-item');
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(0);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      0
+    );
   });
 
   it('should return 0 for invalid layout', () => {
     allowConsoleError(() => {
       const element = createResource({width: 500}, 'qwerty');
-      expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(0);
+      expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+        0
+      );
     });
   });
 
   it('should return the max-width, if present, for FILL layout', () => {
     const element = createResource({maxWidth: 300}, 'fill');
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      300
+    );
   });
 
   it("should return parent's fixed width for FILL layout", () => {
@@ -77,13 +88,17 @@ describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
     parent.setAttribute('layout', 'fixed');
     doc.body.appendChild(parent);
     const element = createResource({} /* config */, 'fill', 'amp-ad', parent);
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      300
+    );
   });
 
   it('should return the max-width, if present, for FIXED_HEIGHT layout', () => {
     const element = createResource({height: 300}, 'fixed-height');
     element.style.maxWidth = '250px';
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(250);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      250
+    );
   });
 
   it("should return parent's fixed width for FIXED_HEIGHT layout", () => {
@@ -97,13 +112,17 @@ describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
       'amp-ad',
       parent
     );
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      300
+    );
   });
 
   it('should return the max-width, if present, for FLUID layout', () => {
     const element = createResource({height: 300}, 'fluid');
     element.style.maxWidth = '250px';
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(250);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      250
+    );
   });
 
   it("should return parent's fixed width for FLUID layout", () => {
@@ -112,13 +131,17 @@ describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
     parent.setAttribute('layout', 'fixed');
     doc.body.appendChild(parent);
     const element = createResource({height: 250}, 'fluid', 'amp-ad', parent);
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      300
+    );
   });
 
   it('should return the max-width, if present, for RESPONSIVE layout', () => {
     const element = createResource({height: 200, width: 200}, 'responsive');
     element.style.maxWidth = '250px';
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(250);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      250
+    );
   });
 
   it("should return parent's fixed width for RESPONSIVE layout", () => {
@@ -132,7 +155,9 @@ describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
       'amp-ad',
       parent
     );
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      300
+    );
   });
 
   it('should return the viewport width for CONTAINER layout', () => {
@@ -140,7 +165,9 @@ describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
     sandbox
       .stub(Services.viewportForDoc(element), 'getSize')
       .returns({width: 300});
-    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(300);
+    expect(getFlexibleAdSlotRequestParams(win, element).parentWidth).to.equal(
+      300
+    );
   });
 
   it('should return null for non-fixed layouts', () => {
@@ -162,8 +189,8 @@ describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
     for (let el = parent.parentElement; el != null; el = el.parentElement) {
       el.setAttribute('style', 'overflow: visible !important;');
     }
-    expect(getFlexibleAdSlotRequestParams(win, element).fwSignal)
-        .to.be.undefined;
+    expect(getFlexibleAdSlotRequestParams(win, element).fwSignal).to.be
+      .undefined;
   });
 
   it('should have fwSignal=128 when ancestor is hidden', () => {

@@ -16,24 +16,25 @@
 import {DomAncestorVisitor} from '../../../src/utils/dom-ancestor-visitor';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
 
 /** @const @enum {number} */
 const FULL_WIDTH_SIGNALS = {
   OVERFLOW_HIDDEN: 4,
   ELEMENT_HIDDEN: 128,
-}
+};
 
 /**
  * Gets the maximum width the given element may occupy.
  * @param {!Element} element
- * @param {!Object<style, style>} style
+ * @param {!Object<string, string>} style
  * @return {?number} The width if it was found, null otherwise.
  */
-function getElementWidth(el, style) {
-  const layout = el.getAttribute('layout');
+function getElementWidth(element, style) {
+  const layout = element.getAttribute('layout');
   switch (layout) {
     case Layout.FIXED:
-      return parseInt(el.getAttribute('width'), 10) || 0;
+      return parseInt(element.getAttribute('width'), 10) || 0;
     case Layout.RESPONSIVE:
     case Layout.FILL:
     case Layout.FIXED_HEIGHT:
@@ -58,7 +59,7 @@ function getElementWidth(el, style) {
       // If no layout is provided, we must use getComputedStyle.
       return parseInt(style.width, 10) || 0;
   }
-};
+}
 
 /**
  * Returns a callback function that can be passed as a visitor for computing the
@@ -75,19 +76,28 @@ function getFullWidthSignalVisitor() {
   };
 }
 
+/** @typedef {{
+ *    fwSignal: ?number,
+ *    slotWidth: ?number,
+ *    parentWidth: ?number,
+ * }}
+ */
+let ParamsTypeDef;
+
 /**
  * Returns the fixed size of the given element, or the fixed size of its nearest
  * ancestor that has a fixed size, if the given element has none.
  * @param {!Window} win
  * @param {?Element} element
- * @return {number} The width of the given element, or of the nearest ancestor
- *    with a fixed size, if the given element has none.
+ * @return {!ParamsTypeDef} The width of the given
+ *    element, or of the nearest ancestor with a fixed size, if the given
+ *    element has none.
  */
 export function getFlexibleAdSlotRequestParams(win, element) {
-  return new DomAncestorVisitor(win)
+  return /** @type {!ParamsTypeDef} */ (new DomAncestorVisitor(win)
     .addVisitor('parentWidth', getElementWidth, 100 /* maxDepth */)
     .addVisitor('slotWidth', getElementWidth, 1 /* maxDepth */)
     .addVisitor('fwSignal', getFullWidthSignalVisitor(), 100 /* maxDepth */)
     .visitAncestorsStartingFrom(element)
-    .getAllResults();
+    .getAllResults());
 }

@@ -15,11 +15,9 @@
  */
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
-import {map} from './object.js';
 
 /** @typedef {
- *    function(!Element, !Object<string, string>, function(*): undefined):
- *      undefined
+ *    function(!Element, !Object<string, string>): *
  *  }
  */
 let CallbackTypeDef;
@@ -42,11 +40,8 @@ class Visitor {
     /** @private @const {!CallbackTypeDef} */
     this.callback_ = callback;
 
-    /** @private @const {number} */
-    this.maxAncestorsToVisit_ = maxAncestorsToVisit;
-
     /** @private {number} */
-    this.ancestorsVisited_ = 0;
+    this.maxAncestorsToVisit_ = maxAncestorsToVisit;
 
     /** @private {*} */
     this.result_ = null;
@@ -68,9 +63,9 @@ class Visitor {
       this.result_ = this.callback_(element, style);
     } catch (e) {
       dev().warn(
-          'DOM-ANCESTOR-VISITOR',
-          `Visitor ${this.getName()} encountered error ` +
-            `during callback execution: "${e}".`
+        'DOM-ANCESTOR-VISITOR',
+        `Visitor ${this.getName()} encountered error ` +
+          `during callback execution: "${e}".`
       );
     }
     if (!--this.maxAncestorsToVisit_ || this.result_ != undefined) {
@@ -111,6 +106,15 @@ class Visitor {
  * visiting further nodes by returning a value, which may later be retrived by
  * calling 'getValueFor(visitorName)'. Once all visitors have returned or hit
  * their maximum nodes to visit, no more nodes will be visited.
+ *
+ * Example usage:
+ * const {vis1, vis2, ..., visN} = new DomAncestorVisitor()
+ *   .addVisitor('vis1', (el, style) => { ... })
+ *   .addVisitor('vis2', (el, style) => { ... })
+ *   ...
+ *   .addVisitor('visN', (el, style) => { ... })
+ *   .visitAncestorsStartingFrom(someElement)
+ *   .getAllResults();
  */
 export class DomAncestorVisitor {
   /** @param {!Window=} win */
@@ -142,11 +146,9 @@ export class DomAncestorVisitor {
    * @return {!DomAncestorVisitor}
    */
   addVisitor(visitorName, callback, maxAncestorsToVisit = 100) {
-    this.visitors_.push(new Visitor(
-      visitorName,
-      callback,
-      maxAncestorsToVisit
-    ));
+    this.visitors_.push(
+      new Visitor(visitorName, callback, maxAncestorsToVisit)
+    );
     return this;
   }
 
@@ -157,7 +159,8 @@ export class DomAncestorVisitor {
    */
   getResultFor(visitorName) {
     const visitor = this.visitors_.find(
-        visitor => visitor.getName() == visitorName);
+      visitor => visitor.getName() == visitorName
+    );
     devAssert(visitor, `No visitor with name ${visitorName} found.`);
     return visitor.getResult();
   }
@@ -183,7 +186,9 @@ export class DomAncestorVisitor {
     let visitors = [];
     while (el && (visitors = this.getActiveVisitors_()).length) {
       const style = computedStyle(this.win_, el);
-      visitors.forEach(visitor => visitor.callback(el, style));
+      visitors.forEach(visitor =>
+        visitor.callback(dev().assertElement(el), style)
+      );
       el = el.parentElement;
     }
     this.visitors_.forEach(visitor => visitor.setComplete());
