@@ -14,24 +14,28 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-bling-link-wrapper {
-  position: relative;
+ amp-story-bling-link {
+  position: relative !important;
+  width: 90px !important;
+  height: 90px !important;
 }
 
-amp-story-bling-link {
-  margin: 10px !important;
-  background: rgba(255, 255, 255, 1) !important;
+.i-amphtml-story-bling-link-button {
+  position: absolute !important;  
   border-radius: 50% !important;
-  position: absolute !important;
+  background: rgba(255, 255, 255, 1) !important;
+  margin: 7.5px !important;
+  width: 75px; /* set somewhere else */
+  height: 75px;  
 }
 
 amp-story-page[active] .i-amphtml-story-bling-link-pulse {
-  width: 75px; /* set somewhere else */
-  height: 75px;  
-  margin: 10px !important;
-  background: rgba(255, 255, 255, 0.4) !important;
-  border-radius: 50% !important;
   position: absolute !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  margin: 7.5px !important;
+  width: 75px;
+  height: 75px;
   animation-name: pulse !important;
   animation-duration: 1.5s !important;
   animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
@@ -47,16 +51,16 @@ amp-story-page[active] .i-amphtml-story-bling-link-pulse {
     transform: scale(1);    
   }
   100% {
-    transform: scale(1.25);    
+    transform: scale(1.2);    
   }
 }
 
-amp-story-bling-link:hover {
+amp-story-bling-link:hover .i-amphtml-story-bling-link-button {
   background: rgba(255, 255, 255, 0.4) !important;
   cursor: pointer !important;
 }
 
-amp-story-bling-link-pulse:hover {
+amp-story-bling-link:hover .i-amphtml-story-bling-link-pulse {
   animation: none !important;
 }
 

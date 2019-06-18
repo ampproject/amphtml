@@ -40,7 +40,7 @@ export class AmpStoryBlingLink extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     //this.addPulse_();
-    this.addIconElement_();
+    //this.addIconElement_();
   }
 
   /**
