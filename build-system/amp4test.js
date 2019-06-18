@@ -210,7 +210,8 @@ app.get('/a4a/:bid', (req, res) => {
             "img": "\${htmlAttr(amp-img,src)}",
             "navTiming": "\${navTiming(requestStart,requestStart)}",
             "navType": "\${navType}",
-            "navRedirectCount": "\${navRedirectCount}"
+            "navRedirectCount": "\${navRedirectCount}",
+            "sourceUrl": "\${sourceUrl}"
           }
         }
       }

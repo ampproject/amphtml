@@ -48,8 +48,8 @@ supported by the AMP component library.
 
 2. If you're using a **common 3rd party** like Youtube, Vimeo or [others supported in AMP](../../spec/amp-video-interface.md), you should use their supported component (e.g. [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube), [`amp-vimeo`](https://amp.dev/documentation/components/amp-vimeo)).
 
-3. If you've built a **custom player** or are using one provided by an **unsupported 3rd party**, **you sould use `amp-video-iframe`**. This is different from using [`amp-iframe`](https://amp.dev/documentation/components/amp-iframe) in that it enables
-[Video Features on AMP.](../../spec/amp-video-interface.md). See [behavior](#behavior) below for more details.
+3. If you've built a **custom player** or are using one provided by an **unsupported 3rd party**, **you should use `amp-video-iframe`**. This is different from using [`amp-iframe`](https://amp.dev/documentation/components/amp-iframe) in that it enables
+[Video Features on AMP](../../spec/amp-video-interface.md). See [behavior](#behavior) below for more details.
 
 ## Behavior
 

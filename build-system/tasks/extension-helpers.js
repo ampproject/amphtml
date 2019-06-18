@@ -26,6 +26,7 @@ const {
   verifyExtensionAliasBundles,
 } = require('../../bundles.config');
 const {compileJs, mkdirSync} = require('./helpers');
+const {compileVendorConfigs} = require('./vendor-configs');
 const {isTravisBuild} = require('../travis');
 const {jsifyCssAsync} = require('./jsify-css');
 
@@ -366,16 +367,24 @@ function buildExtension(
       buildExtension(name, version, latestVersion, hasCss, optionsCopy);
     });
   }
-  let promise = Promise.resolve();
+  const promises = [];
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    promise = buildExtensionCss(path, name, version, optionsCopy);
+    const buildCssPromise = buildExtensionCss(path, name, version, optionsCopy);
     if (options.compileOnlyCss) {
-      return promise;
+      return buildCssPromise;
     }
+
+    promises.push(buildCssPromise);
   }
-  return promise.then(() => {
+
+  // minify and copy vendor configs for amp-analytics component
+  if (name === 'amp-analytics' && argv.compile_vendor_configs) {
+    promises.push(compileVendorConfigs(options));
+  }
+
+  return Promise.all(promises).then(() => {
     if (argv.single_pass) {
       return Promise.resolve();
     } else {
@@ -457,11 +466,11 @@ function buildExtensionJs(path, name, version, latestVersion, options) {
   ).then(() => {
     // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
     if (name === 'amp-script') {
-      // TODO(choumx): Compile this when worker-dom externs are available.
-      const dir = 'node_modules/@ampproject/worker-dom/dist/';
+      const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
       const file = `dist/v0/amp-script-worker-${version}`;
-      fs.copyFileSync(dir + 'worker.safe.js', `${file}.js`);
-      fs.copyFileSync(dir + 'unminified.worker.safe.js', `${file}.max.js`);
+      // TODO(choumx): Minified amp-script worker binary?
+      fs.copyFileSync(dir + 'worker.mjs', `${file}.js`);
+      fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
     }
   });
 }
