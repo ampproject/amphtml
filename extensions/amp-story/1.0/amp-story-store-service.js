@@ -50,6 +50,7 @@ export const UIType = {
   MOBILE: 0,
   DESKTOP_PANELS: 1, // Default desktop UI.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
+  SCROLL: 3, // Vertical scrolling versions, for search engine bots indexing.
 };
 
 /**
