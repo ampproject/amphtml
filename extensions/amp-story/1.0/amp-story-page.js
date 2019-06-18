@@ -40,6 +40,7 @@ import {
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
+import {CSS} from '../../../build/amp-story-page-description-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
@@ -57,7 +58,13 @@ import {
   matches,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
+  createElementWithAttributes,
 } from '../../../src/dom';
+import {
+  createShadowRootWithStyle,
+  isMediaDisplayed,
+  setTextBackgroundColor,
+} from './utils';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -68,7 +75,6 @@ import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {isMediaDisplayed, setTextBackgroundColor} from './utils';
 import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -264,6 +270,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
+
+    /** @private {string} A textual description of the content of the page. */
+    this.description_ = null;
   }
 
   /**
@@ -311,6 +320,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       uiState => this.onUIStateUpdate_(uiState),
       true /* callToInitialize */
     );
+    this.setHasAttachmentAttribute_();
+    this.setPageDescription_();
   }
 
   /**
@@ -1430,5 +1441,47 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setDescendantCssTextStyles_() {
     setTextBackgroundColor(this.element);
+  }
+
+  /**
+   * Sets the description of the page.
+   * @private
+   */
+  setPageDescription_() {
+    this.description_ = this.element.getAttribute('title');
+
+    if (this.isBotUserAgent_) {
+      this.renderPageDescription_();
+    } else {
+      // Strip the title attribute from the page on non-bot user agents, to
+      // prevent the browser tooltip.
+      this.element.removeAttribute('title');
+    }
+  }
+
+  /**
+   * Renders the page description in the page.
+   */
+  renderPageDescription_() {
+    if (!this.description_) {
+      return;
+    }
+
+    const pageContentEl = createElementWithAttributes(
+      this.win.document,
+      'div',
+      dict({
+        'class': 'page-description',
+      })
+    );
+    const descriptionEl = this.win.document.createElement('span');
+    descriptionEl./* OK */ textContent = this.description_;
+
+    createShadowRootWithStyle(pageContentEl, descriptionEl, CSS);
+
+    this.element.parentElement.insertBefore(
+      pageContentEl,
+      this.element.nextElementSibling
+    );
   }
 }
