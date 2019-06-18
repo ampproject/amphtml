@@ -235,6 +235,105 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it(
+    'should not poll if live-story-disabled is present and other live-lists ' +
+      'are also disabled',
+    () => {
+      const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+
+      ready();
+      // Important that we set this before build since then is when they register
+      liveList.buildCallback();
+      liveList2.buildCallback();
+      expect(liveList.isEnabled()).to.be.true;
+      expect(liveList2.isEnabled()).to.be.true;
+      return manager.whenDocReady_().then(() => {
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer1 = doc.createElement('div');
+        const fromServer1List1 = doc.createElement('amp-live-list');
+        fromServer1List1.setAttribute('id', 'id-1');
+        const fromServer1List2 = doc.createElement('amp-live-list');
+        fromServer1List2.setAttribute('id', 'id-2');
+        fromServer1List2.setAttribute('live-story-disabled', '');
+        fromServer1.appendChild(fromServer1List1);
+        fromServer1.appendChild(fromServer1List2);
+
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.true;
+
+        manager.updateLiveLists_(fromServer1);
+
+        // Still polls since at least one live list can still receive updates.
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.false;
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer2 = doc.createElement('div');
+        const fromServer2List1 = doc.createElement('amp-live-list');
+        fromServer2List1.setAttribute('id', 'id-1');
+        fromServer2List1.setAttribute('disabled', '');
+        fromServer2.appendChild(fromServer2List1);
+
+        manager.updateLiveLists_(fromServer2);
+
+        expect(liveList.isEnabled()).to.be.false;
+        expect(liveList2.isEnabled()).to.be.false;
+        // At this point nothing can ever turn this back on since we stopped
+        // polling altogether.
+        expect(manager.poller_.isRunning()).to.be.false;
+      });
+    }
+  );
+
+  it(
+    "should poll if at least one amp-live-list's is still active after " +
+      'register and a live-story-disabled attribute is used',
+    () => {
+      const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+
+      ready();
+      // Important that we set this before build since then is when they register
+      liveList.buildCallback();
+      liveList2.buildCallback();
+      expect(liveList.isEnabled()).to.be.true;
+      expect(liveList2.isEnabled()).to.be.true;
+      return manager.whenDocReady_().then(() => {
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer1 = doc.createElement('div');
+        const fromServer1List1 = doc.createElement('amp-live-list');
+        fromServer1List1.setAttribute('id', 'id-1');
+        const fromServer1List2 = doc.createElement('amp-live-list');
+        fromServer1List2.setAttribute('id', 'id-2');
+        fromServer1List2.setAttribute('live-story-disabled', '');
+        fromServer1.appendChild(fromServer1List1);
+        fromServer1.appendChild(fromServer1List2);
+
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.true;
+
+        manager.updateLiveLists_(fromServer1);
+
+        // Still polls since at least one live list can still receive updates.
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.false;
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer2 = doc.createElement('div');
+        const fromServer2List1 = doc.createElement('amp-live-list');
+        fromServer2List1.setAttribute('id', 'id-1');
+        fromServer2.appendChild(fromServer2List1);
+
+        manager.updateLiveLists_(fromServer2);
+
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.false;
+        expect(manager.poller_.isRunning()).to.be.true;
+      });
+    }
+  );
+
+  it(
     "should poll if at least one amp-live-list's is still active after  " +
       'register',
     () => {
