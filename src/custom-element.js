@@ -1706,6 +1706,10 @@ function createBaseCustomElementClass(win) {
         // Loading has already been canceled. Ignore.
         return;
       }
+      if (state === this.loadingState_ && !opt_options) {
+        // Loading state is the same.
+        return;
+      }
       this.loadingState_ = state;
       if (!state && !this.loadingContainer_) {
         return;
