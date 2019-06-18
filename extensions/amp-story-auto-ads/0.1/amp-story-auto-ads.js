@@ -462,7 +462,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     badge.className = 'i-amphtml-story-ad-attribution';
     badge.textContent = 'Ad';
 
-    this.adBadgeContainer_.append(badge);
+    this.adBadgeContainer_.appendChild(badge);
     createShadowRootWithStyle(root, this.adBadgeContainer_, attributionCSS);
     this.ampStory_.element.appendChild(root);
   }
