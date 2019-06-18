@@ -446,7 +446,7 @@ export class AmpStory extends AMP.BaseElement {
     const textNodes = Array.from(this.element.childNodes).filter(
       node => node.nodeType === Node.TEXT_NODE
     );
-    textNodes.forEach((node) => {
+    textNodes.forEach(node => {
       this.element.removeChild(node);
     });
 
