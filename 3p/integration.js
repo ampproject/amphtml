@@ -293,6 +293,7 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
   runative: true,
   speakol: true,
+  mgid: true,
 };
 
 init(window);
