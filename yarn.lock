@@ -7,10 +7,12 @@
   resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.2.0.tgz#82b6b68b6fe0eacbcc95d3f0a82ddf19a0e2b316"
   integrity sha512-CiMdKK9eMa6eqhqZc9bq86nPdgbALY+E8rKgUPR7wf2wGUNTm/jtFZQ7fn4sj/oggn0wvadBokabErtl1m1KSw==
 
-"@ampproject/worker-dom@0.10.1":
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.10.1.tgz#72d786b22a77fd3c01d122b546ad97fc2d06d89a"
-  integrity sha512-uzuh3G4KBO045tNlxTeft8gKXb0BsTAZKCsFestacfhF15cVDYS6FeUf3It9TjoluRoqlkypSoILzlxGogs0Pg==
+"@ampproject/worker-dom@0.12.3":
+  version "0.12.3"
+  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.12.3.tgz#651af1c4923c7ffd6d8cd5761ae66a0b59ac5b7e"
+  integrity sha512-abBzcHLa1mtQRfAImpKiMLfDBmm94KHFkZyyYWj9jNQ+34Ubr6vxCc+laBF/SK670HuL2eVvS+dpAsFHudUQDA==
+  dependencies:
+    "@types/sinon" "7.0.11"
 
 "@ava/babel-plugin-throws-helper@^3.0.0":
   version "3.0.0"
@@ -1746,6 +1748,11 @@
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-5.5.0.tgz#146c2a29ee7d3bae4bf2fcb274636e264c813c45"
   integrity sha512-41qEJgBH/TWgo5NFSvBCJ1qkoi3Q6ONSF2avrHq1LVEZfYpdHmj0y9SuTK+u9ZhG1sYQKBL1AWXKyLWP4RaUoQ==
+
+"@types/sinon@7.0.11":
+  version "7.0.11"
+  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-7.0.11.tgz#6f28f005a36e779b7db0f1359b9fb9eef72aae88"
+  integrity sha512-6ee09Ugx6GyEr0opUIakmxIWFNmqYPjkqa3/BuxCBokA0klsOLPgMD5K4q40lH7/yZVuJVzOfQpd7pipwjngkQ==
 
 "@types/stack-utils@^1.0.1":
   version "1.0.1"

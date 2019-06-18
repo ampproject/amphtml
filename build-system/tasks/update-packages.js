@@ -119,15 +119,13 @@ function patchRegisterElement() {
 }
 
 /**
- * Closure Compiler doesn't recognize .mjs extension yet, so copy the file to
- * have a .js file extension.
+ * transformEs6Packages() doesn't work on subdirectories of dist/,
+ * and I can't figure out which option enables it.
+ * Just move "dist/amp/main.mjs" to "dist/amp.main.mjs" as a workaround.
  */
-function patchWorkerDom() {
+function moveWorkerDom() {
   const dir = 'node_modules/@ampproject/worker-dom/dist/';
-  fs.copyFileSync(
-    dir + 'unminified.index.safe.mjs',
-    dir + 'unminified.index.safe.mjs.patched.js'
-  );
+  fs.copyFileSync(dir + 'amp/main.mjs', dir + 'amp.main.mjs');
 }
 
 /**
@@ -228,7 +226,7 @@ async function updatePackages() {
   }
   patchWebAnimations();
   patchRegisterElement();
-  patchWorkerDom();
+  moveWorkerDom();
   transformEs6Packages();
 }
 
