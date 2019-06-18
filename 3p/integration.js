@@ -277,6 +277,7 @@ const AMP_EMBED_ALLOWED = {
   kuadio: true,
   'mantis-recommend': true,
   miximedia: true,
+  mgid: true,
   mywidget: true,
   opinary: true,
   outbrain: true,
@@ -293,7 +294,6 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
   runative: true,
   speakol: true,
-  mgid: true,
 };
 
 init(window);
