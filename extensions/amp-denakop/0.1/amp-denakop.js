@@ -17,6 +17,7 @@
 import * as utils from './utils';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
+import {getCookie, setCookie} from '../../../src/cookies';
 import {userAssert} from '../../../src/log';
 
 /** @const */
@@ -43,7 +44,7 @@ export class AmpDenakop extends AMP.BaseElement {
 
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     const whenVisible = viewer.whenFirstVisible();
-    const uxid = utils.getCookie('uxid');
+    const uxid = getCookie(this.win, 'uxid');
 
     whenVisible
         .then(() => {
@@ -62,8 +63,9 @@ export class AmpDenakop extends AMP.BaseElement {
           const doc = ampdoc.win.document;
           const body = ampdoc.getBody();
 
-          utils.setCookie('uxid', configObj['user']['uxid'],
-              configObj['settings']['topDomain'], 10);
+          setCookie(this.win, 'uxid', configObj['user']['uxid'],
+              Date.now() + 315360000000,
+              {domain: configObj['settings']['topDomain']});
 
           const stickyAdAttributes = utils.getStickyAdAttributes();
 
