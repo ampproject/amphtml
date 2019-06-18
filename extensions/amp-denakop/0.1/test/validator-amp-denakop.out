@@ -7,15 +7,21 @@ PASS
 |    <link rel="canonical" href="amps.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-|    <style amp-custom>
-|      amp-denakop {
-|        color: red;
-|      }
-|    </style>
+|    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+|    <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+|    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+|    <script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-1.0.js"></script>
 |    <script async custom-element="amp-denakop" src="https://cdn.ampproject.org/v0/amp-denakop-0.1.js"></script>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <amp-denakop layout="responsive" width="150" height="80"></amp-denakop>
+|    <amp-denakop data-tag-id="2819896d-f724" data-publisher-id="22" layout="nodisplay"></amp-denakop>
+|    <amp-iframe width="1" title="User Sync"
+|                height="1"
+|                sandbox="allow-scripts"
+|                frameborder="0"
+|                src="https://cdn.jsdelivr.net/npm/prebid-universal-creative@latest/dist/load-cookie.html?endpoint=appnexus&max_sync_count=5">
+|      <amp-img layout="fill" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" placeholder></amp-img>
+|    </amp-iframe>
 |  </body>
 |  </html>
