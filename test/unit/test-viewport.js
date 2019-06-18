@@ -23,10 +23,13 @@ import {
   stringifyViewportMeta,
   updateViewportMetaString,
 } from '../../src/service/viewport/viewport-impl';
-import {ViewportBindingDef} from '../../src/service/viewport/viewport-binding-def';
 import {ViewportBindingIosEmbedShadowRoot_} from '../../src/service/viewport/viewport-binding-ios-embed-sd';
 import {ViewportBindingIosEmbedWrapper_} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
 
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from '../../src/service/viewport/viewport-binding-def';
 import {ViewportBindingNatural_} from '../../src/service/viewport/viewport-binding-natural';
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
@@ -1729,4 +1732,69 @@ describe('createViewport', () => {
       });
     }
   );
+});
+
+describes.realWin('marginBottomOfLastChild', {}, env => {
+  let win;
+  let doc;
+  let element;
+  let firstChild;
+  let secondChild;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = env.win.document;
+
+    element = doc.createElement('div');
+    doc.body.appendChild(element);
+
+    firstChild = doc.createElement('h1');
+    firstChild.style.marginBottom = '11px';
+    firstChild.style.height = '1px';
+    element.appendChild(firstChild);
+
+    secondChild = doc.createElement('h2');
+    secondChild.style.marginBottom = '22px';
+    secondChild.style.height = '2px';
+    element.appendChild(secondChild);
+
+    toggleExperiment(win, 'margin-bottom-in-content-height', true, true);
+  });
+
+  it('should return the marginBottom of the last child', () => {
+    expect(marginBottomOfLastChild(win, element)).to.equal(22);
+  });
+
+  it('should return 0 if experiment is disabled', () => {
+    toggleExperiment(win, 'margin-bottom-in-content-height', false, true);
+    expect(marginBottomOfLastChild(win, element)).to.equal(0);
+  });
+
+  it('should return 0 if element has no children', () => {
+    expect(firstChild.children.length).to.equal(0);
+    expect(marginBottomOfLastChild(win, firstChild)).to.equal(0);
+  });
+
+  it('should skip elements that have zero height', () => {
+    secondChild.style.height = '0px';
+    expect(marginBottomOfLastChild(win, element)).to.equal(11);
+  });
+
+  it('should skip elements that are not position: static|relative', () => {
+    secondChild.style.position = 'absolute';
+    expect(marginBottomOfLastChild(win, element)).to.equal(11);
+
+    secondChild.style.position = 'static';
+    expect(marginBottomOfLastChild(win, element)).to.equal(22);
+
+    secondChild.style.position = 'fixed';
+    expect(marginBottomOfLastChild(win, element)).to.equal(11);
+
+    secondChild.style.position = 'relative';
+    expect(marginBottomOfLastChild(win, element)).to.equal(22);
+
+    secondChild.style.position = '-webkit-sticky'; // Still needed on Safari 12!
+    secondChild.style.position = 'sticky';
+    expect(marginBottomOfLastChild(win, element)).to.equal(11);
+  });
 });
