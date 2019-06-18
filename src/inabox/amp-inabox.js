@@ -45,6 +45,7 @@ import {
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {internalRuntimeVersion} from '../internal-version';
 import {isExperimentOn} from '../experiments';
+import {doNotTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
@@ -102,6 +103,7 @@ startupChunk(self.document, function initial() {
         installAmpdocServices(ampdoc, undefined, true);
         // We need the core services (viewer/resources) to start instrumenting
         perf.coreServicesAvailable();
+        doNotTrackImpression();
         registerIniLoadListener(ampdoc);
       });
       startupChunk(self.document, function builtins() {
