@@ -442,6 +442,14 @@ export class AmpStory extends AMP.BaseElement {
     // hover. (See 17654)
     this.element.removeAttribute('title');
 
+    // Remove text nodes which would be shown outside of the amp-story
+    const textNodes = Array.from(this.element.childNodes).filter(
+      node => node.nodeType === Node.TEXT_NODE
+    );
+    textNodes.forEach((node) => {
+      this.element.removeChild(node);
+    });
+
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', invocation => {
         const {args} = invocation;
