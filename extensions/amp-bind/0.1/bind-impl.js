@@ -56,11 +56,18 @@ const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
  */
 const MAX_MERGE_DEPTH = 10;
 
-/** @const {!Object<string, !Array<string>>} */
+/** @const {!Object<string, !Object<string, boolean>>} */
 const FORM_VALUE_PROPERTIES = {
-  'INPUT': ['checked', 'value'],
-  'OPTION': ['selected'],
-  'TEXTAREA': ['text'],
+  'INPUT': {
+    'checked': true,
+    'value': true,
+  },
+  'OPTION': {
+    'selected': true,
+  },
+  'TEXTAREA': {
+    'text': true,
+  },
 };
 
 /**
@@ -1192,8 +1199,8 @@ export class Bind {
    * @param {string} property
    */
   dispatchFormValueChangeEventIfNecessary_(element, property) {
-    const props = FORM_VALUE_PROPERTIES[element.tagName];
-    if (!props || !props.includes(property)) {
+    const isPropertyAFormValue = FORM_VALUE_PROPERTIES[element.tagName];
+    if (!isPropertyAFormValue || !isPropertyAFormValue[property]) {
       return;
     }
 
