@@ -74,27 +74,69 @@ describe('BindExpression', () => {
     });
 
     it('disallow: operators with side effects', () => {
-      expect(() => { evaluate('foo = 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo += 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo -= 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo *= 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo /= 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo %= 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo **= 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo <<= 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo >>= 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo >>>= 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo &= 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo ^= 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo |= 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo++', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo--', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('~foo', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo << 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo >> 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('foo >>> 1', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('new Object()', {foo: 0}); }).to.throw();
-      expect(() => { evaluate('delete foo', {foo: 0}); }).to.throw();
+      expect(() => {
+        evaluate('foo = 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo += 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo -= 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo *= 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo /= 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo %= 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo **= 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo <<= 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo >>= 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo >>>= 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo &= 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo ^= 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo |= 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo++', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo--', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('~foo', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo << 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo >> 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('foo >>> 1', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('new Object()', {foo: 0});
+      }).to.throw();
+      expect(() => {
+        evaluate('delete foo', {foo: 0});
+      }).to.throw();
     });
 
     /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators */
@@ -109,10 +151,18 @@ describe('BindExpression', () => {
       expect(evaluate('new')).to.be.null;
       expect(evaluate('super')).to.be.null;
 
-      expect(() => { evaluate('function*'); }).to.throw();
-      expect(() => { evaluate('/ab+c/i'); }).to.throw();
-      expect(() => { evaluate('yield*'); }).to.throw();
-      expect(() => { evaluate('async function*'); }).to.throw();
+      expect(() => {
+        evaluate('function*');
+      }).to.throw();
+      expect(() => {
+        evaluate('/ab+c/i');
+      }).to.throw();
+      expect(() => {
+        evaluate('yield*');
+      }).to.throw();
+      expect(() => {
+        evaluate('async function*');
+      }).to.throw();
     });
   });
 
@@ -162,8 +212,7 @@ describe('BindExpression', () => {
       expect(evaluate('"abc".indexOf("b")')).to.equal(1);
       expect(evaluate('"aaa".lastIndexOf("a")')).to.equal(2);
       expect(evaluate('"abc".slice(0, 2)')).to.equal('ab');
-      expect(evaluate('"a-b-c".split("-")'))
-          .to.deep.equal(['a', 'b', 'c']);
+      expect(evaluate('"a-b-c".split("-")')).to.deep.equal(['a', 'b', 'c']);
       expect(evaluate('"abc".substr(1)')).to.equal('bc');
       expect(evaluate('"abc".substring(0, 2)')).to.equal('ab');
       expect(evaluate('"ABC".toLowerCase()')).to.equal('abc');
@@ -215,10 +264,12 @@ describe('BindExpression', () => {
       expect(evaluate('foo', {foo: 'bar'})).to.equal('bar');
       expect(evaluate('foo', {foo: 1})).to.equal(1);
       expect(evaluate('foo', {foo: [1, 2, 3]})).to.deep.equal([1, 2, 3]);
-      expect(evaluate('foo', {foo: {'bar': 'qux'}}))
-          .to.deep.equal({bar: 'qux'});
-      expect(evaluate('{"foo": bar}', {bar: 'qux'}))
-          .to.deep.equal({foo: 'qux'});
+      expect(evaluate('foo', {foo: {'bar': 'qux'}})).to.deep.equal({
+        bar: 'qux',
+      });
+      expect(evaluate('{"foo": bar}', {bar: 'qux'})).to.deep.equal({
+        foo: 'qux',
+      });
       expect(evaluate('[foo]', {foo: 'bar'})).to.deep.equal(['bar']);
       expect(evaluate('foo[1]', {foo: ['b', 'c']})).to.equal('c');
       expect(evaluate('foo.length', {foo: [1, 2, 3]})).to.equal(3);
@@ -230,17 +281,15 @@ describe('BindExpression', () => {
     it('literals', () => {
       expect(evaluate('[]')).to.deep.equal([]);
       expect(evaluate('["a", "b"].length')).to.equal(2);
-      expect(evaluate('[1, "a", [], {}]'))
-          .to.deep.equal([1, 'a', [], {}]);
+      expect(evaluate('[1, "a", [], {}]')).to.deep.equal([1, 'a', [], {}]);
       expect(evaluate('["a", "b"][1]')).to.equal('b');
       expect(evaluate('["a", foo][1]', {foo: 'b'})).to.equal('b');
     });
 
     it('trailing commas in literals', () => {
-      expect(evaluate('[1,2,3,]')).to.deep.equal([1,2,3]);
+      expect(evaluate('[1,2,3,]')).to.deep.equal([1, 2, 3]);
       expect(evaluate('["a", "b",].length')).to.equal(2);
-      expect(evaluate('[1, "a", [], {},]'))
-          .to.deep.equal([1, 'a', [], {}]);
+      expect(evaluate('[1, "a", [], {},]')).to.deep.equal([1, 'a', [], {}]);
       expect(evaluate('["a", "b",][1]')).to.equal('b');
       expect(evaluate('["a", foo,][1]', {foo: 'b'})).to.equal('b');
     });
@@ -255,29 +304,44 @@ describe('BindExpression', () => {
     });
 
     it('prototype functions', () => {
-      expect(evaluate('["a", "b"].concat(["c", "d"])'))
-          .to.deep.equal(['a', 'b', 'c', 'd']);
+      expect(evaluate('["a", "b"].concat(["c", "d"])')).to.deep.equal([
+        'a',
+        'b',
+        'c',
+        'd',
+      ]);
       expect(evaluate('["a", "a"].indexOf("a")')).to.equal(0);
       expect(evaluate('["a", "b", "c"].join("-")')).to.equal('a-b-c');
       expect(evaluate('["a", "a"].lastIndexOf("a")')).to.equal(1);
-      expect(evaluate('["a", "b", "c"].slice(1, 2)'))
-          .to.deep.equal(['b']);
+      expect(evaluate('["a", "b", "c"].slice(1, 2)')).to.deep.equal(['b']);
       expect(evaluate('[1, 2, 3, 4, 5].includes(3)')).to.be.true;
     });
 
     it('custom Array#sort()', () => {
       expect(evaluate('[11, 1, 2].sort()')).to.deep.equal([1, 11, 2]);
-      expect(evaluate('[11, 1, 2].sort((x, y) => x - y)'))
-          .to.deep.equal([1, 2, 11]);
+      expect(evaluate('[11, 1, 2].sort((x, y) => x - y)')).to.deep.equal([
+        1,
+        2,
+        11,
+      ]);
 
       const a = [11, 1, 2];
       expect(evaluate('a.sort()', {a})).to.deep.equal([1, 11, 2]);
-      expect(evaluate('a.sort((x, y) => x - y)', {a}))
-          .to.deep.equal([1, 2, 11]);
+      expect(evaluate('a.sort((x, y) => x - y)', {a})).to.deep.equal([
+        1,
+        2,
+        11,
+      ]);
 
       // Sort should be out-of-place i.e. does not sort the caller.
-      expect(evaluate('a.sort().concat(a)', {a}))
-          .to.deep.equal([1, 11, 2, 11, 1, 2]);
+      expect(evaluate('a.sort().concat(a)', {a})).to.deep.equal([
+        1,
+        11,
+        2,
+        11,
+        1,
+        2,
+      ]);
     });
 
     it('custom Array#splice()', () => {
@@ -293,8 +357,12 @@ describe('BindExpression', () => {
       expect(evaluate('a.splice(1, 1, 47)', {a})).to.deep.equal([1, 47, 3]);
 
       // Splice should be out-of-place i.e. does not splice the caller.
-      expect(evaluate('a.splice(1).concat(a)', {a}))
-          .to.deep.equal([1, 1, 2, 3]);
+      expect(evaluate('a.splice(1).concat(a)', {a})).to.deep.equal([
+        1,
+        1,
+        2,
+        3,
+      ]);
     });
 
     it('non-whitelisted functions', () => {
@@ -361,6 +429,8 @@ describe('BindExpression', () => {
       expect(evaluate('max(0, 1)')).to.equal(1);
       expect(evaluate('min(0, 1)')).to.equal(0);
       expect(evaluate('round(0.6)')).to.equal(1);
+      expect(evaluate('sqrt(4)')).to.equal(2);
+      expect(evaluate('log(20.2)')).to.equal(3.005682604407159);
       const r = evaluate('random()');
       expect(r).to.be.at.least(0);
       expect(r).to.be.at.below(1);
@@ -368,6 +438,8 @@ describe('BindExpression', () => {
 
       // Functions should not conflict with scope variables.
       expect(evaluate('abs(-2) + abs', {abs: 2})).to.equal(4);
+      expect(evaluate('sqrt(4) + sqrt', {sqrt: 2})).to.equal(4);
+      expect(evaluate('log(20) + log', {log: 1})).to.equal(3.995732273553991);
 
       // Don't support non-whitelisted functions.
       expect(() => {
@@ -381,13 +453,23 @@ describe('BindExpression', () => {
       expect(() => {
         evaluate('Math.abs(-1)', {Math});
       }).to.throw(unsupportedFunctionError);
+
+      expect(() => {
+        evaluate('Math.sqrt(4)', {Math});
+      }).to.throw(unsupportedFunctionError);
+
+      expect(() => {
+        evaluate('Math.log(20.2)', {Math});
+      }).to.throw(unsupportedFunctionError);
     });
 
     it('encodeURI and encodeURIComponent', () => {
-      expect(evaluate('encodeURI("http://google.com/s p a c e.html")'))
-          .to.equal('http://google.com/s%20p%20a%20c%20e.html');
-      expect(evaluate('encodeURIComponent("http://google.com/foo?foo=bar")'))
-          .to.equal('http%3A%2F%2Fgoogle.com%2Ffoo%3Ffoo%3Dbar');
+      expect(
+        evaluate('encodeURI("http://google.com/s p a c e.html")')
+      ).to.equal('http://google.com/s%20p%20a%20c%20e.html');
+      expect(
+        evaluate('encodeURIComponent("http://google.com/foo?foo=bar")')
+      ).to.equal('http%3A%2F%2Fgoogle.com%2Ffoo%3Ffoo%3Dbar');
     });
 
     it('splice()', () => {
@@ -417,26 +499,45 @@ describe('BindExpression', () => {
     });
 
     it('disallow: function declarations', () => {
-      expect(() => { evaluate('(function() {})'); }).to.throw();
-      expect(() => { evaluate('function foo() {}'); }).to.throw();
-      expect(() => { evaluate('new Function()'); }).to.throw();
-      expect(() => { evaluate('Function()'); }).to.throw();
-      expect(() => { evaluate('() => {}'); }).to.throw();
-      expect(() => { evaluate('class Foo {}'); }).to.throw();
+      expect(() => {
+        evaluate('(function() {})');
+      }).to.throw();
+      expect(() => {
+        evaluate('function foo() {}');
+      }).to.throw();
+      expect(() => {
+        evaluate('new Function()');
+      }).to.throw();
+      expect(() => {
+        evaluate('Function()');
+      }).to.throw();
+      expect(() => {
+        evaluate('() => {}');
+      }).to.throw();
+      expect(() => {
+        evaluate('class Foo {}');
+      }).to.throw();
     });
 
     it('disallow: invocation of custom functions in scope', () => {
       const scope = {
         foo: {
-          bar: () => { 'bar'; },
+          bar: () => {
+            'bar';
+          },
         },
-        baz: () => { 'baz'; },
+        baz: () => {
+          'baz';
+        },
         qux: window.Function,
       };
       // baz() throws a parse error because functions must have a caller.
-      expect(() => { evaluate('baz()', scope); }).to.throw();
-      expect(() => { evaluate('foo.bar()', scope); })
-          .to.throw(Error, unsupportedFunctionError);
+      expect(() => {
+        evaluate('baz()', scope);
+      }).to.throw();
+      expect(() => {
+        evaluate('foo.bar()', scope);
+      }).to.throw(Error, unsupportedFunctionError);
       expect(() => {
         evaluate('foo.qux("a", "return a")', scope);
       }).to.throw(unsupportedFunctionError);
@@ -478,8 +579,11 @@ describe('BindExpression', () => {
       // Only allow objects in arguments for some functions.
       expect(evaluate('keys({x: 2})')).to.deep.equal(['x']);
       expect(evaluate('values({x: 2})')).to.deep.equal([2]);
-      expect(evaluate('splice([1, 3], 1, 0, {x: 2})'))
-          .to.deep.equal([1, {x: 2}, 3]);
+      expect(evaluate('splice([1, 3], 1, 0, {x: 2})')).to.deep.equal([
+        1,
+        {x: 2},
+        3,
+      ]);
     });
   });
 
@@ -530,13 +634,21 @@ describe('BindExpression', () => {
     });
 
     it('disallow: loops', () => {
-      expect(() => { evaluate('if (foo) "bar"', {foo: 0}); }).to.throw();
+      expect(() => {
+        evaluate('if (foo) "bar"', {foo: 0});
+      }).to.throw();
       expect(() => {
         evaluate('switch (foo) { case 0: "bar" }', {foo: 0});
       }).to.throw();
-      expect(() => { evaluate('for (;;) {}'); }).to.throw();
-      expect(() => { evaluate('while (true) {}'); }).to.throw();
-      expect(() => { evaluate('do {} while (true)'); }).to.throw();
+      expect(() => {
+        evaluate('for (;;) {}');
+      }).to.throw();
+      expect(() => {
+        evaluate('while (true) {}');
+      }).to.throw();
+      expect(() => {
+        evaluate('do {} while (true)');
+      }).to.throw();
       expect(() => {
         evaluate('for (var i in foo) {}', {foo: [1, 2, 3]});
       }).to.throw();
@@ -554,16 +666,36 @@ describe('BindExpression', () => {
       expect(evaluate('NaN')).to.be.null;
       expect(evaluate('undefined')).to.be.null;
 
-      expect(() => { evaluate('eval()'); }).to.throw();
-      expect(() => { evaluate('uneval()'); }).to.throw();
-      expect(() => { evaluate('isFinite()'); }).to.throw();
-      expect(() => { evaluate('isNaN()'); }).to.throw();
-      expect(() => { evaluate('parseFloat()'); }).to.throw();
-      expect(() => { evaluate('parseInt()'); }).to.throw();
-      expect(() => { evaluate('decodeURI()'); }).to.throw();
-      expect(() => { evaluate('decodeURIComponent()'); }).to.throw();
-      expect(() => { evaluate('escape()'); }).to.throw();
-      expect(() => { evaluate('unescape()'); }).to.throw();
+      expect(() => {
+        evaluate('eval()');
+      }).to.throw();
+      expect(() => {
+        evaluate('uneval()');
+      }).to.throw();
+      expect(() => {
+        evaluate('isFinite()');
+      }).to.throw();
+      expect(() => {
+        evaluate('isNaN()');
+      }).to.throw();
+      expect(() => {
+        evaluate('parseFloat()');
+      }).to.throw();
+      expect(() => {
+        evaluate('parseInt()');
+      }).to.throw();
+      expect(() => {
+        evaluate('decodeURI()');
+      }).to.throw();
+      expect(() => {
+        evaluate('decodeURIComponent()');
+      }).to.throw();
+      expect(() => {
+        evaluate('escape()');
+      }).to.throw();
+      expect(() => {
+        evaluate('unescape()');
+      }).to.throw();
 
       expect(evaluate('Object')).to.be.null;
       expect(evaluate('Function')).to.be.null;
@@ -623,8 +755,8 @@ describe('BindExpression', () => {
     });
 
     it('disallow: exceeding maximum AST size', () => {
-      expect(new BindExpression('1 + 1', {}, /* maxAstSize */ 3))
-          .to.not.be.null;
+      expect(new BindExpression('1 + 1', {}, /* maxAstSize */ 3)).to.not.be
+        .null;
 
       // The expression '1 + 1' should have an AST size of 3 -- one for each
       // literal, and a PLUS expression wrapping them.
@@ -641,16 +773,16 @@ describe('BindExpression', () => {
       expect(add.getExpressionSize()).to.equal(3);
 
       // The expression add(1, 1) should have an AST size of 3.
-      expect(new BindExpression('add(1, 1)', {add}, /* maxAstSize */ 3))
-          .to.not.be.null;
+      expect(new BindExpression('add(1, 1)', {add}, /* maxAstSize */ 3)).to.not
+        .be.null;
 
       expect(() => {
         new BindExpression('add(1, 1)', {add}, /* maxAstSize */ 2);
       }).to.throw(expressionSizeExceededError);
 
       // The expression add(1, 1 + 1) should have an AST size of 5.
-      expect(new BindExpression('add(1, 1 + 1)', {add}, /* maxAstSize */ 5))
-          .to.not.be.null;
+      expect(new BindExpression('add(1, 1 + 1)', {add}, /* maxAstSize */ 5)).to
+        .not.be.null;
 
       expect(() => {
         new BindExpression('add(1, 1 + 1)', {add}, /* maxAstSize */ 4);
@@ -692,27 +824,51 @@ describe('BindExpression', () => {
     });
 
     it('disallow: usage other than as function parameter', () => {
-      expect(() => { evaluate('() => 123'); }).to.throw();
-      expect(() => { evaluate('x => 123'); }).to.throw();
-      expect(() => { evaluate('(x, y) => 123'); }).to.throw();
+      expect(() => {
+        evaluate('() => 123');
+      }).to.throw();
+      expect(() => {
+        evaluate('x => 123');
+      }).to.throw();
+      expect(() => {
+        evaluate('(x, y) => 123');
+      }).to.throw();
 
-      expect(() => { evaluate('(() => 123).constructor()'); }).to.throw();
-      expect(() => { evaluate('(x => 123).constructor()'); }).to.throw();
-      expect(() => { evaluate('((x, y) => 123).constructor()'); }).to.throw();
+      expect(() => {
+        evaluate('(() => 123).constructor()');
+      }).to.throw();
+      expect(() => {
+        evaluate('(x => 123).constructor()');
+      }).to.throw();
+      expect(() => {
+        evaluate('((x, y) => 123).constructor()');
+      }).to.throw();
 
-      expect(() => { evaluate('(() => 123).name'); }).to.throw();
-      expect(() => { evaluate('(x => 123).name'); }).to.throw();
-      expect(() => { evaluate('((x, y) => 123).name'); }).to.throw();
+      expect(() => {
+        evaluate('(() => 123).name');
+      }).to.throw();
+      expect(() => {
+        evaluate('(x => 123).name');
+      }).to.throw();
+      expect(() => {
+        evaluate('((x, y) => 123).name');
+      }).to.throw();
     });
 
     it('disallow: `arguments` or `this`', () => {
       const a = [1, 2, 3];
-      expect(evaluate('a.map(() => arguments)', {a}))
-          .to.deep.equal([null, null, null]);
+      expect(evaluate('a.map(() => arguments)', {a})).to.deep.equal([
+        null,
+        null,
+        null,
+      ]);
       expect(evaluate('a.reduce(() => arguments)', {a})).to.deep.equal(null);
 
-      expect(evaluate('a.map(() => this)', {a}))
-          .to.deep.equal([null, null, null]);
+      expect(evaluate('a.map(() => this)', {a})).to.deep.equal([
+        null,
+        null,
+        null,
+      ]);
       expect(evaluate('a.reduce(() => this)', {a})).to.deep.equal(null);
     });
   });

@@ -23,11 +23,13 @@
 
 import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
-import {dev, initLogConstructor} from '../log';
+import {dev, initLogConstructor, setReportError} from '../log';
 import {exponentialBackoff} from '../exponential-backoff';
+import {reportError} from '../error';
 import {urls} from '../config';
 
 initLogConstructor();
+setReportError(reportError);
 
 /** @const {string} */
 const TAG = 'web-worker';
@@ -58,8 +60,12 @@ self.addEventListener('unhandledrejection', errorHandler_);
 self.addEventListener('error', errorHandler_);
 
 self.addEventListener('message', function(event) {
-  const {method, args, id, scope} =
-    /** @type {ToWorkerMessageDef} */ (event.data);
+  const {
+    method,
+    args,
+    id,
+    scope,
+  } = /** @type {ToWorkerMessageDef} */ (event.data);
   let returnValue;
 
   // TODO(choumx): Remove this fallback when we confirm there are no errors.
@@ -72,13 +78,11 @@ self.addEventListener('message', function(event) {
   switch (method) {
     case 'bind.init':
       if (evaluator) {
-        dev().error(TAG, 'Evaluator already exists for scope:', scope);
-        returnValue = false;
-      } else {
-        const allowUrlProperties = args[0];
-        evaluators_[scope] = new BindEvaluator(allowUrlProperties);
-        returnValue = true;
+        dev().warn(TAG, 'Overwriting existing evaluator for scope:', scope);
       }
+      const allowUrlProperties = args[0];
+      evaluators_[scope] = new BindEvaluator(allowUrlProperties);
+      returnValue = true;
       break;
     case 'bind.addBindings':
       returnValue = evaluator.addBindings.apply(evaluator, args);
@@ -100,12 +104,15 @@ self.addEventListener('message', function(event) {
       dev().error(TAG, 'Unrecognized method: %s', method);
   }
 
-  const message =
-    /** @type {FromWorkerMessageDef} */ ({method, returnValue, id});
+  const message = /** @type {FromWorkerMessageDef} */ ({
+    method,
+    returnValue,
+    id,
+  });
   // `message` may only contain values or objects handled by the
   // structured clone algorithm.
   // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
-  self./*OK*/postMessage(message);
+  self./*OK*/ postMessage(message);
 });
 
 /**
@@ -121,16 +128,25 @@ function report_(e) {
     e = new Error(e);
   }
   const config = self.AMP_CONFIG || {};
-  const url = urls.errorReporting + '?' +
-      'ww=1' + // Tags request as coming from a worker.
-      '&v=' + encodeURIComponent(config.v) +
-      '&m=' + encodeURIComponent(e.message) +
-      '&ca=' + (config.canary ? 1 : 0) +
-      '&s=' + encodeURIComponent(e.stack || '');
-  fetch(url, /** @type {!RequestInit} */ ({
-    // We don't care about the response.
-    mode: 'no-cors',
-  })).catch(reason => {
-    console./*OK*/error(reason);
+  const url =
+    urls.errorReporting +
+    '?' +
+    'ww=1' + // Tags request as coming from a worker.
+    '&v=' +
+    encodeURIComponent(config.v) +
+    '&m=' +
+    encodeURIComponent(e.message) +
+    '&ca=' +
+    (config.canary ? 1 : 0) +
+    '&s=' +
+    encodeURIComponent(e.stack || '');
+  fetch(
+    url,
+    /** @type {!RequestInit} */ ({
+      // We don't care about the response.
+      mode: 'no-cors',
+    })
+  ).catch(reason => {
+    console./*OK*/ error(reason);
   });
 }

@@ -47,10 +47,8 @@ const TIMEOUT_ = 30000;
  * Exposes CID API for cache-served pages without a viewer.
  */
 export class CacheCidApi {
-
   /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
-
     /** @private {!./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -104,7 +102,8 @@ export class CacheCidApi {
     });
 
     // Make the XHR request to the cache endpoint.
-    return this.timer_.timeoutPromise(
+    return this.timer_
+      .timeoutPromise(
         TIMEOUT_,
         Services.xhrFor(this.ampdoc_.win).fetchJson(url, {
           method: 'POST',
@@ -112,30 +111,33 @@ export class CacheCidApi {
           credentials: 'include',
           mode: 'cors',
           body: payload,
-        })).then(res => {
-      return res.json().then(response => {
-        if (response['optOut']) {
-	            return null;
-	          }
-	          const cid = response['publisherClientId'];
-        if (!cid && useAlternate && response['alternateUrl']) {
-          // If an alternate url is provided, try again with the alternate url
-          // The client is still responsible for appending API keys to the URL.
-          const alt = `${response['alternateUrl']}?key=${SERVICE_KEY_}`;
-          return this.fetchCid_(dev().assertString(alt), false);
-	          }
-        return cid;
-	        });
-    }).catch(e => {
-      if (e && e.response) {
-        e.response.json().then(res => {
-          dev().error(TAG_, JSON.stringify(res));
+        })
+      )
+      .then(res => {
+        return res.json().then(response => {
+          if (response['optOut']) {
+            return null;
+          }
+          const cid = response['publisherClientId'];
+          if (!cid && useAlternate && response['alternateUrl']) {
+            // If an alternate url is provided, try again with the alternate url
+            // The client is still responsible for appending API keys to the URL.
+            const alt = `${response['alternateUrl']}?key=${SERVICE_KEY_}`;
+            return this.fetchCid_(dev().assertString(alt), false);
+          }
+          return cid;
         });
-      } else {
-        dev().error(TAG_, e);
-      }
-      return null;
-    });
+      })
+      .catch(e => {
+        if (e && e.response) {
+          e.response.json().then(res => {
+            dev().error(TAG_, JSON.stringify(res));
+          });
+        } else {
+          dev().error(TAG_, e);
+        }
+        return null;
+      });
   }
 
   /**
@@ -146,8 +148,10 @@ export class CacheCidApi {
    */
   scopeCid_(publisherCid, scope) {
     const text = publisherCid + ';' + scope;
-    return Services.cryptoFor(this.ampdoc_.win).sha384Base64(text).then(enc => {
-      return 'amp-' + enc;
-    });
+    return Services.cryptoFor(this.ampdoc_.win)
+      .sha384Base64(text)
+      .then(enc => {
+        return 'amp-' + enc;
+      });
   }
 }

@@ -20,6 +20,7 @@ import {
   invokeWebWorker,
 } from '../../../src/web-worker/amp-worker';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {installXhrService} from '../../../src/service/xhr-impl';
 
 describe('invokeWebWorker', () => {
@@ -29,6 +30,7 @@ describe('invokeWebWorker', () => {
   let ampWorker;
   let postMessageStub;
   let fakeWorker;
+  let fetchTextCallStub;
   let workerReadyPromise;
 
   beforeEach(() => {
@@ -52,12 +54,15 @@ describe('invokeWebWorker', () => {
 
     // Stub xhr.fetchText() to return a resolved promise.
     installXhrService(fakeWin);
-    sandbox.stub(Services.xhrFor(fakeWin), 'fetchText').callsFake(
-        () => Promise.resolve({
+    fetchTextCallStub = sandbox
+      .stub(Services.xhrFor(fakeWin), 'fetchText')
+      .callsFake(() =>
+        Promise.resolve({
           text() {
             return Promise.resolve();
           },
-        }));
+        })
+      );
 
     ampWorker = ampWorkerForTesting(fakeWin);
     workerReadyPromise = ampWorker.fetchPromiseForTesting();
@@ -69,13 +74,15 @@ describe('invokeWebWorker', () => {
 
   it('should check if Worker is supported', () => {
     fakeWin.Worker = undefined;
-    return expect(invokeWebWorker(fakeWin, 'foo'))
-        .to.eventually.be.rejectedWith('not supported');
+    return expect(
+      invokeWebWorker(fakeWin, 'foo')
+    ).to.eventually.be.rejectedWith('not supported');
   });
 
   it('should send and receive a message', () => {
     // Sending.
     const invokePromise = invokeWebWorker(fakeWin, 'foo', ['bar', 123]);
+    getMode(fakeWin).bypassInterceptorForDev = true;
 
     return workerReadyPromise.then(() => {
       expect(postMessageStub).to.have.been.calledWithMatch({
@@ -83,6 +90,14 @@ describe('invokeWebWorker', () => {
         args: sinon.match(['bar', 123]),
         id: 0,
       });
+
+      expect(fetchTextCallStub).to.have.been.calledWithMatch(
+        'http://localhost:9876/dist/ww.js',
+        {
+          ampCors: false,
+          bypassInterceptorForDev: true,
+        }
+      );
 
       // Receiving.
       const data = {
@@ -104,21 +119,27 @@ describe('invokeWebWorker', () => {
     const qux = invokeWebWorker(fakeWin, 'qux', ['qux-arg']);
 
     return workerReadyPromise.then(() => {
-      fakeWorker.onmessage({data: {
-        method: 'bar',
-        returnValue: 'bar-retVal',
-        id: 1,
-      }});
-      fakeWorker.onmessage({data: {
-        method: 'qux',
-        returnValue: 'qux-retVal',
-        id: 2,
-      }});
-      fakeWorker.onmessage({data: {
-        method: 'foo',
-        returnValue: 'foo-retVal',
-        id: 0,
-      }});
+      fakeWorker.onmessage({
+        data: {
+          method: 'bar',
+          returnValue: 'bar-retVal',
+          id: 1,
+        },
+      });
+      fakeWorker.onmessage({
+        data: {
+          method: 'qux',
+          returnValue: 'qux-retVal',
+          id: 2,
+        },
+      });
+      fakeWorker.onmessage({
+        data: {
+          method: 'foo',
+          returnValue: 'foo-retVal',
+          id: 0,
+        },
+      });
 
       return Promise.all([foo, bar, qux]).then(values => {
         expect(values[0]).to.equal('foo-retVal');
@@ -147,21 +168,27 @@ describe('invokeWebWorker', () => {
         id: 2,
       });
 
-      fakeWorker.onmessage({data: {
-        method: 'foo',
-        returnValue: 'three',
-        id: 2,
-      }});
-      fakeWorker.onmessage({data: {
-        method: 'foo',
-        returnValue: 'one',
-        id: 0,
-      }});
-      fakeWorker.onmessage({data: {
-        method: 'foo',
-        returnValue: 'two',
-        id: 1,
-      }});
+      fakeWorker.onmessage({
+        data: {
+          method: 'foo',
+          returnValue: 'three',
+          id: 2,
+        },
+      });
+      fakeWorker.onmessage({
+        data: {
+          method: 'foo',
+          returnValue: 'one',
+          id: 0,
+        },
+      });
+      fakeWorker.onmessage({
+        data: {
+          method: 'foo',
+          returnValue: 'two',
+          id: 1,
+        },
+      });
 
       return Promise.all([one, two, three]).then(values => {
         expect(values[0]).to.equal('one');
@@ -180,22 +207,28 @@ describe('invokeWebWorker', () => {
       expect(errorStub.callCount).to.equal(0);
 
       // Unexpected `id` value.
-      fakeWorker.onmessage({data: {
-        method: 'foo',
-        returnValue: undefined,
-        id: 3,
-      }});
+      fakeWorker.onmessage({
+        data: {
+          method: 'foo',
+          returnValue: undefined,
+          id: 3,
+        },
+      });
       expect(errorStub.callCount).to.equal(1);
       expect(errorStub).to.have.been.calledWith('web-worker');
 
       // Unexpected method at valid `id`.
-      allowConsoleError(() => { expect(() => {
-        fakeWorker.onmessage({data: {
-          method: 'bar',
-          returnValue: undefined,
-          id: 0,
-        }});
-      }).to.throw('mismatched method'); });
+      allowConsoleError(() => {
+        expect(() => {
+          fakeWorker.onmessage({
+            data: {
+              method: 'bar',
+              returnValue: undefined,
+              id: 0,
+            },
+          });
+        }).to.throw('mismatched method');
+      });
     });
   });
 
@@ -205,11 +238,13 @@ describe('invokeWebWorker', () => {
     return workerReadyPromise.then(() => {
       expect(ampWorker.hasPendingMessages()).to.be.true;
 
-      fakeWorker.onmessage({data: {
-        method: 'foo',
-        returnValue: 'abc',
-        id: 0,
-      }});
+      fakeWorker.onmessage({
+        data: {
+          method: 'foo',
+          returnValue: 'abc',
+          id: 0,
+        },
+      });
 
       expect(ampWorker.hasPendingMessages()).to.be.false;
     });

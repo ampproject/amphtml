@@ -22,7 +22,7 @@ FAIL
 |  <!doctype html>
 |  <html ⚡ actions>
 >> ^~~~~~~~~
-feature_tests/amp_actions.html:22:0 The attribute 'actions' may not appear in tag 'html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/amp_actions.html:22:0 The attribute 'actions' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">

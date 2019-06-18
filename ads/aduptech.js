@@ -30,7 +30,6 @@ export function aduptech(global, data) {
 
   // load aduptech js api
   loadScript(global, 'https://s.d.adup-tech.com/jsapi', () => {
-
     // force responsive ads for amp
     data.responsive = true;
 

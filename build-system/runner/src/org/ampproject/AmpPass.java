@@ -49,15 +49,19 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   private final ImmutableMap<String, Node> assignmentReplacements;
   private final ImmutableMap<String, Node> prodAssignmentReplacements;
   final boolean isProd;
+  private final String amp_version;
 
   public AmpPass(AbstractCompiler compiler, boolean isProd,
         ImmutableSet<String> stripTypeSuffixes,
-        ImmutableMap<String, Node> assignmentReplacements, ImmutableMap<String, Node> prodAssignmentReplacements) {
+        ImmutableMap<String, Node> assignmentReplacements,
+        ImmutableMap<String, Node> prodAssignmentReplacements,
+        String amp_version) {
     this.compiler = compiler;
     this.stripTypeSuffixes = stripTypeSuffixes;
     this.isProd = isProd;
     this.assignmentReplacements = assignmentReplacements;
     this.prodAssignmentReplacements = prodAssignmentReplacements;
+    this.amp_version = amp_version;
   }
 
   @Override public void process(Node externs, Node root) {
@@ -86,6 +90,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
         maybeReplaceRValueInVar(n, prodAssignmentReplacements);
       }
       maybeReplaceRValueInVar(n, assignmentReplacements);
+      maybeReplaceCallWithVersion(n, parent);
     }
   }
 
@@ -181,6 +186,22 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
       }
     }
     return false;
+  }
+
+  private void maybeReplaceCallWithVersion(Node n, Node parent) {
+    if (n == null || !n.isCall() || amp_version.isEmpty()) {
+      return;
+    }
+
+    String name = buildQualifiedName(n);
+    if (!name.equals("internalRuntimeVersion$$module$src$internal_version()")) {
+      return;
+    }
+
+    Node version =  IR.string(amp_version);
+    version.useSourceInfoIfMissingFrom(n);
+    parent.replaceChild(n, version);
+    compiler.reportChangeToEnclosingScope(parent);
   }
 
   private void maybeReplaceRValueInVar(Node n, Map<String, Node> map) {

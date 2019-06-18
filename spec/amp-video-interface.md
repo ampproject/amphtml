@@ -57,14 +57,14 @@ component's visual area.
 - The video can be dragged and repositioned by the user on a different corner.
 - Multiple videos on the same page can be docked.
 
-In order to use this attribute, the [`amp-video-docking`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md)
+In order to use this attribute, the [`amp-video-docking`](https://amp.dev/documentation/components/amp-video-docking)
 extension script must be present:
 
 ```
 <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
 ```
 
-For more details, see [documentation on the docking extension itself.](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md)
+For more details, see [documentation on the docking extension itself.](https://amp.dev/documentation/components/amp-video-docking)
 
 <a id="rotate-to-fullscreen"></a>
 

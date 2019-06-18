@@ -371,7 +371,7 @@ A **binding** is a special attribute of the form `[property]` that links an elem
 
 When the **state** changes, expressions are re-evaluated and the bound elements' properties are updated with the new expression results.
 
-`amp-bind` supports data bindings on four types of element state:
+`amp-bind` supports data bindings on five types of element state:
 
 <table>
   <tr>
@@ -398,6 +398,11 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Size of <a href="https://www.ampproject.org/docs/reference/components">AMP elements</a></td>
     <td><code>[width]</code><br><code>[height]</code></td>
     <td>Changes the width and/or height of the AMP element.</td>
+  </tr>
+  <tr>
+    <td>Accessibility states and properties</td>
+    <td><code>[aria-hidden]</code><br><code>[aria-label]</code><br>etc.</td>
+    <td>Used for dynamically updating information available to assistive technologies like screen readers.</td>
   </tr>
   <tr>
     <td>Element-specific attributes</td>
@@ -551,8 +556,8 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;textarea&gt;</code></td>
-    <td><code>[autocomplete]</code><br><code>[autofocus]</code><br><code>[cols]</code><br><code>[disabled]</code><br><code>[maxlength]</code><br><code>[minlength]</code><br><code>[placeholder]</code><br><code>[readonly]</code><br><code>[required]</code><br><code>[rows]</code><br><code>[selectiondirection]</code><br><code>[selectionend]</code><br><code>[selectionstart]</code><br><code>[spellcheck]</code><br><code>[wrap]</code></td>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes">textarea attributes</a>.</td>
+    <td><code>[autocomplete]</code><br><code>[autofocus]</code><br><code>[cols]</code><br><code>[disabled]</code><br><code>[defaultText]</code><br><code>[maxlength]</code><br><code>[minlength]</code><br><code>[placeholder]</code><br><code>[readonly]</code><br><code>[required]</code><br><code>[rows]</code><br><code>[selectiondirection]</code><br><code>[selectionend]</code><br><code>[selectionstart]</code><br><code>[spellcheck]</code><br><code>[wrap]</code></td>
+    <td>Use <code>[defaultText]</code> to update initial text, and <code>[text]</code> to update current text.<br>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes">textarea attributes</a>.</td>
   </tr>
 </table>
 <sup>*</sup>Denotes bindable attributes that don't have a non-bindable counterpart.

@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Gauti nuorodą',
   },
@@ -111,22 +114,25 @@ const strings = {
     string: 'Padidinkite lango aukštį, kad galėtumėte peržiūrėti šią funkciją',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Padidinkite lango aukštį ir plotį, kad galėtumėte peržiūrėti ' +
-        'šią funkciją',
+    string:
+      'Padidinkite lango aukštį ir plotį, kad galėtumėte peržiūrėti ' +
+      'šią funkciją',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Padidinkite lango plotį, kad galėtumėte peržiūrėti šią funkciją',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Turite įgalinti AMP istorijos eksperimentą, kad galėtumėte ' +
-        'peržiūrėti šį turinį.',
+    string:
+      'Turite įgalinti AMP istorijos eksperimentą, kad galėtumėte ' +
+      'peržiūrėti šį turinį.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Puslapį geriausia žiūrėti portreto režimu',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Apgailestaujame, bet panašu, kad jūsų naršyklėje ši funkcija ' +
-        'nepalaikoma',
+    string:
+      'Apgailestaujame, bet panašu, kad jūsų naršyklėje ši funkcija ' +
+      'nepalaikoma',
   },
 };
 

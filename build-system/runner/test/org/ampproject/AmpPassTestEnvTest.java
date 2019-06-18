@@ -29,7 +29,7 @@ public class AmpPassTestEnvTest extends CompilerTestCase {
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
     return new AmpPass(compiler, /* isProd */ false, suffixTypes, assignmentReplacements,
-        prodAssignmentReplacements);
+        prodAssignmentReplacements, "123");
   }
 
   @Override protected int getNumRepetitions() {

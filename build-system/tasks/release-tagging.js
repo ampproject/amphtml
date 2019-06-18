@@ -20,7 +20,6 @@ const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const git = require('gulp-git');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
 
@@ -28,13 +27,12 @@ const {GITHUB_ACCESS_TOKEN} = process.env;
 const gitExec = BBPromise.promisify(git.exec);
 
 const isDryrun = argv.dryrun;
-const verbose = (argv.verbose || argv.v);
+const verbose = argv.verbose || argv.v;
 
 const LABELS = {
   'canary': 'PR use: In Canary',
   'prod': 'PR use: In Production',
 };
-
 
 /**
  * @param {string} type Either of "canary" or "prod".
@@ -48,19 +46,21 @@ function releaseTagFor(type, dir) {
 
   // Fetch tag.
   let tag;
-  promise = promise.then(function() {
-    return githubRequest('/releases');
-  }).then(res => {
-    const array = JSON.parse(res.body);
-    for (let i = 0; i < array.length; i++) {
-      const release = array[i];
-      const releaseType = release.prerelease ? 'canary' : 'prod';
-      if (releaseType == type) {
-        tag = release.tag_name;
-        break;
+  promise = promise
+    .then(function() {
+      return githubRequest('/releases');
+    })
+    .then(res => {
+      const array = JSON.parse(res.body);
+      for (let i = 0; i < array.length; i++) {
+        const release = array[i];
+        const releaseType = release.prerelease ? 'canary' : 'prod';
+        if (releaseType == type) {
+          tag = release.tag_name;
+          break;
+        }
       }
-    }
-  });
+    });
 
   // Checkout tag.
   promise = promise.then(function() {
@@ -73,29 +73,31 @@ function releaseTagFor(type, dir) {
 
   // Log.
   const pullRequests = [];
-  promise = promise.then(function() {
-    const date = new Date();
-    date.setDate(date.getDate() - 15);
-    const dateIso = date.toISOString().split('T')[0];
-    return gitExec({
-      cwd: ampDir,
-      args: 'log --pretty=oneline --since=' + dateIso,
+  promise = promise
+    .then(function() {
+      const date = new Date();
+      date.setDate(date.getDate() - 15);
+      const dateIso = date.toISOString().split('T')[0];
+      return gitExec({
+        cwd: ampDir,
+        args: 'log --pretty=oneline --since=' + dateIso,
+      });
+    })
+    .then(function(output) {
+      const lines = output.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        const paren = line.lastIndexOf('(');
+        line = paren != -1 ? line.substring(paren) : '';
+        if (!line) {
+          continue;
+        }
+        const match = line.match(/\(\#(\d+)\)/);
+        if (match && match[1]) {
+          pullRequests.push(match[1]);
+        }
+      }
     });
-  }).then(function(output) {
-    const lines = output.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-      let line = lines[i];
-      const paren = line.lastIndexOf('(');
-      line = paren != -1 ? line.substring(paren) : '';
-      if (!line) {
-        continue;
-      }
-      const match = line.match(/\(\#(\d+)\)/);
-      if (match && match[1]) {
-        pullRequests.push(match[1]);
-      }
-    }
-  });
 
   // Update.
   const label = LABELS[type];
@@ -125,13 +127,11 @@ function applyLabel(pullRequest, label) {
   if (isDryrun) {
     return Promise.resolve();
   }
-  return githubRequest(
-      '/issues/' + pullRequest + '/labels',
-      'POST',
-      [label]).then(function() {
+  return githubRequest('/issues/' + pullRequest + '/labels', 'POST', [
+    label,
+  ]).then(function() {
     if (verbose) {
-      log(colors.green(
-          'Label applied ' + label + ' for #' + pullRequest));
+      log(colors.green('Label applied ' + label + ' for #' + pullRequest));
     }
   });
 }
@@ -213,10 +213,12 @@ function releaseTag() {
   return promise;
 }
 
+module.exports = {
+  releaseTag,
+};
 
-gulp.task('release:tag', 'Tag the releases in pull requests', releaseTag, {
-  options: {
-    dryrun: '  Generate update log but dont push it out',
-    type: '  Either of "canary", "prod" or "all". Default is "all".',
-  },
-});
+releaseTag.description = 'Tag the releases in pull requests';
+releaseTag.flags = {
+  dryrun: '  Generate update log but dont push it out',
+  type: '  Either of "canary", "prod" or "all". Default is "all".',
+};

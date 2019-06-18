@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Dapatkan Link',
   },
@@ -111,15 +114,15 @@ const strings = {
     string: 'Luaskan tinggi jendela untuk menampilkan pengalaman ini',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Luaskan tinggi dan lebar jendela untuk menampilkan pengalaman ' +
-        'ini',
+    string: 'Luaskan tinggi dan lebar jendela untuk menampilkan pengalaman ini',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Luaskan lebar jendela untuk menampilkan pengalaman ini',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Anda harus mengaktifkan eksperimen cerita AMP untuk melihat ' +
-        'konten ini.',
+    string:
+      'Anda harus mengaktifkan eksperimen cerita AMP untuk melihat ' +
+      'konten ini.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Halaman ini ditampilkan paling baik dalam mode potret',

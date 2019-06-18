@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,19 @@ export function idealmedia(global, data) {
 
   document.body.appendChild(scriptRoot);
 
-  const url = `https://jsc.idealmedia.io/${encodeURIComponent(data.publisher[0])}/`
-    + `${encodeURIComponent(data.publisher[1])}/`
-    + `${encodeURIComponent(data.publisher)}.`
-    + `${encodeURIComponent(data.widget)}.js?t=`
-    + Math.floor(Date.now() / 36e5);
+  const url =
+    `https://jsc.idealmedia.io/${encodeURIComponent(data.publisher[0])}/` +
+    `${encodeURIComponent(data.publisher[1])}/` +
+    `${encodeURIComponent(data.publisher)}.` +
+    `${encodeURIComponent(data.widget)}.js?t=` +
+    Math.floor(Date.now() / 36e5);
+
+  window.context.observeIntersection(function(changes) {
+    changes.forEach(function(c) {
+      window['intersectionRect' + data.widget] = c.intersectionRect;
+      window['boundingClientRect' + data.widget] = c.boundingClientRect;
+    });
+  });
 
   loadScript(global, data.url || url);
 }

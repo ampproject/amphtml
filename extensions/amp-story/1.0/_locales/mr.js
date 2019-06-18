@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'लिंक मिळवा',
   },
@@ -111,22 +114,24 @@ const strings = {
     string: 'हा प्रयोग पाहाण्यासाठी तुमच्या विंडोच्या उंचीचा विस्तार करा',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'हा प्रयोग पाहाण्यासाठी तुमच्या विंडोची उंची आणि रूंदी दोन्हींचा ' +
-        'विस्तार करा',
+    string:
+      'हा प्रयोग पाहाण्यासाठी तुमच्या विंडोची उंची आणि रूंदी दोन्हींचा ' +
+      'विस्तार करा',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'हा प्रयोग पाहाण्यासाठी तुमच्या विंडोची रूंदीचा विस्तार करा',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'तुम्ही हा आशय पाहाण्यासाठी AMP स्टोरी प्रयोग सुरू करणे आवश्यक ' +
-        'आहे.',
+    string:
+      'तुम्ही हा आशय पाहाण्यासाठी AMP स्टोरी प्रयोग सुरू करणे आवश्यक आहे.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'पेज पोर्ट्रेट मोडमध्ये उत्तम पाहिले जाते',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'आम्ही क्षमस्व आहोत, तुमचा ब्राउझर या प्रयोगाला सपोर्ट करत ' +
-        'नसल्याचे दिसते',
+    string:
+      'आम्ही क्षमस्व आहोत, तुमचा ब्राउझर या प्रयोगाला सपोर्ट करत ' +
+      'नसल्याचे दिसते',
   },
 };
 

@@ -169,7 +169,10 @@ export class HighlightHandler {
   findHighlightedNodes_(highlightInfo) {
     const {win} = this.ampdoc_;
     const sens = findSentences(
-        win, this.ampdoc_.getBody(), highlightInfo.sentences);
+      win,
+      this.ampdoc_.getBody(),
+      highlightInfo.sentences
+    );
     if (!sens) {
       return;
     }
@@ -206,10 +209,9 @@ export class HighlightHandler {
 
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];
-      // The background color is same as Android Chrome text finding.
-      // https://cs.chromium.org/chromium/src/chrome/android/java/res/values/colors.xml?l=158&rcl=8b461e376e824c72fec1d6d91cd6633ba344dd55&q=ff9632
+      // The background color is same as Android Chrome text finding (yellow).
       setStyles(n, {
-        backgroundColor: '#ff9632',
+        backgroundColor: '#fcff00',
         color: '#000',
       });
     }
@@ -232,8 +234,11 @@ export class HighlightHandler {
         called = true;
       });
     }
-    listenOnce(this.ampdoc_.getBody(), 'click',
-        this.dismissHighlight_.bind(this));
+    listenOnce(
+      this.ampdoc_.getBody(),
+      'click',
+      this.dismissHighlight_.bind(this)
+    );
   }
 
   /**
@@ -253,8 +258,11 @@ export class HighlightHandler {
       // top and bottom returned by getLayoutRect includes the header padding
       // size. We need to cancel the padding to calculate the positions in
       // document.body like Viewport.animateScrollIntoView does.
-      const {top, bottom} = moveLayoutRect(viewport.getLayoutRect(nodes[i]),
-          0, -paddingTop);
+      const {top, bottom} = moveLayoutRect(
+        viewport.getLayoutRect(nodes[i]),
+        0,
+        -paddingTop
+      );
       minTop = Math.min(minTop, top);
       maxBottom = Math.max(maxBottom, bottom);
     }
@@ -344,7 +352,9 @@ export class HighlightHandler {
    */
   setupMessaging(messaging) {
     messaging.registerHandler(
-        HIGHLIGHT_DISMISS, this.dismissHighlight_.bind(this));
+      HIGHLIGHT_DISMISS,
+      this.dismissHighlight_.bind(this)
+    );
   }
 
   /**

@@ -2,7 +2,7 @@
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use baseInstance file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -63,8 +63,10 @@ export class PositionObserverWorker {
     this.fidelity = fidelity;
 
     /** @type {number} */
-    this.turn = (fidelity == PositionObserverFidelity.LOW) ?
-      Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0;
+    this.turn =
+      (fidelity == PositionObserverFidelity.LOW)
+        ? Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT)
+        : 0;
 
     /** @type {?PositionInViewportEntryDef} */
     this.prevPosition_ = null;
@@ -80,20 +82,26 @@ export class PositionObserverWorker {
    */
   trigger_(position) {
     const prevPos = this.prevPosition_;
-    if (prevPos
-        && layoutRectEquals(prevPos.positionRect, position.positionRect)
-        && layoutRectEquals(prevPos.viewportRect, position.viewportRect)) {
+    if (
+      prevPos &&
+      layoutRectEquals(prevPos.positionRect, position.positionRect) &&
+      layoutRectEquals(prevPos.viewportRect, position.viewportRect)
+    ) {
       // position didn't change, do nothing.
       return;
     }
 
-    devAssert(position.positionRect,
-        'PositionObserver should always trigger entry with clientRect');
+    devAssert(
+      position.positionRect,
+      'PositionObserver should always trigger entry with clientRect'
+    );
     const positionRect =
-    /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
+      /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
     // Add the relative position of the element to its viewport
-    position.relativePos = layoutRectsRelativePos(positionRect,
-        position.viewportRect);
+    position.relativePos = layoutRectsRelativePos(
+      positionRect,
+      position.viewportRect
+    );
 
     if (layoutRectsOverlap(positionRect, position.viewportRect)) {
       // Update position
@@ -127,15 +135,20 @@ export class PositionObserverWorker {
     }
 
     const viewportSize = this.viewport_.getSize();
-    const viewportBox =
-        layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
+    const viewportBox = layoutRectLtwh(
+      0,
+      0,
+      viewportSize.width,
+      viewportSize.height
+    );
     this.viewport_.getClientRectAsync(this.element).then(elementBox => {
       this.trigger_(
-      /** @type {./position-observer-worker.PositionInViewportEntryDef}*/ ({
-            positionRect: elementBox,
-            viewportRect: viewportBox,
-            relativePos: '',
-          }));
+        /** @type {./position-observer-worker.PositionInViewportEntryDef}*/ ({
+          positionRect: elementBox,
+          viewportRect: viewportBox,
+          relativePos: '',
+        })
+      );
     });
   }
 }

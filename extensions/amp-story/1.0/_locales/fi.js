@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Hae linkki',
   },
@@ -117,8 +120,8 @@ const strings = {
     string: 'Lisää ikkunan leveyttä, jos haluat katsella tätä',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'AMP-tarinakokeilu on otettava käyttöön tämän sisällön ' +
-        'näkemiseksi.',
+    string:
+      'AMP-tarinakokeilu on otettava käyttöön tämän sisällön näkemiseksi.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Sivu toimii parhaiten muotokuvatilassa',

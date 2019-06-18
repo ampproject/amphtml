@@ -60,14 +60,14 @@ FAIL
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-link-rewriter extension .js script' is present, but is excluded by the presence of 'amp-skimlinks'. (see https://www.ampproject.org/docs/reference/components/amp-link-rewriter) [AMP_TAG_PROBLEM]
+amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-link-rewriter extension .js script' is present, but is excluded by the presence of 'amp-skimlinks'. (see https://amp.dev/documentation/components/amp-link-rewriter) [AMP_TAG_PROBLEM]
 >>       ^~~~~~~~~
-amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-link-rewriter extension .js script' is present, but is excluded by the presence of 'amp-smartlinks'. (see https://www.ampproject.org/docs/reference/components/amp-link-rewriter) [AMP_TAG_PROBLEM]
+amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-link-rewriter extension .js script' is present, but is excluded by the presence of 'amp-smartlinks'. (see https://amp.dev/documentation/components/amp-link-rewriter) [AMP_TAG_PROBLEM]
 >>       ^~~~~~~~~
-amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-skimlinks extension .js script' is present, but is excluded by the presence of 'amp-link-rewriter'. (see https://www.ampproject.org/docs/reference/components/amp-skimlinks) [AMP_TAG_PROBLEM]
+amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-skimlinks extension .js script' is present, but is excluded by the presence of 'amp-link-rewriter'. (see https://amp.dev/documentation/components/amp-skimlinks) [AMP_TAG_PROBLEM]
 >>       ^~~~~~~~~
-amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-skimlinks extension .js script' is present, but is excluded by the presence of 'amp-smartlinks'. (see https://www.ampproject.org/docs/reference/components/amp-skimlinks) [AMP_TAG_PROBLEM]
+amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-skimlinks extension .js script' is present, but is excluded by the presence of 'amp-smartlinks'. (see https://amp.dev/documentation/components/amp-skimlinks) [AMP_TAG_PROBLEM]
 >>       ^~~~~~~~~
-amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-smartlinks extension .js script' is present, but is excluded by the presence of 'amp-link-rewriter'. (see https://www.ampproject.org/docs/reference/components/amp-smartlinks) [AMP_TAG_PROBLEM]
+amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-smartlinks extension .js script' is present, but is excluded by the presence of 'amp-link-rewriter'. (see https://amp.dev/documentation/components/amp-smartlinks) [AMP_TAG_PROBLEM]
 >>       ^~~~~~~~~
-amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-smartlinks extension .js script' is present, but is excluded by the presence of 'amp-skimlinks'. (see https://www.ampproject.org/docs/reference/components/amp-smartlinks) [AMP_TAG_PROBLEM]
+amp-link-rewriter/0.1/test/validator-amp-link-rewriter-exclude.html:60:6 The tag 'amp-smartlinks extension .js script' is present, but is excluded by the presence of 'amp-skimlinks'. (see https://amp.dev/documentation/components/amp-smartlinks) [AMP_TAG_PROBLEM]

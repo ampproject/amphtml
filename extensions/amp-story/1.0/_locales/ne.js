@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'लिंक प्राप्त गर्नुहोस्',
   },
@@ -117,15 +120,17 @@ const strings = {
     string: 'यो अनुभव हेर्न आफ्नो विन्डोको चौडाइ बढाउनुहोस्',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'यो सामग्री हेर्न तपाईंले अनिवार्य रूपमा amp स्टोरीको परीक्षण ' +
-        'सक्षम पार्नु पर्छ।',
+    string:
+      'यो सामग्री हेर्न तपाईंले अनिवार्य रूपमा amp स्टोरीको परीक्षण ' +
+      'सक्षम पार्नु पर्छ।',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'यो पृष्ठ पोर्ट्रेट मोडमा हेर्दा राम्रो देखिन्छ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'माफ गर्नुहोला, तपाईंको ब्राउजरले यो अनुभवको समर्थन गर्दैन जस्तो ' +
-        'देखिन्छ',
+    string:
+      'माफ गर्नुहोला, तपाईंको ब्राउजरले यो अनुभवको समर्थन गर्दैन जस्तो ' +
+      'देखिन्छ',
   },
 };
 

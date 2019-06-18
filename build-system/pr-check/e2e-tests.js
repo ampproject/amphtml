@@ -21,31 +21,51 @@
  * This is run during the CI stage = test; job = e2e tests.
  */
 
+const colors = require('ansi-colors');
 const {
-  downloadBuildOutput,
   downloadDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase} = require('./utils');
+  timedExecOrDie: timedExecOrDieBase,
+} = require('./utils');
+const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'e2e-tests.js';
-const timedExecOrDie =
-  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
+const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
+const timedExecOrDie = (cmd, unusedFileName) =>
+  timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp e2e --nobuild --headless');
   } else {
     printChangeSummary(FILENAME);
-    downloadBuildOutput(FILENAME);
-  }
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp e2e --nobuild --headless');
+    const buildTargets = new Set();
+    determineBuildTargets(buildTargets, FILENAME);
 
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('FLAG_CONFIG') ||
+      buildTargets.has('E2E_TEST')
+    ) {
+      downloadDistOutput(FILENAME);
+      timedExecOrDie('gulp update-packages');
+      timedExecOrDie('gulp e2e --nobuild --headless');
+    } else {
+      console.log(
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('End to End Tests'),
+        'because this commit does not affect the runtime, flag configs,',
+        'or end-to-end tests'
+      );
+    }
+  }
   stopTimer(FILENAME, FILENAME, startTime);
 }
 

@@ -18,9 +18,11 @@ export const PIANO_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://api-v3.tinypass.com',
     'basePrefix': '/api/v3',
-    'baseSuffix': '&pageview_id=${pageViewId}&rand=${random}&' +
+    'baseSuffix':
+      '&pageview_id=${pageViewId}&rand=${random}&' +
       'amp_client_id=${clientId}&aid=${aid}',
-    'pageview': '${host}${basePrefix}/page/track?url=${canonicalUrl}&' +
+    'pageview':
+      '${host}${basePrefix}/page/track?url=${canonicalUrl}&' +
       'referer=${documentReferrer}&content_created=${contentCreated}&' +
       'content_author=${contentAuthor}&content_section=${contentSection}&' +
       'timezone_offset=${timezone}&tags=${tags}&amp_url=${ampdocUrl}&' +

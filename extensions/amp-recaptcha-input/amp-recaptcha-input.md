@@ -27,10 +27,6 @@ Appends a <a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3
 
 <table>
 <tr>
-<td width="40%"><strong>Status</strong></td>
-<td>Experimental. You must turn on the `amp-recaptcha-input` experiment to use this component.</td>
-</tr>
-<tr>
 <td width="40%"><strong>Required Script</strong></td>
 <td><code>&lt;script async custom-element="amp-recaptcha-input" src="https://cdn.ampproject.org/v0/amp-recaptcha-input-0.1.js">&lt;/script></code></td>
 </tr>
@@ -40,7 +36,7 @@ Appends a <a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3
 </tr>
 <tr>
 <td width="40%"><strong>Examples</strong></td>
-<td><a href="https://github.com/ampproject/amphtml/blob/master/examples/recaptcha.amp.html">Development Example</a></td>
+<td><a href="https://amp.dev/documentation/examples/components/amp-recaptcha-input">Example on amp.dev</a></td>
 </tr>
 </table>
 

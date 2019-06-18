@@ -21,9 +21,8 @@ const {isTravisBuild} = require('./travis');
 
 const {green, cyan} = colors;
 
-const killCmd =
-    (process.platform == 'win32') ? 'taskkill /f /pid' : 'kill -KILL';
-const killSuffix = (process.platform == 'win32') ? '>NUL' : '';
+const killCmd = process.platform == 'win32' ? 'taskkill /f /pid' : 'kill -KILL';
+const killSuffix = process.platform == 'win32' ? '>NUL' : '';
 
 /**
  * Creates an async child process that handles Ctrl + C and immediately cancels
@@ -33,11 +32,19 @@ const killSuffix = (process.platform == 'win32') ? '>NUL' : '';
  */
 exports.createCtrlcHandler = function(command) {
   if (!isTravisBuild()) {
-    log(green('Running'), cyan(command) + green('. Press'), cyan('Ctrl + C'),
-        green('to cancel...'));
+    log(
+      green('Running'),
+      cyan(command) + green('. Press'),
+      cyan('Ctrl + C'),
+      green('to cancel...')
+    );
   }
-  const killMessage = green('\nDetected ') + cyan('Ctrl + C') +
-      green('. Canceling ') + cyan(command) + green('.');
+  const killMessage =
+    green('\nDetected ') +
+    cyan('Ctrl + C') +
+    green('. Canceling ') +
+    cyan(command) +
+    green('.');
   const listenerCmd = `
     #!/bin/sh
     ctrlcHandler() {
@@ -48,8 +55,9 @@ exports.createCtrlcHandler = function(command) {
     trap 'ctrlcHandler' INT
     read _ # Waits until the process is terminated
   `;
-  return execScriptAsync(
-      listenerCmd, {'stdio': [null, process.stdout, process.stderr]}).pid;
+  return execScriptAsync(listenerCmd, {
+    'stdio': [null, process.stdout, process.stderr],
+  }).pid;
 };
 
 /**

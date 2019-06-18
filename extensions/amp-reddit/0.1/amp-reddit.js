@@ -20,7 +20,6 @@ import {listenFor} from '../../../src/iframe-helper';
 import {userAssert} from '../../../src/log';
 
 class AmpReddit extends AMP.BaseElement {
-
   /**
    * @param {boolean=} onLayout
    * @override
@@ -32,13 +31,19 @@ class AmpReddit extends AMP.BaseElement {
       this.preconnect.url('https://www.redditmedia.com', onLayout);
       // The domain for JS and CSS used in rendering embeds.
       this.preconnect.url('https://www.redditstatic.com', onLayout);
-      this.preconnect.preload('https://www.redditstatic.com/comment-embed.js', 'script');
+      this.preconnect.preload(
+        'https://www.redditstatic.com/comment-embed.js',
+        'script'
+      );
     } else {
       // Posts don't use the static domain.
       this.preconnect.url('https://www.reddit.com', onLayout);
       // Posts defer to the embedly API.
       this.preconnect.url('https://cdn.embedly.com', onLayout);
-      this.preconnect.preload('https://embed.redditmedia.com/widgets/platform.js', 'script');
+      this.preconnect.preload(
+        'https://embed.redditmedia.com/widgets/platform.js',
+        'script'
+      );
     }
 
     preloadBootstrap(this.win, this.preconnect);
@@ -51,24 +56,33 @@ class AmpReddit extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    userAssert(this.element.getAttribute('data-src'),
-        'The data-src attribute is required for <amp-reddit> %s',
-        this.element);
-    userAssert(this.element.getAttribute('data-embedtype'),
-        'The data-embedtype attribute is required for <amp-reddit> %s',
-        this.element);
+    userAssert(
+      this.element.getAttribute('data-src'),
+      'The data-src attribute is required for <amp-reddit> %s',
+      this.element
+    );
+    userAssert(
+      this.element.getAttribute('data-embedtype'),
+      'The data-embedtype attribute is required for <amp-reddit> %s',
+      this.element
+    );
 
-    const iframe = getIframe(this.win, this.element, 'reddit', null,
-        {allowFullscreen: true});
+    const iframe = getIframe(this.win, this.element, 'reddit', null, {
+      allowFullscreen: true,
+    });
     this.applyFillContent(iframe);
-    listenFor(iframe, 'embed-size', data => {
-      this./*OK*/changeHeight(data['height']);
-    }, /* opt_is3P */true);
+    listenFor(
+      iframe,
+      'embed-size',
+      data => {
+        this./*OK*/ changeHeight(data['height']);
+      },
+      /* opt_is3P */ true
+    );
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
   }
 }
-
 
 AMP.extension('amp-reddit', '0.1', AMP => {
   AMP.registerElement('amp-reddit', AmpReddit);

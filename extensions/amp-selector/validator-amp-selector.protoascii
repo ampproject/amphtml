@@ -109,7 +109,7 @@ tags: {
     name: "selected"
     value: ""
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
+  spec_url: "https://amp.dev/documentation/components/amp-selector"
 }
 tags: {
   html_format: AMP

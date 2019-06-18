@@ -17,23 +17,16 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Observable} from '../../src/observable';
 import {Services} from '../../src/services';
-import {
-  installActivityServiceForTesting,
-} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
+import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
+import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {
-  installViewportServiceForDoc,
-} from '../../src/service/viewport/viewport-impl';
+import {installViewportServiceForDoc} from '../../src/service/viewport/viewport-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
-import {
-  markElementScheduledForTesting,
-} from '../../src/service/custom-element-registry';
+import {markElementScheduledForTesting} from '../../src/service/custom-element-registry';
 
 describe('Activity getTotalEngagedTime', () => {
-
   let sandbox;
   let clock;
   let fakeDoc;
@@ -102,12 +95,14 @@ describe('Activity getTotalEngagedTime', () => {
     fakeDoc.head.defaultView = fakeWin;
 
     ampdoc = new AmpDocSingle(fakeWin);
-    fakeWin.services['ampdoc'] = {obj: {
-      getAmpDoc: () => ampdoc,
-      isSingleDoc: () => true,
-    }};
+    fakeWin.services['ampdoc'] = {
+      obj: {
+        getAmpDoc: () => ampdoc,
+        isSingleDoc: () => true,
+      },
+    };
 
-    installDocumentStateService(fakeWin);
+    installGlobalDocumentStateService(fakeWin);
     installTimerService(fakeWin);
     installVsyncService(fakeWin);
     installPlatformService(fakeWin);
@@ -149,8 +144,7 @@ describe('Activity getTotalEngagedTime', () => {
     return expect(activity.getTotalEngagedTime()).to.equal(0);
   });
 
-  it('should have 5 seconds of engaged time after viewer becomes' +
-     ' visible', () => {
+  it('should have 5 seconds of engaged time after viewer becomes visible', () => {
     whenFirstVisibleResolve();
     return viewer.whenFirstVisible().then(() => {
       clock.tick(10000);
@@ -216,32 +210,44 @@ describe('Activity getTotalEngagedTime', () => {
     });
   });
 
-  it('should set event listeners on the document for' +
-     ' "mousedown", "mouseup", "mousemove", "keyup", "keydown"', () => {
-    const addEventListenerSpy = sandbox.spy(fakeDoc, 'addEventListener');
-    expect(addEventListenerSpy).to.not.have.been.calledWith('mousedown',
-        activity.boundHandleActivity_);
-    expect(addEventListenerSpy).to.not.have.been.calledWith('mouseup',
-        activity.boundHandleActivity_);
-    expect(addEventListenerSpy).to.not.have.been.calledWith('mousemove',
-        activity.boundHandleActivity_);
-    expect(addEventListenerSpy).to.not.have.been.calledWith('keydown',
-        activity.boundHandleActivity_);
-    expect(addEventListenerSpy).to.not.have.been.calledWith('keyup',
-        activity.boundHandleActivity_);
-    whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
-      expect(addEventListenerSpy.getCall(0).args[0]).to.equal('mousedown');
-      expect(addEventListenerSpy.getCall(1).args[0]).to.equal('mouseup');
-      expect(addEventListenerSpy.getCall(2).args[0]).to.equal('mousemove');
-      expect(addEventListenerSpy.getCall(3).args[0]).to.equal('keydown');
-      expect(addEventListenerSpy.getCall(4).args[0]).to.equal('keyup');
-    });
-  });
+  it(
+    'should set event listeners on the document for' +
+      ' "mousedown", "mouseup", "mousemove", "keyup", "keydown"',
+    () => {
+      const addEventListenerSpy = sandbox.spy(fakeDoc, 'addEventListener');
+      expect(addEventListenerSpy).to.not.have.been.calledWith(
+        'mousedown',
+        activity.boundHandleActivity_
+      );
+      expect(addEventListenerSpy).to.not.have.been.calledWith(
+        'mouseup',
+        activity.boundHandleActivity_
+      );
+      expect(addEventListenerSpy).to.not.have.been.calledWith(
+        'mousemove',
+        activity.boundHandleActivity_
+      );
+      expect(addEventListenerSpy).to.not.have.been.calledWith(
+        'keydown',
+        activity.boundHandleActivity_
+      );
+      expect(addEventListenerSpy).to.not.have.been.calledWith(
+        'keyup',
+        activity.boundHandleActivity_
+      );
+      whenFirstVisibleResolve();
+      return viewer.whenFirstVisible().then(() => {
+        expect(addEventListenerSpy.getCall(0).args[0]).to.equal('mousedown');
+        expect(addEventListenerSpy.getCall(1).args[0]).to.equal('mouseup');
+        expect(addEventListenerSpy.getCall(2).args[0]).to.equal('mousemove');
+        expect(addEventListenerSpy.getCall(3).args[0]).to.equal('keydown');
+        expect(addEventListenerSpy.getCall(4).args[0]).to.equal('keyup');
+      });
+    }
+  );
 });
 
 describe('Activity getIncrementalEngagedTime', () => {
-
   let sandbox;
   let clock;
   let fakeDoc;
@@ -310,12 +316,14 @@ describe('Activity getIncrementalEngagedTime', () => {
     fakeDoc.head.defaultView = fakeWin;
 
     ampdoc = new AmpDocSingle(fakeWin);
-    fakeWin.services['ampdoc'] = {obj: {
-      getAmpDoc: () => ampdoc,
-      isSingleDoc: () => true,
-    }};
+    fakeWin.services['ampdoc'] = {
+      obj: {
+        getAmpDoc: () => ampdoc,
+        isSingleDoc: () => true,
+      },
+    };
 
-    installDocumentStateService(fakeWin);
+    installGlobalDocumentStateService(fakeWin);
     installTimerService(fakeWin);
     installVsyncService(fakeWin);
     installPlatformService(fakeWin);
@@ -349,22 +357,23 @@ describe('Activity getIncrementalEngagedTime', () => {
     sandbox.restore();
   });
 
-  it('should have 0 seconds of incremental engaged ' +
-  'time with no activity', () => {
+  it('should have 0 seconds of incremental engaged time with no activity', () => {
     return expect(activity.getIncrementalEngagedTime('tests')).to.equal(0);
   });
 
-  it('should have 5 seconds of incremental engaged time after viewer ' +
-    'becomes visible', () => {
-    whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
-      clock.tick(10000);
-      return expect(activity.getIncrementalEngagedTime('tests')).to.equal(5);
-    });
-  });
+  it(
+    'should have 5 seconds of incremental engaged time after viewer ' +
+      'becomes visible',
+    () => {
+      whenFirstVisibleResolve();
+      return viewer.whenFirstVisible().then(() => {
+        clock.tick(10000);
+        return expect(activity.getIncrementalEngagedTime('tests')).to.equal(5);
+      });
+    }
+  );
 
-  it('should have 4 seconds of incremental engaged time after 4' +
-  ' seconds', () => {
+  it('should have 4 seconds of incremental engaged time after 4 seconds', () => {
     whenFirstVisibleResolve();
     return viewer.whenFirstVisible().then(() => {
       clock.tick(4000);

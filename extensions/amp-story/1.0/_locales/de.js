@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Link abrufen',
   },
@@ -108,20 +111,24 @@ const strings = {
     string: 'Tweet maximieren',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Maximiere die Höhe deines Fensters, um diese Funktion nutzen zu ' +
-        'können',
+    string:
+      'Maximiere die Höhe deines Fensters, um diese Funktion nutzen zu ' +
+      'können',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Maximiere die Höhe und Breite deines Fensters, um diese ' +
-        'Funktion nutzen zu können',
+    string:
+      'Maximiere die Höhe und Breite deines Fensters, um diese ' +
+      'Funktion nutzen zu können',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Maximiere die Breite deines Fensters, um diese Funktion nutzen ' +
-        'zu können',
+    string:
+      'Maximiere die Breite deines Fensters, um diese Funktion nutzen ' +
+      'zu können',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Wenn du diesen Inhalt aufrufen möchtest, musst du den ' +
-        'amp-story-Test aktivieren.',
+    string:
+      'Wenn du diesen Inhalt aufrufen möchtest, musst du den ' +
+      'amp-story-Test aktivieren.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Diese Seite lässt sich am besten im Hochformat ansehen',

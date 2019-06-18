@@ -41,6 +41,12 @@
     }
   </script>
 
+  <script cryptokeys type="application/json">
+    {
+      "google.com": "ENCRYPT({\"accessRequirements\": [\"norcal.com:premium\"], \"key\":\"aBcDef781-2-4/sjfdi\"})",
+      "local": "ENCRYPT({\"accessRequirements\": [\"whateveryouwant:12\"], \"key\":\"0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ=\"})"
+    }
+  </script>
 
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <style amp-custom>
@@ -214,7 +220,7 @@
             srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
             layout="responsive" width="360" placeholder
             alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
-            height="216">
+            height="116">
         </amp-img>
       </figure>
 
@@ -250,6 +256,20 @@
           Login or subscribe to read more.
         </section>
 
+        <br/>
+
+        <div>
+          ↓[encrypted content below]↓
+          <h2>
+            <script type="application/octet-stream" encrypted>
+              PTzfydqid9+FitGB3xeQEG98u+zj6/wpZ/KMeZewGldw/pp2MCvwstHGCtqjIN5ROi61OmZkQDW9c2ezuu1WTXDANoE5UY5ED51lftywdTYmLk+rvtRL/fUVaPIOaiP/wkm+I2Ssw99cOnv4hFphOuz9Db2/RisQXVT/7yiaiHDEE5aJlxuAYqyjMnDweGhKjuXpgAOpbOOEI78t91AKpTbsQg9bxXafruB46+3jI6COfzI3e7griJ5LoQSPG4JEn7bw8jnD67djb9J3c6hak++vbSvqBxewNpSV+v9HU+w=
+            </script>
+          </h2>
+          ↑[encrypted content above]↑
+        </div>
+
+        <br/>
+
         <div subscriptions-section="content" class="article-body" itemprop="articleBody">
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -269,15 +289,6 @@
             Mauris sem est, accumsan sed tincidunt ut, sagittis vel arcu.
             Nullam in libero nisi.
           </p>
-
-          <div class="ad-container">
-            <amp-ad width=300 height=250
-                type="a9"
-                data-aax_size="300x250"
-                data-aax_pubname="abc123"
-                data-aax_src="302">
-            </amp-ad>
-          </div>
 
           <p>
             Sed pharetra semper fringilla. Nulla fringilla, neque eget
@@ -337,13 +348,6 @@
             Ut elementum velit fermentum felis volutpat sodales in non libero.
             Aliquam erat volutpat.
           </p>
-
-          <div class="ad-container">
-            <amp-ad width=300 height=200
-                type="adsense"
-                data-ad-client="ca-pub-9350112648257122">
-            </amp-ad>
-          </div>
 
           <p>
             Morbi at velit vitae eros congue congue venenatis non dui.

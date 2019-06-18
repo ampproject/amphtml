@@ -35,13 +35,13 @@ FAIL
 |    <!-- So many AMP extensions! -->
 |    <script async custom-element="amp-access"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:35:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:35:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
 |    <script async custom-element="amp-accordion"
 |       src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
 |    <script async custom-element="amp-ad"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:39:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:39:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 |    <script async custom-element="amp-analytics"
 |       src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
@@ -53,29 +53,29 @@ amp4ads_feature_tests/extensions.html:39:2 Custom JavaScript is not allowed. (se
 |       src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
 |    <script async custom-element="amp-brid-player"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:49:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:49:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-brid-player-0.1.js"></script>
 |    <script async custom-element="amp-brightcove"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:51:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:51:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"></script>
 |    <script async custom-element="amp-carousel"
 |       src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
 |    <script async custom-element="amp-dailymotion"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:55:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:55:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-dailymotion-0.1.js"></script>
 |    <script async custom-element="amp-dynamic-css-classes"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:57:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:57:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
 |    <script async custom-element="amp-experiment"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:59:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:59:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js"></script>
 |    <script async custom-element="amp-facebook"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:61:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:61:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"></script>
 |    <script async custom-element="amp-fit-text"
 |       src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
@@ -85,91 +85,91 @@ amp4ads_feature_tests/extensions.html:61:2 Custom JavaScript is not allowed. (se
 |       src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
 |    <script async custom-element="amp-fx-flying-carpet"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:69:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:69:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js"></script>
 |    <script async custom-element="amp-iframe"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:71:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:71:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
 |    <script async custom-element="amp-image-lightbox"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:73:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:73:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
 |    <script async custom-element="amp-instagram"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:75:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:75:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
 |    <script async custom-element="amp-install-serviceworker"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:77:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:77:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"></script>
 |    <script async custom-element="amp-jwplayer"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:79:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:79:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js"></script>
 |    <script async custom-element="amp-kaltura-player"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:81:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:81:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-kaltura-player-0.1.js"></script>
 |    <script async custom-element="amp-lightbox"
 |       src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
 |    <script async custom-element="amp-list"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:85:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:85:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
 |    <script async custom-element="amp-live-list"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:87:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:87:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
 |    <script async custom-element="amp-o2-player"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:89:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:89:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-o2-player-0.1.js"></script>
 |    <script async custom-element="amp-pinterest"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:91:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:91:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js"></script>
 |    <script async custom-element="amp-reach-player"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:93:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:93:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-reach-player-0.1.js"></script>
 |    <script async custom-element="amp-sidebar"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:95:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:95:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
 |    <script async custom-element="amp-slides"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:97:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:97:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-slides-0.1.js"></script>
 |    <script async custom-element="amp-social-share"
 |       src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
 |    <script async custom-element="amp-soundcloud"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:101:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:101:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js"></script>
 |    <script async custom-element="amp-springboard-player"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:103:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:103:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-springboard-player-0.1.js"></script>
 |    <script async custom-element="amp-sticky-ad"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:105:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:105:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-sticky-ad-0.1.js"></script>
 |    <script async custom-element="amp-twitter"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:107:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:107:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
 |    <script async custom-element="amp-user-notification"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:109:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:109:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
 |    <script async custom-element="amp-vimeo"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:111:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:111:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-vimeo-0.1.js"></script>
 |    <script async custom-element="amp-vine"
 >>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:113:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4ads_feature_tests/extensions.html:113:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-vine-0.1.js"></script>
 |    <script async custom-element="amp-youtube"
 |       src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>

@@ -63,13 +63,13 @@ component's visual area. If the user scrolls back, the video reverts to its orig
 This extension is used in conjunction with a [supported video player](../../spec/amp-video-interface.md).
 Currently, the supported players are:
 
-- [`amp-brightcove`](https://www.ampproject.org/docs/reference/components/amp-brightcove)
-- [`amp-dailymotion`](https://www.ampproject.org/docs/reference/components/amp-dailymotion)
+- [`amp-brightcove`](https://amp.dev/documentation/components/amp-brightcove)
+- [`amp-dailymotion`](https://amp.dev/documentation/components/amp-dailymotion)
 - [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)
-- [`amp-ima-video`](https://www.ampproject.org/docs/reference/components/amp-ima-video)
-- [`amp-video`](https://www.ampproject.org/docs/reference/components/amp-video)
-- [`amp-video-iframe`](https://www.ampproject.org/docs/reference/components/amp-youtube)
-- [`amp-youtube`](https://www.ampproject.org/docs/reference/components/amp-youtube)
+- [`amp-ima-video`](https://amp.dev/documentation/components/amp-ima-video)
+- [`amp-video`](https://amp.dev/documentation/components/amp-video)
+- [`amp-video-iframe`](https://amp.dev/documentation/components/amp-video-iframe)
+- [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube)
 
 ### Triggering conditions
 
@@ -106,7 +106,7 @@ When setting the `dock` attribute to a non-empty value, the video will dock to t
 <amp-layout id="my-dock-slot" ...>
 <amp-video src="my-video.mp4" ... dock="#my-dock-slot">
 ```
-The slot element must always be an [`amp-layout`](https://www.ampproject.org/docs/reference/components/amp-layout), which allows us to leverage the [AMP layout system](https://www.ampproject.org/docs/design/amp-html-layout) in order to keep the same sizing properties between the slot and the video.
+The slot element must always be an [`amp-layout`](https://amp.dev/documentation/components/amp-layout), which allows us to leverage the [AMP layout system](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/) in order to keep the same sizing properties between the slot and the video.
 
 In order for custom positioning to work properly, the slot element must be [`position: fixed`.](https://developer.mozilla.org/en-US/docs/Web/CSS/position)
 
@@ -118,9 +118,9 @@ Custom positioning will be rejected when the element target is not visible. This
 
 ### `dock` and `undock`
 
-When the video becomes docked or undocked by scrolling, the [low-trust events](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events) `dock` and `undock` are triggered respectively.
+When the video becomes docked or undocked by scrolling, the [low-trust events](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events) `dock` and `undock` are triggered respectively.
 
-These can, for example, trigger an [`amp-animation`](https://www.ampproject.org/docs/reference/components/amp-animation) that slides content in order to make room for the docked element. For an example where events trigger animations required for docking, [see AMP by Example.](https://ampbyexample.com/advanced/advanced_video_docking/)
+These can, for example, trigger an [`amp-animation`](https://amp.dev/documentation/components/amp-animation) that slides content in order to make room for the docked element. For an example where events trigger animations required for docking, [see AMP by Example.](https://ampbyexample.com/advanced/advanced_video_docking/)
 
 ### Event source
 
@@ -200,4 +200,3 @@ Represents a layer displaying the `poster` or `placeholder` image of the video o
 Represents an animated icon for a UX affordance displayed on the empty component area.
 
 This element also gets the classname `amp-small` when rendered in small viewports (those under 420 pixels wide). It also gets the classname `amp-rtl` when animating from right to left.
-

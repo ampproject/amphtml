@@ -36,13 +36,18 @@ tags: {  # <amp-accordion>
   tag_name: "AMP-ACCORDION"
   requires_extension: "amp-accordion"
   attrs: { name: "animate" value: "" }
-  attrs: { name: "disable-session-states" value: "" }
+  attrs: {
+    # session-states are always disabled in AMP4EMAIL
+    disabled_by: "amp4email"
+    name: "disable-session-states"
+    value: ""
+  }
   attrs: { name: "expand-single-section" value: "" }
   attr_lists: "extended-amp-global"
   child_tags: {
     child_tag_name_oneof: "SECTION"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-accordion"
+  spec_url: "https://amp.dev/documentation/components/amp-accordion"
   amp_layout: {
     supported_layouts: CONTAINER
   }

@@ -17,7 +17,8 @@
 export const MEDIAMETRIE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://prof.estat.com/m/web',
-    'pageview': '${host}/${serial}?' +
+    'pageview':
+      '${host}/${serial}?' +
       'c=${level1}' +
       '&dom=${ampdocUrl}' +
       '&enc=${documentCharset}' +

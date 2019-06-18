@@ -55,8 +55,7 @@ const VIEWER_ORIGIN_TIMEOUT_ = 1000;
  * @const
  * @private {!RegExp}
  */
-const TRIM_ORIGIN_PATTERN_ =
-  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
+const TRIM_ORIGIN_PATTERN_ = /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -91,7 +90,6 @@ const TRUSTED_VIEWER_HOSTS = [
  */
 let RequestResponderDef;
 
-
 /**
  * An AMP representation of the Viewer. This class doesn't do any work itself
  * but instead delegates everything to the actual viewer. This class and the
@@ -100,7 +98,6 @@ let RequestResponderDef;
  * @package Visible for type.
  */
 export class Viewer {
-
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!Object<string, string>=} opt_initParams
@@ -116,7 +113,7 @@ export class Viewer {
     this.isIframed_ = isIframed(this.win);
 
     /** @const {!./document-state.DocumentState} */
-    this.docState_ = Services.documentStateFor(this.win);
+    this.docState_ = Services.globalDocumentStateFor(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = true;
@@ -221,15 +218,16 @@ export class Viewer {
     this.isRuntimeOn_ = !parseInt(this.params_['off'], 10);
     dev().fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
 
-    this.overtakeHistory_ = !!(parseInt(this.params_['history'], 10) ||
-        this.overtakeHistory_);
+    this.overtakeHistory_ = !!(
+      parseInt(this.params_['history'], 10) || this.overtakeHistory_
+    );
     dev().fine(TAG_, '- history:', this.overtakeHistory_);
 
     this.setVisibilityState_(this.params_['visibilityState']);
     dev().fine(TAG_, '- visibilityState:', this.getVisibilityState());
 
-    this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
-        this.prerenderSize_;
+    this.prerenderSize_ =
+      parseInt(this.params_['prerenderSize'], 10) || this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     /**
@@ -242,8 +240,9 @@ export class Viewer {
      * Whether the AMP document was served by a proxy.
      * @private @const {boolean}
      */
-    this.isProxyOrigin_ =
-        isProxyOrigin(parseUrlDeprecated(this.ampdoc.win.location.href));
+    this.isProxyOrigin_ = isProxyOrigin(
+      parseUrlDeprecated(this.ampdoc.win.location.href)
+    );
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -255,8 +254,9 @@ export class Viewer {
     /** @const @private {!Function} */
     this.messagingReadyResolver_ = messagingDeferred.resolve;
     /** @const @private {?Promise} */
-    this.messagingReadyPromise_ =
-        this.initMessagingChannel_(messagingDeferred.promise);
+    this.messagingReadyPromise_ = this.initMessagingChannel_(
+      messagingDeferred.promise
+    );
 
     /** @private {?Promise<boolean>} */
     this.isTrustedViewer_ = null;
@@ -266,10 +266,11 @@ export class Viewer {
 
     /** @private {string} */
     this.unconfirmedReferrerUrl_ =
-        (this.isEmbedded() && 'referrer' in this.params_ &&
-            this.isTrustedAncestorOrigins_() !== false)
-          ? this.params_['referrer']
-          : this.win.document.referrer;
+      this.isEmbedded() &&
+      'referrer' in this.params_ &&
+      this.isTrustedAncestorOrigins_() !== false
+        ? this.params_['referrer']
+        : this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise(resolve => {
@@ -282,9 +283,13 @@ export class Viewer {
           } else {
             resolve(this.win.document.referrer);
             if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
-              dev().expectedError(TAG_, 'Untrusted viewer referrer override: ' +
-                  this.unconfirmedReferrerUrl_ + ' at ' +
-                  this.messagingOrigin_);
+              dev().expectedError(
+                TAG_,
+                'Untrusted viewer referrer override: ' +
+                  this.unconfirmedReferrerUrl_ +
+                  ' at ' +
+                  this.messagingOrigin_
+              );
               this.unconfirmedReferrerUrl_ = this.win.document.referrer;
             }
           }
@@ -308,8 +313,13 @@ export class Viewer {
           if (isTrusted) {
             this.resolvedViewerUrl_ = viewerUrlOverride;
           } else {
-            dev().expectedError(TAG_, 'Untrusted viewer url override: ' +
-                viewerUrlOverride + ' at ' + this.messagingOrigin_);
+            dev().expectedError(
+              TAG_,
+              'Untrusted viewer url override: ' +
+                viewerUrlOverride +
+                ' at ' +
+                this.messagingOrigin_
+            );
           }
           resolve(this.resolvedViewerUrl_);
         });
@@ -359,7 +369,8 @@ export class Viewer {
    */
   initMessagingChannel_(messagingPromise) {
     const isEmbedded = !!(
-      (this.isIframed_ && !this.win.AMP_TEST_IFRAME
+      (this.isIframed_ &&
+        !this.win.AMP_TEST_IFRAME &&
         // Checking param "origin", as we expect all viewers to provide it.
         // See https://github.com/ampproject/amphtml/issues/4183
         // There appears to be a bug under investigation where the
@@ -368,25 +379,27 @@ export class Viewer {
         // for visibilityState.
         // After https://github.com/ampproject/amphtml/issues/6070
         // is fixed we should probably only keep the amp_js_v check here.
-        && (this.params_['origin']
-          || this.params_['visibilityState']
+        (this.params_['origin'] ||
+          this.params_['visibilityState'] ||
           // Parent asked for viewer JS. We must be embedded.
-          || (this.win.location.search.indexOf('amp_js_v') != -1)))
-      || this.isWebviewEmbedded()
-      || this.isCctEmbedded()
-      || !this.ampdoc.isSingleDoc());
+          this.win.location.search.indexOf('amp_js_v') != -1)) ||
+      this.isWebviewEmbedded() ||
+      this.isCctEmbedded() ||
+      !this.ampdoc.isSingleDoc()
+    );
 
     if (!isEmbedded) {
       return null;
     }
     return Services.timerFor(this.win)
-        .timeoutPromise(20000, messagingPromise)
-        .catch(reason => {
-          const error = getChannelError(
-              /** @type {!Error|string|undefined} */ (reason));
-          reportError(error);
-          throw error;
-        });
+      .timeoutPromise(20000, messagingPromise)
+      .catch(reason => {
+        const error = getChannelError(
+          /** @type {!Error|string|undefined} */ (reason)
+        );
+        reportError(error);
+        throw error;
+      });
   }
 
   /**
@@ -460,8 +473,9 @@ export class Viewer {
     this.isCctEmbedded_ = false;
     if (!this.isIframed_) {
       const queryParams = parseQueryString(this.win.location.search);
-      this.isCctEmbedded_ = queryParams['amp_gsa'] === '1' &&
-          startsWith(queryParams['amp_js_v'] || '', 'a');
+      this.isCctEmbedded_ =
+        queryParams['amp_gsa'] === '1' &&
+        startsWith(queryParams['amp_js_v'] || '', 'a');
     }
     return this.isCctEmbedded_;
   }
@@ -491,9 +505,12 @@ export class Viewer {
     const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
     if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
       this.hashParams_['ampshare'] = canonicalUrl;
-      this.win.history.replaceState({}, '',
-          '#' + serializeQueryString(
-              /** @type {!JsonObject} */ (this.hashParams_)));
+      this.win.history.replaceState(
+        {},
+        '',
+        '#' +
+          serializeQueryString(/** @type {!JsonObject} */ (this.hashParams_))
+      );
     }
   }
 
@@ -580,16 +597,17 @@ export class Viewer {
     // viewer). Unfortunately, the viewer sends HIDDEN instead of PRERENDER or
     // INACTIVE, though we know better.
     if (state === VisibilityState.HIDDEN) {
-      state = this.hasBeenVisible_ ?
-        VisibilityState.INACTIVE :
-        VisibilityState.PRERENDER;
+      state = this.hasBeenVisible_
+        ? VisibilityState.INACTIVE
+        : VisibilityState.PRERENDER;
     }
 
     this.viewerVisibilityState_ = state;
 
-    if (this.docState_.isHidden() &&
-        (state === VisibilityState.VISIBLE ||
-         state === VisibilityState.PAUSED)) {
+    if (
+      this.docState_.isHidden() &&
+      (state === VisibilityState.VISIBLE || state === VisibilityState.PAUSED)
+    ) {
       state = VisibilityState.HIDDEN;
     }
 
@@ -648,7 +666,7 @@ export class Viewer {
 
     const deferred = new Deferred();
     this.nextVisibleResolve_ = deferred.resolve;
-    return this.nextVisiblePromise_ = deferred.promise;
+    return (this.nextVisiblePromise_ = deferred.promise);
   }
 
   /**
@@ -747,13 +765,14 @@ export class Viewer {
   isTrustedViewer() {
     if (!this.isTrustedViewer_) {
       const isTrustedAncestorOrigins = this.isTrustedAncestorOrigins_();
-      this.isTrustedViewer_ = isTrustedAncestorOrigins !== undefined
-        ? Promise.resolve(isTrustedAncestorOrigins)
-        : this.messagingReadyPromise_.then(origin => {
-          return origin ? this.isTrustedViewerOrigin_(origin) : false;
-        });
+      this.isTrustedViewer_ =
+        isTrustedAncestorOrigins !== undefined
+          ? Promise.resolve(isTrustedAncestorOrigins)
+          : this.messagingReadyPromise_.then(origin => {
+              return origin ? this.isTrustedViewerOrigin_(origin) : false;
+            });
     }
-    return /** @type {!Promise<boolean>} */(this.isTrustedViewer_);
+    return /** @type {!Promise<boolean>} */ (this.isTrustedViewer_);
   }
 
   /**
@@ -765,13 +784,18 @@ export class Viewer {
     if (!this.isEmbedded()) {
       // Not embedded in IFrame - can't trust the viewer.
       return false;
-    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded() &&
-        !this.isCctEmbedded()) {
+    } else if (
+      this.win.location.ancestorOrigins &&
+      !this.isWebviewEmbedded() &&
+      !this.isCctEmbedded()
+    ) {
       // Ancestors when available take precedence. This is the main API used
       // for this determination. Fallback is only done when this API is not
       // supported by the browser.
-      return this.win.location.ancestorOrigins.length > 0 &&
-          this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]);
+      return (
+        this.win.location.ancestorOrigins.length > 0 &&
+        this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0])
+      );
     }
   }
 
@@ -787,17 +811,23 @@ export class Viewer {
       if (!this.isEmbedded()) {
         // Viewer is only determined for iframed documents at this time.
         origin = '';
-      } else if (this.win.location.ancestorOrigins &&
-          this.win.location.ancestorOrigins.length > 0) {
+      } else if (
+        this.win.location.ancestorOrigins &&
+        this.win.location.ancestorOrigins.length > 0
+      ) {
         origin = this.win.location.ancestorOrigins[0];
       }
-      this.viewerOrigin_ = origin !== undefined
-        ? Promise.resolve(origin)
-        : Services.timerFor(this.win)
-            .timeoutPromise(VIEWER_ORIGIN_TIMEOUT_, this.messagingReadyPromise_)
-            .catch(() => '');
+      this.viewerOrigin_ =
+        origin !== undefined
+          ? Promise.resolve(origin)
+          : Services.timerFor(this.win)
+              .timeoutPromise(
+                VIEWER_ORIGIN_TIMEOUT_,
+                this.messagingReadyPromise_
+              )
+              .catch(() => '');
     }
-    return /** @type {!Promise<string>} */(this.viewerOrigin_);
+    return /** @type {!Promise<string>} */ (this.viewerOrigin_);
   }
 
   /**
@@ -880,7 +910,8 @@ export class Viewer {
     }
     if (eventType == 'broadcast') {
       this.broadcastObservable_.fire(
-          /** @type {!JsonObject|undefined} */ (data));
+        /** @type {!JsonObject|undefined} */ (data)
+      );
       return Promise.resolve();
     }
     const observable = this.messageObservables_[eventType];
@@ -922,9 +953,10 @@ export class Viewer {
       this.messageQueue_ = [];
       queue.forEach(message => {
         const responsePromise = this.messageDeliverer_(
-            message.eventType,
-            message.data,
-            message.awaitResponse);
+          message.eventType,
+          message.data,
+          message.awaitResponse
+        );
 
         if (message.awaitResponse) {
           message.responseResolver(responsePromise);
@@ -978,11 +1010,14 @@ export class Viewer {
       // Certain message deliverers return fake "Promise" instances called
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
-      return /** @type {!Promise<?JsonObject|string|undefined>} */ (
-        tryResolve(() => this.messageDeliverer_(
+      return /** @type {!Promise<?JsonObject|string|undefined>} */ (tryResolve(
+        () =>
+          this.messageDeliverer_(
             eventType,
             /** @type {?JsonObject|string|undefined} */ (data),
-            awaitResponse)));
+            awaitResponse
+          )
+      ));
     }
 
     if (!this.messagingReadyPromise_) {
@@ -999,8 +1034,7 @@ export class Viewer {
       });
     }
 
-    const found = findIndex(this.messageQueue_,
-        m => m.eventType == eventType);
+    const found = findIndex(this.messageQueue_, m => m.eventType == eventType);
 
     let message;
     if (found != -1) {
@@ -1037,8 +1071,10 @@ export class Viewer {
       return Promise.resolve(false);
     }
 
-    return this.sendMessageInternal_('broadcast', message, false, false)
-        .then(() => true, () => false);
+    return this.sendMessageInternal_('broadcast', message, false, false).then(
+      () => true,
+      () => false
+    );
   }
 
   /**
@@ -1066,9 +1102,11 @@ export class Viewer {
    * @param {?string} newUrl
    */
   replaceUrl(newUrl) {
-    if (!newUrl ||
-        !this.ampdoc.isSingleDoc() ||
-        !this.win.history.replaceState) {
+    if (
+      !newUrl ||
+      !this.ampdoc.isSingleDoc() ||
+      !this.win.history.replaceState
+    ) {
       return;
     }
 
@@ -1076,9 +1114,12 @@ export class Viewer {
       // The origin and source origin must match.
       const url = parseUrlDeprecated(this.win.location.href);
       const replaceUrl = parseUrlDeprecated(
-          removeFragment(newUrl) + this.win.location.hash);
-      if (url.origin == replaceUrl.origin &&
-          getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
+        removeFragment(newUrl) + this.win.location.hash
+      );
+      if (
+        url.origin == replaceUrl.origin &&
+        getSourceOrigin(url) == getSourceOrigin(replaceUrl)
+      ) {
         this.win.history.replaceState({}, '', replaceUrl.href);
         this.win.location.originalHref = url.href;
         dev().fine(TAG_, 'replace url:' + replaceUrl.href);
@@ -1105,7 +1146,6 @@ function parseParams_(str, allParams) {
   }
 }
 
-
 /**
  * Creates an error for the case where a channel cannot be established.
  * @param {*=} opt_reason
@@ -1120,7 +1160,6 @@ function getChannelError(opt_reason) {
   return new Error('No messaging channel: ' + opt_reason);
 }
 
-
 /**
  * Sets the viewer visibility state. This calls is restricted to runtime only.
  * @param {!Viewer} viewer
@@ -1131,16 +1170,17 @@ export function setViewerVisibilityState(viewer, state) {
   viewer.setVisibilityState_(state);
 }
 
-
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installViewerServiceForDoc(ampdoc, opt_initParams) {
-  registerServiceBuilderForDoc(ampdoc,
-      'viewer',
-      function() {
-        return new Viewer(ampdoc, opt_initParams);
-      },
-      /* opt_instantiate */ true);
+  registerServiceBuilderForDoc(
+    ampdoc,
+    'viewer',
+    function() {
+      return new Viewer(ampdoc, opt_initParams);
+    },
+    /* opt_instantiate */ true
+  );
 }

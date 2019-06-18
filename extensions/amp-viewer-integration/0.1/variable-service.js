@@ -27,7 +27,6 @@ export let ViewerIntegrationVariableDef;
  * Used for URL replacement service. See usage in src/url-replacements-impl.
  */
 export class AmpViewerIntegrationVariableService {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -38,14 +37,13 @@ export class AmpViewerIntegrationVariableService {
     /** @private @const {!ViewerIntegrationVariableDef} */
     this.variables_ = {
       ancestorOrigin: (unusedParam, unusedDefaultValue) => {
-	      return this.getAncestorOrigin_();
+        return this.getAncestorOrigin_();
       },
       fragmentParam: (param, defaultValue) => {
-	      return this.getFragmentParamData_(param, defaultValue);
+        return this.getFragmentParamData_(param, defaultValue);
       },
     };
   }
-
 
   /**
    * Return the FRAGMENT_PARAM from the original location href
@@ -55,13 +53,15 @@ export class AmpViewerIntegrationVariableService {
    * @private
    */
   getFragmentParamData_(param, defaultValue) {
-    userAssert(param,
-        'The first argument to FRAGMENT_PARAM, the fragment string ' +
-        'param is required');
+    userAssert(
+      param,
+      'The first argument to FRAGMENT_PARAM, the fragment string ' +
+        'param is required'
+    );
     userAssert(typeof param == 'string', 'param should be a string');
     const hash = this.ampdoc_.win.location.originalHash;
     const params = parseQueryString(hash);
-    return (params[param] === undefined) ? defaultValue : params[param];
+    return params[param] === undefined ? defaultValue : params[param];
   }
 
   /**

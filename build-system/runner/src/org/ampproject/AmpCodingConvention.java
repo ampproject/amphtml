@@ -22,7 +22,6 @@ import com.google.javascript.jscomp.ClosureCodingConvention;
 import com.google.javascript.jscomp.CodingConvention;
 import com.google.javascript.jscomp.CodingConvention.AssertionFunctionSpec;
 import com.google.javascript.jscomp.CodingConventions;
-import com.google.javascript.jscomp.ClosureCodingConvention;
 import com.google.javascript.rhino.jstype.JSType;
 import com.google.javascript.rhino.jstype.JSTypeNative;
 
@@ -35,41 +34,14 @@ import java.util.Collection;
  */
 public final class AmpCodingConvention extends CodingConventions.Proxy {
 
-  private boolean singleFileCompilation = false;
-
   /** By default, decorate the ClosureCodingConvention. */
   public AmpCodingConvention() {
     this(new ClosureCodingConvention());
   }
 
-  public AmpCodingConvention(boolean singleFileCompilation) {
-    this(new ClosureCodingConvention());
-    this.singleFileCompilation = singleFileCompilation;
-  }
-
   /** Decorates a wrapped CodingConvention. */
   public AmpCodingConvention(CodingConvention convention) {
     super(convention);
-  }
-
-  @Override
-  public ImmutableCollection<AssertionFunctionSpec> getAssertionFunctions() {
-    return ImmutableList.of(
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "module$src$log.devAssert"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "devAssert$$module$src$log"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "module$src$log.userAssert"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "userAssert$$module$src$log"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "assertService$$module$src$element_service"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "module$src$layout.assertLength"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "assertLength$$module$src$layout")
-    );
   }
 
   /**
@@ -80,9 +52,6 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
    * delivery), this could go away there.
    */
   @Override public boolean isExported(String name, boolean local) {
-    if (singleFileCompilation) {
-      return false;
-    }
     // This stops compiler from inlining functions (local or not) that end with
     // NoInline in their name. Mostly used for externing try-catch to avoid v8
     // de-optimization (https://goo.gl/gvzlDp)
@@ -92,7 +61,8 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     // Bad hack, but we should really not try to inline CSS as these strings can
     // be very long.
     // See https://github.com/ampproject/amphtml/issues/10118
-    if (name.equals("cssText$$module$build$css")) {
+    // cssText is defined in build-system/tasks/css.js#writeCss
+    if (name.startsWith("cssText$$module$build$")) {
       return true;
     }
 

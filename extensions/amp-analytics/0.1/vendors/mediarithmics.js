@@ -23,7 +23,8 @@ export const MEDIARITHMICS_CONFIG = /** @type {!JsonObject} */ ({
   },
   'requests': {
     'host': 'https://${domain}',
-    'pageview': '${host}/v1/visits/pixel?' +
+    'pageview':
+      '${host}/v1/visits/pixel?' +
       '$site_token=${site_token}' +
       '&$url=${url}' +
       '&$ev=${event_name}' +

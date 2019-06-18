@@ -54,11 +54,6 @@ PASS
 |    <!-- Valid: Using [src] is valid-->
 |    <amp-state id="test" [src]="{{example_url}}" crossorigin="amp-viewer-auth-token-via-post"></amp-state>
 |
-|    <!-- Valid: Using cross-origin is valid-->
-|    <amp-state id="test" [src]="{{example_url}}" cross-origin="amp-viewer-auth-token-via-post"></amp-state>
->>   ^~~~~~~~~
-actions_feature_tests/amp_bind.html:57:2 The attribute 'cross-origin' in tag 'AMP-STATE (ACTIONS)' is deprecated - use 'crossorigin' instead. (see https://github.com/ampproject/amphtml/issues/21399) [DEPRECATION]
-|
 |    <!-- Valid: Credentials valid with [src] -->
 |    <amp-state id="test" [src]="{{example_url}}" data-amp-replace="CLIENT_ID CLIENT_ID(cid)"
 |    crossorigin="amp-viewer-auth-token-via-post" credentials="123" overridable></amp-state>

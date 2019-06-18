@@ -3,6 +3,7 @@ $category@: layout
 formats:
   - websites
   - ads
+  - email
 teaser:
   text: Displays elements in a full-viewport “lightbox” modal.
 ---

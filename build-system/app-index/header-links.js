@@ -17,7 +17,8 @@
 module.exports = [
   {
     'name': 'Developing',
-    'href': 'https://' +
+    'href':
+      'https://' +
       'github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md',
   },
   {

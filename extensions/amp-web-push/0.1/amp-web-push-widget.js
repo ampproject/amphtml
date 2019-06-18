@@ -24,7 +24,6 @@ import {Layout} from '../../../src/layout';
  * All widgets are initially invisible while their visibility is computed.
  */
 export class WebPushWidget extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

@@ -16,10 +16,7 @@
 
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
-import {
-  createElementWithAttributes,
-  removeElement,
-} from './dom';
+import {createElementWithAttributes, removeElement} from './dom';
 import {devAssert} from './log';
 import {dict} from './utils/object';
 import {isArray, toWin} from './types';
@@ -35,19 +32,27 @@ import {triggerAnalyticsEvent} from './analytics';
  * @return {!Element} created analytics element
  */
 export function insertAnalyticsElement(
-  parentElement, config, loadAnalytics = false, disableImmediate = false) {
+  parentElement,
+  config,
+  loadAnalytics = false,
+  disableImmediate = false
+) {
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
   const analyticsElem = createElementWithAttributes(
-      doc,
-      'amp-analytics', dict({
-        'sandbox': 'true',
-        'trigger': disableImmediate ? '' : 'immediate',
-      }));
+    doc,
+    'amp-analytics',
+    dict({
+      'sandbox': 'true',
+      'trigger': disableImmediate ? '' : 'immediate',
+    })
+  );
   const scriptElem = createElementWithAttributes(
-      doc,
-      'script', dict({
-        'type': 'application/json',
-      }));
+    doc,
+    'script',
+    dict({
+      'type': 'application/json',
+    })
+  );
   scriptElem.textContent = JSON.stringify(config);
   analyticsElem.appendChild(scriptElem);
   analyticsElem.CONFIG = config;
@@ -55,10 +60,11 @@ export function insertAnalyticsElement(
   // Force load analytics extension if script not included in page.
   if (loadAnalytics) {
     // Get Extensions service and force load analytics extension.
-    const extensions =
-        Services.extensionsFor(toWin(parentElement.ownerDocument.defaultView));
+    const extensions = Services.extensionsFor(
+      toWin(parentElement.ownerDocument.defaultView)
+    );
     const ampdoc = Services.ampdoc(parentElement);
-    extensions./*OK*/installExtensionForDoc(ampdoc, 'amp-analytics');
+    extensions./*OK*/ installExtensionForDoc(ampdoc, 'amp-analytics');
   } else {
     Services.analyticsForDocOrNull(parentElement).then(analytics => {
       devAssert(analytics);
@@ -92,15 +98,20 @@ class CustomEventReporter {
 
     for (const event in config['triggers']) {
       const eventType = config['triggers'][event]['on'];
-      devAssert(eventType,
-          'CustomEventReporter config must specify trigger eventType');
+      devAssert(
+        eventType,
+        'CustomEventReporter config must specify trigger eventType'
+      );
       const newEventType = this.getEventTypeInSandbox_(eventType);
       config['triggers'][event]['on'] = newEventType;
     }
 
-    this.parent_.signals().whenSignal(CommonSignals.LOAD_START).then(() => {
-      insertAnalyticsElement(this.parent_, config, true);
-    });
+    this.parent_
+      .signals()
+      .whenSignal(CommonSignals.LOAD_START)
+      .then(() => {
+        insertAnalyticsElement(this.parent_, config, true);
+      });
   }
 
   /**
@@ -108,10 +119,15 @@ class CustomEventReporter {
    * @param {!JsonObject=} opt_vars A map of vars and their values.
    */
   trigger(eventType, opt_vars) {
-    devAssert(this.config_['triggers'][eventType],
-        'Cannot trigger non initiated eventType');
-    triggerAnalyticsEvent(this.parent_,
-        this.getEventTypeInSandbox_(eventType), opt_vars);
+    devAssert(
+      this.config_['triggers'][eventType],
+      'Cannot trigger non initiated eventType'
+    );
+    triggerAnalyticsEvent(
+      this.parent_,
+      this.getEventTypeInSandbox_(eventType),
+      opt_vars
+    );
   }
   /**
    * @param {string} eventType
@@ -122,7 +138,6 @@ class CustomEventReporter {
   }
 }
 
-
 /**
  * A builder class that enable extension elements to easily build and get a
  * CustomEventReporter instance. Its constructor requires the parent AMP
@@ -132,7 +147,6 @@ class CustomEventReporter {
 export class CustomEventReporterBuilder {
   /** @param {!AmpElement} parent */
   constructor(parent) {
-
     /** @private {!AmpElement} */
     this.parent_ = parent;
 
@@ -167,8 +181,10 @@ export class CustomEventReporterBuilder {
    */
   track(eventType, request) {
     request = isArray(request) ? request : [request];
-    devAssert(!this.config_['triggers'][eventType],
-        'customEventReporterBuilder should not track same eventType twice');
+    devAssert(
+      !this.config_['triggers'][eventType],
+      'customEventReporterBuilder should not track same eventType twice'
+    );
     const requestList = [];
     for (let i = 0; i < request.length; i++) {
       const requestName = `${eventType}-request-${i}`;
@@ -190,12 +206,13 @@ export class CustomEventReporterBuilder {
   build() {
     devAssert(this.config_, 'CustomEventReporter already built');
     const report = new CustomEventReporter(
-        this.parent_, /** @type {!JsonObject} */ (this.config_));
+      this.parent_,
+      /** @type {!JsonObject} */ (this.config_)
+    );
     this.config_ = null;
     return report;
   }
 }
-
 
 /**
  * A helper method that should be used by all extension elements to add their
@@ -208,26 +225,32 @@ export function useAnalyticsInSandbox(element, promise) {
   let analyticsElement = null;
   let configPromise = promise;
   // Listener to LOAD_START signal. Insert analytics element on LOAD_START
-  element.signals().whenSignal(CommonSignals.LOAD_START).then(() => {
-    if (analyticsElement || !configPromise) {
-      return;
-    }
-    configPromise.then(config => {
-      if (!configPromise) {
-        // If config promise resolve after unload, do nothing.
+  element
+    .signals()
+    .whenSignal(CommonSignals.LOAD_START)
+    .then(() => {
+      if (analyticsElement || !configPromise) {
         return;
       }
-      configPromise = null;
-      analyticsElement = insertAnalyticsElement(element, config, false);
+      configPromise.then(config => {
+        if (!configPromise) {
+          // If config promise resolve after unload, do nothing.
+          return;
+        }
+        configPromise = null;
+        analyticsElement = insertAnalyticsElement(element, config, false);
+      });
     });
-  });
 
   // Listener to UNLOAD signal. Destroy remove element on UNLOAD
-  element.signals().whenSignal(CommonSignals.UNLOAD).then(() => {
-    configPromise = null;
-    if (analyticsElement) {
-      removeElement(analyticsElement);
-      analyticsElement = null;
-    }
-  });
+  element
+    .signals()
+    .whenSignal(CommonSignals.UNLOAD)
+    .then(() => {
+      configPromise = null;
+      if (analyticsElement) {
+        removeElement(analyticsElement);
+        analyticsElement = null;
+      }
+    });
 }

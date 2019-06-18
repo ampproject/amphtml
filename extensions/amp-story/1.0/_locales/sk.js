@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Získať odkaz',
   },
@@ -111,15 +114,17 @@ const strings = {
     string: 'Ak si chcete zobraziť toto prostredie, zväčšite výšku okna.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Ak si chcete zobraziť toto prostredie, zväčšite výšku aj šírku ' +
-        'okna.',
+    string:
+      'Ak si chcete zobraziť toto prostredie, zväčšite výšku aj šírku ' +
+      'okna.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Ak si chcete zobraziť toto prostredie, zväčšite šírku okna.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Ak si chcete zobraziť tento obsah, musíte povoliť experiment ' +
-        's príbehom AMP.',
+    string:
+      'Ak si chcete zobraziť tento obsah, musíte povoliť experiment ' +
+      's príbehom AMP.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Stránka sa najlepšie zobrazí v režime portrétu',

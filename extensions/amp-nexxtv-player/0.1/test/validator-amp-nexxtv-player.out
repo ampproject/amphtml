@@ -59,7 +59,7 @@ FAIL
 |      <!-- invalid, needs data-mediaid -->
 |      <amp-nexxtv-player
 >>     ^~~~~~~~~
-amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:59:4 The mandatory attribute 'data-mediaid' is missing in tag 'amp-nexxtv-player'. (see https://www.ampproject.org/docs/reference/components/amp-nexxtv-player) [AMP_TAG_PROBLEM]
+amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:59:4 The mandatory attribute 'data-mediaid' is missing in tag 'amp-nexxtv-player'. (see https://amp.dev/documentation/components/amp-nexxtv-player) [AMP_TAG_PROBLEM]
 |              data-client="761"
 |              width="480" height="270"
 |      ></amp-nexxtv-player>
@@ -67,7 +67,7 @@ amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:59:4 The mandatory a
 |      <!-- invalid, needs data-client -->
 |      <amp-nexxtv-player
 >>     ^~~~~~~~~
-amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:65:4 The mandatory attribute 'data-client' is missing in tag 'amp-nexxtv-player'. (see https://www.ampproject.org/docs/reference/components/amp-nexxtv-player) [AMP_TAG_PROBLEM]
+amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:65:4 The mandatory attribute 'data-client' is missing in tag 'amp-nexxtv-player'. (see https://amp.dev/documentation/components/amp-nexxtv-player) [AMP_TAG_PROBLEM]
 |              data-mediaid="71QQG852413DU7J"
 |              width="480" height="270"
 |      ></amp-nexxtv-player>

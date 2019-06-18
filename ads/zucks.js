@@ -33,21 +33,17 @@ export function zucks(global, data) {
       container.appendChild(d);
 
       if (data['zoeMultiAd'] !== 'true') {
-        (global.gZgokZoeQueue =
-          (global.gZgokZoeQueue || [])).push({frameId});
+        (global.gZgokZoeQueue = global.gZgokZoeQueue || []).push({frameId});
       }
 
-      (global.gZgokZoeWidgetQueue =
-        (global.gZgokZoeWidgetQueue || []))
-          .push({frameId, parent: `#${elementId}`});
+      (global.gZgokZoeWidgetQueue = global.gZgokZoeWidgetQueue || []).push({
+        frameId,
+        parent: `#${elementId}`,
+      });
     });
+  } else if (data['adtype'] === 'native') {
+    loadScript(global, `https://j.zucks.net.zimg.jp/n?f=${data['frameId']}`);
+  } else {
+    writeScript(global, `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`);
   }
-
-  let script = `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`;
-
-  if (data['adtype'] === 'native') {
-    script = `https://j.zucks.net.zimg.jp/n?f=${data['frameId']}`;
-  }
-
-  writeScript(global, script);
 }

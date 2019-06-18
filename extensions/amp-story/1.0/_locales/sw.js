@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Pata Kiungo',
   },
@@ -117,8 +120,7 @@ const strings = {
     string: 'Panua upana wa kidirisha chako ili uone hali hii',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Lazima uwashe jaribio la habari kwenye amp ili uone maudhui ' +
-        'haya.',
+    string: 'Lazima uwashe jaribio la habari kwenye amp ili uone maudhui haya.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Ukurasa hutazamwa vyema zaidi katika mkao wima',

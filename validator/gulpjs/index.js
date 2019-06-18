@@ -106,7 +106,7 @@ module.exports.format = function(logger) {
       report += colors.green(validationResult.status);
       report += '\nReview our \'publishing checklist\' to ensure '
           + 'successful AMP document distribution. '
-          + 'See https://bit.ly/2D54tM9';
+          + 'See https://go.amp.dev/publishing-checklist';
     } else if (validationResult.status === STATUS_UNKNOWN) {
       report += colors.red(validationResult.status);
     } else {

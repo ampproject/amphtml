@@ -32,19 +32,23 @@ tags: {  # amp-carousel
 attr_lists: {
   name: "amp-carousel-common"
   attrs: {
+    disabled_by: "amp4email"
     name: "arrows"
     value: ""
   }
   attrs: {
+    disabled_by: "amp4email"
     name: "autoplay"
     value_regex: "(|[0-9]+)"
   }
   attrs: { name: "controls" }
   attrs: {
+    disabled_by: "amp4email"
     name: "delay"
     value_regex: "[0-9]+"
   }
   attrs: {
+    disabled_by: "amp4email"
     name: "dots"
     value: ""
   }
@@ -69,7 +73,7 @@ tags: {  # <amp-carousel type=slides>
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -92,10 +96,11 @@ tags: {  # <amp-carousel type=carousel>
     name: "type"
     value: "carousel"
     mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel"
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -119,7 +124,7 @@ tags: {  # <amp-carousel lightbox type=slides>
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -153,7 +158,7 @@ tags: {  # <amp-carousel lightbox type=carousel>
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel"
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -168,9 +173,6 @@ tags: {  # <amp-carousel lightbox type=carousel>
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-CAROUSEL lightbox [lightbox-exclude]"
   attrs: {
@@ -180,9 +182,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-CAROUSEL lightbox [child]"
   attrs: {

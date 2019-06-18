@@ -16,7 +16,6 @@
 import {StateChangeType} from '../navigation-state';
 import {getAnalyticsService} from '../story-analytics';
 
-
 describes.fakeWin('amp-story analytics', {}, env => {
   let analytics;
   let rootEl;
@@ -27,7 +26,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
   });
 
   it('should trigger `story-page-visible` on change', () => {
-    const trigger = sandbox.stub(analytics, 'triggerEvent_');
+    const trigger = sandbox.stub(analytics, 'triggerEvent');
 
     analytics.onNavigationStateChange({
       type: StateChangeType.ACTIVE_PAGE,

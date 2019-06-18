@@ -16,9 +16,7 @@
 
 import {GestureRecognizer, Gestures} from '../../src/gesture';
 
-
 describe('Gestures', () => {
-
   class TestRecognizer extends GestureRecognizer {
     constructor(manager) {
       super('test', manager);
@@ -77,7 +75,6 @@ describe('Gestures', () => {
     eventListeners[event.type](event);
   }
 
-
   it('onPointerDown should be called', () => {
     const handler = sandbox.spy();
     gestures.onPointerDown(handler);
@@ -85,10 +82,15 @@ describe('Gestures', () => {
     expect(handler).to.be.calledOnce;
   });
 
-
   it('should proceed with series if touchstart returns true', () => {
-    recognizerMock.expects('onTouchStart').returns(true).once();
-    recognizerMock.expects('onTouchMove').returns(true).once();
+    recognizerMock
+      .expects('onTouchStart')
+      .returns(true)
+      .once();
+    recognizerMock
+      .expects('onTouchMove')
+      .returns(true)
+      .once();
     recognizerMock.expects('onTouchEnd').once();
     sendEvent({type: 'touchstart'});
     sendEvent({type: 'touchmove'});
@@ -96,7 +98,10 @@ describe('Gestures', () => {
   });
 
   it('should cancel series if touchstart returns false', () => {
-    recognizerMock.expects('onTouchStart').returns(false).once();
+    recognizerMock
+      .expects('onTouchStart')
+      .returns(false)
+      .once();
     recognizerMock.expects('onTouchMove').never();
     recognizerMock.expects('onTouchEnd').never();
     sendEvent({type: 'touchstart'});
@@ -105,8 +110,14 @@ describe('Gestures', () => {
   });
 
   it('should cancel series if touchmove returns false', () => {
-    recognizerMock.expects('onTouchStart').returns(true).once();
-    recognizerMock.expects('onTouchMove').returns(false).once();
+    recognizerMock
+      .expects('onTouchStart')
+      .returns(true)
+      .once();
+    recognizerMock
+      .expects('onTouchMove')
+      .returns(false)
+      .once();
     recognizerMock.expects('onTouchEnd').never();
     sendEvent({type: 'touchstart'});
     sendEvent({type: 'touchmove'});
@@ -114,21 +125,30 @@ describe('Gestures', () => {
   });
 
   it('should enter tracking mode on touchstart true', () => {
-    recognizerMock.expects('onTouchStart').returns(true).once();
+    recognizerMock
+      .expects('onTouchStart')
+      .returns(true)
+      .once();
     sendEvent({type: 'touchstart'});
     expect(gestures.tracking_[0]).to.equal(true);
   });
 
   it('should stay in tracking mode on touchmove true', () => {
     gestures.tracking_[0] = true;
-    recognizerMock.expects('onTouchMove').returns(true).once();
+    recognizerMock
+      .expects('onTouchMove')
+      .returns(true)
+      .once();
     sendEvent({type: 'touchmove'});
     expect(gestures.tracking_[0]).to.equal(true);
   });
 
   it('should exit tracking mode on touchmove false', () => {
     gestures.tracking_[0] = true;
-    recognizerMock.expects('onTouchMove').returns(false).once();
+    recognizerMock
+      .expects('onTouchMove')
+      .returns(false)
+      .once();
     sendEvent({type: 'touchmove'});
     expect(gestures.tracking_[0]).to.equal(false);
   });
@@ -173,7 +193,6 @@ describe('Gestures', () => {
     expect(gestures.tracking_[0]).to.equal(false);
   });
 
-
   it('should deny ready state if already eventing', () => {
     gestures.eventing_ = {};
     recognizerMock.expects('acceptCancel').once();
@@ -190,7 +209,6 @@ describe('Gestures', () => {
     expect(gestures.passAfterEvent_).to.equal(true);
   });
 
-
   it('should deny pending state if already eventing', () => {
     gestures.eventing_ = {};
     gestures.pending_[0] = 0;
@@ -206,19 +224,19 @@ describe('Gestures', () => {
     expect(gestures.pending_[0]).to.equal(11);
   });
 
-
   it('should stop eventing', () => {
     gestures.eventing_ = recognizer;
     gestures.signalEnd_(recognizer);
     expect(gestures.eventing_).to.equal(null);
   });
 
-
   it('should deny emit if another eventing', () => {
     gestures.eventing_ = {};
-    allowConsoleError(() => { expect(() => {
-      gestures.signalEmit_(recognizer, {}, null);
-    }).to.throw(/Recognizer is not currently allowed/); });
+    allowConsoleError(() => {
+      expect(() => {
+        gestures.signalEmit_(recognizer, {}, null);
+      }).to.throw(/Recognizer is not currently allowed/);
+    });
     expect(onGesture).to.have.not.been.called;
   });
 
@@ -235,7 +253,6 @@ describe('Gestures', () => {
     expect(gesture.event).to.equal(event);
     expect(gesture.time).to.equal(1);
   });
-
 
   it('should ignore pass - nothing to do', () => {
     recognizerMock.expects('acceptStart').never();
@@ -278,7 +295,6 @@ describe('Gestures', () => {
     expect(gestures.pass_.isPending()).to.equal(false);
     expect(gestures.eventing_).to.equal(recognizer);
   });
-
 
   it('should allow event to propagate when nothing happening', () => {
     const event = {
@@ -405,7 +421,7 @@ describe('Gestures', () => {
 
       onGesture = sandbox.spy();
 
-      gestures = Gestures.get(element, /* shouldNotPreventDefault */true);
+      gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
       gestures.onGesture(TestRecognizer, onGesture);
       expect(gestures.recognizers_.length).to.equal(1);
       recognizer = gestures.recognizers_[0];
@@ -479,7 +495,5 @@ describe('Gestures', () => {
       expect(event.preventDefault).to.have.not.been.called;
       expect(event.stopPropagation).to.have.not.been.called;
     });
-
   });
-
 });

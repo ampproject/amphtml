@@ -24,9 +24,7 @@ import {
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
 
-
 describe('chunk', () => {
-
   beforeEach(() => {
     activateChunkingForTesting();
   });
@@ -87,65 +85,75 @@ describe('chunk', () => {
     });
   }
 
-  describes.fakeWin('visible no amp', {
-    amp: false,
-  }, env => {
-
-    beforeEach(() => {
-      installDocService(env.win, /* isSingleDoc */ true);
-      expect(env.win.services.viewer).to.be.undefined;
-      env.win.document.hidden = false;
-    });
-
-    basicTests(env);
-  });
-
-  describes.fakeWin('invisible no amp', {
-    amp: false,
-  }, env => {
-
-    beforeEach(() => {
-      installDocService(env.win, /* isSingleDoc */ true);
-      expect(env.win.services.viewer).to.be.undefined;
-      env.win.document.hidden = true;
-      env.win.requestIdleCallback = function() {
-        throw new Error('Should not be called');
-      };
-      env.win.postMessage = function(data, targetOrigin) {
-        expect(targetOrigin).to.equal('*');
-        Promise.resolve().then(() => {
-          const event = {
-            data,
-            type: 'message',
-          };
-          env.win.eventListeners.fire(event);
-        });
-      };
-    });
-
-    basicTests(env);
-  });
-
-  describes.fakeWin('with viewer', {
-    amp: true,
-  }, env => {
-
-    beforeEach(() => {
-      expect(env.win.services.viewer).to.exist;
-      env.win.document.hidden = false;
-    });
-
-    describe('visible', () => {
+  describes.fakeWin(
+    'visible no amp',
+    {
+      amp: false,
+    },
+    env => {
       beforeEach(() => {
-        const viewer = Services.viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-          return true;
-        });
+        installDocService(env.win, /* isSingleDoc */ true);
+        expect(env.win.services.viewer).to.be.undefined;
+        env.win.document.hidden = false;
       });
-      basicTests(env);
-    });
 
-    describe.configure().skip(() => !('onunhandledrejection' in window))
+      basicTests(env);
+    }
+  );
+
+  describes.fakeWin(
+    'invisible no amp',
+    {
+      amp: false,
+    },
+    env => {
+      beforeEach(() => {
+        installDocService(env.win, /* isSingleDoc */ true);
+        expect(env.win.services.viewer).to.be.undefined;
+        env.win.document.hidden = true;
+        env.win.requestIdleCallback = function() {
+          throw new Error('Should not be called');
+        };
+        env.win.postMessage = function(data, targetOrigin) {
+          expect(targetOrigin).to.equal('*');
+          Promise.resolve().then(() => {
+            const event = {
+              data,
+              type: 'message',
+            };
+            env.win.eventListeners.fire(event);
+          });
+        };
+      });
+
+      basicTests(env);
+    }
+  );
+
+  describes.fakeWin(
+    'with viewer',
+    {
+      amp: true,
+    },
+    env => {
+      beforeEach(() => {
+        expect(env.win.services.viewer).to.exist;
+        env.win.document.hidden = false;
+      });
+
+      describe('visible', () => {
+        beforeEach(() => {
+          const viewer = Services.viewerForDoc(env.win.document);
+          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+            return true;
+          });
+        });
+        basicTests(env);
+      });
+
+      describe
+        .configure()
+        .skip(() => !('onunhandledrejection' in window))
         .run('error handling', () => {
           let fakeWin;
           let done;
@@ -178,142 +186,153 @@ describe('chunk', () => {
           });
         });
 
-    describe('invisible', () => {
-      beforeEach(() => {
-        const viewer = Services.viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-          return false;
+      describe('invisible', () => {
+        beforeEach(() => {
+          const viewer = Services.viewerForDoc(env.win.document);
+          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+            return false;
+          });
+          env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
+            15
+          );
+          const chunks = chunkInstanceForTesting(env.win.document);
+          env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
+            throw new Error('No calls expected: executeAsap_');
+          });
+          env.win.location.resetHref('test#visibilityState=hidden');
         });
-        env.win.requestIdleCallback =
-            resolvingIdleCallbackWithTimeRemaining(15);
-        const chunks = chunkInstanceForTesting(env.win.document);
-        env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
-          throw new Error('No calls expected: executeAsap_');
-        });
-        env.win.location.resetHref('test#visibilityState=hidden');
+
+        basicTests(env);
       });
 
-      basicTests(env);
-    });
-
-    describe('invisible but deactivated', () => {
-      beforeEach(() => {
-        deactivateChunking();
-        const viewer = Services.viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-          return false;
+      describe('invisible but deactivated', () => {
+        beforeEach(() => {
+          deactivateChunking();
+          const viewer = Services.viewerForDoc(env.win.document);
+          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+            return false;
+          });
+          env.win.requestIdleCallback = () => {
+            throw new Error('No calls expected');
+          };
+          env.win.location.resetHref('test#visibilityState=hidden');
         });
-        env.win.requestIdleCallback = () => {
-          throw new Error('No calls expected');
-        };
-        env.win.location.resetHref('test#visibilityState=hidden');
+
+        basicTests(env);
       });
 
-      basicTests(env);
-    });
+      describe('invisible via document.hidden', () => {
+        beforeEach(() => {
+          const viewer = Services.viewerForDoc(env.win.document);
+          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+            return false;
+          });
+          env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
+            15
+          );
+          const chunks = chunkInstanceForTesting(env.win.document);
+          env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
+            throw new Error('No calls expected: executeAsap_');
+          });
+          env.win.document.hidden = true;
+        });
 
-    describe('invisible via document.hidden', () => {
-      beforeEach(() => {
-        const viewer = Services.viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-          return false;
-        });
-        env.win.requestIdleCallback =
-            resolvingIdleCallbackWithTimeRemaining(15);
-        const chunks = chunkInstanceForTesting(env.win.document);
-        env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
-          throw new Error('No calls expected: executeAsap_');
-        });
-        env.win.document.hidden = true;
+        basicTests(env);
       });
 
-      basicTests(env);
-    });
-
-    describe('invisible to visible', () => {
-      beforeEach(() => {
-        env.win.location.resetHref('test#visibilityState=hidden');
-        const viewer = Services.viewerForDoc(env.win.document);
-        let visible = false;
-        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-          return visible;
-        });
-        env.win.requestIdleCallback = () => {
-          // Don't call the callback, but transition to visible
-          visible = true;
-          viewer.onVisibilityChange_();
-        };
-      });
-
-      basicTests(env);
-    });
-
-    describe('invisible to visible', () => {
-      beforeEach(() => {
-        env.win.location.resetHref('test#visibilityState=prerender');
-        const viewer = Services.viewerForDoc(env.win.document);
-        let visible = false;
-        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-          return visible;
-        });
-        env.win.requestIdleCallback = () => {
-          // Don't call the callback, but transition to visible
-          visible = true;
-          viewer.onVisibilityChange_();
-        };
-      });
-
-      basicTests(env);
-    });
-
-    describe('invisible to visible after a while', () => {
-      beforeEach(() => {
-        env.win.location.resetHref('test#visibilityState=hidden');
-        const viewer = Services.viewerForDoc(env.win.document);
-        let visible = false;
-        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-          return visible;
-        });
-        env.win.requestIdleCallback = () => {
-          // Don't call the callback, but transition to visible
-          setTimeout(() => {
+      describe('invisible to visible', () => {
+        beforeEach(() => {
+          env.win.location.resetHref('test#visibilityState=hidden');
+          const viewer = Services.viewerForDoc(env.win.document);
+          let visible = false;
+          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+            return visible;
+          });
+          env.win.requestIdleCallback = () => {
+            // Don't call the callback, but transition to visible
             visible = true;
             viewer.onVisibilityChange_();
-          }, 10);
-        };
+          };
+        });
+
+        basicTests(env);
       });
 
+      describe('invisible to visible', () => {
+        beforeEach(() => {
+          env.win.location.resetHref('test#visibilityState=prerender');
+          const viewer = Services.viewerForDoc(env.win.document);
+          let visible = false;
+          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+            return visible;
+          });
+          env.win.requestIdleCallback = () => {
+            // Don't call the callback, but transition to visible
+            visible = true;
+            viewer.onVisibilityChange_();
+          };
+        });
+
+        basicTests(env);
+      });
+
+      describe('invisible to visible after a while', () => {
+        beforeEach(() => {
+          env.win.location.resetHref('test#visibilityState=hidden');
+          const viewer = Services.viewerForDoc(env.win.document);
+          let visible = false;
+          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+            return visible;
+          });
+          env.win.requestIdleCallback = () => {
+            // Don't call the callback, but transition to visible
+            setTimeout(() => {
+              visible = true;
+              viewer.onVisibilityChange_();
+            }, 10);
+          };
+        });
+
+        basicTests(env);
+      });
+    }
+  );
+
+  describes.realWin(
+    'realWin',
+    {
+      amp: true,
+    },
+    env => {
+      beforeEach(() => {
+        Object.defineProperty(env.win.document, 'hidden', {
+          get: () => false,
+        });
+      });
       basicTests(env);
-    });
-  });
+    }
+  );
 
-  describes.realWin('realWin', {
-    amp: true,
-  }, env => {
-    beforeEach(() => {
-      Object.defineProperty(env.win.document, 'hidden', {
-        get: () => false,
+  describes.realWin(
+    'realWin noIdleCallback',
+    {
+      amp: true,
+    },
+    env => {
+      beforeEach(() => {
+        env.win.requestIdleCallback = null;
+        expect(env.win.requestIdleCallback).to.be.null;
+        const viewer = Services.viewerForDoc(env.win.document);
+        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+          return false;
+        });
+        Object.defineProperty(env.win.document, 'hidden', {
+          get: () => false,
+        });
       });
-    });
-    basicTests(env);
-  });
-
-  describes.realWin('realWin noIdleCallback', {
-    amp: true,
-  }, env => {
-    beforeEach(() => {
-      env.win.requestIdleCallback = null;
-      expect(env.win.requestIdleCallback).to.be.null;
-      const viewer = Services.viewerForDoc(env.win.document);
-      env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-        return false;
-      });
-      Object.defineProperty(env.win.document, 'hidden', {
-        get: () => false,
-      });
-    });
-    basicTests(env);
-  });
+      basicTests(env);
+    }
+  );
 });
 
 describe('onIdle', () => {

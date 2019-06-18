@@ -35,7 +35,7 @@ public class AmpPassTest extends CompilerTestCase {
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
     return new AmpPass(compiler, /* isProd */ true, suffixTypes, assignmentReplacements,
-        prodAssignmentReplacements);
+        prodAssignmentReplacements, "123");
   }
 
   @Override protected int getNumRepetitions() {
@@ -366,5 +366,17 @@ public class AmpPassTest extends CompilerTestCase {
             "  console.log(a);",
             "})(self.AMP);",
             "console.log(a);"));
+  }
+
+  @Test public void testAmpVersionReplacement() throws Exception {
+    test(
+        LINE_JOINER.join(
+            "var a = `test${internalRuntimeVersion$$module$src$internal_version()}ing`;",
+            "var b = 'test' + internalRuntimeVersion$$module$src$internal_version() + 'ing';",
+            "var c = internalRuntimeVersion$$module$src$internal_version();"),
+        LINE_JOINER.join(
+            "var a = `test${'123'}ing`;",
+            "var b = 'test' + '123' + 'ing';",
+            "var c = '123';"));
   }
 }

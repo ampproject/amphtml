@@ -46,11 +46,11 @@ const Side = {
 };
 
 /**
-  * For browsers with bottom nav bars the content towards the bottom
-  * end of the sidebar is cut off.
-  * Currently Safari is the only browser with a nav bar on the bottom
-  * so we set the width of this block to the width of Safari's nav bar.
-  * Source for value: https://github.com/WebKit/webkit/blob/de9875e914c8fda3f46247cd482ce4f849ddad0a/Source/WebInspectorUI/UserInterface/Views/Variables.css#L119
+ * For browsers with bottom nav bars the content towards the bottom
+ * end of the sidebar is cut off.
+ * Currently Safari is the only browser with a nav bar on the bottom
+ * so we set the width of this block to the width of Safari's nav bar.
+ * Source for value: https://github.com/WebKit/webkit/blob/de9875e914c8fda3f46247cd482ce4f849ddad0a/Source/WebInspectorUI/UserInterface/Views/Variables.css#L119
  */
 /** @private @const {string} */
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '29px';
@@ -129,7 +129,8 @@ export class AmpSidebar extends AMP.BaseElement {
 
     if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
       this.side_ = this.setSideAttribute_(
-          isRTL(this.document_) ? Side.RIGHT : Side.LEFT);
+        isRTL(this.document_) ? Side.RIGHT : Side.LEFT
+      );
       element.setAttribute('side', this.side_);
     }
 
@@ -170,8 +171,9 @@ export class AmpSidebar extends AMP.BaseElement {
     });
 
     // Replacement label for invisible close button set value in amp sidebar
-    const ariaLabel = element.getAttribute('data-close-button-aria-label')
-    || 'Close the sidebar';
+    const ariaLabel =
+      element.getAttribute('data-close-button-aria-label') ||
+      'Close the sidebar';
 
     // Invisible close button at the end of sidebar for screen-readers.
     const screenReaderCloseButton = this.document_.createElement('button');
@@ -188,37 +190,44 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
-    element.addEventListener('click', e => {
-      const target =
-        closestAncestorElementBySelector(dev().assertElement(e.target), 'A');
-      if (target && target.href) {
-        const tgtLoc = Services.urlForDoc(element).parse(target.href);
-        const currentHref = this.getAmpDoc().win.location.href;
-        // Important: Only close sidebar (and hence pop sidebar history entry)
-        // when navigating locally, Chrome might cancel navigation request
-        // due to after-navigation history manipulation inside a timer callback.
-        // See this issue for more details:
-        // https://github.com/ampproject/amphtml/issues/6585
-        if (removeFragment(target.href) != removeFragment(currentHref)) {
-          return;
-        }
+    element.addEventListener(
+      'click',
+      e => {
+        const target = closestAncestorElementBySelector(
+          dev().assertElement(e.target),
+          'A'
+        );
+        if (target && target.href) {
+          const tgtLoc = Services.urlForDoc(element).parse(target.href);
+          const currentHref = this.getAmpDoc().win.location.href;
+          // Important: Only close sidebar (and hence pop sidebar history entry)
+          // when navigating locally, Chrome might cancel navigation request
+          // due to after-navigation history manipulation inside a timer callback.
+          // See this issue for more details:
+          // https://github.com/ampproject/amphtml/issues/6585
+          if (removeFragment(target.href) != removeFragment(currentHref)) {
+            return;
+          }
 
-        if (tgtLoc.hash) {
-          this.close_();
+          if (tgtLoc.hash) {
+            this.close_();
+          }
         }
-      }
-    }, true);
-
+      },
+      true
+    );
   }
 
   /** @override */
   onLayoutMeasure() {
-    this.getAmpDoc().whenReady().then(() => {
-      // Check our toolbars for changes
-      this.toolbars_.forEach(toolbar => {
-        toolbar.onLayoutChange();
+    this.getAmpDoc()
+      .whenReady()
+      .then(() => {
+        // Check our toolbars for changes
+        this.toolbars_.forEach(toolbar => {
+          toolbar.onLayoutChange();
+        });
       });
-    });
   }
 
   /**
@@ -268,25 +277,17 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * Updates the sidebar before it opens. This needs to be done as a separate
-   * step from opening so that we can animate, as the sidebar is initially
-   * display: none.
+   * Updates the sidebar while it is animating to the opened state.
    */
-  updateForPreOpening_() {
-    toggle(this.element, /* display */true);
+  updateForOpening_() {
+    toggle(this.element, /* display */ true);
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.isIos_ && this.isSafari_) {
       this.compensateIosBottombar_();
     }
-    this.element./*OK*/scrollTop = 1;
-    this.setUpdateFn_(() => this.updateForOpening_());
-  }
 
-  /**
-   * Updates the sidebar while it is animating to the opened state.
-   */
-  updateForOpening_() {
+    this.element./*OK*/ scrollTop = 1;
     this.openMask_();
     this.element.setAttribute('open', '');
     this.element.setAttribute('aria-hidden', 'false');
@@ -302,7 +303,10 @@ export class AmpSidebar extends AMP.BaseElement {
     const children = this.getRealChildren();
     this.scheduleLayout(children);
     this.scheduleResume(children);
-    tryFocus(this.element);
+    // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
+    if (!this.isIosWebView_()) {
+      tryFocus(this.element);
+    }
     this.triggerEvent_(SidebarEvents.OPEN);
   }
 
@@ -320,7 +324,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * Updates the sidebar for when it has finished closing.
    */
   updateForClosed_() {
-    toggle(this.element, /* display */false);
+    toggle(this.element, /* display */ false);
     this.schedulePause(this.getRealChildren());
     this.triggerEvent_(SidebarEvents.CLOSE);
   }
@@ -335,10 +339,12 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.enterOverlayMode();
-    this.setUpdateFn_(() => this.updateForPreOpening_());
-    this.getHistory_().push(this.close_.bind(this)).then(historyId => {
-      this.historyId_ = historyId;
-    });
+    this.setUpdateFn_(() => this.updateForOpening_());
+    this.getHistory_()
+      .push(this.close_.bind(this))
+      .then(historyId => {
+        this.historyId_ = historyId;
+      });
     if (opt_invocation) {
       this.openerElement_ = opt_invocation.caller;
       this.initialScrollTop_ = this.viewport_.getScrollTop();
@@ -357,16 +363,18 @@ export class AmpSidebar extends AMP.BaseElement {
     }
     this.viewport_.leaveOverlayMode();
     const scrollDidNotChange =
-      (this.initialScrollTop_ == this.viewport_.getScrollTop());
-    const sidebarIsActive =
-        this.element.contains(this.document_.activeElement);
+      this.initialScrollTop_ == this.viewport_.getScrollTop();
+    const sidebarIsActive = this.element.contains(this.document_.activeElement);
     this.setUpdateFn_(() => this.updateForClosing_());
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
       this.historyId_ = -1;
     }
     if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
-      tryFocus(this.openerElement_);
+      // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
+      if (!this.isIosWebView_()) {
+        tryFocus(this.openerElement_);
+      }
     }
     return true;
   }
@@ -417,14 +425,14 @@ export class AmpSidebar extends AMP.BaseElement {
   fixIosElasticScrollLeak_() {
     this.element.addEventListener('scroll', e => {
       if (this.isOpen_()) {
-        if (this.element./*OK*/scrollTop < 1) {
-          this.element./*OK*/scrollTop = 1;
+        if (this.element./*OK*/ scrollTop < 1) {
+          this.element./*OK*/ scrollTop = 1;
           e.preventDefault();
-        } else if (this.element./*OK*/scrollHeight ==
-              this.element./*OK*/scrollTop +
-              this.element./*OK*/offsetHeight) {
-          this.element./*OK*/scrollTop =
-              this.element./*OK*/scrollTop - 1;
+        } else if (
+          this.element./*OK*/ scrollHeight ==
+          this.element./*OK*/ scrollTop + this.element./*OK*/ offsetHeight
+        ) {
+          this.element./*OK*/ scrollTop = this.element./*OK*/ scrollTop - 1;
           e.preventDefault();
         }
       }
@@ -462,6 +470,16 @@ export class AmpSidebar extends AMP.BaseElement {
   triggerEvent_(name) {
     const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isIosWebView_() {
+    // Don't use isWebviewEmbedded() because it assumes there's no parent
+    // iframe, but this is not necessarily true for all UIWebView embeds.
+    return this.isIos_ && Services.viewerForDoc(this.element).isEmbedded();
   }
 }
 
