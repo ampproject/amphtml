@@ -129,7 +129,7 @@ export class SignatureVerifier {
      * the performance system will be used; otherwise Date.now() will be
      * returned.
      *
-     * @private @const {function(): number}
+     * @protected @const {function(): number}
      */
     this.getNow_ =
       win.performance && win.performance.now

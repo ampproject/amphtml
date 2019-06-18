@@ -52,7 +52,7 @@ export class Poller {
 
     /**
      * For testing purposes.
-     * @private {?Promise}
+     * @visibleForTesting {?Promise}
      */
     this.lastWorkPromise_ = null;
   }

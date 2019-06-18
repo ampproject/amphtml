@@ -213,7 +213,7 @@ export class SystemLayer {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!Element} */
+    /** @protected @const {!Element} */
     this.parentEl_ = parentEl;
 
     /** @private {boolean} */

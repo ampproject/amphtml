@@ -155,7 +155,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private {?Element} */
     this.mask_ = null;
 
-    /** @private {?Element} */
+    /** @protected {?Element} */
     this.navControls_ = null;
 
     /** @private {?Element} */
@@ -170,7 +170,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private  {?Element} */
     this.gallery_ = null;
 
-    /** @private  {?Element} */
+    /** @protected  {?Element} */
     this.topBar_ = null;
 
     /** @private {!LightboxControlsModes} */

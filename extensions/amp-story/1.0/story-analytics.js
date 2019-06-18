@@ -67,7 +67,7 @@ export class StoryAnalyticsService {
    * @param {!Element} element
    */
   constructor(win, element) {
-    /** @private @const {!Window} */
+    /** @protected @const {!Window} */
     this.win_ = win;
 
     /** @private @const {!Element} */

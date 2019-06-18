@@ -664,7 +664,7 @@ export class CssTranslateNode extends CssFuncNode {
         ? ['w', 'h', 'z']
         : null
     );
-    /** @const @private {string} */
+    /** @const @protected {string} */
     this.suffix_ = suffix;
   }
 }
