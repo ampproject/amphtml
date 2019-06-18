@@ -63,6 +63,8 @@ export function wrap(WrappedComponent) {
       return React.createElement(WrappedComponent, props);
     }
   }
+  /** @private @const visible for testing */
+  MaximumNights.getIsOutsideRange = getIsOutsideRange;
 
   /**
    * Creates a function that will restrict the user from selecting a range

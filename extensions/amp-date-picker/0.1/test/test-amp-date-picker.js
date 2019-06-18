@@ -449,6 +449,100 @@ describes.realWin(
         });
       });
 
+      describe('changing dates', () => {
+        it('should set the date in a single date picker', async () => {
+          const {element, picker, layoutCallback} = createDatePicker();
+          await layoutCallback();
+
+          picker.onDateChange(moment('2018-01-03'));
+
+          expect(element.getAttribute('date')).to.equal('2018-01-03');
+        });
+
+        it('should set date range in a date range picker', async () => {
+          const {element, picker, layoutCallback} = createDatePicker({
+            'blocked': '2018-01-06',
+          });
+          await layoutCallback();
+
+          picker.onDatesChange({
+            'startDate': moment('2018-01-03'),
+            'endDate': moment('2018-01-05'),
+          });
+
+          expect(element.getAttribute('start-date')).to.equal('2018-01-03');
+          expect(element.getAttribute('end-date')).to.equal('2018-01-05');
+        });
+      });
+
+      describe('iterateDataRange', () => {
+        it('should not iterate for an end date before start date ', () => {
+          const {picker} = createDatePicker();
+          const spy = sandbox.spy();
+
+          picker.iterateDateRange_(
+            moment('2018-01-03'),
+            moment('2018-01-01'),
+            spy
+          );
+
+          expect(spy).to.not.have.been.called;
+        });
+
+        it('should handle both dates being the same', () => {
+          const {picker} = createDatePicker();
+          const spy = sandbox.spy();
+
+          picker.iterateDateRange_(
+            moment('2018-01-01'),
+            moment('2018-01-01'),
+            spy
+          );
+
+          expect(spy).to.have.been.calledOnce;
+          const date = spy.getCall(0).args[0];
+          expect(date.isSame('2018-01-01')).to.be.true;
+        });
+
+        it('should handle a null end date as both dates being the same', () => {
+          const {picker} = createDatePicker();
+          const spy = sandbox.spy();
+
+          picker.iterateDateRange_(moment('2018-01-01'), null, spy);
+
+          expect(spy).to.have.been.calledOnce;
+          const date = spy.getCall(0).args[0];
+          expect(date.isSame('2018-01-01')).to.be.true;
+        });
+
+        it('should handle both dates being different', () => {
+          const {picker} = createDatePicker();
+          const spy = sandbox.spy();
+
+          picker.iterateDateRange_(
+            moment('2018-01-01'),
+            moment('2018-01-07'),
+            spy
+          );
+
+          expect(spy.callCount).to.equal(7);
+          let date = spy.getCall(0).args[0];
+          expect(date.isSame('2018-01-01')).to.be.true;
+          date = spy.getCall(1).args[0];
+          expect(date.isSame('2018-01-02')).to.be.true;
+          date = spy.getCall(2).args[0];
+          expect(date.isSame('2018-01-03')).to.be.true;
+          date = spy.getCall(3).args[0];
+          expect(date.isSame('2018-01-04')).to.be.true;
+          date = spy.getCall(4).args[0];
+          expect(date.isSame('2018-01-05')).to.be.true;
+          date = spy.getCall(5).args[0];
+          expect(date.isSame('2018-01-06')).to.be.true;
+          date = spy.getCall(6).args[0];
+          expect(date.isSame('2018-01-07')).to.be.true;
+        });
+      });
+
       describe('touch keyboard suppression', () => {
         it(
           'should add and remove the readonly property on focus' +
