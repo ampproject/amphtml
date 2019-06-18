@@ -21,6 +21,7 @@ import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
   VariableService,
+  stringToBool,
   variableServicePromiseForDoc,
 } from './variables';
 import {
@@ -722,17 +723,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve(spec);
     }
 
-    return this.expandTemplateWithUrlParams_(spec, expansionOptions).then(
-      val => {
-        return (
-          val !== '' &&
-          val !== '0' &&
-          val !== 'false' &&
-          val !== 'null' &&
-          val !== 'NaN' &&
-          val !== 'undefined'
-        );
-      }
+    return this.expandTemplateWithUrlParams_(spec, expansionOptions).then(val =>
+      stringToBool(val)
     );
   }
 
