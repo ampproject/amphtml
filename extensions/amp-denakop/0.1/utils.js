@@ -130,7 +130,7 @@ export function getAdAttributes(adUnit) {
     obj['data-enable-refresh'] = '45';
   }
 
-  return /** @type {JsonObject} */ obj;
+  return obj;
 }
 
 /**
