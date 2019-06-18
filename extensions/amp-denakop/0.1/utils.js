@@ -61,7 +61,7 @@ export function getConfigUrl(params) {
 }
 
 /**
- * @return {integer}
+ * @return {number}
  */
 export function rand() {
   return Math.floor(Math.random() * 9999999999) + 1000000000;
@@ -134,8 +134,8 @@ export function getAdAttributes(adUnit) {
 }
 
 /**
- * @param {string|integer} publisherId
- * @param {string|integer} tagId
+ * @param {string|number} publisherId
+ * @param {string|number} tagId
  * @param {JsonObject} config
  * @param {JsonObject} adUnit
  *
