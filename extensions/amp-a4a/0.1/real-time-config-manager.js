@@ -98,7 +98,7 @@ export class RealTimeConfigManager {
     /** @private {?RtcConfigDef} */
     this.rtcConfig_ = null;
 
-    /** @private !../../../src/service/ampdoc-impl.AmpDoc */
+    /** @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampDoc_ = this.a4aElement_.getAmpDoc();
 
     /** @private {?CONSENT_POLICY_STATE} */

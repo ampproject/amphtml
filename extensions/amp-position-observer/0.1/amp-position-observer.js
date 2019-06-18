@@ -480,7 +480,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 
   /**
-   * @private
+   * @protected
    */
   maybeUninstallPositionObserver_() {
     if (this.positionObserver_) {

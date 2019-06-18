@@ -802,10 +802,10 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private {!Array<!UnlistenDef>} */
     this.unlistenFns_ = [];
 
-    /** @private {?UnlistenDef} */
+    /** @protected {?UnlistenDef} */
     this.unlistenEndedFn_ = null;
 
-    /** @private {?UnlistenDef} */
+    /** @protected {?UnlistenDef} */
     this.unlistenTimeupdateFn_ = null;
 
     /** @private {?../../../src/video-interface.VideoInterface} */

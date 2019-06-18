@@ -67,8 +67,10 @@ export class AnalyticsRoot {
     /** @private {?./scroll-manager.ScrollManager} */
     this.scrollManager_ = null;
 
+    /** @private {?Promise} */
     this.usingHostAPIPromise_ = null;
 
+    /** @restricted {!../../../src/inabox/host-services.VisibilityInterface} */
     this.hostVisibilityService_ = null;
   }
 

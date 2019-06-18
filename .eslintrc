@@ -77,7 +77,7 @@
     "amphtml-internal/prefer-destructuring": 2,
     "amphtml-internal/query-selector": 2,
     "amphtml-internal/todo-format": 0,
-    "amphtml-internal/unused-private-field": 0,
+    "amphtml-internal/unused-private-field": 2,
     "amphtml-internal/vsync": 0,
     "chai-expect/missing-assertion": 2,
     "chai-expect/no-inner-compare": 2,

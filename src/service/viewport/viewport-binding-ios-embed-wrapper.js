@@ -46,7 +46,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private {!../vsync-impl.Vsync} */
+    /** @protected {!../vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(win);
 
     const doc = this.win.document;

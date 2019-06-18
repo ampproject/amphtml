@@ -98,7 +98,7 @@ export class Vsync {
     /** @private {?Promise} */
     this.nextFramePromise_ = null;
 
-    /** @private {?function()} */
+    /** @protected {?function()} */
     this.nextFrameResolver_ = null;
 
     /** @const {!Function} */

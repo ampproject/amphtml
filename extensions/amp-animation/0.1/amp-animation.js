@@ -222,7 +222,6 @@ export class AmpAnimation extends AMP.BaseElement {
    * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @return {?Promise}
    * @private
-   * @visibleForTesting
    */
   startAction_(opt_invocation) {
     // The animation has been triggered, but there's no guarantee that it
