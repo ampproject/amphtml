@@ -1771,6 +1771,8 @@ export class AmpStory extends AMP.BaseElement {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
+          this.element.removeAttribute('scroll');
+          resetStyles(this.win.document.body, ['height']);
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
@@ -1780,6 +1782,8 @@ export class AmpStory extends AMP.BaseElement {
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
+          this.element.removeAttribute('scroll');
+          resetStyles(this.win.document.body, ['height']);
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
@@ -1798,7 +1802,18 @@ export class AmpStory extends AMP.BaseElement {
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
+          this.element.removeAttribute('scroll');
+          resetStyles(this.win.document.body, ['height']);
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-panels');
+        });
+        break;
+      case UIType.SCROLL:
+        this.vsync_.mutate(() => {
+          this.element.setAttribute('scroll', '');
+          setImportantStyles(this.win.document.body, {height: 'auto'});
+          this.element.removeAttribute('desktop');
+          this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
         });
         break;
@@ -1811,6 +1826,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getUIType_() {
+    if (this.platform_.isBot()) {
+      return UIType.SCROLL;
+    }
+
     if (
       !this.isDesktop_() ||
       isExperimentOn(this.win, 'disable-amp-story-desktop')
