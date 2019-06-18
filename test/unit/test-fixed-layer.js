@@ -1210,6 +1210,36 @@ describes.sandboxed('FixedLayer', {}, () => {
             });
         });
       });
+
+      it('should ignore descendants of already-tracked elements', () => {
+        const updateStub = sandbox.stub(fixedLayer, 'update');
+        expect(fixedLayer.elements_).to.have.length(5);
+
+        element1.appendChild(element6);
+
+        // Add.
+        fixedLayer.addElement(element6);
+        expect(updateStub).not.to.have.been.called;
+        expect(fixedLayer.elements_).to.have.length(5);
+      });
+
+      it('should replace descendants of tracked elements', () => {
+        const updateStub = sandbox.stub(fixedLayer, 'update');
+        expect(fixedLayer.elements_).to.have.length(5);
+
+        element6.appendChild(element1);
+
+        // Add.
+        fixedLayer.addElement(element6);
+        expect(updateStub).to.be.calledOnce;
+        expect(fixedLayer.elements_).to.have.length(5);
+
+        const fe = fixedLayer.elements_[4];
+        expect(fe.id).to.equal('F5');
+        expect(fe.element).to.equal(element6);
+        expect(fe.selectors).to.deep.equal(['*']);
+        expect(fe.forceTransfer).to.be.undefined;
+      });
     });
 
   describe('with-transfer', () => {
