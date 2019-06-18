@@ -255,6 +255,8 @@ export class LiveListManager {
     const inClientDomLiveList = this.liveLists_[id];
     inClientDomLiveList.toggle(
       !liveList.hasAttribute('disabled') &&
+        // When the live list is an amp-story, we use an amp-story specific
+        // attribute so publishers can disable the live story functionality.
         !liveList.hasAttribute('live-story-disabled')
     );
 
