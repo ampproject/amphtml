@@ -23,6 +23,9 @@ import {Layout} from '../../../src/layout';
 /** @const */
 const ICON_CLASS = 'i-amphtml-story-bling-link-icon';
 
+/** @const */
+const SHOPPING_CART_ICON_CLASS = 'i-amphtml-story-shopping-cart';
+
 export class AmpStoryBlingLink extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -47,6 +50,6 @@ export class AmpStoryBlingLink extends AMP.BaseElement {
  */
 function addIconElement(el, win) {
   const iconEl = win.document.createElement('i');
-  iconEl.classList.add(ICON_CLASS, 'shopping-cart');
+  iconEl.classList.add(ICON_CLASS, SHOPPING_CART_ICON_CLASS);
   el.appendChild(iconEl);
 }
