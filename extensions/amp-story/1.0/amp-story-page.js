@@ -321,7 +321,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       true /* callToInitialize */
     );
     this.setHasAttachmentAttribute_();
+<<<<<<< HEAD
     this.setPageDescription_();
+=======
+    this.handlePageDescription_();
+>>>>>>> Remove shadow DOM
   }
 
   /**
@@ -1461,26 +1465,24 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Renders the page description in the page.
+   * @private
    */
   renderPageDescription_() {
     if (!this.description_) {
       return;
     }
 
-    const pageContentEl = createElementWithAttributes(
+    const descriptionEl = createElementWithAttributes(
       this.win.document,
       'div',
       dict({
-        'class': 'page-description',
+        'class': 'i-amphtml-story-page-description',
       })
     );
-    const descriptionEl = this.win.document.createElement('span');
     descriptionEl./* OK */ textContent = this.description_;
 
-    createShadowRootWithStyle(pageContentEl, descriptionEl, CSS);
-
     this.element.parentElement.insertBefore(
-      pageContentEl,
+      descriptionEl,
       this.element.nextElementSibling
     );
   }
