@@ -19,13 +19,8 @@ import {Services} from '../../../src/services';
 
 /** @const @enum {number} */
 const FULL_WIDTH_SIGNALS = {
-  UNUSED_DEFAULT: 0,
-  ELEMENT_MISSING: 1,
-  OVERFLOW_HIDDEN: 2,
-  NULL_STYLE: 3,
-  // enums 4, 5, 6 are reserved but unused here.
-  ELEMENT_HIDDEN: 7,
-  ELEMENT_IN_IFRAME: 8
+  OVERFLOW_HIDDEN: 4,
+  ELEMENT_HIDDEN: 128,
 }
 
 /**
@@ -66,14 +61,18 @@ function getElementWidth(el, style) {
 };
 
 /**
- * Gets the maximum width the given element may occupy.
- * @param {!Element} element
- * @param {!Object<style, style>} style
- * @param {function(*): undefined} returnResult
+ * Returns a callback function that can be passed as a visitor for computing the
+ * 'fws' request parameter.
  */
-
-function getFullWidthSignal(el, style) {
-  return -1;
+function getFullWidthSignalVisitor() {
+  return (el, style) => {
+    if (style.overflowY && style.overflowY != 'visible') {
+      return FULL_WIDTH_SIGNALS.OVERFLOW_HIDDEN;
+    }
+    if (style.display == 'none') {
+      return FULL_WIDTH_SIGNALS.ELEMENT_HIDDEN;
+    }
+  };
 }
 
 /**
@@ -86,9 +85,9 @@ function getFullWidthSignal(el, style) {
  */
 export function getFlexibleAdSlotRequestParams(win, element) {
   return new DomAncestorVisitor(win)
-    .addVisitor('psz', getElementWidth, 100 /* maxDepth */)
-    .addVisitor('msz', getElementWidth, 1 /* maxDepth */)
-    .addVisitor('fws', getFullWidthSignal, 100 /* maxDepth */)
+    .addVisitor('parentWidth', getElementWidth, 100 /* maxDepth */)
+    .addVisitor('slotWidth', getElementWidth, 1 /* maxDepth */)
+    .addVisitor('fwSignal', getFullWidthSignalVisitor(), 100 /* maxDepth */)
     .visitAncestorsStartingFrom(element)
     .getAllResults();
 }

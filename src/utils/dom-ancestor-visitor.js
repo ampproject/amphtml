@@ -88,6 +88,11 @@ class Visitor {
     return this.complete_;
   }
 
+  /** Marks the visitor as complete. */
+  setComplete() {
+    this.complete_ = true;
+  }
+
   /** @return {*} */
   getResult() {
     devAssert(
@@ -181,6 +186,7 @@ export class DomAncestorVisitor {
       visitors.forEach(visitor => visitor.callback(el, style));
       el = el.parentElement;
     }
+    this.visitors_.forEach(visitor => visitor.setComplete());
     return this;
   }
 }

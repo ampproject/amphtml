@@ -523,21 +523,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const pageLayoutBox = this.isSinglePageStoryAd
       ? this.element.getPageLayoutBox()
       : null;
-    let psz = null;
     let msz = null;
+    let psz = null;
+    let fws = null;
     if (this.sendFlexibleAdSlotParams_) {
-      const parentWidth = getFlexibleAdSlotRequestParams(
-        this.win,
-        this.element.parentElement
-      );
-      let slotWidth = getFlexibleAdSlotRequestParams(
-        this.win,
-        this.element,
-        1 /* maxDepth */
-      );
-      slotWidth = slotWidth == -1 ? parentWidth : slotWidth;
+      const {fwSignal, slotWidth, parentWidth} =
+          getFlexibleAdSlotRequestParams(this.win, this.element.parentElement);
+      // If slotWidth were undefined, that means its layout was fluid, and thus
+      // its available width depends on its parent element, and so should have
+      // the same value as parentWidth.
+      msz = `${slotWidth == undefined ? parentWidth : slotWidth}x-1`;
       psz = `${parentWidth}x-1`;
-      msz = `${slotWidth}x-1`;
+      fws = fwSignal ? fwSignal : '0';
     }
     return Object.assign(
       {
@@ -559,6 +556,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // disallowed in AMP.
         'msz': msz,
         'psz': psz,
+        'fws': fws,
         'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
