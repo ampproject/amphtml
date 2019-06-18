@@ -52,7 +52,7 @@ export function denakopElementIsValid(el) {
 }
 
 /**
- * @param {JsonObject} params
+ * @param {!Object} params
  *
  * @return {string}
  */
