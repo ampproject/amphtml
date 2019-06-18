@@ -89,6 +89,7 @@ describe
         expect(req.url).to.match(/^\/bar\?/);
         const queries = parseQueryString(req.url.substr('/bar'.length));
         expect(queries['cid']).to.equal('');
+        expect(queries['sourceUrl']).be.ok;
       });
       return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
     }
