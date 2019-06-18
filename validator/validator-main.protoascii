@@ -994,7 +994,7 @@ tags: {
   }
 }
 # AMP metadata, name=amp-vars-*
-# Allows advertises to pass information from creatives
+# Allows advertisers to pass information from creatives
 # to be included in amp-ad-metadata.
 tags: {
   html_format: AMP4ADS
