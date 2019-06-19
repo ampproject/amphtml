@@ -35,7 +35,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
     expect(trigger).to.have.been.calledWith('story-page-visible');
   });
 
-  it('should trigger `story-last-page-visible` on change', () => {
+  it('should trigger `story-last-page-visible` when last page is visible', () => {
     const trigger = sandbox.stub(analytics, 'triggerEvent');
 
     analytics.onNavigationStateChange({
