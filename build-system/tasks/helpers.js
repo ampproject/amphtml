@@ -408,7 +408,7 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
  * Returns array of relative paths to "dependencies" defined in package.json.
  * @return {!Array<string>}
  */
-export function devDependencies() {
+function devDependencies() {
   const rootPackageJsonFile = 'package.json';
   const rootPackageJsonContents = fs.readFileSync(rootPackageJsonFile, 'utf8');
   const rootPackageJson = JSON.parse(rootPackageJsonContents);
@@ -767,6 +767,7 @@ module.exports = {
   compileAllUnminifiedTargets,
   compileJs,
   compileTs,
+  devDependencies,
   enableLocalTesting,
   endBuildStep,
   hostname,
