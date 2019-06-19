@@ -620,11 +620,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.element.parentElement &&
       this.element.parentElement.tagName == 'AMP-STICKY-AD'
     ) {
-      this.win.addEventListener('message', event => {
-        if (event['data'] == 'fill_sticky') {
+      const stickyMsgListener = event => {
+        if (
+          event['data'] == 'fill_sticky' &&
+          event['source'] == this.iframe.contentWindow
+        ) {
           this.renderStarted();
+          this.element.parentElement.setAttribute('visible', '');
+          this.win.removeEventListener('message', stickyMsgListener);
         }
-      });
+      };
+      this.win.addEventListener('message', stickyMsgListener);
       return true;
     }
     return false;
