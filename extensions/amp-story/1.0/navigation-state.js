@@ -25,6 +25,7 @@ export const StateChangeType = {
   BOOKEND_ENTER: 1,
   BOOKEND_EXIT: 2,
   END: 3,
+  LAST_PAGE: 4,
 };
 
 /** @typedef {{type: !StateChangeType, value: *}} */
@@ -97,6 +98,7 @@ export class NavigationState {
     this.fire_(StateChangeType.ACTIVE_PAGE, changeValue);
 
     if (isFinalPage) {
+      this.fire_(StateChangeType.LAST_PAGE);
       this.hasBookend_().then(hasBookend => {
         if (!hasBookend) {
           this.fire_(StateChangeType.END);

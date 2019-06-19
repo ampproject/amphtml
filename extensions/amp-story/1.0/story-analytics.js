@@ -23,6 +23,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 export const AnalyticsEvent = {
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
+  LAST_PAGE_VISIBLE: 'story-last-page-visible',
   PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
   PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
   PAGE_VISIBLE: 'story-page-visible',
@@ -90,6 +91,9 @@ export class StoryAnalyticsService {
         break;
       case StateChangeType.BOOKEND_EXIT:
         this.triggerEvent(AnalyticsEvent.BOOKEND_EXIT);
+        break;
+      case StateChangeType.LAST_PAGE:
+        this.triggerEvent(AnalyticsEvent.LAST_PAGE_VISIBLE);
         break;
     }
   }
