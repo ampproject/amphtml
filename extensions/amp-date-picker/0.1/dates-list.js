@@ -80,7 +80,9 @@ export class DatesList {
       }
     }
     const rruleDates = this.rrulestrs_
-      .map(rrule => rrule.after(date))
+      .map(rrule => {
+        return /** @type {!RRule} */ (rrule).after(date, undefined);
+      })
       .filter(Boolean);
     firstDatesAfter.concat(rruleDates);
 
@@ -138,7 +140,7 @@ export class DatesList {
 /**
  * Tries to parse a string into an RRULE object.
  * @param {string} str A string which represents a repeating date RRULE spec.
- * @return {?JsonObject}
+ * @return {?RRule}
  */
 function tryParseRrulestr(str) {
   try {
