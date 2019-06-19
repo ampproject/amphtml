@@ -47,7 +47,8 @@ describe('amp-analytics', function() {
             "a": 1,
             "b": "\${title}",
             "cid": "\${clientId(_cid)}",
-            "loadend": "\${navTiming(loadEventEnd)}"
+            "loadend": "\${navTiming(loadEventEnd)}",
+            "default": "\$DEFAULT( , test)"
           }
         }
         </script>
@@ -67,6 +68,7 @@ describe('amp-analytics', function() {
           expect(q['b']).to.equal('AMP TEST');
           expect(q['cid']).to.equal('amp-12345');
           expect(q['loadend']).to.not.equal('0');
+          expect(q['default']).to.equal('test');
           expect(
             req.headers.referer,
             'should keep referrer if no referrerpolicy specified'
