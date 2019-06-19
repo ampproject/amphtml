@@ -37,19 +37,28 @@
   align-items: center;
 
   scroll-behavior: smooth;
-  /* Hide scrollbar */
-  box-sizing: content-box !important;
   -webkit-overflow-scrolling: touch !important;
+  
+  /*
+   * Hide scrollbars, with three different methods:
+   *
+   * 1. scrollbar-width
+   *  - Note: this is actually scrollbar *thickness* and applies to horizontal
+   *    scrollbars as well
+   * 2. ::-webkit-scrollbar
+   * 3. Using padding to push scrollbar outside of the overflow
+   *
+   * The last method has side-effect of having the bottom of the slides being
+   * cut-off, since the height (or width) of the scrollbar is included when
+   * calculating the 100% height (or width) of the slide.
+   */
+  scrollbar-width: none; /* Firefox */
+  box-sizing: content-box !important;
 
   --visible-count: 1;
 }
 
-/**
- * Make sure the scrollbar does not take up space on desktop, which will cause
- * the bottom of the slides to be cutoff. Padding + overflow is used to hide
- * the scrollbars for all browsers.
- * TODO(sparhami) Find a solution for the clipping on all browsers.
- */
+/* Chrome, Safari */
 .i-amphtml-carousel-scroll::-webkit-scrollbar {
   display: none;
 }
