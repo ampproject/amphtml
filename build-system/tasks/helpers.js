@@ -405,7 +405,7 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
 }
 
 /**
- * Returns array of relative paths to "dependencies" defined in package.json.
+ * Returns array of relative paths to "devDependencies" defined in package.json.
  * @return {!Array<string>}
  */
 function devDependencies() {
