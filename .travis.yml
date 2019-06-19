@@ -76,10 +76,14 @@ jobs:
       name: "Remote (Sauce Labs) Tests"
       script:
         - unbuffer node build-system/pr-check/remote-tests.js
+      after_script:
+        - ps -ef
     - stage: test
       name: "End to End Tests"
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
+      after_script:
+        - ps -ef
 cache:
   directories:
     - node_modules
