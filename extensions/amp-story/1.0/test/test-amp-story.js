@@ -183,6 +183,17 @@ describes.realWin(
       });
     });
 
+    it('should remove text child nodes when built', () => {
+      createPages(story.element, 1, ['cover']);
+      const textToRemove = 'this should be removed';
+      const textNode = win.document.createTextNode(textToRemove);
+      story.element.appendChild(textNode);
+      story.buildCallback();
+      return story.layoutCallback().then(() => {
+        expect(story.element.innerText).to.not.have.string(textToRemove);
+      });
+    });
+
     it('should preload the bookend if navigating to the last page', () => {
       createPages(story.element, 1, ['cover']);
 
