@@ -17,7 +17,7 @@
 describe
   .configure()
   .skipEdge()
-  .run('amp-accordion', function () {
+  .run('amp-accordion', function() {
     this.timeout(10000);
     const extensions = ['amp-accordion'];
     const body = `
