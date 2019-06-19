@@ -295,11 +295,11 @@ export class Expander {
   evaluateBinding_(bindingInfo, opt_args) {
     const {encode, name} = bindingInfo;
     let binding;
-    if (hasOwn(bindingInfo, 'prioritized')) {
+    if (bindingInfo.prioritized) {
       // If a binding is passed in through the bindings argument it always takes
       // precedence.
       binding = bindingInfo.prioritized;
-    } else if (this.sync_ && hasOwn(bindingInfo, 'sync')) {
+    } else if (this.sync_ && bindingInfo.sync) {
       // Use the sync resolution if avaliable when called synchronously.
       binding = bindingInfo.sync;
     } else if (this.sync_) {
