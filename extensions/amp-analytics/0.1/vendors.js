@@ -130,6 +130,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'clientId': 'CLIENT_ID',
       'consentState': 'CONSENT_STATE',
       'contentLoadTime': 'CONTENT_LOAD_TIME',
+      'cookie': 'COOKIE',
       'counter': 'COUNTER',
       'documentCharset': 'DOCUMENT_CHARSET',
       'documentReferrer': 'DOCUMENT_REFERRER',
