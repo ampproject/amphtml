@@ -99,6 +99,14 @@ tags: {  # <amp-story>
     name: "title"
     mandatory: true
   }
+  attrs: {
+    name: "live-story"
+    value: ""
+  }
+  attrs: {
+    name: "live-story-disabled"
+    value: ""
+  }
   siblings_disallowed: true
   child_tags: {
     mandatory_min_num_child_tags: 1
