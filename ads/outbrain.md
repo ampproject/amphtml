@@ -48,7 +48,8 @@ See [AMP documentation](https://amp.dev/documentation/components/amp-sticky-ad) 
 
 ## Configuration
 
-For details on the configuration semantics, please contact Outbrain’s Account Management Team.
+For details on the configuration semantics, please contact Outbrain’s Account Management Team.\
+These configurations are relevant for both `<amp-ad />` and `<amp-embed />`.
 
 ### Required parameters
 
