@@ -20,7 +20,7 @@
   height: 90px !important;
 }
 
-.i-amphtml-story-bling-link-button {
+.i-amphtml-story-bling-link-circle {
   position: absolute !important;  
   border-radius: 50% !important;
   background: rgba(255, 255, 255, 1) !important;
@@ -36,14 +36,7 @@ amp-story-page[active] .i-amphtml-story-bling-link-pulse {
   margin: 7.5px !important;
   width: 75px !important;
   height: 75px !important;
-  animation-name: pulse !important;
-  animation-duration: 1.5s !important;
-  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-  animation-delay: 0 !important;
-  animation-direction: alternate !important;
-  animation-iteration-count: infinite !important;
-  animation-fill-mode: none !important;
-  animation-play-state: running !important;
+  animation: pulse 1.5s cubic-bezier(0.4, 0.0, 0.2, 1) infinite alternate !important;
 }
 
 @keyframes pulse {
@@ -55,7 +48,7 @@ amp-story-page[active] .i-amphtml-story-bling-link-pulse {
   }
 }
 
-amp-story-bling-link:hover .i-amphtml-story-bling-link-button {
+amp-story-bling-link:hover .i-amphtml-story-bling-link-circle {
   background: rgba(255, 255, 255, 0.4) !important;
   cursor: pointer !important;
 }
