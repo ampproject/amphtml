@@ -98,12 +98,12 @@ git checkout -b <branch name> master
 
 ## Test AMP
 
-* Run the unit tests: `gulp test --unit` (doesn't build the runtime)
-* Run the integration tests: `gulp test --integration` (builds the runtime)
-* Run tests, but skip building after having done so previously: `gulp test [--unit|--integration] --nobuild`
-* Run the tests in a specified set of files: `gulp test [--unit|--integration] --files=<test-files-path-glob>`
-* Add the `--watch` flag to any `gulp test` command to automatically re-run the tests when a file changes
-* To run only a certain set of Mocha tests, change  `describe` to `describe.only` for the tests you want to run; combine this with `gulp test --watch` to automatically rerun your test when files are changed   (but make sure to run all the tests before sending your change for review)
+* Run the unit tests: `gulp unit` (doesn't build the runtime)
+* Run the integration tests: `gulp integration` (builds the runtime)
+* Run integration tests, but skip building after having done so previously: `gulp integration --nobuild`
+* Run the tests in a specified set of files: `gulp [unit|integration] --files=<test-files-path-glob>`
+* Add the `--watch` flag to `gulp [unit|integration]` to automatically re-run the tests when a file changes
+* To run only a certain set of Mocha tests, change  `describe` to `describe.only` for the tests you want to run; combine this with `gulp [unit|integration] --watch` to automatically rerun your test when files are changed (but make sure to run all the tests before sending your change for review)
 
 ## Create commits to contain your changes
 

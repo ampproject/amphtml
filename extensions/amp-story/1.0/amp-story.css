@@ -17,6 +17,7 @@
 @import './amp-story-access.css';
 @import './amp-story-desktop-panels.css';
 @import './amp-story-page-attachment.css';
+@import './amp-story-scroll.css';
 @import './amp-story-templates.css';
 @import './amp-story-user-overridable.css';
 @import './pagination-buttons.css';
@@ -124,6 +125,11 @@ amp-story[standalone] {
   max-width: initial !important;
   min-height: initial !important;
   min-width: initial !important;
+}
+
+amp-story[standalone].amp-notbuilt {
+  /* Ensures amp-story has a height and is prerendered. */
+  min-height: 1px !important;
 }
 
 amp-story[standalone]:-webkit-full-screen {

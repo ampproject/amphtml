@@ -58,7 +58,38 @@ location with a form or an analytics request, the Variable Substitution variable
 
 ## Attributes
 
-The `amp-user-location` component only requires an `id` attribute.
+##### id (required)
+
+The `id` attribute is required and allows the component to be referenced in AMP Actions and Events.
+
+##### src (optional)
+
+The `src` attribute specifies a remote configuration for the `amp-user-location` component.
+
+```html
+<amp-user-location
+  id="location"
+  src="https://www.example.com/amp-user-location.json"
+  layout="nodisplay"
+></amp-user-location>
+```
+
+Alternatively, a local configuration can be specified in a `script` tag.
+
+```html
+<amp-user-location
+  id="location"
+  layout="nodisplay"
+>
+<script type="application/json">
+{
+  "fallback": {"lat": 40, "lon": -40},
+  "maximumAge": 60000,
+  "timeout": 5000
+}
+</script>
+</amp-user-location>
+```
 
 ## AMP Actions
 

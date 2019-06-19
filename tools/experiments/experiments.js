@@ -404,14 +404,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
   },
   {
-    id: 'amp-autocomplete',
-    name:
-      'AMP Autocomplete provides a set of suggestions to' +
-      ' complete a user query in an input field.',
-    spec: 'https://github.com/ampproject/amphtml/issues/9785',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21021',
-  },
-  {
     id: 'inabox-viewport-friendly',
     name:
       'Inabox viewport measures the host window directly if ' +
@@ -429,6 +421,22 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
+    id: 'fie-css-cleanup',
+    name:
+      'Experiment to prevent regression after a major CSS clean up' +
+      ' for AMPHTML Ads in FIE rendering mode',
+    spec: 'https://github.com/ampproject/amphtml/issues/22418',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
+  },
+  {
+    id: 'inabox-css-cleanup',
+    name:
+      'Experiment to prevent regression after a major CSS clean up' +
+      ' for AMPHTML Ads in inabox rendering mode',
+    spec: 'https://github.com/ampproject/amphtml/issues/22418',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
+  },
+  {
     id: 'amp-force-prerender-visible-elements',
     name:
       'Force builds the AMP elements that are visible and in the viewport ' +
@@ -443,6 +451,12 @@ const EXPERIMENTS = [
       'access after user interaction and approval',
     spec: 'https://github.com/ampproject/amphtml/issues/8929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
+  },
+  {
+    id: 'margin-bottom-in-content-height',
+    name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
+    spec: 'https://github.com/ampproject/amphtml/issues/22718',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
   },
 ];
 

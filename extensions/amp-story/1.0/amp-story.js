@@ -575,15 +575,19 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateViewportSizeStyles_() {
-    if (!this.activePage_ || !this.isStandalone_()) {
+    const pageEl =
+      (this.activePage_ && this.activePage_.element) ||
+      this.element.querySelector('amp-story-page');
+
+    if (!pageEl || !this.isStandalone_()) {
       return;
     }
 
     return this.vsync_.runPromise(
       {
         measure: state => {
-          state.vh = this.activePage_.element./*OK*/ clientHeight / 100;
-          state.vw = this.activePage_.element./*OK*/ clientWidth / 100;
+          state.vh = pageEl./*OK*/ clientHeight / 100;
+          state.vw = pageEl./*OK*/ clientWidth / 100;
           state.vmin = Math.min(state.vh, state.vw);
           state.vmax = Math.max(state.vh, state.vw);
         },
@@ -983,9 +987,12 @@ export class AmpStory extends AMP.BaseElement {
     // page is built. Other pages will only build if the document becomes
     // visible.
     if (!this.viewer_.hasBeenVisible()) {
-      return whenUpgradedToCustomElement(firstPageEl).then(() =>
-        firstPageEl.whenBuilt()
-      );
+      return whenUpgradedToCustomElement(firstPageEl).then(() => {
+        return Promise.all([
+          firstPageEl.whenBuilt(),
+          this.updateViewportSizeStyles_(),
+        ]);
+      });
     }
 
     // Will resolve when all pages are built.
@@ -997,7 +1004,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   initializeLiveStory_() {
-    if (this.element.hasAttribute('dynamic-live-list')) {
+    if (this.element.hasAttribute('live-story')) {
       this.liveStoryManager_ = new LiveStoryManager(this);
       this.liveStoryManager_.build();
 
@@ -1764,6 +1771,8 @@ export class AmpStory extends AMP.BaseElement {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
+          this.element.removeAttribute('scroll');
+          resetStyles(this.win.document.body, ['height']);
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
@@ -1773,6 +1782,8 @@ export class AmpStory extends AMP.BaseElement {
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
+          this.element.removeAttribute('scroll');
+          resetStyles(this.win.document.body, ['height']);
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
@@ -1791,7 +1802,18 @@ export class AmpStory extends AMP.BaseElement {
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
+          this.element.removeAttribute('scroll');
+          resetStyles(this.win.document.body, ['height']);
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-panels');
+        });
+        break;
+      case UIType.SCROLL:
+        this.vsync_.mutate(() => {
+          this.element.setAttribute('scroll', '');
+          setImportantStyles(this.win.document.body, {height: 'auto'});
+          this.element.removeAttribute('desktop');
+          this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
         });
         break;
@@ -1804,6 +1826,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getUIType_() {
+    if (this.platform_.isBot()) {
+      return UIType.SCROLL;
+    }
+
     if (
       !this.isDesktop_() ||
       isExperimentOn(this.win, 'disable-amp-story-desktop')

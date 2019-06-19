@@ -19,15 +19,13 @@ import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
-import {
-  getServiceForDoc,
-  registerServiceBuilderForDoc,
-} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
-const SERVICE_ID = 'liveListManager';
+/** @const {string} */
+export const SERVICE_ID = 'liveListManager';
 
 const TRANSFORMED_PREFIX = 'google;v=';
 
@@ -119,6 +117,17 @@ export class LiveListManager {
   /** @override */
   dispose() {
     this.poller_.stop();
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {!Promise<!LiveListManager>}
+   */
+  static forDoc(element) {
+    return /** @type {!Promise<!LiveListManager>} */ (getServicePromiseForDoc(
+      element,
+      SERVICE_ID
+    ));
   }
 
   /**
@@ -222,15 +231,20 @@ export class LiveListManager {
   /**
    * Updates the appropriate `amp-live-list` with its updates from the server.
    *
-   * @param {!Element} liveList
+   * @param {!Element} liveList Live list or custom element that built it.
    * @return {number}
    */
   updateLiveList_(liveList) {
-    // amp-live-list elements can be appended dynamically by another
-    // component using the [dynamic-live-list] attribute.
-    const id = liveList.hasAttribute('dynamic-live-list')
-      ? liveList.getAttribute('dynamic-live-list')
-      : liveList.getAttribute('id');
+    // amp-live-list elements can be appended dynamically in the client by
+    // another component using the `i-amphtml-` + `other-component-id` +
+    // `-dynamic-list` combination as the ID of the amp-live-list.
+    //
+    // The fact that we know how this ID is built allows us to find the
+    // amp-live-list element in the server document. See live-story-manager.js
+    // for an example.
+    const dynamicId = 'i-amphtml-' + liveList.id + '-dynamic-list';
+    const id =
+      dynamicId in this.liveLists_ ? dynamicId : liveList.getAttribute('id');
     userAssert(id, 'amp-live-list must have an id.');
     userAssert(
       id in this.liveLists_,
@@ -239,7 +253,12 @@ export class LiveListManager {
     );
 
     const inClientDomLiveList = this.liveLists_[id];
-    inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
+    inClientDomLiveList.toggle(
+      !liveList.hasAttribute('disabled') &&
+        // When the live list is an amp-story, we use an amp-story specific
+        // attribute so publishers can disable the live story functionality.
+        !liveList.hasAttribute('live-story-disabled')
+    );
 
     if (inClientDomLiveList.isEnabled()) {
       return inClientDomLiveList.update(liveList);
@@ -254,10 +273,16 @@ export class LiveListManager {
    * @param {!./amp-live-list.AmpLiveList} liveList
    */
   register(id, liveList) {
-    const isNotRegistered = !(id in this.liveLists_);
-    if (isNotRegistered) {
-      this.liveLists_[id] = liveList;
-      this.intervals_.push(liveList.getInterval());
+    if (id in this.liveLists_) {
+      return;
+    }
+    this.liveLists_[id] = liveList;
+    this.intervals_.push(liveList.getInterval());
+
+    // Polling may not be started yet if no live lists were registered by
+    // doc ready in LiveListManager's constructor.
+    if (liveList.isEnabled() && this.poller_ && this.viewer_.isVisible()) {
+      this.poller_.start();
     }
   }
 
@@ -337,25 +362,4 @@ function isDocTransformed(root) {
   const {documentElement} = root.ownerDocument;
   const transformed = documentElement.getAttribute('transformed');
   return Boolean(transformed) && startsWith(transformed, TRANSFORMED_PREFIX);
-}
-
-/**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- */
-function installLiveListManager(ampdoc) {
-  registerServiceBuilderForDoc(
-    ampdoc,
-    SERVICE_ID,
-    LiveListManager,
-    /* instantiate */ true
-  );
-}
-
-/**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!LiveListManager}
- */
-export function liveListManagerForDoc(ampdoc) {
-  installLiveListManager(ampdoc);
-  return getServiceForDoc(ampdoc, SERVICE_ID);
 }

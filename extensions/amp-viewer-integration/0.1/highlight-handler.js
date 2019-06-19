@@ -209,10 +209,9 @@ export class HighlightHandler {
 
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];
-      // The background color is same as Android Chrome text finding.
-      // https://cs.chromium.org/chromium/src/chrome/android/java/res/values/colors.xml?l=158&rcl=8b461e376e824c72fec1d6d91cd6633ba344dd55&q=ff9632
+      // The background color is same as Android Chrome text finding (yellow).
       setStyles(n, {
-        backgroundColor: '#ff9632',
+        backgroundColor: '#fcff00',
         color: '#000',
       });
     }

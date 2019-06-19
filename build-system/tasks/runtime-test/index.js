@@ -38,7 +38,7 @@ const {clean} = require('../clean');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {css} = require('../css');
 const {dist} = require('../dist');
-const {getAdTypes, refreshKarmaWdCache} = require('./helpers');
+const {getAdTypes} = require('./helpers');
 const {isLargeRefactor, unitTestsToRun} = require('./helpers-unit');
 const {isTravisBuild} = require('../../travis');
 
@@ -424,9 +424,6 @@ async function runTests() {
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
 
-  // Avoid Karma startup errors
-  refreshKarmaWdCache();
-
   // Notify the test-status bot that the tests are running.
   reportTestStarted();
 
@@ -647,7 +644,37 @@ async function runTests() {
   }
 }
 
+//TODO(estherkim): delete this file at some point
+function deprecateTaskWarning() {
+  const pattern = '~ * ';
+  log(cyan(pattern.repeat(27)));
+  log(red('Attention Please!'));
+  log(
+    cyan('gulp test [--unit | --integration]'),
+    'has been renamed to new, separate tasks:',
+    cyan('gulp unit'),
+    'and',
+    cyan('gulp integration.')
+  );
+  log(
+    cyan('--local-changes'),
+    'has been changed to',
+    cyan('--local_changes'),
+    'and',
+    cyan('--saucelabs-lite'),
+    'has been renamed to',
+    cyan('--saucelabs')
+  );
+  log(
+    'All other flags remain the same and our documentation has been updated to reflect these changes.'
+  );
+  log('Thanks!', red('<3'), '@ampproject/wg-infra');
+  log(cyan(pattern.repeat(27)));
+}
+
 async function test() {
+  deprecateTaskWarning();
+
   if (!argv.nobuild) {
     if (argv.unit || argv.a4a || argv['local-changes']) {
       await css();

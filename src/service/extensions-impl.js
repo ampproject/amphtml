@@ -39,9 +39,6 @@ import {getMode} from '../mode';
 import {install as installCustomElements} from '../polyfills/custom-elements';
 import {install as installDOMTokenListToggle} from '../polyfills/domtokenlist-toggle';
 import {install as installDocContains} from '../polyfills/document-contains';
-import {installImg} from '../../builtins/amp-img';
-import {installLayout} from '../../builtins/amp-layout';
-import {installPixel} from '../../builtins/amp-pixel';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
 import {installTimerInEmbedWindow} from './timer-impl';
@@ -457,8 +454,9 @@ export class Extensions {
     // Install runtime styles.
     installStylesLegacy(
       childWin.document,
-      // TODO(lannka): remove ampDocCss for FIE rendering #22418
-      ampDocCss + ampSharedCss,
+      isExperimentOn(this.win, 'fie-css-cleanup')
+        ? ampSharedCss
+        : ampDocCss + ampSharedCss,
       /* callback */ null,
       /* opt_isRuntimeCss */ true,
       /* opt_ext */ 'amp-runtime'
@@ -670,17 +668,6 @@ export class Extensions {
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
-}
-
-/**
- * Install builtins.
- * @param {!Window} win
- * @restricted
- */
-export function installBuiltinElements(win) {
-  installImg(win);
-  installPixel(win);
-  installLayout(win);
 }
 
 /**
