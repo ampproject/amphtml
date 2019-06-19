@@ -84,6 +84,7 @@ import {adpon} from '../ads/adpon';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adsensor} from '../ads/adsensor';
+import {adsloom} from '../ads/adsloom';
 import {adsnative} from '../ads/adsnative';
 import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
@@ -269,6 +270,7 @@ import {zucks} from '../ads/zucks';
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
   '24smi': true,
+  adsloom: true,
   bringhub: true,
   dable: true,
   engageya: true,
@@ -327,6 +329,7 @@ register('adpon', adpon);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adsensor', adsensor);
+register('adsloom', adsloom);
 register('adsnative', adsnative);
 register('adspeed', adspeed);
 register('adspirit', adspirit);
