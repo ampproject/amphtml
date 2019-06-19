@@ -40,6 +40,11 @@ The examples below must be accompanied by AMP-enabled widgets delivered by Outbr
   </amp-ad>
 </amp-sticky-ad>
 ```
+Note that `<amp-sticky-ad />` component requires the following script to be included in the page:
+```html
+<script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-1.0.js"></script>
+```
+See [AMP documentation](https://amp.dev/documentation/components/amp-sticky-ad) for more information regarding `<amp-sticky-ad />` component.
 
 ## Configuration
 
