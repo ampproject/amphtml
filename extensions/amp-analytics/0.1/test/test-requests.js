@@ -426,6 +426,25 @@ describes.realWin('Requests', {amp: 1}, env => {
     expect(spy).to.be.calledWith('r1&test&test2');
   });
 
+  it('COOKIE read cookie value', function*() {
+    const spy = sandbox.spy();
+    const r = {'baseUrl': 'r1&c1=COOKIE(test)&c2=${cookie(test)}'};
+    let handler = createRequestHandler(r, spy);
+    const expansionOptions = new ExpansionOptions({
+      'cookie': 'COOKIE',
+    });
+    handler.send({}, {}, expansionOptions);
+    yield macroTask();
+    expect(spy).to.be.calledWith('r1&c1=&c2=');
+
+    env.win.document.cookie = 'test=123';
+    spy.resetHistory();
+    handler = createRequestHandler(r, spy);
+    handler.send({}, {}, expansionOptions);
+    yield macroTask();
+    expect(spy).to.be.calledWith('r1&c1=123&c2=123');
+  });
+
   describe('expandPostMessage', () => {
     let expansionOptions;
     let params;
