@@ -1459,6 +1459,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     } else {
       // Strip the title attribute from the page on non-bot user agents, to
       // prevent the browser tooltip.
+      if (!this.element.getAttribute('aria-label')) {
+        this.element.setAttribute('aria-label', this.description_);
+      }
       this.element.removeAttribute('title');
     }
   }
@@ -1472,11 +1475,13 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
+    const descriptionElId = `i-amphtml-story-${this.element.id}-description`;
     const descriptionEl = createElementWithAttributes(
       this.win.document,
       'div',
       dict({
         'class': 'i-amphtml-story-page-description',
+        'id': descriptionElId,
       })
     );
     descriptionEl./* OK */ textContent = this.description_;
@@ -1485,5 +1490,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       descriptionEl,
       this.element.nextElementSibling
     );
+
+    if (!this.element.getAttribute('aria-labelledby')) {
+      this.element.setAttribute('aria-labelledby', descriptionElId);
+    }
   }
 }
