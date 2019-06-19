@@ -33,13 +33,10 @@ export const getDetailsForMeta = meta => {
 };
 
 export const getOgImage = doc => {
-  const ogImages = doc.head.querySelectorAll('meta[property="og:image"]');
-  if (ogImages && ogImages.length > 0) {
-    // If there is more than one og:image, just pick the first
-    const imageUrl = ogImages[0].content;
-    if (imageUrl) {
-      return imageUrl;
-    }
+  const ogImage = doc.head.querySelector('meta[property="og:image"]');
+
+  if (ogImage) {
+    return ogImage.content;
   }
   return '';
 };
