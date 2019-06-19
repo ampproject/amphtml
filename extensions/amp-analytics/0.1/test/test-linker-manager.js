@@ -812,7 +812,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
   describe('form support', () => {
     it('should register the `beforeSubmit` callback', () => {
-      toggleExperiment(win, 'linker-form', true);
       const linkerManager = new LinkerManager(
         ampdoc,
         {
@@ -831,7 +830,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
       return linkerManager.init().then(() => {
         expect(beforeSubmitStub.calledOnce).to.be.true;
-        toggleExperiment(win, 'linker-form', false);
         expect(beforeSubmitStub).to.be.calledWith(sinon.match.func);
       });
     });
