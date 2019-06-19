@@ -327,12 +327,15 @@ export class FixedLayer {
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
-    this.setupElement_(
+    const added = this.setupElement_(
       element,
       /* selector */ '*',
       /* position */ 'fixed',
       opt_forceTransfer
     );
+    if (!added) {
+      return Promise.resolve();
+    }
     this.sortInDomOrder_();
 
     // If this is the first element, we need to start the mutation observer.
@@ -651,6 +654,7 @@ export class FixedLayer {
    *    be forcibly transferred to the transfer layer.
    * @param {boolean=} opt_lightboxMode If true, then descendants of lightboxes
    *    are allowed to be set up. Default is false.
+   * @return {boolean}
    * @private
    */
   setupElement_(
@@ -666,16 +670,40 @@ export class FixedLayer {
     // Ignore lightboxes because FixedLayer can interfere with their
     // opening/closing animations (#19149).
     if (isLightbox(element)) {
-      return;
+      return false;
     }
     const isLightboxDescendant = closest(element, isLightbox);
     if (!opt_lightboxMode && isLightboxDescendant) {
-      return;
+      return false;
+    }
+
+    const elements = this.elements_;
+
+    // Avoid ancestor-descendant relationships in tracked elements to prevent
+    // "double top-offset" (#22860).
+    const removals = [];
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i].element;
+      if (el === element) {
+        break;
+      }
+      // Early exit if element is a child of an already-tracked element...
+      if (el.contains(element)) {
+        return false;
+      }
+      // Remove the already-tracked element if it is a child of the new
+      // element...
+      if (element.contains(el)) {
+        removals.push(el);
+      }
+    }
+    for (let i = 0; i < removals.length; i++) {
+      this.removeElement(removals[i]);
     }
 
     let fe = null;
-    for (let i = 0; i < this.elements_.length; i++) {
-      const el = this.elements_[i];
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
       if (el.element == element && el.position == position) {
         fe = el;
         break;
@@ -705,10 +733,11 @@ export class FixedLayer {
         stickyNow: false,
         lightboxed: !!isLightboxDescendant,
       };
-      this.elements_.push(fe);
+      elements.push(fe);
     }
 
     fe.forceTransfer = isFixed ? opt_forceTransfer : false;
+    return true;
   }
 
   /**
