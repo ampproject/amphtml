@@ -86,6 +86,7 @@ import {
   childElement,
   childElementByTag,
   childElements,
+  childNodes,
   closest,
   createElementWithAttributes,
   isRTL,
@@ -441,6 +442,15 @@ export class AmpStory extends AMP.BaseElement {
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
     this.element.removeAttribute('title');
+
+    // Remove text nodes which would be shown outside of the amp-story
+    const textNodes = childNodes(
+      this.element,
+      node => node.nodeType === Node.TEXT_NODE
+    );
+    textNodes.forEach(node => {
+      this.element.removeChild(node);
+    });
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', invocation => {
