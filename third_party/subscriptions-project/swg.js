@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.55 */
+/** Version: 0.1.22.56 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -3202,7 +3202,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.55',
+    '_client': 'SwG 0.1.22.56',
   });
 }
 
@@ -13695,7 +13695,11 @@ function validateEvent(event) {
 
 /** @implements {../api/client-event-manager-api.ClientEventManagerApi} */
 class ClientEventManager {
-  constructor() {
+  /**
+   *
+   * @param {!Promise} configuredPromise
+   */
+  constructor(configuredPromise) {
     /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent)>} */
     this.listeners_ = [];
 
@@ -13704,6 +13708,9 @@ class ClientEventManager {
 
     /** @private {?Promise} */
     this.lastAction_ = null;
+
+    /** @private @const {!Promise} */
+    this.isReadyPromise_ = configuredPromise;
   }
 
   /**
@@ -13726,37 +13733,21 @@ class ClientEventManager {
     this.filterers_.push(filterer);
   }
 
-
   /**
    * @overrides
    */
   logEvent(event) {
     validateEvent(event);
-    this.lastAction_ = new Promise(resolve => {
+    this.lastAction_ = this.isReadyPromise_.then(() => {
       for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
         if (this.filterers_[filterer](event) === FilterResult.CANCEL_EVENT) {
-          resolve();
-          return;
+          return Promise.resolve();
         }
       }
       for (let listener = 0; listener < this.listeners_.length; listener++) {
         this.listeners_[listener](event);
       }
-      resolve();
-    });
-  }
-
-  /**
-   * This function exists for the sole purpose of allowing the code to be
-   * presubmitted.  It can be removed once there is code generating a real
-   * event object somewhere.
-   */
-  useValidateEventForCompilationPurposes() {
-    validateEvent({
-      eventType: AnalyticsEvent.UNKNOWN,
-      eventOriginator: EventOriginator.UNKNOWN_CLIENT,
-      isFromUserAction: null,
-      additionalParameters: {},
+      return Promise.resolve();
     });
   }
 }
@@ -13788,12 +13779,14 @@ class ConfiguredRuntime {
    * @param {!../model/page-config.PageConfig} pageConfig
    * @param {{
    *     fetcher: (!Fetcher|undefined),
+   *     eventManager: (!ClientEventManager|undefined)
    *   }=} opt_integr
    * @param {!../api/subscriptions.Config=} opt_config
    */
   constructor(winOrDoc, pageConfig, opt_integr, opt_config) {
     /** @private @const {!ClientEventManager} */
-    this.eventManager_ = new ClientEventManager();
+    this.eventManager_ = (opt_integr && opt_integr.eventManager)
+        || new ClientEventManager(Promise.resolve());
 
     /** @private @const {!Doc} */
     this.doc_ = resolveDoc(winOrDoc);
@@ -13803,6 +13796,7 @@ class ConfiguredRuntime {
 
     /** @private @const {!../api/subscriptions.Config} */
     this.config_ = defaultConfig();
+
     if (isEdgeBrowser$1(this.win_)) {
       // TODO(dvoytenko, b/120607343): Find a way to remove this restriction
       // or move it to Web Activities.
@@ -13814,6 +13808,10 @@ class ConfiguredRuntime {
 
     /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = pageConfig;
+
+    /** @private @const {!Propensity} */
+    this.propensityModule_ = new Propensity(this.win_,
+      this.pageConfig_, this.eventManager_);
 
     /** @private @const {!Promise} */
     this.documentParsed_ = this.doc_.whenReady();
@@ -13841,6 +13839,10 @@ class ConfiguredRuntime {
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
 
+    //NOTE: 'this' is passed in as a DepsDef.  Do not pass in 'this' before
+    //analytics service and entitlements manager are constructed unless
+    //you are certain they do not rely on them because they are part of that
+    //definition.
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this);
 
@@ -13853,10 +13855,6 @@ class ConfiguredRuntime {
 
     /** @private @const {!ButtonApi} */
     this.buttonApi_ = new ButtonApi(this.doc_);
-
-    /** @private @const {!Propensity} */
-    this.propensityModule_ = new Propensity(this.win_,
-        this.pageConfig_, this.eventManager_);
 
     const preconnect = new Preconnect(this.win_.document);
 
