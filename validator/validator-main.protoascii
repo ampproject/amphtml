@@ -993,15 +993,14 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
 }
-# AMP metadata, name=amp-vars-*
+# AMP metadata, name=amp4ads-vars-*
 # Allows advertisers to pass information from creatives
 # to be included in amp-ad-metadata.
 tags: {
   html_format: AMP4ADS
   tag_name: "META"
-  spec_name: "meta name=amp-vars-*"
+  spec_name: "meta name=amp4ads-vars-*"
   mandatory_parent: "HEAD"
-  unique: true
   attrs: {
     name: "content"
     mandatory: true
@@ -1009,8 +1008,7 @@ tags: {
   attrs: {
     name: "name"
     mandatory: true
-    value_regex: "^amp-vars-.+"
-    dispatch_key: NAME_VALUE_DISPATCH
+    value_regex: "^amp4ads-vars-.+"
   }
 }
 # 4.2.6 The style
