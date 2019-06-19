@@ -70,6 +70,8 @@ describe('amp-analytics', function() {
           expect(q['cid']).to.equal('amp-12345');
           expect(q['loadend']).to.not.equal('0');
           expect(q['default']).to.equal('test');
+          // cookie set via http response header when requesting
+          // localhost:9876/amp4test/compose-doc
           expect(q['cookie']).to.equal('test');
           expect(
             req.headers.referer,
