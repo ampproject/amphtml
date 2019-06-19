@@ -22,6 +22,7 @@ import {
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
+import {cookieReader} from './cookie-reader';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
@@ -130,6 +131,7 @@ export class RequestHandler {
     // TODO: (@zhouyx) Move to variable service once that becomes
     // a doc level services
     bindings['CONSENT_STATE'] = getConsentStateStr(this.element_);
+    bindings['COOKIE'] = name => cookieReader(this.win, this.element_, name);
 
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');

@@ -90,6 +90,10 @@ describe
         const queries = parseQueryString(req.url.substr('/bar'.length));
         expect(queries['cid']).to.equal('');
         expect(queries['sourceUrl']).be.ok;
+        // Cookie is sent via http response header when requesting
+        // localhost:9876/amp4test/a4a/
+        // COOKIE macro is not allowed in inabox and resolves to empty
+        expect(queries['cookie']).to.equal('');
       });
       return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
     }
