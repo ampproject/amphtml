@@ -76,8 +76,6 @@ jobs:
       name: "Remote (Sauce Labs) Tests"
       script:
         - unbuffer node build-system/pr-check/remote-tests.js
-      after_script:
-        - build-system/sauce_connect/stop_sauce_connect.sh
     - stage: test
       name: "End to End Tests"
       script:
@@ -87,9 +85,7 @@ cache:
     - node_modules
     - build-system/tasks/e2e/node_modules
     - build-system/tasks/visual-diff/node_modules
-    - sauce_connect
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
-    - $HOME/.cache/pip
   yarn: true
