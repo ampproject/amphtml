@@ -409,10 +409,9 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
  * @return {!Array<string>}
  */
 function devDependencies() {
-  const rootPackageJsonFile = 'package.json';
-  const rootPackageJsonContents = fs.readFileSync(rootPackageJsonFile, 'utf8');
-  const rootPackageJson = JSON.parse(rootPackageJsonContents);
-  const devDependencies = Object.keys(rootPackageJson['devDependencies']);
+  const file = fs.readFileSync('package.json', 'utf8');
+  const packageJson = JSON.parse(file);
+  const devDependencies = Object.keys(packageJson['devDependencies']);
   return devDependencies.map(p => `./node_modules/${p}`);
 }
 
