@@ -72,6 +72,7 @@ module.exports = {
       [
         'babelify',
         {
+          // Transform "node_modules/", but ignore devDependencies (on Travis).
           'global': isTravisBuild(),
           'ignore': devDependencies(),
           'sourceMapsAbsolute': true,
