@@ -31,3 +31,12 @@ export const getDetailsForMeta = meta => {
     content,
   };
 };
+
+export const getOgImage = doc => {
+  const ogImage = doc.head.querySelector('meta[property="og:image"]');
+
+  if (ogImage) {
+    return ogImage.content;
+  }
+  return '';
+};
