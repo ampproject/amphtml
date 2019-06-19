@@ -784,6 +784,34 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       }
     );
 
+    it('not unlock page if no entitlments and viewer provides paywall', () => {
+      subscriptionService.doesViewerProvidePaywall_ = true;
+      subscriptionService.doesViewerProvideAuth_ = true;
+      subscriptionService.platformStore_ = new PlatformStore(products);
+      const getGrantStatusStub = sandbox
+        .stub(subscriptionService.platformStore_, 'getGrantStatus')
+        .callsFake(() => Promise.resolve());
+      const selectAndActivateStub = sandbox.stub(
+        subscriptionService,
+        'selectAndActivatePlatform_'
+      );
+      const performPingbackStub = sandbox.stub(
+        subscriptionService,
+        'performPingback_'
+      );
+      const setGrantStateStub = sandbox.stub(
+        subscriptionService.renderer_,
+        'setGrantState'
+      );
+      subscriptionService.startAuthorizationFlow_();
+      expect(getGrantStatusStub).to.be.calledOnce;
+      expect(selectAndActivateStub).to.be.calledOnce;
+      return subscriptionService.platformStore_.getGrantStatus().then(() => {
+        expect(performPingbackStub).to.be.called;
+        expect(setGrantStateStub).to.not.be.called;
+      });
+    });
+
     it('should fallback if viewer provides auth but fails', function*() {
       // Make sendMessageAwaitResponse() return a pending promise so we have
       // a chance to stub the platform store.
