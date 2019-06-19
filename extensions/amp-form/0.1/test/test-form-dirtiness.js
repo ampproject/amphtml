@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../../src/amp-events';
 import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
 import {Services} from '../../../../src/services';
+import {createCustomEvent} from '../../../../src/event-helper';
 
 function getForm(doc) {
   const form = doc.createElement('form');
@@ -29,6 +31,16 @@ function changeInput(element, value) {
   element.value = value;
   const event = new Event('input', {bubbles: true});
   element.dispatchEvent(event);
+}
+
+function dispatchFormValueChangeEvent(element, win) {
+  const ampValueChangeEvent = createCustomEvent(
+    win,
+    AmpEvents.FORM_VALUE_CHANGE,
+    /* detail */ null,
+    {bubbles: true}
+  );
+  element.dispatchEvent(ampValueChangeEvent);
 }
 
 describes.realWin('form-dirtiness', {}, env => {
@@ -73,6 +85,31 @@ describes.realWin('form-dirtiness', {}, env => {
       form.appendChild(disabled);
 
       changeInput(disabled, 'changed');
+      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+  });
+
+  describe('amp-bind changes', () => {
+    let input;
+
+    beforeEach(() => {
+      input = doc.createElement('input');
+      input.name = 'name';
+      form.appendChild(input);
+    });
+
+    it('adds dirtiness class if an element is changed with amp-bind', () => {
+      input.value = 'changed';
+      dispatchFormValueChangeEvent(input, env.win);
+
+      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('removes dirtiness class if a dirty element is cleared with amp-bind', () => {
+      changeInput(input, 'changed');
+      input.value = '';
+      dispatchFormValueChangeEvent(input, env.win);
+
       expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
     });
   });
