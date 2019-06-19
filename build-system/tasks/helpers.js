@@ -405,6 +405,18 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
 }
 
 /**
+ * Returns array of relative paths to "dependencies" defined in package.json.
+ * @return {!Array<string>}
+ */
+export function devDependencies() {
+  const rootPackageJsonFile = 'package.json';
+  const rootPackageJsonContents = fs.readFileSync(rootPackageJsonFile, 'utf8');
+  const rootPackageJson = JSON.parse(rootPackageJsonContents);
+  const devDependencies = Object.keys(rootPackageJson['devDependencies']);
+  return devDependencies.map(p => `./node_modules/${p}`);
+}
+
+/**
  * Transforms a given JavaScript file entry point with browserify, and watches
  * it for changes (if required).
  * @param {string} srcDir
@@ -422,7 +434,11 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   let bundler = browserify({
     entries: entryPoint,
     debug: true,
-  }).transform(babelify);
+  }).transform(babelify, {
+    // Transform "node_modules/", but ignore devDependencies.
+    global: true,
+    ignore: devDependencies(),
+  });
 
   if (options.watch) {
     bundler = watchify(bundler);
