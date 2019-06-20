@@ -99,14 +99,10 @@ const BIND_ONLY_ATTRIBUTES = map({
 });
 
 /**
- * List of element tag names that should opt-out of tree walk DOM scanning.
+ * Element that opt-out of tree walking in favor of rescan() with {fast: true}.
  * @const {!Array<string>}
  */
-const TREEWALKER_OPTOUT_TAGS = [
-  // <amp-list> has a custom integration that uses rescan() with {fast: true},
-  // which is more performant than normal tree walker approach.
-  'AMP-LIST',
-];
+const FAST_RESCAN_TAGS = ['AMP-LIST'];
 
 /**
  * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from
@@ -416,7 +412,8 @@ export class Bind {
    * `addedElements` after adding new bindings.
    *
    * If `options.fast` is true, uses a faster scan method that requires
-   * elements with bindings to have the attribute `i-amphtml-binding`.
+   * (1) elements with bindings to have the attribute `i-amphtml-binding` and
+   * (2) the parent element tag name be listed in FAST_RESCAN_TAGS.
    *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
@@ -425,10 +422,9 @@ export class Bind {
    * complete within `options.timeout` (default=2000), promise is rejected.
    */
   rescan(addedElements, removedElements, options = {}) {
-    // Don't wait for full initization in fast mode. Normally, there's a risk
-    // of duplicate bindings due to race with initial DOM scan, but we skip
-    // these elements during tree walk via TREEWALKER_OPTOUT_TAGS.
-    // TODO(choumx): This assumes that fast mode is only used by amp-list.
+    // Don't wait for full initization in fast mode.
+    // Normally, there's a risk of duplicate bindings due to race with initial
+    // scan, but elements in FAST_RESCAN_TAGS are skipped in initial scan.
     const waitFor = options.fast
       ? this.addMacrosDeferred_.promise
       : this.initializePromise_;
@@ -846,8 +842,9 @@ export class Bind {
       if (node.nodeType !== Node.ELEMENT_NODE) {
         return !walker.nextNode();
       }
-      // Skip subtree for opted-out tags.
-      if (TREEWALKER_OPTOUT_TAGS.includes(node.nodeName)) {
+      // Elements in FAST_RESCAN_TAGS opt-out of "slow" tree walking in favor of
+      // rescan() with {fast: true} for better performance.
+      if (FAST_RESCAN_TAGS.includes(node.nodeName)) {
         return !walker.nextSibling();
       }
       const element = dev().assertElement(node);
@@ -1510,7 +1507,7 @@ export class Bind {
     const target = dev().assertElement(event.target);
     // TODO(choumx): Remove assumption of DOM structure of event target.
     const parent = target.parentNode;
-    if (parent && TREEWALKER_OPTOUT_TAGS.includes(parent.nodeName)) {
+    if (parent && FAST_RESCAN_TAGS.includes(parent.nodeName)) {
       return;
     }
     dev().info(TAG, 'dom_update:', target);
