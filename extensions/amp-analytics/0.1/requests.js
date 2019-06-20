@@ -379,9 +379,10 @@ export class RequestHandler {
    */
   composeRequestUrl_(baseUrl, opt_requestOrigin) {
     if (opt_requestOrigin) {
-      // parse can handle relative request origins and will use the
-      // current page's origin if so. However, we only want to accept absolute
-      // URLs for request origin to keep our URL composition rules simple
+      // We expect requestOrigin to always contain the URL origin. In the case
+      // where requestOrigin has a relative URL, the current page's origin will
+      // be used. We will simply respect the requestOrigin and baseUrl, we don't
+      // check if they form a valid URL and request will fail silently
       const requestOriginInfo = this.urlService_.parse(opt_requestOrigin);
       return requestOriginInfo.origin + baseUrl;
     }

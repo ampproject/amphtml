@@ -114,6 +114,21 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledWith('/r1');
       });
 
+      it('handle baseUrl with no leading slash', function*() {
+        const r = {
+          'baseUrl': 'r1',
+          'origin': 'https://requestorigin.com',
+        };
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith(
+          'https://requestorigin.comr1'
+        );
+      });
+
       it('prepend request origin to absolute baseUrl', function*() {
         const r = {
           'baseUrl': 'https://baseurl.com',
@@ -126,6 +141,21 @@ describes.realWin('Requests', {amp: 1}, env => {
         yield macroTask();
         expect(spy).to.be.calledWith(
           'https://requestorigin.comhttps://baseurl.com'
+        );
+      });
+
+      it('handle relative request origin', function*() {
+        const r = {
+          'baseUrl': '/r1',
+          'origin': '/requestorigin',
+        };
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith(
+          'http://localhost:9876/r1' // 9876 is the port karma uses
         );
       });
 
