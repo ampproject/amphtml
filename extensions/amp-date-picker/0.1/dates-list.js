@@ -15,7 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import RRule from '../../../third_party/rrule/rrule';
+import {rrulestr} from 'rrule';
 
 /** @enum {string} */
 const DateType = {
@@ -142,7 +142,7 @@ export class DatesList {
  */
 function tryParseRrulestr(str) {
   try {
-    return RRule.fromString(str);
+    return rrulestr(str);
   } catch (e) {
     return null;
   }
