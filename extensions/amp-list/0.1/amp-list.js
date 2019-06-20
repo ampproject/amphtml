@@ -712,15 +712,14 @@ export class AmpList extends AMP.BaseElement {
 
     /**
      * @param {!../../../extensions/amp-bind/0.1/bind-impl.Bind} bind
-     * @param {boolean=} apply
      */
-    function updateWith(bind, apply = true) {
+    const updateWith = bind => {
       const removedElements = append ? [] : [this.container_];
       // Forward elements to chained promise on success or failure.
       return bind
-        .rescan(elements, removedElements, {'fast': true, 'apply': apply})
+        .rescan(elements, removedElements, {'fast': true, 'apply': true})
         .then(() => elements, () => elements);
-    }
+    };
 
     // "refresh": Do _not_ block on retrieval of the Bind service before the
     // first mutation (AMP.setState).
@@ -731,7 +730,7 @@ export class AmpList extends AMP.BaseElement {
         // On first render, scan but don't apply.
         Services.bindForDocOrNull(this.element).then(bind => {
           if (bind) {
-            updateWith(bind, /* apply */ false);
+            bind.rescan(elements, [], {'fast': true, 'apply': false});
           }
         });
         return Promise.resolve(elements);

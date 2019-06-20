@@ -473,7 +473,7 @@ export class Bind {
    */
   fastScan_(addedElements, removedElements) {
     /** @return {!Promise<number>} */
-    function add() {
+    const add = () => {
       if (this.numberOfBindings() > this.maxNumberOfBindings_) {
         this.emitMaxBindingsExceededError_();
         return Promise.resolve(0);
@@ -495,7 +495,7 @@ export class Bind {
       } else {
         return Promise.resolve(0);
       }
-    }
+    };
 
     return add().then(added => {
       // Don't return/chain this promise as an optimization.
@@ -541,7 +541,7 @@ export class Bind {
     return this.ww_('bind.init', [allowUrlProperties])
       .then(() => {
         return Promise.all([
-          this.addMacros_(),
+          this.addMacros_().then(() => this.addMacrosDeferred_.resolve()),
           this.addBindingsForNodes_([root]),
         ]);
       })
@@ -681,7 +681,6 @@ export class Bind {
             elements[i]
           );
         });
-        this.addMacrosDeferred_.resolve();
         return macros.length;
       });
     }
