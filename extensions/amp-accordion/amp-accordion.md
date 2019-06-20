@@ -126,6 +126,10 @@ The events below will be triggered on `section`s of `accordion`.
     <td width="40%"><strong><code>expand-single-section</code></strong></td>
     <td>Set this attribute on the <code>&lt;amp-accordion&gt;</code> to only allow one <code>&lt;section&gt;</code> to be expanded at a time. If the user focuses on one <code>&lt;section&gt;</code> any other previously expanded <code>&lt;section&gt;</code> will be collapsed.</td>
   </tr>
+  <tr>
+    <td width="40%"><strong><code>[data-expand]</code></strong></td>
+    <td>Bind this attribute on a <code>&lt;section&gt;</code> to expand or collapse the section. An expression that evaluates to <code>false</code> will collapse the section if it is expanded, and anything else will expand the section if it is collapsed.</td>
+  </tr>
 </table>
 
 ## Styling

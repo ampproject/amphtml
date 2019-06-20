@@ -61,6 +61,10 @@ tags: {  # <amp-accordion> > <section>
   spec_name: "amp-accordion > section"
   mandatory_parent: "AMP-ACCORDION"
   attrs: { name: "expanded" value: "" }
+  # amp-bind
+  attrs: {
+    name: "[data-expand]"
+  }
   child_tags: {
     mandatory_num_child_tags: 2
     first_child_tag_name_oneof: "H1"
