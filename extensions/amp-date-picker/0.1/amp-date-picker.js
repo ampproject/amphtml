@@ -38,7 +38,7 @@ import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {once} from '../../../src/utils/function';
@@ -100,8 +100,11 @@ const DatePickerMode = {
   OVERLAY: 'overlay',
 };
 
-/** @enum {string} */
-const DatePickerState = {
+/**
+ * @enum {string}
+ * @private visible for testing
+ */
+export const DatePickerState = {
   OVERLAY_CLOSED: 'overlay-closed',
   OVERLAY_OPEN_INPUT: 'overlay-open-input',
   OVERLAY_OPEN_PICKER: 'overlay-open-picker',
@@ -343,7 +346,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
 
-    /** @private {?FiniteStateMachine} */
+    /** @private {?FiniteStateMachine} visible for testing */
     this.stateMachine_ = null;
 
     /** @private */
@@ -540,7 +543,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.setupTemplates_();
     }
 
-    Promise.resolve(p).then(() => this.setState_(newState));
+    return Promise.resolve(p).then(() => this.setState_(newState));
   }
 
   /** @override */
@@ -671,10 +674,10 @@ export class AmpDatePicker extends AMP.BaseElement {
       return;
     }
 
-    if (!this.stateMachine_) {
-      return;
-    }
-
+    devAssert(
+      this.stateMachine_,
+      'transitonTo called before state machine is initialized'
+    );
     this.stateMachine_.setState(state);
   }
 

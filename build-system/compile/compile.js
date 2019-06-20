@@ -238,8 +238,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'node_modules/web-animations-js/web-animations.install.js',
       'node_modules/web-activities/activity-ports.js',
       'node_modules/@ampproject/animations/dist/animations.mjs',
-      'node_modules/@ampproject/worker-dom/dist/' +
-        'unminified.index.safe.mjs.patched.js',
+      'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
       'node_modules/document-register-element/build/' +
         'document-register-element.patched.js',
       // 'node_modules/core-js/modules/**.js',
@@ -372,6 +371,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
       compilerOptions.jscomp_error.push(
+        'conformanceViolations',
         'checkTypes',
         'accessControls',
         'const',

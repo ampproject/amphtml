@@ -88,9 +88,9 @@ export class AnchorAdStrategy {
    * @private
    */
   isFilledAnchorAdEnabled_() {
-    return (this.configObj_['optInStatus'] || []).includes(
-      OptInStatus.OPT_IN_STATUS_ANCHOR_ADS
-    );
+    return user()
+      .assertArray(this.configObj_['optInStatus'] || [])
+      .includes(OptInStatus.OPT_IN_STATUS_ANCHOR_ADS);
   }
 
   /**
@@ -98,9 +98,9 @@ export class AnchorAdStrategy {
    * @private
    */
   isNoFillAnchorAdEnabled_() {
-    return (this.configObj_['optInStatus'] || []).includes(
-      OptInStatus.OPT_IN_STATUS_NO_FILL_ANCHOR_ADS
-    );
+    return user()
+      .assertArray(this.configObj_['optInStatus'] || [])
+      .includes(OptInStatus.OPT_IN_STATUS_NO_FILL_ANCHOR_ADS);
   }
 
   /**

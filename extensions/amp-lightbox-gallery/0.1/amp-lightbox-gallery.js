@@ -155,7 +155,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private {?Element} */
     this.mask_ = null;
 
-    /** @private {?Element} */
+    /** @protected {?Element} */
     this.navControls_ = null;
 
     /** @private {?Element} */
@@ -170,7 +170,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private  {?Element} */
     this.gallery_ = null;
 
-    /** @private  {?Element} */
+    /** @protected  {?Element} */
     this.topBar_ = null;
 
     /** @private {!LightboxControlsModes} */
@@ -312,6 +312,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         const container = this.doc_.createElement('div');
         const imageViewer = htmlFor(this.doc_)`
           <amp-image-viewer layout="fill"></amp-image-viewer>`;
+        // Copy any data attributes from the cloneNode to the new slide
+        // container. For example. when cloning carousel slides, we want to
+        // carry over data-slide-id.
+        for (const name in clonedNode.dataset) {
+          container.dataset[name] = clonedNode.dataset[name];
+        }
         clonedNode.removeAttribute('class');
         imageViewer.appendChild(clonedNode);
         container.appendChild(imageViewer);

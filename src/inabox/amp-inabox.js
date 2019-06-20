@@ -24,6 +24,7 @@ import {Services} from '../services';
 import {adopt} from '../runtime';
 import {cssText as ampDocCss} from '../../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
+import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
@@ -45,7 +46,6 @@ import {
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {internalRuntimeVersion} from '../internal-version';
 import {isExperimentOn} from '../experiments';
-import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
@@ -100,10 +100,10 @@ startupChunk(self.document, function initial() {
         // runtime tries to install the normal one.
         installViewerServiceForDoc(ampdoc);
         installInaboxViewportService(ampdoc);
-        installAmpdocServices(ampdoc);
+        installAmpdocServices(ampdoc, undefined, true);
         // We need the core services (viewer/resources) to start instrumenting
         perf.coreServicesAvailable();
-        maybeTrackImpression(self);
+        doNotTrackImpression();
         registerIniLoadListener(ampdoc);
       });
       startupChunk(self.document, function builtins() {

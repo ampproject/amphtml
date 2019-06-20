@@ -43,7 +43,7 @@ export class PositionObserver {
     this.win_ = win;
     /** @private {?Observable} */
     this.positionObservable_ = null;
-    /** @private {!Element} */
+    /** @protected {!Element} */
     this.scrollingElement_ = getScrollingElement(this.win_);
     /** @private {?LayoutRectDef} */
     this.viewportRect_ = null;
