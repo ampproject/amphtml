@@ -112,7 +112,7 @@ With the responsive layout, the width and height from the example should yield c
   <li>`data-param-controls=1` becomes `&controls=1`</li>
 </ul>
 <p>See <a href="https://developers.google.com/youtube/player_parameters">YouTube Embedded Player Parameters</a> for more parameter options for YouTube.</p>
-<p>Note: Use the <code>autoplay</code> attribute instead of <code>data-param-autoplay</code> and the <code>loop</code> attribute instead of <code>data-param-loop</code>.</p>
+<p>Note: Use the <code>autoplay</code> attribute instead of <code>data-param-autoplay</code> and the <code>loop</code> attribute instead of <code>data-param-loop</code> since both the autoplay and looping behaviors are handled internally by AMP instead of the Youtube player.</p>
 </td>
   </tr>
   <tr>
