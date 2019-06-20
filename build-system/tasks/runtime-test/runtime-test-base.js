@@ -27,6 +27,7 @@ const {
   startTestServer,
 } = require('./helpers');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
+const {devDependencies} = require('../helpers');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {reportTestStarted} = require('.././report-test-status');
@@ -235,7 +236,17 @@ class RuntimeTestConfig {
         },
       ];
 
-      this.browserify.transform = [['babelify', {plugins: [plugin]}]];
+      this.browserify.transform = [
+        [
+          'babelify',
+          {
+            // Transform "node_modules/", but ignore devDependencies.
+            'global': true,
+            'ignore': devDependencies(),
+            'plugins': [plugin],
+          },
+        ],
+      ];
     }
   }
 }
