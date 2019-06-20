@@ -124,9 +124,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
-        expect(spy).to.be.calledWith(
-          'https://requestorigin.comr1'
-        );
+        expect(spy).to.be.calledWith('https://requestorigin.comr1');
       });
 
       it('prepend request origin to absolute baseUrl', function*() {
