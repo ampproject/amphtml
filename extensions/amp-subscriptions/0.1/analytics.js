@@ -44,6 +44,7 @@ export const SubscriptionAnalyticsEvents = {
   LINK_CANCELED: 'subscriptions-link-canceled',
 };
 
+/** @enum {string} */
 export const Action = {
   LOGIN: 'login',
   LOGOUT: 'logout',
@@ -54,12 +55,13 @@ export const Action = {
   SHOW_OFFERS: 'showOffers',
 };
 
+/** @enum {string} */
 export const ActionStatus = {
   STARTED: 'started',
   REJECTED: 'rejected',
   FAILED: 'failed',
   SUCCESS: 'success',
-}
+};
 
 export class SubscriptionAnalytics {
   /**
