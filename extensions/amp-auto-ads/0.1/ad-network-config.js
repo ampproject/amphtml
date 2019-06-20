@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {OptInStatus} from './opt-in-status';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
@@ -66,6 +67,13 @@ class AdNetworkConfigDef {
    * @return {!SizeInfoDef}
    */
   getSizing() {}
+
+  /**
+   * Returns the settings to use when running the anchor ad strategy.
+   * @param {!JsonObject} unusedConfigObj
+   * @return {JsonObject<string, string>} null if the anchor ad strategy should not be run.
+   */
+  getStickyAdAttributes(unusedConfigObj) {}
 }
 
 /**
@@ -148,6 +156,11 @@ class PingNetworkConfig {
   getSizing() {
     return {};
   }
+
+  /** @override */
+  getStickyAdAttributes(unusedConfigObj) {
+    return null;
+  }
 }
 
 /**
@@ -220,6 +233,22 @@ class AdSenseNetworkConfig {
   /** @override */
   getSizing() {
     return {};
+  }
+
+  /** @override */
+  getStickyAdAttributes(configObj) {
+    const filledAnchorEnabled = (configObj['optInStatus'] || []).includes(
+      OptInStatus.OPT_IN_STATUS_ANCHOR_ADS
+    );
+    const noFillAnchorEnabled = (configObj['optInStatus'] || []).includes(
+      OptInStatus.OPT_IN_STATUS_NO_FILL_ANCHOR_ADS
+    );
+    if (!filledAnchorEnabled && !noFillAnchorEnabled) {
+      return null;
+    }
+    return dict({
+      'no-fill': String(noFillAnchorEnabled && !filledAnchorEnabled),
+    });
   }
 }
 
@@ -305,5 +334,10 @@ class DoubleclickNetworkConfig {
       };
     }
     return {};
+  }
+
+  /** @override */
+  getStickyAdAttributes(unusedConfigObj) {
+    return null;
   }
 }

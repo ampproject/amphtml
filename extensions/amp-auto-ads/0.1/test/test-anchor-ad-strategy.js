@@ -52,13 +52,17 @@ describes.realWin(
     });
 
     describe('run', () => {
-      it('should insert sticky ad if opted in', () => {
+      it('should insert sticky ad if opted in for anchor ads', () => {
         configObj['optInStatus'].push(2);
+        const anchorAttributes = {
+          'no-fill': 'false',
+        };
 
         const anchorAdStrategy = new AnchorAdStrategy(
           env.ampdoc,
           attributes,
-          configObj
+          configObj,
+          anchorAttributes
         );
 
         const strategyPromise = anchorAdStrategy.run().then(placed => {
@@ -81,6 +85,7 @@ describes.realWin(
               expect(ampAd.getAttribute('data-ad-client')).to.equal(
                 'ca-pub-test'
               );
+              expect(ampAd.getAttribute('no-fill')).to.equal('false');
               resolve();
             }
           );
@@ -89,7 +94,47 @@ describes.realWin(
         return Promise.all([strategyPromise, expectPromise]);
       });
 
-      it('should not insert sticky ad if not opted in anchor ad or no fill anchor ad', () => {
+      it('should insert sticky ad if have anchor ads attribute', () => {
+        const anchorAttributes = {
+          'no-fill': 'true',
+        };
+        const anchorAdStrategy = new AnchorAdStrategy(
+          env.ampdoc,
+          attributes,
+          configObj,
+          anchorAttributes
+        );
+
+        const strategyPromise = anchorAdStrategy.run().then(placed => {
+          expect(placed).to.equal(true);
+        });
+
+        const expectPromise = new Promise(resolve => {
+          waitForChild(
+            env.win.document.body,
+            parent => {
+              return parent.firstChild.tagName == 'AMP-STICKY-AD';
+            },
+            () => {
+              const stickyAd = env.win.document.body.firstChild;
+              expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
+              const ampAd = stickyAd.firstChild;
+              expect(ampAd.getAttribute('type')).to.equal('adsense');
+              expect(ampAd.getAttribute('width')).to.equal('360');
+              expect(ampAd.getAttribute('height')).to.equal('100');
+              expect(ampAd.getAttribute('data-ad-client')).to.equal(
+                'ca-pub-test'
+              );
+              expect(ampAd.getAttribute('no-fill')).to.equal('true');
+              resolve();
+            }
+          );
+        });
+
+        return Promise.all([strategyPromise, expectPromise]);
+      });
+
+      it('should not insert sticky ad if not opted in anchor ad or do not have anchor ad attributes', () => {
         const anchorAdStrategy = new AnchorAdStrategy(
           env.ampdoc,
           attributes,
@@ -137,100 +182,6 @@ describes.realWin(
             ).to.have.lengthOf(1);
             resolve();
           }, 500);
-        });
-
-        return Promise.all([strategyPromise, expectPromise]);
-      });
-
-      it('should set data-no-fill to false if opted in for anchor ads', () => {
-        configObj['optInStatus'].push(2);
-
-        const anchorAdStrategy = new AnchorAdStrategy(
-          env.ampdoc,
-          attributes,
-          configObj
-        );
-
-        const strategyPromise = anchorAdStrategy.run().then(placed => {
-          expect(placed).to.equal(true);
-        });
-
-        const expectPromise = new Promise(resolve => {
-          waitForChild(
-            env.win.document.body,
-            parent => {
-              return parent.firstChild.tagName == 'AMP-STICKY-AD';
-            },
-            () => {
-              const stickyAd = env.win.document.body.firstChild;
-              expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
-              expect(stickyAd.getAttribute('data-no-fill')).to.equal('false');
-              resolve();
-            }
-          );
-        });
-
-        return Promise.all([strategyPromise, expectPromise]);
-      });
-
-      it('should set data-no-fill to true if opted in only for no fill anchor ads', () => {
-        configObj['optInStatus'].push(4);
-
-        const anchorAdStrategy = new AnchorAdStrategy(
-          env.ampdoc,
-          attributes,
-          configObj
-        );
-
-        const strategyPromise = anchorAdStrategy.run().then(placed => {
-          expect(placed).to.equal(true);
-        });
-
-        const expectPromise = new Promise(resolve => {
-          waitForChild(
-            env.win.document.body,
-            parent => {
-              return parent.firstChild.tagName == 'AMP-STICKY-AD';
-            },
-            () => {
-              const stickyAd = env.win.document.body.firstChild;
-              expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
-              expect(stickyAd.getAttribute('data-no-fill')).to.equal('true');
-              resolve();
-            }
-          );
-        });
-
-        return Promise.all([strategyPromise, expectPromise]);
-      });
-
-      it('should set data-no-fill to false if opted in for both filled anchor ads and no fill anchor ads', () => {
-        configObj['optInStatus'].push(2);
-        configObj['optInStatus'].push(4);
-
-        const anchorAdStrategy = new AnchorAdStrategy(
-          env.ampdoc,
-          attributes,
-          configObj
-        );
-
-        const strategyPromise = anchorAdStrategy.run().then(placed => {
-          expect(placed).to.equal(true);
-        });
-
-        const expectPromise = new Promise(resolve => {
-          waitForChild(
-            env.win.document.body,
-            parent => {
-              return parent.firstChild.tagName == 'AMP-STICKY-AD';
-            },
-            () => {
-              const stickyAd = env.win.document.body.firstChild;
-              expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
-              expect(stickyAd.getAttribute('data-no-fill')).to.equal('false');
-              resolve();
-            }
-          );
         });
 
         return Promise.all([strategyPromise, expectPromise]);
