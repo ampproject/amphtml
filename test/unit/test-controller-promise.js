@@ -138,123 +138,48 @@ config.run('ControllerPromise', () => {
 
   describe('retryable behavior', () => {
     it('should allow promises to be retryable', async () => {
-      const valueFunction = sandbox.stub();
-      valueFunction.resolves(6);
-      valueFunction
-        .onCall(0)
-        .resolves(0)
-        .onCall(1)
-        .resolves(1)
-        .onCall(2)
-        .resolves(2)
-        .onCall(3)
-        .resolves(3)
-        .onCall(4)
-        .resolves(4)
-        .onCall(5)
-        .resolves(5);
-
       const p = new ControllerPromise(
         Promise.resolve(0),
-        getWaitFunction(valueFunction)
+        getWaitFunction(getValueFunction)
       );
 
       expect(await p).to.equal(0);
-      expect(await p.waitForValue(x => x == 1)).to.equal(1);
-      expect(await p.waitForValue(x => x == 2)).to.equal(2);
-      expect(await p.waitForValue(x => x == 3)).to.equal(3);
-      expect(await p.waitForValue(x => x == 4)).to.equal(4);
       expect(await p.waitForValue(x => x == 5)).to.equal(5);
       expect(await p).to.equal(0);
     });
 
     it('should allow retryable promises to be then-ed once', async () => {
-      const valueFunction = sandbox.stub();
-      valueFunction.returns(6);
-      valueFunction
-        .onCall(0)
-        .resolves(0)
-        .onCall(1)
-        .resolves(1)
-        .onCall(2)
-        .resolves(2)
-        .onCall(3)
-        .resolves(3)
-        .onCall(4)
-        .resolves(4)
-        .onCall(5)
-        .resolves(5);
-
       const p = new ControllerPromise(
         Promise.resolve(0),
-        getWaitFunction(valueFunction)
+        getWaitFunction(getValueFunction)
       );
       const testP = p.then(x => (x + 1) * 2);
 
       expect(await testP).to.equal(2);
-      expect(await testP.waitForValue(x => x == 4)).to.equal(4);
-      expect(await testP.waitForValue(x => x == 6)).to.equal(6);
-      expect(await testP.waitForValue(x => x == 8)).to.equal(8);
-      expect(await testP.waitForValue(x => x == 10)).to.equal(10);
       expect(await testP.waitForValue(x => x == 12)).to.equal(12);
       expect(await testP).to.equal(2);
     });
 
     it('should allow retryable promises to be then-ed more than once', async () => {
-      const valueFunction = sandbox.stub();
-      valueFunction.resolves(6);
-      valueFunction
-        .onCall(0)
-        .resolves(0)
-        .onCall(1)
-        .resolves(1)
-        .onCall(2)
-        .resolves(2)
-        .onCall(3)
-        .resolves(3)
-        .onCall(4)
-        .resolves(4)
-        .onCall(5)
-        .resolves(5);
-
       const p = new ControllerPromise(
         Promise.resolve(0),
-        getWaitFunction(valueFunction)
+        getWaitFunction(getValueFunction)
       );
       const testP = p.then(x => (x + 1) * 2).then(x => x + 1);
 
       expect(await testP).to.equal(3);
-      expect(await testP.waitForValue(x => x == 5)).to.equal(5);
-      expect(await testP.waitForValue(x => x == 7)).to.equal(7);
-      expect(await testP.waitForValue(x => x == 9)).to.equal(9);
-      expect(await testP.waitForValue(x => x == 11)).to.equal(11);
       expect(await testP.waitForValue(x => x == 13)).to.equal(13);
       expect(await testP).to.equal(3);
     });
 
     it('should reject on failure and not allow retrying', async () => {
-      const valueFunction = sandbox.stub();
-      valueFunction.returns(6);
-      valueFunction
-        .onCall(0)
-        .resolves(0)
-        .onCall(1)
-        .resolves(1)
-        .onCall(2)
-        .resolves(2)
-        .onCall(3)
-        .resolves(3)
-        .onCall(4)
-        .rejects('failure');
-
       const p = new ControllerPromise(
         Promise.resolve(0),
-        getWaitFunction(valueFunction)
+        getWaitFunction(getErrorFunction)
       );
       const testP = p.then(x => (x + 1) * 2).then(x => x + 1);
 
       expect(await testP).to.equal(3);
-      expect(await testP.waitForValue(x => x == 5)).to.equal(5);
       expect(await testP.waitForValue(x => x == 7)).to.equal(7);
       expect(testP.waitForValue(x => x == 9)).to.eventually.be.rejectedWith(
         'failure'
@@ -266,19 +191,73 @@ config.run('ControllerPromise', () => {
     });
 
     /**
+     * Returns a method that resolves the numbers 0 through 6.
+     * @return {function():!Promise<number>}
+     */
+    function getValueFunction() {
+      const valueFunction = sandbox.stub();
+      valueFunction.resolves(6);
+      valueFunction
+        .onCall(0)
+        .resolves(0)
+        .onCall(1)
+        .resolves(1)
+        .onCall(2)
+        .resolves(2)
+        .onCall(3)
+        .resolves(3)
+        .onCall(4)
+        .resolves(4)
+        .onCall(5)
+        .resolves(5);
+
+      return valueFunction;
+    }
+
+    /**
+     * Returns a method that rejects on its fourth call.
+     * @return {function():!Promise<number>}
+     */
+    function getErrorFunction() {
+      const errorFunction = sandbox.stub();
+      errorFunction.returns(6);
+      errorFunction
+        .onCall(0)
+        .resolves(0)
+        .onCall(1)
+        .resolves(1)
+        .onCall(2)
+        .resolves(2)
+        .onCall(3)
+        .resolves(3)
+        .onCall(4)
+        .rejects('failure');
+
+      return errorFunction;
+    }
+
+    /**
      * Simulate the WebDriver polling functionality to get the latest value
      * and mutate it with any `then` blocks that have been chained to the
      * ControllerPromise.
      * See {@link ../../build-system/tasks/e2e/expect.js} for real usage
      */
-    function getWaitFunction(valueFunction) {
+    function getWaitFunction(valueFunctionGetter) {
       return (conditionFn, opt_mutate) => {
+        /**
+         * Each call to `waitForValue` gets its own value function.
+         * This simulates the value returned by a WebDriver framework for
+         * a request for a value e.g. from the DOM.
+         * See {@link ../../build-system/tasks/e2e/selenium-webdriver-controller.js#getElementText}
+         */
+        const valueFunction = valueFunctionGetter();
+
         opt_mutate = opt_mutate || (x => x);
         return new Promise((resolve, reject) => {
           /**
            * Poll for the new value. This simulates behavior in the concrete
-           * implementations of the FunctionalTestController implementations.
-           * See {@link build-system/tasks/e2e/selenium-webdriver-controller.js#getWaitFn_}
+           * implementations of the `FunctionalTestController` implementations.
+           * See {@link ../../build-system/tasks/e2e/selenium-webdriver-controller.js#getWaitFn_}
            */
           const id = setInterval(async () => {
             let value;
