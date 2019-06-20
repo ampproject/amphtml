@@ -904,11 +904,24 @@ describes.repeated(
           });
 
           describe('no `binding` attribute', () => {
-            it('should call rescan()', function*() {
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
+            it('should rescan()', async () => {
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
               expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {update: true, fast: true}
+              );
+            });
+
+            it('should not rescan() if new children have no bindings', async () => {
+              const child = doc.createElement('div');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.not.be.called;
             });
           });
 
@@ -917,11 +930,17 @@ describes.repeated(
               element.setAttribute('binding', 'always');
             });
 
-            it('should call rescan()', function*() {
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
+            it('should rescan()', async () => {
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
               expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {update: true, fast: true}
+              );
             });
           });
 
@@ -931,11 +950,12 @@ describes.repeated(
             });
 
             it('should rescan() with {update: false} before FIRST_MUTATE', async () => {
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
               await list.layoutCallback();
               expect(bind.rescan).to.have.been.calledOnce;
-              expect(bind.rescan).calledWithExactly(output, [], {
+              expect(bind.rescan).calledWithExactly([child], [], {
                 update: false,
                 fast: true,
               });
@@ -945,14 +965,19 @@ describes.repeated(
               bind.signals = () => {
                 return {get: name => name === 'FIRST_MUTATE'};
               };
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
               await list.layoutCallback();
               expect(bind.rescan).to.have.been.calledOnce;
-              expect(bind.rescan).calledWithExactly(output, [list.container_], {
-                update: true,
-                fast: true,
-              });
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {
+                  update: true,
+                  fast: true,
+                }
+              );
             });
           });
 

@@ -472,9 +472,11 @@ export class Bind {
     // returned promise (worker message) as an optimization.
     const removePromise = this.removeBindingsForNodes_(removedElements);
 
-    // Scan `addedElements` for bindings.
+    // Scan `addedElements` and descendants for bindings.
     const bindings = [];
-    const elementsToScan = addedElements.slice();
+    const elementsToScan = addedElements.filter(el =>
+      el.hasAttribute('i-amphtml-binding')
+    );
     addedElements.forEach(el => {
       const children = el.querySelectorAll('[i-amphtml-binding]');
       Array.prototype.push.apply(elementsToScan, children);

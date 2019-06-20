@@ -715,7 +715,9 @@ export class AmpList extends AMP.BaseElement {
 
     // Early out if elements contain no bindings.
     const hasBindings = elements.some(
-      el => !!el.querySelector('[i-amphtml-binding]')
+      el =>
+        el.hasAttribute('i-amphtml-binding') ||
+        !!el.querySelector('[i-amphtml-binding]')
     );
     if (!hasBindings) {
       return Promise.resolve(elements);
