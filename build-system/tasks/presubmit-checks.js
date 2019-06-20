@@ -632,6 +632,8 @@ const forbiddenTerms = {
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
+      // TODO: @jonathantyng cleanup #22757
+      'build-system/tasks/generate-vendor-jsons.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
