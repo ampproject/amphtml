@@ -56,44 +56,74 @@ config.run('ControllerPromise', () => {
     });
 
     it('should accept calls to `catch`', async () => {
-      const p = new ControllerPromise(Promise.reject('failure'));
-      p.then(() => {
-        throw new Error('should not happen');
-      });
-      return p.catch(e => {
-        expect(e).to.equal('failure');
-      });
+      const catchSpy = sandbox.spy();
+      const errorObject = {};
+      const p = new ControllerPromise(Promise.reject(errorObject));
+
+      await p.catch(catchSpy);
+
+      expect(catchSpy).to.have.been.calledOnce;
+      expect(catchSpy).to.have.been.calledWith(errorObject);
     });
 
     it('should accept a second parameter for `then`', async () => {
-      const p = new ControllerPromise(Promise.reject('failure'));
-      p.then(() => {
-        throw new Error('should not happen');
-      });
-      return p.then(null, e => {
-        expect(e).to.equal('failure');
-      });
+      const thenSpy = sandbox.spy();
+      const thenCatchSpy = sandbox.spy();
+      const onlyCatchSpy = sandbox.spy();
+      const errorObject = {};
+
+      const p = new ControllerPromise(Promise.reject(errorObject));
+      await p.then(thenSpy, thenCatchSpy);
+      await p.then(null, onlyCatchSpy);
+
+      expect(thenSpy).to.not.have.been.called;
+      expect(thenCatchSpy).to.have.been.calledOnce;
+      expect(thenCatchSpy).to.have.been.calledWith(errorObject);
+      expect(onlyCatchSpy).to.have.been.calledOnce;
+      expect(onlyCatchSpy).to.have.been.calledWith(errorObject);
     });
 
-    it('should accept calls to `finally`', () => {
+    it('should accept rejected calls to `finally`', async () => {
+      const catchSpy = sandbox.spy();
+      const finallySpy = sandbox.spy();
+      const failureObject = {};
       const rejectedControllerPromise = new ControllerPromise(
-        Promise.reject('failure')
+        Promise.reject(failureObject)
       );
-      const rejectedFinallyPromise = new Promise(resolve => {
-        rejectedControllerPromise.finally(() => resolve('success'));
-      });
 
+      // The catch in this line prevents Promise.reject from breaking the test
+      await rejectedControllerPromise.catch(catchSpy).finally(finallySpy);
+
+      expect(catchSpy).to.have.been.calledOnce;
+      expect(finallySpy).to.have.been.calledOnce;
+    });
+
+    it('should accept resolved calls to `finally`', async () => {
+      const finallySpy = sandbox.spy();
+      const thenSpy = sandbox.spy();
+      const successObject = {};
       const resolvedControllerPromise = new ControllerPromise(
-        Promise.reject('failure')
+        Promise.resolve(successObject)
       );
-      const resolvedFinallyPromise = new Promise(resolve => {
-        resolvedControllerPromise.finally(() => resolve('success'));
-      });
 
-      return Promise.all([
-        expect(rejectedFinallyPromise).to.eventually.equal('success'),
-        expect(resolvedFinallyPromise).to.eventually.equal('success'),
-      ]);
+      await resolvedControllerPromise.then(thenSpy).finally(finallySpy);
+
+      expect(thenSpy).to.have.been.calledWith(successObject);
+      expect(finallySpy).to.have.been.calledOnce;
+    });
+
+    it('should pass errors beyond `finally` to `catch` blocks', async () => {
+      const finallySpy = sandbox.spy();
+      const catchSpy = sandbox.spy();
+      const failureObject = {};
+      const rejectedControllerPromise = new ControllerPromise(
+        Promise.reject(failureObject)
+      );
+
+      await rejectedControllerPromise.finally(finallySpy).catch(catchSpy);
+
+      expect(finallySpy).to.have.been.calledOnce;
+      expect(catchSpy).to.have.been.calledWith(failureObject);
     });
 
     it('should accept long then chains', async () => {
