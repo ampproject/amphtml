@@ -524,7 +524,6 @@ export const adConfig = {
 
   'invibes': {
     prefetch: 'https://k.r66net.com/GetAmpLink',
-    preconnect: 'https://k.r66net.com',
     renderStartImplemented: true,
     consentHandlingOverride: true,
   },
