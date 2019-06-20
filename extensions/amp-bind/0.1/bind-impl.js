@@ -472,6 +472,7 @@ export class Bind {
         this.emitMaxBindingsExceededError_();
         return Promise.resolve(0);
       }
+
       // Scan `addedElements` for bindings.
       const bindings = [];
       const elementsToScan = addedElements.slice();
@@ -690,6 +691,10 @@ export class Bind {
    * @private
    */
   addBindingsForNodes_(nodes) {
+    if (!nodes.length) {
+      return Promise.resolve(0);
+    }
+
     // For each node, scan it for bindings and store them.
     const scanPromises = nodes.map(node => {
       // Limit number of total bindings (unless in local manual testing).
@@ -760,6 +765,10 @@ export class Bind {
    * @private
    */
   removeBindingsForNodes_(nodes) {
+    if (!nodes.length) {
+      return Promise.resolve(0);
+    }
+
     // Eliminate bound elements that are descendants of `nodes`.
     remove(this.boundElements_, boundElement => {
       for (let i = 0; i < nodes.length; i++) {

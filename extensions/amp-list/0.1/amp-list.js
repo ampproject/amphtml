@@ -718,7 +718,7 @@ export class AmpList extends AMP.BaseElement {
       const removedElements = append ? [] : [this.container_];
       // Forward elements to chained promise on success or failure.
       return bind
-        .rescan(elements, removedElements, {fast: true, apply})
+        .rescan(elements, removedElements, {'fast': true, 'apply': apply})
         .then(() => elements, () => elements);
     }
 

@@ -1879,7 +1879,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       // user interaction, and this won't run until then.
       Services.bindForDocOrNull(this.element).then(bind => {
         if (bind) {
-          return bind.rescan([this.element], [this.element], {apply: true});
+          return bind.rescan([this.element], [this.element], {'apply': true});
         }
       });
     } else {
