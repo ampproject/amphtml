@@ -199,12 +199,12 @@ export function experimentTogglesOrNull(win) {
  */
 function getExperimentToggles(win) {
   let experimentsString = '';
-  if ('localStorage' in win) {
-    try {
+  try {
+    if ('localStorage' in win) {
       experimentsString = win.localStorage.getItem(LOCAL_STORAGE_KEY);
-    } catch (e) {
-      dev().expectedError(TAG, 'localStorage not supported.');
     }
+  } catch (e) {
+    dev().expectedError(TAG, 'localStorage not supported.');
   }
   const tokens = experimentsString ? experimentsString.split(/\s*,\s*/g) : [];
 
@@ -232,12 +232,12 @@ function saveExperimentToggles(win, toggles) {
   for (const experiment in toggles) {
     experimentIds.push((toggles[experiment] === false ? '-' : '') + experiment);
   }
-  if ('localStorage' in win) {
-    try {
+  try {
+    if ('localStorage' in win) {
       win.localStorage.setItem(LOCAL_STORAGE_KEY, experimentIds.join(','));
-    } catch (e) {
-      user().error(TAG, 'Failed to save experiments to localStorage.');
     }
+  } catch (e) {
+    user().error(TAG, 'Failed to save experiments to localStorage.');
   }
 }
 
