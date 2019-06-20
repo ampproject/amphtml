@@ -354,7 +354,7 @@ For example, if you use [Visual Studio Code](https://code.visualstudio.com/), yo
 
 Alternatively, you can manually fix lint errors in your code by running:
 ```
-gulp lint --local-changes --fix
+gulp lint --local_changes --fix
 ```
 
 # Testing your changes

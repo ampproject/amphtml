@@ -131,7 +131,7 @@ function runLinter(filePath, stream, options) {
               colors.yellow('NOTE 1:'),
               'You may be able to automatically fix some of these warnings ' +
                 '/ errors by running',
-              colors.cyan('gulp lint --local-changes --fix'),
+              colors.cyan('gulp lint --local_changes --fix'),
               'from your local branch.'
             );
             log(
@@ -215,11 +215,22 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
+  // TODO(amp-infra): Remove this warning after a few weeks.
+  if (argv['local-changes']) {
+    log(
+      colors.yellow('WARNING:'),
+      'The',
+      colors.cyan('--local-changes'),
+      'flag has been renamed to',
+      colors.cyan('--local_changes')
+    );
+    return Promise.resolve();
+  }
   if (argv.files) {
     setFilesToLint(argv.files.split(','));
   } else if (
     !eslintRulesChanged() &&
-    (process.env.LOCAL_PR_CHECK || argv['local-changes'])
+    (process.env.LOCAL_PR_CHECK || argv.local_changes)
   ) {
     const jsFiles = jsFilesChanged();
     if (jsFiles.length == 0) {
@@ -241,6 +252,6 @@ lint.description = 'Validates against Google Closure Linter';
 lint.flags = {
   'watch': '  Watches for changes in files, validates against the linter',
   'fix': '  Fixes simple lint errors (spacing etc)',
-  'local-changes': '  Lints just the changes commited to the local branch',
+  'local_changes': '  Lints just the files changed in the local branch',
   'quiet': '  Suppress warnings from outputting',
 };
