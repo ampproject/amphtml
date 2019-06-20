@@ -707,9 +707,17 @@ export class AmpList extends AMP.BaseElement {
       ? elementOrElements
       : [elementOrElements]);
 
-    // "no": Always skip binding update.
+    // binding=no: Always skip render-blocking update.
     const binding = this.element.getAttribute('binding');
     if (binding === 'no') {
+      return Promise.resolve(elements);
+    }
+
+    // Early out if elements contain no bindings.
+    const hasBindings = elements.some(
+      el => !!el.querySelector('[i-amphtml-binding]')
+    );
+    if (!hasBindings) {
       return Promise.resolve(elements);
     }
 
@@ -725,9 +733,10 @@ export class AmpList extends AMP.BaseElement {
         .then(() => elements, () => elements);
     };
 
-    // "refresh": Do _not_ block on retrieval of the Bind service before the
-    // first mutation (AMP.setState).
+    // binding=refresh: Only do render-blocking update after initial render.
     if (binding === 'refresh') {
+      // Bind service must be available after first mutation, so don't
+      // wait on the async service getter.
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
         return updateWith(this.bind_);
       } else {
@@ -740,8 +749,8 @@ export class AmpList extends AMP.BaseElement {
         return Promise.resolve(elements);
       }
     }
-    // "always" (default): Wait for Bind to scan for and evalute any bindings
-    // in the newly rendered `elements`.
+    // binding=always (default): Wait for amp-bind to download and always
+    // do render-blocking update.
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
         return updateWith(bind);
