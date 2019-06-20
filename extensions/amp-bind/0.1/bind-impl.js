@@ -412,7 +412,7 @@ export class Bind {
    * Removes bindings from `removedElements` and adds new bindings in
    * `addedElements`.
    *
-   * If `options.apply` is true, evaluates and applies changes to
+   * If `options.update` is true, evaluates and applies changes to
    * `addedElements` after adding new bindings.
    *
    * If `options.fast` is true, uses a faster scan method that requires
@@ -457,7 +457,7 @@ export class Bind {
       : this.slowScan_(addedElements, removedElements);
 
     return rescanPromise.then(() => {
-      if (options.apply) {
+      if (options.update) {
         return this.evaluate_().then(results =>
           this.applyElements_(results, addedElements)
         );
