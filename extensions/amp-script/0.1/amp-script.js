@@ -35,7 +35,7 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {upgrade} from '@ampproject/worker-dom/dist/amp.main.mjs';
+import {upgrade} from '@ampproject/worker-dom/dist/amp/main.mjs';
 
 /** @const {string} */
 const TAG = 'amp-script';
