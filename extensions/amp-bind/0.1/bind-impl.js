@@ -454,7 +454,7 @@ export class Bind {
 
     const rescanPromise = options.fast
       ? this.fastScan_(addedElements, removedElements)
-      : this.removeThenAdd_(removedElements, addedElements, 'rescan.slow');
+      : this.slowScan_(addedElements, removedElements);
 
     return rescanPromise.then(() => {
       if (options.apply) {
@@ -472,42 +472,36 @@ export class Bind {
    * @private
    */
   fastScan_(addedElements, removedElements) {
-    /** @return {!Promise<number>} */
-    const add = () => {
-      if (this.numberOfBindings() > this.maxNumberOfBindings_) {
-        this.emitMaxBindingsExceededError_();
-        return Promise.resolve(0);
-      }
+    // Sync remove bindings from internal state first, but don't chain on
+    // returned promise (worker message) as an optimization.
+    const removePromise = this.removeBindingsForNodes_(removedElements);
 
-      // Scan `addedElements` for bindings.
-      const bindings = [];
-      const elementsToScan = addedElements.slice();
-      addedElements.forEach(el => {
-        const children = el.querySelectorAll('[i-amphtml-binding]');
-        Array.prototype.push.apply(elementsToScan, children);
-      });
-      elementsToScan.forEach(el => {
-        this.scanElement_(el, Number.POSITIVE_INFINITY, bindings);
-      });
-
-      if (bindings.length > 0) {
-        return this.sendBindingsToWorker_(bindings);
-      } else {
-        return Promise.resolve(0);
-      }
-    };
-
-    return add().then(added => {
-      // Don't return/chain this promise as an optimization.
-      this.removeBindingsForNodes_(removedElements).then(removed => {
-        dev().info(
-          TAG,
-          'rescan.fast: delta=%s, total=%s',
-          added - removed,
-          this.numberOfBindings()
-        );
-      });
+    // Scan `addedElements` for bindings.
+    const bindings = [];
+    const elementsToScan = addedElements.slice();
+    addedElements.forEach(el => {
+      const children = el.querySelectorAll('[i-amphtml-binding]');
+      Array.prototype.push.apply(elementsToScan, children);
     });
+    elementsToScan.forEach(el => {
+      const quota = this.maxNumberOfBindings_ - this.numberOfBindings();
+      this.scanElement_(el, quota, bindings);
+    });
+
+    removePromise.then(removed => {
+      dev().info(
+        TAG,
+        'rescan.fast: delta=%s, total=%s',
+        bindings.length - removed,
+        this.numberOfBindings()
+      );
+    });
+
+    if (bindings.length > 0) {
+      return this.sendBindingsToWorker_(bindings);
+    } else {
+      return Promise.resolve();
+    }
   }
 
   /**
@@ -1520,7 +1514,7 @@ export class Bind {
       return;
     }
     dev().info(TAG, 'dom_update:', target);
-    this.removeThenAdd_([target], [target], 'dom_update.end').then(() => {
+    this.slowScan_([target], [target], 'dom_update.end').then(() => {
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
   }
@@ -1529,18 +1523,18 @@ export class Bind {
    * Removes bindings for nodes in `remove`, then scans for bindings in `add`.
    * Return promise that resolves upon completion with struct containing number
    * of removed and added bindings.
-   * @param {!Array<!Node>} remove
-   * @param {!Array<!Node>} add
+   * @param {!Array<!Node>} addedNodes
+   * @param {!Array<!Node>} removedNodes
    * @param {string=} label
    * @return {!Promise}
    * @private
    */
-  removeThenAdd_(remove, add, label = 'removeThenAdd') {
+  slowScan_(addedNodes, removedNodes, label = 'rescan.slow') {
     let removed = 0;
-    return this.removeBindingsForNodes_(remove)
+    return this.removeBindingsForNodes_(removedNodes)
       .then(r => {
         removed = r;
-        return this.addBindingsForNodes_(add);
+        return this.addBindingsForNodes_(addedNodes);
       })
       .then(added => {
         dev().info(

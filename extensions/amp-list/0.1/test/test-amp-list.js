@@ -930,22 +930,29 @@ describes.repeated(
               element.setAttribute('binding', 'refresh');
             });
 
-            it('should not call rescan() before FIRST_MUTATE', function*() {
+            it('should rescan() with {update: false} before FIRST_MUTATE', async () => {
               const output = [doc.createElement('div')];
               expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
-              expect(bind.rescan).to.not.have.been.called;
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(output, [], {
+                update: false,
+                fast: true,
+              });
             });
 
-            it('should call rescan() after FIRST_MUTATE', function*() {
+            it('should rescan() with {update: true} after FIRST_MUTATE', async () => {
               bind.signals = () => {
                 return {get: name => name === 'FIRST_MUTATE'};
               };
               const output = [doc.createElement('div')];
               expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
+              await list.layoutCallback();
               expect(bind.rescan).to.have.been.calledOnce;
-              expect(bind.rescan).calledWithExactly(output, [list.container_]);
+              expect(bind.rescan).calledWithExactly(output, [list.container_], {
+                update: true,
+                fast: true,
+              });
             });
           });
 
@@ -954,10 +961,10 @@ describes.repeated(
               element.setAttribute('binding', 'no');
             });
 
-            it('should not call rescan()', function*() {
+            it('should not rescan()', async () => {
               const output = [doc.createElement('div')];
               expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
+              await list.layoutCallback();
               expect(bind.rescan).to.not.have.been.called;
             });
           });
