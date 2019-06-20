@@ -41,7 +41,6 @@ import {AdvancementMode, getAnalyticsService} from './story-analytics';
 import {AmpEvents} from '../../../src/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBackground} from './background';
-import {AmpStoryBlingLink} from './amp-story-bling-link';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
@@ -2700,7 +2699,6 @@ export class AmpStory extends AMP.BaseElement {
 AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story', AmpStory, CSS);
   AMP.registerElement('amp-story-access', AmpStoryAccess);
-  AMP.registerElement('amp-story-bling-link', AmpStoryBlingLink);
   AMP.registerElement('amp-story-bookend', AmpStoryBookend);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);

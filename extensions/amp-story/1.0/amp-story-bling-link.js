@@ -18,46 +18,42 @@
  * @fileoverview Bling link component that turns into a tooltip when clicked.
  */
 
-import {Layout} from '../../../src/layout';
 import {htmlFor} from '../../../src/static-template';
 
-export class AmpStoryBlingLink extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-  }
+/**
+ * Links that are bling links.
+ * @const {string}
+ */
+export const BLING_LINK_SELECTOR = 'a.i-amphtml-story-bling-link';
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.FIXED;
-  }
-
-  /** @override */
-  buildCallback() {
-    this.addPulseElement_();
-    this.addIconElement_();
-  }
-
+export class AmpStoryBlingLink {
   /**
    * Adds icon as a child element of <amp-story-bling-link>
-   * @private
+   * @param {!Element} element
    */
-  addIconElement_() {
-    const iconEl = htmlFor(this.element)`
+  static addIconElement(element) {
+    if (element.querySelector('.i-amphtml-story-bling-link-circle')) {
+      return;
+    }
+
+    const iconEl = htmlFor(element)`
       <div class="i-amphtml-story-bling-link-circle">
-        <i class="i-amphtml-story-bling-link-icon i-amphtml-story-bling-link-shopping-cart">
-        </i>
+        <i class="i-amphtml-story-bling-link-icon i-amphtml-story-bling-link-shopping-cart"></i>
       </div>`;
-    this.element.appendChild(iconEl);
+    element.appendChild(iconEl);
   }
 
   /**
    * Adds pulse as a child element of <amp-story-bling-link>
-   * @private
+   * @param {!Element} element
    */
-  addPulseElement_() {
-    const pulseEl = htmlFor(this.element)`
+  static addPulseElement(element) {
+    if (element.querySelector('.i-amphtml-story-bling-link-pulse')) {
+      return;
+    }
+
+    const pulseEl = htmlFor(element)`
       <div class="i-amphtml-story-bling-link-pulse"></div>`;
-    this.element.appendChild(pulseEl);
+    element.appendChild(pulseEl);
   }
 }

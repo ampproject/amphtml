@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- .amp-story-bling-link {
+ .i-amphtml-story-bling-link {
   position: relative !important;
   width: 90px !important;
   height: 90px !important;
@@ -48,12 +48,11 @@ amp-story-page[active] .i-amphtml-story-bling-link-pulse {
   }
 }
 
-.amp-story-bling-link:hover .i-amphtml-story-bling-link-circle {
+.i-amphtml-story-bling-link:hover .i-amphtml-story-bling-link-circle {
   background: rgba(255, 255, 255, 0.4) !important;
-  cursor: pointer !important;
 }
 
-.amp-story-bling-link:hover .i-amphtml-story-bling-link-pulse {
+.i-amphtml-story-bling-link:hover .i-amphtml-story-bling-link-pulse {
   animation: none !important;
 }
 
