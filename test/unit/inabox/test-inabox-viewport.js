@@ -39,6 +39,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let onResizeCallback;
   let topWindowObservable;
   let measureSpy;
+  let requestMeasureSpy;
 
   function stubIframeClientMakeRequest(
     requestType,
@@ -94,10 +95,12 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     installPlatformService(win);
     binding = new ViewportBindingInabox(win);
     measureSpy = sandbox.spy();
+    requestMeasureSpy = sandbox.spy();
     element = {
       getBoundingClientRect() {
         return layoutRectLtwh(0, 0, 100, 100);
       },
+      requestMeasure: requestMeasureSpy,
       measure: measureSpy,
     };
     sandbox
@@ -174,6 +177,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(onScrollCallback).to.not.be.called;
       expect(onResizeCallback).to.be.calledOnce;
       expect(measureSpy).to.be.calledOnce;
+      expect(requestMeasureSpy).to.be.calledOnce;
       expect(binding.getLayoutRect(element)).to.deep.equal(
         layoutRectLtwh(10, 20, 100, 100)
       );
@@ -188,6 +192,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(onScrollCallback).to.be.calledOnce;
       expect(onResizeCallback).to.not.be.called;
       expect(measureSpy).to.not.be.called;
+      expect(requestMeasureSpy).to.not.be.called;
       expect(binding.getLayoutRect(element)).to.deep.equal(
         layoutRectLtwh(10, 20, 100, 100)
       );
@@ -202,6 +207,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(onScrollCallback).to.not.be.called;
       expect(onResizeCallback).to.be.calledOnce;
       expect(measureSpy).to.not.be.called;
+      expect(requestMeasureSpy).to.not.be.called;
       expect(binding.getLayoutRect(element)).to.deep.equal(
         layoutRectLtwh(10, 20, 100, 100)
       );
@@ -220,6 +226,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(onScrollCallback).to.not.be.called;
       expect(onResizeCallback).to.not.be.called;
       expect(measureSpy).to.be.calledOnce;
+      expect(requestMeasureSpy).to.be.calledOnce;
       expect(binding.getLayoutRect(element)).to.deep.equal(
         layoutRectLtwh(20, 20, 100, 100)
       );
@@ -231,6 +238,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       .fill(undefined)
       .map(() => ({
         measure: sandbox.spy(),
+        requestMeasure: sandbox.spy(),
       }));
 
     sandbox

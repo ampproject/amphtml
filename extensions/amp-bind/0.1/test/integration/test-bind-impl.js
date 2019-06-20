@@ -141,6 +141,11 @@ function waitForEvent(env, name) {
   });
 }
 
+const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
+  type: AmpEvents.FORM_VALUE_CHANGE,
+  bubbles: true,
+};
+
 describe
   .configure()
   .ifChrome()
@@ -1137,6 +1142,105 @@ describe
           // performing AMP.setState({foo: ...}) should not change it.
           yield onBindReadyAndSetState(env, bind, {foo: 'bar'});
           expect(foo.textContent).to.not.equal('bar');
+        });
+
+        describe('AmpEvents.FORM_VALUE_CHANGE', () => {
+          it('should dispatch FORM_VALUE_CHANGE on <input [value]> changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[value]="foo"',
+              'input'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
+              expect(spy).to.have.been.calledOnce;
+              expect(spy).calledWithMatch(FORM_VALUE_CHANGE_EVENT_ARGUMENTS);
+            });
+          });
+
+          it('should dispatch FORM_VALUE_CHANGE on <input [checked]> changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[checked]="foo"',
+              'input'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'checked'}).then(
+              () => {
+                expect(spy).to.have.been.calledOnce;
+                expect(spy).calledWithMatch(FORM_VALUE_CHANGE_EVENT_ARGUMENTS);
+              }
+            );
+          });
+
+          it('should dispatch FORM_VALUE_CHANGE at parent <select> on <option [selected]> changes', () => {
+            const select = env.win.document.createElement('select');
+            select.innerHTML = `
+              <optgroup>
+                <option [selected]="foo"></option>
+              </optgroup>
+            `;
+            container.appendChild(select);
+
+            const spy = sandbox.spy(select, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'selected'}).then(
+              () => {
+                expect(spy).to.have.been.calledOnce;
+                expect(spy).calledWithMatch({
+                  type: AmpEvents.FORM_VALUE_CHANGE,
+                  bubbles: true,
+                });
+              }
+            );
+          });
+
+          it('should dispatch FORM_VALUE_CHANGE on <textarea [text]> changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[text]="foo"',
+              'textarea'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
+              expect(spy).to.have.been.calledOnce;
+              expect(spy).calledWithMatch({
+                type: AmpEvents.FORM_VALUE_CHANGE,
+                bubbles: true,
+              });
+            });
+          });
+
+          it('should NOT dispatch FORM_VALUE_CHANGE on other attributes changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[name]="foo"',
+              'input'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'name'}).then(() => {
+              expect(spy).to.not.have.been.called;
+            });
+          });
+
+          it('should NOT dispatch FORM_VALUE_CHANGE on other element changes', () => {
+            const element = createElement(env, container, '[text]="foo"', 'p');
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'selected'}).then(
+              () => {
+                expect(spy).to.not.have.been.called;
+              }
+            );
+          });
         });
       }
     ); // in single ampdoc

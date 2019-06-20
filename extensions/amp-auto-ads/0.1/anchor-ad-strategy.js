@@ -83,9 +83,9 @@ export class AnchorAdStrategy {
    * @private
    */
   isFilledAnchorAdEnabled_() {
-    return (this.configObj_['optInStatus'] || []).includes(
-      OptInStatus.OPT_IN_STATUS_ANCHOR_ADS
-    );
+    return user()
+      .assertArray(this.configObj_['optInStatus'] || [])
+      .includes(OptInStatus.OPT_IN_STATUS_ANCHOR_ADS);
   }
 
   /**

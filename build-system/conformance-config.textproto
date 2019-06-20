@@ -258,6 +258,7 @@ requirement: {
   whitelist: 'src/web-worker/web-worker.js'
   # Allowing violations in ads code for now.
   # We would have to fix this to property obfuscated the 3p frame code.
+  whitelist: '3p/iframe-messaging-client.js'
   whitelist: 'ads/google/deprecated_doubleclick.js'
   whitelist: 'ads/google/imaVideo.js'
 }
@@ -348,10 +349,11 @@ requirement: {
   whitelist: 'extensions/amp-date-picker/0.1/dates-list.js'
 }
 
-requirement: {
-  type: BANNED_PROPERTY_CALL
-  error_message: 'ChildNode.p.after() is unusual. Please use Node.p.insertBefore()'
-  value: 'Element.prototype.after'
-  value: 'DocumentType.prototype.after'
-  value: 'CharacterData.prototype.after'
-}
+# TODO(rsimha): Reenable when we move RRule to a node module.
+# requirement: {
+  # type: BANNED_PROPERTY_CALL
+  # error_message: 'ChildNode.p.after() is unusual. Please use Node.p.insertBefore()'
+  # value: 'Element.prototype.after'
+  # value: 'DocumentType.prototype.after'
+  # value: 'CharacterData.prototype.after'
+# }
