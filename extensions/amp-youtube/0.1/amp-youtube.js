@@ -81,6 +81,12 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?boolean}  */
     this.muted_ = false;
 
+    /** @private {?boolean}  */
+    this.isLoop_ = false;
+
+    /** @private {?boolean}  */
+    this.isPlaylist_ = false;
+
     /** @private {?Element} */
     this.iframe_ = null;
 
@@ -236,11 +242,12 @@ class AmpYoutube extends AMP.BaseElement {
 
     // In the case of a playlist, looping is delegated to the Youtube player
     // instead of AMP manually looping the video through the Youtube API
-    const hasLoop =
+    this.isLoop_ =
       element.hasAttribute('loop') ||
       ('loop' in params && params['loop'] == '1');
-    if (hasLoop) {
-      if ('playlist' in params) {
+    this.isPlaylist_ = 'playlist' in params;
+    if (this.isLoop_) {
+      if (this.isPlaylist_) {
         // Use native looping for playlists
         params['loop'] = '1';
       } else if ('loop' in params) {
@@ -274,12 +281,7 @@ class AmpYoutube extends AMP.BaseElement {
       this.handleYoutubeMessage_.bind(this)
     );
 
-    const params = getDataParamsFromAttributes(this.element);
-    const hasLoop =
-      this.element.hasAttribute('loop') ||
-      ('loop' in params && params['loop'] == '1');
-    const isPlaylist = 'playlist' in params;
-    if (hasLoop && !isPlaylist) {
+    if (this.isLoop_ && !this.isPlaylist_) {
       this.unlistenLooping_ = listen(
         this.element,
         VideoEvents.ENDED,
