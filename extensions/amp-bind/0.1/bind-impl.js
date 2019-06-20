@@ -842,12 +842,8 @@ export class Bind {
       }
       const element = dev().assertElement(node);
       const remainingQuota = limit - bindings.length;
-      // Ignore elements rendered by amp-mustache which have [i-amphtml-binding]
-      // attribute.
-      if (!element.hasAttribute('i-amphtml-binding')) {
-        if (this.scanElement_(element, remainingQuota, bindings)) {
-          limitExceeded = true;
-        }
+      if (this.scanElement_(element, remainingQuota, bindings)) {
+        limitExceeded = true;
       }
       return !walker.nextNode() || limitExceeded;
     };
