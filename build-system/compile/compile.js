@@ -371,6 +371,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
       compilerOptions.jscomp_error.push(
+        'conformanceViolations',
         'checkTypes',
         'accessControls',
         'const',
