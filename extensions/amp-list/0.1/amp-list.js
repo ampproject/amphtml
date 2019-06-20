@@ -424,7 +424,10 @@ export class AmpList extends AMP.BaseElement {
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {
           const removed = toArray(this.container_.children);
-          this.bind_.rescan(/* added */ [], removed, {'fast': true, 'update': false});
+          this.bind_.rescan(/* added */ [], removed, {
+            'fast': true,
+            'update': false,
+          });
         }
         removeChildren(dev().assertElement(this.container_));
       });
