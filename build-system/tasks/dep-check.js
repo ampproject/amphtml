@@ -29,7 +29,6 @@ const source = require('vinyl-source-stream');
 const through = require('through2');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {css} = require('./css');
-const {devDependencies} = require('./helpers');
 const {isTravisBuild} = require('../travis');
 
 const root = process.cwd();
@@ -208,9 +207,9 @@ function getGraph(entryModule) {
   // we're not running browserify twice on travis.
   const bundler = browserify(entryModule, {debug: true}).transform(babelify, {
     compact: false,
-    // Transform "node_modules/", but ignore devDependencies.
+    // Transform files in node_modules since deps use ES6 export.
+    // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
     global: true,
-    ignore: devDependencies(),
   });
 
   bundler.pipeline.get('deps').push(

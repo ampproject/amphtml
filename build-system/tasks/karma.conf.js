@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const {devDependencies} = require('./helpers');
 const {gitCommitterEmail} = require('../git');
 const {isTravisBuild, travisJobNumber} = require('../travis');
 
@@ -69,15 +68,7 @@ module.exports = {
     debug: true,
     basedir: __dirname + '/../../',
     transform: [
-      [
-        'babelify',
-        {
-          // Transform "node_modules/", but ignore devDependencies (on Travis).
-          'global': isTravisBuild(),
-          'ignore': devDependencies(),
-          'sourceMapsAbsolute': true,
-        },
-      ],
+      ['babelify', {'global': isTravisBuild(), 'sourceMapsAbsolute': true}],
     ],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
