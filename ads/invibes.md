@@ -28,7 +28,7 @@ limitations under the License.
 
 ## Configuration
 
-For configuration semantics, please contact [Invibes](`publisher-team@invibes.com`).
+For configuration semantics, please contact [Invibes](https://www.invibes.com/#section-contact-email)
 
 Supported parameters:
 
