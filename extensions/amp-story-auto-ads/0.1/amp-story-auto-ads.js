@@ -807,6 +807,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   setVisibleAttribute_(adElement) {
     const friendlyIframeEmbed = adElement.querySelector('iframe');
+    if (!friendlyIframeEmbed) {
+      return;
+    }
+
     const frameDoc =
       friendlyIframeEmbed.contentDocument || friendlyIframeEmbed.win.document;
     const {body} = frameDoc;
