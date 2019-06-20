@@ -18,6 +18,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
 import {BindValidator} from './bind-validator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
+import {Deferred} from '../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
@@ -215,6 +216,9 @@ export class Bind {
       .then(root => {
         return this.initialize_(root);
       });
+
+    /** @const @private {!Deferred} */
+    this.addMacrosDeferred_ = new Deferred();
 
     /** @private {Promise} */
     this.setStatePromise_ = null;
@@ -421,11 +425,13 @@ export class Bind {
    * complete within `options.timeout` (default=2000), promise is rejected.
    */
   rescan(addedElements, removedElements, options = {}) {
-    // Don't wait for init in fast mode. Normally, there's a risk of duplicate
-    // bindings due to race with init, but we currently skip these elements
-    // during initial tree walk via TREEWALKER_OPTOUT_TAGS.
+    // Don't wait for full initization in fast mode. Normally, there's a risk
+    // of duplicate bindings due to race with initial DOM scan, but we skip
+    // these elements during tree walk via TREEWALKER_OPTOUT_TAGS.
     // TODO(choumx): This assumes that fast mode is only used by amp-list.
-    const waitFor = options.fast ? Promise.resolve() : this.initializePromise_;
+    const waitFor = options.fast
+      ? this.addMacrosDeferred_.promise
+      : this.initializePromise_;
 
     return waitFor.then(() =>
       this.timer_.timeoutPromise(
@@ -490,6 +496,7 @@ export class Bind {
         return Promise.resolve(0);
       }
     }
+
     return add().then(added => {
       // Don't return/chain this promise as an optimization.
       this.removeBindingsForNodes_(removedElements).then(removed => {
@@ -648,8 +655,8 @@ export class Bind {
    * @private
    */
   addMacros_() {
-    // TODO(choumx, #17194): Query selector can miss elements when the body
-    // is streamed. This should be done at the custom element level.
+    // TODO(choumx, #17194): One-time query selector can miss dynamically
+    // created elements. Should do what <amp-state> does.
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros = /** @type {!Array<!BindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
@@ -674,6 +681,7 @@ export class Bind {
             elements[i]
           );
         });
+        this.addMacrosDeferred_.resolve();
         return macros.length;
       });
     }
