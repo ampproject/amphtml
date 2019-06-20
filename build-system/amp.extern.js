@@ -691,7 +691,7 @@ let BindEvaluateExpressionResultDef;
 
 /**
  * Options for Bind.rescan().
- * @typedef {{apply: boolean|undefined, fast: boolean|undefined, timeout: number|undefined}}
+ * @typedef {{apply: (boolean|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
  */
 let BindRescanOptionsDef;
 

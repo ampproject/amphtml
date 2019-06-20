@@ -730,7 +730,9 @@ export class AmpList extends AMP.BaseElement {
       } else {
         // On first render, scan but don't apply.
         Services.bindForDocOrNull(this.element).then(bind => {
-          updateWith(bind, /* apply */ false);
+          if (bind) {
+            updateWith(bind, /* apply */ false);
+          }
         });
         return Promise.resolve(elements);
       }

@@ -421,10 +421,12 @@ export class Bind {
    * complete within `options.timeout` (default=2000), promise is rejected.
    */
   rescan(addedElements, removedElements, options = {}) {
-    // Don't wait for initialization in fast mode.
-    // It won't result in duplicate bindings because the initial tree walk
-    // ignores elements with [i-amphtml-binding] attribute.
+    // Don't wait for init in fast mode. Normally, there's a risk of duplicate
+    // bindings due to race with init, but we currently skip these elements
+    // during initial tree walk via TREEWALKER_OPTOUT_TAGS.
+    // TODO(choumx): This assumes that fast mode is only used by amp-list.
     const waitFor = options.fast ? Promise.resolve() : this.initializePromise_;
+
     return waitFor.then(() =>
       this.timer_.timeoutPromise(
         options.timeout || 2000,
@@ -446,15 +448,9 @@ export class Bind {
 
     const rescanPromise = options.fast
       ? this.fastScan_(addedElements, removedElements)
-      : this.removeThenAdd_(removedElements, addedElements);
+      : this.removeThenAdd_(removedElements, addedElements, 'rescan.slow');
 
-    return rescanPromise.then(delta => {
-      dev().info(
-        TAG,
-        'rescan.end: delta=%s, total=%s',
-        delta,
-        this.numberOfBindings()
-      );
+    return rescanPromise.then(() => {
       if (options.apply) {
         return this.evaluate_().then(results =>
           this.applyElements_(results, addedElements)
@@ -466,7 +462,7 @@ export class Bind {
   /**
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @return {!Promise<number>}
+   * @return {!Promise}
    * @private
    */
   fastScan_(addedElements, removedElements) {
@@ -494,8 +490,14 @@ export class Bind {
       }
     }
     return add().then(added => {
+      // Don't return/chain this promise as an optimization.
       this.removeBindingsForNodes_(removedElements).then(removed => {
-        return added - removed;
+        dev().info(
+          TAG,
+          'rescan.fast: delta=%s, total=%s',
+          added - removed,
+          this.numberOfBindings()
+        );
       });
     });
   }
@@ -1506,13 +1508,7 @@ export class Bind {
       return;
     }
     dev().info(TAG, 'dom_update:', target);
-    this.removeThenAdd_([target], [target]).then(delta => {
-      dev().info(
-        TAG,
-        'dom_update.end: delta=%s, total=%s',
-        delta,
-        this.numberOfBindings()
-      );
+    this.removeThenAdd_([target], [target], 'dom_update.end').then(() => {
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
   }
@@ -1523,10 +1519,11 @@ export class Bind {
    * of removed and added bindings.
    * @param {!Array<!Node>} remove
    * @param {!Array<!Node>} add
-   * @return {!Promise<number>}
+   * @param {string=} label
+   * @return {!Promise}
    * @private
    */
-  removeThenAdd_(remove, add) {
+  removeThenAdd_(remove, add, label = 'removeThenAdd') {
     let removed = 0;
     return this.removeBindingsForNodes_(remove)
       .then(r => {
@@ -1534,7 +1531,13 @@ export class Bind {
         return this.addBindingsForNodes_(add);
       })
       .then(added => {
-        return added - removed;
+        dev().info(
+          TAG,
+          '%s: delta=%s, total=%s',
+          label,
+          added - removed,
+          this.numberOfBindings()
+        );
       });
   }
 
