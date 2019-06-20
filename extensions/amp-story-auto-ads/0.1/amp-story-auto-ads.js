@@ -807,6 +807,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   setVisibleAttribute_(adElement) {
     const friendlyIframeEmbed = adElement.querySelector('iframe');
+    // TODO(calebcordry): Properly handle visible trigger for custom ads.
     if (!friendlyIframeEmbed) {
       return;
     }
