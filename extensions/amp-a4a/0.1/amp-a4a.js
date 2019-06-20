@@ -1540,12 +1540,10 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Shared functionality for cross-domain iframe-based rendering methods.
    * @param {!JsonObject<string, string>} attributes The attributes of the iframe.
-   * @param {boolean} letCreativeTriggerRenderStart Whether amp-ad-xorigin should let
-   *    the creative trigger render-start, or simply trigger it itself.
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
-  iframeRenderHelper_(attributes, letCreativeTriggerRenderStart) {
+  iframeRenderHelper_(attributes) {
     const mergedAttributes = Object.assign(
       attributes,
       dict({
@@ -1582,7 +1580,7 @@ export class AmpA4A extends AMP.BaseElement {
     const frameLoadPromise = this.xOriginIframeHandler_.init(
       this.iframe,
       /* opt_isA4A */ true,
-      letCreativeTriggerRenderStart
+      this.letCreativeTriggerRenderStart()
     );
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(
@@ -1623,8 +1621,7 @@ export class AmpA4A extends AMP.BaseElement {
         'name': JSON.stringify(
           getContextMetadata(this.win, this.element, this.sentinel)
         ),
-      }),
-      this.letCreativeTriggerRenderStart()
+      })
     );
   }
 
@@ -1700,10 +1697,7 @@ export class AmpA4A extends AMP.BaseElement {
           `${this.safeframeVersion};${creative.length};${creative}` +
           `${contextMetadata}`;
       }
-      return this.iframeRenderHelper_(
-        dict({'src': srcPath, 'name': name}),
-        false
-      );
+      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
 
