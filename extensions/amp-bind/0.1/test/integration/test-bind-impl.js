@@ -115,11 +115,11 @@ function onBindReadyAndSetStateWithExpression(env, bind, expression, scope) {
  * @param {!Array<!Element>} removed
  * @return {!Promise}
  */
-function onBindReadyAndScanAndApply(env, bind, added, removed) {
+function onBindReadyAndRescan(env, bind, added, removed) {
   return bind
     .initializePromiseForTesting()
     .then(() => {
-      return bind.scanAndApply(added, removed);
+      return bind.rescan(added, removed, {apply: true, fast: true});
     })
     .then(() => {
       env.flushVsync();
@@ -1116,7 +1116,7 @@ describe
           });
         });
 
-        it('should scanAndApply()', function*() {
+        it('should rescan()', function*() {
           const foo = createElement(env, container, '[text]="foo"');
           yield onBindReadyAndSetState(env, bind, {foo: 'foo'});
           expect(foo.textContent).to.equal('foo');
@@ -1130,7 +1130,7 @@ describe
           );
           // Required marker attribute for elements with bindings.
           onePlusOne.setAttribute('i-amphtml-binding', '');
-          yield onBindReadyAndScanAndApply(
+          yield onBindReadyAndRescan(
             env,
             bind,
             /* added */ [onePlusOne],

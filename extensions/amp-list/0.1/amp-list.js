@@ -424,7 +424,7 @@ export class AmpList extends AMP.BaseElement {
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {
           const removed = toArray(this.container_.children);
-          this.bind_.scanAndApply(/* added */ [], removed);
+          this.bind_.rescan(/* added */ [], removed, {'apply': false});
         }
         removeChildren(dev().assertElement(this.container_));
       });
@@ -703,24 +703,35 @@ export class AmpList extends AMP.BaseElement {
     const elements = /** @type {!Array<!Element>} */ (isArray(elementOrElements)
       ? elementOrElements
       : [elementOrElements]);
-    const binding = this.element.getAttribute('binding');
+
     // "no": Always skip binding update.
+    const binding = this.element.getAttribute('binding');
     if (binding === 'no') {
       return Promise.resolve(elements);
     }
-    const updateWith = bind => {
+
+    /**
+     * @param {!../../../extensions/amp-bind/0.1/bind-impl.Bind} bind
+     * @param {boolean=} apply
+     */
+    function updateWith(bind, apply = true) {
       const removedElements = append ? [] : [this.container_];
       // Forward elements to chained promise on success or failure.
       return bind
-        .scanAndApply(elements, removedElements)
+        .rescan(elements, removedElements, {fast: true, apply})
         .then(() => elements, () => elements);
-    };
+    }
+
     // "refresh": Do _not_ block on retrieval of the Bind service before the
     // first mutation (AMP.setState).
     if (binding === 'refresh') {
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
         return updateWith(this.bind_);
       } else {
+        // On first render, scan but don't apply.
+        Services.bindForDocOrNull(this.element).then(bind => {
+          updateWith(bind, /* apply */ false);
+        });
         return Promise.resolve(elements);
       }
     }

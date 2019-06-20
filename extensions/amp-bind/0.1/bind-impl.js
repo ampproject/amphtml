@@ -41,6 +41,7 @@ import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {whenDocumentReady} from '../../../src/document-ready';
 
+/** @const {string} */
 const TAG = 'amp-bind';
 
 /**
@@ -95,6 +96,16 @@ const BIND_ONLY_ATTRIBUTES = map({
   'AMP-LIST': ['state', 'is-layout-container'],
   'AMP-SELECTOR': ['selected'],
 });
+
+/**
+ * List of element tag names that should opt-out of tree walk DOM scanning.
+ * @const {!Array<string>}
+ */
+const TREEWALKER_OPTOUT_TAGS = [
+  // <amp-list> has a custom integration that uses rescan() with {fast: true},
+  // which is more performant than normal tree walker approach.
+  'AMP-LIST',
+];
 
 /**
  * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from
@@ -394,92 +405,99 @@ export class Bind {
   }
 
   /**
-   * Removes bindings from `removed` elements and scans `added` for bindings.
-   * Then, evaluates all expressions and applies results to `added` elements.
-   * Does _not_ mutate any other elements.
+   * Removes bindings from `removedElements` and adds new bindings in
+   * `addedElements`.
    *
-   * Returned promise is resolved when all operations complete.
-   * If they don't complete within `timeout` ms, the promise is rejected.
+   * If `options.apply` is true, evaluates and applies changes to
+   * `addedElements` after adding new bindings.
    *
-   * Note that elements with bindings must have attribute `i-amphtml-binding`.
+   * If `options.fast` is true, uses a faster scan method that requires
+   * elements with bindings to have the attribute `i-amphtml-binding`.
    *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @param {number=} opt_timeout Timeout in milliseconds.
-   * @return {!Promise}
+   * @param {BindRescanOptionsDef=} options
+   * @return {!Promise} Resolved when all operations complete. If they don't
+   * complete within `options.timeout` (default=2000), promise is rejected.
    */
-  scanAndApply(addedElements, removedElements, opt_timeout) {
-    // TODO(choumx): Dependency on init may be removed if we skip elements
-    // with .i-amphtml-binding during tree walk and extract macro setup.
-    return this.initializePromise_.then(() => {
-      return this.rescan_(addedElements, removedElements, opt_timeout || 2000);
+  rescan(addedElements, removedElements, options = {}) {
+    // Don't wait for initialization in fast mode.
+    // It won't result in duplicate bindings because the initial tree walk
+    // ignores elements with [i-amphtml-binding] attribute.
+    const waitFor = options.fast ? Promise.resolve() : this.initializePromise_;
+    return waitFor.then(() =>
+      this.timer_.timeoutPromise(
+        options.timeout || 2000,
+        this.rescan_(addedElements, removedElements, options),
+        'Timed out waiting for amp-bind to rescan.'
+      )
+    );
+  }
+
+  /**
+   * @param {!Array<!Element>} addedElements
+   * @param {!Array<!Element>} removedElements
+   * @param {!BindRescanOptionsDef} options
+   * @return {!Promise}
+   * @private
+   */
+  rescan_(addedElements, removedElements, options) {
+    dev().info(TAG, 'rescan: ', addedElements, removedElements, options);
+
+    const rescanPromise = options.fast
+      ? this.fastScan_(addedElements, removedElements)
+      : this.removeThenAdd_(removedElements, addedElements);
+
+    return rescanPromise.then(delta => {
+      dev().info(
+        TAG,
+        'rescan.end: delta=%s, total=%s',
+        delta,
+        this.numberOfBindings()
+      );
+      if (options.apply) {
+        return this.evaluate_().then(results =>
+          this.applyElements_(results, addedElements)
+        );
+      }
     });
   }
 
   /**
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @param {number} timeout
-   * @return {!Promise}
+   * @return {!Promise<number>}
    * @private
    */
-  rescan_(addedElements, removedElements, timeout) {
-    dev().info(TAG, 'rescan:', addedElements, removedElements);
-    /**
-     * Helper function for cleaning up bindings in removed elements.
-     * @param {number} added
-     * @return {!Promise}
-     */
-    const cleanup = added => {
+  fastScan_(addedElements, removedElements) {
+    /** @return {!Promise<number>} */
+    function add() {
+      if (this.numberOfBindings() > this.maxNumberOfBindings_) {
+        this.emitMaxBindingsExceededError_();
+        return Promise.resolve(0);
+      }
+      // Scan `addedElements` for bindings.
+      const bindings = [];
+      const elementsToScan = addedElements.slice();
+      addedElements.forEach(el => {
+        const children = el.querySelectorAll('[i-amphtml-binding]');
+        Array.prototype.push.apply(elementsToScan, children);
+      });
+      elementsToScan.forEach(el => {
+        this.scanElement_(el, Number.POSITIVE_INFINITY, bindings);
+      });
+
+      if (bindings.length > 0) {
+        return this.sendBindingsToWorker_(bindings);
+      } else {
+        return Promise.resolve(0);
+      }
+    }
+    return add().then(added => {
       this.removeBindingsForNodes_(removedElements).then(removed => {
-        dev().info(
-          TAG,
-          '⤷',
-          'Δ:',
-          added - removed,
-          ', ∑:',
-          this.numberOfBindings()
-        );
+        return added - removed;
       });
-      return Promise.resolve();
-    };
-    // Early-out if max number of bindings has already been exceeded.
-    // This can happen since we purge old bindings in `removedElements`
-    // _after_ adding new ones (rather than before) as an optimization.
-    if (this.numberOfBindings() > this.maxNumberOfBindings_) {
-      this.emitMaxBindingsExceededError_();
-      return cleanup(0);
-    }
-    const bindings = [];
-    // Scan `addedElements` and their children for elements with bindings.
-    const elementsToScan = addedElements.slice();
-    addedElements.forEach(el => {
-      const children = el.querySelectorAll('[i-amphtml-binding]');
-      Array.prototype.push.apply(elementsToScan, children);
     });
-    elementsToScan.forEach(el => {
-      this.scanElement_(el, Number.POSITIVE_INFINITY, bindings);
-    });
-    const added = bindings.length;
-    // Early-out if there are no elements to add -- just clean up `removed`.
-    if (added === 0) {
-      return cleanup(0);
-    }
-    const promise = this.sendBindingsToWorker_(bindings)
-      .then(() => {
-        return this.evaluate_().then(results =>
-          this.applyElements_(results, addedElements)
-        );
-      })
-      .then(() => {
-        // Remove bindings at the end to reduce evaluation/apply latency.
-        cleanup(added);
-      });
-    return this.timer_.timeoutPromise(
-      timeout,
-      promise,
-      'Timed out waiting for amp-bind to process rendered template.'
-    );
   }
 
   /**
@@ -816,10 +834,18 @@ export class Bind {
       if (node.nodeType !== Node.ELEMENT_NODE) {
         return !walker.nextNode();
       }
+      // Skip subtree for opted-out tags.
+      if (TREEWALKER_OPTOUT_TAGS.includes(node.nodeName)) {
+        return !walker.nextSibling();
+      }
       const element = dev().assertElement(node);
       const remainingQuota = limit - bindings.length;
-      if (this.scanElement_(element, remainingQuota, bindings)) {
-        limitExceeded = true;
+      // Ignore elements rendered by amp-mustache which have [i-amphtml-binding]
+      // attribute.
+      if (!element.hasAttribute('i-amphtml-binding')) {
+        if (this.scanElement_(element, remainingQuota, bindings)) {
+          limitExceeded = true;
+        }
       }
       return !walker.nextNode() || limitExceeded;
     };
@@ -1474,13 +1500,19 @@ export class Bind {
    */
   onDomUpdate_(event) {
     const target = dev().assertElement(event.target);
-    // Skip amp-list since there's already a custom integration for it.
+    // TODO(choumx): Remove assumption of DOM structure of event target.
     const parent = target.parentNode;
-    if (parent && parent.tagName == 'AMP-LIST') {
+    if (parent && TREEWALKER_OPTOUT_TAGS.includes(parent.nodeName)) {
       return;
     }
     dev().info(TAG, 'dom_update:', target);
-    this.removeThenAdd_([target], [target]).then(() => {
+    this.removeThenAdd_([target], [target]).then(delta => {
+      dev().info(
+        TAG,
+        'dom_update.end: delta=%s, total=%s',
+        delta,
+        this.numberOfBindings()
+      );
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
   }
@@ -1491,7 +1523,7 @@ export class Bind {
    * of removed and added bindings.
    * @param {!Array<!Node>} remove
    * @param {!Array<!Node>} add
-   * @return {!Promise<{added: number, removed: number}>}
+   * @return {!Promise<number>}
    * @private
    */
   removeThenAdd_(remove, add) {
@@ -1502,15 +1534,7 @@ export class Bind {
         return this.addBindingsForNodes_(add);
       })
       .then(added => {
-        dev().info(
-          TAG,
-          '⤷',
-          'Δ:',
-          added - removed,
-          ', ∑:',
-          this.numberOfBindings()
-        );
-        return {added, removed};
+        return added - removed;
       });
   }
 

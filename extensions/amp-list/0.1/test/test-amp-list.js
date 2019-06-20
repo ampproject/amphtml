@@ -698,7 +698,7 @@ describes.repeated(
 
           beforeEach(() => {
             bind = {
-              scanAndApply: sandbox.stub().returns(Promise.resolve()),
+              rescan: sandbox.stub().returns(Promise.resolve()),
               signals: () => {
                 return {get: unusedName => false};
               },
@@ -824,8 +824,8 @@ describes.repeated(
                 'src': 'https://new.com/list.json',
               });
 
-              expect(bind.scanAndApply).to.be.calledTwice;
-              expect(bind.scanAndApply).to.be.calledWith([], sinon.match.array);
+              expect(bind.rescan).to.be.calledTwice;
+              expect(bind.rescan).to.be.calledWith([], sinon.match.array);
             });
           });
 
@@ -904,11 +904,11 @@ describes.repeated(
           });
 
           describe('no `binding` attribute', () => {
-            it('should call scanAndApply()', function*() {
+            it('should call rescan()', function*() {
               const output = [doc.createElement('div')];
               expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
               yield list.layoutCallback();
-              expect(bind.scanAndApply).to.have.been.calledOnce;
+              expect(bind.rescan).to.have.been.calledOnce;
             });
           });
 
@@ -917,11 +917,11 @@ describes.repeated(
               element.setAttribute('binding', 'always');
             });
 
-            it('should call scanAndApply()', function*() {
+            it('should call rescan()', function*() {
               const output = [doc.createElement('div')];
               expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
               yield list.layoutCallback();
-              expect(bind.scanAndApply).to.have.been.calledOnce;
+              expect(bind.rescan).to.have.been.calledOnce;
             });
           });
 
@@ -930,24 +930,22 @@ describes.repeated(
               element.setAttribute('binding', 'refresh');
             });
 
-            it('should not call scanAndApply() before FIRST_MUTATE', function*() {
+            it('should not call rescan() before FIRST_MUTATE', function*() {
               const output = [doc.createElement('div')];
               expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
               yield list.layoutCallback();
-              expect(bind.scanAndApply).to.not.have.been.called;
+              expect(bind.rescan).to.not.have.been.called;
             });
 
-            it('should call scanAndApply() after FIRST_MUTATE', function*() {
+            it('should call rescan() after FIRST_MUTATE', function*() {
               bind.signals = () => {
                 return {get: name => name === 'FIRST_MUTATE'};
               };
               const output = [doc.createElement('div')];
               expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
               yield list.layoutCallback();
-              expect(bind.scanAndApply).to.have.been.calledOnce;
-              expect(bind.scanAndApply).calledWithExactly(output, [
-                list.container_,
-              ]);
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(output, [list.container_]);
             });
           });
 
@@ -956,11 +954,11 @@ describes.repeated(
               element.setAttribute('binding', 'no');
             });
 
-            it('should not call scanAndApply()', function*() {
+            it('should not call rescan()', function*() {
               const output = [doc.createElement('div')];
               expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
               yield list.layoutCallback();
-              expect(bind.scanAndApply).to.not.have.been.called;
+              expect(bind.rescan).to.not.have.been.called;
             });
           });
         }); // with amp-bind
