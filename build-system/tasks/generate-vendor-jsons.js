@@ -15,6 +15,8 @@
  */
 
 // TODO: @jonathantyng cleanup #22757
+// this is a temporary gulp task while we migrate amp-analytics to use vendor
+// JSONs instead of JS files
 
 const del = require('del');
 const file = require('gulp-file');
