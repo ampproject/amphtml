@@ -138,7 +138,7 @@ describes.realWin(
         });
       });
 
-      it('should get sticky attributes if opted in for anchor ads and no fill ads both', () => {
+      it('should get sticky attributes if opted in for both anchor ads and no fill ads', () => {
         const configObj = {
           optInStatus: [2, 4],
         };
@@ -149,7 +149,7 @@ describes.realWin(
       });
 
       it('should return null if not opted in for anchor ads and no fill ads', () => {
-        const adNetwork = getAdNetworkConfig('doubleclick', ampAutoAdsElem);
+        const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
         expect(adNetwork.getStickyAdAttributes()).to.be.null;
       });
     });

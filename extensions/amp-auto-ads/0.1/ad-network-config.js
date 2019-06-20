@@ -69,9 +69,9 @@ class AdNetworkConfigDef {
   getSizing() {}
 
   /**
-   * Returns the settings to use when running the anchor ad strategy.
+   * Returns the sticky ad attributes that should be applied on sticky ad.
    * @param {!JsonObject} unusedConfigObj
-   * @return {JsonObject<string, string>} null if the anchor ad strategy should not be run.
+   * @return {JsonObject<string, string>} null if there is no sticky ad attributes.
    */
   getStickyAdAttributes(unusedConfigObj) {}
 }
