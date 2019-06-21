@@ -99,7 +99,7 @@ const BIND_ONLY_ATTRIBUTES = map({
 });
 
 /**
- * Element that opt-out of tree walking in favor of rescan() with {fast: true}.
+ * Elements that opt-out of tree walking in favor of rescan() with {fast: true}.
  * @const {!Array<string>}
  */
 const FAST_RESCAN_TAGS = ['AMP-LIST'];
@@ -422,9 +422,10 @@ export class Bind {
    * complete within `options.timeout` (default=2000), promise is rejected.
    */
   rescan(addedElements, removedElements, options = {}) {
-    // Don't wait for full initization in fast mode.
-    // Normally, there's a risk of duplicate bindings due to race with initial
-    // scan, but elements in FAST_RESCAN_TAGS are skipped in initial scan.
+    // * In non-fast mode, wait for initial tree walk to avoid racy double
+    //   scanning of `addedElements` which may cause duplicate bindings.
+    // * In fast mode, the initial tree walk skips subtrees of FAST_RESCAN_TAGS
+    //   so only wait for <amp-bind-macro> setup (much faster!).
     const waitFor = options.fast
       ? this.addMacrosDeferred_.promise
       : this.initializePromise_;
@@ -1508,7 +1509,9 @@ export class Bind {
    */
   onDomUpdate_(event) {
     const target = dev().assertElement(event.target);
-    // TODO(choumx): Remove assumption of DOM structure of event target.
+    // TODO(choumx): Consider removing this check now that slowScan_() skips
+    // FAST_RESCAN_TAGS internally, and because this makes an assumption about
+    // the DOM structure of the EventTarget.
     const parent = target.parentNode;
     if (parent && FAST_RESCAN_TAGS.includes(parent.nodeName)) {
       return;
