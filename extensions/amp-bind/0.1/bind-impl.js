@@ -482,10 +482,13 @@ export class Bind {
       const children = el.querySelectorAll('[i-amphtml-binding]');
       Array.prototype.push.apply(elementsToScan, children);
     });
-    elementsToScan.forEach(el => {
-      const quota = this.maxNumberOfBindings_ - this.numberOfBindings();
-      this.scanElement_(el, quota, bindings);
-    });
+    const quota = this.maxNumberOfBindings_ - this.numberOfBindings();
+    for (let i = 0; i < elementsToScan.length; i++) {
+      const el = elementsToScan[i];
+      if (this.scanElement_(el, quota - bindings.length, bindings)) {
+        break;
+      }
+    }
 
     removePromise.then(removed => {
       dev().info(
