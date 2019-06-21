@@ -149,8 +149,11 @@ describes.realWin(
       });
 
       it('should return null if not opted in for anchor ads and no fill ads', () => {
+        const configObj = {
+          optInStatus: [1],
+        };
         const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
-        expect(adNetwork.getStickyAdAttributes()).to.be.null;
+        expect(adNetwork.getStickyAdAttributes(configObj)).to.be.null;
       });
     });
 
