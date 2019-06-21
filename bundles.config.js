@@ -933,10 +933,10 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-mplayer',
+    name: 'amp-minute-media-player',
     version: '0.1',
     latestVersion: '0.1',
-    type: TYPES.MISC,
+    type: TYPES.MEDIA,
   },
 ];
 

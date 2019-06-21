@@ -38,10 +38,10 @@ import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const */
-const TAG = 'amp-mplayer';
+const TAG = 'amp-minute-media-player';
 
 /** @implements {../../../src/video-interface.VideoInterface} */
-class AmpMPlayer extends AMP.BaseElement {
+class AmpMinuteMediaPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -99,7 +99,7 @@ class AmpMPlayer extends AMP.BaseElement {
 
     this.contentType_ = userAssert(
       element.getAttribute('data-content-type'),
-      'The data-content-type must be specified for <amp-mplayer> %s',
+      'The data-content-type must be specified for <amp-minute-media-player> %s',
       element
     );
 
@@ -108,7 +108,7 @@ class AmpMPlayer extends AMP.BaseElement {
         ? userAssert(
             element.getAttribute('data-content-id'),
             'The data-content-id must be specified for %s ' +
-              'data-content-type in <amp-mplayer> %s',
+              'data-content-type in <amp-minute-media-player> %s',
             this.contentType_,
             element
           )
@@ -476,5 +476,5 @@ class AmpMPlayer extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpMPlayer);
+  AMP.registerElement(TAG, AmpMinuteMediaPlayer);
 });
