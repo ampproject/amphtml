@@ -393,7 +393,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(ActionStatus.SUBSCRIBE)
+      .withExactArgs(Action.SUBSCRIBE)
       .returns(loginResult)
       .once();
     callback(callbacks.subscribeRequest)();
