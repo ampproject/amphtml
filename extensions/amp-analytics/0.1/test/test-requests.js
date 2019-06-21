@@ -58,6 +58,131 @@ describes.realWin('Requests', {amp: 1}, env => {
   }
 
   describe('RequestHandler', () => {
+    describe('send with request origin', () => {
+      let spy;
+      beforeEach(() => {
+        spy = sandbox.spy();
+      });
+
+      it('should prepend request origin', function*() {
+        const r = {'baseUrl': '/r1', 'origin': 'http://example.com'};
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith('http://example.com/r1');
+      });
+
+      it('handle trailing slash in request origin', function*() {
+        const r = {'baseUrl': '/r1', 'origin': 'http://example.com/'};
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith('http://example.com/r1');
+      });
+
+      it('handle trailing path in request origin', function*() {
+        const r = {'baseUrl': '/r1', 'origin': 'http://example.com/test'};
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith('http://example.com/r1');
+      });
+
+      it('handle empty requestOrigin', function*() {
+        const r = {'baseUrl': '/r1', 'origin': ''};
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith('/r1');
+      });
+
+      it('handle undefined requestOrigin', function*() {
+        const r = {'baseUrl': '/r1', 'origin': undefined};
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith('/r1');
+      });
+
+      it('handle baseUrl with no leading slash', function*() {
+        const r = {
+          'baseUrl': 'r1',
+          'origin': 'https://requestorigin.com',
+        };
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith('https://requestorigin.comr1');
+      });
+
+      it('prepend request origin to absolute baseUrl', function*() {
+        const r = {
+          'baseUrl': 'https://baseurl.com',
+          'origin': 'https://requestorigin.com',
+        };
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith(
+          'https://requestorigin.comhttps://baseurl.com'
+        );
+      });
+
+      it('handle relative request origin', function*() {
+        const r = {
+          'baseUrl': '/r1',
+          'origin': '/requestorigin',
+        };
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith(
+          'http://localhost:9876/r1' // 9876 is the port karma uses
+        );
+      });
+
+      it('should expand request origin', function*() {
+        const r = {'baseUrl': '/r2', 'origin': '${documentReferrer}'};
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({
+          'documentReferrer': 'http://example.com',
+        });
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith('http://example.com/r2');
+      });
+
+      it('should expand nested request origin', function*() {
+        const r = {'baseUrl': '/r3', 'origin': '${a}'};
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({
+          'a': '${b}',
+          'b': 'http://example.com',
+        });
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith('http://example.com/r3');
+      });
+    });
+
     describe('batch', () => {
       it('should batch multiple send', function*() {
         const spy = sandbox.spy();
