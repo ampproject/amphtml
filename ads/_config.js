@@ -70,6 +70,8 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  '1wo': {},
+
   '24smi': {
     prefetch: 'https://jsn.24smi.net/smi.js',
     preconnect: 'https://data.24smi.net',
