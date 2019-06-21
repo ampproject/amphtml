@@ -399,6 +399,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 
 ## Supported embed types
 
+- [1wo](../../ads/1wo.md)
 - [24smi](../../ads/24smi.md)
 - [AdsLoom](../../ads/adsloom.md)
 - [Bringhub](../../ads/bringhub.md)
