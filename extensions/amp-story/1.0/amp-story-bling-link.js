@@ -26,16 +26,30 @@ import {htmlFor} from '../../../src/static-template';
  */
 export const BLING_LINK_SELECTOR = 'a.i-amphtml-story-bling-link';
 
+export const BLING_LINK_BUILT = 'built';
+
 export class AmpStoryBlingLink {
   /**
-   * Adds icon as a child element of <amp-story-bling-link>
+   * Builds bling link
    * @param {!Element} element
    */
-  static addIconElement(element) {
-    if (element.querySelector('.i-amphtml-story-bling-link-circle')) {
+  static build(element) {
+    if (element[BLING_LINK_BUILT]) {
       return;
     }
 
+    this.addPulseElement_(element);
+    this.addIconElement_(element);
+
+    element[BLING_LINK_BUILT] = true;
+  }
+
+  /**
+   * Adds icon as a child element of <amp-story-bling-link>
+   * @param {!Element} element
+   * @private
+   */
+  static addIconElement_(element) {
     const iconEl = htmlFor(element)`
       <div class="i-amphtml-story-bling-link-circle">
         <i class="i-amphtml-story-bling-link-icon i-amphtml-story-bling-link-shopping-cart"></i>
@@ -46,12 +60,9 @@ export class AmpStoryBlingLink {
   /**
    * Adds pulse as a child element of <amp-story-bling-link>
    * @param {!Element} element
+   * @private
    */
-  static addPulseElement(element) {
-    if (element.querySelector('.i-amphtml-story-bling-link-pulse')) {
-      return;
-    }
-
+  static addPulseElement_(element) {
     const pulseEl = htmlFor(element)`
       <div class="i-amphtml-story-bling-link-pulse"></div>`;
     element.appendChild(pulseEl);
