@@ -81,6 +81,12 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?boolean}  */
     this.muted_ = false;
 
+    /** @private {?boolean}  */
+    this.isLoop_ = false;
+
+    /** @private {?boolean}  */
+    this.isPlaylist_ = false;
+
     /** @private {?Element} */
     this.iframe_ = null;
 
@@ -98,6 +104,9 @@ class AmpYoutube extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private {?Function} */
+    this.unlistenLooping_ = null;
   }
 
   /**
@@ -223,6 +232,30 @@ class AmpYoutube extends AMP.BaseElement {
       params['playsinline'] = '1';
     }
 
+    if ('loop' in params) {
+      // Loop is managed by the amp-youtube extension, prefer loop param instead
+      this.user().warn(
+        'AMP-YOUTUBE',
+        'Use loop attribute instead of the deprecated data-param-loop'
+      );
+    }
+
+    // In the case of a playlist, looping is delegated to the Youtube player
+    // instead of AMP manually looping the video through the Youtube API
+    this.isLoop_ =
+      element.hasAttribute('loop') ||
+      ('loop' in params && params['loop'] == '1');
+    this.isPlaylist_ = 'playlist' in params;
+    if (this.isLoop_) {
+      if (this.isPlaylist_) {
+        // Use native looping for playlists
+        params['loop'] = '1';
+      } else if ('loop' in params) {
+        // Use js-based looping for single videos
+        delete params['loop'];
+      }
+    }
+
     src = addParamsToUrl(src, params);
     return (this.videoIframeSrc_ = src);
   }
@@ -248,6 +281,14 @@ class AmpYoutube extends AMP.BaseElement {
       this.handleYoutubeMessage_.bind(this)
     );
 
+    if (this.isLoop_ && !this.isPlaylist_) {
+      this.unlistenLooping_ = listen(
+        this.element,
+        VideoEvents.ENDED,
+        unusedEvent => this.play(false /** unusedIsAutoplay */)
+      );
+    }
+
     const loaded = this.loadPromise(this.iframe_)
       // Make sure the YT player is ready for this. For some reason YT player
       // would send couple of messages but then stop. Waiting for a bit before
@@ -272,8 +313,13 @@ class AmpYoutube extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
+    }
+
+    if (this.unlistenLooping_) {
+      this.unlistenLooping_();
     }
 
     const deferred = new Deferred();

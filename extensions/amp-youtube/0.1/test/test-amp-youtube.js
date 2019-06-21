@@ -107,12 +107,16 @@ describes.realWin(
         return getYt({
           'data-videoid': datasource,
           'autoplay': '1',
+          'loop': '',
+          'data-param-loop': '1',
           'data-param-my-param': 'hello world',
         }).then(yt => {
           const iframe = yt.querySelector('iframe');
           expect(iframe.src).to.contain('myParam=hello%20world');
           // data-param-autoplay is black listed in favor of just autoplay
           expect(iframe.src).to.not.contain('autoplay=1');
+          // data-param-loop is black listed in favor of just loop for single videos
+          expect(iframe.src).to.not.contain('loop=1');
           // playsinline should default to 1 if not provided.
           expect(iframe.src).to.contain('playsinline=1');
         });
@@ -138,6 +142,28 @@ describes.realWin(
           expect(iframe.src).to.contain('playsinline=1');
           // annotation policy should default to 3 if not specified.
           expect(iframe.src).to.contain('iv_load_policy=3');
+        });
+      });
+
+      it('should keep data-param-loop in the iframe src for playlists', () => {
+        return getYt({
+          'data-videoid': datasource,
+          'data-param-playlist': datasource,
+          'data-param-loop': '1',
+        }).then(yt => {
+          const iframe = yt.querySelector('iframe');
+          expect(iframe.src).to.contain('loop=1');
+        });
+      });
+
+      it('should pass data-param-loop to the iframe src for playlists when using loop', () => {
+        return getYt({
+          'data-videoid': datasource,
+          'data-param-playlist': datasource,
+          'loop': '',
+        }).then(yt => {
+          const iframe = yt.querySelector('iframe');
+          expect(iframe.src).to.contain('loop=1');
         });
       });
 

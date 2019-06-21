@@ -73,19 +73,27 @@ With the responsive layout, the width and height from the example should yield c
 <table>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
-    <td>If this attribute is present, and the browser supports autoplay:</p>
-<ul>
-  <li>the video is automatically muted before autoplay starts
-  </li>
-  <li>when the video is scrolled out of view, the video is paused
-  </li>
-  <li>when the video is scrolled into view, the video resumes playback
-  </li>
-  <li>when the user taps the video, the video is unmuted
-  </li>
-  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
-  </li>
-</ul></td>
+    <td>
+      <p>If this attribute is present, and the browser supports autoplay:</p>
+      <ul>
+        <li>the video is automatically muted before autoplay starts
+        </li>
+        <li>when the video is scrolled out of view, the video is paused
+        </li>
+        <li>when the video is scrolled into view, the video resumes playback
+        </li>
+        <li>when the user taps the video, the video is unmuted
+        </li>
+        <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+        </li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>loop</strong></td>
+    <td>
+      <p>If this attribute is present, the video or playlist will play again (from the beginning) once it ends.</p>
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>data-videoid</strong></td>
@@ -98,12 +106,13 @@ With the responsive layout, the width and height from the example should yield c
   </tr>
   <tr>
     <td width="40%"><strong>data-param-&#42;</strong></td>
-    <td><p>All <code>data-param-*</code> attributes will be added as query parameter to the YouTube iframe src. This may be used to pass custom values through to YouTube plugins, such as whether to show controls.</p>
+    <td><p>All <code>data-param-*</code> attributes (with the exception of <code>data-param-autoplay</code> and <code>data-param-loop</code>) will be added as query parameter to the YouTube iframe src. This may be used to pass custom values through to YouTube plugins, such as whether to show controls.</p>
 <p>Keys and values will be URI encoded. Keys will be camel cased.</p>
 <ul>
   <li>`data-param-controls=1` becomes `&controls=1`</li>
 </ul>
 <p>See <a href="https://developers.google.com/youtube/player_parameters">YouTube Embedded Player Parameters</a> for more parameter options for YouTube.</p>
+<p>Note: Use the <code>autoplay</code> attribute instead of <code>data-param-autoplay</code> and the <code>loop</code> attribute instead of <code>data-param-loop</code> since both the autoplay and looping behaviors are handled internally by AMP instead of the Youtube player.</p>
 </td>
   </tr>
   <tr>
