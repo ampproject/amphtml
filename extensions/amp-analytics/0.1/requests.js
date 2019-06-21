@@ -48,6 +48,9 @@ export class RequestHandler {
     /** @const {!Window} */
     this.win = this.ampdoc_.win;
 
+    /** @const {string} !if specified, all requests are prepended with this */
+    this.requestOrigin_ = request['origin'];
+
     /** @const {string} */
     this.baseUrl = devAssert(request['baseUrl']);
 
@@ -66,11 +69,17 @@ export class RequestHandler {
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
 
+    /** @private {!../../../src/service/url-impl.Url} */
+    this.urlService_ = Services.urlForDoc(element);
+
     /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
 
     /** @private {?Promise<string>} */
     this.baseUrlTemplatePromise_ = null;
+
+    /** @private {?Promise<string>} */
+    this.requestOriginPromise_ = null;
 
     /** @private {!Array<!Promise<!BatchSegmentDef>>} */
     this.batchSegmentPromises_ = [];
@@ -135,10 +144,12 @@ export class RequestHandler {
 
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
+
       this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
         this.baseUrl,
         expansionOption
       );
+
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
         return this.urlReplacementService_.expandUrlAsync(
           baseUrl,
@@ -146,6 +157,29 @@ export class RequestHandler {
           this.whiteList_
         );
       });
+    }
+
+    // expand requestOrigin if it is declared
+    if (!this.requestOriginPromise_ && this.requestOrigin_) {
+      // do not encode vars in request origin
+      const requestOriginExpansionOpt = new ExpansionOptions(
+        expansionOption.vars,
+        expansionOption.iterations,
+        true // opt_noEncode
+      );
+
+      this.requestOriginPromise_ = this.variableService_
+        // expand variables in request origin
+        .expandTemplate(this.requestOrigin_, requestOriginExpansionOpt)
+        // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
+        .then(expandedRequestOrigin => {
+          return this.urlReplacementService_.expandUrlAsync(
+            expandedRequestOrigin,
+            bindings,
+            this.whiteList_,
+            true // opt_noEncode
+          );
+        });
     }
 
     const params = Object.assign({}, configParams, trigger['extraUrlParams']);
@@ -209,6 +243,7 @@ export class RequestHandler {
    */
   fire_() {
     const {
+      requestOriginPromise_: requestOriginPromise,
       baseUrlTemplatePromise_: baseUrlTemplatePromise,
       baseUrlPromise_: baseUrlPromise,
       batchSegmentPromises_: segmentPromises,
@@ -216,31 +251,40 @@ export class RequestHandler {
     const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
-    baseUrlTemplatePromise.then(preUrl => {
+    // preconnect to requestOrigin if available, otherwise baseUrlTemplate
+    const preconnectPromise = requestOriginPromise
+      ? requestOriginPromise
+      : baseUrlTemplatePromise;
+
+    preconnectPromise.then(preUrl => {
       this.preconnect_.url(preUrl, true);
-      Promise.all([baseUrlPromise, Promise.all(segmentPromises)]).then(
-        results => {
-          const baseUrl = results[0];
-          const batchSegments = results[1];
-          if (batchSegments.length === 0) {
-            return;
-          }
-          // TODO: iframePing will not work with batch. Add a config validation.
-          if (trigger['iframePing']) {
-            userAssert(
-              trigger['on'] == 'visible',
-              'iframePing is only available on page view requests.'
-            );
-            this.transport_.sendRequestUsingIframe(baseUrl, batchSegments[0]);
-          } else {
-            this.transport_.sendRequest(
-              baseUrl,
-              batchSegments,
-              !!this.batchInterval_
-            );
-          }
-        }
-      );
+    });
+
+    Promise.all([
+      baseUrlPromise,
+      Promise.all(segmentPromises),
+      requestOriginPromise,
+    ]).then(results => {
+      const requestUrl = this.composeRequestUrl_(results[0], results[2]);
+
+      const batchSegments = results[1];
+      if (batchSegments.length === 0) {
+        return;
+      }
+      // TODO: iframePing will not work with batch. Add a config validation.
+      if (trigger['iframePing']) {
+        userAssert(
+          trigger['on'] == 'visible',
+          'iframePing is only available on page view requests.'
+        );
+        this.transport_.sendRequestUsingIframe(requestUrl, batchSegments[0]);
+      } else {
+        this.transport_.sendRequest(
+          requestUrl,
+          batchSegments,
+          !!this.batchInterval_
+        );
+      }
     });
   }
 
@@ -326,6 +370,26 @@ export class RequestHandler {
       this.trigger_(true);
       this.refreshBatchInterval_();
     }, interval);
+  }
+
+  /**
+   * Composes a request URL given a base and requestOrigin
+   * @private
+   * @param {string} baseUrl
+   * @param {string=} opt_requestOrigin
+   * @return {string}
+   */
+  composeRequestUrl_(baseUrl, opt_requestOrigin) {
+    if (opt_requestOrigin) {
+      // We expect requestOrigin to always contain the URL origin. In the case
+      // where requestOrigin has a relative URL, the current page's origin will
+      // be used. We will simply respect the requestOrigin and baseUrl, we don't
+      // check if they form a valid URL and request will fail silently
+      const requestOriginInfo = this.urlService_.parse(opt_requestOrigin);
+      return requestOriginInfo.origin + baseUrl;
+    }
+
+    return baseUrl;
   }
 }
 
