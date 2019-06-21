@@ -824,7 +824,7 @@ describes.repeated(
                 'src': 'https://new.com/list.json',
               });
 
-              expect(bind.rescan).to.be.calledTwice;
+              expect(bind.rescan).to.be.calledOnce;
               expect(bind.rescan).to.be.calledWith([], sinon.match.array);
             });
           });

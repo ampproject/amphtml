@@ -580,8 +580,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scheduleRender_(data, opt_append, opt_payload) {
-    dev().info(TAG, 'schedule:', this.element, data);
-
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
 
@@ -615,7 +613,6 @@ export class AmpList extends AMP.BaseElement {
     const current = this.renderItems_;
 
     devAssert(current && current.data, 'Nothing to render.');
-    dev().info(TAG, 'pass:', this.element, current);
     const scheduleNextPass = () => {
       // If there's a new `renderItems_`, schedule it for render.
       if (this.renderItems_ !== current) {

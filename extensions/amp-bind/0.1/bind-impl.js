@@ -254,7 +254,7 @@ export class Bind {
    * @return {!Promise}
    */
   setState(state, opt_skipEval, opt_skipAmpState) {
-    dev().info(TAG, 'setState:', state);
+    dev().info(TAG, 'setState (init=%s):', opt_skipEval, state);
 
     try {
       deepMerge(this.state_, state, MAX_MERGE_DEPTH);
@@ -844,17 +844,18 @@ export class Bind {
       if (node.nodeType !== Node.ELEMENT_NODE) {
         return !walker.nextNode();
       }
-      // Elements in FAST_RESCAN_TAGS opt-out of "slow" tree walking in favor of
-      // rescan() with {fast: true} for better performance.
-      if (FAST_RESCAN_TAGS.includes(node.nodeName)) {
-        return !walker.nextSibling();
-      }
       const element = dev().assertElement(node);
       const remainingQuota = limit - bindings.length;
       if (this.scanElement_(element, remainingQuota, bindings)) {
         limitExceeded = true;
       }
-      return !walker.nextNode() || limitExceeded;
+      // Elements in FAST_RESCAN_TAGS opt-out of "slow" tree walking in favor of
+      // rescan() with {fast: true} for better performance. Note that only
+      // children are opted-out (e.g. amp-list children, not amp-list itself).
+      const next = FAST_RESCAN_TAGS.includes(node.nodeName)
+        ? walker.nextSibling()
+        : walker.nextNode();
+      return !next || limitExceeded;
     };
 
     return new Promise(resolve => {
