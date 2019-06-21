@@ -117,6 +117,41 @@ describes.realWin(
           maxAdCount: 8,
         });
       });
+
+      it('should get sticky attributes if opted in for anchor ads', () => {
+        const configObj = {
+          optInStatus: [2],
+        };
+        const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+        expect(adNetwork.getStickyAdAttributes(configObj)).to.deep.equal({
+          'no-fill': 'false',
+        });
+      });
+
+      it('should get sticky attributes if opted in for no fill anchor ads', () => {
+        const configObj = {
+          optInStatus: [4],
+        };
+        const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+        expect(adNetwork.getStickyAdAttributes(configObj)).to.deep.equal({
+          'no-fill': 'true',
+        });
+      });
+
+      it('should get sticky attributes if opted in for both anchor ads and no fill ads', () => {
+        const configObj = {
+          optInStatus: [2, 4],
+        };
+        const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+        expect(adNetwork.getStickyAdAttributes(configObj)).to.deep.equal({
+          'no-fill': 'false',
+        });
+      });
+
+      it('should return null if not opted in for anchor ads and no fill ads', () => {
+        const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+        expect(adNetwork.getStickyAdAttributes()).to.be.null;
+      });
     });
 
     describe('Doubleclick', () => {
@@ -205,6 +240,11 @@ describes.realWin(
         const adNetwork = getAdNetworkConfig('doubleclick', ampAutoAdsElem);
         expect(adNetwork.isResponsiveEnabled()).to.be.false;
       });
+    });
+
+    it('should return null for sticky attributes', () => {
+      const adNetwork = getAdNetworkConfig('doubleclick', ampAutoAdsElem);
+      expect(adNetwork.getStickyAdAttributes()).to.be.null;
     });
 
     it('should return null for unknown type', () => {
