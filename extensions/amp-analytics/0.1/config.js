@@ -475,7 +475,8 @@ export function expandConfigRequest(config) {
       config['requests'][k] = expandRequestStr(config['requests'][k]);
     }
   }
-  return config;
+
+  return handleTopLevelAttributes_(config);
 }
 
 /**
@@ -489,4 +490,25 @@ function expandRequestStr(request) {
   return {
     'baseUrl': request,
   };
+}
+
+/**
+ * Handles top level fields in the given config
+ * @param {!JsonObject} config
+ * @return {JsonObject}
+ */
+function handleTopLevelAttributes_(config) {
+  // handle a top level requestOrigin
+  if (hasOwn(config, 'requests') && hasOwn(config, 'requestOrigin')) {
+    const requestOrigin = config['requestOrigin'];
+
+    for (const requestName in config['requests']) {
+      // only add top level request origin into request if it doesn't have one
+      if (!hasOwn(config['requests'][requestName], 'origin')) {
+        config['requests'][requestName]['origin'] = requestOrigin;
+      }
+    }
+  }
+
+  return config;
 }
