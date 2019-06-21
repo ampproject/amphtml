@@ -21,6 +21,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {parseUrlDeprecated} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 /** @typedef {{width: (number|undefined), height: (number|undefined)}} */
 export let SizeInfoDef;
@@ -237,12 +238,12 @@ class AdSenseNetworkConfig {
 
   /** @override */
   getStickyAdAttributes(configObj) {
-    const filledAnchorEnabled = (configObj['optInStatus'] || []).includes(
-      OptInStatus.OPT_IN_STATUS_ANCHOR_ADS
-    );
-    const noFillAnchorEnabled = (configObj['optInStatus'] || []).includes(
-      OptInStatus.OPT_IN_STATUS_NO_FILL_ANCHOR_ADS
-    );
+    const filledAnchorEnabled = user()
+      .assertArray(configObj['optInStatus'] || [])
+      .includes(OptInStatus.OPT_IN_STATUS_ANCHOR_ADS);
+    const noFillAnchorEnabled = user()
+      .assertArray(configObj['optInStatus'] || [])
+      .includes(OptInStatus.OPT_IN_STATUS_NO_FILL_ANCHOR_ADS);
     if (!filledAnchorEnabled && !noFillAnchorEnabled) {
       return null;
     }
