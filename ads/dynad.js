@@ -15,7 +15,6 @@
  */
 
 import {
-  validateData,
   validateSrcContains,
   validateSrcPrefix,
   writeScript,
