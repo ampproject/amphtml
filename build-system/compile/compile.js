@@ -362,6 +362,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       define,
       hide_warnings_for: hideWarningsFor,
     };
+    if (argv.pretty_print) {
+      compilerOptions.formatting = 'PRETTY_PRINT';
+    }
 
     // For now do type check separately
     if (options.typeCheckOnly) {
