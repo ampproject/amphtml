@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {OptInStatus} from './opt-in-status';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
@@ -21,6 +20,7 @@ import {user} from '../../../src/log';
 
 const TAG = 'amp-auto-ads';
 const STICKY_AD_TAG = 'amp-sticky-ad';
+const OPT_IN_STATUS_ANCHOR_ADS = 2;
 
 export class AnchorAdStrategy {
   /**
@@ -44,25 +44,15 @@ export class AnchorAdStrategy {
    * @return {!Promise<boolean>} Resolves when the strategy is complete.
    */
   run() {
-    const filledAnchorEnabled = this.isFilledAnchorAdEnabled_();
-    const noFillAnchorEnabled = this.isNoFillAnchorAdEnabled_();
-
     if (this.hasExistingStickyAd_()) {
-      if (noFillAnchorEnabled) {
-        user().warn(
-          TAG,
-          'Auto ads may not work because of already existing <amp-sticky-ad>.'
-        );
-      } else {
-        user().warn(
-          TAG,
-          'Auto Ads is unable to create an anchor ad because of already existing <amp-sticky-ad>.'
-        );
-      }
+      user().warn(
+        TAG,
+        'Auto ads may not work because of already existing <amp-sticky-ad>.'
+      );
       return Promise.resolve(false);
     }
 
-    if (!filledAnchorEnabled && !noFillAnchorEnabled) {
+    if (!this.isAnchorAdEnabled_()) {
       return Promise.resolve(false);
     }
 
@@ -71,7 +61,7 @@ export class AnchorAdStrategy {
       STICKY_AD_TAG,
       '1.0'
     );
-    this.placeStickyAd_(noFillAnchorEnabled && !filledAnchorEnabled);
+    this.placeStickyAd_();
     return Promise.resolve(true);
   }
 
@@ -87,27 +77,16 @@ export class AnchorAdStrategy {
    * @return {boolean}
    * @private
    */
-  isFilledAnchorAdEnabled_() {
+  isAnchorAdEnabled_() {
     return user()
       .assertArray(this.configObj_['optInStatus'] || [])
-      .includes(OptInStatus.OPT_IN_STATUS_ANCHOR_ADS);
+      .includes(OPT_IN_STATUS_ANCHOR_ADS);
   }
 
   /**
-   * @return {boolean}
    * @private
    */
-  isNoFillAnchorAdEnabled_() {
-    return user()
-      .assertArray(this.configObj_['optInStatus'] || [])
-      .includes(OptInStatus.OPT_IN_STATUS_NO_FILL_ANCHOR_ADS);
-  }
-
-  /**
-   * @param {boolean} noFill
-   * @private
-   */
-  placeStickyAd_(noFill) {
+  placeStickyAd_() {
     const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
     const attributes = /** @type {!JsonObject} */ (Object.assign(
       dict(),
@@ -124,7 +103,6 @@ export class AnchorAdStrategy {
       'amp-sticky-ad',
       dict({
         'layout': 'nodisplay',
-        'data-no-fill': String(noFill),
       })
     );
     stickyAd.appendChild(ampAd);
