@@ -119,26 +119,12 @@ class AmpTwitter extends AMP.BaseElement {
    * @private
    */
   updateForSuccessState_(height) {
-    let placeholderHeight;
-    this.measureMutateElement(
-      () => {
-        if (!this.userPlaceholder_) {
-          // Use an explicit height so that the placeholder does not move when\
-          // the container resizes.
-          placeholderHeight = this.element./*OK*/ getBoundingClientRect()
-            .height;
-        }
-      },
-      () => {
-        if (this.userPlaceholder_) {
-          this.togglePlaceholder(false);
-        }
-        this./*OK*/ changeHeight(height);
-        if (placeholderHeight) {
-          setStyle(this.getPlaceholder(), 'height', placeholderHeight, 'px');
-        }
+    this.mutateElement(() => {
+      if (this.userPlaceholder_) {
+        this.togglePlaceholder(false);
       }
-    );
+      this./*OK*/ changeHeight(height);
+    });
   }
 
   /**
