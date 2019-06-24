@@ -1211,26 +1211,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Attempts to resize the ad, if the returned size is smaller than the primary
    * dimensions.
-   * @param {number} width
-   * @param {number} height
+   * @param {number} newWidth
+   * @param {number} newHeight
    * @private
    */
-  handleResize_(width, height) {
+  handleResize_(newWidth, newHeight) {
     const isFluidRequestAndFixedResponse = !!(
       this.isFluidRequest_ &&
-      width &&
-      height
+      newWidth &&
+      newHeight
     );
-    const declaredSize = this.getDeclaredSlotSize_();
-    const pWidth = declaredSize.width;
-    const pHeight = declaredSize.height;
-    const returnedSizeDifferent = width != pWidth || height != pHeight;
-    const heightNotIncreased = height <= pHeight;
+    const {width, height} = this.getDeclaredSlotSize_();
+    const returnedSizeDifferent = newWidth != width || newHeight != height;
+    const heightNotIncreased = newHeight <= height;
     if (
       isFluidRequestAndFixedResponse ||
       (returnedSizeDifferent && heightNotIncreased)
     ) {
-      this.attemptChangeSize(height, width).catch(() => {});
+      this.attemptChangeSize(newHeight, newWidth).catch(() => {});
     }
   }
 
