@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {Action, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';
 import {Messenger} from '../../../amp-access/0.1/iframe-api/messenger';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
-import {SubscriptionAnalytics} from '../analytics';
 import {UrlBuilder} from '../url-builder';
 import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 
@@ -30,8 +30,8 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
   let serviceAdapter;
 
   const actionMap = {
-    'subscribe': 'https://lipsum.com/subscribe',
-    'login': 'https://lipsum.com/login',
+    [Action.SUBSCRIBE]: 'https://lipsum.com/subscribe',
+    [Action.LOGIN]: 'https://lipsum.com/login',
   };
 
   const configiframeSrc = 'https://lipsum.com/iframe?rid=READER_ID';
