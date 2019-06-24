@@ -430,10 +430,17 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const wrapper = options.wrapper || wrappers.none;
   const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
-  let bundler = browserify({
-    entries: entryPoint,
-    debug: true,
-  }).transform(babelify, {
+  // TODO: @jonathantyng remove browserifyOptions #22757
+  const browserifyOptions = Object.assign(
+    {},
+    {
+      entries: entryPoint,
+      debug: true,
+    },
+    options.browserifyOptions
+  );
+
+  let bundler = browserify(browserifyOptions).transform(babelify, {
     // Transform "node_modules/", but ignore devDependencies.
     global: true,
     ignore: devDependencies(),
