@@ -898,6 +898,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {width, height};
   }
 
+<<<<<<< HEAD
   /**
    * @return {string} The size parameter.
    * @private
@@ -935,6 +936,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return this.shouldSandbox_;
   }
 
+=======
+>>>>>>> cc85a8649756e638ff16ff4832a6c8cf7074eb4f
   /** @override */
   tearDownSlot() {
     super.tearDownSlot();
