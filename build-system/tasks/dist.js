@@ -53,7 +53,7 @@ const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const tempy = require('tempy');
 const conf = require('../build.conf');
-const {isCommonJsModule} = require('../compile/compile-utils');
+const {isCommonJsModule, SRC_GLOBS} = require('../compile/compile-utils');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -62,18 +62,11 @@ const argv = require('minimist')(process.argv.slice(2));
 const deglob = require('globs-to-files');
 const babel = require("@babel/core");
 
-const allJsSrcsGlob = [
-  '3p/**/*.js',
-  'ads/**/*.js',
-  'extensions/**/*.js',
-  'src/**/*.js',
-];
-
 function transferSrcsToTempDir() {
   const tmp = `${tempy.directory()}/amphtml`;
   process.env.AMP_TMP_DIR = tmp;
   console.log('new tmp dir', tmp);
-  const files = deglob.sync(allJsSrcsGlob);
+  const files = deglob.sync(SRC_GLOBS);
   console.log('Executing babel transforms');
   files.forEach(file => {
     const {code} = babel.transformFileSync(file, {
@@ -96,11 +89,11 @@ function transferSrcsToTempDir() {
  */
 async function dist() {
   maybeUpdatePackages();
-  //transferSrcsToTempDir();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
   printNobuildHelp();
   cleanupBuildDir();
+  transferSrcsToTempDir();
   if (argv.fortesting) {
     let cmd = 'gulp dist --fortesting';
     if (argv.single_pass) {
@@ -129,13 +122,13 @@ async function dist() {
         // NOTE: When adding a line here,
         // consider whether you need to include polyfills
         // and whether you need to init logging (initLogConstructor).
-        buildAlp({minify: true, watch: false}),
-        buildExaminer({minify: true, watch: false}),
-        buildWebWorker({minify: true, watch: false}),
-        buildExtensions({minify: true, watch: false}),
-        buildExperiments({minify: true, watch: false}),
-        buildLoginDone({minify: true, watch: false}),
-        buildWebPushPublisherFiles({minify: true, watch: false}),
+        //buildAlp({minify: true, watch: false}),
+        //buildExaminer({minify: true, watch: false}),
+        //buildWebWorker({minify: true, watch: false}),
+        //buildExtensions({minify: true, watch: false}),
+        //buildExperiments({minify: true, watch: false}),
+        //buildLoginDone({minify: true, watch: false}),
+        //buildWebPushPublisherFiles({minify: true, watch: false}),
         copyCss(),
       ]);
     })

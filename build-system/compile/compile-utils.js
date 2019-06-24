@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+exports.SRC_DIRS = ['src', 'builtins', '3p', 'ads', 'extensions'];
+
+exports.SRC_GLOBS = exports.SRC_DIRS.map(x => `${x}/**/*.js`);
+
+
 // Since we no longer pass the process_common_js_modules flag to closure
 // compiler, we must now tranform these common JS node_modules to ESM before
 // passing them to closure.
