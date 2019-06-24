@@ -50,7 +50,7 @@ export const UIType = {
   MOBILE: 0,
   DESKTOP_PANELS: 1, // Default desktop UI.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
-  SCROLL: 3, // Vertical scrolling versions, for search engine bots indexing.
+  VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
 };
 
 /**
@@ -323,6 +323,13 @@ const actions = (state, action, data) => {
         [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data,
       }));
     case Action.TOGGLE_UI:
+      if (
+        state[StateProperty.UI_STATE] === UIType.VERTICAL &&
+        data !== UIType.VERTICAL
+      ) {
+        dev().error(TAG, 'Cannot switch away from UIType.VERTICAL');
+        return state;
+      }
       return /** @type {!State} */ (Object.assign({}, state, {
         // Keep DESKTOP_STATE for compatiblity with v0.1.
         [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
