@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Action} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
@@ -66,14 +67,14 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     beforeEach(() => {
       actions1 = createElementWithAttributes(doc, 'div', {
         id: 'actions1',
-        'subscriptions-action': 'login',
+        'subscriptions-action': Action.LOGIN,
         'subscriptions-display': 'loggedIn',
       });
       actions2 = createElementWithAttributes(doc, 'div', {
         id: 'actions2',
         'subscriptions-section': 'actions',
         'subscriptions-display': 'subscribed',
-        'subscriptions-action': 'login',
+        'subscriptions-action': Action.LOGIN,
         'subscriptions-service': 'service',
         'subscriptions-decorate': '',
       });

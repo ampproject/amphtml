@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Action} from '../analytics';
 import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
 import {Renderer} from '../renderer';
 import {Services} from '../../../../src/services';
@@ -145,15 +146,15 @@ describes.realWin(
 
       actionLogin = createElementWithAttributes(doc, 'div', {
         id: 'actionLogin',
-        'subscriptions-action': 'login',
+        'subscriptions-action': Action.LOGIN,
       });
       actionLogout = createElementWithAttributes(doc, 'div', {
         id: 'actionLogout',
-        'subscriptions-action': 'logout',
+        'subscriptions-action': Action.LOGOUT,
       });
       actionSubscribe = createElementWithAttributes(doc, 'div', {
         id: 'actionSubscribe',
-        'subscriptions-action': 'subscribe',
+        'subscriptions-action': Action.SUBSCRIBE,
       });
 
       doc.body.appendChild(unrelated);

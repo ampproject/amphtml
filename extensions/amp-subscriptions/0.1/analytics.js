@@ -44,6 +44,25 @@ export const SubscriptionAnalyticsEvents = {
   LINK_CANCELED: 'subscriptions-link-canceled',
 };
 
+/** @enum {string} */
+export const Action = {
+  LOGIN: 'login',
+  LOGOUT: 'logout',
+  LINK: 'link',
+  SUBSCRIBE: 'subscribe',
+  CONTRIBUTE: 'contribute',
+  SHOW_CONTRIBUTION_OPTIONS: 'showContributionOptions',
+  SHOW_OFFERS: 'showOffers',
+};
+
+/** @enum {string} */
+export const ActionStatus = {
+  STARTED: 'started',
+  REJECTED: 'rejected',
+  FAILED: 'failed',
+  SUCCESS: 'success',
+};
+
 export class SubscriptionAnalytics {
   /**
    * Creates an instance of SubscriptionAnalytics.

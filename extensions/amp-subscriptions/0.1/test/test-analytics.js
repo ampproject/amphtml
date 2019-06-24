@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {SubscriptionAnalytics} from '../analytics';
+import {ActionStatus, SubscriptionAnalytics} from '../analytics';
 
 describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
   let analytics;
@@ -39,7 +39,7 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
 
   it('should trigger an action event', () => {
     const stub = sandbox.stub(analytics, 'event');
-    analytics.actionEvent('service1', 'action1', 'success');
+    analytics.actionEvent('service1', 'action1', ActionStatus.SUCCESS);
     expect(stub).to.be.calledOnce.calledWith(
       'subscriptions-action-action1-success',
       {'serviceId': 'service1'}
