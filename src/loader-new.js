@@ -90,6 +90,7 @@ class LoaderBuilder {
    *
    */
   build() {
+    this.setSize();
     this.addSpinner();
     this.maybeAddLogo();
     this.maybeAddBackgroundShim();
@@ -99,71 +100,43 @@ class LoaderBuilder {
   /**
    * Add a spinner based on host element's size and a few special cases
    */
-  addSpinner() {
+  setSize() {
+    const sizeClassDefault = 'i-amphtml-new-loader-size-default';
+    const sizeClassSmall = 'i-amphtml-new-loader-size-small';
+    const sizeClassLarge = 'i-amphtml-new-loader-size-large';
+
     // Ads always get the default spinner regardless of the host size
     if (this.isAd()) {
-      return this.addDefaultSpinner();
+      return this.loaderDom_.classList.add(sizeClassDefault);
     }
 
     // Other than Ads, small spinner is always used if host element is small.
     if (this.isSmall()) {
-      return this.addSmallSpinner();
+      return this.loaderDom_.classList.add(sizeClassSmall);
     }
 
     // If host is not small, default size spinner is normally used
     // unless due to branding guidelines (e.g. Instagram) a larger spinner is
     // required.
     if (this.requiresLargeSpinner()) {
-      return this.addLargeSpinner();
+      return this.loaderDom_.classList.add(sizeClassLarge);
     }
-    return this.addDefaultSpinner();
+    return this.loaderDom_.classList.add(sizeClassDefault);
   }
 
   /**
    *
    */
-  isAd() {
-    return false;
-  }
-
-  /**
-   *
-   */
-  isSmall() {
-    const box = this.element_.getLayoutBox();
-    return !isTiny(this.element_) && (box.width <= 100 || box.height <= 100);
-  }
-
-  /**
-   *
-   */
-  requiresLargeSpinner() {
-    return false;
-  }
-
-  /**
-   *
-   */
-  addDefaultSpinner() {
-    const spinner = htmlFor(this.doc_)`<div>Default Spinner</div>`;
-
-    this.loaderDom_.appendChild(spinner);
-  }
-
-  /**
-   *
-   */
-  addSmallSpinner() {
-    const spinner = htmlFor(this.doc_)`<div>Small Spinner</div>`;
-
-    this.loaderDom_.appendChild(spinner);
-  }
-
-  /**
-   *
-   */
-  addLargeSpinner() {
-    const spinner = htmlFor(this.doc_)`<div>Large Spinner</div>`;
+  addSpinner() {
+    const spinner = htmlFor(this.doc_)`<g class="i-amphtml-new-loader-spinner">
+    <circle cx="60" cy="60" r="22">
+    </circle>
+    <circle cx="60" cy="60" r="22">
+    </circle>
+    <circle cx="60" cy="60" r="22">
+    </circle>
+    <circle cx="60" cy="60" r="22">
+    </circle></g>`;
 
     this.loaderDom_.appendChild(spinner);
   }
@@ -201,7 +174,11 @@ class LoaderBuilder {
    *
    */
   getDefaultLogo() {
-    return htmlFor(this.doc_)`<div>Default Logo</div>`;
+    return htmlFor(
+      this.doc_
+    )`<circle class="i-amphtml-new-loader-logo i-amphtml-new-loader-logo-default"
+        cx="60" cy="60" r="12">
+      </circle>`;
   }
 
   /**
@@ -223,6 +200,28 @@ class LoaderBuilder {
     // Add shim
 
     return;
+  }
+
+  /**
+   *
+   */
+  isAd() {
+    return false;
+  }
+
+  /**
+   *
+   */
+  isSmall() {
+    const box = this.element_.getLayoutBox();
+    return !isTiny(this.element_) && (box.width <= 100 || box.height <= 100);
+  }
+
+  /**
+   *
+   */
+  requiresLargeSpinner() {
+    return false;
   }
 
   /**
