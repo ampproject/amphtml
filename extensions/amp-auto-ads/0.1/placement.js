@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {
   LayoutMarginsChangeDef,
   cloneLayoutMarginsChangeDef,
@@ -29,7 +30,6 @@ import {
 import {computedStyle} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getAttributesFromConfigObj} from './attributes';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -376,7 +376,10 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
     if (!isPositionValid(anchorElement, placementObj['pos'])) {
       return;
     }
-    const attributes = getAttributesFromConfigObj(placementObj);
+    const attributes = getAttributesFromConfigObj(
+      placementObj,
+      Attributes.BASE_ATTRIBUTES
+    );
     placements.push(
       new Placement(
         ampdoc,
