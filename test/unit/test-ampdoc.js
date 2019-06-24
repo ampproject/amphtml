@@ -17,6 +17,7 @@
 import * as docready from '../../src/document-ready';
 import * as dom from '../../src/dom';
 import {
+  AmpDocFie,
   AmpDocService,
   AmpDocShadow,
   AmpDocSingle,
@@ -28,6 +29,7 @@ import {
   setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
 import {createShadowRoot} from '../../src/shadow-embed';
+import {setParentWindow} from '../../src/service';
 import {toggleExperiment} from '../../src/experiments';
 
 describe('AmpDocService', () => {
@@ -39,6 +41,7 @@ describe('AmpDocService', () => {
 
   afterEach(() => {
     sandbox.restore();
+    delete window.document['__AMPDOC'];
   });
 
   describe('single-doc mode', () => {
@@ -276,6 +279,149 @@ describe('AmpDocService', () => {
         expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
       });
   });
+
+  describe('fie-doc mode', () => {
+    let service;
+    let host, shadowRoot, content;
+
+    beforeEach(() => {
+      toggleExperiment(window, 'ampdoc-fie', true);
+      service = new AmpDocService(window, /* isSingleDoc */ true);
+      content = document.createElement('span');
+      host = document.createElement('div');
+      setShadowDomSupportedVersionForTesting(undefined);
+      if (isShadowDomSupported()) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+          shadowRoot = host.attachShadow({mode: 'open'});
+        } else {
+          shadowRoot = host.createShadowRoot();
+        }
+        shadowRoot.appendChild(content);
+      }
+      document.body.appendChild(host);
+    });
+
+    afterEach(() => {
+      toggleExperiment(window, 'ampdoc-fie', false);
+      if (host.parentNode) {
+        host.parentNode.removeChild(host);
+      }
+    });
+
+    it('should initialize as single-doc', () => {
+      expect(service.isSingleDoc()).to.be.true;
+      expect(service.singleDoc_).to.exist;
+    });
+
+    it('should yield custom-element doc when exists', () => {
+      const ampDoc = {};
+      content.ampdoc_ = ampDoc;
+      host.appendChild(content);
+      expect(service.getAmpDoc(content)).to.equal(ampDoc);
+    });
+
+    it('should yield cached or custom-element shadow-doc when exists', () => {
+      if (!shadowRoot) {
+        return;
+      }
+      const ampDoc = {};
+      shadowRoot['__AMPDOC'] = ampDoc;
+      expect(service.getAmpDoc(content)).to.equal(ampDoc);
+      expect(service.getAmpDoc(shadowRoot)).to.equal(ampDoc);
+
+      // Override via custom element.
+      const ampDoc2 = {};
+      content.ampdoc_ = ampDoc2;
+      expect(service.getAmpDoc(content)).to.equal(ampDoc2);
+
+      // Fallback to cached version when custom element returns null.
+      content.ampdoc_ = null;
+      expect(service.getAmpDoc(content)).to.equal(ampDoc);
+    });
+
+    it('should create and cache shadow-doc', () => {
+      if (!shadowRoot) {
+        return;
+      }
+      const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+      const ampDoc = service.getAmpDoc(content);
+      expect(ampDoc).to.equal(newAmpDoc);
+      expect(ampDoc).to.exist;
+      expect(service.getAmpDoc(shadowRoot)).to.equal(ampDoc);
+      expect(ampDoc).to.be.instanceOf(AmpDocShadow);
+      expect(ampDoc.shadowRoot_).to.equal(shadowRoot);
+      expect(shadowRoot['__AMPDOC']).to.equal(ampDoc);
+    });
+
+    it('should navigate to parent if shadow root not found', () => {
+      if (!shadowRoot) {
+        return;
+      }
+      expect(service.getAmpDoc(host)).to.equal(service.singleDoc_);
+    });
+
+    it('should fail to install shadow doc twice', () => {
+      if (!shadowRoot) {
+        return;
+      }
+      service.installShadowDoc('https://a.org/', shadowRoot);
+      allowConsoleError(() => {
+        expect(() => {
+          service.installShadowDoc('https://a.org/', shadowRoot);
+        }).to.throw(/The shadow root already contains ampdoc/);
+      });
+    });
+
+    // TODO(dvoytenko, #11827): Make this test work on Safari.
+    it.configure()
+      .skipSafari()
+      .skipFirefox()
+      .run('should navigate via host', () => {
+        if (!shadowRoot) {
+          return;
+        }
+
+        const newAmpDoc = service.installShadowDoc(
+          'https://a.org/',
+          shadowRoot
+        );
+        const ampDoc = service.getAmpDoc(content);
+        expect(ampDoc).to.equal(newAmpDoc);
+
+        const content2 = document.createElement('span');
+        const host2 = document.createElement('div');
+        const shadowRoot2 = host2.createShadowRoot();
+        shadowRoot2.appendChild(content2);
+        shadowRoot.appendChild(host2);
+        expect(content2.parentNode).to.equal(shadowRoot2);
+        expect(shadowRoot2.host).to.equal(host2);
+        expect(host2.shadowRoot).to.equal(shadowRoot2);
+        expect(host2.parentNode).to.equal(shadowRoot);
+
+        expect(service.getAmpDoc(host2)).to.equal(ampDoc);
+        expect(service.getAmpDoc(content2)).to.equal(ampDoc);
+        expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
+      });
+
+    describes.realWin('fie-doc', {}, env => {
+      let childWin;
+
+      beforeEach(() => {
+        childWin = env.win;
+        setParentWindow(childWin, service.win);
+      });
+
+      it('should create and cache fie-doc', () => {
+        const newAmpDoc = service.installFieDoc('https://a.org/', childWin);
+        const content = document.createElement('div');
+        childWin.document.body.appendChild(content);
+        const ampDoc = service.getAmpDoc(content);
+        expect(ampDoc).to.equal(newAmpDoc);
+        expect(ampDoc.getParent()).to.equal(service.singleDoc_);
+        expect(childWin.document['__AMPDOC']).to.equal(ampDoc);
+      });
+    });
+  });
 });
 
 describe('AmpDocSingle', () => {
@@ -471,6 +617,84 @@ describe('AmpDocShadow', () => {
       expect(() => {
         ampdoc.setBody(body);
       }).to.throw(/Duplicate body/);
+    });
+  });
+
+  it('should update when doc is ready', () => {
+    // "Ready" is still expected.
+    expect(ampdoc.isReady()).to.be.false;
+    expect(ampdoc.readyResolver_).to.be.ok;
+
+    // Set ready.
+    const readyPromise = ampdoc.whenReady();
+    ampdoc.setReady();
+    expect(ampdoc.isReady()).to.be.true;
+    expect(ampdoc.readyResolver_).to.be.undefined;
+    expect(ampdoc.readyPromise_).to.be.ok;
+    return readyPromise.then(() => {
+      expect(ampdoc.isReady()).to.be.true;
+    });
+  });
+
+  it('should only allow one ready update', () => {
+    ampdoc.setReady();
+    allowConsoleError(() => {
+      expect(() => {
+        ampdoc.setReady();
+      }).to.throw(/Duplicate ready state/);
+    });
+  });
+});
+
+describes.realWin('AmpDocFie', {}, env => {
+  const URL = 'https://example.org/document';
+
+  let service;
+  let childWin;
+  let parent;
+  let ampdoc;
+
+  beforeEach(() => {
+    service = new AmpDocService(window, /* isSingleDoc */ true);
+    childWin = env.win;
+    setParentWindow(childWin, window);
+    parent = service.singleDoc_;
+    ampdoc = new AmpDocFie(childWin, URL, parent);
+  });
+
+  it('should create AmpDocFie', () => {
+    const ampdoc = service.installFieDoc(URL, childWin);
+    expect(ampdoc.win).to.equal(childWin);
+    expect(ampdoc.isSingleDoc()).to.be.false;
+    expect(ampdoc.getUrl()).to.equal(URL);
+    expect(ampdoc.getParent()).to.equal(parent);
+  });
+
+  it('should return window', () => {
+    expect(ampdoc.win).to.equal(childWin);
+    expect(ampdoc.isSingleDoc()).to.be.false;
+    expect(ampdoc.getUrl()).to.equal(URL);
+    expect(ampdoc.getParent()).to.equal(parent);
+  });
+
+  it('should return document as root', () => {
+    expect(ampdoc.getRootNode()).to.equal(childWin.document);
+    expect(ampdoc.getHeadNode()).to.equal(childWin.document.head);
+  });
+
+  it('should find element by id', () => {
+    const id = 'ampdoc_test_element_' + Date.now();
+    const element = document.createElement('div');
+    element.setAttribute('id', id);
+    childWin.document.body.appendChild(element);
+    expect(ampdoc.getElementById(id)).to.equal(element);
+  });
+
+  it('should update when body is available', () => {
+    expect(ampdoc.isBodyAvailable()).to.be.true;
+    expect(ampdoc.getBody()).to.equal(childWin.document.body);
+    return ampdoc.waitForBodyOpen().then(body => {
+      expect(body).to.equal(childWin.document.body);
     });
   });
 
