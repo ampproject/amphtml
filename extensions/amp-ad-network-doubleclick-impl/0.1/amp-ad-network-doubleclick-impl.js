@@ -1219,16 +1219,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       isFluidRequestAndFixedResponse ||
       (returnedSizeDifferent && heightNotIncreased)
     ) {
-      if (height == pHeight) {
-        // If we're only changing the width, then we call changeSize which
-        // should allow us to resize the element even if it's in the viewport.
-        this.mutateElement(() => {
-          this.element.getResources()
-              ./*OK*/changeSize(this.element, height, width);
-        });
-      } else {
-        this.attemptChangeSize(height, width).catch(() => {});
-      }
+      this.attemptChangeSize(height, width).catch(() => {});
     }
   }
 

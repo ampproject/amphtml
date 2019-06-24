@@ -1087,12 +1087,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         impl.element.style.width = `${width}px`;
         return Promise.resolve();
       });
-      sandbox
-        .stub(impl.element.getResources(), 'changeSize')
-        .callsFake((element, height, width) => {
-          element.style.height = `${height}px`;
-          element.style.width = `${width}px`;
-        });
       sandbox.stub(impl, 'getAmpAdMetadata').callsFake(() => {
         return {
           customElementExtensions: [],
