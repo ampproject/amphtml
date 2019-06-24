@@ -932,6 +932,12 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
+  {
+    name: 'amp-amazon-onetag',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
 ];
 
 exports.aliasBundles = [
