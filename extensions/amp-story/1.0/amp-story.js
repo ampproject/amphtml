@@ -1781,8 +1781,6 @@ export class AmpStory extends AMP.BaseElement {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
-          this.element.removeAttribute('scroll');
-          resetStyles(this.win.document.body, ['height']);
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
@@ -1792,8 +1790,6 @@ export class AmpStory extends AMP.BaseElement {
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
-          this.element.removeAttribute('scroll');
-          resetStyles(this.win.document.body, ['height']);
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
@@ -1812,19 +1808,27 @@ export class AmpStory extends AMP.BaseElement {
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
-          this.element.removeAttribute('scroll');
-          resetStyles(this.win.document.body, ['height']);
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
         });
         break;
-      case UIType.SCROLL:
+      // Because of the DOM mutations, switching from this mode to another is
+      // not allowed, and prevented within the store service.
+      case UIType.VERTICAL:
+        const pageAttachments = scopedQuerySelectorAll(
+          this.element,
+          'amp-story-page amp-story-page-attachment'
+        );
+
         this.vsync_.mutate(() => {
-          this.element.setAttribute('scroll', '');
+          this.element.setAttribute('i-amphtml-vertical', '');
           setImportantStyles(this.win.document.body, {height: 'auto'});
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
+          for (let i = 0; i < pageAttachments.length; i++) {
+            this.element.appendChild(pageAttachments[i]);
+          }
         });
         break;
     }
@@ -1837,7 +1841,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   getUIType_() {
     if (this.platform_.isBot()) {
-      return UIType.SCROLL;
+      return UIType.VERTICAL;
     }
 
     if (
