@@ -138,8 +138,10 @@ exports.getFlags = function(config) {
       'globalThis',
     ],
     hide_warnings_for: config.hideWarningsFor,
-    formatting: argv.pretty_print ? 'PRETTY_PRINT' : '',
   };
+  if (argv.pretty_print) {
+    flags.formatting = 'PRETTY_PRINT';
+  }
 
   // Turn object into deterministically sorted array.
   const flagsArray = [];

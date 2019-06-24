@@ -363,8 +363,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       jscomp_off: ['unknownDefines'],
       define,
       hide_warnings_for: hideWarningsFor,
-      formatting: argv.pretty_print ? 'PRETTY_PRINT' : '',
     };
+    if (argv.pretty_print) {
+      compilerOptions.formatting = 'PRETTY_PRINT';
+    }
 
     // For now do type check separately
     if (options.typeCheckOnly) {
