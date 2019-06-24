@@ -139,6 +139,9 @@ exports.getFlags = function(config) {
     ],
     hide_warnings_for: config.hideWarningsFor,
   };
+  if (argv.pretty_print) {
+    flags.formatting = 'PRETTY_PRINT';
+  }
 
   // Turn object into deterministically sorted array.
   const flagsArray = [];
