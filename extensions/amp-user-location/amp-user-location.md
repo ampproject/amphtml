@@ -24,7 +24,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-user-location`
+# amp-user-location
 
 <table>
   <tr>
@@ -33,7 +33,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental. The `amp-user-location` experiment must be enabled to use this component.</td>
+    <td>Experimental. The <code>amp-user-location</code> experiment must be enabled to use this component.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -114,14 +114,14 @@ for the current domain, if the user has not already.
 </tr>
 <tr>
 <td><code>approve</code></td>
-<td>This event is fired when the user triggers the `request` action and then approves the browser prompt to access their location, or the user has previously approved the prompt. The `event` object contains `lat` `lon` and `source` properties.</td>
+<td>This event is fired when the user triggers the <code>request</code> action and then approves the browser prompt to access their location, or the user has previously approved the prompt. The <code>event</code> object contains <code>lat</code>, <code>lon</code>, and <code>source</code> properties.</td>
 </tr>
 <tr>
 <td><code>deny</code></td>
-<td>This event is fired when the user triggers the `request` action and then denies the browser prompt to access their location, or the user has previously denied the prompt.</td>
+<td>This event is fired when the user triggers the <code>request</code> action and then denies the browser prompt to access their location, or the user has previously denied the prompt.</td>
 </tr>
 <td><code>error</code></td>
-<td>This event is fired when the user triggers the `request` action and and error occurs. This can happen if the browser takes too long to retrieve the location information, if the hardware is unavailable, or other errors occur.</td>
+<td>This event is fired when the user triggers the <code>request</code> action and and error occurs. This can happen if the browser takes too long to retrieve the location information, if the hardware is unavailable, or other errors occur.</td>
 </tr>
 </table>
 
