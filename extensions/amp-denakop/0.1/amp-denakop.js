@@ -36,16 +36,16 @@ export class AmpDenakop extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     Services.extensionsFor(this.win).installExtensionForDoc(ampdoc, 'amp-ad');
     Services.extensionsFor(this.win).installExtensionForDoc(
-        ampdoc,
-        'amp-sticky-ad'
+      ampdoc,
+      'amp-sticky-ad'
     );
     Services.extensionsFor(this.win).installExtensionForDoc(
-        ampdoc,
-        'amp-iframe'
+      ampdoc,
+      'amp-iframe'
     );
     Services.extensionsFor(this.win).installExtensionForDoc(
-        ampdoc,
-        'amp-analytics'
+      ampdoc,
+      'amp-analytics'
     );
 
     const viewer = Services.viewerForDoc(this.getAmpDoc());
@@ -53,61 +53,61 @@ export class AmpDenakop extends AMP.BaseElement {
     const uxid = getCookie(this.win, 'uxid');
 
     whenVisible
-        .then(() => {
-          return this.getConfig_(
-              utils.getConfigUrl({
-                t: tagId,
-                p: publisherId,
-                tz: utils.rand(),
-                uxid,
-              })
-          );
-        })
-        .then(configObj => {
-          if (!configObj) {
-            return;
-          }
+      .then(() => {
+        return this.getConfig_(
+          utils.getConfigUrl({
+            t: tagId,
+            p: publisherId,
+            tz: utils.rand(),
+            uxid,
+          })
+        );
+      })
+      .then(configObj => {
+        if (!configObj) {
+          return;
+        }
 
-          const doc = ampdoc.win.document;
-          const body = ampdoc.getBody();
+        const doc = ampdoc.win.document;
+        const body = ampdoc.getBody();
 
-          setCookie(
-              this.win,
-              'uxid',
-              configObj['user']['uxid'],
-              Date.now() + 315360000000,
-              {domain: configObj['settings']['topDomain']}
-          );
+        setCookie(
+          this.win,
+          'uxid',
+          configObj['user']['uxid'],
+          Date.now() + 315360000000,
+          {domain: configObj['settings']['topDomain']}
+        );
 
-          if (configObj['adUnits'].length !== 0) {
-            configObj['adUnits'].forEach(function(adUnit) {
-              const ampAd = createElementWithAttributes(
-                  doc,
-                  'amp-ad',
-                  utils.getAdAttributes(adUnit)
-              );
-              const ampStickyAd = createElementWithAttributes(
-                  doc,
-                  'amp-sticky-ad',
-                  utils.getStickyAdAttributes()
-              );
-              const extraUrlParams = utils.getExtraUrlParams(
-                  publisherId,
-                  tagId,
-                  configObj,
-                  adUnit
-              );
+        if (configObj['adUnits'].length !== 0) {
+          configObj['adUnits'].forEach(function(adUnit) {
+            const ampAd = createElementWithAttributes(
+              doc,
+              'amp-ad',
+              utils.getAdAttributes(adUnit)
+            );
+            const ampStickyAd = createElementWithAttributes(
+              doc,
+              'amp-sticky-ad',
+              utils.getStickyAdAttributes()
+            );
+            const extraUrlParams = utils.getExtraUrlParams(
+              publisherId,
+              tagId,
+              configObj,
+              adUnit
+            );
 
-              ampStickyAd.appendChild(ampAd);
-              body.insertBefore(ampStickyAd, body.firstChild);
-              utils.analyticAd(
-                  ampAd,
-                  utils.getAmpAdAnalyticsAuthorizedConfig(extraUrlParams),
-                  utils.getAmpAdAnalyticsViewConfig(extraUrlParams)
-              );
-            });
-          }
-        });
+            ampStickyAd.appendChild(ampAd);
+            body.insertBefore(ampStickyAd, body.firstChild);
+            utils.analyticAd(
+              ampAd,
+              utils.getAmpAdAnalyticsAuthorizedConfig(extraUrlParams),
+              utils.getAmpAdAnalyticsViewConfig(extraUrlParams)
+            );
+          });
+        }
+      });
   }
 
   /** @override */
@@ -132,13 +132,13 @@ export class AmpDenakop extends AMP.BaseElement {
     };
 
     return Services.xhrFor(this.win)
-        .fetch(configUrl, xhrInit)
-        .then(res => res.json())
-        .catch(reason => {
-          this.user().error(TAG, 'amp-denakop config xhr failed: ' + reason);
+      .fetch(configUrl, xhrInit)
+      .then(res => res.json())
+      .catch(reason => {
+        this.user().error(TAG, 'amp-denakop config xhr failed: ' + reason);
 
-          return null;
-        });
+        return null;
+      });
   }
 }
 

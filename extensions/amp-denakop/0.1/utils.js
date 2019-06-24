@@ -35,7 +35,8 @@ export function denakopElementIsValid(el) {
   return !(
     tagId === null ||
     tagId === '' ||
-    publisherId === null || publisherId === ''
+    publisherId === null ||
+    publisherId === ''
   );
 }
 
@@ -68,8 +69,8 @@ export function analyticAd(
   insertAnalyticsElement(ampAd, adAnalyticsAuthorizedConfig, false);
 
   /**
-     * Wait for the ad render
-     */
+   * Wait for the ad render
+   */
   const signals = ampAd.signals();
   Promise.race([
     signals.whenSignal(CommonSignals.RENDER_START),
@@ -96,12 +97,12 @@ export function getAdAttributes(adUnit) {
    * Ad unit sizes ordered by sizes
    */
   const wH = adUnit['adUnitSizes']
-      .map(function(v) {
-        return v.join('x');
-      })
-      .sort(function(a, b) {
-        return b - a;
-      });
+    .map(function(v) {
+      return v.join('x');
+    })
+    .sort(function(a, b) {
+      return b - a;
+    });
 
   const widthHeightH = wH[0].split('x');
   const obj = dict();
