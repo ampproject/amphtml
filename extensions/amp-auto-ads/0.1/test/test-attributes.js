@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getAttributesFromConfigObj} from '../attributes';
+import {Attributes, getAttributesFromConfigObj} from '../attributes';
 
 describe('attributes', () => {
   it('should ignore attributes field if an array', () => {
@@ -22,9 +22,9 @@ describe('attributes', () => {
       attributes: ['val1', 'val2'],
     };
 
-    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal(
-      {}
-    );
+    expect(
+      getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
+    ).to.deep.equal({});
   });
 
   it('should get only whitelisted attributes', () => {
@@ -39,7 +39,9 @@ describe('attributes', () => {
       },
     };
 
-    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal({
+    expect(
+      getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
+    ).to.deep.equal({
       'type': 'val2',
       'data-something': 'val5',
       'data-1234': 'val6',
@@ -54,7 +56,7 @@ describe('attributes', () => {
     };
 
     expect(
-      getAttributesFromConfigObj(configObj, 'stickyAdAttributes')
+      getAttributesFromConfigObj(configObj, Attributes.STICKY_AD_ATTRIBUTES)
     ).to.deep.equal({
       'data-no-fill': 'val1',
     });
@@ -66,7 +68,9 @@ describe('attributes', () => {
         'data-key': 1,
       },
     };
-    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal({
+    expect(
+      getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
+    ).to.deep.equal({
       'data-key': '1',
     });
   });
@@ -77,7 +81,9 @@ describe('attributes', () => {
         'data-key': 'one',
       },
     };
-    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal({
+    expect(
+      getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
+    ).to.deep.equal({
       'data-key': 'one',
     });
   });
@@ -89,7 +95,9 @@ describe('attributes', () => {
         'data-key2': false,
       },
     };
-    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal({
+    expect(
+      getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
+    ).to.deep.equal({
       'data-key1': 'true',
       'data-key2': 'false',
     });
@@ -102,8 +110,8 @@ describe('attributes', () => {
         'data-key2': [],
       },
     };
-    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal(
-      {}
-    );
+    expect(
+      getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
+    ).to.deep.equal({});
   });
 });

@@ -30,22 +30,30 @@ const NON_DATA_ATTRIBUTE_WHITELIST = {
 };
 
 /**
+ * Indicates attributes from config object for different ad formats.
+ * @enum {string}
+ */
+export const Attributes = {
+  // Attributes from config object which should be added on any ads.
+  BASE_ATTRIBUTES: 'attributes',
+  // Attributes from config object which should be added on anchor ads.
+  STICKY_AD_ATTRIBUTES: 'stickyAdAttributes',
+};
+
+/**
  * @param {!JsonObject} configObj
- * @param {string} attributeName
+ * @param {!Attributes} attributes
  * @return {!JsonObject<string, string>}
  */
-export function getAttributesFromConfigObj(configObj, attributeName) {
-  if (!configObj[attributeName]) {
+export function getAttributesFromConfigObj(configObj, attributes) {
+  if (!configObj[attributes]) {
     return dict();
   }
-  if (
-    !isObject(configObj[attributeName]) ||
-    isArray(configObj[attributeName])
-  ) {
-    user().warn(TAG, attributeName + ' property not an object');
+  if (!isObject(configObj[attributes]) || isArray(configObj[attributes])) {
+    user().warn(TAG, attributes + ' property not an object');
     return dict();
   }
-  return parseAttributes(configObj[attributeName]);
+  return parseAttributes(configObj[attributes]);
 }
 
 /**
