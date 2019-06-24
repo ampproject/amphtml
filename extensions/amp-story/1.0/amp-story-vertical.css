@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-amp-story[standalone][scroll] {
-  overflow-y: auto !important;
+/**
+ * Vertical scrolling rendering, so the pages are visible to search engine
+ * indexing tools, and not stacked on top of each other.
+ */
+
+amp-story[standalone][i-amphtml-vertical] {
   height: auto !important;
   contain: initial !important;
 }
 
-[scroll] amp-story-page {
+[i-amphtml-vertical] amp-story-page {
   position: relative !important;
   /* iPhone 6/7/8 ratio. */
   height: 178vw !important;
@@ -29,18 +33,20 @@ amp-story[standalone][scroll] {
 }
 
 /* Increase CSS specifity. */
-amp-story[scroll].i-amphtml-element amp-story-page.i-amphtml-element {
+amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element {
   transform: none !important;
 }
 
-[scroll] .i-amphtml-story-page-attachment-container[hidden] .i-amphtml-story-page-attachment-content {
+[i-amphtml-vertical] .i-amphtml-story-page-attachment-container[hidden] .i-amphtml-story-page-attachment-content {
   opacity: 1 !important;
 }
 
-[scroll] .i-amphtml-story-page-attachment-container[hidden] .i-amphtml-story-page-attachment-content > * {
+[i-amphtml-vertical] .i-amphtml-story-page-attachment-container[hidden] .i-amphtml-story-page-attachment-content > * {
   display: block !important;
 }
 
-[scroll] amp-story-page[i-amphtml-has-attachment] {
-  margin-bottom: 178vw !important;
+[i-amphtml-vertical] amp-story-page-attachment {
+  position: relative !important;
+  height: 178vw !important;
+  transform: none !important;
 }

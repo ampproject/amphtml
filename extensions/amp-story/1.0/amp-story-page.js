@@ -119,9 +119,6 @@ const TAG = 'amp-story-page';
 /** @private @const {string} */
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
-/** @private @const {string} */
-const HAS_ATTACHMENT_ATTR_NAME = 'i-amphtml-has-attachment';
-
 /** @private @const {number} */
 const REWIND_TIMEOUT_MS = 350;
 
@@ -308,7 +305,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.emitProgress_(progress)
     );
     this.setDescendantCssTextStyles_();
-    this.setHasAttachmentAttribute_();
   }
 
   /**
@@ -944,15 +940,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (distance > 0 && distance <= 2) {
       this.findAndPrepareEmbeddedComponents_();
       this.preloadAllMedia_();
-    }
-  }
-
-  /**
-   * @private
-   */
-  setHasAttachmentAttribute_() {
-    if (this.element.querySelector('amp-story-page-attachment')) {
-      this.element.setAttribute(HAS_ATTACHMENT_ATTR_NAME, '');
     }
   }
 
