@@ -1820,6 +1820,8 @@ export class AmpStory extends AMP.BaseElement {
           'amp-story-page amp-story-page-attachment'
         );
 
+        this.initializeBookend_().then(() => this.showBookend_());
+
         this.vsync_.mutate(() => {
           this.element.setAttribute('i-amphtml-vertical', '');
           setImportantStyles(this.win.document.body, {height: 'auto'});
@@ -2314,8 +2316,10 @@ export class AmpStory extends AMP.BaseElement {
       this.element.appendChild(bookendEl);
     }
 
-    return bookendEl.getImpl().then(bookendImpl => {
-      this.bookend_ = bookendImpl;
+    return whenUpgradedToCustomElement(bookendEl).then(() => {
+      return bookendEl.getImpl().then(bookendImpl => {
+        this.bookend_ = bookendImpl;
+      });
     });
   }
 
