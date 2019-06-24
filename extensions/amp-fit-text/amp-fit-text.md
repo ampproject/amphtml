@@ -53,34 +53,34 @@ The `amp-fit-text` component allows you to manage the size and fit of text withi
 
 In the following example, the `<amp-fit-text>` element is nested within a 300x300 blue `div` block (class `fixedblock`). For the `<amp-fit-text>` element, we specified a `responsive` layout.  As a result, the text scales responsively per the aspect ratio provided by the width and height (200x200) of the `<amp-fit-text>` element, but the text does not exceed the size of its parent.
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="207"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampfittext.base.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
+[example preview="inline" playground="true" imports="amp-fit-text"]
+```html
+<div class="fixedblock">
+  <amp-fit-text width="200"
+    height="200"
+    layout="responsive">
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
+  </amp-fit-text>
 </div>
+```
+[/example]
 
 ##### Example: Text scales to fit area using a maximum font size
 
 The following example is similar to the one above, but in this example we specify a `max-font-size` of `22`, so the text is smaller but still fits the space:
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-  <amp-iframe height="226"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampfittext.max-font.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-
+[example preview="inline" playground="true" imports="amp-fit-text"]
+```html
+<div class="fixedblock">
+  <amp-fit-text width="200"
+    height="200"
+    layout="responsive"
+    max-font-size="22">
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
+  </amp-fit-text>
 </div>
+```
+[/example]
 
 ### Overflowing content
 
@@ -91,17 +91,18 @@ If the content of the `amp-fit-text` overflows the available space, even with a
 
 In the following example, we specified a `min-font-size` of `40`, which causes the content to exceed the size of its fixed block parent, so the text is truncated to fit the container.
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="226"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampfittext.min-font.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
+[example preview="inline" playground="true" imports="amp-fit-text"]
+```html
+<div class="fixedblock">
+  <amp-fit-text width="200"
+    height="200"
+    layout="responsive"
+    min-font-size="40">
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
+  </amp-fit-text>
 </div>
+```
+[/example]
 
 
 ## Attributes
