@@ -22,6 +22,7 @@ import {closestAncestorElementBySelector, escapeHtml} from './dom';
 import {dev, rethrowAsync, userAssert} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
+import {isExperimentOn} from './experiments';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -120,19 +121,24 @@ export function getFriendlyIframeEmbedOptional(iframe) {
  * @param {!HTMLIFrameElement} iframe
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
- * @param {function(!Window)=} opt_preinstallCallback
+ * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(
   iframe,
   container,
   spec,
-  opt_preinstallCallback
+  opt_preinstallCallback // TODO(#22733): remove "window" argument.
 ) {
   /** @const {!Window} */
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
+  const ampdocFieExperimentOn = isExperimentOn(win, 'ampdoc-fie');
+  /** @const {?./service/ampdoc-impl.AmpDocService} */
+  const ampdocService = ampdocFieExperimentOn
+    ? Services.ampdocServiceFor(win)
+    : null;
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
@@ -211,16 +217,28 @@ export function installFriendlyIframeEmbed(
   }
 
   return readyPromise.then(() => {
-    const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise);
+    const childWin = /** @type {!Window} */ (iframe.contentWindow);
+    const ampdoc =
+      ampdocFieExperimentOn && ampdocService
+        ? ampdocService.installFieDoc(spec.url, childWin)
+        : null;
+    const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise, ampdoc);
     iframe[EMBED_PROP] = embed;
 
-    const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
-    extensions.installExtensionsInChildWindow(
-      childWin,
-      spec.extensionIds || [],
-      opt_preinstallCallback
-    );
+    if (ampdoc && ampdocFieExperimentOn) {
+      extensions.installExtensionsInFie(
+        ampdoc,
+        spec.extensionIds || [],
+        opt_preinstallCallback
+      );
+    } else {
+      extensions.installExtensionsInChildWindow(
+        childWin,
+        spec.extensionIds || [],
+        opt_preinstallCallback
+      );
+    }
     // Ready to be shown.
     embed.startRender_();
     return embed;
@@ -329,13 +347,17 @@ export class FriendlyIframeEmbed {
    * @param {!HTMLIFrameElement} iframe
    * @param {!FriendlyIframeSpec} spec
    * @param {!Promise} loadedPromise
+   * @param {?./service/ampdoc-impl.AmpDocFie} ampdoc
    */
-  constructor(iframe, spec, loadedPromise) {
+  constructor(iframe, spec, loadedPromise, ampdoc) {
     /** @const {!HTMLIFrameElement} */
     this.iframe = iframe;
 
     /** @const {!Window} */
     this.win = /** @type {!Window} */ (iframe.contentWindow);
+
+    /** @const {?./service/ampdoc-impl.AmpDocFie} */
+    this.ampdoc = ampdoc;
 
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;
@@ -361,6 +383,9 @@ export class FriendlyIframeEmbed {
 
     /** @private @const {!Promise} */
     this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
+    if (this.ampdoc) {
+      this.whenReady().then(() => this.ampdoc.setReady());
+    }
   }
 
   /**
