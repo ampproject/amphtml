@@ -31,17 +31,21 @@ const NON_DATA_ATTRIBUTE_WHITELIST = {
 
 /**
  * @param {!JsonObject} configObj
+ * @param {string} attributeName
  * @return {!JsonObject<string, string>}
  */
-export function getAttributesFromConfigObj(configObj) {
-  if (!configObj['attributes']) {
+export function getAttributesFromConfigObj(configObj, attributeName) {
+  if (!configObj[attributeName]) {
     return dict();
   }
-  if (!isObject(configObj['attributes']) || isArray(configObj['attributes'])) {
-    user().warn(TAG, 'attributes property not an object');
+  if (
+    !isObject(configObj[attributeName]) ||
+    isArray(configObj[attributeName])
+  ) {
+    user().warn(TAG, attributeName + ' property not an object');
     return dict();
   }
-  return parseAttributes(configObj['attributes']);
+  return parseAttributes(configObj[attributeName]);
 }
 
 /**

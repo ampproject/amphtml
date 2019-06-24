@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {OptInStatus} from './opt-in-status';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {parseUrlDeprecated} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
 
 /** @typedef {{width: (number|undefined), height: (number|undefined)}} */
 export let SizeInfoDef;
@@ -68,13 +66,6 @@ class AdNetworkConfigDef {
    * @return {!SizeInfoDef}
    */
   getSizing() {}
-
-  /**
-   * Returns the sticky ad attributes that should be applied on sticky ad.
-   * @param {!JsonObject} unusedConfigObj
-   * @return {JsonObject<string, string>} null if there is no sticky ad attributes.
-   */
-  getStickyAdAttributes(unusedConfigObj) {}
 }
 
 /**
@@ -157,11 +148,6 @@ class PingNetworkConfig {
   getSizing() {
     return {};
   }
-
-  /** @override */
-  getStickyAdAttributes(unusedConfigObj) {
-    return null;
-  }
 }
 
 /**
@@ -234,22 +220,6 @@ class AdSenseNetworkConfig {
   /** @override */
   getSizing() {
     return {};
-  }
-
-  /** @override */
-  getStickyAdAttributes(configObj) {
-    const filledAnchorEnabled = user()
-      .assertArray(configObj['optInStatus'] || [])
-      .includes(OptInStatus.OPT_IN_STATUS_ANCHOR_ADS);
-    const noFillAnchorEnabled = user()
-      .assertArray(configObj['optInStatus'] || [])
-      .includes(OptInStatus.OPT_IN_STATUS_NO_FILL_ANCHOR_ADS);
-    if (!filledAnchorEnabled && !noFillAnchorEnabled) {
-      return null;
-    }
-    return dict({
-      'no-fill': String(noFillAnchorEnabled && !filledAnchorEnabled),
-    });
   }
 }
 
@@ -335,10 +305,5 @@ class DoubleclickNetworkConfig {
       };
     }
     return {};
-  }
-
-  /** @override */
-  getStickyAdAttributes(unusedConfigObj) {
-    return null;
   }
 }

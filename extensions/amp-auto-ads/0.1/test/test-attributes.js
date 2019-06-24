@@ -22,7 +22,9 @@ describe('attributes', () => {
       attributes: ['val1', 'val2'],
     };
 
-    expect(getAttributesFromConfigObj(configObj)).to.deep.equal({});
+    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal(
+      {}
+    );
   });
 
   it('should get only whitelisted attributes', () => {
@@ -37,10 +39,24 @@ describe('attributes', () => {
       },
     };
 
-    expect(getAttributesFromConfigObj(configObj)).to.deep.equal({
+    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal({
       'type': 'val2',
       'data-something': 'val5',
       'data-1234': 'val6',
+    });
+  });
+
+  it('should get sticky ad attributes', () => {
+    const configObj = {
+      stickyAdAttributes: {
+        'data-no-fill': 'val1',
+      },
+    };
+
+    expect(
+      getAttributesFromConfigObj(configObj, 'stickyAdAttributes')
+    ).to.deep.equal({
+      'data-no-fill': 'val1',
     });
   });
 
@@ -50,7 +66,7 @@ describe('attributes', () => {
         'data-key': 1,
       },
     };
-    expect(getAttributesFromConfigObj(configObj)).to.deep.equal({
+    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal({
       'data-key': '1',
     });
   });
@@ -61,7 +77,7 @@ describe('attributes', () => {
         'data-key': 'one',
       },
     };
-    expect(getAttributesFromConfigObj(configObj)).to.deep.equal({
+    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal({
       'data-key': 'one',
     });
   });
@@ -73,7 +89,7 @@ describe('attributes', () => {
         'data-key2': false,
       },
     };
-    expect(getAttributesFromConfigObj(configObj)).to.deep.equal({
+    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal({
       'data-key1': 'true',
       'data-key2': 'false',
     });
@@ -86,6 +102,8 @@ describe('attributes', () => {
         'data-key2': [],
       },
     };
-    expect(getAttributesFromConfigObj(configObj)).to.deep.equal({});
+    expect(getAttributesFromConfigObj(configObj, 'attributes')).to.deep.equal(
+      {}
+    );
   });
 });

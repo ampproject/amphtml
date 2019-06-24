@@ -28,9 +28,8 @@ export class AnchorAdStrategy {
    * @param {!JsonObject<string, string>} baseAttributes Any attributes that
    *     should be added to any inserted ads.
    * @param {!JSONType} configObj
-   * @param {JsonObject<string, string>} anchorAdAttributes Any attributes that should be added to anchor ads.
    */
-  constructor(ampdoc, baseAttributes, configObj, anchorAdAttributes) {
+  constructor(ampdoc, baseAttributes, configObj) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -39,9 +38,6 @@ export class AnchorAdStrategy {
 
     /** @const @private {!JSONType} */
     this.configObj_ = configObj;
-
-    /** @const @private {JsonObject<string, string>} */
-    this.anchorAdAttributes_ = anchorAdAttributes;
   }
 
   /**
@@ -56,7 +52,7 @@ export class AnchorAdStrategy {
       return Promise.resolve(false);
     }
 
-    if (!this.isFilledAnchorAdEnabled_() && !this.anchorAdAttributes_) {
+    if (!this.isAnchorAdEnabled_()) {
       return Promise.resolve(false);
     }
 
@@ -81,7 +77,7 @@ export class AnchorAdStrategy {
    * @return {boolean}
    * @private
    */
-  isFilledAnchorAdEnabled_() {
+  isAnchorAdEnabled_() {
     return user()
       .assertArray(this.configObj_['optInStatus'] || [])
       .includes(OptInStatus.OPT_IN_STATUS_ANCHOR_ADS);
@@ -95,7 +91,6 @@ export class AnchorAdStrategy {
     const attributes = /** @type {!JsonObject} */ (Object.assign(
       dict(),
       this.baseAttributes_,
-      this.anchorAdAttributes_,
       dict({
         'width': String(viewportWidth),
         'height': '100',
