@@ -1478,7 +1478,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const descriptionElId = `i-amphtml-story-${this.element.id}-description`;
     const descriptionEl = createElementWithAttributes(
       this.win.document,
-      'div',
+      'h2',
       dict({
         'class': 'i-amphtml-story-page-description',
         'id': descriptionElId,
