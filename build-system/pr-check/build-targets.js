@@ -99,6 +99,8 @@ const targetMatchers = [
     func: file => {
       return (
         file == 'build-system/tasks/integration.js' ||
+        (file.startsWith('build-system/tasks/runtime-test/') &&
+          !file.endsWith('unit.js')) ||
         config.integrationTestPaths.some(pattern => {
           return minimatch(file, pattern);
         })
@@ -110,6 +112,7 @@ const targetMatchers = [
     func: file => {
       return (
         file == 'build-system/tasks/unit.js' ||
+        file.startsWith('build-system/tasks/runtime-test/') ||
         config.unitTestPaths.some(pattern => {
           return minimatch(file, pattern);
         })
