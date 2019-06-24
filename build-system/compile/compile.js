@@ -363,6 +363,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       jscomp_off: ['unknownDefines'],
       define,
       hide_warnings_for: hideWarningsFor,
+      formatting: argv.pretty_print ? 'PRETTY_PRINT' : '',
     };
 
     // For now do type check separately
