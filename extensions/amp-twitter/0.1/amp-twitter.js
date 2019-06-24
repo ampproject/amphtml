@@ -19,7 +19,6 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
 
 class AmpTwitter extends AMP.BaseElement {
   /** @param {!AmpElement} element */
