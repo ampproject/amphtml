@@ -13431,6 +13431,11 @@ rocambole@0.7.0:
   dependencies:
     esprima "^2.1"
 
+rrule@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/rrule/-/rrule-2.2.0.tgz#f346c523bf73707dafe562c222650467b49f6d5c"
+  integrity sha1-80bFI79zcH2v5WLCImUEZ7SfbVw=
+
 rsvp@^3.3.3:
   version "3.6.2"
   resolved "https://registry.yarnpkg.com/rsvp/-/rsvp-3.6.2.tgz#2e96491599a96cde1b515d5674a8f7a91452926a"
