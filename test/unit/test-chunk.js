@@ -51,38 +51,115 @@ describe('chunk', () => {
       }
     });
 
-    it('should execute a chunk', done => {
-      startupChunk(fakeWin.document, unusedIdleDeadline => {
-        done();
-      });
+    // it('should execute a chunk', done => {
+    //   startupChunk(fakeWin.document, unusedIdleDeadline => {
+    //     done();
+    //   });
+    // });
+
+    it('should execute a chunk in macro task after long running previous task', done => {
+      let progress = '';
+      function complete(str, long) {
+        return function(unusedIdleDeadline) {
+          if (long) {
+            const start = Date.now();
+            // Ensure this task takes a long time (sleep?)
+            // While true with a timestamp > (5ms + buffer) exit.
+            while (Date.now() - start <= 7) {
+              console.log(Date.now() - start);
+              continue;
+            }
+          }
+          progress += str;
+        };
+      }
+      startupChunk(fakeWin.document, complete('a', false));
+      startupChunk(fakeWin.document, complete('b', true));
+      expect(progress).to.equal('ab');
+      done();
+      // return Promise.resolve().then(() => {
+      //   // Since the 'b' task takes a long time
+      //   // a micro task will not have the right progress
+      //   // value. Instead a macro task will be used.
+      //   expect(progress).to.equal('a');
+      //   // done();
+      // });
+      // setTimeout(() => {
+      //   done();
+      // }, 1000);
+      // Promise.resolve(() => {
+      //   // Since the 'b' task takes a long time
+      //   // a micro task will not have the right progress
+      //   // value. Instead a macro task will be used.
+      //   expect(progress).to.equal('a');
+      //   setTimeout(() => {
+      //     expect(progress).to.equal('ab');
+      //     done();
+      //   }, 1100);
+      // });
     });
 
-    it('should execute chunks', () => {
-      let count = 0;
-      let progress = '';
-      return new Promise(resolve => {
-        function complete(str) {
-          return function(unusedIdleDeadline) {
-            progress += str;
-            if (++count == 6) {
-              resolve();
-            }
-          };
-        }
-        startupChunk(fakeWin.document, complete('a'));
-        startupChunk(fakeWin.document, complete('b'));
-        startupChunk(fakeWin.document, function() {
-          complete('c')();
-          startupChunk(fakeWin.document, function() {
-            complete('d')();
-            startupChunk(fakeWin.document, complete('e'));
-            startupChunk(fakeWin.document, complete('f'));
-          });
-        });
-      }).then(() => {
-        expect(progress).to.equal('abcdef');
-      });
-    });
+    // it('should execute a chunk in micro task after other tasks have completed', done => {
+    //   let progress = '';
+    //   function complete(str, long) {
+    //     return function(unusedIdleDeadline) {
+    //       if (long) {
+    //         const start = Date.now();
+    //         // Ensure this task takes a long time (sleep?)
+    //         // While true with a timestamp > (5ms + buffer) exit.
+    //         while (Date.now() - start <= 7) {
+    //           console.log(Date.now() - start);
+    //           continue;
+    //         }
+    //       }
+    //       progress += str;
+    //     };
+    //   }
+    //   startupChunk(fakeWin.document, complete('a', false));
+    //   startupChunk(fakeWin.document, function() {
+    //     expect(progress).to.equal('a');
+
+    //     complete('b', true)();
+    //     Promise.resolve(() => {
+    //       // Since the 'b' task takes a long time
+    //       // a micro task will not have the right progress
+    //       // value. Instead a macro task will be used.
+    //       expect(progress).to.equal('a');
+    //     });
+
+    //     setTimeout(() => {
+    //       expect(progress).to.equal('ab');
+    //       done();
+    //     }, 1100);
+    //   });
+    // });
+
+    // it('should execute chunks', () => {
+    //   let count = 0;
+    //   let progress = '';
+    //   return new Promise(resolve => {
+    //     function complete(str) {
+    //       return function(unusedIdleDeadline) {
+    //         progress += str;
+    //         if (++count == 6) {
+    //           resolve();
+    //         }
+    //       };
+    //     }
+    //     startupChunk(fakeWin.document, complete('a'));
+    //     startupChunk(fakeWin.document, complete('b'));
+    //     startupChunk(fakeWin.document, function() {
+    //       complete('c')();
+    //       startupChunk(fakeWin.document, function() {
+    //         complete('d')();
+    //         startupChunk(fakeWin.document, complete('e'));
+    //         startupChunk(fakeWin.document, complete('f'));
+    //       });
+    //     });
+    //   }).then(() => {
+    //     expect(progress).to.equal('abcdef');
+    //   });
+    // });
   }
 
   describes.fakeWin(
