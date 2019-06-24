@@ -15,7 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import RRule from '../../../third_party/rrule/rrule';
+import {rrulestr} from 'rrule';
 
 /** @enum {string} */
 const DateType = {
@@ -139,10 +139,11 @@ export class DatesList {
  * Tries to parse a string into an RRULE object.
  * @param {string} str A string which represents a repeating date RRULE spec.
  * @return {?JsonObject}
+ * @suppress {missingProperties} // Remove after https://github.com/google/closure-compiler/issues/3041 is fixed
  */
 function tryParseRrulestr(str) {
   try {
-    return RRule.fromString(str);
+    return rrulestr(str);
   } catch (e) {
     return null;
   }
