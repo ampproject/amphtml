@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,29 @@ export function invibes(global, data) {
 
   let url = 'https://k.r66net.com/GetAmpLink';
   if (data.adCateg) {
-    url += '?adCateg=' + encodeURIComponent(data.adCateg);
+    url = addQueryParam(url, 'adCateg', data.adCateg);
   }
 
   if (data.pid) {
-    url += '&pid=' + encodeURIComponent(data.pid);
+    url = addQueryParam(url, 'pid', data.pid);
   }
 
   loadScript(global, url);
+}
+
+/**
+ * @param {string} url
+ * @param {string} param
+ * @param {*} value
+ * @return {string}
+ */
+function addQueryParam(url, param, value) {
+  const paramValue =
+    encodeURIComponent(param) + '=' + encodeURIComponent(value);
+  if (!url.includes('?')) {
+    url += '?' + paramValue;
+  } else {
+    url += '&' + paramValue;
+  }
+  return url;
 }
