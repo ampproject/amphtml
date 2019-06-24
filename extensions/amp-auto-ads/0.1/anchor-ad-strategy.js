@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {OptInStatus} from './opt-in-status';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
@@ -21,6 +20,7 @@ import {user} from '../../../src/log';
 
 const TAG = 'amp-auto-ads';
 const STICKY_AD_TAG = 'amp-sticky-ad';
+const OPT_IN_STATUS_ANCHOR_ADS = 2;
 
 export class AnchorAdStrategy {
   /**
@@ -80,7 +80,7 @@ export class AnchorAdStrategy {
   isAnchorAdEnabled_() {
     return user()
       .assertArray(this.configObj_['optInStatus'] || [])
-      .includes(OptInStatus.OPT_IN_STATUS_ANCHOR_ADS);
+      .includes(OPT_IN_STATUS_ANCHOR_ADS);
   }
 
   /**

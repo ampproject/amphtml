@@ -89,11 +89,11 @@ export class AmpAutoAds extends AMP.BaseElement {
           adTracker,
           adNetwork.isResponsiveEnabled()
         ).run();
-        const stickyAdattributes = /** @type {!JsonObject} */ (Object.assign(
+        const stickyAdAttributes = /** @type {!JsonObject} */ (Object.assign(
           attributes,
           getAttributesFromConfigObj(configObj, Attributes.STICKY_AD_ATTRIBUTES)
         ));
-        new AnchorAdStrategy(ampdoc, stickyAdattributes, configObj).run();
+        new AnchorAdStrategy(ampdoc, stickyAdAttributes, configObj).run();
       });
   }
 
