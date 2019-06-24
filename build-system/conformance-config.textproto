@@ -349,11 +349,12 @@ requirement: {
   whitelist: 'extensions/amp-date-picker/0.1/dates-list.js'
 }
 
-# TODO(rsimha): Reenable when we move RRule to a node module.
-# requirement: {
-  # type: BANNED_PROPERTY_CALL
-  # error_message: 'ChildNode.p.after() is unusual. Please use Node.p.insertBefore()'
-  # value: 'Element.prototype.after'
-  # value: 'DocumentType.prototype.after'
-  # value: 'CharacterData.prototype.after'
-# }
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.after() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.after'
+  value: 'DocumentType.prototype.after'
+  value: 'CharacterData.prototype.after'
+  # It's really hard to properly type check this one.
+  whitelist: 'extensions/amp-date-picker/0.1/dates-list.js'
+}
