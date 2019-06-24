@@ -638,6 +638,10 @@ export class AmpStoryEmbeddedComponent {
       // no arrow
 
       // style
+      setImportantStyles(devAssert(this.tooltip_), {
+        'border-radius': '20px',
+        'width': '200px',
+      });
 
       // position on top of bling link
       const elementRect = component.element.getBoundingClientRect();
