@@ -456,6 +456,7 @@ afterEach(function() {
   window.AMP_DEV_MODE = false;
   window.context = undefined;
   window.AMP_MODE = undefined;
+  delete window.document['__AMPDOC'];
 
   if (windowState.length != initialWindowState.length) {
     for (let i = initialWindowState.length; i < windowState.length; ++i) {

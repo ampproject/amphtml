@@ -433,9 +433,26 @@ export class Extensions {
    * Install extensions in the child window (friendly iframe). The pre-install
    * callback, if specified, is executed after polyfills have been configured
    * but before the first extension is installed.
+   * @param {!./ampdoc-impl.AmpDocFie} ampdoc
+   * @param {!Array<string>} extensionIds
+   * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+   * @return {!Promise}
+   * @restricted
+   */
+  installExtensionsInFie(ampdoc, extensionIds, opt_preinstallCallback) {
+    // TODO(#22734): Implement.
+    if (opt_preinstallCallback) {
+      opt_preinstallCallback(ampdoc.win, ampdoc);
+    }
+  }
+
+  /**
+   * Install extensions in the child window (friendly iframe). The pre-install
+   * callback, if specified, is executed after polyfills have been configured
+   * but before the first extension is installed.
    * @param {!Window} childWin
    * @param {!Array<string>} extensionIds
-   * @param {function(!Window)=} opt_preinstallCallback
+   * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
    * @return {!Promise}
    * @restricted
    */
@@ -444,6 +461,7 @@ export class Extensions {
     extensionIds,
     opt_preinstallCallback
   ) {
+    // TODO(#22733): remove this method when ampdoc-fie is launched.
     const topWin = this.win;
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);

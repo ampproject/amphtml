@@ -25,6 +25,7 @@ import {
 import {
   childElementsByTag,
   closestNode,
+  isShadowRoot,
   iterateCursor,
   removeElement,
 } from './dom';
@@ -160,31 +161,12 @@ function createShadowRootPolyfill(hostElement) {
 }
 
 /**
- * Determines if value is actually a `ShadowRoot` node.
- * @param {*} value
- * @return {boolean}
- */
-export function isShadowRoot(value) {
-  if (!value) {
-    return false;
-  }
-  // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
-  // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
-  if (value.tagName == 'I-AMPHTML-SHADOW-ROOT') {
-    return true;
-  }
-  return (
-    value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
-    Object.prototype.toString.call(value) === '[object ShadowRoot]'
-  );
-}
-
-/**
  * Return shadow root for the specified node.
  * @param {!Node} node
  * @return {?ShadowRoot}
  */
 export function getShadowRootNode(node) {
+  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
   if (isShadowDomSupported() && Node.prototype.getRootNode) {
     return /** @type {?ShadowRoot} */ (node.getRootNode(UNCOMPOSED_SEARCH));
   }
