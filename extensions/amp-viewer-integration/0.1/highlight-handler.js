@@ -67,7 +67,7 @@ const NUM_SENTENCES_LIMIT = 15;
  */
 const NUM_ALL_CHARS_LIMIT = 1500;
 
-/** @typedef {{sentences: !Array<string>, skipRendering: boolean}} */
+/** @typedef {{sentences: !Array<string>, skipScrollAnimation: boolean, skipRendering: boolean}} */
 export let HighlightInfoDef;
 
 /**
@@ -118,8 +118,13 @@ export function getHighlightParam(ampdoc) {
   if (highlight['n']) {
     skipRendering = true;
   }
+  let skipScrollAnimation = false;
+  if (highlight['na']) {
+    skipScrollAnimation = true;
+  }
   return {
     sentences: sens,
+    skipScrollAnimation,
     skipRendering,
   };
 }
@@ -184,6 +189,22 @@ export class HighlightHandler {
   }
 
   /**
+   * Registers a callback invoked once when the doc becomes visible.
+   * @param {function()} handler
+   */
+  onVisibleOnce(handler) {
+    let called = false;
+    this.viewer_.onVisibilityChanged(() => {
+      // TODO(yunabe): Unregister the handler.
+      if (called || this.viewer_.getVisibilityState() != 'visible') {
+        return;
+      }
+      handler();
+      called = true;
+    });
+  }
+
+  /**
    * @param {!HighlightInfoDef} highlightInfo
    * @private
    */
@@ -217,22 +238,28 @@ export class HighlightHandler {
     }
 
     const visibility = this.viewer_.getVisibilityState();
-    if (visibility == 'visible') {
-      this.animateScrollToTop_(scrollTop);
+    if (!highlightInfo.skipScrollAnimation) {
+      if (visibility == 'visible') {
+        this.animateScrollToTop_(scrollTop);
+      } else {
+        // Scroll to the animation start position before the page becomes visible
+        // so that the top of the page is not painted when it becomes visible.
+        this.scrollToAnimationStart_(scrollTop);
+        this.onVisibleOnce(() => {
+          this.animateScrollToTop_(this.calcTopToCenterHighlightedNodes_());
+        });
+      }
     } else {
-      // Scroll to the animation start position before the page becomes visible
-      // so that the top of the page is not painted when it becomes visible.
-      this.scrollToAnimationStart_(scrollTop);
-
-      let called = false;
-      this.viewer_.onVisibilityChanged(() => {
-        // TODO(yunabe): Unregister the handler.
-        if (called || this.viewer_.getVisibilityState() != 'visible') {
-          return;
-        }
-        this.animateScrollToTop_(this.calcTopToCenterHighlightedNodes_());
-        called = true;
-      });
+      if (visibility == 'visible') {
+        this.scrollToTopWitoutAnimation_(scrollTop);
+      } else {
+        this.viewport_.setScrollTop(scrollTop);
+        this.onVisibleOnce(() => {
+          this.scrollToTopWitoutAnimation_(
+            this.calcTopToCenterHighlightedNodes_()
+          );
+        });
+      }
     }
     listenOnce(
       this.ampdoc_.getBody(),
@@ -275,6 +302,17 @@ export class HighlightHandler {
       pos = minTop - PAGE_TOP_MARGIN;
     }
     return pos > 0 ? pos : 0;
+  }
+
+  /**
+   * Equivalent to animateScrollToTop_ without scroll animation.
+   * @param {number} top
+   * @private
+   */
+  scrollToTopWitoutAnimation_(top) {
+    this.sendHighlightState_('auto_scroll');
+    this.viewport_.setScrollTop(top);
+    this.sendHighlightState_('shown');
   }
 
   /**
