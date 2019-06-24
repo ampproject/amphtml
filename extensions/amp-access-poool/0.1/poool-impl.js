@@ -24,14 +24,13 @@ import {resetStyles, setStyle, setStyles} from '../../../src/style';
 const TAG = 'amp-access-poool';
 
 const ACCESS_CONFIG = {
-  'authorization':
-    'https://api.poool.fr/api/v2/amp/access?rid=READER_ID',
+  'authorization': 'https://api.poool.fr/api/v2/amp/access?rid=READER_ID',
   'iframe':
-    'https://assets.poool.fr/amp.html'
-        + '?rid=READER_ID'
-        + '&c=CANONICAL_URL'
-        + '&o=AMPDOC_URL'
-        + '&r=DOCUMENT_REFERRER',
+    'https://assets.poool.fr/amp.html' +
+    '?rid=READER_ID' +
+    '&c=CANONICAL_URL' +
+    '&o=AMPDOC_URL' +
+    '&r=DOCUMENT_REFERRER',
 };
 
 const AUTHORIZATION_TIMEOUT = 3000;
@@ -59,7 +58,6 @@ export class PooolVendor {
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    */
   constructor(accessService, accessSource) {
-
     /** @const */
     this.ampdoc = accessService.ampdoc;
 
@@ -102,20 +100,22 @@ export class PooolVendor {
    * @return {!Promise<!JsonObject>}
    */
   authorize() {
-    return this.getPooolAccess_()
-        .then(response => {
-          return {access: response.access};
-        }, err => {
-          if (!err || !err.response) {
-            throw err;
-          }
-          const {response} = err;
-          if (response.status !== 402) {
-            throw err;
-          }
-          this.renderPoool_();
-          return {access: false};
-        });
+    return this.getPooolAccess_().then(
+      response => {
+        return {access: response.access};
+      },
+      err => {
+        if (!err || !err.response) {
+          throw err;
+        }
+        const {response} = err;
+        if (response.status !== 402) {
+          throw err;
+        }
+        this.renderPoool_();
+        return {access: false};
+      }
+    );
   }
 
   /**
@@ -154,16 +154,18 @@ export class PooolVendor {
    * @private
    */
   getPooolAccess_() {
-    const url = addParamToUrl(this.accessUrl_ , 'iid', this.itemID_);
+    const url = addParamToUrl(this.accessUrl_, 'iid', this.itemID_);
     const urlPromise = this.accessSource_.buildUrl(url, false);
-    return urlPromise.then(url => {
-      return this.accessSource_.getLoginUrl(url);
-    }).then(url => {
-      dev().info(TAG, 'Authorization URL: ', url);
-      return this.timer_.timeoutPromise(
-          AUTHORIZATION_TIMEOUT,
-          this.xhr_.fetchJson(url)).then(res => res.json());
-    });
+    return urlPromise
+      .then(url => {
+        return this.accessSource_.getLoginUrl(url);
+      })
+      .then(url => {
+        dev().info(TAG, 'Authorization URL: ', url);
+        return this.timer_
+          .timeoutPromise(AUTHORIZATION_TIMEOUT, this.xhr_.fetchJson(url))
+          .then(res => res.json());
+      });
   }
 
   /**
@@ -172,18 +174,23 @@ export class PooolVendor {
   renderPoool_() {
     const pooolContainer = document.getElementById('poool');
     const urlPromise = this.accessSource_.buildUrl(
-        addParamsToUrl(this.iframeUrl_, dict({
+      addParamsToUrl(
+        this.iframeUrl_,
+        dict({
           'bi': this.pooolConfig_['bundleID'],
           'iid': this.pooolConfig_['itemID'],
           'ce': this.pooolConfig_['cookiesEnabled'],
-          'd': typeof this.pooolConfig_['debug'] !== 'undefined' &&
+          'd':
+            typeof this.pooolConfig_['debug'] !== 'undefined' &&
             this.pooolConfig_['debug'] !== null
-            ? this.pooolConfig_['debug']
-            : getMode().development || getMode().localDev,
+              ? this.pooolConfig_['debug']
+              : getMode().development || getMode().localDev,
           'fw': this.pooolConfig_['forceWidget'],
           'cs': this.pooolConfig_['customSegment'],
-        })),
-        false);
+        })
+      ),
+      false
+    );
 
     return urlPromise.then(url => {
       this.iframe_.src = url;

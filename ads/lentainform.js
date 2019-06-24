@@ -28,11 +28,12 @@ export function lentainform(global, data) {
 
   document.body.appendChild(scriptRoot);
 
-  const url = `https://jsc.lentainform.com/${encodeURIComponent(data.publisher[0])}/`
-    + `${encodeURIComponent(data.publisher[1])}/`
-    + `${encodeURIComponent(data.publisher)}.`
-    + `${encodeURIComponent(data.widget)}.js?t=`
-    + Math.floor(Date.now() / 36e5);
+  const url =
+    `https://jsc.lentainform.com/${encodeURIComponent(data.publisher[0])}/` +
+    `${encodeURIComponent(data.publisher[1])}/` +
+    `${encodeURIComponent(data.publisher)}.` +
+    `${encodeURIComponent(data.widget)}.js?t=` +
+    Math.floor(Date.now() / 36e5);
 
   loadScript(global, data.url || url);
 }

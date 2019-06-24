@@ -16,7 +16,6 @@
 
 import {Observable} from '../../../src/observable';
 
-
 /**
  * @typedef {{
  *   form: !HTMLFormElement,
@@ -24,7 +23,6 @@ import {Observable} from '../../../src/observable';
  * }}
  */
 export let FormSubmitEventDef;
-
 
 export class FormSubmitService {
   /**

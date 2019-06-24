@@ -24,9 +24,11 @@ import {validateData, writeScript} from '../3p/3p';
  */
 export function fluct(global, data) {
   validateData(data, ['g', 'u']);
-  writeScript(global,
-      `https://cdn-fluct.sh.adingo.jp/f.js?G=${encodeURIComponent(data['g'])}`,
-      function() {
-        adingoFluct.showAd(data['u']);
-      });
+  writeScript(
+    global,
+    `https://cdn-fluct.sh.adingo.jp/f.js?G=${encodeURIComponent(data['g'])}`,
+    function() {
+      adingoFluct.showAd(data['u']);
+    }
+  );
 }

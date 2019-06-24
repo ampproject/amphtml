@@ -21,11 +21,14 @@
  * @see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/106812/
  */
 
-import {
-  LayoutRectDef,
-  layoutRectLtwh,
-} from './layout-rect';
+import {LayoutRectDef, layoutRectLtwh} from './layout-rect';
 import {isConnectedNode} from './dom';
+
+/**
+ * Stores the native getBoundingClientRect before we patch it, so that the
+ * patch may call the native implementation.
+ */
+let nativeClientRect;
 
 /**
  * Polyfill for Node.getBoundingClientRect API.
@@ -34,7 +37,6 @@ import {isConnectedNode} from './dom';
  */
 function getBoundingClientRect() {
   if (isConnectedNode(this)) {
-    const nativeClientRect = Element.prototype.getBoundingClientRect;
     return nativeClientRect.call(this);
   }
 
@@ -54,7 +56,7 @@ function shouldInstall(win) {
 
   try {
     const div = win.document.createElement('div');
-    const rect = div./*OK*/getBoundingClientRect();
+    const rect = div./*OK*/ getBoundingClientRect();
     return rect.top !== 0;
   } catch (e) {
     // IE 10 or less
@@ -69,6 +71,7 @@ function shouldInstall(win) {
  */
 export function install(win) {
   if (shouldInstall(win)) {
+    nativeClientRect = Element.prototype.getBoundingClientRect;
     win.Object.defineProperty(win.Element.prototype, 'getBoundingClientRect', {
       value: getBoundingClientRect,
     });

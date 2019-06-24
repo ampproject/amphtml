@@ -22,7 +22,12 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function eplanning(global, data) {
   validateData(data, [
-    'epl_si', 'epl_isv', 'epl_sv', 'epl_sec', 'epl_kvs', 'epl_e',
+    'epl_si',
+    'epl_isv',
+    'epl_sv',
+    'epl_sec',
+    'epl_kvs',
+    'epl_e',
   ]);
   // push the two object into the '_eplanning' global
   (global._eplanning = global._eplanning || []).push({

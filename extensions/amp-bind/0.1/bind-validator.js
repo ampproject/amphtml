@@ -93,7 +93,7 @@ export class BindValidator {
    * @return {boolean}
    */
   canBind(tag, property) {
-    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
+    return this.rulesForTagAndProperty_(tag, property) !== undefined;
   }
 
   /**
@@ -405,6 +405,9 @@ function createElementRules_() {
     'OPTGROUP': {
       'disabled': null,
       'label': null,
+    },
+    'SECTION': {
+      'data-expand': null,
     },
     'SELECT': {
       'autofocus': null,

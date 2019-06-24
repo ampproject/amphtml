@@ -189,19 +189,22 @@ describe('json', () => {
 
     it('throw if not one script', () => {
       expect(() => getChildJsonConfig(element)).to.throw(
-          'Found 0 <script> children. Expected 1');
+        'Found 0 <script> children. Expected 1'
+      );
       element.appendChild(script);
       const script2 = document.createElement('script');
       element.appendChild(script2);
       expect(() => getChildJsonConfig(element)).to.throw(
-          'Found 2 <script> children. Expected 1');
+        'Found 2 <script> children. Expected 1'
+      );
     });
 
     it('throw if type is not application/json', () => {
       script.setAttribute('type', '');
       element.appendChild(script);
       expect(() => getChildJsonConfig(element)).to.throw(
-          '<script> child must have type="application/json"');
+        '<script> child must have type="application/json"'
+      );
     });
 
     it('throw if cannot parse json', () => {
@@ -209,10 +212,10 @@ describe('json', () => {
       script.textContent = invalidText;
       element.appendChild(script);
       expect(() => getChildJsonConfig(element)).to.throw(
-          'Failed to parse <script> contents. Is it valid JSON?');
+        'Failed to parse <script> contents. Is it valid JSON?'
+      );
     });
   });
-
 
   describe('deepEquals', () => {
     it('should throw on non-finite depth arg', () => {

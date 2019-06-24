@@ -23,7 +23,8 @@ export const TREASUREDATA_CONFIG = /** @type {!JsonObject} */ ({
   },
   'requests': {
     'base': 'https://${host}/postback/v3/event/${database}',
-    'baseParams': 'td_write_key=${writeKey}' +
+    'baseParams':
+      'td_write_key=${writeKey}' +
       '&td_global_id=td_global_id' +
       '&td_client_id=CLIENT_ID(_td)' +
       '&td_charset=DOCUMENT_CHARSET' +

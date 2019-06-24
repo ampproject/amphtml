@@ -34,7 +34,6 @@ const READ_ONLY_MESSAGES = [MessageType.SEND_POSITIONS];
 
 /** Simple helper for named callbacks. */
 class NamedObservable {
-
   /**
    * Creates an instance of NamedObservable.
    */
@@ -76,7 +75,6 @@ class NamedObservable {
 let AdFrameDef;
 
 export class InaboxMessagingHost {
-
   /**
    * @param {!Window} win
    * @param {!Array<!HTMLIFrameElement>} iframes
@@ -98,13 +96,19 @@ export class InaboxMessagingHost {
     this.frameOverlayManager_ = new FrameOverlayManager(win);
 
     this.msgObservable_.listen(
-        MessageType.SEND_POSITIONS, this.handleSendPositions_);
+      MessageType.SEND_POSITIONS,
+      this.handleSendPositions_
+    );
 
     this.msgObservable_.listen(
-        MessageType.FULL_OVERLAY_FRAME, this.handleEnterFullOverlay_);
+      MessageType.FULL_OVERLAY_FRAME,
+      this.handleEnterFullOverlay_
+    );
 
     this.msgObservable_.listen(
-        MessageType.CANCEL_FULL_OVERLAY_FRAME, this.handleCancelFullOverlay_);
+      MessageType.CANCEL_FULL_OVERLAY_FRAME,
+      this.handleCancelFullOverlay_
+    );
   }
 
   /**
@@ -125,24 +129,29 @@ export class InaboxMessagingHost {
       return false;
     }
 
-    const adFrame =
-        this.getFrameElement_(message.source, request['sentinel']);
+    const adFrame = this.getFrameElement_(message.source, request['sentinel']);
     if (!adFrame) {
       dev().info(TAG, 'Ignored message from untrusted iframe:', message);
       return false;
     }
 
     const allowedTypes = adFrame.iframe.dataset['ampAllowed'];
-    const allowedTypesList = allowedTypes ?
-      allowedTypes.split(/\s*,\s*/) :
-      READ_ONLY_MESSAGES;
+    const allowedTypesList = allowedTypes
+      ? allowedTypes.split(/\s*,\s*/)
+      : READ_ONLY_MESSAGES;
     if (allowedTypesList.indexOf(request['type']) === -1) {
       dev().info(TAG, 'Ignored non-whitelisted message type:', message);
       return false;
     }
 
-    if (!this.msgObservable_.fire(request['type'], this,
-        [adFrame.measurableFrame, request, message.source, message.origin])) {
+    if (
+      !this.msgObservable_.fire(request['type'], this, [
+        adFrame.measurableFrame,
+        request,
+        message.source,
+        message.origin,
+      ])
+    ) {
       dev().warn(TAG, 'Unprocessed AMP message:', message);
       return false;
     }
@@ -160,16 +169,27 @@ export class InaboxMessagingHost {
   handleSendPositions_(iframe, request, source, origin) {
     const viewportRect = this.positionObserver_.getViewportRect();
     const targetRect = this.positionObserver_.getTargetRect(iframe);
-    this.sendPosition_(request, source, origin, dict({
-      'viewportRect': viewportRect,
-      'targetRect': targetRect,
-    }));
+    this.sendPosition_(
+      request,
+      source,
+      origin,
+      dict({
+        'viewportRect': viewportRect,
+        'targetRect': targetRect,
+      })
+    );
 
     devAssert(this.iframeMap_[request.sentinel]);
     this.iframeMap_[request.sentinel].observeUnregisterFn =
-        this.iframeMap_[request.sentinel].observeUnregisterFn ||
-        this.positionObserver_.observe(iframe, data =>
-          this.sendPosition_(request, source, origin, /** @type ?JsonObject */(data)));
+      this.iframeMap_[request.sentinel].observeUnregisterFn ||
+      this.positionObserver_.observe(iframe, data =>
+        this.sendPosition_(
+          request,
+          source,
+          origin,
+          /** @type {?JsonObject} */ (data)
+        )
+      );
     return true;
   }
 
@@ -182,9 +202,10 @@ export class InaboxMessagingHost {
    */
   sendPosition_(request, source, origin, data) {
     dev().fine(TAG, 'Sent position data to [%s] %s', request.sentinel, data);
-    source./*OK*/postMessage(
-        serializeMessage(MessageType.POSITION, request.sentinel, data),
-        origin);
+    source./*OK*/ postMessage(
+      serializeMessage(MessageType.POSITION, request.sentinel, data),
+      origin
+    );
   }
 
   /**
@@ -199,15 +220,17 @@ export class InaboxMessagingHost {
    */
   handleEnterFullOverlay_(iframe, request, source, origin) {
     this.frameOverlayManager_.expandFrame(iframe, boxRect => {
-      source./*OK*/postMessage(
-          serializeMessage(
-              MessageType.FULL_OVERLAY_FRAME_RESPONSE,
-              request.sentinel,
-              dict({
-                'success': true,
-                'boxRect': boxRect,
-              })),
-          origin);
+      source./*OK*/ postMessage(
+        serializeMessage(
+          MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+          request.sentinel,
+          dict({
+            'success': true,
+            'boxRect': boxRect,
+          })
+        ),
+        origin
+      );
     });
 
     return true;
@@ -222,15 +245,17 @@ export class InaboxMessagingHost {
    */
   handleCancelFullOverlay_(iframe, request, source, origin) {
     this.frameOverlayManager_.collapseFrame(iframe, boxRect => {
-      source./*OK*/postMessage(
-          serializeMessage(
-              MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
-              request.sentinel,
-              dict({
-                'success': true,
-                'boxRect': boxRect,
-              })),
-          origin);
+      source./*OK*/ postMessage(
+        serializeMessage(
+          MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
+          request.sentinel,
+          dict({
+            'success': true,
+            'boxRect': boxRect,
+          })
+        ),
+        origin
+      );
     });
 
     return true;
@@ -271,8 +296,11 @@ export class InaboxMessagingHost {
     const measurableWin = measurableFrame.contentWindow;
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];
-      for (let j = 0, tempWin = measurableWin;
-        j < 10; j++, tempWin = tempWin.parent) {
+      for (
+        let j = 0, tempWin = measurableWin;
+        j < 10;
+        j++, tempWin = tempWin.parent
+      ) {
         if (iframe.contentWindow == tempWin) {
           this.iframeMap_[sentinel] = {iframe, measurableFrame};
           return this.iframeMap_[sentinel];
@@ -304,9 +332,11 @@ export class InaboxMessagingHost {
     // hierarchy. If win is not nested within x-domain framing, then
     // this loop breaks immediately.
     let topXDomainWin;
-    for (let j = 0, tempWin = win;
+    for (
+      let j = 0, tempWin = win;
       j < 10 && tempWin != tempWin.top && !canInspectWindow(tempWin);
-      j++, topXDomainWin = tempWin, tempWin = tempWin.parent) {}
+      j++, topXDomainWin = tempWin, tempWin = tempWin.parent
+    ) {}
     // If topXDomainWin exists, we know that the frame we want to measure
     // is a x-domain frame. Unfortunately, you can not access properties
     // on a x-domain window, so we can not do window.frameElement, and
@@ -314,18 +344,20 @@ export class InaboxMessagingHost {
     // over that parent's child iframes until we find the frame element
     // that corresponds to topXDomainWin.
     if (!!topXDomainWin) {
-      const iframes =
-            topXDomainWin.parent.document.querySelectorAll('iframe');
-      for (let k = 0, frame = iframes[k]; k < iframes.length;
-        k++, frame = iframes[k]) {
+      const iframes = topXDomainWin.parent.document.querySelectorAll('iframe');
+      for (
+        let k = 0, frame = iframes[k];
+        k < iframes.length;
+        k++, frame = iframes[k]
+      ) {
         if (frame.contentWindow == topXDomainWin) {
-          return /** @type {!HTMLIFrameElement} */(frame);
+          return /** @type {!HTMLIFrameElement} */ (frame);
         }
       }
     }
     // If topXDomainWin does not exist, then win is friendly, and we can
     // just return its frameElement directly.
-    return /** @type {!HTMLIFrameElement} */(win.frameElement);
+    return /** @type {!HTMLIFrameElement} */ (win.frameElement);
   }
 
   /**

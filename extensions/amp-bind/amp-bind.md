@@ -371,7 +371,7 @@ A **binding** is a special attribute of the form `[property]` that links an elem
 
 When the **state** changes, expressions are re-evaluated and the bound elements' properties are updated with the new expression results.
 
-`amp-bind` supports data bindings on four types of element state:
+`amp-bind` supports data bindings on five types of element state:
 
 <table>
   <tr>
@@ -398,6 +398,11 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Size of <a href="https://www.ampproject.org/docs/reference/components">AMP elements</a></td>
     <td><code>[width]</code><br><code>[height]</code></td>
     <td>Changes the width and/or height of the AMP element.</td>
+  </tr>
+  <tr>
+    <td>Accessibility states and properties</td>
+    <td><code>[aria-hidden]</code><br><code>[aria-label]</code><br>etc.</td>
+    <td>Used for dynamically updating information available to assistive technologies like screen readers.</td>
   </tr>
   <tr>
     <td>Element-specific attributes</td>
@@ -533,6 +538,11 @@ Only binding to the following components and attributes are allowed:
     <td><code>&lt;optgroup&gt;</code></td>
     <td><code>[disabled]</code><br><code>[label]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes">optgroup attributes</a></td>
+  </tr>
+  <tr>
+    <td><code>&lt;section&gt;</code></td>
+    <td><code>[data-expand]</code></td>
+    <td>Changes the expansion of a <code>section</code> in an <a href="https://amp.dev/documentation/components/amp-accordion">amp-accordion</a>.</td>
   </tr>
   <tr>
     <td><code>&lt;select&gt;</code></td>

@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 872
+spec_file_revision: 896
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -142,12 +142,20 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "TITLE"
   spec_name: "title"
   attrs: { name: "[text]" }
 }
+tags: {
+  html_format: AMP4EMAIL
+  tag_name: "TITLE"
+  spec_name: "title [AMP4EMAIL]"
+  attrs: { name: "[text]" }
+  deprecation: "Title tags in email have no meaning. This tag may become invalid in the future."
+  deprecation_url: "https://github.com/ampproject/amphtml/issues/22318"
+}
+
 # 4.2.3 the base element
 tags: {
   html_format: AMP
@@ -566,6 +574,7 @@ tags: {
     value_casei: "amp-experiment-token"
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  satisfies: "amp-experiment-token"
 }
 # AMP metadata, name=amp-link-variable-allowed-origin
 # https://github.com/ampproject/amphtml/issues/8132
@@ -995,6 +1004,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   named_id: STYLE_AMP_CUSTOM
   unique: true
   mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: {
     name: "amp-custom"
     mandatory: true
@@ -1005,7 +1015,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     # attribute and thus can't have a dispatch_key.
     # dispatch_key: NAME_DISPATCH
   }
-  attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
     name: "type"
     value_casei: "text/css"
@@ -1160,6 +1169,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
   spec_name: "style amp-custom (AMP4ADS)"
   unique: true
   mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: {
     name: "amp-custom"
     mandatory: true
@@ -1170,7 +1180,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
     # attribute and thus can't have a dispatch_key.
     # dispatch_key: NAME_DISPATCH
   }
-  attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
     name: "type"
     value_casei: "text/css"
@@ -1259,7 +1268,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     # attribute and thus can't have a dispatch_key.
     # dispatch_key: NAME_DISPATCH
   }
-  attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
     name: "type"
     value_casei: "text/css"
@@ -1321,13 +1329,13 @@ tags: {
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
     value: ""
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  attrs: { name: "nonce" }
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
@@ -1363,13 +1371,13 @@ tags: {
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: {
     name: "amp4ads-boilerplate"
     mandatory: true
     value: ""
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  attrs: { name: "nonce" }
   cdata: {
     # This regex allows arbitrary whitespace around the body statement, but
     # not inside it. This is a compromise to keep things simple, but allow
@@ -1391,7 +1399,6 @@ tags: {
     value: ""
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  attrs: { name: "nonce" }
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
@@ -1409,13 +1416,13 @@ tags: {
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
     value: ""
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  attrs: { name: "nonce" }
   cdata {
     cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
   }
@@ -1799,6 +1806,9 @@ tags: {
       # Blackberry messenger
       # (http://devblog.blackberry.com/2015/02/cross-platform-sharing-with-bbm/)
       protocol: "bbmi"
+      # IOS over-the-air app installation
+      # (https://github.com/nifcblm/AHPP-iOS-App/wiki/How-to-distribute-enterprise-iOS-App)
+      protocol: "itms-services"
       protocol: "fb-me"
       protocol: "fb-messenger"
       protocol: "intent"
@@ -2119,7 +2129,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "RTC"
 }
@@ -2135,7 +2144,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "BDI"
 }
@@ -3818,7 +3826,10 @@ tags: {
   }
   attrs: { name: "cellpadding" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "cellspacing" }  # Not valid html5 but commonly used and supported.
-  attrs: { name: "sortable" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "sortable"
+  }
   attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
 }
 # 4.9.2 The caption element
@@ -3916,7 +3927,10 @@ tags: {
   attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "rowspan" }
   attrs: { name: "scope" }
-  attrs: { name: "sorted" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "sorted"
+  }
   attrs: { name: "valign" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
 }
@@ -4054,15 +4068,6 @@ tags: {  # <form method=POST ...>
         "{{|}}"    # Mustache is disallowed in action-xhr.
   }
   attrs: { name: "autocomplete" }
-  attrs: {
-    name: "cross-origin"
-    value: "amp-viewer-auth-token-via-post"
-    trigger: {
-      also_requires_attr: "action-xhr"
-    }
-    deprecation: "crossorigin"
-    deprecation_url: "https://github.com/ampproject/amphtml/issues/21399"
-  }
   attrs: {
     name: "crossorigin"
     value: "amp-viewer-auth-token-via-post"
@@ -4312,8 +4317,14 @@ attr_lists: {
   attrs: { name: "checked" }
   attrs: { name: "disabled" }
   attrs: { name: "height" }
-  attrs: { name: "inputmode" }
-  attrs: { name: "list" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "inputmode"
+  }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "list"
+  }
   attrs: { name: "max" }
   attrs: { name: "maxlength" }
   attrs: { name: "min" }
@@ -4323,7 +4334,10 @@ attr_lists: {
   attrs: { name: "placeholder" }
   attrs: { name: "readonly" }
   attrs: { name: "required" }
-  attrs: { name: "selectiondirection" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "selectiondirection"
+  }
   attrs: { name: "size" }
   attrs: { name: "spellcheck" }
   attrs: { name: "step" }
@@ -4331,13 +4345,22 @@ attr_lists: {
   attrs: { name: "value" }
   attrs: { name: "width" }
   # <amp-bind>
-  attrs: { name: "[accept]" }
-  attrs: { name: "[accesskey]" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[accept]"
+  }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[accesskey]"
+  }
   attrs: { name: "[autocomplete]" }
   attrs: { name: "[checked]" }
   attrs: { name: "[disabled]" }
   attrs: { name: "[height]" }
-  attrs: { name: "[inputmode]" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[inputmode]"
+  }
   attrs: { name: "[max]" }
   attrs: { name: "[maxlength]" }
   attrs: { name: "[min]" }
@@ -4347,7 +4370,10 @@ attr_lists: {
   attrs: { name: "[placeholder]" }
   attrs: { name: "[readonly]" }
   attrs: { name: "[required]" }
-  attrs: { name: "[selectiondirection]" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[selectiondirection]"
+  }
   attrs: { name: "[size]" }
   attrs: { name: "[spellcheck]" }
   attrs: { name: "[step]" }
@@ -4372,6 +4398,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "INPUT"
   attrs: {
+    disabled_by: "amp4email"
     name: "no-verify"
     value: ""
   }
@@ -4396,6 +4423,7 @@ tags: {
   tag_name: "INPUT"
   spec_name: "INPUT [type=file]"
    attrs: {
+    disabled_by: "amp4email"
     name: "no-verify"
     value: ""
   }
@@ -4466,7 +4494,10 @@ tags: {
   attrs: { name: "value" }
   # <amp-bind>
   attrs: { name: "[disabled]" }
-  attrs: { name: "[type]" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[type]"
+  }
   attrs: { name: "[value]" }
   attr_lists: "name-attr"
 }
@@ -4502,17 +4533,24 @@ tags: {
   html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "SELECT"
-  attrs: { name: "autofocus" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "autofocus"
+  }
   attrs: { name: "disabled" }
   attrs: { name: "multiple" }
   attrs: {
+    disabled_by: "amp4email"
     name: "no-verify"
     value: ""
   }
   attrs: { name: "required" }
   attrs: { name: "size" }
   # <amp-bind>
-  attrs: { name: "[autofocus]" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[autofocus]"
+  }
   attrs: { name: "[disabled]" }
   attrs: { name: "[multiple]" }
   attrs: { name: "[required]" }
@@ -4574,12 +4612,16 @@ tags: {
     name: "autoexpand"
     requires_extension: "amp-form"
   }
-  attrs: { name: "autofocus" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "autofocus"
+  }
   attrs: { name: "cols" }
   attrs: { name: "disabled" }
   attrs: { name: "maxlength" }
   attrs: { name: "minlength" }
   attrs: {
+    disabled_by: "amp4email"
     name: "no-verify"
     value: ""
   }
@@ -4588,14 +4630,26 @@ tags: {
   attrs: { name: "readonly" }
   attrs: { name: "required" }
   attrs: { name: "rows" }
-  attrs: { name: "selectiondirection" }
-  attrs: { name: "selectionend" }
-  attrs: { name: "selectionstart" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "selectiondirection"
+  }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "selectionend"
+  }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "selectionstart"
+  }
   attrs: { name: "spellcheck" }
   attrs: { name: "wrap" }
   # <amp-bind>
   attrs: { name: "[autocomplete]" }
-  attrs: { name: "[autofocus]" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[autofocus]"
+  }
   attrs: { name: "[cols]" }
   attrs: { name: "[defaulttext]" }
   attrs: { name: "[disabled]" }
@@ -4606,9 +4660,18 @@ tags: {
   attrs: { name: "[readonly]" }
   attrs: { name: "[required]" }
   attrs: { name: "[rows]" }
-  attrs: { name: "[selectiondirection]" }
-  attrs: { name: "[selectionend]" }
-  attrs: { name: "[selectionstart]" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[selectiondirection]"
+  }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[selectionend]"
+  }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[selectionstart]"
+  }
   attrs: { name: "[spellcheck]" }
   attrs: { name: "[wrap]" }
   attr_lists: "name-attr"
@@ -4709,14 +4772,11 @@ tags: {
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: {
     name: "async"
     mandatory: true
     value: ""
-  }
-  attrs: {
-    disabled_by: "transformed"
-    name: "nonce"
   }
   attrs: {
     name: "src"
@@ -4743,14 +4803,11 @@ tags: {
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: {
     name: "async"
     mandatory: true
     value: ""
-  }
-  attrs: {
-    disabled_by: "transformed"
-    name: "nonce"
   }
   attrs: {
     name: "src"
@@ -4778,10 +4835,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "script type=application/ld+json"
-  attrs: {
-    disabled_by: "transformed"
-    name: "nonce"
-  }
+  attr_lists: "nonce-attr"
   attrs: {
     name: "type"
     mandatory: true
@@ -4803,15 +4857,12 @@ tags: {
   spec_name: "script id=amp-rtc"
   unique: true
   mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: {
     name: "id"
     mandatory: true
     value_casei: "amp-rtc"
     dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: {
-    disabled_by: "transformed"
-    name: "nonce"
   }
   attrs: {
     name: "type"
@@ -5088,15 +5139,14 @@ tags: {  # <amp-img>
     supported_layouts: RESPONSIVE
   }
 }
-# See the restrictions on mandatory-src-amp4email.
+# See the restrictions on mandatory-src-amp4email, as well as the removal of
+# `object-fit` and `object-position`.
 tags: {  # <amp-img>
   html_format: AMP4EMAIL
   tag_name: "AMP-IMG"
   spec_name: "AMP-IMG (AMP4EMAIL)"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "object-fit" }
-  attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"
@@ -5197,6 +5247,22 @@ attr_lists: {
   attrs: { name: "[width]" }
 }
 
+# We generally want to allow publishers to use nonce on their own pages, to
+# aid security on origin. The AMP Cache will strip these attributes so as
+# not to break the behavior of the document on the cache. However, certain
+# contexts do not make sense for nonce attributes. Email never is displayed
+# on the publisher origin. Transformed documents are typically used as signed
+# exchanges where the AMP Cache cannot strip the nonces. The nonce attribute
+# is also present in the "common-extension-attrs" attr_lists below.
+attr_lists: {
+  name: "nonce-attr"
+  attrs: {
+    disabled_by: "amp4email"
+    disabled_by: "transformed"
+    name: "nonce"
+  }
+}
+
 # AMP Extension attributes. These attributes are used in every AMP
 # extension script tag
 attr_lists: {
@@ -5208,6 +5274,7 @@ attr_lists: {
   }
   attrs: {
     disabled_by: "transformed"
+    disabled_by: "amp4email"
     name: "nonce"
   }
   attrs: {
@@ -5345,6 +5412,7 @@ attr_lists: {
         ")(\\s|$)"
   }
 }
+
 
 # Disallows document properties on "name" attribute for use on <form>.
 attr_lists: {
@@ -6370,6 +6438,7 @@ attr_lists: {
         ")(\\s|$)"
   }
   attrs: { name: "lang" }
+  attrs: { name: "slot" }
   attrs: { name: "tabindex" }
   attrs: { name: "title" }
   attrs: { name: "translate" }
@@ -6511,6 +6580,10 @@ attr_lists: {
   }
   attrs: {
     name: "subscriptions-display"
+    requires_extension: "amp-subscriptions"
+  }
+  attrs: {
+    name: "subscriptions-lang"
     requires_extension: "amp-subscriptions"
   }
   attrs: {

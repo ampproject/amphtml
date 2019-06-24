@@ -223,10 +223,12 @@ const createLinkerTests = [
     description: 'works for AMP CID API generated Client ID',
     version: '1',
     pairs: {
-      '_ga': 'amp-' +
+      '_ga':
+        'amp-' +
         'oRg8vByriPdstwLgkz-UNWbp2P13vNFsnhES5vW8s5WodTOoea0mTiY7X62utLyz',
     },
-    output: '1*1fkd1zz*_ga*' +
+    output:
+      '1*1fkd1zz*_ga*' +
       'YW1wLW9SZzh2QnlyaVBkc3R3TGdrei1VTldicDJQMT' +
       'N2TkZzbmhFUzV2VzhzNVdvZFRPb2VhMG1UaVk3WDYydXRMeXo.',
   },
@@ -234,10 +236,10 @@ const createLinkerTests = [
     description: 'works for AMP Viewer generated Client ID',
     version: '1',
     pairs: {
-      '_ga':
-          'WgcaAD4XN2lydhQVNFruk6X8zwoUg6K2RnaRlhjs6CXvTv4aJV-3oVLdI1WxxvJb',
+      '_ga': 'WgcaAD4XN2lydhQVNFruk6X8zwoUg6K2RnaRlhjs6CXvTv4aJV-3oVLdI1WxxvJb',
     },
-    output: '1*19eaxqc*_ga*' +
+    output:
+      '1*19eaxqc*_ga*' +
       'V2djYUFENFhOMmx5ZGhRVk5GcnVrNlg4endvVWc2Sz' +
       'JSbmFSbGhqczZDWHZUdjRhSlYtM29WTGRJMVd4eHZKYg..',
   },
@@ -252,9 +254,11 @@ describe('Linker', () => {
     sandbox.useFakeTimers(BASE_TIME);
     sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
     mockWin = mockWindowInterface(sandbox);
-    mockWin.getUserAgent.returns('Mozilla/5.0 (X11; Linux x86_64) ' +
+    mockWin.getUserAgent.returns(
+      'Mozilla/5.0 (X11; Linux x86_64) ' +
         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 ' +
-        'Safari/537.36');
+        'Safari/537.36'
+    );
     mockWin.getUserLanguage.returns('en-US');
   });
 

@@ -34,9 +34,7 @@ import {
   isCdnProxy,
   isGoogleAdsA4AValidEnvironment,
 } from '../../../ads/google/a4a/utils';
-import {
-  selectAndSetExperiments,
-} from '../../../ads/google/a4a/experiment-utils';
+import {selectAndSetExperiments} from '../../../ads/google/a4a/experiment-utils';
 
 /** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
@@ -70,12 +68,16 @@ export const ADSENSE_EXP_NAMES = {
  * @param {!Element} element
  */
 function selectExperiments(win, element) {
-  selectAndSetExperiments(win, element,
-      [ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP,
-        ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_CTL],
-      ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL,
-      true);
-
+  selectAndSetExperiments(
+    win,
+    element,
+    [
+      ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP,
+      ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_CTL,
+    ],
+    ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL,
+    true
+  );
 
   // See if in holdback control/experiment.
   const urlExperimentId = extractUrlExperimentId(win, element);
@@ -84,18 +86,25 @@ function selectExperiments(win, element) {
     addExperimentIdToElement(experimentId, element);
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
     dev().info(
-        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+      TAG,
+      `url experiment selection ${urlExperimentId}: ${experimentId}.`
+    );
   }
 
   // If not in the unconditioned canonical experiment, attempt to
   // select into the undiluted canonical experiment.
   const inUnconditionedCanonicalExp = !!getExperimentBranch(
-      win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL);
+    win,
+    ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL
+  );
   if (!inUnconditionedCanonicalExp && !isCdnProxy(win)) {
-    selectAndSetExperiments(win, element,
-        [ADSENSE_EXPERIMENTS.CANONICAL_EXP,
-          ADSENSE_EXPERIMENTS.CANONICAL_CTL],
-        ADSENSE_EXP_NAMES.CANONICAL, true);
+    selectAndSetExperiments(
+      win,
+      element,
+      [ADSENSE_EXPERIMENTS.CANONICAL_EXP, ADSENSE_EXPERIMENTS.CANONICAL_CTL],
+      ADSENSE_EXP_NAMES.CANONICAL,
+      true
+    );
   }
 }
 
@@ -110,10 +119,11 @@ export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
     return false;
   }
   selectExperiments(win, element);
-  return isGoogleAdsA4AValidEnvironment(win) ||
-      getExperimentBranch(
-          win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL) ==
+  return (
+    isGoogleAdsA4AValidEnvironment(win) ||
+    getExperimentBranch(win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL) ==
       ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP ||
-      getExperimentBranch(win, ADSENSE_EXP_NAMES.CANONICAL) ==
-      ADSENSE_EXPERIMENTS.CANONICAL_EXP;
+    getExperimentBranch(win, ADSENSE_EXP_NAMES.CANONICAL) ==
+      ADSENSE_EXPERIMENTS.CANONICAL_EXP
+  );
 }

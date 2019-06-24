@@ -18,119 +18,177 @@ import {CarouselCriteria} from '../carousel-criteria';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 
-
 const TAG = 'amp-auto-lightbox';
 
-
-describes.realWin(TAG, {
-  amp: {
-    amp: true,
-    ampdoc: 'single',
-    experiments: ['amp-auto-lightbox-carousel'],
+describes.realWin(
+  TAG,
+  {
+    amp: {
+      amp: true,
+      ampdoc: 'single',
+      experiments: ['amp-auto-lightbox-carousel'],
+    },
   },
-}, env => {
+  env => {
+    let html;
 
-  let html;
+    function buildCarousel(slides) {
+      const element = html`
+        <amp-carousel></amp-carousel>
+      `;
+      slides.forEach(slide => {
+        slide.classList.add('amp-carousel-slide');
+        element.appendChild(slide);
+      });
+      env.win.document.body.appendChild(element);
+      return element;
+    }
 
-  function buildCarousel(slides) {
-    const element = html`<amp-carousel></amp-carousel>`;
-    slides.forEach(slide => {
-      slide.classList.add('amp-carousel-slide');
-      element.appendChild(slide);
+    beforeEach(() => {
+      html = htmlFor(env.win.document.body);
+      toggleExperiment(env.win, 'amp-auto-lightbox-carousel', true);
     });
-    env.win.document.body.appendChild(element);
-    return element;
+
+    it('rejects carousels without <amp-img>', () => {
+      const root = buildCarousel([
+        html`
+          <div>Slide 1</div>
+        `,
+        html`
+          <div>Slide 2</div>
+        `,
+      ]);
+
+      expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
+    });
+
+    it('rejects carousels with <amp-img> but non-image slides', () => {
+      const root = buildCarousel([
+        html`
+          <amp-img></amp-img>
+        `,
+        html`
+          <amp-img></amp-img>
+        `,
+        html`
+          <div>Slide</div>
+        `,
+      ]);
+
+      expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
+    });
+
+    it('accepts carousels with only <amp-img>', () => {
+      const root = buildCarousel([
+        html`
+          <amp-img></amp-img>
+        `,
+        html`
+          <amp-img></amp-img>
+        `,
+        html`
+          <amp-img></amp-img>
+        `,
+      ]);
+
+      expect(CarouselCriteria.meetsAll(root)).to.eventually.be.true;
+    });
+
+    it('accepts carousels with only <amp-img> (nested)', () => {
+      const root = buildCarousel([
+        html`
+          <div><amp-img></amp-img></div>
+        `,
+        html`
+          <div><amp-img></amp-img></div>
+        `,
+        html`
+          <div><amp-img></amp-img></div>
+        `,
+      ]);
+
+      expect(CarouselCriteria.meetsAll(root)).to.eventually.be.true;
+    });
+
+    it('accepts carousels with <amp-img> in every slide (mixed)', () => {
+      const root = buildCarousel([
+        html`
+          <div><amp-img></amp-img> Hello world!</div>
+        `,
+        html`
+          <amp-img></amp-img>
+        `,
+        html`
+          <div>
+            <amp-img></amp-img>
+            <div><strong>Hola</strong></div>
+          </div>
+        `,
+        html`
+          <div>
+            <h1>My Image</h1>
+            <amp-img></amp-img>
+          </div>
+        `,
+      ]);
+
+      expect(CarouselCriteria.meetsAll(root)).to.eventually.be.true;
+    });
+
+    it('rejects deep trees with only <amp-img>', () => {
+      const deep = html`
+        <div>
+          <div>
+            <div>
+              <div>
+                <div>
+                  <div>
+                    <div>
+                      <div>
+                        <div>
+                          <amp-img></amp-img>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const root = buildCarousel([
+        deep,
+        deep.cloneNode(/* deep */ true),
+        deep.cloneNode(/* deep */ true),
+      ]);
+
+      expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
+    });
+
+    it('rejects wide trees with only <amp-img>', () => {
+      const wide = html`
+        <div>
+          <amp-img></amp-img>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      `;
+
+      const root = buildCarousel([
+        wide,
+        wide.cloneNode(/* deep */ true),
+        wide.cloneNode(/* deep */ true),
+      ]);
+
+      expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
+    });
   }
-
-  beforeEach(() => {
-    html = htmlFor(env.win.document.body);
-    toggleExperiment(env.win, 'amp-auto-lightbox-carousel', true);
-  });
-
-  it('rejects carousels without <amp-img>', () => {
-    const root = buildCarousel([
-      html`<div>Slide 1</div>`,
-      html`<div>Slide 2</div>`,
-    ]);
-
-    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
-  });
-
-  it('rejects carousels with <amp-img> but non-image slides', () => {
-    const root = buildCarousel([
-      html`<amp-img></amp-img>`,
-      html`<amp-img></amp-img>`,
-      html`<div>Slide</div>`,
-    ]);
-
-    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
-  });
-
-  it('accepts carousels with only <amp-img>', () => {
-    const root = buildCarousel([
-      html`<amp-img></amp-img>`,
-      html`<amp-img></amp-img>`,
-      html`<amp-img></amp-img>`,
-    ]);
-
-    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.true;
-  });
-
-  it('accepts carousels with only <amp-img> (nested)', () => {
-    const root = buildCarousel([
-      html`<div><amp-img></amp-img></div>`,
-      html`<div><amp-img></amp-img></div>`,
-      html`<div><amp-img></amp-img></div>`,
-    ]);
-
-    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.true;
-  });
-
-  it('accepts carousels with <amp-img> in every slide (mixed)', () => {
-    const root = buildCarousel([
-      html`<div><amp-img></amp-img> Hello world!</div>`,
-      html`<amp-img></amp-img>`,
-      html`<div><amp-img></amp-img><div><strong>Hola</strong></div>`,
-      html`<div><h1>My Image</h1><amp-img></amp-img></div>`,
-    ]);
-
-    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.true;
-  });
-
-  it('rejects deep trees with only <amp-img>', () => {
-    const deep = html`<div><div><div><div><div><div><div><div><div>
-      <amp-img></amp-img>
-    </div></div></div></div></div></div></div></div></div>`;
-
-    const root = buildCarousel([
-      deep,
-      deep.cloneNode(/* deep */ true),
-      deep.cloneNode(/* deep */ true),
-    ]);
-
-    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
-  });
-
-  it('rejects wide trees with only <amp-img>', () => {
-    const wide = html`<div>
-      <amp-img></amp-img>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-    </div>`;
-
-    const root = buildCarousel([
-      wide,
-      wide.cloneNode(/* deep */ true),
-      wide.cloneNode(/* deep */ true),
-    ]);
-
-    expect(CarouselCriteria.meetsAll(root)).to.eventually.be.false;
-  });
-
-});
+);

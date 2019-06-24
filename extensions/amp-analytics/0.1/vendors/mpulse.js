@@ -16,7 +16,8 @@
 
 export const MPULSE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
-    'onvisible': 'https://${beacon_url}?' +
+    'onvisible':
+      'https://${beacon_url}?' +
       'h.d=${h.d}' +
       '&h.key=${h.key}' +
       '&h.t=${h.t}' +

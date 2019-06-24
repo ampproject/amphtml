@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {exponentialBackoff, exponentialBackoffClock}
-  from '../../src/exponential-backoff';
-
+import {
+  exponentialBackoff,
+  exponentialBackoffClock,
+} from '../../src/exponential-backoff';
 
 describe('exponentialBackoff', () => {
-
   let sandbox;
   let clock;
 

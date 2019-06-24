@@ -1,3 +1,11 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - stories
+teaser:
+  text: Creates an iframe and displays a Gist from GitHub
+---
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 

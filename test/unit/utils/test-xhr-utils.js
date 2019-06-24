@@ -14,79 +14,31 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
 import {
-  ALLOW_SOURCE_ORIGIN_HEADER,
   getViewerAuthTokenIfAvailable,
   getViewerInterceptResponse,
   setupAMPCors,
   setupInit,
   setupJsonFetchInit,
-  verifyAmpCORSHeaders,
 } from '../../../src/utils/xhr-utils';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
 
 describes.sandboxed('utils/xhr-utils', {}, env => {
-
   let sandbox;
 
   beforeEach(() => {
     sandbox = env.sandbox;
   });
 
-  describe('verifyAmpCORSHeaders', () => {
-    it('should verify allowed source origin', () => {
-      const sourceOrigin = 'https://www.da-original.org';
-      const headers = {};
-      headers[ALLOW_SOURCE_ORIGIN_HEADER] = sourceOrigin;
-      const response = new Response({}, {headers: new Headers(headers)});
-      const win = {
-        location: {
-          href: sourceOrigin,
-        },
-      };
-      expect(() => {
-        verifyAmpCORSHeaders(win, response, /* init */ {});
-      }).to.not.throw;
-    });
-
-    it('should throw error if invalid origin', () => {
-      const sourceOrigin = 'https://www.da-original.org';
-      const headers = {};
-      headers[ALLOW_SOURCE_ORIGIN_HEADER] = 'https://www.original.org';
-      const response = new Response({}, {headers: new Headers(headers)});
-      const win = {
-        location: {
-          href: sourceOrigin,
-        },
-      };
-      expect(() => {
-        verifyAmpCORSHeaders(win, response, {} /* init */);})
-          .to.throw('Returned AMP-Access-Control-Allow-Source-Origin '
-              + 'is not equal to the current: https://www.original.org vs '
-              + 'https://www.da-original.org');
-    });
-  });
-
   describe('setupAMPCors', () => {
-    describe('requireAmpResponseSourceOrigin', () => {
-      it('should be false if ampCors is false', () => {
-        const fetchInitDef = setupAMPCors(
-            {origin: 'http://www.origin.org'}, 'http://www.origin.org', {ampCors: false});
-        expect(fetchInitDef.requireAmpResponseSourceOrigin).to.equal(false);
-      });
-
-      it('should be set if not defined', () => {
-        const fetchInitDef = setupAMPCors(
-            {origin: 'http://www.origin.org'}, 'http://www.origin.org', {});
-        expect(fetchInitDef.requireAmpResponseSourceOrigin).to.equal(true);
-      });
-    });
-
     it('should set AMP-Same-Origin header', () => {
       // Given a same origin request.
       const fetchInitDef = setupAMPCors(
-          {origin: 'http://www.origin.org'}, 'http://www.origin.org', {});
+        {origin: 'http://www.origin.org'},
+        'http://www.origin.org',
+        {}
+      );
       // Expect proper header to be set.
       expect(fetchInitDef['headers']['AMP-Same-Origin']).to.equal('true');
     });
@@ -94,7 +46,10 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     it('should not set AMP-Same-Origin header', () => {
       // If not a same origin request.
       const fetchInitDef = setupAMPCors(
-          {origin: 'http://www.originz.org'}, 'http://www.origin.org', {headers: {}});
+        {origin: 'http://www.originz.org'},
+        'http://www.origin.org',
+        {headers: {}}
+      );
       expect(fetchInitDef['headers']['AMP-Same-Origin']).to.be.undefined;
     });
   });
@@ -111,9 +66,11 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     });
 
     it('should handle null credentials', () => {
-      allowConsoleError(() => { expect(() => {
-        setupInit({credentials: null}, 'text/html');
-      }).to.throw(/Only credentials=include\|omit support: null/); });
+      allowConsoleError(() => {
+        expect(() => {
+          setupInit({credentials: null}, 'text/html');
+        }).to.throw(/Only credentials=include\|omit support: null/);
+      });
     });
   });
 
@@ -164,19 +121,33 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
 
     it('should be no-op if amp doc is absent', () => {
       ampDocSingle = null;
-      return getViewerInterceptResponse(win, ampDocSingle, input, init)
-          .then(() => {
-            expect(viewerForDoc).to.not.have.been.called;
-          });
+      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
+        () => {
+          expect(viewerForDoc).to.not.have.been.called;
+        }
+      );
+    });
+
+    it('should be no-op if request is initialized to bypass', () => {
+      ampDocSingle = null;
+      // Given the bypass flag and since the context of this running
+      // is a test, thus mode.localDev is true.
+      return getViewerInterceptResponse(win, ampDocSingle, input, {
+        bypassInterceptorDev: true,
+      }).then(() => {
+        // Expect no interception.
+        expect(viewerForDoc).to.not.have.been.called;
+      });
     });
 
     it('should be no-op if amp doc does not support xhr interception', () => {
       doc.removeAttribute('allow-xhr-interception');
       input = 'https://www.googz.org';
-      return getViewerInterceptResponse(win, ampDocSingle, input, init)
-          .then(() => {
-            expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-          });
+      return getViewerInterceptResponse(win, ampDocSingle, input, {
+        bypassInterceptorDev: false,
+      }).then(() => {
+        expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+      });
     });
 
     it('should send xhr request to viewer', () => {
@@ -186,93 +157,104 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       input = 'https://www.googz.org';
       init = {body: {}};
       viewer.sendMessageAwaitResponse.returns(Promise.resolve({}));
-      return getViewerInterceptResponse(win, ampDocSingle, input, init)
-          .then(() => {
-            const msgPayload = dict({
-              'originalRequest': {
-                'input': 'https://www.googz.org',
-                'init': {
-                  'body': {},
-                },
+      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
+        () => {
+          const msgPayload = dict({
+            'originalRequest': {
+              'input': 'https://www.googz.org',
+              'init': {
+                'body': {},
               },
-            });
-            expect(viewer.sendMessageAwaitResponse).to.have.been.calledOnce;
-            expect(viewer.sendMessageAwaitResponse)
-                .to.have.been.calledWith('xhr', msgPayload);
+            },
           });
+          expect(viewer.sendMessageAwaitResponse).to.have.been.calledOnce;
+          expect(viewer.sendMessageAwaitResponse).to.have.been.calledWith(
+            'xhr',
+            msgPayload
+          );
+        }
+      );
     });
   });
 
   describe('getViewerAuthTokenIfAvailable', () => {
     it('should return undefined if crossorigin attr is not present', () => {
       const el = document.createElement('html');
-      return getViewerAuthTokenIfAvailable(el)
-          .then(token => {
-            expect(token).to.equal(undefined);
-          });
+      return getViewerAuthTokenIfAvailable(el).then(token => {
+        expect(token).to.equal(undefined);
+      });
     });
 
-    it('should return undefined if crossorigin attr does not contain ' +
-       'exactly "amp-viewer-auth-token-post"', () => {
-      const el = document.createElement('html');
-      el.setAttribute('crossorigin', '');
-      return getViewerAuthTokenIfAvailable(el)
-          .then(token => {
-            expect(token).to.be.undefined;
-          });
-    });
+    it(
+      'should return undefined if crossorigin attr does not contain ' +
+        'exactly "amp-viewer-auth-token-post"',
+      () => {
+        const el = document.createElement('html');
+        el.setAttribute('crossorigin', '');
+        return getViewerAuthTokenIfAvailable(el).then(token => {
+          expect(token).to.be.undefined;
+        });
+      }
+    );
 
     it('should return an auth token if one is present', () => {
       sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
-          Promise.resolve({
-            getIdTokenPromise: (() => Promise.resolve('idToken')),
-          }));
+        Promise.resolve({
+          getIdTokenPromise: () => Promise.resolve('idToken'),
+        })
+      );
       const el = document.createElement('html');
       el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-      return getViewerAuthTokenIfAvailable(el)
-          .then(token => {
-            expect(token).to.equal('idToken');
-          });
+      return getViewerAuthTokenIfAvailable(el).then(token => {
+        expect(token).to.equal('idToken');
+      });
     });
 
     it('should return an empty auth token if there is not one present', () => {
       sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
-          Promise.resolve({
-            getIdTokenPromise: (() => Promise.resolve(undefined)),
-          }));
+        Promise.resolve({
+          getIdTokenPromise: () => Promise.resolve(undefined),
+        })
+      );
       const el = document.createElement('html');
       el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-      return getViewerAuthTokenIfAvailable(el)
-          .then(token => {
-            expect(token).to.equal('');
-          });
+      return getViewerAuthTokenIfAvailable(el).then(token => {
+        expect(token).to.equal('');
+      });
     });
 
-    it('should return an empty auth token if there is an issue retrieving ' +
-        'the identity token', () => {
-      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+    it(
+      'should return an empty auth token if there is an issue retrieving ' +
+        'the identity token',
+      () => {
+        sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
           Promise.reject({
-            getIdTokenPromise: (() => Promise.reject()),
-          }));
-      const el = document.createElement('html');
-      el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-      return getViewerAuthTokenIfAvailable(el)
-          .then(token => {
-            expect(token).to.equal('');
-          });
-    });
+            getIdTokenPromise: () => Promise.reject(),
+          })
+        );
+        const el = document.createElement('html');
+        el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
+        return getViewerAuthTokenIfAvailable(el).then(token => {
+          expect(token).to.equal('');
+        });
+      }
+    );
 
     it('should assert that amp-viewer-assistance extension is present', () => {
-      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
-          Promise.resolve());
+      sandbox
+        .stub(Services, 'viewerAssistanceForDocOrNull')
+        .returns(Promise.resolve());
       const el = document.createElement('html');
       el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
       expectAsyncConsoleError(
-          'crossorigin="amp-viewer-auth-token-post" ' +
-          'requires amp-viewer-assistance extension.', 1);
-      return getViewerAuthTokenIfAvailable(el)
-          .then(undefined,
-              e => expect(e).to.not.be.undefined);
+        'crossorigin="amp-viewer-auth-token-post" ' +
+          'requires amp-viewer-assistance extension.',
+        1
+      );
+      return getViewerAuthTokenIfAvailable(el).then(
+        undefined,
+        e => expect(e).to.not.be.undefined
+      );
     });
   });
 });

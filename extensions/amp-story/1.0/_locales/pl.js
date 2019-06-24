@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Pobierz link',
   },
@@ -117,8 +120,9 @@ const strings = {
     string: 'Poszerz okno, by użyć tej funkcji',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Musisz włączyć eksperyment z relacją w technologii AMP, by ' +
-        'wyświetlić te treści.',
+    string:
+      'Musisz włączyć eksperyment z relacją w technologii AMP, by ' +
+      'wyświetlić te treści.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Tę stronę najlepiej oglądać w pionie',

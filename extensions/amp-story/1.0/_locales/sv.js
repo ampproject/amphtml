@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Kopiera länken',
   },
@@ -117,8 +120,9 @@ const strings = {
     string: 'Gör fönstret bredare om du vill kunna läsa bildinlägg',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Du måste aktivera experimentet med amp-story om du vill kunna ' +
-        'läsa bildinlägg.',
+    string:
+      'Du måste aktivera experimentet med amp-story om du vill kunna ' +
+      'läsa bildinlägg.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Sidan visas bäst i stående format',

@@ -20,7 +20,7 @@ import {
   Axis,
   findOverlappingIndex,
   getDimension,
-  getOffsetStart,
+  getScrollPosition,
   scrollContainerToElement,
   setScrollPosition,
   setTransformTranslateStyle,
@@ -28,11 +28,9 @@ import {
 } from './dimensions.js';
 import {AutoAdvance} from './auto-advance';
 import {CarouselAccessibility} from './carousel-accessibility';
-import {
-  backwardWrappingDistance,
-  forwardWrappingDistance,
-} from './array-util';
-import {createCustomEvent, listenOnce} from '../../../src/event-helper';
+import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
+import {clamp, mod} from '../../../src/utils/math';
+import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dict} from '../../../src/utils/object';
 import {
@@ -42,7 +40,6 @@ import {
   setStyles,
 } from '../../../src/style';
 import {iterateCursor} from '../../../src/dom';
-import {mod} from '../../../src/utils/math';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -146,19 +143,14 @@ function sum(arr) {
  */
 export class Carousel {
   /**
-  * @param {{
-  *   win: !Window,
-  *   element: !Element,
-  *   scrollContainer: !Element,
-  *   runMutate: function(function()),
-  * }} config
-  */
-  constructor({
-    win,
-    element,
-    scrollContainer,
-    runMutate,
-  }) {
+   * @param {{
+   *   win: !Window,
+   *   element: !Element,
+   *   scrollContainer: !Element,
+   *   runMutate: function(function()),
+   * }} config
+   */
+  constructor({win, element, scrollContainer, runMutate}) {
     /** @private @const */
     this.win_ = win;
 
@@ -189,8 +181,10 @@ export class Carousel {
 
     /** @private @const */
     this.debouncedResetScrollReferencePoint_ = debounce(
-        win, () => this.resetScrollReferencePoint_(),
-        RESET_SCROLL_REFERENCE_POINT_WAIT_MS);
+      win,
+      () => this.resetScrollReferencePoint_(),
+      RESET_SCROLL_REFERENCE_POINT_WAIT_MS
+    );
 
     /** @private {number} */
     this.advanceCount_ = 1;
@@ -219,22 +213,22 @@ export class Carousel {
     /** @private {!Array<!Element>} */
     this.afterSpacers_ = [];
 
-    /** @private {!Array<!Element>} */
+    /** @protected {!Array<!Element>} */
     this.allSpacers_ = [];
 
     /**
-    * Set from sources of programmatic scrolls to avoid doing work associated
-    * with regular scrolling.
-    * @private {boolean}
-    */
+     * Set from sources of programmatic scrolls to avoid doing work associated
+     * with regular scrolling.
+     * @private {boolean}
+     */
     this.ignoreNextScroll_ = false;
 
     /**
-    * The offset from the start edge for the element at the current index.
-    * This is used to preserve relative scroll position when updating the UI
-    * after things have moved (e.g. on rotate).
-    * @private {number}
-    */
+     * The offset from the start edge for the element at the current index.
+     * This is used to preserve relative scroll position when updating the UI
+     * after things have moved (e.g. on rotate).
+     * @protected {number}
+     */
     this.currentElementOffset_ = 0;
 
     /**
@@ -247,21 +241,21 @@ export class Carousel {
     this.requestedIndex_ = null;
 
     /**
-    * The reference index where the the scrollable area last stopped
-    * scrolling. This slide is not translated and other slides are translated
-    * to move before or after as needed. This is also used when looping to
-    * prevent a single swipe from wrapping past the starting point.
-    * @private {number}
-    */
+     * The reference index where the the scrollable area last stopped
+     * scrolling. This slide is not translated and other slides are translated
+     * to move before or after as needed. This is also used when looping to
+     * prevent a single swipe from wrapping past the starting point.
+     * @private {number}
+     */
     this.restingIndex_ = NaN;
 
     /**
-    * Whether or not the user is currently touching the scrollable area. This
-    * is used to avoid resetting the resting point while the user is touching
-    * (e.g. they have dragged part way to the next slide, but have not yet
-    * released their finger).
-    * @private {boolean}
-    */
+     * Whether or not the user is currently touching the scrollable area. This
+     * is used to avoid resetting the resting point while the user is touching
+     * (e.g. they have dragged part way to the next slide, but have not yet
+     * released their finger).
+     * @private {boolean}
+     */
     this.touching_ = false;
 
     /**
@@ -288,6 +282,17 @@ export class Carousel {
     this.axis_ = Axis.X;
 
     /**
+     * Whether slides are laid out in the forwards or reverse direction. When
+     * using rtl (right to left), this should be false. This is used to set the
+     * transforms for slides and spacers correctly when the flex direction is
+     * reversed due to a rtl direction. TODO(sparhami) is there some way we
+     * could get this to work without needing to be explicitly told what the
+     * direction is?
+     * @private {boolean}
+     */
+    this.forwards_ = true;
+
+    /**
      * TODO(sparhami) Rename this to `activeIndex`. We do not want to expose
      * this as it changes, only when the user stops scrolling. Also change
      * restingIndex to currentIndex.
@@ -295,7 +300,11 @@ export class Carousel {
      */
     this.currentIndex_ = 0;
 
-    /** @private {boolean} */
+    /**
+     * Whether or not looping is requested. Do not use directly, but rather use
+     * `isLooping` instead.
+     * @private {boolean}
+     */
     this.loop_ = false;
 
     /** @private {boolean} */
@@ -308,11 +317,25 @@ export class Carousel {
     this.visibleCount_ = 1;
 
     this.scrollContainer_.addEventListener(
-        'scroll', () => this.handleScroll_(), true);
+      'scroll',
+      () => this.handleScroll_(),
+      true
+    );
     this.scrollContainer_.addEventListener(
-        'touchstart', () => this.handleTouchStart_(), true);
-    this.scrollContainer_.addEventListener(
-        'wheel', () => this.handleWheel_(), true);
+      'scrollend',
+      () => this.handleScrollEnd_(),
+      true
+    );
+    listen(
+      this.scrollContainer_,
+      'touchstart',
+      () => this.handleTouchStart_(),
+      {capture: true, passive: true}
+    );
+    listen(this.scrollContainer_, 'wheel', () => this.handleWheel_(), {
+      capture: true,
+      passive: true,
+    });
   }
 
   /**
@@ -320,7 +343,7 @@ export class Carousel {
    * @param {!ActionSource=} actionSource
    */
   next(actionSource) {
-    this.advance(this.advanceCount_, actionSource);
+    this.advance(this.advanceCount_, {actionSource});
   }
 
   /**
@@ -328,7 +351,7 @@ export class Carousel {
    * @param {!ActionSource=} actionSource
    */
   prev(actionSource) {
-    this.advance(-this.advanceCount_, actionSource);
+    this.advance(-this.advanceCount_, {actionSource});
   }
 
   /**
@@ -351,9 +374,12 @@ export class Carousel {
    *
    * TODO(sparhami) How can we make this work well for accessibility?
    * @param {number} delta
-   * @param {!ActionSource=} actionSource
+   * @param {{
+   *   actionSource: (!ActionSource|undefined),
+   *   allowWrap: (boolean|undefined),
+   * }=} options
    */
-  advance(delta, actionSource) {
+  advance(delta, {actionSource, allowWrap = false} = {}) {
     const {slides_, currentIndex_, requestedIndex_} = this;
 
     // If we have a requested index, use that as the reference point. The
@@ -368,10 +394,15 @@ export class Carousel {
     const passingEnd = newIndex > endIndex;
 
     let slideIndex;
-    if (this.loop_) {
+    if (this.isLooping()) {
       slideIndex = mod(newIndex, endIndex + 1);
-    } else if (delta > 0 && this.inLastWindow_(index) &&
-        this.inLastWindow_(newIndex)) {
+    } else if (!allowWrap) {
+      slideIndex = clamp(0, newIndex, endIndex);
+    } else if (
+      delta > 0 &&
+      this.inLastWindow_(index) &&
+      this.inLastWindow_(newIndex)
+    ) {
       slideIndex = 0;
     } else if ((passingStart && atStart) || (passingEnd && !atEnd)) {
       slideIndex = endIndex;
@@ -410,10 +441,19 @@ export class Carousel {
   }
 
   /**
+   * @return {number} The number of items visible at a time.
+   */
+  getVisibleCount() {
+    return this.visibleCount_;
+  }
+
+  /**
+   * Checks whether or not looping is enabled. This requires that looping is
+   * configured and that there are enough slides to do looping.
    * @return {boolean} Whether or not looping is enabled.
    */
-  getLoop() {
-    return this.loop_;
+  isLooping() {
+    return this.loop_ && this.slides_.length / this.visibleCount_ >= 3;
   }
 
   /**
@@ -499,6 +539,15 @@ export class Carousel {
   }
 
   /**
+   * @param {boolean} forwards Whether or not the advancement direction is
+   *    forwards (e.g. ltr) or reverse (e.g. rtl).
+   */
+  updateForwards(forwards) {
+    this.forwards_ = forwards;
+    this.updateUi();
+  }
+
+  /**
    * @param {boolean} horizontal Whether the scrollable should lay out
    *    horizontally or vertically.
    */
@@ -580,9 +629,11 @@ export class Carousel {
       this.updating_ = false;
       this.scrollContainer_.setAttribute('mixed-length', this.mixedLength_);
       this.scrollContainer_.setAttribute(
-          'user-scrollable', this.userScrollable_);
+        'user-scrollable',
+        this.userScrollable_
+      );
       this.scrollContainer_.setAttribute('horizontal', this.axis_ == Axis.X);
-      this.scrollContainer_.setAttribute('loop', this.loop_);
+      this.scrollContainer_.setAttribute('loop', this.isLooping());
       this.scrollContainer_.setAttribute('snap', this.snap_);
       // TODO(sparhami) Do not use CSS custom property
       setImportantStyles(this.scrollContainer_, {
@@ -594,11 +645,12 @@ export class Carousel {
       }
 
       this.autoAdvance_.updateMaxAdvances(
-          (this.autoAdvanceLoops_ * this.slides_.length) - 1);
+        this.autoAdvanceLoops_ * this.slides_.length - 1
+      );
       this.updateSpacers_();
       this.setChildrenSnapAlign_();
       this.hideSpacersAndSlides_();
-      this.resetScrollReferencePoint_(/* force */true);
+      this.resetScrollReferencePoint_(/* force */ true);
     });
   }
 
@@ -620,10 +672,26 @@ export class Carousel {
   updateRestingIndex_(restingIndex) {
     this.restingIndex_ = restingIndex;
     this.element_.dispatchEvent(
-        createCustomEvent(this.win_, 'indexchange', dict({
+      createCustomEvent(
+        this.win_,
+        'indexchange',
+        dict({
           'index': restingIndex,
           'actionSource': this.actionSource_,
-        })));
+        })
+      )
+    );
+  }
+
+  /**
+   * Fires an event when the scroll position has changed, once scrolling has
+   * settled. In some situations, the index may not change, but you still want
+   * to react to the scroll position changing.
+   */
+  notifyScrollPositionChanged_() {
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, 'scrollpositionchange', null)
+    );
   }
 
   /**
@@ -636,12 +704,18 @@ export class Carousel {
     this.actionSource_ = ActionSource.TOUCH;
     this.requestedIndex_ = null;
 
-    listenOnce(window, 'touchend', () => {
-      this.touching_ = false;
-      this.debouncedResetScrollReferencePoint_();
-    }, {
-      capture: true,
-    });
+    listenOnce(
+      window,
+      'touchend',
+      () => {
+        this.touching_ = false;
+        this.debouncedResetScrollReferencePoint_();
+      },
+      {
+        capture: true,
+        passive: true,
+      }
+    );
   }
 
   /**
@@ -670,13 +744,24 @@ export class Carousel {
   }
 
   /**
+   * For browsers that support the scrollend event, reset the reference point
+   * immediately. This prevents users from hitting the wrapping point while
+   * scrolling continually.
+   */
+  handleScrollEnd_() {
+    this.resetScrollReferencePoint_();
+  }
+
+  /**
    * @return {boolean} Whether or not the user is scrolling. For example, the
    *    user flicked the carousel and there is a momentum scroll in progress.
    */
   isUserScrolling_() {
-    return this.scrolling_ && (
-      this.actionSource_ == ActionSource.TOUCH ||
-      this.actionSource_ == ActionSource.WHEEL);
+    return (
+      this.scrolling_ &&
+      (this.actionSource_ == ActionSource.TOUCH ||
+        this.actionSource_ == ActionSource.WHEEL)
+    );
   }
 
   /**
@@ -688,8 +773,9 @@ export class Carousel {
    * @private
    */
   setElementTransform_(el, revolutions, revolutionLength) {
-    setTransformTranslateStyle(
-        this.axis_, el, revolutions * revolutionLength);
+    const dir = this.forwards_ ? 1 : -1;
+    const delta = revolutions * revolutionLength * dir;
+    setTransformTranslateStyle(this.axis_, el, delta);
     el._revolutions = revolutions;
   }
 
@@ -715,6 +801,32 @@ export class Carousel {
   }
 
   /**
+   * @return {boolean} True if the carousel is not looping, and is at the
+   *    start, false otherwise.
+   */
+  isAtEnd() {
+    if (this.isLooping()) {
+      return false;
+    }
+
+    const el = this.scrollContainer_;
+    const {width} = el./*OK*/ getBoundingClientRect();
+    return el./*OK*/ scrollLeft + width >= el./*OK*/ scrollWidth;
+  }
+
+  /**
+   * @return {boolean} True if the carousel is not looping, and is at the
+   *    end, false otherwise.
+   */
+  isAtStart() {
+    if (this.isLooping()) {
+      return false;
+    }
+
+    return this.scrollContainer_./*OK*/ scrollLeft <= 0;
+  }
+
+  /**
    * @param {number} count The number of spacers to create
    * @return {!Array<!Element>} An array of spacers.
    * @private
@@ -737,7 +849,7 @@ export class Carousel {
     const {axis_, slides_} = this;
     const slideLengths = this.getSlideLengths_();
     const totalLength = sum(slideLengths);
-    const count = this.loop_ ? slides_.length : 0;
+    const count = this.isLooping() ? slides_.length : 0;
 
     // Replace the before spacers.
     this.beforeSpacers_.forEach(spacer => {
@@ -774,8 +886,10 @@ export class Carousel {
       this.scrollContainer_.appendChild(spacer);
     });
 
-    this.allSpacers_ = this.beforeSpacers_
-        .concat(this.replacementSpacers_, this.afterSpacers_);
+    this.allSpacers_ = this.beforeSpacers_.concat(
+      this.replacementSpacers_,
+      this.afterSpacers_
+    );
   }
 
   /**
@@ -785,7 +899,7 @@ export class Carousel {
    */
   setChildrenSnapAlign_() {
     const slideCount = this.slides_.length;
-    const startAligned = this.alignment_ == Alignment.START ;
+    const startAligned = this.alignment_ == Alignment.START;
     const oddVisibleCount = mod(this.visibleCount_, 2) == 1;
     // For the legacy scroll-snap-coordinate, when center aligning with an odd
     // count, actually use a start coordinate. Otherwise it will snap to the
@@ -824,25 +938,22 @@ export class Carousel {
    * @private
    */
   hideSpacersAndSlides_() {
-    const {
-      afterSpacers_,
-      beforeSpacers_,
-      currentIndex_,
-      slides_,
-    } = this;
+    const {afterSpacers_, beforeSpacers_, currentIndex_, slides_} = this;
     const numBeforeSpacers = Math.max(0, slides_.length - currentIndex_ - 1);
     const numAfterSpacers = Math.max(0, currentIndex_ - 1);
 
     beforeSpacers_.forEach((el, i) => {
       const distance = backwardWrappingDistance(
-          currentIndex_, i, beforeSpacers_);
+        currentIndex_,
+        i,
+        beforeSpacers_
+      );
       const tooFar = distance > slides_.length - 1;
       el.hidden = tooFar || i < slides_.length - numBeforeSpacers;
     });
 
     afterSpacers_.forEach((el, i) => {
-      const distance = forwardWrappingDistance(
-          currentIndex_, i, afterSpacers_);
+      const distance = forwardWrappingDistance(currentIndex_, i, afterSpacers_);
       const tooFar = distance > slides_.length - 1;
       el.hidden = tooFar || i > numAfterSpacers;
     });
@@ -859,8 +970,7 @@ export class Carousel {
       alignment_,
       axis_,
       currentIndex_,
-      element_,
-      loop_,
+      scrollContainer_,
       slides_,
     } = this;
     const totalLength = sum(this.getSlideLengths_());
@@ -868,10 +978,20 @@ export class Carousel {
     // translate their content instead of the whole slide. As a result, we need
     // to use the spacers to figure out where we are rather than the slides
     // themselves.
-    const items = loop_ ? allSpacers_ : slides_;
-    const startIndex = loop_ ? currentIndex_ + slides_.length : currentIndex_;
-    const overlappingIndex =
-        findOverlappingIndex(axis_, alignment_, element_, items, startIndex);
+    // Note: we do not check looping directly, since the spacers / layout are
+    // updated asynchronously.
+    const hasSpacers = !!allSpacers_.length;
+    const items = hasSpacers ? allSpacers_ : slides_;
+    const startIndex = hasSpacers
+      ? currentIndex_ + slides_.length
+      : currentIndex_;
+    const overlappingIndex = findOverlappingIndex(
+      axis_,
+      alignment_,
+      scrollContainer_,
+      items,
+      startIndex
+    );
 
     // Currently not over a slide (e.g. on top of overscroll area).
     if (overlappingIndex === undefined) {
@@ -884,8 +1004,10 @@ export class Carousel {
     // Update the current offset on each scroll so that we have it up to date
     // in case of a resize.
     const currentElement = slides_[newIndex];
-    const dimension = getDimension(axis_, currentElement);
-    this.currentElementOffset_ = dimension.start;
+    const {start: elementStart} = getDimension(axis_, currentElement);
+    const {start: containerStart} = getDimension(axis_, scrollContainer_);
+
+    this.currentElementOffset_ = elementStart - containerStart;
 
     // We did not move at all.
     if (newIndex == currentIndex_) {
@@ -898,7 +1020,6 @@ export class Carousel {
     });
   }
 
-
   /**
    * Resets the frame of reference for scrolling, centering things around the
    * current index and moving things as appropriate.
@@ -908,6 +1029,9 @@ export class Carousel {
    */
   resetScrollReferencePoint_(force = false) {
     this.scrolling_ = false;
+    this.runMutate_(() => {
+      this.notifyScrollPositionChanged_();
+    });
 
     // Make sure if the user is in the middle of a drag, we do not move
     // anything.
@@ -919,9 +1043,11 @@ export class Carousel {
     // we stopped scrolling. If so, we do not want move anything or fire an
     // event. If we have a programmatic scroll request, we still need to move
     // to that index.
-    if (this.restingIndex_ == this.currentIndex_ &&
-        this.requestedIndex_ != null &&
-        !force) {
+    if (
+      this.restingIndex_ == this.currentIndex_ &&
+      this.requestedIndex_ == null &&
+      !force
+    ) {
       return;
     }
 
@@ -960,14 +1086,17 @@ export class Carousel {
       slides_,
     } = this;
     const currentElement = slides_[currentIndex_];
-    const {length, start} = getDimension(axis_, scrollContainer_);
-    const currentElementStart = Math.abs(currentElementOffset_) <= length ?
-      currentElementOffset_ : 0;
-    // Use the offsetStart to figure out the scroll position of the current
-    // element. Note that this only works because the element is not translated
-    // at this point.
-    const offsetStart = getOffsetStart(axis_, currentElement);
-    const pos = offsetStart - currentElementStart + start;
+    const {length: containerLength, start: containerStart} = getDimension(
+      axis_,
+      scrollContainer_
+    );
+    const {start: elementStart} = getDimension(axis_, currentElement);
+    const scrollPos = getScrollPosition(axis_, scrollContainer_);
+    const offset =
+      Math.abs(currentElementOffset_) <= containerLength
+        ? currentElementOffset_
+        : 0;
+    const pos = elementStart - offset - containerStart + scrollPos;
 
     this.ignoreNextScroll_ = true;
     runDisablingSmoothScroll(scrollContainer_, () => {
@@ -983,16 +1112,14 @@ export class Carousel {
    * }} options
    * @private
    */
-  scrollSlideIntoView_(slide, {
-    smoothScroll,
-  }) {
+  scrollSlideIntoView_(slide, {smoothScroll}) {
     const runner = smoothScroll ? (el, cb) => cb() : runDisablingSmoothScroll;
     runner(this.scrollContainer_, () => {
       scrollContainerToElement(
-          slide,
-          this.scrollContainer_,
-          this.axis_,
-          this.alignment_
+        slide,
+        this.scrollContainer_,
+        this.axis_,
+        this.alignment_
       );
     });
   }
@@ -1008,11 +1135,11 @@ export class Carousel {
   moveSlidesBeforeOrAfter__(totalLength, count, isAfter) {
     const {currentIndex_, restingIndex_, slides_} = this;
     const current = slides_[currentIndex_];
-    const currentRevolutions = (current._revolutions || 0);
+    const currentRevolutions = current._revolutions || 0;
     const dir = isAfter ? 1 : -1;
 
     for (let i = 1; i <= count; i++) {
-      const elIndex = mod(currentIndex_ + (i * dir), slides_.length);
+      const elIndex = mod(currentIndex_ + i * dir, slides_.length);
 
       // We do not want to move the slide that we started at.
       if (elIndex === restingIndex_ && currentIndex_ !== restingIndex_) {
@@ -1022,8 +1149,9 @@ export class Carousel {
       const el = slides_[elIndex];
       // Check if the element is on the wrong side of the current index.
       const needsMove = elIndex > currentIndex_ !== isAfter;
-      const revolutions = needsMove ? currentRevolutions + dir :
-        currentRevolutions;
+      const revolutions = needsMove
+        ? currentRevolutions + dir
+        : currentRevolutions;
 
       this.setElementTransform_(el, revolutions, totalLength);
     }
@@ -1036,21 +1164,26 @@ export class Carousel {
    * @private
    */
   moveSlides_(totalLength) {
+    if (!this.isLooping()) {
+      return;
+    }
+
     // TODO(sparhami) We could only the number of slides needed to have enough
     // buffer between scrolls. One thing we need to look out for is to make
     // sure the mixed length and visibleCount cases are handled correctly.
-    const count = (this.slides_.length - 1) / 2;
+    // TODO(sparhami) The current approach of moving a set number of slides
+    // does not work well for the mixed length use case.
+    const {alignment_, slides_, visibleCount_} = this;
+    const isStartAligned = alignment_ == Alignment.START;
+    // How many slides fit into the current "window" of slides. When center
+    // aligning, we can ignore this as we want to have the same amount on both
+    // sides.
+    const windowSlideCount = isStartAligned ? visibleCount_ - 1 : 0;
+    const beforeCount = (slides_.length - 1 - windowSlideCount) / 2;
+    const afterCount = (slides_.length - 1 + windowSlideCount) / 2;
 
-    if (!this.loop_) {
-      return;
-    }
-
-    if (this.slides_.length <= 2) {
-      return;
-    }
-
-    this.moveSlidesBeforeOrAfter__(totalLength, Math.floor(count), false);
-    this.moveSlidesBeforeOrAfter__(totalLength, Math.ceil(count), true);
+    this.moveSlidesBeforeOrAfter__(totalLength, Math.round(beforeCount), false);
+    this.moveSlidesBeforeOrAfter__(totalLength, Math.round(afterCount), true);
   }
 
   /**

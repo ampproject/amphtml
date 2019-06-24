@@ -46,7 +46,6 @@ class MockVisibilityInterface {
   }
 }
 
-
 describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
   let win;
   let ampdoc;
@@ -65,8 +64,7 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
     viewer = win.services.viewer.obj;
     sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => 1);
     visibilityInterface = new MockVisibilityInterface();
-    root =
-        new VisibilityManagerForMApp(ampdoc, visibilityInterface);
+    root = new VisibilityManagerForMApp(ampdoc, visibilityInterface);
 
     win.IntersectionObserver = null;
 
@@ -78,8 +76,7 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
   it('should initialize correctly', () => {
     viewer.setVisibilityState_(VisibilityState.HIDDEN);
     visibilityInterface = new MockVisibilityInterface(0.5);
-    root =
-        new VisibilityManagerForMApp(ampdoc, visibilityInterface);
+    root = new VisibilityManagerForMApp(ampdoc, visibilityInterface);
     expect(root.parent).to.be.null;
     expect(root.ampdoc).to.equal(ampdoc);
     expect(root.getStartTime()).to.equal(viewer.getFirstVisibleTime());
@@ -111,8 +108,7 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
 
   it('should switch root model to no-visibility on dispose', () => {
     visibilityInterface = new MockVisibilityInterface(1);
-    root =
-        new VisibilityManagerForMApp(ampdoc, visibilityInterface);
+    root = new VisibilityManagerForMApp(ampdoc, visibilityInterface);
     expect(root.getRootVisibility()).to.equal(1);
     root.dispose();
     expect(root.getRootVisibility()).to.equal(0);
@@ -121,15 +117,21 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
   it('should not support listen on element', () => {
     const target = win.document.createElement('div');
     //root.listenElement(target, {}, null, null, () => {});
-    allowConsoleError(() => { expect(() => {
-      root.listenElement(target, {}, null, null, () => {});
-    }).to.throw(/element level visibility not supported/); });
-    allowConsoleError(() => { expect(() => {
-      root.observe();
-    }).to.throw(/element level visibility not supported/); });
-    allowConsoleError(() => { expect(() => {
-      root.getElementVisibility();
-    }).to.throw(/element level visibility not supported/); });
+    allowConsoleError(() => {
+      expect(() => {
+        root.listenElement(target, {}, null, null, () => {});
+      }).to.throw(/element level visibility not supported/);
+    });
+    allowConsoleError(() => {
+      expect(() => {
+        root.observe();
+      }).to.throw(/element level visibility not supported/);
+    });
+    allowConsoleError(() => {
+      expect(() => {
+        root.getElementVisibility();
+      }).to.throw(/element level visibility not supported/);
+    });
   });
 
   it('should protect from invalid intersection values', () => {
@@ -179,7 +181,9 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
 
     // Back to visible range
     visibilityInterface.fireVisibilityChangeForTesting(
-        0.3, layoutRectLtwh(1, 2, 100, 201));
+      0.3,
+      layoutRectLtwh(1, 2, 100, 201)
+    );
     clock.tick(3);
     return eventPromise.then(state => {
       expect(disposed).to.be.calledOnce;

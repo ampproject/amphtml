@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Link ophalen',
   },
@@ -111,15 +114,17 @@ const strings = {
     string: 'Maak je venster hoger om deze functionaliteit te bekijken',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Maak je venster hoger en breder om deze functionaliteit te ' +
-        'bekijken',
+    string:
+      'Maak je venster hoger en breder om deze functionaliteit te ' +
+      'bekijken',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Maak je venster breder om deze functionaliteit te bekijken',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Je moet het amp-story-experiment inschakelen om deze content te ' +
-        'bekijken.',
+    string:
+      'Je moet het amp-story-experiment inschakelen om deze content te ' +
+      'bekijken.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'De pagina kan het beste worden bekeken in de staande modus',

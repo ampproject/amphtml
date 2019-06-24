@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Preuzmi link',
   },
@@ -123,8 +126,8 @@ const strings = {
     string: 'Ovu stranicu je najbolje pregledati u uspravnom načinu',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Žao nam je, ali izgleda da vaš preglednik ne podržava ovo ' +
-        'iskustvo',
+    string:
+      'Žao nam je, ali izgleda da vaš preglednik ne podržava ovo iskustvo',
   },
 };
 

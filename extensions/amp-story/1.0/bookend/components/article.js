@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  BookendComponentInterface,
-} from './bookend-component-interface';
+import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
@@ -39,18 +37,18 @@ export let ArticleComponentDef;
  * @implements {BookendComponentInterface}
  */
 export class ArticleComponent {
-
   /** @override */
   assertValidity(articleJson, element) {
-
     const requiredFields = ['title', 'url'];
-    const hasAllRequiredFields =
-        !requiredFields.some(field => !(field in articleJson));
+    const hasAllRequiredFields = !requiredFields.some(
+      field => !(field in articleJson)
+    );
     userAssert(
-        hasAllRequiredFields,
-        'Small article component must contain ' +
-            requiredFields.map(field => '`' + field + '`').join(', ') +
-            ' fields, skipping invalid.');
+      hasAllRequiredFields,
+      'Small article component must contain ' +
+        requiredFields.map(field => '`' + field + '`').join(', ') +
+        ' fields, skipping invalid.'
+    );
 
     userAssertValidProtocol(element, articleJson['url']);
 
@@ -87,20 +85,21 @@ export class ArticleComponent {
   buildElement(articleData, doc) {
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
-    const el =
-        html`
-        <a class="i-amphtml-story-bookend-article
+    const el = html`
+      <a
+        class="i-amphtml-story-bookend-article
           i-amphtml-story-bookend-component"
-          target="_top">
-          <div class="i-amphtml-story-bookend-article-text-content">
-            <h2
-              class="i-amphtml-story-bookend-article-heading" ref="heading">
-            </h2>
-            <div
-              class="i-amphtml-story-bookend-component-meta" ref="meta">
-            </div>
-          </div>
-        </a>`;
+        target="_top"
+      >
+        <div class="i-amphtml-story-bookend-article-text-content">
+          <h2
+            class="i-amphtml-story-bookend-article-heading"
+            ref="heading"
+          ></h2>
+          <div class="i-amphtml-story-bookend-component-meta" ref="meta"></div>
+        </div>
+      </a>
+    `;
     addAttributesToElement(el, dict({'href': articleData.url}));
 
     if (articleData['amphtml'] === true) {
@@ -108,8 +107,7 @@ export class ArticleComponent {
     }
 
     if (articleData.image) {
-      const imgEl =
-          html`
+      const imgEl = html`
           <div class="i-amphtml-story-bookend-article-image">
             <img ref="image">
             </img>

@@ -18,13 +18,19 @@
 const app = require('express').Router();
 const cors = require('./amp-cors');
 const minimist = require('minimist');
-const argv = minimist(
-    process.argv.slice(2), {boolean: ['strictBabelTransform']});
+const argv = minimist(process.argv.slice(2), {
+  boolean: ['strictBabelTransform'],
+});
 const multer = require('multer');
-
+const path = require('path');
+const {renderShadowViewer} = require('./shadow-viewer');
+const {replaceUrls} = require('./app-utils');
 const upload = multer();
 
 /* eslint-disable max-len */
+
+const KARMA_SERVER_PORT = 9876;
+const {SERVE_MODE} = process.env;
 
 /**
  * Logs the given messages to the console when --verbose is specified.
@@ -37,16 +43,12 @@ function log(...messages) {
 }
 
 app.use('/compose-doc', function(req, res) {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   res.setHeader('X-XSS-Protection', '0');
 
   const {body, css, experiments, extensions, spec} = req.query;
 
   const compiled = process.env.SERVE_MODE == 'compiled';
-  const frameHtml = (compiled)
+  const frameHtml = compiled
     ? 'dist.3p/current-min/frame.html'
     : 'dist.3p/current/frame.max.html';
 
@@ -55,8 +57,7 @@ app.use('/compose-doc', function(req, res) {
     const string = `"${experiments.split(',').join('","')}"`;
     // TODO: Why is setting localDev necessary?
     // `allow-doc-opt-in` enables any experiment to be enabled via doc opt-in.
-    experimentsBlock =
-      `<script>
+    experimentsBlock = `<script>
         window.AMP_CONFIG = window.AMP_CONFIG || {"localDev": true};
         window.AMP_CONFIG['allow-doc-opt-in'] = (window.AMP_CONFIG['allow-doc-opt-in'] || []).concat([${string}]);
       </script>
@@ -64,8 +65,7 @@ app.use('/compose-doc', function(req, res) {
   }
 
   // TODO: Do we need to inject amp-3p-iframe-src for non-ad tests?
-  const head =
-    `${experimentsBlock}
+  const head = `${experimentsBlock}
     <meta name="amp-3p-iframe-src" content="http://localhost:9876/${frameHtml}">`;
 
   const doc = composeDocument({
@@ -75,6 +75,7 @@ app.use('/compose-doc', function(req, res) {
     head,
     spec,
   });
+  res.cookie('test-cookie', 'test');
   res.send(doc);
 });
 
@@ -94,6 +95,16 @@ ${req.query.body}
   `);
 });
 
+app.use('/compose-shadow', function(req, res) {
+  const {docUrl} = req.query;
+  const viewerHtml = renderShadowViewer({
+    src: docUrl.replace(/^\//, ''),
+    port: KARMA_SERVER_PORT,
+    baseHref: path.dirname(req.url),
+  });
+  res.send(replaceUrls(SERVE_MODE, viewerHtml));
+});
+
 /**
  * A server side temporary request storage which is useful for testing
  * browser sent HTTP requests.
@@ -104,23 +115,20 @@ const bank = {};
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.use(
-    '/request-bank/:bid/deposit/:id/',
-    upload.array(),
-    (req, res) => {
-      cors.enableCors(req, res);
-      if (!bank[req.params.bid]) {
-        bank[req.params.bid] = {};
-      }
-      const key = req.params.id;
-      log('SERVER-LOG [DEPOSIT]: ', key);
-      if (typeof bank[req.params.bid][key] === 'function') {
-        bank[req.params.bid][key](req);
-      } else {
-        bank[req.params.bid][key] = req;
-      }
-      res.end();
-    });
+app.use('/request-bank/:bid/deposit/:id/', upload.array(), (req, res) => {
+  cors.enableCors(req, res);
+  if (!bank[req.params.bid]) {
+    bank[req.params.bid] = {};
+  }
+  const key = req.params.id;
+  log('SERVER-LOG [DEPOSIT]: ', key);
+  if (typeof bank[req.params.bid][key] === 'function') {
+    bank[req.params.bid][key](req);
+  } else {
+    bank[req.params.bid][key] = req;
+  }
+  res.end();
+});
 
 /**
  * Withdraw a request. If the request of the given ID is already in the bank,
@@ -178,10 +186,6 @@ app.use('/request-bank/:bid/teardown/', (req, res) => {
  * Serves a fake ad for test-amp-ad-fake.js
  */
 app.get('/a4a/:bid', (req, res) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   const {bid} = req.params;
   const body = `
   <a href=https://ampbyexample.com target=_blank>
@@ -207,7 +211,9 @@ app.get('/a4a/:bid', (req, res) => {
             "img": "\${htmlAttr(amp-img,src)}",
             "navTiming": "\${navTiming(requestStart,requestStart)}",
             "navType": "\${navType}",
-            "navRedirectCount": "\${navRedirectCount}"
+            "navRedirectCount": "\${navRedirectCount}",
+            "sourceUrl": "\${sourceUrl}",
+            "cookie": "\${cookie(test-cookie)}"
           }
         }
       }
@@ -221,6 +227,7 @@ app.get('/a4a/:bid', (req, res) => {
     css: 'body { background-color: #f4f4f4; }',
     extensions: ['amp-analytics'],
   });
+  res.cookie('test-cookie', 'test');
   res.send(doc);
 });
 
@@ -230,9 +237,9 @@ app.get('/a4a/:bid', (req, res) => {
 function composeDocument(config) {
   const {body, css, extensions, head, spec, mode} = config;
 
-  const m = (mode || process.env.SERVE_MODE);
-  const cdn = (m === 'cdn');
-  const compiled = (m === 'compiled');
+  const m = mode || process.env.SERVE_MODE;
+  const cdn = m === 'cdn';
+  const compiled = m === 'compiled';
 
   const cssTag = css ? `<style amp-custom>${css}</style>` : '';
 
@@ -243,22 +250,25 @@ function composeDocument(config) {
   switch (amp) {
     case 'amp':
       canonical = '<link rel="canonical" href="http://nonblocking.io" />';
-      boilerplate = '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
-      runtime = (cdn)
+      boilerplate =
+        '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
+      runtime = cdn
         ? 'https://cdn.ampproject.org/v0.js'
         : `/dist/${compiled ? 'v0' : 'amp'}.js`;
       break;
     case 'amp4ads':
       canonical = '';
-      boilerplate = '<style amp4ads-boilerplate>body{visibility:hidden}</style>';
-      runtime = (cdn)
+      boilerplate =
+        '<style amp4ads-boilerplate>body{visibility:hidden}</style>';
+      runtime = cdn
         ? 'https://cdn.ampproject.org/amp4ads-v0.js'
         : `/dist/${compiled ? 'amp4ads-v0' : 'amp-inabox'}.js`;
       break;
     case 'amp4email':
       canonical = '';
-      boilerplate = '<style amp4email-boilerplate>body{visibility:hidden}</style>';
-      runtime = (cdn)
+      boilerplate =
+        '<style amp4email-boilerplate>body{visibility:hidden}</style>';
+      runtime = cdn
         ? 'https://cdn.ampproject.org/v0.js'
         : `/dist/${compiled ? 'v0' : 'amp'}.js`;
       break;
@@ -270,19 +280,20 @@ function composeDocument(config) {
   // Generate extension <script> markup.
   let extensionScripts = '';
   if (extensions) {
-    extensionScripts = extensions.map(extension => {
-      const tuple = extension.split(':');
-      const name = tuple[0];
-      const version = tuple[1] || '0.1';
-      const src = (cdn)
-        ? `https://cdn.ampproject.org/v0/${name}-${version}.js`
-        : `/dist/v0/${name}-${version}.${compiled ? '' : 'max.'}js`;
-      return `<script async custom-element="${name}" src="${src}"></script>`;
-    }).join('\n');
+    extensionScripts = extensions
+      .map(extension => {
+        const tuple = extension.split(':');
+        const name = tuple[0];
+        const version = tuple[1] || '0.1';
+        const src = cdn
+          ? `https://cdn.ampproject.org/v0/${name}-${version}.js`
+          : `/dist/v0/${name}-${version}.${compiled ? '' : 'max.'}js`;
+        return `<script async custom-element="${name}" src="${src}"></script>`;
+      })
+      .join('\n');
   }
 
-  const topHalfOfHtml =
-    `<!doctype html>
+  const topHalfOfHtml = `<!doctype html>
     <html ${amp}>
     <head>
       <title>AMP TEST</title>
@@ -304,7 +315,8 @@ function composeDocument(config) {
     const start = topHalfOfHtml.indexOf(runtimeScript);
     let end = start + runtimeScript.length;
 
-    let customElements = [], extensionsMap = [];
+    let customElements = [],
+      extensionsMap = [];
     if (extensions) {
       end = topHalfOfHtml.indexOf(extensionScripts) + extensionScripts.length;
       // Filter out extensions that are not custom elements, e.g. amp-mustache.
@@ -317,8 +329,7 @@ function composeDocument(config) {
         };
       });
     }
-    ampAdMeta =
-      `<script amp-ad-metadata type=application/json>
+    ampAdMeta = `<script amp-ad-metadata type=application/json>
       {
         "ampRuntimeUtf16CharOffsets": [ ${start}, ${end} ],
         "customElementExtensions": ${JSON.stringify(customElements)},

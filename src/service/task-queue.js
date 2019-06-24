@@ -16,7 +16,6 @@
 
 import {devAssert} from '../log';
 
-
 /**
  * The internal structure for the task.
  * @typedef {{
@@ -37,15 +36,12 @@ export let TaskDef;
  */
 let PeekStateDef;
 
-
-
 /**
  * A scheduling queue for Resources.
  *
  * @package
  */
 export class TaskQueue {
-
   /**
    * Creates an instance of TaskQueue.
    */
@@ -102,8 +98,7 @@ export class TaskQueue {
    * @param {!TaskDef} task
    */
   enqueue(task) {
-    devAssert(
-        !this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
+    devAssert(!this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
     this.tasks_.push(task);
     this.taskIdMap_[task.id] = task;
     this.lastEnqueueTime_ = Date.now();

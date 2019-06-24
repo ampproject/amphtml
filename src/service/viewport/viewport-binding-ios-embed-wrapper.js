@@ -16,12 +16,15 @@
 
 import {Observable} from '../../observable';
 import {Services} from '../../services';
-import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from './viewport-binding-def';
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {waitForBody} from '../../dom';
+import {waitForBodyOpen} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
 
 const TAG_ = 'Viewport';
@@ -36,7 +39,6 @@ const TAG_ = 'Viewport';
  * @visibleForTesting
  */
 export class ViewportBindingIosEmbedWrapper_ {
-
   /**
    * @param {!Window} win
    */
@@ -44,7 +46,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private {!../vsync-impl.Vsync} */
+    /** @protected {!../vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(win);
 
     const doc = this.win.document;
@@ -79,7 +81,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     // Setup UI.
     /** @private {boolean} */
     this.setupDone_ = false;
-    waitForBody(doc, this.setup_.bind(this));
+    waitForBodyOpen(doc, this.setup_.bind(this));
 
     // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
     // iOS rendering bugs. See #8798 for details.
@@ -149,9 +151,15 @@ export class ViewportBindingIosEmbedWrapper_ {
       return true;
     }
     // The jumping fixed elements have been fixed in iOS 12.2.
-    const iosVersion = parseFloat(Services.platformFor(this.win)
-        .getIosVersionString());
+    const iosVersion = parseFloat(
+      Services.platformFor(this.win).getIosVersionString()
+    );
     return iosVersion < 12.2;
+  }
+
+  /** @override */
+  overrideGlobalScrollTo() {
+    return true;
   }
 
   /** @override */
@@ -212,14 +220,14 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   getSize() {
     return {
-      width: this.win./*OK*/innerWidth,
-      height: this.win./*OK*/innerHeight,
+      width: this.win./*OK*/ innerWidth,
+      height: this.win./*OK*/ innerHeight,
     };
   }
 
   /** @override */
   getScrollTop() {
-    return this.wrapper_./*OK*/scrollTop;
+    return this.wrapper_./*OK*/ scrollTop;
   }
 
   /** @override */
@@ -231,52 +239,58 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getScrollWidth() {
-    return this.wrapper_./*OK*/scrollWidth;
+    return this.wrapper_./*OK*/ scrollWidth;
   }
 
   /** @override */
   getScrollHeight() {
-    return this.wrapper_./*OK*/scrollHeight;
+    return this.wrapper_./*OK*/ scrollHeight;
   }
 
   /** @override */
   getContentHeight() {
-    // Don't use scrollHeight, since it returns `MAX(viewport_height,
-    // document_height)` (we only want the latter), and it doesn't account
-    // for margins.
-    const scrollingElement = this.win.document.body;
-    const rect = scrollingElement./*OK*/getBoundingClientRect();
-    const style = computedStyle(this.win, scrollingElement);
-    // Note: unlike viewport-binding-natural.js, there's no need to calculate
-    // the "top gap" since the wrapped body _does_ account for child margins.
-    // However, the parent's paddingTop still needs to be added.
-    return rect.height
-        + this.paddingTop_
-        + parseInt(style.marginTop, 10)
-        + parseInt(style.marginBottom, 10);
+    // The wrapped body, not this.wrapper_ itself, will have the correct height.
+    const content = this.win.document.body;
+    const {height} = content./*OK*/ getBoundingClientRect();
+
+    // Unlike other viewport bindings, there's no need to include the
+    // rect top since the wrapped body accounts for the top margin of children.
+    // However, the parent's padding-top (this.paddingTop_) must be added.
+
+    // As of Safari 12.1.1, the getBoundingClientRect().height does not include
+    // the bottom margin of children and there's no other API that does.
+    const childMarginBottom = marginBottomOfLastChild(this.win, content);
+
+    const style = computedStyle(this.win, content);
+    return (
+      parseInt(style.marginTop, 10) +
+      this.paddingTop_ +
+      height +
+      childMarginBottom +
+      parseInt(style.marginBottom, 10)
+    );
   }
 
   /** @override */
-  contentHeightChanged() {
-  }
+  contentHeightChanged() {}
 
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
-    const b = el./*OK*/getBoundingClientRect();
+    const b = el./*OK*/ getBoundingClientRect();
     if (this.useLayers_) {
       return layoutRectLtwh(b.left, b.top, b.width, b.height);
     }
 
-    const scrollTop = opt_scrollTop != undefined
-      ? opt_scrollTop
-      : this.getScrollTop();
-    const scrollLeft = opt_scrollLeft != undefined
-      ? opt_scrollLeft
-      : this.getScrollLeft();
-    return layoutRectLtwh(Math.round(b.left + scrollLeft),
-        Math.round(b.top + scrollTop),
-        Math.round(b.width),
-        Math.round(b.height));
+    const scrollTop =
+      opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
+    const scrollLeft =
+      opt_scrollLeft != undefined ? opt_scrollLeft : this.getScrollLeft();
+    return layoutRectLtwh(
+      Math.round(b.left + scrollLeft),
+      Math.round(b.top + scrollTop),
+      Math.round(b.width),
+      Math.round(b.height)
+    );
   }
 
   /** @override */
@@ -288,7 +302,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   setScrollTop(scrollTop) {
     // If scroll top is 0, it's set to 1 to avoid scroll-freeze issue. See
     // `onScrolled_` for more details.
-    this.wrapper_./*OK*/scrollTop = scrollTop || 1;
+    this.wrapper_./*OK*/ scrollTop = scrollTop || 1;
   }
 
   /**
@@ -301,8 +315,8 @@ export class ViewportBindingIosEmbedWrapper_ {
     // This is very sad but very necessary. See #330 for more details.
     // Unfortunately, the same is very expensive to do on the bottom, due to
     // costly scrollHeight.
-    if (this.wrapper_./*OK*/scrollTop == 0) {
-      this.wrapper_./*OK*/scrollTop = 1;
+    if (this.wrapper_./*OK*/ scrollTop == 0) {
+      this.wrapper_./*OK*/ scrollTop = 1;
       if (opt_event) {
         opt_event.preventDefault();
       }

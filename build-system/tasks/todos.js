@@ -28,7 +28,6 @@ const {GITHUB_ACCESS_TOKEN} = process.env;
 /** @type {!Object<string, !Promise<number>>} */
 const issueCache = Object.create(null);
 
-
 /**
  * Test if a file's contents contains closed TODOs.
  *
@@ -56,16 +55,17 @@ function findClosedTodosInFile(file) {
   if (promises.length == 0) {
     return Promise.resolve(0);
   }
-  return Promise.all(promises).then(results => {
-    return results.reduce(function(acc, v) {
-      return acc + v;
-    }, 0);
-  }).catch(function(error) {
-    log(colors.red('Failed in', file.path, error, error.stack));
-    return 0;
-  });
+  return Promise.all(promises)
+    .then(results => {
+      return results.reduce(function(acc, v) {
+        return acc + v;
+      }, 0);
+    })
+    .catch(function(error) {
+      log(colors.red('Failed in', file.path, error, error.stack));
+      return 0;
+    });
 }
-
 
 /**
  * @param {!File} file file is a vinyl file object
@@ -77,17 +77,17 @@ function reportClosedIssue(file, issueId, todo) {
   if (issueCache[issueId] !== undefined) {
     return issueCache[issueId];
   }
-  return issueCache[issueId] = githubRequest('/issues/' + issueId)
-      .then(response => {
-        const issue = JSON.parse(response.body);
-        const value = issue.state == 'closed' ? 1 : 0;
-        if (value) {
-          log(colors.red(todo, 'in', file.path));
-        }
-        return value;
-      });
+  return (issueCache[issueId] = githubRequest('/issues/' + issueId).then(
+    response => {
+      const issue = JSON.parse(response.body);
+      const value = issue.state == 'closed' ? 1 : 0;
+      if (value) {
+        log(colors.red(todo, 'in', file.path));
+      }
+      return value;
+    }
+  ));
 }
-
 
 /**
  * @param {string} path
@@ -116,25 +116,27 @@ function githubRequest(path, opt_method, opt_data) {
   return request(options);
 }
 
-
 /**
  * todos:find-closed task.
  */
 function todosFindClosed() {
   let foundCount = 0;
-  return gulp.src(srcGlobs)
-      .pipe(through2.obj(function(file, enc, cb) {
+  return gulp
+    .src(srcGlobs)
+    .pipe(
+      through2.obj(function(file, enc, cb) {
         findClosedTodosInFile(file).then(function(count) {
           foundCount += count;
           cb();
         });
-      }))
-      .on('end', function() {
-        if (foundCount > 0) {
-          log(colors.red('Found closed TODOs: ', foundCount));
-          process.exit(1);
-        }
-      });
+      })
+    )
+    .on('end', function() {
+      if (foundCount > 0) {
+        log(colors.red('Found closed TODOs: ', foundCount));
+        process.exit(1);
+      }
+    });
 }
 
 module.exports = {

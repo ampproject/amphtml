@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-
 export const ACTIVATION_TIMEOUT = 5000; // 5 seconds.
 
 const ACTIVATION_EVENTS = ['click', 'input', 'dblclick', 'keypress', 'submit'];
-
 
 /**
  * See https://github.com/dtapuska/useractivation for inspiration.
  * @implements {../../../src/service.Disposable}
  */
 export class UserActivationTracker {
-
   /**
    * @param {!Element} root
    */
@@ -41,9 +38,10 @@ export class UserActivationTracker {
 
     ACTIVATION_EVENTS.forEach(type => {
       this.root_.addEventListener(
-          type,
-          this.boundActivated_,
-          /* capture */ true);
+        type,
+        this.boundActivated_,
+        /* capture */ true
+      );
     });
   }
 
@@ -51,9 +49,10 @@ export class UserActivationTracker {
   dispose() {
     ACTIVATION_EVENTS.forEach(type => {
       this.root_.removeEventListener(
-          type,
-          this.boundActivated_,
-          /* capture */ true);
+        type,
+        this.boundActivated_,
+        /* capture */ true
+      );
     });
   }
 
@@ -70,9 +69,11 @@ export class UserActivationTracker {
    * @return {boolean}
    */
   isActive() {
-    return ((this.lastActivationTime_ > 0
-        && Date.now() - this.lastActivationTime_ <= ACTIVATION_TIMEOUT)
-        || this.inLongTask_);
+    return (
+      (this.lastActivationTime_ > 0 &&
+        Date.now() - this.lastActivationTime_ <= ACTIVATION_TIMEOUT) ||
+      this.inLongTask_
+    );
   }
 
   /**
@@ -91,11 +92,13 @@ export class UserActivationTracker {
       return;
     }
     this.inLongTask_ = true;
-    promise.catch(() => {}).then(() => {
-      this.inLongTask_ = false;
-      // Add additional "activity window" after a long task is done.
-      this.lastActivationTime_ = Date.now();
-    });
+    promise
+      .catch(() => {})
+      .then(() => {
+        this.inLongTask_ = false;
+        // Add additional "activity window" after a long task is done.
+        this.lastActivationTime_ = Date.now();
+      });
   }
 
   /**

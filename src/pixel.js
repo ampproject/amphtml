@@ -50,10 +50,13 @@ function createNoReferrerPixel(win, src) {
     // if "referrerPolicy" is not supported, use iframe wrapper
     // to scrub the referrer.
     const iframe = createElementWithAttributes(
-        /** @type {!Document} */ (win.document), 'iframe', dict({
-          'src': 'about:blank',
-          'style': 'display:none',
-        }));
+      /** @type {!Document} */ (win.document),
+      'iframe',
+      dict({
+        'src': 'about:blank',
+        'style': 'display:none',
+      })
+    );
     win.document.body.appendChild(iframe);
     createImagePixel(iframe.contentWindow, src);
     return iframe;

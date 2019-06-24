@@ -17,7 +17,6 @@
 import {dict, omit} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
 
-
 /**
  * A higher-order component that wraps a specific date-picker implmentation
  * with common functionality.
@@ -57,8 +56,9 @@ export function withDatePickerCommon(WrappedComponent) {
    * @return {boolean}
    */
   function isInclusivelyBetween(date, min, max) {
-    return isInclusivelyAfterDay(date, min) &&
-        isInclusivelyBeforeDay(date, max);
+    return (
+      isInclusivelyAfterDay(date, min) && isInclusivelyBeforeDay(date, max)
+    );
   }
 
   /**
@@ -144,8 +144,13 @@ export function withDatePickerCommon(WrappedComponent) {
       const min = props['min'];
       const startDate = props['startDate'];
 
-      this.isDayBlocked = isDayBlocked.bind(null,
-          blocked, startDate, endDate, allowBlockedEndDate);
+      this.isDayBlocked = isDayBlocked.bind(
+        null,
+        blocked,
+        startDate,
+        endDate,
+        allowBlockedEndDate
+      );
       this.isDayHighlighted = datesListContains.bind(null, highlighted);
       this.isOutsideRange = isOutsideRange.bind(null, min, max);
     }
@@ -171,12 +176,19 @@ export function withDatePickerCommon(WrappedComponent) {
         this.isOutsideRange = isOutsideRange.bind(null, min, max);
       }
 
-      if (blocked != this.props['blocked'] ||
+      if (
+        blocked != this.props['blocked'] ||
         allowBlockedEndDate != this.props['allowBlockedEndDate'] ||
         startDate != this.props['startDate'] ||
-        endDate != this.props['endDate']) {
-        this.isDayBlocked = isDayBlocked.bind(null,
-            blocked, startDate, endDate, allowBlockedEndDate);
+        endDate != this.props['endDate']
+      ) {
+        this.isDayBlocked = isDayBlocked.bind(
+          null,
+          blocked,
+          startDate,
+          endDate,
+          allowBlockedEndDate
+        );
       }
 
       if (highlighted != this.props['highlighted']) {
@@ -186,8 +198,10 @@ export function withDatePickerCommon(WrappedComponent) {
 
     /** @override */
     render() {
-      const props = /** @type {!JsonObject} */ (
-        omit(this.props, Object.keys(defaultProps)));
+      const props = /** @type {!JsonObject} */ (omit(
+        this.props,
+        Object.keys(defaultProps)
+      ));
 
       const date = props['date'];
       const daySize = props['daySize'];
@@ -196,16 +210,22 @@ export function withDatePickerCommon(WrappedComponent) {
       const startDate = props['startDate'];
 
       const initialDate =
-          initialVisibleMonth || date || startDate || endDate || undefined;
+        initialVisibleMonth || date || startDate || endDate || undefined;
       props['initialVisibleMonth'] = () => moment(initialDate);
 
-      return React.createElement(WrappedComponent, Object.assign({}, props,
+      return React.createElement(
+        WrappedComponent,
+        Object.assign(
+          {},
+          props,
           dict({
             'daySize': Number(daySize),
             'isDayBlocked': this.isDayBlocked,
             'isDayHighlighted': this.isDayHighlighted,
             'isOutsideRange': this.isOutsideRange,
-          })));
+          })
+        )
+      );
     }
   }
 

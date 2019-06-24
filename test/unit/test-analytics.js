@@ -20,57 +20,63 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../src/service';
-import {
-  triggerAnalyticsEvent,
-} from '../../src/analytics';
+import {triggerAnalyticsEvent} from '../../src/analytics';
 
+describes.realWin(
+  'analytics',
+  {
+    amp: true,
+  },
+  env => {
+    let sandbox;
+    let timer;
+    let ampdoc;
 
-describes.realWin('analytics', {
-  amp: true,
-}, env => {
-  let sandbox;
-  let timer;
-  let ampdoc;
+    describe('triggerAnalyticsEvent', () => {
+      let triggerEventSpy;
 
-  describe('triggerAnalyticsEvent', () => {
-    let triggerEventSpy;
-
-    class MockInstrumentation {
-      triggerEventForTarget(nodeOrDoc, eventType, opt_vars) {
-        triggerEventSpy(nodeOrDoc, eventType, opt_vars);
+      class MockInstrumentation {
+        triggerEventForTarget(nodeOrDoc, eventType, opt_vars) {
+          triggerEventSpy(nodeOrDoc, eventType, opt_vars);
+        }
       }
-    }
 
-    beforeEach(() => {
-      sandbox = sinon.sandbox;
-      timer = Services.timerFor(env.win);
-      ampdoc = env.ampdoc;
-      triggerEventSpy = sandbox.spy();
-      resetServiceForTesting(window, 'amp-analytics-instrumentation');
-    });
+      beforeEach(() => {
+        sandbox = sinon.sandbox;
+        timer = Services.timerFor(env.win);
+        ampdoc = env.ampdoc;
+        triggerEventSpy = sandbox.spy();
+        resetServiceForTesting(window, 'amp-analytics-instrumentation');
+      });
 
-    afterEach(() => {
-      sandbox.restore();
-    });
+      afterEach(() => {
+        sandbox.restore();
+      });
 
-    it('should not do anything if analytics is not installed', () => {
-      triggerAnalyticsEvent(ampdoc.win.document, 'hello');
-      return timer.promise(50).then(() => {
-        expect(triggerEventSpy).to.have.not.been.called;
+      it('should not do anything if analytics is not installed', () => {
+        triggerAnalyticsEvent(ampdoc.win.document, 'hello');
+        return timer.promise(50).then(() => {
+          expect(triggerEventSpy).to.have.not.been.called;
+        });
+      });
+
+      it('should trigger analytics event if analytics is installed', () => {
+        registerServiceBuilderForDoc(
+          ampdoc,
+          'amp-analytics-instrumentation',
+          MockInstrumentation
+        );
+        // Force instantiation
+        getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
+        triggerAnalyticsEvent(ampdoc.win.document, 'hello');
+        return timer.promise(50).then(() => {
+          expect(triggerEventSpy).to.have.been.called;
+          expect(triggerEventSpy).to.have.been.calledWith(
+            ampdoc.win.document,
+            'hello'
+          );
+        });
       });
     });
-
-    it('should trigger analytics event if analytics is installed', () => {
-      registerServiceBuilderForDoc(
-          ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
-      // Force instantiation
-      getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
-      triggerAnalyticsEvent(ampdoc.win.document, 'hello');
-      return timer.promise(50).then(() => {
-        expect(triggerEventSpy).to.have.been.called;
-        expect(triggerEventSpy).to.have.been.calledWith(
-            ampdoc.win.document, 'hello');
-      });
-    });
-  });
-});
+  }
+);

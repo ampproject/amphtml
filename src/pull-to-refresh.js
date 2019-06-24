@@ -16,7 +16,6 @@
 
 import {Services} from './services';
 
-
 /**
  * Installs "pull-to-refresh" (P2R) blocker if viewer has requested. P2R can
  * be very disruptive for different viewer scenarios. This is currently only
@@ -27,13 +26,16 @@ export function installPullToRefreshBlocker(win) {
   // Only do when requested and don't even try it on Safari!
   // This mode is only executed in the single-doc mode.
   const {documentElement} = win.document;
-  if (Services.viewerForDoc(documentElement).getParam('p2r') == '0' &&
-      Services.platformFor(win).isChrome()) {
+  if (
+    Services.viewerForDoc(documentElement).getParam('p2r') == '0' &&
+    Services.platformFor(win).isChrome()
+  ) {
     new PullToRefreshBlocker(
-        win.document, Services.viewportForDoc(documentElement));
+      win.document,
+      Services.viewportForDoc(documentElement)
+    );
   }
 }
-
 
 /**
  * Visible for testing only.
@@ -82,9 +84,11 @@ export class PullToRefreshBlocker {
   onTouchStart_(event) {
     // P2R won't trigger when document is scrolled. Also can ignore when we are
     // already tracking this touch and for non-single-touch events.
-    if (this.tracking_ ||
-          !(event.touches && event.touches.length == 1) ||
-          this.viewport_.getScrollTop() > 0) {
+    if (
+      this.tracking_ ||
+      !(event.touches && event.touches.length == 1) ||
+      this.viewport_.getScrollTop() > 0
+    ) {
       return;
     }
 

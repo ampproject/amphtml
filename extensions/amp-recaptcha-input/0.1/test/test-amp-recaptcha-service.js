@@ -23,56 +23,58 @@ import {AmpRecaptchaService} from '../amp-recaptcha-service';
  * with a "fake iframe" document.
  */
 
-describes.realWin('amp-recaptcha-service', {
-  amp: { /* amp spec */
-    extensions: ['amp-recaptcha-input'],
+describes.realWin(
+  'amp-recaptcha-service',
+  {
+    amp: {
+      /* amp spec */
+      extensions: ['amp-recaptcha-input'],
+    },
   },
-}, env => {
-  let recaptchaService;
-  const fakeSitekey = 'fake-sitekey-fortesting';
-  const anotherFakeSitekey = 'another-fake-sitekey-fortesting';
+  env => {
+    let recaptchaService;
+    const fakeSitekey = 'fake-sitekey-fortesting';
+    const anotherFakeSitekey = 'another-fake-sitekey-fortesting';
 
-  beforeEach(() => {
-    recaptchaService = new AmpRecaptchaService(env.ampdoc);
-  });
+    beforeEach(() => {
+      recaptchaService = new AmpRecaptchaService(env.ampdoc);
+    });
 
-  it('should create an iframe on register if first element to register', () => {
-    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-    return recaptchaService
-        .register(fakeSitekey).then(() => {
-          expect(recaptchaService.registeredElementCount_).to.be.equal(1);
-          expect(recaptchaService.iframe_).to.be.ok;
-        });
-  });
+    it('should create an iframe on register if first element to register', () => {
+      expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+      return recaptchaService.register(fakeSitekey).then(() => {
+        expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+        expect(recaptchaService.iframe_).to.be.ok;
+      });
+    });
 
-  it('should only initialize once for X number of elements,' +
-    ' and iframe already exists', () => {
-
-    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-    return recaptchaService
-        .register(fakeSitekey).then(() => {
+    it(
+      'should only initialize once for X number of elements,' +
+        ' and iframe already exists',
+      () => {
+        expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+        return recaptchaService.register(fakeSitekey).then(() => {
           expect(recaptchaService.registeredElementCount_).to.be.equal(1);
           expect(recaptchaService.iframe_).to.be.ok;
           const currentIframe = recaptchaService.iframe_;
 
           // Register a second element
-          return recaptchaService
-              .register(fakeSitekey)
-              .then(() => {
-                expect(recaptchaService.registeredElementCount_)
-                    .to.be.equal(2);
-                expect(recaptchaService.iframe_).to.be.ok;
-                expect(recaptchaService.iframe_).to.be.equal(currentIframe);
-              });
+          return recaptchaService.register(fakeSitekey).then(() => {
+            expect(recaptchaService.registeredElementCount_).to.be.equal(2);
+            expect(recaptchaService.iframe_).to.be.ok;
+            expect(recaptchaService.iframe_).to.be.equal(currentIframe);
+          });
         });
-  });
+      }
+    );
 
-  it('should dispose of the iframe,' +
-    ' once all registered elements unregister', () => {
-    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    it(
+      'should dispose of the iframe,' +
+        ' once all registered elements unregister',
+      () => {
+        expect(recaptchaService.registeredElementCount_).to.be.equal(0);
 
-    return recaptchaService
-        .register(fakeSitekey).then(() => {
+        return recaptchaService.register(fakeSitekey).then(() => {
           expect(recaptchaService.registeredElementCount_).to.be.equal(1);
           expect(recaptchaService.iframe_).to.be.ok;
 
@@ -80,13 +82,15 @@ describes.realWin('amp-recaptcha-service', {
           expect(recaptchaService.registeredElementCount_).to.be.equal(0);
           expect(recaptchaService.iframe_).to.be.not.ok;
         });
-  });
+      }
+    );
 
-  it('should unlisten to all listeners,' +
-    ' once all registered elements unregister', () => {
-    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-    return recaptchaService
-        .register(fakeSitekey).then(() => {
+    it(
+      'should unlisten to all listeners,' +
+        ' once all registered elements unregister',
+      () => {
+        expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+        return recaptchaService.register(fakeSitekey).then(() => {
           expect(recaptchaService.unlisteners_.length).to.be.equal(3);
 
           // Stub out the unlisten function
@@ -97,13 +101,15 @@ describes.realWin('amp-recaptcha-service', {
           expect(recaptchaService.unlisteners_.length).to.be.equal(0);
           expect(unlistener).to.be.called;
         });
-  });
+      }
+    );
 
-  it('should not allow elements to register,' +
-    ' if they pass a different sitekey', () => {
-    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-    return recaptchaService
-        .register(fakeSitekey).then(() => {
+    it(
+      'should not allow elements to register,' +
+        ' if they pass a different sitekey',
+      () => {
+        expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+        return recaptchaService.register(fakeSitekey).then(() => {
           expect(recaptchaService.registeredElementCount_).to.be.equal(1);
           expect(recaptchaService.iframe_).to.be.ok;
 
@@ -113,68 +119,68 @@ describes.realWin('amp-recaptcha-service', {
             expect(recaptchaService.iframe_).to.be.ok;
           });
         });
-  });
-
-  it('should return when the iframe is' +
-    ' loaded and ready', () => {
-    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-    return recaptchaService
-        .register(fakeSitekey).then(() => {
-          expect(recaptchaService.unlisteners_.length).to.be.equal(3);
-          expect(recaptchaService.iframeLoadPromise_).to.be.ok;
-          expect(recaptchaService.recaptchaApiReady_).to.be.ok;
-
-          return recaptchaService.iframeLoadPromise_.then(() => {
-            expect(true).to.be.ok;
-          });
-        });
-  });
-
-  it('should add the element to the execute map on successful execute', () => {
-    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-    return recaptchaService
-        .register(fakeSitekey).then(() => {
-          expect(recaptchaService.unlisteners_.length).to.be.equal(3);
-
-          recaptchaService.execute(0, '');
-
-          const executeMapKeys = Object.keys(recaptchaService.executeMap_);
-          expect(executeMapKeys.length).to.be.equal(1);
-          expect(executeMapKeys[0]).to.be.equal('0');
-        });
-  });
-
-  it('should postmessage to the specified ' +
-    'recaptcha frame origin on execute', () => {
-
-    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-
-    const postMessageStub = sandbox.stub(
-        recaptchaService,
-        'postMessageToIframe_'
+      }
     );
 
-    return recaptchaService
-        .register(fakeSitekey).then(() => {
-          recaptchaService.execute(0, '');
+    it('should return when the iframe is loaded and ready', () => {
+      expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+      return recaptchaService.register(fakeSitekey).then(() => {
+        expect(recaptchaService.unlisteners_.length).to.be.equal(3);
+        expect(recaptchaService.iframeLoadPromise_).to.be.ok;
+        expect(recaptchaService.recaptchaApiReady_).to.be.ok;
 
-          recaptchaService.recaptchaApiReady_.resolve();
-          return recaptchaService.recaptchaApiReady_.promise;
-        }).then(() => {
-          expect(postMessageStub).to.be.calledWith(
-              recaptchaService.recaptchaFrameOrigin_
-          );
+        return recaptchaService.iframeLoadPromise_.then(() => {
+          expect(true).to.be.ok;
         });
-  });
-
-
-  it('should reject if there is no iframe on execute', () => {
-    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-    expect(recaptchaService.iframe_).to.not.be.ok;
-    return recaptchaService.execute(0, '').catch(err => {
-      expect(err).to.be.ok;
+      });
     });
-  });
-});
 
+    it('should add the element to the execute map on successful execute', () => {
+      expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+      return recaptchaService.register(fakeSitekey).then(() => {
+        expect(recaptchaService.unlisteners_.length).to.be.equal(3);
 
+        recaptchaService.execute(0, '');
+
+        const executeMapKeys = Object.keys(recaptchaService.executeMap_);
+        expect(executeMapKeys.length).to.be.equal(1);
+        expect(executeMapKeys[0]).to.be.equal('0');
+      });
+    });
+
+    it(
+      'should postmessage to the specified ' +
+        'recaptcha frame origin on execute',
+      () => {
+        expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+
+        const postMessageStub = sandbox.stub(
+          recaptchaService,
+          'postMessageToIframe_'
+        );
+
+        return recaptchaService
+          .register(fakeSitekey)
+          .then(() => {
+            recaptchaService.execute(0, '');
+
+            recaptchaService.recaptchaApiReady_.resolve();
+            return recaptchaService.recaptchaApiReady_.promise;
+          })
+          .then(() => {
+            expect(postMessageStub).to.be.calledWith(
+              recaptchaService.recaptchaFrameOrigin_
+            );
+          });
+      }
+    );
+
+    it('should reject if there is no iframe on execute', () => {
+      expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+      expect(recaptchaService.iframe_).to.not.be.ok;
+      return recaptchaService.execute(0, '').catch(err => {
+        expect(err).to.be.ok;
+      });
+    });
+  }
+);

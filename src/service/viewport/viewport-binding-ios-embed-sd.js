@@ -16,7 +16,10 @@
 
 import {Observable} from '../../observable';
 import {Services} from '../../services';
-import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from './viewport-binding-def';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -28,7 +31,7 @@ import {dev} from '../../log';
 import {htmlFor} from '../../static-template';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {waitForBody} from '../../dom';
+import {waitForBodyOpen} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
 
 const TAG_ = 'Viewport';
@@ -85,7 +88,6 @@ const INHERIT_STYLES = [
   'table-layout',
 ];
 
-
 /**
  * Implementation of ViewportBindingDef based for iframed iOS case where iframes
  * are not scrollable. Scrolling accomplished here by attaching shadow root,
@@ -95,7 +97,6 @@ const INHERIT_STYLES = [
  * @visibleForTesting
  */
 export class ViewportBindingIosEmbedShadowRoot_ {
-
   /**
    * @param {!Window} win
    */
@@ -177,7 +178,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     // Setup UI.
     /** @private {boolean} */
     this.setupDone_ = false;
-    waitForBody(doc, this.setup_.bind(this));
+    waitForBodyOpen(doc, this.setup_.bind(this));
 
     // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
     // iOS rendering bugs. See #8798 for details.
@@ -229,7 +230,8 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     this.updateBodyStyles_();
     if (this.win.MutationObserver) {
       const bodyObserver = new this.win.MutationObserver(
-          this.updateBodyStyles_.bind(this));
+        this.updateBodyStyles_.bind(this)
+      );
       bodyObserver.observe(body, {attributes: true});
     }
 
@@ -261,8 +263,10 @@ export class ViewportBindingIosEmbedShadowRoot_ {
       },
       mutate: () => {
         this.bodySyncScheduled_ = false;
-        setImportantStyles(this.wrapper_, assertDoesNotContainDisplay(
-            inheritStyles));
+        setImportantStyles(
+          this.wrapper_,
+          assertDoesNotContainDisplay(inheritStyles)
+        );
       },
     });
   }
@@ -282,8 +286,10 @@ export class ViewportBindingIosEmbedShadowRoot_ {
   /** @override */
   disconnect() {
     this.win.removeEventListener('resize', this.boundResizeEventListener_);
-    this.scroller_.removeEventListener('scroll',
-        this.boundScrollEventListener_);
+    this.scroller_.removeEventListener(
+      'scroll',
+      this.boundScrollEventListener_
+    );
   }
 
   /** @override */
@@ -295,6 +301,11 @@ export class ViewportBindingIosEmbedShadowRoot_ {
   /** @override */
   requiresFixedLayerTransfer() {
     return false;
+  }
+
+  /** @override */
+  overrideGlobalScrollTo() {
+    return true;
   }
 
   /** @override */
@@ -360,14 +371,14 @@ export class ViewportBindingIosEmbedShadowRoot_ {
   /** @override */
   getSize() {
     return {
-      width: this.win./*OK*/innerWidth,
-      height: this.win./*OK*/innerHeight,
+      width: this.win./*OK*/ innerWidth,
+      height: this.win./*OK*/ innerHeight,
     };
   }
 
   /** @override */
   getScrollTop() {
-    return this.scroller_./*OK*/scrollTop;
+    return this.scroller_./*OK*/ scrollTop;
   }
 
   /** @override */
@@ -379,12 +390,12 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @override */
   getScrollWidth() {
-    return this.scroller_./*OK*/scrollWidth;
+    return this.scroller_./*OK*/ scrollWidth;
   }
 
   /** @override */
   getScrollHeight() {
-    return this.scroller_./*OK*/scrollHeight;
+    return this.scroller_./*OK*/ scrollHeight;
   }
 
   /** @override */
@@ -392,43 +403,53 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     // Don't use scrollHeight, since it returns `MAX(viewport_height,
     // document_height)` (we only want the latter), and it doesn't account
     // for margins.
-    const bodyWrapper = this.wrapper_;
-    const rect = bodyWrapper./*OK*/getBoundingClientRect();
-    const style = computedStyle(this.win, bodyWrapper);
-    // The Y-position of any element can be offset by the vertical margin
+    const content = this.wrapper_;
+    const rect = content./*OK*/ getBoundingClientRect();
+
+    // The Y-position of `content` can be offset by the vertical margin
     // of its first child, and this is _not_ accounted for in `rect.height`.
-    // This "top gap" causes smaller than expected contentHeight, so calculate
-    // and add it manually. Note that the "top gap" includes any padding-top
-    // on ancestor elements and the scroller's border-top. The "bottom gap"
-    // remains unaddressed.
-    const topGapPlusPaddingAndBorder = rect.top + this.getScrollTop();
-    return rect.height
-        + topGapPlusPaddingAndBorder
-        + parseInt(style.marginTop, 10)
-        + parseInt(style.marginBottom, 10);
+    // This causes smaller than expected content height, so add it manually.
+    // Note this "top" value already includes padding-top of ancestor elements
+    // and getBorderTop().
+    const top = rect.top + this.getScrollTop();
+
+    // As of Safari 12.1.1, the getBoundingClientRect().height does not include
+    // the bottom margin of children and there's no other API that does.
+    const childMarginBottom = marginBottomOfLastChild(
+      this.win,
+      this.win.document.body
+    );
+
+    const style = computedStyle(this.win, content);
+    return (
+      top +
+      parseInt(style.marginTop, 10) +
+      rect.height +
+      childMarginBottom +
+      parseInt(style.marginBottom, 10)
+    );
   }
 
   /** @override */
-  contentHeightChanged() {
-  }
+  contentHeightChanged() {}
 
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
-    const b = el./*OK*/getBoundingClientRect();
+    const b = el./*OK*/ getBoundingClientRect();
     if (this.useLayers_) {
       return layoutRectLtwh(b.left, b.top, b.width, b.height);
     }
 
-    const scrollTop = opt_scrollTop != undefined
-      ? opt_scrollTop
-      : this.getScrollTop();
-    const scrollLeft = opt_scrollLeft != undefined
-      ? opt_scrollLeft
-      : this.getScrollLeft();
-    return layoutRectLtwh(Math.round(b.left + scrollLeft),
-        Math.round(b.top + scrollTop),
-        Math.round(b.width),
-        Math.round(b.height));
+    const scrollTop =
+      opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
+    const scrollLeft =
+      opt_scrollLeft != undefined ? opt_scrollLeft : this.getScrollLeft();
+    return layoutRectLtwh(
+      Math.round(b.left + scrollLeft),
+      Math.round(b.top + scrollTop),
+      Math.round(b.width),
+      Math.round(b.height)
+    );
   }
 
   /** @override */
@@ -440,7 +461,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
   setScrollTop(scrollTop) {
     // If scroll top is 0, it's set to 1 to avoid scroll-freeze issue. See
     // `onScrolled_` for more details.
-    this.scroller_./*OK*/scrollTop = scrollTop || 1;
+    this.scroller_./*OK*/ scrollTop = scrollTop || 1;
   }
 
   /**
@@ -453,8 +474,8 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     // This is very sad but very necessary. See #330 for more details.
     // Unfortunately, the same is very expensive to do on the bottom, due to
     // costly scrollHeight.
-    if (this.scroller_./*OK*/scrollTop == 0) {
-      this.scroller_./*OK*/scrollTop = 1;
+    if (this.scroller_./*OK*/ scrollTop == 0) {
+      this.scroller_./*OK*/ scrollTop = 1;
       if (opt_event) {
         opt_event.preventDefault();
       }

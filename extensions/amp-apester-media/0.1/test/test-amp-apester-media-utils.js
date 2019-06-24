@@ -22,7 +22,6 @@ import {
 } from '../utils';
 
 describes.realWin('amp-apester-media-utils', {}, unused => {
-
   beforeEach(() => {
     document.body.textContent = '';
     document.head.textContent = '';
@@ -176,8 +175,8 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
     const meta = document.createElement('meta');
     meta.setAttribute('name', 'keywords');
     meta.setAttribute(
-        'content',
-        'sport,Eddie Jones,England Rugby Union Team,' +
+      'content',
+      'sport,Eddie Jones,England Rugby Union Team,' +
         'Argentina Rugby Union Team,Rugby Union'
     );
     document.head.appendChild(meta);

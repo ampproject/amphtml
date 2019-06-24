@@ -18,7 +18,8 @@ import {buildUrl} from '../url-builder';
 
 describe('buildUrl', () => {
   it('should build a simple URL', () => {
-    expect(buildUrl('https://example.com', {'key': 'value'}, Infinity))
-        .to.equal('https://example.com?key=value');
+    expect(
+      buildUrl('https://example.com', {'key': 'value'}, Infinity)
+    ).to.equal('https://example.com?key=value');
   });
 });

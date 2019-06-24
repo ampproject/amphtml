@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Отримати посилання',
   },
@@ -117,8 +120,9 @@ const strings = {
     string: 'Щоб переглядати цей вміст, збільште ширину вікна',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Щоб переглядати цей вміст, потрібно ввімкнути експеримент з ' +
-        'AMP-історіями.',
+    string:
+      'Щоб переглядати цей вміст, потрібно ввімкнути експеримент з ' +
+      'AMP-історіями.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Цю сторінку найкраще переглядати в книжковій орієнтації',

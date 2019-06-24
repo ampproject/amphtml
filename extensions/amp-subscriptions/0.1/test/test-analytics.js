@@ -16,7 +16,6 @@
 
 import {SubscriptionAnalytics} from '../analytics';
 
-
 describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
   let analytics;
   let ampdoc;
@@ -42,7 +41,8 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
     const stub = sandbox.stub(analytics, 'event');
     analytics.actionEvent('service1', 'action1', 'success');
     expect(stub).to.be.calledOnce.calledWith(
-        'subscriptions-action-action1-success',
-        {'serviceId': 'service1'});
+      'subscriptions-action-action1-success',
+      {'serviceId': 'service1'}
+    );
   });
 });

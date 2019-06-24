@@ -30,10 +30,7 @@ const TIMEOUT_VALUE = 8000;
 
 let trackImpressionPromise = null;
 
-const DEFAULT_APPEND_URL_PARAM = [
-  'gclid',
-  'gclsrc',
-];
+const DEFAULT_APPEND_URL_PARAM = ['gclid', 'gclsrc'];
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -57,8 +54,7 @@ const TRUSTED_REFERRER_HOSTS = [
  * @return {!Promise}
  */
 export function getTrackImpressionPromise() {
-  return userAssert(trackImpressionPromise,
-      'E#19457 trackImpressionPromise');
+  return userAssert(trackImpressionPromise, 'E#19457 trackImpressionPromise');
 }
 
 /**
@@ -78,36 +74,44 @@ export function maybeTrackImpression(win) {
   const deferred = new Deferred();
   const {promise, resolve: resolveImpression} = deferred;
 
-  trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
-      promise, 'TrackImpressionPromise timeout').catch(error => {
-    dev().warn('IMPRESSION', error);
-  });
+  trackImpressionPromise = Services.timerFor(win)
+    .timeoutPromise(TIMEOUT_VALUE, promise, 'TrackImpressionPromise timeout')
+    .catch(error => {
+      dev().warn('IMPRESSION', error);
+    });
 
   const viewer = Services.viewerForDoc(win.document.documentElement);
   const isTrustedViewerPromise = viewer.isTrustedViewer();
-  const isTrustedReferrerPromise = viewer.getReferrerUrl().then(
-      referrer => isTrustedReferrer(referrer));
-  Promise.all([
-    isTrustedViewerPromise,
-    isTrustedReferrerPromise,
-  ]).then(results => {
-    const isTrustedViewer = results[0];
-    const isTrustedReferrer = results[1];
-    // Enable the feature in the case of trusted viewer,
-    // or trusted referrer
-    // or with experiment turned on
-    if (!isTrustedViewer && !isTrustedReferrer && !isExperimentOn(win, 'alp')) {
-      resolveImpression();
-      return;
+  const isTrustedReferrerPromise = viewer
+    .getReferrerUrl()
+    .then(referrer => isTrustedReferrer(referrer));
+  Promise.all([isTrustedViewerPromise, isTrustedReferrerPromise]).then(
+    results => {
+      const isTrustedViewer = results[0];
+      const isTrustedReferrer = results[1];
+      // Enable the feature in the case of trusted viewer,
+      // or trusted referrer
+      // or with experiment turned on
+      if (
+        !isTrustedViewer &&
+        !isTrustedReferrer &&
+        !isExperimentOn(win, 'alp')
+      ) {
+        resolveImpression();
+        return;
+      }
+
+      const replaceUrlPromise = handleReplaceUrl(win);
+      const clickUrlPromise = handleClickUrl(win);
+
+      Promise.all([replaceUrlPromise, clickUrlPromise]).then(
+        () => {
+          resolveImpression();
+        },
+        () => {}
+      );
     }
-
-    const replaceUrlPromise = handleReplaceUrl(win);
-    const clickUrlPromise = handleClickUrl(win);
-
-    Promise.all([replaceUrlPromise, clickUrlPromise]).then(() => {
-      resolveImpression();
-    }, () => {});
-  });
+  );
 }
 
 /**
@@ -146,16 +150,20 @@ function handleReplaceUrl(win) {
   }
 
   // request async replaceUrl is viewer support getReplaceUrl.
-  return viewer.sendMessageAwaitResponse('getReplaceUrl', /* data */ undefined)
-      .then(response => {
+  return viewer
+    .sendMessageAwaitResponse('getReplaceUrl', /* data */ undefined)
+    .then(
+      response => {
         if (!response || typeof response != 'object') {
           dev().warn('IMPRESSION', 'get invalid replaceUrl response');
           return;
         }
         viewer.replaceUrl(response['replaceUrl'] || null);
-      }, err => {
+      },
+      err => {
         dev().warn('IMPRESSION', 'Error request replaceUrl from viewer', err);
-      });
+      }
+    );
 }
 
 /**
@@ -186,9 +194,11 @@ function handleClickUrl(win) {
   }
 
   if (clickUrl.indexOf('https://') != 0) {
-    user().warn('IMPRESSION',
-        'click fragment param should start with https://. Found ',
-        clickUrl);
+    user().warn(
+      'IMPRESSION',
+      'click fragment param should start with https://. Found ',
+      clickUrl
+    );
     return Promise.resolve();
   }
 
@@ -200,13 +210,17 @@ function handleClickUrl(win) {
   }
 
   // TODO(@zhouyx) need test with a real response.
-  return viewer.whenFirstVisible().then(() => {
-    return invoke(win, dev().assertString(clickUrl));
-  }).then(response => {
-    applyResponse(win, response);
-  }).catch(err => {
-    user().warn('IMPRESSION', 'Error on request clickUrl: ', err);
-  });
+  return viewer
+    .whenFirstVisible()
+    .then(() => {
+      return invoke(win, dev().assertString(clickUrl));
+    })
+    .then(response => {
+      applyResponse(win, response);
+    })
+    .catch(err => {
+      user().warn('IMPRESSION', 'Error on request clickUrl: ', err);
+    });
 }
 
 /**
@@ -219,17 +233,17 @@ function invoke(win, clickUrl) {
   if (getMode().localDev && !getMode().test) {
     clickUrl = 'http://localhost:8000/impression-proxy?url=' + clickUrl;
   }
-  return Services.xhrFor(win).fetchJson(clickUrl, {
-    credentials: 'include',
-    // All origins are allows to send these requests.
-    requireAmpResponseSourceOrigin: false,
-  }).then(res => {
-    // Treat 204 no content response specially
-    if (res.status == 204) {
-      return null;
-    }
-    return res.json();
-  });
+  return Services.xhrFor(win)
+    .fetchJson(clickUrl, {
+      credentials: 'include',
+    })
+    .then(res => {
+      // Treat 204 no content response specially
+      if (res.status == 204) {
+        return null;
+      }
+      return res.json();
+    });
 }
 
 /**
@@ -280,8 +294,9 @@ function applyResponse(win, response) {
  */
 export function shouldAppendExtraParams(ampdoc) {
   return ampdoc.whenReady().then(() => {
-    return !!ampdoc.getBody().querySelector(
-        'amp-analytics[type=googleanalytics]');
+    return !!ampdoc
+      .getBody()
+      .querySelector('amp-analytics[type=googleanalytics]');
   });
 }
 
@@ -329,9 +344,10 @@ function getQueryParamUrl(params) {
   let url = '';
   for (let i = 0; i < params.length; i++) {
     const param = params[i];
-    url += (i == 0) ?
-      `${param}=QUERY_PARAM(${param})` :
-      `&${param}=QUERY_PARAM(${param})`;
+    url +=
+      i == 0
+        ? `${param}=QUERY_PARAM(${param})`
+        : `&${param}=QUERY_PARAM(${param})`;
   }
   return url;
 }
