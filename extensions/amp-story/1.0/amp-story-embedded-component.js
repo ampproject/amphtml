@@ -633,7 +633,21 @@ export class AmpStoryEmbeddedComponent {
     this.updateTooltipText_(component.element, embedConfig);
     this.updateTooltipComponentIcon_(component.element, embedConfig);
     this.updateTooltipActionIcon_(embedConfig);
-    this.positionTooltip_(component);
+
+    if (component.element.classList.contains('i-amphtml-story-bling-link')) {
+      // no arrow
+
+      // style
+
+      // position on top of bling link
+      const elementRect = component.element.getBoundingClientRect();
+      setImportantStyles(devAssert(this.tooltip_), {
+        top: `${elementRect.top}px`,
+        left: `${elementRect.left}px`,
+      });
+    } else {
+      this.positionTooltip_(component);
+    }
   }
 
   /**

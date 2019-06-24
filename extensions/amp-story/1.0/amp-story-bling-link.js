@@ -26,7 +26,7 @@ import {htmlFor} from '../../../src/static-template';
  */
 export const BLING_LINK_SELECTOR = 'a.i-amphtml-story-bling-link';
 
-export const BLING_LINK_BUILT = 'built';
+export const BLING_LINK_BUILT = '__AMP_BLING_LINK_BUILT';
 
 export class AmpStoryBlingLink {
   /**
