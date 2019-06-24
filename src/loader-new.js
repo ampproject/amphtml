@@ -15,7 +15,7 @@
  */
 
 import {dev} from './log';
-import {htmlFor} from './static-template';
+import {htmlFor, svgFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {toWin} from './types';
 
@@ -26,7 +26,7 @@ import {toWin} from './types';
  * screenshots and various states of the new loader design.
  *
  * @param {!Document} doc
- * @param {!Element} container
+ * @param {!Element} element
  * @return {!Element}
  */
 export function createLoaderElement(doc, element) {
@@ -56,7 +56,9 @@ export function isLoaderIneligible(element) {
  * @param {*} doc
  */
 export function getDefaultPlaceholder(doc) {
-  return htmlFor(doc)`<div placeholder style="background:#f8f8f8"></div>`;
+  return htmlFor(
+    doc
+  )`<div placeholder class="i-amphtml-new-loader-placeholder"></div>`;
 }
 
 /**
@@ -80,21 +82,40 @@ class LoaderBuilder {
   constructor(doc, element) {
     this.doc_ = doc;
     this.element_ = element;
-    this.loaderDom_ = htmlFor(this.element_)`<div class="i-amphtml-new-loader">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="24 24 72 72">
-    </svg>
-    </div>`;
+    this.domRoot_;
+    this.svgRoot_;
   }
 
   /**
    *
    */
   build() {
+    this.buildContainers();
     this.setSize();
     this.addSpinner();
     this.maybeAddLogo();
     this.maybeAddBackgroundShim();
-    return this.loaderDom_;
+    return this.domRoot_;
+  }
+
+  /**
+   *
+   */
+  buildContainers() {
+    this.domRoot_ = htmlFor(this.element_)`<div class="i-amphtml-new-loader">
+    </div>`;
+
+    this.svgRoot_ = svgFor(
+      this.element_
+    )`<svg xmlns="http://www.w3.org/2000/svg" viewBox="24 24 72 72"></svg>`;
+
+    // this.element_.ownerDocument.createElementNS(
+    //   'http://www.w3.org/2000/svg',
+    //   'svg'
+    // );
+    // this.svgRoot_.setAttribute('viewBox', '24 24 72 72');
+
+    this.domRoot_.appendChild(this.svgRoot_);
   }
 
   /**
@@ -107,38 +128,38 @@ class LoaderBuilder {
 
     // Ads always get the default spinner regardless of the host size
     if (this.isAd()) {
-      return this.loaderDom_.classList.add(sizeClassDefault);
+      return this.domRoot_.classList.add(sizeClassDefault);
     }
 
     // Other than Ads, small spinner is always used if host element is small.
     if (this.isSmall()) {
-      return this.loaderDom_.classList.add(sizeClassSmall);
+      return this.domRoot_.classList.add(sizeClassSmall);
     }
 
     // If host is not small, default size spinner is normally used
     // unless due to branding guidelines (e.g. Instagram) a larger spinner is
     // required.
     if (this.requiresLargeSpinner()) {
-      return this.loaderDom_.classList.add(sizeClassLarge);
+      return this.domRoot_.classList.add(sizeClassLarge);
     }
-    return this.loaderDom_.classList.add(sizeClassDefault);
+    return this.domRoot_.classList.add(sizeClassDefault);
   }
 
   /**
    *
    */
   addSpinner() {
-    const spinner = htmlFor(this.doc_)`<g class="i-amphtml-new-loader-spinner">
-    <circle cx="60" cy="60" r="22">
+    const spinner = svgFor(this.doc_)`<g class="i-amphtml-new-loader-spinner">
+    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
     </circle>
-    <circle cx="60" cy="60" r="22">
+    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
     </circle>
-    <circle cx="60" cy="60" r="22">
+    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
     </circle>
-    <circle cx="60" cy="60" r="22">
+    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
     </circle></g>`;
 
-    this.loaderDom_.appendChild(spinner);
+    this.svgRoot_.appendChild(spinner);
   }
 
   /**
@@ -174,7 +195,7 @@ class LoaderBuilder {
    *
    */
   getDefaultLogo() {
-    return htmlFor(
+    return svgFor(
       this.doc_
     )`<circle class="i-amphtml-new-loader-logo i-amphtml-new-loader-logo-default"
         cx="60" cy="60" r="12">
@@ -186,7 +207,7 @@ class LoaderBuilder {
    * @param {*} logo
    */
   addLogo(logo) {
-    this.loaderDom_.appendChild(logo);
+    this.svgRoot_.appendChild(logo);
   }
 
   /**

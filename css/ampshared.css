@@ -18,45 +18,39 @@
   display: inline-block;
 }
 
-
 .i-amphtml-blurry-placeholder {
-  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: opacity 0.3s cubic-bezier(0, 0, 0.2, 1) !important;
 }
 
 /* layout=nodisplay are automatically hidden until JS initializes. */
-[layout=nodisplay]:not(.i-amphtml-element) {
+[layout='nodisplay']:not(.i-amphtml-element) {
   display: none !important;
 }
 
 /* Initialized layout=nodisplay contain [hidden] */
 .i-amphtml-layout-nodisplay[hidden],
-[layout=nodisplay][hidden]:not(.i-amphtml-layout-nodisplay)
-{
+[layout='nodisplay'][hidden]:not(.i-amphtml-layout-nodisplay) {
   /* Display is set/reset via the hidden attribute */
 }
 .i-amphtml-layout-nodisplay:not([hidden]),
-[layout=nodisplay]:not(.i-amphtml-layout-nodisplay[hidden])
-{
+[layout='nodisplay']:not(.i-amphtml-layout-nodisplay[hidden]) {
   /* Display is set/reset via the hidden attribute */
 }
 
 .i-amphtml-layout-fixed,
-[layout=fixed][width][height]:not(.i-amphtml-layout-fixed)
-{
+[layout='fixed'][width][height]:not(.i-amphtml-layout-fixed) {
   display: inline-block;
   position: relative;
 }
 
 .i-amphtml-layout-responsive,
-[layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
-[width][height][sizes]:not(.i-amphtml-layout-responsive)
-{
+[layout='responsive'][width][height]:not(.i-amphtml-layout-responsive),
+[width][height][sizes]:not(.i-amphtml-layout-responsive) {
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-intrinsic
-{
+.i-amphtml-layout-intrinsic {
   display: inline-block;
   position: relative;
   max-width: 100%;
@@ -68,22 +62,19 @@
 }
 
 .i-amphtml-layout-fixed-height,
-[layout=fixed-height][height]
-{
+[layout='fixed-height'][height] {
   display: block;
   position: relative;
 }
 
 .i-amphtml-layout-container,
-[layout=container]
-{
+[layout='container'] {
   display: block;
   position: relative;
 }
 
 .i-amphtml-layout-fill,
-[layout=fill]:not(.i-amphtml-layout-fill)
-{
+[layout='fill']:not(.i-amphtml-layout-fill) {
   display: block;
   overflow: hidden !important;
   position: absolute;
@@ -94,8 +85,7 @@
 }
 
 .i-amphtml-layout-flex-item,
-[layout=flex-item]:not(.i-amphtml-layout-flex-item)
-{
+[layout='flex-item']:not(.i-amphtml-layout-flex-item) {
   display: block;
   position: relative;
   flex: 1 1 auto;
@@ -190,7 +180,10 @@ i-amphtml-sizer {
 .i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
   left: 12px !important;
 }
-.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+.i-amphtml-screen-reader
+  ~ .i-amphtml-screen-reader
+  ~ .i-amphtml-screen-reader
+  ~ .i-amphtml-screen-reader {
   left: 16px !important;
 }
 
@@ -215,16 +208,14 @@ i-amphtml-sizer {
 }
 
 .i-amphtml-notbuilt,
-[layout]:not(.i-amphtml-element)
-{
+[layout]:not(.i-amphtml-element) {
   position: relative;
   overflow: hidden !important;
   color: transparent !important;
 }
 
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
-[layout]:not([layout=container]):not(.i-amphtml-element) > *
-{
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > *,
+[layout]:not([layout='container']):not(.i-amphtml-element) > * {
   display: none;
 }
 
@@ -296,7 +287,8 @@ i-amphtml-sizer {
  * seamless attribute.
  * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
  */
-i-amphtml-scroll-container, i-amp-scroll-container {
+i-amphtml-scroll-container,
+i-amp-scroll-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -310,7 +302,8 @@ i-amphtml-scroll-container, i-amp-scroll-container {
  * rendered.
  * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
  */
-i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
+i-amphtml-scroll-container.amp-active,
+i-amp-scroll-container.amp-active {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -338,12 +331,12 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 
 .i-amphtml-loader-line {
   position: absolute;
-  top:0;
+  top: 0;
   left: 0;
   right: 0;
   height: 1px;
   overflow: hidden !important;
-  background-color:rgba(151, 151, 151, 0.2);
+  background-color: rgba(151, 151, 151, 0.2);
   display: block;
 }
 
@@ -357,8 +350,12 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 }
 
 @keyframes i-amphtml-loader-line-moving {
-  0% {transform: translateX(-100%);}
-  100% {transform: translateX(100%);}
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .i-amphtml-loader-line.amp-active .i-amphtml-loader-moving-line {
@@ -388,9 +385,9 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   width: 10px;
   margin: 2px;
   border-radius: 100%;
-  background-color: rgba(0, 0, 0, .3);
+  background-color: rgba(0, 0, 0, 0.3);
 
-  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
   will-change: transform;
 }
 
@@ -399,25 +396,25 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 }
 
 .i-amphtml-loader .i-amphtml-loader-dot:nth-child(2) {
-  animation-delay: .1s;
+  animation-delay: 0.1s;
 }
 
 .i-amphtml-loader .i-amphtml-loader-dot:nth-child(3) {
-  animation-delay: .2s;
+  animation-delay: 0.2s;
 }
 
 @keyframes i-amphtml-loader-dots {
-  0%, 100% {
-    transform: scale(.7);
-    background-color: rgba(0, 0, 0, .3);
+  0%,
+  100% {
+    transform: scale(0.7);
+    background-color: rgba(0, 0, 0, 0.3);
   }
 
   50% {
-    transform: scale(.8);
-    background-color: rgba(0, 0, 0, .5);
+    transform: scale(0.8);
+    background-color: rgba(0, 0, 0, 0.5);
   }
 }
-
 
 /**
  * "overflow" element is an element shown when more content is available but
@@ -461,7 +458,8 @@ amp-pixel {
 /**
  * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics, amp-story-auto-ads {
+amp-analytics,
+amp-story-auto-ads {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;
@@ -477,7 +475,6 @@ html.i-amphtml-fie > amp-analytics {
   */
   position: initial !important;
 }
-
 
 /**
  * Forms error/success messaging containers should be hidden at first.
@@ -530,4 +527,137 @@ amp-accordion > section > :last-child {
 /* Expand content when needed. */
 amp-accordion > section[expanded] > :last-child {
   display: block !important;
+}
+
+/* New Loaders */
+
+/* Placeholder */
+.i-amphtml-new-loader-placeholder {
+  background-color: #f8f8f8;
+}
+
+/* Container and sizes */
+.i-amphtml-new-loader {
+  display: inline-block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+.i-amphtml-new-loader-size-default {
+  margin-left: -36px;
+  margin-top: -36px;
+  width: 72px;
+  height: 72px;
+}
+
+/* Spinner */
+.i-amphtml-new-loader-spinner {
+  transform-origin: 60px 60px;
+  animation-fill-mode: forwards;
+  fill: transparent;
+  stroke: #aaa;
+  stroke-width: 1.5px;
+  stroke-dasharray: 34.5575191895 103.6725575685;
+  stroke-dashoffset: 51.8362787842;
+  animation: i-amphtml-new-loader-fade-in 0.8s ease-in 1.8s;
+  animation-fill-mode: forwards;
+}
+
+.i-amphtml-new-loader-spinner-segment {
+  transform-origin: 60px 60px;
+  animation: none 0.6s cubic-bezier(0.5, 0, 0.8, 1) 2.8s,
+    none 1.2s linear 3.4s infinite;
+  animation-fill-mode: forwards;
+}
+
+.i-amphtml-new-loader-spinner-segment:nth-child(1) {
+  transform: rotate(90deg);
+  animation-name: i-amphtml-new-loader-first-spin-1, i-amphtml-new-loader-spin-1;
+}
+.i-amphtml-new-loader-spinner-segment:nth-child(2) {
+  transform: rotate(180deg);
+  animation-name: i-amphtml-new-loader-first-spin-2, i-amphtml-new-loader-spin-2;
+}
+.i-amphtml-new-loader-spinner-segment:nth-child(3) {
+  transform: rotate(270deg);
+  animation-name: i-amphtml-new-loader-first-spin-3, i-amphtml-new-loader-spin-3;
+}
+.i-amphtml-new-loader-spinner-segment:nth-child(4) {
+  animation-name: i-amphtml-new-loader-first-spin-4, none;
+}
+
+@keyframes i-amphtml-new-loader-spin-1 {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-spin-2 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-spin-3 {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(270deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-first-spin-1 {
+  0% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-first-spin-2 {
+  0% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-first-spin-3 {
+  0% {
+    transform: rotate(270deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-first-spin-4 {
+  0% {
+    transform: rotate(0deg);
+  }
+  99% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0;
+  }
+}
+@keyframes i-amphtml-new-loader-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }

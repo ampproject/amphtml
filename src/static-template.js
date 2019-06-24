@@ -17,7 +17,8 @@
 import {devAssert} from './log';
 import {map} from './utils/object.js';
 
-let container;
+let htmlContainer;
+let svgContainer;
 
 /**
  * Creates the html helper for the doc.
@@ -27,11 +28,44 @@ let container;
  */
 export function htmlFor(nodeOrDoc) {
   const doc = nodeOrDoc.ownerDocument || nodeOrDoc;
-  if (!container || container.ownerDocument !== doc) {
-    container = doc.createElement('div');
+  if (!htmlContainer || htmlContainer.ownerDocument !== doc) {
+    htmlContainer = doc.createElement('div');
   }
 
   return html;
+}
+
+/**
+ * Creates the svg helper for the doc.
+ *
+ * @param {!Element|!Document} nodeOrDoc
+ * @return {function(!Array<string>):!Element}
+ */
+export function svgFor(nodeOrDoc) {
+  const doc = nodeOrDoc.ownerDocument || nodeOrDoc;
+  if (!svgContainer || svgContainer.ownerDocument !== svgContainer) {
+    svgContainer = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  }
+
+  return svg;
+}
+
+/**
+ * A tagged template literal helper to generate static SVG trees.
+ * This must be used as a tagged template, ie
+ *
+ * ```
+ * const circle = svg`<circle cx="60" cy="60" r="22"></circle>`;
+ * ```
+ *
+ * Only the root element and its subtree will be returned. DO NOT use this to
+ * render subtree's with dynamic content, it WILL result in an error!
+ *
+ * @param {!Array<string>} strings
+ * @return {!Element}
+ */
+function svg(strings) {
+  return createNode(svgContainer, strings);
 }
 
 /**
@@ -49,6 +83,16 @@ export function htmlFor(nodeOrDoc) {
  * @return {!Element}
  */
 function html(strings) {
+  return createNode(htmlContainer, strings);
+}
+
+/**
+ * Helper used by html and svg string literal functions.
+ * @param {!Element} container
+ * @param {!Array<string>} strings
+ * @return {!Element}
+ */
+function createNode(container, strings) {
   devAssert(strings.length === 1, 'Improper html template tag usage.');
   container./*OK*/ innerHTML = strings[0];
 
