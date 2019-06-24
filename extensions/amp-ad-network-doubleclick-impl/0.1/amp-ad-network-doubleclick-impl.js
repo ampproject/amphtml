@@ -151,10 +151,10 @@ let TroubleshootDataDef;
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
 
-/**
- * @typedef
- * {({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)}
- */
+/** @typedef {{width: number, height: number}} */
+let SizeDef;
+
+/** @typedef {(SizeDef|../../../src/layout-rect.LayoutRectDef)} */
 let LayoutRectOrDimsDef;
 
 /** @final */
@@ -899,15 +899,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Returns the width and height of the slot as defined by the width and height
    * attributes, or the dimensions as computed by
    * getIntersectionElementLayoutBox.
-   * @return {{width: number, height: number}|../../../src/layout-rect.LayoutRectDef}
+   * @return {!LayoutRectOrDimsDef}
    */
   getSlotSize() {
-    const width = Number(this.element.getAttribute('width'));
-    const height = Number(this.element.getAttribute('height'));
+    const {width, height} = this.getDeclaredSlotSize_();
     return width && height
       ? {width, height}
       : // width/height could be 'auto' in which case we fallback to measured.
         this.getIntersectionElementLayoutBox();
+  }
+
+  /**
+   * Returns the width and height, as defined by the slot element's width and
+   * height attributes.
+   * @return {!SizeDef}
+   */
+  getDeclaredSlotSize_() {
+    const width = Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('height'));
+    return {width, height};
   }
 
   /** @override */
