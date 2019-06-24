@@ -55,24 +55,6 @@ function convertPathsToTmpRoot(paths) {
   return paths.map(path => path.replace(/^(\!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
 }
 
-/**
- * Prefixes the the tmp directory if we need to shadow files that have been
- * preprocess by babel in the `dist` task.
- *
- * @param {!Array<string>}
- * @return {!Array<string>}
- */
-function maybeConvertPathsToTmpRoot(paths) {
-  return paths.map(path => {
-    return path;
-    //if (path.contains('src')) {
-      //const hasNegation = path.charAt(0) === '!';
-      //const newPath = hasNegation ? path.substr(1) : newPath;
-      //return `${hasNegation ? '!' : ''}${process.env.AMP_TMP_DIR}${path}`;
-    //}
-  });
-}
-
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
@@ -299,7 +281,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         'build/patched-module/',
         'build/fake-module/',
         'build/fake-polyfills/',
-        process.env.AMP_TMP_DIR,
       ],
       entry_point: entryModuleFilenames,
       module_resolution: 'NODE',
