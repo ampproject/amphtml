@@ -59,73 +59,6 @@ const Key = {
   'Tab': 'Tab',
 };
 
-/**
- * Allow expectations to await the expected value. Duck-type a real Promise.
- * This class, and its waitForValue member function, are necessary because
- * to behave like a Promise and to wait for the correct value from the
- * Browser Automation Framework, the onFulfilled chains need to propagate into
- * the new values that come from the browser.
- *
- * @template TYPE
- * @extends {Promise}
- */
-class ControllerPromise {
-  /**
-   * @param {function(function(?TYPE):void, function(*):void):void|!Promise<TYPE>} executorOrPromise
-   * @param {function(TYPE,function(TYPE): ?TYPE): !Promise=} opt_waitForValue
-   */
-  constructor(executorOrPromise, opt_waitForValue) {
-    this.promise_ =
-      typeof executorOrPromise == 'function'
-        ? new Promise(executorOrPromise)
-        : executorOrPromise;
-
-    /**
-     * Returns a Promise that resolves when the given expected value fulfills
-     * the given condition.
-     * @param {function(TYPE): ?TYPE} condition
-     * @return {!Promise<?TYPE>}
-     */
-    this.waitForValue = opt_waitForValue;
-  }
-
-  /** @override */
-  catch(onRejected) {
-    return new ControllerPromise(
-      this.promise_.catch(onRejected),
-      this.waitForValue
-    );
-  }
-
-  /** @override */
-  finally(onFinally) {
-    return new ControllerPromise(
-      this.promise_.finally(onFinally),
-      this.waitForValue
-    );
-  }
-
-  /** @override */
-  then(opt_onFulfilled, opt_onRejected) {
-    opt_onFulfilled = opt_onFulfilled || (x => x);
-    // Allow this and future `then`s to update the wait value.
-    let wrappedWait = null;
-    if (this.waitForValue) {
-      wrappedWait = (condition, opt_mutate) => {
-        opt_mutate = opt_mutate || (x => x);
-        return this.waitForValue(condition, value =>
-          opt_mutate(opt_onFulfilled(value))
-        );
-      };
-    }
-
-    return new ControllerPromise(
-      this.promise_.then(opt_onFulfilled, opt_onRejected),
-      wrappedWait
-    );
-  }
-}
-
 /** @interface */
 class FunctionalTestController {
   /**
@@ -489,7 +422,6 @@ let ScrollToOptionsDef;
 
 module.exports = {
   ElementHandle,
-  ControllerPromise,
   FunctionalTestController,
   Key,
   WindowRectDef,

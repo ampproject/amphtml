@@ -15,7 +15,7 @@
  */
 
 const chai = require('chai');
-const {ControllerPromise} = require('./functional-test-controller');
+const {ControllerPromise} = require('./controller-promise');
 
 let installed;
 let lastExpectError;
@@ -183,11 +183,22 @@ function overwriteAlwaysUseSuper(utils) {
         return _super.apply(this, arguments);
       }
 
-      const resultPromise = waitForValue(obj => {
+      /**
+       * When passed to `waitForValue`, this method causes the Promise
+       * returned by `waitForValue` to resolve only when the value it
+       * polls matches expectation set by the `expect` chain.
+       * @param {*} value
+       * @return {boolean} true if the ControllerPromise polling value
+       * satisfies the `expect` chain.
+       */
+      const valueSatisfiesExpectation = value => {
         try {
-          flag(this, 'object', obj);
+          // Tell chai to use value as the subject of the expect chain.
+          flag(this, 'object', value);
+
           // Run the code that checks the condition.
           _super.apply(this, arguments);
+
           clearLastExpectError();
           // Let waitForValue know we are done.
           return true;
@@ -200,8 +211,9 @@ function overwriteAlwaysUseSuper(utils) {
         } finally {
           flag(this, 'object', resultPromise);
         }
-      });
+      };
 
+      const resultPromise = waitForValue(valueSatisfiesExpectation);
       flag(this, 'object', resultPromise);
       return resultPromise;
     };
