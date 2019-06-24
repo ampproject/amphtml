@@ -1201,13 +1201,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   handleResize_(width, height) {
-    const pWidth = Number(this.element.getAttribute('width'));
-    const pHeight = Number(this.element.getAttribute('height'));
     const isFluidRequestAndFixedResponse = !!(
       this.isFluidRequest_ &&
       width &&
       height
     );
+    const declaredSize = this.getDeclaredSlotSize_();
+    const pWidth = declaredSize.width;
+    const pHeight = declaredSize.height;
     const returnedSizeDifferent = width != pWidth || height != pHeight;
     const heightNotIncreased = height <= pHeight;
     if (
