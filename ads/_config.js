@@ -70,6 +70,8 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  '1wo': {},
+
   '24smi': {
     prefetch: 'https://jsn.24smi.net/smi.js',
     preconnect: 'https://data.24smi.net',
@@ -180,7 +182,9 @@ export const adConfig = {
     clientIdScope: 'amp_ecid_adensor',
     renderStartImplemented: true,
   },
-
+  'adsloom': {
+    clientIdScope: 'AMP_ECID_ADSLOOM',
+  },
   'adsnative': {
     prefetch: 'https://static.adsnative.com/static/js/render.v1.js',
     preconnect: 'https://api.adsnative.com',

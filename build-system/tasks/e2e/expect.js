@@ -15,7 +15,7 @@
  */
 
 const chai = require('chai');
-const {ControllerPromise} = require('./functional-test-controller');
+const {ControllerPromise} = require('./controller-promise');
 
 let installed;
 let lastExpectError;
@@ -109,15 +109,11 @@ const chaiMethodsAndProperties = [
   {name: 'keys', type: ChaiType.METHOD},
   {name: 'least', type: ChaiType.METHOD},
   {name: 'length', type: ChaiType.CHAINABLE_METHOD},
-  {name: 'length', type: ChaiType.CHAINABLE_METHOD},
-  {name: 'lengthOf', type: ChaiType.CHAINABLE_METHOD},
   {name: 'lengthOf', type: ChaiType.CHAINABLE_METHOD},
   {name: 'lessThan', type: ChaiType.METHOD},
   {name: 'lt', type: ChaiType.METHOD},
   {name: 'lte', type: ChaiType.METHOD},
   {name: 'match', type: ChaiType.METHOD},
-  {name: 'match', type: ChaiType.METHOD},
-  {name: 'matches', type: ChaiType.METHOD},
   {name: 'matches', type: ChaiType.METHOD},
   {name: 'members', type: ChaiType.METHOD},
   {name: 'most', type: ChaiType.METHOD},
@@ -127,7 +123,9 @@ const chaiMethodsAndProperties = [
   {name: 'oneOf', type: ChaiType.METHOD},
   {name: 'ownProperty', type: ChaiType.METHOD},
   {name: 'ownPropertyDescriptor', type: ChaiType.METHOD},
-  {name: 'property', type: ChaiType.METHOD},
+  // 'property' is implemented as ChaiType:METHOD in Chai
+  // but doing so here causes assertion errors. See #22811
+  {name: 'property', type: ChaiType.CHAINABLE_METHOD},
   {name: 'respondsTo', type: ChaiType.METHOD},
   {name: 'respondTo', type: ChaiType.METHOD},
   {name: 'satisfies', type: ChaiType.METHOD},
@@ -185,11 +183,22 @@ function overwriteAlwaysUseSuper(utils) {
         return _super.apply(this, arguments);
       }
 
-      const resultPromise = waitForValue(obj => {
+      /**
+       * When passed to `waitForValue`, this method causes the Promise
+       * returned by `waitForValue` to resolve only when the value it
+       * polls matches expectation set by the `expect` chain.
+       * @param {*} value
+       * @return {boolean} true if the ControllerPromise polling value
+       * satisfies the `expect` chain.
+       */
+      const valueSatisfiesExpectation = value => {
         try {
-          flag(this, 'object', obj);
+          // Tell chai to use value as the subject of the expect chain.
+          flag(this, 'object', value);
+
           // Run the code that checks the condition.
           _super.apply(this, arguments);
+
           clearLastExpectError();
           // Let waitForValue know we are done.
           return true;
@@ -202,8 +211,9 @@ function overwriteAlwaysUseSuper(utils) {
         } finally {
           flag(this, 'object', resultPromise);
         }
-      });
+      };
 
+      const resultPromise = waitForValue(valueSatisfiesExpectation);
       flag(this, 'object', resultPromise);
       return resultPromise;
     };

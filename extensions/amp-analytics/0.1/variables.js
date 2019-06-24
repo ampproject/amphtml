@@ -89,15 +89,14 @@ export class ExpansionOptions {
 }
 
 /**
- * @param {*} value
+ * @param {string} value
  * @param {string} s
  * @param {string=} opt_l
  * @return {string}
  */
 function substrMacro(value, s, opt_l) {
   const start = Number(s);
-  const str = value.toString();
-  let {length} = str;
+  let {length} = value;
   userAssert(
     isFiniteNumber(start),
     'Start index ' + start + 'in substr macro should be a number'
@@ -110,7 +109,7 @@ function substrMacro(value, s, opt_l) {
     );
   }
 
-  return str.substr(start, length);
+  return value.substr(start, length);
 }
 
 /**
@@ -120,7 +119,7 @@ function substrMacro(value, s, opt_l) {
  */
 function defaultMacro(value, defaultValue) {
   if (!value || !value.length) {
-    return user().assertString(defaultValue);
+    return defaultValue;
   }
   return value;
 }
@@ -169,9 +168,13 @@ export class VariableService {
     this.register_('$BASE64', value => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
     this.register_('$IF', (value, thenValue, elseValue) =>
-      value ? thenValue : elseValue
+      stringToBool(value) ? thenValue : elseValue
     );
     this.register_('$REPLACE', replaceMacro);
+    this.register_(
+      '$EQUALS',
+      (firstValue, secValue) => firstValue === secValue
+    );
     // TODO(ccordry): Make sure this stays a window level service when this
     // VariableService is migrated to document level.
     this.register_('LINKER_PARAM', (name, id) =>
@@ -351,4 +354,20 @@ export function getConsentStateStr(element) {
     }
     return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
   });
+}
+
+/**
+ * Converts string to boolean
+ * @param {string} str
+ * @return {boolean}
+ */
+export function stringToBool(str) {
+  return (
+    str !== 'false' &&
+    str !== '' &&
+    str !== '0' &&
+    str !== 'null' &&
+    str !== 'NaN' &&
+    str !== 'undefined'
+  );
 }

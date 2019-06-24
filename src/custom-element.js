@@ -838,7 +838,9 @@ function createBaseCustomElementClass(win) {
           // Resources can now be initialized since the ampdoc is now available.
           this.layers_ = Services.layersForDoc(this.ampdoc_);
         }
-        this.getLayers().add(this);
+        const layers = this.getLayers();
+        layers.add(this);
+        layers.declareLayer(this);
       }
       this.getResources().add(this);
 
@@ -1732,6 +1734,10 @@ function createBaseCustomElementClass(win) {
         (this.layoutCount_ > 0 || this.signals_.get(CommonSignals.RENDER_START))
       ) {
         // Loading has already been canceled. Ignore.
+        return;
+      }
+      if (state === this.loadingState_ && !opt_options) {
+        // Loading state is the same.
         return;
       }
       this.loadingState_ = state;

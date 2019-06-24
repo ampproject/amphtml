@@ -15,12 +15,13 @@
  */
 
 /**
- * @fileoverview Embeds a story
+ * @fileoverview Embeds a single page in a story
  *
  * Example:
  * <code>
  * <amp-story-page>
- * </amp-story>
+ *   ...
+ * </amp-story-page>
  * </code>
  */
 import {
@@ -31,6 +32,7 @@ import {
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {AmpEvents} from '../../../src/amp-events';
+import {AmpStoryBlingLink, BLING_LINK_SELECTOR} from './amp-story-bling-link';
 import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
@@ -509,6 +511,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   findAndPrepareEmbeddedComponents_(forceResize = false) {
     this.addClickShieldToEmbeddedComponents_();
     this.resizeInteractiveEmbeddedComponents_(forceResize);
+    this.addStylesToBlingLinks_();
   }
 
   /**
@@ -559,6 +562,15 @@ export class AmpStoryPage extends AMP.BaseElement {
         // Run in case target never changes size.
         debouncePrepareForAnimation(el, null /* unlisten */);
       }
+    });
+  }
+
+  /**
+   * Adds icon and pulse animation to bling links
+   */
+  addStylesToBlingLinks_() {
+    scopedQuerySelectorAll(this.element, BLING_LINK_SELECTOR).forEach(el => {
+      AmpStoryBlingLink.build(el);
     });
   }
 
