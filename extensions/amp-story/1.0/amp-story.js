@@ -1821,7 +1821,7 @@ export class AmpStory extends AMP.BaseElement {
         );
 
         this.vsync_.mutate(() => {
-          this.element.setAttribute('vertical', '');
+          this.element.setAttribute('i-amphtml-vertical', '');
           setImportantStyles(this.win.document.body, {height: 'auto'});
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
