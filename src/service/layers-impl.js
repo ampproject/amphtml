@@ -751,9 +751,6 @@ export class LayoutElement {
     // This might lead to a double tracking.
     if (!this.children_.includes(child)) {
       this.children_.push(child);
-      if (child.isLayer()) {
-        this.transfer_(child);
-      }
     }
   }
 
@@ -803,7 +800,7 @@ export class LayoutElement {
     this.needsScrollRemeasure_ = true;
 
     // Transfer all children elements into this new coordinate system
-    const parent = this.parentLayer_;
+    const parent = this.getParentLayer();
     if (parent) {
       parent.transfer_(this);
     }
@@ -1209,7 +1206,7 @@ export class LayoutElement {
   remeasure_() {
     this.updateScrollPosition_();
     this.needsRemeasure_ = false;
-    const {element_: element} = this;
+    const element = this.element_;
 
     // We need a relative box to measure our offset. Importantly, this box must
     // be negatively offset by its scroll position, to account for the fact
@@ -1243,11 +1240,11 @@ export class LayoutElement {
 
     // Now, recursively measure all child nodes, to since they've probably been
     // invalidated by the parent changing.
-    // TODO(jridgewell): When do children need to be remeasured? Could we skip
-    // for only size changes? Or only position changes?
     const children = this.children_;
-    if (children.length > 0) {
+    if (children.length) {
       for (let i = 0; i < children.length; i++) {
+        // TODO(jridgewell): We can probably optimize this if this layer
+        // didn't change at all.
         children[i].remeasure_();
       }
     }
