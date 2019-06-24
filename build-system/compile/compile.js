@@ -32,11 +32,19 @@ const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
+const debug = require('gulp-debug');
 
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
+
+const {SRC_DIRS} = require('./compile-utils');
+
+
+function isSourceDir(path) {
+  return SRC_DIRS.some(x => path.startsWith(x) || path.startsWith(`!${x}`));
+}
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
@@ -47,12 +55,12 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
  */
 function maybeConvertPathsToTmpRoot(paths) {
   return paths.map(path => {
+    if (isSourceDir(path)) {
+      const hasNegation = path.charAt(0) === '!';
+      const newPath = hasNegation ? path.substr(1) : path;
+      return `${hasNegation ? '!' : ''}${process.env.AMP_TMP_DIR}/${newPath}`;
+    }
     return path;
-    //if (path.contains('src')) {
-      //const hasNegation = path.charAt(0) === '!';
-      //const newPath = hasNegation ? path.substr(1) : newPath;
-      //return `${hasNegation ? '!' : ''}${process.env.AMP_TMP_DIR}${path}`;
-    //}
   });
 }
 
@@ -360,7 +368,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         'build/fake-polyfills/',
         process.env.AMP_TMP_DIR,
       ],
-      entry_point: entryModuleFilenames,
+      entry_point: '../../../../' + maybeConvertPathsToTmpRoot(entryModuleFilenames),
       module_resolution: 'NODE',
       process_common_js_modules: true,
       // This strips all files from the input set that aren't explicitly
@@ -423,6 +431,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       }
     });
 
+    console.log(rewrittenSrcs);
+
     if (options.typeCheckOnly) {
       return gulp
         .src(srcs, {base: '.'})
@@ -435,7 +445,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .on('end', resolve);
     } else {
       return gulp
-        .src(srcs, {base: '.'})
+        .src(srcs, {base: process.ENV.AMP_TMP_DIR})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray))
