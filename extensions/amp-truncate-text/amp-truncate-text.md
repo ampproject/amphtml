@@ -2,7 +2,6 @@
 $category@: presentation
 formats:
   - websites
-  - email
 teaser:
   text: Truncates text with an ellipsis, optionally showing an overflow element.
 experimental: true
