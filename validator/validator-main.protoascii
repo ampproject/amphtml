@@ -1008,7 +1008,7 @@ tags: {
   attrs: {
     name: "name"
     mandatory: true
-    value_regex: "^amp4ads-vars-.+"
+    value_regex: "amp4ads-vars-.+"
   }
 }
 # 4.2.6 The style
