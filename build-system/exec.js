@@ -66,7 +66,7 @@ function execScriptAsync(script, options) {
  */
 function execOrDie(cmd, options) {
   const p = exec(cmd, options);
-  if (p.status != 0) {
+  if (p.status && p.status != 0) {
     process.exit(p.status);
   }
 }
