@@ -80,7 +80,7 @@ export class DatesList {
       }
     }
     const rruleDates = this.rrulestrs_
-      .map(rrule => rrule.after(date))
+      .map((/** {RRule} */ rrule) => rrule.after(date))
       .filter(Boolean);
     firstDatesAfter.concat(rruleDates);
 
@@ -109,7 +109,7 @@ export class DatesList {
       .startOf('day')
       .add(1, 'day')
       .toDate();
-    return this.rrulestrs_.some(rrule => {
+    return this.rrulestrs_.some((/** {RRule} */ rrule) => {
       const rruleDay = this.moment_(rrule.before(nextDate));
       return this.ReactDates_['isSameDay'](rruleDay, date);
     });
