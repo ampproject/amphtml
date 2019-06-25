@@ -66,7 +66,7 @@ export class TextMask {
 
     this.controller_.mask();
 
-    Services.formSubmitPromiseForDoc(element).then(formSubmitService => {
+    Services.formSubmitForDoc(element).then(formSubmitService => {
       formSubmitService.beforeSubmit(e => {
         if (e.form != this.element_.form) {
           return;

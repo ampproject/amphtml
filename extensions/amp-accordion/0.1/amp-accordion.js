@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
+import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -64,9 +65,7 @@ class AmpAccordion extends AMP.BaseElement {
     this.action_ = null;
 
     /** @private {number|string} */
-    this.suffix_ = element.id
-      ? element.id
-      : Math.floor(Math.random() * Math.floor(100));
+    this.prefix_ = element.id ? element.id : Math.floor(Math.random() * 100);
   }
 
   /** @override */
@@ -109,7 +108,7 @@ class AmpAccordion extends AMP.BaseElement {
         // we need to make sure that each accordion has a unique ID.
         // In case the accordion doesn't have an ID we use a
         // random number to ensure uniqueness.
-        contentId = this.suffix_ + '_AMP_content_' + index;
+        contentId = this.prefix_ + '_AMP_content_' + index;
         content.setAttribute('id', contentId);
       }
 
@@ -151,6 +150,14 @@ class AmpAccordion extends AMP.BaseElement {
             this.collapse_(this.sections_[i]);
           }
         }
+      });
+
+      // Listen for mutations on the 'data-expand' attribute.
+      const expandObserver = new this.win.MutationObserver(mutations => {
+        this.toggleExpandMutations_(mutations);
+      });
+      expandObserver.observe(section, {
+        attributeFilter: ['data-expand'],
       });
 
       if (this.currentState_[contentId]) {
@@ -602,8 +609,23 @@ class AmpAccordion extends AMP.BaseElement {
       tryFocus(newFocusHeader);
     }
   }
+
+  /**
+   * Callback function to execute when mutations are observed on "data-expand".
+   * @param {!Array<!MutationRecord>} mutations
+   */
+  toggleExpandMutations_(mutations) {
+    mutations.forEach(mutation => {
+      const sectionEl = dev().assertElement(mutation.target);
+      const toExpand = sectionEl.hasAttribute('data-expand');
+      const isExpanded = sectionEl.hasAttribute('expanded');
+      if (isExpanded !== toExpand) {
+        this.toggle_(sectionEl, toExpand);
+      }
+    });
+  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpAccordion);
+  AMP.registerElement(TAG, AmpAccordion, CSS);
 });

@@ -23,11 +23,15 @@ const {
   compileCssExpr,
 } = require('./build-system/tasks/compile-expr');
 const {
+  generateVendorJsons,
+} = require('./build-system/tasks/generate-vendor-jsons');
+const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
   processGithubIssues,
 } = require('./build-system/tasks/process-github-issues');
+const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
 const {build, defaultTask, watch} = require('./build-system/tasks/build');
@@ -62,9 +66,11 @@ const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
 const {validator, validatorWebui} = require('./build-system/tasks/validator');
+const {vendorConfigs} = require('./build-system/tasks/vendor-configs');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
 
 // Keep this list alphabetized.
+gulp.task('a4a', a4a);
 gulp.task('ava', ava);
 gulp.task('babel-plugin-tests', babelPluginTests);
 gulp.task('build', build);
@@ -88,6 +94,7 @@ gulp.task('dev-dashboard-tests', devDashboardTests);
 gulp.task('dist', dist);
 gulp.task('e2e', e2e);
 gulp.task('firebase', firebase);
+gulp.task('generate-vendor-jsons', generateVendorJsons);
 gulp.task('get-zindex', getZindex);
 gulp.task('integration', integration);
 gulp.task('json-syntax', jsonSyntax);
@@ -109,5 +116,6 @@ gulp.task('unit', unit);
 gulp.task('update-packages', updatePackages);
 gulp.task('validator', validator);
 gulp.task('validator-webui', validatorWebui);
+gulp.task('vendor-configs', vendorConfigs);
 gulp.task('visual-diff', visualDiff);
 gulp.task('watch', watch);

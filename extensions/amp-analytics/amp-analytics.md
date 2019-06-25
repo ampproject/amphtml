@@ -41,7 +41,7 @@ Capture analytics data from an AMP document.
 
 ## Sending analytics to a vendor or in-house?
 
-Before you start using AMP analytics on your site, you need to decide whether you will you use third-party analytics tools to analyze user engagement, or your own in-house solution.
+Before you start using AMP analytics on your site, you need to decide whether you will use third-party analytics tools to analyze user engagement, or your own in-house solution.
 
 {% call callout('Read on', type='read') %}
 Learn all about AMP analytics in the [Configure Analytics](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/) guide.
@@ -737,7 +737,7 @@ The above configuration translates to:
 AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
 
 
-#### Video analytics triggers
+##### Video analytics triggers
 
 Video analytics provides several triggers (`"on": "video-*"`) that publishers can use to track different events occurring during a video's lifecycle. More details are available in [AMP Video Analytics](./amp-video-analytics.md).
 

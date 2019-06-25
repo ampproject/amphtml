@@ -21,17 +21,18 @@
 import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
-import {
-  adopt,
-  installAmpdocServices,
-  installBuiltins,
-  installRuntimeServices,
-} from '../runtime';
+import {adopt} from '../runtime';
 import {cssText as ampDocCss} from '../../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
+import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
+import {
+  installAmpdocServices,
+  installBuiltinElements,
+  installRuntimeServices,
+} from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
@@ -44,7 +45,7 @@ import {
 } from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {internalRuntimeVersion} from '../internal-version';
-import {maybeTrackImpression} from '../impression';
+import {isExperimentOn} from '../experiments';
 import {maybeValidate} from '../validator-integration';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
@@ -81,10 +82,10 @@ startupChunk(self.document, function initial() {
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
-  // TODO(lannka): remove ampDocCss for inabox rendering #22418
   const fullCss =
-    ampDocCss +
-    ampSharedCss +
+    (isExperimentOn(self, 'inabox-css-cleanup')
+      ? ampSharedCss
+      : ampDocCss + ampSharedCss) +
     'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
   installStylesForDoc(
     ampdoc,
@@ -99,15 +100,15 @@ startupChunk(self.document, function initial() {
         // runtime tries to install the normal one.
         installViewerServiceForDoc(ampdoc);
         installInaboxViewportService(ampdoc);
-        installAmpdocServices(ampdoc);
+        installAmpdocServices(ampdoc, undefined, true);
         // We need the core services (viewer/resources) to start instrumenting
         perf.coreServicesAvailable();
-        maybeTrackImpression(self);
+        doNotTrackImpression();
         registerIniLoadListener(ampdoc);
       });
       startupChunk(self.document, function builtins() {
         // Builtins.
-        installBuiltins(self);
+        installBuiltinElements(self);
       });
       startupChunk(self.document, function adoptWindow() {
         adopt(self);

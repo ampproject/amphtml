@@ -20,7 +20,7 @@ import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {ElementStub} from '../../src/element-stub';
 import {Services} from '../../src/services';
-import {adopt, adoptShadowMode, installAmpdocServices} from '../../src/runtime';
+import {adopt, adoptShadowMode} from '../../src/runtime';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {deactivateChunking, runChunksForTesting} from '../../src/chunk';
 import {
@@ -28,9 +28,11 @@ import {
   getServicePromise,
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
+import {installAmpdocServices} from '../../src/service/core-services';
 import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
@@ -1379,6 +1381,7 @@ describes.realWin(
 
         beforeEach(() => {
           deactivateChunking();
+          setShadowDomSupportedVersionForTesting(undefined);
           hostElement = win.document.createElement('div');
           const shadowRoot = createShadowRoot(hostElement);
           ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);

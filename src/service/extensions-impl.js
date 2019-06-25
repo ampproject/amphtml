@@ -39,11 +39,9 @@ import {getMode} from '../mode';
 import {install as installCustomElements} from '../polyfills/custom-elements';
 import {install as installDOMTokenListToggle} from '../polyfills/domtokenlist-toggle';
 import {install as installDocContains} from '../polyfills/document-contains';
-import {installImg} from '../../builtins/amp-img';
-import {installLayout} from '../../builtins/amp-layout';
-import {installPixel} from '../../builtins/amp-pixel';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
+import {installTimerInEmbedWindow} from './timer-impl';
 import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {startsWith} from '../string';
@@ -435,9 +433,26 @@ export class Extensions {
    * Install extensions in the child window (friendly iframe). The pre-install
    * callback, if specified, is executed after polyfills have been configured
    * but before the first extension is installed.
+   * @param {!./ampdoc-impl.AmpDocFie} ampdoc
+   * @param {!Array<string>} extensionIds
+   * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+   * @return {!Promise}
+   * @restricted
+   */
+  installExtensionsInFie(ampdoc, extensionIds, opt_preinstallCallback) {
+    // TODO(#22734): Implement.
+    if (opt_preinstallCallback) {
+      opt_preinstallCallback(ampdoc.win, ampdoc);
+    }
+  }
+
+  /**
+   * Install extensions in the child window (friendly iframe). The pre-install
+   * callback, if specified, is executed after polyfills have been configured
+   * but before the first extension is installed.
    * @param {!Window} childWin
    * @param {!Array<string>} extensionIds
-   * @param {function(!Window)=} opt_preinstallCallback
+   * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
    * @return {!Promise}
    * @restricted
    */
@@ -446,6 +461,7 @@ export class Extensions {
     extensionIds,
     opt_preinstallCallback
   ) {
+    // TODO(#22733): remove this method when ampdoc-fie is launched.
     const topWin = this.win;
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
@@ -456,8 +472,9 @@ export class Extensions {
     // Install runtime styles.
     installStylesLegacy(
       childWin.document,
-      // TODO(lannka): remove ampDocCss for FIE rendering #22418
-      ampDocCss + ampSharedCss,
+      isExperimentOn(this.win, 'fie-css-cleanup')
+        ? ampSharedCss
+        : ampDocCss + ampSharedCss,
       /* callback */ null,
       /* opt_isRuntimeCss */ true,
       /* opt_ext */ 'amp-runtime'
@@ -469,7 +486,7 @@ export class Extensions {
     }
 
     // Install embeddable standard services.
-    installStandardServicesInEmbed(childWin, parentWin);
+    installStandardServicesInEmbed(childWin);
 
     // Install built-ins and legacy elements.
     copyBuiltinElementsToChildWindow(topWin, childWin);
@@ -672,17 +689,6 @@ export class Extensions {
 }
 
 /**
- * Install builtins.
- * @param {!Window} win
- * @restricted
- */
-export function installBuiltinElements(win) {
-  installImg(win);
-  installPixel(win);
-  installLayout(win);
-}
-
-/**
  * Copy builtins to a child window.
  * @param {!Window} parentWin
  * @param {!Window} childWin
@@ -726,10 +732,9 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
 /**
  * Adopt predefined core services for the child window (friendly iframe).
  * @param {!Window} childWin
- * @param {!Window} parentWin
  * @visibleForTesting
  */
-export function installStandardServicesInEmbed(childWin, parentWin) {
+export function installStandardServicesInEmbed(childWin) {
   const frameElement = dev().assertElement(
     childWin.frameElement,
     'frameElement not found for embed'
@@ -740,13 +745,13 @@ export function installStandardServicesInEmbed(childWin, parentWin) {
     Services.actionServiceForDoc(frameElement),
     Services.standardActionsForDoc(frameElement),
     Services.navigationForDoc(frameElement),
-    Services.timerFor(parentWin),
   ];
   const ampdoc = getAmpdoc(frameElement);
   standardServices.forEach(service => {
     // Static functions must be invoked on the class, not the instance.
     service.constructor.installInEmbedWindow(childWin, ampdoc);
   });
+  installTimerInEmbedWindow(childWin);
 }
 
 /**

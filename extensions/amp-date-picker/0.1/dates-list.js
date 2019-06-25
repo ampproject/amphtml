@@ -15,7 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import RRule from '../../../third_party/rrule/rrule';
+import {rrulestr} from 'rrule';
 
 /** @enum {string} */
 const DateType = {
@@ -65,11 +65,12 @@ export class DatesList {
 
   /**
    * Gets the first date in the date list after the given date.
-   * @param {!moment|string} date
+   * @param {!moment|string} momentOrString
    * @return {!moment}
    */
-  firstDateAfter(date) {
-    const m = this.moment_(date);
+  firstDateAfter(momentOrString) {
+    const m = this.moment_(momentOrString);
+    const date = m.toDate();
 
     const firstDatesAfter = [];
     for (let i = 0; i < this.dates_.length; i++) {
@@ -79,7 +80,7 @@ export class DatesList {
       }
     }
     const rruleDates = this.rrulestrs_
-      .map(rrule => rrule.after(m.toDate()))
+      .map(rrule => rrule.after(date))
       .filter(Boolean);
     firstDatesAfter.concat(rruleDates);
 
@@ -138,10 +139,11 @@ export class DatesList {
  * Tries to parse a string into an RRULE object.
  * @param {string} str A string which represents a repeating date RRULE spec.
  * @return {?JsonObject}
+ * @suppress {missingProperties} // Remove after https://github.com/google/closure-compiler/issues/3041 is fixed
  */
 function tryParseRrulestr(str) {
   try {
-    return RRule.fromString(str);
+    return rrulestr(str);
   } catch (e) {
     return null;
   }

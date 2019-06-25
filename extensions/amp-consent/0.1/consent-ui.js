@@ -24,6 +24,7 @@ import {
   insertAfterOrAtStart,
   isAmpElement,
   removeElement,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
@@ -228,7 +229,13 @@ export class ConsentUI {
       // If the UI is an AMP Element, wait until it's built before showing it,
       // to avoid race conditions where the UI would be hidden by the runtime
       // at build time. (see #18841).
-      isAmpElement(this.ui_) ? this.ui_.whenBuilt().then(() => show()) : show();
+      if (isAmpElement(this.ui_)) {
+        whenUpgradedToCustomElement(this.ui_)
+          .then(() => this.ui_.whenBuilt())
+          .then(() => show());
+      } else {
+        show();
+      }
     }
 
     this.isVisible_ = true;
@@ -349,13 +356,13 @@ export class ConsentUI {
    */
   createPromptIframeFromSrc_(promptUISrc) {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
-    let sandbox = 'allow-scripts';
+    const sandbox = ['allow-scripts', 'allow-popups'];
     iframe.src = assertHttpsUrl(promptUISrc, this.parent_);
     const allowSameOrigin = this.allowSameOrigin_(iframe.src);
     if (allowSameOrigin) {
-      sandbox = 'allow-scripts allow-same-origin';
+      sandbox.push('allow-same-origin');
     }
-    iframe.setAttribute('sandbox', sandbox);
+    iframe.setAttribute('sandbox', sandbox.join(' '));
     const {classList} = iframe;
     classList.add(consentUiClasses.fill);
     // Append iframe lazily to save resources.
