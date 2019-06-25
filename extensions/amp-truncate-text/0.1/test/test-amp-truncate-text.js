@@ -401,18 +401,19 @@ describes.realWin(
             expect(collapseEl.offsetWidth).to.be.gt(0);
           });
 
-
           it('should hide any sizer element when expanded', async () => {
             const element = await createElement(
-                `
+              `
               ${loremText}
               <span slot="collapsed">See more</span>
               <span slot="expanded">See more</span>
-            `, {
-              layout: 'responsive',
-              width: 150,
-              height: 26,
-            });
+            `,
+              {
+                layout: 'responsive',
+                width: 150,
+                height: 26,
+              }
+            );
             element.style.width = '150px';
 
             const expandEl = element.querySelector('[slot="collapsed"]');
@@ -429,11 +430,10 @@ describes.realWin(
             expect(sizer.getBoundingClientRect()).to.include({
               width: 0,
               height: 0,
-            })
+            });
             expect(element.scrollHeight).to.be.gt(26);
             expect(element.scrollHeight).to.equal(element.offsetHeight);
           });
-
 
           it('should collapse when clicking the collapse element', async () => {
             const element = await createElement(
