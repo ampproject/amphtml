@@ -67,7 +67,7 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
   height: 178vw !important;
 }
 
-[scroll] .i-amphtml-story-page-description {
+[i-amphtml-vertical] .i-amphtml-story-page-description {
   background: white !important;
   color: black !important;
   display: block !important;
