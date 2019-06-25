@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const {devDependencies} = require('./helpers');
+const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
 const {gitCommitterEmail} = require('../git');
 const {isTravisBuild, travisJobNumber} = require('../travis');
 
@@ -71,12 +71,9 @@ module.exports = {
     transform: [
       [
         'babelify',
-        {
-          // Transform "node_modules/", but ignore devDependencies.
-          'global': true,
-          'ignore': devDependencies(),
-          'sourceMapsAbsolute': true,
-        },
+        Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {
+          sourceMapsAbsolute: true,
+        }),
       ],
     ],
     // Prevent "cannot find module" errors on Travis. See #14166.
