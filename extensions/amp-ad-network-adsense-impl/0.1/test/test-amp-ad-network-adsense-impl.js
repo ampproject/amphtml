@@ -525,6 +525,27 @@ describes.realWin(
         });
       });
 
+      it('should contain aanf if have no-fill attribute', () => {
+        const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
+          'layout': 'nodisplay',
+        });
+        element.setAttribute('data-no-fill', 'true');
+        ampStickyAd.appendChild(element);
+        doc.body.appendChild(ampStickyAd);
+        return expect(impl.getAdUrl()).to.eventually.match(
+          /(\?|&)aanf=true(&|$)/
+        );
+      });
+
+      it('should not contain aanf if do not have no-fill attribute', () => {
+        const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
+          'layout': 'nodisplay',
+        });
+        ampStickyAd.appendChild(element);
+        doc.body.appendChild(ampStickyAd);
+        return expect(impl.getAdUrl()).to.not.match(/(\?|&)aanf=(&|$)/);
+      });
+
       it('formats client properly', () => {
         element.setAttribute('data-ad-client', 'SoMeClient');
         return impl.getAdUrl().then(url => {

@@ -384,6 +384,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'rc': this.fromResumeCallback ? 1 : null,
       'rafmt': this.getRafmtParam_(),
       'pfx': pfx ? '1' : '0',
+      'aanf': this.element.getAttribute('data-no-fill'),
       // Matched content specific fields.
       'crui': this.element.getAttribute('data-matched-content-ui-type'),
       'cr_row': this.element.getAttribute('data-matched-content-rows-num'),
