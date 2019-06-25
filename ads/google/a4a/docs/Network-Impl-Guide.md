@@ -104,26 +104,16 @@ is allowed by including the following headers in the response:
   <dt><code>Access-Control-Allow-Origin</code></dt>
   <dd>With the value matching the value of the request "Origin" header only if
     the origin domain is allowed. Note that requests from pages hosted on the
-    <a href="https://developers.google.com/amp/cache/">Google AMP Cache</a> will have a value matching the <code>https://cdn.ampproject.org</code>
-    domain.</dd>
-  <dt><code>AMP-Access-Control-Allow-Source-Origin</code></dt>
-  <dd>With the value matching the value of the <code>"__amp_source_origin"</code>
-    request parameter, which is <a href="https://github.com/ampproject/amphtml/blob/master/src/service/xhr-impl.js#L103">added</a>
-    by the AMP Runtime and matches the origin of the request had the page not
-    been served from the Google AMP Cache
-    (the originating source of the page).  Ad network can use this to prevent
-    access by particular publisher domains where lack of response header will
-    cause the response to be <a href="https://github.com/ampproject/amphtml/blob/master/src/service/xhr-impl.js#L137">dropped</a>
-    by the AMP Runtime.</dd>
+    <a href="https://developers.google.com/amp/cache/">Google AMP Cache</a> will have a value matching the <code>https://your-domain.cdn.ampproject.org</code> domain.</dd>
   <dt><code>Access-Control-Allow-Credentials</code></dt>
   <dd>With the value "true" if cookies should be included in the request.</dd>
-    <dt><code>Access-Control-Expose-Headers</code></dt>
+  <dt><code>Access-Control-Expose-Headers</code></dt>
   <dd>With the value matching a comma-separated list of any non-standard
-    response headers included in the response. At a minimum, this should
-    include <code>"AMP-Access-Control-Allow-Source-Origin"</code>. If other
+    response headers included in the response. If other
     custom headers are not included, they will be dropped by the browser.</dd>
 </dl>
 
+For details on CORS verification in AMP context, see [Verify CORS requests](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#verify-cors-header).
 
 ### Creating an AMPHTML ad extension implementation
 
