@@ -89,9 +89,6 @@ function maybeTimeoutFonts(win) {
       // To avoid blocking the render, we assign a non-matching media
       // attribute first…
       const media = link.media || 'all';
-      // Move from generic 'non-matching' media to 'print', avoiding
-      // issue where Chromium based browsers will avoid downloading
-      // these media assets aggressively. (https://bugs.chromium.org/p/chromium/issues/detail?id=977573)
       link.media = 'print';
       // And then switch it back to the original after the stylesheet
       // loaded.
