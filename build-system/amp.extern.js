@@ -299,6 +299,8 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function() {};
+RRule.prototype.before;
+RRule.prototype.after;
 
 /**
  * @dict
