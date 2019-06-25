@@ -315,7 +315,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       uiState => this.onUIStateUpdate_(uiState),
       true /* callToInitialize */
     );
-    this.setHasAttachmentAttribute_();
     this.setPageDescription_();
   }
 
