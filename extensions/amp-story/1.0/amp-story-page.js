@@ -40,7 +40,6 @@ import {
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
-import {CSS} from '../../../build/amp-story-page-description-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
