@@ -96,7 +96,7 @@ The events below will be triggered on `section`s of `accordion`.
   </tr>
   <tr>
     <td width="40%"><strong><code>toggle</code></strong></td>
-    <td>This action toggles between the <code>expanded</code> and <code>collapsed</code> states of the <code>amp-accordion<code/>. When called with no arguments, it will toggle all sections of the accordion. A single section may be specified with the <code>section</code> argument and the corresponding <code>id</code> as the value.</td>
+    <td>This action toggles between the <code>expanded</code> and <code>collapsed</code> states of the <code>amp-accordion</code>. When called with no arguments, it will toggle all sections of the accordion. A single section may be specified with the <code>section</code> argument and the corresponding <code>id</code> as the value.</td>
   </tr>
   <tr>
     <td width="40%"><strong><code>expand</code></strong></td>
