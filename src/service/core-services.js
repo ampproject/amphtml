@@ -93,7 +93,7 @@ export function installAmpdocServices(ampdoc, opt_initParams, opt_inabox) {
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
   if (!opt_inabox) {
-    // For security, CLIENT_ID is not supported in inabox.
+    // For security, Storage is not supported in inabox.
     installStorageServiceForDoc(ampdoc);
   }
   installGlobalNavigationHandlerForDoc(ampdoc);
