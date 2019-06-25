@@ -96,15 +96,15 @@ The events below will be triggered on `section`s of `accordion`.
   </tr>
   <tr>
     <td width="40%"><strong><code>toggle</code></strong></td>
-    <td>This action toggles between the <code>expanded</code> and <code>collapsed</code> states of the `amp-accordion`. When called with no arguments, it will toggle all sections of the accordion. A single section may be specified with the <code>section</code> argument and the corresponding <code>id</code> as the value.</td>
+    <td>This action toggles between the <code>expanded</code> and <code>collapsed</code> states of the <code>amp-accordion<code/>. When called with no arguments, it will toggle all sections of the accordion. A single section may be specified with the <code>section</code> argument and the corresponding <code>id</code> as the value.</td>
   </tr>
   <tr>
     <td width="40%"><strong><code>expand</code></strong></td>
-    <td>This action expands an `amp-accordion`. If it is already <code>expanded</code>, it will stay so. When called with no arguments, it will expand all sections of the accordion. A single section may be specified with the <code>section</code> argument and the corresponding <code>id</code> as the value.</td>
+    <td>This action expands an <code>amp-accordion</code>. If it is already <code>expanded</code>, it will stay so. When called with no arguments, it will expand all sections of the accordion. A single section may be specified with the <code>section</code> argument and the corresponding <code>id</code> as the value.</td>
   </tr>
   <tr>
     <td width="40%"><strong><code>collapse</code></strong></td>
-    <td>This action collapses an `amp-accordion`. If it is already collapsed, it will stay so. When called with no arguments, it will collapse all sections of the accordion. A single section may be specified with the <code>section</code> argument and the corresponding <code>id</code> as the value.</td>
+    <td>This action collapses an <code>amp-accordion</code>. If it is already collapsed, it will stay so. When called with no arguments, it will collapse all sections of the accordion. A single section may be specified with the <code>section</code> argument and the corresponding <code>id</code> as the value.</td>
   </tr>
 </table>
 
