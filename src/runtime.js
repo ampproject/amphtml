@@ -641,6 +641,7 @@ export class MultidocManager {
   mergeShadowHead_(ampdoc, shadowRoot, doc) {
     const extensionIds = [];
     if (doc.head) {
+      shadowRoot.AMP.head = doc.head;
       const parentLinks = {};
       const links = childElementsByTag(
         dev().assertElement(this.win.document.head),
