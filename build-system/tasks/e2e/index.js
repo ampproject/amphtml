@@ -24,7 +24,7 @@ const log = require('fancy-log');
 const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
 const {cyan} = require('ansi-colors');
-const {execOrDie, execScriptAsync} = require('../../exec');
+const {execOrDie, execScriptAsync, getStderr} = require('../../exec');
 const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
 
@@ -37,7 +37,11 @@ const TEST_RETRIES = 2;
 let webServerProcess_;
 
 function installPackages_() {
-  execOrDie('npx yarn --cwd build-system/tasks/e2e', {'stdio': 'ignore'});
+  const stderr = getStderr('npx yarn --cwd build-system/tasks/e2e').trim();
+  if (stderr !== '') {
+    log('Error in install packages:', stderr);
+    process.exit(1);
+  }
 }
 
 function buildRuntime_() {
