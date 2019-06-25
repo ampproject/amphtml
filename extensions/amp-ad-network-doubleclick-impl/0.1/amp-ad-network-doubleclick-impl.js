@@ -154,10 +154,10 @@ let TroubleshootDataDef;
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
 
-/**
- * @typedef
- * {({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)}
- */
+/** @typedef {{width: number, height: number}} */
+let SizeDef;
+
+/** @typedef {(SizeDef|../../../src/layout-rect.LayoutRectDef)} */
 let LayoutRectOrDimsDef;
 
 /** @final */
@@ -877,15 +877,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Returns the width and height of the slot as defined by the width and height
    * attributes, or the dimensions as computed by
    * getIntersectionElementLayoutBox.
-   * @return {{width: number, height: number}|../../../src/layout-rect.LayoutRectDef}
+   * @return {!LayoutRectOrDimsDef}
    */
   getSlotSize() {
-    const width = Number(this.element.getAttribute('width'));
-    const height = Number(this.element.getAttribute('height'));
+    const {width, height} = this.getDeclaredSlotSize_();
     return width && height
       ? {width, height}
       : // width/height could be 'auto' in which case we fallback to measured.
         this.getIntersectionElementLayoutBox();
+  }
+
+  /**
+   * Returns the width and height, as defined by the slot element's width and
+   * height attributes.
+   * @return {!SizeDef}
+   */
+  getDeclaredSlotSize_() {
+    const width = Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('height'));
+    return {width, height};
   }
 
   /**
@@ -1201,22 +1211,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Attempts to resize the ad, if the returned size is smaller than the primary
    * dimensions.
-   * @param {number} width
-   * @param {number} height
+   * @param {number} newWidth
+   * @param {number} newHeight
    * @private
    */
-  handleResize_(width, height) {
-    const pWidth = this.element.getAttribute('width');
-    const pHeight = this.element.getAttribute('height');
-    // We want to resize only if neither returned dimension is larger than its
-    // primary counterpart, and if at least one of the returned dimensions
-    // differ from its primary counterpart.
+  handleResize_(newWidth, newHeight) {
+    const isFluidRequestAndFixedResponse = !!(
+      this.isFluidRequest_ &&
+      newWidth &&
+      newHeight
+    );
+    const {width, height} = this.getDeclaredSlotSize_();
+    const returnedSizeDifferent = newWidth != width || newHeight != height;
+    const heightNotIncreased = newHeight <= height;
     if (
-      (this.isFluidRequest_ && width && height) ||
-      ((width != pWidth || height != pHeight) &&
-        (width <= pWidth && height <= pHeight))
+      isFluidRequestAndFixedResponse ||
+      (returnedSizeDifferent && heightNotIncreased)
     ) {
-      this.attemptChangeSize(height, width).catch(() => {});
+      this.attemptChangeSize(newHeight, newWidth).catch(() => {});
     }
   }
 
