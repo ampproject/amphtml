@@ -93,10 +93,9 @@ startupChunk(self.document, function initial() {
     fullCss,
     () => {
       startupChunk(self.document, function services() {
-        // For security, storage and CLIENT_ID are not supported in inabox.
+        // For security, storage is not supported in inabox.
         // Fail early with console errors for any attempt of access.
         unsupportedService(ampdoc, 'storage');
-        unsupportedService(ampdoc, 'cid');
         // Core services.
         installRuntimeServices(self);
         fontStylesheetTimeout(self);

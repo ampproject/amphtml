@@ -79,10 +79,7 @@ export function installRuntimeServices(global) {
 export function installAmpdocServices(ampdoc, opt_initParams, opt_inabox) {
   // Order is important!
   installUrlForDoc(ampdoc);
-  if (!opt_inabox) {
-    // For security, storage service is not supported in inabox.
-    installCidService(ampdoc);
-  }
+  installCidService(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   if (!opt_inabox) {
     // viewer & viewport were installed in amp-inabox.js
