@@ -24,15 +24,15 @@ export function tracdelight(global, data) {
 
   const mandatoryFields = [
     'widget_id',
-    'access_key',
+    'access_key'
   ];
 
   const optionalFields = [
-    'mode',
+    'mode'
   ];
 
   validateData(data, mandatoryFields, optionalFields);
 
-  global.td_data = data;
+  global.tdData = data;
   writeScript(global, 'https://scripts.tracdelight.com/amp.js');
 }
