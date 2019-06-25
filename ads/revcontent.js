@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript, loadScript} from '../3p/3p';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -51,6 +51,6 @@ export function revcontent(global, data) {
   if (data.loadscript) {
     loadScript(window, endpoint);
   } else {
-    writeScript(window, endpoint); 
+    writeScript(window, endpoint);
   }
 }
