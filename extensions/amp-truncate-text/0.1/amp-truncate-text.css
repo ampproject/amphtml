@@ -27,7 +27,7 @@ amp-truncate-text[i-amphtml-truncate-expanded] .i-amphtml-truncate-content {
   position: static !important;
 }
 
-amp-truncate-text:not([i-amphtml-truncate-expanded]) .i-amphtml-truncate-collapse-slot {
+amp-truncate-text:not([i-amphtml-truncate-expanded]) .i-amphtml-truncate-expanded-slot {
   display: none !important;
 }
 
@@ -44,7 +44,7 @@ amp-truncate-text:not([i-amphtml-truncate-expanded]) .i-amphtml-truncate-collaps
   white-space: nowrap !important;
 }
 
-.i-amphtml-truncate-content:not([i-amphtml-truncate-overflow]) .i-amphtml-truncate-expand-slot {
+.i-amphtml-truncate-content:not([i-amphtml-truncate-overflow]) .i-amphtml-truncate-collapsed-slot {
   display: none !important;
 }
 
