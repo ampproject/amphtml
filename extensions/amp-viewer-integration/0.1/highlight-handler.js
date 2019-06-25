@@ -19,6 +19,7 @@ import {dict} from '../../../src/utils/object';
 import {findSentences, markTextRangeList} from './findtext';
 import {listenOnce} from '../../../src/event-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {once} from '../../../src/utils/function';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
 import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
@@ -193,14 +194,13 @@ export class HighlightHandler {
    * @param {function()} handler
    */
   onVisibleOnce(handler) {
-    let called = false;
+    // TODO(yunabe): Unregister the handler.
+    handler = once(handler);
     this.viewer_.onVisibilityChanged(() => {
-      // TODO(yunabe): Unregister the handler.
-      if (called || this.viewer_.getVisibilityState() != 'visible') {
+      if (this.viewer_.getVisibilityState() != 'visible') {
         return;
       }
       handler();
-      called = true;
     });
   }
 
