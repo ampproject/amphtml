@@ -345,8 +345,6 @@ requirement: {
   value: 'Element.prototype.before'
   value: 'DocumentType.prototype.before'
   value: 'CharacterData.prototype.before'
-  # It's really hard to properly type check this one.
-  whitelist: 'extensions/amp-date-picker/0.1/dates-list.js'
 }
 
 requirement: {
@@ -355,6 +353,4 @@ requirement: {
   value: 'Element.prototype.after'
   value: 'DocumentType.prototype.after'
   value: 'CharacterData.prototype.after'
-  # It's really hard to properly type check this one.
-  whitelist: 'extensions/amp-date-picker/0.1/dates-list.js'
 }
