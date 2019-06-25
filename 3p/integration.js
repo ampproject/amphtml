@@ -60,6 +60,7 @@ import {yotpo} from './yotpo';
 import {_ping_} from '../ads/_ping_';
 
 // 3P Ad Networks - please keep in alphabetic order
+import {_1wo} from '../ads/1wo';
 import {_24smi} from '../ads/24smi';
 import {a8} from '../ads/a8';
 import {a9} from '../ads/a9';
@@ -77,12 +78,14 @@ import {adman} from '../ads/adman';
 import {admanmedia} from '../ads/admanmedia';
 import {admixer} from '../ads/admixer';
 import {adocean} from '../ads/adocean';
+import {adop} from '../ads/adop';
 import {adpicker} from '../ads/adpicker';
 import {adplugg} from '../ads/adplugg';
 import {adpon} from '../ads/adpon';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adsensor} from '../ads/adsensor';
+import {adsloom} from '../ads/adsloom';
 import {adsnative} from '../ads/adsnative';
 import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
@@ -223,6 +226,7 @@ import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {speakol} from '../ads/speakol';
 import {spotx} from '../ads/spotx';
+import {strossle} from '../ads/strossle';
 import {sunmedia} from '../ads/sunmedia';
 import {svknative} from '../ads/svknative';
 import {swoop} from '../ads/swoop';
@@ -266,7 +270,9 @@ import {zucks} from '../ads/zucks';
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
+  '1wo': true,
   '24smi': true,
+  adsloom: true,
   bringhub: true,
   dable: true,
   engageya: true,
@@ -285,6 +291,7 @@ const AMP_EMBED_ALLOWED = {
   smartclip: true,
   smi2: true,
   svknative: true,
+  strossle: true,
   taboola: true,
   zen: true,
   zergnet: true,
@@ -299,6 +306,7 @@ if (getMode().test || getMode().localDev) {
 }
 
 // Keep the list in alphabetic order
+register('1wo', _1wo);
 register('24smi', _24smi);
 register('3d-gltf', gltfViewer);
 register('a8', a8);
@@ -317,12 +325,14 @@ register('adman', adman);
 register('admanmedia', admanmedia);
 register('admixer', admixer);
 register('adocean', adocean);
+register('adop', adop);
 register('adpicker', adpicker);
 register('adplugg', adplugg);
 register('adpon', adpon);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adsensor', adsensor);
+register('adsloom', adsloom);
 register('adsnative', adsnative);
 register('adspeed', adspeed);
 register('adspirit', adspirit);
@@ -472,6 +482,7 @@ register('sogouad', sogouad);
 register('sortable', sortable);
 register('sovrn', sovrn);
 register('spotx', spotx);
+register('strossle', strossle);
 register('sunmedia', sunmedia);
 register('svknative', svknative);
 register('swoop', swoop);

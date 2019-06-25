@@ -33,8 +33,8 @@
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
+ *   ampCors: (boolean|undefined),
+ *   bypassInterceptorForDev: (boolean|undefined)
  * }}
  */
 var FetchInitDef;
@@ -688,6 +688,12 @@ let BindEvaluateBindingsResultDef;
  * @typedef {{result: BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
  */
 let BindEvaluateExpressionResultDef;
+
+/**
+ * Options for Bind.rescan().
+ * @typedef {{update: (boolean|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
+ */
+let BindRescanOptionsDef;
 
 /////////////////////////////
 ////// Web Anmomation externs

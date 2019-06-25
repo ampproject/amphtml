@@ -24,11 +24,15 @@ import {
   installGlobalNavigationHandlerForDoc,
 } from '../service/navigation';
 import {Services} from '../services';
-import {adopt, installBuiltins, installRuntimeServices} from '../runtime';
+import {adopt} from '../runtime';
 import {cssText as ampDocCss} from '../../build/ampdoc.css';
-import {cssText as ampElementCss} from '../../build/ampelement.css';
+import {cssText as ampSharedCss} from '../../build/ampshared.css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
+import {
+  installBuiltinElements,
+  installRuntimeServices,
+} from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
@@ -85,7 +89,7 @@ self.document.documentElement.classList.add('i-amphtml-inabox');
 // TODO(lannka): remove ampDocCss for inabox rendering #22418
 const fullCss =
   ampDocCss +
-  ampElementCss +
+  ampSharedCss +
   'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
 installStylesForDoc(
   ampdoc,
@@ -100,7 +104,7 @@ installStylesForDoc(
     registerIniLoadListener(ampdoc);
 
     // Builtins.
-    installBuiltins(self);
+    installBuiltinElements(self);
     adopt(self);
 
     // Pre-stub already known elements.

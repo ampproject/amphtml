@@ -1579,7 +1579,8 @@ export class AmpA4A extends AMP.BaseElement {
     // to frame but prior to load to allow for earlier access.
     const frameLoadPromise = this.xOriginIframeHandler_.init(
       this.iframe,
-      /* opt_isA4A */ true
+      /* opt_isA4A */ true,
+      this.letCreativeTriggerRenderStart()
     );
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(
@@ -1622,6 +1623,16 @@ export class AmpA4A extends AMP.BaseElement {
         ),
       })
     );
+  }
+
+  /**
+   * Whether AMP Ad Xorigin Iframe handler should wait for the creative to
+   * call render-start, rather than triggering it itself. Example use case
+   * is that amp-sticky-ad should trigger render-start itself so that the
+   * sticky container isn't shown before an ad is ready.
+   */
+  letCreativeTriggerRenderStart() {
+    return false;
   }
 
   /**

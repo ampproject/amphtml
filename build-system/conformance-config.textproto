@@ -258,6 +258,7 @@ requirement: {
   whitelist: 'src/web-worker/web-worker.js'
   # Allowing violations in ads code for now.
   # We would have to fix this to property obfuscated the 3p frame code.
+  whitelist: '3p/iframe-messaging-client.js'
   whitelist: 'ads/google/deprecated_doubleclick.js'
   whitelist: 'ads/google/imaVideo.js'
 }
@@ -354,4 +355,6 @@ requirement: {
   value: 'Element.prototype.after'
   value: 'DocumentType.prototype.after'
   value: 'CharacterData.prototype.after'
+  # It's really hard to properly type check this one.
+  whitelist: 'extensions/amp-date-picker/0.1/dates-list.js'
 }

@@ -60,7 +60,7 @@ export class Vsync {
     this.ampdocService_ = Services.ampdocServiceFor(this.win);
 
     /** @private @const {!./document-state.DocumentState} */
-    this.docState_ = Services.documentStateFor(this.win);
+    this.docState_ = Services.globalDocumentStateFor(this.win);
 
     /** @private @const {function(function())}  */
     this.raf_ = this.getRaf_();
@@ -98,7 +98,7 @@ export class Vsync {
     /** @private {?Promise} */
     this.nextFramePromise_ = null;
 
-    /** @private {?function()} */
+    /** @protected {?function()} */
     this.nextFrameResolver_ = null;
 
     /** @const {!Function} */

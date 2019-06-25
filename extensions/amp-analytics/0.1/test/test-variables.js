@@ -210,6 +210,35 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       return expect(expanded).to.eventually.equal(output);
     }
 
+    it('handles consecutive macros in inner arguments', () => {
+      sandbox.useFakeTimers(123456789);
+      win.location.href = 'https://example.com/?test=yes';
+      return check(
+        '$IF(QUERY_PARAM(test), 1.$SUBSTR(TIMESTAMP, 0, 10)QUERY_PARAM(test), ``)',
+        '1.123456789yes'
+      );
+    });
+
+    it('handles consecutive macros w/o parens in inner arguments', () => {
+      sandbox.useFakeTimers(123456789);
+      win.location.href = 'https://example.com/?test=yes';
+      return check('$IF(QUERY_PARAM(test), 1.TIMESTAMP, ``)', '1.123456789');
+    });
+
+    it('handles string + macro as inner argument', () =>
+      check('$REPLACE(testCLIENT_ID(scope), amp-, ``)', 'test12345', {
+        CLIENT_ID: 'amp-12345',
+      }));
+
+    it('should not trim right of string before macro', () => {
+      sandbox.useFakeTimers(123456789);
+      win.location.href = 'https://example.com/?test=yes';
+      return check(
+        '$IF(QUERY_PARAM(test), foo TIMESTAMP, ``)',
+        'foo%20123456789'
+      );
+    });
+
     it('default works without first arg', () => check('$DEFAULT(,two)', 'two'));
 
     it('default works without first arg length', () =>
@@ -243,7 +272,39 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       return check('$BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
     });
 
-    it('if works', () => check('$IF(hey, truthy, falsey)', 'truthy'));
+    it('if works with true', () =>
+      check('$IF(true, truthy, falsey)', 'truthy'));
+
+    it('if works with other string', () =>
+      check('$IF(test, truthy, falsey)', 'truthy'));
+
+    it('if works with false', () =>
+      check('$IF(false, truthy, falsey)', 'falsey'));
+
+    it('if works with empty string', () =>
+      check('$IF(, truthy, falsey)', 'falsey'));
+
+    it('if works with null', () =>
+      check('$IF(null, truthy, falsey)', 'falsey'));
+
+    it('if works with undefined', () =>
+      check('$IF(undefined, truthy, falsey)', 'falsey'));
+
+    it('equals works (truth-y test)', () => {
+      return check('$EQUALS(testValue, testValue)', 'true');
+    });
+
+    it('equals works (false-y test)', () => {
+      return check('$EQUALS(testValue, otherValue)', 'false');
+    });
+
+    it('equals works with if (truth-y test)', () => {
+      return check('$IF($EQUALS(A, A), truthy, falsey)', 'truthy');
+    });
+
+    it('equals works with if (false-y test)', () => {
+      return check('$IF($EQUALS(A, B), truthy, falsey)', 'falsey');
+    });
 
     it('chaining works', () => {
       return check('$SUBSTR(Hello world!, 6)', 'world!')

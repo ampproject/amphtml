@@ -46,16 +46,11 @@ export class LiveStoryManager {
    * configuration and appends it to the DOM.
    */
   build() {
-    const listId = userAssert(
-      this.storyEl_.getAttribute('dynamic-live-list'),
-      'amp-story element must contain the dynamic-live-list attribute to ' +
-        'use the live story functionality.'
-    );
     const liveListEl = createElementWithAttributes(
       this.ampStory_.win.document,
       'amp-live-list',
       dict({
-        'id': listId,
+        'id': 'i-amphtml-' + this.storyEl_.id + '-dynamic-list',
         'data-poll-interval':
           this.storyEl_.getAttribute('data-poll-interval') || 15000,
         'sort': 'ascending',
@@ -99,6 +94,7 @@ export class LiveStoryManager {
         this.storeService_.dispatch(Action.ADD_TO_PAGE_IDS, [page.element.id]);
         lastPageEl = page.element;
       });
+      this.storeService_.dispatch(Action.ADD_NEW_PAGE_ID, lastPageEl.id);
     });
   }
 }

@@ -84,12 +84,6 @@ export class AmpList extends AMP.BaseElement {
     this.renderPass_ = new Pass(this.win, () => this.doRenderPass_());
 
     /**
-     * Local data queued for render from `src` mutation before layoutCallback.
-     * @private {?Array}
-     */
-    this.prelayoutLocalData_ = null;
-
-    /**
      * Latest fetched items to render and the promise resolver and rejecter
      * to be invoked on render success or fail, respectively.
      * @private {?RenderItems}
@@ -224,16 +218,7 @@ export class AmpList extends AMP.BaseElement {
       this.initializeLoadMoreElements_();
     }
 
-    // Don't fetch if `src` is empty string.
-    if (!!this.element.getAttribute('src')) {
-      return this.fetchList_();
-    } else if (this.prelayoutLocalData_) {
-      return this.scheduleRender_(this.prelayoutLocalData_);
-    }
-    // Clean up any "prelayout" data now that we're laid out.
-    this.prelayoutLocalData_ = null;
-
-    return Promise.resolve();
+    return this.fetchList_();
   }
 
   /**
@@ -324,14 +309,8 @@ export class AmpList extends AMP.BaseElement {
       // Remove the 'src' now that local data is used to render the list.
       this.element.setAttribute('src', '');
       const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
-      // Defer to render in layoutCallback() before first layout.
-      if (this.layoutCompleted_) {
-        this.resetIfNecessary_(/* isFetch */ false);
-        return this.scheduleRender_(array);
-      } else {
-        this.prelayoutLocalData_ = array;
-      }
-      return Promise.resolve();
+      this.resetIfNecessary_(/* isFetch */ false);
+      return this.scheduleRender_(array, /* append */ false);
     };
 
     const src = mutations['src'];
@@ -445,7 +424,10 @@ export class AmpList extends AMP.BaseElement {
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {
           const removed = toArray(this.container_.children);
-          this.bind_.scanAndApply(/* added */ [], removed);
+          this.bind_.rescan(/* added */ [], removed, {
+            'fast': true,
+            'update': false,
+          });
         }
         removeChildren(dev().assertElement(this.container_));
       });
@@ -580,11 +562,6 @@ export class AmpList extends AMP.BaseElement {
             response
           );
           request.fetchOpt.responseType = 'application/json';
-          this.ssrTemplateHelper_.verifySsrResponse(
-            this.win,
-            response,
-            request
-          );
           return response;
         },
         error => {
@@ -603,9 +580,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scheduleRender_(data, opt_append, opt_payload) {
-    devAssert(this.layoutCompleted_);
-    dev().info(TAG, 'schedule:', this.element, data);
-
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
 
@@ -639,7 +613,6 @@ export class AmpList extends AMP.BaseElement {
     const current = this.renderItems_;
 
     devAssert(current && current.data, 'Nothing to render.');
-    dev().info(TAG, 'pass:', this.element, current);
     const scheduleNextPass = () => {
       // If there's a new `renderItems_`, schedule it for render.
       if (this.renderItems_ !== current) {
@@ -730,29 +703,53 @@ export class AmpList extends AMP.BaseElement {
     const elements = /** @type {!Array<!Element>} */ (isArray(elementOrElements)
       ? elementOrElements
       : [elementOrElements]);
+
+    // binding=no: Always skip render-blocking update.
     const binding = this.element.getAttribute('binding');
-    // "no": Always skip binding update.
     if (binding === 'no') {
       return Promise.resolve(elements);
     }
+
+    // Early out if elements contain no bindings.
+    const hasBindings = elements.some(
+      el =>
+        el.hasAttribute('i-amphtml-binding') ||
+        !!el.querySelector('[i-amphtml-binding]')
+    );
+    if (!hasBindings) {
+      return Promise.resolve(elements);
+    }
+
+    /**
+     * @param {!../../../extensions/amp-bind/0.1/bind-impl.Bind} bind
+     * @return {!Promise<!Array<!Element>>}
+     */
     const updateWith = bind => {
       const removedElements = append ? [] : [this.container_];
       // Forward elements to chained promise on success or failure.
       return bind
-        .scanAndApply(elements, removedElements)
+        .rescan(elements, removedElements, {'fast': true, 'update': true})
         .then(() => elements, () => elements);
     };
-    // "refresh": Do _not_ block on retrieval of the Bind service before the
-    // first mutation (AMP.setState).
+
+    // binding=refresh: Only do render-blocking update after initial render.
     if (binding === 'refresh') {
+      // Bind service must be available after first mutation, so don't
+      // wait on the async service getter.
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
         return updateWith(this.bind_);
       } else {
+        // On initial render, do a non-blocking scan and don't update.
+        Services.bindForDocOrNull(this.element).then(bind => {
+          if (bind) {
+            bind.rescan(elements, [], {'fast': true, 'update': false});
+          }
+        });
         return Promise.resolve(elements);
       }
     }
-    // "always" (default): Wait for Bind to scan for and evalute any bindings
-    // in the newly rendered `elements`.
+    // binding=always (default): Wait for amp-bind to download and always
+    // do render-blocking update.
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
         return updateWith(bind);

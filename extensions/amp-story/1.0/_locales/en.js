@@ -98,6 +98,11 @@ const strings = {
     string: 'Play video',
     description: 'Label for a button to play the video visible on the page.',
   },
+  [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
+    string: 'Updated',
+    description:
+      'Label that indicates that additional content has been added to a story',
+  },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Tap Next',
     description:
@@ -143,6 +148,11 @@ const strings = {
     string: 'Google+',
     description:
       'Button label for the share target that shares a link via Google+.',
+  },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+    description:
+      'Button label for the share target that shares a link via Line.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Get Link',

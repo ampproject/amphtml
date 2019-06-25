@@ -17,6 +17,7 @@
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {LiveStoryManager} from '../live-story-manager';
+import {Services} from '../../../../src/services';
 import {addAttributesToElement} from '../../../../src/dom';
 
 describes.realWin('LiveStoryManager', {amp: true}, env => {
@@ -47,10 +48,12 @@ describes.realWin('LiveStoryManager', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
+    const viewer = Services.viewerForDoc(env.ampdoc);
+    sandbox.stub(Services, 'viewerForDoc').returns(viewer);
     storyEl = win.document.createElement('amp-story');
     addAttributesToElement(storyEl, {
       'id': 'testStory',
-      'dynamic-live-list': 'storyLiveList',
+      'live-story': '',
     });
     ampStory = new AmpStory(storyEl);
     liveStoryManager = new LiveStoryManager(ampStory);
@@ -63,24 +66,13 @@ describes.realWin('LiveStoryManager', {amp: true}, env => {
     expect(liveListEl).to.exist;
   });
 
-  it('live-list id should correspond to attribute dynamic-live-list', () => {
+  it('live-list id should equal story id + dymanic-list combo', () => {
     liveStoryManager.build();
-    const storyAttr = ampStory.element.getAttribute('dynamic-live-list');
-
     const liveListEl = ampStory.element.querySelector('amp-live-list');
-    expect(storyAttr).to.equal(liveListEl.id);
-  });
 
-  it('should throw if no dynamic-live-list attr is set', () => {
-    ampStory.element.removeAttribute('dynamic-live-list');
-
-    allowConsoleError(() => {
-      expect(() => {
-        liveStoryManager.build();
-      }).to.throw(
-        /amp-story element must contain the dynamic-live-list attribute to use the live story functionality/
-      );
-    });
+    expect(liveListEl.id).to.equal(
+      'i-amphtml-' + ampStory.element.id + '-dynamic-list'
+    );
   });
 
   it('should throw if no story id is set', () => {

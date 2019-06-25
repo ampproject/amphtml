@@ -58,7 +58,7 @@ describe('SanitizerImpl', () => {
       expect(base.getAttribute('href')).to.be.null;
     });
 
-    it('should allow changes to built-in AMP tags', () => {
+    it('should allow changes to built-in AMP tags except amp-pixel', () => {
       const img = win.document.createElement('amp-img');
       s.mutateAttribute(img, 'src', 'foo.jpg');
       expect(img.getAttribute('src')).to.include('foo.jpg');
@@ -69,13 +69,23 @@ describe('SanitizerImpl', () => {
 
       const pixel = win.document.createElement('amp-pixel');
       s.mutateAttribute(pixel, 'src', '/foo/track');
-      expect(pixel.getAttribute('src')).to.include('/foo/track');
+      expect(pixel.getAttribute('src')).to.be.null;
     });
 
     it('should not allow changes to other AMP tags', () => {
       const analytics = win.document.createElement('amp-analytics');
       s.mutateAttribute(analytics, 'data-credentials', 'include');
       expect(analytics.getAttribute('data-credentials')).to.be.null;
+    });
+
+    it('should not allow changes to form elements', () => {
+      const form = win.document.createElement('form');
+      s.mutateAttribute(form, 'action-xhr', 'https://example.com/post');
+      expect(form.getAttribute('action-xhr')).to.be.null;
+
+      const input = win.document.createElement('input');
+      s.mutateAttribute(input, 'value', 'foo');
+      expect(input.getAttribute('value')).to.be.null;
     });
   });
 });

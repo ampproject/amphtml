@@ -226,6 +226,11 @@ export class Viewport {
         Object.defineProperty(win, 'scrollTo', {
           value: (x, y) => this.setScrollTop(y),
         });
+        ['pageYOffset', 'scrollY'].forEach(prop => {
+          Object.defineProperty(win, prop, {
+            get: () => this.getScrollTop(),
+          });
+        });
       } catch (e) {
         // Ignore errors.
       }
