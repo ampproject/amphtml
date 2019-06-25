@@ -52,18 +52,13 @@ import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {
   childElement,
   closestAncestorElementBySelector,
+  createElementWithAttributes,
   isAmpElement,
   iterateCursor,
   matches,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
-  createElementWithAttributes,
 } from '../../../src/dom';
-import {
-  createShadowRootWithStyle,
-  isMediaDisplayed,
-  setTextBackgroundColor,
-} from './utils';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -74,6 +69,7 @@ import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
+import {isMediaDisplayed, setTextBackgroundColor} from './utils';
 import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
 
