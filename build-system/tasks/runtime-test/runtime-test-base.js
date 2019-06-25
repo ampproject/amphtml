@@ -26,7 +26,6 @@ const {
   runTestInBatches,
   startTestServer,
 } = require('./helpers');
-const {BABELIFY_GLOBAL_TRANSFORM} = require('../helpers');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
@@ -240,7 +239,7 @@ class RuntimeTestConfig {
       this.browserify.transform = [
         [
           'babelify',
-          Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {plugins: [plugin]}),
+          Object.assign({}, this.babelifyConfig, {plugins: [plugin]}),
         ],
       ];
     }

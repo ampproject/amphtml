@@ -36,6 +36,10 @@ const SAUCE_TIMEOUT_CONFIG = {
   idleTimeout: 5 * 60,
 };
 
+const BABELIFY_CONFIG = Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {
+  sourceMapsAbsolute: true,
+});
+
 const preprocessors = ['browserify'];
 
 /**
@@ -64,18 +68,13 @@ module.exports = {
   // Details: https://support.saucelabs.com/hc/en-us/articles/115010079868
   hostname: 'localhost',
 
+  babelifyConfig: BABELIFY_CONFIG,
+
   browserify: {
     watch: true,
     debug: true,
     basedir: __dirname + '/../../',
-    transform: [
-      [
-        'babelify',
-        Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {
-          sourceMapsAbsolute: true,
-        }),
-      ],
-    ],
+    transform: [['babelify', BABELIFY_CONFIG]],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
   },
