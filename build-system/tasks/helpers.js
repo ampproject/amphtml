@@ -770,6 +770,7 @@ function toPromise(readable) {
 }
 
 module.exports = {
+  BABELIFY_GLOBAL_TRANSFORM,
   buildAlp,
   buildExaminer,
   buildWebWorker,
@@ -777,7 +778,6 @@ module.exports = {
   compileAllUnminifiedTargets,
   compileJs,
   compileTs,
-  BABELIFY_GLOBAL_TRANSFORM,
   devDependencies,
   enableLocalTesting,
   endBuildStep,
