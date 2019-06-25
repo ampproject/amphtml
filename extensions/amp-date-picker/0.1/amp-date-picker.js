@@ -1876,10 +1876,10 @@ export class AmpDatePicker extends AMP.BaseElement {
   onMount() {
     if (this.mode_ == DatePickerMode.OVERLAY) {
       // REVIEW: this should be ok, since opening the overlay requires a
-      // user interaction, and this won't run until then
+      // user interaction, and this won't run until then.
       Services.bindForDocOrNull(this.element).then(bind => {
         if (bind) {
-          return bind.scanAndApply([this.element], [this.element]);
+          return bind.rescan([this.element], [this.element], {'apply': true});
         }
       });
     } else {

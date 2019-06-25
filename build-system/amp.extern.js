@@ -689,6 +689,12 @@ let BindEvaluateBindingsResultDef;
  */
 let BindEvaluateExpressionResultDef;
 
+/**
+ * Options for Bind.rescan().
+ * @typedef {{update: (boolean|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
+ */
+let BindRescanOptionsDef;
+
 /////////////////////////////
 ////// Web Anmomation externs
 /////////////////////////////
