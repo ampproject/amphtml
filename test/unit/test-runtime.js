@@ -1366,6 +1366,13 @@ describes.realWin(
         expect(viewer.getVisibilityState()).to.equal('inactive');
         expect(viewer.dispose).to.be.calledOnce;
       });
+
+      it('should expose head tag ', () => {
+        const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+        expect(amp.head).to.exist;
+        expect(amp.head.children).to.exist;
+        expect(amp.head.children.length).to.greaterThan(0);
+      });
     });
 
     describe
