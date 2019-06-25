@@ -215,9 +215,7 @@ export class AmpDocService {
   installFieDoc(url, childWin) {
     const doc = childWin.document;
     devAssert(!doc[AMPDOC_PROP], 'The fie already contains ampdoc');
-    const frameElement = /** @type {!Node} */ (devAssert(
-      getParentWindowFrameElement(doc, this.win)
-    ));
+    const frameElement = devAssert(childWin.frameElement);
     const ampdoc = new AmpDocFie(childWin, url, this.getAmpDoc(frameElement));
     doc[AMPDOC_PROP] = ampdoc;
     return ampdoc;
@@ -688,4 +686,14 @@ export function installDocService(win, isSingleDoc) {
   registerServiceBuilder(win, 'ampdoc', function() {
     return new AmpDocService(win, isSingleDoc);
   });
+}
+
+/**
+ * @param {AmpDocService} ampdocService
+ * @param {boolean} value
+ * @visibleForTesting
+ */
+export function updateFieModeForTesting(ampdocService, value) {
+  // TODO(#22733): remove this method once ampdoc-fie is launched.
+  ampdocService.ampdocFieExperimentOn_ = value;
 }
