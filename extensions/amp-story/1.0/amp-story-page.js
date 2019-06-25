@@ -321,11 +321,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       true /* callToInitialize */
     );
     this.setHasAttachmentAttribute_();
-<<<<<<< HEAD
     this.setPageDescription_();
-=======
-    this.handlePageDescription_();
->>>>>>> Remove shadow DOM
   }
 
   /**
