@@ -18,6 +18,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
 import {BindValidator} from './bind-validator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
+import {Deferred} from '../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
@@ -41,6 +42,7 @@ import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {whenDocumentReady} from '../../../src/document-ready';
 
+/** @const {string} */
 const TAG = 'amp-bind';
 
 /**
@@ -95,6 +97,12 @@ const BIND_ONLY_ATTRIBUTES = map({
   'AMP-LIST': ['state', 'is-layout-container'],
   'AMP-SELECTOR': ['selected'],
 });
+
+/**
+ * Elements that opt-out of tree walking in favor of rescan() with {fast: true}.
+ * @const {!Array<string>}
+ */
+const FAST_RESCAN_TAGS = ['AMP-LIST'];
 
 /**
  * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from
@@ -205,6 +213,9 @@ export class Bind {
         return this.initialize_(root);
       });
 
+    /** @const @private {!Deferred} */
+    this.addMacrosDeferred_ = new Deferred();
+
     /** @private {Promise} */
     this.setStatePromise_ = null;
 
@@ -243,7 +254,7 @@ export class Bind {
    * @return {!Promise}
    */
   setState(state, opt_skipEval, opt_skipAmpState) {
-    dev().info(TAG, 'setState:', state);
+    dev().info(TAG, 'setState (init=%s):', opt_skipEval, state);
 
     try {
       deepMerge(this.state_, state, MAX_MERGE_DEPTH);
@@ -394,92 +405,105 @@ export class Bind {
   }
 
   /**
-   * Removes bindings from `removed` elements and scans `added` for bindings.
-   * Then, evaluates all expressions and applies results to `added` elements.
-   * Does _not_ mutate any other elements.
+   * Removes bindings from `removedElements` and adds new bindings in
+   * `addedElements`.
    *
-   * Returned promise is resolved when all operations complete.
-   * If they don't complete within `timeout` ms, the promise is rejected.
+   * If `options.update` is true, evaluates and applies changes to
+   * `addedElements` after adding new bindings.
    *
-   * Note that elements with bindings must have attribute `i-amphtml-binding`.
+   * If `options.fast` is true, uses a faster scan method that requires
+   * (1) elements with bindings to have the attribute `i-amphtml-binding` and
+   * (2) the parent element tag name be listed in FAST_RESCAN_TAGS.
    *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @param {number=} opt_timeout Timeout in milliseconds.
-   * @return {!Promise}
+   * @param {BindRescanOptionsDef=} options
+   * @return {!Promise} Resolved when all operations complete. If they don't
+   * complete within `options.timeout` (default=2000), promise is rejected.
    */
-  scanAndApply(addedElements, removedElements, opt_timeout) {
-    // TODO(choumx): Dependency on init may be removed if we skip elements
-    // with .i-amphtml-binding during tree walk and extract macro setup.
-    return this.initializePromise_.then(() => {
-      return this.rescan_(addedElements, removedElements, opt_timeout || 2000);
+  rescan(addedElements, removedElements, options = {}) {
+    // * In non-fast mode, wait for initial tree walk to avoid racy double
+    //   scanning of `addedElements` which may cause duplicate bindings.
+    // * In fast mode, the initial tree walk skips subtrees of FAST_RESCAN_TAGS
+    //   so only wait for <amp-bind-macro> setup (much faster!).
+    const waitFor = options.fast
+      ? this.addMacrosDeferred_.promise
+      : this.initializePromise_;
+
+    return waitFor.then(() =>
+      this.timer_.timeoutPromise(
+        options.timeout || 2000,
+        this.rescan_(addedElements, removedElements, options),
+        'Timed out waiting for amp-bind to rescan.'
+      )
+    );
+  }
+
+  /**
+   * @param {!Array<!Element>} addedElements
+   * @param {!Array<!Element>} removedElements
+   * @param {!BindRescanOptionsDef} options
+   * @return {!Promise}
+   * @private
+   */
+  rescan_(addedElements, removedElements, options) {
+    dev().info(TAG, 'rescan: ', addedElements, removedElements, options);
+
+    const rescanPromise = options.fast
+      ? this.fastScan_(addedElements, removedElements)
+      : this.slowScan_(addedElements, removedElements);
+
+    return rescanPromise.then(() => {
+      if (options.update) {
+        return this.evaluate_().then(results =>
+          this.applyElements_(results, addedElements)
+        );
+      }
     });
   }
 
   /**
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @param {number} timeout
    * @return {!Promise}
    * @private
    */
-  rescan_(addedElements, removedElements, timeout) {
-    dev().info(TAG, 'rescan:', addedElements, removedElements);
-    /**
-     * Helper function for cleaning up bindings in removed elements.
-     * @param {number} added
-     * @return {!Promise}
-     */
-    const cleanup = added => {
-      this.removeBindingsForNodes_(removedElements).then(removed => {
-        dev().info(
-          TAG,
-          '⤷',
-          'Δ:',
-          added - removed,
-          ', ∑:',
-          this.numberOfBindings()
-        );
-      });
-      return Promise.resolve();
-    };
-    // Early-out if max number of bindings has already been exceeded.
-    // This can happen since we purge old bindings in `removedElements`
-    // _after_ adding new ones (rather than before) as an optimization.
-    if (this.numberOfBindings() > this.maxNumberOfBindings_) {
-      this.emitMaxBindingsExceededError_();
-      return cleanup(0);
-    }
+  fastScan_(addedElements, removedElements) {
+    // Sync remove bindings from internal state first, but don't chain on
+    // returned promise (worker message) as an optimization.
+    const removePromise = this.removeBindingsForNodes_(removedElements);
+
+    // Scan `addedElements` and descendants for bindings.
     const bindings = [];
-    // Scan `addedElements` and their children for elements with bindings.
-    const elementsToScan = addedElements.slice();
+    const elementsToScan = addedElements.filter(el =>
+      el.hasAttribute('i-amphtml-binding')
+    );
     addedElements.forEach(el => {
       const children = el.querySelectorAll('[i-amphtml-binding]');
       Array.prototype.push.apply(elementsToScan, children);
     });
-    elementsToScan.forEach(el => {
-      this.scanElement_(el, Number.POSITIVE_INFINITY, bindings);
-    });
-    const added = bindings.length;
-    // Early-out if there are no elements to add -- just clean up `removed`.
-    if (added === 0) {
-      return cleanup(0);
+    const quota = this.maxNumberOfBindings_ - this.numberOfBindings();
+    for (let i = 0; i < elementsToScan.length; i++) {
+      const el = elementsToScan[i];
+      if (this.scanElement_(el, quota - bindings.length, bindings)) {
+        break;
+      }
     }
-    const promise = this.sendBindingsToWorker_(bindings)
-      .then(() => {
-        return this.evaluate_().then(results =>
-          this.applyElements_(results, addedElements)
-        );
-      })
-      .then(() => {
-        // Remove bindings at the end to reduce evaluation/apply latency.
-        cleanup(added);
-      });
-    return this.timer_.timeoutPromise(
-      timeout,
-      promise,
-      'Timed out waiting for amp-bind to process rendered template.'
-    );
+
+    removePromise.then(removed => {
+      dev().info(
+        TAG,
+        'rescan.fast: delta=%s, total=%s',
+        bindings.length - removed,
+        this.numberOfBindings()
+      );
+    });
+
+    if (bindings.length > 0) {
+      return this.sendBindingsToWorker_(bindings);
+    } else {
+      return Promise.resolve();
+    }
   }
 
   /**
@@ -513,7 +537,7 @@ export class Bind {
     return this.ww_('bind.init', [allowUrlProperties])
       .then(() => {
         return Promise.all([
-          this.addMacros_(),
+          this.addMacros_().then(() => this.addMacrosDeferred_.resolve()),
           this.addBindingsForNodes_([root]),
         ]);
       })
@@ -627,8 +651,8 @@ export class Bind {
    * @private
    */
   addMacros_() {
-    // TODO(choumx, #17194): Query selector can miss elements when the body
-    // is streamed. This should be done at the custom element level.
+    // TODO(choumx, #17194): One-time query selector can miss dynamically
+    // created elements. Should do what <amp-state> does.
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros = /** @type {!Array<!BindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
@@ -670,6 +694,10 @@ export class Bind {
    * @private
    */
   addBindingsForNodes_(nodes) {
+    if (!nodes.length) {
+      return Promise.resolve(0);
+    }
+
     // For each node, scan it for bindings and store them.
     const scanPromises = nodes.map(node => {
       // Limit number of total bindings (unless in local manual testing).
@@ -740,6 +768,10 @@ export class Bind {
    * @private
    */
   removeBindingsForNodes_(nodes) {
+    if (!nodes.length) {
+      return Promise.resolve(0);
+    }
+
     // Eliminate bound elements that are descendants of `nodes`.
     remove(this.boundElements_, boundElement => {
       for (let i = 0; i < nodes.length; i++) {
@@ -821,7 +853,13 @@ export class Bind {
       if (this.scanElement_(element, remainingQuota, bindings)) {
         limitExceeded = true;
       }
-      return !walker.nextNode() || limitExceeded;
+      // Elements in FAST_RESCAN_TAGS opt-out of "slow" tree walking in favor of
+      // rescan() with {fast: true} for better performance. Note that only
+      // children are opted-out (e.g. amp-list children, not amp-list itself).
+      const next = FAST_RESCAN_TAGS.includes(node.nodeName)
+        ? walker.nextSibling()
+        : walker.nextNode();
+      return !next || limitExceeded;
     };
 
     return new Promise(resolve => {
@@ -1474,13 +1512,15 @@ export class Bind {
    */
   onDomUpdate_(event) {
     const target = dev().assertElement(event.target);
-    // Skip amp-list since there's already a custom integration for it.
+    // TODO(choumx): Consider removing this check now that slowScan_() skips
+    // FAST_RESCAN_TAGS internally, and because this makes an assumption about
+    // the DOM structure of the EventTarget.
     const parent = target.parentNode;
-    if (parent && parent.tagName == 'AMP-LIST') {
+    if (parent && FAST_RESCAN_TAGS.includes(parent.nodeName)) {
       return;
     }
     dev().info(TAG, 'dom_update:', target);
-    this.removeThenAdd_([target], [target]).then(() => {
+    this.slowScan_([target], [target], 'dom_update.end').then(() => {
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
   }
@@ -1489,28 +1529,27 @@ export class Bind {
    * Removes bindings for nodes in `remove`, then scans for bindings in `add`.
    * Return promise that resolves upon completion with struct containing number
    * of removed and added bindings.
-   * @param {!Array<!Node>} remove
-   * @param {!Array<!Node>} add
-   * @return {!Promise<{added: number, removed: number}>}
+   * @param {!Array<!Node>} addedNodes
+   * @param {!Array<!Node>} removedNodes
+   * @param {string=} label
+   * @return {!Promise}
    * @private
    */
-  removeThenAdd_(remove, add) {
+  slowScan_(addedNodes, removedNodes, label = 'rescan.slow') {
     let removed = 0;
-    return this.removeBindingsForNodes_(remove)
+    return this.removeBindingsForNodes_(removedNodes)
       .then(r => {
         removed = r;
-        return this.addBindingsForNodes_(add);
+        return this.addBindingsForNodes_(addedNodes);
       })
       .then(added => {
         dev().info(
           TAG,
-          '⤷',
-          'Δ:',
+          '%s: delta=%s, total=%s',
+          label,
           added - removed,
-          ', ∑:',
           this.numberOfBindings()
         );
-        return {added, removed};
       });
   }
 
