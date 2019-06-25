@@ -1083,8 +1083,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         };
       });
       sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
-        impl.element.setAttribute('height', height);
-        impl.element.setAttribute('width', width);
+        impl.element.style.height = `${height}px`;
+        impl.element.style.width = `${width}px`;
         return Promise.resolve();
       });
       sandbox.stub(impl, 'getAmpAdMetadata').callsFake(() => {
@@ -1205,6 +1205,25 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(impl.adUrl_).to.be.ok;
         expect(impl.adUrl_.length).to.be.ok;
       });
+    });
+
+    it('should attempt resize for fluid request + fixed response case', () => {
+      impl.isFluidRequest_ = true;
+      impl.handleResize_(350, 300);
+      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
+      expect(impl.element.getAttribute('style')).to.match(/height: 300/);
+    });
+
+    it('should attempt resize for larger width response', () => {
+      impl.handleResize_(350, 50);
+      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
+      expect(impl.element.getAttribute('style')).to.match(/height: 50/);
+    });
+
+    it('should not attempt resize for larger height response', () => {
+      impl.handleResize_(350, 300);
+      expect(impl.element.getAttribute('style')).to.match(/width: 200/);
+      expect(impl.element.getAttribute('style')).to.match(/height: 50/);
     });
   });
 
