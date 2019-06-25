@@ -751,6 +751,9 @@ export class LayoutElement {
     // This might lead to a double tracking.
     if (!this.children_.includes(child)) {
       this.children_.push(child);
+      if (child.isLayer()) {
+        this.transfer_(child);
+      }
     }
   }
 
@@ -800,7 +803,7 @@ export class LayoutElement {
     this.needsScrollRemeasure_ = true;
 
     // Transfer all children elements into this new coordinate system
-    const parent = this.getParentLayer();
+    const parent = this.parentLayer_;
     if (parent) {
       parent.transfer_(this);
     }
@@ -1117,7 +1120,14 @@ export class LayoutElement {
    * the element.
    */
   dirtyMeasurements() {
+    if (this.needsRemeasure_) {
+      return;
+    }
     this.needsRemeasure_ = true;
+    const children = this.children_;
+    for (let i = 0; i < children.length; i++) {
+      children[i].dirtyMeasurements();
+    }
   }
 
   /**
@@ -1126,30 +1136,6 @@ export class LayoutElement {
    */
   dirtyScrollMeasurements() {
     this.needsScrollRemeasure_ = true;
-  }
-
-  /**
-   * Remasures the element's size and offset position. This traverse as high as
-   * possible in the layer tree to remeasure as many elements as possible in
-   * one go. This is necessary both from a performance standpoint, and to
-   * ensure that any calculation uses the correct value, since layer in the
-   * ancestry may have been dirtied.
-   *
-   * No matter what, though, the current element will be remeasured.
-   */
-  remeasure() {
-    let layer = this;
-
-    // Find the topmost dirty layer, and remeasure from there.
-    for (let p = this.getParentLayer(); p; p = p.getParentLayer()) {
-      if (p.needsRemeasure_) {
-        layer = p;
-      }
-    }
-
-    if (layer.needsRemeasure_) {
-      layer.remeasure_();
-    }
   }
 
   /**
@@ -1198,13 +1184,15 @@ export class LayoutElement {
   }
 
   /**
-   * Remeasures the element, and all children, since this element was marked
-   * dirty.
-   *
-   * @private
+   * Remasures the element's size and offset position, and any ancestor
+   * elements as needed.
    */
-  remeasure_() {
+  remeasure() {
     this.updateScrollPosition_();
+
+    if (!this.needsRemeasure_) {
+      return;
+    }
     this.needsRemeasure_ = false;
     const element = this.element_;
 
@@ -1236,17 +1224,6 @@ export class LayoutElement {
     if ((getMode().localDev || getMode().test) && Object.freeze) {
       Object.freeze(this.size_);
       Object.freeze(this.position_);
-    }
-
-    // Now, recursively measure all child nodes, to since they've probably been
-    // invalidated by the parent changing.
-    const children = this.children_;
-    if (children.length) {
-      for (let i = 0; i < children.length; i++) {
-        // TODO(jridgewell): We can probably optimize this if this layer
-        // didn't change at all.
-        children[i].remeasure_();
-      }
     }
   }
 
