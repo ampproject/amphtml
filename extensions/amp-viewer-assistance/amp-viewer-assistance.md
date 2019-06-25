@@ -1,3 +1,8 @@
+---
+formats:
+  - actions
+---
+
 # <a name="amp-viewer-assistance"></a> amp-viewer-assistance
 
 [TOC]
