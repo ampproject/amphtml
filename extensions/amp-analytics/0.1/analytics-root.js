@@ -474,7 +474,6 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
   createVisibilityManager() {
     if (this.hostVisibilityService_) {
       // If there is hostAPI (hostAPI never exist with the FIE case)
-      fetch('http://localhost:8000/visiblityManagerForMAPP');
       return new VisibilityManagerForMApp(
         this.ampdoc,
         this.hostVisibilityService_
