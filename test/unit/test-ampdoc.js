@@ -103,7 +103,7 @@ describe('AmpDocService', () => {
         expect(ampDoc).to.equal(service.singleDoc_);
       });
 
-      it('should yield the shadow doc when explicitly asked', () => {
+      it('should yield the closest shadow doc when explicitly asked', () => {
         if (!shadowRoot) {
           return;
         }
