@@ -115,31 +115,6 @@ export class StoryAnalyticsService {
    * @param {!StoryAnalyticsEvent} eventType
    */
   triggerEvent(eventType) {
-    this.element_.dispatchCustomEvent(eventType, this.getDetails_(eventType));
-  }
-
-  /**
-   * Consolidates count of event types per page and variables of the event.
-   * @param {!StoryAnalyticsEvent} eventType
-   * @private
-   * @return {!Object}
-   */
-  getDetails_(eventType) {
-    const vars = this.variableService_.get();
-    const pageId = vars['storyPageId'];
-
-    this.eventsPerPage_[pageId] = this.eventsPerPage_[pageId]
-      ? this.eventsPerPage_[pageId]
-      : {};
-
-    this.eventsPerPage_[pageId][eventType] = this.eventsPerPage_[pageId][
-      eventType
-    ]
-      ? this.eventsPerPage_[pageId][eventType]
-      : 0;
-
-    this.eventsPerPage_[pageId][eventType]++;
-
-    return Object.assign({pageEvents: this.eventsPerPage_}, vars);
+    this.element_.dispatchCustomEvent(eventType, this.variableService_.get());
   }
 }

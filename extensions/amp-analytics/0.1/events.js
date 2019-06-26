@@ -23,7 +23,7 @@ import {
 } from '../../../src/video-interface';
 import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isEnumValue, isFiniteNumber} from '../../../src/types';
@@ -419,6 +419,9 @@ class AmpStoryEventTracker extends EventTracker {
         .getRoot()
         .addEventListener(StoryAnalyticsEvent[key], this.boundOnSession_);
     });
+
+    /** @private {!Object} */
+    this.eventsPerPage_ = map();
   }
 
   /** @override */
@@ -434,7 +437,7 @@ class AmpStoryEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const storySpec = config['storySpec'] || {};
-    const selector = config['selector'] || storySpec['selector'] || ':root';
+    const selector = config['selector'] || ':root';
     const selectionMethod = config['selectionMethod'] || null;
     const targetReady = this.root.getElement(
       context,
@@ -446,15 +449,16 @@ class AmpStoryEventTracker extends EventTracker {
 
     return this.sessionObservable_.add(event => {
       const {type} = event;
-      const details = /** @type {?JsonObject|undefined} */ (getData(event));
-      const pageId = details['storyPageId'];
-      const pageEvents = details['pageEvents'];
-      const eventsForPage = pageEvents[pageId];
 
       if (type !== on) {
         return;
       }
+      const details = /** @type {?JsonObject|undefined} */ (getData(event));
+      const pageId = details['storyPageId'];
 
+      this.updateTrackedEvents_(pageId, type);
+
+      const eventsForPage = this.eventsPerPage_[pageId];
       if (repeat === false && eventsForPage[type] > 1) {
         return;
       }
@@ -469,6 +473,20 @@ class AmpStoryEventTracker extends EventTracker {
         }
       });
     });
+  }
+
+  /**
+   * Updates the count of event types per page.
+   * @param {string} pageId
+   * @param {string} eventType
+   */
+  updateTrackedEvents_(pageId, eventType) {
+    this.eventsPerPage_[pageId] = this.eventsPerPage_[pageId] || {};
+
+    const pageEvents = this.eventsPerPage_[pageId];
+    pageEvents[eventType] = pageEvents[eventType] || 0;
+
+    pageEvents[eventType]++;
   }
 }
 
