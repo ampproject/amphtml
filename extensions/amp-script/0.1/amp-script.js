@@ -106,8 +106,7 @@ export class AmpScript extends AMP.BaseElement {
 
     const authorScriptPromise = this.getAuthorScript_();
     if (!authorScriptPromise) {
-      const e = user().createError('"src" or "script" attribute is required.');
-      return Promise.reject(e);
+      return Promise.reject();
     }
 
     const workerAndAuthorScripts = Promise.all([
@@ -199,12 +198,17 @@ export class AmpScript extends AMP.BaseElement {
         .then(r => r.text());
     } else {
       const id = this.element.getAttribute('script');
-      if (id) {
-        const local = this.getAmpDoc().getElementById(id);
-        return Promise.resolve(local.textContent);
-      }
+      user().assert(id, '[%s] "src" or "script" attribute is required.', TAG);
+      const local = this.getAmpDoc().getElementById(id);
+      const type = local.getAttribute('type');
+      user().assert(
+        type === 'text/amp-script',
+        '[%s] #%s must have type="text/amp-script".',
+        TAG,
+        id
+      );
+      return Promise.resolve(local.textContent);
     }
-    return null;
   }
 
   /**
