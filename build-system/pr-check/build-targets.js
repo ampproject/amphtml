@@ -166,13 +166,12 @@ const targetMatchers = [
  * Populates buildTargets with a set of build targets contained in a PR after
  * making sure they are valid. Used to determine which checks to perform / tests
  * to run during PR builds.
- * @param {!Set<string>} buildTargets
  * @param {string} fileName
  * @return {boolean}
  */
-function determineBuildTargets(buildTargets, fileName = 'build-targets.js') {
+function determineBuildTargets(fileName = 'build-targets.js') {
   const filesChanged = gitDiffNameOnlyMaster();
-  buildTargets.clear;
+  const buildTargets = new Set();
   for (const file of filesChanged) {
     let matched = false;
     targetMatchers.forEach(matcher => {
@@ -194,7 +193,7 @@ function determineBuildTargets(buildTargets, fileName = 'build-targets.js') {
         .join(', ')
     )
   );
-  return true;
+  return buildTargets;
 }
 
 module.exports = {
