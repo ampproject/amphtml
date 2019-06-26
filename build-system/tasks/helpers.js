@@ -76,6 +76,11 @@ const MINIFIED_TARGETS = [
   'f.js',
 ];
 
+const BABELIFY_GLOBAL_TRANSFORM = {
+  global: true, // Transform node_modules
+  ignore: devDependencies(), // Ignore devDependencies
+};
+
 const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
@@ -440,11 +445,10 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     options.browserifyOptions
   );
 
-  let bundler = browserify(browserifyOptions).transform(babelify, {
-    // Transform "node_modules/", but ignore devDependencies.
-    global: true,
-    ignore: devDependencies(),
-  });
+  let bundler = browserify(browserifyOptions).transform(
+    babelify,
+    BABELIFY_GLOBAL_TRANSFORM
+  );
 
   if (options.watch) {
     bundler = watchify(bundler);
@@ -766,6 +770,7 @@ function toPromise(readable) {
 }
 
 module.exports = {
+  BABELIFY_GLOBAL_TRANSFORM,
   buildAlp,
   buildExaminer,
   buildWebWorker,

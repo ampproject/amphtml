@@ -27,9 +27,9 @@ const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
+const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {css} = require('./css');
-const {devDependencies} = require('./helpers');
 const {isTravisBuild} = require('../travis');
 
 const root = process.cwd();
@@ -206,12 +206,10 @@ function getGraph(entryModule) {
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  const bundler = browserify(entryModule, {debug: true}).transform(babelify, {
-    compact: false,
-    // Transform "node_modules/", but ignore devDependencies.
-    global: true,
-    ignore: devDependencies(),
-  });
+  const bundler = browserify(entryModule, {debug: true}).transform(
+    babelify,
+    Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {compact: false})
+  );
 
   bundler.pipeline.get('deps').push(
     through.obj(function(row, enc, next) {
