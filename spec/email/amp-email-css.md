@@ -303,6 +303,7 @@ supported for conditionally applying rules via `@media` queries.
       *   `min-device-width`
 *   [`hover`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/hover)
 *   [`orientation`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/orientation)
+*   [`pointer`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/pointer)
 *   [`resolution`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/resolution)
       *   `max-resolution`
       *   `min-resolution`
