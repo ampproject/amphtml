@@ -356,22 +356,28 @@ function buildExtension(
   if (options.compileOnlyCss && !hasCss) {
     return Promise.resolve();
   }
+  const path = 'extensions/' + name + '/' + version;
+
   // Use a separate watcher for extensions to copy / inline CSS and compile JS
   // instead of relying on the watcher used by compileUnminifiedJs, which only
   // recompiles JS.
-  const path = 'extensions/' + name + '/' + version;
-  const optionsCopy = Object.create(options);
   if (options.watch) {
-    optionsCopy.watch = false;
+    options.watch = false;
     watch(path + '/*', function() {
-      buildExtension(name, version, latestVersion, hasCss, optionsCopy);
+      buildExtension(
+        name,
+        version,
+        latestVersion,
+        hasCss,
+        Object.assign({}, options, {continueOnError: true})
+      );
     });
   }
   const promises = [];
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    const buildCssPromise = buildExtensionCss(path, name, version, optionsCopy);
+    const buildCssPromise = buildExtensionCss(path, name, version, options);
     if (options.compileOnlyCss) {
       return buildCssPromise;
     }
@@ -388,7 +394,7 @@ function buildExtension(
     if (argv.single_pass) {
       return Promise.resolve();
     } else {
-      return buildExtensionJs(path, name, version, latestVersion, optionsCopy);
+      return buildExtensionJs(path, name, version, latestVersion, options);
     }
   });
 }
