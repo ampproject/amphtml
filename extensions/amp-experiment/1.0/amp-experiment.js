@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {applyExperimentToVariant} from './apply-experiment';
 import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -26,7 +27,6 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
-import {parseMutation} from './mutation-parser';
 
 const TAG = 'amp-experiment';
 
@@ -97,8 +97,9 @@ export class AmpExperiment extends AMP.BaseElement {
         /** @private @const {!Promise<!Object<string, ?string>>} */
         const experimentVariants = Promise.all(variants)
           .then(() => {
-            this.validateExperimentToVariant_(config, experimentToVariant);
-            const applyExperimentsPromise = this.applyExperimentVariants_(
+            const ampdoc = this.getAmpDoc();
+            const applyExperimentsPromise = applyExperimentToVariant(
+              ampdoc,
               config,
               experimentToVariant
             );
@@ -173,101 +174,6 @@ export class AmpExperiment extends AMP.BaseElement {
     });
 
     return experimentToVariant;
-  }
-
-  /**
-   * Function to run validations and limitations on the current
-   * chosen Experiment / variant combination.
-   *
-   * @param {!JsonObject} config
-   * @param {!Object<string, ?string>} experimentToVariant
-   */
-  validateExperimentToVariant_(config, experimentToVariant) {
-    // Ensure that the current experiment / variant
-    // combination does not exceed the maximum mutations.
-    // NOTE: We are not validating the entire config,
-    // As that would take more time, and affect the user,
-    // vs. help the developer.
-    let totalMutations = 0;
-    const experimentToVariantKeys = Object.keys(experimentToVariant);
-
-    for (let i = 0; i < experimentToVariantKeys.length; i++) {
-      const experimentKey = experimentToVariantKeys[i];
-      const variantKey = experimentToVariant[experimentKey];
-      const variant =
-        /** @type {!JsonObject} */ (config[experimentKey]['variants'][
-          variantKey
-        ]);
-      totalMutations += variant['mutations'].length;
-    }
-
-    if (totalMutations > MAX_MUTATIONS) {
-      const numMutationsError =
-        'Max number of mutations for the total ' +
-        `applied experiments exceeded: ${totalMutations} > ` +
-        MAX_MUTATIONS;
-      user().error(TAG, numMutationsError);
-      throw new Error(numMutationsError);
-    }
-  }
-
-  /**
-   * Passes the given experiment and variant pairs to the correct handler,
-   * to apply the experiment to the document.
-   * Experiment with no variant assigned (null) will be skipped.
-   *
-   * For example, the `experimentToVariant` object looks like:
-   * {
-   *   'appliedExperimentName': 'chosenVariantName',
-   *   'anotherAppliedExperimentName': 'chosenVariantName'
-   * }
-   * Which is a simplified version of the config and
-   * represents what variant of each experiment
-   * should be applied.
-   *
-   * @param {!JsonObject} config
-   * @param {!Object<string, ?string>} experimentToVariant
-   * @return {!Promise<!Object<string, ?string>>} a promise of the original
-   *     param passed in
-   * @private
-   */
-  applyExperimentVariants_(config, experimentToVariant) {
-    const appliedExperimentToVariantPromises = [];
-
-    for (const experimentName in experimentToVariant) {
-      const variantName = experimentToVariant[experimentName];
-      if (variantName) {
-        const variantObject = config[experimentName]['variants'][variantName];
-        appliedExperimentToVariantPromises.push(
-          this.applyMutations_(experimentName, variantObject)
-        );
-      }
-    }
-
-    return Promise.all(appliedExperimentToVariantPromises).then(
-      () => experimentToVariant
-    );
-  }
-
-  /**
-   * Passes the given experimentName and variantObject pairs
-   * to the mutation service to be applied to the document.
-   * @param {string} experimentName
-   * @param {!JsonObject} variantObject
-   * @return {!Promise}
-   * @private
-   */
-  applyMutations_(experimentName, variantObject) {
-    const doc = this.getAmpDoc();
-    return doc.whenReady().then(() => {
-      // Parse / Validate all of our mutations
-      const mutationOperations = variantObject['mutations'].map(mutation =>
-        parseMutation(mutation, this.win.document)
-      );
-
-      // Apply our mutations
-      mutationOperations.forEach(mutationOperation => mutationOperation());
-    });
   }
 
   /**
