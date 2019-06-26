@@ -163,53 +163,15 @@ const targetMatchers = [
 ];
 
 /**
- * Returns false if flag config files are mixed with any other files.
- * @param {!Set<string>} buildTargets
- * @param {string} fileName
- * @return {boolean}
- */
-function areValidBuildTargets(buildTargets, fileName) {
-  const files = gitDiffNameOnlyMaster();
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  if (buildTargets.has('FLAG_CONFIG') && buildTargets.size > 1) {
-    console.log(
-      fileLogPrefix,
-      colors.red('ERROR:'),
-      'Looks like your PR contains',
-      colors.cyan('{prod|canary}-config.json'),
-      'in addition to other files.'
-    );
-    console.log(
-      fileLogPrefix,
-      colors.red('ERROR:'),
-      'AMP config files need to be backward compatible with source code for at',
-      'least two weeks. See https://github.com/ampproject/amphtml/issues/8188.'
-    );
-    const nonFlagConfigFiles = files.filter(
-      file => !file.startsWith('build-system/global-configs/')
-    );
-    console.log(
-      fileLogPrefix,
-      colors.red('ERROR:'),
-      'Please move these files to a separate PR:\n',
-      colors.cyan(nonFlagConfigFiles.join('\n '))
-    );
-    return false;
-  }
-  return true;
-}
-
-/**
  * Populates buildTargets with a set of build targets contained in a PR after
  * making sure they are valid. Used to determine which checks to perform / tests
  * to run during PR builds.
- * @param {!Set<string>} buildTargets
  * @param {string} fileName
  * @return {boolean}
  */
-function determineBuildTargets(buildTargets, fileName = 'build-targets.js') {
+function determineBuildTargets(fileName = 'build-targets.js') {
   const filesChanged = gitDiffNameOnlyMaster();
-  buildTargets.clear;
+  const buildTargets = new Set();
   for (const file of filesChanged) {
     let matched = false;
     targetMatchers.forEach(matcher => {
@@ -231,7 +193,7 @@ function determineBuildTargets(buildTargets, fileName = 'build-targets.js') {
         .join(', ')
     )
   );
-  return areValidBuildTargets(buildTargets, fileName);
+  return buildTargets;
 }
 
 module.exports = {
