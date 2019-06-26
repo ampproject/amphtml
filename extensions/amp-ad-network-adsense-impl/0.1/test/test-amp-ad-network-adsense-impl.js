@@ -525,35 +525,35 @@ describes.realWin(
         });
       });
 
-      it('should contain aanf if have no-fill attribute', () => {
-        const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
-          'layout': 'nodisplay',
-        });
-        element.setAttribute('data-no-fill', 'true');
-        ampStickyAd.appendChild(element);
-        doc.body.appendChild(ampStickyAd);
-        return expect(impl.getAdUrl()).to.eventually.match(
-          /(\?|&)aanf=true(&|$)/
+      [
+        {noFill: 'true'},
+        {noFill: 'ignore', notPresent: true},
+        {noFill: 'True', notPresent: true},
+      ].forEach(({noFill, notPresent}) => {
+        it(
+          notPresent
+            ? `should not contain aanf for ${noFill}`
+            : `should have aanf equal to ${noFill}`,
+          () => {
+            const ampStickyAd = createElementWithAttributes(
+              doc,
+              'amp-sticky-ad',
+              {
+                'layout': 'nodisplay',
+              }
+            );
+            element.setAttribute('data-no-fill', `${noFill}`);
+            ampStickyAd.appendChild(element);
+            doc.body.appendChild(ampStickyAd);
+            return impl.getAdUrl().then(url => {
+              if (notPresent) {
+                expect(url).to.not.match(/(\?|&)aanf=(&|$)/);
+              } else {
+                expect(url).to.match(new RegExp(`(\\?|&)aanf=${noFill}(&|$)`));
+              }
+            });
+          }
         );
-      });
-
-      it('should not contain aanf if do not have no-fill attribute', () => {
-        const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
-          'layout': 'nodisplay',
-        });
-        ampStickyAd.appendChild(element);
-        doc.body.appendChild(ampStickyAd);
-        return expect(impl.getAdUrl()).to.not.match(/(\?|&)aanf=(&|$)/);
-      });
-
-      it('should aanf set to null if do not have case sensitive boolean value', () => {
-        const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
-          'layout': 'nodisplay',
-        });
-        element.setAttribute('data-no-fill', 'True');
-        ampStickyAd.appendChild(element);
-        doc.body.appendChild(ampStickyAd);
-        return expect(impl.getAdUrl()).to.not.match(/(\?|&)aanf=(&|$)/);
       });
 
       it('formats client properly', () => {
