@@ -37,7 +37,6 @@ import {
   removeFragment,
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
-import {getMode} from '../mode';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
 import {
@@ -286,12 +285,6 @@ export class GlobalVariableSource extends VariableSource {
           'The first argument to CLIENT_ID, the fallback' +
             /*OK*/ ' Cookie name, is required'
         );
-
-        if (getMode().runtime == 'inabox') {
-          return /** @type {!Promise<ResolverReturnDef>} */ (Promise.resolve(
-            null
-          ));
-        }
 
         let consent = Promise.resolve();
 

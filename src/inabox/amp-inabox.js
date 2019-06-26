@@ -36,6 +36,7 @@ import {
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
+import {installInaboxCidService} from './inabox-cid';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installPerformanceService} from '../service/performance-impl';
 import {
@@ -96,8 +97,8 @@ startupChunk(self.document, function initial() {
         installRuntimeServices(self);
         fontStylesheetTimeout(self);
         installIframeMessagingClient(self);
-        // Install inabox specific Viewport service before
-        // runtime tries to install the normal one.
+        // Install inabox specific services.
+        installInaboxCidService(ampdoc);
         installViewerServiceForDoc(ampdoc);
         installInaboxViewportService(ampdoc);
         installAmpdocServices(ampdoc, undefined, true);

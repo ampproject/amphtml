@@ -80,7 +80,7 @@ export class AccessService {
 
     // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
     // is migrated to ampdoc as well.
-    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
+    /** @private @const {!Promise<!../../../src/service/cid-impl.CidDef>} */
     this.cid_ = Services.cidForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */

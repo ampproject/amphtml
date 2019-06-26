@@ -79,10 +79,10 @@ export function installRuntimeServices(global) {
 export function installAmpdocServices(ampdoc, opt_initParams, opt_inabox) {
   // Order is important!
   installUrlForDoc(ampdoc);
-  installCidService(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   if (!opt_inabox) {
-    // viewer & viewport were installed in amp-inabox.js
+    // those services are installed in amp-inabox.js
+    installCidService(ampdoc);
     installViewerServiceForDoc(ampdoc, opt_initParams);
     installViewportServiceForDoc(ampdoc);
   }

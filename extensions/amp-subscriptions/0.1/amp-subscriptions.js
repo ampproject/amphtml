@@ -117,7 +117,7 @@ export class SubscriptionService {
     this.doesViewerProvidePaywall_ =
       this.doesViewerProvideAuth_ && this.viewer_.hasCapability('paywall');
 
-    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
+    /** @private @const {!Promise<!../../../src/service/cid-impl.CidDef>} */
     this.cid_ = Services.cidForDoc(ampdoc);
 
     /** @private {!Object<string, ?Promise<string>>} */
