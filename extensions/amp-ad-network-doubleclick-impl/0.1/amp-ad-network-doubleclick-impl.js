@@ -525,7 +525,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       : null;
     let psz = null;
     let msz = null;
-    if (this.sendFlexibleAdSlotParams_ || 1 < 2) {
+    if (this.sendFlexibleAdSlotParams_) {
       const parentWidth = getContainerWidth(
         this.win,
         this.element.parentElement
@@ -848,7 +848,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
-    let size = {width:411, height:250};  // super.extractSize(responseHeaders);
+    let size = super.extractSize(responseHeaders);
     if (size) {
       this.returnedSize_ = size;
       this.handleResize_(size.width, size.height);
@@ -1208,16 +1208,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   handleResize_(width, height) {
     const pWidth = this.element.getAttribute('width');
     const pHeight = this.element.getAttribute('height');
-    const isFluidRequestAndFixedResponse = !!(
-      this.isFluidRequest_ &&
-      width &&
-      height
-    );
-    const returnedSizeDifferent = width != pWidth || height != pHeight;
-    const heightNotIncreased = height <= pHeight;
+    // We want to resize only if neither returned dimension is larger than its
+    // primary counterpart, and if at least one of the returned dimensions
+    // differ from its primary counterpart.
     if (
-      isFluidRequestAndFixedResponse ||
-      (returnedSizeDifferent && heightNotIncreased)
+      (this.isFluidRequest_ && width && height) ||
+      ((width != pWidth || height != pHeight) &&
+        (width <= pWidth && height <= pHeight))
     ) {
       this.attemptChangeSize(height, width).catch(() => {});
     }

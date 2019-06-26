@@ -1601,12 +1601,15 @@ export class Resources {
    * @return {boolean}
    */
   widthOnlyReflowFreeExpansion_(element, width) {
-    debugger;
     const parent = element && element.parentElement;
+    // If the element has siblings, it's possible that a width-expansion will
+    // cause some of them to be pushed down.
     if (!parent || parent.childElementCount > 1) {
       return false;
     }
     const parentWidth = parseInt(computedStyle(this.win, parent).width, 10);
+    // Reflow will not happen if the parent element is at least as wide as the
+    // new width.
     return parentWidth >= width;
   }
 
