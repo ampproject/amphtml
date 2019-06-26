@@ -42,7 +42,7 @@ exports.extension = function(
   }
 
   let deps = '';
-  if (intermediateDeps) {
+  if (intermediateDeps && intermediateDeps.length) {
     deps = 'i:';
     function quote(s) {
       return `"${s}"`;

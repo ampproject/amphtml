@@ -231,7 +231,8 @@ exports.getBundleFlags = function(g) {
       const configEntry = getExtensionBundleConfig(originalName);
       if (configEntry) {
         cmd += `:${configEntry.type}`;
-        bundleDeps.push('_base_i', configEntry.type);
+        // This is not necessary with intermediate concating.
+        // bundleDeps.push('_base_i', configEntry.type);
       } else {
         // All lower tier bundles depend on _base_i
         if (TYPES_VALUES.includes(name)) {
