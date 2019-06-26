@@ -421,6 +421,9 @@ const forbiddenTerms = {
   'cidForDoc|cidForDocOrNull': {
     message: requiresReviewPrivacy,
     whitelist: [
+      // CID service is not allowed in amp4ads. No usage should there be
+      // in extensions listed in the amp4ads spec:
+      // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/ad-cid.js',
       'src/services.js',
       'src/service/cid-impl.js',
@@ -468,6 +471,9 @@ const forbiddenTerms = {
   'storageForDoc': {
     message: requiresReviewPrivacy,
     whitelist: [
+      // Storage service is not allowed in amp4ads. No usage should there be
+      // in extensions listed in the amp4ads spec:
+      // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/services.js',
       'src/service/cid-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
