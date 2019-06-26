@@ -50,13 +50,7 @@ function main() {
     timedExecOrDie('gulp validator-webui');
   } else {
     printChangeSummary(FILENAME);
-    const buildTargets = new Set();
-    if (!determineBuildTargets(buildTargets, FILENAME)) {
-      stopTimer(FILENAME, FILENAME, startTime);
-      process.exitCode = 1;
-      return;
-    }
-
+    const buildTargets = determineBuildTargets(FILENAME);
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('VALIDATOR') &&
