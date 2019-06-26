@@ -370,21 +370,20 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 /**
  * Handles a browserify bundling error
  * @param {Error} err
- * @param {boolean} failOnError
- * @param {string} srcFilename
- * @param {string} startTime
+ * @param {boolean} continueOnError
+ * @param {string} destFilename
  */
-function handleBundleError(err, failOnError, srcFilename, startTime) {
+function handleBundleError(err, continueOnError, destFilename) {
   let message = err;
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
     message = err.stack.replace(/    at[^]*/, '').trim();
   }
   console.error(red(message));
-  if (failOnError) {
-    process.exit(1);
+  if (continueOnError) {
+    log('Error while compiling', cyan(destFilename));
   } else {
-    endBuildStep('Error while compiling', srcFilename, startTime);
+    process.exit(1);
   }
 }
 
@@ -452,21 +451,21 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
 
   if (options.watch) {
     bundler = watchify(bundler);
-    bundler.on('update', () => performBundle(/* failOnError */ false));
+    bundler.on('update', () => performBundle(/* continueOnError */ true));
   }
 
   /**
-   * @param {boolean} failOnError
+   * @param {boolean} continueOnError
    * @return {Promise}
    */
-  function performBundle(failOnError) {
+  function performBundle(continueOnError) {
     let startTime;
     return toPromise(
       bundler
         .bundle()
         .once('readable', () => (startTime = Date.now()))
         .on('error', err =>
-          handleBundleError(err, failOnError, srcFilename, startTime)
+          handleBundleError(err, continueOnError, destFilename)
         )
         .pipe(source(srcFilename))
         .pipe(buffer())
@@ -501,7 +500,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       });
   }
 
-  return performBundle(/* failOnError */ true);
+  return performBundle(options.continueOnError);
 }
 
 /**
