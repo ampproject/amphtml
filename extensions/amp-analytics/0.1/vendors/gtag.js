@@ -118,6 +118,25 @@ const GTAG_CONFIG = jsonLiteral({
       'https://${flSrc}.fls.doubleclick.net/activityi;src=${flSrc};type=${flType};cat=${flCat}',
     'dnsBase': 'https://ad.doubleclick.net/ddm/clk/',
   },
+  'triggers': {
+    'storyProgress': {
+      'on': 'story-page-visible',
+      'request': 'uaEvent',
+      'vars': {
+        'eventAction': 'story_progress',
+        'eventCategory': '${title}',
+        'eventLabel': '${storyPageId}',
+      },
+    },
+    'storyEnd': {
+      'on': 'story-last-page-visible',
+      'request': 'uaEvent',
+      'vars': {
+        'eventAction': 'story_complete',
+        'eventCategory': '${title}',
+      },
+    },
+  },
   'transport': {
     'beacon': false,
     'xhrpost': false,

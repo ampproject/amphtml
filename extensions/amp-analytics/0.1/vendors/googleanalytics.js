@@ -106,6 +106,23 @@ const GOOGLEANALYTICS_CONFIG = jsonLiteral({
         'timingRequestType': 'adtiming',
       },
     },
+    'storyProgress': {
+      'on': 'story-page-visible',
+      'request': 'event',
+      'vars': {
+          'eventAction': 'story_progress',
+          'eventCategory': '${title}',
+          'eventLabel': '${storyPageId}',
+      },
+    },
+    'storyEnd': {
+      'on': 'story-last-page-visible',
+      'request': 'event',
+      'vars': {
+          'eventAction': 'story_complete',
+          'eventCategory': '${title}',
+      },
+    },
   },
   'extraUrlParamsReplaceMap': {
     'dimension': 'cd',
