@@ -668,8 +668,7 @@ AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a sin
 <p>The <code>src</code> attribute allows all standard URL variable substitutions. See the <a href="../../spec/amp-var-substitutions.md">Substitutions Guide</a> for more info.</p>
 <p>[tip type="important"]
   The endpoint must implement the requirements specified in the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests">CORS Requests in AMP</a> spec.
-  
-[/tip]</p></td>
+  [/tip]</p></td>
   </tr>
   <tr>
     <td width="40%"><strong>credentials (optional)</strong></td>

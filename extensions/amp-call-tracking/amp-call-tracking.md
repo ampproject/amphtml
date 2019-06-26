@@ -72,8 +72,7 @@ Each unique CORS endpoint is called only once per page.
 </ul>
 <p>[tip type="important"]
   Your XHR endpoint must implement the requirements specified in the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests">CORS Requests in AMP</a> spec.
-  
-[/tip]</p></td>
+  [/tip]</p></td>
   </tr>
 </table>
 
