@@ -188,7 +188,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /**
    * Query local or fetch remote author script.
-   * @return {!Promise<string>}
+   * @return {?Promise<string>}
    * @private
    */
   getAuthorScript_() {
