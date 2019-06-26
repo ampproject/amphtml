@@ -28,7 +28,6 @@ import {
 } from '../linker-reader';
 import {installVariableServiceForTesting} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
-import {toggleExperiment} from '../../../../src/experiments';
 
 // TODO(ccordry): Refactor all these tests with async/await.
 describes.realWin('Linker Manager', {amp: true}, env => {
