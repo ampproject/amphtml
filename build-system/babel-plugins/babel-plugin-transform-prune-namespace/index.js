@@ -59,7 +59,7 @@ module.exports = function() {
   }
 
   return {
-    name: 'transform-eliminate-intermediate-bundles',
+    name: 'transform-prune-namespace',
 
     visitor: {
       Program(path) {

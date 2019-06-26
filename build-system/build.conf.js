@@ -67,7 +67,7 @@ module.exports = {
   eliminateIntermediateBundles() {
     return [
       require.resolve(
-        './babel-plugins/babel-plugin-transform-eliminate-intermediate-bundles'
+        './babel-plugins/babel-plugin-transform-prune-namespace'
       ),
     ];
   },

@@ -1,4 +1,0 @@
-{
-  "plugins": ["../../../../../babel-plugin-transform-eliminate-intermediate-bundles"],
-  "throws": "can't handle computed namespace"
-}
