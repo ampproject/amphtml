@@ -546,6 +546,16 @@ describes.realWin(
         return expect(impl.getAdUrl()).to.not.match(/(\?|&)aanf=(&|$)/);
       });
 
+      it('should aanf set to null if do not have boolean value', () => {
+        const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
+          'layout': 'nodisplay',
+        });
+        element.setAttribute('data-no-fill', 'True');
+        ampStickyAd.appendChild(element);
+        doc.body.appendChild(ampStickyAd);
+        return expect(impl.getAdUrl()).to.not.match(/(\?|&)aanf=(&|$)/);
+      });
+
       it('formats client properly', () => {
         element.setAttribute('data-ad-client', 'SoMeClient');
         return impl.getAdUrl().then(url => {
