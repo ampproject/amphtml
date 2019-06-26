@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 896
+spec_file_revision: 901
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -6810,6 +6810,10 @@ error_specificity {
   code: CSS_EXCESSIVELY_NESTED
   specificity: 119
 }
+error_specificity {
+  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  specificity: 120
+}
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -7269,4 +7273,8 @@ error_formats {
 error_formats {
   code: CSS_EXCESSIVELY_NESTED
   format: "CSS excessively nested in tag '%1'."
+}
+error_formats {
+  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  format: "Document exceeded %1 bytes limit. Actual size %2 bytes."
 }
