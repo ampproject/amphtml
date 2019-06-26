@@ -37,11 +37,7 @@ import {
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
-import {
-  AdvancementMode,
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from './story-analytics';
+import {AdvancementMode, getAnalyticsService} from './story-analytics';
 import {AmpEvents} from '../../../src/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
@@ -73,6 +69,7 @@ import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
+import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {
   SwipeXYRecognizer,
   SwipeYRecognizer,

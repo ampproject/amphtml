@@ -15,20 +15,9 @@
  */
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
+import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {getVariableService} from './variable-service';
 import {registerServiceBuilder} from '../../../src/service';
-
-/** @enum {string} */
-export const StoryAnalyticsEvent = {
-  BOOKEND_ENTER: 'story-bookend-enter',
-  BOOKEND_EXIT: 'story-bookend-exit',
-  LAST_PAGE_VISIBLE: 'story-last-page-visible',
-  PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
-  PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
-  PAGE_VISIBLE: 'story-page-visible',
-  STORY_MUTED: 'story-audio-muted',
-  STORY_UNMUTED: 'story-audio-unmuted',
-};
 
 /** @enum {string} */
 export const AdvancementMode = {

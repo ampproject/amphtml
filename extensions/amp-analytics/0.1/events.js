@@ -21,7 +21,7 @@ import {
   PlayingStates,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
-import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
+import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
