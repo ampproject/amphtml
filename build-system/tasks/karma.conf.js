@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const {devDependencies} = require('./helpers');
+const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
 const {gitCommitterEmail} = require('../git');
 const {isTravisBuild, travisJobNumber} = require('../travis');
 
@@ -35,6 +35,10 @@ const SAUCE_TIMEOUT_CONFIG = {
   commandTimeout: 10 * 60,
   idleTimeout: 5 * 60,
 };
+
+const BABELIFY_CONFIG = Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {
+  sourceMapsAbsolute: true,
+});
 
 const preprocessors = ['browserify'];
 
@@ -64,21 +68,13 @@ module.exports = {
   // Details: https://support.saucelabs.com/hc/en-us/articles/115010079868
   hostname: 'localhost',
 
+  babelifyConfig: BABELIFY_CONFIG,
+
   browserify: {
     watch: true,
     debug: true,
     basedir: __dirname + '/../../',
-    transform: [
-      [
-        'babelify',
-        {
-          // Transform "node_modules/", but ignore devDependencies.
-          'global': true,
-          'ignore': devDependencies(),
-          'sourceMapsAbsolute': true,
-        },
-      ],
-    ],
+    transform: [['babelify', BABELIFY_CONFIG]],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
   },
