@@ -20,6 +20,7 @@ import {AmpFormTextarea} from './amp-form-textarea';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
+  SUBMIT_TIMEOUT_TYPE
 } from '../../../src/async-input';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
@@ -578,26 +579,42 @@ export class AmpForm {
     // Set ourselves to the SUBMITTING State
     this.setState_(FormState.SUBMITTING);
 
+    //Promised to run before all async calls ; require extended timeout
+    var increasedTimeoutPresubmitPromised = [];
+    iterateCursor(asyncInputs, input =>{
+      if(input.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)) increasedTimeoutPresubmitPromised.push(input);
+    })
+
     // Promises to run before submitting the form
+    var timeout = SUBMIT_TIMEOUT_TYPE.REGULAR;
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
     iterateCursor(asyncInputs, asyncInput => {
-      presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+      if(asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)) presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
     });
 
-    return this.waitOnPromisesOrTimeout_(
-      presubmitPromises,
-      SUBMIT_TIMEOUT
-    ).then(
-      () => this.handlePresubmitSuccess_(trust),
-      error => {
-        const detail = dict();
-        if (error && error.message) {
-          detail['error'] = error.message;
+    function runPresubmitPromisesWithTimeout(promises, timeout, sucsess_callback){
+      console.log('running presubit ')
+      this.waitOnPromisesOrTimeout_(
+        promises,
+        timeout
+      ).then(
+        () => sucsess_callback(),
+        error => {
+          const detail = dict();
+          if (error && error.message) {
+            detail['error'] = error.message;
+          }
+          return this.handleSubmitFailure_(error, detail);
         }
-        return this.handleSubmitFailure_(error, detail);
-      }
-    );
+      );
+    }
+
+    return runPresubmitPromisesWithTimeout(increasedTimeoutPresubmitPromised, SUBMIT_TIMEOUT_TYPE.INCREASED, function(){
+      runPresubmitPromisesWithTimeout(presubmitPromises, SUBMIT_TIMEOUT_TYPE.REGULAR, function(){
+        return this.handlePresubmitSuccess_(trust)
+      })
+    })
   }
 
   /**

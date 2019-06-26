@@ -58,6 +58,12 @@ export const AsyncInputAttributes = {
   NAME: 'name',
 };
 
+export const SUBMIT_TIMEOUT_TYPE = Object.freeze({
+  REGULAR : 10000,
+  /* 5 minutes */
+  INCREASED : 300000
+});
+
 /**
  * Classes
  *
@@ -77,4 +83,5 @@ export const AsyncInputClasses = {
    * and use async-input elements.
    */
   'ASYNC_INPUT': 'i-amphtml-async-input',
+  'ASYNC_REQUIRED_ACTION':'i-async-require-action'
 };
