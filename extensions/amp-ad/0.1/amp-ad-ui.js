@@ -16,7 +16,6 @@
 
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
-import {isNewLoaderExperimentEnabled} from '../../../src/loader-new';
 
 export class AmpAdUIHandler {
   /**
@@ -137,9 +136,6 @@ export class AmpAdUIHandler {
    * @private
    */
   addDefaultUiComponent_(name) {
-    if (isNewLoaderExperimentEnabled(this.doc_.defaultView)) {
-      return null;
-    }
     if (this.element_.tagName == 'AMP-EMBED') {
       // Do nothing for amp-embed element;
       return null;

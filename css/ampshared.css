@@ -18,39 +18,45 @@
   display: inline-block;
 }
 
+
 .i-amphtml-blurry-placeholder {
-  transition: opacity 0.3s cubic-bezier(0, 0, 0.2, 1) !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 /* layout=nodisplay are automatically hidden until JS initializes. */
-[layout='nodisplay']:not(.i-amphtml-element) {
+[layout=nodisplay]:not(.i-amphtml-element) {
   display: none !important;
 }
 
 /* Initialized layout=nodisplay contain [hidden] */
 .i-amphtml-layout-nodisplay[hidden],
-[layout='nodisplay'][hidden]:not(.i-amphtml-layout-nodisplay) {
+[layout=nodisplay][hidden]:not(.i-amphtml-layout-nodisplay)
+{
   /* Display is set/reset via the hidden attribute */
 }
 .i-amphtml-layout-nodisplay:not([hidden]),
-[layout='nodisplay']:not(.i-amphtml-layout-nodisplay[hidden]) {
+[layout=nodisplay]:not(.i-amphtml-layout-nodisplay[hidden])
+{
   /* Display is set/reset via the hidden attribute */
 }
 
 .i-amphtml-layout-fixed,
-[layout='fixed'][width][height]:not(.i-amphtml-layout-fixed) {
+[layout=fixed][width][height]:not(.i-amphtml-layout-fixed)
+{
   display: inline-block;
   position: relative;
 }
 
 .i-amphtml-layout-responsive,
-[layout='responsive'][width][height]:not(.i-amphtml-layout-responsive),
-[width][height][sizes]:not(.i-amphtml-layout-responsive) {
+[layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
+[width][height][sizes]:not(.i-amphtml-layout-responsive)
+{
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-intrinsic {
+.i-amphtml-layout-intrinsic
+{
   display: inline-block;
   position: relative;
   max-width: 100%;
@@ -62,19 +68,22 @@
 }
 
 .i-amphtml-layout-fixed-height,
-[layout='fixed-height'][height] {
+[layout=fixed-height][height]
+{
   display: block;
   position: relative;
 }
 
 .i-amphtml-layout-container,
-[layout='container'] {
+[layout=container]
+{
   display: block;
   position: relative;
 }
 
 .i-amphtml-layout-fill,
-[layout='fill']:not(.i-amphtml-layout-fill) {
+[layout=fill]:not(.i-amphtml-layout-fill)
+{
   display: block;
   overflow: hidden !important;
   position: absolute;
@@ -85,7 +94,8 @@
 }
 
 .i-amphtml-layout-flex-item,
-[layout='flex-item']:not(.i-amphtml-layout-flex-item) {
+[layout=flex-item]:not(.i-amphtml-layout-flex-item)
+{
   display: block;
   position: relative;
   flex: 1 1 auto;
@@ -180,10 +190,7 @@ i-amphtml-sizer {
 .i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
   left: 12px !important;
 }
-.i-amphtml-screen-reader
-  ~ .i-amphtml-screen-reader
-  ~ .i-amphtml-screen-reader
-  ~ .i-amphtml-screen-reader {
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
   left: 16px !important;
 }
 
@@ -208,14 +215,16 @@ i-amphtml-sizer {
 }
 
 .i-amphtml-notbuilt,
-[layout]:not(.i-amphtml-element) {
+[layout]:not(.i-amphtml-element)
+{
   position: relative;
   overflow: hidden !important;
   color: transparent !important;
 }
 
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > *,
-[layout]:not([layout='container']):not(.i-amphtml-element) > * {
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
+[layout]:not([layout=container]):not(.i-amphtml-element) > *
+{
   display: none;
 }
 
@@ -287,8 +296,7 @@ i-amphtml-sizer {
  * seamless attribute.
  * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
  */
-i-amphtml-scroll-container,
-i-amp-scroll-container {
+i-amphtml-scroll-container, i-amp-scroll-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -302,8 +310,7 @@ i-amp-scroll-container {
  * rendered.
  * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
  */
-i-amphtml-scroll-container.amp-active,
-i-amp-scroll-container.amp-active {
+i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -331,12 +338,12 @@ i-amp-scroll-container.amp-active {
 
 .i-amphtml-loader-line {
   position: absolute;
-  top: 0;
+  top:0;
   left: 0;
   right: 0;
   height: 1px;
   overflow: hidden !important;
-  background-color: rgba(151, 151, 151, 0.2);
+  background-color:rgba(151, 151, 151, 0.2);
   display: block;
 }
 
@@ -350,12 +357,8 @@ i-amp-scroll-container.amp-active {
 }
 
 @keyframes i-amphtml-loader-line-moving {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+  0% {transform: translateX(-100%);}
+  100% {transform: translateX(100%);}
 }
 
 .i-amphtml-loader-line.amp-active .i-amphtml-loader-moving-line {
@@ -385,9 +388,9 @@ i-amp-scroll-container.amp-active {
   width: 10px;
   margin: 2px;
   border-radius: 100%;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, .3);
 
-  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
   will-change: transform;
 }
 
@@ -396,25 +399,25 @@ i-amp-scroll-container.amp-active {
 }
 
 .i-amphtml-loader .i-amphtml-loader-dot:nth-child(2) {
-  animation-delay: 0.1s;
+  animation-delay: .1s;
 }
 
 .i-amphtml-loader .i-amphtml-loader-dot:nth-child(3) {
-  animation-delay: 0.2s;
+  animation-delay: .2s;
 }
 
 @keyframes i-amphtml-loader-dots {
-  0%,
-  100% {
-    transform: scale(0.7);
-    background-color: rgba(0, 0, 0, 0.3);
+  0%, 100% {
+    transform: scale(.7);
+    background-color: rgba(0, 0, 0, .3);
   }
 
   50% {
-    transform: scale(0.8);
-    background-color: rgba(0, 0, 0, 0.5);
+    transform: scale(.8);
+    background-color: rgba(0, 0, 0, .5);
   }
 }
+
 
 /**
  * "overflow" element is an element shown when more content is available but
@@ -458,8 +461,7 @@ amp-pixel {
 /**
  * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics,
-amp-story-auto-ads {
+amp-analytics, amp-story-auto-ads {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;
@@ -475,6 +477,7 @@ html.i-amphtml-fie > amp-analytics {
   */
   position: initial !important;
 }
+
 
 /**
  * Forms error/success messaging containers should be hidden at first.
@@ -531,12 +534,12 @@ amp-accordion > section[expanded] > :last-child {
 
 /* New Loaders */
 
-/* Placeholder */
-.i-amphtml-default-placeholder {
+ /* Placeholder */
+ .i-amphtml-default-placeholder {
   background-color: #f8f8f8;
 }
 
-/* Container and sizes */
+ /* Container and sizes */
 .i-amphtml-new-loader {
   display: inline-block;
   position: absolute;
@@ -544,21 +547,21 @@ amp-accordion > section[expanded] > :last-child {
   left: 50%;
 }
 
-.i-amphtml-new-loader-size-default {
+ .i-amphtml-new-loader-size-default {
   margin-left: -36px;
   margin-top: -36px;
   width: 72px;
   height: 72px;
 }
 
-.i-amphtml-new-loader-size-small {
+ .i-amphtml-new-loader-size-small {
   margin-left: -24px;
   margin-top: -24px;
   width: 48px;
   height: 48px;
 }
 
-/* Logo */
+ /* Logo */
 .i-amphtml-new-loader-logo {
   transform-origin: 60px 60px;
   opacity: 0;
@@ -566,7 +569,7 @@ amp-accordion > section[expanded] > :last-child {
     i-amphtml-new-loader-fade-out 0.8s ease-out 1.8s forwards;
 }
 
-/* Spinner and its segments*/
+ /* Spinner and its segments*/
 .i-amphtml-new-loader-spinner {
   transform-origin: 60px 60px;
   opacity: 0;
@@ -576,7 +579,7 @@ amp-accordion > section[expanded] > :last-child {
   animation: i-amphtml-new-loader-fade-in 0.8s ease-in 1.8s forwards;
 }
 
-.i-amphtml-new-loader-size-default .i-amphtml-new-loader-spinner {
+ .i-amphtml-new-loader-size-default .i-amphtml-new-loader-spinner {
   stroke-dasharray: 36 118;
   stroke-dashoffset: 52;
 }
@@ -590,20 +593,20 @@ amp-accordion > section[expanded] > :last-child {
   animation-delay: 0.8s;
 }
 
-.i-amphtml-new-loader-spinner-segment {
+ .i-amphtml-new-loader-spinner-segment {
   transform-origin: 60px 60px;
   animation: none 0.6s cubic-bezier(0.5, 0, 0.8, 1) 2.8s forwards,
     none 1.2s linear 3.4s infinite forwards;
 }
 
-.i-amphtml-new-loader-size-default .i-amphtml-new-loader-spinner-segment {
+ .i-amphtml-new-loader-size-default .i-amphtml-new-loader-spinner-segment {
   r: 22;
 }
 .i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner-segment {
   r: 11;
 }
 
-.i-amphtml-new-loader-spinner-segment:nth-child(1) {
+ .i-amphtml-new-loader-spinner-segment:nth-child(1) {
   transform: rotate(90deg);
   animation-name: i-amphtml-new-loader-first-spin-1, i-amphtml-new-loader-spin-1;
 }
@@ -619,7 +622,7 @@ amp-accordion > section[expanded] > :last-child {
   animation-name: i-amphtml-new-loader-first-spin-4, none;
 }
 
-/* Animations only run when active */
+ /* Animations only run when active */
 .i-amphtml-new-loader * {
   animation-play-state: paused;
 }
@@ -627,7 +630,7 @@ amp-accordion > section[expanded] > :last-child {
   animation-play-state: running;
 }
 
-/* Animation keyframes */
+ /* Animation keyframes */
 @keyframes i-amphtml-new-loader-spin-1 {
   0% {
     transform: rotate(0deg);

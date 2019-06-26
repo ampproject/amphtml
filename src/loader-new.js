@@ -28,7 +28,7 @@ import {toWin} from './types';
  * @param {!Document} doc
  * @param {!Element} loadingContainer
  * @param {!Element} element
- * @return {!Element}
+ * @return {!Element} new loader root element
  */
 export function createLoaderElement(doc, loadingContainer, element) {
   dev().assert(!isLoaderIneligible(element));
@@ -39,78 +39,50 @@ export function createLoaderElement(doc, loadingContainer, element) {
 }
 
 /**
- * @param {!Document} win
- */
-export function isNewLoaderExperimentEnabled(win) {
-  return isExperimentOn(win, 'new-loaders');
-}
-
-/**
- * @param {!AmpElement} element
- */
-export function isLoaderIneligible(element) {
-  const result = isTiny(element) || isImageWithPlaceholder(element);
-  return result;
-}
-
-/**
- *
- * @param {*} element
- */
-function isTiny(element) {
-  const box = element.getLayoutBox();
-  return box.width < 50 || box.height < 50;
-}
-
-/**
- *
- * @param {*} element
- */
-function hasPlaceholder(element) {
-  return !!element.querySelector('[placeholder]');
-}
-
-/**
- *
- * @param {*} element
- */
-function isImageWithPlaceholder(element) {
-  return element.tagName === 'AMP-IMG' && hasPlaceholder(element);
-}
-/**
- *
+ * Helper class to build the new loader's DOM.
  */
 class LoaderBuilder {
   /**
-   * @param {*} doc
-   * @param {*} loadingContainer
-   * @param {*} element
+   * @param {!Document} doc
+   * @param {!Element} loadingContainer
+   * @param {!Element} element
    */
   constructor(doc, loadingContainer, element) {
+    /** @private {!Document} */
     this.doc_ = doc;
+
+    /** @private {!Element} */
     this.loadingContainer_ = loadingContainer;
+
+    /** @private {!Element} */
     this.element_ = element;
+
+    /** @private {?Element} */
     this.domRoot_;
+
+    /** @private {?Element} */
     this.svgRoot_;
   }
 
   /**
-   *
+   * Builds the loader's DOM and returns the element.
+   * @return {!Element} new loader root element
    */
   build() {
-    this.buildContainers();
-    this.setSize();
-    this.addSpinner();
-    this.maybeAddLogo();
-    this.maybeAddBackgroundShim();
-    this.maybeAddDefaultPlaceholder();
-    return this.domRoot_;
+    this.buildContainers_();
+    this.setSize_();
+    this.addSpinner_();
+    this.maybeAddLogo_();
+    this.maybeAddBackgroundShim_();
+    this.maybeAddDefaultPlaceholder_();
+    return dev().assertElement(this.domRoot_);
   }
 
   /**
-   *
+   * Builds the wrappers for the loader.
+   * @private
    */
-  buildContainers() {
+  buildContainers_() {
     this.domRoot_ = htmlFor(this.element_)`<div class="i-amphtml-new-loader">
       <div ref="innerContainer"></div>
     </div>`;
@@ -124,7 +96,10 @@ class LoaderBuilder {
      *  }
      * The extra div mimic a similar DOM.
      */
-    const {innerContainer} = htmlRefs(this.domRoot_);
+    const innerContainer = dev().assertElement(
+      htmlRefs(this.domRoot_)['innerContainer']
+    );
+
     this.svgRoot_ = svgFor(
       this.element_
     )`<svg xmlns="http://www.w3.org/2000/svg" viewBox="24 24 72 72"></svg>`;
@@ -133,36 +108,38 @@ class LoaderBuilder {
   }
 
   /**
-   * Add a spinner based on host element's size and a few special cases
+   * Add a spinner based on element's size and a few special cases.
+   * @private
    */
-  setSize() {
+  setSize_() {
     const sizeClassDefault = 'i-amphtml-new-loader-size-default';
     const sizeClassSmall = 'i-amphtml-new-loader-size-small';
     const sizeClassLarge = 'i-amphtml-new-loader-size-large';
 
-    // Ads always get the default spinner regardless of the host size
-    if (this.isAd()) {
+    // Ads always get the default spinner regardless of the element size
+    if (this.isAd_()) {
       return this.domRoot_.classList.add(sizeClassDefault);
     }
 
-    // Other than Ads, small spinner is always used if host element is small.
-    if (this.isSmall()) {
+    // Other than Ads, small spinner is always used if element is small.
+    if (this.isSmall_()) {
       return this.domRoot_.classList.add(sizeClassSmall);
     }
 
     // If host is not small, default size spinner is normally used
     // unless due to branding guidelines (e.g. Instagram) a larger spinner is
     // required.
-    if (this.requiresLargeSpinner()) {
+    if (this.requiresLargeSpinner_()) {
       return this.domRoot_.classList.add(sizeClassLarge);
     }
     return this.domRoot_.classList.add(sizeClassDefault);
   }
 
   /**
-   *
+   * Adds the spinner.
+   * @private
    */
-  addSpinner() {
+  addSpinner_() {
     const spinner = svgFor(this.doc_)`<g class="i-amphtml-new-loader-spinner">
       <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
       </circle>
@@ -178,57 +155,71 @@ class LoaderBuilder {
   }
 
   /**
-   *
+   * Adds the default or branded logo.
+   * @private
    */
-  maybeAddLogo() {
+  maybeAddLogo_() {
+    const logo = this.getLogo_();
+
     // Ads always get the logo regardless of size
-    if (this.isAd(this.element_)) {
-      return this.addLogo(this.getAdLogo());
+    if (this.isAd_()) {
+      return this.addLogo_(logo);
     }
 
     // Small hosts do not get a logo
-    if (this.isSmall(this.element_)) {
+    if (this.isSmall_()) {
       return;
     }
 
-    const logo = this.getCustomLogo(this.element_);
-    if (logo) {
-      return this.addLogo(logo);
-    }
-
-    return this.addLogo(this.getDefaultLogo());
+    return this.addLogo_(logo);
   }
 
   /**
-   *
+   * Returns the logo for the element.
+   * @private
+   * @return {!Element}
    */
-  getCustomLogo() {
+  getLogo_() {
+    const logo = this.getCustomLogo_();
+    return logo || this.getDefaultLogo_();
+  }
+
+  /**
+   * Returns the custom logo for the element if there is one.
+   * @private
+   * @return {?Element}
+   */
+  getCustomLogo_() {
     // Not Implemented
     return null;
   }
 
   /**
-   *
+   * Returns the default logo.
+   * @private
+   * @return {!Element}
    */
-  getDefaultLogo() {
+  getDefaultLogo_() {
     return svgFor(this.doc_)`<circle class="i-amphtml-new-loader-logo"
       cx="60" cy="60" r="12" fill="#aaaaaa">
     </circle>`;
   }
 
   /**
-   *
-   * @param {*} logo
+   * Adds the given logo to the loader.
+   * @param {!Element} logo
    */
-  addLogo(logo) {
+  addLogo_(logo) {
     this.svgRoot_.appendChild(logo);
   }
 
   /**
-   *
+   * Adds the background shim under the loader for cases where loader is on
+   * top of an image.
+   * @private
    */
-  maybeAddBackgroundShim() {
-    if (!this.hasImagePlaceholder()) {
+  maybeAddBackgroundShim_() {
+    if (!this.hasImagePlaceholder_()) {
       return;
     }
 
@@ -238,43 +229,114 @@ class LoaderBuilder {
   }
 
   /**
-   *
+   * Add a gray default placeholder if there isn't a placeholder already and
+   * other special cases.
+   * @private
    */
-  maybeAddDefaultPlaceholder() {
+  maybeAddDefaultPlaceholder_() {
+    // NOTE(aghassemi): I do believe we need to exclude amp-list here, but
+    // let's see how experimentation goes. Maybe a better idea is to have a
+    // white list, any component that does not fully load a new background may
+    // look bad if a gray placeholder shows up and goes away quickly. This
+    // default placeholder is good for image, video, etc.. but amp-list which
+    // usually just loads text is debatable. amp-iframe is also a candidate
+    // to exclude, often it does load a video or maps but it may not load
+    // text on transparent background in certain cases.
     if (!hasPlaceholder(this.element_)) {
       this.loadingContainer_.classList.add('i-amphtml-default-placeholder');
     }
   }
 
   /**
-   *
+   * Whether the element is an Ad.
+   * @private
+   * @return {boolean}
    */
-  isAd() {
+  isAd_() {
     // Not Implemented
     return false;
   }
 
   /**
-   *
+   * Whether the element is small.
+   * Small elements get a different loader with does not have a logo and is
+   * just a spinner.
+   * @private
+   * @return {boolean}
    */
-  isSmall() {
+  isSmall_() {
     const box = this.element_.getLayoutBox();
     return !isTiny(this.element_) && (box.width <= 100 || box.height <= 100);
   }
 
   /**
-   *
+   * Some components such as Instagram require larger spinner due to
+   * branding guidelines.
+   * @private
+   * @return {boolean}
    */
-  requiresLargeSpinner() {
+  requiresLargeSpinner_() {
     // Not Implemented
     return false;
   }
 
   /**
-   *
+   * Whether element has an existing image placeholder.
+   * @private
+   * @return {boolean}
    */
-  hasImagePlaceholder() {
+  hasImagePlaceholder_() {
     // Not Implemented
     return false;
   }
+}
+
+/**
+ * Whether the new loader experiment is enabled.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isNewLoaderExperimentEnabled(win) {
+  return isExperimentOn(win, 'new-loaders');
+}
+
+/**
+ * Whether the element is eligible for loaders based on new loader heuristics
+ * This is is called by `isLoadingEnabled_` in `custom-element.js`
+ * and is additional heuristics to what `isLoadingEnabled_` checks.
+ * @param {!AmpElement} element
+ * @return {boolean}
+ */
+export function isLoaderIneligible(element) {
+  const result = isTiny(element) || isImageWithPlaceholder(element);
+  return result;
+}
+
+/**
+ * Very small layout are not eligible for new loaders.
+ * @param {!AmpElement} element
+ * @return {boolean}
+ */
+function isTiny(element) {
+  const box = element.getLayoutBox();
+  return box.width < 50 || box.height < 50;
+}
+
+/**
+ * Whether element is an amp-img with an existing
+ * placeholder (e.g. blurry image placeholder)
+ * @param {!AmpElement} element
+ * @return {boolean}
+ */
+function isImageWithPlaceholder(element) {
+  return element.tagName === 'AMP-IMG' && hasPlaceholder(element);
+}
+
+/**
+ * Whether an element already has a placeholder or not.
+ * @param {!AmpElement} element
+ * @return {boolean}
+ */
+function hasPlaceholder(element) {
+  return !!element.querySelector('[placeholder]');
 }
