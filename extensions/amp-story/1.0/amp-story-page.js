@@ -32,6 +32,7 @@ import {
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {AmpEvents} from '../../../src/amp-events';
+import {AmpStoryBlingLink, BLING_LINK_SELECTOR} from './amp-story-bling-link';
 import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
@@ -118,9 +119,6 @@ const TAG = 'amp-story-page';
 
 /** @private @const {string} */
 const ADVERTISEMENT_ATTR_NAME = 'ad';
-
-/** @private @const {string} */
-const HAS_ATTACHMENT_ATTR_NAME = 'i-amphtml-has-attachment';
 
 /** @private @const {number} */
 const REWIND_TIMEOUT_MS = 350;
@@ -308,7 +306,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.emitProgress_(progress)
     );
     this.setDescendantCssTextStyles_();
-    this.setHasAttachmentAttribute_();
   }
 
   /**
@@ -514,6 +511,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   findAndPrepareEmbeddedComponents_(forceResize = false) {
     this.addClickShieldToEmbeddedComponents_();
     this.resizeInteractiveEmbeddedComponents_(forceResize);
+    this.addStylesToBlingLinks_();
   }
 
   /**
@@ -564,6 +562,15 @@ export class AmpStoryPage extends AMP.BaseElement {
         // Run in case target never changes size.
         debouncePrepareForAnimation(el, null /* unlisten */);
       }
+    });
+  }
+
+  /**
+   * Adds icon and pulse animation to bling links
+   */
+  addStylesToBlingLinks_() {
+    scopedQuerySelectorAll(this.element, BLING_LINK_SELECTOR).forEach(el => {
+      AmpStoryBlingLink.build(el);
     });
   }
 
@@ -944,15 +951,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (distance > 0 && distance <= 2) {
       this.findAndPrepareEmbeddedComponents_();
       this.preloadAllMedia_();
-    }
-  }
-
-  /**
-   * @private
-   */
-  setHasAttachmentAttribute_() {
-    if (this.element.querySelector('amp-story-page-attachment')) {
-      this.element.setAttribute(HAS_ATTACHMENT_ATTR_NAME, '');
     }
   }
 

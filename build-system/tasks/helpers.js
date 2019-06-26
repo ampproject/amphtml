@@ -76,6 +76,11 @@ const MINIFIED_TARGETS = [
   'f.js',
 ];
 
+const BABELIFY_GLOBAL_TRANSFORM = {
+  global: true, // Transform node_modules
+  ignore: devDependencies(), // Ignore devDependencies
+};
+
 const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
@@ -365,21 +370,20 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 /**
  * Handles a browserify bundling error
  * @param {Error} err
- * @param {boolean} failOnError
- * @param {string} srcFilename
- * @param {string} startTime
+ * @param {boolean} continueOnError
+ * @param {string} destFilename
  */
-function handleBundleError(err, failOnError, srcFilename, startTime) {
+function handleBundleError(err, continueOnError, destFilename) {
   let message = err;
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
     message = err.stack.replace(/    at[^]*/, '').trim();
   }
   console.error(red(message));
-  if (failOnError) {
-    process.exit(1);
+  if (continueOnError) {
+    log('Error while compiling', cyan(destFilename));
   } else {
-    endBuildStep('Error while compiling', srcFilename, startTime);
+    process.exit(1);
   }
 }
 
@@ -430,32 +434,38 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const wrapper = options.wrapper || wrappers.none;
   const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
-  let bundler = browserify({
-    entries: entryPoint,
-    debug: true,
-  }).transform(babelify, {
-    // Transform "node_modules/", but ignore devDependencies.
-    global: true,
-    ignore: devDependencies(),
-  });
+  // TODO: @jonathantyng remove browserifyOptions #22757
+  const browserifyOptions = Object.assign(
+    {},
+    {
+      entries: entryPoint,
+      debug: true,
+    },
+    options.browserifyOptions
+  );
+
+  let bundler = browserify(browserifyOptions).transform(
+    babelify,
+    BABELIFY_GLOBAL_TRANSFORM
+  );
 
   if (options.watch) {
     bundler = watchify(bundler);
-    bundler.on('update', () => performBundle(/* failOnError */ false));
+    bundler.on('update', () => performBundle(/* continueOnError */ true));
   }
 
   /**
-   * @param {boolean} failOnError
+   * @param {boolean} continueOnError
    * @return {Promise}
    */
-  function performBundle(failOnError) {
+  function performBundle(continueOnError) {
     let startTime;
     return toPromise(
       bundler
         .bundle()
         .once('readable', () => (startTime = Date.now()))
         .on('error', err =>
-          handleBundleError(err, failOnError, srcFilename, startTime)
+          handleBundleError(err, continueOnError, destFilename)
         )
         .pipe(source(srcFilename))
         .pipe(buffer())
@@ -490,7 +500,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       });
   }
 
-  return performBundle(/* failOnError */ true);
+  return performBundle(options.continueOnError);
 }
 
 /**
@@ -759,6 +769,7 @@ function toPromise(readable) {
 }
 
 module.exports = {
+  BABELIFY_GLOBAL_TRANSFORM,
   buildAlp,
   buildExaminer,
   buildWebWorker,

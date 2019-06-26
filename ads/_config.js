@@ -70,6 +70,8 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  '1wo': {},
+
   '24smi': {
     prefetch: 'https://jsn.24smi.net/smi.js',
     preconnect: 'https://data.24smi.net',
@@ -173,6 +175,7 @@ export const adConfig = {
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
     consentHandlingOverride: true,
+    renderStartImplemented: true,
   },
 
   'adsensor': {
