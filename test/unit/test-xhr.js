@@ -763,6 +763,20 @@ describe
           .then(() => expect(sendMessageStub).to.have.been.called);
       });
 
+      it('should intercept if untrusted-xhr-interception capability enabled', () => {
+        sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
+        sandbox.stub(mode, 'getMode').returns({localDev: false});
+        const hasCapability = sandbox.stub(viewer, 'hasCapability');
+        hasCapability.withArgs('xhrInterceptor').returns(true);
+        hasCapability.withArgs('untrusted-xhr-interception').returns(true);
+
+        const xhr = xhrServiceForTesting(interceptionEnabledWin);
+
+        return xhr
+          .fetch('https://www.some-url.org/some-resource/')
+          .then(() => expect(sendMessageStub).to.have.been.called);
+      });
+
       it('should intercept if non-dev mode but viewer trusted', () => {
         sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(true));
         interceptionEnabledWin.AMP_DEV_MODE = false;

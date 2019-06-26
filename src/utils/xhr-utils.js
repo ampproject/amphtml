@@ -217,7 +217,11 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
       return viewer.isTrustedViewer();
     })
     .then(viewerTrusted => {
-      if (!viewerTrusted && !getMode(win).localDev) {
+      if (
+        !viewerTrusted &&
+        !getMode(win).localDev &&
+        !viewer.hasCapability('untrusted-xhr-interception')
+      ) {
         return;
       }
       const messagePayload = dict({
