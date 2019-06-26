@@ -15,7 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import RRule from '../../../third_party/rrule/rrule';
+import {rrulestr} from 'rrule';
 
 /** @enum {string} */
 const DateType = {
@@ -80,7 +80,7 @@ export class DatesList {
       }
     }
     const rruleDates = this.rrulestrs_
-      .map(rrule => rrule.after(date))
+      .map((/** {RRule} */ rrule) => rrule.after(date))
       .filter(Boolean);
     firstDatesAfter.concat(rruleDates);
 
@@ -109,7 +109,7 @@ export class DatesList {
       .startOf('day')
       .add(1, 'day')
       .toDate();
-    return this.rrulestrs_.some(rrule => {
+    return this.rrulestrs_.some((/** {RRule} */ rrule) => {
       const rruleDay = this.moment_(rrule.before(nextDate));
       return this.ReactDates_['isSameDay'](rruleDay, date);
     });
@@ -139,10 +139,11 @@ export class DatesList {
  * Tries to parse a string into an RRULE object.
  * @param {string} str A string which represents a repeating date RRULE spec.
  * @return {?JsonObject}
+ * @suppress {missingProperties} // Remove after https://github.com/google/closure-compiler/issues/3041 is fixed
  */
 function tryParseRrulestr(str) {
   try {
-    return RRule.fromString(str);
+    return rrulestr(str);
   } catch (e) {
     return null;
   }

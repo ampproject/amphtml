@@ -147,9 +147,9 @@ describes.realWin('Layers', {amp: true}, env => {
             layout.forgetParentLayer();
             expect(layout.getParentLayer()).to.equal(rootLayout);
 
-            const spy = sinon.sandbox.spy(div, 'getBoundingClientRect');
-            rootLayout.dirtyMeasurements();
             rootLayout.remeasure();
+            const spy = sinon.sandbox.spy(layout, 'dirtyMeasurements');
+            rootLayout.dirtyMeasurements();
 
             expect(spy).to.have.callCount(1);
           });

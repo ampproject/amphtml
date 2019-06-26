@@ -152,6 +152,14 @@ class AmpAccordion extends AMP.BaseElement {
         }
       });
 
+      // Listen for mutations on the 'data-expand' attribute.
+      const expandObserver = new this.win.MutationObserver(mutations => {
+        this.toggleExpandMutations_(mutations);
+      });
+      expandObserver.observe(section, {
+        attributeFilter: ['data-expand'],
+      });
+
       if (this.currentState_[contentId]) {
         section.setAttribute('expanded', '');
       } else if (this.currentState_[contentId] === false) {
@@ -600,6 +608,21 @@ class AmpAccordion extends AMP.BaseElement {
       const newFocusHeader = this.headers_[newFocusIndex];
       tryFocus(newFocusHeader);
     }
+  }
+
+  /**
+   * Callback function to execute when mutations are observed on "data-expand".
+   * @param {!Array<!MutationRecord>} mutations
+   */
+  toggleExpandMutations_(mutations) {
+    mutations.forEach(mutation => {
+      const sectionEl = dev().assertElement(mutation.target);
+      const toExpand = sectionEl.hasAttribute('data-expand');
+      const isExpanded = sectionEl.hasAttribute('expanded');
+      if (isExpanded !== toExpand) {
+        this.toggle_(sectionEl, toExpand);
+      }
+    });
   }
 }
 

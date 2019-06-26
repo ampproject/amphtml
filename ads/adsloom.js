@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
+import {loadScript, validateData} from '../3p/3p';
+
 /**
- * Indicates Opt in status of the publisher for different ad formats.
- * @enum {number}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-export const OptInStatus = {
-  UNKNOWN: 0,
-  OPT_IN_STATUS_BANNER_ADS: 1,
-  OPT_IN_STATUS_ANCHOR_ADS: 2,
-  OPT_IN_STATUS_NATIVE_IN_ARTICLE_ADS: 3,
-  OPT_IN_STATUS_NO_FILL_ANCHOR_ADS: 4,
-};
+export function adsloom(global, data) {
+  validateData(data, ['widgetId']);
+  global._adsLoom = global._adsLoom || {
+    widgetId: data['widgetId'],
+    clientId: global.context.clientId,
+    sourceUrl: global.context.sourceUrl,
+  };
+  loadScript(
+    global,
+    'https://adsloomwebservices.adsloom.com/scripts/amp-loader.js'
+  );
+}

@@ -21,9 +21,9 @@ import {
   getExistingAds,
 } from './ad-tracker';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
+import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {Services} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
-import {getAttributesFromConfigObj} from './attributes';
 import {getPlacementsFromConfigObj} from './placement';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
@@ -75,7 +75,7 @@ export class AmpAutoAds extends AMP.BaseElement {
         const placements = getPlacementsFromConfigObj(ampdoc, configObj);
         const attributes = /** @type {!JsonObject} */ (Object.assign(
           adNetwork.getAttributes(),
-          getAttributesFromConfigObj(configObj)
+          getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
         ));
         const sizing = adNetwork.getSizing();
         const adConstraints =
@@ -89,7 +89,11 @@ export class AmpAutoAds extends AMP.BaseElement {
           adTracker,
           adNetwork.isResponsiveEnabled()
         ).run();
-        new AnchorAdStrategy(ampdoc, attributes, configObj).run();
+        const stickyAdAttributes = /** @type {!JsonObject} */ (Object.assign(
+          attributes,
+          getAttributesFromConfigObj(configObj, Attributes.STICKY_AD_ATTRIBUTES)
+        ));
+        new AnchorAdStrategy(ampdoc, stickyAdAttributes, configObj).run();
       });
   }
 

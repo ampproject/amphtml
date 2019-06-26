@@ -1120,7 +1120,14 @@ export class LayoutElement {
    * the element.
    */
   dirtyMeasurements() {
+    if (this.needsRemeasure_) {
+      return;
+    }
     this.needsRemeasure_ = true;
+    const children = this.children_;
+    for (let i = 0; i < children.length; i++) {
+      children[i].dirtyMeasurements();
+    }
   }
 
   /**
@@ -1129,30 +1136,6 @@ export class LayoutElement {
    */
   dirtyScrollMeasurements() {
     this.needsScrollRemeasure_ = true;
-  }
-
-  /**
-   * Remasures the element's size and offset position. This traverse as high as
-   * possible in the layer tree to remeasure as many elements as possible in
-   * one go. This is necessary both from a performance standpoint, and to
-   * ensure that any calculation uses the correct value, since layer in the
-   * ancestry may have been dirtied.
-   *
-   * No matter what, though, the current element will be remeasured.
-   */
-  remeasure() {
-    let layer = this;
-
-    // Find the topmost dirty layer, and remeasure from there.
-    for (let p = this.getParentLayer(); p; p = p.getParentLayer()) {
-      if (p.needsRemeasure_) {
-        layer = p;
-      }
-    }
-
-    if (layer.needsRemeasure_) {
-      layer.remeasure_();
-    }
   }
 
   /**
@@ -1201,15 +1184,17 @@ export class LayoutElement {
   }
 
   /**
-   * Remeasures the element, and all children, since this element was marked
-   * dirty.
-   *
-   * @private
+   * Remasures the element's size and offset position, and any ancestor
+   * elements as needed.
    */
-  remeasure_() {
+  remeasure() {
     this.updateScrollPosition_();
+
+    if (!this.needsRemeasure_) {
+      return;
+    }
     this.needsRemeasure_ = false;
-    const {element_: element} = this;
+    const element = this.element_;
 
     // We need a relative box to measure our offset. Importantly, this box must
     // be negatively offset by its scroll position, to account for the fact
@@ -1239,17 +1224,6 @@ export class LayoutElement {
     if ((getMode().localDev || getMode().test) && Object.freeze) {
       Object.freeze(this.size_);
       Object.freeze(this.position_);
-    }
-
-    // Now, recursively measure all child nodes, to since they've probably been
-    // invalidated by the parent changing.
-    // TODO(jridgewell): When do children need to be remeasured? Could we skip
-    // for only size changes? Or only position changes?
-    const children = this.children_;
-    if (children.length > 0) {
-      for (let i = 0; i < children.length; i++) {
-        children[i].remeasure_();
-      }
     }
   }
 

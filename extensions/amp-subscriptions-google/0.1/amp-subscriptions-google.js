@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  Action,
+  ActionStatus,
+  SubscriptionAnalyticsEvents,
+} from '../../amp-subscriptions/0.1/analytics';
 import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
 import {
   ConfiguredRuntime,
@@ -27,7 +32,6 @@ import {
 } from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {SubscriptionAnalyticsEvents} from '../../amp-subscriptions/0.1/analytics';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -99,8 +103,8 @@ export class GoogleSubscriptionsPlatform {
       this.onLinkComplete_();
       this.subscriptionAnalytics_.actionEvent(
         this.getServiceId(),
-        'link',
-        'success'
+        Action.LINK,
+        ActionStatus.SUCCESS
       );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
@@ -110,15 +114,15 @@ export class GoogleSubscriptionsPlatform {
     });
     this.runtime_.setOnFlowStarted(e => {
       if (
-        e.flow == 'subscribe' ||
-        e.flow == 'contribute' ||
-        e.flow == 'showContributionOptions' ||
-        e.flow == 'showOffers'
+        e.flow == Action.SUBSCRIBE ||
+        e.flow == Action.CONTRIBUTE ||
+        e.flow == Action.SHOW_CONTRIBUTION_OPTIONS ||
+        e.flow == Action.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
           this.getServiceId(),
           e.flow,
-          'started'
+          ActionStatus.STARTED
         );
       }
     });
@@ -127,8 +131,8 @@ export class GoogleSubscriptionsPlatform {
         this.onLinkComplete_();
         this.subscriptionAnalytics_.actionEvent(
           this.getServiceId(),
-          'link',
-          'rejected'
+          Action.LINK,
+          ActionStatus.REJECTED
         );
         // TODO(dvoytenko): deprecate separate "link" events.
         this.subscriptionAnalytics_.serviceEvent(
@@ -136,15 +140,15 @@ export class GoogleSubscriptionsPlatform {
           this.getServiceId()
         );
       } else if (
-        e.flow == 'subscribe' ||
-        e.flow == 'contribute' ||
-        e.flow == 'showContributionOptions' ||
-        e.flow == 'showOffers'
+        e.flow == Action.SUBSCRIBE ||
+        e.flow == Action.CONTRIBUTE ||
+        e.flow == Action.SHOW_CONTRIBUTION_OPTIONS ||
+        e.flow == Action.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
           this.getServiceId(),
           e.flow,
-          'rejected'
+          ActionStatus.REJECTED
         );
       }
     });
@@ -153,12 +157,12 @@ export class GoogleSubscriptionsPlatform {
     });
     this.runtime_.setOnSubscribeResponse(promise => {
       promise.then(response => {
-        this.onSubscribeResponse_(response, 'subscribe');
+        this.onSubscribeResponse_(response, Action.SUBSCRIBE);
       });
     });
     this.runtime_.setOnContributionResponse(promise => {
       promise.then(response => {
-        this.onSubscribeResponse_(response, 'contribute');
+        this.onSubscribeResponse_(response, Action.CONTRIBUTE);
       });
     });
 
@@ -185,8 +189,8 @@ export class GoogleSubscriptionsPlatform {
       this.runtime_.linkAccount();
       this.subscriptionAnalytics_.actionEvent(
         this.getServiceId(),
-        'link',
-        'started'
+        Action.LINK,
+        ActionStatus.STARTED
       );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
@@ -207,7 +211,7 @@ export class GoogleSubscriptionsPlatform {
   /** @private */
   onNativeSubscribeRequest_() {
     this.maybeComplete_(
-      this.serviceAdapter_.delegateActionToLocal('subscribe')
+      this.serviceAdapter_.delegateActionToLocal(Action.SUBSCRIBE)
     );
   }
 
@@ -235,7 +239,7 @@ export class GoogleSubscriptionsPlatform {
     this.subscriptionAnalytics_.actionEvent(
       this.getServiceId(),
       eventType,
-      'success'
+      ActionStatus.SUCCESS
     );
   }
 
@@ -379,21 +383,21 @@ export class GoogleSubscriptionsPlatform {
      * subscribe flows elsewhere since they are invoked after
      * offer selection.
      */
-    if (action == 'subscribe') {
+    if (action == Action.SUBSCRIBE) {
       this.runtime_.showOffers({
         list: 'amp',
         isClosable: true,
       });
       return Promise.resolve(true);
     }
-    if (action == 'contribute') {
+    if (action == Action.CONTRIBUTE) {
       this.runtime_.showContributionOptions({
         list: 'amp',
         isClosable: true,
       });
       return Promise.resolve(true);
     }
-    if (action == 'login') {
+    if (action == Action.LOGIN) {
       this.runtime_.linkAccount();
       return Promise.resolve(true);
     }
@@ -405,7 +409,7 @@ export class GoogleSubscriptionsPlatform {
     const opts = options ? options : {};
 
     switch (action) {
-      case 'subscribe':
+      case Action.SUBSCRIBE:
         element.textContent = '';
         this.runtime_.attachButton(element, options, () => {});
         break;
@@ -415,7 +419,7 @@ export class GoogleSubscriptionsPlatform {
         opts.theme = 'light';
         opts.lang = userAssert(
           element.getAttribute('subscriptions-lang'),
-          'subscribe-smartbutton must have a language attrbiute'
+          'subscribe-smartbutton must have a language attribute'
         );
         this.runtime_.attachSmartButton(element, opts, () => {});
         break;
@@ -424,7 +428,7 @@ export class GoogleSubscriptionsPlatform {
         opts.theme = 'dark';
         opts.lang = userAssert(
           element.getAttribute('subscriptions-lang'),
-          'subscribe-smartbutton must have a language attrbiute'
+          'subscribe-smartbutton must have a language attribute'
         );
         this.runtime_.attachSmartButton(element, opts, () => {});
         break;
