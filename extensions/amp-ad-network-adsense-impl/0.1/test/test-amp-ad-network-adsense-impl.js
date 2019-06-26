@@ -546,7 +546,7 @@ describes.realWin(
         return expect(impl.getAdUrl()).to.not.match(/(\?|&)aanf=(&|$)/);
       });
 
-      it('should aanf set to null if do not have boolean value', () => {
+      it('should aanf set to null if do not have case sensitive boolean value', () => {
         const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
           'layout': 'nodisplay',
         });
