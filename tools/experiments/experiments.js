@@ -371,11 +371,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18068',
   },
   {
-    id: 'fie-metadata-extension',
-    name: 'Use version supporting extension field in amp-ad-metadata.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18737',
-  },
-  {
     id: 'amp-list-load-more',
     name: 'Enables load-more related functionality in amp-list',
     spec: 'https://github.com/ampproject/amphtml/issues/13575',
