@@ -32,8 +32,8 @@ tags: {  # <amp-script> (local script)
   attrs: {
     name: "type"
     mandatory: true
-    value_casei: "text/amp-script"
-    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+    value: "text/amp-script"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "mandatory-id-attr"
   attr_lists: "nonce-attr"
@@ -75,8 +75,5 @@ tags: {  # <amp-script>
     supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
-  }
-  child_tags: {
-    first_child_tag_name_oneof: "SCRIPT"
   }
 }
