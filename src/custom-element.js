@@ -32,7 +32,6 @@ import {Services} from './services';
 import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLegacyLoaderElement} from '../src/loader-legacy';
-import {createNewLoaderElement} from '../src/loader-new';
 import {dev, devAssert, rethrowAsync, user} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
@@ -551,14 +550,6 @@ function createBaseCustomElementClass(win) {
             const placeholder = this.createPlaceholder();
             if (placeholder) {
               this.appendChild(placeholder);
-            } else {
-              const win = toWin(this.ownerDocument.defaultView);
-              if (newLoader.isNewLoaderExperimentEnabled(win)) {
-                const defaultPlaceholder = newLoader.getDefaultPlaceholder(
-                  this.ownerDocument
-                );
-                this.appendChild(defaultPlaceholder);
-              }
             }
           }
         },
@@ -1699,6 +1690,7 @@ function createBaseCustomElementClass(win) {
         if (newLoader.isNewLoaderExperimentEnabled(win)) {
           loadingElement = newLoader.createLoaderElement(
             /** @type {!Document} */ (doc),
+            container,
             this
           );
         } else {

@@ -15,7 +15,7 @@
  */
 
 import {dev} from './log';
-import {htmlFor, svgFor} from './static-template';
+import {htmlFor, htmlRefs, svgFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {toWin} from './types';
 
@@ -26,14 +26,15 @@ import {toWin} from './types';
  * screenshots and various states of the new loader design.
  *
  * @param {!Document} doc
+ * @param {!Element} loadingContainer
  * @param {!Element} element
  * @return {!Element}
  */
-export function createLoaderElement(doc, element) {
+export function createLoaderElement(doc, loadingContainer, element) {
   dev().assert(!isLoaderIneligible(element));
   dev().assert(isNewLoaderExperimentEnabled(toWin(doc.defaultView)));
 
-  const loader = new LoaderBuilder(doc, element);
+  const loader = new LoaderBuilder(doc, loadingContainer, element);
   return loader.build();
 }
 
@@ -48,17 +49,8 @@ export function isNewLoaderExperimentEnabled(win) {
  * @param {!AmpElement} element
  */
 export function isLoaderIneligible(element) {
-  return isTiny(element);
-}
-
-/**
- *
- * @param {*} doc
- */
-export function getDefaultPlaceholder(doc) {
-  return htmlFor(
-    doc
-  )`<div placeholder class="i-amphtml-new-loader-placeholder"></div>`;
+  const result = isTiny(element) || isImageWithPlaceholder(element);
+  return result;
 }
 
 /**
@@ -72,15 +64,31 @@ function isTiny(element) {
 
 /**
  *
+ * @param {*} element
+ */
+function hasPlaceholder(element) {
+  return !!element.querySelector('[placeholder]');
+}
+
+/**
+ *
+ * @param {*} element
+ */
+function isImageWithPlaceholder(element) {
+  return element.tagName === 'AMP-IMG' && hasPlaceholder(element);
+}
+/**
+ *
  */
 class LoaderBuilder {
   /**
-   *
    * @param {*} doc
+   * @param {*} loadingContainer
    * @param {*} element
    */
-  constructor(doc, element) {
+  constructor(doc, loadingContainer, element) {
     this.doc_ = doc;
+    this.loadingContainer_ = loadingContainer;
     this.element_ = element;
     this.domRoot_;
     this.svgRoot_;
@@ -95,6 +103,7 @@ class LoaderBuilder {
     this.addSpinner();
     this.maybeAddLogo();
     this.maybeAddBackgroundShim();
+    this.maybeAddDefaultPlaceholder();
     return this.domRoot_;
   }
 
@@ -103,19 +112,24 @@ class LoaderBuilder {
    */
   buildContainers() {
     this.domRoot_ = htmlFor(this.element_)`<div class="i-amphtml-new-loader">
+      <div ref="innerContainer"></div>
     </div>`;
 
+    /**
+     * There is an extra inner div here for backward compatibility with
+     * customizing loaders. The common and documented CSS for customizing
+     * loaders includes a style to hide the old three dots via:
+     *  .my-custom-loader .amp-active > div {
+     *     display: none;
+     *  }
+     * The extra div mimic a similar DOM.
+     */
+    const {innerContainer} = htmlRefs(this.domRoot_);
     this.svgRoot_ = svgFor(
       this.element_
     )`<svg xmlns="http://www.w3.org/2000/svg" viewBox="24 24 72 72"></svg>`;
 
-    // this.element_.ownerDocument.createElementNS(
-    //   'http://www.w3.org/2000/svg',
-    //   'svg'
-    // );
-    // this.svgRoot_.setAttribute('viewBox', '24 24 72 72');
-
-    this.domRoot_.appendChild(this.svgRoot_);
+    innerContainer.appendChild(this.svgRoot_);
   }
 
   /**
@@ -150,14 +164,15 @@ class LoaderBuilder {
    */
   addSpinner() {
     const spinner = svgFor(this.doc_)`<g class="i-amphtml-new-loader-spinner">
-    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
-    </circle>
-    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
-    </circle>
-    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
-    </circle>
-    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
-    </circle></g>`;
+      <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
+      </circle>
+      <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
+      </circle>
+      <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
+      </circle>
+      <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
+      </circle>
+    </g>`;
 
     this.svgRoot_.appendChild(spinner);
   }
@@ -188,6 +203,7 @@ class LoaderBuilder {
    *
    */
   getCustomLogo() {
+    // Not Implemented
     return null;
   }
 
@@ -195,11 +211,9 @@ class LoaderBuilder {
    *
    */
   getDefaultLogo() {
-    return svgFor(
-      this.doc_
-    )`<circle class="i-amphtml-new-loader-logo i-amphtml-new-loader-logo-default"
-        cx="60" cy="60" r="12">
-      </circle>`;
+    return svgFor(this.doc_)`<circle class="i-amphtml-new-loader-logo"
+      cx="60" cy="60" r="12" fill="#aaaaaa">
+    </circle>`;
   }
 
   /**
@@ -218,7 +232,7 @@ class LoaderBuilder {
       return;
     }
 
-    // Add shim
+    // Not Implemented
 
     return;
   }
@@ -226,7 +240,17 @@ class LoaderBuilder {
   /**
    *
    */
+  maybeAddDefaultPlaceholder() {
+    if (!hasPlaceholder(this.element_)) {
+      this.loadingContainer_.classList.add('i-amphtml-default-placeholder');
+    }
+  }
+
+  /**
+   *
+   */
   isAd() {
+    // Not Implemented
     return false;
   }
 
@@ -242,6 +266,7 @@ class LoaderBuilder {
    *
    */
   requiresLargeSpinner() {
+    // Not Implemented
     return false;
   }
 
@@ -249,6 +274,7 @@ class LoaderBuilder {
    *
    */
   hasImagePlaceholder() {
+    // Not Implemented
     return false;
   }
 }
