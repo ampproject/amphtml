@@ -14,10 +14,39 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {htmlFor, htmlRefs, svgFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {toWin} from './types';
+
+/* LEGACY LOADER */
+
+/** @private @const */
+const LINE_LOADER_ELEMENTS = {
+  'AMP-AD': true,
+};
+
+/**
+ * Creates a default "loading indicator" element. This element accepts
+ * `amp-active` class in which case it may choose to run an animation.
+ * @param {!Document} doc
+ * @param {string} elementName
+ * @return {!Element}
+ */
+export function createLegacyLoaderElement(doc, elementName) {
+  if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
+    return htmlFor(doc)`<div class="i-amphtml-loader-line">
+          <div class="i-amphtml-loader-moving-line"></div>
+        </div>`;
+  }
+  return htmlFor(doc)`<div class="i-amphtml-loader">
+        <div class="i-amphtml-loader-dot"></div>
+        <div class="i-amphtml-loader-dot"></div>
+        <div class="i-amphtml-loader-dot"></div>
+      </div>`;
+}
+
+/* NEW LOADER */
 
 /**
  * Creates a default "loading indicator" element based on the new design.
@@ -30,9 +59,9 @@ import {toWin} from './types';
  * @param {!Element} element
  * @return {!Element} new loader root element
  */
-export function createLoaderElement(doc, loadingContainer, element) {
-  dev().assert(!isLoaderIneligible(element));
-  dev().assert(isNewLoaderExperimentEnabled(toWin(doc.defaultView)));
+export function createNewLoaderElement(doc, loadingContainer, element) {
+  devAssert(!isNewLoaderIneligible(element));
+  devAssert(isNewLoaderExperimentEnabled(toWin(doc.defaultView)));
 
   const loader = new LoaderBuilder(doc, loadingContainer, element);
   return loader.build();
@@ -83,9 +112,18 @@ class LoaderBuilder {
    * @private
    */
   buildContainers_() {
-    this.domRoot_ = htmlFor(this.element_)`<div class="i-amphtml-new-loader">
-      <div ref="innerContainer"></div>
-    </div>`;
+    const html = htmlFor(this.element_);
+    this.domRoot_ = html`
+      <div class="i-amphtml-new-loader">
+        <div ref="innerContainer">
+          <svg
+            ref="svgRoot"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="24 24 72 72"
+          ></svg>
+        </div>
+      </div>
+    `;
 
     /**
      * There is an extra inner div here for backward compatibility with
@@ -96,13 +134,9 @@ class LoaderBuilder {
      *  }
      * The extra div mimic a similar DOM.
      */
-    const innerContainer = dev().assertElement(
-      htmlRefs(this.domRoot_)['innerContainer']
-    );
-
-    this.svgRoot_ = svgFor(
-      this.element_
-    )`<svg xmlns="http://www.w3.org/2000/svg" viewBox="24 24 72 72"></svg>`;
+    const refs = htmlRefs(this.domRoot_);
+    const innerContainer = dev().assertElement(refs['innerContainer']);
+    this.svgRoot_ = dev().assertElement(refs['svgRoot']);
 
     innerContainer.appendChild(this.svgRoot_);
   }
@@ -140,16 +174,19 @@ class LoaderBuilder {
    * @private
    */
   addSpinner_() {
-    const spinner = svgFor(this.doc_)`<g class="i-amphtml-new-loader-spinner">
-      <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
-      </circle>
-      <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
-      </circle>
-      <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
-      </circle>
-      <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
-      </circle>
-    </g>`;
+    const svg = svgFor(this.doc_);
+    const spinner = svg`
+      <g class="i-amphtml-new-loader-spinner">
+        <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
+        </circle>
+        <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
+        </circle>
+        <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
+        </circle>
+        <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
+        </circle>
+      </g>
+    `;
 
     this.svgRoot_.appendChild(spinner);
   }
@@ -200,9 +237,17 @@ class LoaderBuilder {
    * @return {!Element}
    */
   getDefaultLogo_() {
-    return svgFor(this.doc_)`<circle class="i-amphtml-new-loader-logo"
-      cx="60" cy="60" r="12" fill="#aaaaaa">
-    </circle>`;
+    const svg = svgFor(this.doc_);
+    return svg`
+      <circle
+        class="i-amphtml-new-loader-logo"
+        cx="60"
+        cy="60"
+        r="12"
+        fill="#aaaaaa"
+      >
+      </circle>
+    `;
   }
 
   /**
@@ -307,8 +352,8 @@ export function isNewLoaderExperimentEnabled(win) {
  * @param {!AmpElement} element
  * @return {boolean}
  */
-export function isLoaderIneligible(element) {
-  const result = isTiny(element) || isImageWithPlaceholder(element);
+export function isNewLoaderIneligible(element) {
+  const result = isTiny(element) || hasBlurryImagePlaceholder(element);
   return result;
 }
 
@@ -323,13 +368,16 @@ function isTiny(element) {
 }
 
 /**
- * Whether element is an amp-img with an existing
- * placeholder (e.g. blurry image placeholder)
+ * Whether element has an image blurry placeholder
  * @param {!AmpElement} element
  * @return {boolean}
  */
-function isImageWithPlaceholder(element) {
-  return element.tagName === 'AMP-IMG' && hasPlaceholder(element);
+function hasBlurryImagePlaceholder(element) {
+  const placeholder = element.getPlaceholder();
+  return (
+    placeholder &&
+    placeholder.classList.contains('i-amphtml-blurry-placeholder')
+  );
 }
 
 /**
@@ -338,5 +386,5 @@ function isImageWithPlaceholder(element) {
  * @return {boolean}
  */
 function hasPlaceholder(element) {
-  return !!element.querySelector('[placeholder]');
+  return !!element.getPlaceholder();
 }

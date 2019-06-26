@@ -15,7 +15,6 @@
  */
 
 import * as dom from './dom';
-import * as newLoader from '../src/loader-new';
 import {AmpEvents} from './amp-events';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
@@ -31,7 +30,12 @@ import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
-import {createLegacyLoaderElement} from '../src/loader-legacy';
+import {
+  createLegacyLoaderElement,
+  createNewLoaderElement,
+  isNewLoaderExperimentEnabled,
+  isNewLoaderIneligible,
+} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
@@ -1644,10 +1648,7 @@ function createBaseCustomElementClass(win) {
 
       // Additional eligibility logic for new loaders
       const win = toWin(this.ownerDocument.defaultView);
-      if (
-        newLoader.isNewLoaderExperimentEnabled(win) &&
-        newLoader.isLoaderIneligible(this)
-      ) {
+      if (isNewLoaderExperimentEnabled(win) && isNewLoaderIneligible(this)) {
         return false;
       }
 
@@ -1687,8 +1688,8 @@ function createBaseCustomElementClass(win) {
               amp-hidden"></div>`;
 
         let loadingElement;
-        if (newLoader.isNewLoaderExperimentEnabled(win)) {
-          loadingElement = newLoader.createLoaderElement(
+        if (isNewLoaderExperimentEnabled(win)) {
+          loadingElement = createNewLoaderElement(
             /** @type {!Document} */ (doc),
             container,
             this
