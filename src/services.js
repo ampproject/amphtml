@@ -206,10 +206,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/cid-impl.Cid>}
+   * @return {!Promise<!./service/cid-impl.CidDef>}
    */
   static cidForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/cid-impl.Cid>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/cid-impl.CidDef>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'cid'
     ));
