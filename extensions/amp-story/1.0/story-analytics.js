@@ -17,10 +17,9 @@ import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {getVariableService} from './variable-service';
 import {registerServiceBuilder} from '../../../src/service';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @enum {string} */
-export const AnalyticsEvent = {
+export const StoryAnalyticsEvent = {
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
   LAST_PAGE_VISIBLE: 'story-last-page-visible',
@@ -113,13 +112,34 @@ export class StoryAnalyticsService {
   }
 
   /**
-   * @param {!AnalyticsEvent} eventType
+   * @param {!StoryAnalyticsEvent} eventType
    */
   triggerEvent(eventType) {
-    triggerAnalyticsEvent(
-      this.element_,
-      eventType,
-      this.variableService_.get()
-    );
+    this.element_.dispatchCustomEvent(eventType, this.getDetails_(eventType));
+  }
+
+  /**
+   * Consolidates count of event types per page and variables of the event.
+   * @param {!StoryAnalyticsEvent} eventType
+   * @private
+   * @return {!Object}
+   */
+  getDetails_(eventType) {
+    const vars = this.variableService_.get();
+    const pageId = vars['storyPageId'];
+
+    this.eventsPerPage_[pageId] = this.eventsPerPage_[pageId]
+      ? this.eventsPerPage_[pageId]
+      : {};
+
+    this.eventsPerPage_[pageId][eventType] = this.eventsPerPage_[pageId][
+      eventType
+    ]
+      ? this.eventsPerPage_[pageId][eventType]
+      : 0;
+
+    this.eventsPerPage_[pageId][eventType]++;
+
+    return Object.assign({pageEvents: this.eventsPerPage_}, vars);
   }
 }
