@@ -12,9 +12,9 @@ A container to display an ad. The <code>amp-embed</code> is an alias to the <cod
 
 [TOC]
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 The specification of `amp-ad` / `amp-embed` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
-{% endcall %}
+[/tip]
 
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.

@@ -70,9 +70,9 @@ In this example, we display three sections, where the third section is expanded 
 </amp-iframe>
 </div>
 
-{% call callout('Tip', type='success') %}
+[tip type="success"]
 To see more demos of the `amp-accordion`, visit [AMP By Example](https://ampbyexample.com/components/amp-accordion/).
-{% endcall %}
+[/tip]
 
 ### Events
 The events below will be triggered on `section`s of `accordion`.

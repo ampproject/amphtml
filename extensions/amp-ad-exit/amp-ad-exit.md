@@ -359,12 +359,12 @@ Example:
 By convention, user-defined variables should be in `_camelCase`. System
 variables are in `ALL_CAPS`.
 
-{% call callout('Warning', type='caution') %}
+[tip type="important"]
 Be careful with your variable names. Substitution works by simple
 string replacement. *Any* occurrence of the variable in the URL will be
 replaced. For example, if you define a custom variable named "_b" with value
 "foo", `/?a_b_c=_b` will become `/?afoo_c=foo`.
-{% endcall %}
+[/tip]
 
 ## Behaviors
 Behaviors specify additional properties of the exit action.

@@ -43,9 +43,9 @@ Capture analytics data from an AMP document.
 
 Before you start using AMP analytics on your site, you need to decide whether you will use third-party analytics tools to analyze user engagement, or your own in-house solution.
 
-{% call callout('Read on', type='read') %}
+[tip type="read-on"]
 Learn all about AMP analytics in the [Configure Analytics](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/) guide.
-{% endcall %}
+[/tip]
 
 ### Sending data to an analytics vendor <a name="analytics-vendors"></a>
 
@@ -85,18 +85,18 @@ In the following example, analytics data is sent to Nielsen, a third-party analy
 If you have your own in-house solution for measuring user engagement, the only thing you will need to integrate AMP analytics with that solution is a URL. This is where you will send the data. You can also send data to various URLs. For example, you can send page view data to one URL, and social engagement data to another URL.
 
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 If your in-house solution involves working with an analytics vendor that hasn't integrated with AMP, work with the vendor to determine what configuration information is required.
-{% endcall %}
+[/tip]
 
 To send data to a specific URL:
 
 1.  Determine what data you want to capture and track, and [specify those details in the configuration data](#specifying-configuration-data).
 2.  In the [`requests`](#requests) configuration object, specify the type of request to track (e.g., pageview, specific triggered events) and the url(s) of where you want to send the tracking data to.
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 When processing AMP URLs in the referrer header of analytics requests, strip out or ignore the `usqp` parameter. This parameter is used by Google to trigger experiments for the Google AMP Cache.
-{% endcall %}
+[/tip]
 
 *Example: Sending data to a URL*
 
@@ -120,9 +120,9 @@ Here's a simple example that tracks page views.  Every time a page is visible, t
 </amp-analytics>
 ```
 
-{% call callout('Tip', type='success') %}
+[tip type="success"]
 For some common tracking use cases (e.g., page views, page clicks, scrolling, etc.) see [Analytics: Use Cases](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/use_cases).
-{% endcall %}
+[/tip]
 
 
 ## Specifying configuration data

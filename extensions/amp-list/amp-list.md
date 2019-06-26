@@ -47,9 +47,9 @@ using a supplied template.
 
 The `<amp-list>` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains data, which is rendered in the specified template.
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
-{% endcall %}
+[/tip]
 
 You can specify a template in one of two ways:
 
@@ -204,9 +204,9 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-list>`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
-{% endcall %}
+[/tip]
 
 The `src` attribute may be omitted if the `[src]` attribute exists.
 

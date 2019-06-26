@@ -55,9 +55,9 @@ The `amp-position-observer` component monitors the position of an
 element within the viewport as a user scrolls, and dispatches
 `enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**), which can be used to trigger actions (**Only Low Trust Actions**) on other components (e.g., [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation).
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 The `amp-position-observer` component is only useful when used with other components and does not do anything on its own.
-{% endcall %}
+[/tip]
 
 ## What can I do with amp-position-observer?
 

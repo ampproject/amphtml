@@ -205,9 +205,9 @@ In the following example, we display a `toolbar` if the window width is less tha
 
 
 
-{% call callout('Tip', type='success') %}
+[tip type="success"]
 See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sidebar/).
-{% endcall %}
+[/tip]
 
 ## Sidebar for Stories
 Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/).
@@ -291,9 +291,9 @@ The `amp-sidebar` component can be styled with standard CSS.
 - The height of the `amp-sidebar` may be set to adjust the height of the sidebar, if required. If the height exceeds 100vw, the sidebar will have a vertical scrollbar. The preset height of the sidebar is 100vw and can be overridden in CSS to make it shorter.
 - The current state of the sidebar is exposed via the `open` attribute that is set on the `amp-sidebar` tag when the side bar is open on the page.
 
-{% call callout('Tip', type='success') %}
+[tip type="success"]
 Visit [AMP Start](https://ampstart.com/components#navigation) for responsive, pre-styled navigation menus that you can use in your AMP pages.
-{% endcall %}
+[/tip]
 
 ## Auto scrolling within overflowing areas
 

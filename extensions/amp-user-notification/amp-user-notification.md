@@ -104,9 +104,9 @@ You can add it as a query string field (e.g.,
 
 If the `data-show-if-href` attribute is not specified, AMP will only check if the notification with the specified ID has been "dismissed" by the user locally. If not, the notification will be shown.
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
 For handling CORS requests and responses, see the [AMP CORS spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).
-{% endcall %}
+[/tip]
 
 **CORS GET request** query string fields: `elementId`, `ampUserId`
 
@@ -194,9 +194,9 @@ When specified, AMP will make a CORS POST request to the specified URL transmitt
 
 If this attribute is not specified, AMP will not send a request upon dismissal, and will only store the "dismissed" flag for the specified ID locally.
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
 For handling CORS requests and responses, see the [AMP CORS spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).
-{% endcall %}
+[/tip]
 
 **POST request** JSON fields: `elementId`, `ampUserId`
 

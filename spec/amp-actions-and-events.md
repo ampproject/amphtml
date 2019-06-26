@@ -87,7 +87,7 @@ AMP defines a `tap` event globally that you can listen to on any HTML element (i
 
 AMP also defines the `hide`, `show` and `toggleVisibility` actions globally that you can trigger on any HTML element.
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 An element can only be shown if it was previously hidden by a `hide` or `toggleVisibility` action, or by using the [`hidden`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden) attribute. The `show` action does not support elements hidden by CSS `display:none` or AMP's `layout=nodisplay`.
 
 For example, the following is possible in AMP:
@@ -97,7 +97,7 @@ For example, the following is possible in AMP:
 
 <button on="tap:warning-message.hide">Cool, thanks!</button>
 ```
-{% endcall %}
+[/tip]
 
 ## Element-specific events
 

@@ -71,9 +71,9 @@ Renders as:
     src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAyAS599A2GGPKTmtNr9CptD61LE4gN6oQ&q=iceland">
 </amp-iframe>
 
-{% call callout('Tip', type='success') %}
+[tip type="success"]
 To see more demos of the `amp-iframe`, visit [AMP By Example](https://ampbyexample.com/components/amp-iframe/).
-{% endcall %}
+[/tip]
 
 ## Usage of amp-iframe for advertising
 

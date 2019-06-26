@@ -50,9 +50,9 @@ limitations under the License.
 
 The `amp-form` extension allows you to create forms (`<form>`) to submit input fields in an AMP document. The  `amp-form` extension also provides [polyfills](#polyfills) for some missing behaviors in browsers.
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
 If you're submitting data in your form, your server endpoint must implement the requirements for [CORS security](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
-{% endcall %}
+[/tip]
 
 
 Before creating a `<form>`, you must include the required script for the `<amp-form>` extension, otherwise your document will be invalid. If you're using `input` tags for purposes other than submitting their values (e.g., inputs not inside a `<form>`), you do not need to load the `amp-form` extension.
@@ -85,17 +85,17 @@ Specifies a server endpoint to handle the form input. The value must be an `http
 * For `method=POST`: use the [`action-xhr`](#action-xhr) attribute.
 
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fallback to using `action` and `target` in cases where the `amp-form` extension fails to load.
-{% endcall %}
+[/tip]
 
 ##### action-xhr
 
 Specifies a server endpoint to handle the form input and submit the form via XMLHttpRequest (XHR). An XHR request (sometimes called an AJAX request) is where the browser would make the request without a full load of the page or opening a new page. Browsers will send the request in the background using the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) when available and fallback to [XMLHttpRequest API](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) for older browsers.
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
 Your XHR endpoint must implement the requirements for [CORS security](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
-{% endcall %}
+[/tip]
 
 
 This attribute is required for `method=POST`, and is optional for `method=GET`.
@@ -141,9 +141,9 @@ The `amp-form` element exposes the following actions:
 | `submit` | Allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events). |
 | `clear` | Empties the values from each input in the form. This can allow users to quickly fill out forms a second time. |
 
-{% call callout('Read on', type='read') %}
+[tip type="read-on"]
 Learn more about [Actions and Events in AMP](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events.html).
-{% endcall %}
+[/tip]
 
 ## Events
 
@@ -405,9 +405,9 @@ Access-Control-Expose-Headers: AMP-Access-Control-Allow-Source-Origin, AMP-Redir
 ```
 
 
-{% call callout('Tip', type='success') %}
+[tip type="success"]
 Check out AMP By Example's [Form Submission with Update](https://ampbyexample.com/components/amp-form/#form-submission-with-page-update) and [Product Page](https://ampbyexample.com/samples_templates/product_page/#product-page) that demonstrate using redirection after a form submission.
-{% endcall %}
+[/tip]
 
 
 ## Custom validations
@@ -437,9 +437,9 @@ For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
 
 For validation messages, if your element contains no text content inside, AMP will fill it out with the browser's default validation message. In the example above, when the `name5` input is empty and validation is kicked off (i.e., user tried to submit the form) AMP will fill `<span visible-when-invalid="valueMissing" validation-for="name5"></span>` with the browser's validation message and show that `span` to the user.
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
 You must provide your own validation UI for each kind of invalid state that the input could have. If these are not present, users will not see any `custom-validation-reporting` for the missing error state. The validity states can be found in the [official W3C HTML validation reporting documentation](https://www.w3.org/TR/html50/forms.html#validitystate).
-{% endcall %}
+[/tip]
 
 ### Reporting strategies
 
@@ -621,9 +621,9 @@ Publishers can use these classes to style their inputs and fieldsets to be respo
 
 See the [full example here](../../examples/forms.amp.html) on using these.
 
-{% call callout('Tip', type='success') %}
+[tip type="success"]
 Visit [AMP Start](https://ampstart.com/components#form-elements) for responsive, pre-styled AMP form elements that you can use in your AMP pages.
-{% endcall %}
+[/tip]
 
 ## Security considerations
 

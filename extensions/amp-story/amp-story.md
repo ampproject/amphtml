@@ -46,9 +46,9 @@ limitations under the License.
   </tr>
 </table>
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
 This component is under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
-{% endcall %}
+[/tip]
 
 [TOC]
 
@@ -484,9 +484,9 @@ Example:
 
 The following are available templates to specify for the layout of the grid layer.
 
-{% call callout('Tip', type='success') %}
+[tip type="success"]
 To see the layout templates in use, check out the [layouts demo on AMP By Example](https://ampbyexample.com/stories/features/layouts/).
-{% endcall %}
+[/tip]
 
 ##### fill
 
@@ -1088,9 +1088,9 @@ The following animation effects are available as presets for AMP stories:
 | `zoom-out`        | 1000                  | 0 |
 
 
-{% call callout('Tip', type='success') %}
+[tip type="success"]
 See a [live demo of all the AMP story animations](https://ampbyexample.com/stories/features/animations/) on AMP By Example.
-{% endcall %}
+[/tip]
 
 
 ### Animation attributes
@@ -1145,9 +1145,9 @@ Fly from left!
 </h2>
 ```
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as *delay this animation for at least N milliseconds*. This applies to all elements including those with a delay of 0 seconds.
-{% endcall %}
+[/tip]
 
 ##### animate-in-after [optional]
 
@@ -1250,9 +1250,9 @@ You can apply multiple entrance animations on one element (for example, an eleme
 </div>
 ```
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
-{% endcall %}
+[/tip]
 
 ## Bookend: `amp-story-bookend`
 

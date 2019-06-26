@@ -60,9 +60,9 @@ Pressing the escape key on the keyboard closes the lightbox. Alternatively, sett
 </amp-lightbox>
 ```
 
-{% call callout('Read on', type='read') %}
+[tip type="read-on"]
 For showing images in a lightbox, there's also the [`<amp-image-lightbox>`](https://www.ampproject.org/docs/reference/components/amp-image-lightbox) component.
-{% endcall %}
+[/tip]
 
 
 ## Attributes
@@ -127,9 +127,9 @@ The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to t
 
 ## <a id="a4a"></a> Using `amp-lightbox` in AMPHTML ads
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 The `amp-lightbox` component for use in AMPHTML ads is [experimental](https://www.ampproject.org/docs/reference/experimental) and under active development. To use `amp-lightbox` in AMPHTML ads, [enable the `amp-lightbox-a4a-proto` experiment](http://cdn.ampproject.org/experiments.html).
-{% endcall %}
+[/tip]
 
 There are some differences between using `amp-lightbox` in normal AMP documents vs. [ads written in AMPHTML](../amp-a4a/amp-a4a-format.md):
 

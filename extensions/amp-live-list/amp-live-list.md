@@ -118,10 +118,10 @@ point is not shown for either updates (using `data-update-time`) or tombstone
 (using `data-tombstone`) operations without an insert (newly discovered id's)
 operation.
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 When using `position: fixed` we highly recommend that you use an id selector or a css selector with no other css combinators, because complex combinators cannot be moved into the fixed layer (fixed layer is an iOS workaround
 for webkit's fixed position [bug](https://bugs.webkit.org/show_bug.cgi?id=154399).
-{% endcall %}
+[/tip]
 
 The actual action handler may be at a descendant and does not have to be at the
 `update` reference point. the `amp-live-list` component then has an internal

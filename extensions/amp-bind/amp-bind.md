@@ -75,9 +75,9 @@ In the following example, tapping the button changes the `<p>` element's text fr
 <button on="tap:AMP.setState({foo: 'amp-bind'})">Say "Hello amp-bind"</button>
 ```
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 For performance and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means that the visual elements should be given a default state and not rely `amp-bind` for initial render.
-{% endcall %}
+[/tip]
 
 ### How does it work?
 
@@ -138,9 +138,9 @@ When the button is pressed:
     - The second `<p>` element's `class` attribute will be "redBackground".
     - The `amp-img` element will show the image of a cat.
 
-{% call callout('Tip', type='success') %}
+[tip type="success"]
 [Try out the **live demo**](https://ampbyexample.com/components/amp-bind/) for this example with code annotations!
-{% endcall %}
+[/tip]
 
 
 ## Details
@@ -666,9 +666,10 @@ AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a sin
     <td width="40%"><strong>src</strong></td>
     <td><p>The URL of the remote endpoint that will return the JSON that will update this <code>amp-state</code>. This must be a CORS HTTP service.</p>
 <p>The <code>src</code> attribute allows all standard URL variable substitutions. See the <a href="../../spec/amp-var-substitutions.md">Substitutions Guide</a> for more info.</p>
-<p>{% call callout('Important', type='caution') %}
+<p>[tip type="important"]
   The endpoint must implement the requirements specified in the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests">CORS Requests in AMP</a> spec.
-  {% endcall %}</p></td>
+  
+[/tip]</p></td>
   </tr>
   <tr>
     <td width="40%"><strong>credentials (optional)</strong></td>

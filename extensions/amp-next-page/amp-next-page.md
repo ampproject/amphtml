@@ -82,10 +82,11 @@ usually be placed directly after the unique content of a given page: for
 example, at the end of a news article or recipe, but before the footer or
 other content repeated across articles.
 
-{% call callout('Note', type='note') %} For performance reasons the
+[tip type="note"]
+For performance reasons the
 component will render a maximum of three documents (total) on screen at one
 time. This limit may be changed or removed in the future.
-{% endcall %}
+[/tip]
 
 ### Recommendation box
 
@@ -152,8 +153,10 @@ selectors will be set to `display: none` in all child documents.
 configure this <code>amp-next-page</code> component. This must be a CORS HTTP service.
 The URL's protocol must be HTTPS.
 <br><br>
-{% call callout('Important', type='caution') %} Your endpoint must implement
-the requirements specified in the CORS Requests in AMP spec. {% endcall %}
+[tip type="important"]
+Your endpoint must implement
+the requirements specified in the CORS Requests in AMP spec. 
+[/tip]
 <br><br>
 The <code>src</code> attribute is required unless a config has been specified inline.</td>
   </tr>
