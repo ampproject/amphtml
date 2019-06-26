@@ -15,15 +15,28 @@
  */
 
 import {ControllerPromise} from '../../build-system/tasks/e2e/controller-promise';
+/*OK*/ import sinon from 'sinon';
 
-// Since this is designed to run in Node we don't need to run it
-// on the full set of sauce labs browsers
-const config = describe.configure().ifChrome();
-config.run('ControllerPromise', () => {
+/**
+ * This is a unit test that is located with the E2E tests because it
+ * only tests the E2E features itself. It is not written like other E2E tests
+ * because it does not need a WebDriver instance and can run on Node only.
+ */
+describe('ControllerPromise', () => {
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
   describe('Promise wrapping behavior', () => {
     it('should behave like a normal thenable', () => {
       const p = new ControllerPromise(Promise.resolve('success'));
-      return p.then(result => expect(result).to.equal('success'));
+      return p.then(result => /*OK*/ expect(result).to.equal('success'));
     });
 
     it('should behave like a normal thenable with await', async () => {
@@ -62,8 +75,8 @@ config.run('ControllerPromise', () => {
 
       await p.catch(catchSpy);
 
-      expect(catchSpy).to.have.been.calledOnce;
-      expect(catchSpy).to.have.been.calledWith(errorObject);
+      /*OK*/ expect(catchSpy.calledOnce).to.be.true;
+      /*OK*/ expect(catchSpy.calledWith(errorObject)).to.be.true;
     });
 
     it('should accept a second parameter for `then`', async () => {
@@ -76,11 +89,11 @@ config.run('ControllerPromise', () => {
       await p.then(thenSpy, thenCatchSpy);
       await p.then(null, onlyCatchSpy);
 
-      expect(thenSpy).to.not.have.been.called;
-      expect(thenCatchSpy).to.have.been.calledOnce;
-      expect(thenCatchSpy).to.have.been.calledWith(errorObject);
-      expect(onlyCatchSpy).to.have.been.calledOnce;
-      expect(onlyCatchSpy).to.have.been.calledWith(errorObject);
+      /*OK*/ expect(thenSpy.called).to.be.false;
+      /*OK*/ expect(thenCatchSpy.calledOnce).to.be.true;
+      /*OK*/ expect(thenCatchSpy.calledWith(errorObject)).to.be.true;
+      /*OK*/ expect(onlyCatchSpy.calledOnce).to.be.true;
+      /*OK*/ expect(onlyCatchSpy.calledWith(errorObject)).to.be.true;
     });
 
     it('should accept rejected calls to `finally`', async () => {
@@ -94,8 +107,8 @@ config.run('ControllerPromise', () => {
       // The catch in this line prevents Promise.reject from breaking the test
       await rejectedControllerPromise.catch(catchSpy).finally(finallySpy);
 
-      expect(catchSpy).to.have.been.calledOnce;
-      expect(finallySpy).to.have.been.calledOnce;
+      /*OK*/ expect(catchSpy.calledOnce).to.be.true;
+      /*OK*/ expect(finallySpy.calledOnce).to.be.true;
     });
 
     it('should accept resolved calls to `finally`', async () => {
@@ -108,8 +121,8 @@ config.run('ControllerPromise', () => {
 
       await resolvedControllerPromise.then(thenSpy).finally(finallySpy);
 
-      expect(thenSpy).to.have.been.calledWith(successObject);
-      expect(finallySpy).to.have.been.calledOnce;
+      /*OK*/ expect(thenSpy.calledWith(successObject)).to.be.true;
+      /*OK*/ expect(finallySpy.calledOnce).to.be.true;
     });
 
     it('should pass errors beyond `finally` to `catch` blocks', async () => {
@@ -122,8 +135,8 @@ config.run('ControllerPromise', () => {
 
       await rejectedControllerPromise.finally(finallySpy).catch(catchSpy);
 
-      expect(finallySpy).to.have.been.calledOnce;
-      expect(catchSpy).to.have.been.calledWith(failureObject);
+      /*OK*/ expect(finallySpy.calledOnce).to.be.true;
+      /*OK*/ expect(catchSpy.calledWith(failureObject)).to.be.true;
     });
 
     it('should accept long then chains', async () => {
@@ -132,7 +145,7 @@ config.run('ControllerPromise', () => {
 
       const three = two.then(x => x + 1).then(x => 'hello world ' + x);
 
-      expect(await three).to.equal('hello world 3');
+      /*OK*/ expect(await three).to.equal('hello world 3');
     });
   });
 
@@ -143,9 +156,9 @@ config.run('ControllerPromise', () => {
         getWaitFunction(getValueFunction)
       );
 
-      expect(await p).to.equal(0);
-      expect(await p.waitForValue(x => x == 5)).to.equal(5);
-      expect(await p).to.equal(0);
+      /*OK*/ expect(await p).to.equal(0);
+      /*OK*/ expect(await p.waitForValue(x => x == 5)).to.equal(5);
+      /*OK*/ expect(await p).to.equal(0);
     });
 
     it('should allow retryable promises to be then-ed once', async () => {
@@ -155,9 +168,9 @@ config.run('ControllerPromise', () => {
       );
       const testP = p.then(x => (x + 1) * 2);
 
-      expect(await testP).to.equal(2);
-      expect(await testP.waitForValue(x => x == 12)).to.equal(12);
-      expect(await testP).to.equal(2);
+      /*OK*/ expect(await testP).to.equal(2);
+      /*OK*/ expect(await testP.waitForValue(x => x == 12)).to.equal(12);
+      /*OK*/ expect(await testP).to.equal(2);
     });
 
     it('should allow retryable promises to be then-ed more than once', async () => {
@@ -167,9 +180,9 @@ config.run('ControllerPromise', () => {
       );
       const testP = p.then(x => (x + 1) * 2).then(x => x + 1);
 
-      expect(await testP).to.equal(3);
-      expect(await testP.waitForValue(x => x == 13)).to.equal(13);
-      expect(await testP).to.equal(3);
+      /*OK*/ expect(await testP).to.equal(3);
+      /*OK*/ expect(await testP.waitForValue(x => x == 13)).to.equal(13);
+      /*OK*/ expect(await testP).to.equal(3);
     });
 
     it('should reject on failure and not allow retrying', async () => {
@@ -179,15 +192,28 @@ config.run('ControllerPromise', () => {
       );
       const testP = p.then(x => (x + 1) * 2).then(x => x + 1);
 
-      expect(await testP).to.equal(3);
-      expect(await testP.waitForValue(x => x == 7)).to.equal(7);
-      expect(testP.waitForValue(x => x == 9)).to.eventually.be.rejectedWith(
-        'failure'
-      );
-      expect(testP.waitForValue(x => x == 5)).to.eventually.be.rejectedWith(
-        'failure'
-      );
-      expect(await testP).to.equal(3);
+      /*OK*/ expect(await testP).to.equal(3);
+      /*OK*/ expect(await testP.waitForValue(x => x == 7)).to.equal(7);
+
+      return testP
+        .waitForValue(x => x == 11)
+        .then(
+          () => {
+            throw new Error('should not succeed');
+          },
+          e => {
+            /*OK*/ expect(e).to.be.an('error');
+            return testP.waitForValue(x => x == 13);
+          }
+        )
+        .then(
+          () => {
+            throw new Error('should not succeed');
+          },
+          e => {
+            /*OK*/ expect(e).to.be.an('error');
+          }
+        );
     });
 
     /**
@@ -220,7 +246,7 @@ config.run('ControllerPromise', () => {
      */
     function getErrorFunction() {
       const errorFunction = sandbox.stub();
-      errorFunction.returns(6);
+      errorFunction.rejects();
       errorFunction
         .onCall(0)
         .resolves(0)
@@ -229,10 +255,7 @@ config.run('ControllerPromise', () => {
         .onCall(2)
         .resolves(2)
         .onCall(3)
-        .resolves(3)
-        .onCall(4)
-        .rejects('failure');
-
+        .resolves(3);
       return errorFunction;
     }
 
@@ -241,11 +264,13 @@ config.run('ControllerPromise', () => {
      * and mutate it with any `then` blocks that have been chained to the
      * ControllerPromise.
      * See {@link ../../build-system/tasks/e2e/expect.js} for real usage
+     * @param {function(): function():(!Promise<T>|T)}
+     * @template T
      */
     function getWaitFunction(valueFunctionGetter) {
       return (conditionFn, opt_mutate) => {
         /**
-         * Each call to `waitForValue` gets its own value function.
+         * Each call to `waitForValue` gets its own value function thunk.
          * This simulates the value returned by a WebDriver framework for
          * a request for a value e.g. from the DOM.
          * See {@link ../../build-system/tasks/e2e/selenium-webdriver-controller.js#getElementText}
@@ -270,7 +295,7 @@ config.run('ControllerPromise', () => {
             }
 
             /**
-             * This simulates behavior in the Chai wrapper `expect.js`
+             * This resolves the promise that the Chai wrapper `expect.js` awaits.
              * The condition is passed in by the expectations and it
              * stops polling when the condition matches.
              * See {@link ../../build-system/tasks/e2e/expect.js#valueSatisfiesExpectation}
