@@ -528,7 +528,7 @@ describes.realWin(
       [
         {noFill: 'true'},
         {noFill: 'ignore', notPresent: true},
-        {noFill: 'True', notPresent: true},
+        {noFill: 'True'},
       ].forEach(({noFill, notPresent}) => {
         it(
           notPresent
@@ -547,7 +547,9 @@ describes.realWin(
             doc.body.appendChild(ampStickyAd);
             return impl.getAdUrl().then(url => {
               if (notPresent) {
-                expect(url).to.not.match(/(\?|&)aanf=(&|$)/);
+                expect(url).to.not.match(
+                  new RegExp(`(\\?|&)aanf=${noFill}(&|$)`)
+                );
               } else {
                 expect(url).to.match(new RegExp(`(\\?|&)aanf=${noFill}(&|$)`));
               }
