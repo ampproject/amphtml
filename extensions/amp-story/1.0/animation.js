@@ -300,7 +300,9 @@ class AnimationRunner {
    * @private
    */
   finishWhenReady_(runner) {
-    if (runner.getPlayState() == WebAnimationPlayState.RUNNING) {
+    if (this.runner_) {
+      // Init or no-op if the runner was already running.
+      runner.start();
       runner.finish();
     }
   }
