@@ -15,6 +15,7 @@
  */
 
 import {Action, getStoreService} from './amp-story-store-service';
+import {CommonSignals} from '../../../src/common-signals';
 import {EventType} from './events';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes, lastChildElement} from '../../../src/dom';
@@ -69,14 +70,16 @@ export class LiveStoryManager {
       'amp-story must contain id to use the live story functionality'
     );
 
-    this.ampStory_.element.addEventListener(EventType.STORY_LOADED, () => {
-      Services.extensionsFor(this.ampdoc_.win).installExtensionForDoc(
-        this.ampdoc_,
-        'amp-live-list'
-      );
-    });
-
-    this.storyEl_.insertBefore(liveListEl, this.storyEl_.firstElementChild);
+    this.ampStory_.element
+      .signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => {
+        Services.extensionsFor(this.ampdoc_.win).installExtensionForDoc(
+          this.ampdoc_,
+          'amp-live-list'
+        );
+        this.storyEl_.insertBefore(liveListEl, this.storyEl_.firstElementChild);
+      });
   }
 
   /**

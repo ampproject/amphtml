@@ -1030,8 +1030,13 @@ export class AmpStory extends AMP.BaseElement {
       this.element.addEventListener(AmpEvents.DOM_UPDATE, () => {
         this.liveStoryManager_.update();
         this.initializePages_().then(() => {
-          this.setDesktopPositionAttributes_(this.activePage_);
           this.preloadPagesByDistance_();
+          if (
+            this.storeService_.get(StateProperty.UI_STATE) ===
+            UIType.DESKTOP_PANELS
+          ) {
+            this.setDesktopPositionAttributes_(this.activePage_);
+          }
         });
       });
     }

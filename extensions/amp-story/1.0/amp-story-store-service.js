@@ -156,10 +156,10 @@ export const StateProperty = {
 /** @private @const @enum {string} */
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
-  SET_PAGE_IDS: 'addToPageIds',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
+  SET_PAGE_IDS: 'addToPageIds',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
@@ -218,10 +218,6 @@ const actions = (state, action, data) => {
       );
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
-      }));
-    case Action.SET_PAGE_IDS:
-      return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.PAGE_IDS]: data,
       }));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
@@ -350,6 +346,10 @@ const actions = (state, action, data) => {
     case Action.SET_ADVANCEMENT_MODE:
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ADVANCEMENT_MODE]: data,
+      }));
+    case Action.SET_PAGE_IDS:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAGE_IDS]: data,
       }));
     default:
       dev().error(TAG, 'Unknown action %s.', action);
