@@ -406,7 +406,7 @@ Usage:
 * [Optional] Add the [`data-poll-interval`](#data-poll-interval-[optional]) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
 * [Optional] Add the [`live-story-disabled`](#live-story-disabled-[optional]) attribute to the `<amp-story>` element to disable the polling.
 * On each `<amp-story-page>`:
-  * Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting entries. Higher timestamps will be inserted before older entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
+  * Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
 
 ```html
 <amp-story id="story1" live-story ...>
