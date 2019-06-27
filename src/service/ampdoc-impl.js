@@ -53,9 +53,6 @@ export class AmpDocService {
     }
 
     /** @private @const */
-    this.alwaysClosestAmpDoc_ = isExperimentOn(win, 'ampdoc-closest');
-
-    /** @private @const */
     this.ampdocFieExperimentOn_ = isExperimentOn(win, 'ampdoc-fie');
   }
 
@@ -78,16 +75,10 @@ export class AmpDocService {
    *
    * TODO(#22733): rewrite docs once the ampdoc-fie is launched.
    *
-   * TODO(#17614): We should always look for the closest AmpDoc (make
-   * closestAmpDoc always true).
-   *
    * @param {!Node=} opt_node
-   * @param {{
-   *  closestAmpDoc: boolean
-   * }=} opt_options
    * @return {?AmpDoc}
    */
-  getAmpDocIfAvailable(opt_node = undefined, {closestAmpDoc = false} = {}) {
+  getAmpDocIfAvailable(opt_node = undefined) {
     if (this.ampdocFieExperimentOn_) {
       // TODO(#22733): make node not optional.
       const node = opt_node;
@@ -126,11 +117,6 @@ export class AmpDocService {
       return null;
     }
 
-    // Single document: return it immediately.
-    if (this.singleDoc_ && !closestAmpDoc && !this.alwaysClosestAmpDoc_) {
-      return this.singleDoc_;
-    }
-
     // TODO(sparhami) Should we always require a node to be passed? This will
     // make sure any functionality that works for a standalone AmpDoc works if
     // the AmpDoc is loaded in a shadow doc.
@@ -144,7 +130,7 @@ export class AmpDocService {
       // for the closest AmpDoc, the element might have a reference to the
       // global AmpDoc, which we do not want. This occurs when using
       // <amp-next-page>.
-      if (n.ampdoc_ && (this.alwaysClosestAmpDoc_ || !closestAmpDoc)) {
+      if (n.ampdoc_) {
         return n.ampdoc_;
       }
 
@@ -156,7 +142,8 @@ export class AmpDocService {
       }
 
       // Shadow doc.
-      const shadowRoot = getShadowRootNode(n);
+      const shadowRoot =
+        n.nodeType == /* DOCUMENT */ 9 ? n : getShadowRootNode(n);
       if (!shadowRoot) {
         break;
       }
@@ -186,12 +173,9 @@ export class AmpDocService {
    *
    * An Error is thrown in development if no `AmpDoc` is found.
    * @param {!Node=} opt_node
-   * @param {{
-   *  closestAmpDoc: boolean
-   * }=} opt_options
    * @return {!AmpDoc}
    */
-  getAmpDoc(opt_node, opt_options) {
+  getAmpDoc(opt_node) {
     // TODO(#22733): make node not optional.
     // Ensure that node is attached if specified. This check uses a new and
     // fast `isConnected` API and thus only checked on platforms that have it.
@@ -204,7 +188,7 @@ export class AmpDocService {
       );
     }
 
-    const ampdoc = this.getAmpDocIfAvailable(opt_node, opt_options);
+    const ampdoc = this.getAmpDocIfAvailable(opt_node);
     if (!ampdoc) {
       throw dev().createError('No ampdoc found for', opt_node);
     }

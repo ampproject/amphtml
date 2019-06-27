@@ -76,7 +76,7 @@ describe
     it('should provide the sourceUrl', () => {
       const win = {
         document: {
-          nodeType: /* document */ 9,
+          nodeType: /* DOCUMENT */ 9,
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
