@@ -209,6 +209,9 @@ function createBaseCustomElementClass(win) {
       this.layoutWidth_ = -1;
 
       /** @private {number} */
+      this.layoutHeight_ = -1;
+
+      /** @private {number} */
       this.layoutCount_ = 0;
 
       /** @private {boolean} */
@@ -614,6 +617,7 @@ function createBaseCustomElementClass(win) {
      */
     updateLayoutBox(layoutBox, opt_measurementsChanged) {
       this.layoutWidth_ = layoutBox.width;
+      this.layoutHeight_ = layoutBox.height;
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
@@ -1690,8 +1694,9 @@ function createBaseCustomElementClass(win) {
         let loadingElement;
         if (isNewLoaderExperimentEnabled(win)) {
           loadingElement = createNewLoaderElement(
-            /** @type {!Document} */ (doc),
-            this
+            this,
+            this.layoutWidth_,
+            this.layoutHeight_
           );
         } else {
           loadingElement = createLegacyLoaderElement(

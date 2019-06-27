@@ -54,14 +54,17 @@ export function createLegacyLoaderElement(doc, elementName) {
  * Please see https://github.com/ampproject/amphtml/issues/20237 for details,
  * screenshots and various states of the new loader design.
  *
- * @param {!Document} doc
- * @param {!Element} element
- * @return {!Element} new loader root element
+ * @param {!AmpElement} element
+ * @param {number} elementWidth
+ * @param {number} elementHeight
+ * @return {!Element} New loader root element
  */
-export function createNewLoaderElement(doc, element) {
-  devAssert(isNewLoaderExperimentEnabled(toWin(doc.defaultView)));
+export function createNewLoaderElement(element, elementWidth, elementHeight) {
+  devAssert(
+    isNewLoaderExperimentEnabled(toWin(element.ownerDocument.defaultView))
+  );
 
-  const loader = new LoaderBuilder(doc, element);
+  const loader = new LoaderBuilder(element, elementWidth, elementHeight);
   return loader.build();
 }
 
@@ -70,14 +73,12 @@ export function createNewLoaderElement(doc, element) {
  */
 class LoaderBuilder {
   /**
-   * @param {!Document} doc
-   * @param {!Element} element
+   * @param {number} elementWidth
+   * @param {number} elementHeight
+   * @param {!AmpElement} element
    */
-  constructor(doc, element) {
-    /** @private {!Document} */
-    this.doc_ = doc;
-
-    /** @private {!Element} */
+  constructor(element, elementWidth, elementHeight) {
+    /** @private {!AmpElement} */
     this.element_ = element;
 
     /** @private {?Element} */
@@ -85,6 +86,12 @@ class LoaderBuilder {
 
     /** @private {?Element} */
     this.svgRoot_;
+
+    /** @private {number} */
+    this.layoutWidth_ = elementWidth;
+
+    /** @private {number} */
+    this.layoutHeight_ = elementHeight;
   }
 
   /**
@@ -107,7 +114,7 @@ class LoaderBuilder {
     const html = htmlFor(this.element_);
     this.domRoot_ = html`
       <div class="i-amphtml-new-loader">
-        <div ref="innerContainer">
+        <div>
           <svg
             ref="svgRoot"
             xmlns="http://www.w3.org/2000/svg"
@@ -126,11 +133,7 @@ class LoaderBuilder {
      *  }
      * The extra div mimic a similar DOM.
      */
-    const refs = htmlRefs(this.domRoot_);
-    const innerContainer = dev().assertElement(refs['innerContainer']);
-    this.svgRoot_ = dev().assertElement(refs['svgRoot']);
-
-    innerContainer.appendChild(this.svgRoot_);
+    this.svgRoot_ = dev().assertElement(htmlRefs(this.domRoot_)['svgRoot']);
   }
 
   /**
@@ -182,7 +185,7 @@ class LoaderBuilder {
    * @private
    */
   addSpinner_() {
-    const svg = svgFor(this.doc_);
+    const svg = svgFor(this.element_);
     const spinner = svg`
       <g class="i-amphtml-new-loader-spinner">
         <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
@@ -291,7 +294,7 @@ class LoaderBuilder {
    * @return {!Element}
    */
   getDefaultLogo_() {
-    const svg = svgFor(this.doc_);
+    const svg = svgFor(this.element_);
     return svg`
       <circle
         class="i-amphtml-new-loader-logo"
@@ -322,8 +325,9 @@ class LoaderBuilder {
    * @return {boolean}
    */
   isSmall_() {
-    const box = this.element_.getLayoutBox();
-    return !this.isTiny_() && (box.width <= 100 || box.height <= 100);
+    return (
+      !this.isTiny_() && (this.layoutWidth_ <= 100 || this.layoutHeight_ <= 100)
+    );
   }
 
   /**
@@ -331,8 +335,7 @@ class LoaderBuilder {
    * @return {boolean}
    */
   isTiny_() {
-    const box = this.element_.getLayoutBox();
-    return box.width < 50 || box.height < 50;
+    return this.layoutWidth_ < 50 || this.layoutHeight_ < 50;
   }
 
   /**
