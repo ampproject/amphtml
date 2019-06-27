@@ -1638,10 +1638,11 @@ function createBaseCustomElementClass(win) {
       }
 
       if (
+        this.layoutCount_ > 0 ||
+        this.layoutWidth_ <= 0 || // Layout is not ready or invisible
         this.loadingDisabled_ ||
         !isLoadingAllowed(this) ||
         isTooSmallForLoader(this) ||
-        this.layoutCount_ > 0 ||
         isInternalOrServiceNode(this) ||
         !isLayoutSizeDefined(this.layout_)
       ) {
@@ -1902,8 +1903,8 @@ function isInternalOrServiceNode(node) {
  * @return {boolean}
  */
 function isTooSmallForLoader(element) {
+  // New loaders experiments has its own sizing heuristics
   if (isNewLoaderExperimentEnabled(toWin(element.ownerDocument.defaultView))) {
-    // New loaders experiments has its own sizing heuristics
     return false;
   }
 

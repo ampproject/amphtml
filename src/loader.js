@@ -251,7 +251,9 @@ class LoaderBuilder {
    * @private
    */
   maybeAddDefaultPlaceholder_() {
-    if (this.hasPlaceholder()) {
+    const hasPlaceholder = !!this.element_.getPlaceholder();
+    const hasPoster = this.element_.hasAttribute('poster');
+    if (hasPlaceholder || hasPoster) {
       return;
     }
 
@@ -349,16 +351,6 @@ class LoaderBuilder {
       placeholder &&
       placeholder.classList.contains('i-amphtml-blurry-placeholder')
     );
-  }
-
-  /**
-   *
-   */
-  hasPlaceholder() {
-    const hasPlaceholder = !!this.element_.getPlaceholder();
-    // we consider poster same as placeholder for our case.
-    const hasPoster = this.element_.getAttribute('poster') != '';
-    return hasPlaceholder || hasPoster;
   }
 
   /**

@@ -77,17 +77,14 @@
           if (e.srcElement.hasAttribute('placeholder')) {
             return;
           }
+
           const lc = e.srcElement.implementation_.layoutCallback.bind(
             e.srcElement.implementation_
           );
           e.srcElement.implementation_.layoutCallback = function() {
-            if (e.srcElement.finishedLayoutAlready_) {
-              return Promise.resolve();
-            }
             return new Promise(function(resolve) {
               setTimeout(() => {
                 lc().then(resolve);
-                e.srcElement.finishedLayoutAlready_ = true;
               }, delay);
             });
           };
@@ -112,19 +109,13 @@
       custom-element="amp-video-iframe"
       src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js"
     ></script>
+    <script
+      async
+      custom-element="amp-selector"
+      src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"
+    ></script>
     <style amp-custom>
       /* boring boiler place stuff */
-      main {
-        max-width: 600px;
-        margin: auto;
-        border-left: 1px #eee solid;
-        border-right: 1px #eee solid;
-        min-height: 100vh;
-        font-family: 'Courier New', Courier, monospace;
-        padding: 0 5px;
-        text-align: center;
-        padding-bottom: 20vh;
-      }
       button {
         background: #5e35b1;
         padding: 7px;
@@ -162,6 +153,67 @@
       amp-img img {
         object-fit: cover;
       }
+
+      :root {
+        --color-primary: #005af0;
+        --space-1: 0.5rem; /* 8px */
+        --space-4: 2rem; /* 32px */
+      }
+
+      /* Styles for the flex layout based tabs */
+      amp-selector[role='tablist'].tabs-with-flex {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      amp-selector[role='tablist'].tabs-with-flex [role='tab'] {
+        flex-grow: 1;
+        /* custom styling, feel free to change */
+        text-align: center;
+        padding: var(--space-1);
+      }
+      amp-selector[role='tablist'].tabs-with-flex [role='tab'][selected] {
+        outline: none;
+        /* custom styling, feel free to change */
+        border-bottom: 2px solid var(--color-primary);
+      }
+      amp-selector[role='tablist'].tabs-with-flex [role='tabpanel'] {
+        display: none;
+        width: 100%;
+        order: 1; /* must be greater than the order of the tab buttons to flex to the next line */
+        /* custom styling, feel free to change */
+        padding: var(--space-4);
+      }
+      amp-selector[role='tablist'].tabs-with-flex
+        [role='tab'][selected]
+        + [role='tabpanel'] {
+        display: block;
+      }
+
+      /* Styles for the selector based tabs */
+      amp-selector[role='tablist'].tabs-with-selector {
+        display: flex;
+      }
+      amp-selector[role='tablist'].tabs-with-selector [role='tab'][selected] {
+        outline: none;
+        /* custom styling, feel free to change */
+        border-bottom: 2px solid var(--color-primary);
+      }
+      amp-selector[role='tablist'].tabs-with-selector {
+        display: flex;
+      }
+      amp-selector[role='tablist'].tabs-with-selector [role='tab'] {
+        /* custom styling, feel free to change */
+        width: 100%;
+        text-align: center;
+        padding: var(--space-1);
+      }
+
+      [role='tabpanel'] section {
+        max-width: 600px;
+        margin: auto;
+        text-align: center;
+      }
+
       /* END boring boiler place stuff */
 
       /* Custom loader from ABE */
@@ -190,148 +242,117 @@
       .custom-loader-1 .amp-active > div {
         display: none;
       }
-
-      .button {
-        padding: 10px;
-        border: solid 1px blue;
-        background: silver;
-      }
-
-      .filters {
-        border: 1px solid #333;
-      }
-      .filters button {
-        padding: 10px;
-        border: none;
-        background-color: #eee;
-        color: #111;
-      }
-      .filters button.selected {
-        background: #fbc02d;
-      }
     </style>
   </head>
   <body>
-    <main>
-      <div class="info">
-        <div>- Default delay is ~4 seconds</div>
-        <div>
-          - You can change the delay by adding ?{number} (e.g. ?5000) to the Url
-        </div>
+    <div class="info">
+      <div>- Default delay is ~4 seconds</div>
+      <div>
+        - You can change the delay by adding ?{number} (e.g. ?5000) to the Url
       </div>
-      <div class="toolbar">
-        <button onclick="toggleExp('new-loaders')">
-          Toggle New/Old Default Loaders
-        </button>
+    </div>
+    <div class="toolbar">
+      <button onclick="toggleExp('new-loaders')">
+        Toggle New/Old Default Loaders
+      </button>
+    </div>
+
+    <amp-selector class="tabs-with-flex" role="tablist">
+      <div id="tab1" role="tab" aria-controls="tabpanel1" option selected>
+        amp-img
       </div>
-
-      <div class="filters">
-        <button
-          id="ampImgButton"
-          on="tap:sectionAmpImg.toggleVisibility(),ampImgButton.toggleClass(class='selected')"
-          class="selected"
-        >
-          amp-img
-        </button>
-        <button
-          id="ampIframeButton"
-          on="tap:sectionAmpIframe.toggleVisibility(),ampIframeButton.toggleClass(class='selected')"
-          class="selected"
-        >
-          amp-iframe
-        </button>
-      </div>
-
-      <section id="sectionAmpImg">
-        <h1>amp-img</h1>
-        <h2>normal</h2>
-        <amp-img
-          src="https://picsum.photos/1600/900?image=110"
-          layout="responsive"
-          width="1600"
-          height="900"
-        ></amp-img>
-
-        <h2>small</h2>
-        <amp-img
-          src="https://picsum.photos/320/50?image=165"
-          layout="fixed"
-          width="320"
-          height="50"
-        ></amp-img>
-
-        <h2>tiny</h2>
-        <amp-img
-          src="https://picsum.photos/100/100?image=125"
-          layout="fixed"
-          width="40"
-          height="40"
-        ></amp-img>
-
-        <h2>with blurry placeholder</h2>
-        <amp-img
-          src="https://rawcdn.githack.com/ampproject/amp-toolbox/6e4d9e794cf7bd0e98ea80224516d7180096c867/optimizer/spec/transformers/bball.jpg"
-          layout="responsive"
-          width="1600"
-          height="900"
-        >
-          <img
-            placeholder
-            class="i-amphtml-blurry-placeholder"
-            src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' xmlns%3Axlink='http%3A//www.w3.org/1999/xlink' viewBox='0 0 9 7'%3E%3Cfilter id='b' color-interpolation-filters='sRGB'%3E%3CfeGaussianBlur stdDeviation='.5'%3E%3C/feGaussianBlur%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1 1'%3E%3C/feFuncA%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cimage filter='url(%23b)' x='0' y='0' height='100%25' width='100%25' xlink%3Ahref='data%3Aimage/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAHCAYAAADam2dgAAAA4klEQVR4ARXBO04CURSA4f/OnHkpA4TRWGhFMg3oFlyCjTuwYRsULMEtuAgTGzUhttpZkagREwhEhwvjvI7x+8z0aqAHXYj3wA/gfpZz82yZXCakPYf8u0LspmGbGTxXaUfK21fJ7atltGiRHvn4cYOYXIl8RRSkVj5+Sv5JXvD7qWQrg2QW3BqWlDzOtuycGhSe3nOSdkmaeIjdKXfzjMNQGA1asF9wMXQ4G1Z0ogqxipuZYNyVkH4YsVg7FGuh73qcnAvecczqwSBL49AJI6a1QSolLJTexnB6bRC/4WUe8AdyJ1gLZ2JPFwAAAABJRU5ErkJggg=='%3E%3C/image%3E%3C/svg%3E"
-            style="object-fit: cover"
-          />
-        </amp-img>
-
-        <h2>Customized</h2>
-        <amp-img
-          src="https://picsum.photos/1600/900?image=210"
-          class="custom-loader-1"
-          layout="responsive"
-          width="1600"
-          height="900"
-        ></amp-img>
-      </section>
-
-      <section id="sectionAmpIframe">
-        <h1>amp-iframe</h1>
-        <h2>Normal amp-iframe</h2>
-        <amp-iframe
-          sandbox="allow-scripts allow-forms allow-same-origin"
-          src="https://maps.google.com/maps?width=100%&amp;height=600&amp;hl=en&amp;q=1%20Grafton%20Street%2C%20Dublin%2C%20Ireland+(My%20Business%20Name)&amp;ie=UTF8&amp;t=&amp;z=14&amp;iwloc=B&amp;output=embed"
-          layout="responsive"
-          width="1600"
-          height="900"
-        ></amp-iframe>
-
-        <h2>amp-iframe with image placeholder</h2>
-        <amp-iframe
-          sandbox="allow-scripts allow-forms allow-same-origin"
-          src="https://maps.google.com/maps?width=100%&amp;height=600&amp;hl=en&amp;q=1%20Grafton%20Street%2C%20Dublin%2C%20Ireland+(My%20Business%20Name)&amp;ie=UTF8&amp;t=&amp;z=14&amp;iwloc=B&amp;output=embed"
-          layout="responsive"
-          width="250"
-          height="250"
-        >
+      <div id="tabpanel1" role="tabpanel" aria-labelledby="tab1">
+        <section id="sectionAmpImg">
+          <h2>normal</h2>
           <amp-img
-            placeholder
-            src="https://picsum.photos/1600/900?image=314"
+            src="https://picsum.photos/1600/900?image=110"
+            layout="responsive"
+            width="1600"
+            height="900"
+          ></amp-img>
+
+          <h2>small</h2>
+          <amp-img
+            src="https://picsum.photos/320/50?image=165"
+            layout="fixed"
+            width="320"
+            height="50"
+          ></amp-img>
+
+          <h2>tiny</h2>
+          <amp-img
+            src="https://picsum.photos/100/100?image=125"
+            layout="fixed"
+            width="40"
+            height="40"
+          ></amp-img>
+
+          <h2>with blurry placeholder</h2>
+          <amp-img
+            src="https://rawcdn.githack.com/ampproject/amp-toolbox/6e4d9e794cf7bd0e98ea80224516d7180096c867/optimizer/spec/transformers/bball.jpg"
+            layout="responsive"
+            width="1600"
+            height="900"
+          >
+            <img
+              placeholder
+              class="i-amphtml-blurry-placeholder"
+              src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' xmlns%3Axlink='http%3A//www.w3.org/1999/xlink' viewBox='0 0 9 7'%3E%3Cfilter id='b' color-interpolation-filters='sRGB'%3E%3CfeGaussianBlur stdDeviation='.5'%3E%3C/feGaussianBlur%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1 1'%3E%3C/feFuncA%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cimage filter='url(%23b)' x='0' y='0' height='100%25' width='100%25' xlink%3Ahref='data%3Aimage/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAHCAYAAADam2dgAAAA4klEQVR4ARXBO04CURSA4f/OnHkpA4TRWGhFMg3oFlyCjTuwYRsULMEtuAgTGzUhttpZkagREwhEhwvjvI7x+8z0aqAHXYj3wA/gfpZz82yZXCakPYf8u0LspmGbGTxXaUfK21fJ7atltGiRHvn4cYOYXIl8RRSkVj5+Sv5JXvD7qWQrg2QW3BqWlDzOtuycGhSe3nOSdkmaeIjdKXfzjMNQGA1asF9wMXQ4G1Z0ogqxipuZYNyVkH4YsVg7FGuh73qcnAvecczqwSBL49AJI6a1QSolLJTexnB6bRC/4WUe8AdyJ1gLZ2JPFwAAAABJRU5ErkJggg=='%3E%3C/image%3E%3C/svg%3E"
+              style="object-fit: cover"
+            />
+          </amp-img>
+
+          <h2>Customized</h2>
+          <amp-img
+            src="https://picsum.photos/1600/900?image=210"
             class="custom-loader-1"
             layout="responsive"
-            width="250"
-            height="250"
+            width="1600"
+            height="900"
           ></amp-img>
-        </amp-iframe>
+        </section>
+      </div>
 
-        <h2>amp-video-iframe with poster</h2>
-        <amp-video-iframe
-          poster="https://picsum.photos/600/600?image=30"
-          sandbox="allow-scripts allow-forms allow-same-origin"
-          src="https://player.vimeo.com/video/183849543"
-          layout="responsive"
-          width="1600"
-          height="900"
-        ></amp-video-iframe>
-      </section>
-    </main>
+      <div id="tab2" role="tab" aria-controls="tabpanel2" option>
+        amp-iframe
+      </div>
+      <div id="tabpanel2" role="tabpanel" aria-labelledby="tab2">
+        <section id="sectionAmpIframe">
+          <h2>amp-iframe with image placeholder</h2>
+          <amp-iframe
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            src="https://maps.google.com/maps?width=100%&amp;height=600&amp;hl=en&amp;q=1%20Grafton%20Street%2C%20Dublin%2C%20Ireland+(My%20Business%20Name)&amp;ie=UTF8&amp;t=&amp;z=14&amp;iwloc=B&amp;output=embed"
+            layout="responsive"
+            width="250"
+            height="150"
+          >
+            <amp-img
+              placeholder
+              src="https://picsum.photos/1600/900?image=314"
+              class="custom-loader-1"
+              layout="responsive"
+              width="200"
+              height="150"
+            ></amp-img>
+          </amp-iframe>
+
+          <h2>Normal amp-iframe</h2>
+
+          <amp-iframe
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            src="https://maps.google.com/maps?width=100%&amp;height=600&amp;hl=en&amp;q=1%20Grafton%20Street%2C%20Dublin%2C%20Ireland+(My%20Business%20Name)&amp;ie=UTF8&amp;t=&amp;z=14&amp;iwloc=B&amp;output=embed"
+            layout="responsive"
+            width="1600"
+            height="900"
+          ></amp-iframe>
+        </section>
+      </div>
+      <div id="tab3" role="tab" aria-controls="tabpanel3" option>
+        amp-video
+      </div>
+      <div id="tabpanel3" role="tabpanel" aria-labelledby="tab3">
+        Tab three content...
+      </div>
+    </amp-selector>
   </body>
 </html>
