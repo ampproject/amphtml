@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AttributeMutationDefaultClass} from './mutation/attribute-mutation-default-class';
 import {AttributeMutationDefaultStyle} from './mutation/attribute-mutation-default-style';
 import {AttributeMutationDefaultUrl} from './mutation/attribute-mutation-default-url';
 import {CharacterDataMutation} from './mutation/character-data-mutation';
@@ -107,6 +108,8 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
         mutationRecord['attributeName'] === 'src'
       ) {
         mutation = new AttributeMutationDefaultUrl(mutationRecord, elements);
+      } else if (mutationRecord['attributeName'] === 'class') {
+        mutation = new AttributeMutationDefaultClass(mutationRecord, elements);
       } else {
         // Did not find a supported attributeName
         throw new Error(

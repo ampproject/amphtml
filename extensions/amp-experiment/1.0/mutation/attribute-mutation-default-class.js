@@ -21,7 +21,7 @@ import {assertAttributeMutationFormat} from './mutation';
  *
  * @implements {./mutation.Mutation}
  */
-export class AttributeMutationDefaultStyle {
+export class AttributeMutationDefaultClass {
   /**
    * @param {!JsonObject} mutationRecord
    * @param {!Array<Element>} elements
@@ -36,21 +36,11 @@ export class AttributeMutationDefaultStyle {
   validate() {
     const value = this.mutationRecord['value'];
 
-    // Do not allow Important or HTML Comments
-    if (value.match(/(!\s*important|<!--)/)) {
+    // Don't allow the .i-amphtml class
+    // Should stay in sync with
+    // `validator/validator-main.protoascii`
+    if (value.match(/(^|\\W)i-amphtml-/)) {
       return false;
-    }
-
-    // Allow Color
-    if (value.match(/^color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/)) {
-      return true;
-    }
-
-    // Allow Background color
-    if (
-      value.match(/^background-color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/)
-    ) {
-      return true;
     }
 
     return true;
