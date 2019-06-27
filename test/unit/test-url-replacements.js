@@ -169,6 +169,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
         cookie: '',
         documentElement: {
           nodeType: /* element */ 1,
+          getRootNode() {
+            return win.document;
+          },
         },
       },
       Math: {
@@ -190,6 +193,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
       // Fake query selectors needed to bypass <meta> tag checks.
       querySelector: () => null,
       querySelectorAll: () => [],
+      getRootNode() {
+        return win.document;
+      },
     };
     installDocService(win, /* isSingleDoc */ true);
     const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
