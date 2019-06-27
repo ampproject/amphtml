@@ -25,7 +25,6 @@ import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {Services} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
 import {getPlacementsFromConfigObj} from './placement';
-import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const */
@@ -37,8 +36,6 @@ const AD_TAG = 'amp-ad';
 export class AmpAutoAds extends AMP.BaseElement {
   /** @override */
   buildCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-auto-ads'), 'Experiment is off');
-
     const type = this.element.getAttribute('type');
     userAssert(type, 'Missing type attribute');
 
