@@ -70,6 +70,17 @@ export class SubscriptionAnalytics {
    */
   constructor(element) {
     this.element_ = element;
+
+    /** @private @const {Array<function(string,!JsonObject=)>} */
+    this.listeners_ = [];
+  }
+
+  /**
+   * Notified of any event sent to SubscriptionAnalytics.
+   * @param {function(string,!JsonObject=)} listener
+   */
+  registerEventListener(listener) {
+    this.listeners_.push(listener);
   }
 
   /**
@@ -96,6 +107,10 @@ export class SubscriptionAnalytics {
   event(eventType, opt_vars) {
     user().info(TAG, eventType, opt_vars || '');
     triggerAnalyticsEvent(this.element_, eventType, opt_vars || dict({}));
+
+    for (let l = 0; l < this.listeners_.length; l++) {
+      this.listeners_[l](eventType, opt_vars);
+    }
   }
 
   /**
@@ -110,5 +125,26 @@ export class SubscriptionAnalytics {
       serviceId,
       opt_vars
     );
+  }
+
+  /**
+   * Converts an action event string into its corresponding action and status.
+   * @param {string} event
+   * @return {{
+   *  action: (string|undefined),
+   *  status: (string|undefined),
+   * }}
+   */
+  getActionStatus(event) {
+    let action = undefined;
+    let status = undefined;
+
+    const arr = event.split('-');
+    if (arr.length > 3 && arr[0] === 'subscriptions' && arr[1] === 'action') {
+      action = arr[2];
+      status = arr[3];
+    }
+
+    return {action, status};
   }
 }

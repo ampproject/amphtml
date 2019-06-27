@@ -45,4 +45,35 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
       {'serviceId': 'service1'}
     );
   });
+
+  describe('listeners', () => {
+    let eventStr;
+    let eventObj;
+
+    beforeEach(() => {
+      analytics.registerEventListener(event => {
+        eventStr = event;
+        eventObj = analytics.getActionStatus(event);
+      });
+    });
+
+    it('should notify listeners', () => {
+      analytics.event('event');
+      expect(eventStr).to.equal('event');
+
+      analytics.serviceEvent('servEvent', '1');
+      expect(eventStr).to.equal('servEvent');
+
+      analytics.actionEvent('1', 'action', 'status');
+      expect(eventStr).to.equal('subscriptions-action-action-status');
+    });
+
+    it('should decode action events', () => {
+      analytics.actionEvent('1', 'action1', 'status1');
+      expect(eventObj).to.deep.equal({
+        action: 'action1',
+        status: 'status1',
+      });
+    });
+  });
 });
