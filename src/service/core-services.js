@@ -92,7 +92,10 @@ export function installAmpdocServices(ampdoc, opt_initParams, opt_inabox) {
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
-  installStorageServiceForDoc(ampdoc);
+  if (!opt_inabox) {
+    // For security, Storage is not supported in inabox.
+    installStorageServiceForDoc(ampdoc);
+  }
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
