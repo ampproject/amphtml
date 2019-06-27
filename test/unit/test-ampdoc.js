@@ -93,17 +93,7 @@ describe('AmpDocService', () => {
         }
       });
 
-      it('should yield the single doc', () => {
-        if (!shadowRoot) {
-          return;
-        }
-
-        service.installShadowDoc('https://a.org/', shadowRoot);
-        const ampDoc = service.getAmpDoc(content);
-        expect(ampDoc).to.equal(service.singleDoc_);
-      });
-
-      it('should yield the closest shadow doc when explicitly asked', () => {
+      it('should yield the closest shadow doc', () => {
         if (!shadowRoot) {
           return;
         }
