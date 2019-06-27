@@ -28,7 +28,6 @@ t.run('user-error', function() {
     {
       extensions: ['amp-analytics'],
       hash: 'log=0',
-      experiments: ['user-error-reporting'],
       body: `
     <amp-analytics>
       <script type="application/json">
@@ -67,8 +66,6 @@ t.run('user-error', function() {
     {
       extensions: ['amp-analytics'],
       hash: 'log=0',
-      experiments: ['user-error-reporting'],
-
       body: `
     <amp-img
       src="../../examples/img/sea@1x.jpg"
@@ -109,8 +106,6 @@ t.run('user-error', function() {
     {
       extensions: ['amp-analytics', 'amp-ad'],
       hash: 'log=0',
-      experiments: ['user-error-reporting'],
-
       body: `
     <amp-ad width=300 height=250
         type="_ping_"
