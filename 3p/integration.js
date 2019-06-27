@@ -518,6 +518,9 @@ register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
 register('speakol', speakol);
+register('mgid', mgid);
+register('lentainform', lentainform);
+register('idealmedia', idealmedia);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
