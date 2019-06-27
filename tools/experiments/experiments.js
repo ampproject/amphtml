@@ -101,12 +101,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
-    id: 'amp-auto-ads',
-    name: 'AMP Auto Ads',
-    spec: 'https://github.com/ampproject/amphtml/issues/6196',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
-  },
-  {
     id: 'amp-base-carousel',
     name: 'AMP extension for a basic, flexible, carousel',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
@@ -364,16 +358,6 @@ const EXPERIMENTS = [
     name: 'Enables <amp-video dock>',
     spec: 'https://github.com/ampproject/amphtml/issues/14061',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
-  },
-  {
-    id: 'linker-form',
-    name: 'Enables form support in linker',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18068',
-  },
-  {
-    id: 'fie-metadata-extension',
-    name: 'Use version supporting extension field in amp-ad-metadata.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18737',
   },
   {
     id: 'amp-list-load-more',

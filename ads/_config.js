@@ -175,6 +175,7 @@ export const adConfig = {
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
     consentHandlingOverride: true,
+    renderStartImplemented: true,
   },
 
   'adsensor': {

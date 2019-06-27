@@ -55,13 +55,7 @@ async function prCheck(cb) {
   }
 
   printChangeSummary(FILENAME);
-  const buildTargets = new Set();
-  if (!determineBuildTargets(buildTargets, FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
-    return;
-  }
-
+  const buildTargets = determineBuildTargets(FILENAME);
   runCheck('gulp lint --local_changes');
   runCheck('gulp presubmit');
 

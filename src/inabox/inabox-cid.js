@@ -14,40 +14,28 @@
  * limitations under the License.
  */
 
-:host {
-  padding: 0 !important;
-  border: none !important;
+import {CidDef} from '../service/cid-impl';
+import {registerServiceBuilderForDoc} from '../service';
+
+/**
+ * A dummy impl of CID service as CLIENT_ID is not supported
+ * in inabox.
+ *
+ * @implements {CidDef}
+ */
+class InaboxCid {
+  /** @override */
+  get() {
+    return Promise.resolve(null);
+  }
+
+  /** @override */
+  optOut() {}
 }
 
-:host([i-amphtml-truncate-expanded]) {
-  height: auto !important;
-}
-
-:host([i-amphtml-truncate-expanded]) .content {
-  position: static;
-}
-
-:host(:not([i-amphtml-truncate-expanded])) .expanded-slot {
-  display: none;
-}
-
-.content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-}
-
-.expand-slot::slotted(*) {
-  margin: 0 !important;
-  white-space: nowrap !important;
-}
-
-:host(:not([i-amphtml-truncate-overflow])) .collapsed-slot {
-  display: none;
-}
-
-::slotted([i-amphtml-truncate-child-overflow]) {
-  display: none !important;
+/**
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installInaboxCidService(ampdoc) {
+  return registerServiceBuilderForDoc(ampdoc, 'cid', InaboxCid);
 }

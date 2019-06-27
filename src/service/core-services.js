@@ -79,10 +79,10 @@ export function installRuntimeServices(global) {
 export function installAmpdocServices(ampdoc, opt_initParams, opt_inabox) {
   // Order is important!
   installUrlForDoc(ampdoc);
-  installCidService(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   if (!opt_inabox) {
-    // viewer & viewport were installed in amp-inabox.js
+    // those services are installed in amp-inabox.js
+    installCidService(ampdoc);
     installViewerServiceForDoc(ampdoc, opt_initParams);
     installViewportServiceForDoc(ampdoc);
   }
@@ -92,7 +92,10 @@ export function installAmpdocServices(ampdoc, opt_initParams, opt_inabox) {
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
-  installStorageServiceForDoc(ampdoc);
+  if (!opt_inabox) {
+    // For security, Storage is not supported in inabox.
+    installStorageServiceForDoc(ampdoc);
+  }
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
