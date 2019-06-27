@@ -142,8 +142,8 @@ export class AmpDocService {
       }
 
       // Shadow doc.
-      const shadowRoot = n.nodeType == /* DOCUMENT */ 9
-        ? n : getShadowRootNode(n);
+      const shadowRoot =
+        n.nodeType == /* DOCUMENT */ 9 ? n : getShadowRootNode(n);
       if (!shadowRoot) {
         break;
       }
