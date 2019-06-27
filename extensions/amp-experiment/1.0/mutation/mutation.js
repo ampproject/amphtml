@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {userAssert} from '../../../../src/log';
+
 /**
  * Interface for amp-experiment mutations.
  * Mutation should be implemented
@@ -26,12 +28,59 @@ export class Mutation {
    * Called to validate the value of a mutation
    * @return {!Boolean}
    */
-  getValue() {}
+  validate() {}
 
   /**
    * Called to aplly the changes to the selected
    * element(s)
    */
   mutate() {}
+}
+
+/**
+
+ * Function to assert the format for attribute
+ * mutations.
+ * @param {!Object} mutationRecord
+ */
+export function assertAttributeMutationFormat(mutationRecord) {
+
+  const stringifiedMutation = JSON.stringify(mutationRecord);
+
+  // Assert the mutation value
+  userAssert(
+    mutationRecord['value'] !== undefined &&
+    typeof mutationRecord['value'] === 'string',
+    'Mutation %s must have a value.',
+    stringifiedMutation
+  );
+
+  // Assert mutation attributeName
+  userAssert(
+    mutationRecord['attributeName'] !== undefined &&
+    typeof mutationRecord['attributeName'] === 'string',
+    'Mutation %s must have a attributeName.',
+    stringifiedMutation
+  );
+}
+
+/**
+ * Function to assert the format for textContent
+ * mutations.
+ * @param {!Object} mutationRecord
+ */
+export function assertCharacterDataMutationFormat(
+  mutationRecord
+) {
+
+  const stringifiedMutation = JSON.stringify(mutationRecord);
+
+  // Assert the mutation value
+  userAssert(
+    mutationRecord['value'] !== undefined &&
+    typeof mutationRecord['value'] === 'string',
+    'Mutation %s must have a value.',
+    stringifiedMutation
+  );
 }
 

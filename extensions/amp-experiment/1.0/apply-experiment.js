@@ -19,6 +19,12 @@ import {
   getElementsFromMutationRecordSelector,
   MUTATION_TYPES
 } from './mutation-record';
+import {
+  AttributeMutationDefaultStyle
+} from './mutation/attribute-mutation-default-style';
+import {
+  CharacterDataMutation
+} from './mutation/character-data-mutation';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-experiment mutation';
@@ -86,14 +92,59 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     throw new Error(numMutationsError);
   }
 
-  // TODO: Make the mutation
+  // Create the mutations
+  let mutations = [];
+  mutationRecordsAndElements.forEach(mutationRecordAndElements => {
+    const mutationRecord = mutationRecordAndElements.mutationRecord;
+    const elements = mutationRecordAndElements.elements;
 
+    let mutation = undefined;
+    if (mutationRecord['type'] === 'characterData') {
+      mutation = new CharacterDataMutation(
+        mutationRecord,
+        elements
+      );
+    } else if (mutationRecord['type'] === 'attributes') {
+      if (mutationRecord['attributeName'] === 'style') {
+        mutation = new AttributeMutationDefaultStyle(
+          mutationRecord,
+          elements
+        );
+      } else if (mutationRecord['attributeName'] === 'href' ||
+        mutationRecord['attributeName'] === 'src') {
+        mutation = new AttributeMutationDefaultUrl(
+          mutationRecord,
+          elements
+        );
+      } else {
+        // Did not find a supported attributeName
+        throw new Error(
+          `Mutation ${JSON.stringify(this.mutationRecord)} has an unsupported attributeName.`
+        );
+      }
+    } else {
 
-  // TODO: Apply the mutation
+      user().error(
+        TAG,
+        'childList mutations not supported in the current experiment state.'
+      );
 
+      // TODO: Allow for innerHTML mutations
+      // Therefore, return a noop mutation.
+      mutation = {
+        validate: () => true,
+        mutate: () => {}
+      };
+    }
+
+    mutations.push(mutation);
+  });
 
   return ampdoc.whenReady().then(() => {
-    // TODO: Apply all the mutations
+    // Apply all the mutations
+    mutations.forEach(mutation => {
+      mutation.mutate();
+    });
     return experimentToVariant;
   });
 }
