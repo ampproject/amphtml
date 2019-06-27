@@ -5,11 +5,6 @@
     "amp-next-page",
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
-<<<<<<< HEAD
-    "linker-meta-opt-in",
-=======
-    "inabox-remove-height-auto",
->>>>>>> master
     "inabox-css-cleanup"
   ],
   "allow-url-opt-in": [
