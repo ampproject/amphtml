@@ -220,9 +220,8 @@ const actions = (state, action, data) => {
         [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
       }));
     case Action.ADD_TO_PAGE_IDS:
-      const newPageIds = [].concat(state[StateProperty.PAGE_IDS], data);
       return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.PAGE_IDS]: newPageIds,
+        [StateProperty.PAGE_IDS]: data,
       }));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:

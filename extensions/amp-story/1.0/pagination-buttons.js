@@ -246,6 +246,13 @@ export class PaginationButtons {
       }
     );
 
+    this.storeService_.subscribe(StateProperty.PAGE_IDS, () => {
+      const currentPageIndex = this.storeService_.get(
+        StateProperty.CURRENT_PAGE_INDEX
+      );
+      this.onCurrentPageIndexUpdate_(currentPageIndex);
+    });
+
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
       isVisible => {

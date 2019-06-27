@@ -933,7 +933,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeSidebar_();
     this.setThemeColor_();
 
-    const storyLayoutPromise = this.initializePages_()
+    const storyLayoutPromise = this.initializePages()
       .then(() => {
         this.handleConsentExtension_();
         this.initializeStoryAccess_();
@@ -1019,18 +1019,18 @@ export class AmpStory extends AMP.BaseElement {
    */
   initializeLiveStory_() {
     if (this.element.hasAttribute('live-story')) {
-      this.liveStoryManager_ = new LiveStoryManager(this);
+      this.liveStoryManager_ = new LiveStoryManager(this, this.getAmpDoc());
       this.liveStoryManager_.build();
 
       this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [
         {tagOrTarget: 'AMP-LIVE-LIST', method: 'update'},
       ]);
 
-      this.element.addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
-        this.liveStoryManager_.update(
-          target,
-          this.element.querySelectorAll('amp-story-page:not([ad])')
-        );
+      this.element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+        this.liveStoryManager_.update().then(() => {
+          this.setDesktopPositionAttributes_(this.activePage_);
+          this.preloadPagesByDistance_();
+        });
       });
     }
   }
@@ -1226,8 +1226,10 @@ export class AmpStory extends AMP.BaseElement {
     return true;
   }
 
-  /** @private */
-  initializePages_() {
+  /**
+   * Returns a promise that resolves when pages have finished initializing.
+   */
+  initializePages() {
     const pageImplPromises = Array.prototype.map.call(
       this.element.querySelectorAll('amp-story-page'),
       pageEl => pageEl.getImpl()
