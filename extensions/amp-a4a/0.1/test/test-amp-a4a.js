@@ -63,7 +63,6 @@ import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
-import {toggleExperiment} from '../../../../src/experiments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 
 describe('amp-a4a', () => {
@@ -736,18 +735,8 @@ describe('amp-a4a', () => {
         });
       });
 
-      it("shouldn't set feature policy for sync-xhr with exp off-a4a", () => {
+      it('should set feature policy for sync-xhr', () => {
         a4a.sandboxHTMLCreativeFrame = () => true;
-        a4a.onLayoutMeasure();
-        return a4a.layoutCallback().then(() => {
-          verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-          expect(a4a.iframe.getAttribute('allow')).to.not.match(/sync-xhr/);
-        });
-      });
-
-      it('should set feature policy for sync-xhr with exp on-a4a', () => {
-        a4a.sandboxHTMLCreativeFrame = () => true;
-        toggleExperiment(a4a.win, 'no-sync-xhr-in-ads', true);
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
