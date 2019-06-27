@@ -146,10 +146,7 @@ export function getIframe(
   // request completes.
   iframe.setAttribute('allow', "sync-xhr 'none';");
   const excludeFromSandbox = ['facebook'];
-  if (
-    isExperimentOn(parentWindow, 'sandbox-ads') &&
-    !excludeFromSandbox.includes(opt_type)
-  ) {
+  if (!excludeFromSandbox.includes(opt_type)) {
     applySandbox(iframe);
   }
   iframe.setAttribute(
