@@ -6,7 +6,6 @@
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
     "linker-meta-opt-in",
-    "inabox-remove-height-auto",
     "inabox-css-cleanup"
   ],
   "allow-url-opt-in": [
@@ -53,7 +52,6 @@
   "font-display-swap": 1,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
-  "inabox-remove-height-auto": 1,
   "linker-meta-opt-in": 1,
   "margin-bottom-in-content-height": 1,
   "no-initial-intersection": 1,
