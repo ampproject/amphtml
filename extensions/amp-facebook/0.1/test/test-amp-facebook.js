@@ -18,7 +18,6 @@ import '../amp-facebook';
 import {facebook} from '../../../../3p/facebook';
 import {resetServiceForTesting} from '../../../../src/service';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-facebook',
