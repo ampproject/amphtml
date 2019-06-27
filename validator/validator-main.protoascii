@@ -6303,6 +6303,8 @@ attr_lists: {
   attrs: { name: "accesskey" }
   attrs: {
     # attribute "class" for transformed is handled within the Validator engine.
+    # If this changes, please be sure to also update:
+    # amp-experiment 1.0 implementation.
     disabled_by: "transformed"
     name: "class"
     blacklisted_value_regex: "(^|\\W)i-amphtml-"

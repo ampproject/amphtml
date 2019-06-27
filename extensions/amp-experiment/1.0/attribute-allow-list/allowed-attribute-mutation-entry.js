@@ -91,3 +91,23 @@ export class DefaultAllowedURLAttributeMutationEntry extends AllowedAttributeMut
     return true;
   }
 }
+
+/**
+ * Class for handling class type attribute
+ * mutations. E.g ['class']['*']
+ */
+export class DefaultClassAllowedAttributeMutationEntry extends AllowedAttributeMutationEntry {
+  /** @override */
+  validate(mutationRecord) {
+    const value = mutationRecord['value'];
+
+    // Don't allow the .i-amphtml class
+    // Should stay in sync with
+    // `validator/validator-main.protoascii`
+    if (value.match(/(^|\\W)i-amphtml-/)) {
+      return false;
+    }
+
+    return true;
+  }
+}

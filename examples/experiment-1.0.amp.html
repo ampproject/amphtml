@@ -15,6 +15,10 @@
       background-color: yellow;
       height: 50px;
     }
+
+    .blue-class {
+      color: blue;
+    }
   </style>
 </head>
 <body>
@@ -50,6 +54,22 @@
                   "target": "h1",
                   "attributeName": "style",
                   "value": "background-color: #FF0000"
+                }
+              ]
+            }
+          }
+        },
+        "background-color-test": {
+          "consentNotificationId": "amp-user-notification",
+          "variants": {
+            "blue": {
+              "weight": 50,
+              "mutations": [
+                {
+                  "type": "attributes",
+                  "target": "h1",
+                  "attributeName": "class",
+                  "value": "blue-class"
                 }
               ]
             }
