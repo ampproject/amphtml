@@ -31,6 +31,7 @@ const relativePath = require('path').relative;
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
+const terser = require('terser');
 const through = require('through2');
 const {
   extensionBundles,
@@ -231,7 +232,8 @@ exports.getBundleFlags = function(g) {
       const configEntry = getExtensionBundleConfig(originalName);
       if (configEntry) {
         cmd += `:${configEntry.type}`;
-        bundleDeps.push('_base_i', configEntry.type);
+        // This is not necessary with intermediate concating.
+        // bundleDeps.push('_base_i', configEntry.type);
       } else {
         // All lower tier bundles depend on _base_i
         if (TYPES_VALUES.includes(name)) {
@@ -255,10 +257,7 @@ exports.getBundleFlags = function(g) {
         jsFilesToWrap.push(name);
       } else {
         const configEntry = getExtensionBundleConfig(originalName);
-        const marker =
-          configEntry && Array.isArray(configEntry.postPrepend)
-            ? SPLIT_MARKER
-            : '';
+        const marker = configEntry ? SPLIT_MARKER : '';
         flagsArray.push(
           '--module_wrapper',
           name +
@@ -580,7 +579,9 @@ exports.singlePassCompile = async function(entryModule, options) {
     })
     .then(compile)
     .then(wrapMainBinaries)
-    .then(postProcessConcat)
+    .then(intermediateBundleConcat)
+    .then(eliminateIntermediateBundles)
+    .then(thirdPartyConcat)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       return Promise.reject(err);
@@ -615,43 +616,64 @@ function wrapMainBinaries() {
 }
 
 /**
- * Appends the listed file to the built js binary.
+ * Prepends intermediate bundles to the built js binary.
  * TODO(erwinm, #18811): This operation is needed but straight out breaks
  * source maps.
  */
-function postProcessConcat() {
-  const extensions = extensionBundles.filter(x => Array.isArray(x.postPrepend));
-  extensions.forEach(extension => {
-    const isAltMainBundle = altMainBundles.some(x => {
-      return x.name === extension.name;
-    });
-    // We assume its in v0 unless its an alternative main binary.
-    const srcTargetDir = isAltMainBundle ? 'dist/' : 'dist/v0/';
+function intermediateBundleConcat() {
+  extensionBundles.forEach(extension => {
+    const prependContents = [
+      'dist/v0/_base_i.js',
+      `dist/v0/${extension.type}.js`,
+    ].map(readFile);
 
-    function createFullPath(version) {
-      return `${srcTargetDir}${extension.name}-${version}.js`;
+    // If there are third_party libraries to prepend too, ensure we inject a
+    // new split marker.
+    if (Array.isArray(extension.postPrepend)) {
+      prependContents.push(SPLIT_MARKER);
     }
 
-    let targets = [];
-    if (Array.isArray(extension.version)) {
-      targets = extension.version.map(createFullPath);
-    } else {
-      targets.push(createFullPath(extension.version));
+    return postPrepend(extension, prependContents);
+  });
+}
+
+/**
+ * Prepends the listed file to the built js binary.
+ * TODO(erwinm, #18811): This operation is needed but straight out breaks
+ * source maps.
+ */
+function thirdPartyConcat() {
+  extensionBundles.forEach(extension => {
+    const postPrependPaths = extension.postPrepend;
+    if (!Array.isArray(postPrependPaths)) {
+      return;
     }
-    targets.forEach(path => {
-      const prependContent = extension.postPrepend
-        .map(x => {
-          return ';' + fs.readFileSync(x, 'utf8').toString();
-        })
-        .join('');
-      const content = fs
-        .readFileSync(path, 'utf8')
-        .toString()
-        .split(SPLIT_MARKER);
-      const prefix = content[0];
-      const suffix = content[1];
-      fs.writeFileSync(path, prefix + prependContent + suffix, 'utf8');
-    });
+    const prependContents = postPrependPaths.map(readFile);
+
+    return postPrepend(extension, prependContents);
+  });
+}
+
+function postPrepend(extension, prependContents) {
+  function createFullPath(version) {
+    return `dist/v0/${extension.name}-${version}.js`;
+  }
+
+  let targets = [];
+  if (Array.isArray(extension.version)) {
+    targets = extension.version.map(createFullPath);
+  } else {
+    targets.push(createFullPath(extension.version));
+  }
+  const prependContent = ';' + prependContents.join(';');
+  targets.forEach(path => {
+    const content = fs
+      .readFileSync(path, 'utf8')
+      .toString()
+      .split(SPLIT_MARKER);
+    const prefix = content[0];
+    const suffix = content[1];
+    fs.writeFileSync(path, prefix + prependContent + suffix, 'utf8');
   });
 }
 
@@ -672,4 +694,42 @@ function compile(flagsArray) {
       .pipe(gulp.dest('.'))
       .on('end', resolve);
   });
+}
+
+function eliminateIntermediateBundles() {
+  extensionBundles.forEach(extension => {
+    function createFullPath(version) {
+      return `dist/v0/${extension.name}-${version}.js`;
+    }
+
+    let targets = [];
+    if (Array.isArray(extension.version)) {
+      targets = extension.version.map(createFullPath);
+    } else {
+      targets.push(createFullPath(extension.version));
+    }
+    targets.forEach(path => {
+      const {code} = babel.transformFileSync(path, {
+        plugins: conf.eliminateIntermediateBundles(),
+        retainLines: true,
+      });
+      const compressed = terser.minify(code, {
+        mangle: false,
+        compress: {
+          defaults: false,
+          unused: true,
+        },
+        output: {
+          beautify: !!argv.pretty_print,
+          comments: 'all',
+          keep_quoted_props: true,
+        },
+      }).code;
+      fs.outputFileSync(path, compressed);
+    });
+  });
+}
+
+function readFile(path) {
+  return fs.readFileSync(path, 'utf8').toString();
 }
