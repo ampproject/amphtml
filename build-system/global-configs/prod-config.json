@@ -5,7 +5,6 @@
     "amp-next-page",
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
-    "linker-meta-opt-in",
     "inabox-remove-height-auto",
     "inabox-css-cleanup"
   ],
@@ -53,7 +52,6 @@
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
   "inabox-remove-height-auto": 1,
-  "linker-meta-opt-in": 1,
   "margin-bottom-in-content-height": 1,
   "no-sync-xhr-in-ads": 1,
   "pump-early-frame": 1,
