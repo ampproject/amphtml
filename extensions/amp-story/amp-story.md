@@ -398,7 +398,7 @@ This means that publishers of stories do not need to set up a JSON endpoint or p
   </amp-anim>
 </figure>
 
-**Note**: As long as the `live-story` attribute is present on the `<amp-story>` element, the client will make continous polls to the server copy of the story document. Make sure to set the `live-story-disabled` attribute to make the polling stop once you're finished with the live broadcast of your story. Learn more on the [polling section](#polling).
+**Note**: As long as the `live-story` attribute is present on the `<amp-story>` element, the client will make continuous polls to the server copy of the document. Make sure to set the `live-story-disabled` attribute to make the polling stop once you're finished with the live broadcast of your story. Learn more on the [polling section](#polling).
 
 Usage:
 * Specify an `id` on the `<amp-story>` element.
