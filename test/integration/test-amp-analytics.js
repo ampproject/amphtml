@@ -73,6 +73,7 @@ describe('amp-analytics', function() {
           // cookie set via http response header when requesting
           // localhost:9876/amp4test/compose-doc
           expect(q['cookie']).to.equal('test');
+          expect(req.url).to.equal('/?a=2&b=AMP%20TEST&cid=amp-12345');
           expect(
             req.headers.referer,
             'should keep referrer if no referrerpolicy specified'
