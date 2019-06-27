@@ -61,7 +61,7 @@ Example:
 <table>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
-    <td>If this attribute is present, and the browser supports autoplay:</p>
+    <td>If this attribute is present, and the browser supports autoplay:
 <ul>
   <li>the video is automatically muted before autoplay starts</li>
   <li>when the video is scrolled out of view, the video is paused</li>
