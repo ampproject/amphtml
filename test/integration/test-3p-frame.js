@@ -309,16 +309,7 @@ describe
       expect(iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
     });
 
-    it('should not set sandbox with sandbox-ads off', () => {
-      const div = document.createElement('my-element');
-      setupElementFunctions(div);
-      container.appendChild(div);
-      const iframe = getIframe(window, div, 'none');
-      expect(iframe.getAttribute('sandbox')).to.equal(null);
-    });
-
-    it('should set sandbox with sandbox-ads on', () => {
-      toggleExperiment(window, 'sandbox-ads', true);
+    it('should set sandbox', () => {
       const div = document.createElement('my-element');
       setupElementFunctions(div);
       container.appendChild(div);

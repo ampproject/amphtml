@@ -23,7 +23,6 @@ import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
-import {getMode} from '../../src/mode';
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -629,20 +628,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace CLIENT_ID with empty string for inabox', () => {
-    setCookie(window, '_ga', 'GA1.2.12345.54321');
-    const origMode = getMode().runtime;
-    getMode().runtime = 'inabox';
-    return expandUrlAsync(
-      '?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)',
-      /*opt_bindings*/ undefined,
-      {withCid: true}
-    ).then(res => {
-      getMode().runtime = origMode;
-      expect(res).to.equal('?a=&b=');
-    });
-  });
-
   it('should parse _ga cookie correctly', () => {
     setCookie(window, '_ga', 'GA1.2.12345.54321');
     return expandUrlAsync(
@@ -970,14 +955,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
           delete eventListeners[eventType];
         }
       };
-      const timerMock = {
-        promise: () => {
-          return Promise.resolve();
-        },
-      };
-      registerServiceBuilder(win, 'timer', function() {
-        return timerMock;
-      });
     });
 
     it('is replaced if timing info is not available', () => {

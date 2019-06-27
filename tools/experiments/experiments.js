@@ -101,12 +101,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
-    id: 'amp-auto-ads',
-    name: 'AMP Auto Ads',
-    spec: 'https://github.com/ampproject/amphtml/issues/6196',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
-  },
-  {
     id: 'amp-base-carousel',
     name: 'AMP extension for a basic, flexible, carousel',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
@@ -147,12 +141,6 @@ const EXPERIMENTS = [
     name: 'AMP Visualization using Vega grammar',
     spec: 'https://github.com/ampproject/amphtml/issues/3991',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
-  },
-  {
-    id: 'amp-apester-media',
-    name: 'AMP extension for Apester media (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/3233',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
   },
   {
     id: 'cache-service-worker',
@@ -301,12 +289,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'sandbox-ads',
-    name: 'Applies a sandbox to ad iframes.',
-    spec: 'https://github.com/ampproject/amphtml/issues/14240',
-    cleanupIssue: 'TODO',
-  },
-  {
     id: 'iframe-messaging',
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
@@ -329,14 +311,6 @@ const EXPERIMENTS = [
     name: 'Enables DOM diffing of amp-list renders via set-dom',
     spec: 'https://github.com/ampproject/amphtml/pull/17000',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
-  },
-  {
-    id: 'no-initial-intersection',
-    name:
-      'Do not invoke context.observeIntersection callback with ' +
-      'initialintersection',
-    spec: 'https://github.com/ampproject/amphtml/issues/8562',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
   },
   {
     id: 'custom-elements-v1',
@@ -364,16 +338,6 @@ const EXPERIMENTS = [
     name: 'Enables <amp-video dock>',
     spec: 'https://github.com/ampproject/amphtml/issues/14061',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
-  },
-  {
-    id: 'linker-form',
-    name: 'Enables form support in linker',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18068',
-  },
-  {
-    id: 'fie-metadata-extension',
-    name: 'Use version supporting extension field in amp-ad-metadata.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18737',
   },
   {
     id: 'amp-list-load-more',

@@ -241,7 +241,7 @@ describe('amp-a4a', () => {
    * @param {string} sfVersion
    * @param {boolean=} shouldSandbox
    */
-  function verifySafeFrameRender(element, sfVersion, shouldSandbox = false) {
+  function verifySafeFrameRender(element, sfVersion, shouldSandbox = true) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
@@ -277,7 +277,7 @@ describe('amp-a4a', () => {
    * @param {!Element} element
    * @param {boolean} shouldSandbox
    */
-  function verifyNameFrameRender(element, shouldSandbox = false) {
+  function verifyNameFrameRender(element, shouldSandbox = true) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
@@ -299,7 +299,7 @@ describe('amp-a4a', () => {
   function verifyCachedContentIframeRender(
     element,
     srcUrl,
-    shouldSandbox = false
+    shouldSandbox = true
   ) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
@@ -2969,18 +2969,6 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
         expect(a4a.inNonAmpPreferenceExp()).to.equal(!!expected);
       })
     );
-  });
-
-  describe('#sandboxHTMLCreativeFrame', () => {
-    it('should return true if experiment enabled', () => {
-      toggleExperiment(a4a.win, 'sandbox-ads', true);
-      expect(a4a.sandboxHTMLCreativeFrame()).to.be.true;
-    });
-
-    it('should return true if experiment disabled', () => {
-      toggleExperiment(a4a.win, 'sandbox-ads', false);
-      expect(a4a.sandboxHTMLCreativeFrame()).to.be.false;
-    });
   });
 
   describe('single pass experiments', () => {
