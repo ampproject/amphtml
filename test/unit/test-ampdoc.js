@@ -65,16 +65,6 @@ describe('AmpDocService', () => {
       expect(service.getAmpDoc(div)).to.equal(service.singleDoc_);
     });
 
-    it('should yield the single doc when ampdoc-closest is enabled', () => {
-      toggleExperiment(window, 'ampdoc-closest', true);
-      service = new AmpDocService(window, /* isSingleDoc */ true);
-      expect(service.getAmpDoc(null)).to.equal(service.singleDoc_);
-      expect(service.getAmpDoc(document)).to.equal(service.singleDoc_);
-      const div = document.createElement('div');
-      document.body.appendChild(div);
-      expect(service.getAmpDoc(div)).to.equal(service.singleDoc_);
-    });
-
     // For example, <amp-next-page> creates shadow documents in single-doc
     // mode.
     describe('shadow documents', () => {
@@ -101,39 +91,13 @@ describe('AmpDocService', () => {
         if (host.parentNode) {
           host.parentNode.removeChild(host);
         }
-        toggleExperiment(window, 'ampdoc-closest', false);
       });
 
-      it('should yield the single doc', () => {
+      it('should yield the closest shadow doc', () => {
         if (!shadowRoot) {
           return;
         }
 
-        service.installShadowDoc('https://a.org/', shadowRoot);
-        const ampDoc = service.getAmpDoc(content);
-        expect(ampDoc).to.equal(service.singleDoc_);
-      });
-
-      it('should yield the shadow doc when explicitly asked', () => {
-        if (!shadowRoot) {
-          return;
-        }
-
-        const newAmpDoc = service.installShadowDoc(
-          'https://a.org/',
-          shadowRoot
-        );
-        const ampDoc = service.getAmpDoc(content, {closestAmpDoc: true});
-        expect(ampDoc).to.equal(newAmpDoc);
-      });
-
-      it('should yield the shadow doc when ampdoc-closest is enabled', () => {
-        if (!shadowRoot) {
-          return;
-        }
-
-        toggleExperiment(window, 'ampdoc-closest', true);
-        service = new AmpDocService(window, /* isSingleDoc */ true);
         const newAmpDoc = service.installShadowDoc(
           'https://a.org/',
           shadowRoot

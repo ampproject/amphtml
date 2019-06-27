@@ -41,6 +41,7 @@ describe('IntersectionObserverApi', () => {
   let sandbox;
   let onScrollSpy;
   let onChangeSpy;
+  let testDoc;
   let testEle;
   let baseElement;
   let ioApi;
@@ -85,6 +86,7 @@ describe('IntersectionObserverApi', () => {
       return mockViewport;
     });
     sandbox.stub(Services, 'ampdoc').callsFake(() => fakeAmpDoc);
+    testDoc = {defaultView: window};
     testEle = {
       isBuilt: () => {
         return true;
@@ -96,7 +98,8 @@ describe('IntersectionObserverApi', () => {
         return layoutRectLtwh(50, 100, 150, 200);
       },
       win: window,
-      ownerDocument: {defaultView: window},
+      ownerDocument: testDoc,
+      getRootNode: () => testDoc,
       nodeType: 1,
     };
 
@@ -334,6 +337,7 @@ describe('IntersectionObserverPolyfill', () => {
   });
 
   describe('tick function', () => {
+    let testDoc;
     let element;
     let callbackSpy;
 
@@ -357,6 +361,7 @@ describe('IntersectionObserverPolyfill', () => {
         };
       });
 
+      testDoc = {defaultView: window};
       element = {
         isBuilt: () => {
           return true;
@@ -364,7 +369,8 @@ describe('IntersectionObserverPolyfill', () => {
         getOwner: () => {
           return null;
         },
-        ownerDocument: {defaultView: window},
+        ownerDocument: testDoc,
+        getRootNode: () => testDoc,
         nodeType: 1,
       };
     });
