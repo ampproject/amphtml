@@ -30,6 +30,7 @@
     "react-dates": "15.5.3",
     "rrule": "2.6.2",
     "set-dom": "7.5.2",
+    "terser": "4.0.0",
     "web-activities": "1.13.0",
     "web-animations-js": "2.3.1"
   },

@@ -28,7 +28,7 @@ const defaultPlugins = [
 ];
 
 module.exports = {
-  plugins: ({isEsmBuild, isCommonJsModule, isForTesting}) => {
+  plugins({isEsmBuild, isCommonJsModule, isForTesting}) {
     let pluginsToApply = defaultPlugins;
     if (isEsmBuild) {
       pluginsToApply = pluginsToApply.concat([
@@ -62,5 +62,11 @@ module.exports = {
       ]);
     }
     return pluginsToApply;
+  },
+
+  eliminateIntermediateBundles() {
+    return [
+      require.resolve('./babel-plugins/babel-plugin-transform-prune-namespace'),
+    ];
   },
 };
