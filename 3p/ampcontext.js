@@ -18,7 +18,6 @@ import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {dev, devAssert} from '../src/log';
 import {dict} from '../src/utils/object';
-import {isExperimentOn, nextTick} from './3p';
 import {isObject} from '../src/types';
 import {parseUrlDeprecated} from '../src/url';
 import {tryParseJson} from '../src/json';
@@ -170,25 +169,13 @@ export class AbstractAmpContext {
    *    every time we receive an intersection message.
    */
   observeIntersection(callback) {
-    const unlisten = this.client_.makeRequest(
+    return this.client_.makeRequest(
       MessageType.SEND_INTERSECTIONS,
       MessageType.INTERSECTION,
       intersection => {
         callback(intersection['changes']);
       }
     );
-
-    if (!isExperimentOn('no-initial-intersection')) { // eslint-disable-line
-      // Call the callback with the value that was transmitted when the
-      // iframe was drawn. Called in nextTick, so that callers don't
-      // have to specially handle the sync case.
-      // TODO(lannka, #8562): Deprecate this behavior
-      nextTick(this.win_, () => {
-        callback([this.initialIntersection]);
-      });
-    }
-
-    return unlisten;
   }
 
   /**

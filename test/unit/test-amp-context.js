@@ -200,10 +200,7 @@ describe('3p ampcontext.js', () => {
 
     // window.context should have received intersection observer postMessage
     // back, and should have called the callback function
-    // TODO(alanorozco): Called twice for backwards compatibility with
-    // window.context. This behavior is deprecated and this test should be
-    // changed when removed.
-    expect(callbackSpy).to.be.calledTwice;
+    expect(callbackSpy).to.be.calledOnce;
     expect(callbackSpy).to.be.calledWith('changes');
 
     // Stop listening for intersection observer messages
@@ -211,11 +208,7 @@ describe('3p ampcontext.js', () => {
 
     // Send intersection observer message
     windowMessageHandler(message);
-
-    // TODO(alanorozco): Called twice for backwards compatibility with
-    // window.context. This behavior is deprecated and this test should be
-    // changed when removed.
-    expect(callbackSpy).to.be.calledTwice;
+    expect(callbackSpy).to.be.calledOnce;
   });
 
   it('should send a pM and set callback when onPageVisibilityChange()', () => {
