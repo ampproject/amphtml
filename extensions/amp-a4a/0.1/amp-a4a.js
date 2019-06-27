@@ -59,7 +59,6 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
@@ -1555,12 +1554,10 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
-    if (isExperimentOn(this.win, 'no-sync-xhr-in-ads')) {
-      // Block synchronous XHR in ad. These are very rare, but super bad for UX
-      // as they block the UI thread for the arbitrary amount of time until the
-      // request completes.
-      mergedAttributes['allow'] = "sync-xhr 'none';";
-    }
+    // Block synchronous XHR in ad. These are very rare, but super bad for UX
+    // as they block the UI thread for the arbitrary amount of time until the
+    // request completes.
+    mergedAttributes['allow'] = "sync-xhr 'none';";
     this.iframe = createElementWithAttributes(
       /** @type {!Document} */ (this.element.ownerDocument),
       'iframe',
