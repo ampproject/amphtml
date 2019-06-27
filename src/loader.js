@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,25 +73,25 @@ export function createNewLoaderElement(element, elementWidth, elementHeight) {
  */
 class LoaderBuilder {
   /**
+   * @param {!AmpElement} element
    * @param {number} elementWidth
    * @param {number} elementHeight
-   * @param {!AmpElement} element
    */
   constructor(element, elementWidth, elementHeight) {
-    /** @private {!AmpElement} */
+    /** @private @const {!AmpElement} */
     this.element_ = element;
+
+    /** @private @const  {number} */
+    this.layoutWidth_ = elementWidth;
+
+    /** @private @const  {number} */
+    this.layoutHeight_ = elementHeight;
 
     /** @private {?Element} */
     this.domRoot_;
 
     /** @private {?Element} */
     this.svgRoot_;
-
-    /** @private {number} */
-    this.layoutWidth_ = elementWidth;
-
-    /** @private {number} */
-    this.layoutHeight_ = elementHeight;
   }
 
   /**
