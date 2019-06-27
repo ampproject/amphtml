@@ -210,6 +210,9 @@ function createBaseCustomElementClass(win) {
       this.layoutWidth_ = -1;
 
       /** @private {number} */
+      this.layoutHeight_ = -1;
+
+      /** @private {number} */
       this.layoutCount_ = 0;
 
       /** @private {boolean} */
@@ -615,6 +618,7 @@ function createBaseCustomElementClass(win) {
      */
     updateLayoutBox(layoutBox, opt_measurementsChanged) {
       this.layoutWidth_ = layoutBox.width;
+      this.layoutHeight_ = layoutBox.height;
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
@@ -1633,16 +1637,10 @@ function createBaseCustomElementClass(win) {
         this.loadingDisabled_ = this.hasAttribute('noloading');
       }
 
-      let isTooSmall = this.layoutWidth_ < MIN_WIDTH_FOR_LOADING;
-      // New loaders experiments has its own sizing heuristics
-      if (isNewLoaderExperimentEnabled(toWin(this.ownerDocument.defaultView))) {
-        isTooSmall = false;
-      }
-
       if (
         this.loadingDisabled_ ||
         !isLoadingAllowed(this) ||
-        isTooSmall ||
+        isTooSmallForLoader(this) ||
         this.layoutCount_ > 0 ||
         isInternalOrServiceNode(this) ||
         !isLayoutSizeDefined(this.layout_)
@@ -1688,8 +1686,9 @@ function createBaseCustomElementClass(win) {
         let loadingElement;
         if (isNewLoaderExperimentEnabled(win)) {
           loadingElement = createNewLoaderElement(
-            /** @type {!Document} */ (doc),
-            this
+            this,
+            this.layoutWidth_,
+            this.layoutHeight_
           );
         } else {
           loadingElement = createLegacyLoaderElement(
@@ -1895,6 +1894,20 @@ function isInternalOrServiceNode(node) {
     return true;
   }
   return false;
+}
+
+/**
+ * Whether element size is too small to show loader.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function isTooSmallForLoader(element) {
+  if (isNewLoaderExperimentEnabled(toWin(element.ownerDocument.defaultView))) {
+    // New loaders experiments has its own sizing heuristics
+    return false;
+  }
+
+  return element.layoutWidth_ < MIN_WIDTH_FOR_LOADING;
 }
 
 /**
