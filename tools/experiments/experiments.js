@@ -143,12 +143,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
   },
   {
-    id: 'amp-apester-media',
-    name: 'AMP extension for Apester media (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/3233',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
-  },
-  {
     id: 'cache-service-worker',
     name: 'AMP Cache Service Worker',
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
@@ -289,18 +283,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
   },
   {
-    id: 'no-sync-xhr-in-ads',
-    name: 'Disables syncronous XHR requests in 3p iframes.',
-    spec: 'TODO',
-    cleanupIssue: 'TODO',
-  },
-  {
-    id: 'sandbox-ads',
-    name: 'Applies a sandbox to ad iframes.',
-    spec: 'https://github.com/ampproject/amphtml/issues/14240',
-    cleanupIssue: 'TODO',
-  },
-  {
     id: 'iframe-messaging',
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
@@ -323,14 +305,6 @@ const EXPERIMENTS = [
     name: 'Enables DOM diffing of amp-list renders via set-dom',
     spec: 'https://github.com/ampproject/amphtml/pull/17000',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
-  },
-  {
-    id: 'no-initial-intersection',
-    name:
-      'Do not invoke context.observeIntersection callback with ' +
-      'initialintersection',
-    spec: 'https://github.com/ampproject/amphtml/issues/8562',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
   },
   {
     id: 'custom-elements-v1',
