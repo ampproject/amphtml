@@ -220,45 +220,6 @@ class LoaderBuilder {
   }
 
   /**
-   * Returns the logo for the element.
-   * @private
-   * @return {!Element}
-   */
-  getLogo_() {
-    const logo = this.getCustomLogo_();
-    return logo || this.getDefaultLogo_();
-  }
-
-  /**
-   * Returns the custom logo for the element if there is one.
-   * @private
-   * @return {?Element}
-   */
-  getCustomLogo_() {
-    // Not Implemented
-    return null;
-  }
-
-  /**
-   * Returns the default logo.
-   * @private
-   * @return {!Element}
-   */
-  getDefaultLogo_() {
-    const svg = svgFor(this.doc_);
-    return svg`
-      <circle
-        class="i-amphtml-new-loader-logo"
-        cx="60"
-        cy="60"
-        r="12"
-        fill="#aaaaaa"
-      >
-      </circle>
-    `;
-  }
-
-  /**
    * Adds the given logo to the loader.
    * @param {!Element} logo
    */
@@ -302,6 +263,45 @@ class LoaderBuilder {
       `;
       this.element_.appendChild(defaultPlaceholder);
     }
+  }
+
+  /**
+   * Returns the logo for the element.
+   * @private
+   * @return {!Element}
+   */
+  getLogo_() {
+    const logo = this.getCustomLogo_();
+    return logo || this.getDefaultLogo_();
+  }
+
+  /**
+   * Returns the custom logo for the element if there is one.
+   * @private
+   * @return {?Element}
+   */
+  getCustomLogo_() {
+    // Not Implemented
+    return null;
+  }
+
+  /**
+   * Returns the default logo.
+   * @private
+   * @return {!Element}
+   */
+  getDefaultLogo_() {
+    const svg = svgFor(this.doc_);
+    return svg`
+      <circle
+        class="i-amphtml-new-loader-logo"
+        cx="60"
+        cy="60"
+        r="12"
+        fill="#aaaaaa"
+      >
+      </circle>
+    `;
   }
 
   /**
