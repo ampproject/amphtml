@@ -289,12 +289,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
   },
   {
-    id: 'no-sync-xhr-in-ads',
-    name: 'Disables syncronous XHR requests in 3p iframes.',
-    spec: 'TODO',
-    cleanupIssue: 'TODO',
-  },
-  {
     id: 'sandbox-ads',
     name: 'Applies a sandbox to ad iframes.',
     spec: 'https://github.com/ampproject/amphtml/issues/14240',

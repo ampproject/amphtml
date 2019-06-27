@@ -747,7 +747,6 @@ describe('amp-a4a', () => {
 
       it('should set feature policy for sync-xhr with exp on-a4a', () => {
         a4a.sandboxHTMLCreativeFrame = () => true;
-        toggleExperiment(a4a.win, 'no-sync-xhr-in-ads', true);
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL, true);

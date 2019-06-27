@@ -301,7 +301,6 @@ describe
     });
 
     it('should set feature policy for sync-xhr with exp on', () => {
-      toggleExperiment(window, 'no-sync-xhr-in-ads', true);
       const div = document.createElement('my-element');
       setupElementFunctions(div);
       container.appendChild(div);
