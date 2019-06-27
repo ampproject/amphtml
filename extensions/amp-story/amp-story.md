@@ -340,11 +340,11 @@ A URL to the [story poster](#posters) in landscape format (4x3 aspect ratio).
 
 ##### live-story [optional]
 
-Enables the [live stories](#Live-stories) functionality.
+Enables the [Live story](#Live-story) functionality. Read more on that section.
 
 ##### live-story-disabled [optional]
 
-Stops polling the server when using the live-story attribute. Use this when you want to stop sending live updates to the story.
+Disables the [Live story](#Live-story) functionality. Read more on that section.
 
 ##### data-poll-interval [optional]
 
@@ -374,39 +374,41 @@ Usage: `<amp-story ... supports-landscape>...</amp-story>`
   </amp-anim>
 </figure>
 
-### Live stories
+### Live story
 
-If the `live-story` attribute is specified on the `<amp-story>` element, it will allow users to receive real-time updates coming from the server. It updates the client device without having to refresh the page and shows a notification when there are updates available and the user is on the last page of the story.
+Using the `live-story` attribute, you can append new pages to a story for users to see in real-time. If the user is on the last page it will show a notification saying there are new pages and the progress bar will be updated.
+
+The core use cases for this are: coverage for breaking news or live events where the user can stay on to see new pages as they come in. Common examples are award shows, sporting events, and elections.
+
+#### How it works
+
+In the background, while an AMP Story using `live-story` is displayed on the client, the AMP runtime polls the origin document on the host for updates. When the client receives a response, it then filters and dynamically inserts those updates back into the story on the client. Publishers can customize the polling rate in order to control the number of incoming requests, and AMP caches like the Google AMP Cache can perform optimizations to reduce the server response payload, saving client bandwidth and CPU cycles.
+
+#### Polling
+
+In most implementations for live blogs, content is either pushed by the server to the client instance of a page, or the client polls a JSON endpoint to receive updates. The implementation here is different, in that the client instance of the story polls the server copy of the story document for updates inside the `<amp-story>` element. For instance: if the user is viewing a story served from an AMP cache, the client will poll that document hosted on that AMP cache for updates; if the user is viewing a document served from a web publisher's origin domain (e.g. "example.com"), then the client will poll the document hosted on that origin domain for updates.
+
+This means that publishers of stories do not need to set up a JSON endpoint or push mechanism for this functionality to work. New content just needs to be published to the same URL, with a valid amp-story markup, and the user will have that content pulled into their client instance during the next poll (poll intervals are configurable in the component, and are valid above the minimum of 15 seconds).
 
 <figure class="centered-fig">
-  <amp-anim alt="Live stories example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif">
+  <amp-anim alt="Live story example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif">
   <noscript>
-    <img alt="Live stories example" width="200" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif" />
+    <img alt="Live story example" width="200" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif" />
   </noscript>
   </amp-anim>
 </figure>
 
-**Note**: As long as the `live-story` attribute is present on the `<amp-story>` element, the client will make continous polls to the server. Make sure to set the `live-story-disabled` attribute to make the polling stop once you're finished with the live broadcast of your story.
+**Note**: As long as the `live-story` attribute is present on the `<amp-story>` element, the client will make continous polls to the server copy of the story document. Make sure to set the `live-story-disabled` attribute to make the polling stop once you're finished with the live broadcast of your story. Learn more on the [polling section](#polling).
 
 Usage:
-* Import the `amp-live-list` extension in the `<head>` tag of your document.
 * Specify an `id` on the `<amp-story>` element.
 * Add the `live-story` attribute to the `<amp-story>` element.
 * [Optional] Add the [`data-poll-interval`](#data-poll-interval-[optional]) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
 * [Optional] Add the [`live-story-disabled`](#live-story-disabled-[optional]) attribute to the `<amp-story>` element to disable the polling.
 * On each `<amp-story-page>`:
   * Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting entries. Higher timestamps will be inserted before older entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
-  * [Optional] Specify the `data-update-time` attribute with a valid value. This is a timestamp when the entry was last updated. Use this attribute to trigger an update on an existing page: the client will replace all existing content in this page with the new, updated content. We recommend using [Unix time](https://www.unixtimestamp.com/).
-  * [Optional] Specify the `data-tombstone` attribute. If present, will delete the `amp-story-page` from the client.
 
 ```html
-<head>
-  <!-- Import the amp-live-list extension.  -->
-  <script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
-</head>
-
-...
-
 <amp-story id="story1" live-story ...>
   <amp-story-page id="cover" data-sort-time="1552330790"> ... </amp-story-page>
   <amp-story-page id="page1" data-sort-time="1552330791"> ... </amp-story-page>
@@ -1050,8 +1052,6 @@ Story page attachments allow the same HTML elements as AMP Story along with addi
     <li><code>&lt;amp-jwplayer></code></li>
     <li><code>&lt;amp-kaltura-player></code></li>
     <li><code>&lt;amp-list></code></li>
-    <li><code>&lt;amp-list></code></li>
-    <li><code>&lt;amp-live-list></code></li>
     <li><code>&lt;amp-live-list></code></li>
     <li><code>&lt;amp-mathml></code></li>
     <li><code>&lt;amp-mowplayer></code></li>
