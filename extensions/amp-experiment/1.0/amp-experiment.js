@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {applyExperimentToVariant} from './apply-experiment';
 import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {applyExperimentToVariant} from './apply-experiment';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -29,9 +29,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 
 const TAG = 'amp-experiment';
-
-/** @const {number} */
-const MAX_MUTATIONS = 70;
 
 export class AmpExperiment extends AMP.BaseElement {
   /** @override */

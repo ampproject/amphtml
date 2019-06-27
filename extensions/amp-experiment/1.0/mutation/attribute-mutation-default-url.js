@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  assertAttributeMutationFormat
-} from './mutation';
+import {assertAttributeMutationFormat} from './mutation';
+import {assertHttpsUrl} from '../../../../src/url';
 
 /**
  * Mutation for attribute (url) mutations, for both
@@ -26,9 +25,8 @@ import {
  * @implements {./mutation.Mutation}
  */
 export class AttributeMutationDefaultUrl {
-
   /**
-   * @param {!Object} mutationRecord
+   * @param {!JsonObject} mutationRecord
    * @param {!Array<Element>} elements
    */
   constructor(mutationRecord, elements) {
@@ -57,4 +55,3 @@ export class AttributeMutationDefaultUrl {
     });
   }
 }
-

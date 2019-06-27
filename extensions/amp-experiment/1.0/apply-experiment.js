@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
+import {AttributeMutationDefaultStyle} from './mutation/attribute-mutation-default-style';
+import {AttributeMutationDefaultUrl} from './mutation/attribute-mutation-default-url';
+import {CharacterDataMutation} from './mutation/character-data-mutation';
 import {
   assertMutationRecordFormat,
   getElementsFromMutationRecordSelector,
-  MUTATION_TYPES
 } from './mutation-record';
-import {
-  AttributeMutationDefaultStyle
-} from './mutation/attribute-mutation-default-style';
-import {
-  CharacterDataMutation
-} from './mutation/character-data-mutation';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-experiment mutation';
 
@@ -54,15 +50,15 @@ const MAX_MUTATIONS = 70;
  * @private
  */
 export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
-
   // Get all of our mutation records across all experiments
   // That are being applied
+  /** {Array<JsonObject>} */
   let mutationRecords = [];
   for (const experimentName in experimentToVariant) {
     const variantName = experimentToVariant[experimentName];
     if (variantName) {
       const variantObject = config[experimentName]['variants'][variantName];
-      mutationRecords = mutationRecords.concat(variantObject.mutations);
+      mutationRecords = mutationRecords.concat(variantObject['mutations']);
     }
   }
 
@@ -75,11 +71,14 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     assertMutationRecordFormat(mutationRecord);
 
     // Select the elements from the mutation record
-    const elements = getElementsFromMutationRecordSelector(ampdoc.win.document, mutationRecord);
+    const elements = getElementsFromMutationRecordSelector(
+      ampdoc.win.document,
+      mutationRecord
+    );
     totalMutations += elements.length;
     mutationRecordsAndElements.push({
       mutationRecord,
-      elements
+      elements,
     });
   });
 
@@ -93,37 +92,30 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
   }
 
   // Create the mutations
-  let mutations = [];
+  const mutations = [];
   mutationRecordsAndElements.forEach(mutationRecordAndElements => {
-    const mutationRecord = mutationRecordAndElements.mutationRecord;
-    const elements = mutationRecordAndElements.elements;
+    const {mutationRecord, elements} = mutationRecordAndElements;
 
     let mutation = undefined;
     if (mutationRecord['type'] === 'characterData') {
-      mutation = new CharacterDataMutation(
-        mutationRecord,
-        elements
-      );
+      mutation = new CharacterDataMutation(mutationRecord, elements);
     } else if (mutationRecord['type'] === 'attributes') {
       if (mutationRecord['attributeName'] === 'style') {
-        mutation = new AttributeMutationDefaultStyle(
-          mutationRecord,
-          elements
-        );
-      } else if (mutationRecord['attributeName'] === 'href' ||
-        mutationRecord['attributeName'] === 'src') {
-        mutation = new AttributeMutationDefaultUrl(
-          mutationRecord,
-          elements
-        );
+        mutation = new AttributeMutationDefaultStyle(mutationRecord, elements);
+      } else if (
+        mutationRecord['attributeName'] === 'href' ||
+        mutationRecord['attributeName'] === 'src'
+      ) {
+        mutation = new AttributeMutationDefaultUrl(mutationRecord, elements);
       } else {
         // Did not find a supported attributeName
         throw new Error(
-          `Mutation ${JSON.stringify(this.mutationRecord)} has an unsupported attributeName.`
+          `Mutation ${JSON.stringify(
+            mutationRecord
+          )} has an unsupported attributeName.`
         );
       }
     } else {
-
       user().error(
         TAG,
         'childList mutations not supported in the current experiment state.'
@@ -133,11 +125,21 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
       // Therefore, return a noop mutation.
       mutation = {
         validate: () => true,
-        mutate: () => {}
+        mutate: () => {},
       };
     }
 
     mutations.push(mutation);
+  });
+
+  // Validate all mutations
+  // Apply all the mutations
+  mutations.forEach(mutation => {
+    userAssert(
+      mutation.validate(),
+      'Mutation %s has an an unsupported value.',
+      JSON.stringify(mutation.mutationRecord)
+    );
   });
 
   return ampdoc.whenReady().then(() => {
@@ -148,4 +150,3 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     return experimentToVariant;
   });
 }
-

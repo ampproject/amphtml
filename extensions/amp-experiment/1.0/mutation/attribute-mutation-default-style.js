@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  assertAttributeMutationFormat
-} from './mutation';
+import {assertAttributeMutationFormat} from './mutation';
 
 /**
  * Mutation for attribute (style) mutations on unspecified elements.
@@ -24,9 +22,8 @@ import {
  * @implements {./mutation.Mutation}
  */
 export class AttributeMutationDefaultStyle {
-
   /**
-   * @param {!Object} mutationRecord
+   * @param {!JsonObject} mutationRecord
    * @param {!Array<Element>} elements
    */
   constructor(mutationRecord, elements) {
@@ -69,4 +66,3 @@ export class AttributeMutationDefaultStyle {
     });
   }
 }
-

@@ -26,7 +26,7 @@ import {userAssert} from '../../../../src/log';
 export class Mutation {
   /**
    * Called to validate the value of a mutation
-   * @return {!Boolean}
+   * @return {boolean}
    */
   validate() {}
 
@@ -41,16 +41,15 @@ export class Mutation {
 
  * Function to assert the format for attribute
  * mutations.
- * @param {!Object} mutationRecord
+ * @param {!JsonObject} mutationRecord
  */
 export function assertAttributeMutationFormat(mutationRecord) {
-
   const stringifiedMutation = JSON.stringify(mutationRecord);
 
   // Assert the mutation value
   userAssert(
     mutationRecord['value'] !== undefined &&
-    typeof mutationRecord['value'] === 'string',
+      typeof mutationRecord['value'] === 'string',
     'Mutation %s must have a value.',
     stringifiedMutation
   );
@@ -58,7 +57,7 @@ export function assertAttributeMutationFormat(mutationRecord) {
   // Assert mutation attributeName
   userAssert(
     mutationRecord['attributeName'] !== undefined &&
-    typeof mutationRecord['attributeName'] === 'string',
+      typeof mutationRecord['attributeName'] === 'string',
     'Mutation %s must have a attributeName.',
     stringifiedMutation
   );
@@ -67,20 +66,16 @@ export function assertAttributeMutationFormat(mutationRecord) {
 /**
  * Function to assert the format for textContent
  * mutations.
- * @param {!Object} mutationRecord
+ * @param {!JsonObject} mutationRecord
  */
-export function assertCharacterDataMutationFormat(
-  mutationRecord
-) {
-
+export function assertCharacterDataMutationFormat(mutationRecord) {
   const stringifiedMutation = JSON.stringify(mutationRecord);
 
   // Assert the mutation value
   userAssert(
     mutationRecord['value'] !== undefined &&
-    typeof mutationRecord['value'] === 'string',
+      typeof mutationRecord['value'] === 'string',
     'Mutation %s must have a value.',
     stringifiedMutation
   );
 }
-

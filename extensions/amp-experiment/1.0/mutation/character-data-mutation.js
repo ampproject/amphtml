@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  assertCharacterDataMutationFormat
-} from './mutation';
+import {assertCharacterDataMutationFormat} from './mutation';
 
 /**
  * Mutation for characterData (textContent) mutations
@@ -24,9 +22,8 @@ import {
  * @implements {./mutation.Mutation}
  */
 export class CharacterDataMutation {
-
   /**
-   * @param {!Object} mutationRecord
+   * @param {!JsonObject} mutationRecord
    * @param {!Array<Element>} elements
    */
   constructor(mutationRecord, elements) {
@@ -43,8 +40,7 @@ export class CharacterDataMutation {
   /** @override */
   mutate() {
     this.elements.forEach(element => {
-      element.textContent = this.mutationRecord.value;
+      element.textContent = this.mutationRecord['value'];
     });
   }
 }
-

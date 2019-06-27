@@ -15,7 +15,7 @@
  */
 
 import {isObject} from '../../../src/types';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /**
  * Types of possibile mutations
@@ -40,7 +40,8 @@ export function assertMutationRecordFormat(mutationRecord) {
 
   // Assert the mutation type
   userAssert(
-    mutationRecord['type'] !== undefined && typeof mutationRecord['type'] === 'string',
+    mutationRecord['type'] !== undefined &&
+      typeof mutationRecord['type'] === 'string',
     'Mutation %s must have a type.',
     JSON.stringify(mutationRecord)
   );
@@ -54,7 +55,8 @@ export function assertMutationRecordFormat(mutationRecord) {
 
   // Assert the mutation target
   userAssert(
-    mutationRecord['target'] !== undefined && typeof mutationRecord['target'] === 'string',
+    mutationRecord['target'] !== undefined &&
+      typeof mutationRecord['target'] === 'string',
     'Mutation %s must have a target.',
     JSON.stringify(mutationRecord)
   );
@@ -66,11 +68,14 @@ export function assertMutationRecordFormat(mutationRecord) {
  * Function to set the target elements from the
  * target selector to the target element key,
  * and assert that we found the element.
- * @param {!Object} mutationRecord
  * @param {!Document} document
+ * @param {!Object} mutationRecord
  * @return {!Array<Element>}
  */
-export function getElementsFromMutationRecordSelector(document, mutationRecord) {
+export function getElementsFromMutationRecordSelector(
+  document,
+  mutationRecord
+) {
   const targetElement = document.querySelector(mutationRecord['target']);
 
   userAssert(
