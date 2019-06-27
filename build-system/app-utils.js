@@ -52,12 +52,7 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
       hostName + '/dist/v0/$1.max.js'
     );
     if (inabox) {
-      let filename;
-      if (inabox == '1') {
-        filename = '/dist/amp-inabox.js';
-      } else if (inabox == '2') {
-        filename = '/dist/amp-inabox-lite.js';
-      }
+      const filename = '/dist/amp-inabox.js';
       file = file.replace(/<html [^>]*>/, '<html amp4ads>');
       file = file.replace(/\/dist\/amp\.js/g, filename);
     }
