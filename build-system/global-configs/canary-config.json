@@ -5,8 +5,7 @@
     "amp-next-page",
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
-    "inabox-css-cleanup",
-    "linker-meta-opt-in"
+    "inabox-css-cleanup"
   ],
   "allow-url-opt-in": [
     "pump-early-frame",
@@ -23,7 +22,6 @@
   "ad-type-custom": 1,
   "amp-access-iframe": 1,
   "amp-ad-ff-adx-ady": 0.01,
-  "amp-apester-media": 1,
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-auto-lightbox": 1,
   "amp-consent-v2": 1,
@@ -54,7 +52,6 @@
   "inabox-remove-height-auto": 1,
   "ios-fixed-no-transfer": 1,
   "layers": 1,
-  "linker-meta-opt-in": 1,
   "margin-bottom-in-content-height": 1,
   "no-sync-xhr-in-ads": 1,
   "pump-early-frame": 1,
