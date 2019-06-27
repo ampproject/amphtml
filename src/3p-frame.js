@@ -20,7 +20,6 @@ import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 import {startsWith} from './string';
 import {tryParseJson} from './json';
