@@ -25,7 +25,6 @@
   "amp-access-iframe": 1,
   "amp-ad-ff-adx-ady": 0.01,
   "amp-apester-media": 1,
-  "amp-auto-ads": 1,
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-auto-lightbox": 1,
   "amp-consent-v2": 1,
@@ -55,13 +54,9 @@
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
   "inabox-remove-height-auto": 1,
-  "linker-form": 1,
   "linker-meta-opt-in": 1,
   "margin-bottom-in-content-height": 1,
-  "no-initial-intersection": 1,
   "no-sync-xhr-in-ads": 1,
   "pump-early-frame": 1,
-  "sandbox-ads": 1,
-  "user-error-reporting": 1,
   "version-locking": 1
 }
