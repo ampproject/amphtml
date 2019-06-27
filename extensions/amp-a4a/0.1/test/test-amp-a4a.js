@@ -736,16 +736,7 @@ describe('amp-a4a', () => {
         });
       });
 
-      it("shouldn't set feature policy for sync-xhr with exp off-a4a", () => {
-        a4a.sandboxHTMLCreativeFrame = () => true;
-        a4a.onLayoutMeasure();
-        return a4a.layoutCallback().then(() => {
-          verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-          expect(a4a.iframe.getAttribute('allow')).to.not.match(/sync-xhr/);
-        });
-      });
-
-      it('should set feature policy for sync-xhr with exp on-a4a', () => {
+      it('should set feature policy for sync-xhr', () => {
         a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
