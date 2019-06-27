@@ -143,12 +143,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
   },
   {
-    id: 'amp-apester-media',
-    name: 'AMP extension for Apester media (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/3233',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
-  },
-  {
     id: 'cache-service-worker',
     name: 'AMP Cache Service Worker',
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
