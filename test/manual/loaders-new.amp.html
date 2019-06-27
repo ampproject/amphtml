@@ -81,9 +81,13 @@
             e.srcElement.implementation_
           );
           e.srcElement.implementation_.layoutCallback = function() {
+            if (e.srcElement.finishedLayoutAlready_) {
+              return Promise.resolve();
+            }
             return new Promise(function(resolve) {
               setTimeout(() => {
                 lc().then(resolve);
+                e.srcElement.finishedLayoutAlready_ = true;
               }, delay);
             });
           };
@@ -181,6 +185,27 @@
       .custom-loader-1 .amp-active > div {
         display: none;
       }
+
+      .button {
+        padding: 10px;
+        border: solid 1px blue;
+        background: silver;
+      }
+
+      .filters {
+        border: 1px solid #333;
+      }
+      .filters button {
+        display: block;
+        padding: 10px;
+        border: none;
+        border-right: 1px solid #666;
+        background-color: #eee;
+        color: #111;
+      }
+      .filters button.selected {
+        background: #fbc02d;
+      }
     </style>
   </head>
   <body>
@@ -197,8 +222,18 @@
         </button>
       </div>
 
-      <h1>amp-img</h1>
-      <div>
+      <div class="filters">
+        <button
+          id="ampImgButton"
+          on="tap:sectionAmpImg.toggleVisibility(),ampImgButton.toggleClass(class='selected')"
+          class="selected"
+        >
+          amp-img
+        </button>
+      </div>
+
+      <section id="sectionAmpImg">
+        <h1>amp-img</h1>
         <h2>normal</h2>
         <amp-img
           src="https://picsum.photos/1600/900?image=110"
@@ -246,7 +281,7 @@
           width="1600"
           height="900"
         ></amp-img>
-      </div>
+      </section>
     </main>
   </body>
 </html>

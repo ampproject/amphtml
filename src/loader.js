@@ -55,15 +55,13 @@ export function createLegacyLoaderElement(doc, elementName) {
  * screenshots and various states of the new loader design.
  *
  * @param {!Document} doc
- * @param {!Element} loadingContainer
  * @param {!Element} element
  * @return {!Element} new loader root element
  */
-export function createNewLoaderElement(doc, loadingContainer, element) {
-  devAssert(!isNewLoaderIneligible(element));
+export function createNewLoaderElement(doc, element) {
   devAssert(isNewLoaderExperimentEnabled(toWin(doc.defaultView)));
 
-  const loader = new LoaderBuilder(doc, loadingContainer, element);
+  const loader = new LoaderBuilder(doc, element);
   return loader.build();
 }
 
@@ -73,15 +71,11 @@ export function createNewLoaderElement(doc, loadingContainer, element) {
 class LoaderBuilder {
   /**
    * @param {!Document} doc
-   * @param {!Element} loadingContainer
    * @param {!Element} element
    */
-  constructor(doc, loadingContainer, element) {
+  constructor(doc, element) {
     /** @private {!Document} */
     this.doc_ = doc;
-
-    /** @private {!Element} */
-    this.loadingContainer_ = loadingContainer;
 
     /** @private {!Element} */
     this.element_ = element;
@@ -99,11 +93,9 @@ class LoaderBuilder {
    */
   build() {
     this.buildContainers_();
-    this.setSize_();
-    this.addSpinner_();
-    this.maybeAddLogo_();
-    this.maybeAddBackgroundShim_();
     this.maybeAddDefaultPlaceholder_();
+    this.maybeAddLoaderAnimation_();
+
     return dev().assertElement(this.domRoot_);
   }
 
@@ -142,7 +134,23 @@ class LoaderBuilder {
   }
 
   /**
-   * Add a spinner based on element's size and a few special cases.
+   * Adds a combination of spinner/logo if element is eligible based on
+   * certain heuristics.
+   */
+  maybeAddLoaderAnimation_() {
+    // If very small or already has image placeholder, no loader animation.
+    if (this.isTiny_() || this.hasBlurryImagePlaceholder_()) {
+      return;
+    }
+
+    this.setSize_();
+    this.addSpinner_();
+    this.maybeAddLogo_();
+    this.maybeAddBackgroundShim_();
+  }
+
+  /**
+   * Sets the size of the loader based element's size and a few special cases.
    * @private
    */
   setSize_() {
@@ -287,8 +295,12 @@ class LoaderBuilder {
     // usually just loads text is debatable. amp-iframe is also a candidate
     // to exclude, often it does load a video or maps but it may not load
     // text on transparent background in certain cases.
-    if (!hasPlaceholder(this.element_)) {
-      this.loadingContainer_.classList.add('i-amphtml-default-placeholder');
+    if (!this.hasPlaceholder()) {
+      const html = htmlFor(this.element_);
+      const defaultPlaceholder = html`
+        <div placeholder class="i-amphtml-default-placeholder"></div>
+      `;
+      this.element_.appendChild(defaultPlaceholder);
     }
   }
 
@@ -311,7 +323,35 @@ class LoaderBuilder {
    */
   isSmall_() {
     const box = this.element_.getLayoutBox();
-    return !isTiny(this.element_) && (box.width <= 100 || box.height <= 100);
+    return !this.isTiny_() && (box.width <= 100 || box.height <= 100);
+  }
+
+  /**
+   * Very small layout are not eligible for new loaders.
+   * @return {boolean}
+   */
+  isTiny_() {
+    const box = this.element_.getLayoutBox();
+    return box.width < 50 || box.height < 50;
+  }
+
+  /**
+   * Whether element has an image blurry placeholder
+   * @return {boolean}
+   */
+  hasBlurryImagePlaceholder_() {
+    const placeholder = this.element_.getPlaceholder();
+    return (
+      placeholder &&
+      placeholder.classList.contains('i-amphtml-blurry-placeholder')
+    );
+  }
+
+  /**
+   *
+   */
+  hasPlaceholder() {
+    return !!this.element_.getPlaceholder();
   }
 
   /**
@@ -343,48 +383,4 @@ class LoaderBuilder {
  */
 export function isNewLoaderExperimentEnabled(win) {
   return isExperimentOn(win, 'new-loaders');
-}
-
-/**
- * Whether the element is eligible for loaders based on new loader heuristics
- * This is is called by `isLoadingEnabled_` in `custom-element.js`
- * and is additional heuristics to what `isLoadingEnabled_` checks.
- * @param {!AmpElement} element
- * @return {boolean}
- */
-export function isNewLoaderIneligible(element) {
-  const result = isTiny(element) || hasBlurryImagePlaceholder(element);
-  return result;
-}
-
-/**
- * Very small layout are not eligible for new loaders.
- * @param {!AmpElement} element
- * @return {boolean}
- */
-function isTiny(element) {
-  const box = element.getLayoutBox();
-  return box.width < 50 || box.height < 50;
-}
-
-/**
- * Whether element has an image blurry placeholder
- * @param {!AmpElement} element
- * @return {boolean}
- */
-function hasBlurryImagePlaceholder(element) {
-  const placeholder = element.getPlaceholder();
-  return (
-    placeholder &&
-    placeholder.classList.contains('i-amphtml-blurry-placeholder')
-  );
-}
-
-/**
- * Whether an element already has a placeholder or not.
- * @param {!AmpElement} element
- * @return {boolean}
- */
-function hasPlaceholder(element) {
-  return !!element.getPlaceholder();
 }

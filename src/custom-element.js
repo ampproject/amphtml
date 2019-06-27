@@ -34,7 +34,6 @@ import {
   createLegacyLoaderElement,
   createNewLoaderElement,
   isNewLoaderExperimentEnabled,
-  isNewLoaderIneligible,
 } from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
@@ -1646,12 +1645,6 @@ function createBaseCustomElementClass(win) {
         return false;
       }
 
-      // Additional eligibility logic for new loaders
-      const win = toWin(this.ownerDocument.defaultView);
-      if (isNewLoaderExperimentEnabled(win) && isNewLoaderIneligible(this)) {
-        return false;
-      }
-
       return true;
     }
 
@@ -1691,7 +1684,6 @@ function createBaseCustomElementClass(win) {
         if (isNewLoaderExperimentEnabled(win)) {
           loadingElement = createNewLoaderElement(
             /** @type {!Document} */ (doc),
-            container,
             this
           );
         } else {
