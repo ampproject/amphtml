@@ -34,4 +34,14 @@ describes.fakeWin('amp-story analytics', {}, env => {
 
     expect(trigger).to.have.been.calledWith('story-page-visible');
   });
+
+  it('should trigger `story-last-page-visible` when last page is visible', () => {
+    const trigger = sandbox.stub(analytics, 'triggerEvent');
+
+    analytics.onNavigationStateChange({
+      type: StateChangeType.LAST_PAGE,
+    });
+
+    expect(trigger).to.have.been.calledWith('story-last-page-visible');
+  });
 });

@@ -23,6 +23,9 @@ const {
   compileCssExpr,
 } = require('./build-system/tasks/compile-expr');
 const {
+  generateVendorJsons,
+} = require('./build-system/tasks/generate-vendor-jsons');
+const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
@@ -63,6 +66,7 @@ const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
 const {validator, validatorWebui} = require('./build-system/tasks/validator');
+const {vendorConfigs} = require('./build-system/tasks/vendor-configs');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
 
 // Keep this list alphabetized.
@@ -90,6 +94,7 @@ gulp.task('dev-dashboard-tests', devDashboardTests);
 gulp.task('dist', dist);
 gulp.task('e2e', e2e);
 gulp.task('firebase', firebase);
+gulp.task('generate-vendor-jsons', generateVendorJsons);
 gulp.task('get-zindex', getZindex);
 gulp.task('integration', integration);
 gulp.task('json-syntax', jsonSyntax);
@@ -111,5 +116,6 @@ gulp.task('unit', unit);
 gulp.task('update-packages', updatePackages);
 gulp.task('validator', validator);
 gulp.task('validator-webui', validatorWebui);
+gulp.task('vendor-configs', vendorConfigs);
 gulp.task('visual-diff', visualDiff);
 gulp.task('watch', watch);

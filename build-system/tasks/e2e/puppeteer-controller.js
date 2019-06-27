@@ -22,12 +22,12 @@ const {
   ElementHandle: PuppeteerHandle, // eslint-disable-line no-unused-vars
 } = require('puppeteer');
 const {
-  ControllerPromise,
   DOMRectDef,
   ElementHandle,
   FunctionalTestController, // eslint-disable-line no-unused-vars
   Key,
 } = require('./functional-test-controller');
+const {ControllerPromise} = require('./controller-promise');
 const {dirname, join} = require('path');
 
 /**

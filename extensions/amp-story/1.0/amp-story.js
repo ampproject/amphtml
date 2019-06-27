@@ -86,6 +86,7 @@ import {
   childElement,
   childElementByTag,
   childElements,
+  childNodes,
   closest,
   createElementWithAttributes,
   isRTL,
@@ -441,6 +442,15 @@ export class AmpStory extends AMP.BaseElement {
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
     this.element.removeAttribute('title');
+
+    // Remove text nodes which would be shown outside of the amp-story
+    const textNodes = childNodes(
+      this.element,
+      node => node.nodeType === Node.TEXT_NODE
+    );
+    textNodes.forEach(node => {
+      this.element.removeChild(node);
+    });
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', invocation => {
@@ -1802,6 +1812,27 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.remove('i-amphtml-story-desktop-panels');
         });
         break;
+      // Because of the DOM mutations, switching from this mode to another is
+      // not allowed, and prevented within the store service.
+      case UIType.VERTICAL:
+        const pageAttachments = scopedQuerySelectorAll(
+          this.element,
+          'amp-story-page amp-story-page-attachment'
+        );
+
+        this.initializeBookend_().then(() => this.showBookend_());
+
+        this.vsync_.mutate(() => {
+          this.element.setAttribute('i-amphtml-vertical', '');
+          setImportantStyles(this.win.document.body, {height: 'auto'});
+          this.element.removeAttribute('desktop');
+          this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-panels');
+          for (let i = 0; i < pageAttachments.length; i++) {
+            this.element.appendChild(pageAttachments[i]);
+          }
+        });
+        break;
     }
   }
 
@@ -1811,6 +1842,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getUIType_() {
+    if (this.platform_.isBot()) {
+      return UIType.VERTICAL;
+    }
+
     if (
       !this.isDesktop_() ||
       isExperimentOn(this.win, 'disable-amp-story-desktop')
@@ -2281,8 +2316,10 @@ export class AmpStory extends AMP.BaseElement {
       this.element.appendChild(bookendEl);
     }
 
-    return bookendEl.getImpl().then(bookendImpl => {
-      this.bookend_ = bookendImpl;
+    return whenUpgradedToCustomElement(bookendEl).then(() => {
+      return bookendEl.getImpl().then(bookendImpl => {
+        this.bookend_ = bookendImpl;
+      });
     });
   }
 

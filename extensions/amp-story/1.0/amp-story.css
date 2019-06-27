@@ -15,10 +15,12 @@
  */
 
 @import './amp-story-access.css';
+@import './amp-story-bling-link.css';
 @import './amp-story-desktop-panels.css';
 @import './amp-story-page-attachment.css';
 @import './amp-story-templates.css';
 @import './amp-story-user-overridable.css';
+@import './amp-story-vertical.css';
 @import './pagination-buttons.css';
 
 /** Common */

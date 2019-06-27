@@ -14,14 +14,28 @@
  * limitations under the License.
  */
 
+import {CidDef} from '../service/cid-impl';
+import {registerServiceBuilderForDoc} from '../service';
+
 /**
- * Indicates Opt in status of the publisher for different ad formats.
- * @enum {number}
+ * A dummy impl of CID service as CLIENT_ID is not supported
+ * in inabox.
+ *
+ * @implements {CidDef}
  */
-export const OptInStatus = {
-  UNKNOWN: 0,
-  OPT_IN_STATUS_BANNER_ADS: 1,
-  OPT_IN_STATUS_ANCHOR_ADS: 2,
-  OPT_IN_STATUS_NATIVE_IN_ARTICLE_ADS: 3,
-  OPT_IN_STATUS_NO_FILL_ANCHOR_ADS: 4,
-};
+class InaboxCid {
+  /** @override */
+  get() {
+    return Promise.resolve(null);
+  }
+
+  /** @override */
+  optOut() {}
+}
+
+/**
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installInaboxCidService(ampdoc) {
+  return registerServiceBuilderForDoc(ampdoc, 'cid', InaboxCid);
+}

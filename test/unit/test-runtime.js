@@ -32,6 +32,7 @@ import {installAmpdocServices} from '../../src/service/core-services';
 import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
@@ -1365,6 +1366,13 @@ describes.realWin(
         expect(viewer.getVisibilityState()).to.equal('inactive');
         expect(viewer.dispose).to.be.calledOnce;
       });
+
+      it('should expose head tag ', () => {
+        const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+        expect(amp.head).to.exist;
+        expect(amp.head.children).to.exist;
+        expect(amp.head.children.length).to.greaterThan(0);
+      });
     });
 
     describe
@@ -1380,6 +1388,7 @@ describes.realWin(
 
         beforeEach(() => {
           deactivateChunking();
+          setShadowDomSupportedVersionForTesting(undefined);
           hostElement = win.document.createElement('div');
           const shadowRoot = createShadowRoot(hostElement);
           ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);

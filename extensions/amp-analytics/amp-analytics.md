@@ -737,7 +737,7 @@ The above configuration translates to:
 AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
 
 
-#### Video analytics triggers
+##### Video analytics triggers
 
 Video analytics provides several triggers (`"on": "video-*"`) that publishers can use to track different events occurring during a video's lifecycle. More details are available in [AMP Video Analytics](./amp-video-analytics.md).
 

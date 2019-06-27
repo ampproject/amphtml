@@ -62,7 +62,7 @@ export class Storage {
 
   /**
    * @return {!Storage}
-   * @private
+   * @protected
    */
   start_() {
     this.listenToBroadcasts_();
