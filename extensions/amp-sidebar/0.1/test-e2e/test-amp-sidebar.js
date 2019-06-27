@@ -21,6 +21,7 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-sidebar/amp-sidebar.html',
+    environments: ['single', 'viewer-demo'],
   },
   async env => {
     let controller;
