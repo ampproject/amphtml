@@ -279,7 +279,6 @@ const AMP_EMBED_ALLOWED = {
   'mantis-recommend': true,
   miximedia: true,
   mywidget: true,
-  lentainform: true,
   opinary: true,
   outbrain: true,
   plista: true,
