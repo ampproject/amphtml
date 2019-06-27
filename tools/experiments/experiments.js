@@ -366,11 +366,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
-    id: 'linker-form',
-    name: 'Enables form support in linker',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18068',
-  },
-  {
     id: 'amp-list-load-more',
     name: 'Enables load-more related functionality in amp-list',
     spec: 'https://github.com/ampproject/amphtml/issues/13575',
