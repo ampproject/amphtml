@@ -621,6 +621,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   buildSystemLayer_() {
     this.updateAudioIcon_();
+
     let pageIds;
     if (this.pages_.length) {
       pageIds = this.pages_.map(page => page.element.id);
@@ -628,7 +629,7 @@ export class AmpStory extends AMP.BaseElement {
       const pages = this.element.querySelectorAll('amp-story-page');
       pageIds = Array.prototype.map.call(pages, el => el.id);
     }
-    this.storeService_.dispatch(Action.ADD_TO_PAGE_IDS, pageIds);
+    this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
     this.element.appendChild(this.systemLayer_.build());
   }
 
@@ -933,7 +934,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeSidebar_();
     this.setThemeColor_();
 
-    const storyLayoutPromise = this.initializePages()
+    const storyLayoutPromise = this.initializePages_()
       .then(() => {
         this.handleConsentExtension_();
         this.initializeStoryAccess_();
@@ -1019,7 +1020,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   initializeLiveStory_() {
     if (this.element.hasAttribute('live-story')) {
-      this.liveStoryManager_ = new LiveStoryManager(this, this.getAmpDoc());
+      this.liveStoryManager_ = new LiveStoryManager(this);
       this.liveStoryManager_.build();
 
       this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [
@@ -1027,7 +1028,8 @@ export class AmpStory extends AMP.BaseElement {
       ]);
 
       this.element.addEventListener(AmpEvents.DOM_UPDATE, () => {
-        this.liveStoryManager_.update().then(() => {
+        this.liveStoryManager_.update();
+        this.initializePages_().then(() => {
           this.setDesktopPositionAttributes_(this.activePage_);
           this.preloadPagesByDistance_();
         });
@@ -1226,10 +1228,8 @@ export class AmpStory extends AMP.BaseElement {
     return true;
   }
 
-  /**
-   * Returns a promise that resolves when pages have finished initializing.
-   */
-  initializePages() {
+  /** @private */
+  initializePages_() {
     const pageImplPromises = Array.prototype.map.call(
       this.element.querySelectorAll('amp-story-page'),
       pageEl => pageEl.getImpl()

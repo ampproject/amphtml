@@ -19,8 +19,8 @@ import {StateProperty, getStoreService} from './amp-story-store-service';
 import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '../../../src/css';
 import {hasOwn, map} from '../../../src/utils/object';
+import {removeChildren, scopedQuerySelector} from '../../../src/dom';
 import {scale, setImportantStyles} from '../../../src/style';
-import {scopedQuerySelector} from '../../../src/dom';
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the
@@ -111,7 +111,7 @@ export class ProgressBar {
           this.updateProgress(
             this.activeSegmentId_,
             this.activeSegmentProgress_,
-            true /** opt_updateAllSegments */
+            true /** updateAllSegments */
           );
         }
       },
@@ -140,8 +140,8 @@ export class ProgressBar {
    * Clears the progress bar.
    */
   clear_() {
+    removeChildren(this.root_);
     this.segmentIdMap_ = map();
-    this.root_.textContent = '';
     this.segmentCount_ = 0;
   }
 
@@ -184,9 +184,9 @@ export class ProgressBar {
    * @param {string} segmentId the id of the segment whos progress to change.
    * @param {number} progress A number from 0.0 to 1.0, representing the
    *     progress of the current segment.
-   * @param {boolean} opt_updateAllSegments Updates all of the segments.
+   * @param {boolean} updateAllSegments Updates all of the segments.
    */
-  updateProgress(segmentId, progress, opt_updateAllSegments) {
+  updateProgress(segmentId, progress, updateAllSegments = false) {
     this.assertVaildSegmentId_(segmentId);
     const segmentIndex = this.segmentIdMap_[segmentId];
 
@@ -194,7 +194,7 @@ export class ProgressBar {
 
     // If updating progress for a new segment, update all the other progress
     // bar segments.
-    if (this.activeSegmentIndex_ !== segmentIndex || opt_updateAllSegments) {
+    if (this.activeSegmentIndex_ !== segmentIndex || updateAllSegments) {
       this.updateSegments_(
         segmentIndex,
         progress,

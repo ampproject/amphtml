@@ -15,8 +15,9 @@
  */
 
 import {Action, getStoreService} from './amp-story-store-service';
+import {EventType} from './events';
 import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes, lastChildElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {userAssert} from '../../../src/log';
 
@@ -30,14 +31,13 @@ const AMP_LIVE_LIST_CUSTOM_SLOT_ID = 'AMP_LIVE_LIST_CUSTOM_SLOT_ID';
 export class LiveStoryManager {
   /**
    * @param {!./amp-story.AmpStory} ampStory
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(ampStory, ampdoc) {
+  constructor(ampStory) {
     /** @private @const {!./amp-story.AmpStory} */
     this.ampStory_ = ampStory;
 
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    this.ampdoc_ = this.ampStory_.getAmpDoc();
 
     /** @private @const {!Element} */
     this.storyEl_ = ampStory.element;
@@ -69,10 +69,12 @@ export class LiveStoryManager {
       'amp-story must contain id to use the live story functionality'
     );
 
-    Services.extensionsFor(this.ampdoc_.win).installExtensionForDoc(
-      this.ampdoc_,
-      'amp-live-list'
-    );
+    this.ampStory_.element.addEventListener(EventType.STORY_LOADED, () => {
+      Services.extensionsFor(this.ampdoc_.win).installExtensionForDoc(
+        this.ampdoc_,
+        'amp-live-list'
+      );
+    });
 
     this.storyEl_.insertBefore(liveListEl, this.storyEl_.firstElementChild);
   }
@@ -81,16 +83,14 @@ export class LiveStoryManager {
    * Updates the client amp-story with the changes from the server document.
    */
   update() {
-    const storyPages = this.storyEl_.querySelectorAll('amp-story-page');
-    const newPages = Array.prototype.filter.call(storyPages, page => {
-      return page.classList.contains('amp-live-list-item-new');
-    });
+    const lastNewPageEl = lastChildElement(this.storyEl_, page =>
+      page.classList.contains('amp-live-list-item-new')
+    );
 
-    const lastNewPageEl = newPages[newPages.length - 1];
+    const storyPages = this.storyEl_.querySelectorAll('amp-story-page');
     const pageIds = Array.prototype.map.call(storyPages, el => el.id);
 
-    this.storeService_.dispatch(Action.ADD_TO_PAGE_IDS, pageIds);
+    this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
     this.storeService_.dispatch(Action.ADD_NEW_PAGE_ID, lastNewPageEl.id);
-    return this.ampStory_.initializePages();
   }
 }

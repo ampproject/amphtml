@@ -156,7 +156,7 @@ export const StateProperty = {
 /** @private @const @enum {string} */
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
-  ADD_TO_PAGE_IDS: 'addToPageIds',
+  SET_PAGE_IDS: 'addToPageIds',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
@@ -219,7 +219,7 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
       }));
-    case Action.ADD_TO_PAGE_IDS:
+    case Action.SET_PAGE_IDS:
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.PAGE_IDS]: data,
       }));
