@@ -28,7 +28,6 @@ import {
 } from '../linker-reader';
 import {installVariableServiceForTesting} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
-import {toggleExperiment} from '../../../../src/experiments';
 
 // TODO(ccordry): Refactor all these tests with async/await.
 describes.realWin('Linker Manager', {amp: true}, env => {
@@ -812,7 +811,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
   describe('form support', () => {
     it('should register the `beforeSubmit` callback', () => {
-      toggleExperiment(win, 'linker-form', true);
       const linkerManager = new LinkerManager(
         ampdoc,
         {
@@ -831,7 +829,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
       return linkerManager.init().then(() => {
         expect(beforeSubmitStub.calledOnce).to.be.true;
-        toggleExperiment(win, 'linker-form', false);
         expect(beforeSubmitStub).to.be.calledWith(sinon.match.func);
       });
     });
