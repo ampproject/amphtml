@@ -65,7 +65,7 @@ The `amp-script` component allows you to render widgets and other UI using custo
 </amp-script>
 
 <!-- Local scripts are referenced by id. -->
-<script type="text/amp-script" id="hello-world">
+<script type="text/plain" target="amp-script" id="hello-world">
   const button = document.getElementById('hello');
   button.addEventListener('click', () => {
     const h1 = document.createElement('h1');
@@ -120,8 +120,8 @@ See our [Quick Start](https://github.com/ampproject/amphtml/blob/master/contribu
 
 `amp-script` has restrictions on the size of the JS.
 
-- Maximum of 10,000 bytes per inline script per `<amp-script>` element.
-- Maximum total of 150,000 bytes for all `<amp-script>` elements on the page.
+- Maximum of 10,000 bytes per `amp-script` element that uses a local script via `script[type=text/plain][target=amp-script]`.
+- Maximum total of 150,000 bytes for all `amp-script` elements on the page.
 
 #### Which JavaScript APIs can I use?
 

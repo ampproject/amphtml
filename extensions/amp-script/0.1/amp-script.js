@@ -106,7 +106,11 @@ export class AmpScript extends AMP.BaseElement {
 
     const authorScriptPromise = this.getAuthorScript_();
     if (!authorScriptPromise) {
-      return Promise.reject();
+      const error = user().createError(
+        '[%s] "src" or "script" attribute is required.',
+        TAG
+      );
+      return Promise.reject(error);
     }
 
     const workerAndAuthorScripts = Promise.all([
@@ -186,7 +190,8 @@ export class AmpScript extends AMP.BaseElement {
   }
 
   /**
-   * Query local or fetch remote author script.
+   * Query local or fetch remote author script. Returns promise that resolves
+   * with the script contents. Returns null if script reference is missing.
    * @return {?Promise<string>}
    * @private
    */
@@ -198,17 +203,19 @@ export class AmpScript extends AMP.BaseElement {
         .then(r => r.text());
     } else {
       const id = this.element.getAttribute('script');
-      user().assert(id, '[%s] "src" or "script" attribute is required.', TAG);
-      const local = this.getAmpDoc().getElementById(id);
-      const type = local.getAttribute('type');
-      user().assert(
-        type === 'text/amp-script',
-        '[%s] #%s must have type="text/amp-script".',
-        TAG,
-        id
-      );
-      return Promise.resolve(local.textContent);
+      if (id) {
+        const local = this.getAmpDoc().getElementById(id);
+        const target = local.getAttribute('target');
+        user().assert(
+          target === 'amp-script',
+          '[%s] script#%s must have target="amp-script".',
+          TAG,
+          id
+        );
+        return Promise.resolve(local.textContent);
+      }
     }
+    return null;
   }
 
   /**

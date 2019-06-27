@@ -30,10 +30,15 @@ tags: {  # <amp-script> (local script)
   spec_name: "amp-script extension local script"
   requires_extension: "amp-script"
   attrs: {
+    name: "target"
+    mandatory: true
+    value: "amp-script"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
     name: "type"
     mandatory: true
-    value: "text/amp-script"
-    dispatch_key: NAME_VALUE_DISPATCH
+    value_casei: "text/plain"
   }
   attr_lists: "mandatory-id-attr"
   attr_lists: "nonce-attr"
