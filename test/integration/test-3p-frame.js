@@ -292,16 +292,7 @@ describe
       expect(iframe.not_whitelisted).to.equal(undefined);
     });
 
-    it('should not set feature policy for sync-xhr with exp off', () => {
-      const div = document.createElement('my-element');
-      setupElementFunctions(div);
-      container.appendChild(div);
-      const iframe = getIframe(window, div, 'none');
-      expect(iframe.getAttribute('allow')).to.equal(null);
-    });
-
-    it('should set feature policy for sync-xhr with exp on', () => {
-      toggleExperiment(window, 'no-sync-xhr-in-ads', true);
+    it('should set feature policy for sync-xhr', () => {
       const div = document.createElement('my-element');
       setupElementFunctions(div);
       container.appendChild(div);
