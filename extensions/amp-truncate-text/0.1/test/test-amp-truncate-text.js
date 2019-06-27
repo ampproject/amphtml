@@ -72,10 +72,10 @@ describes.realWin(
 
       async function createElement(
         content,
-        {width, height, container = doc.body}
+        {width, height, layout = 'fixed', container = doc.body}
       ) {
         const element = win.document.createElement('amp-truncate-text');
-        element.setAttribute('layout', 'fixed');
+        element.setAttribute('layout', layout);
         element.setAttribute('width', width);
         element.setAttribute('height', height);
         setStyles(element, {
@@ -399,6 +399,40 @@ describes.realWin(
             expect(element.scrollHeight).to.equal(element.offsetHeight);
             expect(collapseEl.offsetHeight).to.be.gt(0);
             expect(collapseEl.offsetWidth).to.be.gt(0);
+          });
+
+          it('should hide any sizer element when expanded', async () => {
+            const element = await createElement(
+              `
+              ${loremText}
+              <span slot="collapsed">See more</span>
+              <span slot="expanded">See more</span>
+            `,
+              {
+                layout: 'responsive',
+                width: 150,
+                height: 26,
+              }
+            );
+            element.style.width = '150px';
+
+            const expandEl = element.querySelector('[slot="collapsed"]');
+            const sizer = element.querySelector('i-amphtml-sizer');
+
+            expect(sizer.getBoundingClientRect()).to.include({
+              width: 150,
+              height: 26,
+            });
+
+            expandEl.click();
+            await afterMutationAndClamp();
+
+            expect(sizer.getBoundingClientRect()).to.include({
+              width: 0,
+              height: 0,
+            });
+            expect(element.scrollHeight).to.be.gt(26);
+            expect(element.scrollHeight).to.equal(element.offsetHeight);
           });
 
           it('should collapse when clicking the collapse element', async () => {
