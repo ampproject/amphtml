@@ -1333,7 +1333,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @return {boolean} whether html creatives should be sandboxed. */
   sandboxHTMLCreativeFrame() {
-    return isExperimentOn(this.win, 'sandbox-ads');
+    return true;
   }
 
   /**
