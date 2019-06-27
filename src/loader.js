@@ -248,15 +248,16 @@ class LoaderBuilder {
    * @private
    */
   maybeAddDefaultPlaceholder_() {
-    // NOTE(aghassemi): I do believe we need to exclude amp-list here, but
-    // let's see how experimentation goes. Maybe a better idea is to have a
-    // white list, any component that does not fully load a new background may
-    // look bad if a gray placeholder shows up and goes away quickly. This
-    // default placeholder is good for image, video, etc.. but amp-list which
-    // usually just loads text is debatable. amp-iframe is also a candidate
-    // to exclude, often it does load a video or maps but it may not load
-    // text on transparent background in certain cases.
-    if (!this.hasPlaceholder()) {
+    if (this.hasPlaceholder()) {
+      return;
+    }
+
+    // Is it whitelisted for default placeholder?
+    const tagName = this.element_.tagName.toUpperCase();
+    if (
+      DEFAULT_PLACEHOLDER_WHITELIST[tagName] || // static white list
+      videoPlayerTagNameRe.test(tagName) // regex for various video players
+    ) {
       const html = htmlFor(this.element_);
       const defaultPlaceholder = html`
         <div placeholder class="i-amphtml-default-placeholder"></div>
@@ -351,7 +352,10 @@ class LoaderBuilder {
    *
    */
   hasPlaceholder() {
-    return !!this.element_.getPlaceholder();
+    const hasPlaceholder = !!this.element_.getPlaceholder();
+    // we consider poster same as placeholder for our case.
+    const hasPoster = this.element_.getAttribute('poster') != '';
+    return hasPlaceholder || hasPoster;
   }
 
   /**
@@ -375,6 +379,27 @@ class LoaderBuilder {
     return false;
   }
 }
+
+/**
+ * Elements will get a default gray placeholder if they don't already have a
+ * placeholder
+ * @enum {boolean}
+ * @private  Visible for testing only!
+ */
+export const DEFAULT_PLACEHOLDER_WHITELIST = {
+  'AMP-BRIGHTCOVE': true,
+  'AMP-DAILYMOTION': true,
+  'AMP-IMG': true,
+  'AMP-YOUTUBE': true,
+  'AMP-VIMEO': true,
+};
+/**
+ * All video player components must either have a) "video" or b) "player" in
+ * their name. A few components don't follow this convention for historical
+ * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
+ * @private @const {!RegExp}
+ */
+const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
 
 /**
  * Whether the new loader experiment is enabled.

@@ -41,6 +41,7 @@ import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
+import {scopedQuerySelectorAll} from './dom';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from '../src/consent';
 import {toWin} from './types';
@@ -1523,15 +1524,12 @@ function createBaseCustomElementClass(win) {
      * @package @final @this {!Element}
      */
     getPlaceholder() {
-      return dom.lastChildElement(this, el => {
-        return (
-          el.hasAttribute('placeholder') &&
-          // Blacklist elements that has a native placeholder property
-          // like input and textarea. These are not allowed to be AMP
-          // placeholders.
-          !isInputPlaceholder(el)
-        );
-      });
+      const candidates = scopedQuerySelectorAll(this, '> [placeholder]');
+      // Take the last match
+      const candidate = candidates[candidates.length - 1];
+      if (candidate && !isInputPlaceholder(candidate)) {
+        return candidate;
+      }
     }
 
     /**

@@ -104,8 +104,13 @@
     <script src="https://cdn.ampproject.org/v0.js"></script>
     <script
       async
-      custom-element="amp-ad"
-      src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"
+      custom-element="amp-iframe"
+      src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-video-iframe"
+      src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js"
     ></script>
     <style amp-custom>
       /* boring boiler place stuff */
@@ -196,10 +201,8 @@
         border: 1px solid #333;
       }
       .filters button {
-        display: block;
         padding: 10px;
         border: none;
-        border-right: 1px solid #666;
         background-color: #eee;
         color: #111;
       }
@@ -229,6 +232,13 @@
           class="selected"
         >
           amp-img
+        </button>
+        <button
+          id="ampIframeButton"
+          on="tap:sectionAmpIframe.toggleVisibility(),ampIframeButton.toggleClass(class='selected')"
+          class="selected"
+        >
+          amp-iframe
         </button>
       </div>
 
@@ -281,6 +291,46 @@
           width="1600"
           height="900"
         ></amp-img>
+      </section>
+
+      <section id="sectionAmpIframe">
+        <h1>amp-iframe</h1>
+        <h2>Normal amp-iframe</h2>
+        <amp-iframe
+          sandbox="allow-scripts allow-forms allow-same-origin"
+          src="https://maps.google.com/maps?width=100%&amp;height=600&amp;hl=en&amp;q=1%20Grafton%20Street%2C%20Dublin%2C%20Ireland+(My%20Business%20Name)&amp;ie=UTF8&amp;t=&amp;z=14&amp;iwloc=B&amp;output=embed"
+          layout="responsive"
+          width="1600"
+          height="900"
+        ></amp-iframe>
+
+        <h2>amp-iframe with image placeholder</h2>
+        <amp-iframe
+          sandbox="allow-scripts allow-forms allow-same-origin"
+          src="https://maps.google.com/maps?width=100%&amp;height=600&amp;hl=en&amp;q=1%20Grafton%20Street%2C%20Dublin%2C%20Ireland+(My%20Business%20Name)&amp;ie=UTF8&amp;t=&amp;z=14&amp;iwloc=B&amp;output=embed"
+          layout="responsive"
+          width="250"
+          height="250"
+        >
+          <amp-img
+            placeholder
+            src="https://picsum.photos/1600/900?image=314"
+            class="custom-loader-1"
+            layout="responsive"
+            width="250"
+            height="250"
+          ></amp-img>
+        </amp-iframe>
+
+        <h2>amp-video-iframe with poster</h2>
+        <amp-video-iframe
+          poster="https://picsum.photos/600/600?image=30"
+          sandbox="allow-scripts allow-forms allow-same-origin"
+          src="https://player.vimeo.com/video/183849543"
+          layout="responsive"
+          width="1600"
+          height="900"
+        ></amp-video-iframe>
       </section>
     </main>
   </body>
