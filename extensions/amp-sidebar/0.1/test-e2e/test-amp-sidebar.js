@@ -47,14 +47,15 @@ describes.endtoend(
       await expect(controller.getElementProperty(sidebar, 'hidden')).to.be
         .false;
 
-      await expect(
-        controller.getElementProperty(sidebar, 'clientWidth')
-      ).to.be.greaterThan(0);
+      await expect(controller.getElementRect(sidebar)).to.include({
+        width: 300,
+        left: 0,
+      });
 
       const backingImage = await controller.findElement('#image img');
       await expect(
         controller.getElementProperty(backingImage, 'clientWidth')
-      ).to.be.greaterThan(0);
+      ).to.equal(300);
     });
 
     it('should close the sidebar on button click', async () => {
@@ -65,9 +66,14 @@ describes.endtoend(
       await expect(controller.getElementProperty(sidebar, 'hidden')).to.be
         .false;
 
+      // Wait for the button to become visible
+      await expect(controller.getElementRect(sidebar)).to.include({
+        width: 300,
+        right: 300,
+      });
+
       const close = await controller.findElement('#close');
       await controller.click(close);
-
       await expect(controller.getElementProperty(sidebar, 'hidden')).to.be.true;
     });
 
