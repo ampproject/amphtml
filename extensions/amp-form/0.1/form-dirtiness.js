@@ -23,9 +23,10 @@ import {map} from '../../../src/utils/object';
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 
 /** @private {!Object<string, boolean>} */
-const SUPPORTED_TYPES = {
-  'text': true,
-  'textarea': true,
+const SUPPORTED_TAG_NAMES = {
+  'INPUT': true,
+  'SELECT': true,
+  'TEXTAREA': true,
 };
 
 export class FormDirtiness {
@@ -219,10 +220,9 @@ export class FormDirtiness {
  * @return {boolean}
  */
 function shouldSkipDirtinessCheck(field) {
-  const {type, name, hidden} = field;
+  const {tagName, name, hidden} = field;
 
-  // TODO: add support for radio buttons, checkboxes, and dropdown menus
-  if (!SUPPORTED_TYPES[type]) {
+  if (!SUPPORTED_TAG_NAMES[tagName]) {
     return true;
   }
 

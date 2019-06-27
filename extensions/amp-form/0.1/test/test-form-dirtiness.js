@@ -17,6 +17,7 @@
 import {AmpEvents} from '../../../../src/amp-events';
 import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
 import {Services} from '../../../../src/services';
+import {closestAncestorElementBySelector} from '../../../../src/dom';
 import {createCustomEvent} from '../../../../src/event-helper';
 
 function getForm(doc) {
@@ -27,8 +28,33 @@ function getForm(doc) {
   return form;
 }
 
+function createElement(doc, tagName, attributes) {
+  const element = doc.createElement(tagName);
+  for (const attributeName in attributes) {
+    element.setAttribute(attributeName, attributes[attributeName]);
+  }
+  return element;
+}
+
 function changeInput(element, value) {
   element.value = value;
+  dispatchInputEvent(element);
+}
+
+function checkInput(element, checked) {
+  element.checked = checked;
+  dispatchInputEvent(element);
+}
+
+function selectOption(option, selected) {
+  option.selected = selected;
+
+  // The native `InputEvent` is dispatched at the parent `<select>` when its
+  // selected `<option>` changes.
+  dispatchInputEvent(closestAncestorElementBySelector(option, 'select'));
+}
+
+function dispatchInputEvent(element) {
   const event = new Event('input', {bubbles: true});
   element.dispatchEvent(event);
 }
@@ -181,6 +207,118 @@ describes.realWin('form-dirtiness', {}, env => {
       dirtinessHandler.onSubmitting();
       dirtinessHandler.onSubmitSuccess();
       changeInput(textarea, 'submitted');
+
+      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+  });
+
+  describe('checkbox changes', () => {
+    let checkbox;
+
+    beforeEach(() => {
+      checkbox = createElement(doc, 'input', {
+        type: 'checkbox',
+        name: 'checkbox',
+      });
+      form.appendChild(checkbox);
+    });
+
+    it('clears dirtiness class when checkbox is in default state', () => {
+      checkbox.setAttribute('checked', 'checked');
+      checkInput(checkbox, true);
+
+      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('clears dirtiness class when checkbox is not checked', () => {
+      checkInput(checkbox, false);
+      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('adds dirtiness class when checkbox state has changed', () => {
+      checkInput(checkbox, true);
+      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('clears dirtiness class when checkbox matches its submitted state', () => {
+      checkInput(checkbox, true);
+      dirtinessHandler.onSubmitting();
+      dirtinessHandler.onSubmitSuccess();
+      checkInput(checkbox, true);
+
+      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+  });
+
+  describe('radio button changes', () => {
+    let optionA, optionB;
+
+    beforeEach(() => {
+      optionA = createElement(doc, 'input', {type: 'radio', name: 'radio'});
+      optionB = createElement(doc, 'input', {type: 'radio', name: 'radio'});
+      form.appendChild(optionA);
+      form.appendChild(optionB);
+    });
+
+    it('clears dirtiness class when radio button is in default state', () => {
+      optionA.setAttribute('checked', 'checked');
+      checkInput(optionA, true);
+
+      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('clears dirtiness class when no radio button is checked', () => {
+      checkInput(optionA, false);
+      checkInput(optionB, false);
+
+      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('adds dirtiness class when radio button state has changed', () => {
+      checkInput(optionB, true);
+      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('clears dirtiness class when radio button state matches its submitted state', () => {
+      checkInput(optionB, true);
+      dirtinessHandler.onSubmitting();
+      dirtinessHandler.onSubmitSuccess();
+      checkInput(optionB, true);
+
+      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+  });
+
+  describe('dropdown selection changes', () => {
+    let dropdown, optionA, optionB;
+
+    beforeEach(() => {
+      dropdown = createElement(doc, 'select', {name: 'select'});
+      optionA = createElement(doc, 'option', {value: 'A'});
+      optionB = createElement(doc, 'option', {value: 'B'});
+
+      dropdown.appendChild(optionA);
+      dropdown.appendChild(optionB);
+      form.appendChild(dropdown);
+    });
+
+    it('clears dirtiness class when dropdown is in its default state', () => {
+      optionA.setAttribute('selected', 'selected');
+      selectOption(optionA, true);
+
+      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('adds dirtiness class when dropdown is not in its default state', () => {
+      selectOption(optionB, true);
+      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('clears dirtiness class when dropdown selection matches its submitted state', () => {
+      selectOption(optionA, true);
+      dirtinessHandler.onSubmitting();
+      dirtinessHandler.onSubmitSuccess();
+      selectOption(optionA, true);
 
       expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
     });
