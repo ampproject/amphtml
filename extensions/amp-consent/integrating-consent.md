@@ -1,8 +1,6 @@
 # Integrate your Consent Management Platform (CMP) with AMP Consent
 
 ## Overview
-The feature is in experimental mode. Please opt-in using the `amp-consent-v2` flag. To opt-in, you can either run `AMP.toggleExperiment('amp-consent-v2')` in console, or turn on the experiment from the [experiments managing page](https://cdn.ampproject.org/experiments.html).
-
 To enable customers to operate a CMP to manage their user consents in AMPHTML pages, Consent Management Providers should integrate their service in `amp-consent`.
 
 ## Before you begin
