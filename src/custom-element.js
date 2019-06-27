@@ -1634,10 +1634,17 @@ function createBaseCustomElementClass(win) {
       if (this.loadingDisabled_ === undefined) {
         this.loadingDisabled_ = this.hasAttribute('noloading');
       }
+
+      let isTooSmall = this.layoutWidth_ < MIN_WIDTH_FOR_LOADING;
+      // New loaders experiments has its own sizing heuristics
+      if (isNewLoaderExperimentEnabled(toWin(this.ownerDocument.defaultView))) {
+        isTooSmall = false;
+      }
+
       if (
         this.loadingDisabled_ ||
         !isLoadingAllowed(this) ||
-        this.layoutWidth_ < MIN_WIDTH_FOR_LOADING ||
+        isTooSmall ||
         this.layoutCount_ > 0 ||
         isInternalOrServiceNode(this) ||
         !isLayoutSizeDefined(this.layout_)
