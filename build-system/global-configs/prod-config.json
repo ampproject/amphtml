@@ -58,6 +58,5 @@
   "margin-bottom-in-content-height": 1,
   "no-sync-xhr-in-ads": 1,
   "pump-early-frame": 1,
-  "sandbox-ads": 1,
   "version-locking": 1
 }

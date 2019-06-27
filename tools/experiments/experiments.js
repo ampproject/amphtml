@@ -295,12 +295,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'sandbox-ads',
-    name: 'Applies a sandbox to ad iframes.',
-    spec: 'https://github.com/ampproject/amphtml/issues/14240',
-    cleanupIssue: 'TODO',
-  },
-  {
     id: 'iframe-messaging',
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
