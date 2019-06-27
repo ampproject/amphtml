@@ -5,8 +5,7 @@
     "amp-next-page",
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
-    "inabox-css-cleanup",
-    "linker-meta-opt-in"
+    "inabox-css-cleanup"
   ],
   "allow-url-opt-in": [
     "pump-early-frame",
@@ -53,7 +52,6 @@
   "inabox-remove-height-auto": 1,
   "ios-fixed-no-transfer": 1,
   "layers": 1,
-  "linker-meta-opt-in": 1,
   "margin-bottom-in-content-height": 1,
   "no-sync-xhr-in-ads": 1,
   "pump-early-frame": 1,
