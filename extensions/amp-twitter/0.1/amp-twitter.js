@@ -19,7 +19,6 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
 
 class AmpTwitter extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -119,26 +118,12 @@ class AmpTwitter extends AMP.BaseElement {
    * @private
    */
   updateForSuccessState_(height) {
-    let placeholderHeight;
-    this.measureMutateElement(
-      () => {
-        if (!this.userPlaceholder_) {
-          // Use an explicit height so that the placeholder does not move when\
-          // the container resizes.
-          placeholderHeight = this.element./*OK*/ getBoundingClientRect()
-            .height;
-        }
-      },
-      () => {
-        if (this.userPlaceholder_) {
-          this.togglePlaceholder(false);
-        }
-        this./*OK*/ changeHeight(height);
-        if (placeholderHeight) {
-          setStyle(this.getPlaceholder(), 'height', placeholderHeight, 'px');
-        }
+    this.mutateElement(() => {
+      if (this.userPlaceholder_) {
+        this.togglePlaceholder(false);
       }
-    );
+      this./*OK*/ changeHeight(height);
+    });
   }
 
   /**
