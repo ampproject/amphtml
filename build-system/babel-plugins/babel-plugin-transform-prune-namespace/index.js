@@ -25,7 +25,7 @@ module.exports = function() {
 
       const namespaceMember = deepestMember(path);
       if (namespaceMember.node.computed) {
-        console.error(namespaceMember.toString());
+        console./*OK*/ error(namespaceMember.toString());
         throw path.buildCodeFrameError("can't handle computed namespace");
       }
 

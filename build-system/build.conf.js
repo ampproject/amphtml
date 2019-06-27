@@ -66,9 +66,7 @@ module.exports = {
 
   eliminateIntermediateBundles() {
     return [
-      require.resolve(
-        './babel-plugins/babel-plugin-transform-prune-namespace'
-      ),
+      require.resolve('./babel-plugins/babel-plugin-transform-prune-namespace'),
     ];
   },
 };
