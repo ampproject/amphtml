@@ -59,7 +59,6 @@
   "no-initial-intersection": 1,
   "no-sync-xhr-in-ads": 1,
   "pump-early-frame": 1,
-  "sandbox-ads": 1,
   "user-error-reporting": 1,
   "version-locking": 1
 }

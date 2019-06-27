@@ -2971,18 +2971,6 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
     );
   });
 
-  describe('#sandboxHTMLCreativeFrame', () => {
-    it('should return true if experiment enabled', () => {
-      toggleExperiment(a4a.win, 'sandbox-ads', true);
-      expect(a4a.sandboxHTMLCreativeFrame()).to.be.true;
-    });
-
-    it('should return true if experiment disabled', () => {
-      toggleExperiment(a4a.win, 'sandbox-ads', false);
-      expect(a4a.sandboxHTMLCreativeFrame()).to.be.false;
-    });
-  });
-
   describe('single pass experiments', () => {
     it('should add single pass id', () => {
       getMode().singlePassType = 'sp';
