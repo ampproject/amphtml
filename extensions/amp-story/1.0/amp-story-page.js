@@ -307,8 +307,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     this.setDescendantCssTextStyles_();
     this.storeService_.subscribe(
-        StateProperty.UI_STATE,
-        uiState => this.onUIStateUpdate_(uiState), true /* callToInitialize */);
+      StateProperty.UI_STATE,
+      uiState => this.onUIStateUpdate_(uiState),
+      true /* callToInitialize */
+    );
   }
 
   /**
@@ -469,11 +471,12 @@ export class AmpStoryPage extends AMP.BaseElement {
   onUIStateUpdate_(uiState) {
     // On vertical rendering, render all the animations with their final state.
     if (uiState === UIType.VERTICAL && this.animationManager_) {
-      this.signals().whenSignal(CommonSignals.LOAD_END)
-          .then(() => this.maybeApplyFirstAnimationFrame())
-          .then(() => {
-            this.animationManager_.finishAll();
-          });
+      this.signals()
+        .whenSignal(CommonSignals.LOAD_END)
+        .then(() => this.maybeApplyFirstAnimationFrame())
+        .then(() => {
+          this.animationManager_.finishAll();
+        });
     }
   }
 
