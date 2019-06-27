@@ -25,7 +25,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
@@ -206,7 +206,7 @@ export class AmpScript extends AMP.BaseElement {
       if (id) {
         const local = this.getAmpDoc().getElementById(id);
         const target = local.getAttribute('target');
-        user().assert(
+        userAssert(
           target === 'amp-script',
           '[%s] script#%s must have target="amp-script".',
           TAG,
