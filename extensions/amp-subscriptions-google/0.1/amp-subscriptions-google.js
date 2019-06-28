@@ -104,21 +104,19 @@ export class GoogleSubscriptionsPlatform {
   /**
    * Listens for events from analytics and transmits them to the SwG event
    * manager if appropriate.
-   * @param {string} event
+   * @param {!SubscriptionAnalyticsEvents|string} event
+   * @param {!JsonObject} optVarsUnused
+   * @param {!JsonObject} internalVars
    */
-  handleAnalyticsEvent_(event) {
+  handleAnalyticsEvent_(event, optVarsUnused, internalVars) {
     let eventType = null;
+    const action = internalVars['action'];
+    const status = internalVars['status'];
 
     if (AMP_EVENT_TO_SWG_EVENT[event]) {
       eventType = AMP_EVENT_TO_SWG_EVENT[event];
-    } else {
-      const actionStatus = this.subscriptionAnalytics_.getActionStatus(event);
-      if (actionStatus.action && AMP_ACTION_TO_SWG_EVENT[actionStatus.action]) {
-        const actionMap = AMP_ACTION_TO_SWG_EVENT[actionStatus.action];
-        if (actionMap[actionStatus.status]) {
-          eventType = actionMap[actionStatus.status];
-        }
-      }
+    } else if (action && AMP_ACTION_TO_SWG_EVENT[action]) {
+      eventType = AMP_ACTION_TO_SWG_EVENT[action][status];
     }
 
     if (!eventType) {
