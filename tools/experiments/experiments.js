@@ -403,6 +403,14 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
   },
   {
+    id: 'untrusted-xhr-interception',
+    name:
+      'Enable "xhrInterceptor" capability for untrusted viewers. ' +
+      'For development use only',
+    spec: 'N/A',
+    cleanupIssue: 'N/A',
+  },
+  {
     id: 'new-loaders',
     name: 'New default loaders',
     spec: 'https://github.com/ampproject/amphtml/issues/20237',
