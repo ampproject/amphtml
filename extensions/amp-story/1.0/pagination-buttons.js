@@ -259,9 +259,9 @@ export class PaginationButtons {
         .signals()
         .whenSignal(CommonSignals.LOAD_END)
         .then(() => {
-          const currentPageIndex = this.storeService_.get(
-            StateProperty.CURRENT_PAGE_INDEX
-          );
+          const currentPageIndex = /** @type {number} */ (devAssert(
+            this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+          ));
           this.onCurrentPageIndexUpdate_(currentPageIndex);
         });
     });

@@ -140,7 +140,7 @@ export class ProgressBar {
    * Clears the progress bar.
    */
   clear_() {
-    removeChildren(this.root_);
+    removeChildren(devAssert(this.root_));
     this.segmentIdMap_ = map();
     this.segmentCount_ = 0;
   }
