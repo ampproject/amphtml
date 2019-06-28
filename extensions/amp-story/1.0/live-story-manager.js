@@ -16,7 +16,6 @@
 
 import {Action, getStoreService} from './amp-story-store-service';
 import {CommonSignals} from '../../../src/common-signals';
-import {EventType} from './events';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes, lastChildElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';

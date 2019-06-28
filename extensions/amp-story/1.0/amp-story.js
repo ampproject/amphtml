@@ -897,7 +897,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     // TODO(#19768): Avoid passing a private function here.
-    this.paginationButtons_ = PaginationButtons.create(this.win, () =>
+    this.paginationButtons_ = PaginationButtons.create(this, () =>
       this.hasBookend_()
     );
 
