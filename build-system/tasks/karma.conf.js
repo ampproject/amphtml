@@ -279,8 +279,8 @@ module.exports = {
       // Run tests up to 3 times before failing them on Travis.
       retries: isTravisBuild() ? 2 : 0,
     },
-    captureConsole: true,
-    verboseLogging: true,
+    captureConsole: false,
+    verboseLogging: false,
     testServerPort: TEST_SERVER_PORT,
   },
 
