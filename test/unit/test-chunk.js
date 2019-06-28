@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {
   activateChunkingForTesting,
@@ -337,37 +336,18 @@ describe('chunk', () => {
   );
 });
 
-describes.fakeWin(
-  'long chunk tasks force a macro task between work',
-  {
-    amp: true,
-  },
-  env => {
-    let subscriptions;
-    let clock;
+describe('taskQueues', () => {
+  describes.fakeWin(
+    'long chunk tasks force a macro task between work',
+    {
+      amp: true,
+    },
+    env => {
+      let subscriptions;
+      let sandbox;
+      let clock;
+      let progress;
 
-    beforeEach(() => {
-      subscriptions = {};
-      clock = lolex.install({target: env.win});
-
-      env.win.addEventListener = function(type, handler) {
-        if (subscriptions[type] && !subscriptions[type].includes(handler)) {
-          subscriptions[type].push(handler);
-        } else {
-          subscriptions[type] = [handler];
-        }
-      };
-      env.win.postMessage = function(key) {
-        if (subscriptions['message']) {
-          subscriptions['message']
-            .slice()
-            .forEach(method => method({data: key}));
-        }
-      };
-    });
-
-    it('should execute chunks after long task in a macro task', done => {
-      let progress = '';
       function complete(str, long) {
         return function(unusedIdleDeadline) {
           if (long) {
@@ -377,21 +357,85 @@ describes.fakeWin(
           progress += str;
         };
       }
-      startupChunk(env.win.document, complete('a', false));
-      startupChunk(env.win.document, () => {
-        expect(progress).to.equal('a');
-        complete('b', true)();
-        startupChunk(env.win.document, complete('c', false));
+
+      beforeEach(() => {
+        subscriptions = {};
+        sandbox = sinon.sandbox;
+        clock = sandbox.useFakeTimers();
+
+        env.win.addEventListener = function(type, handler) {
+          if (subscriptions[type] && !subscriptions[type].includes(handler)) {
+            subscriptions[type].push(handler);
+          } else {
+            subscriptions[type] = [handler];
+          }
+        };
+        env.win.postMessage = function(key) {
+          if (subscriptions['message']) {
+            subscriptions['message']
+              .slice()
+              .forEach(method => method({data: key}));
+          }
+        };
+
+        progress = '';
       });
-      env.win.addEventListener('message', e => {
-        if (e.data == 'amp-macro-task') {
-          expect(progress).to.equal('abc');
-          done();
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should execute chunks after long task in a macro task', done => {
+        startupChunk(env.win.document, complete('a', false));
+        startupChunk(env.win.document, () => {
+          expect(progress).to.equal('a');
+          complete('b', true)();
+          startupChunk(env.win.document, complete('c', false));
+        });
+        env.win.addEventListener('message', e => {
+          if (e.data == 'amp-macro-task') {
+            expect(progress).to.equal('abc');
+            done();
+          }
+        });
+      });
+
+      it('should execute chunks after a macro task in micro tasks', done => {
+        let macroTasksCalled = 0;
+        let progress = '';
+        function complete(str, long) {
+          return function(unusedIdleDeadline) {
+            if (long) {
+              // Ensure this task takes a long time beyond the 5ms buffer.
+              clock.tick(100);
+            }
+            progress += str;
+          };
         }
+        startupChunk(env.win.document, () => {
+          complete('a', true)();
+          startupChunk(env.win.document, complete('b', false));
+        });
+        env.win.addEventListener('message', e => {
+          if (e.data == 'amp-macro-task') {
+            macroTasksCalled++;
+
+            expect(macroTasksCalled).to.equal(1);
+            expect(progress).to.equal('ab');
+
+            if (macroTasksCalled < 2) {
+              startupChunk(env.win.document, complete('c', false));
+              startupChunk(env.win.document, () => {
+                expect(progress).to.equal('abc');
+                done();
+              });
+            }
+          }
+        });
       });
-    });
-  }
-);
+    }
+  );
+});
 
 describe('onIdle', () => {
   let win;
