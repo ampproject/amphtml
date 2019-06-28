@@ -88,6 +88,7 @@ jobs:
 cache:
   directories:
     - node_modules
+    - build-system/tasks/e2e/node_modules
     - build-system/tasks/visual-diff/node_modules
     - sauce_connect
     - validator/node_modules
