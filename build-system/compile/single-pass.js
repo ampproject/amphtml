@@ -51,7 +51,6 @@ const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('../compile-wrappers');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
-const {isCommonJsModule} = require('./compile-utils');
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest =
