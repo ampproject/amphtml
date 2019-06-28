@@ -59,21 +59,28 @@ The `amp-script` component allows you to render widgets and other UI using custo
 ### A simple example
 
 ```html
-<!-- hello-world.html -->
+<!-- Using a local script ("script" attribute). -->
+<amp-script layout="container" script="hello-world">
+  <button id="hello">Insert Hello World!</button>
+</amp-script>
+
+<!-- Local scripts are referenced by id. -->
+<script type="text/plain" target="amp-script" id="hello-world">
+  const button = document.getElementById('hello');
+  button.addEventListener('click', () => {
+    const h1 = document.createElement('h1');
+    h1.textContent = 'Hello World!';
+    // `document.body` is effectively the <amp-script> element.
+    document.body.appendChild(h1);
+  });
+</script>
+```
+
+```html
+<!-- Using an remote script ("src" attribute). -->
 <amp-script layout="container" src="https://example.com/hello-world.js">
   <button id="hello">Insert Hello World!</button>
 </amp-script>
-```
-
-```js
-// hello-world.js
-const button = document.getElementById('hello');
-button.addEventListener('click', () => {
-  const el = document.createElement('h1');
-  el.textContent = 'Hello World!';
-  // `document.body` is effectively the <amp-script> element.
-  document.body.appendChild(el);
-});
 ```
 
 {% call callout('Tip', type='success') %}
@@ -99,7 +106,7 @@ Overall mutation rules are:
 
 1. Mutations are always accepted after a user action for a user action interval of 5 seconds.
 2. The 5 seconds interval is extended if the user script performs a `fetch()` operation.
-3. Smaller `amp-script` elements with height under `300px` and non-`container` layout are allowed unlimitted mutations.
+3. Smaller `amp-script` elements with height under `300px` and non-`container` layout are allowed unlimited mutations.
 
 ## Interested in using `<amp-script>`?
 
@@ -109,10 +116,17 @@ See our [Quick Start](https://github.com/ampproject/amphtml/blob/master/contribu
 
 ## FAQ
 
-1. Which JavaScript APIs can I use?
+#### I'm getting a "size exceeded" error.
 
-   * Currently, most DOM elements and their properties are supported. DOM query APIs like `querySelector` have partial support. Browser APIs like `History` are not implemented yet. We'll publish an API support matrix soon.
+`amp-script` has restrictions on the size of the JS.
 
-2. Can you support ____ API?
+- Maximum of 10,000 bytes per `amp-script` element that uses a local script via `script[type=text/plain][target=amp-script]`.
+- Maximum total of 150,000 bytes for all `amp-script` elements on the page.
 
-    * Our feature timelines are informed by your real-world use cases! Please [file an issue](https://github.com/ampproject/amphtml/issues/new) and mention `@choumx` and `@kristoferbaxter`.
+#### Which JavaScript APIs can I use?
+
+Currently, most DOM elements and their properties are supported. DOM query APIs like `querySelector` have partial support. Browser APIs like `History` are not implemented yet. We'll publish an API support matrix soon.
+
+#### Can you support ____ API?
+
+Our feature timelines are informed by your real-world use cases! Please [file an issue](https://github.com/ampproject/amphtml/issues/new) and mention `@choumx` and `@kristoferbaxter`.

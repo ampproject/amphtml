@@ -24,17 +24,47 @@ tags: {
   }
   attr_lists: "common-extension-attrs"
 }
-
+tags: {  # <amp-script> (local script)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-script extension local script"
+  requires_extension: "amp-script"
+  attrs: {
+    name: "target"
+    mandatory: true
+    value: "amp-script"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "text/plain"
+  }
+  attr_lists: "mandatory-id-attr"
+  attr_lists: "nonce-attr"
+  cdata: {
+    max_bytes: 10000
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-script#faq"
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-script"
+}
 tags: {  # <amp-script>
   html_format: AMP
   tag_name: "AMP-SCRIPT"
   disallowed_ancestor: "AMP-SCRIPT"
   requires_extension: "amp-script"
   requires: "amp-experiment-token"
-  unique: true # TODO(choumx): Remove when global size limit is implemented.
+  attrs: {
+    name: "script"
+    mandatory_anyof: "['script', 'src']"
+  }
   attrs: {
     name: "src"
-    mandatory: true
+    mandatory_anyof: "['script', 'src']"
     value_url: {
       protocol: "https"
       allow_relative: false
