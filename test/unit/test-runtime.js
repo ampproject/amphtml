@@ -54,6 +54,7 @@ describes.fakeWin(
       extensionElementIndex = 0;
       ampdocService = {
         isSingleDoc: () => true,
+        getSingleDoc: () => null,
         getAmpDoc: () => null,
         installShadowDoc_: () => null,
       };
@@ -63,6 +64,7 @@ describes.fakeWin(
         ampdoc: {obj: ampdocService},
       };
       const ampdoc = new AmpDocSingle(win);
+      ampdocService.getSingleDoc = () => ampdoc;
       ampdocService.getAmpDoc = () => ampdoc;
       installGlobalDocumentStateService(win);
       installPlatformService(win);
