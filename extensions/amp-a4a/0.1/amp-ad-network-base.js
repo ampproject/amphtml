@@ -59,12 +59,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
      * @type {number}
      */
     this.retryLimit_ = 0;
-
-    /**
-     * Flag to ensure we don't send multiple requests on layout changes.
-     * @type {boolean}
-     */
-    this.adRequestSent_ = false;
   }
 
   /** @override */
@@ -74,9 +68,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    if (!this.adRequestSent_) {
+    if (!this.adResponsePromise_) {
       this.sendRequest_();
-      this.adRequestSent_ = true;
     }
   }
 
@@ -157,11 +150,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * @private
    */
   sendRequest_() {
-    Services.viewerForDoc(this.getAmpDoc())
+    this.adResponsePromise_ = Services.viewerForDoc(this.getAmpDoc())
       .whenFirstVisible()
       .then(() => {
         const url = this.getRequestUrl();
-        this.adResponsePromise_ = sendXhrRequest(this.win, url);
+        return sendXhrRequest(this.win, url);
       });
   }
 
