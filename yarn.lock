@@ -4034,7 +4034,7 @@ commander@2.2.x:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.2.0.tgz#175ad4b9317f3ff615f201c1e57224f55a3e91df"
   integrity sha1-F1rUuTF/P/YV8gHB5XIk9Vo+kd8=
 
-commander@2.20.0, commander@~2.20.0:
+commander@2.20.0, commander@^2.20.0, commander@~2.20.0:
   version "2.20.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.0.tgz#d58bb2b5c1ee8f87b0d340027e9e94e222c5a422"
   integrity sha512-7j2y+40w61zy6YC2iRNpUe/NwhNyoXrYpHMrSunaMG64nRnaf96zO/KMQR4OyN/UnE5KLyEBnKHd4aG3rskjpQ==
@@ -4046,7 +4046,7 @@ commander@2.9.0:
   dependencies:
     graceful-readlink ">= 1.0.0"
 
-commander@^2.16.0, commander@^2.19.0:
+commander@^2.19.0:
   version "2.19.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.19.0.tgz#f6198aa84e5b83c46054b94ddedbfed5ee9ff12a"
   integrity sha512-6tvAOO+D6OENvRAh524Dh9jcfKTYDQAqvqezbCW82xj5X0pSrcpxtvRKHLG0yBY6SD7PSDrJaj+0AiOcKVd1Xg==
@@ -8317,7 +8317,7 @@ isbinaryfile@^3.0.0:
   dependencies:
     buffer-alloc "^1.2.0"
 
-isemail@^3.1.2:
+isemail@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/isemail/-/isemail-3.2.0.tgz#59310a021931a9fb06bbb51e155ce0b3f236832c"
   integrity sha512-zKqkK+O+dGqevc93KNsbZ/TqTUFd46MwWjYOoMrjIMZ51eU7DtQG3Wmd9SQQT7i7RVnuTPEiYEWHU3MSbxC1Tg==
@@ -9843,15 +9843,15 @@ liftoff@^3.1.0:
     rechoir "^0.6.2"
     resolve "^1.1.7"
 
-link-check@^4.4.4:
-  version "4.4.4"
-  resolved "https://registry.yarnpkg.com/link-check/-/link-check-4.4.4.tgz#08dbb881b70c23f1c173889c3a34d682c2e68c1a"
-  integrity sha512-yvowNBZEMOFH9nGLiJ5/YV68PBMVTo4opC2SzcACO8g4gSPTB9Rwa5GIziOX9Z5Er3Yf01DHoOyVV2LeApIw8w==
+link-check@^4.4.5:
+  version "4.4.5"
+  resolved "https://registry.yarnpkg.com/link-check/-/link-check-4.4.5.tgz#d2cc536ce37939613fd1ac388281040c8726a8e7"
+  integrity sha512-csF0k7MAQjyDLkrZfsAJNkTav/vvATMYkm9dAstzmu60vzNGlgvWd3SgBTFH9KLWOO1hUuVxgSEPuWv+fdyuaQ==
   dependencies:
     is-relative-url "^2.0.0"
-    isemail "^3.1.2"
+    isemail "^3.2.0"
     ms "^2.1.1"
-    request "^2.87.0"
+    request "^2.88.0"
 
 load-json-file@^1.0.0:
   version "1.1.0"
@@ -10363,31 +10363,31 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-markdown-link-check@3.7.2:
-  version "3.7.2"
-  resolved "https://registry.yarnpkg.com/markdown-link-check/-/markdown-link-check-3.7.2.tgz#4e3485c22d2dc70c9cbe63258fc7e155a9e3c1c1"
-  integrity sha512-rt6d75iz0Bw9LHmN+DT1a7kiVrkK3gsGhPVB/PwwZDq8LHlILQToC/hwq9tE2CUDg8OdZOV1+7j8vuG9Mu4sIQ==
+markdown-link-check@3.7.3:
+  version "3.7.3"
+  resolved "https://registry.yarnpkg.com/markdown-link-check/-/markdown-link-check-3.7.3.tgz#86b222b6d0ddb6d4261f05c0132e14f1ba664315"
+  integrity sha512-X/HWomzeox5HtkKLupin4affBXHq22r7RNqiSKsxlgZQMSU9n+zpGY0sbzJr1IycB6FXpKUZet1VH3Rs1/8WQg==
   dependencies:
     async "^2.6.1"
-    chalk "^2.4.1"
-    commander "^2.16.0"
-    link-check "^4.4.4"
-    lodash "^4.17.10"
-    markdown-link-extractor "^1.2.0"
-    progress "^2.0.0"
-    request "^2.87.0"
+    chalk "^2.4.2"
+    commander "^2.20.0"
+    link-check "^4.4.5"
+    lodash "^4.17.11"
+    markdown-link-extractor "^1.2.1"
+    progress "^2.0.3"
+    request "^2.88.0"
 
-markdown-link-extractor@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/markdown-link-extractor/-/markdown-link-extractor-1.2.0.tgz#aecb2df2d811d9af1cc26b52de5073c2d7a9b05b"
-  integrity sha512-1unDsoZSSiF5oGFu/2y8M3E2I2YhWT/jiKGTQxa1IAmkC1OcyHo9OYNu3qCuVSj5Ty87+mFtgQxJPUfc08WirA==
+markdown-link-extractor@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/markdown-link-extractor/-/markdown-link-extractor-1.2.1.tgz#02356797b313653a2603daeb0e19054c2b47ac16"
+  integrity sha512-eo4hXLZC6/NrVimHqEu0X029ymIreg0VQjlWudGtOg1FiiZYPwU+Sh1CP3CQqP16woyCsDplVfqPD2Oi8JRpdw==
   dependencies:
-    marked "^0.4.0"
+    marked "^0.6.2"
 
-marked@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-0.4.0.tgz#9ad2c2a7a1791f10a852e0112f77b571dce10c66"
-  integrity sha512-tMsdNBgOsrUophCAFQl0XPe6Zqk/uy9gnue+jIIKhykO51hxyu6uNx7zBPy0+y/WKYVZZMspV9YeXLNdKk+iYw==
+marked@^0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-0.6.2.tgz#c574be8b545a8b48641456ca1dbe0e37b6dccc1a"
+  integrity sha512-LqxwVH3P/rqKX4EKGz7+c2G9r98WeM/SW34ybhgNGhUQNKtf1GmmSkJ6cDGJ/t6tiyae49qRkpyTw2B9HOrgUA==
 
 matchdep@^2.0.0:
   version "2.0.0"
@@ -12463,7 +12463,7 @@ process@^0.11.1, process@~0.11.0:
   resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
   integrity sha1-czIwDoQBYb2j5podHZGn1LwW8YI=
 
-progress@2.0.3, progress@^2.0.0:
+progress@2.0.3, progress@^2.0.0, progress@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.3.tgz#7e8cf8d8f5b8f239c1bc68beb4eb78567d572ef8"
   integrity sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==
