@@ -90,7 +90,7 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
   stringifyPingbackData_(entitlements) {
     if (isArray(entitlements)) {
       const entitlementArray = [];
-      entitlements.forEach((ent) => {
+      entitlements.forEach(ent => {
         entitlementArray.push(ent.jsonForPingback());
       });
       return JSON.stringify(entitlementArray);
