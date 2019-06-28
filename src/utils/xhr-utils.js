@@ -27,6 +27,7 @@ import {
 } from '../url';
 import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
+import {isExperimentOn} from '../experiments'
 import {isFormDataWrapper} from '../form-data-wrapper';
 
 /** @private @const {!Array<string>} */
@@ -217,10 +218,8 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
       return viewer.isTrustedViewer();
     })
     .then(viewerTrusted => {
-      if (
-        !viewerTrusted &&
-        !getMode(win).localDev &&
-        !viewer.hasCapability('untrusted-xhr-interception')
+      if (!(viewerTrusted || getMode(win).localDev
+          || isExperimentOn(win, 'untrusted-xhr-interception')
       ) {
         return;
       }

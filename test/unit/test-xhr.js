@@ -20,6 +20,7 @@ import {assertSuccess} from '../../src/utils/xhr-utils';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
 import {fetchPolyfill} from '../../src/polyfills/fetch';
 import {getCookie} from '../../src/cookies';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
@@ -685,6 +686,14 @@ describe
         };
       });
 
+      afterEach(() => {
+        toggleExperiment(
+          interceptionEnabledWin,
+          'untrusted-xhr-interception',
+          false
+        );
+      });
+
       it('should not intercept if AMP doc is not single', () => {
         ampdocServiceForStub.returns({
           isSingleDoc: () => false,
@@ -763,12 +772,18 @@ describe
           .then(() => expect(sendMessageStub).to.have.been.called);
       });
 
-      it('should intercept if untrusted-xhr-interception capability enabled', () => {
+      it('should intercept if untrusted-xhr-interception experiment enabled', () => {
         sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
         sandbox.stub(mode, 'getMode').returns({localDev: false});
-        const hasCapability = sandbox.stub(viewer, 'hasCapability');
-        hasCapability.withArgs('xhrInterceptor').returns(true);
-        hasCapability.withArgs('untrusted-xhr-interception').returns(true);
+        sandbox
+          .stub(viewer, 'hasCapability')
+          .withArgs('xhrInterceptor')
+          .returns(true);
+        toggleExperiment(
+          interceptionEnabledWin,
+          'untrusted-xhr-interception',
+          true
+        );
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 

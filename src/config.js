@@ -58,8 +58,7 @@ export const urls = {
    * @export {!Array<!RegExp>}
    */
   trustedViewerHosts: [
-    /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
-    /(^|\.)gmail\.dev$/,
+    /(^|\.)(google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)|gmail\.dev)$/,
   ],
 };
 
