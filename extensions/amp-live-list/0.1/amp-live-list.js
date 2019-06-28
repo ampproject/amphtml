@@ -240,9 +240,7 @@ export class AmpLiveList extends AMP.BaseElement {
       actualCount
     );
 
-    if (isExperimentOn(this.win, 'amp-live-list-sorting')) {
-      this.isReverseOrder_ = this.element.getAttribute('sort') === 'ascending';
-    }
+    this.isReverseOrder_ = this.element.getAttribute('sort') === 'ascending';
 
     // Make sure we hide the button
     this.toggleUpdateButton_(false);

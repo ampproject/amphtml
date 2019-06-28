@@ -18,7 +18,6 @@ import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-live-list',
@@ -1286,7 +1285,6 @@ describes.realWin(
         itemsSlot.appendChild(child1);
         itemsSlot.appendChild(child2);
         buildElement(elem, Object.assign({}, dftAttrs, {'sort': 'ascending'}));
-        toggleExperiment(liveList.win, 'amp-live-list-sorting', true);
         liveList.buildCallback();
         expect(liveList.itemsSlot_.childElementCount).to.equal(2);
         expect(elem.querySelector('[update]')).to.have.class('amp-hidden');
@@ -1350,7 +1348,6 @@ describes.realWin(
           })
         );
         sandbox.stub(liveList, 'isElementAboveViewport_').returns(true);
-        toggleExperiment(liveList.win, 'amp-live-list-sorting', true);
         liveList.buildCallback();
         const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
 
@@ -1405,7 +1402,6 @@ describes.realWin(
         pred.onCall(0).returns(true);
         // Anything else
         pred.returns(false);
-        toggleExperiment(liveList.win, 'amp-live-list-sorting', true);
         liveList.buildCallback();
         const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
 
