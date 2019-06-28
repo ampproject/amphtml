@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {StateChangeType} from './navigation-state';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {getVariableService} from './variable-service';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -76,26 +76,34 @@ export class StoryAnalyticsService {
 
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(win);
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(win);
+
+    this.initializeListeners_();
   }
 
-  /**
-   * @param {!./navigation-state.StateChangeEventDef} stateChangeEvent
-   */
-  onNavigationStateChange(stateChangeEvent) {
-    switch (stateChangeEvent.type) {
-      case StateChangeType.ACTIVE_PAGE:
-        this.triggerEvent(AnalyticsEvent.PAGE_VISIBLE);
-        break;
-      case StateChangeType.BOOKEND_ENTER:
-        this.triggerEvent(AnalyticsEvent.BOOKEND_ENTER);
-        break;
-      case StateChangeType.BOOKEND_EXIT:
-        this.triggerEvent(AnalyticsEvent.BOOKEND_EXIT);
-        break;
-      case StateChangeType.LAST_PAGE:
+  /** @private */
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      this.triggerEvent(
+        isActive ? AnalyticsEvent.BOOKEND_ENTER : AnalyticsEvent.BOOKEND_EXIT
+      );
+    });
+
+    // Using pageId instead of pageIndex since it's guaranteed to be called at
+    // the beginning.
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
+      this.triggerEvent(AnalyticsEvent.PAGE_VISIBLE);
+
+      const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
+      const pageIndex = this.storeService_.get(
+        StateProperty.CURRENT_PAGE_INDEX
+      );
+      if (pageIndex === pageIds.length - 1) {
         this.triggerEvent(AnalyticsEvent.LAST_PAGE_VISIBLE);
-        break;
-    }
+      }
+    });
   }
 
   /**
