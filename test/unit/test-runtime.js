@@ -698,7 +698,7 @@ describes.fakeWin(
       });
 
       it('should register element without CSS', function*() {
-        const ampdoc = ampdocService.getAmpDoc();
+        const ampdoc = ampdocService.getSingleDoc();
         const servicePromise = getServicePromise(win, 'amp-ext');
         const installStylesStub = sandbox.stub(styles, 'installStylesForDoc');
 
@@ -733,7 +733,7 @@ describes.fakeWin(
       });
 
       it('should register element with CSS', function*() {
-        const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+        const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
         const servicePromise = getServicePromise(win, 'amp-ext');
         let installStylesCallback;
         const installStylesStub = sandbox
