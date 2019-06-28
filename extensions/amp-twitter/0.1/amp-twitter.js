@@ -168,6 +168,7 @@ class AmpTwitter extends AMP.BaseElement {
     const svg = svgFor(this.element);
     return svg`
       <path
+        class="i-amphtml-new-loader-white-on-shim"
         fill="#1DA1F2"
         d="M56.29,68.13c7.55,0,11.67-6.25,11.67-11.67c0-0.18,0-0.35-0.01-0.53c0.8-0.58,1.5-1.3,2.05-2.12
     c-0.74,0.33-1.53,0.55-2.36,0.65c0.85-0.51,1.5-1.31,1.8-2.27c-0.79,0.47-1.67,0.81-2.61,1c-0.75-0.8-1.82-1.3-3-1.3

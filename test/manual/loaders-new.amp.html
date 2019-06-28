@@ -124,6 +124,26 @@
       custom-element="amp-youtube"
       src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"
     ></script>
+    <script
+      async
+      custom-element="amp-facebook"
+      src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-comments"
+      src="https://cdn.ampproject.org/v0/amp-facebook-comments-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-facebook-page"
+      src="https://cdn.ampproject.org/v0/amp-facebook-page-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-pinterest"
+      src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js"
+    ></script>
     <style amp-custom>
       /* boring boiler place stuff */
       button {
@@ -448,6 +468,80 @@
           >
             <div placeholder>No poster for this one!</div>
           </amp-youtube>
+        </section>
+      </div>
+      <div id="tab5" role="tab" aria-controls="tabpanel5" option>
+        amp-facebook
+      </div>
+      <div id="tabpanel5" role="tabpanel" aria-labelledby="tab5">
+        <section>
+          <h2>amp-facebook</h2>
+          <amp-facebook
+            width="550"
+            height="273"
+            layout="responsive"
+            data-href="https://www.facebook.com/zuck/posts/10102593740125791"
+          >
+          </amp-facebook>
+
+          <h2>amp-facebook with with placeholder</h2>
+          <amp-facebook
+            width="550"
+            height="273"
+            layout="responsive"
+            data-href="https://www.facebook.com/zuck/posts/10102593740125791"
+          >
+            <amp-img
+              placeholder
+              src="https://wallpapercave.com/wp/wp2126142.jpg"
+              width="550"
+              height="273"
+              layout="responsive"
+            ></amp-img>
+          </amp-facebook>
+        </section>
+      </div>
+      <div id="tab6" role="tab" aria-controls="tabpanel6" option>
+        amp-pinterest
+      </div>
+      <div id="tabpanel6" role="tabpanel" aria-labelledby="tab6">
+        <section>
+          <h2>amp-pinterest</h2>
+          <amp-pinterest
+            width="355"
+            height="410"
+            data-do="embedPin"
+            data-width="medium"
+            data-url="https://www.pinterest.com/pin/99360735500167749/"
+          >
+          </amp-pinterest>
+
+          <h2>amp-pinterest with image placeholder</h2>
+          <amp-pinterest
+            width="355"
+            height="410"
+            data-do="embedPin"
+            data-width="medium"
+            data-url="https://www.pinterest.com/pin/99360735500167749/"
+          >
+            <amp-img
+              placeholder
+              src="https://i.pinimg.com/345x/a7/66/56/a76656e966b1958f568d63c3f1c05aec.jpg"
+              width="355"
+              height="410"
+              layout="responsive"
+            ></amp-img>
+          </amp-pinterest>
+
+          <h2>small amp-pinterest</h2>
+          <amp-pinterest
+            width="320"
+            height="50"
+            data-do="embedPin"
+            data-width="medium"
+            data-url="https://www.pinterest.com/pin/99360735500167749/"
+          >
+          </amp-pinterest>
         </section>
       </div>
     </amp-selector>
