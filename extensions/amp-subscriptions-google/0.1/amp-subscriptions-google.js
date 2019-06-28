@@ -456,6 +456,7 @@ class AmpFetcher {
     return this.xhr_
       .fetchJson(url, {
         credentials: 'include',
+        privacySafe: true,
       })
       .then(response => response.json());
   }
