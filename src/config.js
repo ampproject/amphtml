@@ -55,10 +55,11 @@ export const urls = {
    * (but somewhat more stringent) to the one described in the [3p/README.md](
    * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
    *
-   * @export {!Array<!RegExp>}
+   * {!Array<!RegExp>}
    */
   trustedViewerHosts: [
-    /(^|\.)(google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)|gmail\.dev)$/,
+    /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
+    /(^|\.)gmail\.dev$/,
   ],
 };
 
