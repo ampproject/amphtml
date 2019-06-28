@@ -621,6 +621,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   buildSystemLayer_() {
     this.updateAudioIcon_();
+
     let pageIds;
     if (this.pages_.length) {
       pageIds = this.pages_.map(page => page.element.id);
@@ -628,7 +629,7 @@ export class AmpStory extends AMP.BaseElement {
       const pages = this.element.querySelectorAll('amp-story-page');
       pageIds = Array.prototype.map.call(pages, el => el.id);
     }
-    this.storeService_.dispatch(Action.ADD_TO_PAGE_IDS, pageIds);
+    this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
     this.element.appendChild(this.systemLayer_.build());
   }
 
@@ -896,7 +897,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     // TODO(#19768): Avoid passing a private function here.
-    this.paginationButtons_ = PaginationButtons.create(this.win, () =>
+    this.paginationButtons_ = PaginationButtons.create(this, () =>
       this.hasBookend_()
     );
 
@@ -1026,11 +1027,17 @@ export class AmpStory extends AMP.BaseElement {
         {tagOrTarget: 'AMP-LIVE-LIST', method: 'update'},
       ]);
 
-      this.element.addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
-        this.liveStoryManager_.update(
-          target,
-          this.element.querySelectorAll('amp-story-page:not([ad])')
-        );
+      this.element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+        this.liveStoryManager_.update();
+        this.initializePages_().then(() => {
+          this.preloadPagesByDistance_();
+          if (
+            this.storeService_.get(StateProperty.UI_STATE) ===
+            UIType.DESKTOP_PANELS
+          ) {
+            this.setDesktopPositionAttributes_(this.activePage_);
+          }
+        });
       });
     }
   }

@@ -19,6 +19,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
+import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
@@ -166,10 +167,14 @@ class PaginationButton {
 /** Pagination buttons layer. */
 export class PaginationButtons {
   /**
-   * @param {!Window} win
+   * @param {!./amp-story.AmpStory} ampStory
    * @param {function():Promise<boolean>} hasBookend
    */
-  constructor(win, hasBookend) {
+  constructor(ampStory, hasBookend) {
+    /** @private @const {!./amp-story.AmpStory} */
+    this.ampStory_ = ampStory;
+
+    const {win} = this.ampStory_;
     const doc = win.document;
     this.storeService_ = getStoreService(win);
 
@@ -205,12 +210,12 @@ export class PaginationButtons {
   }
 
   /**
-   * @param {!Window} win
+   * @param {!./amp-story.AmpStory} ampStory
    * @param {function():Promise<boolean>} hasBookend
    * @return {!PaginationButtons}
    */
-  static create(win, hasBookend) {
-    return new PaginationButtons(win, hasBookend);
+  static create(ampStory, hasBookend) {
+    return new PaginationButtons(ampStory, hasBookend);
   }
 
   /** @param {!Element} element */
@@ -245,6 +250,21 @@ export class PaginationButtons {
         this.onCurrentPageIndexUpdate_(pageIndex);
       }
     );
+
+    this.storeService_.subscribe(StateProperty.PAGE_IDS, () => {
+      // Since onCurrentPageIndexUpdate_ uses this.hasBookend_, and the bookend
+      // isn't initialized until after the story is laid out, we wait for the
+      // story to be laid out before calling this function.
+      this.ampStory_.element
+        .signals()
+        .whenSignal(CommonSignals.LOAD_END)
+        .then(() => {
+          const currentPageIndex = /** @type {number} */ (devAssert(
+            this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+          ));
+          this.onCurrentPageIndexUpdate_(currentPageIndex);
+        });
+    });
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
