@@ -636,7 +636,8 @@ export class Services {
   static urlReplacementsForDoc(element) {
     return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (getExistingServiceForDocInEmbedScope(
       element,
-      'url-replace'
+      'url-replace',
+      /* opt_searchElementPath */ true
     ));
   }
 

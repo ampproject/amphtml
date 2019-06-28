@@ -233,6 +233,7 @@ describe('service', () => {
     let ampdoc;
     let ampdocMock;
     let node;
+    let doc;
     let count;
     let factory;
 
@@ -260,7 +261,12 @@ describe('service', () => {
       registerServiceBuilder(windowApi, 'ampdoc', function() {
         return ampdocServiceApi;
       });
-      node = {nodeType: 1, ownerDocument: {defaultView: windowApi}};
+      doc = {};
+      node = {
+        nodeType: 1,
+        ownerDocument: {defaultView: windowApi},
+        parentElement: doc,
+      };
       resetServiceForTesting(windowApi, 'a');
       resetServiceForTesting(windowApi, 'b');
       resetServiceForTesting(windowApi, 'c');
@@ -509,7 +515,11 @@ describe('service', () => {
           frameElement: {ownerDocument: {defaultView: windowApi}},
         };
         childWin.document.defaultView = childWin;
-        childWinNode = {nodeType: 1, ownerDocument: childWin.document};
+        childWinNode = {
+          nodeType: 1,
+          ownerDocument: {defaultView: childWin},
+          parentElement: node,
+        };
         setParentWindow(childWin, windowApi);
 
         // A grandchild.
@@ -521,6 +531,7 @@ describe('service', () => {
           nodeType: 1,
           ownerDocument: grandchildWin.document,
           frameElement: {ownerDocument: {defaultView: childWin}},
+          parentElement: childWinNode,
         };
         setParentWindow(grandchildWin, childWin);
 

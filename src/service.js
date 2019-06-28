@@ -21,6 +21,7 @@
  */
 
 import {Deferred} from './utils/promise';
+import {closestAncestorElementBySelector} from './dom';
 import {dev, devAssert} from './log';
 import {isExperimentOn} from './experiments';
 import {toWin} from './types';
@@ -76,9 +77,17 @@ export class EmbeddableService {
  *
  * @param {!Element|!ShadowRoot} element
  * @param {string} id
+ * @param {boolean=} opt_searchElementPath If true, searches for element-held
+ *   services between `element` and its root node. This is a special case that
+ *   allows services to be scoped to an element subtree rather than the
+ *   enclosing AmpDoc.
  * @return {?Object}
  */
-export function getExistingServiceForDocInEmbedScope(element, id) {
+export function getExistingServiceForDocInEmbedScope(
+  element,
+  id,
+  opt_searchElementPath
+) {
   // TODO(#22733): completely remove this method once ampdoc-fie launches.
   const document = element.ownerDocument;
   const win = toWin(document.defaultView);
@@ -93,8 +102,8 @@ export function getExistingServiceForDocInEmbedScope(element, id) {
     // Fallback from FIE to parent is intentionally unsupported for safety.
     return null;
   } else {
-    // Resolve via the element's ampdoc.
-    return getServiceForDocOrNullInternal(element, id);
+    // Resolve via an element-held service or the element's ampdoc.
+    return getServiceForDocOrNullInternal(element, id, opt_searchElementPath);
   }
 }
 
@@ -166,6 +175,27 @@ export function registerServiceBuilderForDoc(
   registerServiceInternal(holder, ampdoc, id, constructor);
   if (opt_instantiate) {
     getServiceInternal(holder, id);
+  }
+}
+
+/**
+ * Same as registerServiceBuilderForDoc() but stores the service on `element`
+ * instead of its AmpDoc.
+ * @param {!AmpElement} element
+ * @param {string} id of the service.
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} constructor
+ * @param {boolean=} opt_instantiate Whether to immediately create the service
+ */
+export function registerServiceBuilderForElement(
+  element,
+  id,
+  constructor,
+  opt_instantiate
+) {
+  const ampdoc = getAmpdoc(element);
+  registerServiceInternal(element, ampdoc, id, constructor);
+  if (opt_instantiate) {
+    getServiceInternal(element, id);
   }
 }
 
@@ -254,8 +284,29 @@ export function getServiceForDoc(elementOrAmpDoc, id) {
  * If service `id` is not registered, returns null.
  * @param {!Element|!ShadowRoot} element
  * @param {string} id
+ * @param {boolean=} opt_searchElementPath If true, searches for element-held
+ *   services between `element` and its root node. This is a special case that
+ *   allows services to be scoped to an element subtree rather than the
+ *   enclosing AmpDoc.
+ * @return {?T}
+ * @template T
  */
-function getServiceForDocOrNullInternal(element, id) {
+function getServiceForDocOrNullInternal(element, id, opt_searchElementPath) {
+  // This is a first step in decoupling services from AmpDoc. It allows
+  // AMP elements to override services in the scope of their DOM subtrees,
+  // e.g. amp-script has special behavior for URL replacements for its children.
+  if (opt_searchElementPath && element.nodeType === /* ELEMENT */ 1) {
+    for (
+      let e = dev().assertElement(element);
+      e;
+      e = closestAncestorElementBySelector(e, '.i-amphtml-element')
+    ) {
+      if (isServiceRegistered(e, id)) {
+        return getServiceInternal(e, id);
+      }
+    }
+  }
+  // Otherwise, resolve via ampdoc as usual.
   const ampdoc = getAmpdoc(element);
   const holder = getAmpdocServiceHolder(ampdoc);
   if (isServiceRegistered(holder, id)) {

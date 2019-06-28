@@ -42,6 +42,7 @@ import {hasOwn} from '../utils/object';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
+  registerServiceBuilderForElement,
 } from '../service';
 import {internalRuntimeVersion} from '../internal-version';
 import {tryResolve} from '../utils/promise';
@@ -1321,6 +1322,16 @@ export function extractClientIdFromGaCookie(gaCookie) {
 export function installUrlReplacementsServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'url-replace', function(doc) {
     return new UrlReplacements(doc, new GlobalVariableSource(doc));
+  });
+}
+
+/**
+ * @param {!Element} element
+ * @param {!VariableSource} varSource
+ */
+export function installUrlReplacementsServiceForElement(element, varSource) {
+  registerServiceBuilderForElement(element, 'url-replace', function(doc) {
+    return new UrlReplacements(doc, varSource);
   });
 }
 
