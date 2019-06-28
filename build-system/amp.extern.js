@@ -34,6 +34,7 @@
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
  *   ampCors: (boolean|undefined),
+ *   privacySafe: (boolean|undefined),
  *   bypassInterceptorForDev: (boolean|undefined)
  * }}
  */

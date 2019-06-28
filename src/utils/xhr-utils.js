@@ -200,20 +200,23 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
     return Promise.resolve();
   }
   const viewer = Services.viewerForDoc(ampdocSingle);
-  const whenFirstVisible = viewer.whenFirstVisible();
+
+  const whenUnblocked = init.privacySafe ?
+      Promise.resolve() : viewer.whenFirstVisible();
+
   if (
     isProxyOrigin(input) ||
     !viewer.hasCapability('xhrInterceptor') ||
     (init.bypassInterceptorForDev && getMode(win).localDev)
   ) {
-    return whenFirstVisible;
+    return whenUnblocked;
   }
   const htmlElement = ampdocSingle.getRootNode().documentElement;
   const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
   if (!docOptedIn) {
-    return whenFirstVisible;
+    return whenUnblocked;
   }
-  return whenFirstVisible
+  return whenUnblocked
     .then(() => {
       return viewer.isTrustedViewer();
     })
