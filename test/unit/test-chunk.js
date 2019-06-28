@@ -24,317 +24,317 @@ import {
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
 
-describe('chunk', () => {
-  beforeEach(() => {
-    activateChunkingForTesting();
-  });
+// describe('chunk', () => {
+//   beforeEach(() => {
+//     activateChunkingForTesting();
+//   });
 
-  const resolvingIdleCallbackWithTimeRemaining = timeRemaining => fn => {
-    Promise.resolve({
-      timeRemaining: () => timeRemaining,
-    }).then(fn);
-  };
+//   const resolvingIdleCallbackWithTimeRemaining = timeRemaining => fn => {
+//     Promise.resolve({
+//       timeRemaining: () => timeRemaining,
+//     }).then(fn);
+//   };
 
-  function basicTests(env) {
-    let fakeWin;
+//   function basicTests(env) {
+//     let fakeWin;
 
-    beforeEach(() => {
-      fakeWin = env.win;
+//     beforeEach(() => {
+//       fakeWin = env.win;
 
-      // If there is a viewer, wait for it, so we run with it being
-      // installed.
-      if (env.win.services.viewer) {
-        return Services.viewerPromiseForDoc(env.win.document).then(() => {
-          // Make sure we make a chunk instance, so all runs
-          // have a viewer.
-          chunkInstanceForTesting(env.win.document);
-        });
-      }
-    });
+//       // If there is a viewer, wait for it, so we run with it being
+//       // installed.
+//       if (env.win.services.viewer) {
+//         return Services.viewerPromiseForDoc(env.win.document).then(() => {
+//           // Make sure we make a chunk instance, so all runs
+//           // have a viewer.
+//           chunkInstanceForTesting(env.win.document);
+//         });
+//       }
+//     });
 
-    it('should execute a chunk', done => {
-      startupChunk(fakeWin.document, unusedIdleDeadline => {
-        done();
-      });
-    });
+//     it('should execute a chunk', done => {
+//       startupChunk(fakeWin.document, unusedIdleDeadline => {
+//         done();
+//       });
+//     });
 
-    it('should execute chunks', () => {
-      let count = 0;
-      let progress = '';
-      return new Promise(resolve => {
-        function complete(str) {
-          return function(unusedIdleDeadline) {
-            progress += str;
-            if (++count == 6) {
-              resolve();
-            }
-          };
-        }
-        startupChunk(fakeWin.document, complete('a'));
-        startupChunk(fakeWin.document, complete('b'));
-        startupChunk(fakeWin.document, function() {
-          complete('c')();
-          startupChunk(fakeWin.document, function() {
-            complete('d')();
-            startupChunk(fakeWin.document, complete('e'));
-            startupChunk(fakeWin.document, complete('f'));
-          });
-        });
-      }).then(() => {
-        expect(progress).to.equal('abcdef');
-      });
-    });
-  }
+//     it('should execute chunks', () => {
+//       let count = 0;
+//       let progress = '';
+//       return new Promise(resolve => {
+//         function complete(str) {
+//           return function(unusedIdleDeadline) {
+//             progress += str;
+//             if (++count == 6) {
+//               resolve();
+//             }
+//           };
+//         }
+//         startupChunk(fakeWin.document, complete('a'));
+//         startupChunk(fakeWin.document, complete('b'));
+//         startupChunk(fakeWin.document, function() {
+//           complete('c')();
+//           startupChunk(fakeWin.document, function() {
+//             complete('d')();
+//             startupChunk(fakeWin.document, complete('e'));
+//             startupChunk(fakeWin.document, complete('f'));
+//           });
+//         });
+//       }).then(() => {
+//         expect(progress).to.equal('abcdef');
+//       });
+//     });
+//   }
 
-  describes.fakeWin(
-    'visible no amp',
-    {
-      amp: false,
-    },
-    env => {
-      beforeEach(() => {
-        installDocService(env.win, /* isSingleDoc */ true);
-        expect(env.win.services.viewer).to.be.undefined;
-        env.win.document.hidden = false;
-      });
+//   describes.fakeWin(
+//     'visible no amp',
+//     {
+//       amp: false,
+//     },
+//     env => {
+//       beforeEach(() => {
+//         installDocService(env.win, /* isSingleDoc */ true);
+//         expect(env.win.services.viewer).to.be.undefined;
+//         env.win.document.hidden = false;
+//       });
 
-      basicTests(env);
-    }
-  );
+//       basicTests(env);
+//     }
+//   );
 
-  describes.fakeWin(
-    'invisible no amp',
-    {
-      amp: false,
-    },
-    env => {
-      beforeEach(() => {
-        installDocService(env.win, /* isSingleDoc */ true);
-        expect(env.win.services.viewer).to.be.undefined;
-        env.win.document.hidden = true;
-        env.win.requestIdleCallback = function() {
-          throw new Error('Should not be called');
-        };
-        env.win.postMessage = function(data, targetOrigin) {
-          expect(targetOrigin).to.equal('*');
-          Promise.resolve().then(() => {
-            const event = {
-              data,
-              type: 'message',
-            };
-            env.win.eventListeners.fire(event);
-          });
-        };
-      });
+//   describes.fakeWin(
+//     'invisible no amp',
+//     {
+//       amp: false,
+//     },
+//     env => {
+//       beforeEach(() => {
+//         installDocService(env.win, /* isSingleDoc */ true);
+//         expect(env.win.services.viewer).to.be.undefined;
+//         env.win.document.hidden = true;
+//         env.win.requestIdleCallback = function() {
+//           throw new Error('Should not be called');
+//         };
+//         env.win.postMessage = function(data, targetOrigin) {
+//           expect(targetOrigin).to.equal('*');
+//           Promise.resolve().then(() => {
+//             const event = {
+//               data,
+//               type: 'message',
+//             };
+//             env.win.eventListeners.fire(event);
+//           });
+//         };
+//       });
 
-      basicTests(env);
-    }
-  );
+//       basicTests(env);
+//     }
+//   );
 
-  describes.fakeWin(
-    'with viewer',
-    {
-      amp: true,
-    },
-    env => {
-      beforeEach(() => {
-        expect(env.win.services.viewer).to.exist;
-        env.win.document.hidden = false;
-      });
+//   describes.fakeWin(
+//     'with viewer',
+//     {
+//       amp: true,
+//     },
+//     env => {
+//       beforeEach(() => {
+//         expect(env.win.services.viewer).to.exist;
+//         env.win.document.hidden = false;
+//       });
 
-      describe('visible', () => {
-        beforeEach(() => {
-          const viewer = Services.viewerForDoc(env.win.document);
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-            return true;
-          });
-        });
-        basicTests(env);
-      });
+//       describe('visible', () => {
+//         beforeEach(() => {
+//           const viewer = Services.viewerForDoc(env.win.document);
+//           env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+//             return true;
+//           });
+//         });
+//         basicTests(env);
+//       });
 
-      describe
-        .configure()
-        .skip(() => !('onunhandledrejection' in window))
-        .run('error handling', () => {
-          let fakeWin;
-          let done;
+//       describe
+//         .configure()
+//         .skip(() => !('onunhandledrejection' in window))
+//         .run('error handling', () => {
+//           let fakeWin;
+//           let done;
 
-          function onReject(event) {
-            expect(event.reason.message).to.match(/test async/);
-            done();
-          }
+//           function onReject(event) {
+//             expect(event.reason.message).to.match(/test async/);
+//             done();
+//           }
 
-          beforeEach(() => {
-            fakeWin = env.win;
-            const viewer = Services.viewerForDoc(env.win.document);
-            env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-              return true;
-            });
-            window.addEventListener('unhandledrejection', onReject);
-          });
+//           beforeEach(() => {
+//             fakeWin = env.win;
+//             const viewer = Services.viewerForDoc(env.win.document);
+//             env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+//               return true;
+//             });
+//             window.addEventListener('unhandledrejection', onReject);
+//           });
 
-          afterEach(() => {
-            window.removeEventListener('unhandledrejection', onReject);
-          });
+//           afterEach(() => {
+//             window.removeEventListener('unhandledrejection', onReject);
+//           });
 
-          it('should proceed on error and rethrowAsync', d => {
-            startupChunk(fakeWin.document, () => {
-              throw new Error('test async');
-            });
-            startupChunk(fakeWin.document, () => {
-              done = d;
-            });
-          });
-        });
+//           it('should proceed on error and rethrowAsync', d => {
+//             startupChunk(fakeWin.document, () => {
+//               throw new Error('test async');
+//             });
+//             startupChunk(fakeWin.document, () => {
+//               done = d;
+//             });
+//           });
+//         });
 
-      describe('invisible', () => {
-        beforeEach(() => {
-          const viewer = Services.viewerForDoc(env.win.document);
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-            return false;
-          });
-          env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
-            15
-          );
-          const chunks = chunkInstanceForTesting(env.win.document);
-          env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
-            throw new Error('No calls expected: executeAsap_');
-          });
-          env.win.location.resetHref('test#visibilityState=hidden');
-        });
+//       describe('invisible', () => {
+//         beforeEach(() => {
+//           const viewer = Services.viewerForDoc(env.win.document);
+//           env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+//             return false;
+//           });
+//           env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
+//             15
+//           );
+//           const chunks = chunkInstanceForTesting(env.win.document);
+//           env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
+//             throw new Error('No calls expected: executeAsap_');
+//           });
+//           env.win.location.resetHref('test#visibilityState=hidden');
+//         });
 
-        basicTests(env);
-      });
+//         basicTests(env);
+//       });
 
-      describe('invisible but deactivated', () => {
-        beforeEach(() => {
-          deactivateChunking();
-          const viewer = Services.viewerForDoc(env.win.document);
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-            return false;
-          });
-          env.win.requestIdleCallback = () => {
-            throw new Error('No calls expected');
-          };
-          env.win.location.resetHref('test#visibilityState=hidden');
-        });
+//       describe('invisible but deactivated', () => {
+//         beforeEach(() => {
+//           deactivateChunking();
+//           const viewer = Services.viewerForDoc(env.win.document);
+//           env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+//             return false;
+//           });
+//           env.win.requestIdleCallback = () => {
+//             throw new Error('No calls expected');
+//           };
+//           env.win.location.resetHref('test#visibilityState=hidden');
+//         });
 
-        basicTests(env);
-      });
+//         basicTests(env);
+//       });
 
-      describe('invisible via document.hidden', () => {
-        beforeEach(() => {
-          const viewer = Services.viewerForDoc(env.win.document);
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-            return false;
-          });
-          env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
-            15
-          );
-          const chunks = chunkInstanceForTesting(env.win.document);
-          env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
-            throw new Error('No calls expected: executeAsap_');
-          });
-          env.win.document.hidden = true;
-        });
+//       describe('invisible via document.hidden', () => {
+//         beforeEach(() => {
+//           const viewer = Services.viewerForDoc(env.win.document);
+//           env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+//             return false;
+//           });
+//           env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
+//             15
+//           );
+//           const chunks = chunkInstanceForTesting(env.win.document);
+//           env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
+//             throw new Error('No calls expected: executeAsap_');
+//           });
+//           env.win.document.hidden = true;
+//         });
 
-        basicTests(env);
-      });
+//         basicTests(env);
+//       });
 
-      describe('invisible to visible', () => {
-        beforeEach(() => {
-          env.win.location.resetHref('test#visibilityState=hidden');
-          const viewer = Services.viewerForDoc(env.win.document);
-          let visible = false;
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-            return visible;
-          });
-          env.win.requestIdleCallback = () => {
-            // Don't call the callback, but transition to visible
-            visible = true;
-            viewer.onVisibilityChange_();
-          };
-        });
+//       describe('invisible to visible', () => {
+//         beforeEach(() => {
+//           env.win.location.resetHref('test#visibilityState=hidden');
+//           const viewer = Services.viewerForDoc(env.win.document);
+//           let visible = false;
+//           env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+//             return visible;
+//           });
+//           env.win.requestIdleCallback = () => {
+//             // Don't call the callback, but transition to visible
+//             visible = true;
+//             viewer.onVisibilityChange_();
+//           };
+//         });
 
-        basicTests(env);
-      });
+//         basicTests(env);
+//       });
 
-      describe('invisible to visible', () => {
-        beforeEach(() => {
-          env.win.location.resetHref('test#visibilityState=prerender');
-          const viewer = Services.viewerForDoc(env.win.document);
-          let visible = false;
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-            return visible;
-          });
-          env.win.requestIdleCallback = () => {
-            // Don't call the callback, but transition to visible
-            visible = true;
-            viewer.onVisibilityChange_();
-          };
-        });
+//       describe('invisible to visible', () => {
+//         beforeEach(() => {
+//           env.win.location.resetHref('test#visibilityState=prerender');
+//           const viewer = Services.viewerForDoc(env.win.document);
+//           let visible = false;
+//           env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+//             return visible;
+//           });
+//           env.win.requestIdleCallback = () => {
+//             // Don't call the callback, but transition to visible
+//             visible = true;
+//             viewer.onVisibilityChange_();
+//           };
+//         });
 
-        basicTests(env);
-      });
+//         basicTests(env);
+//       });
 
-      describe('invisible to visible after a while', () => {
-        beforeEach(() => {
-          env.win.location.resetHref('test#visibilityState=hidden');
-          const viewer = Services.viewerForDoc(env.win.document);
-          let visible = false;
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-            return visible;
-          });
-          env.win.requestIdleCallback = () => {
-            // Don't call the callback, but transition to visible
-            setTimeout(() => {
-              visible = true;
-              viewer.onVisibilityChange_();
-            }, 10);
-          };
-        });
+//       describe('invisible to visible after a while', () => {
+//         beforeEach(() => {
+//           env.win.location.resetHref('test#visibilityState=hidden');
+//           const viewer = Services.viewerForDoc(env.win.document);
+//           let visible = false;
+//           env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+//             return visible;
+//           });
+//           env.win.requestIdleCallback = () => {
+//             // Don't call the callback, but transition to visible
+//             setTimeout(() => {
+//               visible = true;
+//               viewer.onVisibilityChange_();
+//             }, 10);
+//           };
+//         });
 
-        basicTests(env);
-      });
-    }
-  );
+//         basicTests(env);
+//       });
+//     }
+//   );
 
-  describes.realWin(
-    'realWin',
-    {
-      amp: true,
-    },
-    env => {
-      beforeEach(() => {
-        Object.defineProperty(env.win.document, 'hidden', {
-          get: () => false,
-        });
-      });
-      basicTests(env);
-    }
-  );
+//   describes.realWin(
+//     'realWin',
+//     {
+//       amp: true,
+//     },
+//     env => {
+//       beforeEach(() => {
+//         Object.defineProperty(env.win.document, 'hidden', {
+//           get: () => false,
+//         });
+//       });
+//       basicTests(env);
+//     }
+//   );
 
-  describes.realWin(
-    'realWin noIdleCallback',
-    {
-      amp: true,
-    },
-    env => {
-      beforeEach(() => {
-        env.win.requestIdleCallback = null;
-        expect(env.win.requestIdleCallback).to.be.null;
-        const viewer = Services.viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
-          return false;
-        });
-        Object.defineProperty(env.win.document, 'hidden', {
-          get: () => false,
-        });
-      });
-      basicTests(env);
-    }
-  );
-});
+//   describes.realWin(
+//     'realWin noIdleCallback',
+//     {
+//       amp: true,
+//     },
+//     env => {
+//       beforeEach(() => {
+//         env.win.requestIdleCallback = null;
+//         expect(env.win.requestIdleCallback).to.be.null;
+//         const viewer = Services.viewerForDoc(env.win.document);
+//         env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+//           return false;
+//         });
+//         Object.defineProperty(env.win.document, 'hidden', {
+//           get: () => false,
+//         });
+//       });
+//       basicTests(env);
+//     }
+//   );
+// });
 
 describe('taskQueues', () => {
   describes.fakeWin(
@@ -402,16 +402,7 @@ describe('taskQueues', () => {
 
       it('should execute chunks after a macro task in micro tasks', done => {
         let macroTasksCalled = 0;
-        let progress = '';
-        function complete(str, long) {
-          return function(unusedIdleDeadline) {
-            if (long) {
-              // Ensure this task takes a long time beyond the 5ms buffer.
-              clock.tick(100);
-            }
-            progress += str;
-          };
-        }
+
         startupChunk(env.win.document, () => {
           complete('a', true)();
           startupChunk(env.win.document, complete('b', false));
