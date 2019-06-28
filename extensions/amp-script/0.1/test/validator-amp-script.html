@@ -29,15 +29,50 @@
   <meta name="amp-experiment-token" content="{copy your token here}">
 </head>
 <body>
-  <!-- Valid. -->
-  <amp-script layout=container src="https://example.com/foo.js"><div class="root"><p>Some text to hydrate.</p></div></amp-script>
+  <!-- Valid: With 'script' attribute. -->
+  <amp-script layout=container script=hello></amp-script>
+  <script type=text/plain target=amp-script id=hello>
+    document.body.textContent = "Hello world!";
+  </script>
+
+  <!-- Valid: With 'src' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js">
+    <div class="root">
+      <p>Some text to hydrate.</p>
+    </div>
+  </amp-script>
+
+  <!-- Invalid: With neither 'script' or 'src' attributes. -->
+  <amp-script layout=container></amp-script>
 
   <!-- Invalid: Relative URL. -->
   <amp-script layout=container src="/foo.js"></amp-script>
 
-  <!-- Invalid: Missing 'src' attribute. -->
-  <amp-script layout=container></amp-script>
-
   <!-- Invalid: Non-https 'src' attribute. -->
   <amp-script layout=container src="http://not.https.url"></amp-script>
+
+  <!-- Invalid: Local script without 'target' or 'id' attributes. -->
+  <script type=text/plain>
+    document.body.textContent = "Hello World!";
+  </script>
+
+  <!-- Invalid: Local script with invalid 'type'. -->
+  <script type=text/amp-script target=amp-script id=hello>
+    document.body.textContent = "Hello World!";
+  </script>
+
+  <!-- Invalid: Local script with invalid 'target'. -->
+  <script type=text/plain target=amp-js id=hello>
+    document.body.textContent = "Hello World!";
+  </script>
+
+  <!-- Invalid: Local script without 'target' attribute. -->
+  <script type=text/plain id=hello>
+    document.body.textContent = "Hello World!";
+  </script>
+
+  <!-- Invalid: Local script without 'id' attribute. -->
+  <script type=text/plain target=amp-script>
+    document.body.textContent = "Hello World!";
+  </script>
 </body>

@@ -21,6 +21,7 @@
   <script async custom-template="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
 </head>
 <body>
+  <h1>Example: hello-world.js</h1>
   <amp-script layout=container src="/examples/amp-script/hello-world.js">
     <div class="root">
       <button id="hello">Insert Hello World!</button>
@@ -31,8 +32,14 @@
     </div>
   </amp-script>
 
-  <!--
-  -->
+  <h1>Example: #local-script</h1>
+  <amp-script width=400 height=100 script="local-script">
+  </amp-script>
+  <script type="text/plain" target="amp-script" id="local-script">
+    document.body.textContent = 'Hi there!';
+  </script>
+
+  <h1>Example: empty.js</h1>
   <amp-script layout=container src="/examples/amp-script/empty.js">
     <div class="root">should be empty</div>
   </amp-script>
