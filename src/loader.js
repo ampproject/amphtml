@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {childElements} from './dom';
 import {dev, devAssert} from './log';
 import {htmlFor, htmlRefs, svgFor} from './static-template';
 import {isExperimentOn} from './experiments';
+import {isVideoPlayerComponent} from './layout';
 import {toWin} from './types';
 
 /* LEGACY LOADER */
@@ -147,9 +149,9 @@ class LoaderBuilder {
     }
 
     this.setSize_();
+    this.maybeAddBackgroundShim_();
     this.addSpinner_();
     this.maybeAddLogo_();
-    this.maybeAddBackgroundShim_();
   }
 
   /**
@@ -219,6 +221,12 @@ class LoaderBuilder {
       return;
     }
 
+    // If element requires a background shim but logo is the default,
+    // we don't show the logo.
+    if (this.requiresBackgroundShim_() && logo.isDefault) {
+      return;
+    }
+
     return this.addLogo_(logo);
   }
 
@@ -227,7 +235,7 @@ class LoaderBuilder {
    * @param {!Element} logo
    */
   addLogo_(logo) {
-    this.svgRoot_.appendChild(logo);
+    this.svgRoot_.appendChild(logo.svg);
   }
 
   /**
@@ -236,13 +244,22 @@ class LoaderBuilder {
    * @private
    */
   maybeAddBackgroundShim_() {
-    if (!this.hasImagePlaceholder_()) {
+    if (!this.requiresBackgroundShim_()) {
       return;
     }
 
-    // Not Implemented
+    const svg = svgFor(this.element_);
+    const shimNode = svg`
+      <circle
+        class="i-amphtml-new-loader-shim"
+        cx="60"
+        cy="60"
+      >
+      </circle>
+    `;
 
-    return;
+    this.domRoot_.classList.add('i-amphtml-new-loader-has-shim');
+    this.svgRoot_.appendChild(shimNode);
   }
 
   /**
@@ -260,8 +277,8 @@ class LoaderBuilder {
     // Is it whitelisted for default placeholder?
     const tagName = this.element_.tagName.toUpperCase();
     if (
-      DEFAULT_PLACEHOLDER_WHITELIST[tagName] || // static white list
-      videoPlayerTagNameRe.test(tagName) // regex for various video players
+      DEFAULT_PLACEHOLDER_WHITELIST_NONE_VIDEO[tagName] || // static white list
+      isVideoPlayerComponent(tagName) // regex for various video players
     ) {
       const html = htmlFor(this.element_);
       const defaultPlaceholder = html`
@@ -298,7 +315,7 @@ class LoaderBuilder {
    */
   getDefaultLogo_() {
     const svg = svgFor(this.element_);
-    return svg`
+    const svgNode = svg`
       <circle
         class="i-amphtml-new-loader-logo"
         cx="60"
@@ -308,6 +325,11 @@ class LoaderBuilder {
       >
       </circle>
     `;
+
+    return {
+      svg: svgNode,
+      isDefault: true,
+    };
   }
 
   /**
@@ -346,11 +368,36 @@ class LoaderBuilder {
    * @return {boolean}
    */
   hasBlurryImagePlaceholder_() {
+    if (this.element_.hasAttribute('poster')) {
+      return true;
+    }
     const placeholder = this.element_.getPlaceholder();
     return (
       placeholder &&
       placeholder.classList.contains('i-amphtml-blurry-placeholder')
     );
+  }
+
+  /**
+   * Whether loaders needs the translucent background shim, this is normally
+   * needed when the loader is on top of an image placeholder:
+   *    - placeholder is `amp-img`
+   *    - Element has implicit placeholder like a `poster` on video
+   * @private
+   * @return {boolean}
+   */
+  requiresBackgroundShim_() {
+    if (this.element_.hasAttribute('poster')) {
+      return true;
+    }
+    const placeholder = this.element_.getPlaceholder();
+    if (!placeholder) {
+      return false;
+    }
+    if (placeholder.tagName == 'AMP-IMG') {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -363,38 +410,18 @@ class LoaderBuilder {
     // Not Implemented
     return false;
   }
-
-  /**
-   * Whether element has an existing image placeholder.
-   * @private
-   * @return {boolean}
-   */
-  hasImagePlaceholder_() {
-    // Not Implemented
-    return false;
-  }
 }
 
 /**
  * Elements will get a default gray placeholder if they don't already have a
- * placeholder
+ * placeholder. This list does not include video players which are detected
+ * using `isVideoPlayerComponent`
  * @enum {boolean}
  * @private  Visible for testing only!
  */
-export const DEFAULT_PLACEHOLDER_WHITELIST = {
-  'AMP-BRIGHTCOVE': true,
-  'AMP-DAILYMOTION': true,
+const DEFAULT_PLACEHOLDER_WHITELIST_NONE_VIDEO = {
   'AMP-IMG': true,
-  'AMP-YOUTUBE': true,
-  'AMP-VIMEO': true,
 };
-/**
- * All video player components must either have a) "video" or b) "player" in
- * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
- * @private @const {!RegExp}
- */
-const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
 
 /**
  * Whether the new loader experiment is enabled.

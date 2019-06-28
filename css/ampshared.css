@@ -569,7 +569,28 @@ amp-accordion > section[expanded] > :last-child {
     i-amphtml-new-loader-fade-out 0.8s ease-out 1.8s forwards;
 }
 
- /* Spinner and its segments*/
+/* Background shim */
+.i-amphtml-new-loader-shim {
+  transform-origin: 60px 60px;
+  opacity: 0;
+  fill: rgba(0, 0, 0, .6);
+  r: 36;
+  animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in 0.6s forwards;
+}
+
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-shim {
+  r: 24;
+}
+
+/* shim forces spinner and logo fills to be white */
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-logo {
+  fill: #ffffff !important
+}
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-spinner-segment {
+  stroke: #ffffff !important
+}
+
+ /* Spinner and its segments */
 .i-amphtml-new-loader-spinner {
   transform-origin: 60px 60px;
   opacity: 0;
@@ -590,7 +611,10 @@ amp-accordion > section[expanded] > :last-child {
    * Small loader does not have a logo but its spinner appears at the same
    * time as the logo for the default spinner does.
    */
-  animation-delay: 0.8s;
+  animation-delay: 0.6s;
+}
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner-segment {
+  animation-delay: 1.4s, 2s;
 }
 
 .i-amphtml-new-loader-spinner-segment {

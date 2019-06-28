@@ -51,8 +51,6 @@ describe('Layout', () => {
       // in whitelist.
       'AMP-AD',
       'AMP-ANIM',
-      'AMP-BRIGHTCOVE',
-      'AMP-DAILYMOTION',
       'AMP-EMBED',
       'AMP-FACEBOOK',
       'AMP-FACEBOOK-COMMENTS',
@@ -65,8 +63,6 @@ describe('Layout', () => {
       'AMP-LIST',
       'AMP-PINTEREST',
       'AMP-PLAYBUZZ',
-      'AMP-YOUTUBE',
-      'AMP-VIMEO',
 
       // matched by video player naming convention (fake)
       'AMP-FOO-PLAYER',
@@ -77,6 +73,10 @@ describe('Layout', () => {
       'AMP-OOYALA-PLAYER',
       'AMP-VIDEO',
       'AMP-VIDEO-IFRAME',
+      'AMP-YOUTUBE',
+      'AMP-VIMEO',
+      'AMP-BRIGHTCOVE',
+      'AMP-DAILYMOTION',
     ];
     elementsValidTagNames.forEach(function(tag) {
       el.tagName = tag;
