@@ -222,7 +222,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install auto undeclared elements for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test']).to
         .be.undefined;
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test-sub'])
@@ -245,7 +245,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should skip non-auto undeclared elements for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test']).to
         .be.undefined;
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test-sub'])
@@ -273,7 +273,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install declared elements for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       ampdoc.declareExtension('amp-test');
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test']).to
         .be.undefined;
@@ -298,7 +298,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install non-auto declared elements for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       ampdoc.declareExtension('amp-test');
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test']).to
         .be.undefined;
@@ -454,7 +454,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install auto undeclared services for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       const factory1Spy = sandbox.spy();
       const factory2Spy = sandbox.spy();
       const factory1 = function() {
@@ -483,7 +483,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should skip non-auto undeclared services for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       const factory1 = sandbox.spy();
       const factory2 = sandbox.spy();
 
@@ -513,7 +513,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install declared services for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       ampdoc.declareExtension('amp-test');
 
       const factory1Spy = sandbox.spy();

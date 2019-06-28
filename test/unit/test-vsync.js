@@ -81,7 +81,7 @@ describe('vsync', () => {
 
     beforeEach(() => {
       installDocService(win, /* isSingleDoc */ true);
-      ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       win.services['viewer'] = {obj: viewer};
       vsync = new Vsync(win);
       return Services.viewerPromiseForDoc(ampdoc);

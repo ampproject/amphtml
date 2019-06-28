@@ -429,7 +429,7 @@ function createFakeVideoPlayerClass(win) {
 
     /** @override */
     buildCallback() {
-      const ampdoc = Services.ampdocServiceFor(this.win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(this.win).getSingleDoc();
       installVideoManagerForDoc(ampdoc);
       Services.videoManagerForDoc(this.win.document).register(this);
     }

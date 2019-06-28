@@ -120,9 +120,11 @@ describe('reportErrorToServerOrViewer', () => {
     optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
 
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
+    const ampdoc = {getRootNode: () => optedInDoc};
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
-      getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+      getAmpDoc: () => ampdoc,
+      getSingleDoc: () => ampdoc,
     });
 
     viewer = {
@@ -151,9 +153,11 @@ describe('reportErrorToServerOrViewer', () => {
 
   it('should report to server if AMP doc is not opted in', () => {
     const nonOptedInDoc = window.document.implementation.createHTMLDocument('');
+    const ampdoc = {getRootNode: () => nonOptedInDoc};
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
-      getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+      getAmpDoc: () => ampdoc,
+      getSingleDoc: () => ampdoc,
     });
     return reportErrorToServerOrViewer(win, data).then(() => {
       expect(createXhr).to.be.calledOnce;

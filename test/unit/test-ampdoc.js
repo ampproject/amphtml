@@ -58,7 +58,8 @@ describe('AmpDocService', () => {
     });
 
     it('should always yield the single document', () => {
-      expect(service.getAmpDoc(null)).to.equal(service.singleDoc_);
+      expect(() => service.getAmpDoc(null)).to.throw;
+      expect(service.getSingleDoc()).to.equal(service.singleDoc_);
       expect(service.getAmpDoc(document)).to.equal(service.singleDoc_);
       const div = document.createElement('div');
       document.body.appendChild(div);
