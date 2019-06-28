@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
+import {devAssert} from './log';
 
 /**
  * @template STATE
  */
 export class FiniteStateMachine {
-
   /**
    * Constructs a FSM using the bits defined in initialState as changeable
    * states.
@@ -50,9 +49,9 @@ export class FiniteStateMachine {
    */
   addTransition(oldState, newState, callback) {
     const transition = this.statesToTransition_(oldState, newState);
-    dev().assert(
-        !this.transitions_[transition],
-        'cannot define a duplicate transition callback'
+    devAssert(
+      !this.transitions_[transition],
+      'cannot define a duplicate transition callback'
     );
     this.transitions_[transition] = callback;
   }

@@ -27,7 +27,7 @@ describes.realWin('getMinOpacity', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     style = doc.createElement('style');
-    style.setAttribute('amp-custom','');
+    style.setAttribute('amp-custom', '');
     style.innerHTML = `
     #img {
       opacity: 0.5;
@@ -67,7 +67,7 @@ describes.realWin('getMinOpacity', {amp: true}, env => {
     expect(getMinOpacity(ampElement)).to.equal(0);
   });
 
-  it('amp element\'s parent opacity value lower than amp element', () => {
+  it("amp element's parent opacity value lower than amp element", () => {
     parent.style.opacity = 0;
     expect(getMinOpacity(ampElement)).to.equal(0);
 

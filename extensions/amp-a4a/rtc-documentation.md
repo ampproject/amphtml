@@ -6,7 +6,7 @@
 For AMP Fast Fetch, support publisher-specified, multiple, simultaneous callouts in order to augment targeting information included in the ad request.  
 ## Background
 
-Remote HTML support was added for Delayed Fetch to support first-party cookie targeting. This was because AMP does not allow custom JavaScript, and pages served from the AMP cache are identical for each user.  However, Remote HTML leverages the fact that custom JavaScript execution occurs as a part of generating an ad request via Delayed Fetch. Fast Fetch allows for sending the ad request early by moving all code related to ad generation within the AMP runtime, disallowing any custom JavaScript as part of ad request creation. Therefore Fast Fetch is incompatible with Remote HTML. Real Time Config (RTC) has been added as an optional feature of Fast Fetch to allow for publishers to add user-targeting information to ad requests from AMP pages in a generic way that can be utilized by any ad networks, and any user-targeting vendors.
+Remote HTML support was added for Delayed Fetch to support first-party cookie targeting. This was because AMP does not allow custom JavaScript, and pages served from the AMP cache are identical for each user.  However, Remote HTML leverages the fact that custom JavaScript execution occurs as a part of generating an ad request via Delayed Fetch. Fast Fetch allows for sending the ad request early by moving all code related to ad generation within the AMP runtime, disallowing any custom JavaScript as part of ad request creation. Therefore Fast Fetch is incompatible with Remote HTML. Real Time Config (RTC) has been added as an optional feature of Fast Fetch to allow for publishers to add user-targeting information to ad requests from AMP pages in a generic way that can be utilized by any ad networks, and any user-targeting vendors. Common use cases for RTC are to retrieve 1st party or 3rd party data, or to integrate 3rd party demand, also known as Header Bidding.
 
 ## Overview
 
@@ -119,6 +119,20 @@ The `macros` attribute is optional, i.e. a vendor could specify a URL that has n
 Additionally, macros can be substituted in by the Fast Fetch implementation itself. The URL for a vendor will be expanded with the correct macro values prior to callout. See [URL Macro Substitution](#url-macro-substitution) section below for detailed explanation and example.
 
 The `errorReportingUrl` property is optional. The only available macros are ERROR_TYPE and HREF. See [RTC Error Pingback](#rtc-error-pingback) section below for more information on how error reporting works.
+
+#### Currently Supported Vendors
+
+*   AppNexus
+*   APS
+*   Criteo
+*   IndexExchange
+*   Lotame
+*   Media.net
+*   PubMatic OpenWrap
+*   Purch
+*   Rubicon
+*   Salesforce
+*   Yieldbot
 
 ### RTC Callout Request Specification
 

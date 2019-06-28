@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Action} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
-import {
-  LocalSubscriptionPlatformRenderer,
-} from '../local-subscription-platform-renderer';
+import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -35,7 +34,10 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     dialog = new Dialog(ampdoc);
     serviceAdapter = new ServiceAdapter(null);
     renderer = new LocalSubscriptionPlatformRenderer(
-        ampdoc, dialog, serviceAdapter);
+      ampdoc,
+      dialog,
+      serviceAdapter
+    );
     const serviceIds = ['service1', 'service2'];
     entitlementsForService1 = new Entitlement({
       service: serviceIds[0],
@@ -45,14 +47,17 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
   });
 
   describe('render method', () => {
-    it('should call renderActions_ and renderDialog with '
-        + 'the entitlements provided', () => {
-      const actionRenderStub = sandbox.stub(renderer, 'renderActions_');
-      const dialogRenderStub = sandbox.stub(renderer, 'renderDialog_');
-      renderer.render(entitlementsForService1);
-      expect(actionRenderStub).to.be.calledWith(entitlementsForService1);
-      expect(dialogRenderStub).to.be.calledWith(entitlementsForService1);
-    });
+    it(
+      'should call renderActions_ and renderDialog with ' +
+        'the entitlements provided',
+      () => {
+        const actionRenderStub = sandbox.stub(renderer, 'renderActions_');
+        const dialogRenderStub = sandbox.stub(renderer, 'renderDialog_');
+        renderer.render(entitlementsForService1);
+        expect(actionRenderStub).to.be.calledWith(entitlementsForService1);
+        expect(dialogRenderStub).to.be.calledWith(entitlementsForService1);
+      }
+    );
   });
 
   describe('action rendering', () => {
@@ -62,20 +67,18 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     beforeEach(() => {
       actions1 = createElementWithAttributes(doc, 'div', {
         id: 'actions1',
-        'subscriptions-action': 'login',
+        'subscriptions-action': Action.LOGIN,
         'subscriptions-display': 'loggedIn',
       });
       actions2 = createElementWithAttributes(doc, 'div', {
         id: 'actions2',
         'subscriptions-section': 'actions',
         'subscriptions-display': 'subscribed',
-        'subscriptions-action': 'login',
+        'subscriptions-action': Action.LOGIN,
         'subscriptions-service': 'service',
         'subscriptions-decorate': '',
       });
-      elements = [
-        actions1, actions2,
-      ];
+      elements = [actions1, actions2];
       elements.forEach(element => {
         doc.body.appendChild(element);
       });
@@ -93,9 +96,12 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       elements.forEach(element => {
         const shouldBeDisplayed = array.includes(element);
         expect(isDisplayed(element)).to.equal(
-            shouldBeDisplayed,
-            'Expected ' + element.id + ' to be ' +
-            (shouldBeDisplayed ? 'displayed' : 'not displayed'));
+          shouldBeDisplayed,
+          'Expected ' +
+            element.id +
+            ' to be ' +
+            (shouldBeDisplayed ? 'displayed' : 'not displayed')
+        );
       });
     }
 
@@ -113,12 +119,15 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     });
 
     it('should hide sections on reset', () => {
-      return renderer.render({subscribed: true}).then(() => {
-        displayed([actions2]);
-        return renderer.reset();
-      }).then(() => {
-        displayed([]);
-      });
+      return renderer
+        .render({subscribed: true})
+        .then(() => {
+          displayed([actions2]);
+          return renderer.reset();
+        })
+        .then(() => {
+          displayed([]);
+        });
     });
   });
 
@@ -165,12 +174,16 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     it('should render an element', () => {
       templatesMock.expects('renderTemplate').never();
       let content;
-      dialogMock.expects('open')
-          .withExactArgs(sinon.match(arg => {
+      dialogMock
+        .expects('open')
+        .withExactArgs(
+          sinon.match(arg => {
             content = arg;
             return true;
-          }), true)
-          .once();
+          }),
+          true
+        )
+        .once();
       return renderer.renderDialog_({value: 'A'}).then(() => {
         expect(content.id).to.equal('dialog1');
         expect(content.textContent).to.equal('dialog1');
@@ -183,17 +196,22 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     it('should render a template', () => {
       const rendered = createElementWithAttributes(doc, 'div', {});
       const data = {value: 'B'};
-      templatesMock.expects('renderTemplate')
-          .withExactArgs(dialog2, data)
-          .returns(Promise.resolve(rendered))
-          .once();
+      templatesMock
+        .expects('renderTemplate')
+        .withExactArgs(dialog2, data)
+        .returns(Promise.resolve(rendered))
+        .once();
       let content;
-      dialogMock.expects('open')
-          .withExactArgs(sinon.match(arg => {
+      dialogMock
+        .expects('open')
+        .withExactArgs(
+          sinon.match(arg => {
             content = arg;
             return true;
-          }), true)
-          .once();
+          }),
+          true
+        )
+        .once();
       return renderer.renderDialog_(data).then(() => {
         expect(content).to.equal(rendered);
       });

@@ -56,8 +56,7 @@ export class InaboxHost {
     setReportError(reportError);
 
     if (win[INABOX_IFRAMES] && !Array.isArray(win[INABOX_IFRAMES])) {
-      dev().info(TAG, `Invalid ${INABOX_IFRAMES}`,
-          win[INABOX_IFRAMES]);
+      dev().info(TAG, 'Invalid %s. %s', INABOX_IFRAMES, win[INABOX_IFRAMES]);
       win[INABOX_IFRAMES] = [];
     }
     const host = new InaboxMessagingHost(win, win[INABOX_IFRAMES]);
@@ -70,7 +69,7 @@ export class InaboxHost {
       win.AMP[INABOX_UNREGISTER_IFRAME] = host.unregisterIframe.bind(host);
     }
     const queuedMsgs = win[PENDING_MESSAGES];
-    const processMessageFn = /** @type function(Event)*/(evt => {
+    const processMessageFn = /** @type {function(Event)} */ (evt => {
       try {
         host.processMessage(evt);
       } catch (err) {
@@ -88,7 +87,7 @@ export class InaboxHost {
           processMessageFn(message);
         });
       } else {
-        dev().info(TAG, `Invalid ${PENDING_MESSAGES}`, queuedMsgs);
+        dev().info(TAG, 'Invalid %s %s', PENDING_MESSAGES, queuedMsgs);
       }
     }
     // Empty and ensure that future messages are no longer stored in the array.
@@ -108,9 +107,10 @@ export class InaboxHost {
 function validateMessage(message) {
   const valid = !!(message.source && message.source.postMessage);
   if (!valid) {
-    user().error(TAG,
-        'Missing message.source. message.data='
-        + JSON.stringify(getData(message)));
+    user().error(
+      TAG,
+      'Missing message.source. message.data=' + JSON.stringify(getData(message))
+    );
   }
   return valid;
 }

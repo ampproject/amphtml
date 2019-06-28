@@ -21,11 +21,12 @@ export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
   'vars': {
-    'anonymousId': 'CLIENT_ID(segment_amp_id)',
+    'anonymousId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
   },
   'requests': {
     'host': 'https://api.segment.io/v1/pixel',
-    'base': '?writeKey=${writeKey}' +
+    'base':
+      '?writeKey=${writeKey}' +
       '&context.library.name=amp' +
       '&anonymousId=${anonymousId}' +
       '&context.locale=${browserLanguage}' +
@@ -53,7 +54,7 @@ export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
   'cookies': {
-    'segment_amp_id': {
+    '_ga': {
       'value': 'LINKER_PARAM(segment, s_amp_id)',
     },
   },

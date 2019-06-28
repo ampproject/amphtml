@@ -25,7 +25,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -33,16 +33,15 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+
+const TAG = 'amp-wistia-player';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
 class AmpWistiaPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -86,26 +85,31 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const {element} = this;
-    const mediaId = user().assert(
-        element.getAttribute('data-media-hashed-id'),
-        'The data-media-hashed-id attribute is required ' +
-            'for <amp-wistia-player> %s',
-        element);
+    const mediaId = userAssert(
+      element.getAttribute('data-media-hashed-id'),
+      'The data-media-hashed-id attribute is required ' +
+        'for <amp-wistia-player> %s',
+      element
+    );
 
-    const iframe = createFrameFor(this,
-        `https://fast.wistia.net/embed/iframe/${encodeURIComponent(mediaId)}`);
+    const iframe = createFrameFor(
+      this,
+      `https://fast.wistia.net/embed/iframe/${encodeURIComponent(mediaId)}`
+    );
 
-    iframe.setAttribute('title',
-        element.getAttribute('title') || 'Wistia Video Player');
+    iframe.setAttribute(
+      'title',
+      element.getAttribute('title') || 'Wistia Video Player'
+    );
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('allowtransparency', '');
 
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleWistiaMessage_.bind(this)
+      this.win,
+      'message',
+      this.handleWistiaMessage_.bind(this)
     );
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
@@ -172,10 +176,10 @@ class AmpWistiaPlayer extends AMP.BaseElement {
       return;
     }
 
-    const playerEvent = (data['args'] ? data['args'][0] : undefined);
+    const playerEvent = data['args'] ? data['args'][0] : undefined;
 
     if (playerEvent === 'statechange') {
-      const state = (data['args'] ? data['args'][1] : undefined);
+      const state = data['args'] ? data['args'][1] : undefined;
       redispatch(element, state, {
         'playing': VideoEvents.PLAYING,
         'paused': VideoEvents.PAUSE,
@@ -185,16 +189,16 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     }
 
     if (playerEvent == 'mutechange') {
-      const isMuted = (data['args'] ? data['args'][1] : undefined);
+      const isMuted = data['args'] ? data['args'][1] : undefined;
       element.dispatchCustomEvent(mutedOrUnmutedEvent(isMuted));
       return;
     }
   }
 
   /**
-  * Sends 'listening' message to the Wistia iframe to listen for events.
-  * @private
-  */
+   * Sends 'listening' message to the Wistia iframe to listen for events.
+   * @private
+   */
   listenToFrame_() {
     this.sendCommand_('amp-listening');
   }
@@ -207,7 +211,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   sendCommand_(command) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow./*OK*/postMessage(command, '*');
+        this.iframe_.contentWindow./*OK*/ postMessage(command, '*');
       }
     });
   }
@@ -316,9 +320,13 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
-
-AMP.extension('amp-wistia-player', '0.1', AMP => {
-  AMP.registerElement('amp-wistia-player', AmpWistiaPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpWistiaPlayer);
 });

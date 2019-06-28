@@ -26,7 +26,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -35,10 +35,10 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+
+const TAG = 'amp-mowplayer';
 
 /**
  * @enum {number}
@@ -53,7 +53,6 @@ const PlayerStates = {
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpMowplayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -105,10 +104,11 @@ class AmpMowplayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.mediaid_ = user().assert(
-        (this.element.getAttribute('data-mediaid')),
-        '/The data-mediaid attribute is required for <amp-mowplayer> %s',
-        this.element);
+    this.mediaid_ = userAssert(
+      this.element.getAttribute('data-mediaid'),
+      '/The data-mediaid attribute is required for <amp-mowplayer> %s',
+      this.element
+    );
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -129,10 +129,12 @@ class AmpMowplayer extends AMP.BaseElement {
     const params = dict({
       'code': this.mediaid_,
     });
-    const src = addParamsToUrl('https://cdn.mowplayer.com/player.html',
-        /** @type {!JsonObject} */ (params));
+    const src = addParamsToUrl(
+      'https://cdn.mowplayer.com/player.html',
+      /** @type {!JsonObject} */ (params)
+    );
 
-    return this.videoIframeSrc_ = src;
+    return (this.videoIframeSrc_ = src);
   }
 
   /** @override */
@@ -140,9 +142,9 @@ class AmpMowplayer extends AMP.BaseElement {
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
     this.iframe_ = iframe;
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleMowMessage_.bind(this)
+      this.win,
+      'message',
+      this.handleMowMessage_.bind(this)
     );
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell mowplayer that we want to receive messages
@@ -195,12 +197,17 @@ class AmpMowplayer extends AMP.BaseElement {
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(dict({
-          'event': 'command',
-          'func': command,
-          'args': opt_args || '',
-        }));
-        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+        const message = JSON.stringify(
+          dict({
+            'event': 'command',
+            'func': command,
+            'args': opt_args || '',
+          })
+        );
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          message,
+          'https://cdn.mowplayer.com'
+        );
       }
     });
   }
@@ -214,11 +221,13 @@ class AmpMowplayer extends AMP.BaseElement {
       return;
     }
     const eventData = getData(event);
+
     if (!isJsonOrObj(eventData)) {
       return;
     }
 
     const data = objOrParseJson(eventData);
+
     if (data == null) {
       return; // We only process valid JSON.
     }
@@ -227,6 +236,10 @@ class AmpMowplayer extends AMP.BaseElement {
     const info = data['info'] || {};
 
     const {element} = this;
+
+    if (eventType === 'set_aspect_ratio') {
+      this.attemptChangeHeight(info['new_height']).catch(() => {});
+    }
 
     const playerState = info['playerState'];
     if (eventType == 'infoDelivery' && playerState != null) {
@@ -248,7 +261,6 @@ class AmpMowplayer extends AMP.BaseElement {
       element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
       return;
     }
-
   }
 
   /**
@@ -259,9 +271,13 @@ class AmpMowplayer extends AMP.BaseElement {
     if (!this.iframe_) {
       return;
     }
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
-      'event': 'listening',
-    })), '*');
+
+    this.sendCommand_('listening', [
+      'amp',
+      window.location.href,
+      window.location.origin,
+      true,
+    ]);
   }
 
   /** @override */
@@ -360,9 +376,13 @@ class AmpMowplayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
-
-AMP.extension('amp-mowplayer', '0.1', AMP => {
-  AMP.registerElement('amp-mowplayer', AmpMowplayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpMowplayer);
 });

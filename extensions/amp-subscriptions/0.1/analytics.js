@@ -38,10 +38,32 @@ export const SubscriptionAnalyticsEvents = {
   STARTED: 'subscriptions-started',
   ACCESS_GRANTED: 'subscriptions-access-granted',
   ACCESS_DENIED: 'subscriptions-access-denied',
+  // common service adapter events
+  LINK_REQUESTED: 'subscriptions-link-requested',
+  LINK_COMPLETE: 'subscriptions-link-complete',
+  LINK_CANCELED: 'subscriptions-link-canceled',
+};
+
+/** @enum {string} */
+export const Action = {
+  LOGIN: 'login',
+  LOGOUT: 'logout',
+  LINK: 'link',
+  SUBSCRIBE: 'subscribe',
+  CONTRIBUTE: 'contribute',
+  SHOW_CONTRIBUTION_OPTIONS: 'showContributionOptions',
+  SHOW_OFFERS: 'showOffers',
+};
+
+/** @enum {string} */
+export const ActionStatus = {
+  STARTED: 'started',
+  REJECTED: 'rejected',
+  FAILED: 'failed',
+  SUCCESS: 'success',
 };
 
 export class SubscriptionAnalytics {
-
   /**
    * Creates an instance of SubscriptionAnalytics.
    * @param {!Element} element
@@ -51,24 +73,42 @@ export class SubscriptionAnalytics {
   }
 
   /**
-   *
    * @param {string} eventType
    * @param {string} serviceId
    * @param {!JsonObject=} opt_vars
    */
   serviceEvent(eventType, serviceId, opt_vars) {
-    this.event(eventType, /** @type {!JsonObject} */ (Object.assign(dict({
-      'serviceId': serviceId,
-    }), opt_vars)));
+    this.event(
+      eventType,
+      /** @type {!JsonObject} */ (Object.assign(
+        dict({
+          'serviceId': serviceId,
+        }),
+        opt_vars
+      ))
+    );
   }
 
   /**
-   *
    * @param {string} eventType
    * @param {!JsonObject=} opt_vars
    */
   event(eventType, opt_vars) {
     user().info(TAG, eventType, opt_vars || '');
     triggerAnalyticsEvent(this.element_, eventType, opt_vars || dict({}));
+  }
+
+  /**
+   * @param {string} serviceId
+   * @param {string} action
+   * @param {string} status
+   * @param {!JsonObject=} opt_vars
+   */
+  actionEvent(serviceId, action, status, opt_vars) {
+    this.serviceEvent(
+      `subscriptions-action-${action}-${status}`,
+      serviceId,
+      opt_vars
+    );
   }
 }

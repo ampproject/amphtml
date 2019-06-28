@@ -20,7 +20,7 @@ import {AmpStoryRequestService} from '../amp-story-request-service';
 import {ArticleComponent} from '../bookend/components/article';
 import {CtaLinkComponent} from '../bookend/components/cta-link';
 import {LandscapeComponent} from '../bookend/components/landscape';
-import {LocalizationService} from '../localization';
+import {LocalizationService} from '../../../../src/service/localization';
 import {PortraitComponent} from '../bookend/components/portrait';
 import {Services} from '../../../../src/services';
 import {TextBoxComponent} from '../bookend/components/text-box';
@@ -122,8 +122,11 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     storyElem = win.document.createElement('amp-story');
     storyElem.appendChild(win.document.createElement('amp-story-page'));
     win.document.body.appendChild(storyElem);
-    bookendElem = createElementWithAttributes(win.document,
-        'amp-story-bookend', {'layout': 'nodisplay'});
+    bookendElem = createElementWithAttributes(
+      win.document,
+      'amp-story-bookend',
+      {'layout': 'nodisplay'}
+    );
     storyElem.appendChild(bookendElem);
 
     requestService = new AmpStoryRequestService(win, storyElem);
@@ -206,8 +209,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(config => {
       config.components.forEach((currentComponent, index) => {
-        return expect(currentComponent).to.deep
-            .equal(expectedComponents[index]);
+        return expect(currentComponent).to.deep.equal(
+          expectedComponents[index]
+        );
       });
     });
   });
@@ -280,297 +284,327 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(config => {
       config.components.forEach((currentComponent, index) => {
-        return expect(currentComponent).to.deep
-            .equal(expectedComponents[index]);
+        return expect(currentComponent).to.deep.equal(
+          expectedComponents[index]
+        );
       });
     });
   });
 
-  it('should add amp-to-amp linking to individual cta links when ' +
-      'specified in the JSON config', () => {
-    const userJson = {
-      'bookendVersion': 'v1.0',
-      'shareProviders': [
-        'email',
-        {'provider': 'facebook', 'app_id': '254325784911610'},
-        'whatsapp',
-      ],
-      'components': [
-        {
-          'type': 'cta-link',
-          'links': [
-            {
-              'text': 'buttonA',
-              'url': 'google.com',
-              'amphtml': true,
-            },
-          ],
-        },
-      ],
-    };
+  it(
+    'should add amp-to-amp linking to individual cta links when ' +
+      'specified in the JSON config',
+    () => {
+      const userJson = {
+        'bookendVersion': 'v1.0',
+        'shareProviders': [
+          'email',
+          {'provider': 'facebook', 'app_id': '254325784911610'},
+          'whatsapp',
+        ],
+        'components': [
+          {
+            'type': 'cta-link',
+            'links': [
+              {
+                'text': 'buttonA',
+                'url': 'google.com',
+                'amphtml': true,
+              },
+            ],
+          },
+        ],
+      };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
-    bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const ctaLinks =
-          bookend.bookendEl_
-              .querySelector('.i-amphtml-story-bookend-cta-link-wrapper');
-      expect(ctaLinks.children[0]).to.have.attribute('rel');
-      expect(ctaLinks.children[0].getAttribute('rel')).to.equal('amphtml');
-    });
-  });
+      bookend.build();
+      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+        const ctaLinks = bookend.bookendEl_.querySelector(
+          '.i-amphtml-story-bookend-cta-link-wrapper'
+        );
+        expect(ctaLinks.children[0]).to.have.attribute('rel');
+        expect(ctaLinks.children[0].getAttribute('rel')).to.equal('amphtml');
+      });
+    }
+  );
 
-  it('should not add amp-to-amp linking to cta links when not ' +
-      'specified in the JSON config', () => {
-    const userJson = {
-      'bookendVersion': 'v1.0',
-      'shareProviders': [
-        'email',
-        {'provider': 'facebook', 'app_id': '254325784911610'},
-        'whatsapp',
-      ],
-      'components': [
-        {
-          'type': 'cta-link',
-          'links': [
-            {
-              'text': 'buttonB',
-              'url': 'google.com',
-              'amphtml': '',
-            },
-            {
-              'text': 'longtext longtext longtext longtext longtext',
-              'url': 'google.com',
-              'amphtml': false,
-            },
-          ],
-        },
-      ],
-    };
+  it(
+    'should not add amp-to-amp linking to cta links when not ' +
+      'specified in the JSON config',
+    () => {
+      const userJson = {
+        'bookendVersion': 'v1.0',
+        'shareProviders': [
+          'email',
+          {'provider': 'facebook', 'app_id': '254325784911610'},
+          'whatsapp',
+        ],
+        'components': [
+          {
+            'type': 'cta-link',
+            'links': [
+              {
+                'text': 'buttonB',
+                'url': 'google.com',
+                'amphtml': '',
+              },
+              {
+                'text': 'longtext longtext longtext longtext longtext',
+                'url': 'google.com',
+                'amphtml': false,
+              },
+            ],
+          },
+        ],
+      };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
-    bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const ctaLinks =
-          bookend.bookendEl_
-              .querySelector('.i-amphtml-story-bookend-cta-link-wrapper');
-      expect(ctaLinks.children[0]).to.not.have.attribute('rel');
-      expect(ctaLinks.children[1]).to.not.have.attribute('rel');
-    });
-  });
+      bookend.build();
+      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+        const ctaLinks = bookend.bookendEl_.querySelector(
+          '.i-amphtml-story-bookend-cta-link-wrapper'
+        );
+        expect(ctaLinks.children[0]).to.not.have.attribute('rel');
+        expect(ctaLinks.children[1]).to.not.have.attribute('rel');
+      });
+    }
+  );
 
-  it('should add amp-to-amp linking to small articles when specified ' +
-      'in the JSON config', () => {
-    const userJson = {
-      'bookendVersion': 'v1.0',
-      'shareProviders': [
-        'email',
-        {'provider': 'facebook', 'app_id': '254325784911610'},
-        'whatsapp',
-      ],
-      'components': [
-        {
-          'type': 'small',
-          'title': 'This is an example article!',
-          'url': 'http://example.com/article.html',
-          'image': 'http://placehold.it/256x128',
-          'amphtml': true,
-        },
-      ],
-    };
+  it(
+    'should add amp-to-amp linking to small articles when specified ' +
+      'in the JSON config',
+    () => {
+      const userJson = {
+        'bookendVersion': 'v1.0',
+        'shareProviders': [
+          'email',
+          {'provider': 'facebook', 'app_id': '254325784911610'},
+          'whatsapp',
+        ],
+        'components': [
+          {
+            'type': 'small',
+            'title': 'This is an example article!',
+            'url': 'http://example.com/article.html',
+            'image': 'http://placehold.it/256x128',
+            'amphtml': true,
+          },
+        ],
+      };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
-    bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const articles =
-          bookend.bookendEl_
-              .querySelectorAll('.i-amphtml-story-bookend-article');
-      expect(articles[0]).to.have.attribute('rel');
-      expect(articles[0].getAttribute('rel')).to.equal('amphtml');
-    });
-  });
+      bookend.build();
+      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+        const articles = bookend.bookendEl_.querySelectorAll(
+          '.i-amphtml-story-bookend-article'
+        );
+        expect(articles[0]).to.have.attribute('rel');
+        expect(articles[0].getAttribute('rel')).to.equal('amphtml');
+      });
+    }
+  );
 
-  it('should not add amp-to-amp linking to small articles when not ' +
-      'specified in the JSON config', () => {
-    const userJson = {
-      'bookendVersion': 'v1.0',
-      'shareProviders': [
-        'email',
-        {'provider': 'facebook', 'app_id': '254325784911610'},
-        'whatsapp',
-      ],
-      'components': [
-        {
-          'type': 'small',
-          'title': 'This is an example article!',
-          'url': 'http://example.com/article.html',
-          'image': 'http://placehold.it/256x128',
-        },
-        {
-          'type': 'small',
-          'title': 'This is an example article!',
-          'url': 'http://example.com/article.html',
-          'image': 'http://placehold.it/256x128',
-          'amphtml': 'true',
-        },
-      ],
-    };
+  it(
+    'should not add amp-to-amp linking to small articles when not ' +
+      'specified in the JSON config',
+    () => {
+      const userJson = {
+        'bookendVersion': 'v1.0',
+        'shareProviders': [
+          'email',
+          {'provider': 'facebook', 'app_id': '254325784911610'},
+          'whatsapp',
+        ],
+        'components': [
+          {
+            'type': 'small',
+            'title': 'This is an example article!',
+            'url': 'http://example.com/article.html',
+            'image': 'http://placehold.it/256x128',
+          },
+          {
+            'type': 'small',
+            'title': 'This is an example article!',
+            'url': 'http://example.com/article.html',
+            'image': 'http://placehold.it/256x128',
+            'amphtml': 'true',
+          },
+        ],
+      };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
-    bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const articles = bookend.bookendEl_
-          .querySelectorAll('.i-amphtml-story-bookend-article');
-      expect(articles[0]).to.not.have.attribute('rel');
-      expect(articles[1]).to.not.have.attribute('rel');
-    });
-  });
+      bookend.build();
+      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+        const articles = bookend.bookendEl_.querySelectorAll(
+          '.i-amphtml-story-bookend-article'
+        );
+        expect(articles[0]).to.not.have.attribute('rel');
+        expect(articles[1]).to.not.have.attribute('rel');
+      });
+    }
+  );
 
-  it('should add amp-to-amp linking to portrait articles when specified ' +
-      'in the JSON config', () => {
-    const userJson = {
-      'bookendVersion': 'v1.0',
-      'shareProviders': [
-        'email',
-        {'provider': 'facebook', 'app_id': '254325784911610'},
-        'whatsapp',
-      ],
-      'components': [
-        {
-          'type': 'portrait',
-          'title': 'example title',
-          'category': 'example category',
-          'url': 'http://example.com/article.html',
-          'image': 'http://placehold.it/256x128',
-          'amphtml': true,
-        },
-      ],
-    };
+  it(
+    'should add amp-to-amp linking to portrait articles when specified ' +
+      'in the JSON config',
+    () => {
+      const userJson = {
+        'bookendVersion': 'v1.0',
+        'shareProviders': [
+          'email',
+          {'provider': 'facebook', 'app_id': '254325784911610'},
+          'whatsapp',
+        ],
+        'components': [
+          {
+            'type': 'portrait',
+            'title': 'example title',
+            'category': 'example category',
+            'url': 'http://example.com/article.html',
+            'image': 'http://placehold.it/256x128',
+            'amphtml': true,
+          },
+        ],
+      };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
-    bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const articles = bookend.bookendEl_
-          .querySelectorAll('.i-amphtml-story-bookend-portrait');
-      expect(articles[0]).to.have.attribute('rel');
-      expect(articles[0].getAttribute('rel')).to.equal('amphtml');
-    });
-  });
+      bookend.build();
+      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+        const articles = bookend.bookendEl_.querySelectorAll(
+          '.i-amphtml-story-bookend-portrait'
+        );
+        expect(articles[0]).to.have.attribute('rel');
+        expect(articles[0].getAttribute('rel')).to.equal('amphtml');
+      });
+    }
+  );
 
-  it('should not add amp-to-amp linking to portrait articles when not ' +
-      'specified in the JSON config', () => {
-    const userJson = {
-      'bookendVersion': 'v1.0',
-      'shareProviders': [
-        'email',
-        {'provider': 'facebook', 'app_id': '254325784911610'},
-        'whatsapp',
-      ],
-      'components': [
-        {
-          'type': 'portrait',
-          'title': 'example title',
-          'category': 'example category',
-          'url': 'http://example.com/article.html',
-          'image': 'http://placehold.it/256x128',
-        },
-        {
-          'type': 'portrait',
-          'title': 'example title',
-          'category': 'example category',
-          'url': 'http://example.com/article.html',
-          'image': 'http://placehold.it/256x128',
-          'amphtml': 'true',
-        },
-      ],
-    };
+  it(
+    'should not add amp-to-amp linking to portrait articles when not ' +
+      'specified in the JSON config',
+    () => {
+      const userJson = {
+        'bookendVersion': 'v1.0',
+        'shareProviders': [
+          'email',
+          {'provider': 'facebook', 'app_id': '254325784911610'},
+          'whatsapp',
+        ],
+        'components': [
+          {
+            'type': 'portrait',
+            'title': 'example title',
+            'category': 'example category',
+            'url': 'http://example.com/article.html',
+            'image': 'http://placehold.it/256x128',
+          },
+          {
+            'type': 'portrait',
+            'title': 'example title',
+            'category': 'example category',
+            'url': 'http://example.com/article.html',
+            'image': 'http://placehold.it/256x128',
+            'amphtml': 'true',
+          },
+        ],
+      };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
-    bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const articles = bookend.bookendEl_
-          .querySelectorAll('.i-amphtml-story-bookend-portrait');
-      expect(articles[0]).to.not.have.attribute('rel');
-      expect(articles[1]).to.not.have.attribute('rel');
-    });
-  });
+      bookend.build();
+      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+        const articles = bookend.bookendEl_.querySelectorAll(
+          '.i-amphtml-story-bookend-portrait'
+        );
+        expect(articles[0]).to.not.have.attribute('rel');
+        expect(articles[1]).to.not.have.attribute('rel');
+      });
+    }
+  );
 
-  it('should add amp-to-amp linking to landscape articles when ' +
-      'specified in the JSON config', () => {
-    const userJson = {
-      'bookendVersion': 'v1.0',
-      'shareProviders': [
-        'email',
-        {'provider': 'facebook', 'app_id': '254325784911610'},
-        'whatsapp',
-      ],
-      'components': [
-        {
-          'type': 'landscape',
-          'category': 'example category',
-          'title': 'example title',
-          'url': 'http://example.com/article.html',
-          'image': 'http://placehold.it/256x128',
-          'amphtml': true,
-        },
-      ],
-    };
+  it(
+    'should add amp-to-amp linking to landscape articles when ' +
+      'specified in the JSON config',
+    () => {
+      const userJson = {
+        'bookendVersion': 'v1.0',
+        'shareProviders': [
+          'email',
+          {'provider': 'facebook', 'app_id': '254325784911610'},
+          'whatsapp',
+        ],
+        'components': [
+          {
+            'type': 'landscape',
+            'category': 'example category',
+            'title': 'example title',
+            'url': 'http://example.com/article.html',
+            'image': 'http://placehold.it/256x128',
+            'amphtml': true,
+          },
+        ],
+      };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
-    bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const articles = bookend.bookendEl_
-          .querySelectorAll('.i-amphtml-story-bookend-landscape');
-      expect(articles[0]).to.have.attribute('rel');
-      expect(articles[0].getAttribute('rel')).to.equal('amphtml');
-    });
-  });
+      bookend.build();
+      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+        const articles = bookend.bookendEl_.querySelectorAll(
+          '.i-amphtml-story-bookend-landscape'
+        );
+        expect(articles[0]).to.have.attribute('rel');
+        expect(articles[0].getAttribute('rel')).to.equal('amphtml');
+      });
+    }
+  );
 
-  it('should not add amp-to-amp linking to landscape articles when not' +
-      ' specified in the JSON config', () => {
-    const userJson = {
-      'bookendVersion': 'v1.0',
-      'shareProviders': [
-        'email',
-        {'provider': 'facebook', 'app_id': '254325784911610'},
-        'whatsapp',
-      ],
-      'components': [
-        {
-          'type': 'landscape',
-          'category': 'example category',
-          'title': 'example title',
-          'url': 'http://example.com/article.html',
-          'image': 'http://placehold.it/256x128',
-        },
-        {
-          'type': 'landscape',
-          'category': 'example category',
-          'title': 'example title',
-          'url': 'http://example.com/article.html',
-          'image': 'http://placehold.it/256x128',
-          'amphtml': 'true',
-        },
-      ],
-    };
+  it(
+    'should not add amp-to-amp linking to landscape articles when not' +
+      ' specified in the JSON config',
+    () => {
+      const userJson = {
+        'bookendVersion': 'v1.0',
+        'shareProviders': [
+          'email',
+          {'provider': 'facebook', 'app_id': '254325784911610'},
+          'whatsapp',
+        ],
+        'components': [
+          {
+            'type': 'landscape',
+            'category': 'example category',
+            'title': 'example title',
+            'url': 'http://example.com/article.html',
+            'image': 'http://placehold.it/256x128',
+          },
+          {
+            'type': 'landscape',
+            'category': 'example category',
+            'title': 'example title',
+            'url': 'http://example.com/article.html',
+            'image': 'http://placehold.it/256x128',
+            'amphtml': 'true',
+          },
+        ],
+      };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
-    bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const articles = bookend.bookendEl_
-          .querySelectorAll('.i-amphtml-story-bookend-landscape');
-      expect(articles[0]).to.not.have.attribute('rel');
-      expect(articles[1]).to.not.have.attribute('rel');
-    });
-  });
+      bookend.build();
+      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+        const articles = bookend.bookendEl_.querySelectorAll(
+          '.i-amphtml-story-bookend-landscape'
+        );
+        expect(articles[0]).to.not.have.attribute('rel');
+        expect(articles[1]).to.not.have.attribute('rel');
+      });
+    }
+  );
 
   it('should build the users share providers', () => {
     const userJson = {
@@ -578,8 +612,12 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       'shareProviders': [
         'email',
         {'provider': 'facebook', 'app_id': '254325784911610'},
-        {'provider': 'twitter', 'text': 'This is custom share text that I' +
-            ' would like for the Twitter platform'},
+        {
+          'provider': 'twitter',
+          'text':
+            'This is custom share text that I' +
+            ' would like for the Twitter platform',
+        },
         'whatsapp',
       ],
       'components': [
@@ -599,8 +637,12 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     const expectedShareProviders = [
       'email',
       {'provider': 'facebook', 'app_id': '254325784911610'},
-      {'provider': 'twitter', 'text': 'This is custom share text that I ' +
-          'would like for the Twitter platform'},
+      {
+        'provider': 'twitter',
+        'text':
+          'This is custom share text that I ' +
+          'would like for the Twitter platform',
+      },
       'whatsapp',
     ];
 
@@ -609,8 +651,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(config => {
       config['shareProviders'].forEach((currProvider, index) => {
-        return expect(currProvider).to.deep
-            .equal(expectedShareProviders[index]);
+        return expect(currProvider).to.deep.equal(
+          expectedShareProviders[index]
+        );
       });
     });
   });
@@ -666,9 +709,11 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(() => {
       expect(userWarnStub).to.be.calledOnce;
-      expect(userWarnStub.args[0][1]).to.be.equal('`system` is not a valid ' +
-      'share provider type. Native sharing is ' +
-      'enabled by default and cannot be turned off.');
+      expect(userWarnStub.args[0][1]).to.be.equal(
+        '`system` is not a valid ' +
+          'share provider type. Native sharing is ' +
+          'enabled by default and cannot be turned off.'
+      );
     });
   });
 
@@ -696,8 +741,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
     allowConsoleError(() => {
       expect(() => articleComponent.assertValidity(userJson)).to.throw(
-          'Small article component must contain `title`, `url` fields, ' +
-          'skipping invalid.​​​');
+        'Small article component must contain `title`, `url` fields, ' +
+          'skipping invalid.​​​'
+      );
     });
   });
 
@@ -722,8 +768,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
     allowConsoleError(() => {
       expect(() => portraitComponant.assertValidity(userJson)).to.throw(
-          'Portrait component must contain `title`, `image`, ' +
-          '`url` fields, skipping invalid.');
+        'Portrait component must contain `title`, `image`, ' +
+          '`url` fields, skipping invalid.'
+      );
     });
   });
 
@@ -755,8 +802,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
     allowConsoleError(() => {
       expect(() => ctaLinkComponent.assertValidity(userJson)).to.throw(
-          'CTA link component must be an array ' +
-          'and contain at least one link inside it.');
+        'CTA link component must be an array ' +
+          'and contain at least one link inside it.'
+      );
     });
   });
 
@@ -790,8 +838,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
     allowConsoleError(() => {
       expect(() => landscapeComponent.assertValidity(userJson)).to.throw(
-          'Landscape component must contain `title`, `image`, ' +
-          '`url` fields, skipping invalid.');
+        'Landscape component must contain `title`, `image`, ' +
+          '`url` fields, skipping invalid.'
+      );
     });
   });
 
@@ -823,9 +872,10 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
     allowConsoleError(() => {
       expect(() => textBoxComponent.assertValidity(userJson)).to.throw(
-          'Textbox component must contain ' +
+        'Textbox component must contain ' +
           '`text` array and at least one element inside it, ' +
-          'skipping invalid.');
+          'skipping invalid.'
+      );
     });
   });
 
@@ -835,8 +885,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
     bookend.build();
 
-    const promptButtonEl =
-        bookend.getShadowRoot().querySelector(`[on="tap:${consentId}.prompt"]`);
+    const promptButtonEl = bookend
+      .getShadowRoot()
+      .querySelector(`[on="tap:${consentId}.prompt"]`);
 
     expect(promptButtonEl).to.exist;
   });
@@ -845,8 +896,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     bookend.build();
 
     // No element with an "on" attribute ending with ".prompt".
-    const promptButtonEl =
-        bookend.getShadowRoot().querySelector('[on$=".prompt"]');
+    const promptButtonEl = bookend
+      .getShadowRoot()
+      .querySelector('[on$=".prompt"]');
 
     expect(promptButtonEl).to.be.null;
   });
@@ -877,7 +929,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
-    expectAsyncConsoleError(/[Component `invalid-type` is not supported. Skipping invalid]/);
+    expectAsyncConsoleError(
+      /[Component `invalid-type` is not supported. Skipping invalid]/
+    );
 
     return bookend.loadConfigAndMaybeRenderBookend().then(config => {
       // Still builds rest of valid components.

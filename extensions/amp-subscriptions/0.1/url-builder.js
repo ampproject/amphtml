@@ -17,16 +17,17 @@
 import {Services} from '../../../src/services';
 import {getValueForExpr} from '../../../src/json';
 
-
 export class UrlBuilder {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Promise<string>} readerIdPromise
    */
   constructor(ampdoc, readerIdPromise) {
+    const headNode = ampdoc.getHeadNode();
+
     /** @private @const {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(headNode);
+
     /** @private @const {!Promise<string>} */
     this.readerIdPromise_ = readerIdPromise;
 

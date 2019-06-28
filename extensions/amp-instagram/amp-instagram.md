@@ -1,3 +1,10 @@
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Displays an Instagram embed.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-instagram"></a> `amp-instagram`
+# amp-instagram
+
+Displays an Instagram embed.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays an Instagram embed.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js">&lt;/script></code></td>
@@ -62,19 +67,23 @@ When using non-responsive layout you will need to account for the extra space ad
 
 ## Attributes
 
-##### data-shortcode
+<table>
+  <tr>
+    <td width="40%"><strong>data-shortcode</strong></td>
+    <td>The instagram data-shortcode is found in every instagram photo URL.
+<br>
+For example, in https://instagram.com/p/fBwFP, <code>fBwFP</code> is the data-shortcode.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-captioned</strong></td>
+    <td>Include the Instagram caption. <code>amp-instagram</code> will attempt to resize to the correct height including the caption.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
-The instagram data-shortcode is found in every instagram photo URL.
-
-For example, in https://instagram.com/p/fBwFP, `fBwFP` is the data-shortcode.
-
-##### data-captioned
-
-Include the Instagram caption.  `amp-instagram` will attempt to resize to the correct height including the caption.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

@@ -21,7 +21,6 @@ import {getMode} from '../../../../src/mode';
 import {isUserErrorMessage} from '../../../../src/log';
 import {removeFragment, serializeQueryString} from '../../../../src/url';
 
-
 describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
   let win;
   let ampdoc;
@@ -59,16 +58,16 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
     contextMock.verify();
   });
 
-
   describe('config', () => {
     it('should load valid config', () => {
       const adapter = new AccessServerJwtAdapter(ampdoc, validConfig, context);
-      expect(adapter.clientAdapter_.authorizationUrl_).to
-          .equal('https://acme.com/a?rid=READER_ID');
-      expect(adapter.clientAdapter_.pingbackUrl_).to
-          .equal('https://acme.com/p?rid=READER_ID');
-      expect(adapter.keyUrl_).to
-          .equal('https://acme.com/pk');
+      expect(adapter.clientAdapter_.authorizationUrl_).to.equal(
+        'https://acme.com/a?rid=READER_ID'
+      );
+      expect(adapter.clientAdapter_.pingbackUrl_).to.equal(
+        'https://acme.com/p?rid=READER_ID'
+      );
+      expect(adapter.keyUrl_).to.equal('https://acme.com/pk');
       expect(adapter.key_).to.be.null;
       expect(adapter.serverState_).to.equal('STATE1');
       expect(adapter.isProxyOrigin_).to.be.false;
@@ -78,23 +77,29 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
 
     it('should fail if config is invalid: authorization', () => {
       delete validConfig['authorization'];
-      allowConsoleError(() => { expect(() => {
-        new AccessServerJwtAdapter(ampdoc, validConfig, context);
-      }).to.throw(/"authorization" URL must be specified/); });
+      allowConsoleError(() => {
+        expect(() => {
+          new AccessServerJwtAdapter(ampdoc, validConfig, context);
+        }).to.throw(/"authorization" URL must be specified/);
+      });
     });
 
     it('should fail if config is invalid: publicKeyUrl', () => {
       delete validConfig['publicKeyUrl'];
-      allowConsoleError(() => { expect(() => {
-        new AccessServerJwtAdapter(ampdoc, validConfig, context);
-      }).to.throw(/"publicKey" or "publicKeyUrl" must be specified/); });
+      allowConsoleError(() => {
+        expect(() => {
+          new AccessServerJwtAdapter(ampdoc, validConfig, context);
+        }).to.throw(/"publicKey" or "publicKeyUrl" must be specified/);
+      });
     });
 
     it('should fail if config is invalid: http publicKeyUrl', () => {
       validConfig['publicKeyUrl'] = 'http://acme.com/pk';
-      allowConsoleError(() => { expect(() => {
-        new AccessServerJwtAdapter(ampdoc, validConfig, context);
-      }).to.throw(/https/); });
+      allowConsoleError(() => {
+        expect(() => {
+          new AccessServerJwtAdapter(ampdoc, validConfig, context);
+        }).to.throw(/https/);
+      });
     });
 
     it('should support either publicKey or publicKeyUrl', () => {
@@ -113,7 +118,6 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
   });
 
   describe('runtime', () => {
-
     let adapter;
     let clientAdapter;
     let clientAdapterMock;
@@ -165,12 +169,12 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
     });
 
     describe('authorize', () => {
-
       it('should fallback to client auth when not on proxy', () => {
         adapter.isProxyOrigin_ = false;
         const p = Promise.resolve();
-        const stub = sandbox.stub(adapter, 'authorizeOnClient_').callsFake(
-            () => p);
+        const stub = sandbox
+          .stub(adapter, 'authorizeOnClient_')
+          .callsFake(() => p);
         docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
@@ -180,8 +184,9 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       it('should fallback to client auth w/o server state', () => {
         adapter.serverState_ = null;
         const p = Promise.resolve();
-        const stub = sandbox.stub(adapter, 'authorizeOnClient_').callsFake(
-            () => p);
+        const stub = sandbox
+          .stub(adapter, 'authorizeOnClient_')
+          .callsFake(() => p);
         docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
@@ -190,8 +195,9 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
 
       it('should execute via server on proxy and w/server state', () => {
         const p = Promise.resolve();
-        const stub = sandbox.stub(adapter, 'authorizeOnServer_').callsFake(
-            () => p);
+        const stub = sandbox
+          .stub(adapter, 'authorizeOnServer_')
+          .callsFake(() => p);
         docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
@@ -201,8 +207,9 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       it('should fetch JWT directly via client', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
-        sandbox.stub(adapter, 'fetchJwt_').callsFake(
-            () => Promise.resolve({jwt}));
+        sandbox
+          .stub(adapter, 'fetchJwt_')
+          .callsFake(() => Promise.resolve({jwt}));
         docFetcherMock.expects('fetchDocument').never();
         return adapter.authorizeOnClient_().then(result => {
           expect(result).to.equal(authdata);
@@ -214,29 +221,30 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        sandbox.stub(adapter, 'fetchJwt_').callsFake(
-            () => Promise.resolve({jwt, encoded}));
+        sandbox
+          .stub(adapter, 'fetchJwt_')
+          .callsFake(() => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
           'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'jwt': encoded,
         });
-        docFetcherMock.expects('fetchDocument')
-            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
-              method: 'POST',
-              body: request,
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-              requireAmpResponseSourceOrigin: false,
-            })
-            .returns(Promise.resolve(responseDoc))
-            .once();
-        const replaceSectionsStub =
-            sandbox.stub(adapter, 'replaceSections_').callsFake(
-                () => {
-                  return Promise.resolve();
-                });
+        docFetcherMock
+          .expects('fetchDocument')
+          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+            method: 'POST',
+            body: request,
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          })
+          .returns(Promise.resolve(responseDoc))
+          .once();
+        const replaceSectionsStub = sandbox
+          .stub(adapter, 'replaceSections_')
+          .callsFake(() => {
+            return Promise.resolve();
+          });
         return adapter.authorizeOnServer_().then(response => {
           expect(response).to.equal(authdata);
           expect(replaceSectionsStub).to.be.calledOnce;
@@ -248,35 +256,39 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        sandbox.stub(adapter, 'fetchJwt_').callsFake(
-            () => Promise.resolve({jwt, encoded}));
+        sandbox
+          .stub(adapter, 'fetchJwt_')
+          .callsFake(() => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
           'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'jwt': encoded,
         });
-        docFetcherMock.expects('fetchDocument')
-            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
-              method: 'POST',
-              body: request,
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-              requireAmpResponseSourceOrigin: false,
-            })
-            .returns(Promise.reject('intentional'))
-            .once();
-        const replaceSectionsStub =
-            sandbox.stub(adapter, 'replaceSections_').callsFake(
-                () => {
-                  return Promise.resolve();
-                });
-        return adapter.authorizeOnServer_().then(() => {
-          throw new Error('must never happen');
-        }, error => {
-          expect(error).to.match(/intentional/);
-          expect(replaceSectionsStub).to.have.not.been.called;
-        });
+        docFetcherMock
+          .expects('fetchDocument')
+          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+            method: 'POST',
+            body: request,
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          })
+          .returns(Promise.reject('intentional'))
+          .once();
+        const replaceSectionsStub = sandbox
+          .stub(adapter, 'replaceSections_')
+          .callsFake(() => {
+            return Promise.resolve();
+          });
+        return adapter.authorizeOnServer_().then(
+          () => {
+            throw new Error('must never happen');
+          },
+          error => {
+            expect(error).to.match(/intentional/);
+            expect(replaceSectionsStub).to.have.not.been.called;
+          }
+        );
       });
 
       it('should fail when authorize-and-fill times out', () => {
@@ -284,39 +296,45 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        sandbox.stub(adapter, 'fetchJwt_').callsFake(
-            () => Promise.resolve({jwt, encoded}));
+        sandbox
+          .stub(adapter, 'fetchJwt_')
+          .callsFake(() => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
           'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'jwt': encoded,
         });
-        docFetcherMock.expects('fetchDocument')
-            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
-              method: 'POST',
-              body: request,
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-              requireAmpResponseSourceOrigin: false,
-            })
-            .returns(new Promise(() => {})) // Never resolved.
-            .once();
-        const replaceSectionsStub =
-            sandbox.stub(adapter, 'replaceSections_').callsFake(
-                () => {
-                  return Promise.resolve();
-                });
+        docFetcherMock
+          .expects('fetchDocument')
+          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+            method: 'POST',
+            body: request,
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          })
+          .returns(new Promise(() => {})) // Never resolved.
+          .once();
+        const replaceSectionsStub = sandbox
+          .stub(adapter, 'replaceSections_')
+          .callsFake(() => {
+            return Promise.resolve();
+          });
         const promise = adapter.authorizeOnServer_();
-        return Promise.resolve().then(() => {
-          clock.tick(3001);
-          return promise;
-        }).then(() => {
-          throw new Error('must never happen');
-        }, error => {
-          expect(error).to.match(/timeout/);
-          expect(replaceSectionsStub).to.have.not.been.called;
-        });
+        return Promise.resolve()
+          .then(() => {
+            clock.tick(3001);
+            return promise;
+          })
+          .then(
+            () => {
+              throw new Error('must never happen');
+            },
+            error => {
+              expect(error).to.match(/timeout/);
+              expect(replaceSectionsStub).to.have.not.been.called;
+            }
+          );
       });
 
       it('should replace sections', () => {
@@ -336,12 +354,16 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         responseDoc.appendChild(unknownResponseElement3);
 
         return adapter.replaceSections_(responseDoc).then(() => {
-          expect(win.document.querySelector('[i-amphtml-access-id="1/1"]')
-              .textContent).to.equal('a1');
-          expect(win.document.querySelector('[i-amphtml-access-id="1/2"]')
-              .textContent).to.equal('a2');
-          expect(win.document.querySelector('[i-amphtml-access-id=a3]'))
-              .to.be.null;
+          expect(
+            win.document.querySelector('[i-amphtml-access-id="1/1"]')
+              .textContent
+          ).to.equal('a1');
+          expect(
+            win.document.querySelector('[i-amphtml-access-id="1/2"]')
+              .textContent
+          ).to.equal('a2');
+          expect(win.document.querySelector('[i-amphtml-access-id=a3]')).to.be
+            .null;
         });
       });
 
@@ -360,26 +382,32 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        contextMock.expects('buildUrl')
-            .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
-            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
-            .once();
-        xhrMock.expects('fetchText')
-            .withExactArgs('https://acme.com/a?rid=r1', {
-              credentials: 'include',
-            })
-            .returns(Promise.resolve({
+        contextMock
+          .expects('buildUrl')
+          .withExactArgs(
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false
+          )
+          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .once();
+        xhrMock
+          .expects('fetchText')
+          .withExactArgs('https://acme.com/a?rid=r1', {
+            credentials: 'include',
+          })
+          .returns(
+            Promise.resolve({
               text() {
                 return Promise.resolve(encoded);
               },
-            }))
-            .once();
-        jwtMock.expects('decode')
-            .withExactArgs(encoded)
-            .returns(jwt)
-            .once();
+            })
+          )
+          .once();
+        jwtMock
+          .expects('decode')
+          .withExactArgs(encoded)
+          .returns(jwt)
+          .once();
         sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => false);
         return adapter.fetchJwt_().then(resp => {
           expect(resp.encoded).to.equal(encoded);
@@ -388,50 +416,64 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       });
 
       it('should fail when JWT fetch fails', () => {
-        contextMock.expects('buildUrl')
-            .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
-            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
-            .once();
-        xhrMock.expects('fetchText')
-            .withExactArgs('https://acme.com/a?rid=r1', {
-              credentials: 'include',
-            })
-            .returns(Promise.reject('intentional'))
-            .once();
+        contextMock
+          .expects('buildUrl')
+          .withExactArgs(
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false
+          )
+          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .once();
+        xhrMock
+          .expects('fetchText')
+          .withExactArgs('https://acme.com/a?rid=r1', {
+            credentials: 'include',
+          })
+          .returns(Promise.reject('intentional'))
+          .once();
         jwtMock.expects('decode').never();
-        return adapter.fetchJwt_().then(() => {
-          throw new Error('must never happen');
-        }, error => {
-          expect(error).to.match(/intentional/);
-          expect(isUserErrorMessage(error.message)).to.be.true;
-        });
+        return adapter.fetchJwt_().then(
+          () => {
+            throw new Error('must never happen');
+          },
+          error => {
+            expect(error).to.match(/intentional/);
+            expect(isUserErrorMessage(error.message)).to.be.true;
+          }
+        );
       });
 
       it('should fail when JWT fetch times out', () => {
-        contextMock.expects('buildUrl')
-            .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
-            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
-            .once();
-        xhrMock.expects('fetchText')
-            .withExactArgs('https://acme.com/a?rid=r1', {
-              credentials: 'include',
-            })
-            .returns(new Promise(() => {})) // Never resolved.
-            .once();
+        contextMock
+          .expects('buildUrl')
+          .withExactArgs(
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false
+          )
+          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .once();
+        xhrMock
+          .expects('fetchText')
+          .withExactArgs('https://acme.com/a?rid=r1', {
+            credentials: 'include',
+          })
+          .returns(new Promise(() => {})) // Never resolved.
+          .once();
         jwtMock.expects('decode').never();
         const promise = adapter.fetchJwt_();
-        return Promise.resolve().then(() => {
-          clock.tick(3001);
-          return promise;
-        }).then(() => {
-          throw new Error('must never happen');
-        }, error => {
-          expect(error).to.match(/timeout/);
-        });
+        return Promise.resolve()
+          .then(() => {
+            clock.tick(3001);
+            return promise;
+          })
+          .then(
+            () => {
+              throw new Error('must never happen');
+            },
+            error => {
+              expect(error).to.match(/timeout/);
+            }
+          );
       });
 
       it('should verified JWT after fetch when supported', () => {
@@ -440,41 +482,52 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const encoded = 'rAnDoM';
         const pem = 'pEm';
         const pemPromise = Promise.resolve(pem);
-        contextMock.expects('buildUrl')
-            .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
-            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
-            .once();
-        xhrMock.expects('fetchText')
-            .withExactArgs('https://acme.com/a?rid=r1', {
-              credentials: 'include',
-            })
-            .returns(Promise.resolve({
+        contextMock
+          .expects('buildUrl')
+          .withExactArgs(
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false
+          )
+          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .once();
+        xhrMock
+          .expects('fetchText')
+          .withExactArgs('https://acme.com/a?rid=r1', {
+            credentials: 'include',
+          })
+          .returns(
+            Promise.resolve({
               text() {
                 return Promise.resolve(encoded);
               },
-            }))
-            .once();
-        xhrMock.expects('fetchText')
-            .withExactArgs('https://acme.com/pk')
-            .returns(Promise.resolve({
+            })
+          )
+          .once();
+        xhrMock
+          .expects('fetchText')
+          .withExactArgs('https://acme.com/pk')
+          .returns(
+            Promise.resolve({
               text() {
                 return pemPromise;
               },
-            }))
-            .once();
-        jwtMock.expects('decode')
-            .withExactArgs(encoded)
-            .returns(jwt)
-            .once();
-        jwtMock.expects('isVerificationSupported')
-            .returns(true)
-            .once();
-        jwtMock.expects('decodeAndVerify')
-            .withExactArgs(encoded, pemPromise)
-            .returns(Promise.resolve(jwt))
-            .once();
+            })
+          )
+          .once();
+        jwtMock
+          .expects('decode')
+          .withExactArgs(encoded)
+          .returns(jwt)
+          .once();
+        jwtMock
+          .expects('isVerificationSupported')
+          .returns(true)
+          .once();
+        jwtMock
+          .expects('decodeAndVerify')
+          .withExactArgs(encoded, pemPromise)
+          .returns(Promise.resolve(jwt))
+          .once();
         sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
         const validateStub = sandbox.stub(adapter, 'validateJwt_');
         return adapter.fetchJwt_().then(resp => {
@@ -490,79 +543,101 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const encoded = 'rAnDoM';
         const pem = 'pEm';
         adapter.key_ = pem;
-        contextMock.expects('buildUrl')
-            .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
-            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
-            .once();
-        xhrMock.expects('fetchText')
-            .withExactArgs('https://acme.com/a?rid=r1', {
-              credentials: 'include',
-            })
-            .returns(Promise.resolve({
+        contextMock
+          .expects('buildUrl')
+          .withExactArgs(
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false
+          )
+          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .once();
+        xhrMock
+          .expects('fetchText')
+          .withExactArgs('https://acme.com/a?rid=r1', {
+            credentials: 'include',
+          })
+          .returns(
+            Promise.resolve({
               text() {
                 return Promise.resolve(encoded);
               },
-            }))
-            .once();
-        xhrMock.expects('fetchText')
-            .withExactArgs('https://acme.com/pk')
-            .never();
-        jwtMock.expects('decode')
-            .withExactArgs(encoded)
-            .returns(jwt)
-            .once();
-        jwtMock.expects('isVerificationSupported')
-            .returns(true)
-            .once();
+            })
+          )
+          .once();
+        xhrMock
+          .expects('fetchText')
+          .withExactArgs('https://acme.com/pk')
+          .never();
+        jwtMock
+          .expects('decode')
+          .withExactArgs(encoded)
+          .returns(jwt)
+          .once();
+        jwtMock
+          .expects('isVerificationSupported')
+          .returns(true)
+          .once();
         let pemPromise;
-        jwtMock.expects('decodeAndVerify')
-            .withExactArgs(encoded, sinon.match(arg => {
+        jwtMock
+          .expects('decodeAndVerify')
+          .withExactArgs(
+            encoded,
+            sinon.match(arg => {
               pemPromise = arg;
               return true;
-            }))
-            .returns(Promise.resolve(jwt))
-            .once();
+            })
+          )
+          .returns(Promise.resolve(jwt))
+          .once();
         sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
         const validateStub = sandbox.stub(adapter, 'validateJwt_');
-        return adapter.fetchJwt_().then(resp => {
-          expect(resp.encoded).to.equal(encoded);
-          expect(resp.jwt).to.equal(jwt);
-          expect(validateStub).to.be.calledOnce;
-          return pemPromise;
-        }).then(pemValue => {
-          expect(pemValue).to.equal(pem);
-        });
+        return adapter
+          .fetchJwt_()
+          .then(resp => {
+            expect(resp.encoded).to.equal(encoded);
+            expect(resp.jwt).to.equal(jwt);
+            expect(validateStub).to.be.calledOnce;
+            return pemPromise;
+          })
+          .then(pemValue => {
+            expect(pemValue).to.equal(pem);
+          });
       });
 
       it('should NOT verified JWT after fetch when not supported', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        contextMock.expects('buildUrl')
-            .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
-            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
-            .once();
-        xhrMock.expects('fetchText')
-            .withExactArgs('https://acme.com/a?rid=r1', {
-              credentials: 'include',
-            })
-            .returns(Promise.resolve({
+        contextMock
+          .expects('buildUrl')
+          .withExactArgs(
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false
+          )
+          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .once();
+        xhrMock
+          .expects('fetchText')
+          .withExactArgs('https://acme.com/a?rid=r1', {
+            credentials: 'include',
+          })
+          .returns(
+            Promise.resolve({
               text() {
                 return Promise.resolve(encoded);
               },
-            }))
-            .once();
-        jwtMock.expects('decode')
-            .withExactArgs(encoded)
-            .returns(jwt)
-            .once();
-        jwtMock.expects('isVerificationSupported')
-            .returns(false)
-            .once();
+            })
+          )
+          .once();
+        jwtMock
+          .expects('decode')
+          .withExactArgs(encoded)
+          .returns(jwt)
+          .once();
+        jwtMock
+          .expects('isVerificationSupported')
+          .returns(false)
+          .once();
         jwtMock.expects('decodeAndVerify').never();
         sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
         const validateStub = sandbox.stub(adapter, 'validateJwt_');
@@ -575,7 +650,6 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
     });
 
     describe('validation', () => {
-
       let jwt;
 
       beforeEach(() => {
@@ -591,23 +665,29 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
 
       it('should fail w/o exp', () => {
         delete jwt['exp'];
-        allowConsoleError(() => { expect(() => {
-          adapter.validateJwt_(jwt);
-        }).to.throw(/"exp" field must be specified/); });
+        allowConsoleError(() => {
+          expect(() => {
+            adapter.validateJwt_(jwt);
+          }).to.throw(/"exp" field must be specified/);
+        });
       });
 
       it('should fail w/invalid exp', () => {
         jwt['exp'] = 'invalid';
-        allowConsoleError(() => { expect(() => {
-          adapter.validateJwt_(jwt);
-        }).to.throw(); });
+        allowConsoleError(() => {
+          expect(() => {
+            adapter.validateJwt_(jwt);
+          }).to.throw();
+        });
       });
 
       it('should fail when expired', () => {
         jwt['exp'] = Math.floor((Date.now() - 10000) / 1000);
-        allowConsoleError(() => { expect(() => {
-          adapter.validateJwt_(jwt);
-        }).to.throw(/token has expired/); });
+        allowConsoleError(() => {
+          expect(() => {
+            adapter.validateJwt_(jwt);
+          }).to.throw(/token has expired/);
+        });
       });
 
       it('should succeed with array aud', () => {
@@ -623,31 +703,38 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
 
       it('should fail w/o aud', () => {
         delete jwt['aud'];
-        allowConsoleError(() => { expect(() => {
-          adapter.validateJwt_(jwt);
-        }).to.throw(/"aud" field must be specified/); });
+        allowConsoleError(() => {
+          expect(() => {
+            adapter.validateJwt_(jwt);
+          }).to.throw(/"aud" field must be specified/);
+        });
       });
 
       it('should fail w/non-AMP aud', () => {
         jwt['aud'] = 'other.org';
-        allowConsoleError(() => { expect(() => {
-          adapter.validateJwt_(jwt);
-        }).to.throw(/"aud" must be "ampproject.org"/); });
+        allowConsoleError(() => {
+          expect(() => {
+            adapter.validateJwt_(jwt);
+          }).to.throw(/"aud" must be "ampproject.org"/);
+        });
       });
 
       it('should fail w/non-AMP aud array', () => {
         jwt['aud'] = ['another.org', 'other.org'];
-        allowConsoleError(() => { expect(() => {
-          adapter.validateJwt_(jwt);
-        }).to.throw(/"aud" must be "ampproject.org"/); });
+        allowConsoleError(() => {
+          expect(() => {
+            adapter.validateJwt_(jwt);
+          }).to.throw(/"aud" must be "ampproject.org"/);
+        });
       });
     });
 
     describe('pingback', () => {
       it('should always send client pingback', () => {
-        clientAdapterMock.expects('pingback')
-            .returns(Promise.resolve())
-            .once();
+        clientAdapterMock
+          .expects('pingback')
+          .returns(Promise.resolve())
+          .once();
         adapter.pingback();
       });
     });

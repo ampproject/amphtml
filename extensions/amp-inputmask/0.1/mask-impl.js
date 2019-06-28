@@ -14,29 +14,34 @@
  * limitations under the License.
  */
 
-import {
-  MASK_SEPARATOR_CHAR,
-  MaskChars,
-  NamedMasks,
-} from './constants';
+import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
 import {MaskInterface} from './mask-interface';
-import {
-  factory as inputmaskDependencyFactory,
-} from '../../../third_party/inputmask/inputmask.dependencyLib';
-import {
-  factory as inputmaskFactory,
-} from '../../../third_party/inputmask/inputmask';
+import {dict} from '../../../src/utils/object';
+import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
+import {factory as inputmaskPaymentCardAliasFactory} from './inputmask-payment-card-alias';
+import {requireExternal} from '../../../src/module';
 
-const NamedMasksToInputmask = {
-  [NamedMasks.EMAIL]: 'email',
-  [NamedMasks.PHONE]: 'phone',
-  [NamedMasks.PHONE_US]: 'phone-us',
-  [NamedMasks.DATE_INTL]: 'dd/mm/yyyy',
-  [NamedMasks.DATE_US]: 'mm/dd/yyyy',
-  [NamedMasks.DATE_ISO]: 'yyyy-mm-dd',
-};
+const NamedMasksToInputmask = dict({
+  [NamedMasks.PAYMENT_CARD]: 'payment-card',
+  [NamedMasks.DATE_DD_MM_YYYY]: {
+    'alias': 'datetime',
+    'inputFormat': 'dd/mm/yyyy',
+  },
+  [NamedMasks.DATE_MM_DD_YYYY]: {
+    'alias': 'datetime',
+    'inputFormat': 'mm/dd/yyyy',
+  },
+  [NamedMasks.DATE_MM_YY]: {
+    'alias': 'datetime',
+    'inputFormat': 'mm/yy',
+  },
+  [NamedMasks.DATE_YYYY_MM_DD]: {
+    'alias': 'datetime',
+    'inputFormat': 'yyyy-mm-dd',
+  },
+});
 
-const MaskCharsToInputmask = {
+const MaskCharsToInputmask = dict({
   [MaskChars.ALPHANUMERIC_REQUIRED]: '*',
   [MaskChars.ALPHANUMERIC_OPTIONAL]: '[*]',
   [MaskChars.ALPHABETIC_REQUIRED]: 'a',
@@ -46,10 +51,7 @@ const MaskCharsToInputmask = {
   [MaskChars.NUMERIC_REQUIRED]: '9',
   [MaskChars.NUMERIC_OPTIONAL]: '[9]',
   [MaskChars.ESCAPE]: '\\',
-};
-
-let InputmaskDependencyLib;
-let Inputmask;
+});
 
 /**
  * TODO(cvializ): allow masks to be passed as data
@@ -62,42 +64,69 @@ export class Mask {
    * @param {string} mask
    */
   constructor(element, mask) {
-    const doc = element.ownerDocument;
-    const win = element.ownerDocument.defaultView;
-
-    InputmaskDependencyLib = InputmaskDependencyLib ||
-        inputmaskDependencyFactory(win, doc);
-    Inputmask = Inputmask || inputmaskFactory(
-        InputmaskDependencyLib, win, doc, undefined);
-
-    Inputmask.extendDefaults({
-      // A list of supported input type attribute values
-      supportsInputType: [
-        'text',
-        'tel',
-        'search',
-        // 'password', // use-case?
-        // 'email', // doesn't support setSelectionRange. workaround?
-      ],
-    });
+    this.Inputmask_ = Mask.getInputmask_(element);
 
     this.element_ = element;
 
-    const config = {
-      placeholder: '\u2000',
-      showMaskOnHover: false,
-      showMaskOnFocus: false,
-      noValuePatching: true,
-    };
+    const config = dict({
+      'placeholder': '\u2000',
+      'showMaskOnHover': false,
+      'showMaskOnFocus': false,
+      'noValuePatching': true,
+      'jitMasking': true,
+    });
 
-    if (NamedMasksToInputmask[mask]) {
-      config.alias = NamedMasksToInputmask[mask];
+    const trimmedMask = mask.trim();
+    const namedFormat = NamedMasksToInputmask[trimmedMask];
+    if (namedFormat) {
+      if (typeof namedFormat == 'object') {
+        Object.assign(config, namedFormat);
+      } else {
+        config['alias'] = namedFormat;
+      }
     } else {
-      const inputmaskMask = convertAmpMaskToInputmask(mask);
-      config.mask = () => inputmaskMask;
+      // If not a named mask, it is a custom mask
+      config['alias'] = 'custom';
+
+      const inputmaskMask = convertAmpMaskToInputmask(trimmedMask);
+      config['customMask'] = inputmaskMask;
+      const trimZeros = element.getAttribute('mask-trim-zeros');
+      config['trimZeros'] = trimZeros ? Number(trimZeros) : 2;
     }
 
-    this.controller_ = Inputmask(config);
+    this.controller_ = this.Inputmask_(config);
+  }
+
+  /**
+   * Require and configure the Inputmask dependency.
+   * @param {!Element} element
+   * @return {function(!Object):!Inputmask}
+   * @private visible for testing
+   */
+  static getInputmask_(element) {
+    if (this.Inputmask_) {
+      return this.Inputmask_;
+    }
+
+    const inputmaskFactory = requireExternal('inputmaskFactory');
+    const Inputmask = inputmaskFactory(element);
+    inputmaskCustomAliasFactory(Inputmask);
+    inputmaskPaymentCardAliasFactory(Inputmask);
+
+    Inputmask.extendDefaults(
+      dict({
+        // A list of supported input type attribute values
+        'supportsInputType': [
+          'text',
+          'tel',
+          'search',
+          // 'password', // use-case?
+          // 'email', // doesn't support setSelectionRange. workaround?
+        ],
+      })
+    );
+
+    return Inputmask;
   }
 
   /** @override */
@@ -118,7 +147,7 @@ export class Mask {
 
   /** @override */
   dispose() {
-    this.controller_./*OK*/remove();
+    this.controller_./*OK*/ remove();
     this.controller_ = null;
   }
 }
@@ -137,10 +166,19 @@ export class Mask {
  */
 function convertAmpMaskToInputmask(ampMask) {
   const masks = ampMask
-      .split(MASK_SEPARATOR_CHAR)
-      .map(m => m.replace(/_/g, ' '));
+    .split(MASK_SEPARATOR_CHAR)
+    .map(m => m.replace(/_/g, ' '));
   return masks.map(mask => {
-    return mask.split('').map(c => MaskCharsToInputmask[c] || c).join('');
+    let escapeNext = false;
+    return mask
+      .split('')
+      .map(c => {
+        const escape = escapeNext;
+        escapeNext = c == MaskChars.ESCAPE;
+
+        return (escape ? c : MaskCharsToInputmask[c]) || c;
+      })
+      .join('');
   });
 }
 

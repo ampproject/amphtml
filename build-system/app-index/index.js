@@ -15,132 +15,60 @@
  */
 'use strict';
 
-
+const api = require('./api/api');
+const basepathMappings = require('./basepath-mappings');
 const BBPromise = require('bluebird');
-const bundler = require('./bundler');
 const fs = BBPromise.promisifyAll(require('fs'));
-const {join, normalize, sep} = require('path');
+const path = require('path');
+const {
+  getListing,
+  isMainPageFromUrl,
+  formatBasepath,
+} = require('./util/listing');
+const {join} = require('path');
 const {renderTemplate} = require('./template');
 
 const pc = process;
 
-// JS Component
-const mainComponent = join(__dirname, '/components/main.js');
+// Sitting on /build-system/app-index, so we go back twice for the repo root.
+const root = path.join(__dirname, '../../');
 
 // CSS
 const mainCssFile = join(__dirname, '/main.css');
 
+async function serveIndex({url}, res, next) {
+  const mappedPath = basepathMappings[url] || url;
+  const fileSet = await getListing(root, mappedPath);
 
-function isMaliciousPath(path, rootPath) {
-  return (path + sep).substr(0, rootPath.length) !== rootPath;
-}
-
-
-async function getListing(rootPath, basepath) {
-  const path = normalize(join(rootPath, basepath));
-
-  if (~path.indexOf('\0')) {
-    return null;
+  if (fileSet == null) {
+    return next();
   }
 
-  if (isMaliciousPath(path, rootPath)) {
-    return null;
-  }
+  const css = (await fs.readFileAsync(mainCssFile)).toString();
 
-  try {
-    if ((await fs.statAsync(path)).isDirectory()) {
-      return fs.readdirAsync(path);
-    }
-  } catch (unusedE) {
-    /* empty catch for fallbacks */
-    return null;
-  }
+  const renderedHtml = renderTemplate({
+    fileSet,
+    selectModePrefix: '/',
+    isMainPage: isMainPageFromUrl(url),
+    basepath: formatBasepath(mappedPath),
+    serveMode: pc.env.SERVE_MODE || 'default',
+    css,
+  });
+
+  res.end(renderedHtml);
+
+  return renderedHtml; // for testing
 }
 
+function installExpressMiddleware(app) {
+  api.installExpressMiddleware(app);
 
-let shouldCache = true;
-function setCacheStatus(cacheStatus) {
-  shouldCache = cacheStatus;
-}
-
-
-let mainBundleCache;
-async function bundleMain() {
-  if (shouldCache && mainBundleCache) {
-    return mainBundleCache;
-  }
-  const bundle = await bundler.bundleComponent(mainComponent);
-  if (shouldCache) {
-    mainBundleCache = bundle;
-  }
-  return bundle;
-}
-
-
-function isMainPageFromUrl(url) {
-  return url == '/';
-}
-
-
-/**
- * Adds a trailing slash if missing.
- * @param {string} basepath
- * @return {string}
- */
-function formatBasepath(basepath) {
-  return basepath.replace(/[^\/]$/, lastChar => `${lastChar}/`);
-}
-
-
-function serveIndex({root, mapBasepath}) {
-  const mapBasepathOrPassthru = mapBasepath || (url => url);
-
-  return (req, res, next) => {
-    if (!root) {
-      res.status(500);
-      res.end('Misconfigured: missing `root`.');
-      return;
-    }
-
-    return (async() => {
-      const isMainPage = isMainPageFromUrl(req.url);
-      const basepath = mapBasepathOrPassthru(req.url);
-
-      const fileSet = await getListing(root, basepath);
-
-      if (fileSet == null) {
-        next();
-        return;
-      }
-
-      const css = (await fs.readFileAsync(mainCssFile)).toString();
-
-      const serveMode = pc.env.SERVE_MODE || 'default';
-
-      const renderedHtml = renderTemplate({
-        basepath: formatBasepath(basepath),
-        fileSet,
-        isMainPage,
-        serveMode,
-        css,
-      });
-
-      res.end(renderedHtml);
-
-      return renderedHtml; // for testing
-    })();
-  };
-}
-
-// Promises to run before serving
-async function beforeServeTasks() {
-  if (shouldCache) {
-    await bundleMain();
-  }
+  app.get(['/', '/*'], serveIndex);
 }
 
 module.exports = {
-  setCacheStatus,
-  serveIndex,
-  beforeServeTasks,
+  installExpressMiddleware,
+
+  // To be tested but not be exported for use.
+  serveIndexForTesting: serveIndex,
 };

@@ -14,30 +14,19 @@
  * limitations under the License.
  */
 
-const assert = require('assert');
-const {join} = require('path');
+const {expect} = require('chai');
+const {serveIndexForTesting} = require('../index');
 
-const bundler = require('../bundler');
-const devDashboard = require('../index');
+const NOOP = () => {};
 
-const expressResMock = {
-  end: () => {},
-};
+describe('devdash', () => {
 
-describe('Tests for the dev dashboard', () => {
+  describe('express middleware', () => {
 
-  it('should bundle', () => {
-    return bundler.bundleComponent(join(__dirname, '../components/main.js'))
-        .then(bundle => {
-          assert.ok(bundle);
-        });
-  });
-
-  it('should be able to return HTML', () => {
-    return devDashboard.serveIndex({
-      root: __dirname,
-    })({url: '/'}, expressResMock).then(renderedHtml => {
-      assert.ok(renderedHtml);
+    it('renders HTML', async() => {
+      const renderedHtml = await serveIndexForTesting({url: '/'}, {end: NOOP});
+      expect(renderedHtml).to.be.ok;
     });
+
   });
 });

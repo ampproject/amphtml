@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpStoryAnalytics} from '../analytics';
 import {StateChangeType} from '../navigation-state';
-
+import {getAnalyticsService} from '../story-analytics';
 
 describes.fakeWin('amp-story analytics', {}, env => {
   let analytics;
@@ -23,16 +22,26 @@ describes.fakeWin('amp-story analytics', {}, env => {
 
   beforeEach(() => {
     rootEl = env.win.document.createElement('div');
-    analytics = new AmpStoryAnalytics(rootEl);
+    analytics = getAnalyticsService(env.win, rootEl);
   });
 
   it('should trigger `story-page-visible` on change', () => {
-    const trigger = sandbox.stub(analytics, 'triggerEvent_');
+    const trigger = sandbox.stub(analytics, 'triggerEvent');
 
     analytics.onNavigationStateChange({
       type: StateChangeType.ACTIVE_PAGE,
     });
 
     expect(trigger).to.have.been.calledWith('story-page-visible');
+  });
+
+  it('should trigger `story-last-page-visible` when last page is visible', () => {
+    const trigger = sandbox.stub(analytics, 'triggerEvent');
+
+    analytics.onNavigationStateChange({
+      type: StateChangeType.LAST_PAGE,
+    });
+
+    expect(trigger).to.have.been.calledWith('story-last-page-visible');
   });
 });

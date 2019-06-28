@@ -19,17 +19,19 @@ import {Services} from '../../../src/services';
 
 AMP.extension('amp-access-scroll', '0.1', function(AMP) {
   AMP.registerServiceForDoc(
-      'scroll',
-      function(ampdoc) {
-        return Services.accessServiceForDoc(ampdoc).then(accessService => {
-          const source = accessService.getVendorSource('scroll');
-          const vendor = new ScrollAccessVendor(ampdoc, source);
-          const adapter = /** @type {
+    'scroll',
+    /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    function(ampdoc) {
+      const element = ampdoc.getHeadNode();
+      return Services.accessServiceForDoc(element).then(accessService => {
+        const source = accessService.getVendorSource('scroll');
+        const vendor = new ScrollAccessVendor(ampdoc, source);
+        const adapter = /** @type {
             !../../amp-access/0.1/amp-access-vendor.AccessVendorAdapter
           } */ (source.getAdapter());
-          adapter.registerVendor(vendor);
-          return vendor;
-        });
-      }
+        adapter.registerVendor(vendor);
+        return vendor;
+      });
+    }
   );
 });

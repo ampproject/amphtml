@@ -15,7 +15,7 @@
  */
 
 import {AstNodeType} from './bind-expr-defines';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
@@ -115,22 +115,6 @@ function generateFunctionWhitelist() {
     return sort;
   }
 
-  /**
-   * Polyfills Object.values for IE.
-   * @param {!Object} object
-   * @return {!Array}
-   * @see https://github.com/es-shims/Object.values
-   */
-  function values(object) {
-    const v = [];
-    for (const key in object) {
-      if (hasOwn(object, key)) {
-        v.push(object[key]);
-      }
-    }
-    return v;
-  }
-
   // Prototype functions.
   const whitelist = dict({
     '[object Array]': {
@@ -176,12 +160,15 @@ function generateFunctionWhitelist() {
     'abs': Math.abs,
     'ceil': Math.ceil,
     'floor': Math.floor,
+    'sqrt': Math.sqrt,
+    'log': Math.log,
     'max': Math.max,
     'min': Math.min,
     'random': Math.random,
     'round': Math.round,
     'sign': Math.sign,
-    'keys': Object.keys, // Object.values is polyfilled below.
+    'keys': Object.keys,
+    'values': Object.values,
   };
 
   // Creates a map of function name to the function itself.
@@ -194,8 +181,11 @@ function generateFunctionWhitelist() {
     Object.keys(functionsForType).forEach(name => {
       const func = functionsForType[name];
       if (func) {
-        dev().assert(!func.name || name === func.name, 'Listed function name ' +
-            `"${name}" doesn't match name property "${func.name}".`);
+        devAssert(
+          !func.name || name === func.name,
+          'Listed function name ' +
+            `"${name}" doesn't match name property "${func.name}".`
+        );
         out[type][name] = func;
       } else {
         // This can happen if a browser doesn't support a built-in function.
@@ -209,8 +199,6 @@ function generateFunctionWhitelist() {
   out[CUSTOM_FUNCTIONS]['copyAndSplice'] = splice; // Deprecated.
   out[CUSTOM_FUNCTIONS]['sort'] = sort; // Deprecated.
   out[CUSTOM_FUNCTIONS]['splice'] = splice; // Deprecated.
-  out[CUSTOM_FUNCTIONS]['values'] =
-      (typeof Object.values == 'function') ? Object.values : values;
 
   return out;
 }
@@ -246,8 +234,10 @@ export class BindExpression {
     const maxSize = opt_maxAstSize || MAX_AST_SIZE;
     const skipConstraint = getMode().localDev && !getMode().test;
     if (this.expressionSize > maxSize && !skipConstraint) {
-      throw new Error(`Expression size (${this.expressionSize}) exceeds max ` +
-          `(${maxSize}). Please reduce number of operands.`);
+      throw new Error(
+        `Expression size (${this.expressionSize}) exceeds max ` +
+          `(${maxSize}). Please reduce number of operands.`
+      );
     }
   }
 
@@ -297,7 +287,7 @@ export class BindExpression {
    */
   isMacroInvocationNode_(ast) {
     const isInvocationWithNoCaller =
-        (ast.type === AstNodeType.INVOCATION && !ast.args[0]);
+      ast.type === AstNodeType.INVOCATION && !ast.args[0];
     if (isInvocationWithNoCaller) {
       const macroExistsWithValue = this.macros_[String(ast.value)] != null;
       return macroExistsWithValue;
@@ -315,8 +305,9 @@ export class BindExpression {
   argumentsForInvocation_(ast) {
     // The INVOCATION node may or may not contain an ARGS child node.
     const argsNode =
-        (ast.args.length === 2 && ast.args[1].type === AstNodeType.ARGS)
-          ? ast.args[1] : null;
+      ast.args.length === 2 && ast.args[1].type === AstNodeType.ARGS
+        ? ast.args[1]
+        : null;
     if (argsNode) {
       // An ARGS node can either have an empty array or an ARRAY child.
       const {args} = argsNode;
@@ -358,7 +349,7 @@ export class BindExpression {
 
       case AstNodeType.INVOCATION:
         // Built-in functions and macros don't have a caller object.
-        const isBuiltInOrMacro = (args[0] === undefined);
+        const isBuiltInOrMacro = args[0] === undefined;
 
         const caller = this.eval_(args[0], scope);
         const params = this.eval_(args[1], scope);
@@ -372,7 +363,9 @@ export class BindExpression {
           if (macro) {
             validFunction = function() {
               return macro.evaluate(
-                  scope, Array.prototype.slice.call(arguments));
+                scope,
+                Array.prototype.slice.call(arguments)
+              );
             };
           } else {
             validFunction = FUNCTION_WHITELIST[CUSTOM_FUNCTIONS][method];
@@ -382,8 +375,10 @@ export class BindExpression {
           }
         } else {
           if (caller === null) {
-            user().warn(TAG, `Cannot invoke method ${method} on null; ` +
-                'returning null.');
+            user().warn(
+              TAG,
+              `Cannot invoke method ${method} on null; returning null.`
+            );
             return null;
           }
           const callerType = Object.prototype.toString.call(caller);
@@ -397,8 +392,7 @@ export class BindExpression {
             }
           }
           if (!validFunction) {
-            unsupportedError =
-                `${callerType}.${method} is not a supported function.`;
+            unsupportedError = `${callerType}.${method} is not a supported function.`;
           }
         }
 
@@ -428,9 +422,7 @@ export class BindExpression {
         if (memberType !== 'string' && memberType !== 'number') {
           return null;
         }
-        // Ignore Closure's type constraint for `hasOwnProperty`.
-        if (Object.prototype.hasOwnProperty.call(
-            /** @type {Object} */ (target), member)) {
+        if (hasOwn(target, String(member))) {
           return target[member];
         }
         return null;
@@ -440,22 +432,20 @@ export class BindExpression {
 
       case AstNodeType.VARIABLE:
         const variable = value;
-        if (Object.prototype.hasOwnProperty.call(scope, variable)) {
+        if (hasOwn(scope, String(variable))) {
           return scope[variable];
         }
         return null;
 
       case AstNodeType.ARGS:
       case AstNodeType.ARRAY_LITERAL:
-        return (args.length > 0) ? this.eval_(args[0], scope) : [];
+        return args.length > 0 ? this.eval_(args[0], scope) : [];
 
       case AstNodeType.ARRAY:
         return args.map(element => this.eval_(element, scope));
 
       case AstNodeType.OBJECT_LITERAL:
-        return (args.length > 0)
-          ? this.eval_(args[0], scope)
-          : map();
+        return args.length > 0 ? this.eval_(args[0], scope) : map();
 
       case AstNodeType.OBJECT:
         const object = map();
@@ -484,20 +474,28 @@ export class BindExpression {
         return this.eval_(args[0], scope) + this.eval_(args[1], scope);
 
       case AstNodeType.MINUS:
-        return Number(this.eval_(args[0], scope)) -
-            Number(this.eval_(args[1], scope));
+        return (
+          Number(this.eval_(args[0], scope)) -
+          Number(this.eval_(args[1], scope))
+        );
 
       case AstNodeType.MULTIPLY:
-        return Number(this.eval_(args[0], scope)) *
-            Number(this.eval_(args[1], scope));
+        return (
+          Number(this.eval_(args[0], scope)) *
+          Number(this.eval_(args[1], scope))
+        );
 
       case AstNodeType.DIVIDE:
-        return Number(this.eval_(args[0], scope)) /
-            Number(this.eval_(args[1], scope));
+        return (
+          Number(this.eval_(args[0], scope)) /
+          Number(this.eval_(args[1], scope))
+        );
 
       case AstNodeType.MODULO:
-        return Number(this.eval_(args[0], scope)) %
-            Number(this.eval_(args[1], scope));
+        return (
+          Number(this.eval_(args[0], scope)) %
+          Number(this.eval_(args[1], scope))
+        );
 
       case AstNodeType.LOGICAL_AND:
         return this.eval_(args[0], scope) && this.eval_(args[1], scope);

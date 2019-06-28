@@ -28,7 +28,6 @@ const DOUBLETAP_DELAY = 200;
  */
 export let TapDef;
 
-
 /**
  * Recognizes "tap" gestures.
  * @extends {GestureRecognizer<TapDef>}
@@ -91,16 +90,17 @@ export class TapRecognizer extends GestureRecognizer {
 
   /** @override */
   acceptStart() {
-    this.signalEmit({
-      clientX: this.lastX_,
-      clientY: this.lastY_,
-      target: this.target_,
-    }, null);
+    this.signalEmit(
+      {
+        clientX: this.lastX_,
+        clientY: this.lastY_,
+        target: this.target_,
+      },
+      null
+    );
     this.signalEnd();
   }
 }
-
-
 
 /**
  * A "doubletap" gesture.
@@ -110,7 +110,6 @@ export class TapRecognizer extends GestureRecognizer {
  * }}
  */
 export let DoubletapDef;
-
 
 /**
  * Recognizes a "doubletap" gesture. This gesture will block a single "tap"
@@ -202,8 +201,6 @@ export class DoubletapRecognizer extends GestureRecognizer {
   }
 }
 
-
-
 /**
  * A "swipe-xy", "swipe-x" or "swipe-y" gesture. A number of these gestures
  * may be emitted for a single touch series.
@@ -217,7 +214,6 @@ export class DoubletapRecognizer extends GestureRecognizer {
  * }}
  */
 export let SwipeDef;
-
 
 /**
  * Recognizes swipe gestures. This gesture will yield about 10ms to other
@@ -280,6 +276,10 @@ class SwipeRecognizer extends GestureRecognizer {
   /** @override */
   onTouchStart(e) {
     const {touches} = e;
+    // If already eventing, ignore additional touches
+    if (this.eventing_ && touches && touches.length > 1) {
+      return true;
+    }
     if (touches && touches.length == 1) {
       this.startTime_ = Date.now();
       this.startX_ = touches[0].clientX;
@@ -293,13 +293,15 @@ class SwipeRecognizer extends GestureRecognizer {
   /** @override */
   onTouchMove(e) {
     const {touches} = e;
-    if (touches && touches.length == 1) {
-      const {clientX: x, clientY: y} = touches[0] ;
+    if (touches && touches.length >= 1) {
+      const {clientX: x, clientY: y} = touches[0];
       this.lastX_ = x;
       this.lastY_ = y;
       if (this.eventing_) {
+        // If already eventing, always emit new coordinates
         this.emit_(false, false, e);
       } else {
+        // Figure out whether or not we should start eventing
         const dx = Math.abs(x - this.startX_);
         const dy = Math.abs(y - this.startY_);
         // Swipe is penalized slightly since it's one of the least demanding
@@ -332,7 +334,11 @@ class SwipeRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchEnd(e) {
-    this.end_(e);
+    const {touches} = e;
+    // Number of current touches on the page
+    if (touches && touches.length == 0) {
+      this.end_(e);
+    }
   }
 
   /** @override */
@@ -366,30 +372,47 @@ class SwipeRecognizer extends GestureRecognizer {
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
     if ((!last && deltaTime > 4) || (last && deltaTime > 16)) {
-      this.velocityX_ = calcVelocity(this.lastX_ - this.prevX_, deltaTime,
-          this.velocityX_);
-      this.velocityY_ = calcVelocity(this.lastY_ - this.prevY_, deltaTime,
-          this.velocityY_);
-      this.velocityX_ = Math.abs(this.velocityX_) > 1e-4 ? this.velocityX_ : 0;
-      this.velocityY_ = Math.abs(this.velocityY_) > 1e-4 ? this.velocityY_ : 0;
+      const velocityX = calcVelocity(
+        this.lastX_ - this.prevX_,
+        deltaTime,
+        this.velocityX_
+      );
+      const velocityY = calcVelocity(
+        this.lastY_ - this.prevY_,
+        deltaTime,
+        this.velocityY_
+      );
+
+      // On iOS, the touchend will always have the same x/y position as the
+      // last touchmove, so we want to make sure we do not remove the velocity.
+      // The touchend event with zero velocity can occur within a couple of
+      // frames of the last touchmove.
+      if (!last || deltaTime > 32 || velocityX != 0 || velocityY != 0) {
+        this.velocityX_ = Math.abs(velocityX) > 1e-4 ? velocityX : 0;
+        this.velocityY_ = Math.abs(velocityY) > 1e-4 ? velocityY : 0;
+      }
+
       this.prevX_ = this.lastX_;
       this.prevY_ = this.lastY_;
       this.prevTime_ = this.lastTime_;
     }
 
-    this.signalEmit({
-      first,
-      last,
-      time: this.lastTime_,
-      deltaX: this.horiz_ ? this.lastX_ - this.startX_ : 0,
-      deltaY: this.vert_ ? this.lastY_ - this.startY_ : 0,
-      startX: this.startX_,
-      startY: this.startY_,
-      lastX: this.lastX_,
-      lastY: this.lastY_,
-      velocityX: this.horiz_ ? this.velocityX_ : 0,
-      velocityY: this.vert_ ? this.velocityY_ : 0,
-    }, event);
+    this.signalEmit(
+      {
+        first,
+        last,
+        time: this.lastTime_,
+        deltaX: this.lastX_ - this.startX_,
+        deltaY: this.lastY_ - this.startY_,
+        startX: this.startX_,
+        startY: this.startY_,
+        lastX: this.lastX_,
+        lastY: this.lastY_,
+        velocityX: this.velocityX_,
+        velocityY: this.velocityY_,
+      },
+      event
+    );
   }
 
   /**
@@ -405,7 +428,6 @@ class SwipeRecognizer extends GestureRecognizer {
   }
 }
 
-
 /**
  * Recognizes "swipe-xy" gesture. Yields about 10ms to other gestures.
  */
@@ -417,7 +439,6 @@ export class SwipeXYRecognizer extends SwipeRecognizer {
     super('swipe-xy', manager, true, true);
   }
 }
-
 
 /**
  * Recognizes "swipe-x" gesture. Yields about 10ms to other gestures.
@@ -431,7 +452,6 @@ export class SwipeXRecognizer extends SwipeRecognizer {
   }
 }
 
-
 /**
  * Recognizes "swipe-y" gesture. Yields about 10ms to other gestures.
  */
@@ -443,8 +463,6 @@ export class SwipeYRecognizer extends SwipeRecognizer {
     super('swipe-y', manager, false, true);
   }
 }
-
-
 
 /**
  * A "tapzoom" gesture. It has a center, delta off the center center and
@@ -461,7 +479,6 @@ export class SwipeYRecognizer extends SwipeRecognizer {
  * }}
  */
 let TapzoomDef;
-
 
 /**
  * Recognizes a "tapzoom" gesture. This gesture will block other gestures
@@ -593,25 +610,34 @@ export class TapzoomRecognizer extends GestureRecognizer {
     if (first) {
       this.velocityX_ = this.velocityY_ = 0;
     } else if (this.lastTime_ - this.prevTime_ > 2) {
-      this.velocityX_ = calcVelocity(this.lastX_ - this.prevX_,
-          this.lastTime_ - this.prevTime_, this.velocityX_);
-      this.velocityY_ = calcVelocity(this.lastY_ - this.prevY_,
-          this.lastTime_ - this.prevTime_, this.velocityY_);
+      this.velocityX_ = calcVelocity(
+        this.lastX_ - this.prevX_,
+        this.lastTime_ - this.prevTime_,
+        this.velocityX_
+      );
+      this.velocityY_ = calcVelocity(
+        this.lastY_ - this.prevY_,
+        this.lastTime_ - this.prevTime_,
+        this.velocityY_
+      );
     }
     this.prevX_ = this.lastX_;
     this.prevY_ = this.lastY_;
     this.prevTime_ = this.lastTime_;
 
-    this.signalEmit({
-      first,
-      last,
-      centerClientX: this.startX_,
-      centerClientY: this.startY_,
-      deltaX: this.lastX_ - this.startX_,
-      deltaY: this.lastY_ - this.startY_,
-      velocityX: this.velocityX_,
-      velocityY: this.velocityY_,
-    }, event);
+    this.signalEmit(
+      {
+        first,
+        last,
+        centerClientX: this.startX_,
+        centerClientY: this.startY_,
+        deltaX: this.lastX_ - this.startX_,
+        deltaY: this.lastY_ - this.startY_,
+        velocityX: this.velocityX_,
+        velocityY: this.velocityY_,
+      },
+      event
+    );
   }
 
   /**
@@ -626,8 +652,6 @@ export class TapzoomRecognizer extends GestureRecognizer {
     }
   }
 }
-
-
 
 /**
  * A "pinch" gesture. It has a center, delta off the center center and
@@ -719,11 +743,19 @@ export class PinchRecognizer extends GestureRecognizer {
   /** @override */
   onTouchStart(e) {
     const {touches} = e;
+    if (!touches) {
+      return false;
+    }
     // Pinch touches are not always simultaneous, continue to listen
     // for second touch.
-    if (touches && touches.length == 1) {
+    if (touches.length == 1) {
       return true;
-    } else if (touches && touches.length == 2) {
+    }
+    // If already in the middle of a pinch event, ignore additional touches.
+    if (this.eventing_ && touches.length > 2) {
+      return true;
+    }
+    if (touches.length == 2) {
       this.startTime_ = Date.now();
       this.startX1_ = touches[0].clientX;
       this.startY1_ = touches[0].clientY;
@@ -738,43 +770,78 @@ export class PinchRecognizer extends GestureRecognizer {
   /** @override */
   onTouchMove(e) {
     const {touches} = e;
-    // Pinch touches are not always simultaneous, continue to listen
-    // for second touch.
-    if (touches && touches.length == 1) {
-      return true;
-    } else if (touches && touches.length == 2) {
-      this.lastX1_ = touches[0].clientX;
-      this.lastY1_ = touches[0].clientY;
-      this.lastX2_ = touches[1].clientX;
-      this.lastY2_ = touches[1].clientY;
-      if (this.eventing_) {
-        this.emit_(false, false, e);
-      } else {
-        const dx1 = this.lastX1_ - this.startX1_;
-        const dy1 = this.lastY1_ - this.startY1_;
-        const dx2 = this.lastX2_ - this.startX2_;
-        const dy2 = this.lastY2_ - this.startY2_;
-        // Fingers should move in opposite directions and go over the threshold.
-        if (dx1 * dx2 <= 0 && dy1 * dy2 <= 0) {
-          if (Math.abs(dx1 - dx2) >= PINCH_ACCEPT_THRESHOLD
-            || Math.abs(dy1 - dy2) >= PINCH_ACCEPT_THRESHOLD) {
-            this.signalReady(0);
-          }
-        } else if (Math.abs(dx1 + dx2) >= PINCH_REJECT_THRESHOLD
-          || Math.abs(dy1 + dy2) >= PINCH_REJECT_THRESHOLD) {
-          // Moving in the same direction over a threshold.
-          return false;
-        }
-      }
-      return true;
-    } else {
+    if (!touches || touches.length == 0) {
       return false;
     }
+    // Pinch touches are not always simultaneous, continue to listen
+    // for second touch.
+    if (touches.length == 1) {
+      return true;
+    }
+
+    // Have 2+ touches
+    this.lastX1_ = touches[0].clientX;
+    this.lastY1_ = touches[0].clientY;
+    this.lastX2_ = touches[1].clientX;
+    this.lastY2_ = touches[1].clientY;
+
+    // If eventing, always emit gesture with new coordinates
+    if (this.eventing_) {
+      this.emit_(false, false, e);
+      return true;
+    }
+
+    // Gesture is 2+ touch but direction indicates not a pinch
+    if (this.isPinchRejected_()) {
+      return false;
+    }
+
+    if (this.isPinchReady_()) {
+      this.signalReady(0);
+    }
+    // Pinch gesture detected but threshold not reached, continue listening
+    return true;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isPinchReady_() {
+    const dx1 = this.lastX1_ - this.startX1_;
+    const dy1 = this.lastY1_ - this.startY1_;
+    const dx2 = this.lastX2_ - this.startX2_;
+    const dy2 = this.lastY2_ - this.startY2_;
+
+    const pinchDirectionCorrect = dx1 * dx2 <= 0 && dy1 * dy2 <= 0;
+    const xPinchRecognized = Math.abs(dx1 - dx2) >= PINCH_ACCEPT_THRESHOLD;
+    const yPinchRecognized = Math.abs(dy1 - dy2) >= PINCH_ACCEPT_THRESHOLD;
+    return pinchDirectionCorrect && (xPinchRecognized || yPinchRecognized);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isPinchRejected_() {
+    const dx1 = this.lastX1_ - this.startX1_;
+    const dy1 = this.lastY1_ - this.startY1_;
+    const dx2 = this.lastX2_ - this.startX2_;
+    const dy2 = this.lastY2_ - this.startY2_;
+
+    const pinchDirectionIncorrect = dx1 * dx2 > 0 || dy1 * dy2 > 0;
+    const xPinchRejected = Math.abs(dx1 + dx2) >= PINCH_REJECT_THRESHOLD;
+    const yPinchRejected = Math.abs(dy1 + dy2) >= PINCH_REJECT_THRESHOLD;
+    return pinchDirectionIncorrect && (xPinchRejected || yPinchRejected);
   }
 
   /** @override */
   onTouchEnd(e) {
-    this.end_(e);
+    // Pinch requires at least two touches on the page
+    const {touches} = e;
+    if (touches && touches.length < 2) {
+      this.end_(e);
+    }
   }
 
   /** @override */
@@ -807,10 +874,16 @@ export class PinchRecognizer extends GestureRecognizer {
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
     if ((!last && deltaTime > 4) || (last && deltaTime > 16)) {
-      this.velocityX_ = calcVelocity(deltaX - this.prevDeltaX_, deltaTime,
-          this.velocityX_);
-      this.velocityY_ = calcVelocity(deltaY - this.prevDeltaY_, deltaTime,
-          this.velocityY_);
+      this.velocityX_ = calcVelocity(
+        deltaX - this.prevDeltaX_,
+        deltaTime,
+        this.velocityX_
+      );
+      this.velocityY_ = calcVelocity(
+        deltaY - this.prevDeltaY_,
+        deltaTime,
+        this.velocityY_
+      );
       this.velocityX_ = Math.abs(this.velocityX_) > 1e-4 ? this.velocityX_ : 0;
       this.velocityY_ = Math.abs(this.velocityY_) > 1e-4 ? this.velocityY_ : 0;
       this.prevDeltaX_ = deltaX;
@@ -818,22 +891,33 @@ export class PinchRecognizer extends GestureRecognizer {
       this.prevTime_ = this.lastTime_;
     }
 
-    const startSq = this.sqDist_(this.startX1_, this.startX2_,
-        this.startY1_, this.startY2_);
-    const lastSq = this.sqDist_(this.lastX1_, this.lastX2_,
-        this.lastY1_, this.lastY2_);
-    this.signalEmit({
-      first,
-      last,
-      time: this.lastTime_,
-      centerClientX: this.centerClientX_,
-      centerClientY: this.centerClientY_,
-      dir: Math.sign(lastSq - startSq),
-      deltaX: deltaX * 0.5,
-      deltaY: deltaY * 0.5,
-      velocityX: this.velocityX_ * 0.5,
-      velocityY: this.velocityY_ * 0.5,
-    }, event);
+    const startSq = this.sqDist_(
+      this.startX1_,
+      this.startX2_,
+      this.startY1_,
+      this.startY2_
+    );
+    const lastSq = this.sqDist_(
+      this.lastX1_,
+      this.lastX2_,
+      this.lastY1_,
+      this.lastY2_
+    );
+    this.signalEmit(
+      {
+        first,
+        last,
+        time: this.lastTime_,
+        centerClientX: this.centerClientX_,
+        centerClientY: this.centerClientY_,
+        dir: Math.sign(lastSq - startSq),
+        deltaX: deltaX * 0.5,
+        deltaY: deltaY * 0.5,
+        velocityX: this.velocityX_ * 0.5,
+        velocityY: this.velocityY_ * 0.5,
+      },
+      event
+    );
   }
 
   /**
@@ -865,8 +949,9 @@ export class PinchRecognizer extends GestureRecognizer {
    * @private
    */
   deltaX_() {
-    return Math.abs((this.lastX1_ - this.startX1_) -
-        (this.lastX2_ - this.startX2_));
+    return Math.abs(
+      this.lastX1_ - this.startX1_ - (this.lastX2_ - this.startX2_)
+    );
   }
 
   /**
@@ -874,7 +959,8 @@ export class PinchRecognizer extends GestureRecognizer {
    * @private
    */
   deltaY_() {
-    return Math.abs((this.lastY1_ - this.startY1_) -
-        (this.lastY2_ - this.startY2_));
+    return Math.abs(
+      this.lastY1_ - this.startY1_ - (this.lastY2_ - this.startY2_)
+    );
   }
 }

@@ -17,7 +17,8 @@
 export const CHARTBEAT_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://ping.chartbeat.net',
-    'basePrefix': '/ping?h=${domain}&' +
+    'basePrefix':
+      '/ping?h=${domain}&' +
       'p=${canonicalPath}&' +
       'u=${clientId(_cb)}&' +
       'd=${canonicalHost}&' +
@@ -30,6 +31,8 @@ export const CHARTBEAT_CONFIG = /** @type {!JsonObject} */ ({
       'c=120&' +
       'x=${scrollTop}&' +
       'y=${scrollHeight}&' +
+      'o=${scrollWidth}&' +
+      'w=${viewportHeight}&' +
       'j=${decayTime}&' +
       'R=1&' +
       'W=0&' +

@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {dev, user} from '../log';
+import {dev, devAssert, user} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {stringToBytes, utf8Encode} from '../utils/bytes';
 
@@ -79,23 +79,29 @@ export class Crypto {
 
     if (!this.subtle || this.polyfillPromise_) {
       // means native Crypto API is not available or failed before.
-      return (this.polyfillPromise_ || this.loadPolyfill_())
-          .then(polyfillSha384 => polyfillSha384(input));
+      return (this.polyfillPromise_ || this.loadPolyfill_()).then(
+        polyfillSha384 => polyfillSha384(input)
+      );
     }
 
     try {
-      return this.subtle.digest({name: 'SHA-384'}, input)
+      return (
+        this.subtle
+          .digest({name: 'SHA-384'}, input)
           /** @param {?} buffer */
-          .then(buffer => new Uint8Array(buffer),
-              e => {
-                // Chrome doesn't allow the usage of Crypto API under
-                // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
-                if (e.message && e.message.indexOf('secure origin') < 0) {
-                  // Log unexpected fallback.
-                  user().error(TAG, FALLBACK_MSG, e);
-                }
-                return this.loadPolyfill_().then(() => this.sha384(input));
-              });
+          .then(
+            buffer => new Uint8Array(buffer),
+            e => {
+              // Chrome doesn't allow the usage of Crypto API under
+              // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
+              if (e.message && e.message.indexOf('secure origin') < 0) {
+                // Log unexpected fallback.
+                user().error(TAG, FALLBACK_MSG, e);
+              }
+              return this.loadPolyfill_().then(() => this.sha384(input));
+            }
+          )
+      );
     } catch (e) {
       dev().error(TAG, FALLBACK_MSG, e);
       return this.loadPolyfill_().then(() => this.sha384(input));
@@ -126,7 +132,8 @@ export class Crypto {
       // Consider the Uint8 array as a base256 fraction number,
       // then convert it to the decimal form.
       let result = 0;
-      for (let i = 2; i >= 0; i--) { // 3 base256 digits give enough precision
+      for (let i = 2; i >= 0; i--) {
+        // 3 base256 digits give enough precision
         result = (result + buffer[i]) / 256;
       }
       return result;
@@ -142,9 +149,9 @@ export class Crypto {
     if (this.polyfillPromise_) {
       return this.polyfillPromise_;
     }
-    return this.polyfillPromise_ = Services.extensionsFor(this.win_)
-        .preloadExtension('amp-crypto-polyfill')
-        .then(() => getService(this.win_, 'crypto-polyfill'));
+    return (this.polyfillPromise_ = Services.extensionsFor(this.win_)
+      .preloadExtension('amp-crypto-polyfill')
+      .then(() => getService(this.win_, 'crypto-polyfill')));
   }
 
   /**
@@ -170,14 +177,18 @@ export class Crypto {
    * @throws {TypeError} if `jwk` is not an RSA JSON Web Key
    */
   importPkcsKey(jwk) {
-    dev().assert(this.isPkcsAvailable());
+    devAssert(this.isPkcsAvailable());
     // Safari 10 and earlier want this as an ArrayBufferView.
     const keyData = this.isLegacyWebkit_
       ? utf8Encode(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
       : /** @type {!webCrypto.JsonWebKey} */ (jwk);
-    return /** @type {!Promise<!webCrypto.CryptoKey>} */ (
-      this.subtle.importKey('jwk', keyData, this.pkcsAlgo, true, ['verify'])
-    );
+    return /** @type {!Promise<!webCrypto.CryptoKey>} */ (this.subtle.importKey(
+      'jwk',
+      keyData,
+      this.pkcsAlgo,
+      true,
+      ['verify']
+    ));
   }
 
   /**
@@ -191,10 +202,13 @@ export class Crypto {
    *     data and public key
    */
   verifyPkcs(key, signature, data) {
-    dev().assert(this.isPkcsAvailable());
-    return /** @type {!Promise<boolean>} */ (
-      this.subtle.verify(this.pkcsAlgo, key, signature, data)
-    );
+    devAssert(this.isPkcsAvailable());
+    return /** @type {!Promise<boolean>} */ (this.subtle.verify(
+      this.pkcsAlgo,
+      key,
+      signature,
+      data
+    ));
   }
 }
 

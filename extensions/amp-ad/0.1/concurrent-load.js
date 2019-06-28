@@ -15,7 +15,7 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * Store loading ads info within window to ensure it can be properly stored
@@ -58,11 +58,14 @@ export function getAmpAdRenderOutsideViewport(element) {
     return 1.25;
   }
   const errorMessage =
-      'Value of data-loading-strategy should be a float number in range ' +
-      'of [0, 3], but got ' + rawValue;
-  const viewportNumber =
-      user().assertNumber(parseFloat(rawValue), errorMessage);
-  user().assert(viewportNumber >= 0 && viewportNumber <= 3, errorMessage);
+    'Value of data-loading-strategy should be a float number in range ' +
+    'of [0, 3], but got ' +
+    rawValue;
+  const viewportNumber = user().assertNumber(
+    parseFloat(rawValue),
+    errorMessage
+  );
+  userAssert(viewportNumber >= 0 && viewportNumber <= 3, errorMessage);
   return viewportNumber;
 }
 
@@ -84,13 +87,13 @@ export function incrementLoadingAds(win, opt_loadingPromise) {
   }
 
   Services.timerFor(win)
-      .timeoutPromise(1000, opt_loadingPromise)
-      .catch(() => {})
-      .then(() => {
-        if (!--win[LOADING_ADS_WIN_ID_]) {
-          throttlePromiseResolver_();
-          throttlePromise_ = null;
-          throttlePromiseResolver_ = null;
-        }
-      });
+    .timeoutPromise(1000, opt_loadingPromise)
+    .catch(() => {})
+    .then(() => {
+      if (!--win[LOADING_ADS_WIN_ID_]) {
+        throttlePromiseResolver_();
+        throttlePromise_ = null;
+        throttlePromiseResolver_ = null;
+      }
+    });
 }

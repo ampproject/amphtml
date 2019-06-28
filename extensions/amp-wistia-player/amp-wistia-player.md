@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a Wistia video.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-wistia-player"></a> `amp-wistia-player`
+# amp-wistia-player
+
+Displays a <a href="https://wistia.com">Wistia</a> video.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a <a href="https://wistia.com">Wistia</a> video.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-wistia-player" src="https://cdn.ampproject.org/v0/amp-wistia-player-0.1.js">&lt;/script></code></td>
@@ -43,13 +48,16 @@ limitations under the License.
 
 ## Attributes
 
-##### data-media-hashed-id (required)
-
-The Wistia media id is found in every Wistia media page URL. If the media page URL is https://support.wistia.com/medias/u8p9wq6mq8, the data-media-hashed-id is `u8p9wq6mq8`.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>data-media-hashed-id (required)</strong></td>
+    <td>The Wistia media id is found in every Wistia media page URL. If the media page URL is https://support.wistia.com/medias/u8p9wq6mq8, the data-media-hashed-id is <code>u8p9wq6mq8</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Validation
 

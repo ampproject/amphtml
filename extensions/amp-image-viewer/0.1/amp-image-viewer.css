@@ -16,6 +16,13 @@
 
  .i-amphtml-image-viewer-image {
   position: absolute;
+  /**
+   * The image viewer sizes the image using width/height using the natural
+   * width/height, but falls back to the image viewer size itself. This causes
+   * the image to get stretched, and can occur if the image has not laid out or
+   * loaded yet.
+   */
+  object-fit: contain;
 }
 
 .i-amphtml-image-viewer {

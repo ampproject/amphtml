@@ -1,0 +1,205 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js"></script>
+    <title>My Story</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="helloworld.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+      amp-story-page {
+        background: white;
+      }
+      h1 {
+        font-size: 2.875em;
+        font-weight: normal;
+        line-height: 1.174;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story
+      title="Amp-story-doubleclick"
+      publisher="The AMP Team"
+      publisher-logo-src="https://example.com/logo/1x1.png"
+      poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
+      poster-square-src="https://example.com/my-story/poster/1x1.jpg"
+      poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
+      standalone>
+
+        <amp-story-auto-ads id="i-amphtml-demo-1">
+            <script type="application/json">
+              {
+                "ad-attributes": {
+                  "type": "fake",
+                  "src": "/examples/amp-story/ads/app-install.html",
+                  "a4a-conversion": true
+                }
+              }
+            </script>
+          </amp-story-auto-ads>
+
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="vertical">
+          <h1>Ads served from doubleclick</h1>
+          <p>This is the cover page.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-2" auto-advance-after="4s">
+        <amp-story-grid-layer template="vertical">
+          <h1>Auto advance page</h1>
+          <p>This page has auto-advance enabled</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3" auto-advance-after="vid1">
+        <amp-story-grid-layer template="vertical">
+          <h1>Short version of video</h1>
+          <amp-video
+            id="vid1"
+            src="../../examples/av/ForBiggerJoyrides-short.mp4"
+            width="720"
+            height="405"
+            layout="responsive"
+            controls>
+          </amp-video>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-4" auto-advance-after="vid2">
+        <amp-story-grid-layer template="vertical">
+          <h1>Full length video</h1>
+          <amp-video
+            id="vid2"
+            src="../../examples/av/ForBiggerJoyrides.mp4"
+            width="720"
+            height="405"
+            layout="responsive"
+            controls>
+          </amp-video>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-5" auto-advance-after="aud1">
+        <amp-story-grid-layer template="vertical">
+          <h1>Audio</h1>
+          <amp-audio
+            id="aud1"
+            src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+            artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
+            title="Snow Fight"
+            album="Jan Morgenstern"
+            artist="Sintel"
+            height="50"
+            width="auto"
+            controls>
+          </amp-audio>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="six">
+        <amp-story-grid-layer template="vertical">
+          <h1>six Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="seven">
+        <amp-story-grid-layer template="vertical">
+          <h1>seven Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="eight">
+        <amp-story-grid-layer template="vertical">
+          <h1>eight Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="nine">
+        <amp-story-grid-layer template="vertical">
+          <h1>nine Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="ten">
+        <amp-story-grid-layer template="vertical">
+          <h1>ten Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="eleven">
+        <amp-story-grid-layer template="vertical">
+          <h1>eleven Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="twelve">
+        <amp-story-grid-layer template="vertical">
+          <h1>twelve Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="thirteen">
+        <amp-story-grid-layer template="vertical">
+          <h1>thirteen Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="fourteen">
+        <amp-story-grid-layer template="vertical">
+          <h1>fourteen Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="fifteen">
+        <amp-story-grid-layer template="vertical">
+          <h1>fifteen Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="sixteen">
+        <amp-story-grid-layer template="vertical">
+          <h1>sixteen Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="seventeen">
+        <amp-story-grid-layer template="vertical">
+          <h1>seventeen Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="eighteen">
+        <amp-story-grid-layer template="vertical">
+          <h1>eighteen Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="nineteen">
+        <amp-story-grid-layer template="vertical">
+          <h1>nineteen Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="twenty">
+        <amp-story-grid-layer template="vertical">
+          <h1>twenty Page</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-bookend src="../../examples/amp-story/bookendv1.json" layout="nodisplay">
+      </amp-story-bookend>
+    </amp-story>
+  </body>
+</html>

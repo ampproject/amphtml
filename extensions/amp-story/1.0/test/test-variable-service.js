@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {AdvancementMode} from '../story-analytics';
 import {AmpStoryVariableService} from '../variable-service';
 import {StateChangeType} from '../navigation-state';
-
 
 describes.fakeWin('amp-story variable service', {}, () => {
   let variableService;
@@ -36,5 +36,14 @@ describes.fakeWin('amp-story variable service', {}, () => {
     const variables = variableService.get();
     expect(variables['storyPageIndex']).to.equal(123);
     expect(variables['storyPageId']).to.equal('my-page-id');
+  });
+
+  it('should update storyAdvancementMode on change', () => {
+    variableService.onAdvancementModeStateChange(
+      AdvancementMode.MANUAL_ADVANCE
+    );
+
+    const variables = variableService.get();
+    expect(variables['storyAdvancementMode']).to.equal('manualAdvance');
   });
 });

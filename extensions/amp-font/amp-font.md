@@ -1,3 +1,12 @@
+---
+$category@: presentation
+formats:
+  - websites
+  - ads
+  - stories
+teaser:
+  text: Triggers and monitors the loading of custom fonts.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +23,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-font`"></a> `amp-font`
+# amp-font
+Trigger and monitor the loading of custom fonts on AMP pages.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Trigger and monitor the loading of custom fonts on AMP pages.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-font" src="https://cdn.ampproject.org/v0/amp-font-0.1.js">&lt;/script></code></td>
@@ -74,38 +80,41 @@ Using these classes authors can guard whether a font is displayed and get the fo
 The `amp-font` extension accepts the `layout` value:  `nodisplay`
 
 ## Attributes
+<table>
+  <tr>
+    <td width="40%"><strong>font-family</strong></td>
+    <td>The font-family of the custom font being loaded.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>timeout</strong></td>
+    <td>Time in milliseconds after which the we don't wait for the custom font to be available. This attribute is optional and it's default value is 3000. If the timeout is set to 0 then the amp-font loads the font if it is already in the cache, otherwise the font would not be loaded. If the timeout is has an invalid value then the timeout defaults to 3000.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>on-load-add-class</strong></td>
+    <td>CSS class that would be added to the document root after making sure that the custom font is available for display. This attribute is optional.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>on-load-remove-class</strong></td>
+    <td>CSS class that would be removed from the document root after making sure that the custom font is available for display. This attribute is optional.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>on-error-add-class</strong></td>
+    <td>CSS class that would be added to the document root if the timeout interval runs out before the font becomes available for use. This attribute is optional.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>on-error-remove-class</strong></td>
+    <td>CSS class that would be removed from the document root if the timeout interval runs out before the font becomes available for use. This attribute is optional.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>font-weight, font-style, font-variant</strong></td>
+    <td>The attributes above should all behave like they do on standard elements.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>layout</strong></td>
+    <td>Must be <code>nodisplay</code>.</td>
+  </tr>
+</table>
 
-##### font-family
-
-The font-family of the custom font being loaded.
-
-##### timeout
-
-Time in milliseconds after which the we don't wait for the custom font to be available. This attribute is optional and it's default value is 3000. If the timeout is set to 0 then the amp-font loads the font if it is already in the cache, otherwise the font would not be loaded. If the timeout is has an invalid value then the timeout defaults to 3000.
-
-##### on-load-add-class
-
-CSS class that would be added to the document root after making sure that the custom font is available for display. This attribute is optional.
-
-##### on-load-remove-class
-
-CSS class that would be removed from the document root after making sure that the custom font is available for display. This attribute is optional.
-
-##### on-error-add-class
-
-CSS class that would be added to the document root if the timeout interval runs out before the font becomes available for use. This attribute is optional.
-
-**on-error-remove-class**
-
-CSS class that would be removed from the document root if the timeout interval runs out before the font becomes available for use. This attribute is optional.
-
-##### font-weight, font-style, font-variant
-
-The attributes above should all behave like they do on standard elements.
-
-##### layout
-
-Must be `nodisplay`.
 
 ## Validation
 

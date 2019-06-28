@@ -16,13 +16,17 @@
 
 export const ATINTERNET_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+  'vars': {
+    'pixelPath': 'hit.xiti',
+    'domain': '.xiti.com',
+  },
   'requests': {
-    'base': 'https://${log}${domain}/hit.xiti?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
+    'base':
+      'https://${log}${domain}/${pixelPath}?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
     'suffix': '&medium=amp&${extraUrlParams}&ref=${documentReferrer}',
-    'pageview': '${base}&' +
-      'p=${title}&' +
-      's2=${level2}${suffix}',
-    'click': '${base}&' +
+    'pageview': '${base}&p=${title}&s2=${level2}${suffix}',
+    'click':
+      '${base}&' +
       'pclick=${title}&' +
       's2click=${level2}&' +
       'p=${label}&' +

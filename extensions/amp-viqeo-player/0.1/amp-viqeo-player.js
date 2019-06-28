@@ -20,7 +20,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -29,15 +29,14 @@ import {
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe} from '../../../src/3p-frame';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+
+const TAG = 'amp-viqeo-player';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
 class AmpViqeoPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -62,6 +61,9 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.hasAutoplay_ = false;
+
+    /** @private {string} */
+    this.videoId_ = '';
   }
 
   /**
@@ -69,8 +71,8 @@ class AmpViqeoPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://static.viqeo.tv', opt_onLayout);
-    this.preconnect.url('https://stage.embed.viqeo.tv', opt_onLayout);
+    this.preconnect.url('https://api.viqeo.tv', opt_onLayout);
+    this.preconnect.url('https://cdn.viqeo.tv', opt_onLayout);
   }
 
   /**
@@ -84,16 +86,17 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.videoId_ = userAssert(
+      this.element.getAttribute('data-videoid'),
+      'The data-videoid attribute is required for <amp-viqeo-player> %s',
+      this.element
+    );
 
-    user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-viqeo-player> %s',
-        this.element);
-
-    user().assert(
-        this.element.getAttribute('data-profileid'),
-        'The data-profileid attribute is required for <amp-viqeo-player> %s',
-        this.element);
+    userAssert(
+      this.element.getAttribute('data-profileid'),
+      'The data-profileid attribute is required for <amp-viqeo-player> %s',
+      this.element
+    );
 
     this.hasAutoplay_ = this.element.hasAttribute(VideoAttributes.AUTOPLAY);
 
@@ -107,25 +110,25 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-
     const iframe = getIframe(
-        this.win,
-        this.element,
-        'viqeoplayer',
-        {
-          'autoplay': this.hasAutoplay_,
-        },
-        {
-          allowFullscreen: true,
-        });
+      this.win,
+      this.element,
+      'viqeoplayer',
+      {
+        'autoplay': this.hasAutoplay_,
+      },
+      {
+        allowFullscreen: true,
+      }
+    );
 
     // required to display the user gesture in the iframe
     iframe.setAttribute('allow', 'autoplay');
 
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleViqeoMessages_.bind(this)
+      this.win,
+      'message',
+      this.handleViqeoMessages_.bind(this)
     );
 
     return this.mutateElement(() => {
@@ -144,9 +147,11 @@ class AmpViqeoPlayer extends AMP.BaseElement {
    * */
   handleViqeoMessages_(event) {
     const eventData = getData(event);
-    if (!eventData ||
-        event.source !== (this.iframe_ && this.iframe_.contentWindow) ||
-        eventData['source'] !== 'ViqeoPlayer') {
+    if (
+      !eventData ||
+      event.source !== (this.iframe_ && this.iframe_.contentWindow) ||
+      eventData['source'] !== 'ViqeoPlayer'
+    ) {
       return;
     }
 
@@ -186,6 +191,29 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
     return true; // Call layoutCallback again.
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = this.element.ownerDocument.createElement('amp-img');
+    this.propagateAttributes(['aria-label'], placeholder);
+    if (placeholder.hasAttribute('aria-label')) {
+      placeholder.setAttribute(
+        'alt',
+        'Loading video - ' + placeholder.getAttribute('aria-label')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading video');
+    }
+    placeholder.setAttribute(
+      'src',
+      `https://cdn.viqeo.tv/preview/${encodeURIComponent(this.videoId_)}.jpg`
+    );
+    placeholder.setAttribute('layout', 'fill');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    this.applyFillContent(placeholder);
+    return placeholder;
   }
 
   /** @override */
@@ -312,12 +340,17 @@ class AmpViqeoPlayer extends AMP.BaseElement {
         action: command,
       });
     }
-    contentWindow./*OK*/postMessage(command, '*');
+    contentWindow./*OK*/ postMessage(command, '*');
+  }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 
-AMP.extension('amp-viqeo-player', '0.1', AMP => {
-  AMP.registerElement('amp-viqeo-player', AmpViqeoPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpViqeoPlayer);
 });
 
 export default AmpViqeoPlayer;

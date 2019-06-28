@@ -1,3 +1,12 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - email
+  - ads
+teaser:
+  text: Allows you to create forms to submit input fields in an AMP document.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -96,7 +105,7 @@ The value for `action-xhr` can be the same or a different endpoint than `action`
 To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
 
 
-##### other form attributes
+##### Other form attributes
 
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
 
@@ -125,10 +134,10 @@ For details on valid inputs and fields, see [amp-form rules](https://github.com/
 
 ## Actions
 
-The `amp-form` element exposes the following actions: 
+The `amp-form` element exposes the following actions:
 
 | Action | Description |
-|--------|-------------| 
+|--------|-------------|
 | `submit` | Allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events). |
 | `clear` | Empties the values from each input in the form. This can allow users to quickly fill out forms a second time. |
 
@@ -141,7 +150,7 @@ Learn more about [Actions and Events in AMP](https://www.ampproject.org/docs/int
 The `amp-form` exposes the following events:
 
 | Event | Fired when |
-|-------|-------------| 
+|-------|-------------|
 | `submit` | The form is submitted and before the submission is complete. |
 | `submit-success` | The form submission is done and the response is a success. |
 | `submit-error` | The form submission is done and the response is an error. |
@@ -186,7 +195,7 @@ See the [full example here](../../examples/forms.amp.html).
 The `amp-form` extension triggers the following events that you can track in your [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics) config:
 
 | Event                     | Fired when                        |
-|---------------------------|-----------------------------------| 
+|---------------------------|-----------------------------------|
 | `amp-form-submit`         | A form request is initiated.      |
 | `amp-form-submit-success` | A successful response is received (i.e, when the response has a status of `2XX`). |
 | `amp-form-submit-error`   | An unsuccessful response is received (i.e, when the response doesn't have a status of `2XX`). |
@@ -255,7 +264,7 @@ You can render success or error responses in your form by using [extended templa
 ### To render responses with templating:
 
 * Apply a response attribute to *any direct child* of the `<form>` element.
-* Render the response in the child element by including a `<template></template>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
+* Render the response in the child element by including a template via `<template></template>` or `<script type="text/plain"></script>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
 * Provide a valid JSON object for responses to `submit-success` and `submit-error`. Both success and error responses should have a `Content-Type: application/json` header.
 
 
@@ -264,7 +273,7 @@ You can render success or error responses in your form by using [extended templa
 <a id="example-submitting"></a>
 ##### Example: Form displays success, error, and submitting messages
 
-In the following example, the responses are rendered in an inline template inside the form. 
+In the following example, the responses are rendered in an inline template inside the form.
 
 ```html
 <form ...>
@@ -299,7 +308,7 @@ In the following example, the responses are rendered in an inline template insid
 
 The publisher's `action-xhr` endpoint returns the following JSON responses:
 
-On success: 
+On success:
 
 ```json
 {
@@ -309,7 +318,7 @@ On success:
 }
 ```
 
-On error: 
+On error:
 ```json
 {
   "name": "Jane Miller",
@@ -341,7 +350,7 @@ See the [full example here](../../examples/forms.amp.html).
 
 ### To render a successful response with data binding
 
-* Use the [on attribute](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events) to bind the form *submit-success* attribute to [`AMP.setState()`](https://www.ampproject.org/docs/reference/components/amp-bind#updating-state-with-amp.setstate()).  
+* Use the [on attribute](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events) to bind the form *submit-success* attribute to [`AMP.setState()`](https://www.ampproject.org/docs/reference/components/amp-bind#updating-state-with-amp.setstate()).
 * Use the `event` property to capture the response data.
 * Add the state attribute to the desired element to bind the form response.
 
@@ -364,9 +373,9 @@ The following example demonstrates a form `submit-success` response with [`amp-b
     </div>
     <input type="submit" value="Subscribe">
   </form>
- ``` 
+ ```
 
- When the form is submitted successfully it will return a JSON response similar to the following: 
+ When the form is submitted successfully it will return a JSON response similar to the following:
 
 ```json
 {
@@ -380,7 +389,7 @@ Then `amp-bind` updates the `<p>` element's text to match the `subscibe` state:
 ...
   <p [text]="'Thanks, ' + subscribe +'! You have successfully subscribed.'">Thanks Jane Miller! You have successfully subscribed.</p>
 ...
-``` 
+```
 
 ### Redirecting after a submission
 
@@ -392,7 +401,7 @@ Make sure to update your `Access-Control-Expose-Headers` response header to incl
 
 ```text
 AMP-Redirect-To: https://example.com/forms/thank-you
-Access-Control-Expose-Headers: AMP-Access-Control-Allow-Source-Origin, AMP-Redirect-To
+Access-Control-Expose-Headers: AMP-Redirect-To
 ```
 
 
@@ -427,6 +436,10 @@ Here's an example:
 For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
 
 For validation messages, if your element contains no text content inside, AMP will fill it out with the browser's default validation message. In the example above, when the `name5` input is empty and validation is kicked off (i.e., user tried to submit the form) AMP will fill `<span visible-when-invalid="valueMissing" validation-for="name5"></span>` with the browser's validation message and show that `span` to the user.
+
+{% call callout('Important', type='caution') %}
+You must provide your own validation UI for each kind of invalid state that the input could have. If these are not present, users will not see any `custom-validation-reporting` for the missing error state. The validity states can be found in the [official W3C HTML validation reporting documentation](https://www.w3.org/TR/html50/forms.html#validitystate).
+{% endcall %}
 
 ### Reporting strategies
 
@@ -570,7 +583,18 @@ The `:user-invalid` and `:user-valid` pseudo classes are part of the [future CSS
 
 One of the main differences between `:invalid` and `:user-invalid` is when are they applied to the element. The `:user-invalid` class is applied after a significant interaction from the user with the field (e.g., the user types in a field, or blurs from the field).
 
-The `amp-form` extension provides [classes](#classes-and-css-hooks) to polyfill these pseudo-classes. The `amp-form` extension also propagates these to ancestors `fieldset`elements and `form`.
+The `amp-form` extension provides [classes](#classes-and-css-hooks) to polyfill these pseudo-classes. The `amp-form` extension also propagates these to the ancestor `form`. However, `fieldset` elements are only ever set to have class 'user-valid' to be consistent with browser behaviour.
+
+#### `<textarea>` validation
+
+Regular expression matching is a common validation feature supported natively on most input elements, except for `<textarea>`. We polyfill this functionality and support the `pattern` attribute on `<textarea>` elements.
+
+AMP Form provides an `autoexpand` attribute to `<textarea>` elements. This allows the textarea
+to expand and shrink to accomodate the user's rows of input, up to the field's maximum size. If the user manually resizes the field, the autoexpand behavior will be removed.
+
+```html
+<textarea autoexpand></textarea>
+```
 
 ## Styling
 

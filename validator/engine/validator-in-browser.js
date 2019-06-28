@@ -51,13 +51,13 @@ function getUrl(url) {
  */
 amp.validator.isAmpCacheUrl = function(url) {
   return (
-    url.toLowerCase().indexOf('cdn.ampproject.org') !== -1 ||
-    url.toLowerCase().indexOf('amp.cloudflare.com') !== -1);
+    url.toLowerCase().indexOf('cdn.ampproject.org') !== -1 || // lgtm [js/incomplete-url-substring-sanitization]
+    url.toLowerCase().indexOf('amp.cloudflare.com') !== -1); // lgtm [js/incomplete-url-substring-sanitization]
 };
 
 /**
  * Validates doc in the browser by inspecting elements, attributes, etc. in
- * the DOM. This method is exported so it can be unittested.
+ * the DOM. This method is exported so it can be unit tested.
  * @param {!Document=} opt_doc
  * @return {!amp.validator.ValidationResult}
  */

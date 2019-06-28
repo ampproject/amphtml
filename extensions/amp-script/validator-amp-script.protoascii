@@ -14,22 +14,24 @@
 # limitations under the license.
 #
 
-# Invalid until launch ready.
-# tags: {
-#   tag_name: "SCRIPT"
-#   extension_spec: {
-#     name: "amp-script"
-#     version: "0.1"
-#     version: "latest"
-#   }
-#   attr_lists: "common-extension-attrs"
-# }
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-script"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
 
 tags: {  # <amp-script>
   html_format: AMP
   tag_name: "AMP-SCRIPT"
   disallowed_ancestor: "AMP-SCRIPT"
-  # requires_extension: "amp-script"
+  requires_extension: "amp-script"
+  requires: "amp-experiment-token"
+  unique: true # TODO(choumx): Remove when global size limit is implemented.
   attrs: {
     name: "src"
     mandatory: true

@@ -43,7 +43,7 @@ export class PostMessageDispatcher {
 
   /**
    * @param {string} eventType
-   * @param {!Object} eventData
+   * @param {!JsonObject} eventData
    * @private
    */
   emit_(eventType, eventData) {
@@ -87,8 +87,10 @@ export class PostMessageDispatcher {
     switch (data.event) {
       case CONFIGURATION_EVENT: {
         this.emit_(
-            CONFIGURATION_EVENT,
-            Object.assign({}, data, {source: event.source})
+          CONFIGURATION_EVENT,
+          /** @type {!JsonObject} */ (Object.assign({}, data, {
+            'source': event.source,
+          }))
         );
         break;
       }

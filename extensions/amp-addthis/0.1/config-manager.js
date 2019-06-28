@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {CONFIGURATION_EVENT, ORIGIN} from './constants';
+import {getAddThisMode} from './addthis-utils/mode';
 
 import {dict} from '../../../src/utils/object';
 
@@ -67,12 +68,12 @@ export class ConfigManager {
   /**
    * Store the configuration received for the provided pubId, mark the request
    * for the config as completed, and broadcast the config to relevant iframes.
-   * @param {!Object} input
-   * @param {!Object} [input.config]
-   * @param {string} [input.pubId]
-   * @param {*} [input.source]
+   * @param {!JsonObject} data
    */
-  receiveConfiguration({config, pubId, source}) {
+  receiveConfiguration(data) {
+    const config = data['config'];
+    const pubId = data['pubId'];
+    const source = data['source'];
     // Check that the configuration event is coming from an iframe that
     // should be providing configuration information.
     const isProviderIframe = this.configProviderIframes_.some(iframe => {
@@ -89,8 +90,23 @@ export class ConfigManager {
     const {iframeData} = pubData;
 
     iframeData.forEach(iframeDatum => {
-      const {iframe, widgetId, shareConfig, atConfig} = iframeDatum;
-      this.sendConfiguration_({iframe, widgetId, pubId, shareConfig, atConfig});
+      const {
+        iframe,
+        widgetId,
+        shareConfig,
+        atConfig,
+        productCode,
+        containerClassName,
+      } = iframeDatum;
+      this.sendConfiguration_({
+        iframe,
+        widgetId,
+        pubId,
+        shareConfig,
+        atConfig,
+        productCode,
+        containerClassName,
+      });
     });
   }
 
@@ -101,9 +117,19 @@ export class ConfigManager {
    * @param {string} [input.pubId]
    * @param {!Object} [input.shareConfig]
    * @param {!Object} [input.atConfig]
+   * @param {string} [input.productCode]
+   * @param {string} [input.containerClassName]
    * @private
    */
-  sendConfiguration_({iframe, widgetId, pubId, shareConfig, atConfig}) {
+  sendConfiguration_({
+    iframe,
+    widgetId,
+    pubId,
+    shareConfig,
+    atConfig,
+    productCode,
+    containerClassName,
+  }) {
     const pubData = this.dataForPubId_[pubId];
     const {
       config: dashboardConfig,
@@ -115,17 +141,44 @@ export class ConfigManager {
       'atConfig': atConfig,
       'pubId': pubId,
       'widgetId': widgetId,
+      'productCode': productCode,
+      'containerClassName': containerClassName,
       'configRequestStatus': configRequestStatus,
       'dashboardConfig': dashboardConfig,
     });
 
-    if (dashboardConfig &&
-        dashboardConfig.widgets &&
-        Object.keys(dashboardConfig.widgets).length > 0) {
-      this.activeToolsMonitor_.record({widget: dashboardConfig});
+    if (
+      dashboardConfig &&
+      dashboardConfig.widgets &&
+      Object.keys(dashboardConfig.widgets).length > 0
+    ) {
+      const mode = getAddThisMode({pubId, widgetId, productCode});
+      switch (mode) {
+        case 1:
+          // "regular old" amp-addthis mode
+          if (widgetId && dashboardConfig.widgets[widgetId]) {
+            this.activeToolsMonitor_.record(dashboardConfig.widgets[widgetId]);
+          }
+          break;
+        case 2:
+          // "wp addthis mode"
+          if (productCode) {
+            this.activeToolsMonitor_.recordProductCode(productCode);
+          }
+          break;
+        case 3:
+          // "wp anonymous mode"
+          if (productCode) {
+            this.activeToolsMonitor_.recordProductCode(productCode);
+          }
+          return;
+        default:
+          return;
+        // invalid tool configuration
+      }
     }
 
-    iframe.contentWindow./*OK*/postMessage(JSON.stringify(jsonToSend), ORIGIN);
+    iframe.contentWindow./*OK*/ postMessage(JSON.stringify(jsonToSend), ORIGIN);
 
     if (configRequestStatus === RequestStatus.NOT_REQUESTED) {
       // If a config for this pubId has not been requested yet, then this iframe
@@ -143,6 +196,8 @@ export class ConfigManager {
    * activeToolsMonitor: Object<string,string>,
    * atConfig: Object<string,string>,
    * widgetId: string,
+   * containerClassName: string,
+   * productCode: string,
    * iframe: !Element,
    * iframeLoadPromise: !Promise,
    * shareConfig: (JsonObject|undefined)
@@ -151,6 +206,8 @@ export class ConfigManager {
   register({
     pubId,
     widgetId,
+    productCode,
+    containerClassName,
     iframe,
     iframeLoadPromise,
     shareConfig,
@@ -175,15 +232,26 @@ export class ConfigManager {
       pubData.iframeData = [];
     }
 
-    pubData.iframeData.push({iframe, shareConfig, atConfig, widgetId});
-
-    iframeLoadPromise.then(() => this.sendConfiguration_({
+    pubData.iframeData.push({
       iframe,
-      pubId,
-      widgetId,
       shareConfig,
       atConfig,
-    }));
+      widgetId,
+      productCode,
+      containerClassName,
+    });
+
+    iframeLoadPromise.then(() =>
+      this.sendConfiguration_({
+        iframe,
+        pubId,
+        widgetId,
+        shareConfig,
+        atConfig,
+        productCode,
+        containerClassName,
+      })
+    );
   }
 
   /**
@@ -192,7 +260,7 @@ export class ConfigManager {
    */
   unregister({pubId, iframe}) {
     this.configProviderIframes_ = this.configProviderIframes_.filter(
-        providerFrame => providerFrame !== iframe
+      providerFrame => providerFrame !== iframe
     );
 
     const pubData = this.dataForPubId_[pubId] || {};
@@ -217,8 +285,11 @@ ConfigManager.PubIdData; // purely for typedef
 /**
  * @typedef {{
  *   widgetId:string,
+ *   productCode:string,
  *   shareConfig:(Object<string,string>|undefined),
- *   iframe: Element
+ *   iframe: Element,
+ *   atConfig: JsonObject,
+ *   containerClassName: string
  * }}
  */
 ConfigManager.IframeDatum; // purely for typedef

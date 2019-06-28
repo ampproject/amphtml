@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Allows users to subscribe to web push notifications.
+---
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-web-push">amp-web-push</a>
+# amp-web-push
+
+Allows users to subscribe to <a href="https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/">web push notifications</a>.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Allows users to subscribe to <a href="https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/">web push notifications</a>.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-web-push" src="https://cdn.ampproject.org/v0/amp-web-push-0.1.js">&lt;/script></code></td>
@@ -37,7 +42,7 @@ limitations under the License.
 
 ## Behavior
 
-Developers compose widgets that appear based on a user's subscription state. Widgets are composed of AMP elements and can be as simple as a button or a text link. 
+Developers compose widgets that appear based on a user's subscription state. Widgets are composed of AMP elements and can be as simple as a button or a text link.
 
 *Example*
 
@@ -57,11 +62,14 @@ Clicking the subscription widget pops up a page prompting the user for notificat
 
 ## Attributes
 
-##### visibility (required)
+<table>
+  <tr>
+    <td width="40%"><strong>visibility (required)</strong></td>
+    <td>Describes when the widget is shown. The value can be one of <code>unsubscribed</code>, <code>subscribed</code>, or <code>blocked</code>.<br>
+Widgets are initially hidden while the user's subscription state is computed.</td>
+  </tr>
 
-Describes when the widget is shown. The value can be one of `unsubscribed`, `subscribed`, or `blocked`.
-
-Widgets are initially hidden while the user's subscription state is computed.
+</table>
 
 ## Configuration
 
@@ -75,7 +83,7 @@ The `amp-web-push` component requires extra integration on your site. You will n
 ></amp-web-push>
 ```
 
-All properties are <strong>required</strong>, and all URLs must begin with the same origin (e.g. https://example.com).
+All properties are <strong>required</strong>, and all URLs must begin with the same origin (e.g. `https://example.com`).
 
 <table>
   <tr>
@@ -125,6 +133,14 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
       <p>
          If you develop a custom push solution, <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/0.1/amp-web-push.service-worker.js">see this example on how to make your service worker compatible with amp-web-push</a>.
        </p>
+    </td>
+  </tr>
+  <tr>
+    <td><code>service-worker-scope (optional)</code></td>
+    <td>
+      <p>
+        The scope of the service worker to be installed.
+      </p>
     </td>
   </tr>
 </table>

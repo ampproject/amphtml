@@ -17,6 +17,7 @@
 tags: {  # amp-video
   html_format: AMP
   html_format: AMP4ADS
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   # Typically the extension_spec takes care of this, but we have
   # a unique situation where we need to refer to this earlier in
@@ -52,7 +53,10 @@ attr_lists: {
     name: "disableremoteplayback"
     value: ""
   }
-  attrs: { name: "dock" }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
   attrs: {
     name: "loop"
     value: ""
@@ -65,6 +69,8 @@ attr_lists: {
     name: "noaudio"
     value: ""
   }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
   attrs: {
     name: "preload"
@@ -103,6 +109,7 @@ attr_lists: {
 tags: {  # <amp-video> not in amp-story.
   html_format: AMP
   html_format: AMP4ADS
+  html_format: ACTIONS
   tag_name: "AMP-VIDEO"
   # There is an alternate spec for amp-video in amp-story.
   disallowed_ancestor: "AMP-STORY"
@@ -114,7 +121,7 @@ tags: {  # <amp-video> not in amp-story.
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
   attr_lists: "lightboxable-elements"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -143,7 +150,7 @@ tags: {  # <amp-video> in amp-story
   }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

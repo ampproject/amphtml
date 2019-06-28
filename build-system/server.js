@@ -19,9 +19,9 @@
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
-const app = require(require.resolve('./app.js'));
+const app = require('./app');
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const isRunning = require('is-running');
 const log = require('fancy-log');
 const morgan = require('morgan');
@@ -36,14 +36,19 @@ const {
 const useHttps = process.env.SERVE_USEHTTPS == 'true';
 const quiet = process.env.SERVE_QUIET == 'true';
 const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
-const noCachingExtensions = process.env.SERVE_EXTENSIONS_WITHOUT_CACHING ==
-    'true';
+const noCachingExtensions =
+  process.env.SERVE_EXTENSIONS_WITHOUT_CACHING == 'true';
 const header = require('connect-header');
 
 // Exit if the port is in use.
 process.on('uncaughtException', function(err) {
   if (err.errno === 'EADDRINUSE') {
-    log(colors.red('Port', port, 'in use, shutting down server'));
+    log(
+      colors.red('ERROR:'),
+      'Port',
+      colors.cyan(port),
+      'in use, shutting down server'
+    );
   } else {
     log(colors.red(err));
   }
@@ -62,11 +67,13 @@ const middleware = [];
 if (!quiet) {
   middleware.push(morgan('dev'));
 }
-middleware.push(app.middleware);
+middleware.push(app);
 if (sendCachingHeaders) {
-  middleware.push(header({
-    'cache-control': ' max-age=600',
-  }));
+  middleware.push(
+    header({
+      'cache-control': ' max-age=600',
+    })
+  );
 }
 
 if (noCachingExtensions) {
@@ -80,14 +87,12 @@ if (noCachingExtensions) {
 }
 
 // Start gulp webserver
-(async() => {
-  await app.beforeServeTasks();
-  gulp.src(process.cwd())
-      .pipe(webserver({
-        port,
-        host,
-        directoryListing: true,
-        https: useHttps,
-        middleware,
-      }));
-})();
+gulp.src(process.cwd()).pipe(
+  webserver({
+    port,
+    host,
+    directoryListing: true,
+    https: useHttps,
+    middleware,
+  })
+);

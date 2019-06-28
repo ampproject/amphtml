@@ -14,17 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-ad-network-adsense-impl"></a> `amp-ad-network-adsense-impl`
+### amp-ad-network-adsense-impl
+
+AdSense implementation of AMP Ad tag which requests early by XHR and
+renders natively within the page if a valid AMP Ad is returned.  Should
+not be directly referenced by pages and instead is dynamically loaded
+via the amp-ad tag.  However, in order to remove an async script load
+of this library, publishers can include its script declaration.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>AdSense implementation of AMP Ad tag which requests early by XHR and
-    renders natively within the page if a valid AMP Ad is returned.  Should
-    not be directly referenced by pages and instead is dynamically loaded
-    via the amp-ad tag.  However, in order to remove an async script load
-    of this library, publishers can include its script declaration.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
     <td>General Availability</td>

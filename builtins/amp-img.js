@@ -15,23 +15,31 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {isExperimentOn} from '../src/experiments';
-import {isLayoutSizeDefined} from '../src/layout';
 import {listen} from '../src/event-helper';
+import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
-import {setImportantStyles} from '../src/style';
 
 /**
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
-const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
-  'aria-describedby', 'aria-labelledby','srcset', 'src', 'sizes'];
+const ATTRIBUTES_TO_PROPAGATE = [
+  'alt',
+  'title',
+  'referrerpolicy',
+  'aria-label',
+  'aria-describedby',
+  'aria-labelledby',
+  'srcset',
+  'src',
+  'sizes',
+];
 
 export class AmpImg extends BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -50,17 +58,32 @@ export class AmpImg extends BaseElement {
 
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
+
+    /**
+     * The current width used by the automatically generated sizes attribute
+     * @private {number}
+     * */
+    this.sizesWidth_ = 0;
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
     if (this.img_) {
       const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
-          value => mutations[value] !== undefined);
+        value => mutations[value] !== undefined
+      );
       this.propagateAttributes(
-          attrs, this.img_, /* opt_removeMissingAttrs */ true);
+        attrs,
+        this.img_,
+        /* opt_removeMissingAttrs */ true
+      );
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     }
+  }
+
+  /** @override */
+  onMeasureChanged() {
+    this.maybeGenerateSizes_();
   }
 
   /** @override */
@@ -125,15 +148,75 @@ export class AmpImg extends BaseElement {
     if (this.element.getAttribute('role') == 'img') {
       this.element.removeAttribute('role');
       this.user().error(
-          'AMP-IMG', 'Setting role=img on amp-img elements breaks ' +
-        'screen readers please just set alt or ARIA attributes, they will ' +
-        'be correctly propagated for the underlying <img> element.');
+        'AMP-IMG',
+        'Setting role=img on amp-img elements breaks ' +
+          'screen readers please just set alt or ARIA attributes, they will ' +
+          'be correctly propagated for the underlying <img> element.'
+      );
     }
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+    this.maybeGenerateSizes_();
     this.applyFillContent(this.img_, true);
+    propagateObjectFitStyles(this.element, this.img_);
+
     this.element.appendChild(this.img_);
+  }
+
+  /**
+   * This function automatically generates sizes for amp-imgs without
+   * the sizes attribute.
+   * @private
+   */
+  maybeGenerateSizes_() {
+    if (!this.img_) {
+      return;
+    }
+    // No need to generate sizes if already present.
+    const sizes = this.element.getAttribute('sizes');
+    if (sizes) {
+      return;
+    }
+    // Sizes is useless without the srcset attribute or if the srcset
+    // attribute uses the x descriptor.
+    const srcset = this.element.getAttribute('srcset');
+    if (!srcset || /[0-9]+x(?:,|$)/.test(srcset)) {
+      return;
+    }
+
+    const width = this.getLayoutWidth();
+    if (!this.shouldSetSizes_(width)) {
+      return;
+    }
+
+    const viewportWidth = this.getViewport().getWidth();
+
+    const entry = `(max-width: ${viewportWidth}px) ${width}px, `;
+    let defaultSize = width + 'px';
+
+    if (this.getLayout() !== Layout.FIXED) {
+      const ratio = Math.round((width * 100) / viewportWidth);
+      defaultSize = Math.max(ratio, 100) + 'vw';
+    }
+
+    const generatedSizes = entry + defaultSize;
+
+    this.mutateElement(() => {
+      this.img_.setAttribute('sizes', generatedSizes);
+    });
+    this.sizesWidth_ = width;
+  }
+
+  /**
+   * @param {number} newWidth
+   * @private
+   */
+  shouldSetSizes_(newWidth) {
+    if (!this.img_.hasAttribute('sizes')) {
+      return true;
+    }
+    return newWidth > this.sizesWidth_;
   }
 
   /** @override */
@@ -171,12 +254,14 @@ export class AmpImg extends BaseElement {
     return true;
   }
 
-  /** @override **/
+  /** @override */
   firstLayoutCompleted() {
     const placeholder = this.getPlaceholder();
-    if (placeholder &&
+    if (
+      placeholder &&
       placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
-      isExperimentOn(this.win, 'blurry-placeholder')) {
+      isExperimentOn(this.win, 'blurry-placeholder')
+    ) {
       setImportantStyles(placeholder, {'opacity': 0});
     } else {
       this.togglePlaceholder(false);
@@ -187,8 +272,10 @@ export class AmpImg extends BaseElement {
    * @private
    */
   hideFallbackImg_() {
-    if (!this.allowImgLoadFallback_
-      && this.img_.classList.contains('i-amphtml-ghost')) {
+    if (
+      !this.allowImgLoadFallback_ &&
+      this.img_.classList.contains('i-amphtml-ghost')
+    ) {
       this.getVsync().mutate(() => {
         this.img_.classList.remove('i-amphtml-ghost');
         this.toggleFallback(false);

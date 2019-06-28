@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DataAttributeDef, PlacementState} from './placement';
+import {PlacementState} from './placement';
 import {SizeInfoDef} from './ad-network-config';
 import {tryResolve} from '../../../src/utils/promise';
 import {user} from '../../../src/log';
@@ -31,7 +31,6 @@ const TAG = 'amp-auto-ads';
 export let StrategyResult;
 
 export class AdStrategy {
-
   /**
    * @param {!Array<!./placement.Placement>} placements
    * @param {!JsonObject<string, string>} baseAttributes Any attributes that
@@ -41,8 +40,13 @@ export class AdStrategy {
    * @param {!./ad-tracker.AdTracker} adTracker
    * @param {boolean} isResponsiveEnabled
    */
-  constructor(placements, baseAttributes, sizing, adTracker,
-    isResponsiveEnabled = false) {
+  constructor(
+    placements,
+    baseAttributes,
+    sizing,
+    adTracker,
+    isResponsiveEnabled = false
+  ) {
     this.availablePlacements_ = placements.slice(0);
 
     /** @private {!JsonObject<string, string>} */
@@ -100,19 +104,21 @@ export class AdStrategy {
       user().info(TAG, 'unable to fulfill ad strategy');
       return Promise.resolve(false);
     }
-    return nextPlacement.placeAd(
+    return nextPlacement
+      .placeAd(
         this.baseAttributes_,
         this.sizing_,
         this.adTracker_,
-        this.isResponsiveEnabled_)
-        .then(state => {
-          if (state == PlacementState.PLACED) {
-            this.adTracker_.addAd(nextPlacement.getAdElement());
-            this.adsPlaced_++;
-            return true;
-          } else {
-            return this.placeNextAd_();
-          }
-        });
+        this.isResponsiveEnabled_
+      )
+      .then(state => {
+        if (state == PlacementState.PLACED) {
+          this.adTracker_.addAd(nextPlacement.getAdElement());
+          this.adsPlaced_++;
+          return true;
+        } else {
+          return this.placeNextAd_();
+        }
+      });
   }
 }

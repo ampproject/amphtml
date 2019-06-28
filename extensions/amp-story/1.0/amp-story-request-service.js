@@ -16,12 +16,20 @@
 
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
-import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
+import {getChildJsonConfig} from '../../../src/json';
+import {isProtocolValid} from '../../../src/url';
 import {once} from '../../../src/utils/function';
-import {user} from '../../../src/log';
+import {registerServiceBuilder} from '../../../src/service';
+import {user, userAssert} from '../../../src/log';
 
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
+
+/** @private const {string} */
+export const BOOKEND_CREDENTIALS_ATTRIBUTE_NAME = 'data-credentials';
+
+/** @private @const {string} */
+const TAG = 'amp-story-request-service';
 
 /**
  * Service to send XHRs.
@@ -50,33 +58,56 @@ export class AmpStoryRequestService {
    * @private
    */
   loadBookendConfigImpl_() {
-    return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME);
-  }
-
-  /**
-   * @param {string} attributeName
-   * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @private
-   */
-  loadJsonFromAttribute_(attributeName) {
-    const bookendEl = childElementByTag(this.storyElement_,
-        'amp-story-bookend');
-
-    if (!bookendEl || !bookendEl.hasAttribute(attributeName)) {
+    const bookendEl = childElementByTag(
+      this.storyElement_,
+      'amp-story-bookend'
+    );
+    if (!bookendEl) {
       return Promise.resolve(null);
     }
 
-    const rawUrl = bookendEl.getAttribute(attributeName);
-    const opts = {};
-    opts.requireAmpResponseSourceOrigin = false;
+    if (bookendEl.hasAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME)) {
+      const rawUrl = bookendEl.getAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME);
+      const credentials = bookendEl.getAttribute(
+        BOOKEND_CREDENTIALS_ATTRIBUTE_NAME
+      );
+      return this.loadJsonFromAttribute_(rawUrl, credentials);
+    }
 
-    return Services.urlReplacementsForDoc(getAmpdoc(this.storyElement_))
-        .expandUrlAsync(user().assertString(rawUrl))
-        .then(url => this.xhr_.fetchJson(url, opts))
-        .then(response => {
-          user().assert(response.ok, 'Invalid HTTP response');
-          return response.json();
-        });
+    // Fallback. Check for an inline json config.
+    let config = null;
+    try {
+      config = getChildJsonConfig(bookendEl);
+    } catch (err) {}
+
+    return Promise.resolve(config);
+  }
+
+  /**
+   * @param {string} rawUrl
+   * @param {string|null} credentials
+   * @return {(!Promise<!JsonObject>|!Promise<null>)}
+   * @private
+   */
+  loadJsonFromAttribute_(rawUrl, credentials) {
+    const opts = {};
+
+    if (!isProtocolValid(rawUrl)) {
+      user().error(TAG, 'Invalid config url.');
+      return Promise.resolve(null);
+    }
+
+    if (credentials) {
+      opts.credentials = credentials;
+    }
+
+    return Services.urlReplacementsForDoc(this.storyElement_)
+      .expandUrlAsync(user().assertString(rawUrl))
+      .then(url => this.xhr_.fetchJson(url, opts))
+      .then(response => {
+        userAssert(response.ok, 'Invalid HTTP response');
+        return response.json();
+      });
   }
 }
 

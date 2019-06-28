@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Embeds a Yotpo on-site widget.
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,14 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-yotpo`"></a> `amp-yotpo`
+# amp-yotpo
+
+Embeds a <a href="https://support.yotpo.com/en/on-site/reviews-widget">Yotpo</a> on-site widget.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-        <td>Embeds a <a href="https://support.yotpo.com/en/on-site/reviews-widget">Yotpo</a> on-site widget.
-    </td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-yotpo" src="https://cdn.ampproject.org/v0/amp-yotpo-0.1.js">&lt;/script></code></td>
@@ -68,23 +72,21 @@ You can use the `amp-yotpo` extension to display [Yotpo on-site widgets](https:/
 
 ## Attributes
 
-##### data-app-key (required)
-
-Specifies the account app key. For example, `liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5`.
-
-##### data-widget-type (required)
-
-Specifies the type of widget to use. For example, `MainWidget`, `BottomLine`, etc.
-
-##### data-** (optional)
-
-Each Yotpo widget has optional data attributes. For example, the reviews widget has an optional attribute named `product-id`. Refer to [Yottpo's documentation](https://support.yotpo.com/en/on-site) for which attributes to specify.
-
-When using the `amp-yotpo` extension, for each corresponding Yotpo attribute prepend `data` to the attribute. For example, the `product-id` attribute becomes `data-product-id`.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>data-app-key (required)</strong></td>
+    <td>Specifies the account app key. For example, <code>liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-** (optional)</strong></td>
+    <td>Each Yotpo widget has optional data attributes. For example, the reviews widget has an optional attribute named <code>product-id</code>. Refer to <a href="https://support.yotpo.com/en/on-site">Yottpo's documentation</a> for which attributes to specify.<br>
+When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo attribute prepend <code>data</code> to the attribute. For example, the <code>product-id</code> attribute becomes <code>data-product-id</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Validation
 

@@ -33,8 +33,8 @@
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
+ *   ampCors: (boolean|undefined),
+ *   bypassInterceptorForDev: (boolean|undefined)
  * }}
  */
 var FetchInitDef;
@@ -45,17 +45,13 @@ var FetchInitDef;
  */
 var FetchRequestDef;
 
-/** @constructor **/
+/** @constructor */
 var FormDataWrapperInterface = function() {};
 
 FormDataWrapperInterface.prototype.entries = function() {};
 FormDataWrapperInterface.prototype.getFormData = function() {};
 
 FormData.prototype.entries = function () {};
-/**
- * @param {string} unusedName
- */
-FormData.prototype.delete = function (unusedName) {};
 
 /**
  * A type for Objects that can be JSON serialized or that come from
@@ -144,6 +140,7 @@ process.env.SERVE_MODE;
 window.IS_AMP_ALT;
 
 // Exposed to ads.
+// Preserve these filedNames so they can be accessed by 3p code.
 window.context = {};
 window.context.sentinel;
 window.context.clientId;
@@ -153,6 +150,24 @@ window.context.sourceUrl;
 window.context.experimentToggles;
 window.context.master;
 window.context.isMaster;
+window.context.ampcontextVersion;
+window.context.ampcontextFilepath
+window.context.canary;
+window.context.canonicalUrl;
+window.context.consentSharedData;
+window.context.container;
+window.context.domFingerprint;
+window.context.hidden;
+window.context.initialConsentState;
+window.context.initialConsentValue;
+window.context.location;
+window.context.mode;
+window.context.pageViewId;
+window.context.referrer;
+window.context.sourceUrl;
+window.context.startTime;
+window.context.tagName;
+
 
 // Service Holder
 window.services;
@@ -198,6 +213,8 @@ window.AMP.viewport.getWidth;
 window.AMP.attachShadowDoc;
 window.AMP.attachShadowDocAsStream;
 
+window.__AMP_TOP;
+window.__AMP_PARENT;
 
 /** @constructor */
 function AmpConfigType() {}
@@ -228,6 +245,8 @@ AmpConfigType.prototype.canary;
 AmpConfigType.prototype.runtime;
 /* @public {boolean} */
 AmpConfigType.prototype.test;
+/* @public {string|undefined} */
+AmpConfigType.prototype.spt;
 
 /** @type {!AmpConfigType}  */
 window.AMP_CONFIG;
@@ -280,6 +299,18 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function() {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.before = function(unusedDt, unusedInc) {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.after = function(unusedDt, unusedInc) {};
 
 /**
  * @dict
@@ -317,6 +348,32 @@ ReactDatesConstants.ANCHOR_LEFT;
 /** @const {string} */
 ReactDatesConstants.HORIZONTAL_ORIENTATION;
 
+// amp-inputmask externs
+/**
+ * @constructor
+ */
+var Inputmask = class {};
+
+/** @param {!Object} unusedOpts */
+Inputmask.extendAliases = function (unusedOpts) {};
+
+/** @param {!Object} unusedOpts */
+Inputmask.extendDefaults = function (unusedOpts) {};
+
+/** @param {!Element} unusedElement */
+Inputmask.prototype.mask = function (unusedElement) {};
+
+Inputmask.prototype.remove = function () {};
+
+/** @dict */
+window.AMP.dependencies = {};
+
+/**
+ * @param {!Element} unusedElement
+ * @return {!Inputmask}
+ */
+window.AMP.dependencies.inputmaskFactory = function(unusedElement) {};
+
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;
@@ -325,12 +382,6 @@ IntersectionObserverEntry.prototype.rootBounds;
 window.PerformancePaintTiming;
 window.PerformanceObserver;
 Object.prototype.entryTypes
-
-// Externed explicitly because this private property is read across
-// binaries.
-Element.prototype.implementation_ = {};
-Element.prototype.signals;
-window.whenSignal;
 
 /** @typedef {number}  */
 var time;
@@ -347,6 +398,37 @@ var UnlistenDef;
  * @typedef {!Element}
  */
 var AmpElement;
+
+/** @return {!Signals} */
+AmpElement.prototype.signals = function() {};
+
+var Signals = class {};
+/**
+  * @param {string} unusedName
+  * @return {number|!Error|null}
+  */
+Signals.prototype.get = function(unusedName) {};
+
+/**
+  * @param {string} unusedName
+  * @return {!Promise<time>}
+  */
+Signals.prototype.whenSignal = function(unusedName) {};
+
+/**
+  * @param {string} unusedName
+  * @param {time=} unusedOpt_time
+  */
+Signals.prototype.signal = function(unusedName, unusedOpt_time) {};
+
+/**
+  * @param {string} unusedName
+  * @param {!Error} unusedError
+  */
+Signals.prototype.rejectSignal = function(unusedName, unusedError) {};
+
+/** @param {string} unusedName */
+Signals.prototype.reset = function(unusedName) {};
 
 // Temp until we figure out forward declarations
 /** @constructor */
@@ -532,31 +614,6 @@ AMP.AmpAdUIHandler = class {
   constructor(baseInstance) {}
 };
 
-/*
-     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
- \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
-  \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
-   \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
-    \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
-
-  Any private property for BaseElement should be declared in
-  build-system/amp.extern.js, this is so closure compiler doesn't rename
-  the private properties of BaseElement since if it did there is a
-  possibility that the private property's new symbol in the core compilation
-  unit would collide with a renamed private property in the inheriting class
-  in extensions.
- */
-var SomeBaseElementLikeClass;
-SomeBaseElementLikeClass.prototype.layout_;
-
-/** @type {number} */
-SomeBaseElementLikeClass.prototype.layoutWidth_;
-
-/** @type {boolean} */
-SomeBaseElementLikeClass.prototype.inViewport_;
-
-SomeBaseElementLikeClass.prototype.actionMap_;
-
 AMP.BaseTemplate;
 
 AMP.RealTimeConfigManager;
@@ -643,6 +700,12 @@ let BindEvaluateBindingsResultDef;
  * @typedef {{result: BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
  */
 let BindEvaluateExpressionResultDef;
+
+/**
+ * Options for Bind.rescan().
+ * @typedef {{update: (boolean|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
+ */
+let BindRescanOptionsDef;
 
 /////////////////////////////
 ////// Web Anmomation externs

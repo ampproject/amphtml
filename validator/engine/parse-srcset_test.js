@@ -16,7 +16,7 @@
  *
  *  Credits:
  *    Original version of this file was derived from
- *    https://github.com/ampproject/amphtml/blob/master/test/functional/test-srcset.js
+ *    https://github.com/ampproject/amphtml/blob/master/test/unit/test-srcset.js
  */
 goog.provide('parse_srcset.ParseSrcsetTest');
 goog.require('parse_srcset.parseSrcset');

@@ -53,6 +53,30 @@ export const data = {
 }
 </script></body></html>`,
 
+  reserializedMissingOffset: `<!doctype html><html ⚡4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1 name=viewport><script async src=https://cdn.ampproject.org/amp4ads-v0.js></script><script async custom-element=amp-font src=https://cdn.ampproject.org/v0/amp-font-0.1.js></script><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>
+    amp-user-notification.amp-active {
+      opacity: 0;
+    }
+  </style><style amp4ads-boilerplate>body{visibility:hidden}</style></head><body>Hello, world.
+
+<script amp-ad-metadata type=application/json>
+{
+   "customElementExtensions" : [ "amp-font" ],
+   "customStylesheets" : [
+      {
+         "href" : "https://fonts.googleapis.com/css?family=Questrial"
+      }
+   ],
+   "extensions" : [
+      {
+         "custom-element" : "amp-font",
+         "src" : "https://cdn.ampproject.org/v0/amp-font-0.1.js"
+      }
+   ]
+}
+</script></body></html>`,
+
+
   reserializedMissingScriptTag: `<!doctype html><html ⚡4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1 name=viewport><script async src=https://cdn.ampproject.org/amp4ads-v0.js></script><script async custom-element=amp-font src=https://cdn.ampproject.org/v0/amp-font-0.1.js></script><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>
     amp-user-notification.amp-active {
       opacity: 0;

@@ -1,3 +1,10 @@
+---
+$category@: layout
+formats:
+  - websites
+teaser:
+  text: Wraps its children in a unique full-screen scrolling container allowing you to display a full-screen ad without taking up the entire viewport.
+---
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-fx-flying-carpet"></a> `amp-fx-flying-carpet`
+# amp-fx-flying-carpet
+
+A flying carpet wraps its children in a unique full-screen scrolling container. In particular, this allows you to display a full-screen ad without taking up the entire viewport, making for a better user experience.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>A flying carpet wraps its children in a unique full-screen scrolling container. In particular, this allows you to display a full-screen ad without taking up the entire viewport, making for a better user experience.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js">&lt;/script></code></td>
@@ -31,6 +36,9 @@ limitations under the License.
   </tr>
 </table>
 
+[tip type="note"]
+Check if your ad network permits use of flying carpets when implementing the `amp-fx-flying-carpet` to display adds. 
+[/tip]
 [TOC]
 
 ## Behavior
@@ -50,14 +58,17 @@ The following requirements are imposed on `amp-fx-flying-carpet` positioning:
  - It should be positioned so that its top can reach or be above the top of the last viewport when scrolled.
 
 ## Attributes
+<table>
+  <tr>
+    <td width="40%"><strong>height</strong></td>
+    <td>The height of the flying carpet's "window".</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
-##### height
-
-The height of the flying carpet's "window".
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Styling
 

@@ -16,12 +16,16 @@
 
 import {poll} from '../../../../../testing/iframe';
 
-describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {
-  // Extend timeout slightly for flakes on Windows environments
-  this.timeout(4000);
-  const extensions = ['amp-sidebar'];
+describe
+  .configure()
+  .skipSafari()
+  .skipEdge()
+  .run('amp-sidebar', function() {
+    // Extend timeout slightly for flakes on Windows environments
+    this.timeout(4000);
+    const extensions = ['amp-sidebar'];
 
-  const sidebarBody = `
+    const sidebarBody = `
   <amp-sidebar
     id="sidebar1"
     layout="nodisplay"
@@ -46,55 +50,71 @@ describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {
 
   <div id="dummy"></div>
   `;
-  describes.integration('sidebar focus', {
-    body: sidebarBody,
-    extensions,
-  }, env => {
-
-    let win;
-    beforeEach(() => {
-      win = env.win;
-    });
-
-    // TODO (#16157): this tests times out on Chrome Mobile Webview Android
-    it.configure().skipChrome().run('should focus on opener on close', () => {
-      const openerButton = win.document.getElementById('sidebarOpener');
-      const openedPromise = waitForSidebarOpen(win.document);
-      openerButton.click();
-      return openedPromise.then(() => {
-        const closerButton = win.document.getElementById('sidebarCloser');
-        const closedPromise = waitForSidebarClose(win.document);
-        closerButton.click();
-        return closedPromise;
-      }).then(() => {
-        expect(win.document.activeElement).to.equal(openerButton);
-      });
-    });
-
-    it.configure().skipIfPropertiesObfuscated().run(
-        'should not change scroll position after close', () => {
-          const openerButton = win.document.getElementById('sidebarOpener');
-          const sidebar = win.document.getElementById('sidebar1');
-          const viewport = sidebar.implementation_.getViewport();
-          const openedPromise = waitForSidebarOpen(win.document);
-          openerButton.click();
-          expect(viewport.getScrollTop()).to.equal(0);
-          return openedPromise.then(() => {
-            viewport.setScrollTop(1000);
-            expect(viewport.getScrollTop()).to.equal(1000);
-            const closerButton = win.document.getElementById('sidebarCloser');
-            const closedPromise = waitForSidebarClose(win.document);
-            closerButton.click();
-            return closedPromise;
-          }).then(() => {
-            // Firefox resets scroll to top on pop history
-            // Safari resets scroll to top somewhere unrelated to focus
-            // expect(viewport.getScrollTop()).to.equal(1000);
-            expect(win.document.activeElement).to.not.equal(openerButton);
-          });
+    describes.integration(
+      'sidebar focus',
+      {
+        body: sidebarBody,
+        extensions,
+      },
+      env => {
+        let win;
+        beforeEach(() => {
+          win = env.win;
         });
+
+        // TODO (#16157, #21999): this tests times out on FF and Chrome
+        it.configure()
+          .skipChrome()
+          .skipFirefox()
+          .run('should focus on opener on close', () => {
+            const openerButton = win.document.getElementById('sidebarOpener');
+            const openedPromise = waitForSidebarOpen(win.document);
+            openerButton.click();
+            return openedPromise
+              .then(() => {
+                const closerButton = win.document.getElementById(
+                  'sidebarCloser'
+                );
+                const closedPromise = waitForSidebarClose(win.document);
+                closerButton.click();
+                return closedPromise;
+              })
+              .then(() => {
+                expect(win.document.activeElement).to.equal(openerButton);
+              });
+          });
+
+        it.configure()
+          .skipIfPropertiesObfuscated()
+          .skipFirefox()
+          .run('should not change scroll position after close', () => {
+            const openerButton = win.document.getElementById('sidebarOpener');
+            const sidebar = win.document.getElementById('sidebar1');
+            const viewport = sidebar.implementation_.getViewport();
+            const openedPromise = waitForSidebarOpen(win.document);
+            openerButton.click();
+            expect(viewport.getScrollTop()).to.equal(0);
+            return openedPromise
+              .then(() => {
+                viewport.setScrollTop(1000);
+                expect(viewport.getScrollTop()).to.equal(1000);
+                const closerButton = win.document.getElementById(
+                  'sidebarCloser'
+                );
+                const closedPromise = waitForSidebarClose(win.document);
+                closerButton.click();
+                return closedPromise;
+              })
+              .then(() => {
+                // Firefox resets scroll to top on pop history
+                // Safari resets scroll to top somewhere unrelated to focus
+                // expect(viewport.getScrollTop()).to.equal(1000);
+                expect(win.document.activeElement).to.not.equal(openerButton);
+              });
+          });
+      }
+    );
   });
-});
 
 function waitForSidebarOpen(document) {
   return poll('wait for sidebar to open', () => {

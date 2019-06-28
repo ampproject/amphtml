@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Implements subscription-style access protocol for Subscribe with Google.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-subscriptions-google"></a> `amp-subscriptions-google`
+# amp-subscriptions-google
+
+Implements subscription-style access protocol for Subscribe with Google.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Implements subscription-style access protocol for Subscribe with Google.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>Beta.</td>
@@ -82,4 +87,74 @@ The `amp-subscriptions-google` is configured as part of `amp-subscriptions` conf
   </script>
 </head>
 ```
+## Entitlements pingback
+As described in [amp-subscriptions](../amp-subscriptions/amp-subscriptions.md#pingback-endpoint), if a `pingbackUrl` is specified by the local service, the entitlements response returned by the "winning" service will be sent to the  `pingbackUrl` via a POST request.
 
+If `subscribe.google.com` is the "winning" service, the request to the `pingbackUrl` will be of the following format:
+```
+{
+  "raw":"...",
+  "source":"google",
+  "service":"subscribe.google.com",
+  "granted":true,
+  "grantReason":"SUBSCRIBER",
+  "data":{
+    "source":"google",
+    "products":[ ... ],
+    "subscriptionToken":"..."
+  }
+}
+```
+Where `data` matches the [entitlements response](https://github.com/subscriptions-project/swg-js/blob/master/docs/entitlements-flow.md#entitlement-response) format.
+
+## Example with markup
+```
+<head>
+  ...
+  <script async custom-element="amp-subscriptions"
+  src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js"></script>
+  <script async custom-element="amp-subscriptions-google"
+  src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js"></script>
+  <script type="application/json" id="amp-subscriptions">
+  {
+    "services": [
+      {
+         // Local service configuration
+        "authorizationUrl": "https://...",
+        "pingbackUrl": "https://...",
+        "actions":{
+          "login": "https://...",
+          "subscribe": "https://..."
+        }
+      },
+      {
+        "serviceId": "subscribe.google.com"
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "NewsArticle",
+    {...},
+    "isAccessibleForFree": "False",
+    "publisher": {
+      "@type": "Organization",
+      "name": "The Norcal Tribune",
+      "logo": {...}
+    },
+    "hasPart": {
+      "@type": "WebPageElement",
+      "isAccessibleForFree": "False",
+      "cssSelector" : ".paywall"
+    },
+    "isPartOf": {
+      "@type": ["CreativeWork", "Product"],
+      "name" : "The Norcal Tribune",
+      "productID": "norcal_tribune.com:basic"
+    }
+  }
+  </script>
+</head>
+```

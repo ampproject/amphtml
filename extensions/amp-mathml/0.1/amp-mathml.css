@@ -16,4 +16,5 @@
 
 amp-mathml[inline] {
   display: inline-block;
+  vertical-align: middle;
 }

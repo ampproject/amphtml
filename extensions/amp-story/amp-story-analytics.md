@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-story-analytics"></a>AMP Story and Analytics
+# AMP Story and Analytics
 
 ## Story triggers
 
@@ -65,6 +65,14 @@ The `story-audio-muted` trigger is fired when the user initiates an interaction 
 ### Unmute trigger (`"on": "story-audio-unmuted"`)
 
 The `story-audio-unmuted` trigger is fired when the user initiates an interaction to unmute the audio for the current story.
+
+### Page attachment enter trigger (`"on": "story-page-attachment-enter"`)
+
+The `story-page-attachment-enter` trigger is fired when a page attachment is opened by the user.
+
+### Page attachment exit trigger (`"on": "story-page-attachment-exit"`)
+
+The `story-page-attachment-exit` trigger is fired when a page attachment is dismissed by the user.
 
 ## Story variables
 

@@ -15,61 +15,88 @@
  */
 
 import {AmpPixel} from '../../builtins/amp-pixel';
+import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
-import {
-  depositRequestUrl,
-  withdrawRequest,
-} from '../../testing/test-helper';
 
-describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
-  this.timeout(15000);
-
-  describes.integration('amp-pixel referrer integration test', {
-    body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
-  }, env => {
-    it('should keep referrer if no referrerpolicy specified', () => {
-      return withdrawRequest(env.win, 'has-referrer').then(request => {
-        expect(request.headers.referer).to.be.ok;
-      });
-    });
-  });
-
-  describes.integration('amp-pixel macro integration test', {
-    body: `<amp-pixel src="${depositRequestUrl(
-        'hello-world&title=TITLE&qp=QUERY_PARAM(a)')}">`,
-    params: {
-      a: 123,
+describe.configure().run('amp-pixel', function() {
+  describes.integration(
+    'amp-pixel macro integration test',
+    {
+      body: `<amp-pixel
+    src="${RequestBank.getUrl()}hello-world?title=TITLE&qp=QUERY_PARAM(a)">`,
+      params: {
+        a: 123,
+      },
     },
-  }, env => {
-    it('should expand the TITLE macro', () => {
-      return withdrawRequest(env.win, 'hello-world&title=AMP%20TEST&qp=123')
-          .then(request => {
-            expect(request.headers.host).to.be.ok;
-          });
-    });
-  });
-
-  describes.integration('amp-pixel no-referrer integration test', {
-    body: `<amp-pixel src="${depositRequestUrl('no-referrer')}"
-             referrerpolicy="no-referrer">`,
-  }, env => {
-    it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return withdrawRequest(env.win, 'no-referrer').then(request => {
-        expect(request.headers.referer).to.not.be.ok;
+    env => {
+      beforeEach(() => {
+        const browser = new BrowserController(env.win);
+        return browser.waitForElementBuild('amp-pixel');
       });
-    });
-  });
+
+      it('should expand the TITLE macro', () => {
+        return RequestBank.withdraw().then(req => {
+          expect(req.url).to.equal('/hello-world?title=AMP%20TEST&qp=123');
+          expect(req.headers.host).to.be.ok;
+        });
+      });
+    }
+  );
+
+  describes.integration(
+    'amp-pixel referrer integration test',
+    {
+      body: `<amp-pixel src="${RequestBank.getUrl()}">`,
+    },
+    env => {
+      beforeEach(() => {
+        const browser = new BrowserController(env.win);
+        return browser.waitForElementBuild('amp-pixel');
+      });
+
+      it('should keep referrer if no referrerpolicy specified', () => {
+        return RequestBank.withdraw().then(req => {
+          expect(req.url).to.equal('/');
+          expect(req.headers.referer).to.be.ok;
+        });
+      });
+    }
+  );
+
+  describes.integration(
+    'amp-pixel no-referrer integration test',
+    {
+      body: `<amp-pixel src="${RequestBank.getUrl()}"
+             referrerpolicy="no-referrer">`,
+    },
+    env => {
+      beforeEach(() => {
+        const browser = new BrowserController(env.win);
+        return browser.waitForElementBuild('amp-pixel');
+      });
+
+      it('should remove referrer if referrerpolicy=no-referrer', () => {
+        return RequestBank.withdraw().then(req => {
+          expect(req.url).to.equal('/');
+          expect(req.headers.referer).to.not.be.ok;
+        });
+      });
+    }
+  );
 });
 
 describes.fakeWin('amp-pixel with img (inabox)', {amp: true}, env => {
   it('should not write image', () => {
     const src = 'https://foo.com/tracker/foo';
-    const pixelElem =
-        createElementWithAttributes(env.win.document, 'amp-pixel',
-            {src, 'i-amphtml-ssr': ''});
+    const pixelElem = createElementWithAttributes(
+      env.win.document,
+      'amp-pixel',
+      {src, 'i-amphtml-ssr': ''}
+    );
     pixelElem.appendChild(
-        createElementWithAttributes(env.win.document, 'img', {src}));
+      createElementWithAttributes(env.win.document, 'img', {src})
+    );
     env.win.document.body.appendChild(pixelElem);
     const viewer = Services.viewerForDoc(env.win.document);
     env.sandbox.stub(viewer, 'whenFirstVisible').callsFake(() => {

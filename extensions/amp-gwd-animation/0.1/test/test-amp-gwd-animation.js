@@ -22,31 +22,25 @@ import {
   GWD_TIMELINE_EVENT,
   PlaybackCssClass,
 } from '../amp-gwd-animation-impl';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {
-  GWD_PAGEDECK_ID,
-  TAG,
-  addAction,
-} from '../amp-gwd-animation';
+import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
 import {Services} from '../../../../src/services';
 import {createCustomEvent} from '../../../../src/event-helper';
-import {getServiceForDoc} from '../../../../src/service';
+import {getExistingServiceForDocInEmbedScope} from '../../../../src/service';
 
-describe('AMP GWD Animation', () => {
+describes.sandboxed('AMP GWD Animation', {}, () => {
   /**
    * Creates a test amp-gwd-animation element in the given document.
-   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Document} root
    * @param {!Object} attrs Attributes to set on the element.
+   * @return {!Promise}
    */
-  function createGwdAnimationElement(ampdoc, attrs) {
-    const element =
-        ampdoc.getBody().ownerDocument.createElement(TAG);
+  function createGwdAnimationElement(root, attrs) {
+    const element = root.createElement(TAG);
     for (const attr in attrs) {
       element.setAttribute(attr, attrs[attr]);
     }
-    ampdoc.getBody().appendChild(element);
-    element.build();
-    return element;
+    root.body.appendChild(element);
+    return element.build().then(() => element);
   }
 
   /**
@@ -69,29 +63,44 @@ describe('AMP GWD Animation', () => {
     });
   }
 
-  describes.repeated('in single and shadow doc', {
-    'single ampdoc': {ampdoc: 'single'},
-    'shadow ampdoc': {ampdoc: 'shadow'},
-  }, (name, variant) => {
+  describes.repeated(
+    '',
+    {
+      'in top-level document': {ampdoc: 'single'},
+      'in FIE document': {ampdoc: 'fie'},
+    },
+    (name, variant) => {
+      describes.realWin(
+        '',
+        {
+          amp: {
+            ampdoc: variant.ampdoc,
+            extensions: ['amp-gwd-animation'],
+          },
+        },
+        env => {
+          let sandbox;
+          let ampdoc;
+          let element;
+          let impl;
+          let page1Elem;
+          let embed;
+          let win;
+          let doc;
+          let runtime;
 
-    describes.realWin('in iframe', {
-      amp: {
-        ampdoc: variant.ampdoc,
-        extensions: ['amp-gwd-animation'],
-      },
-    }, env => {
-      let ampdoc;
-      let element;
-      let impl;
-      let page1Elem;
-      let sandbox;
+          beforeEach(() => {
+            sandbox = sinon.sandbox;
+            ampdoc = env.ampdoc;
+            embed = env.embed;
+            win = variant.ampdoc == 'fie' ? embed.win : ampdoc.win;
+            doc =
+              variant.ampdoc == 'fie'
+                ? embed.win.document
+                : ampdoc.getRootNode();
 
-      beforeEach(() => {
-        sandbox = sinon.sandbox;
-        ampdoc = env.ampdoc;
-
-        ampdoc.getBody().innerHTML =
-            `<amp-carousel id="pagedeck"
+            // Create a test amp-carousel GWD page deck.
+            doc.body.innerHTML = `<amp-carousel id="pagedeck"
                 on="slideChange:node1.hide;event1:node1.show">
               <div id="page1" class="${GWD_PAGE_WRAPPER_CLASS}">
                 <div>
@@ -104,441 +113,450 @@ describe('AMP GWD Animation', () => {
               <div id="page2" class="${GWD_PAGE_WRAPPER_CLASS}"></div>
             </amp-carousel>`;
 
-        element = createGwdAnimationElement(ampdoc, {
-          'id': 'gwdAnim',
-          'timeline-event-prefix': 'tl_',
-          'layout': 'nodisplay',
-        });
+            // Create a test amp-gwd-animation element.
+            const config = {
+              'id': 'gwdAnim',
+              'timeline-event-prefix': 'tl_',
+              'layout': 'nodisplay',
+            };
+            return createGwdAnimationElement(doc, config).then(el => {
+              element = el;
+              impl = element.implementation_;
+              runtime = getExistingServiceForDocInEmbedScope(
+                element,
+                GWD_SERVICE_NAME
+              );
+              page1Elem = doc.getElementById('page1');
+            });
+          });
 
-        impl = element.implementation_;
-        page1Elem = ampdoc.getRootNode().getElementById('page1');
+          afterEach(() => {
+            doc.body.innerHTML = '';
+          });
 
-        // Manually invoke initialize_(). This is normally done automatically on
-        // bodyAvailable, but bodyAvailable fires before beforeEach so it's
-        // necessary to call it a second time once the test DOM is actually
-        // ready so the initialization can perform setup on the DOM.
-        const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
-        runtime.initialize_();
-      });
-
-      afterEach(() => {
-        ampdoc.getBody().innerHTML = '';
-      });
-
-      // TODO(#7846): This test case verifies the GWD runtime disables itself
-      // initially. It skips doing so for now because the AMP runtime does not
-      // yet invoke setEnabled. Uncomment the test case when this integration is
-      // complete.
-      /*
+          // TODO(#7846): This test case verifies the GWD runtime disables itself
+          // initially. It skips doing so for now because the AMP runtime does not
+          // yet invoke setEnabled. Uncomment the test case when this integration is
+          // complete.
+          /*
       it('should immediately disable animations', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          expect(ampdoc.getBody().classList.contains(ANIMATIONS_DISABLED_CLASS))
-              .to.be.true;
+        return ampdoc.waitForBodyOpen().then(() => {
+          expect(doc.body.classList.contains(ANIMATIONS_DISABLED_CLASS))
+            .to.be.true;
         });
       });
       */
 
-      it('should initially enable animations on GWD page 1', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          // Page 1 should have been enabled.
-          const page1 = ampdoc.getRootNode().getElementById('page1');
-          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+          it('should initially enable animations on GWD page 1', () => {
+            // Page 1 should have been enabled.
+            const page1 = doc.getElementById('page1');
+            expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
 
-          // Page 2 should remain unaffected.
-          const page2 = ampdoc.getRootNode().getElementById('page2');
-          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
-        });
-      });
-
-      it('should install slideChange listeners on the GWD pagedeck', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          const pagedeck = ampdoc.getRootNode().getElementById(GWD_PAGEDECK_ID);
-          expect(pagedeck.getAttribute('on')).to.contain('setCurrentPage');
-          // @see addAction test case below.
-        });
-      });
-
-      it('should change the current page on pagedeck slideChange', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          const pagedeck = ampdoc.getRootNode().getElementById(GWD_PAGEDECK_ID);
-          const page1 = ampdoc.getRootNode().getElementById('page1');
-          const page2 = ampdoc.getRootNode().getElementById('page2');
-
-          // Verify the first page was activated on initialization.
-          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
-
-          // Trigger a setCurrentPage action as though it originated from a
-          // pagedeck slideChange event and verify that page 2 is activated.
-          const setCurrentPageInvocation = {
-            method: 'setCurrentPage',
-            args: {index: 1},
-            source: pagedeck,
-            caller: pagedeck,
-            satisfiesTrust: () => true,
-          };
-          impl.executeAction(setCurrentPageInvocation);
-
-          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
-          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
-
-          // Simulate setCurrentPage from a slideChange event which originated
-          // from some other carousel. There should be no page change.
-          const otherSetCurrentPageInvocation = {
-            method: 'setCurrentPage',
-            args: {index: 0},
-            source: null,
-            caller: pagedeck,
-            satisfiesTrust: () => true,
-          };
-          impl.executeAction(otherSetCurrentPageInvocation);
-
-          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
-          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
-
-          // Remove the pagedeck element and verify that triggering
-          // setCurrentPage does not throw errors. Set a null source on the
-          // dummy invocation to test the comparison to a null pagedeck
-          // reference.
-          pagedeck.remove();
-          otherSetCurrentPageInvocation.source = null;
-          impl.executeAction(otherSetCurrentPageInvocation);
-        });
-      });
-
-      it('should activate and deactivate pages', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
-          const page1 = ampdoc.getRootNode().getElementById('page1');
-          const grandchild = page1.querySelector('#grandchild');
-          const page2 = ampdoc.getRootNode().getElementById('page2');
-
-          // Activate page 1.
-          runtime.setCurrentPage(0);
-
-          // Animations should be enabled on page1 only.
-          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
-          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
-
-          // Set an active label animation, goto counters, and a pause on
-          // several descendant elements and the page element itself to test
-          // that this state is reset when the page is deactivated.
-          page1.classList.add(PlaybackCssClass.PAUSE);
-          grandchild.classList.add(PlaybackCssClass.PAUSE);
-          page1[GOTO_COUNTER_PROP] = {};
-          grandchild[GOTO_COUNTER_PROP] = {};
-          page1.setAttribute(CURRENT_LABEL_ANIMATION_ATTR, 'someLabel1');
-          grandchild.setAttribute(CURRENT_LABEL_ANIMATION_ATTR, 'someLabel2');
-
-          // Change to page 2.
-          runtime.setCurrentPage(1);
-
-          // Animations should be enabled on page2 only.
-          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
-          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
-
-          // Pause, goto counters, and current label animation data should have
-          // been cleared from all elements under page1, including the page
-          // itself.
-          expect(page1.classList.contains(PlaybackCssClass.PAUSE)).to.be.false;
-          expect(grandchild.classList.contains(PlaybackCssClass.PAUSE))
-              .to.be.false;
-          expect(page1).to.not.have.property(GOTO_COUNTER_PROP);
-          expect(grandchild).to.not.have.property(GOTO_COUNTER_PROP);
-          expect(page1.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR)).to.be.false;
-          expect(grandchild.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR))
-              .to.be.false;
-        });
-      });
-
-      it('should disable and re-enable', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          getServiceForDoc(ampdoc, GWD_SERVICE_NAME).setEnabled(true);
-          expect(ampdoc.getBody().classList.contains(ANIMATIONS_DISABLED_CLASS))
-              .to.be.false;
-
-          getServiceForDoc(ampdoc, GWD_SERVICE_NAME).setEnabled(false);
-          expect(ampdoc.getBody().classList.contains(ANIMATIONS_DISABLED_CLASS))
-              .to.be.true;
-        });
-      });
-
-      it('should execute play', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          // Pause an animation to test resuming it.
-          const pauseInvocation = {
-            method: 'pause',
-            args: {id: 'page1'},
-            satisfiesTrust: () => true,
-          };
-          impl.executeAction(pauseInvocation);
-
-          const playInvocation = {
-            method: 'play',
-            args: {id: 'page1'},
-            satisfiesTrust: () => true,
-          };
-          impl.executeAction(playInvocation);
-          expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE))
-              .to.be.false;
-
-          // Repeated play invocations should have no change.
-          impl.executeAction(playInvocation);
-          expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE))
-              .to.be.false;
-
-          // Test handling missing arguments.
-          invokeWithSomeArgsUndefined(impl, playInvocation);
-        });
-      });
-
-      it('should execute pause', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          const invocation = {
-            method: 'pause',
-            args: {id: 'page1'},
-            satisfiesTrust: () => true,
-          };
-
-          impl.executeAction(invocation);
-          expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE))
-              .to.be.true;
-
-          // Repeated pause invocations should have no change.
-          impl.executeAction(invocation);
-          expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE))
-              .to.be.true;
-
-          // Test handling missing arguments.
-          invokeWithSomeArgsUndefined(impl, invocation);
-        });
-      });
-
-      it('should execute togglePlay', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          const invocation = {
-            method: 'togglePlay',
-            args: {id: 'page1'},
-            satisfiesTrust: () => true,
-          };
-
-          impl.executeAction(invocation);
-          expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE))
-              .to.be.true;
-
-          impl.executeAction(invocation);
-          expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE))
-              .to.be.false;
-
-          // Test handling missing arguments.
-          invokeWithSomeArgsUndefined(impl, invocation);
-        });
-      });
-
-      it('should execute gotoAndPlay', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          const invocation = {
-            method: 'gotoAndPlay',
-            args: {id: 'page1', label: 'foo'},
-            satisfiesTrust: () => true,
-          };
-          impl.executeAction(invocation);
-          expect(page1Elem.classList.contains('foo')).to.be.true;
-          expect(page1Elem.getAttribute(CURRENT_LABEL_ANIMATION_ATTR))
-              .to.equal('foo');
-
-          // Repeated invocations should have no effect (animation will be
-          // restarted, however).
-          impl.executeAction(invocation);
-          expect(page1Elem.classList.contains('foo')).to.be.true;
-          expect(page1Elem.getAttribute(CURRENT_LABEL_ANIMATION_ATTR))
-              .to.equal('foo');
-
-          // Change to a different label.
-          invocation.args.label = 'bar';
-          impl.executeAction(invocation);
-          expect(page1Elem.classList.contains('foo')).to.be.false;
-          expect(page1Elem.classList.contains('bar')).to.be.true;
-          expect(page1Elem.getAttribute(CURRENT_LABEL_ANIMATION_ATTR))
-              .to.equal('bar');
-
-          // Test handling missing arguments.
-          invokeWithSomeArgsUndefined(impl, invocation);
-        });
-      });
-
-      it('should execute gotoAndPause', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          // Test handling missing arguments.
-          const invocation = {
-            method: 'gotoAndPause',
-            args: {id: 'page1', label: 'foo'},
-            satisfiesTrust: () => true,
-          };
-          invokeWithSomeArgsUndefined(impl, invocation);
-
-          // gotoAndPause invokes a pause after a short delay, but waiting for
-          // this time to pass makes the test flaky. Stub setTimeout to
-          // execute the callback synchronously.
-          const origSetTimeout = ampdoc.win.setTimeout;
-          ampdoc.win.setTimeout = func => func();
-
-          // Test a valid gotoAndPause invocation. Verify animation was
-          // switched to the label and has been paused.
-          impl.executeAction(invocation);
-          expect(page1Elem.classList.contains('foo')).to.be.true;
-          expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE))
-              .to.be.true;
-
-          ampdoc.win.setTimeout = origSetTimeout;
-        });
-      });
-
-      it('should execute gotoAndPlayNTimes', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          const testEvent = createCustomEvent(
-              ampdoc.win, GWD_TIMELINE_EVENT, {'eventName': 'event-1'});
-
-          // Invoking gotoAndPlayNTimes with a negative N value is a no-op.
-          const invocationWithBadNValue = {
-            method: 'gotoAndPlayNTimes',
-            args: {id: 'page1', label: 'foo', N: -5},
-            event: testEvent,
-            satisfiesTrust: () => true,
-          };
-
-          allowConsoleError(() => {
-            impl.executeAction(invocationWithBadNValue);
+            // Page 2 should remain unaffected.
+            const page2 = doc.getElementById('page2');
+            expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
           });
-          expect(page1Elem.classList.contains('foo')).to.be.false;
 
+          it('should install slideChange listeners on the GWD pagedeck', () => {
+            const pagedeck = doc.getElementById(GWD_PAGEDECK_ID);
+            expect(pagedeck.getAttribute('on')).to.contain('setCurrentPage');
+            // @see addAction test case below.
+          });
 
-          // Initialize a valid gotoAndPlayNTimes invocation from some event.
-          const invocation = {
-            method: 'gotoAndPlayNTimes',
-            args: {id: 'page1', label: 'foo', N: 2},
-            event: testEvent,
-            satisfiesTrust: () => true,
-          };
+          it('should change the current page on pagedeck slideChange', () => {
+            const pagedeck = doc.getElementById(GWD_PAGEDECK_ID);
+            const page1 = doc.getElementById('page1');
+            const page2 = doc.getElementById('page2');
 
-          // gotoAndPlay call #1 from 'event-1'.
-          impl.executeAction(invocation);
-          expect(page1Elem.classList.contains('foo')).to.be.true;
+            // Verify the first page was activated on initialization.
+            expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
 
-          page1Elem.classList.remove('foo');
+            // Trigger a setCurrentPage action as though it originated from a
+            // pagedeck slideChange event and verify that page 2 is activated.
+            const setCurrentPageInvocation = {
+              method: 'setCurrentPage',
+              args: {index: 1},
+              source: pagedeck,
+              caller: pagedeck,
+              satisfiesTrust: () => true,
+            };
+            impl.executeAction(setCurrentPageInvocation);
 
-          // gotoAndPlay call #2 from 'event-1'.
-          impl.executeAction(invocation);
-          expect(page1Elem.classList.contains('foo')).to.be.true;
+            expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+            expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
 
-          page1Elem.classList.remove('foo');
+            // Simulate setCurrentPage from a slideChange event which originated
+            // from some other carousel. There should be no page change.
+            const otherSetCurrentPageInvocation = {
+              method: 'setCurrentPage',
+              args: {index: 0},
+              source: null,
+              caller: pagedeck,
+              satisfiesTrust: () => true,
+            };
+            impl.executeAction(otherSetCurrentPageInvocation);
 
-          // gotoAndPlay call #3 from 'event-1'. The number of invocations
-          // from event 'event-1' is now past the specified max count, so this
-          // and subsequent gotoAndPlayNTimes invocations from this event should
-          // have no effect.
-          impl.executeAction(invocation);
-          impl.executeAction(invocation);
-          expect(page1Elem.classList.contains('foo')).to.be.false;
+            expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+            expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
 
-          // gotoAndPlayNTimes invocations originating from a different timeline
-          // event begin their own counters.
-          const testEvent2 = createCustomEvent(
-              ampdoc.win, GWD_TIMELINE_EVENT, {'eventName': 'event-2'});
-          const invocationFromEvent2 = {
-            method: 'gotoAndPlayNTimes',
-            args: {id: 'page1', label: 'foo', N: 1},
-            event: testEvent2,
-            satisfiesTrust: () => true,
-          };
+            // Remove the pagedeck element and verify that triggering
+            // setCurrentPage does not throw errors. Set a null source on the
+            // dummy invocation to test the comparison to a null pagedeck
+            // reference.
+            pagedeck.remove();
+            otherSetCurrentPageInvocation.source = null;
+            impl.executeAction(otherSetCurrentPageInvocation);
+          });
 
-          impl.executeAction(invocationFromEvent2);
-          expect(page1Elem.classList.contains('foo')).to.be.true;
+          it('should activate and deactivate pages', () => {
+            const page1 = doc.getElementById('page1');
+            const grandchild = page1.querySelector('#grandchild');
+            const page2 = doc.getElementById('page2');
 
-          page1Elem.classList.remove('foo');
+            // Activate page 1.
+            runtime.setCurrentPage(0);
 
-          // Counter for 'event-2' has now run out; no more gotoAndPlays may
-          // execute.
-          impl.executeAction(invocationFromEvent2);
-          expect(page1Elem.classList.contains('foo')).to.be.false;
+            // Animations should be enabled on page1 only.
+            expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+            expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
 
-          // Test handling missing arguments.
-          invokeWithSomeArgsUndefined(impl, invocation);
-        });
-      });
+            // Set an active label animation, goto counters, and a pause on
+            // several descendant elements and the page element itself to test
+            // that this state is reset when the page is deactivated.
+            page1.classList.add(PlaybackCssClass.PAUSE);
+            grandchild.classList.add(PlaybackCssClass.PAUSE);
+            page1[GOTO_COUNTER_PROP] = {};
+            grandchild[GOTO_COUNTER_PROP] = {};
+            page1.setAttribute(CURRENT_LABEL_ANIMATION_ATTR, 'someLabel1');
+            grandchild.setAttribute(CURRENT_LABEL_ANIMATION_ATTR, 'someLabel2');
 
-      it('should trigger timeline events', () => {
-        const triggeredAmpEventNames = [];
-        const triggeredEvents = [];
-        sandbox.stub(Services.actionServiceForDoc(ampdoc), 'trigger').callsFake(
-            (target, name, event) => {
-              triggeredAmpEventNames.push(name);
-              triggeredEvents.push(event);
+            // Change to page 2.
+            runtime.setCurrentPage(1);
+
+            // Animations should be enabled on page2 only.
+            expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+            expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+
+            // Pause, goto counters, and current label animation data should have
+            // been cleared from all elements under page1, including the page
+            // itself.
+            expect(page1.classList.contains(PlaybackCssClass.PAUSE)).to.be
+              .false;
+            expect(grandchild.classList.contains(PlaybackCssClass.PAUSE)).to.be
+              .false;
+            expect(page1).to.not.have.property(GOTO_COUNTER_PROP);
+            expect(grandchild).to.not.have.property(GOTO_COUNTER_PROP);
+            expect(page1.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR)).to.be
+              .false;
+            expect(grandchild.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR)).to.be
+              .false;
+          });
+
+          it('should disable and re-enable', () => {
+            runtime.setEnabled(true);
+            expect(doc.body.classList.contains(ANIMATIONS_DISABLED_CLASS)).to.be
+              .false;
+
+            runtime.setEnabled(false);
+            expect(doc.body.classList.contains(ANIMATIONS_DISABLED_CLASS)).to.be
+              .true;
+          });
+
+          it('should execute play', () => {
+            // Pause an animation to test resuming it.
+            const pauseInvocation = {
+              method: 'pause',
+              args: {id: 'page1'},
+              satisfiesTrust: () => true,
+            };
+            impl.executeAction(pauseInvocation);
+
+            const playInvocation = {
+              method: 'play',
+              args: {id: 'page1'},
+              satisfiesTrust: () => true,
+            };
+            impl.executeAction(playInvocation);
+            expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE)).to.be
+              .false;
+
+            // Repeated play invocations should have no change.
+            impl.executeAction(playInvocation);
+            expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE)).to.be
+              .false;
+
+            // Test handling missing arguments.
+            invokeWithSomeArgsUndefined(impl, playInvocation);
+          });
+
+          it('should execute pause', () => {
+            const invocation = {
+              method: 'pause',
+              args: {id: 'page1'},
+              satisfiesTrust: () => true,
+            };
+
+            impl.executeAction(invocation);
+            expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE)).to.be
+              .true;
+
+            // Repeated pause invocations should have no change.
+            impl.executeAction(invocation);
+            expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE)).to.be
+              .true;
+
+            // Test handling missing arguments.
+            invokeWithSomeArgsUndefined(impl, invocation);
+          });
+
+          it('should execute togglePlay', () => {
+            const invocation = {
+              method: 'togglePlay',
+              args: {id: 'page1'},
+              satisfiesTrust: () => true,
+            };
+
+            impl.executeAction(invocation);
+            expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE)).to.be
+              .true;
+
+            impl.executeAction(invocation);
+            expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE)).to.be
+              .false;
+
+            // Test handling missing arguments.
+            invokeWithSomeArgsUndefined(impl, invocation);
+          });
+
+          it('should execute gotoAndPlay', () => {
+            const invocation = {
+              method: 'gotoAndPlay',
+              args: {id: 'page1', label: 'foo'},
+              satisfiesTrust: () => true,
+            };
+            impl.executeAction(invocation);
+            expect(page1Elem.classList.contains('foo')).to.be.true;
+            expect(
+              page1Elem.getAttribute(CURRENT_LABEL_ANIMATION_ATTR)
+            ).to.equal('foo');
+
+            // Repeated invocations should have no effect (animation will be
+            // restarted, however).
+            impl.executeAction(invocation);
+            expect(page1Elem.classList.contains('foo')).to.be.true;
+            expect(
+              page1Elem.getAttribute(CURRENT_LABEL_ANIMATION_ATTR)
+            ).to.equal('foo');
+
+            // Change to a different label.
+            invocation.args.label = 'bar';
+            impl.executeAction(invocation);
+            expect(page1Elem.classList.contains('foo')).to.be.false;
+            expect(page1Elem.classList.contains('bar')).to.be.true;
+            expect(
+              page1Elem.getAttribute(CURRENT_LABEL_ANIMATION_ATTR)
+            ).to.equal('bar');
+
+            // Test handling missing arguments.
+            invokeWithSomeArgsUndefined(impl, invocation);
+          });
+
+          it('should execute gotoAndPause', () => {
+            // Test handling missing arguments.
+            const invocation = {
+              method: 'gotoAndPause',
+              args: {id: 'page1', label: 'foo'},
+              satisfiesTrust: () => true,
+            };
+            invokeWithSomeArgsUndefined(impl, invocation);
+
+            // gotoAndPause invokes a pause after a short delay, but waiting for
+            // this time to pass makes the test flaky. Stub setTimeout to
+            // execute the callback synchronously.
+            const origSetTimeout = win.setTimeout;
+            win.setTimeout = func => func();
+
+            // Test a valid gotoAndPause invocation. Verify animation was
+            // switched to the label and has been paused.
+            impl.executeAction(invocation);
+            expect(page1Elem.classList.contains('foo')).to.be.true;
+            expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE)).to.be
+              .true;
+
+            win.setTimeout = origSetTimeout;
+          });
+
+          it('should execute gotoAndPlayNTimes', () => {
+            const testEvent = createCustomEvent(win, GWD_TIMELINE_EVENT, {
+              'eventName': 'event-1',
             });
 
-        return ampdoc.whenBodyAvailable().then(() => {
-          const animationendEvent =
-              new AnimationEvent('animationend', {bubbles: true});
+            // Invoking gotoAndPlayNTimes with a negative N value is a no-op.
+            const invocationWithBadNValue = {
+              method: 'gotoAndPlayNTimes',
+              args: {id: 'page1', label: 'foo', N: -5},
+              event: testEvent,
+              satisfiesTrust: () => true,
+            };
 
-          // Dispatch `animationend` events on GWD event elements and on a
-          // non-event element (to test it is ignored).
-          ampdoc.getRootNode().getElementById('event1').dispatchEvent(
-              animationendEvent);
-          ampdoc.getRootNode().getElementById('event2').dispatchEvent(
-              animationendEvent);
-          ampdoc.getRootNode().getElementById('not-an-event').dispatchEvent(
-              animationendEvent);
+            allowConsoleError(() => {
+              impl.executeAction(invocationWithBadNValue);
+            });
+            expect(page1Elem.classList.contains('foo')).to.be.false;
 
-          expect(triggeredAmpEventNames)
-              .to.deep.equal(['tl_event-1', 'tl_event-2']);
-          expect(triggeredEvents.map(event => event.detail.eventName))
-              .to.deep.equal(['event-1', 'event-2']);
-        });
+            // Initialize a valid gotoAndPlayNTimes invocation from some event.
+            const invocation = {
+              method: 'gotoAndPlayNTimes',
+              args: {id: 'page1', label: 'foo', N: 2},
+              event: testEvent,
+              satisfiesTrust: () => true,
+            };
 
-        it('should get the receiver element by id if it exists', () => {
-          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
+            // gotoAndPlay call #1 from 'event-1'.
+            impl.executeAction(invocation);
+            expect(page1Elem.classList.contains('foo')).to.be.true;
 
-          expect(runtime.getReceiver('document.body')).to.equal(
-              ampdoc.getBody());
-          expect(runtime.getReceiver('page1')).to.equal(page1Elem);
-          expect(runtime.getReceiver('nonexistentElement')).to.be.null;
-        });
-      });
+            page1Elem.classList.remove('foo');
+
+            // gotoAndPlay call #2 from 'event-1'.
+            impl.executeAction(invocation);
+            expect(page1Elem.classList.contains('foo')).to.be.true;
+
+            page1Elem.classList.remove('foo');
+
+            // gotoAndPlay call #3 from 'event-1'. The number of invocations
+            // from event 'event-1' is now past the specified max count, so this
+            // and subsequent gotoAndPlayNTimes invocations from this event should
+            // have no effect.
+            impl.executeAction(invocation);
+            impl.executeAction(invocation);
+            expect(page1Elem.classList.contains('foo')).to.be.false;
+
+            // gotoAndPlayNTimes invocations originating from a different timeline
+            // event begin their own counters.
+            const testEvent2 = createCustomEvent(
+              ampdoc.win,
+              GWD_TIMELINE_EVENT,
+              {'eventName': 'event-2'}
+            );
+            const invocationFromEvent2 = {
+              method: 'gotoAndPlayNTimes',
+              args: {id: 'page1', label: 'foo', N: 1},
+              event: testEvent2,
+              satisfiesTrust: () => true,
+            };
+
+            impl.executeAction(invocationFromEvent2);
+            expect(page1Elem.classList.contains('foo')).to.be.true;
+
+            page1Elem.classList.remove('foo');
+
+            // Counter for 'event-2' has now run out; no more gotoAndPlays may
+            // execute.
+            impl.executeAction(invocationFromEvent2);
+            expect(page1Elem.classList.contains('foo')).to.be.false;
+
+            // Test handling missing arguments.
+            invokeWithSomeArgsUndefined(impl, invocation);
+          });
+
+          it('should trigger timeline events', () => {
+            const triggeredAmpEventNames = [];
+            const triggeredEvents = [];
+
+            const actionService = Services.actionServiceForDoc(element);
+            sandbox
+              .stub(actionService, 'trigger')
+              .callsFake((target, name, event) => {
+                triggeredAmpEventNames.push(name);
+                triggeredEvents.push(event);
+              });
+
+            const animationendEvent = new AnimationEvent('animationend', {
+              bubbles: true,
+            });
+
+            // Dispatch `animationend` events on GWD event elements and on a
+            // non-event element (to test it is ignored).
+            doc.getElementById('event1').dispatchEvent(animationendEvent);
+            doc.getElementById('event2').dispatchEvent(animationendEvent);
+            doc.getElementById('not-an-event').dispatchEvent(animationendEvent);
+
+            expect(triggeredAmpEventNames).to.deep.equal([
+              'tl_event-1',
+              'tl_event-2',
+            ]);
+            expect(
+              triggeredEvents.map(event => event.detail.eventName)
+            ).to.deep.equal(['event-1', 'event-2']);
+          });
+
+          it('should get the receiver element by id if it exists', () => {
+            expect(runtime.getReceiver('document.body')).to.equal(doc.body);
+            expect(runtime.getReceiver('page1')).to.equal(page1Elem);
+
+            allowConsoleError(() => {
+              expect(runtime.getReceiver('nonexistentElement')).to.be.null;
+            });
+          });
+        }
+      );
+    }
+  );
+
+  describe('addAction', () => {
+    let element;
+    let actionService;
+
+    beforeEach(() => {
+      actionService = {setActions: sandbox.stub()};
+      element = document.createElement('div');
+      sandbox
+        .stub(Services, 'actionServiceForDoc')
+        .withArgs(element)
+        .returns(actionService);
     });
-  });
-});
 
-describe('addAction', () => {
-  let ampdoc;
+    it('should insert when no existing actions', () => {
+      const target = document.createElement('div');
+      addAction(element, target, 'event1', 'node1.foo()');
+      expect(actionService.setActions).calledWith(target, 'event1:node1.foo()');
+    });
 
-  beforeEach(() => {
-    ampdoc = new AmpDocSingle(window);
-  });
+    it('should insert when actions defined for this event', () => {
+      const target = document.createElement('div');
+      target.setAttribute('on', 'event1:node2.hide;event2:node2.show');
+      addAction(element, target, 'event1', 'node1.foo()');
+      expect(actionService.setActions).calledWith(
+        target,
+        'event1:node1.foo(),node2.hide;event2:node2.show'
+      );
+    });
 
-  it('should insert when no existing actions', () => {
-    const element = document.createElement('div');
+    it('should insert when actions defined for other events only', () => {
+      const target = document.createElement('div');
+      target.setAttribute('on', 'event2:node2.hide');
+      addAction(element, target, 'event1', 'node1.foo()');
+      expect(actionService.setActions).calledWith(
+        target,
+        'event2:node2.hide;event1:node1.foo()'
+      );
+    });
 
-    addAction(ampdoc, element, 'event1', 'node1.foo()');
-
-    expect(element.getAttribute('on')).to.equal('event1:node1.foo()');
-  });
-
-  it('should insert when actions defined for this event', () => {
-    const element = document.createElement('div');
-    element.setAttribute('on', 'event1:node2.hide;event2:node2.show');
-
-    addAction(ampdoc, element, 'event1', 'node1.foo()');
-
-    expect(element.getAttribute('on')).to.equal(
-        'event1:node1.foo(),node2.hide;event2:node2.show');
-  });
-
-  it('should insert when actions defined for other events only', () => {
-    const element = document.createElement('div');
-    element.setAttribute('on', 'event2:node2.hide');
-
-    addAction(ampdoc, element, 'event1', 'node1.foo()');
-
-    expect(element.getAttribute('on')).to.equal(
-        'event2:node2.hide;event1:node1.foo()');
+    it('should insert in FIE', () => {
+      const target = document.createElement('div');
+      target.setAttribute('on', 'event2:node2.hide');
+      // FIE should have its own ActionService.
+      const fieActionService = {setActions: sandbox.stub()};
+      Services.actionServiceForDoc.withArgs(target).returns(fieActionService);
+      // Provide `target` as the service context to simulate FIE case.
+      addAction(target, target, 'event1', 'node1.foo()');
+      // Only the FIE's ActionService should be called.
+      expect(actionService.setActions).to.not.be.called;
+      expect(fieActionService.setActions).calledWith(
+        target,
+        'event2:node2.hide;event1:node1.foo()'
+      );
+    });
   });
 });

@@ -1,3 +1,10 @@
+---
+$category@: layout
+formats:
+  - websites
+teaser:
+  text: Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with other AMP components.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,15 +21,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-orientation-observer"></a> `amp-orientation-observer`
+# amp-orientation-observer
+
+Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with
+other AMP components.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with
-    other AMP components.</code>
-    </td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-orientation-observer" src="https://cdn.ampproject.org/v0/amp-orientation-observer-0.1.js">&lt;/script></code></td>

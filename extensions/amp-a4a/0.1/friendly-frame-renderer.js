@@ -15,7 +15,7 @@
  */
 
 import {Renderer} from './amp-ad-type-defs';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 
 /**
@@ -29,7 +29,6 @@ export let CreativeData;
  * Render a validated AMP creative directly in the parent page.
  */
 export class FriendlyFrameRenderer extends Renderer {
-
   /**
    * Constructs a FriendlyFrameRenderer instance. The instance values here are
    * used by TemplateRenderer, which inherits from FriendlyFrameRenderer.
@@ -40,16 +39,19 @@ export class FriendlyFrameRenderer extends Renderer {
 
   /** @override */
   render(context, element, creativeData) {
-
     creativeData = /** @type {CreativeData} */ (creativeData);
 
     const {size, adUrl} = context;
     const {creativeMetadata} = creativeData;
 
-    dev().assert(size, 'missing creative size');
-    dev().assert(adUrl, 'missing ad request url');
+    devAssert(size, 'missing creative size');
+    devAssert(adUrl, 'missing ad request url');
 
     return renderCreativeIntoFriendlyFrame(
-        adUrl, size, element, creativeMetadata);
+      adUrl,
+      size,
+      element,
+      creativeMetadata
+    );
   }
 }

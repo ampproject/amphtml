@@ -5,6 +5,16 @@ Extended Component](https://www.ampproject.org/docs/reference/components). It
 does not describe every possible validator feature, but rather goes over some
 of the most common rules used when creating a new AMP Extended Component.
 
+## Getting Started
+
+Before writing any of your `.protoascii` or `validator-*.html` files, please
+[see the Installation and Usage sections of the AMP Validator](https://github.com/ampproject/amphtml/blob/master/validator/README.md).
+
+This repo uses a [python script](https://github.com/ampproject/amphtml/blob/master/validator/build.py) to run golden tests using the AMP validator.
+Thus it is a good idea to ensure,
+that your development environment is configured correctly,
+before writing new tests to avoid any confusion.
+
 ## Example
 
 As a concrete example, imagine you are creating an extended component that
@@ -225,7 +235,7 @@ This tells the validator that the html tag name is 'AMP-CAT'.
 ```
 
 This tells the validator that the `amp-cat` tag requires the inclusion of the
-matching extension script tag that we defined above. 
+matching extension script tag that we defined above.
 
 ```
   attrs: {
@@ -362,6 +372,49 @@ attrs: {
 }
 ```
 
+### Additional Common Validation Rules
+
+So let's say we want to add some additional rules to our original element validation rules:
+
+```
+tags: {  # <amp-cat>
+  html_format: AMP
+  tag_name: "AMP-CAT"
+  requires_extension: "amp-cat"
+  attrs: {
+    name: "data-selected-cat"
+    value_casei: "bella"
+    value_casei: "chloe"
+    value_casei: "oscar"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+```
+
+#### Mandatory Parent
+
+Let's say we want `<amp-cat>` to ONLY be a valid element if it is a DIRECT child of a div element. We could add:
+
+```
+mandatory_parent: "DIV"
+```
+
+as a key/value of the `tags`. If `<amp-cat>` can be a DIRECT or INDIRECT (nested) child of a div element, we could add:
+
+```
+mandatory_ancestor: "DIV"
+```
+
+as a key/value of the `tags`.
+
 ## Test Files
 
 It is a good idea to contribute test files along with your validator rules
@@ -404,9 +457,13 @@ Optionally, you may add more than one valid variant and/or invalid examples.
 
 ## Test Output files
 
-For each test file, also add a matching output file which will display the
-validator output for the test case. If you only added valid examples, this file
-should contain a single line:
+After creating your validator html file, You need to create the corresponding `.out` file to act as your test results. These are used to verify if the validator is validating your extension correctly. To do this, navigate to the root of the project, `amphtml/` and run `gulp validator --update_tests`. This should generate a matching `.out` file, and for this example, it would be:
+
+<pre>
+amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat.out</b>
+</pre>
+
+After generating the `.out` file, you should check it's contents that it gives the correct validation results/errors. If you only added valid examples, this file should contain a single line:
 
 ```
 PASS

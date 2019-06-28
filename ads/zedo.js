@@ -16,31 +16,46 @@
 
 import {loadScript, validateData} from '../3p/3p';
 
-
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function zedo(global, data) {
   // check mandatory fields
-  validateData(data,
-      ['superId', 'network', 'placementId', 'channel', 'publisher', 'dim'],
-      ['charset', 'callback', 'renderer']);
+  validateData(
+    data,
+    ['superId', 'network', 'placementId', 'channel', 'publisher', 'dim'],
+    ['charset', 'callback', 'renderer']
+  );
 
   loadScript(global, 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js', () => {
     const {ZGTag} = global;
     const charset = data.charset || '';
     const callback = data.callback || function() {};
-    const geckoTag = new ZGTag(data.superId, data.network, '', '',
-        charset, callback);
+    const geckoTag = new ZGTag(
+      data.superId,
+      data.network,
+      '',
+      '',
+      charset,
+      callback
+    );
     geckoTag.setAMP();
     // define placement
-    const placement = geckoTag.addPlacement(data.placementId,
-        data.channel, data.publisher, data.dim, data.width, data.height);
+    const placement = geckoTag.addPlacement(
+      data.placementId,
+      data.channel,
+      data.publisher,
+      data.dim,
+      data.width,
+      data.height
+    );
     if (data.renderer) {
       for (const key in data.renderer) {
-        placement.includeRenderer(data.renderer[key].name,
-            data.renderer[key].value);
+        placement.includeRenderer(
+          data.renderer[key].name,
+          data.renderer[key].value
+        );
       }
     } else {
       placement.includeRenderer('display', {});

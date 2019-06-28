@@ -62,7 +62,7 @@ tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   }
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio"
   amp_layout {
     defines_default_height: true
     # TODO(johannes): in the longer run, defines_default_width should
@@ -87,15 +87,8 @@ tags: {  # <amp-audio> for AMP, amp-story (autoplay attribute mandatory)
   }
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio"
   amp_layout {
-    defines_default_height: true
-    # TODO(johannes): in the longer run, defines_default_width should
-    # be false, to make it a fixed height layout per default, rather
-    # than a fixed one.
-    defines_default_width: true
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
     supported_layouts: NODISPLAY
   }
 }
@@ -107,7 +100,7 @@ tags: {  # <amp-audio> for A4A (autoplay attribute disallowed)
   requires_extension: "amp-audio"
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio"
   amp_layout {
     defines_default_height: true
     defines_default_width: true

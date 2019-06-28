@@ -1,3 +1,10 @@
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Embeds BeOpinion content.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-beopinion"></a> `amp-beopinion`
+# amp-beopinion
+
+Embeds <a href="https://beopinion.com/">BeOpinion</a> content.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-        <td>Embeds <a href="https://beopinion.com/">BeOpinion</a> content.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-beopinion" src="https://cdn.ampproject.org/v0/amp-beopinion-0.1.js">&lt;/script></code></td>
@@ -72,26 +77,30 @@ An element marked with a `placeholder` attribute displays while the content for 
 Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-beopinion` component.
 
 ## Attributes
+<table>
+  <tr>
+    <td width="40%"><strong>data-account (required)</strong></td>
+    <td>The ID of the BeOpinion account (page owner).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-content (optional)</strong></td>
+    <td>The ID of the BeOpinion content to be displayed on the page.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-name (optional)</strong></td>
+    <td>The name of the BeOpinion slot on the page.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-my-content (optional - <code>amp-ad</code> only !)</strong></td>
+    <td>For <code>amp-ad</code> elements of type <code>beopinion</code>, the value can be set to <code>"0"</code> (default value).
+Warning: the <code>amp-beopinion</code> element overrides this value to <code>"1"</code>, to prevent the serving of ads outside of an <code>amp-ad</code> element.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
-##### data-account (required)
-
-The ID of the BeOpinion account (page owner).
-
-##### data-content (optional)
-
-The ID of the BeOpinion content to be displayed on the page.
-
-##### data-name (optional)
-The name of the BeOpinion slot on the page.
-
-##### data-my-content (optional - `amp-ad` only !)
-
-For `amp-ad` elements of type `beopinion`, the value can be set to `"0"` (default value).
-Warning: the `amp-beopinion` element overrides this value to `"1"`, to prevent the serving of ads outside of an `amp-ad` element.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

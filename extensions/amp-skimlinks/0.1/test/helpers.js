@@ -16,9 +16,9 @@
 
 import {AmpSkimlinks} from '../amp-skimlinks';
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
+import {DEFAULT_SKIM_OPTIONS} from './constants';
 import {Services} from '../../../../src/services';
 import {Tracking} from '../tracking';
-import {pubcode} from './constants';
 
 const helpersFactory = env => {
   const {win} = env;
@@ -57,13 +57,7 @@ const helpersFactory = env => {
     },
 
     createTrackingWithStubAnalytics(skimOptions) {
-      skimOptions = Object.assign(
-          {
-            tracking: true,
-            pubcode,
-          },
-          skimOptions
-      );
+      skimOptions = Object.assign({}, DEFAULT_SKIM_OPTIONS, skimOptions);
       this.stubCustomEventReporterBuilder();
 
       return new Tracking(env, skimOptions, 'my-page-referrer');

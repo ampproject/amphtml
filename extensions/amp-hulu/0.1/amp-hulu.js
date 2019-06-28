@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 
@@ -70,19 +70,21 @@ class AmpHulu extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.eid_ = user().assert(
-        this.element.getAttribute('data-eid'),
-        'The data-eid attribute is required for <amp-hulu> %s',
-        this.element);
+    this.eid_ = userAssert(
+      this.element.getAttribute('data-eid'),
+      'The data-eid attribute is required for <amp-hulu> %s',
+      this.element
+    );
   }
 
   /** @return {string} */
   getVideoIframeSrc_() {
-    dev().assert(this.eid_);
-    return `https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=${encodeURIComponent(this.eid_ || '')}`;
+    devAssert(this.eid_);
+    return `https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=${encodeURIComponent(
+      this.eid_ || ''
+    )}`;
   }
 }
-
 
 AMP.extension('amp-hulu', '0.1', AMP => {
   AMP.registerElement('amp-hulu', AmpHulu);

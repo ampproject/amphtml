@@ -23,8 +23,9 @@ import {yandex} from './yandex';
  */
 export function adfox(global, data) {
   validateData(data, ['adfoxParams', 'ownerId']);
-  loadScript(global, 'https://yastatic.net/pcode/adfox/loader.js',
-      () => initAdFox(global, data));
+  loadScript(global, 'https://yastatic.net/pcode/adfox/loader.js', () =>
+    initAdFox(global, data)
+  );
 }
 
 /**

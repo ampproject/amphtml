@@ -57,8 +57,14 @@ tags: {  # <amp-web-push>
       allow_relative: false
     }
   }
+  attrs: {
+    name: "service-worker-scope"
+    value_url: {
+      protocol: "https"
+    }
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-web-push"
+  spec_url: "https://amp.dev/documentation/components/amp-web-push"
   amp_layout: {
     supported_layouts: NODISPLAY
   }
@@ -75,7 +81,7 @@ tags: {  # <amp-web-push-widget>
     value: "unsubscribed"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-web-push"
+  spec_url: "https://amp.dev/documentation/components/amp-web-push"
   amp_layout: {
     supported_layouts: FIXED
   }

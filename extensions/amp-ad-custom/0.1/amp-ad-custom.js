@@ -23,7 +23,7 @@ import {NameFrameRenderer} from '../../amp-a4a/0.1/name-frame-renderer';
 import {TemplateRenderer} from '../../amp-a4a/0.1/template-renderer';
 import {TemplateValidator} from '../../amp-a4a/0.1/template-validator';
 import {addParamToUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 
 // These have no side-effects, and so may be reused between all instances.
@@ -45,8 +45,10 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
 
     /** @const {string} */
     this.baseRequestUrl_ = this.element.getAttribute('src');
-    dev().assert(this.baseRequestUrl_,
-        'Invalid network configuration: no request URL specified');
+    devAssert(
+      this.baseRequestUrl_,
+      'Invalid network configuration: no request URL specified'
+    );
 
     this.getContext().win = this.win;
   }
@@ -70,14 +72,20 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
     Object.keys(this.element.dataset).forEach(dataField => {
       if (startsWith(dataField, DATA_REQUEST_PARAM_PREFIX)) {
         const requestParamName = dataField.slice(
-            DATA_REQUEST_PARAM_PREFIX.length, dataField.length);
+          DATA_REQUEST_PARAM_PREFIX.length,
+          dataField.length
+        );
         if (requestParamName) {
           // Set the first character to lower case, as reading it in camelCase
           // will automatically put it into upper case.
-          const finalParamName = requestParamName.charAt(0).toLowerCase() +
-              requestParamName.slice(1);
+          const finalParamName =
+            requestParamName.charAt(0).toLowerCase() +
+            requestParamName.slice(1);
           url = addParamToUrl(
-              url, finalParamName, this.element.dataset[dataField]);
+            url,
+            finalParamName,
+            this.element.dataset[dataField]
+          );
         }
       }
     });

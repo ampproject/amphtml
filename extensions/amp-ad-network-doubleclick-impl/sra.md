@@ -28,4 +28,4 @@ Note that SRA is only available if:
 Note also that <a href="refresh.md">Refresh</a> is not compatible with SRA. If both SRA and Refresh are enabled on the same slot, Refresh will be disabled in favor of SRA.
 
 
-#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>
+#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to Google Ad Manager</a>

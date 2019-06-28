@@ -1,3 +1,11 @@
+---
+$category@: presentation
+formats:
+  - websites
+  - ads
+teaser:
+  text: Defines and displays an animation.
+---
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +22,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-animation"></a> `amp-animation`
+# amp-animation
+
+Defines and runs animations.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Defines and runs animations.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js">&lt;/script></code></td>
@@ -96,7 +102,7 @@ and is comprised of:
 
 ### Conditions
 
-Conditions can specify whether this animation component is included in the final animation. Currently, only `media` expression is supported.
+Conditions can specify whether this animation component is included in the final animation.
 
 #### Media query
 
@@ -401,7 +407,7 @@ Another way to specify keyframes is in the document's stylesheet (`<style>` tag)
 CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the JSON per [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument). However, there are some nuances:
  - For broad-platform support, vendor prefixes, e.g. `@-ms-keyframes {}` or `-moz-transform` may be needed. Vendor prefixes are not needed and not allowed in the JSON format, but in CSS they could be necessary.
  - Platforms that do not support `calc()` and `var()` will not be able to take advantage of `amp-animation` polyfills when keyframes are specified in CSS. It's thus recommended to always include fallback values in CSS.
- - CSS extensions such as [`width()`, `height()`, `num()`, `rand()` and `index()`](#css-extensions) cannot be used in CSS.
+ - CSS extensions such as [`width()`, `height()`, `num()`, `rand()`, `index()` and `length()`](#css-extensions) cannot be used in CSS.
 
 
 #### White listed properties for keyframes
@@ -409,10 +415,10 @@ CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the J
 Not all CSS properties can be used in keyframes. Only CSS properties that modern browsers can optimize and
 animate quickly are white listed. This list will grow as more properties are confirmed to provide good
 performance. Currently the list contains:
- - `opacity`
- - `transform`
- - `visibility`
- - 'offsetDistance'
+ - [`opacity`](https://developer.mozilla.org/en-US/docs/Web/CSS/opacity)
+ - [`transform`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform)
+ - [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility)
+ - [`offset-distance`](https://developer.mozilla.org/en-US/docs/Web/CSS/offset-distance)
 
 
 Notice that the use of vendor prefixed CSS properties is neither needed nor allowed.
@@ -566,6 +572,17 @@ Among other things, this property can be combined with `calc()` expressions and 
 {
   "selector": ".class-x",
   "delay": "calc(200ms * index())"
+}
+```
+
+#### CSS `length()` extension
+
+The `length()` function returns the number of target elements in the animation effect. This is most relevant when combined with `index()`:
+
+```
+{
+  "selector": ".class-x",
+  "delay": "calc(200ms * (length() - index()))"
 }
 ```
 

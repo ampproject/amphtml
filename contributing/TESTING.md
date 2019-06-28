@@ -36,6 +36,7 @@ This document provides details for testing and building your AMP code.
   * [Testing with ngrok](#testing-with-ngrok)
   * [Testing with Heroku](#testing-with-heroku)
   * [Testing with Firebase](#testing-with-firebase)
+- [End-to-end Tests](#end-to-end-tests)
 
 ## Testing commands
 
@@ -60,12 +61,13 @@ Command                                                                 | Descri
 `gulp lint --watch`                                                     | Watches for changes in files, and validates against the ESLint linter.
 `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.
 `gulp lint --files=<files-path-glob>`                                   | Lints just the files provided. Can be used with `--fix`.
-`gulp lint --local-changes`                                             | Lints just the files changed in the local branch. Can be used with `--fix`.
+`gulp lint --local_changes`                                             | Lints just the files changed in the local branch. Can be used with `--fix`.
 `gulp build`                                                            | Builds the AMP library.
 `gulp build --extensions=amp-foo,amp-bar`                               | Builds the AMP library, with only the listed extensions.
 `gulp build --extensions=minimal_set`                                   | Builds the AMP library, with only the extensions needed to load `article.amp.html`.
 `gulp build --extensions_from=examples/foo.amp.html`                    | Builds the AMP library, with only the extensions needed to load the listed examples.
 `gulp build --noextensions`                                             | Builds the AMP library with no extensions.
+`gulp build --fortesting`                                               | Builds the AMP library and sets the `test` field in `AMP_CONFIG` to `true`.
 `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.
 `gulp clean`                                                            | Removes build output.
 `gulp css`                                                              | Recompiles css to build directory and builds the embedded css into js files for the AMP library.
@@ -77,22 +79,21 @@ Command                                                                 | Descri
 `gulp pr-check`                                                         | Runs all the Travis CI checks locally.
 `gulp pr-check --nobuild`                                               | Runs all the Travis CI checks locally, but skips the `gulp build` step.
 `gulp pr-check --files=<test-files-path-glob>`                          | Runs all the Travis CI checks locally, and restricts tests to the files provided.
-`gulp test --unit`                                                      | Runs the unit tests in Chrome (doesn't require the AMP library to be built).
-`gulp test --unit --files=<test-files-path-glob>`                       | Runs the unit tests from the specified files in Chrome.
-`gulp test --local-changes`                                             | Runs the unit tests directly affected by the files changed in the local branch in Chrome.
-`gulp test --integration`                                               | Runs the integration tests in Chrome (requires the AMP library to be built).
-`gulp test --integration --files=<test-files-path-glob>`                | Runs the integration tests from the specified files in Chrome.
-`gulp test [--unit\|--integration] --verbose`                           | Runs tests in Chrome with logging enabled.
-`gulp test [--unit\|--integration] --nobuild`                           | Runs tests without re-build.
-`gulp test [--unit\|--integration] --coverage`                          | Runs code coverage tests. After running, the report will be available at test/coverage/index.html
-`gulp test [--unit\|--integration] --watch`                             | Watches for changes in files, runs corresponding test(s) in Chrome.
-`gulp test [--unit\|--integration] --watch --verbose`                   | Same as `watch`, with logging enabled.
-`gulp test [--integration] --saucelabs`                                 | Runs integration tests on saucelabs (requires [setup](#testing-on-sauce-labs)).
-`gulp test [--unit] --saucelabs_lite`                                   | Runs unit tests on a subset of saucelabs browsers (requires [setup](#testing-on-sauce-labs)).
-`gulp test [--unit\|--integration] --safari`                            | Runs tests in Safari.
-`gulp test [--unit\|--integration] --firefox`                           | Runs tests in Firefox.
-`gulp test [--unit\|--integration] --files=<test-files-path-glob>`      | Runs specific test files.
-`gulp test [--unit\|--integration] --testnames`                         | Lists the name of each test being run, and prints a summary at the end.
+`gulp unit`                                                             | Runs the unit tests in Chrome (doesn't require the AMP library to be built).
+`gulp unit --local_changes`                                             | Runs the unit tests directly affected by the files changed in the local branch in Chrome.
+`gulp integration`                                                      | Runs the integration tests in Chrome (requires the AMP library to be built).
+`gulp [unit\|integration] --verbose`                                    | Runs tests in Chrome with logging enabled.
+`gulp [unit\|integration] --nobuild`                                    | Runs tests without re-build.
+`gulp [unit\|integration] --coverage`                                   | Runs code coverage tests. After running, the report will be available at test/coverage/index.html
+`gulp [unit\|integration] --watch`                                      | Watches for changes in files, runs corresponding test(s) in Chrome.
+`gulp [unit\|integration] --watch --verbose`                            | Same as `watch`, with logging enabled.
+`gulp [unit\|integration] --saucelabs`                                  | Runs tests on saucelabs browsers (requires [setup](#testing-on-sauce-labs)).
+`gulp [unit\|integration] --safari`                                     | Runs tests in Safari.
+`gulp [unit\|integration] --firefox`                                    | Runs tests in Firefox.
+`gulp [unit\|integration] --edge`                                       | Runs tests in Edge.
+`gulp [unit\|integration] --ie`                                         | Runs tests in Internet Explorer.
+`gulp [unit\|integration] --files=<test-files-path-glob>`               | Runs specific test files.
+`gulp [unit\|integration] --testnames`                                  | Lists the name of each test being run, and prints a summary at the end.
 `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default.
 `gulp serve --quiet`                                                    | Same as `serve`, with logging silenced.
 `gulp serve --port 9000`                                                | Same as `serve`, but uses a port number other than the default of 8000.
@@ -101,7 +102,6 @@ Command                                                                 | Descri
 `gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.
 `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.
 `gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.
-`node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.
 `gulp ava`                                                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava).
 `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed.
 `gulp visual-diff`                                                      | Runs all visual diff tests on a headless instance of local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`.
@@ -112,6 +112,13 @@ Command                                                                 | Descri
 `gulp firebase --file path/to/file`                                     | Same as above, but copies over the file specified as `firebase/index.html`.
 `gulp firebase --min`                                                   | Same as `gulp firebase`, but uses minified files of the form `/dist/v0/amp-component-name.js` instead of unminified files of the form `/dist/v0/amp-component-name.max.js`.
 `gulp firebase --nobuild`                                               | Same as `gulp firebase`, but skips the `gulp build` step.
+`gulp e2e`                                                              | Runs all end-to-end tests on Chrome.
+`gulp e2e --files=<test-files-path-glob>`                               | Runs end-to-end tests from the specified files on the latest Chrome browser.
+`gulp e2e --nobuild`                                                    | Runs all end-to-end tests without building the runtime.
+`gulp e2e --testnames`                                                  | Lists the name of each test being run, and prints a summary at the end.
+`gulp e2e --engine=ENGINE`                                              | Runs end-to-end tests with the given Web Driver engine. Allowed values are `puppeteer` and `selenium`.
+`gulp e2e --headless`                                                   | Runs end-to-end tests in a headless browser instance.
+`gulp e2e --watch`                                                      | Watches for changes in test files, runs tests.
 
 ## Manual testing
 
@@ -135,7 +142,9 @@ AMP ships with a local proxy for testing production AMP documents with the local
 
 For any public AMP document like: `http://output.jsbin.com/pegizoq/quiet`,
 
-You can access it with the local JS at
+You can access it with the local JS by using the form in
+[`http://localhost:8000`](http://localhost:8000) or by accessing the proxy URL
+directly:
 
 `http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet`.
 
@@ -198,7 +207,7 @@ For testing documents on arbitrary URLs with your current local version of the A
 
 ## Testing on Sauce Labs
 
-In general local testing (i.e. `gulp test`) and the automatic test run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests) that happens when you send a pull request are sufficient.  If you want to run your tests across multiple environments/browsers before sending your PR you can use Sauce Labs.
+We use [Sauce Labs](https://saucelabs.com) to perform cross-browser testing (thanks Sauce Labs!). In general local testing (i.e. gulp [unit|integration]) and the automatic test run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests) that happens when you send a pull request are sufficient, but if you want to run your tests across multiple environments/browsers before sending your PR we recommend using Sauce Labs as well.
 
 To run the tests on Sauce Labs:
 
@@ -218,15 +227,13 @@ To run the tests on Sauce Labs:
    sc
 
    # after seeing the "Sauce Connect is up" msg, run the tests
-   gulp test --saucelabs
+   gulp [unit|integration] --saucelabs
    ```
 * It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
 ## Visual Diff Tests
 
-**NOTE:** *We are working on giving all `ampproject/amphtml` committers automatic access to visual diff test results. Until this is in place, you can fill out [this](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform) form, and your request should be approved soon.*
-
-In addition to building the AMP runtime and running `gulp test`, the automatic test run on Travis includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
+In addition to building the AMP runtime and running `gulp [unit|integration]`, the automatic test run on Travis includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
 
 The technology stack used is:
 
@@ -240,6 +247,10 @@ The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on 
 ### Failing Tests
 
 When a test run fails due to visual diffs being present, click the `details` link next to `percy/amphtml` in your PR and examine the results. By default, Percy highlights the changes between snapshots in red. Clicking on the new snapshot will show it in its raw form. If the diffs indicate a problem that is likely to be due to your PR, you can try running the visual diffs locally in order to debug (see section below). However, if you are sure that the problem is not due to your PR, you may click the green `Approve` button on Percy to approve the snapshots and unblock your PR from being merged.
+
+### Flaky Tests
+
+If a Percy test flakes and you would like to trigger a rerun, you can't do that from within Percy.  Instead, from your PR on GitHub open up the "Details" for the `continuous-integration/travis-ci/pr` check to load the Travis run for your PR.  There you should see a "passed" test shard labeled "Visual Diff Tests".  Click the "Restart Job" icon on just that shard to trigger a rerun on Percy.
 
 ### Running Visual Diff Tests Locally
 
@@ -302,6 +313,8 @@ firebase deploy
 * When initializing firebase within the directory via `firebase init`, make sure to select the following options when asked:
 - "Which Firebase CLI features do you want to setup for this folder?" select `Hosting: Configure and deploy Firebase Hosting sites`.
 - "What do you want to use as your public directory?" enter `firebase`.
+- "Select a default Firebase project for this directory:" select your project name if it's already created, otherwise choose `[don't setup a new project]` and add one later.
+  - Note: If you haven't already, you will have to create a project via the [Firebase Console](https://console.firebase.google.com) after you are done initializing and before you deploy. Once you create the project, you can make it active in your CLI with `firebase use your-project-name` or give it an alias by selecting your project after running `firebase use --add`.
 - "Configure as a single-page app (rewrite all urls to /index.html)?" select `n`.
 
 
@@ -321,3 +334,20 @@ firebase deploy
 ```
 
 If you are only testing a single file, you can use `gulp firebase --file=path/to/my/file.amp.html` to avoid copying over all of `test/manual` and `examples`. It will copy over the specified file to `firebase/index.html`, which simplifies debugging.
+
+After deploying, you can access your project publically at its hosting URL `https://your-project-name.firebaseapp.com`.
+
+Additionally, you can create multiple projects and switch between them in the CLI using `firebase use your-project-name`.
+
+## End-to-End Tests
+
+You can run and create E2E tests locally during development. Currently tests only run on Chrome, but support for additional browsers is underway. These tests have not been added to our CI build yet - but they will be added soon.
+
+Run all tests with:
+```
+gulp e2e
+```
+
+The task will kick off `gulp build` and then `gulp serve` before running the tests. To skip building the runtime, use `--nobuild`.
+
+[Consult the E2E testing documentation](../build-system/tasks/e2e/README.md) to learn how to create your own end-to-end tests.

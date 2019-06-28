@@ -15,8 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import {rrulestr} from '../../../third_party/rrule/rrule';
-
+import {rrulestr} from 'rrule';
 
 /** @enum {string} */
 const DateType = {
@@ -33,23 +32,24 @@ export class DatesList {
    * @param {!Array<string>} dates
    */
   constructor(dates) {
-
     /** @private @const */
-    this.ReactDates_ = /** @type {!JsonObject} */ (
-      requireExternal('react-dates'));
+    this.ReactDates_ = /** @type {!JsonObject} */ (requireExternal(
+      'react-dates'
+    ));
 
     /** @private @const */
     this.moment_ = requireExternal('moment');
 
     /** @private @const */
     this.rrulestrs_ = dates
-        .filter(d => this.getDateType_(d) === DateType.RRULE)
-        .map(d => tryParseRrulestr(d));
+      .filter(d => this.getDateType_(d) === DateType.RRULE)
+      .map(d => tryParseRrulestr(d));
 
     /** @private @const */
     this.dates_ = dates
-        .filter(d => this.getDateType_(d) == DateType.DATE)
-        .map(d => this.moment_(d));
+      .filter(d => this.getDateType_(d) == DateType.DATE)
+      .map(d => this.moment_(d))
+      .sort((a, b) => a.toDate() - b.toDate());
   }
 
   /**
@@ -61,6 +61,30 @@ export class DatesList {
   contains(date) {
     const m = this.moment_(date);
     return this.matchesDate_(m) || this.matchesRrule_(m);
+  }
+
+  /**
+   * Gets the first date in the date list after the given date.
+   * @param {!moment|string} momentOrString
+   * @return {!moment}
+   */
+  firstDateAfter(momentOrString) {
+    const m = this.moment_(momentOrString);
+    const date = m.toDate();
+
+    const firstDatesAfter = [];
+    for (let i = 0; i < this.dates_.length; i++) {
+      if (this.dates_[i].toDate() >= date) {
+        firstDatesAfter.push(this.dates_[i]);
+        break;
+      }
+    }
+    const rruleDates = this.rrulestrs_
+      .map((/** {RRule} */ rrule) => rrule.after(date))
+      .filter(Boolean);
+    firstDatesAfter.concat(rruleDates);
+
+    return firstDatesAfter.sort((a, b) => a.toDate() - b.toDate())[0];
   }
 
   /**
@@ -80,8 +104,12 @@ export class DatesList {
    * @private
    */
   matchesRrule_(date) {
-    const nextDate = date.clone().startOf('day').add(1, 'day').toDate();
-    return this.rrulestrs_.some(rrule => {
+    const nextDate = date
+      .clone()
+      .startOf('day')
+      .add(1, 'day')
+      .toDate();
+    return this.rrulestrs_.some((/** {RRule} */ rrule) => {
       const rruleDay = this.moment_(rrule.before(nextDate));
       return this.ReactDates_['isSameDay'](rruleDay, date);
     });
@@ -111,6 +139,7 @@ export class DatesList {
  * Tries to parse a string into an RRULE object.
  * @param {string} str A string which represents a repeating date RRULE spec.
  * @return {?JsonObject}
+ * @suppress {missingProperties} // Remove after https://github.com/google/closure-compiler/issues/3041 is fixed
  */
 function tryParseRrulestr(str) {
   try {

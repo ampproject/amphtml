@@ -22,7 +22,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -30,18 +30,13 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-
 
 const TAG = 'amp-3q-player';
 
-
 /** @implements {../../../src/video-interface.VideoInterface} */
 class Amp3QPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -73,10 +68,11 @@ class Amp3QPlayer extends AMP.BaseElement {
   buildCallback() {
     const {element: el} = this;
 
-    this.dataId = user().assert(
-        el.getAttribute('data-id'),
-        'The data-id attribute is required for <amp-3q-player> %s',
-        el);
+    this.dataId = userAssert(
+      el.getAttribute('data-id'),
+      'The data-id attribute is required for <amp-3q-player> %s',
+      el
+    );
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -88,18 +84,21 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = createFrameFor(this,
-        'https://playout.3qsdn.com/'
-          + encodeURIComponent(dev().assertString(this.dataId))
-          // Autoplay is handled by VideoManager
-          + '?autoplay=false&amp=true');
+    const iframe = createFrameFor(
+      this,
+      'https://playout.3qsdn.com/' +
+        encodeURIComponent(dev().assertString(this.dataId)) +
+        // Autoplay is handled by VideoManager
+        '?autoplay=false&amp=true'
+    );
 
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.sdnBridge_.bind(this));
+      this.win,
+      'message',
+      this.sdnBridge_.bind(this)
+    );
 
     return this.loadPromise(this.iframe_).then(() => this.playerReadyPromise_);
   }
@@ -178,7 +177,7 @@ class Amp3QPlayer extends AMP.BaseElement {
   sdnPostMessage_(message) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+        this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
       }
     });
   }
@@ -284,8 +283,12 @@ class Amp3QPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-}
 
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, Amp3QPlayer);

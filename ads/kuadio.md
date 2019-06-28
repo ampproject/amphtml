@@ -45,3 +45,4 @@ For configuration semantics, contact [Kuadio](https://www.tenmax.io/kuadio).
 - `data-debug-mode`
 - `data-beta-mode`
 - `data-fast-parse`
+- `data-ref`

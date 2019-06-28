@@ -16,9 +16,9 @@
 
 import {Services} from '../services';
 import {computedStyle} from '../style';
-import {dev} from '../log';
-import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
+import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
+import {isInFie} from '../friendly-iframe-embed';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -142,14 +142,19 @@ export class LayoutLayers {
 
     // Destroys the layer tree on document resize, since entirely new CSS may
     // apply to the document now.
-    this.unlisteners_.push(listen(win, 'resize', () => this.onResize_(), {
-      capture: true,
-      passive: true,
-    }));
+    this.unlisteners_.push(
+      listen(win, 'resize', () => this.onResize_(), {
+        capture: true,
+        passive: true,
+      })
+    );
 
     // Declare scrollingElement as the one true scrolling layer.
-    const root = this.declareLayer_(scrollingElement, true,
-        scrollingElementScrollsLikeViewport);
+    const root = this.declareLayer_(
+      scrollingElement,
+      true,
+      scrollingElementScrollsLikeViewport
+    );
 
     /**
      * Stores the most recently scrolled layer.
@@ -315,8 +320,9 @@ export class LayoutLayers {
   dirty(node) {
     // Find a parent layer, or fall back to the root scrolling layer in cases
     // where the node is the scrolling layer (which doesn't have a parent).
-    const layer = LayoutElement.getParentLayer(node) ||
-        LayoutElement.for(this.scrollingElement_);
+    const layer =
+      LayoutElement.getParentLayer(node) ||
+      LayoutElement.for(this.scrollingElement_);
     layer.dirtyMeasurements();
   }
 
@@ -356,9 +362,16 @@ export class LayoutLayers {
    * @private
    */
   listenForScroll_(root) {
-    this.unlisteners_.push(listen(root, 'scroll', event => {
-      this.scrolled_(event);
-    }, {capture: true, passive: true}));
+    this.unlisteners_.push(
+      listen(
+        root,
+        'scroll',
+        event => {
+          this.scrolled_(event);
+        },
+        {capture: true, passive: true}
+      )
+    );
   }
 
   /**
@@ -381,9 +394,10 @@ export class LayoutLayers {
     // root scroller (`document.scrollingElement`) did the scrolling. But, we
     // can't assign a layer to a Document (only Elements), so just pretend it
     // was the scrolling element that scrolled.
-    const scrolled = target.nodeType == Node.ELEMENT_NODE
-      ? dev().assertElement(target)
-      : this.scrollingElement_;
+    const scrolled =
+      target.nodeType == Node.ELEMENT_NODE
+        ? dev().assertElement(target)
+        : this.scrollingElement_;
     let layer = LayoutElement.forOptional(scrolled);
     if (layer && layer.isLayer()) {
       layer.dirtyScrollMeasurements();
@@ -565,8 +579,9 @@ export class LayoutElement {
    * @return {!LayoutElement}
    */
   static for(element) {
-    return /** @type {!LayoutElement} */ (dev().assert(
-        LayoutElement.forOptional(element)));
+    return /** @type {!LayoutElement} */ (devAssert(
+      LayoutElement.forOptional(element)
+    ));
   }
 
   /**
@@ -601,8 +616,9 @@ export class LayoutElement {
       }
     }
 
-    let win = /** @type {!Window } */ (dev().assert(
-        node.ownerDocument.defaultView));
+    let win = /** @type {!Window } */ (devAssert(
+      node.ownerDocument.defaultView
+    ));
     let el = node;
     let op = node;
     let last = node;
@@ -643,7 +659,7 @@ export class LayoutElement {
           // Else, the original node defines its own layer.
           return null;
         }
-        op = op./*OK*/offsetParent;
+        op = op./*OK*/ offsetParent;
       }
 
       last = el;
@@ -663,14 +679,14 @@ export class LayoutElement {
         op = el;
         // Update our window reference if we crossed a FIE boundary.
         if (el) {
-          win = /** @type {!Window } */ (dev().assert(
-              el.ownerDocument.defaultView));
+          win = /** @type {!Window } */ (devAssert(
+            el.ownerDocument.defaultView
+          ));
         }
       }
     }
 
-    dev().assert(last.nodeType === Node.DOCUMENT_NODE,
-        'node not in the DOM tree');
+    devAssert(last.nodeType === Node.DOCUMENT_NODE, 'node not in the DOM tree');
     return null;
   }
 
@@ -711,7 +727,7 @@ export class LayoutElement {
 
     // Layers in a parent document may contain children of an FIE.
     if (!sameDocument(element, other)) {
-      const frame = frameParent(/** @type {!Node} */(other.ownerDocument));
+      const frame = frameParent(/** @type {!Node} */ (other.ownerDocument));
       return !!frame && this.contains_(element, frame);
     }
 
@@ -727,14 +743,17 @@ export class LayoutElement {
    * @param {!LayoutElement} child
    */
   add(child) {
-    dev().assert(this.isLayer());
-    dev().assert(this.contains(child));
+    devAssert(this.isLayer());
+    devAssert(this.contains(child));
 
     // Parents track the children, but not all children are aware of their
     // parents. When a child finds its parent, it adds itself to the parent.
     // This might lead to a double tracking.
     if (!this.children_.includes(child)) {
       this.children_.push(child);
+      if (child.isLayer()) {
+        this.transfer_(child);
+      }
     }
   }
 
@@ -767,8 +786,10 @@ export class LayoutElement {
    * @param {boolean} scrollsLikeViewport
    */
   declareLayer(isRootLayer, scrollsLikeViewport) {
-    dev().assert(!scrollsLikeViewport || isRootLayer, 'Only root layers may' +
-      ' scroll like a viewport.');
+    devAssert(
+      !scrollsLikeViewport || isRootLayer,
+      'Only root layers may scroll like a viewport.'
+    );
 
     if (this.isLayer_) {
       return;
@@ -777,13 +798,12 @@ export class LayoutElement {
     this.isRootLayer_ = isRootLayer;
     this.scrollsLikeViewport_ = scrollsLikeViewport;
 
-
     // Ensure the coordinate system is remeasured
     this.needsRemeasure_ = true;
     this.needsScrollRemeasure_ = true;
 
     // Transfer all children elements into this new coordinate system
-    const parent = this.getParentLayer();
+    const parent = this.parentLayer_;
     if (parent) {
       parent.transfer_(this);
     }
@@ -804,8 +824,9 @@ export class LayoutElement {
       return;
     }
 
-    const win = /** @type {!Window } */ (dev().assert(
-        element.ownerDocument.defaultView));
+    const win = /** @type {!Window } */ (devAssert(
+      element.ownerDocument.defaultView
+    ));
     // If it remains fixed, it will still be a layer.
     if (computedStyle(win, element).position === 'fixed') {
       return;
@@ -814,9 +835,9 @@ export class LayoutElement {
     this.isLayer_ = false;
     // Handle if this was a fixed position layer (and therefore had null parent
     // layer).
-    const parent = this.getParentLayer() ||
-        LayoutElement.getParentLayer(element, true);
-    this.transfer_(/** @type {!LayoutElement} */ (dev().assert(parent)));
+    const parent =
+      this.getParentLayer() || LayoutElement.getParentLayer(element, true);
+    this.transfer_(/** @type {!LayoutElement} */ (devAssert(parent)));
   }
 
   /**
@@ -1099,7 +1120,14 @@ export class LayoutElement {
    * the element.
    */
   dirtyMeasurements() {
+    if (this.needsRemeasure_) {
+      return;
+    }
     this.needsRemeasure_ = true;
+    const children = this.children_;
+    for (let i = 0; i < children.length; i++) {
+      children[i].dirtyMeasurements();
+    }
   }
 
   /**
@@ -1108,30 +1136,6 @@ export class LayoutElement {
    */
   dirtyScrollMeasurements() {
     this.needsScrollRemeasure_ = true;
-  }
-
-  /**
-   * Remasures the element's size and offset position. This traverse as high as
-   * possible in the layer tree to remeasure as many elements as possible in
-   * one go. This is necessary both from a performance standpoint, and to
-   * ensure that any calculation uses the correct value, since layer in the
-   * ancestry may have been dirtied.
-   *
-   * No matter what, though, the current element will be remeasured.
-   */
-  remeasure() {
-    let layer = this;
-
-    // Find the topmost dirty layer, and remeasure from there.
-    for (let p = this.getParentLayer(); p; p = p.getParentLayer()) {
-      if (p.needsRemeasure_) {
-        layer = p;
-      }
-    }
-
-    if (layer.needsRemeasure_) {
-      layer.remeasure_();
-    }
   }
 
   /**
@@ -1153,9 +1157,9 @@ export class LayoutElement {
 
     // Gather, and update whether the layers are descendants of the active
     // layer.
-    let isActive = activeLayer === this ||
-        (!!activeLayer && activeLayer.contains(this));
-    dev().assert(ANCESTRY_CACHE.length === 0, 'ancestry cache must be empty');
+    let isActive =
+      activeLayer === this || (!!activeLayer && activeLayer.contains(this));
+    devAssert(ANCESTRY_CACHE.length === 0, 'ancestry cache must be empty');
 
     let layer = this;
     while (layer) {
@@ -1180,13 +1184,15 @@ export class LayoutElement {
   }
 
   /**
-   * Remeasures the element, and all children, since this element was marked
-   * dirty.
-   *
-   * @private
+   * Remasures the element's size and offset position, and any ancestor
+   * elements as needed.
    */
-  remeasure_() {
+  remeasure() {
     this.updateScrollPosition_();
+
+    if (!this.needsRemeasure_) {
+      return;
+    }
     this.needsRemeasure_ = false;
     const element = this.element_;
 
@@ -1198,9 +1204,12 @@ export class LayoutElement {
       ? parent.relativeScrolledPositionForChildren_(this)
       : positionLt(0, 0);
 
-    this.size_ = sizeWh(element./*OK*/clientWidth, element./*OK*/clientHeight);
+    this.size_ = sizeWh(
+      element./*OK*/ clientWidth,
+      element./*OK*/ clientHeight
+    );
 
-    let {left, top} = element./*OK*/getBoundingClientRect();
+    let {left, top} = element./*OK*/ getBoundingClientRect();
     // Viewport scroller layers are really screwed up. Their positions will
     // **double** count their scroll position (left === -scrollLeft, top ===
     // -scrollTop), which breaks with every other scroll box on the page.
@@ -1208,27 +1217,13 @@ export class LayoutElement {
       left += this.getScrollLeft();
       top += this.getScrollTop();
     }
-    this.position_ = positionLt(
-        left - relative.left,
-        top - relative.top
-    );
+    this.position_ = positionLt(left - relative.left, top - relative.top);
 
     // In dev mode, we freeze the structs to prevent consumer from mutating it.
     // Stateless FTW.
     if ((getMode().localDev || getMode().test) && Object.freeze) {
       Object.freeze(this.size_);
       Object.freeze(this.position_);
-    }
-
-    // Now, recursively measure all child nodes, to since they've probably been
-    // invalidated by the parent changing.
-    const children = this.children_;
-    if (children.length) {
-      for (let i = 0; i < children.length; i++) {
-        // TODO(jridgewell): We can probably optimize this if this layer
-        // didn't change at all.
-        children[i].remeasure_();
-      }
     }
   }
 
@@ -1239,8 +1234,8 @@ export class LayoutElement {
   updateScrollPosition_() {
     if (this.isLayer_ && this.needsScrollRemeasure_) {
       this.needsScrollRemeasure_ = false;
-      this.scrollLeft_ = this.element_./*OK*/scrollLeft;
-      this.scrollTop_ = this.element_./*OK*/scrollTop;
+      this.scrollLeft_ = this.element_./*OK*/ scrollLeft;
+      this.scrollTop_ = this.element_./*OK*/ scrollTop;
     }
   }
 
@@ -1264,8 +1259,8 @@ export class LayoutElement {
     const {ownerDocument} = this.element_;
     const position = this.getScrolledPosition(ownerDocument.documentElement);
     return positionLt(
-        position.left - this.getScrollLeft(),
-        position.top - this.getScrollTop()
+      position.left - this.getScrollLeft(),
+      position.top - this.getScrollTop()
     );
   }
 }
@@ -1285,18 +1280,17 @@ function sameDocument(element, other) {
 /**
  * Attempts to cross the FIE boundary to the parent node.
  *
- * @param {!Node} node
+ * @param {!Node} doc
  * @return {?Element}
  */
-function frameParent(node) {
-  dev().assert(node.nodeType === Node.DOCUMENT_NODE);
+function frameParent(doc) {
+  devAssert(doc.nodeType === Node.DOCUMENT_NODE);
   try {
-    const {defaultView} = node;
-    const frameElement = defaultView && defaultView.frameElement;
-    return frameElement && getFriendlyIframeEmbedOptional(frameElement)
-      ? frameElement
+    const {defaultView} = doc;
+    return defaultView && isInFie(doc.documentElement)
+      ? defaultView.frameElement
       : null;
-  } catch (e) { }
+  } catch (e) {}
   return null;
 }
 
@@ -1320,10 +1314,21 @@ function isDestroyed(node) {
  * @param {!Element} scrollingElement
  * @param {boolean} scrollingElementScrollsLikeViewport
  */
-export function installLayersServiceForDoc(ampdoc, scrollingElement,
-  scrollingElementScrollsLikeViewport) {
-  registerServiceBuilderForDoc(ampdoc, 'layers', function(ampdoc) {
-    return new LayoutLayers(ampdoc, scrollingElement,
-        scrollingElementScrollsLikeViewport);
-  }, /* opt_instantiate */ true);
+export function installLayersServiceForDoc(
+  ampdoc,
+  scrollingElement,
+  scrollingElementScrollsLikeViewport
+) {
+  registerServiceBuilderForDoc(
+    ampdoc,
+    'layers',
+    function(ampdoc) {
+      return new LayoutLayers(
+        ampdoc,
+        scrollingElement,
+        scrollingElementScrollsLikeViewport
+      );
+    },
+    /* opt_instantiate */ true
+  );
 }
