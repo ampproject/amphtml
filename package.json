@@ -152,7 +152,7 @@
     "postcss-import": "12.0.1",
     "prettier": "1.17.1",
     "pretty-bytes": "5.2.0",
-    "pumpify": "1.5.1",
+    "pumpify": "2.0.0",
     "react": "16.8.6",
     "react-addons-shallow-compare": "15.6.2",
     "react-dom": "16.8.6",
