@@ -294,7 +294,7 @@ export function getNaturalDimensions(element) {
  */
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
-  return LOADING_ELEMENTS_[tagName] || isVideoPlayerComponent(tagName);
+  return LOADING_ELEMENTS_[tagName] || isIframeVideoPlayerComponent(tagName);
 }
 
 /**
@@ -304,7 +304,10 @@ export function isLoadingAllowed(element) {
  * @param {string} tagName
  * @return {boolean}
  */
-export function isVideoPlayerComponent(tagName) {
+export function isIframeVideoPlayerComponent(tagName) {
+  if (tagName == 'AMP-VIDEO') {
+    return false;
+  }
   return videoPlayerTagNameRe.test(tagName);
 }
 

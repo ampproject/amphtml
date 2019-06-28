@@ -17,7 +17,7 @@
 import {dev, devAssert} from './log';
 import {htmlFor, htmlRefs, svgFor} from './static-template';
 import {isExperimentOn} from './experiments';
-import {isVideoPlayerComponent} from './layout';
+import {isIframeVideoPlayerComponent} from './layout';
 import {toWin} from './types';
 
 /* LEGACY LOADER */
@@ -61,9 +61,7 @@ export function createLegacyLoaderElement(doc, elementName) {
  * @return {!Element} New loader root element
  */
 export function createNewLoaderElement(element, elementWidth, elementHeight) {
-  devAssert(
-    isNewLoaderExperimentEnabled(toWin(element.ownerDocument.defaultView))
-  );
+  devAssert(isNewLoaderExperimentEnabled(element));
 
   const loader = new LoaderBuilder(element, elementWidth, elementHeight);
   return loader.build();
@@ -217,11 +215,10 @@ class LoaderBuilder {
       const svg = svgFor(this.element_);
       const logoWrapper = svg`<g class="i-amphtml-new-loader-logo"></g>`;
       if (logo.isDefault) {
-        // default logo is special because it does fade away.
+        // default logo is special because it fades away.
         logoWrapper.classList.add('i-amphtml-new-loader-logo-default');
       }
       logoWrapper.appendChild(logo.svg);
-
       this.svgRoot_.appendChild(logoWrapper);
     }
 
@@ -273,7 +270,11 @@ class LoaderBuilder {
       return;
     }
 
-    return logo;
+    return {
+      svg: logo,
+      color: logo.getAttribute('fill') || DEFAULT_LOGO_SPINNER_COLOR,
+      isDefault: useDefaultLogo,
+    };
   }
 
   /**
@@ -292,7 +293,7 @@ class LoaderBuilder {
     const tagName = this.element_.tagName.toUpperCase();
     if (
       DEFAULT_PLACEHOLDER_WHITELIST_NONE_VIDEO[tagName] || // static white list
-      isVideoPlayerComponent(tagName) // regex for various video players
+      isIframeVideoPlayerComponent(tagName) // regex for various video players
     ) {
       const html = htmlFor(this.element_);
       const defaultPlaceholder = html`
@@ -308,23 +309,26 @@ class LoaderBuilder {
    * @return {?Element}
    */
   getCustomLogo_() {
-    if (this.element_.tagName != 'AMP-TWITTER') {
-      return;
+    // Keeping the video logo here short term.
+    // This is because there is no single CSS for all players, there is
+    // video-interface but not all players implement it. Also the SVG is not
+    // that big.
+    // We need to move most of loaders code out of v0 anyway, see
+    // https://github.com/ampproject/amphtml/issues/23108.
+    if (isIframeVideoPlayerComponent(this.element_.tagName)) {
+      const svg = svgFor(this.element_);
+      const color = DEFAULT_LOGO_SPINNER_COLOR;
+      const svgNode = svg`
+        <path
+          d="M65,58.5V55c0-0.5-0.4-1-1-1H51c-0.5,0-1,0.5-1,1v10c0,0.6,0.5,1,1,1h13c0.6,0,1-0.4,1-1v-3.5l5,4v-11L65,58.5z"
+        ></path>
+      `;
+      svgNode.setAttribute('fill', color);
+      return svgNode;
     }
-    const svg = svgFor(this.element_);
-    const svgNode = svg`
-    <path fill="#1DA1F2" d="M56.29,68.13c7.55,0,11.67-6.25,11.67-11.67c0-0.18,0-0.35-0.01-0.53c0.8-0.58,1.5-1.3,2.05-2.12
-    c-0.74,0.33-1.53,0.55-2.36,0.65c0.85-0.51,1.5-1.31,1.8-2.27c-0.79,0.47-1.67,0.81-2.61,1c-0.75-0.8-1.82-1.3-3-1.3
-    c-2.27,0-4.1,1.84-4.1,4.1c0,0.32,0.04,0.64,0.11,0.94c-3.41-0.17-6.43-1.8-8.46-4.29c-0.35,0.61-0.56,1.31-0.56,2.06
-    c0,1.42,0.72,2.68,1.83,3.42c-0.67-0.02-1.31-0.21-1.86-0.51c0,0.02,0,0.03,0,0.05c0,1.99,1.41,3.65,3.29,4.02
-    c-0.34,0.09-0.71,0.14-1.08,0.14c-0.26,0-0.52-0.03-0.77-0.07c0.52,1.63,2.04,2.82,3.83,2.85c-1.4,1.1-3.17,1.76-5.1,1.76
-    c-0.33,0-0.66-0.02-0.98-0.06C51.82,67.45,53.97,68.13,56.29,68.13"></path>
-    `;
 
-    return {
-      svg: svgNode,
-      color: '#1DA1F2',
-    };
+    const customLogo = this.element_.createLoaderLogo();
+    return customLogo || null;
   }
 
   /**
@@ -343,12 +347,7 @@ class LoaderBuilder {
       </circle>
     `;
     svgNode.setAttribute('fill', DEFAULT_LOGO_SPINNER_COLOR);
-
-    return {
-      svg: svgNode,
-      color: DEFAULT_LOGO_SPINNER_COLOR,
-      isDefault: true,
-    };
+    return svgNode;
   }
 
   /**
@@ -387,9 +386,6 @@ class LoaderBuilder {
    * @return {boolean}
    */
   hasBlurryImagePlaceholder_() {
-    if (this.element_.hasAttribute('poster')) {
-      return true;
-    }
     const placeholder = this.element_.getPlaceholder();
     return (
       placeholder &&
@@ -400,7 +396,8 @@ class LoaderBuilder {
   /**
    * Whether loaders needs the translucent background shim, this is normally
    * needed when the loader is on top of an image placeholder:
-   *    - placeholder is `amp-img`
+   *    - placeholder is `amp-img` or `img` (`img` handles component
+   *      placeholders like `amp-youtube`)
    *    - Element has implicit placeholder like a `poster` on video
    * @private
    * @return {boolean}
@@ -413,7 +410,8 @@ class LoaderBuilder {
     if (!placeholder) {
       return false;
     }
-    if (placeholder.tagName == 'AMP-IMG') {
+
+    if (placeholder.tagName == 'AMP-IMG' || placeholder.tagName == 'IMG') {
       return true;
     }
     return false;
@@ -432,10 +430,11 @@ class LoaderBuilder {
 }
 
 const DEFAULT_LOGO_SPINNER_COLOR = '#aaaaaa';
+
 /**
  * Elements will get a default gray placeholder if they don't already have a
  * placeholder. This list does not include video players which are detected
- * using `isVideoPlayerComponent`
+ * using `isIframeVideoPlayerComponent`
  * @enum {boolean}
  * @private  Visible for testing only!
  */
@@ -445,9 +444,15 @@ const DEFAULT_PLACEHOLDER_WHITELIST_NONE_VIDEO = {
 
 /**
  * Whether the new loader experiment is enabled.
- * @param {!Window} win
+ * @param {!AmpElement} element
  * @return {boolean}
  */
-export function isNewLoaderExperimentEnabled(win) {
+export function isNewLoaderExperimentEnabled(element) {
+  // TODO(sparhami): Implement loader for Ads
+  // Temporarily excluding the amp-ads from this experiment
+  if (element.tagName == 'AMP-AD' || element.tagName == 'AMP-EMBED') {
+    return false;
+  }
+  const win = toWin(element.ownerDocument.defaultView);
   return isExperimentOn(win, 'new-loaders');
 }

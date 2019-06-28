@@ -119,6 +119,11 @@
       custom-element="amp-twitter"
       src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"
     ></script>
+    <script
+      async
+      custom-element="amp-youtube"
+      src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"
+    ></script>
     <style amp-custom>
       /* boring boiler place stuff */
       button {
@@ -411,6 +416,38 @@
               engineer and an exploration into what that even means.
             </blockquote>
           </amp-twitter>
+        </section>
+      </div>
+      <div id="tab4" role="tab" aria-controls="tabpanel4" option>
+        amp-youtube
+      </div>
+      <div id="tabpanel4" role="tabpanel" aria-labelledby="tab4">
+        <section>
+          <h2>amp-youtube</h2>
+          <amp-youtube
+            data-videoid="lBTCB7yLs8Y"
+            width="358"
+            height="204"
+            layout="responsive"
+          ></amp-youtube>
+
+          <h2>small amp-youtube</h2>
+          <amp-youtube
+            data-videoid="lBTCB7yLs8Y"
+            width="320"
+            height="50"
+            layout="fixed"
+          ></amp-youtube>
+
+          <h2>amp-youtube with non-image placeholder</h2>
+          <amp-youtube
+            data-videoid="lBTCB7yLs8Y"
+            width="358"
+            height="204"
+            layout="responsive"
+          >
+            <div placeholder>No poster for this one!</div>
+          </amp-youtube>
         </section>
       </div>
     </amp-selector>
