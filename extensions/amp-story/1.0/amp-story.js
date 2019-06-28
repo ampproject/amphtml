@@ -616,13 +616,18 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Builds the system layer DOM.  This is dependent on the pages_ array having
-   * been initialized, so it cannot happen at build time.
+   * Builds the system layer DOM.
    * @private
    */
   buildSystemLayer_() {
     this.updateAudioIcon_();
-    const pageIds = this.pages_.map(page => page.element.id);
+    let pageIds;
+    if (this.pages_.length) {
+      pageIds = this.pages_.map(page => page.element.id);
+    } else {
+      const pages = this.element.querySelectorAll('amp-story-page');
+      pageIds = Array.prototype.map.call(pages, el => el.id);
+    }
     this.storeService_.dispatch(Action.ADD_TO_PAGE_IDS, pageIds);
     this.element.appendChild(this.systemLayer_.build());
   }
@@ -924,13 +929,12 @@ export class AmpStory extends AMP.BaseElement {
       'Story must have at least one page.'
     );
 
+    this.buildSystemLayer_();
     this.initializeSidebar_();
     this.setThemeColor_();
 
     const storyLayoutPromise = this.initializePages_()
       .then(() => {
-        this.buildSystemLayer_();
-
         this.handleConsentExtension_();
         this.initializeStoryAccess_();
 
