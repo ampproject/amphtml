@@ -252,7 +252,9 @@ export class GoogleSubscriptionsPlatform {
      * for the page to be visible to avoid leaking that the
      * page was prerendered
      */
-    return this.isGoogleViewer_;
+    // TODO(#23102): restore safe prerendering mode. Instead of `false`,
+    // return `this.isGoogleViewer_`.
+    return false;
   }
 
   /** @override */
