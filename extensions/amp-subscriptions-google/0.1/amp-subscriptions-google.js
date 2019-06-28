@@ -89,49 +89,6 @@ export class GoogleSubscriptionsPlatformService {
  */
 export class GoogleSubscriptionsPlatform {
   /**
-   * Determines whether an event manager event should be canceled.
-   * @param {!../../../third_party/subscriptions-project/swg.ClientEvent} event
-   */
-  static filterSwgEvent_(event) {
-    if (event.eventOriginator !== EventOriginator.SWG_CLIENT) {
-      return FilterResult.PROCESS_EVENT;
-    }
-    return SWG_EVENTS_TO_SUPPRESS[event.eventType]
-      ? FilterResult.CANCEL_EVENT
-      : FilterResult.PROCESS_EVENT;
-  }
-
-  /**
-   * Listens for events from analytics and transmits them to the SwG event
-   * manager if appropriate.
-   * @param {!SubscriptionAnalyticsEvents|string} event
-   * @param {!JsonObject} optVarsUnused
-   * @param {!JsonObject} internalVars
-   */
-  handleAnalyticsEvent_(event, optVarsUnused, internalVars) {
-    let eventType = null;
-    const action = internalVars['action'];
-    const status = internalVars['status'];
-
-    if (AMP_EVENT_TO_SWG_EVENT[event]) {
-      eventType = AMP_EVENT_TO_SWG_EVENT[event];
-    } else if (action && AMP_ACTION_TO_SWG_EVENT[action]) {
-      eventType = AMP_ACTION_TO_SWG_EVENT[action][status];
-    }
-
-    if (!eventType) {
-      return;
-    }
-
-    this.eventManager_.logEvent({
-      eventType,
-      eventOriginator: EventOriginator.AMP_CLIENT,
-      isFromUserAction: null,
-      additionalParameters: null,
-    });
-  }
-
-  /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
    * @param {!../../amp-subscriptions/0.1/service-adapter.ServiceAdapter} serviceAdapter
@@ -252,6 +209,49 @@ export class GoogleSubscriptionsPlatform {
 
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
+  }
+
+  /**
+   * Determines whether an event manager event should be canceled.
+   * @param {!../../../third_party/subscriptions-project/swg.ClientEvent} event
+   */
+  static filterSwgEvent_(event) {
+    if (event.eventOriginator !== EventOriginator.SWG_CLIENT) {
+      return FilterResult.PROCESS_EVENT;
+    }
+    return SWG_EVENTS_TO_SUPPRESS[event.eventType]
+      ? FilterResult.CANCEL_EVENT
+      : FilterResult.PROCESS_EVENT;
+  }
+
+  /**
+   * Listens for events from analytics and transmits them to the SwG event
+   * manager if appropriate.
+   * @param {!SubscriptionAnalyticsEvents|string} event
+   * @param {!JsonObject} optVarsUnused
+   * @param {!JsonObject} internalVars
+   */
+  handleAnalyticsEvent_(event, optVarsUnused, internalVars) {
+    let eventType = null;
+    const action = internalVars['action'];
+    const status = internalVars['status'];
+
+    if (AMP_EVENT_TO_SWG_EVENT[event]) {
+      eventType = AMP_EVENT_TO_SWG_EVENT[event];
+    } else if (action && AMP_ACTION_TO_SWG_EVENT[action]) {
+      eventType = AMP_ACTION_TO_SWG_EVENT[action][status];
+    }
+
+    if (!eventType) {
+      return;
+    }
+
+    this.eventManager_.logEvent({
+      eventType,
+      eventOriginator: EventOriginator.AMP_CLIENT,
+      isFromUserAction: null,
+      additionalParameters: null,
+    });
   }
 
   /**
