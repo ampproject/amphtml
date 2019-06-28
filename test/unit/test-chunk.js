@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {
   activateChunkingForTesting,
@@ -343,9 +344,12 @@ describes.fakeWin(
   },
   env => {
     let subscriptions;
+    let clock;
 
     beforeEach(() => {
       subscriptions = {};
+      clock = lolex.install({target: env.win});
+
       env.win.addEventListener = function(type, handler) {
         if (subscriptions[type] && !subscriptions[type].includes(handler)) {
           subscriptions[type].push(handler);
@@ -368,10 +372,7 @@ describes.fakeWin(
         return function(unusedIdleDeadline) {
           if (long) {
             // Ensure this task takes a long time beyond the 5ms buffer.
-            const start = Date.now();
-            while (Date.now() - start < 100) {
-              continue;
-            }
+            clock.tick(100);
           }
           progress += str;
         };
