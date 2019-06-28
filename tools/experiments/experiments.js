@@ -402,6 +402,14 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/22718',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
   },
+  {
+    id: 'untrusted-xhr-interception',
+    name:
+      'Enable "xhrInterceptor" capability for untrusted viewers. ' +
+      'For development use only',
+    spec: 'N/A',
+    cleanupIssue: 'N/A',
+  },
 ];
 
 if (getMode().localDev) {

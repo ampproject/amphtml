@@ -1062,6 +1062,14 @@ describe('Viewer', () => {
       });
     });
 
+    it('should consider trusted by ancestor', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = ['https://gmail.dev'];
+      return new Viewer(ampdoc).isTrustedViewer().then(res => {
+        expect(res).to.be.true;
+      });
+    });
+
     it('should consider non-trusted without ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = [];

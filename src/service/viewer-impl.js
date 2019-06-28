@@ -33,6 +33,7 @@ import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 import {startsWith} from '../string';
+import {urls} from '../config';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -56,34 +57,6 @@ const VIEWER_ORIGIN_TIMEOUT_ = 1000;
  * @private {!RegExp}
  */
 const TRIM_ORIGIN_PATTERN_ = /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
-
-/**
- * These domains are trusted with more sensitive viewer operations such as
- * propagating the referrer. If you believe your domain should be here,
- * file the issue on GitHub to discuss. The process will be similar
- * (but somewhat more stringent) to the one described in the [3p/README.md](
- * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
- *
- * @export {!Array<!RegExp>}
- */
-const TRUSTED_VIEWER_HOSTS = [
-  /**
-   * Google domains, including country-codes and subdomains:
-   * - google.com
-   * - www.google.com
-   * - google.co
-   * - www.google.co
-   * - google.az
-   * - www.google.az
-   * - google.com.az
-   * - www.google.com.az
-   * - google.co.az
-   * - www.google.co.az
-   * - google.cat
-   * - www.google.cat
-   */
-  /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
-];
 
 /**
  * @typedef {function(!JsonObject):(!Promise|undefined)}
@@ -847,7 +820,7 @@ export class Viewer {
       // Non-https origins are never trusted.
       return false;
     }
-    return TRUSTED_VIEWER_HOSTS.some(th => th.test(url.hostname));
+    return urls.trustedViewerHosts.some(th => th.test(url.hostname));
   }
 
   /**
