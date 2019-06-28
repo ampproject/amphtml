@@ -48,9 +48,7 @@ function main() {
     timedExecOrDie('gulp visual-diff --nobuild --master');
   } else {
     printChangeSummary(FILENAME);
-    const buildTargets = new Set();
-    determineBuildTargets(buildTargets, FILENAME);
-
+    const buildTargets = determineBuildTargets(FILENAME);
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     if (
       buildTargets.has('RUNTIME') ||

@@ -13,7 +13,491 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.56 */
+/** Version: 0.1.22.57 */
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number} */
+const AnalyticsEvent = {
+  UNKNOWN: 0,
+  IMPRESSION_PAYWALL: 1,
+  IMPRESSION_AD: 2,
+  IMPRESSION_OFFERS: 3,
+  IMPRESSION_SUBSCRIBE_BUTTON: 4,
+  IMPRESSION_SMARTBOX: 5,
+  ACTION_SUBSCRIBE: 1000,
+  ACTION_PAYMENT_COMPLETE: 1001,
+  ACTION_ACCOUNT_CREATED: 1002,
+  ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
+  ACTION_SUBSCRIPTIONS_LANDING_PAGE: 1004,
+  ACTION_PAYMENT_FLOW_STARTED: 1005,
+  ACTION_OFFER_SELECTED: 1006,
+  EVENT_PAYMENT_FAILED: 2000,
+  EVENT_CUSTOM: 3000,
+};
+/** @enum {number} */
+const EventOriginator = {
+  UNKNOWN_CLIENT: 0,
+  SWG_CLIENT: 1,
+  AMP_CLIENT: 2,
+  PROPENSITY_CLIENT: 3,
+  SWG_SERVER: 4,
+};
+
+/**
+ * @implements {Message}
+ */
+class AnalyticsContext {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.transactionId_ = (data[2] == null) ? null : data[2];
+
+    /** @private {?string} */
+    this.referringOrigin_ = (data[3] == null) ? null : data[3];
+
+    /** @private {?string} */
+    this.utmSource_ = (data[4] == null) ? null : data[4];
+
+    /** @private {?string} */
+    this.utmCampaign_ = (data[5] == null) ? null : data[5];
+
+    /** @private {?string} */
+    this.utmMedium_ = (data[6] == null) ? null : data[6];
+
+    /** @private {?string} */
+    this.sku_ = (data[7] == null) ? null : data[7];
+
+    /** @private {?boolean} */
+    this.readyToPay_ = (data[8] == null) ? null : data[8];
+
+    /** @private {!Array<string>} */
+    this.label_ = data[9] || [];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getEmbedderOrigin() {
+    return this.embedderOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setEmbedderOrigin(value) {
+    this.embedderOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getTransactionId() {
+    return this.transactionId_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setTransactionId(value) {
+    this.transactionId_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getReferringOrigin() {
+    return this.referringOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setReferringOrigin(value) {
+    this.referringOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmSource() {
+    return this.utmSource_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmSource(value) {
+    this.utmSource_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmCampaign() {
+    return this.utmCampaign_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmCampaign(value) {
+    this.utmCampaign_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmMedium() {
+    return this.utmMedium_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmMedium(value) {
+    this.utmMedium_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.sku_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSku(value) {
+    this.sku_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getReadyToPay() {
+    return this.readyToPay_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setReadyToPay(value) {
+    this.readyToPay_ = value;
+  }
+
+  /**
+   * @return {!Array<string>}
+   */
+  getLabelList() {
+    return this.label_;
+  }
+
+  /**
+   * @param {!Array<string>} value
+   */
+  setLabelList(value) {
+    this.label_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.embedderOrigin_,  // field 1 - embedder_origin
+      this.transactionId_,  // field 2 - transaction_id
+      this.referringOrigin_,  // field 3 - referring_origin
+      this.utmSource_,  // field 4 - utm_source
+      this.utmCampaign_,  // field 5 - utm_campaign
+      this.utmMedium_,  // field 6 - utm_medium
+      this.sku_,  // field 7 - sku
+      this.readyToPay_,  // field 8 - ready_to_pay
+      this.label_,  // field 9 - label
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsContext';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class AnalyticsEventMeta {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?EventOriginator} */
+    this.eventOriginator_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?boolean} */
+    this.isFromUserAction_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?EventOriginator}
+   */
+  getEventOriginator() {
+    return this.eventOriginator_;
+  }
+
+  /**
+   * @param {!EventOriginator} value
+   */
+  setEventOriginator(value) {
+    this.eventOriginator_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getIsFromUserAction() {
+    return this.isFromUserAction_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setIsFromUserAction(value) {
+    this.isFromUserAction_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.eventOriginator_,  // field 1 - event_originator
+      this.isFromUserAction_,  // field 2 - is_from_user_action
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsEventMeta';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class AnalyticsRequest {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?AnalyticsContext} */
+    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
+        AnalyticsContext(data[1]);
+
+    /** @private {?AnalyticsEvent} */
+    this.event_ = (data[2] == null) ? null : data[2];
+
+    /** @private {?AnalyticsEventMeta} */
+    this.meta_ = (data[3] == null || data[3] == undefined) ? null : new
+        AnalyticsEventMeta(data[3]);
+
+    /** @private {?EventParams} */
+    this.params_ = (data[4] == null || data[4] == undefined) ? null : new
+        EventParams(data[4]);
+  }
+
+  /**
+   * @return {?AnalyticsContext}
+   */
+  getContext() {
+    return this.context_;
+  }
+
+  /**
+   * @param {!AnalyticsContext} value
+   */
+  setContext(value) {
+    this.context_ = value;
+  }
+
+  /**
+   * @return {?AnalyticsEvent}
+   */
+  getEvent() {
+    return this.event_;
+  }
+
+  /**
+   * @param {!AnalyticsEvent} value
+   */
+  setEvent(value) {
+    this.event_ = value;
+  }
+
+  /**
+   * @return {?AnalyticsEventMeta}
+   */
+  getMeta() {
+    return this.meta_;
+  }
+
+  /**
+   * @param {!AnalyticsEventMeta} value
+   */
+  setMeta(value) {
+    this.meta_ = value;
+  }
+
+  /**
+   * @return {?EventParams}
+   */
+  getParams() {
+    return this.params_;
+  }
+
+  /**
+   * @param {!EventParams} value
+   */
+  setParams(value) {
+    this.params_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.context_ ? this.context_.toArray() : [], // field 1 - context
+      this.event_,  // field 2 - event
+      this.meta_ ? this.meta_.toArray() : [], // field 3 - meta
+      this.params_ ? this.params_.toArray() : [], // field 4 - params
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class EventParams {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.smartboxMessage_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSmartboxMessage() {
+    return this.smartboxMessage_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSmartboxMessage(value) {
+    this.smartboxMessage_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.smartboxMessage_,  // field 1 - smartbox_message
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EventParams';
+  }
+}
+
+const PROTO_MAP = {
+  'AnalyticsContext': AnalyticsContext,
+  'AnalyticsEventMeta': AnalyticsEventMeta,
+  'AnalyticsRequest': AnalyticsRequest,
+  'EventParams': EventParams,
+};
+
+/**
+ * Utility to deserialize a buffer
+ * @param {!Array} data
+ * @return {!Message}
+ */
+function deserialize(data) {
+  /** {?string} */
+  const key = data ? data[0] : null;
+  if (key) {
+    const ctor = PROTO_MAP[key];
+    if (ctor) {
+      return new ctor(data);
+    }
+  }
+  throw new Error('Deserialization failed for ' + data);
+}
+
+/**
+ * @param {function(new: T)} messageType
+ * @return {string}
+ * @template T
+ */
+function getLabel(messageType) {
+  const message = /** @type {!Message} */ (new messageType());
+  return message.label();
+}
+
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -1607,7 +2091,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.24';
+    this.version = '1.23';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -1835,11 +2319,12 @@ var activityPorts = {
   isAbortError,
 };
 var activityPorts_1 = activityPorts.ActivityPorts;
+var activityPorts_2 = activityPorts.ActivityIframePort;
 var activityPorts_11 = activityPorts.createAbortError;
 var activityPorts_12 = activityPorts.isAbortError;
 
 /**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1853,438 +2338,261 @@ var activityPorts_12 = activityPorts.isAbortError;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/** @enum {number} */
-const AnalyticsEvent = {
-  UNKNOWN: 0,
-  IMPRESSION_PAYWALL: 1,
-  IMPRESSION_AD: 2,
-  IMPRESSION_OFFERS: 3,
-  IMPRESSION_SUBSCRIBE_BUTTON: 4,
-  IMPRESSION_SMARTBOX: 5,
-  ACTION_SUBSCRIBE: 1000,
-  ACTION_PAYMENT_COMPLETE: 1001,
-  ACTION_ACCOUNT_CREATED: 1002,
-  ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
-  ACTION_SUBSCRIPTIONS_LANDING_PAGE: 1004,
-  ACTION_PAYMENT_FLOW_STARTED: 1005,
-  ACTION_OFFER_SELECTED: 1006,
-  EVENT_PAYMENT_FAILED: 2000,
-  EVENT_CUSTOM: 3000,
-};
-/** @enum {number} */
-const EventOriginator = {
-  UNKNOWN_CLIENT: 0,
-  SWG_CLIENT: 1,
-  AMP_CLIENT: 2,
-  PROPENSITY_CLIENT: 3,
-  SWG_SERVER: 4,
-};
-
 /**
- * @implements {Message}
+ * @implements {ActivityPortDef}
  */
-class AnalyticsContext {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
-
-    /** @private {?string} */
-    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
-
-    /** @private {?string} */
-    this.transactionId_ = (data[2] == null) ? null : data[2];
-
-    /** @private {?string} */
-    this.referringOrigin_ = (data[3] == null) ? null : data[3];
-
-    /** @private {?string} */
-    this.utmSource_ = (data[4] == null) ? null : data[4];
-
-    /** @private {?string} */
-    this.utmCampaign_ = (data[5] == null) ? null : data[5];
-
-    /** @private {?string} */
-    this.utmMedium_ = (data[6] == null) ? null : data[6];
-
-    /** @private {?string} */
-    this.sku_ = (data[7] == null) ? null : data[7];
-
-    /** @private {?boolean} */
-    this.readyToPay_ = (data[8] == null) ? null : data[8];
-
-    /** @private {!Array<string>} */
-    this.label_ = data[9] || [];
+class ActivityPortDeprecated {
+  /**
+   * @param {!web-activities/activity-ports.ActivityPort} port
+   */
+  constructor(port) {
+    /** @private @const {!web-activities/activity-ports.ActivityPort} */
+    this.port_ = port;
   }
 
   /**
-   * @return {?string}
+   * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
    */
-  getEmbedderOrigin() {
-    return this.embedderOrigin_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setEmbedderOrigin(value) {
-    this.embedderOrigin_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getTransactionId() {
-    return this.transactionId_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setTransactionId(value) {
-    this.transactionId_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getReferringOrigin() {
-    return this.referringOrigin_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setReferringOrigin(value) {
-    this.referringOrigin_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmSource() {
-    return this.utmSource_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmSource(value) {
-    this.utmSource_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmCampaign() {
-    return this.utmCampaign_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmCampaign(value) {
-    this.utmCampaign_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmMedium() {
-    return this.utmMedium_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmMedium(value) {
-    this.utmMedium_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getSku() {
-    return this.sku_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setSku(value) {
-    this.sku_ = value;
-  }
-
-  /**
-   * @return {?boolean}
-   */
-  getReadyToPay() {
-    return this.readyToPay_;
-  }
-
-  /**
-   * @param {boolean} value
-   */
-  setReadyToPay(value) {
-    this.readyToPay_ = value;
-  }
-
-  /**
-   * @return {!Array<string>}
-   */
-  getLabelList() {
-    return this.label_;
-  }
-
-  /**
-   * @param {!Array<string>} value
-   */
-  setLabelList(value) {
-    this.label_ = value;
-  }
-
-  /**
-   * @return {!Array}
-   * @override
-   */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.embedderOrigin_,  // field 1 - embedder_origin
-      this.transactionId_,  // field 2 - transaction_id
-      this.referringOrigin_,  // field 3 - referring_origin
-      this.utmSource_,  // field 4 - utm_source
-      this.utmCampaign_,  // field 5 - utm_campaign
-      this.utmMedium_,  // field 6 - utm_medium
-      this.sku_,  // field 7 - sku
-      this.readyToPay_,  // field 8 - ready_to_pay
-      this.label_,  // field 9 - label
-    ];
-  }
-
-  /**
-   * @return {string}
-   * @override
-   */
-  label() {
-    return 'AnalyticsContext';
+  acceptResult() {
+    return this.port_.acceptResult();
   }
 }
 
 /**
- * @implements {Message}
+ * @implements {ActivityPortDef}
  */
-class AnalyticsEventMeta {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
-
-    /** @private {?EventOriginator} */
-    this.eventOriginator_ = (data[1] == null) ? null : data[1];
-
-    /** @private {?boolean} */
-    this.isFromUserAction_ = (data[2] == null) ? null : data[2];
-  }
-
+class ActivityIframePort$1 {
   /**
-   * @return {?EventOriginator}
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {?Object=} opt_args
    */
-  getEventOriginator() {
-    return this.eventOriginator_;
+  constructor(iframe, url, opt_args) {
+    /** @private @const {!web-activities/activity-ports.ActivityIframePort} */
+    this.iframePort_ = new activityPorts_2(iframe, url, opt_args);
+    /** @private @const {!Object<string, function(!Object)>} */
+    this.callbackMap_ = {};
+    /** @private {?function(!Object)} */
+    this.callbackOriginal_ = null;
   }
 
   /**
-   * @param {!EventOriginator} value
+   * Returns a promise that yields when the iframe is ready to be interacted
+   * with.
+   * @return {!Promise}
    */
-  setEventOriginator(value) {
-    this.eventOriginator_ = value;
+  whenReady() {
+    return this.iframePort_.whenReady().then(() => {
+      this.iframePort_.onMessage(data => {
+        if (this.callbackOriginal_) {
+          this.callbackOriginal_(data);
+        }
+        const response = data && data['RESPONSE'];
+        if (!response) {
+          return;
+        }
+        const cb = this.callbackMap_[response[0]];
+        if (cb) {
+          cb(deserialize(response));
+        }
+      });
+    });
   }
 
   /**
-   * @return {?boolean}
+   * Waits until the activity port is connected to the host.
+   * @return {!Promise}
    */
-  getIsFromUserAction() {
-    return this.isFromUserAction_;
+  connect() {
+    return this.iframePort_.connect();
   }
 
   /**
-   * @param {boolean} value
+   * Disconnect the activity binding and cleanup listeners.
    */
-  setIsFromUserAction(value) {
-    this.isFromUserAction_ = value;
+  disconnect() {
+    this.iframePort_.disconnect();
   }
 
   /**
-   * @return {!Array}
+   * Returns the mode of the activity: iframe, popup or redirect.
+   * @return {!web-activities/activity-ports.ActivityMode}
+   */
+  getMode() {
+    return this.iframePort_.getMode();
+  }
+
+  /**
+   * Accepts the result when ready. The client should verify the activity's
+   * mode, origin, verification and secure channel flags before deciding
+   * whether or not to trust the result.
+   *
+   * Returns the promise that yields when the activity has been completed and
+   * either a result, a cancelation or a failure has been returned.
+   *
+   * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.eventOriginator_,  // field 1 - event_originator
-      this.isFromUserAction_,  // field 2 - is_from_user_action
-    ];
+  acceptResult() {
+    return this.iframePort_.acceptResult();
   }
 
   /**
-   * @return {string}
-   * @override
+   * Register a callback to handle resize requests. Once successfully resized,
+   * ensure to call `resized()` method.
+   * @param {function(number)} callback
    */
-  label() {
-    return 'AnalyticsEventMeta';
+  onResizeRequest(callback) {
+    return this.iframePort_.onResizeRequest(callback);
+  }
+
+  /**
+   * Sends a message to the host.
+   * @param {!Object} payload
+   */
+  messageDeprecated(payload) {
+    this.iframePort_.message(payload);
+  }
+
+  /**
+   * Registers a callback to receive messages from the host.
+   * @param {function(!Object)} callback
+   */
+  onMessageDeprecated(callback) {
+    this.callbackOriginal_ = callback;
+  }
+
+  /**
+   * @param {!../proto/api_messages.Message} request
+   */
+  execute(request) {
+    this.iframePort_.message({'REQUEST': request.toArray()});
+  }
+
+  /**
+   * @param {!function(new: T)} message
+   * @param {function(Object)} callback
+   * @template T
+   */
+  on(message, callback) {
+    const label = getLabel(message);
+    if (!label) {
+      throw new Error('Invalid data type');
+    } else if (this.callbackMap_[label]) {
+      throw new Error('Invalid type or duplicate callback for ', label);
+    }
+    this.callbackMap_[label] = callback;
+  }
+
+  /**
+   * Signals back to the activity implementation that the client has updated
+   * the activity's size.
+   */
+  resized() {
+    this.iframePort_.resized();
   }
 }
 
-/**
- * @implements {Message}
- */
-class AnalyticsRequest {
+class ActivityPorts$1 {
  /**
-  * @param {!Array=} data
+  * @param {!Window} win
   */
-  constructor(data = []) {
-
-    /** @private {?AnalyticsContext} */
-    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
-        AnalyticsContext(data[1]);
-
-    /** @private {?AnalyticsEvent} */
-    this.event_ = (data[2] == null) ? null : data[2];
-
-    /** @private {?AnalyticsEventMeta} */
-    this.meta_ = (data[3] == null || data[3] == undefined) ? null : new
-        AnalyticsEventMeta(data[3]);
-
-    /** @private {?EventParams} */
-    this.params_ = (data[4] == null || data[4] == undefined) ? null : new
-        EventParams(data[4]);
+  constructor(win) {
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = new activityPorts_1(win);
   }
 
-  /**
-   * @return {?AnalyticsContext}
-   */
-  getContext() {
-    return this.context_;
-  }
-
-  /**
-   * @param {!AnalyticsContext} value
-   */
-  setContext(value) {
-    this.context_ = value;
-  }
-
-  /**
-   * @return {?AnalyticsEvent}
-   */
-  getEvent() {
-    return this.event_;
-  }
-
-  /**
-   * @param {!AnalyticsEvent} value
-   */
-  setEvent(value) {
-    this.event_ = value;
-  }
-
-  /**
-   * @return {?AnalyticsEventMeta}
-   */
-  getMeta() {
-    return this.meta_;
-  }
-
-  /**
-   * @param {!AnalyticsEventMeta} value
-   */
-  setMeta(value) {
-    this.meta_ = value;
-  }
-
-  /**
-   * @return {?EventParams}
-   */
-  getParams() {
-    return this.params_;
-  }
-
-  /**
-   * @param {!EventParams} value
-   */
-  setParams(value) {
-    this.params_ = value;
-  }
-
-  /**
-   * @return {!Array}
-   * @override
-   */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.context_ ? this.context_.toArray() : [], // field 1 - context
-      this.event_,  // field 2 - event
-      this.meta_ ? this.meta_.toArray() : [], // field 3 - meta
-      this.params_ ? this.params_.toArray() : [], // field 4 - params
-    ];
-  }
-
-  /**
-   * @return {string}
-   * @override
-   */
-  label() {
-    return 'AnalyticsRequest';
-  }
-}
-
-/**
- * @implements {Message}
- */
-class EventParams {
  /**
-  * @param {!Array=} data
+  * Start an activity within the specified iframe.
+  * @param {!HTMLIFrameElement} iframe
+  * @param {string} url
+  * @param {?Object=} opt_args
+  * @return {!Promise<!ActivityIframePort>}
   */
-  constructor(data = []) {
+  openIframe(iframe, url, opt_args) {
+    const activityPort = new ActivityIframePort$1(iframe, url, opt_args);
+    return activityPort.connect().then(() => activityPort);
+  }
 
-    /** @private {?string} */
-    this.smartboxMessage_ = (data[1] == null) ? null : data[1];
+ /**
+  * Start an activity in a separate window. The result will be delivered
+  * to the `onResult` callback.
+  *
+  * The activity can be opened in two modes: "popup" and "redirect". This
+  * depends on the `target` value, but also on the browser/environment.
+  *
+  * The allowed `target` values are `_blank`, `_top` and name targets. The
+  * `_self`, `_parent` and similar targets are not allowed.
+  *
+  * The `_top` target indicates that the activity should be opened as a
+  * "redirect", while other targets indicate that the activity should be
+  * opened as a popup. The activity client will try to honor the requested
+  * target. However, it's not always possible. Some environments do not
+  * allow popups and they either force redirect or fail the window open
+  * request. In this case, the activity will try to fallback to the "redirect"
+  * mode.
+  *
+  * @param {string} requestId
+  * @param {string} url
+  * @param {string} target
+  * @param {?Object=} opt_args
+  * @param {?web-activities/activity-ports.ActivityOpenOptions=} opt_options
+  * @return {{targetWin: ?Window}}
+  */
+  open(requestId, url, target, opt_args, opt_options) {
+    return this.activityPorts_.open(
+        requestId, url, target, opt_args, opt_options);
+  }
+
+ /**
+  * Registers the callback for the result of the activity opened with the
+  * specified `requestId` (see the `open()` method). The callback is a
+  * function that takes a single `ActivityPort` argument. The client
+  * can use this object to verify the port using it's origin, verified and
+  * secure channel flags. Then the client can call
+  * `ActivityPort.acceptResult()` method to accept the result.
+  *
+  * The activity result is handled via a separate callback because of a
+  * possible redirect. So use of direct callbacks and/or promises is not
+  * possible in that case.
+  *
+  * A typical implementation would look like:
+  * ```
+  * ports.onResult('request1', function(port) {
+  *   port.acceptResult().then(function(result) {
+  *     // Only verified origins are allowed.
+  *     if (result.origin == expectedOrigin &&
+  *         result.originVerified &&
+  *         result.secureChannel) {
+  *       handleResultForRequest1(result);
+  *     }
+  *   });
+  * })
+  *
+  * ports.open('request1', request1Url, '_blank');
+  * ```
+  *
+  * @param {string} requestId
+  * @param {function(!ActivityPortDef)} callback
+  */
+  onResult(requestId, callback) {
+    this.activityPorts_.onResult(requestId, port => {
+      callback(new ActivityPortDeprecated(port));
+    });
+  }
+
+ /**
+  * @param {function(!Error)} handler
+  */
+  onRedirectError(handler) {
+    this.activityPorts_.onRedirectError(handler);
   }
 
   /**
-   * @return {?string}
+   * @return {!web-activities/activity-ports.ActivityPorts}
    */
-  getSmartboxMessage() {
-    return this.smartboxMessage_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setSmartboxMessage(value) {
-    this.smartboxMessage_ = value;
-  }
-
-  /**
-   * @return {!Array}
-   * @override
-   */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.smartboxMessage_,  // field 1 - smartbox_message
-    ];
-  }
-
-  /**
-   * @return {string}
-   * @override
-   */
-  label() {
-    return 'EventParams';
+  getOriginalWebActivityPorts() {
+    return this.activityPorts_;
   }
 }
 
@@ -3202,7 +3510,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.56',
+    '_client': 'SwG 0.1.22.57',
   });
 }
 
@@ -3275,7 +3583,7 @@ class SmartSubscriptionButtonApi {
     /** @private @const {!Document} */
     this.doc_ = this.win_.document;
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!HTMLIFrameElement} */
@@ -3330,7 +3638,7 @@ class SmartSubscriptionButtonApi {
     this.button_.appendChild(this.iframe_);
     this.activityPorts_.openIframe(this.iframe_, this.src_, this.args_)
         .then(port => {
-          port.onMessage(result => {
+          port.onMessageDeprecated(result => {
             if (result['clicked']) {
               if (!this.callback_) {
                 throw new Error('No callback!');
@@ -3940,7 +4248,7 @@ class ErrorUtils {
 
 
 /**
- * @param {!web-activities/activity-ports.ActivityPort} port
+ * @param {!../components/activities.ActivityPortDef} port
  * @param {string} requireOrigin
  * @param {boolean} requireOriginVerified
  * @param {boolean} requireSecureChannel
@@ -3991,7 +4299,7 @@ class ActivityIframeView extends View {
 
   /**
    * @param {!Window} win
-   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   * @param {!../components/activities.ActivityPorts} activityPorts
    * @param {string} src
    * @param {!Object<string, ?>=} args
    * @param {boolean=} shouldFadeBody
@@ -4017,7 +4325,7 @@ class ActivityIframeView extends View {
         /** @type {!HTMLIFrameElement} */ (
             createElement(this.doc_, 'iframe', iframeAttributes$1));
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = activityPorts;
 
     /** @private @const {string} */
@@ -4032,7 +4340,7 @@ class ActivityIframeView extends View {
     /** @private @const {boolean} */
     this.hasLoadingIndicator_ = hasLoadingIndicator;
 
-    /** @private {?web-activities/activity-ports.ActivityIframePort} */
+    /** @private {?../components/activities.ActivityIframePort} */
     this.port_ = null;
 
     /**
@@ -4078,7 +4386,7 @@ class ActivityIframeView extends View {
   }
 
   /**
-   * @param {!web-activities/activity-ports.ActivityIframePort} port
+   * @param {!../components/activities.ActivityIframePort} port
    * @param {!../components/dialog.Dialog} dialog
    * @return {!Promise}
    */
@@ -4094,7 +4402,7 @@ class ActivityIframeView extends View {
   }
 
   /**
-   * @return {!Promise<!web-activities/activity-ports.ActivityIframePort>}
+   * @return {!Promise<!../components/activities.ActivityIframePort>}
    * @private
    */
   getPortPromise_() {
@@ -4104,9 +4412,9 @@ class ActivityIframeView extends View {
   /**
    * @param {!Object} data
    */
-  message(data) {
+  messageDeprecated(data) {
     this.getPortPromise_().then(port => {
-      port.message(data);
+      port.messageDeprecated(data);
     });
   }
 
@@ -4114,9 +4422,9 @@ class ActivityIframeView extends View {
    * Handles the message received by the port.
    * @param {function(!Object<string, string|boolean>)} callback
    */
-  onMessage(callback) {
+  onMessageDeprecated(callback) {
     this.getPortPromise_().then(port => {
-      port.onMessage(callback);
+      port.onMessageDeprecated(callback);
     });
   }
 
@@ -5359,7 +5667,7 @@ class PayCompleteFlow {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
@@ -5413,7 +5721,7 @@ class PayCompleteFlow {
         feUrl('/payconfirmiframe'),
         feArgs(args),
         /* shouldFadeBody */ true);
-    this.activityIframeView_.onMessage(data => {
+    this.activityIframeView_.onMessageDeprecated(data => {
       if (data['entitlements']) {
         this.deps_.entitlementsManager().pushNextEntitlements(
             /** @type {string} */ (data['entitlements']));
@@ -5435,7 +5743,7 @@ class PayCompleteFlow {
     this.analyticsService_.logEvent(AnalyticsEvent.ACTION_ACCOUNT_CREATED);
     this.deps_.entitlementsManager().unblockNextNotification();
     this.readyPromise_.then(() => {
-      this.activityIframeView_.message({'complete': true});
+      this.activityIframeView_.messageDeprecated({'complete': true});
     });
     return this.activityIframeView_.acceptResult().catch(() => {
       // Ignore errors.
@@ -5605,7 +5913,7 @@ class ContributionsFlow {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
@@ -5643,7 +5951,7 @@ class ContributionsFlow {
     });
 
     // If result is due to OfferSelection, redirect to payments.
-    this.activityIframeView_.onMessage(result => {
+    this.activityIframeView_.onMessageDeprecated(result => {
       if (result['alreadyMember']) {
         this.deps_.callbacks().triggerLoginRequest({
           linkRequested: !!result['linkRequested'],
@@ -5698,7 +6006,7 @@ class DeferredAccountFlow {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
@@ -6982,7 +7290,7 @@ class Toast {
     /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {string} */
@@ -8143,7 +8451,7 @@ class LinkbackFlow {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../model/page-config.PageConfig} */
@@ -8185,7 +8493,7 @@ class LinkCompleteFlow {
   static configurePending(deps) {
     /**
      * Handler function.
-     * @param {!web-activities/activity-ports.ActivityPort} port
+     * @param {!../components/activities.ActivityPortDef} port
      */
     function handler(port) {
       deps.entitlementsManager().blockNextNotification();
@@ -8215,7 +8523,7 @@ class LinkCompleteFlow {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
@@ -8310,7 +8618,7 @@ class LinkSaveFlow {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
@@ -8395,7 +8703,7 @@ class LinkSaveFlow {
         /* shouldFadeBody */ false,
         /* hasLoadingIndicator */ true
     );
-    this.activityIframeView_.onMessage(data => {
+    this.activityIframeView_.onMessageDeprecated(data => {
       if (data['getLinkingInfo']) {
         this.requestPromise_ = new Promise(resolve => {
           resolve(this.callback_());
@@ -8412,7 +8720,7 @@ class LinkSaveFlow {
           } else {
             throw new Error('Neither token or authCode is available');
           }
-          this.activityIframeView_.message(saveRequest);
+          this.activityIframeView_.messageDeprecated(saveRequest);
         }).catch(reason => {
           // The flow is complete.
           this.complete_();
@@ -8472,7 +8780,7 @@ class LoginPromptApi {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
@@ -8551,7 +8859,7 @@ class LoginNotificationApi {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
@@ -11792,7 +12100,7 @@ function payDecryptUrl() {
 class PayClient {
   /**
    * @param {!Window} win
-   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   * @param {!../components/activities.ActivityPorts} activityPorts
    * @param {!../components/dialog-manager.DialogManager} dialogManager
    */
   constructor(win, activityPorts, dialogManager) {
@@ -11847,13 +12155,13 @@ class PayClient {
 class PayClientBindingSwg {
   /**
    * @param {!Window} win
-   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   * @param {!../components/activities.ActivityPorts} activityPorts
    * @param {!../components/dialog-manager.DialogManager} dialogManager
    */
   constructor(win, activityPorts, dialogManager) {
     /** @private @const {!Window} */
     this.win_ = win;
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = activityPorts;
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = dialogManager;
@@ -11886,7 +12194,7 @@ class PayClientBindingSwg {
   }
 
   /**
-   * @param {!web-activities/activity-ports.ActivityPort} port
+   * @param {!../components/activities.ActivityPortDef} port
    * @return {!Promise<!Object>}
    * @private
    */
@@ -11933,12 +12241,12 @@ class PayClientBindingSwg {
 class PayClientBindingPayjs {
   /**
    * @param {!Window} win
-   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   * @param {!../components/activities.ActivityPorts} activityPorts
    */
   constructor(win, activityPorts) {
     /** @private @const {!Window} */
     this.win_ = win;
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = activityPorts;
 
     /** @private {?function(!Promise<!Object>)} */
@@ -11973,7 +12281,7 @@ class PayClientBindingPayjs {
         options,
         handler,
         /* useIframe */ false,
-        this.activityPorts_);
+        this.activityPorts_.getOriginalWebActivityPorts());
   }
 
   /** @override */
@@ -12250,7 +12558,7 @@ class WaitForSubscriptionLookupApi {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
@@ -12394,7 +12702,7 @@ class OffersFlow {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
@@ -12436,7 +12744,7 @@ class OffersFlow {
     });
 
     // If result is due to OfferSelection, redirect to payments.
-    this.activityIframeView_.onMessage(result => {
+    this.activityIframeView_.onMessageDeprecated(result => {
       if (result['alreadySubscribed']) {
         this.deps_.callbacks().triggerLoginRequest({
           linkRequested: !!result['linkRequested'],
@@ -12478,7 +12786,7 @@ class SubscribeOptionFlow {
     /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
     this.options_ = options;
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
@@ -12512,7 +12820,7 @@ class SubscribeOptionFlow {
           SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
     });
 
-    this.activityIframeView_.onMessage(data => {
+    this.activityIframeView_.onMessageDeprecated(data => {
       this.maybeOpenOffersFlow_(data);
     });
     this.activityIframeView_.acceptResult().then(result => {
@@ -12561,7 +12869,7 @@ class AbbrvOfferFlow {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
@@ -12597,7 +12905,7 @@ class AbbrvOfferFlow {
     });
 
     // If the user is already subscribed, trigger login flow
-    this.activityIframeView_.onMessage(data => {
+    this.activityIframeView_.onMessageDeprecated(data => {
       if (data['alreadySubscribed']) {
         this.deps_.callbacks().triggerLoginRequest({
           linkRequested: !!data['linkRequested'],
@@ -12909,7 +13217,7 @@ class AnalyticsService {
     /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!HTMLIFrameElement} */
@@ -13043,7 +13351,7 @@ class AnalyticsService {
   }
 
   /**
-   * @return {!Promise<!web-activities/activity-ports.ActivityIframePort>}
+   * @return {!Promise<!../components/activities.ActivityIframePort>}
    * @private
    */
   start_() {
@@ -13113,7 +13421,7 @@ class AnalyticsService {
    */
   onMessage(callback) {
     this.lastAction_ = this.start_().then(port => {
-      port.onMessage(callback);
+      port.onMessageDeprecated(callback);
     });
   }
 
@@ -13127,7 +13435,7 @@ class AnalyticsService {
       return;
     }
     this.lastAction_ = this.start_().then(port => {
-      port.message({'buf': this.createLogRequest_(event).toArray()});
+      port.messageDeprecated({'buf': this.createLogRequest_(event).toArray()});
     });
   }
 
@@ -13829,8 +14137,8 @@ class ConfiguredRuntime {
     /** @private @const {!DialogManager} */
     this.dialogManager_ = new DialogManager(this.doc_);
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = new activityPorts_1(this.win_);
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = new ActivityPorts$1(this.win_);
 
     /** @private @const {!PayClient} */
     this.payClient_ = new PayClient(

@@ -36,6 +36,7 @@ import {
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
+import {installInaboxCidService} from './inabox-cid';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installPerformanceService} from '../service/performance-impl';
 import {
@@ -47,6 +48,7 @@ import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {internalRuntimeVersion} from '../internal-version';
 import {isExperimentOn} from '../experiments';
 import {maybeValidate} from '../validator-integration';
+import {rejectServicePromiseForDoc} from '../service';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
@@ -92,12 +94,15 @@ startupChunk(self.document, function initial() {
     fullCss,
     () => {
       startupChunk(self.document, function services() {
+        // For security, storage is not supported in inabox.
+        // Fail early with console errors for any attempt of access.
+        unsupportedService(ampdoc, 'storage');
         // Core services.
         installRuntimeServices(self);
         fontStylesheetTimeout(self);
         installIframeMessagingClient(self);
-        // Install inabox specific Viewport service before
-        // runtime tries to install the normal one.
+        // Install inabox specific services.
+        installInaboxCidService(ampdoc);
         installViewerServiceForDoc(ampdoc);
         installInaboxViewportService(ampdoc);
         installAmpdocServices(ampdoc, undefined, true);
@@ -149,3 +154,15 @@ self.document.documentElement.setAttribute(
   'amp-version',
   internalRuntimeVersion()
 );
+
+/**
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} name
+ */
+function unsupportedService(ampdoc, name) {
+  rejectServicePromiseForDoc(
+    ampdoc,
+    name,
+    new Error('Un-supported service: ' + name)
+  );
+}
