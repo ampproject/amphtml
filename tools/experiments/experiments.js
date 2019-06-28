@@ -430,8 +430,9 @@ const EXPERIMENTS = [
   },
   {
     id: 'untrusted-xhr-interception',
-    name: 'Enable "xhrInterceptor" capability for untrusted viewers. ' +
-        'For development use only',
+    name:
+      'Enable "xhrInterceptor" capability for untrusted viewers. ' +
+      'For development use only',
     spec: 'N/A',
     cleanupIssue: 'N/A',
   },
