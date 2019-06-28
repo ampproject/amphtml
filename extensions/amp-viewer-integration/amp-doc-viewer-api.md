@@ -30,6 +30,9 @@ Some parameters are read by the AMP runtime and configure its behavior and other
 #### Viewer Integration Script Parameters
 The viewer integration script is added to documents served via a cache URL, e.g. https://cdn.ampproject.org/v/. This script adds behavior and enables communication with a parent Viewer.
 
+`cap`<br/>
+A comma delimited list of capabilities supported by the Viewer. Other boolean parameters should be deprecated and replaced with an entry in cap.
+
 | Parameter             | Supported messages    | Description                               |
 |-----------------------| ----------------------|-------------------------------------------|
 | `a2a`                 | `a2aNavigate`         | AMP-to-AMP (A2A) document linking support.|
@@ -43,11 +46,8 @@ The viewer integration script is added to documents served via a cache URL, e.g.
 | `viewerRenderTemplate`| `viewerRenderTemplate`| Proxies all mustache template rendering to the viewer. |
 | `xhrInterceptor`      | `xhr`                 | Proxies all XHRs through the viewer.      |
 
- ```javascript
-origin
-string
+`origin`<br/>
 The origin of the Viewer. The Viewer Integration will verify this is an allowed domain and this will be the target of all messages sent from the AMP document to the Viewer.
- ```
 
 ### AMP Runtime Parameters
 
@@ -94,12 +94,9 @@ The messages in this section are sent by the Viewer Integration Script and are n
 |`cancelFullOverlay`|Requests that Full Overlay mode is cancelled. If the header was hidden, it should be restored.|undefined|undefined (The response is sent once viewer exits Full Overlay mode.)|
 |`cid`|Requests the scoped  Client ID. See Client identifiers in AMP.|undefined|string (The scoped Client ID.)|
 |`documentHeight`|The AMP runtime sends this request to the Viewer when the height of the document content changes.|{'height’: (number)}|undefined|
-|`documentLoaded`|The AMP runtime sends this request to the Viewer when it has fully loaded and is ready for display.|{'linkRels': (Map<string, Array<string>>),'metaTags': (Map<string, Array<string>>),'title': (string),'sourceUrl': (string)}
-Where:linkRels maps the document’s <link> tags from rel to hrefs.linkRels['canonical'] is the document’s canonical URL.
-metaTags maps the document’s <meta> tags from name to contents.metaTags['theme-color'] is the document’s theme-color.title is the document’s page title.|undefined|
+|`documentLoaded`|The AMP runtime sends this request to the Viewer when it has fully loaded and is ready for display.|{'linkRels': (Map<string, Array<string>>),'metaTags': (Map<string, Array<string>>),'title': (string),'sourceUrl': (string)}|Where linkRels maps the document’s <link> tags from rel to hrefs.linkRels['canonical'] is the document’s canonical URL. metaTags maps the document’s <meta> tags from name to contents.metaTags['theme-color'] is the document’s theme-color.title is the document’s page title.|undefined|
 |`loadStore`|Requests the local storage blob for the document's origin.|{'origin': (string)}|{'blob': (string)}|
-|`openDialog`|Requests that the AMP Access dialog with a specified URL is opened by the Viewer.|{'url': (string)}|string
-(The response is the token string from the dialog if the flow completed successfully. If the dialog is closed without completing the flow, then the response is rejected.)|
+|`openDialog`|Requests that the AMP Access dialog with a specified URL is opened by the Viewer.|{'url': (string)}|string(The response is the token string from the dialog if the flow completed successfully. If the dialog is closed without completing the flow, then the response is rejected.)|
 |`popHistory`|Requests that an entry is popped off the history stack down to the new stackIndex value.|{'stackIndex': (string)} (stackIndex specifies the new stack index.)|undefined (The response resolves once the history pop is complete.)|
 |`prerenderComplete`|Notifies the viewer that prerendering of viewport is complete.|undefined|undefined|
 |`pushHistory`|Pushes the new stack index onto the history stack.|{'stackIndex': (string)} (stackIndex specifies the new stack index.)|undefined (The response resolves once the history pop is complete. It rejects on an invalid stack index.)|
@@ -120,8 +117,7 @@ metaTags maps the document’s <meta> tags from name to contents.metaTags['theme
 |`scrollLock`|Requests that scrolling should be enabled or disabled in the document by calling preventDefault() on any touchmove events. Requires the swipe capability. Will not stop the user from scrolling using a non-touch input device e.g. mouse/keyboard.|boolean|undefined|
 |`disableScroll`|Requests that scrolling should be enabled or disabled in the document by setting overflow: hidden on the viewport.|boolean|undefined|
 |`visibilitychange`|Notifies the document that its visibility state has changed.|{'prerenderSize': (number), 'state': (string)}|undefined|
-|`willLikelyUnload`|Notifies the document that it is likely that it will be imminently unloaded, but it may not be.|{}|
-undefined|
+|`willLikelyUnload`|Notifies the document that it is likely that it will be imminently unloaded, but it may not be.|{}|undefined|
 |`xhr`|Notifies the document that an XHR fires.|{input: (string),init: (!FetchInitDef)}|{response:{JsonObject|string|undefined}}|
 |`viewerRenderTemplate`|Notifies the document that an XHR fires along with mustache template(s) to render the third party endpoint response.|{originalRequest: {input: (string),init: (!FetchInitDef)}, ampComponent: {type: (string),successTemplate: {type: (string),payload: (string),},errorTemplate: {type: (string),payload: (string),}}}|{html: (string),response:{JsonObject|string|undefined}}|
 |`highlightDismiss`|Notifies the document that users selected to dismiss text highlighting by interacting UI on the viewer.|{}|undefined|
