@@ -430,7 +430,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       }
     });
 
-    console.log(convertPathsToTmpRoot(srcs));
     if (options.typeCheckOnly) {
       return gulp
         .src(convertPathsToTmpRoot(srcs), {base: '.'})

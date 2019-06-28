@@ -74,6 +74,7 @@ function transferSrcsToTempDir() {
         isEsmBuild: argv.esm,
         isCommonJsModule: isCommonJsModule(file),
         isForTesting: argv.fortesting,
+        experiment: argv.experiment,
       }),
       retainLines: true,
     });
