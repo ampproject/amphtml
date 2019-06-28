@@ -317,7 +317,7 @@ class Chunks {
     /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
     this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
     /** @private {number} */
-    this.timeSinceLastExecution_ = 0;
+    this.timeSinceLastExecution_ = Date.now();
 
     this.win_.addEventListener('message', e => {
       if (getData(e) == 'amp-macro-task') {
@@ -410,10 +410,7 @@ class Chunks {
     // If we've spent over 5 millseconds executing the
     // last instruction yeild back to the main thread.
     // 5 milliseconds is a magic number.
-    if (
-      this.timeSinceLastExecution_ !== 0 &&
-      Date.now() - this.timeSinceLastExecution_ > 5
-    ) {
+    if (Date.now() - this.timeSinceLastExecution_ > 5) {
       this.requestMacroTask_();
       return;
     }
@@ -429,7 +426,6 @@ class Chunks {
   schedule_() {
     const nextTask = this.nextTask_();
     if (!nextTask) {
-      this.timeSinceLastExecution_ = 0;
       return;
     }
     if (nextTask.immediateTriggerCondition_()) {

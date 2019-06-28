@@ -40,6 +40,7 @@ describe('chunk', () => {
 
     beforeEach(() => {
       fakeWin = env.win;
+
       // If there is a viewer, wait for it, so we run with it being
       // installed.
       if (env.win.services.viewer) {
@@ -51,115 +52,38 @@ describe('chunk', () => {
       }
     });
 
-    // it('should execute a chunk', done => {
-    //   startupChunk(fakeWin.document, unusedIdleDeadline => {
-    //     done();
-    //   });
-    // });
-
-    it('should execute a chunk in macro task after long running previous task', done => {
-      let progress = '';
-      function complete(str, long) {
-        return function(unusedIdleDeadline) {
-          if (long) {
-            const start = Date.now();
-            // Ensure this task takes a long time (sleep?)
-            // While true with a timestamp > (5ms + buffer) exit.
-            while (Date.now() - start <= 7) {
-              console.log(Date.now() - start);
-              continue;
-            }
-          }
-          progress += str;
-        };
-      }
-      startupChunk(fakeWin.document, complete('a', false));
-      startupChunk(fakeWin.document, complete('b', true));
-      expect(progress).to.equal('ab');
-      done();
-      // return Promise.resolve().then(() => {
-      //   // Since the 'b' task takes a long time
-      //   // a micro task will not have the right progress
-      //   // value. Instead a macro task will be used.
-      //   expect(progress).to.equal('a');
-      //   // done();
-      // });
-      // setTimeout(() => {
-      //   done();
-      // }, 1000);
-      // Promise.resolve(() => {
-      //   // Since the 'b' task takes a long time
-      //   // a micro task will not have the right progress
-      //   // value. Instead a macro task will be used.
-      //   expect(progress).to.equal('a');
-      //   setTimeout(() => {
-      //     expect(progress).to.equal('ab');
-      //     done();
-      //   }, 1100);
-      // });
+    it('should execute a chunk', done => {
+      startupChunk(fakeWin.document, unusedIdleDeadline => {
+        done();
+      });
     });
 
-    // it('should execute a chunk in micro task after other tasks have completed', done => {
-    //   let progress = '';
-    //   function complete(str, long) {
-    //     return function(unusedIdleDeadline) {
-    //       if (long) {
-    //         const start = Date.now();
-    //         // Ensure this task takes a long time (sleep?)
-    //         // While true with a timestamp > (5ms + buffer) exit.
-    //         while (Date.now() - start <= 7) {
-    //           console.log(Date.now() - start);
-    //           continue;
-    //         }
-    //       }
-    //       progress += str;
-    //     };
-    //   }
-    //   startupChunk(fakeWin.document, complete('a', false));
-    //   startupChunk(fakeWin.document, function() {
-    //     expect(progress).to.equal('a');
-
-    //     complete('b', true)();
-    //     Promise.resolve(() => {
-    //       // Since the 'b' task takes a long time
-    //       // a micro task will not have the right progress
-    //       // value. Instead a macro task will be used.
-    //       expect(progress).to.equal('a');
-    //     });
-
-    //     setTimeout(() => {
-    //       expect(progress).to.equal('ab');
-    //       done();
-    //     }, 1100);
-    //   });
-    // });
-
-    // it('should execute chunks', () => {
-    //   let count = 0;
-    //   let progress = '';
-    //   return new Promise(resolve => {
-    //     function complete(str) {
-    //       return function(unusedIdleDeadline) {
-    //         progress += str;
-    //         if (++count == 6) {
-    //           resolve();
-    //         }
-    //       };
-    //     }
-    //     startupChunk(fakeWin.document, complete('a'));
-    //     startupChunk(fakeWin.document, complete('b'));
-    //     startupChunk(fakeWin.document, function() {
-    //       complete('c')();
-    //       startupChunk(fakeWin.document, function() {
-    //         complete('d')();
-    //         startupChunk(fakeWin.document, complete('e'));
-    //         startupChunk(fakeWin.document, complete('f'));
-    //       });
-    //     });
-    //   }).then(() => {
-    //     expect(progress).to.equal('abcdef');
-    //   });
-    // });
+    it('should execute chunks', () => {
+      let count = 0;
+      let progress = '';
+      return new Promise(resolve => {
+        function complete(str) {
+          return function(unusedIdleDeadline) {
+            progress += str;
+            if (++count == 6) {
+              resolve();
+            }
+          };
+        }
+        startupChunk(fakeWin.document, complete('a'));
+        startupChunk(fakeWin.document, complete('b'));
+        startupChunk(fakeWin.document, function() {
+          complete('c')();
+          startupChunk(fakeWin.document, function() {
+            complete('d')();
+            startupChunk(fakeWin.document, complete('e'));
+            startupChunk(fakeWin.document, complete('f'));
+          });
+        });
+      }).then(() => {
+        expect(progress).to.equal('abcdef');
+      });
+    });
   }
 
   describes.fakeWin(
@@ -411,6 +335,62 @@ describe('chunk', () => {
     }
   );
 });
+
+describes.fakeWin(
+  'long chunk tasks force a macro task between work',
+  {
+    amp: true,
+  },
+  env => {
+    let subscriptions;
+
+    beforeEach(() => {
+      subscriptions = {};
+      env.win.addEventListener = function(type, handler) {
+        if (subscriptions[type] && !subscriptions[type].includes(handler)) {
+          subscriptions[type].push(handler);
+        } else {
+          subscriptions[type] = [handler];
+        }
+      };
+      env.win.postMessage = function(key) {
+        if (subscriptions['message']) {
+          subscriptions['message']
+            .slice()
+            .forEach(method => method({data: key}));
+        }
+      };
+    });
+
+    it('should execute chunks after long task in a macro task', done => {
+      let progress = '';
+      function complete(str, long) {
+        return function(unusedIdleDeadline) {
+          if (long) {
+            // Ensure this task takes a long time beyond the 5ms buffer.
+            const start = Date.now();
+            while (Date.now() - start < 100) {
+              continue;
+            }
+          }
+          progress += str;
+        };
+      }
+      startupChunk(env.win.document, complete('a', false));
+      startupChunk(env.win.document, () => {
+        expect(progress).to.equal('a');
+        complete('b', true)();
+        startupChunk(env.win.document, complete('c', false));
+      });
+      env.win.addEventListener('message', e => {
+        if (e.data == 'amp-macro-task') {
+          expect(progress).to.equal('abc');
+          done();
+        }
+      });
+    });
+  }
+);
 
 describe('onIdle', () => {
   let win;
