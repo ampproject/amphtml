@@ -46,20 +46,6 @@ html:not([amp4ads]) body {
   margin: 0 !important;
 }
 
-/**
- * TODO(torch2424, #22059): if/when "inabox-preserve-height-auto" launched, merge
- * these styles into : `html:not([amp4ads]), html:not([amp4ads]) body` above, and a new.
- * :not([amp4ads])
- */
-html.i-amphtml-inabox-preserve-height-auto,
-html.i-amphtml-inabox-preserve-height-auto body {
-  height: auto !important;
-}
-
-html.i-amphtml-inabox-preserve-height-auto body {
-  margin: 0 !important;
-}
-
 /** These properties can be overriden by user stylesheets. */
 body {
   /* Text adjust is set to 100% to avoid iOS Safari bugs in Viewer where
