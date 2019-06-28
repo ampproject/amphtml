@@ -59,6 +59,12 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
      * @type {number}
      */
     this.retryLimit_ = 0;
+
+    /**
+     * Flag to ensure we don't send multiple requests on layout changes.
+     * @type {boolean}
+     */
+    this.adRequestSent_ = false;
   }
 
   /** @override */
@@ -68,8 +74,9 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    if (!this.adResponsePromise_) {
+    if (!this.adRequestSent_) {
       this.sendRequest_();
+      this.adRequestSent_ = true;
     }
   }
 
