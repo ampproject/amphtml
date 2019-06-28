@@ -68,7 +68,9 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    this.sendRequest_();
+    if (!this.adResponsePromise_) {
+      this.sendRequest_();
+    }
   }
 
   /** @override */
