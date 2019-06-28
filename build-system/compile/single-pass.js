@@ -59,6 +59,8 @@ if (!singlePassDest.endsWith('/')) {
   singlePassDest = `${singlePassDest}/`;
 }
 
+console.log('experiment singlepass', argv.experiment);
+
 const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
 
 // Used to store transforms and compile v0.js
@@ -477,6 +479,7 @@ function transformPathsToTempDir(graph, config) {
         plugins: conf.plugins({
           isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
           isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
+          experiment: argv.experiment,
         }),
         retainLines: true,
       });
