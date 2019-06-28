@@ -168,7 +168,7 @@ describes.sandboxed('FixedLayer', {}, () => {
     });
     documentApi.defaultView.document = documentApi;
     installDocService(documentApi.defaultView, /* isSingleDoc */ true);
-    ampdoc = Services.ampdocServiceFor(documentApi.defaultView).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(documentApi.defaultView).getSingleDoc();
     installHiddenObserverForDoc(ampdoc);
     installPlatformService(documentApi.defaultView);
     installTimerService(documentApi.defaultView);
