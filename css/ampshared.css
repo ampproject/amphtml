@@ -565,10 +565,13 @@ amp-accordion > section[expanded] > :last-child {
 .i-amphtml-new-loader-logo {
   transform-origin: 60px 60px;
   opacity: 0;
-  animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in 0.6s forwards,
-    i-amphtml-new-loader-fade-out 0.8s ease-out 1.8s forwards;
+  animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in 0.6s forwards;
 }
-
+/* Default logo fades away, custom ones don't*/
+.i-amphtml-new-loader-logo-default {
+  animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in 0.6s forwards,
+  i-amphtml-new-loader-fade-out 0.8s ease-out 1.8s forwards;
+}
 /* Background shim */
 .i-amphtml-new-loader-shim {
   transform-origin: 60px 60px;
@@ -583,8 +586,8 @@ amp-accordion > section[expanded] > :last-child {
 }
 
 /* shim forces spinner and logo fills to be white */
-.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-logo {
-  fill: #ffffff !important
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-logo * {
+  fill: #ffffff !important;
 }
 .i-amphtml-new-loader-has-shim .i-amphtml-new-loader-spinner-segment {
   stroke: #ffffff !important

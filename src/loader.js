@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {childElements} from './dom';
 import {dev, devAssert} from './log';
 import {htmlFor, htmlRefs, svgFor} from './static-template';
 import {isExperimentOn} from './experiments';
@@ -150,8 +149,7 @@ class LoaderBuilder {
 
     this.setSize_();
     this.maybeAddBackgroundShim_();
-    this.addSpinner_();
-    this.maybeAddLogo_();
+    this.addSpinnerAndLogo_();
   }
 
   /**
@@ -183,62 +181,6 @@ class LoaderBuilder {
   }
 
   /**
-   * Adds the spinner.
-   * @private
-   */
-  addSpinner_() {
-    const svg = svgFor(this.element_);
-    const spinner = svg`
-      <g class="i-amphtml-new-loader-spinner">
-        <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
-        </circle>
-        <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
-        </circle>
-        <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
-        </circle>
-        <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
-        </circle>
-      </g>
-    `;
-
-    this.svgRoot_.appendChild(spinner);
-  }
-
-  /**
-   * Adds the default or branded logo.
-   * @private
-   */
-  maybeAddLogo_() {
-    const logo = this.getLogo_();
-
-    // Ads always get the logo regardless of size
-    if (this.isAd_()) {
-      return this.addLogo_(logo);
-    }
-
-    // Small hosts do not get a logo
-    if (this.isSmall_()) {
-      return;
-    }
-
-    // If element requires a background shim but logo is the default,
-    // we don't show the logo.
-    if (this.requiresBackgroundShim_() && logo.isDefault) {
-      return;
-    }
-
-    return this.addLogo_(logo);
-  }
-
-  /**
-   * Adds the given logo to the loader.
-   * @param {!Element} logo
-   */
-  addLogo_(logo) {
-    this.svgRoot_.appendChild(logo.svg);
-  }
-
-  /**
    * Adds the background shim under the loader for cases where loader is on
    * top of an image.
    * @private
@@ -260,6 +202,78 @@ class LoaderBuilder {
 
     this.domRoot_.classList.add('i-amphtml-new-loader-has-shim');
     this.svgRoot_.appendChild(shimNode);
+  }
+
+  /**
+   * Adds the spinner.
+   * @private
+   */
+  addSpinnerAndLogo_() {
+    const logo = this.getLogo_();
+    const color = logo ? logo.color : DEFAULT_LOGO_SPINNER_COLOR;
+    const spinner = this.getSpinner_(color);
+
+    if (logo) {
+      const svg = svgFor(this.element_);
+      const logoWrapper = svg`<g class="i-amphtml-new-loader-logo"></g>`;
+      if (logo.isDefault) {
+        // default logo is special because it does fade away.
+        logoWrapper.classList.add('i-amphtml-new-loader-logo-default');
+      }
+      logoWrapper.appendChild(logo.svg);
+
+      this.svgRoot_.appendChild(logoWrapper);
+    }
+
+    this.svgRoot_.appendChild(spinner);
+  }
+
+  /**
+   * @param {string} color
+   */
+  getSpinner_(color) {
+    const svg = svgFor(this.element_);
+    const spinnerWrapper = svg`
+      <g class="i-amphtml-new-loader-spinner">
+    `;
+    for (let i = 0; i < 4; i++) {
+      const spinnerSegment = svg`
+        <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
+        </circle>
+      `;
+      spinnerSegment.setAttribute('stroke', color);
+      spinnerWrapper.appendChild(spinnerSegment);
+    }
+
+    return spinnerWrapper;
+  }
+
+  /**
+   * Adds the default or branded logo.
+   * @private
+   */
+  getLogo_() {
+    const customLogo = this.getCustomLogo_();
+    const useDefaultLogo = !customLogo;
+    const logo = customLogo || this.getDefaultLogo_();
+
+    // Ads always get the logo regardless of size
+    if (this.isAd_()) {
+      return logo;
+    }
+
+    // Small hosts do not get a logo
+    if (this.isSmall_()) {
+      return;
+    }
+
+    // If element requires a background shim but logo is the default logo,
+    // we don't show the logo.
+    if (this.requiresBackgroundShim_() && useDefaultLogo) {
+      return;
+    }
+
+    return logo;
   }
 
   /**
@@ -289,23 +303,28 @@ class LoaderBuilder {
   }
 
   /**
-   * Returns the logo for the element.
-   * @private
-   * @return {!Element}
-   */
-  getLogo_() {
-    const logo = this.getCustomLogo_();
-    return logo || this.getDefaultLogo_();
-  }
-
-  /**
    * Returns the custom logo for the element if there is one.
    * @private
    * @return {?Element}
    */
   getCustomLogo_() {
-    // Not Implemented
-    return null;
+    if (this.element_.tagName != 'AMP-TWITTER') {
+      return;
+    }
+    const svg = svgFor(this.element_);
+    const svgNode = svg`
+    <path fill="#1DA1F2" d="M56.29,68.13c7.55,0,11.67-6.25,11.67-11.67c0-0.18,0-0.35-0.01-0.53c0.8-0.58,1.5-1.3,2.05-2.12
+    c-0.74,0.33-1.53,0.55-2.36,0.65c0.85-0.51,1.5-1.31,1.8-2.27c-0.79,0.47-1.67,0.81-2.61,1c-0.75-0.8-1.82-1.3-3-1.3
+    c-2.27,0-4.1,1.84-4.1,4.1c0,0.32,0.04,0.64,0.11,0.94c-3.41-0.17-6.43-1.8-8.46-4.29c-0.35,0.61-0.56,1.31-0.56,2.06
+    c0,1.42,0.72,2.68,1.83,3.42c-0.67-0.02-1.31-0.21-1.86-0.51c0,0.02,0,0.03,0,0.05c0,1.99,1.41,3.65,3.29,4.02
+    c-0.34,0.09-0.71,0.14-1.08,0.14c-0.26,0-0.52-0.03-0.77-0.07c0.52,1.63,2.04,2.82,3.83,2.85c-1.4,1.1-3.17,1.76-5.1,1.76
+    c-0.33,0-0.66-0.02-0.98-0.06C51.82,67.45,53.97,68.13,56.29,68.13"></path>
+    `;
+
+    return {
+      svg: svgNode,
+      color: '#1DA1F2',
+    };
   }
 
   /**
@@ -317,17 +336,17 @@ class LoaderBuilder {
     const svg = svgFor(this.element_);
     const svgNode = svg`
       <circle
-        class="i-amphtml-new-loader-logo"
         cx="60"
         cy="60"
         r="12"
-        fill="#aaaaaa"
       >
       </circle>
     `;
+    svgNode.setAttribute('fill', DEFAULT_LOGO_SPINNER_COLOR);
 
     return {
       svg: svgNode,
+      color: DEFAULT_LOGO_SPINNER_COLOR,
       isDefault: true,
     };
   }
@@ -412,6 +431,7 @@ class LoaderBuilder {
   }
 }
 
+const DEFAULT_LOGO_SPINNER_COLOR = '#aaaaaa';
 /**
  * Elements will get a default gray placeholder if they don't already have a
  * placeholder. This list does not include video players which are detected
