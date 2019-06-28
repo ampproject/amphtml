@@ -29,8 +29,16 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should render correctly', async () => {
-      const element = await controller.findElement('amp-script');
+    it('should support local scripts', async () => {
+      const element = await controller.findElement('amp-script#local');
+      await expect(controller.getElementAttribute(element, 'class')).to.contain(
+        'i-amphtml-hydrated'
+      );
+      await expect(controller.getElementText(element)).to.equal('Hello World!');
+    });
+
+    it('should support remote scripts', async () => {
+      const element = await controller.findElement('amp-script#remote');
       await expect(controller.getElementAttribute(element, 'class')).to.contain(
         'i-amphtml-hydrated'
       );
@@ -41,9 +49,7 @@ describes.endtoend(
 
       // Output.
       const h1 = await controller.findElement('h1');
-      await expect(controller.getElementText(h1, 'class')).to.equal(
-        'Hello World!'
-      );
+      await expect(controller.getElementText(h1)).to.equal('Hello World!');
     });
   }
 );
