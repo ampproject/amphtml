@@ -141,7 +141,7 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     userAssert(
       mutation.validate(),
       'Mutation %s has an an unsupported value.',
-      JSON.stringify(mutation.mutationRecord)
+      mutation.toString()
     );
   });
 

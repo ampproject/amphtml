@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isObject} from '../../../src/types';
+import {isObject, toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 /**
@@ -76,13 +76,13 @@ export function getElementsFromMutationRecordSelector(
   document,
   mutationRecord
 ) {
-  const targetElement = document.querySelector(mutationRecord['target']);
+  const targetElements = document.querySelectorAll(mutationRecord['target']);
 
   userAssert(
-    targetElement !== null,
+    targetElements !== null,
     'No element on the document matches the selector, %s .',
     mutationRecord['target']
   );
 
-  return [targetElement];
+  return toArray(targetElements);
 }

@@ -27,9 +27,9 @@ export class CharacterDataMutation {
    * @param {!Array<Element>} elements
    */
   constructor(mutationRecord, elements) {
-    this.mutationRecord = mutationRecord;
-    this.elements = elements;
-    assertCharacterDataMutationFormat(this.mutationRecord);
+    this.mutationRecord_ = mutationRecord;
+    this.elements_ = elements;
+    assertCharacterDataMutationFormat(this.mutationRecord_);
   }
 
   /** @override */
@@ -39,8 +39,13 @@ export class CharacterDataMutation {
 
   /** @override */
   mutate() {
-    this.elements.forEach(element => {
-      element.textContent = this.mutationRecord['value'];
+    this.elements_.forEach(element => {
+      element.textContent = this.mutationRecord_['value'];
     });
+  }
+
+  /** @override */
+  toString() {
+    return JSON.stringify(this.mutationRecord_);
   }
 }

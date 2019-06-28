@@ -31,10 +31,20 @@ export class Mutation {
   validate() {}
 
   /**
-   * Called to aplly the changes to the selected
+   * Called to apply the changes to the selected
    * element(s)
    */
   mutate() {}
+
+  /**
+   * Called to return a string representation of
+   * the mutation for logging purposes.
+   *
+   * @return {string}
+   */
+  toString() {
+    return '';
+  }
 }
 
 /**

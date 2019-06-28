@@ -27,14 +27,14 @@ export class AttributeMutationDefaultClass {
    * @param {!Array<Element>} elements
    */
   constructor(mutationRecord, elements) {
-    this.mutationRecord = mutationRecord;
-    this.elements = elements;
-    assertAttributeMutationFormat(this.mutationRecord);
+    this.mutationRecord_ = mutationRecord;
+    this.elements_ = elements;
+    assertAttributeMutationFormat(this.mutationRecord_);
   }
 
   /** @override */
   validate() {
-    const value = this.mutationRecord['value'];
+    const value = this.mutationRecord_['value'];
 
     // Don't allow the .i-amphtml class
     // Should stay in sync with
@@ -48,11 +48,16 @@ export class AttributeMutationDefaultClass {
 
   /** @override */
   mutate() {
-    this.elements.forEach(element => {
+    this.elements_.forEach(element => {
       element.setAttribute(
-        this.mutationRecord['attributeName'],
-        this.mutationRecord['value']
+        this.mutationRecord_['attributeName'],
+        this.mutationRecord_['value']
       );
     });
+  }
+
+  /** @override */
+  toString() {
+    return JSON.stringify(this.mutationRecord_);
   }
 }

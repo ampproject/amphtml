@@ -27,14 +27,14 @@ export class AttributeMutationDefaultStyle {
    * @param {!Array<Element>} elements
    */
   constructor(mutationRecord, elements) {
-    this.mutationRecord = mutationRecord;
-    this.elements = elements;
-    assertAttributeMutationFormat(this.mutationRecord);
+    this.mutationRecord_ = mutationRecord;
+    this.elements_ = elements;
+    assertAttributeMutationFormat(this.mutationRecord_);
   }
 
   /** @override */
   validate() {
-    const value = this.mutationRecord['value'];
+    const value = this.mutationRecord_['value'];
 
     // Do not allow Important or HTML Comments
     if (value.match(/(!\s*important|<!--)/)) {
@@ -58,11 +58,13 @@ export class AttributeMutationDefaultStyle {
 
   /** @override */
   mutate() {
-    this.elements.forEach(element => {
-      element.setAttribute(
-        this.mutationRecord['attributeName'],
-        this.mutationRecord['value']
-      );
+    this.elements_.forEach(element => {
+      element.setAttribute('style', this.mutationRecord_['value']);
     });
+  }
+
+  /** @override */
+  toString() {
+    return JSON.stringify(this.mutationRecord_);
   }
 }

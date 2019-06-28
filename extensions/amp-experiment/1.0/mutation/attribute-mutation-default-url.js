@@ -30,16 +30,16 @@ export class AttributeMutationDefaultUrl {
    * @param {!Array<Element>} elements
    */
   constructor(mutationRecord, elements) {
-    this.mutationRecord = mutationRecord;
-    this.elements = elements;
-    assertAttributeMutationFormat(mutationRecord);
+    this.mutationRecord_ = mutationRecord;
+    this.elements_ = elements;
+    assertAttributeMutationFormat(this.mutationRecord_);
   }
 
   /** @override */
   validate() {
     assertHttpsUrl(
-      this.mutationRecord['value'],
-      this.mutationRecord['target'],
+      this.mutationRecord_['value'],
+      this.mutationRecord_['target'],
       'attributes mutation'
     );
     return true;
@@ -47,11 +47,16 @@ export class AttributeMutationDefaultUrl {
 
   /** @override */
   mutate() {
-    this.elements.forEach(element => {
+    this.elements_.forEach(element => {
       element.setAttribute(
-        this.mutationRecord['attributeName'],
-        this.mutationRecord['value']
+        this.mutationRecord_['attributeName'],
+        this.mutationRecord_['value']
       );
     });
+  }
+
+  /** @override */
+  toString() {
+    return JSON.stringify(this.mutationRecord_);
   }
 }
