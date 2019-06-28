@@ -186,11 +186,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
-    id: 'font-display-swap',
-    name: 'Use font-display: swap as the default for fonts.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
-  },
-  {
     id: 'pump-early-frame',
     name:
       'If applicable, let the browser paint the current frame before ' +
