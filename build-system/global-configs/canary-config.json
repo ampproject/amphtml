@@ -1,6 +1,5 @@
 {
   "allow-doc-opt-in": [
-    "amp-date-picker",
     "amp-img-auto-sizes",
     "amp-next-page",
     "disable-amp-story-desktop",
@@ -25,7 +24,6 @@
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-auto-lightbox": 1,
   "amp-consent-v2": 1,
-  "amp-date-picker": 1,
   "amp-force-prerender-visible-elements": 1,
   "amp-img-auto-sizes": 1,
   "amp-list-load-more": 1,
