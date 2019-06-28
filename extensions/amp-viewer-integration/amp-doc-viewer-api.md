@@ -66,34 +66,9 @@ The origin of the Viewer. The Viewer Integration will verify this is an allowed 
 |`storage`|`boolean`|Whether the Viewer will provide local storage. If true, then the Viewer must support loadStore and saveStore.|
 |`viewerUrl`|`string`|The url of the Viewer. This is the shareable Viewer URL and may be used as a fallback as part of AMP Access.|
 |`webview`|`boolean`|Whether the document is being loaded in a WebView instead of an iframe. This will enable "embedded" mode for the document, which is needed for dialog to work.|
-|`highlight`|`string`|The information to highlight text. JSON-encoded string. |
-
-
-
-viewportType
-enum: ['natural', 'natural-ios-embed']
-The viewport type.
-natural
-Natural means that the AMP document can read the window dimensions and they will be correct.
-natural-ios-embed
-Viewport mode for use when the AMP document is displayed in an iframe on Mobile Safari. It works around quirks of Mobile Safari's iframe implementation by making the body scrollable rather than the document.
-visibilityState
-enum: [
-	'hidden',  // deprecated, use 'inactive'
-	'inactive',
-	'paused',
-	'visible',
-	‘prerender’,
-]
-The initial visibility state of the AMP document.
-prerender
-The AMP document is being pre-rendered before being shown. It may be prerendered according to prerenderSize.
-inactive or hidden
-The document is not visible to the user.
-paused
-This document should stop loading new resources and pause any resources such as video. The document may still be visible to the user, but the viewer may be performing a performance sensitive operation such as a swipe.
-visible
-The document is active and visible to the user.
+|`highlight`|`string`|The information to highlight text. JSON-encoded string.|
+|`viewportType`| natural, natural-ios-embed|The viewport type. Natural means that the AMP document can read the window dimensions and they will be correct. natural-ios-embed Viewport mode is for use when the AMP document is displayed in an iframe on Mobile Safari. It works around quirks of Mobile Safari's iframe implementation by making the body scrollable rather than the document.|
+|`visibilityState`|'hidden' (deprecated, use 'inactive'), 'inactive','paused','visible',‘prerender’|The initial visibility state of the AMP document.<ul><li>prerender- AMP document is being pre-rendered before being shown. It may be prerendered according to prerenderSize</li><li>inactive or hidden -The document is not visible to the user.</li><li>paused - this document should stop loading new resources and pause any resources such as video. The document may still be visible to the user, but the viewer may be performing a performance sensitive operation such as a swipe.</li><li>visible- The document is active and visible to the user.</li>|
 
 ### Messaging
 The AMP viewer and AMP document can communicate via an RPC-style communication channel. In the AMP runtime and in theWeb Viewer, this is implemented using Promises.
@@ -119,8 +94,7 @@ The messages in this section are sent by the Viewer Integration Script and are n
 |`cancelFullOverlay`|Requests that Full Overlay mode is cancelled. If the header was hidden, it should be restored.|undefined|undefined (The response is sent once viewer exits Full Overlay mode.)|
 |`cid`|Requests the scoped  Client ID. See Client identifiers in AMP.|undefined|string (The scoped Client ID.)|
 |`documentHeight`|The AMP runtime sends this request to the Viewer when the height of the document content changes.|{'height’: (number)}|undefined|
-|`documentLoaded`|The AMP runtime sends this request to the Viewer when it has fully loaded and is ready for display.|
-{'linkRels': (Map<string, Array<string>>),'metaTags': (Map<string, Array<string>>),'title': (string),'sourceUrl': (string)}
+|`documentLoaded`|The AMP runtime sends this request to the Viewer when it has fully loaded and is ready for display.|{'linkRels': (Map<string, Array<string>>),'metaTags': (Map<string, Array<string>>),'title': (string),'sourceUrl': (string)}
 Where:linkRels maps the document’s <link> tags from rel to hrefs.linkRels['canonical'] is the document’s canonical URL.
 metaTags maps the document’s <meta> tags from name to contents.metaTags['theme-color'] is the document’s theme-color.title is the document’s page title.|undefined|
 |`loadStore`|Requests the local storage blob for the document's origin.|{'origin': (string)}|{'blob': (string)}|
@@ -135,7 +109,7 @@ metaTags maps the document’s <meta> tags from name to contents.metaTags['theme
 |`saveStore`|Requests that the specified blob is stored to local storage for the document's origin.|{'origin': (string), 'blob': (string)}|undefined (The response resolves once the blob has been successfully stored.)|
 |`sendCsi`|Requests that the CSI ticks are flushed. See tick.|undefined|undefined|
 |`setFlushParams|Sets arbitrary additional parameters to be included in the CSI flush. See sendCsi.|Object|undefined|
-|`tick`|Records a timing measurement.|{'label': (string)  // The label of this tick, 'from': (string)  // The label of another tick to use timing reference, 'value': (number)  // The time to record.}|undefined|
+|`tick`|Records a timing measurement.|{'label': (string)  //The label of this tick, 'from': (string)  //The label of another tick to use timing reference, 'value': (number)  //The time to record.}|undefined|
   
   
 #### Viewer to Document
@@ -149,8 +123,6 @@ metaTags maps the document’s <meta> tags from name to contents.metaTags['theme
 |`willLikelyUnload`|Notifies the document that it is likely that it will be imminently unloaded, but it may not be.|{}|
 undefined|
 |`xhr`|Notifies the document that an XHR fires.|{input: (string),init: (!FetchInitDef)}|{response:{JsonObject|string|undefined}}|
-|`viewerRenderTemplate`|Notifies the document that an XHR fires along with mustache template(s) to render the third party endpoint response.|{originalRequest: {input: (string),init: (!FetchInitDef)}ampComponent: {type: (string),successTemplate: {type: (string),payload: (string),
-},errorTemplate: {type: (string),payload: (string),}}}|{html: (string),response: {JsonObject|string|undefined}  // The structurally-cloneable response to convert back to a regular Response.}|
-|`highlightDismiss`|Notifies the document that users selected to dismiss text highlighting by interacting UI on the viewer.|
-{}|undefined|
+|`viewerRenderTemplate`|Notifies the document that an XHR fires along with mustache template(s) to render the third party endpoint response.|{originalRequest: {input: (string),init: (!FetchInitDef)}, ampComponent: {type: (string),successTemplate: {type: (string),payload: (string),},errorTemplate: {type: (string),payload: (string),}}}|{html: (string),response:{JsonObject|string|undefined}}|
+|`highlightDismiss`|Notifies the document that users selected to dismiss text highlighting by interacting UI on the viewer.|{}|undefined|
 |`highlightShown`|Notifies the viewer that text highlighting is displayed in the document.|{}|undefined|
