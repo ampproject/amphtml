@@ -363,20 +363,22 @@ describe('taskQueues', () => {
         sandbox = sinon.sandbox;
         clock = sandbox.useFakeTimers();
 
-        env.win.addEventListener = function(type, handler) {
-          if (subscriptions[type] && !subscriptions[type].includes(handler)) {
-            subscriptions[type].push(handler);
-          } else {
-            subscriptions[type] = [handler];
-          }
-        };
-        env.win.postMessage = function(key) {
-          if (subscriptions['message']) {
-            subscriptions['message']
-              .slice()
-              .forEach(method => method({data: key}));
-          }
-        };
+        if (!env.win.addEventListener || !env.win.postMessage) {
+          env.win.addEventListener = function(type, handler) {
+            if (subscriptions[type] && !subscriptions[type].includes(handler)) {
+              subscriptions[type].push(handler);
+            } else {
+              subscriptions[type] = [handler];
+            }
+          };
+          env.win.postMessage = function(key) {
+            if (subscriptions['message']) {
+              subscriptions['message']
+                .slice()
+                .forEach(method => method({data: key}));
+            }
+          };
+        }
 
         progress = '';
       });
