@@ -20,6 +20,7 @@ import {assertSuccess} from '../../src/utils/xhr-utils';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
 import {fetchPolyfill} from '../../src/polyfills/fetch';
 import {getCookie} from '../../src/cookies';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
@@ -685,6 +686,14 @@ describe
         };
       });
 
+      afterEach(() => {
+        toggleExperiment(
+          interceptionEnabledWin,
+          'untrusted-xhr-interception',
+          false
+        );
+      });
+
       it('should not intercept if AMP doc is not single', () => {
         ampdocServiceForStub.returns({
           isSingleDoc: () => false,
@@ -755,6 +764,26 @@ describe
       it('should intercept if viewer untrusted but in local dev mode', () => {
         sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
         sandbox.stub(mode, 'getMode').returns({localDev: true});
+
+        const xhr = xhrServiceForTesting(interceptionEnabledWin);
+
+        return xhr
+          .fetch('https://www.some-url.org/some-resource/')
+          .then(() => expect(sendMessageStub).to.have.been.called);
+      });
+
+      it('should intercept if untrusted-xhr-interception experiment enabled', () => {
+        sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
+        sandbox.stub(mode, 'getMode').returns({localDev: false});
+        sandbox
+          .stub(viewer, 'hasCapability')
+          .withArgs('xhrInterceptor')
+          .returns(true);
+        toggleExperiment(
+          interceptionEnabledWin,
+          'untrusted-xhr-interception',
+          true
+        );
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
