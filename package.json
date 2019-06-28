@@ -46,7 +46,7 @@
     "ast-replace": "1.1.3",
     "atob": "2.1.2",
     "autoprefixer": "9.5.1",
-    "babel-eslint": "10.0.1",
+    "babel-eslint": "10.0.2",
     "babel-plugin-filter-imports": "3.0.0",
     "babel-plugin-istanbul": "5.1.4",
     "babel-plugin-transform-commonjs-es2015-modules": "4.0.1",
