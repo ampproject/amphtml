@@ -32,19 +32,12 @@ const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
-const debug = require('gulp-debug');
 
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
 
-const {SRC_DIRS} = require('./compile-utils');
-
-
-function isSourceDir(path) {
-  return SRC_DIRS.some(x => path.startsWith(x) || path.startsWith(`!${x}`));
-}
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
@@ -53,13 +46,11 @@ function isSourceDir(path) {
  * @param {!Array<string>}
  * @return {!Array<string>}
  */
-function maybeConvertPathsToTmpRoot(paths) {
+function convertPathsToTmpRoot(paths) {
   return paths.map(path => {
-    if (isSourceDir(path)) {
       const hasNegation = path.charAt(0) === '!';
       const newPath = hasNegation ? path.substr(1) : path;
       return `${hasNegation ? '!' : ''}${process.env.AMP_TMP_DIR}/${newPath}`;
-    }
     return path;
   });
 }
@@ -360,6 +351,14 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // respective top level polyfills.js files.
       rewrite_polyfills: false,
       externs,
+      //js_module_root: [
+        //// Do _not_ include 'node_modules/' in js_module_root with 'NODE'
+        //// resolution or bad things will happen (#18600).
+        //process.env.AMP_TMP_DIR + 'build/patched-module/',
+        //process.env.AMP_TMP_DIR + 'build/fake-module/',
+        //process.env.AMP_TMP_DIR + 'build/fake-polyfills/',
+        //process.env.AMP_TMP_DIR,
+      //],
       js_module_root: [
         // Do _not_ include 'node_modules/' in js_module_root with 'NODE'
         // resolution or bad things will happen (#18600).
@@ -368,7 +367,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         'build/fake-polyfills/',
         process.env.AMP_TMP_DIR,
       ],
-      entry_point: '../../../../' + maybeConvertPathsToTmpRoot(entryModuleFilenames),
+      entry_point: entryModuleFilenames,
       module_resolution: 'NODE',
       process_common_js_modules: true,
       // This strips all files from the input set that aren't explicitly
@@ -431,11 +430,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       }
     });
 
-    console.log(rewrittenSrcs);
-
+    console.log(convertPathsToTmpRoot(srcs));
     if (options.typeCheckOnly) {
       return gulp
-        .src(srcs, {base: '.'})
+        .src(convertPathsToTmpRoot(srcs), {base: '.'})
         .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', err => {
           handleTypeCheckError();
@@ -445,7 +443,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .on('end', resolve);
     } else {
       return gulp
-        .src(srcs, {base: process.ENV.AMP_TMP_DIR})
+        .src(convertPathsToTmpRoot(srcs), {base: process.env.AMP_TMP_DIR})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray))
