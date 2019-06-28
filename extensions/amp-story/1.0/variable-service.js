@@ -93,16 +93,15 @@ export class AmpStoryVariableService {
       ];
       this.variables_[Variable.STORY_PAGE_ID] = pageId;
 
-      const pageIndex = this.storeService_.get(
+      const pageIndex = /** @type {number} */ (this.storeService_.get(
         StateProperty.CURRENT_PAGE_INDEX
-      );
+      ));
       this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
 
       const numberOfPages = this.storeService_.get(StateProperty.PAGE_IDS)
         .length;
       if (numberOfPages > 0) {
-        this.variables_[Variable.STORY_PROGRESS] =
-          pageIndex / this.storeService_.get(StateProperty.PAGE_IDS).length;
+        this.variables_[Variable.STORY_PROGRESS] = pageIndex / numberOfPages;
       }
     });
   }
