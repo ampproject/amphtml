@@ -39,7 +39,7 @@ export function fetchDocument(win, input, opt_init) {
   input = setupInput(win, input, init);
   const ampdocService = Services.ampdocServiceFor(win);
   const ampdocSingle = ampdocService.isSingleDoc()
-    ? ampdocService.getAmpDoc()
+    ? ampdocService.getSingleDoc()
     : null;
   init.responseType = 'document';
   return getViewerInterceptResponse(win, ampdocSingle, input, init).then(

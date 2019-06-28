@@ -686,7 +686,7 @@ class AmpLightbox extends AMP.BaseElement {
  */
 function setTransparentBody(win, body) {
   const state = {};
-  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc(body);
 
   Services.resourcesForDoc(ampdoc).measureMutateElement(
     body,

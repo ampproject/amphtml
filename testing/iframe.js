@@ -240,7 +240,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installDocService(iframe.contentWindow, /* isSingleDoc */ true);
       const ampdoc = Services.ampdocServiceFor(
         iframe.contentWindow
-      ).getAmpDoc();
+      ).getSingleDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       installCustomElements(iframe.contentWindow);

@@ -60,7 +60,7 @@ describes.realWin(
     beforeEach(() => {
       doc = env.win.document;
       sandbox = env.sandbox;
-      ampdoc = Services.ampdocServiceFor(env.win).getAmpDoc();
+      ampdoc = Services.ampdocServiceFor(env.win).getSingleDoc();
       container = doc.createElement('div');
       env.win.document.body.appendChild(container);
       stubUrlService(sandbox);

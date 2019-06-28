@@ -85,6 +85,7 @@ describe
       ampdocServiceForStub.returns({
         isSingleDoc: () => false,
         getAmpDoc: () => ampdocViewerStub,
+        getSingleDoc: () => ampdocViewerStub,
       });
 
       location.href = 'https://acme.com/path';
@@ -664,9 +665,11 @@ describe
         optedInDoc = window.document.implementation.createHTMLDocument('');
         optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
 
+        const ampdoc = {getRootNode: () => optedInDoc};
         ampdocServiceForStub.returns({
           isSingleDoc: () => true,
-          getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
         viewer = {
           hasCapability: () => true,
@@ -695,9 +698,11 @@ describe
       });
 
       it('should not intercept if AMP doc is not single', () => {
+        const ampdoc = {getRootNode: () => optedInDoc};
         ampdocServiceForStub.returns({
           isSingleDoc: () => false,
-          getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -710,9 +715,11 @@ describe
         const nonOptedInDoc = window.document.implementation.createHTMLDocument(
           ''
         );
+        const ampdoc = {getRootNode: () => nonOptedInDoc};
         ampdocServiceForStub.returns({
           isSingleDoc: () => true,
-          getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);

@@ -52,7 +52,7 @@ export class Xhr {
     // TODO(alabiaga): This should be investigated and fixed
     /** @private {?./ampdoc-impl.AmpDoc} */
     this.ampdocSingle_ = ampdocService.isSingleDoc()
-      ? ampdocService.getAmpDoc()
+      ? ampdocService.getSingleDoc()
       : null;
   }
 

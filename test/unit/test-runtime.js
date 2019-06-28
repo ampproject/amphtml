@@ -54,6 +54,7 @@ describes.fakeWin(
       extensionElementIndex = 0;
       ampdocService = {
         isSingleDoc: () => true,
+        getSingleDoc: () => null,
         getAmpDoc: () => null,
         installShadowDoc_: () => null,
       };
@@ -63,6 +64,7 @@ describes.fakeWin(
         ampdoc: {obj: ampdocService},
       };
       const ampdoc = new AmpDocSingle(win);
+      ampdocService.getSingleDoc = () => ampdoc;
       ampdocService.getAmpDoc = () => ampdoc;
       installGlobalDocumentStateService(win);
       installPlatformService(win);
@@ -698,7 +700,7 @@ describes.fakeWin(
       });
 
       it('should register element without CSS', function*() {
-        const ampdoc = ampdocService.getAmpDoc();
+        const ampdoc = ampdocService.getSingleDoc();
         const servicePromise = getServicePromise(win, 'amp-ext');
         const installStylesStub = sandbox.stub(styles, 'installStylesForDoc');
 
@@ -733,7 +735,7 @@ describes.fakeWin(
       });
 
       it('should register element with CSS', function*() {
-        const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+        const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
         const servicePromise = getServicePromise(win, 'amp-ext');
         let installStylesCallback;
         const installStylesStub = sandbox
