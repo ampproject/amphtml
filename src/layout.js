@@ -113,7 +113,7 @@ export const LOADING_ELEMENTS_ = {
  * reasons, so they are listed individually.
  * @private @const {!RegExp}
  */
-const videoPlayerTagNameRe = /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO/i;
+const videoPlayerTagNameRe = /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
 
 /**
  * @param {string} s

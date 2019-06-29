@@ -444,6 +444,10 @@ const DEFAULT_LOGO_SPINNER_COLOR = '#aaaaaa';
  */
 const DEFAULT_PLACEHOLDER_WHITELIST_NONE_VIDEO = {
   'AMP-IMG': true,
+  'AMP-ANIM': true,
+  'AMP-PINTEREST': true,
+  'AMP-INSTAGRAM': true,
+  'AMP-GOOGLE-DOCUMENT-EMBED': true,
 };
 
 /**
