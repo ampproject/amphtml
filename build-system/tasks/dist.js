@@ -233,7 +233,7 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
   const minifiedName = fileName + '.js';
   return toPromise(
     gulp
-      .src(basePath + '/*.js', {base: '.'})
+      .src(basePath + '/*.js', {base: basePath})
       .pipe(file(builtName, js))
       .pipe(gulp.dest(tempBuildDir))
   )
@@ -384,6 +384,9 @@ dist.flags = {
   pseudo_names:
     '  Compiles with readable names. ' +
     'Great for profiling and debugging production code.',
+  pretty_print:
+    '  Outputs compiled code with whitespace. ' +
+    'Great for debugging production code.',
   fortesting: '  Compiles production binaries for local testing',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   single_pass: "Compile AMP's primary JS bundles in a single invocation",

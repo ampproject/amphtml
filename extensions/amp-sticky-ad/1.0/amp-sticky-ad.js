@@ -198,10 +198,7 @@ class AmpStickyAd extends AMP.BaseElement {
     // `render-start` is expected to arrive first, but it's not emitted by
     // all types of ads.
     const signals = ad.signals();
-    return Promise.race([
-      signals.whenSignal(CommonSignals.RENDER_START),
-      signals.whenSignal(CommonSignals.LOAD_END),
-    ]).then(() => {
+    return signals.whenSignal(CommonSignals.RENDER_START).then(() => {
       let backgroundColor;
       return this.measureElement(() => {
         backgroundColor = computedStyle(this.win, this.element)[

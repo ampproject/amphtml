@@ -36,6 +36,7 @@ describes.fakeWin(
         '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%7D';
       expect(getHighlightParam(env.ampdoc)).to.deep.equal({
         sentences: ['amp', 'highlight'],
+        skipScrollAnimation: false,
         skipRendering: false,
       });
     });
@@ -47,7 +48,20 @@ describes.fakeWin(
         '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%2C%20%22n%22%3A%201%7D';
       expect(getHighlightParam(env.ampdoc)).to.deep.equal({
         sentences: ['amp', 'highlight'],
+        skipScrollAnimation: false,
         skipRendering: true,
+      });
+    });
+
+    it('skip animation flag', () => {
+      // URL encoded '{"s":["amp","highlight"], "na": 1}'
+      env.win.location =
+        'page.html#highlight=' +
+        '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%2C%20%22na%22%3A%201%7D';
+      expect(getHighlightParam(env.ampdoc)).to.deep.equal({
+        sentences: ['amp', 'highlight'],
+        skipScrollAnimation: true,
+        skipRendering: false,
       });
     });
 
@@ -228,6 +242,53 @@ describes.realWin(
         '<div>text in <span>amp</span> doc</div><div><span>highlight</span>' +
           'ed text</div>'
       );
+    });
+
+    it('initialize with skipScrollAnimation', () => {
+      const {ampdoc} = env;
+      const scrollStub = sandbox.stub(
+        Services.viewportForDoc(ampdoc),
+        'animateScrollIntoView'
+      );
+      scrollStub.returns(Promise.reject());
+      const sendMsgStub = sandbox.stub(
+        Services.viewerForDoc(ampdoc),
+        'sendMessage'
+      );
+      const setScrollTop = sandbox.stub(
+        Services.viewportForDoc(ampdoc),
+        'setScrollTop'
+      );
+
+      const handler = new HighlightHandler(ampdoc, {
+        sentences: ['amp', 'highlight'],
+        skipScrollAnimation: true,
+      });
+
+      // initHighlight_ is not called before document become ready.
+      expect(handler.highlightedNodes_).to.be.null;
+      docreadyCb();
+      // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
+      expect(handler.highlightedNodes_).not.to.be.null;
+
+      expect(setScrollTop).to.be.calledOnce;
+      expect(setScrollTop.firstCall.args.length).to.equal(1);
+
+      expect(scrollStub).not.to.be.calledOnce;
+
+      // For some reason, expect(args).to.deep.equal does not work.
+      expect(sendMsgStub.callCount).to.equal(3);
+      expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
+      expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
+        state: 'found',
+        scroll: 0,
+      });
+      expect(sendMsgStub.secondCall.args[1]).to.deep.equal({
+        state: 'auto_scroll',
+      });
+      expect(sendMsgStub.thirdCall.args[1]).to.deep.equal({
+        state: 'shown',
+      });
     });
 
     it('initialize with amp-access', () => {

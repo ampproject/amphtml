@@ -52,7 +52,7 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical" class="bottom blue-bottom-gradient">
           <p>
-            <span data-text-background-color="#00A3DB">Relentlessly pursues moth annoy owner until he gives you food say meow repeatedly until belly rubs, feels good drool that box?</span>
+            <span data-text-background-color="#00A3DB" animate-in="fly-in-right" animate-in-duration="3s">Relentlessly pursues moth annoy owner until he gives you food say meow repeatedly until belly rubs, feels good drool that box?</span>
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment data-title="Lorem ipsum" layout="nodisplay">
@@ -70,7 +70,7 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="center">
           <p>
-            <span data-text-background-color="crimson">i can fit in that box but inspect anything brought into the house wack the mini furry mouse intently stare at the same spot. Flee in terror at cucumber discovered on floor shake treat bag</span>
+            <span animate-in="fly-in-right" animate-in-duration="3s" data-text-background-color="crimson">i can fit in that box but inspect anything brought into the house wack the mini furry mouse intently stare at the same spot. Flee in terror at cucumber discovered on floor shake treat bag</span>
           </p>
         </amp-story-grid-layer>
       </amp-story-page>
@@ -85,6 +85,63 @@
           </p>
         </amp-story-grid-layer>
       </amp-story-page>
+
+      <amp-story-bookend layout="nodisplay">
+        <script type="application/json">
+          {
+            "bookendVersion": "v1.0",
+            "shareProviders": [
+              "email",
+              {"provider": "facebook", "app_id": "254325784911610"},
+              {"provider": "twitter", "text": "This is custom share text that I would like for the Twitter platform"},
+              "whatsapp",
+              "pinterest",
+              "line"
+            ],
+            "components": [
+              {
+                "type": "heading",
+                "text": "test"
+              },
+              {
+                "type": "small",
+                "title": "This is an example article",
+                "url": "/article.html",
+                "image": "http://placehold.it/500x600"
+              },
+              {
+                "type": "small",
+                "title": "This is an example article2",
+                "url": "http://example.com/article.html",
+                "image": "http://placehold.it/256x128"
+              },
+              {
+                "type": "small",
+                "title": "This is an example article3",
+                "url": "http://example.com/article.html",
+                "image": "http://placehold.it/256x128"
+              },
+              {
+                "type": "heading",
+                "text": "test2"
+              },
+              {
+                "type": "small",
+                "title": "This is an example article",
+                "url": "http://example.com/article.html",
+                "image": "http://placehold.it/256x128"
+              },
+              {
+                "type": "portrait",
+                "title": "Heading for portrait",
+                "category": "This is an example portrait",
+                "url": "http://example.com/article.html",
+                "image": "http://placehold.it/350x470"
+              }
+            ]
+          }
+        </script>
+      </amp-story-bookend>
     </amp-story>
   </body>
 </html>
