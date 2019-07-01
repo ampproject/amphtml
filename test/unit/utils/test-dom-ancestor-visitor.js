@@ -68,16 +68,12 @@ describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
       }
     };
 
-    domAncestorVisitor
-      .addVisitor(callback1)
-      .visitAncestorsStartingFrom(child);
+    domAncestorVisitor.addVisitor(callback1).visitAncestorsStartingFrom(child);
     expect(result1).to.be.false;
 
     parent.id = 'parent';
 
-    domAncestorVisitor
-      .addVisitor(callback)
-      .visitAncestorsStartingFrom(child);
+    domAncestorVisitor.addVisitor(callback2).visitAncestorsStartingFrom(child);
     expect(result1).to.be.false;
     expect(result2).to.be.true;
   });

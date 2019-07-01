@@ -15,7 +15,6 @@
  */
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
-import {findIndex} from './array';
 
 /** @typedef {
  *    function(!Element, !Object<string, string>): *
@@ -67,9 +66,7 @@ export class DomAncestorVisitor {
    * @return {!DomAncestorVisitor}
    */
   addVisitor(callback, maxAncestorsToVisit = 100) {
-    this.visitors_.push(
-      new Visitor(callback, maxAncestorsToVisit)
-    );
+    this.visitors_.push(new Visitor(callback, maxAncestorsToVisit));
     return this;
   }
 
@@ -77,7 +74,6 @@ export class DomAncestorVisitor {
    * @param {?Element} element
    */
   visitAncestorsStartingFrom(element) {
-    return new Promise(resolve => {
     let el = element;
     let visitors = [];
     while (el && (visitors = this.getActiveVisitors_()).length) {
