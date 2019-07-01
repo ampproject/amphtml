@@ -199,16 +199,20 @@ describe
 
           videoManager.register(impl);
           const entry = videoManager.getEntryForVideo_(impl);
-          entry.isVisible_ = false;
+          entry.isVisible_ = true;
+          entry.loaded_ = true;
+          entry.videoVisibilityChanged_();
 
-          this.element.dispatchCustomEvent(VideoEvents.PLAYING);
-          this.element.dispatchCustomEvent(VideoEvents.AD_START);
+          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+            expect(videoManager.userInteracted(impl)).to.be.false;
 
-          expect(videoManager.userInteracted(impl)).to.be.false;
+            listenOncePromise(video, VideoEvents.UNMUTED).then(() => {
+              expect(videoManager.userInteracted(impl)).to.be.true;
+            });
 
-          this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
-
-          expect(videoManager.userInteracted(impl)).to.be.true;
+            video.dispatchCustomEvent(VideoEvents.AD_START);
+            video.dispatchCustomEvent(VideoEvents.UNMUTED);
+          });
         });
 
         it('autoplay - PAUSED if autoplaying and video is outside of view', () => {
