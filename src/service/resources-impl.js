@@ -1494,7 +1494,7 @@ export class Resources {
           // current one.
         } else if (
             request.newHeight == box.height &&
-            this.widthOnlyReflowFreeExpansion_(
+            this.isWidthOnlyReflowFreeExpansion_(
                 resource.element, request.newWidth)
         ){
           // 8. Element is in viewport, but this is a width-only expansion that
@@ -1600,7 +1600,7 @@ export class Resources {
    * @param {number} width
    * @return {boolean}
    */
-  widthOnlyReflowFreeExpansion_(element, width) {
+  isWidthOnlyReflowFreeExpansion_(element, width) {
     const parent = element && element.parentElement;
     // If the element has siblings, it's possible that a width-expansion will
     // cause some of them to be pushed down.
