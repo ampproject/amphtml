@@ -146,7 +146,7 @@ export class DatesList {
  * Date.prototype.getUTC* methods must be used to create a new date object.
  * {@link https://github.com/jakubroztocil/rrule#important-use-utc-dates}
  * @param {!Date} rruleDate
- * @return {!DateType}
+ * @return {!Date}
  */
 function normalizeRruleReturn(rruleDate) {
   const year = rruleDate.getUTCFullYear();
