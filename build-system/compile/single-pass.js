@@ -467,10 +467,7 @@ function transformPathsToTempDir(graph, config) {
   }
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
-    // For now, just copy node_module files instead of transforming them. The
-    // exceptions are common JS modules that need to be transformed to ESM
-    // because we now no longer use the process_common_js_modules flag for
-    // closure compiler.
+    // For now, just copy node_module files instead of transforming them.
     if (f.startsWith('node_modules/')) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
