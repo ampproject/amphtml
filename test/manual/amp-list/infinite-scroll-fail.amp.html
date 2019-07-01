@@ -1,0 +1,198 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <script>
+    (self.AMP=self.AMP||[]).push(function(AMP){
+        AMP.toggleExperiment('amp-list-load-more', true);
+    });
+  </script>
+  <style amp-custom>
+    body {
+      font-family: 'Questrial', Arial;
+    }
+
+    article {
+      display: block;
+      margin: 8px;
+    }
+
+    [load-more-button], [load-more-failed], [load-more-loading] {
+      --light-color: rgba(255,255,255,.8);
+      --dark-color: rgba(51,51,51,.75);
+      --dark-color-transparent: rgba(51,51,51,0);
+
+      font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      text-align: center;
+      height: 80px;
+      padding: 12px 0px;
+      box-sizing: border-box;
+    }
+
+    [load-more-loading] .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      margin: 8px 0px;
+    }
+
+    [load-more-loading] .spinner svg.arc {
+      stroke-width: 1.725px;
+
+      fill: none;
+      transform-origin: 50% 50%;
+      animation: 1000ms spin linear infinite;
+    }
+
+    [load-more-loading] .spinner svg linearGradient stop:first-of-type { stop-color: var(--dark-color); }
+    [load-more-loading] .spinner svg linearGradient stop:last-of-type { stop-color: var(--dark-color-transparent); }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .amp-list-load-more-button {
+      display: inline-block;
+      background-color: var(--dark-color);
+      box-shadow: 0px 0px 0px 1.5px var(--light-color);
+      color: var(--light-color);
+      cursor: pointer;
+      margin: 4px 0px;
+      padding: 0px 32px;
+      box-sizing: border-box;
+
+      height: 48px;
+      line-height: 48px;
+      border-radius: 24px;
+    }
+
+    .amp-list-load-more-button.amp-small {
+      padding: 0px 16px;
+      height: 32px;
+      line-height: 32px;
+    }
+
+    .pin-container {
+      border-radius: 8px;
+      background-color: #fefefe;
+      padding: 8px;
+      margin: 5px;
+    }
+
+    .pin-container:hover {
+       background-color: #eeeeee;
+    }
+
+    amp-img {
+      border-radius: 8px;
+    }
+
+    .title {
+      font-family: Roboto, Sans;
+      margin: 2px;
+    }
+
+    .description {
+      max-width: 160px;
+      font-size: 12px;
+      margin: 2px;
+    }
+
+    div[role="list"] {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+</head>
+<body>
+
+
+  <amp-state id="data">
+    <script type="application/json">
+      {
+        "code": 404,
+        "url": "/infinite-scroll-faulty?code=404"
+      }
+    </script>
+  </amp-state>
+
+<article>
+  <h1>AMP List</h1>
+  <p>This automatic load more example returns 16 items with a faulty next url. Change the error code below. </p>
+  <div>
+    <span>Error Code: </span>
+    <input type="text" id="code" placeholder="Error code" value="404"
+         on="change:AMP.setState({data: {code: event.value}})">
+    <button
+          on="tap:AMP.setState({data: {url: '/infinite-scroll-faulty?code=' + data.code }})">
+      Update
+    </button>
+  </div>
+
+  <amp-list width="auto" height="200" id="list"
+    layout="fixed-height"
+    src="/infinite-scroll-faulty?code=404"
+    [src]="data.url"
+    load-more="auto"
+    reset-on-refresh
+    load-more-bookmark="next">
+    <template type="amp-mustache">
+      <div class="pin-container">
+        <amp-img src="{{imageUrl}}" width="160" height="160"></amp-img>
+        <div class="title">{{title}}</div>
+        <div class="description">
+          At vero eos et accusamus et iusto odio dignissimos ducimus...
+        </div>
+      </div>
+    </template>
+    <div load-more-button>
+      <div class="amp-list-load-more-button">
+        See More
+      </div>
+    </div>
+    <div load-more-loading>
+      <div class="spinner">
+        <svg class="arc" viewbox="0 0 40 40">
+          <defs>
+            <lineargradient id="grad">
+              <stop></stop>
+              <stop offset="100%"></stop>
+            </lineargradient>
+          </defs>
+          <path d="M11,4.4 A18,18, 0,1,0, 38,20" stroke="url(#grad)"></path>
+        </svg>
+      </div>
+    </div>
+    <div load-more-failed>
+      <div class="amp-list-load-more-message">
+        <div class="amp-list-load-more-message-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        </div>
+        Unable to Load More
+      </div>
+      <div class="amp-list-load-more-button amp-small">
+        Retry
+      </div>
+    </div>
+  </amp-list>
+
+</article>
+</body>
+</html>

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * @fileoverview Shows a Pinterest widget.
  * Examples:
@@ -36,21 +35,20 @@
  */
 
 import {CSS} from '../../../build/amp-pinterest-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
-
 import {FollowButton} from './follow-button';
-import {PinItButton} from './pinit-button';
+import {SaveButton} from './save-button';
+
 import {PinWidget} from './pin-widget';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * AMP Pinterest
  * @attr data-do
- *    - buttonPin: Pin It button
+ *    - buttonPin: Save button
  *    - buttonFollow: User follow button
  */
 class AmpPinterest extends AMP.BaseElement {
-
   /**
    * @param {boolean=} onLayout
    * @override
@@ -67,28 +65,33 @@ class AmpPinterest extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const selector = user().assert(this.element.getAttribute('data-do'),
-        'The data-do attribute is required for <amp-pinterest> %s',
-        this.element);
+    const selector = userAssert(
+      this.element.getAttribute('data-do'),
+      'The data-do attribute is required for <amp-pinterest> %s',
+      this.element
+    );
 
     return this.render(selector).then(node => {
       return this.element.appendChild(node);
     });
   }
 
+  /**
+   * Renders the component
+   * @param {string} selector
+   */
   render(selector) {
     switch (selector) {
       case 'embedPin':
         return new PinWidget(this.element).render();
       case 'buttonPin':
-        return new PinItButton(this.element).render();
+        return new SaveButton(this.element).render();
       case 'buttonFollow':
         return new FollowButton(this.element).render();
     }
-    return Promise.reject(user().createError('Invalid selector: ' + selector));
+    return Promise.reject(user().createError('Invalid selector: %s', selector));
   }
 }
-
 
 AMP.extension('amp-pinterest', '0.1', AMP => {
   AMP.registerElement('amp-pinterest', AmpPinterest, CSS);

@@ -15,57 +15,54 @@ limitations under the License.
 -->
 
 # Yieldbot
+Yieldbot can be configured as a demand source by using the Real Time Config (RTC) callout vendor specification. To be a demand source, Yieldbot is configured as an `rtc-config` vendor within an `amp-ad` network tag configuration. Specific Yieldbot publisher identifier and slot name configuration is made using callout vendor substitution macros listed in the table below.
 
-## Example
-
-### Basic
-
-```html
-<amp-ad width="300" height="250"
-          type="yieldbot"
-          data-psn="1234"
-          data-yb-slot="medrec"
-          data-slot="/2476204/medium-rectangle">
-</amp-ad>
-```
-
-### With Doubleclick `amp-ad` data attributes
-
-To specify Doubleclick `amp-ad` data attributes, `multi-size` for example, see [Doubleclick](./google/doubleclick.md) for details. Use the
-Doubleclick attributes as you would with an `<amp-ad type="doubleclick"/>` element.
-
-```html
-<amp-ad width="300" height="250"
-          type="yieldbot"
-          data-psn="1234"
-          data-yb-slot="medrec"
-          data-slot="/2476204/medium-rectangle"
-          data-multi-size="300x220,300x200"
-          json='{"targeting":{"category":["food","lifestyle"]},"categoryExclusions":["health"]}'>
-</amp-ad>
-```
-
-## Configuration
-
-For further Yieldbot configuration information, please check our [documentation](https://ui.yieldbot.com/documentation/tags/async_gpt_advanced) or [contact us](mailto:pubops@yieldbot.com).
-
-### Yieldbot Required parameters
+## Yieldbot Vendor Callout Macros
 
 | Parameter     | Description |
 |:------------- |:-------------|
-| **`data-psn`**    | Yieldbot publisher site number |
-| **`data-yb-slot`**    | Yieldbot slot identifier |
-| **`data-slot`**    | Doubleclick for Publishers (DFP) slot identifier |
+| **`YB_PSN`**    | Yieldbot publisher site number |
+| **`YB_SLOT`**    | Yieldbot slot identifier |
+
+For further information on RTC please see the [RTC Publisher Implementation Guide](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md) and see the example Doubleclick configuration below.
+
+## Doubleclick RTC Configuration
+
+To specify a Doubleclick `amp-ad` integration with Yieldbot, include the vendor `"yieldbot"` in your `rtc-config` tag attributed as shown in the example below. This particular example shows that the Yieldbot demand configuration for the respective Doubleclick slot, `/2476204/medium-rectangle` where:
+
+ - `"YB_PSN": "1234"`, Yieldbot publisher number
+ - `"YB_SLOT": "medrec"`, Yieldbot slot name
+
+
+```html
+<amp-ad width="300" height="250"
+        type="doubleclick"
+        rtc-config='{
+          "vendors": {
+            "yieldbot": {
+              "YB_PSN": "1234",
+              "YB_SLOT": "medrec"
+            }
+          }
+        }'
+        data-slot="/2476204/medium-rectangle"
+        data-multi-size="300x220,300x200"
+        json='{"targeting":{"category":["food","lifestyle"]},"categoryExclusions":["health"]}'>
+</amp-ad>
+```
 
 ### Yieldbot Integration Testing
 
 For integration testing, the Yieldbot Platform can be set to always return a bid for requested slots.
 
-The Yieldbot `amp-ad` type can be tested with the following file:
-- [test/manual/amp-ad.yieldbot.amp.html](../test/manual/amp-ad.yieldbot.amp.html)
+- **Enable** integration testing mode:
+  - http://i.yldbt.com/integration/start
+- **Disable** integration testing mode:
+  - http://i.yldbt.com/integration/stop
 
 When Yieldbot testing mode is enabled, a cookie (`__ybot_test`) on the domain `.yldbt.com` tells the Yieldbot ad server to always return a bid and when creative is requested, return a static integration testing creative.
 
+***Note:***
 - No ad serving metrics are impacted when integration testing mode is enabled.
 - The `__ybot_test` cookie expires in 24 hours.
- - It is good practice to click "Stop testing" when testing is complete, to return to normal ad delivery.
+- It is good practice to action the "Stop testing" Url when testing is complete to return to normal ad delivery.

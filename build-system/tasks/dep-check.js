@@ -15,24 +15,26 @@
  */
 'use strict';
 
-
+const babelify = require('babelify');
 const BBPromise = require('bluebird');
-const babel = require('babelify');
 const browserify = require('browserify');
+const colors = require('ansi-colors');
 const depCheckConfig = require('../dep-check-config');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
+const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
-const util = require('gulp-util');
-
+const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
+const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {css} = require('./css');
+const {isTravisBuild} = require('../travis');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
-const red = msg => util.log(util.colors.red(msg));
-
+const red = msg => log(colors.red(msg));
 
 /**
  * @typedef {{
@@ -54,6 +56,7 @@ let GlobsDef;
 
 /**
  * @constructor @final @struct
+ * @param {!RuleConfigDef} config
  */
 function Rule(config) {
   /** @private @const {!RuleConfigDef} */
@@ -102,8 +105,9 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
     return [];
   }
 
-  const isFilenameMatch = this.filesMatching_
-      .some(x => minimatch(moduleName, x));
+  const isFilenameMatch = this.filesMatching_.some(x =>
+    minimatch(moduleName, x)
+  );
   if (!isFilenameMatch) {
     return [];
   }
@@ -114,6 +118,16 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
   deps.forEach(dep => {
     this.mustNotDependOn_.forEach(badDepPattern => {
       if (minimatch(dep, badDepPattern)) {
+        // Allow extension files to depend on their own code.
+        const dir = path.dirname(dep);
+        if (dir.startsWith('extensions/')) {
+          // eg, 'extensions/amp-geo/0.1'
+          const match = /extensions\/[^\/]+\/[^\/]+/.exec(dir);
+          if (match && path.dirname(moduleName).startsWith(match[0])) {
+            return;
+          }
+        }
+
         const inWhitelist = this.whitelist_.some(entry => {
           const pair = entry.split('->');
           const whitelistedModuleName = pair[0];
@@ -126,8 +140,10 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
         if (inWhitelist) {
           return;
         }
-        mustNotDependErrors.push(`${moduleName} must not depend on ${dep}. ` +
-            `Rule: ${JSON.stringify(this.config_)}.`);
+        mustNotDependErrors.push(
+          `${moduleName} must not depend on ${dep}. ` +
+            `Rule: ${JSON.stringify(this.config_)}.`
+        );
       }
     });
   });
@@ -145,15 +161,34 @@ const rules = depCheckConfig.rules.map(config => new Rule(config));
  * @return {!Promise<!Array<string>>}
  */
 function getSrcs() {
-  return fs.readdirAsync('extensions').then(dirItems => {
-    // Look for extension entry points
-    return flatten(dirItems
-        .map(x => `extensions/${x}`)
-        .filter(x => fs.statSync(x).isDirectory())
-        .map(getEntryModule)
-        // Concat the core binary and integration binary as entry points.
-        .concat('src/amp.js', '3p/integration.js'));
-  });
+  return fs
+    .readdirAsync('extensions')
+    .then(dirItems => {
+      // Look for extension entry points
+      return flatten(
+        dirItems
+          .map(x => `extensions/${x}`)
+          .filter(x => fs.statSync(x).isDirectory())
+          .map(getEntryModule)
+          // Concat the core binary and integration binary as entry points.
+          .concat('src/amp.js', '3p/integration.js')
+      );
+    })
+    .then(files => {
+      // Write all the entry modules into a single file so they can be processed
+      // together.
+      fs.mkdirpSync('./.amp-build');
+      const filename = './.amp-build/gulp-dep-check-collection.js';
+      fs.writeFileSync(
+        filename,
+        files
+          .map(file => {
+            return `import '../${file}';`;
+          })
+          .join('\n')
+      );
+      return [filename];
+    });
 }
 
 /**
@@ -171,22 +206,29 @@ function getGraph(entryModule) {
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  const bundler = browserify(entryModule, {debug: true, deps: true})
-      .transform(babel.configure({}));
+  const bundler = browserify(entryModule, {debug: true}).transform(
+    babelify,
+    Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {compact: false})
+  );
 
-  bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
-    module.deps.push({
-      name: row.file.replace(absPathRegExp, ''),
-      deps: row.deps,
+  bundler.pipeline.get('deps').push(
+    through.obj(function(row, enc, next) {
+      module.deps.push({
+        name: row.file.replace(absPathRegExp, ''),
+        deps: row.deps,
+      });
+      this.push(row);
+      next();
+    })
+  );
+  bundler
+    .bundle()
+    .pipe(source(entryModule))
+    // Unfortunately we need to write the files out.
+    .pipe(gulp.dest('./.amp-build'))
+    .on('end', () => {
+      resolve(module);
     });
-    this.push(row);
-    next();
-  }));
-  bundler.bundle()
-      .pipe(source(entryModule))
-      // Unfortunately we need to write the files out.
-      .pipe(gulp.dest('./.amp-build'))
-      .on('end', resolve.bind(null, module));
   return promise;
 }
 
@@ -196,12 +238,13 @@ function getGraph(entryModule) {
  */
 function getEntryModule(extensionFolder) {
   const extension = path.basename(extensionFolder);
-  return fs.readdirSync(extensionFolder)
-      .map(x => `${extensionFolder}/${x}`)
-      .filter(x => fs.statSync(x).isDirectory())
-      .map(x => `${x}/${extension}.js`)
-      .filter(x => fs.existsSync(x))
-      .filter(x => fs.statSync(x).isFile());
+  return fs
+    .readdirSync(extensionFolder)
+    .map(x => `${extensionFolder}/${x}`)
+    .filter(x => fs.statSync(x).isDirectory())
+    .map(x => `${x}/${extension}.js`)
+    .filter(x => fs.existsSync(x))
+    .filter(x => fs.statSync(x).isFile());
 }
 
 /**
@@ -210,7 +253,7 @@ function getEntryModule(extensionFolder) {
  * with nested dependencies. We flatten it so all we have are individual
  * modules and their imports as well as making the entries unique.
  *
- * @param {!ModuleDef} entryModule
+ * @param {!Array<!ModuleDef>} entryPoints
  * @return {!ModuleDef}
  */
 function flattenGraph(entryPoints) {
@@ -218,16 +261,15 @@ function flattenGraph(entryPoints) {
   // the entry points.
   entryPoints = entryPoints.map(entryPoint => entryPoint.deps);
   // Now make the graph have unique entries
-  return flatten(entryPoints)
-      .reduce((acc, cur) => {
-        const name = cur.name;
-        if (!acc[name]) {
-          acc[name] = Object.keys(cur.deps)
-              // Get rid of the absolute path for minimatch'ing
-              .map(x => cur.deps[x].replace(absPathRegExp, ''));
-        }
-        return acc;
-      }, Object.create(null));
+  return flatten(entryPoints).reduce((acc, cur) => {
+    const {name} = cur;
+    if (!acc[name]) {
+      acc[name] = Object.keys(cur.deps)
+        // Get rid of the absolute path for minimatch'ing
+        .map(x => cur.deps[x].replace(absPathRegExp, ''));
+    }
+    return acc;
+  }, Object.create(null));
 }
 
 /**
@@ -251,20 +293,27 @@ function runRules(modules) {
   return errorsFound;
 }
 
-function depCheck() {
-  return getSrcs().then(entryPoints => {
-    // This check is for extension folders that actually dont have
-    // an extension entry point module yet.
-    entryPoints = entryPoints.filter(x => fs.existsSync(x));
-    return BBPromise.all(entryPoints.map(getGraph));
-  })
-      .then(flattenGraph)
-      .then(runRules)
-      .then(errorsFound => {
-        if (errorsFound) {
-          process.exit(1);
-        }
-      });
+async function depCheck() {
+  const handlerProcess = createCtrlcHandler('dep-check');
+  await css();
+  if (!isTravisBuild()) {
+    log('Checking dependencies...');
+  }
+  return getSrcs()
+    .then(entryPoints => {
+      // This check is for extension folders that actually dont have
+      // an extension entry point module yet.
+      entryPoints = entryPoints.filter(x => fs.existsSync(x));
+      return BBPromise.all(entryPoints.map(getGraph));
+    })
+    .then(flattenGraph)
+    .then(runRules)
+    .then(errorsFound => {
+      if (errorsFound) {
+        process.exit(1);
+      }
+    })
+    .then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -287,14 +336,14 @@ function toArrayOrDefault(value, defaultValue) {
 /**
  * Flatten array of arrays.
  *
- * @type {!Array<!Array>}
+ * @param {!Array<!Array>} arr
  */
 function flatten(arr) {
   return [].concat.apply([], arr);
 }
 
-gulp.task(
-    'dep-check',
-    'Runs a dependency check on each module',
-    ['css'],  // Defined in gulpfile.js, and must be run before dep-check.
-    depCheck);
+module.exports = {
+  depCheck,
+};
+
+depCheck.description = 'Runs a dependency check on each module';

@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {StateChangeType} from '../navigation-state';
 import {AmpStoryAnalytics} from '../analytics';
-
+import {StateChangeType} from '../navigation-state';
 
 describes.fakeWin('amp-story analytics', {}, env => {
   let analytics;
@@ -29,53 +28,10 @@ describes.fakeWin('amp-story analytics', {}, env => {
   it('should trigger `story-page-visible` on change', () => {
     const trigger = sandbox.stub(analytics, 'triggerEvent_');
 
-    analytics.onStateChange({
+    analytics.onNavigationStateChange({
       type: StateChangeType.ACTIVE_PAGE,
-      value: {
-        pageIndex: 123,
-        pageId: 'my-page-id',
-      },
     });
 
-    expect(trigger).to.have.been.calledWith('story-page-visible',
-        sandbox.match(vars =>
-            vars.storyPageIndex === '123' &&
-            vars.storyPageId == 'my-page-id'));
-  });
-
-  it('should trigger `story-page-visible` only once per page', () => {
-    const trigger = sandbox.stub(analytics, 'triggerEvent_');
-
-    for (let i = 0; i < 10; i++) {
-      analytics.onStateChange({
-        type: StateChangeType.ACTIVE_PAGE,
-        value: {
-          pageIndex: 123,
-          pageId: 'my-page-id',
-        },
-      });
-    }
-
-    expect(trigger).to.have.been.calledOnce;
-    expect(trigger).to.have.been.calledWith('story-page-visible',
-        sandbox.match(vars =>
-            vars.storyPageIndex === '123' &&
-            vars.storyPageId == 'my-page-id'));
-
-    for (let i = 0; i < 10; i++) {
-      analytics.onStateChange({
-        type: StateChangeType.ACTIVE_PAGE,
-        value: {
-          pageIndex: 6,
-          pageId: 'foo-page-id',
-        },
-      });
-    }
-
-    expect(trigger).to.have.been.calledTwice;
-    expect(trigger).to.have.been.calledWith('story-page-visible',
-        sandbox.match(vars =>
-            vars.storyPageIndex === '6' &&
-            vars.storyPageId == 'foo-page-id'));
+    expect(trigger).to.have.been.calledWith('story-page-visible');
   });
 });

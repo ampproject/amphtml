@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {getCookie, setCookie} from '../cookies';
 import {Services} from '../services';
+import {WindowInterface} from '../window-interface';
 import {dev} from '../log';
 import {dict} from '../utils/object';
-import {isProxyOrigin} from '../url';
-import {WindowInterface} from '../window-interface';
+import {getCookie, setCookie} from '../cookies';
+import {isProxyOrigin, parseUrlDeprecated} from '../url';
 
-const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
+const GOOGLE_API_URL =
+  'https://ampcid.google.com/v1/publisher:getClientId?key=';
 
 const TAG = 'GoogleCidApi';
 const AMP_TOKEN = 'AMP_TOKEN';
@@ -43,12 +44,12 @@ const YEAR = 365 * DAY;
  * Client impl for Google CID API
  */
 export class GoogleCidApi {
-
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    this.win_ = win;
+  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /**
+     * @private {!Window}
+     */
+    this.win_ = ampdoc.win;
     /**
      * @private {!./timer-impl.Timer}
      */
@@ -58,6 +59,13 @@ export class GoogleCidApi {
      * @private {!Object<string, !Promise<?string>>}
      */
     this.cidPromise_ = {};
+
+    const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
+
+    /** @private {?string} */
+    this.canonicalOrigin_ = canonicalUrl
+      ? parseUrlDeprecated(canonicalUrl).origin
+      : null;
   }
 
   /**
@@ -72,46 +80,58 @@ export class GoogleCidApi {
     let token;
     // Block the request if a previous request is on flight
     // Poll every 200ms. Longer interval means longer latency for the 2nd CID.
-    return this.cidPromise_[scope] = this.timer_.poll(200, () => {
-      token = getCookie(this.win_, AMP_TOKEN);
-      return token !== TokenStatus.RETRIEVING;
-    }).then(() => {
-      if (token === TokenStatus.OPT_OUT) {
-        return TokenStatus.OPT_OUT;
-      }
-      // If the page referrer is proxy origin, we force to use API even the
-      // token indicates a previous fetch returned nothing
-      const forceFetch =
+    return (this.cidPromise_[scope] = this.timer_
+      .poll(200, () => {
+        token = getCookie(this.win_, AMP_TOKEN);
+        return token !== TokenStatus.RETRIEVING;
+      })
+      .then(() => {
+        if (token === TokenStatus.OPT_OUT) {
+          return TokenStatus.OPT_OUT;
+        }
+        // If the page referrer is proxy origin, we force to use API even the
+        // token indicates a previous fetch returned nothing
+        const forceFetch =
           token === TokenStatus.NOT_FOUND && this.isReferrerProxyOrigin_();
 
-      // Token is in a special state, fallback to existing cookie
-      if (!forceFetch && this.isStatusToken_(token)) {
-        return null;
-      }
+        // Token is in a special state, fallback to existing cookie
+        if (!forceFetch && this.isStatusToken_(token)) {
+          return null;
+        }
 
-      if (!token || this.isStatusToken_(token)) {
-        this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
-      }
+        if (!token || this.isStatusToken_(token)) {
+          this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
+        }
 
-      const url = GOOGLE_API_URL + apiKey;
-      return this.fetchCid_(dev().assertString(url), scope, token)
+        const url = GOOGLE_API_URL + apiKey;
+        return this.fetchCid_(dev().assertString(url), scope, token)
           .then(response => {
             const cid = this.handleResponse_(response);
             if (!cid && response['alternateUrl']) {
-              // If an alternate url is provided, try again with the alternate url
-              // The client is still responsible for appending API keys to the URL.
+              // If an alternate url is provided, try again with the alternate
+              // url The client is still responsible for appending API keys to
+              // the URL.
               const altUrl = `${response['alternateUrl']}?key=${apiKey}`;
-              return this.fetchCid_(dev().assertString(altUrl), scope, token)
-                  .then(this.handleResponse_.bind(this));
+              return this.fetchCid_(
+                dev().assertString(altUrl),
+                scope,
+                token
+              ).then(this.handleResponse_.bind(this));
             }
             return cid;
           })
           .catch(e => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
-            dev().error(TAG, e);
+            if (e && e.response) {
+              e.response.json().then(res => {
+                dev().error(TAG, JSON.stringify(res));
+              });
+            } else {
+              dev().error(TAG, e);
+            }
             return null;
           });
-    });
+      }));
   }
 
   /**
@@ -123,19 +143,23 @@ export class GoogleCidApi {
   fetchCid_(url, scope, token) {
     const payload = dict({
       'originScope': scope,
+      'canonicalOrigin': this.canonicalOrigin_,
     });
     if (token) {
       payload['securityToken'] = token;
     }
     return this.timer_.timeoutPromise(
-        TIMEOUT,
-        Services.xhrFor(this.win_).fetchJson(url, {
+      TIMEOUT,
+      Services.xhrFor(this.win_)
+        .fetchJson(url, {
           method: 'POST',
           ampCors: false,
           credentials: 'include',
           mode: 'cors',
           body: payload,
-        }).then(res => res.json()));
+        })
+        .then(res => res.json())
+    );
   }
 
   /**
@@ -164,7 +188,9 @@ export class GoogleCidApi {
    */
   persistToken_(tokenValue, expires) {
     if (tokenValue) {
-      setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires));
+      setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires), {
+        highestAvailableDomain: true,
+      });
     }
   }
 
@@ -176,11 +202,18 @@ export class GoogleCidApi {
     return this.win_.Date.now() + time;
   }
 
+  /**
+   * @return {boolean}
+   */
   isReferrerProxyOrigin_() {
     return isProxyOrigin(WindowInterface.getDocumentReferrer(this.win_));
   }
 
+  /**
+   * @param {?string} token
+   * @return {boolean}
+   */
   isStatusToken_(token) {
-    return token && token[0] === '$';
+    return /** @type {boolean} */ (token && token[0] === '$');
   }
 }

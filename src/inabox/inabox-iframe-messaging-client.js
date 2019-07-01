@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilder, getService} from '../service';
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
+import {getService, registerServiceBuilder} from '../service';
 import {tryParseJson} from '../json';
 
 /**
@@ -23,18 +23,22 @@ import {tryParseJson} from '../json';
  * @return {!../../3p/iframe-messaging-client.IframeMessagingClient}
  */
 export function iframeMessagingClientFor(win) {
-  return /** @type {!../../3p/iframe-messaging-client.IframeMessagingClient} */(
-      getService(win, 'iframeMessagingClient'));
+  return /** @type {!../../3p/iframe-messaging-client.IframeMessagingClient} */ (getService(
+    win,
+    'iframeMessagingClient'
+  ));
 }
 
 /**
  * @param {!Window} win
  */
 export function installIframeMessagingClient(win) {
-  registerServiceBuilder(win,
-      'iframeMessagingClient',
-      createIframeMessagingClient.bind(null, win),
-      /* opt_instantiate */ true);
+  registerServiceBuilder(
+    win,
+    'iframeMessagingClient',
+    createIframeMessagingClient.bind(null, win),
+    /* opt_instantiate */ true
+  );
 }
 
 /**
@@ -62,7 +66,7 @@ function createIframeMessagingClient(win) {
 
 /**
  * @param {!Window} win
- * @returns {string}
+ * @return {string}
  */
 function getRandom(win) {
   return String(win.Math.random()).substr(2);

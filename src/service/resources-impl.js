@@ -22,20 +22,20 @@ import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
-import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
+import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
-import {expandLayoutRect} from '../layout-rect';
-import {installInputService} from '../input';
+import {computedStyle} from '../style';
+import {dev, devAssert} from '../log';
+import {dict, hasOwn} from '../utils/object';
+import {getSourceUrl} from '../url';
+import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
+import {isArray} from '../types';
+import {isBlockedByConsent, reportError} from '../error';
+import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {isArray} from '../types';
-import {dev} from '../log';
-import {dict} from '../utils/object';
-import {reportError} from '../error';
-import {filterSplice} from '../utils/array';
-import {getSourceUrl} from '../url';
-import {areMarginsChanged} from '../layout-rect';
-import {computedStyle} from '../style';
+import {remove} from '../utils/array';
+import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -47,10 +47,8 @@ const PRIORITY_BASE_ = 10;
 const PRIORITY_PENALTY_TIME_ = 1000;
 const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
-const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
+const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
-
 
 /**
  * The internal structure of a ChangeHeightRequest.
@@ -143,7 +141,11 @@ export class Resources {
     /** @private {boolean} */
     this.relayoutAll_ = true;
 
-    /** @private {number} */
+    /**
+     * TODO(jridgewell): relayoutTop should be replaced with parent layer
+     * dirtying.
+     * @private {number}
+     */
     this.relayoutTop_ = -1;
 
     /** @private {time} */
@@ -167,16 +169,28 @@ export class Resources {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const {!function(./task-queue.TaskDef):number} */
-    this.boundTaskScorer_ = task => this.calcTaskScore_(task);
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
 
-   /**
-    * @private {!Array<!ChangeSizeRequestDef>}
-    */
+    /** @private @const {boolean} */
+    this.useLayersPrioritization_ = isExperimentOn(
+      this.win,
+      'layers-prioritization'
+    );
+
+    let boundScorer;
+    if (this.useLayers_ && this.useLayersPrioritization_) {
+      boundScorer = this.calcTaskScoreLayers_.bind(this);
+    } else {
+      boundScorer = this.calcTaskScore_.bind(this);
+    }
+    /** @const {!function(./task-queue.TaskDef, !Object<string, *>):number} */
+    this.boundTaskScorer_ = boundScorer;
+
+    /**
+     * @private {!Array<!ChangeSizeRequestDef>}
+     */
     this.requestsChangeSize_ = [];
-
-    /** @private {!Array<!Function>} */
-    this.deferredMutates_ = [];
 
     /** @private {?Array<!Resource>} */
     this.pendingBuildResources_ = [];
@@ -188,7 +202,7 @@ export class Resources {
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
+    this.vsync_ = Services./*OK*/ vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -201,6 +215,9 @@ export class Resources {
 
     /** @private {boolean} */
     this.maybeChangeHeight_ = false;
+
+    /** @const @private {!Array<function()>} */
+    this.passCallbacks_ = [];
 
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
@@ -221,6 +238,16 @@ export class Resources {
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = Date.now();
     });
+
+    if (this.useLayers_) {
+      const layers = Services.layersForDoc(this.ampdoc);
+
+      /** @private @const {!./layers-impl.LayoutLayers} */
+      this.layers_ = layers;
+
+      /** @private @const {function((number|undefined), !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
+      this.boundCalcLayoutScore_ = this.calcLayoutScore_.bind(this);
+    }
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
@@ -243,6 +270,11 @@ export class Resources {
 
     this.schedulePass();
 
+    this.rebuildDomWhenReady();
+  }
+
+  /** @visibleForTesting */
+  rebuildDomWhenReady() {
     // Ensure that we attempt to rebuild things when DOM is ready.
     this.ampdoc.whenReady().then(() => {
       this.documentReady_ = true;
@@ -272,8 +304,10 @@ export class Resources {
       ]).then(remeasure);
 
       // Remeasure the document when all fonts loaded.
-      if (this.win.document.fonts &&
-          this.win.document.fonts.status != 'loaded') {
+      if (
+        this.win.document.fonts &&
+        this.win.document.fonts.status != 'loaded'
+      ) {
         this.win.document.fonts.ready.then(remeasure);
       }
     });
@@ -304,12 +338,11 @@ export class Resources {
     this.ampdoc.signals().signal(CommonSignals.RENDER_START);
   }
 
-
   /**
    * Returns a subset of resources which are (1) belong to the specified host
    * window, and (2) meet the filterFn given.
    * @param {!Window} hostWin
-   * @param {!function(!Resource):boolean} filterFn
+   * @param {function(!Resource):boolean} filterFn
    * @return {!Promise<!Array<!Resource>>}
    */
   getMeasuredResources(hostWin, filterFn) {
@@ -318,19 +351,29 @@ export class Resources {
     // the initially parsed elements.
     // TODO(jridgewell): this path should be switched to use a future
     // "layer has been measured" signal.
-    return this.ampdoc.signals().whenSignal(READY_SCAN_SIGNAL_).then(() => {
-      // Second, wait for any left-over elements to complete measuring.
-      const measurePromiseArray = [];
-      this.resources_.forEach(r => {
-        if (!r.hasBeenMeasured() && r.hostWin == hostWin && !r.hasOwner()) {
-          measurePromiseArray.push(this.ensuredMeasured_(r));
-        }
-      });
-      return Promise.all(measurePromiseArray);
-    }).then(() => this.resources_.filter(r => {
-      return r.hostWin == hostWin && !r.hasOwner() && r.hasBeenMeasured() &&
-        filterFn(r);
-    }));
+    return this.ampdoc
+      .signals()
+      .whenSignal(READY_SCAN_SIGNAL_)
+      .then(() => {
+        // Second, wait for any left-over elements to complete measuring.
+        const measurePromiseArray = [];
+        this.resources_.forEach(r => {
+          if (!r.hasBeenMeasured() && r.hostWin == hostWin && !r.hasOwner()) {
+            measurePromiseArray.push(this.ensuredMeasured_(r));
+          }
+        });
+        return Promise.all(measurePromiseArray);
+      })
+      .then(() =>
+        this.resources_.filter(r => {
+          return (
+            r.hostWin == hostWin &&
+            !r.hasOwner() &&
+            r.hasBeenMeasured() &&
+            filterFn(r)
+          );
+        })
+      );
   }
 
   /**
@@ -345,8 +388,11 @@ export class Resources {
     return this.getMeasuredResources(hostWin, r => {
       // TODO(jridgewell): Remove isFixed check here once the position
       // is calculted correctly in a separate layer for embeds.
-      if (!r.isDisplayed() || (!r.overlaps(rect) && !r.isFixed()) ||
-          (opt_isInPrerender && !r.prerenderAllowed())) {
+      if (
+        !r.isDisplayed() ||
+        (!r.overlaps(rect) && !r.isFixed()) ||
+        (opt_isInPrerender && !r.prerenderAllowed())
+      ) {
         return false;
       }
       return true;
@@ -355,7 +401,6 @@ export class Resources {
 
   /** @private */
   monitorInput_() {
-    installInputService(this.win);
     const input = Services.inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);
@@ -374,7 +419,7 @@ export class Resources {
    * @private
    */
   toggleInputClass_(clazz, on) {
-    this.ampdoc.whenBodyAvailable().then(body => {
+    this.ampdoc.waitForBodyOpen().then(body => {
       this.vsync_.mutate(() => {
         body.classList.toggle(clazz, on);
       });
@@ -442,7 +487,7 @@ export class Resources {
    */
   ensuredMeasured_(resource) {
     if (resource.hasBeenMeasured()) {
-      return Promise.resolve(resource.getPageLayoutBox());
+      return tryResolve(() => resource.getPageLayoutBox());
     }
     return this.vsync_.measurePromise(() => {
       resource.measure();
@@ -484,14 +529,16 @@ export class Resources {
     // First check if the resource is being reparented and if it requires
     // reconstruction. Only already built elements are eligible.
     let resource = Resource.forElementOptional(element);
-    if (resource &&
-        resource.getState() != ResourceState.NOT_BUILT &&
-        !element.reconstructWhenReparented()) {
+    if (
+      resource &&
+      resource.getState() != ResourceState.NOT_BUILT &&
+      !element.reconstructWhenReparented()
+    ) {
       resource.requestMeasure();
       dev().fine(TAG_, 'resource reused:', resource.debugid);
     } else {
       // Create and add a new resource.
-      resource = new Resource((++this.resourceIdCounter_), element, this);
+      resource = new Resource(++this.resourceIdCounter_, element, this);
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
@@ -516,27 +563,33 @@ export class Resources {
   }
 
   /**
-   * Builds the element if ready to be built, otherwise adds it to pending resources.
+   * Builds the element if ready to be built, otherwise adds it to pending
+   * resources.
    * @param {!Resource} resource
    * @param {boolean=} checkForDupes
    * @param {boolean=} scheduleWhenBuilt
+   * @param {boolean=} force
    * @private
    */
-  buildOrScheduleBuildForResource_(resource, checkForDupes = false,
-      scheduleWhenBuilt = true) {
-    const buildingEnabled = (this.isRuntimeOn_ || this.isBuildOn_);
+  buildOrScheduleBuildForResource_(
+    resource,
+    checkForDupes = false,
+    scheduleWhenBuilt = true,
+    force = false
+  ) {
+    const buildingEnabled = this.isRuntimeOn_ || this.isBuildOn_;
 
     // During prerender mode, don't build elements that aren't allowed to be
     // prerendered. This avoids wasting our prerender build quota.
     // See grantBuildPermission() for more details.
     const shouldBuildResource =
-        this.viewer_.getVisibilityState() != VisibilityState.PRERENDER
-        || resource.prerenderAllowed();
+      this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
+      resource.prerenderAllowed();
 
     if (buildingEnabled && shouldBuildResource) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
-        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt, force);
       } else if (!resource.isBuilt() && !resource.isBuilding()) {
         if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
@@ -576,9 +629,10 @@ export class Resources {
     // elements get a chance to be built.
     for (let i = 0; i < this.pendingBuildResources_.length; i++) {
       const resource = this.pendingBuildResources_[i];
-      if (this.documentReady_ ||
-          hasNextNodeInDocumentOrder(
-              resource.element, this.ampdoc.getRootNode())) {
+      if (
+        this.documentReady_ ||
+        hasNextNodeInDocumentOrder(resource.element, this.ampdoc.getRootNode())
+      ) {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
@@ -590,20 +644,26 @@ export class Resources {
   /**
    * @param {!Resource} resource
    * @param {boolean} schedulePass
+   * @param {boolean=} force
    * @return {?Promise}
    * @private
    */
-  buildResourceUnsafe_(resource, schedulePass) {
-    const promise = resource.build();
+  buildResourceUnsafe_(resource, schedulePass, force = false) {
+    const promise = resource.build(force);
     if (!promise || !schedulePass) {
       return promise;
     }
-    return promise.then(() => this.schedulePass(), error => {
-      // Build failed: remove the resource. No other state changes are
-      // needed.
-      this.removeResource_(resource);
-      throw error;
-    });
+    return promise.then(
+      () => this.schedulePass(),
+      error => {
+        // Build failed: remove the resource. No other state changes are
+        // needed.
+        this.removeResource_(resource);
+        if (!isBlockedByConsent(error)) {
+          throw error;
+        }
+      }
+    );
   }
 
   /**
@@ -631,9 +691,9 @@ export class Resources {
     }
     if (resource.isBuilt()) {
       resource.pauseOnRemove();
-      if (opt_disconnect) {
-        resource.disconnect();
-      }
+    }
+    if (opt_disconnect) {
+      resource.disconnect();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
@@ -685,18 +745,21 @@ export class Resources {
         return;
       }
       if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        promises.push(resource.whenBuilt().then(() => {
-          resource.measure();
-          if (!resource.isDisplayed()) {
-            return;
-          }
-          this.scheduleLayoutOrPreload_(
+        promises.push(
+          resource.whenBuilt().then(() => {
+            resource.measure();
+            if (!resource.isDisplayed()) {
+              return;
+            }
+            this.scheduleLayoutOrPreload_(
               resource,
               /* layout */ true,
               opt_parentPriority,
-              /* forceOutsideViewport */ true);
-          return resource.loadedOnce();
-        }));
+              /* forceOutsideViewport */ true
+            );
+            return resource.loadedOnce();
+          })
+        );
       } else if (resource.isDisplayed()) {
         promises.push(resource.loadedOnce());
       }
@@ -715,9 +778,10 @@ export class Resources {
    */
   scheduleLayout(parentElement, subElements) {
     this.scheduleLayoutOrPreloadForSubresources_(
-        Resource.forElement(parentElement),
-        /* layout */ true,
-        elements_(subElements));
+      Resource.forElement(parentElement),
+      /* layout */ true,
+      elements_(subElements)
+    );
   }
 
   /**
@@ -779,27 +843,28 @@ export class Resources {
    */
   schedulePreload(parentElement, subElements) {
     this.scheduleLayoutOrPreloadForSubresources_(
-        Resource.forElement(parentElement),
-        /* layout */ false,
-        elements_(subElements));
+      Resource.forElement(parentElement),
+      /* layout */ false,
+      elements_(subElements)
+    );
   }
 
   /**
    * Updates the priority of the resource. If there are tasks currently
    * scheduled, their priority is updated as well.
    * @param {!Element} element
-   * @param {number} newPriority
+   * @param {number} newLayoutPriority
    * @restricted
    */
-  updatePriority(element, newPriority) {
+  updateLayoutPriority(element, newLayoutPriority) {
     const resource = Resource.forElement(element);
 
-    resource.updatePriority(newPriority);
+    resource.updateLayoutPriority(newLayoutPriority);
 
     // Update affected tasks
     this.queue_.forEach(task => {
       if (task.resource == resource) {
-        task.priority = newPriority;
+        task.priority = newLayoutPriority;
       }
     });
 
@@ -817,9 +882,10 @@ export class Resources {
    */
   updateInViewport(parentElement, subElements, inLocalViewport) {
     this.updateInViewportForSubresources_(
-        Resource.forElement(parentElement),
-        elements_(subElements),
-        inLocalViewport);
+      Resource.forElement(parentElement),
+      elements_(subElements),
+      inLocalViewport
+    );
   }
 
   /**
@@ -832,8 +898,14 @@ export class Resources {
    * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    */
   changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
-    this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, opt_newMargins, /* force */ true, opt_callback);
+    this.scheduleChangeSize_(
+      Resource.forElement(element),
+      newHeight,
+      newWidth,
+      opt_newMargins,
+      /* force */ true,
+      opt_callback
+    );
   }
 
   /**
@@ -856,30 +928,37 @@ export class Resources {
    */
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
     return new Promise((resolve, reject) => {
-      this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-          newWidth, opt_newMargins, /* force */ false, success => {
-            if (success) {
-              resolve();
-            } else {
-              reject(new Error('changeSize attempt denied'));
-            }
-          });
+      this.scheduleChangeSize_(
+        Resource.forElement(element),
+        newHeight,
+        newWidth,
+        opt_newMargins,
+        /* force */ false,
+        success => {
+          if (success) {
+            resolve();
+          } else {
+            reject(new Error('changeSize attempt denied'));
+          }
+        }
+      );
     });
   }
 
   /**
-   * Requests mutate callback to executed at the earliest possibility.
-   * @param {!Element} element
-   * @param {!Function} callback
+   * Runs the specified measure, which is called in the "measure" vsync phase.
+   * This is simply a proxy to the privileged vsync service.
+   *
+   * @param {function()} measurer
+   * @return {!Promise}
    */
-  deferMutate(element, callback) {
-    this.scheduleDeferredMutate_(Resource.forElement(element), callback);
-    this.schedulePassVsync();
+  measureElement(measurer) {
+    return this.vsync_.measurePromise(measurer);
   }
 
   /**
-   * Runs the specified mutation on the element and ensures that measures
-   * and layouts performed for the affected elements.
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
    *
    * This method should be called whenever a significant mutations are done
    * on the DOM that could affect layout of elements inside this subtree or
@@ -892,6 +971,41 @@ export class Resources {
    * @return {!Promise}
    */
   mutateElement(element, mutator) {
+    return this.measureMutateElement(element, null, mutator);
+  }
+
+  /**
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElement(element, measurer, mutator) {
+    if (this.useLayers_) {
+      return this.measureMutateElementLayers_(element, measurer, mutator);
+    } else {
+      return this.measureMutateElementResources_(element, measurer, mutator);
+    }
+  }
+
+  /**
+   * Handles element mutation (and measurement) APIs in the Resources system.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElementResources_(element, measurer, mutator) {
     const calcRelayoutTop = () => {
       const box = this.viewport_.getLayoutRect(element);
       if (box.width != 0 && box.height != 0) {
@@ -900,14 +1014,17 @@ export class Resources {
       return -1;
     };
     let relayoutTop = -1;
+    // TODO(jridgewell): support state
     return this.vsync_.runPromise({
       measure: () => {
+        if (measurer) {
+          measurer();
+        }
         relayoutTop = calcRelayoutTop();
       },
       mutate: () => {
         mutator();
 
-        // Mark itself and children for re-measurement.
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
           r.requestMeasure();
@@ -937,6 +1054,68 @@ export class Resources {
   }
 
   /**
+   * Handles element mutation (and measurement) APIs in the Layers system.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElementLayers_(element, measurer, mutator) {
+    return this.vsync_.runPromise({
+      measure: measurer || undefined,
+      mutate: () => {
+        // TODO(jridgewell): Audit this system. Did this cause a layer
+        // invalidation (new layer, or removal of old layer)? Right now, we're
+        // only dirtying the measurements.
+        mutator();
+        this.dirtyElement(element);
+      },
+    });
+  }
+
+  /**
+   * Dirties the cached element measurements after a mutation occurs.
+   *
+   * TODO(jridgewell): This API needs to be audited. Common practice is
+   * to pass the amp-element in as the root even though we are only
+   * mutating children. If the amp-element is passed, we invalidate
+   * everything in the parent layer above it, where only invalidating the
+   * amp-element was necessary (only children were mutated, only
+   * amp-element's scroll box is affected).
+   *
+   * @param {!Element} element
+   */
+  dirtyElement(element) {
+    let relayoutAll = false;
+    if (this.useLayers_) {
+      this.layers_.dirty(element);
+      // Bust the Resource's cached measure state, which is independent of
+      // Layers's measurements.
+      if (element.classList.contains('i-amphtml-element')) {
+        const r = Resource.forElement(element);
+        r.requestMeasure();
+      }
+      const ampElements = element.getElementsByClassName('i-amphtml-element');
+      for (let i = 0; i < ampElements.length; i++) {
+        const r = Resource.forElement(ampElements[i]);
+        r.requestMeasure();
+      }
+      // Remeasures can result in a doc height change.
+      this.maybeChangeHeight_ = true;
+    } else {
+      const isAmpElement = element.classList.contains('i-amphtml-element');
+      if (isAmpElement) {
+        const r = Resource.forElement(element);
+        this.setRelayoutTop_(r.getLayoutBox().top);
+      } else {
+        relayoutAll = true;
+      }
+    }
+    this.schedulePass(FOUR_FRAME_DELAY_, relayoutAll);
+  }
+
+  /**
    * Return a promise that requests runtime to collapse this element.
    * The runtime will schedule this request and first attempt to resize
    * the element to height and width 0. If success runtime will set element
@@ -946,20 +1125,26 @@ export class Resources {
    */
   attemptCollapse(element) {
     return new Promise((resolve, reject) => {
-      this.scheduleChangeSize_(Resource.forElement(element), 0, 0, undefined,
-          /* force */ false, success => {
-            if (success) {
-              const resource = Resource.forElement(element);
-              resource.completeCollapse();
-              resolve();
-            } else {
-              reject(new Error('collapse attempt denied'));
-            }
-          });
+      this.scheduleChangeSize_(
+        Resource.forElement(element),
+        0,
+        0,
+        undefined,
+        /* force */ false,
+        success => {
+          if (success) {
+            const resource = Resource.forElement(element);
+            resource.completeCollapse();
+            resolve();
+          } else {
+            reject(new Error('collapse attempt denied'));
+          }
+        }
+      );
     });
   }
 
-    /**
+  /**
    * Collapses the element: ensures that it's `display:none`, notifies its
    * owner and updates the layout box.
    * @param {!Element} element
@@ -968,7 +1153,14 @@ export class Resources {
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
-      this.setRelayoutTop_(box.top);
+      if (
+        isExperimentOn(this.win, 'dirty-collapse-element') ||
+        this.useLayers_
+      ) {
+        this.dirtyElement(element);
+      } else {
+        this.setRelayoutTop_(box.top);
+      }
     }
     resource.completeCollapse();
     this.schedulePass(FOUR_FRAME_DELAY_);
@@ -1023,6 +1215,17 @@ export class Resources {
     this.schedulePass();
   }
 
+  /**
+   * Registers a callback to be called when the next pass happens.
+   * @param {function()} callback
+   */
+  onNextPass(callback) {
+    this.passCallbacks_.push(callback);
+  }
+
+  /**
+   * Runs a pass immediately.
+   */
   doPass() {
     if (!this.isRuntimeOn_) {
       dev().fine(TAG_, 'runtime is off');
@@ -1033,36 +1236,56 @@ export class Resources {
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
 
     const firstPassAfterDocumentReady =
-        (this.documentReady_ && this.firstPassAfterDocumentReady_);
+      this.documentReady_ && this.firstPassAfterDocumentReady_;
     if (firstPassAfterDocumentReady) {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
-      this.viewer_.sendMessage('documentLoaded', dict({
-        'title': doc.title,
-        'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
-        'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
-        'linkRels': Services.documentInfoForDoc(this.ampdoc).linkRels,
-      }), /* cancelUnsent */true);
+      const documentInfo = Services.documentInfoForDoc(this.ampdoc);
+      this.viewer_.sendMessage(
+        'documentLoaded',
+        dict({
+          'title': doc.title,
+          'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
+          'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
+          'linkRels': documentInfo.linkRels,
+          'metaTags': documentInfo.metaTags,
+        }),
+        /* cancelUnsent */ true
+      );
 
       this.contentHeight_ = this.viewport_.getContentHeight();
-      this.viewer_.sendMessage('documentHeight',
-          dict({'height': this.contentHeight_}), /* cancelUnsent */true);
-      dev().fine(TAG_, 'document height on load: ' + this.contentHeight_);
+      this.viewer_.sendMessage(
+        'documentHeight',
+        dict({'height': this.contentHeight_}),
+        /* cancelUnsent */ true
+      );
+      dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
     }
 
     const viewportSize = this.viewport_.getSize();
-    dev().fine(TAG_,
-        'PASS: visible=', this.visible_,
-        ', relayoutAll=', this.relayoutAll_,
-        ', relayoutTop=', this.relayoutTop_,
-        ', viewportSize=', viewportSize.width, viewportSize.height,
-        ', prerenderSize=', this.prerenderSize_);
+    dev().fine(
+      TAG_,
+      'PASS: visible=',
+      this.visible_,
+      ', relayoutAll=',
+      this.relayoutAll_,
+      ', relayoutTop=',
+      this.relayoutTop_,
+      ', viewportSize=',
+      viewportSize.width,
+      viewportSize.height,
+      ', prerenderSize=',
+      this.prerenderSize_
+    );
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
 
     this.visibilityStateMachine_.setState(this.viewer_.getVisibilityState());
-    if (this.documentReady_ && this.ampInitialized_
-        && !this.ampdoc.signals().get(READY_SCAN_SIGNAL_)) {
+    if (
+      this.documentReady_ &&
+      this.ampInitialized_ &&
+      !this.ampdoc.signals().get(READY_SCAN_SIGNAL_)
+    ) {
       // This signal mainly signifies that most of elements have been measured
       // by now. This is mostly used to avoid measuring too many elements
       // individually. This will be superceeded by layers API, e.g.
@@ -1076,13 +1299,23 @@ export class Resources {
       this.vsync_.measure(() => {
         const measuredContentHeight = this.viewport_.getContentHeight();
         if (measuredContentHeight != this.contentHeight_) {
-          this.viewer_.sendMessage('documentHeight',
-              dict({'height': measuredContentHeight}), /* cancelUnsent */true);
+          this.viewer_.sendMessage(
+            'documentHeight',
+            dict({'height': measuredContentHeight}),
+            /* cancelUnsent */ true
+          );
           this.contentHeight_ = measuredContentHeight;
-          dev().fine(TAG_, 'document height changed: ' + this.contentHeight_);
+          dev().fine(TAG_, 'document height changed: %s', this.contentHeight_);
+          this.viewport_.contentHeightChanged();
         }
       });
     }
+
+    for (let i = 0; i < this.passCallbacks_.length; i++) {
+      const fn = this.passCallbacks_[i];
+      fn();
+    }
+    this.passCallbacks_.length = 0;
   }
 
   /**
@@ -1091,8 +1324,7 @@ export class Resources {
    * @private
    */
   hasMutateWork_() {
-    return (this.deferredMutates_.length > 0 ||
-        this.requestsChangeSize_.length > 0);
+    return this.requestsChangeSize_.length > 0;
   }
 
   /**
@@ -1100,6 +1332,15 @@ export class Resources {
    * @private
    */
   mutateWork_() {
+    if (this.useLayers_) {
+      this.mutateWorkViaLayers_();
+    } else {
+      this.mutateWorkViaResources_();
+    }
+  }
+
+  /** @private */
+  mutateWorkViaResources_() {
     // Read all necessary data before mutates.
     // The height changing depends largely on the target element's position
     // in the active viewport. When not in prerendering, we also consider the
@@ -1114,45 +1355,38 @@ export class Resources {
     // the overflow callbacks are called.
     const now = Date.now();
     const viewportRect = this.viewport_.getRect();
-    const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
-    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
-    const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
-        now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
-        now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
+    const isScrollingStopped =
+      (Math.abs(this.lastVelocity_) < 1e-2 &&
+        now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_) ||
+      now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2;
 
-    if (this.deferredMutates_.length > 0) {
-      dev().fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
-      const deferredMutates = this.deferredMutates_;
-      this.deferredMutates_ = [];
-      for (let i = 0; i < deferredMutates.length; i++) {
-        deferredMutates[i]();
-      }
-      this.maybeChangeHeight_ = true;
-    }
+    // TODO(jridgewell, #12780): Update resize rules to account for layers.
     if (this.requestsChangeSize_.length > 0) {
-      dev().fine(TAG_, 'change size requests:',
-          this.requestsChangeSize_.length);
+      dev().fine(
+        TAG_,
+        'change size requests:',
+        this.requestsChangeSize_.length
+      );
       const requestsChangeSize = this.requestsChangeSize_;
       this.requestsChangeSize_ = [];
 
       // Find minimum top position and run all mutates.
       let minTop = -1;
       const scrollAdjSet = [];
+      const dirtySet = [];
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
-        /** @const {!Resource} */
-        const resource = request.resource;
+        const {resource} = /** @type {!ChangeSizeRequestDef} */ (request);
         const box = resource.getLayoutBox();
-        const iniBox = resource.getInitialLayoutBox();
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
-        let topUnchangedBoundary = box.top;
-        let bottomDisplacedBoundary = box.bottom;
+        let leftMarginDiff = 0;
+        let rightMarginDiff = 0;
+        let {top: topUnchangedBoundary, bottom: bottomDisplacedBoundary} = box;
         let newMargins = undefined;
         if (request.marginChange) {
           newMargins = request.marginChange.newMargins;
@@ -1162,6 +1396,12 @@ export class Resources {
           }
           if (newMargins.bottom != undefined) {
             bottomMarginDiff = newMargins.bottom - margins.bottom;
+          }
+          if (newMargins.left != undefined) {
+            leftMarginDiff = newMargins.left - margins.left;
+          }
+          if (newMargins.right != undefined) {
+            rightMarginDiff = newMargins.right - margins.right;
           }
           if (topMarginDiff) {
             topUnchangedBoundary = box.top - margins.top;
@@ -1175,11 +1415,19 @@ export class Resources {
           }
         }
         const heightDiff = request.newHeight - box.height;
+        const widthDiff = request.newWidth - box.width;
 
         // Check resize rules. It will either resize element immediately, or
         // wait until scrolling stops or will call the overflow callback.
         let resize = false;
-        if (heightDiff == 0 && topMarginDiff == 0 && bottomMarginDiff == 0) {
+        if (
+          heightDiff == 0 &&
+          topMarginDiff == 0 &&
+          bottomMarginDiff == 0 &&
+          widthDiff == 0 &&
+          leftMarginDiff == 0 &&
+          rightMarginDiff == 0
+        ) {
           // 1. Nothing to resize.
         } else if (request.force || !this.visible_) {
           // 2. An immediate execution requested or the document is hidden.
@@ -1188,22 +1436,29 @@ export class Resources {
           // 3. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
-        } else if (topUnchangedBoundary >= viewportRect.bottom - bottomOffset ||
-            (topMarginDiff == 0 && box.bottom + Math.min(heightDiff, 0) >=
-             viewportRect.bottom - bottomOffset)) {
+        } else if (
+          topUnchangedBoundary >= viewportRect.bottom - bottomOffset ||
+          (topMarginDiff == 0 &&
+            box.bottom + Math.min(heightDiff, 0) >=
+              viewportRect.bottom - bottomOffset)
+        ) {
           // 4. Elements under viewport are resized immediately, but only if
           // an element's boundary is not changed above the viewport after
           // resize.
           resize = true;
-        } else if (viewportRect.top > 1 &&
-            bottomDisplacedBoundary <= viewportRect.top + topOffset) {
+        } else if (
+          viewportRect.top > 1 &&
+          bottomDisplacedBoundary <= viewportRect.top + topOffset
+        ) {
           // 5. Elements above the viewport can only be resized if we are able
           // to compensate the height change by setting scrollTop and only if
           // the page has already been scrolled by some amount (1px due to iOS).
           // Otherwise the scrolling might move important things like the menu
           // bar out of the viewport at initial page load.
-          if (heightDiff < 0 &&
-              viewportRect.top + aboveVpHeightChange < -heightDiff) {
+          if (
+            heightDiff < 0 &&
+            viewportRect.top + aboveVpHeightChange < -heightDiff
+          ) {
             // Do nothing if height abobe viewport height can't compensate
             // height decrease
             continue;
@@ -1220,75 +1475,135 @@ export class Resources {
             this.requestsChangeSize_.push(request);
           }
           continue;
-        } else if (iniBox.bottom >= docBottomOffset ||
-                      box.bottom >= docBottomOffset) {
+        } else if (this.elementNearBottom_(resource, box)) {
           // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
-        } else if (heightDiff < 0 || topMarginDiff < 0 ||
-              bottomMarginDiff < 0) {
+        } else if (
+          heightDiff < 0 ||
+          topMarginDiff < 0 ||
+          bottomMarginDiff < 0
+        ) {
           // 7. The new height (or one of the margins) is smaller than the
           // current one.
         } else {
           // 8. Element is in viewport don't resize and try overflow callback
           // instead.
-          request.resource.overflowCallback(/* overflown */ true,
-              request.newHeight, request.newWidth, newMargins);
+          request.resource.overflowCallback(
+            /* overflown */ true,
+            request.newHeight,
+            request.newWidth,
+            newMargins
+          );
         }
 
         if (resize) {
           if (box.top >= 0) {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
-          request.resource./*OK*/changeSize(
-              request.newHeight, request.newWidth, newMargins);
-          request.resource.overflowCallback(/* overflown */ false,
-              request.newHeight, request.newWidth, newMargins);
+          if (this.useLayers_) {
+            dirtySet.push(request.resource.element);
+          }
+          request.resource./*OK*/ changeSize(
+            request.newHeight,
+            request.newWidth,
+            newMargins
+          );
+          request.resource.overflowCallback(
+            /* overflown */ false,
+            request.newHeight,
+            request.newWidth,
+            newMargins
+          );
           this.maybeChangeHeight_ = true;
         }
 
         if (request.callback) {
-          request.callback(/* hasSizeChanged */resize);
+          request.callback(/* hasSizeChanged */ resize);
         }
       }
 
-      if (minTop != -1) {
+      if (this.useLayers_) {
+        dirtySet.forEach(element => {
+          this.dirtyElement(element);
+        });
+      } else if (minTop != -1) {
         this.setRelayoutTop_(minTop);
       }
 
       // Execute scroll-adjusting resize requests, if any.
       if (scrollAdjSet.length > 0) {
-        this.vsync_.run({
-          measure: state => {
-            state./*OK*/scrollHeight = this.viewport_./*OK*/getScrollHeight();
-            state./*OK*/scrollTop = this.viewport_./*OK*/getScrollTop();
-          },
-          mutate: state => {
-            let minTop = -1;
-            scrollAdjSet.forEach(request => {
-              const box = request.resource.getLayoutBox();
-              minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
-              request.resource./*OK*/changeSize(
-                  request.newHeight, request.newWidth, request.marginChange ?
-                      request.marginChange.newMargins : undefined);
-              if (request.callback) {
-                request.callback(/* hasSizeChanged */true);
+        this.vsync_.run(
+          {
+            measure: state => {
+              state./*OK*/ scrollHeight = this.viewport_./*OK*/ getScrollHeight();
+              state./*OK*/ scrollTop = this.viewport_./*OK*/ getScrollTop();
+            },
+            mutate: state => {
+              let minTop = -1;
+              scrollAdjSet.forEach(request => {
+                const box = request.resource.getLayoutBox();
+                minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
+                request.resource./*OK*/ changeSize(
+                  request.newHeight,
+                  request.newWidth,
+                  request.marginChange
+                    ? request.marginChange.newMargins
+                    : undefined
+                );
+                if (request.callback) {
+                  request.callback(/* hasSizeChanged */ true);
+                }
+              });
+              if (this.useLayers_) {
+                scrollAdjSet.forEach(request => {
+                  this.dirtyElement(request.resource.element);
+                });
+              } else if (minTop != -1) {
+                this.setRelayoutTop_(minTop);
               }
-            });
-            if (minTop != -1) {
-              this.setRelayoutTop_(minTop);
-            }
-            // Sync is necessary here to avoid UI jump in the next frame.
-            const newScrollHeight = this.viewport_./*OK*/getScrollHeight();
-            if (newScrollHeight != state./*OK*/scrollHeight) {
-              this.viewport_.setScrollTop(state./*OK*/scrollTop +
-                  (newScrollHeight - state./*OK*/scrollHeight));
-            }
-            this.maybeChangeHeight_ = true;
+              // Sync is necessary here to avoid UI jump in the next frame.
+              const newScrollHeight = this.viewport_./*OK*/ getScrollHeight();
+              if (newScrollHeight != state./*OK*/ scrollHeight) {
+                this.viewport_.setScrollTop(
+                  state./*OK*/ scrollTop +
+                    (newScrollHeight - state./*OK*/ scrollHeight)
+                );
+              }
+              this.maybeChangeHeight_ = true;
+            },
           },
-        }, {});
+          {}
+        );
       }
     }
+  }
+
+  /**
+   * TODO(jridgewell): This will be Layer's bread and butter for speed
+   * optimizations.
+   * @private
+   */
+  mutateWorkViaLayers_() {
+    this.mutateWorkViaResources_();
+  }
+
+  /**
+   * Returns true if element is within 15% and 1000px of document bottom.
+   * Caller can provide current/initial layout boxes as an optimization.
+   * @param {!./resource.Resource} resource
+   * @param {!../layout-rect.LayoutRectDef=} opt_layoutBox
+   * @param {!../layout-rect.LayoutRectDef=} opt_initialLayoutBox
+   * @return {boolean}
+   * @private
+   */
+  elementNearBottom_(resource, opt_layoutBox, opt_initialLayoutBox) {
+    const contentHeight = this.viewport_.getContentHeight();
+    const threshold = Math.max(contentHeight * 0.85, contentHeight - 1000);
+
+    const box = opt_layoutBox || resource.getLayoutBox();
+    const initialBox = opt_initialLayoutBox || resource.getInitialLayoutBox();
+    return box.bottom >= threshold || initialBox.bottom >= threshold;
   }
 
   /**
@@ -1296,7 +1611,9 @@ export class Resources {
    * @private
    */
   setRelayoutTop_(relayoutTop) {
-    if (this.relayoutTop_ == -1) {
+    if (this.useLayers_) {
+      this.relayoutAll_ = true;
+    } else if (this.relayoutTop_ == -1) {
       this.relayoutTop_ = relayoutTop;
     } else {
       this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
@@ -1309,17 +1626,23 @@ export class Resources {
    * @private
    */
   checkPendingChangeSize_(element) {
-    const resourceElement = closest(element,
-        el => !!Resource.forElementOptional(el));
+    const resourceElement = closest(
+      element,
+      el => !!Resource.forElementOptional(el)
+    );
     if (!resourceElement) {
       return;
     }
     const resource = Resource.forElement(resourceElement);
     const pendingChangeSize = resource.getPendingChangeSize();
     if (pendingChangeSize !== undefined) {
-      this.scheduleChangeSize_(resource, pendingChangeSize.height,
-          pendingChangeSize.width, pendingChangeSize.margins,
-          /* force */ true);
+      this.scheduleChangeSize_(
+        resource,
+        pendingChangeSize.height,
+        pendingChangeSize.width,
+        pendingChangeSize.margins,
+        /* force */ true
+      );
     }
   }
 
@@ -1353,12 +1676,13 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
-        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
-            /* scheduleWhenBuilt */ false);
+        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
-      if (relayoutAll ||
-              !r.hasBeenMeasured() ||
-              r.getState() == ResourceState.NOT_LAID_OUT) {
+      if (
+        relayoutAll ||
+        !r.hasBeenMeasured() ||
+        r.getState() == ResourceState.NOT_LAID_OUT
+      ) {
         r.applySizesAndMediaQuery();
         relayoutCount++;
       }
@@ -1370,19 +1694,25 @@ export class Resources {
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
     let toUnload;
-    if (relayoutCount > 0 || remeasureCount > 0 ||
-            relayoutAll || relayoutTop != -1) {
+    if (
+      relayoutCount > 0 ||
+      remeasureCount > 0 ||
+      relayoutAll ||
+      relayoutTop != -1
+    ) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         if (r.hasOwner() && !r.isMeasureRequested()) {
           // If element has owner, and measure is not requested, do nothing.
           continue;
         }
-        if (relayoutAll ||
-                r.getState() == ResourceState.NOT_LAID_OUT ||
-                !r.hasBeenMeasured() ||
-                r.isMeasureRequested() ||
-                relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
+        if (
+          relayoutAll ||
+          r.getState() == ResourceState.NOT_LAID_OUT ||
+          !r.hasBeenMeasured() ||
+          r.isMeasureRequested() ||
+          (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop)
+        ) {
           const wasDisplayed = r.isDisplayed();
           r.measure();
           if (wasDisplayed && !r.isDisplayed()) {
@@ -1418,10 +1748,10 @@ export class Resources {
     }
 
     const visibleRect = this.visible_
-      // When the doc is visible, consider the viewport to be 25% larger,
-      // to minimize effect from small scrolling and notify things that
-      // they are in viewport just before they are actually visible.
-      ? expandLayoutRect(viewportRect, 0.25, 0.25)
+      ? // When the doc is visible, consider the viewport to be 25% larger,
+        // to minimize effect from small scrolling and notify things that
+        // they are in viewport just before they are actually visible.
+        expandLayoutRect(viewportRect, 0.25, 0.25)
       : viewportRect;
 
     // Phase 3: Trigger "viewport enter/exit" events.
@@ -1435,8 +1765,8 @@ export class Resources {
       // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
       // layers. This is currently a short-term fix to the problem that
       // the fixed elements get incorrect top coord.
-      const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
-          r.overlaps(visibleRect));
+      const shouldBeInViewport =
+        this.visible_ && r.isDisplayed() && r.overlaps(visibleRect);
       r.setInViewport(shouldBeInViewport);
     }
 
@@ -1445,6 +1775,23 @@ export class Resources {
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
+        // TODO(dvoytenko): This extra build has to be merged with the
+        // scheduleLayoutOrPreload_ method below.
+        // Force build for all resources visible, measured, and in the viewport.
+        if (
+          !r.isBuilt() &&
+          !r.hasOwner() &&
+          r.hasBeenMeasured() &&
+          r.isDisplayed() &&
+          r.overlaps(loadRect)
+        ) {
+          this.buildOrScheduleBuildForResource_(
+            r,
+            /* checkForDupes */ true,
+            /* scheduleWhenBuilt */ undefined,
+            /* force */ true
+          );
+        }
         if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
           continue;
         }
@@ -1457,18 +1804,27 @@ export class Resources {
       }
     }
 
-    if (this.visible_ &&
-          this.exec_.getSize() == 0 &&
-          this.queue_.getSize() == 0 &&
-          now > this.exec_.getLastDequeueTime() + 5000) {
+    if (
+      this.visible_ &&
+      this.exec_.getSize() == 0 &&
+      this.queue_.getSize() == 0 &&
+      now > this.exec_.getLastDequeueTime() + 5000
+    ) {
       // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
       // with idleRenderOutsideViewport true
       let idleScheduledCount = 0;
-      for (let i = 0; i < this.resources_.length && idleScheduledCount < 4;
-          i++) {
+      for (
+        let i = 0;
+        i < this.resources_.length && idleScheduledCount < 4;
+        i++
+      ) {
         const r = this.resources_[i];
-        if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
-            !r.hasOwner() && r.isDisplayed() && r.idleRenderOutsideViewport()) {
+        if (
+          r.getState() == ResourceState.READY_FOR_LAYOUT &&
+          !r.hasOwner() &&
+          r.isDisplayed() &&
+          r.idleRenderOutsideViewport()
+        ) {
           dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
@@ -1476,11 +1832,17 @@ export class Resources {
       }
       // Phase 6: Idle layout: layout more if we are otherwise not doing much.
       // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
-      for (let i = 0; i < this.resources_.length && idleScheduledCount < 4;
-          i++) {
+      for (
+        let i = 0;
+        i < this.resources_.length && idleScheduledCount < 4;
+        i++
+      ) {
         const r = this.resources_[i];
-        if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
-            !r.hasOwner() && r.isDisplayed()) {
+        if (
+          r.getState() == ResourceState.READY_FOR_LAYOUT &&
+          !r.hasOwner() &&
+          r.isDisplayed()
+        ) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
@@ -1505,13 +1867,21 @@ export class Resources {
     const now = Date.now();
 
     let timeout = -1;
-    let task = this.queue_.peek(this.boundTaskScorer_);
+    const state = Object.create(null);
+    let task = this.queue_.peek(this.boundTaskScorer_, state);
     while (task) {
       timeout = this.calcTaskTimeout_(task);
-      dev().fine(TAG_, 'peek from queue:', task.id,
-          'sched at', task.scheduleTime,
-          'score', this.boundTaskScorer_(task),
-          'timeout', timeout);
+      dev().fine(
+        TAG_,
+        'peek from queue:',
+        task.id,
+        'sched at',
+        task.scheduleTime,
+        'score',
+        this.boundTaskScorer_(task, state),
+        'timeout',
+        timeout
+      );
       if (timeout > 16) {
         break;
       }
@@ -1527,22 +1897,24 @@ export class Resources {
         executing.promise.then(reschedule, reschedule);
       } else {
         task.resource.measure();
-        if (this.isLayoutAllowed_(
-            task.resource, task.forceOutsideViewport)) {
+        if (this.isLayoutAllowed_(task.resource, task.forceOutsideViewport)) {
           task.promise = task.callback();
           task.startTime = now;
           dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
           this.exec_.enqueue(task);
-          task.promise.then(this.taskComplete_.bind(this, task, true),
-              this.taskComplete_.bind(this, task, false))
-              .catch(/** @type {function (*)} */ (reportError));
+          task.promise
+            .then(
+              this.taskComplete_.bind(this, task, true),
+              this.taskComplete_.bind(this, task, false)
+            )
+            .catch(/** @type {function (*)} */ (reportError));
         } else {
           dev().fine(TAG_, 'cancelled', task.id);
           task.resource.layoutCanceled();
         }
       }
 
-      task = this.queue_.peek(this.boundTaskScorer_);
+      task = this.queue_.peek(this.boundTaskScorer_, state);
       timeout = -1;
     }
 
@@ -1582,10 +1954,15 @@ export class Resources {
    * this element or away from it.
    *
    * @param {!./task-queue.TaskDef} task
+   * @param {!Object<string, *>} unusedCache
    * @return {number}
    * @private
    */
-  calcTaskScore_(task) {
+  calcTaskScore_(task, unusedCache) {
+    // TODO(jridgewell): these should be taking into account the active
+    // scroller, which may not be the root scroller. Maybe a weighted average
+    // of "scroller scrolls necessary" to see the element.
+    // Demo at https://output.jsbin.com/hicigom/quiet
     const viewport = this.viewport_.getRect();
     const box = task.resource.getLayoutBox();
     let posPriority = Math.floor((box.top - viewport.top) / viewport.height);
@@ -1594,6 +1971,55 @@ export class Resources {
     }
     posPriority = Math.abs(posPriority);
     return task.priority * PRIORITY_BASE_ + posPriority;
+  }
+
+  /**
+   * Calculates the task's score using the Layers service. A task with the
+   * lowest score will be dequeued from the queue the first.
+   *
+   * Refer to {@link calcTaskScore_} for basic explanation.
+   *
+   * Viewport priority is a function of the distance of the element from the
+   * currently visible viewports. The elements in the visible viewport get
+   * higher priority and further away from the viewport get lower priority.
+   *
+   * @param {!./task-queue.TaskDef} task
+   * @param {!Object<string, *>} cache
+   * @return {number}
+   * @private
+   */
+  calcTaskScoreLayers_(task, cache) {
+    const layerScore = this.layers_.iterateAncestry(
+      task.resource.element,
+      this.boundCalcLayoutScore_,
+      cache
+    );
+    return task.priority * PRIORITY_BASE_ + layerScore;
+  }
+
+  /**
+   * Calculates the layout's distance from viewport score, using an iterative
+   * (and cacheable) calculation based on tree depth and distance.
+   *
+   * @param {number|undefined} currentScore
+   * @param {!./layers-impl.LayoutElement} layout
+   * @param {number} depth
+   * @param {!Object<string, *>} cache
+   * @return {number}
+   */
+  calcLayoutScore_(currentScore, layout, depth, cache) {
+    const id = layout.getId();
+    if (hasOwn(cache, id)) {
+      return dev().assertNumber(cache[id]);
+    }
+
+    const score = currentScore || 0;
+    const depthPenalty = 1 + depth / 10;
+    const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
+    const distance =
+      layout.getHorizontalDistanceFromParent() +
+      layout.getVerticalDistanceFromParent();
+    return (cache[id] = score + nonActivePenalty * depthPenalty * distance);
   }
 
   /**
@@ -1631,8 +2057,10 @@ export class Resources {
     this.exec_.forEach(other => {
       // Higher priority tasks get the head start. Currently 500ms per a drop
       // in priority (note that priority is 10-based).
-      const penalty = Math.max((task.priority - other.priority) *
-          PRIORITY_PENALTY_TIME_, 0);
+      const penalty = Math.max(
+        (task.priority - other.priority) * PRIORITY_PENALTY_TIME_,
+        0
+      );
       // TODO(dvoytenko): Consider running total and not maximum.
       timeout = Math.max(timeout, penalty - (now - other.startTime));
     });
@@ -1661,8 +2089,13 @@ export class Resources {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
-      dev().info(TAG_, 'task failed:',
-          task.id, task.resource.debugid, opt_reason);
+      dev().info(
+        TAG_,
+        'task failed:',
+        task.id,
+        task.resource.debugid,
+        opt_reason
+      );
       return Promise.reject(opt_reason);
     }
   }
@@ -1677,11 +2110,23 @@ export class Resources {
    * @param {function(boolean)=} opt_callback A callback function
    * @private
    */
-  scheduleChangeSize_(resource, newHeight, newWidth, newMargins, force,
-      opt_callback) {
+  scheduleChangeSize_(
+    resource,
+    newHeight,
+    newWidth,
+    newMargins,
+    force,
+    opt_callback
+  ) {
     if (resource.hasBeenMeasured() && !newMargins) {
-      this.completeScheduleChangeSize_(resource, newHeight, newWidth,
-          undefined, force, opt_callback);
+      this.completeScheduleChangeSize_(
+        resource,
+        newHeight,
+        newWidth,
+        undefined,
+        force,
+        opt_callback
+      );
     } else {
       // This is a rare case since most of times the element itself schedules
       // resize requests. However, this case is possible when another element
@@ -1692,12 +2137,20 @@ export class Resources {
         if (!resource.hasBeenMeasured()) {
           resource.measure();
         }
-        const marginChange = newMargins ? {
-          newMargins,
-          currentMargins: this.getLayoutMargins_(resource),
-        } : undefined;
-        this.completeScheduleChangeSize_(resource, newHeight, newWidth,
-            marginChange, force, opt_callback);
+        const marginChange = newMargins
+          ? {
+              newMargins,
+              currentMargins: this.getLayoutMargins_(resource),
+            }
+          : undefined;
+        this.completeScheduleChangeSize_(
+          resource,
+          newHeight,
+          newWidth,
+          marginChange,
+          force,
+          opt_callback
+        );
       });
     }
   }
@@ -1727,19 +2180,35 @@ export class Resources {
    * @param {function(boolean)=} opt_callback A callback function
    * @private
    */
-  completeScheduleChangeSize_(resource, newHeight, newWidth, marginChange,
-      force, opt_callback) {
+  completeScheduleChangeSize_(
+    resource,
+    newHeight,
+    newWidth,
+    marginChange,
+    force,
+    opt_callback
+  ) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getPageLayoutBox();
-    if ((newHeight === undefined || newHeight == layoutBox.height) &&
-        (newWidth === undefined || newWidth == layoutBox.width) &&
-        (marginChange === undefined || !areMarginsChanged(
-            marginChange.currentMargins, marginChange.newMargins))) {
-      if (newHeight === undefined && newWidth === undefined &&
-          marginChange === undefined) {
+    if (
+      (newHeight === undefined || newHeight == layoutBox.height) &&
+      (newWidth === undefined || newWidth == layoutBox.width) &&
+      (marginChange === undefined ||
+        !areMarginsChanged(
+          marginChange.currentMargins,
+          marginChange.newMargins
+        ))
+    ) {
+      if (
+        newHeight === undefined &&
+        newWidth === undefined &&
+        marginChange === undefined
+      ) {
         dev().error(
-            TAG_, 'attempting to change size with undefined dimensions',
-            resource.debugid);
+          TAG_,
+          'attempting to change size with undefined dimensions',
+          resource.debugid
+        );
       }
       // Nothing to do.
       if (opt_callback) {
@@ -1763,26 +2232,18 @@ export class Resources {
       request.force = force || request.force;
       request.callback = opt_callback;
     } else {
-      this.requestsChangeSize_.push(/** {!ChangeSizeRequestDef} */{
-        resource,
-        newHeight,
-        newWidth,
-        marginChange,
-        force,
-        callback: opt_callback,
-      });
+      this.requestsChangeSize_.push(
+        /** {!ChangeSizeRequestDef} */ {
+          resource,
+          newHeight,
+          newWidth,
+          marginChange,
+          force,
+          callback: opt_callback,
+        }
+      );
     }
     this.schedulePassVsync();
-  }
-
-  /**
-   * Schedules deferred mutate.
-   * @param {!Resource} resource
-   * @param {!Function} callback
-   * @private
-   */
-  scheduleDeferredMutate_(resource, callback) {
-    this.deferredMutates_.push(callback);
   }
 
   /**
@@ -1795,25 +2256,31 @@ export class Resources {
    */
   isLayoutAllowed_(resource, forceOutsideViewport) {
     // Only built and displayed elements can be loaded.
-    if (resource.getState() == ResourceState.NOT_BUILT ||
-        !resource.isDisplayed()) {
+    if (
+      resource.getState() == ResourceState.NOT_BUILT ||
+      !resource.isDisplayed()
+    ) {
       return false;
     }
 
     // Don't schedule elements when we're not visible, or in prerender mode
     // (and they can't prerender).
     if (!this.visible_) {
-      if (this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
-          !resource.prerenderAllowed()) {
+      if (
+        this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
+        !resource.prerenderAllowed()
+      ) {
         return false;
       }
     }
 
     // The element has to be in its rendering corridor.
-    if (!forceOutsideViewport &&
-        !resource.isInViewport() &&
-        !resource.renderOutsideViewport() &&
-        !resource.idleRenderOutsideViewport()) {
+    if (
+      !forceOutsideViewport &&
+      !resource.isInViewport() &&
+      !resource.renderOutsideViewport() &&
+      !resource.idleRenderOutsideViewport()
+    ) {
       return false;
     }
 
@@ -1828,29 +2295,41 @@ export class Resources {
    * @param {boolean=} opt_forceOutsideViewport
    * @private
    */
-  scheduleLayoutOrPreload_(resource, layout, opt_parentPriority,
-      opt_forceOutsideViewport) {
-    dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
-        resource.isDisplayed(),
-        'Not ready for layout: %s (%s)',
-        resource.debugid, resource.getState());
+  scheduleLayoutOrPreload_(
+    resource,
+    layout,
+    opt_parentPriority,
+    opt_forceOutsideViewport
+  ) {
+    devAssert(
+      resource.getState() != ResourceState.NOT_BUILT && resource.isDisplayed(),
+      'Not ready for layout: %s (%s)',
+      resource.debugid,
+      resource.getState()
+    );
     const forceOutsideViewport = opt_forceOutsideViewport || false;
     if (!this.isLayoutAllowed_(resource, forceOutsideViewport)) {
       return;
     }
 
     if (layout) {
-      this.schedule_(resource,
-          LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
-          opt_parentPriority || 0,
-          forceOutsideViewport,
-          resource.startLayout.bind(resource));
+      this.schedule_(
+        resource,
+        LAYOUT_TASK_ID_,
+        LAYOUT_TASK_OFFSET_,
+        opt_parentPriority || 0,
+        forceOutsideViewport,
+        resource.startLayout.bind(resource)
+      );
     } else {
-      this.schedule_(resource,
-          PRELOAD_TASK_ID_, PRELOAD_TASK_OFFSET_,
-          opt_parentPriority || 0,
-          forceOutsideViewport,
-          resource.startLayout.bind(resource));
+      this.schedule_(
+        resource,
+        PRELOAD_TASK_ID_,
+        PRELOAD_TASK_OFFSET_,
+        opt_parentPriority || 0,
+        forceOutsideViewport,
+        resource.startLayout.bind(resource)
+      );
     }
   }
 
@@ -1866,12 +2345,18 @@ export class Resources {
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       if (resource.getState() == ResourceState.NOT_BUILT) {
         resource.whenBuilt().then(() => {
-          this.measureAndScheduleIfAllowed_(resource, layout,
-              parentResource.getPriority());
+          this.measureAndScheduleIfAllowed_(
+            resource,
+            layout,
+            parentResource.getLayoutPriority()
+          );
         });
       } else {
-        this.measureAndScheduleIfAllowed_(resource, layout,
-            parentResource.getPriority());
+        this.measureAndScheduleIfAllowed_(
+          resource,
+          layout,
+          parentResource.getLayoutPriority()
+        );
       }
     });
   }
@@ -1884,8 +2369,10 @@ export class Resources {
    */
   measureAndScheduleIfAllowed_(resource, layout, parentPriority) {
     resource.measure();
-    if (resource.getState() == ResourceState.READY_FOR_LAYOUT &&
-        resource.isDisplayed()) {
+    if (
+      resource.getState() == ResourceState.READY_FOR_LAYOUT &&
+      resource.isDisplayed()
+    ) {
       this.scheduleLayoutOrPreload_(resource, layout, parentPriority);
     }
   }
@@ -1901,19 +2388,20 @@ export class Resources {
    * @private
    */
   schedule_(
-      resource,
-      localId,
-      priorityOffset,
-      parentPriority,
-      forceOutsideViewport,
-      callback) {
+    resource,
+    localId,
+    priorityOffset,
+    parentPriority,
+    forceOutsideViewport,
+    callback
+  ) {
     const taskId = resource.getTaskId(localId);
 
     const task = {
       id: taskId,
       resource,
-      priority: Math.max(resource.getPriority(), parentPriority) +
-          priorityOffset,
+      priority:
+        Math.max(resource.getLayoutPriority(), parentPriority) + priorityOffset,
       forceOutsideViewport,
       callback,
       scheduleTime: Date.now(),
@@ -1942,8 +2430,11 @@ export class Resources {
    * @param {boolean} inLocalViewport
    * @private
    */
-  updateInViewportForSubresources_(parentResource, subElements,
-      inLocalViewport) {
+  updateInViewportForSubresources_(
+    parentResource,
+    subElements,
+    inLocalViewport
+  ) {
     const inViewport = parentResource.isInViewport() && inLocalViewport;
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       resource.setInViewport(inViewport);
@@ -1958,7 +2449,7 @@ export class Resources {
    */
   discoverResourcesForArray_(parentResource, elements, callback) {
     elements.forEach(element => {
-      dev().assert(parentResource.element.contains(element));
+      devAssert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
     });
   }
@@ -2001,11 +2492,13 @@ export class Resources {
    * @param {!FiniteStateMachine<!VisibilityState>} vsm
    */
   setupVisibilityStateMachine_(vsm) {
-    const prerender = VisibilityState.PRERENDER;
-    const visible = VisibilityState.VISIBLE;
-    const hidden = VisibilityState.HIDDEN;
-    const paused = VisibilityState.PAUSED;
-    const inactive = VisibilityState.INACTIVE;
+    const {
+      PRERENDER: prerender,
+      VISIBLE: visible,
+      HIDDEN: hidden,
+      PAUSED: paused,
+      INACTIVE: inactive,
+    } = VisibilityState;
     const doPass = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();
@@ -2104,13 +2597,16 @@ export class Resources {
       this.exec_.purge(task => {
         return task.resource == resource;
       });
-      filterSplice(this.requestsChangeSize_, request => {
-        return request.resource != resource;
+      remove(this.requestsChangeSize_, request => {
+        return request.resource === resource;
       });
     }
 
-    if (resource.getState() == ResourceState.NOT_BUILT && opt_removePending &&
-        this.pendingBuildResources_) {
+    if (
+      resource.getState() == ResourceState.NOT_BUILT &&
+      opt_removePending &&
+      this.pendingBuildResources_
+    ) {
       const pendingIndex = this.pendingBuildResources_.indexOf(resource);
       if (pendingIndex != -1) {
         this.pendingBuildResources_.splice(pendingIndex, 1);
@@ -2119,17 +2615,15 @@ export class Resources {
   }
 }
 
-
 /**
  * @param {!Element|!Array<!Element>} elements
  * @return {!Array<!Element>}
  */
 function elements_(elements) {
-  return /** @type {!Array<!Element>} */ (
-      isArray(elements) ? elements : [elements]);
+  return /** @type {!Array<!Element>} */ (isArray(elements)
+    ? elements
+    : [elements]);
 }
-
-
 
 /**
  * The internal structure of a ChangeHeightRequest.
@@ -2146,4 +2640,4 @@ export let SizeDef;
  */
 export function installResourcesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
-};
+}

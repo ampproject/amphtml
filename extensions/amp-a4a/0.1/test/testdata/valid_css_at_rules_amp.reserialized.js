@@ -26,6 +26,101 @@ export const data = {
 }
 </script></body></html>`,
 
+  minifiedCreative: '<!doctype html><html ⚡4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1 name=viewport><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>\n    amp-user-notification.amp-active {\n      opacity: 0;\n    }\n  </style><style amp4ads-boilerplate>body{visibility:hidden}</style></head><body>Hello, world.\n\n</body></html>',
+
+
+  reserializedInvalidOffset: `<!doctype html><html ⚡4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1 name=viewport><script async src=https://cdn.ampproject.org/amp4ads-v0.js></script><script async custom-element=amp-font src=https://cdn.ampproject.org/v0/amp-font-0.1.js></script><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>
+    amp-user-notification.amp-active {
+      opacity: 0;
+    }
+  </style><style amp4ads-boilerplate>body{visibility:hidden}</style></head><body>Hello, world.
+
+<script amp-ad-metadata type=application/json>
+{
+   "ampRuntimeUtf16CharOffsets" : [ '116', '281' ],
+   "customElementExtensions" : [ "amp-font" ],
+   "customStylesheets" : [
+      {
+         "href" : "https://fonts.googleapis.com/css?family=Questrial"
+      }
+   ],
+   "extensions" : [
+      {
+         "custom-element" : "amp-font",
+         "src" : "https://cdn.ampproject.org/v0/amp-font-0.1.js"
+      }
+   ]
+}
+</script></body></html>`,
+
+  reserializedMissingOffset: `<!doctype html><html ⚡4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1 name=viewport><script async src=https://cdn.ampproject.org/amp4ads-v0.js></script><script async custom-element=amp-font src=https://cdn.ampproject.org/v0/amp-font-0.1.js></script><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>
+    amp-user-notification.amp-active {
+      opacity: 0;
+    }
+  </style><style amp4ads-boilerplate>body{visibility:hidden}</style></head><body>Hello, world.
+
+<script amp-ad-metadata type=application/json>
+{
+   "customElementExtensions" : [ "amp-font" ],
+   "customStylesheets" : [
+      {
+         "href" : "https://fonts.googleapis.com/css?family=Questrial"
+      }
+   ],
+   "extensions" : [
+      {
+         "custom-element" : "amp-font",
+         "src" : "https://cdn.ampproject.org/v0/amp-font-0.1.js"
+      }
+   ]
+}
+</script></body></html>`,
+
+
+  reserializedMissingScriptTag: `<!doctype html><html ⚡4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1 name=viewport><script async src=https://cdn.ampproject.org/amp4ads-v0.js></script><script async custom-element=amp-font src=https://cdn.ampproject.org/v0/amp-font-0.1.js></script><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>
+    amp-user-notification.amp-active {
+      opacity: 0;
+    }
+  </style><style amp4ads-boilerplate>body{visibility:hidden}</style></head><body>Hello, world.
+
+<script amp-ad-metadata type=application/json>
+{
+   "ampRuntimeUtf16CharOffsets" : [ 116, 281 ],
+   "customElementExtensions" : [ "amp-font" ],
+   "customStylesheets" : [
+      {
+         "href" : "https://fonts.googleapis.com/css?family=Questrial"
+      }
+   ],
+   "extensions" : [
+      {
+         "custom-element" : "amp-font",
+         "src" : "https://cdn.ampproject.org/v0/amp-font-0.1.js"
+      }
+   ]
+}
+</body></html>`,
+
+  adTemplate: `<!doctype html><html ⚡><head><meta charset="utf-8"><link rel="canonical" href="self.html" /><meta name="viewport" content="width=device-width,minimum-scale=1"><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  </head>
+  <body>
+    <template type="amp-mustache">
+      <p>ipsum lorem</p>
+      <a href="{{url}}">Click for ad!</a>
+    </template>
+    <script amp-ad-metadata type=application/json>
+    {
+       "ampRuntimeUtf16CharOffsets" : [ 922, 1094 ],
+       "customElementExtensions" : [],
+       "customStylesheets" : [],
+       "extensions" : []
+    }
+    </script>
+  </body>
+</html>`,
+
+  minifiedTemplateCreative: '<!doctype html><html ⚡><head><meta charset="utf-8"><link rel="canonical" href="self.html" /><meta name="viewport" content="width=device-width,minimum-scale=1"><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>\n  </head>\n  <body>\n    <template type="amp-mustache">\n      <p>ipsum lorem</p>\n      <a href="{{url}}">Click for ad!</a>\n    </template>\n    \n  </body>\n</html>',
+
   original: `<!--
   Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 

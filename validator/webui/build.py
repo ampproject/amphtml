@@ -22,7 +22,6 @@
 # Polymer project, and unlike for the parent directory there's no
 # particular benefit to using Python.
 
-import glob
 import logging
 import os
 import platform
@@ -72,18 +71,13 @@ def CheckPrereqs():
     if not os.path.exists(f):
       Die('%s not found. Must run in amp_validator source directory.' % f)
 
-  # Ensure that npm is installed.
+  # Ensure that yarn is installed.
   try:
-    npm_version = subprocess.check_output(['npm', '--version'])
+    subprocess.check_output(['yarn', '--version'])
   except (subprocess.CalledProcessError, OSError):
-    Die('npm package manager not found. Try "apt-get install npm".')
-
-  # Ensure npm version '1.3.10' or newer.
-  m = re.search('^(\\d+)\\.(\\d+)\\.(\\d+)$', npm_version)
-  if (int(m.group(1)), int(m.group(2)), int(m.group(3))) < (1, 3, 10):
-    Die('Expected npm version 1.3.10 or newer, saw: %s' % npm_version)
-
-  logging.info('... done')
+    Die('Yarn package manager not found. Run '
+        '"curl -o- -L https://yarnpkg.com/install.sh | bash" '
+        'or see https://yarnpkg.com/docs/install.')
 
 
 def SetupOutDir(out_dir):
@@ -103,13 +97,13 @@ def SetupOutDir(out_dir):
 
 
 def InstallNodeDependencies():
-  """Installs the dependencies using npm."""
+  """Installs the dependencies using yarn."""
   logging.info('entering ...')
   # Install the project dependencies specified in package.json into
   # node_modules.
   logging.info('installing AMP Validator webui dependencies ...')
   subprocess.check_call(
-      ['npm', 'install'],
+      ['yarn', 'install'],
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')
 
@@ -133,7 +127,9 @@ def CreateWebuiAppengineDist(out_dir):
         else:
           shutil.copytree(entry, os.path.join(tempdir, entry))
     for entry in os.listdir('node_modules'):
-      if entry == 'web-animations-js':
+      if not os.path.isdir('node_modules/' + entry):
+        continue
+      elif entry == 'web-animations-js':
         shutil.copytree(os.path.join('node_modules', entry),
                         os.path.join(tempdir, '@polymer', entry))
       elif entry != '@polymer':
@@ -161,7 +157,7 @@ def Main():
   logging.basicConfig(
       format='[[%(filename)s %(funcName)s]] - %(message)s',
       level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
-  nodejs_cmd = GetNodeJsCmd()
+  GetNodeJsCmd()
   CheckPrereqs()
   InstallNodeDependencies()
   SetupOutDir(out_dir='dist')

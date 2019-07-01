@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust'; /* eslint no-unused-vars: 0 */
+export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
 
 /**
  * VideoInterface defines a common video API which any AMP component that plays
@@ -31,7 +31,6 @@ import {ActionTrust} from './action-trust'; /* eslint no-unused-vars: 0 */
  * @interface
  */
 export class VideoInterface {
-
   /**
    * Whether the component supports video playback in the current platform.
    * If false, component will be not treated as a video component.
@@ -117,6 +116,17 @@ export class VideoInterface {
 
   /**
    * If this returns true then it will be assumed that the player implements
+   * a feature to enter fullscreen on device rotation internally, so that the
+   * video manager does not override it. If not, the video manager will
+   * implement this feature automatically for videos with the attribute
+   * `rotate-to-fullscreen`.
+   *
+   * @return {boolean}
+   */
+  preimplementsAutoFullscreen() {}
+
+  /**
+   * If this returns true then it will be assumed that the player implements
    * the MediaSession API internally so that the video manager does not override
    * it. If not, the video manager will use the metadata variable as well as
    * inferred meta-data to update the video's Media Session notification.
@@ -124,21 +134,6 @@ export class VideoInterface {
    * @return {boolean}
    */
   preimplementsMediaSessionAPI() {}
-
-
-  /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @return {!AmpElement}
-   */
-  get element() {}
-
-  /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @return {boolean}
-   */
-  isInViewport() {}
 
   /**
    * Enables fullscreen on the internal video element
@@ -163,16 +158,11 @@ export class VideoInterface {
   isFullscreen() {}
 
   /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @param {string} unusedMethod
-   * @param {function(!./service/action-impl.ActionInvocation)} unusedHandler
-   * @param {ActionTrust} unusedMinTrust
-   * @public
+   * Seeks the video to a specified time.
+   * @param {number} unusedTimeSeconds
    */
-  registerAction(unusedMethod, unusedHandler, unusedMinTrust) {}
+  seekTo(unusedTimeSeconds) {}
 }
-
 
 /**
  * Attributes
@@ -189,7 +179,7 @@ export const VideoAttributes = {
    * Whether the developer has configured autoplay on the component.
    * This is normally done by setting `autoplay` attribute on the component.
    *
-   * AMP runtime manages autoplay behaviour itself using methods such as `play`,
+   * AMP runtime manages autoplay behavior itself using methods such as `play`,
    * `pause`, `showControls`, `hideControls`, `mute`, etc.. therefore components
    * should not propagate the autoplay attribute to the underlying player
    * implementation.
@@ -212,7 +202,7 @@ export const VideoAttributes = {
    */
   DOCK: 'dock',
   /**
-   * fullscreen-on-landscape
+   * rotate-to-fullscreen
    *
    * If enabled, this automatically expands the currently visible video and
    * playing to fullscreen when the user changes the device's orientation to
@@ -223,9 +213,14 @@ export const VideoAttributes = {
    * http://caniuse.com/#feat=screen-orientation
    * and http://caniuse.com/#feat=fullscreen
    */
-  FULLSCREEN_ON_LANDSCAPE: 'fullscreen-on-landscape',
+  ROTATE_TO_FULLSCREEN: 'rotate-to-fullscreen',
+  /**
+   * noaudio
+   *
+   * If set and autoplay, the equalizer icon will not be displayed.
+   */
+  NO_AUDIO: 'noaudio',
 };
-
 
 /**
  * Events
@@ -255,6 +250,15 @@ export const VideoEvents = {
    * @event load
    */
   LOAD: 'load',
+
+  /**
+   * loadedmetadata
+   *
+   * Fired when the video's metadata becomes available (e.g. duration).
+   *
+   * @event loadedmetadata
+   */
+  LOADEDMETADATA: 'loadedmetadata',
 
   /**
    * playing
@@ -348,6 +352,8 @@ export const VideoEvents = {
   AD_END: 'ad_end',
 };
 
+/** @typedef {string} */
+export let PlayingStateDef;
 
 /**
  * Playing States
@@ -355,7 +361,7 @@ export const VideoEvents = {
  * Internal playing states used to distinguish between video playing on user's
  * command and videos playing automatically
  *
- * @constant {!Object<string, string>}
+ * @constant {!Object<string, PlayingStateDef>}
  */
 export const PlayingStates = {
   /**
@@ -386,7 +392,6 @@ export const PlayingStates = {
    */
   PAUSED: 'paused',
 };
-
 
 /** @enum {string} */
 export const VideoAnalyticsEvents = {
@@ -444,21 +449,57 @@ export const VideoAnalyticsEvents = {
    * @event video-session-visible
    */
   SECONDS_PLAYED: 'video-seconds-played',
+
+  /**
+   * video-hosted-custom
+   *
+   * Indicates that a custom event incoming from a 3p frame is to be logged.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-custom
+   */
+  CUSTOM: 'video-hosted-custom',
+
+  /**
+   * video-percentage-played
+   *
+   * Indicates that a percentage interval has been played.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-custom
+   */
+  PERCENTAGE_PLAYED: 'video-percentage-played',
 };
 
+/**
+ * Helper union type to be used internally, so that the compiler treats
+ * `VideoInterface` objects as `BaseElement`s, which they should be anyway.
+ *
+ * WARNING: Don't use this at the service level. Its `register` method should
+ * only allow `VideoInterface` as a guarding measure.
+ *
+ * @typedef {!VideoInterface|!./base-element.BaseElement}
+ */
+export let VideoOrBaseElementDef;
 
 /**
- * @typedef {{
- *   autoplay: boolean,
- *   currentTime: number,
- *   duration: number,
- *   height: number,
- *   id: string,
- *   playedRangesJson: string,
- *   playedTotal: number,
- *   muted: boolean,
- *   state: string,
- *   width: number
- * }}
+ * @param {!Element} element
+ * @return {boolean}
  */
-export let VideoAnalyticsDetailsDef;
+export function isDockable(element) {
+  return element.hasAttribute(VideoAttributes.DOCK);
+}
+
+/** @enum {string} */
+export const VideoServiceSignals = {
+  USER_INTERACTED: 'user-interacted',
+  AUTOPLAY_DELEGATED: 'autoplay-delegated',
+};
+
+/** @param {!AmpElement|!VideoOrBaseElementDef} video */
+export function delegateAutoplay(video) {
+  video.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);
+}
+
+/** @param {!AmpElement|!VideoOrBaseElementDef} video */
+export function userInteractedWith(video) {
+  video.signals().signal(VideoServiceSignals.USER_INTERACTED);
+}

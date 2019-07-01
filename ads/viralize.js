@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
 import {addParamsToUrl} from '../src/url';
+import {loadScript, validateData} from '../3p/3p';
 import {parseJson} from '../src/json';
 
 /**
@@ -44,7 +44,10 @@ export function viralize(global, data) {
 
   const scriptUrl = addParamsToUrl(endpoint, queryParams);
 
-  loadScript(global, scriptUrl,
-      () => global.context.renderStart(),
-      () => global.context.noContentAvailable());
+  loadScript(
+    global,
+    scriptUrl,
+    () => global.context.renderStart(),
+    () => global.context.noContentAvailable()
+  );
 }

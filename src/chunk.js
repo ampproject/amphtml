@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import PriorityQueue from './utils/priority-queue';
+import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
-import {registerServiceBuilderForDoc, getServiceForDoc} from './service';
-import {makeBodyVisible} from './style-installer';
-import {Services} from './services';
+import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
+import {makeBodyVisibleRecovery} from './style-installer';
+import PriorityQueue from './utils/priority-queue';
 
 /**
  * @const {string}
@@ -37,13 +37,13 @@ let deactivated = /nochunking=1/.test(self.location.hash);
 const resolved = Promise.resolve();
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!Chunks}
  * @private
  */
-function getChunkServiceForDoc_(nodeOrAmpDoc) {
-  registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
+function chunkServiceForDoc(elementOrAmpDoc) {
+  registerServiceBuilderForDoc(elementOrAmpDoc, 'chunk', Chunks);
+  return getServiceForDoc(elementOrAmpDoc, 'chunk');
 }
 
 /**
@@ -53,16 +53,16 @@ function getChunkServiceForDoc_(nodeOrAmpDoc) {
  * time to do other things) and may even be further delayed until
  * there is time.
  *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Document} document
  * @param {function(?IdleDeadline)} fn
  */
-export function startupChunk(nodeOrAmpDoc, fn) {
+export function startupChunk(document, fn) {
   if (deactivated) {
     resolved.then(fn);
     return;
   }
-  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
-  service.runForStartup_(fn);
+  const service = chunkServiceForDoc(document.documentElement);
+  service.runForStartup(fn);
 }
 
 /**
@@ -75,25 +75,25 @@ export function startupChunk(nodeOrAmpDoc, fn) {
  * object to the function, which can be used to perform a variable amount
  * of work depending on the remaining amount of idle time.
  *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {function(?IdleDeadline)} fn
  * @param {ChunkPriority} priority
  */
-export function chunk(nodeOrAmpDoc, fn, priority) {
+export function chunk(elementOrAmpDoc, fn, priority) {
   if (deactivated) {
     resolved.then(fn);
     return;
   }
-  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
+  const service = chunkServiceForDoc(elementOrAmpDoc);
   service.run(fn, priority);
 }
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!Chunks}
  */
-export function chunkInstanceForTesting(nodeOrAmpDoc) {
-  return getChunkServiceForDoc_(nodeOrAmpDoc);
+export function chunkInstanceForTesting(elementOrAmpDoc) {
+  return chunkServiceForDoc(elementOrAmpDoc);
 }
 
 /**
@@ -104,20 +104,23 @@ export function chunkInstanceForTesting(nodeOrAmpDoc) {
  */
 export function deactivateChunking() {
   deactivated = true;
-};
+}
 
+/**
+ * @visibleForTesting
+ */
 export function activateChunkingForTesting() {
   deactivated = false;
-};
+}
 
 /**
  * Runs all currently scheduled chunks.
  * Independent of errors it will unwind the queue. Will afterwards
  * throw the first encountered error.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  */
-export function runChunksForTesting(nodeOrAmpDoc) {
-  const service = chunkInstanceForTesting(nodeOrAmpDoc);
+export function runChunksForTesting(elementOrAmpDoc) {
+  const service = chunkInstanceForTesting(elementOrAmpDoc);
   const errors = [];
   while (true) {
     try {
@@ -155,7 +158,7 @@ const TaskState = {
  */
 class Task {
   /**
-   * @param {!function(?IdleDeadline)} fn
+   * @param {function(?IdleDeadline)} fn
    */
   constructor(fn) {
     /** @public {TaskState} */
@@ -169,7 +172,7 @@ class Task {
    * Executes the wrapped function.
    * @param {?IdleDeadline} idleDeadline
    * @throws {Error}
-   * @private
+   * @protected
    */
   runTask_(idleDeadline) {
     if (this.state == TaskState.RUN) {
@@ -186,7 +189,7 @@ class Task {
 
   /**
    * @return {string}
-   * @private
+   * @protected
    */
   getName_() {
     return this.fn_.displayName || this.fn_.name;
@@ -204,7 +207,7 @@ class Task {
   /**
    * Returns true if this task should be run without delay.
    * @return {boolean}
-   * @private
+   * @protected
    */
   immediateTriggerCondition_() {
     // By default, there are no immediate trigger conditions.
@@ -215,7 +218,7 @@ class Task {
    * Returns true if this task should be scheduled using `requestIdleCallback`.
    * Otherwise, task is scheduled as macro-task on next event loop.
    * @return {boolean}
-   * @private
+   * @protected
    */
   useRequestIdleCallback_() {
     // By default, always use requestIdleCallback.
@@ -229,7 +232,7 @@ class Task {
  */
 class StartupTask extends Task {
   /**
-   * @param {!function(?IdleDeadline)} fn
+   * @param {function(?IdleDeadline)} fn
    * @param {!Window} win
    * @param {!Promise<!./service/viewer-impl.Viewer>} viewerPromise
    */
@@ -259,7 +262,7 @@ class StartupTask extends Task {
   /** @override */
   onTaskError_(unusedError) {
     // Startup tasks run early in init. All errors should show the doc.
-    makeBodyVisible(self.document);
+    makeBodyVisibleRecovery(self.document);
   }
 
   /** @override */
@@ -292,8 +295,7 @@ class StartupTask extends Task {
       return false;
     }
     // Viewers send a URL param if we are not visible.
-    return !(/visibilityState=(hidden|prerender)/.test(
-        this.win_.location.hash));
+    return !/visibilityState=(hidden|prerender)/.test(this.win_.location.hash);
   }
 }
 
@@ -305,8 +307,6 @@ class Chunks {
    * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
    */
   constructor(ampDoc) {
-    /** @private @const */
-    this.ampDoc_ = ampDoc;
     /** @private @const {!Window} */
     this.win_ = ampDoc.win;
     /** @private @const {!PriorityQueue<Task>} */
@@ -337,9 +337,8 @@ class Chunks {
   /**
    * Run a fn that's part of AMP's startup sequence as a "chunk".
    * @param {function(?IdleDeadline)} fn
-   * @private
    */
-  runForStartup_(fn) {
+  runForStartup(fn) {
     const t = new StartupTask(fn, this.win_, this.viewerPromise_);
     this.enqueueTask_(t, Number.POSITIVE_INFINITY);
   }
@@ -426,20 +425,22 @@ class Chunks {
     // If requestIdleCallback exists, schedule a task with it, but
     // do not wait longer than two seconds.
     if (nextTask.useRequestIdleCallback_() && this.win_.requestIdleCallback) {
-      onIdle(this.win_,
-          // Wait until we have a budget of at least 15ms.
-          // 15ms is a magic number. Budgets are higher when the user
-          // is completely idle (around 40), but that occurs too
-          // rarely to be usable. 15ms budgets can happen during scrolling
-          // but only if the device is doing super, super well, and no
-          // real processing is done between frames.
-          15 /* minimumTimeRemaining */,
-          2000 /* timeout */,
-          this.boundExecute_);
+      onIdle(
+        this.win_,
+        // Wait until we have a budget of at least 15ms.
+        // 15ms is a magic number. Budgets are higher when the user
+        // is completely idle (around 40), but that occurs too
+        // rarely to be usable. 15ms budgets can happen during scrolling
+        // but only if the device is doing super, super well, and no
+        // real processing is done between frames.
+        15 /* minimumTimeRemaining */,
+        2000 /* timeout */,
+        this.boundExecute_
+      );
       return;
     }
     // The message doesn't actually matter.
-    this.win_.postMessage/*OK*/('amp-macro-task', '*');
+    this.win_./*OK*/ postMessage('amp-macro-task', '*');
   }
 }
 
@@ -455,6 +456,9 @@ class Chunks {
  */
 export function onIdle(win, minimumTimeRemaining, timeout, fn) {
   const startTime = Date.now();
+  /**
+   * @param {!IdleDeadline} info
+   */
   function rIC(info) {
     if (info.timeRemaining() < minimumTimeRemaining) {
       const remainingTimeout = timeout - (Date.now() - startTime);
@@ -462,8 +466,12 @@ export function onIdle(win, minimumTimeRemaining, timeout, fn) {
         dev().fine(TAG, 'Timed out', timeout, info.didTimeout);
         fn(info);
       } else {
-        dev().fine(TAG, 'Rescheduling with', remainingTimeout,
-            info.timeRemaining());
+        dev().fine(
+          TAG,
+          'Rescheduling with',
+          remainingTimeout,
+          info.timeRemaining()
+        );
         win.requestIdleCallback(rIC, {timeout: remainingTimeout});
       }
     } else {

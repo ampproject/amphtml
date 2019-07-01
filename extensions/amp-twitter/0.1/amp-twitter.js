@@ -14,21 +14,29 @@
  * limitations under the License.
  */
 
-
+import {MessageType} from '../../../src/3p-frame-messaging';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 
-
 class AmpTwitter extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private {?Element} */
+    this.userPlaceholder_ = null;
+  }
+
+  /**
+   * @override
+   */
+  buildCallback() {
+    this.userPlaceholder_ = this.getPlaceholder();
   }
 
   /**
@@ -39,7 +47,9 @@ class AmpTwitter extends AMP.BaseElement {
     preloadBootstrap(this.win, this.preconnect);
     // Hosts the script that renders tweets.
     this.preconnect.preload(
-        'https://platform.twitter.com/widgets.js', 'script');
+      'https://platform.twitter.com/widgets.js',
+      'script'
+    );
     // This domain serves the actual tweets as JSONP.
     this.preconnect.url('https://syndication.twitter.com', opt_onLayout);
     // All images
@@ -59,24 +69,82 @@ class AmpTwitter extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'twitter');
+    const iframe = getIframe(this.win, this.element, 'twitter', null, {
+      allowFullscreen: true,
+    });
     this.applyFillContent(iframe);
-    listenFor(iframe, 'embed-size', data => {
-      // We only get the message if and when there is a tweet to display,
-      // so hide the placeholder
-      this.togglePlaceholder(false);
-      this./*OK*/changeHeight(data['height']);
-    }, /* opt_is3P */true);
-    listenFor(iframe, 'no-content', () => {
-      if (this.getFallback()) {
-        this.togglePlaceholder(false);
-        this.toggleFallback(true);
-      }
-      // else keep placeholder displayed since there's no fallback
-    }, /* opt_is3P */true);
+    this.updateForLoadingState_();
+    listenFor(
+      iframe,
+      MessageType.EMBED_SIZE,
+      data => {
+        this.updateForSuccessState_(data['height']);
+      },
+      /* opt_is3P */ true
+    );
+    listenFor(
+      iframe,
+      MessageType.NO_CONTENT,
+      () => {
+        this.updateForFailureState_();
+      },
+      /* opt_is3P */ true
+    );
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
+  }
+
+  /**
+   * Updates when starting to load a tweet.
+   * @private
+   */
+  updateForLoadingState_() {
+    let height;
+    this.measureMutateElement(
+      () => {
+        height = this.element./*OK*/ getBoundingClientRect().height;
+      },
+      () => {
+        // Set an explicit height so we can animate it.
+        this./*OK*/ changeHeight(height);
+      }
+    );
+  }
+
+  /**
+   * Updates when the tweet has successfully rendered.
+   * @param {number} height The height of the rendered tweet.
+   * @private
+   */
+  updateForSuccessState_(height) {
+    this.mutateElement(() => {
+      if (this.userPlaceholder_) {
+        this.togglePlaceholder(false);
+      }
+      this./*OK*/ changeHeight(height);
+    });
+  }
+
+  /**
+   * Updates wheen the tweet that failed to load. This uses the fallback
+   * provided if available. If not, it uses the user specified placeholder.
+   * @private
+   */
+  updateForFailureState_() {
+    const fallback = this.getFallback();
+    const content = fallback || this.userPlaceholder_;
+
+    this.mutateElement(() => {
+      if (fallback) {
+        this.togglePlaceholder(false);
+        this.toggleFallback(true);
+      }
+
+      if (content) {
+        this./*OK*/ changeHeight(content./*OK*/ offsetHeight);
+      }
+    });
   }
 
   /** @override */
@@ -93,7 +161,6 @@ class AmpTwitter extends AMP.BaseElement {
     return true;
   }
 }
-
 
 AMP.extension('amp-twitter', '0.1', AMP => {
   AMP.registerElement('amp-twitter', AmpTwitter);

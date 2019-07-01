@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function revcontent(global, data) {
-  const endpoint = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
-  const required = [
-    'id',
-    'width',
-    'height',
-    'wrapper',
-  ];
+  const endpoint =
+    'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
+  const required = ['id', 'width', 'height', 'wrapper'];
   const optional = [
     'api',
     'key',

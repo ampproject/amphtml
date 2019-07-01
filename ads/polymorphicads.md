@@ -19,9 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad
-  width="320"
-  height="50"
+<amp-ad width="320" height="50"
   type="polymorphicads"
   data-adunit="7c0b3ae742beccf94f7726ea832277a2"
   data-params='{"testMode": true}'>
@@ -34,5 +32,5 @@ For configuration details and to generate your tags, please contact [Polymorphic
 
 Supported parameters:
 
-- data-adunit : adUnitId
-- data-params : parameters
+- `data-adunit`: adUnitId
+- `data-params`: parameters

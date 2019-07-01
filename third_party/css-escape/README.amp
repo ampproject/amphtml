@@ -7,3 +7,4 @@ For of CSS.escape polyfill.
 
 Local Modifications:
 Stripped polyfill part and turn it into utility function.
+Transformed code into a regex replace function (size over speed).

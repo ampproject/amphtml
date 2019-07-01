@@ -2,7 +2,7 @@
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use baseInstance file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import {Services} from '../../services';
+import {devAssert} from '../../log';
 import {
   layoutRectEquals,
+  layoutRectLtwh,
   layoutRectsOverlap,
   layoutRectsRelativePos,
-  layoutRectLtwh,
 } from '../../layout-rect';
-import {Services} from '../../services';
-import {dev} from '../../log';
 
 /** @enum {number} */
 export const PositionObserverFidelity = {
@@ -50,21 +50,23 @@ export class PositionObserverWorker {
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
    * @param {!PositionObserverFidelity} fidelity
-   * @param {!function(?PositionInViewportEntryDef)} handler
+   * @param {function(?PositionInViewportEntryDef)} handler
    */
   constructor(ampdoc, element, fidelity, handler) {
     /** @const {!Element} */
     this.element = element;
 
-    /** @const {!function(?PositionInViewportEntryDef)} */
+    /** @const {function(?PositionInViewportEntryDef)} */
     this.handler_ = handler;
 
     /** @type {!PositionObserverFidelity} */
     this.fidelity = fidelity;
 
     /** @type {number} */
-    this.turn = (fidelity == PositionObserverFidelity.LOW) ?
-        Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0;
+    this.turn =
+      (fidelity == PositionObserverFidelity.LOW)
+        ? Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT)
+        : 0;
 
     /** @type {?PositionInViewportEntryDef} */
     this.prevPosition_ = null;
@@ -79,21 +81,27 @@ export class PositionObserverWorker {
    * @private
    */
   trigger_(position) {
-    const prevPos = this.prevPosition_ ;
-    if (prevPos
-        && layoutRectEquals(prevPos.positionRect, position.positionRect)
-        && layoutRectEquals(prevPos.viewportRect, position.viewportRect)) {
+    const prevPos = this.prevPosition_;
+    if (
+      prevPos &&
+      layoutRectEquals(prevPos.positionRect, position.positionRect) &&
+      layoutRectEquals(prevPos.viewportRect, position.viewportRect)
+    ) {
       // position didn't change, do nothing.
       return;
     }
 
-    dev().assert(position.positionRect,
-        'PositionObserver should always trigger entry with clientRect');
+    devAssert(
+      position.positionRect,
+      'PositionObserver should always trigger entry with clientRect'
+    );
     const positionRect =
-        /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
+      /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
     // Add the relative position of the element to its viewport
-    position.relativePos = layoutRectsRelativePos(positionRect,
-        position.viewportRect);
+    position.relativePos = layoutRectsRelativePos(
+      positionRect,
+      position.viewportRect
+    );
 
     if (layoutRectsOverlap(positionRect, position.viewportRect)) {
       // Update position
@@ -127,15 +135,20 @@ export class PositionObserverWorker {
     }
 
     const viewportSize = this.viewport_.getSize();
-    const viewportBox =
-        layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
+    const viewportBox = layoutRectLtwh(
+      0,
+      0,
+      viewportSize.width,
+      viewportSize.height
+    );
     this.viewport_.getClientRectAsync(this.element).then(elementBox => {
       this.trigger_(
-      /** @type {./position-observer-worker.PositionInViewportEntryDef}*/ ({
-        positionRect: elementBox,
-        viewportRect: viewportBox,
-        relativePos: '',
-      }));
+        /** @type {./position-observer-worker.PositionInViewportEntryDef}*/ ({
+          positionRect: elementBox,
+          viewportRect: viewportBox,
+          relativePos: '',
+        })
+      );
     });
   }
 }

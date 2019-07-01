@@ -15,24 +15,19 @@
  */
 'use strict';
 
-
 const fs = require('fs');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
+const PluginError = require('plugin-error');
 const postcss = require('postcss');
 const table = require('text-table');
 const through = require('through2');
-const util = require('gulp-util');
 
-const tableHeaders = [
- ['selector', 'z-index', 'file'],
- ['---', '---', '---'],
-];
+const tableHeaders = [['selector', 'z-index', 'file'], ['---', '---', '---']];
 
 const tableOptions = {
   align: ['l', 'l', 'l'],
   hsep: '   |   ',
 };
-
 
 /**
  * @param {!Object<string, !Array<number>} acc accumulator object for selectors
@@ -67,36 +62,40 @@ function onFileThrough(file, enc, cb) {
   }
 
   if (file.isStream()) {
-    cb(new util.PluginError('size', 'Stream not supported'));
+    cb(new PluginError('size', 'Stream not supported'));
     return;
   }
 
   const selectors = Object.create(null);
 
   postcss([zIndexCollector.bind(null, selectors)])
-      .process(file.contents.toString(), {
-        from: file.relative,
-      }).then(() => {
-        cb(null, {name: file.relative, selectors});
-      });
+    .process(file.contents.toString(), {
+      from: file.relative,
+    })
+    .then(() => {
+      cb(null, {name: file.relative, selectors});
+    });
 }
 
 /**
  * @param {!Object<string, !Object<string, !Array<number>} filesData
  *    accumulation of files and the rules and z index values.
- * @param {function()} cb callback to end the stream
  * @return {!Array<!Array<string>>}
  */
 function createTable(filesData) {
   const rows = [];
-  Object.keys(filesData).sort().forEach(fileName => {
-    const selectors = filesData[fileName];
-    Object.keys(selectors).sort().forEach(selectorName => {
-      const zIndex = selectors[selectorName];
-      const row = [selectorName, zIndex, fileName];
-      rows.push(row);
+  Object.keys(filesData)
+    .sort()
+    .forEach(fileName => {
+      const selectors = filesData[fileName];
+      Object.keys(selectors)
+        .sort()
+        .forEach(selectorName => {
+          const zIndex = selectors[selectorName];
+          const row = [selectorName, zIndex, fileName];
+          rows.push(row);
+        });
     });
-  });
   rows.sort((a, b) => {
     const aZIndex = parseInt(a[1], 10);
     const bZIndex = parseInt(b[1], 10);
@@ -105,35 +104,38 @@ function createTable(filesData) {
   return rows;
 }
 
-
 /**
+ * @param {string} glob
  * @return {!Stream}
  */
-function getZindex(glob) {
+function getZindexStream(glob) {
   return gulp.src(glob).pipe(through.obj(onFileThrough));
 }
 
 /**
  * @param {function()} cb
  */
-function getZindexForAmp(cb) {
+function getZindex(cb) {
   const filesData = Object.create(null);
   // Don't return the stream here since we do a `writeFileSync`
-  getZindex('{css,src,extensions}/**/*.css')
-      .on('data', chunk => {
-        filesData[chunk.name] = chunk.selectors;
-      })
-      .on('end', () => {
-        const rows = createTable(filesData);
-        rows.unshift.apply(rows, tableHeaders);
-        const tbl = table(rows, tableOptions);
-        fs.writeFileSync('css/Z_INDEX.md', tbl);
-        cb();
-      });
+  getZindexStream('{css,src,extensions}/**/*.css')
+    .on('data', chunk => {
+      filesData[chunk.name] = chunk.selectors;
+    })
+    .on('end', () => {
+      const rows = createTable(filesData);
+      rows.unshift.apply(rows, tableHeaders);
+      const tbl = table(rows, tableOptions);
+      fs.writeFileSync('css/Z_INDEX.md', tbl);
+      cb();
+    });
 }
 
-gulp.task('get-zindex', 'Runs through all css files of project to gather ' +
-    'z-index values', getZindexForAmp);
+module.exports = {
+  createTable,
+  getZindex,
+  getZindexStream,
+};
 
-exports.getZindex = getZindex;
-exports.createTable = createTable;
+getZindex.description =
+  'Runs through all css files of project to gather z-index values';

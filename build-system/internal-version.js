@@ -16,28 +16,41 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const crypto = require('crypto');
+const {gitCommitFormattedTime} = require('./git');
 
-// Used to e.g. references the ads binary from the runtime to get
-// version lock.
-exports.VERSION = argv.version ?
-    String(argv.version) : String(Date.now());
-
-// A token that changes its value each time we release AMP. This is intended
-// to verify that two iframes of AMP have the same version of AMP. It is
-// also intended to make running iframes with custom software very unpleasant,
-// so that we are more likely to have everybody on the same version.
-exports.TOKEN = getToken();
-
-function getToken() {
-  const task = process.argv[2];
-  // For tests build parent and child frame can get out of sync because
-  // we do not version lock them. To fix this we use a fixed token.
-  if (!task || task == 'build' || task == 'test') {
-    return 'development--token';
+function getVersion() {
+  if (argv.version) {
+    return String(argv.version);
+  } else {
+    // Generate a consistent version number by using the commit* time of the
+    // latest commit on the active branch as the twelve digits. The last,
+    // thirteenth digit defaults to 0, but can be changed by setting the
+    // --custom_version_mark flag to a different value. This is an undocumented
+    // feature and should rarely be used by AMP release engineers.
+    //
+    // e.g., the version number of a clean (no uncommited changes) tree that was
+    // commited on August 1, 2018 at 14:31:11 EDT would be `1808011831110`
+    // (notice that due to timezone shift, the hour value changes from EDT's 14
+    // to UTC's 18. The last digit is the default value of 0 as
+    // --custom_version_mark was not set.)
+    //
+    // *Commit time is different from author time! Commit time is the time that
+    // the PR was merged into master; author time is when the author ran the
+    // "git commit" command.
+    const lastCommitFormattedTime = gitCommitFormattedTime();
+    let lastDigit = 0;
+    if (argv.custom_version_mark) {
+      lastDigit = parseInt(argv.custom_version_mark, 10);
+      if (isNaN(lastDigit) || lastDigit < 0 || lastDigit > 9) {
+        throw new Error(
+          `--custom_version_mark is set to ${argv.custom_version_mark}, ` +
+            'expected value between 0 and 9!'
+        );
+      }
+    }
+    return `${lastCommitFormattedTime}${lastDigit}`;
   }
-  // For every other build, most importantly `dist` we assume production.
-  return crypto.createHmac(
-      'sha256', crypto.randomBytes(16)).update(exports.VERSION)
-      .digest('hex');
 }
+
+// Used to e.g. references the ads binary from the runtime to get version lock.
+exports.VERSION = getVersion();

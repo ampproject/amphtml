@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-import {urls} from '../../../src/config';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
-import {setStyles} from '../../../src/style';
-import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
+import {createElementWithAttributes} from '../../../src/dom';
+import {devAssert, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {hasOwn} from '../../../src/utils/object';
+import {internalRuntimeVersion} from '../../../src/internal-version';
+import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
+import {toggle} from '../../../src/style';
+import {urls} from '../../../src/config';
 
 /** @private @const {string} */
-const TAG_ = 'amp-analytics.IframeTransport';
+const TAG_ = 'amp-analytics/iframe-transport';
 
 /** @private @const {number} */
 const LONG_TASK_REPORTING_THRESHOLD = 5;
 
 /** @typedef {{
  *    frame: Element,
- *    sentinel: !string,
+ *    sentinel: string,
  *    usageCount: number,
  *    queue: IframeTransportMessageQueue,
  *  }} */
@@ -45,24 +46,30 @@ export let FrameData;
  * @return {string}
  */
 export function getIframeTransportScriptUrl(ampWin, opt_forceProdUrl) {
-  if ((getMode().localDev || getMode().test) && !opt_forceProdUrl &&
-      ampWin.parent && ampWin.parent.location) {
+  if (
+    (getMode().localDev || getMode().test) &&
+    !opt_forceProdUrl &&
+    ampWin.parent &&
+    ampWin.parent.location
+  ) {
     const loc = ampWin.parent.location;
     return `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js`;
   }
-  return urls.thirdParty +
-      '/$internalRuntimeVersion$/iframe-transport-client-v0.js';
+  return (
+    urls.thirdParty +
+    `/${internalRuntimeVersion()}/iframe-transport-client-v0.js`
+  );
 }
 
 /**
- * @VisibleForTesting
+ * @visibleForTesting
  */
 export class IframeTransport {
   /**
    * @param {!Window} ampWin The window object of the AMP document
-   * @param {!string} type The value of the amp-analytics tag's type attribute
+   * @param {string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
-   * @param {!string} id If (potentially) using sendResponseToCreative(), it
+   * @param {string} id If (potentially) using sendResponseToCreative(), it
    *     should be something that the recipient can use to identify the
    *     context of the message, e.g. the resourceID of a DOM element.
    */
@@ -76,8 +83,10 @@ export class IframeTransport {
     /** @private @const {string} */
     this.creativeId_ = id;
 
-    dev().assert(config && config['iframe'],
-        'Must supply iframe URL to constructor!');
+    devAssert(
+      config && config['iframe'],
+      'Must supply iframe URL to constructor!'
+    );
     this.frameUrl_ = config['iframe'];
 
     /** @private {number} */
@@ -90,8 +99,10 @@ export class IframeTransport {
    * Called when a Transport instance is being removed from the DOM
    */
   detach() {
-    IframeTransport.markCrossDomainIframeAsDone(this.ampWin_.document,
-        this.type_);
+    IframeTransport.markCrossDomainIframeAsDone(
+      this.ampWin_.document,
+      this.type_
+    );
   }
 
   /**
@@ -102,19 +113,19 @@ export class IframeTransport {
     let frameData;
     if (IframeTransport.hasCrossDomainIframe(this.type_)) {
       frameData = IframeTransport.getFrameData(this.type_);
-      ++(frameData.usageCount);
+      ++frameData.usageCount;
     } else {
       frameData = this.createCrossDomainIframe();
       this.ampWin_.document.body.appendChild(frameData.frame);
       this.createPerformanceObserver_();
     }
-    dev().assert(frameData, 'Trying to use non-existent frame');
+    devAssert(frameData, 'Trying to use non-existent frame');
   }
 
   /**
    * Create a cross-domain iframe for third-party vendor analytics
    * @return {!FrameData}
-   * @VisibleForTesting
+   * @visibleForTesting
    */
   createCrossDomainIframe() {
     // Explanation of IDs:
@@ -131,28 +142,33 @@ export class IframeTransport {
     // iframeTransport.getCreativeId() -> sentinel relationship is *not*
     // many-to-many.
     const sentinel = IframeTransport.createUniqueId_();
-    const frameName = JSON.stringify(/** @type {JsonObject} */ ({
-      scriptSrc: getIframeTransportScriptUrl(this.ampWin_),
-      sentinel,
-      type: this.type_,
-    }));
-    const frame = createElementWithAttributes(this.ampWin_.document, 'iframe',
-        /** @type {!JsonObject} */ ({
-          sandbox: 'allow-scripts allow-same-origin',
-          name: frameName,
-          'data-amp-3p-sentinel': sentinel,
-        }));
+    const frameName = JSON.stringify(
+      /** @type {JsonObject} */ ({
+        scriptSrc: getIframeTransportScriptUrl(this.ampWin_),
+        sentinel,
+        type: this.type_,
+      })
+    );
+    const frame = createElementWithAttributes(
+      this.ampWin_.document,
+      'iframe',
+      /** @type {!JsonObject} */ ({
+        sandbox: 'allow-scripts allow-same-origin',
+        name: frameName,
+        'data-amp-3p-sentinel': sentinel,
+      })
+    );
     frame.sentinel = sentinel;
-    setStyles(frame, {
-      display: 'none',
-    });
+    toggle(frame, false);
     frame.src = this.frameUrl_;
-    const frameData = /** @const {FrameData} */ ({
+    const frameData = /** @type {FrameData} */ ({
       frame,
       usageCount: 1,
-      queue: new IframeTransportMessageQueue(this.ampWin_,
-          /** @type {!HTMLIFrameElement} */
-          (frame)),
+      queue: new IframeTransportMessageQueue(
+        this.ampWin_,
+        /** @type {!HTMLIFrameElement} */
+        (frame)
+      ),
     });
     IframeTransport.crossDomainIframes_[this.type_] = frameData;
     return frameData;
@@ -165,7 +181,6 @@ export class IframeTransport {
    * once per LONG_TASK_REPORTING_THRESHOLD that a long task occurs. (This
    * implies that there is a grace period for the first
    * LONG_TASK_REPORTING_THRESHOLD-1 occurrences.)
-   * @VisibleForTesting
    * @private
    */
   createPerformanceObserver_() {
@@ -173,31 +188,30 @@ export class IframeTransport {
       return;
     }
     // TODO(jonkeller): Consider merging with jank-meter.js
-    IframeTransport.performanceObservers_[this.type_] =
-        new this.ampWin_.PerformanceObserver(entryList => {
-          if (!entryList) {
-            return;
-          }
-          entryList.getEntries().forEach(entry => {
-            if (entry && entry['entryType'] == 'longtask' &&
-              (entry['name'] == 'cross-origin-descendant' ||
-               (getMode().test &&
-               entry['name'] == 'same-origin-descendant')) &&
-              entry.attribution) {
-              entry.attribution.forEach(attrib => {
-                if (this.frameUrl_ == attrib.containerSrc &&
-                    ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0) {
-                  user().warn(TAG_,
-                      'Long Task: ' +
-                      `Vendor: "${this.type_}" ` +
-                      `Src: "${attrib.containerSrc}" ` +
-                      `Duration: ${entry.duration}ms ` +
-                      `Occurrences: ${this.numLongTasks_}`);
-                }
-              });
+    IframeTransport.performanceObservers_[
+      this.type_
+    ] = new this.ampWin_.PerformanceObserver(entryList => {
+      if (!entryList) {
+        return;
+      }
+      entryList.getEntries().forEach(entry => {
+        if (
+          entry &&
+          entry['entryType'] == 'longtask' &&
+          entry['name'] == 'cross-origin-descendant' &&
+          entry.attribution
+        ) {
+          entry.attribution.forEach(attrib => {
+            if (
+              this.frameUrl_ == attrib['containerSrc'] &&
+              ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0
+            ) {
+              user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
             }
           });
-        });
+        }
+      });
+    });
     IframeTransport.performanceObservers_[this.type_].observe({
       entryTypes: ['longtask'],
     });
@@ -209,14 +223,18 @@ export class IframeTransport {
    * Once all creatives using a frame are done with it, the frame can be
    * destroyed.
    * @param {!HTMLDocument} ampDoc The AMP document
-   * @param {!string} type The type attribute of the amp-analytics tag
+   * @param {string} type The type attribute of the amp-analytics tag
    */
   static markCrossDomainIframeAsDone(ampDoc, type) {
     const frameData = IframeTransport.getFrameData(type);
-    dev().assert(frameData && frameData.frame && frameData.usageCount,
-        'Marked the ' + type + ' frame as done, but there is no' +
-        ' record of it existing.');
-    if (--(frameData.usageCount)) {
+    devAssert(
+      frameData && frameData.frame && frameData.usageCount,
+      'Marked the ' +
+        type +
+        ' frame as done, but there is no' +
+        ' record of it existing.'
+    );
+    if (--frameData.usageCount) {
       // Some other instance is still using it
       return;
     }
@@ -230,9 +248,9 @@ export class IframeTransport {
 
   /**
    * Returns whether this type of cross-domain frame is already known
-   * @param {!string} type The type attribute of the amp-analytics tag
-   * @return {!boolean}
-   * @VisibleForTesting
+   * @param {string} type The type attribute of the amp-analytics tag
+   * @return {boolean}
+   * @visibleForTesting
    */
   static hasCrossDomainIframe(type) {
     return hasOwn(IframeTransport.crossDomainIframes_, type);
@@ -241,37 +259,42 @@ export class IframeTransport {
   /**
    * Create a unique value to differentiate messages from a particular
    * creative to the cross-domain iframe, or to identify the iframe itself.
-   * @returns {string}
+   * @return {string}
    * @private
    */
   static createUniqueId_() {
-    return String(++(IframeTransport.nextId_));
+    return String(++IframeTransport.nextId_);
   }
 
   /**
    * Sends an AMP Analytics trigger event to a vendor's cross-domain iframe,
    * or queues the message if the frame is not yet ready to receive messages.
-   * @param {!string} event A string describing the trigger event
-   * @VisibleForTesting
+   * @param {string} event A string describing the trigger event
+   * @visibleForTesting
    */
   sendRequest(event) {
     const frameData = IframeTransport.getFrameData(this.type_);
-    dev().assert(frameData, 'Trying to send message to non-existent frame');
-    dev().assert(frameData.queue,
-        'Event queue is missing for messages from ' + this.type_ +
-        ' to creative ID ' + this.creativeId_);
+    devAssert(frameData, 'Trying to send message to non-existent frame');
+    devAssert(
+      frameData.queue,
+      'Event queue is missing for messages from ' +
+        this.type_ +
+        ' to creative ID ' +
+        this.creativeId_
+    );
     frameData.queue.enqueue(
-        /**
-         * @type {!../../../src/3p-frame-messaging.IframeTransportEvent}
-         */
-        ({creativeId: this.creativeId_, message: event}));
+      /**
+       * @type {!../../../src/3p-frame-messaging.IframeTransportEvent}
+       */
+      ({creativeId: this.creativeId_, message: event})
+    );
   }
 
   /**
    * Gets the FrameData associated with a particular cross-domain frame type.
-   * @param {!string} type The type attribute of the amp-analytics tag
-   * @returns {FrameData}
-   * @VisibleForTesting
+   * @param {string} type The type attribute of the amp-analytics tag
+   * @return {FrameData}
+   * @visibleForTesting
    */
   static getFrameData(type) {
     return IframeTransport.crossDomainIframes_[type];
@@ -280,23 +303,23 @@ export class IframeTransport {
   /**
    * Removes all knowledge of cross-domain iframes.
    * Does not actually remove them from the DOM.
-   * @VisibleForTesting
+   * @visibleForTesting
    */
   static resetCrossDomainIframes() {
     IframeTransport.crossDomainIframes_ = {};
   }
 
   /**
-   * @returns {!string} Unique ID of this instance of IframeTransport
-   * @VisibleForTesting
+   * @return {string} Unique ID of this instance of IframeTransport
+   * @visibleForTesting
    */
   getCreativeId() {
     return this.creativeId_;
   }
 
   /**
-   * @returns {!string} Type attribute of parent amp-analytics instance
-   * @VisibleForTesting
+   * @return {string} Type attribute of parent amp-analytics instance
+   * @visibleForTesting
    */
   getType() {
     return this.type_;

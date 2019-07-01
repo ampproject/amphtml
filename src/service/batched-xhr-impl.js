@@ -19,7 +19,6 @@ import {getService, registerServiceBuilder} from '../service';
 import {map} from '../utils/object';
 import {removeFragment} from '../url';
 
-
 /**
  * A wrapper around the Xhr service which batches the result of GET requests
  *
@@ -27,14 +26,13 @@ import {removeFragment} from '../url';
  * @visibleForTesting
  */
 export class BatchedXhr extends Xhr {
-
   /**
    * @param {!Window} win
    */
   constructor(win) {
     super(win);
 
-    /** @const {!Object<!Promise<!./xhr-impl.FetchResponse>>} */
+    /** @const {!Object<!Promise<!Response>>} */
     this.fetchPromises_ = map();
   }
 
@@ -42,15 +40,15 @@ export class BatchedXhr extends Xhr {
    * Fetch and batch the requests if possible.
    *
    * @param {string} input URL
-   * @param {?./xhr-impl.FetchInitDef=} opt_init Fetch options object.
-   * @return {!Promise<!./xhr-impl.FetchResponse>}
+   * @param {?FetchInitDef=} opt_init Fetch options object.
+   * @return {!Promise<!Response>}
    * @override
    */
   fetch(input, opt_init) {
     const accept =
-        (opt_init && opt_init.headers && opt_init.headers['Accept']) || '';
+      (opt_init && opt_init.headers && opt_init.headers['Accept']) || '';
     const isBatchable =
-        (!opt_init || !opt_init.method || opt_init.method === 'GET');
+      !opt_init || !opt_init.method || opt_init.method === 'GET';
     const key = this.getMapKey_(input, accept);
     const isBatched = !!this.fetchPromises_[key];
 
@@ -61,13 +59,16 @@ export class BatchedXhr extends Xhr {
     const fetchPromise = super.fetch(input, opt_init);
 
     if (isBatchable) {
-      this.fetchPromises_[key] = fetchPromise.then(response => {
-        delete this.fetchPromises_[key];
-        return response.clone();
-      }, err => {
-        delete this.fetchPromises_[key];
-        throw err;
-      });
+      this.fetchPromises_[key] = fetchPromise.then(
+        response => {
+          delete this.fetchPromises_[key];
+          return response.clone();
+        },
+        err => {
+          delete this.fetchPromises_[key];
+          throw err;
+        }
+      );
     }
 
     return fetchPromise;
@@ -86,7 +87,6 @@ export class BatchedXhr extends Xhr {
   }
 }
 
-
 /**
  * @param {!Window} window
  * @return {!BatchedXhr}
@@ -96,10 +96,9 @@ export function batchedXhrServiceForTesting(window) {
   return getService(window, 'batched-xhr');
 }
 
-
 /**
  * @param {!Window} window
  */
 export function installBatchedXhrService(window) {
   registerServiceBuilder(window, 'batched-xhr', BatchedXhr);
-};
+}

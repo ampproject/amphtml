@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const hasOwnProperty = Object.prototype.hasOwnProperty;
+const {hasOwnProperty} = Object.prototype;
 
 /**
  * Copies values of all enumerable own properties from one or more source
@@ -22,7 +22,7 @@ const hasOwnProperty = Object.prototype.hasOwnProperty;
  *
  * @param {!Object} target
  * @param {...Object} var_args
- * @returns {!Object}
+ * @return {!Object}
  */
 export function assign(target, var_args) {
   if (target == null) {
@@ -42,7 +42,6 @@ export function assign(target, var_args) {
   }
   return output;
 }
-
 
 /**
  * Sets the Object.assign polyfill if it does not exist.

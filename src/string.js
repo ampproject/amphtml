@@ -83,13 +83,30 @@ export function startsWith(string, prefix) {
 }
 
 /**
+ * Polyfill for String.prototype.includes.
+ * @param {string} string
+ * @param {string} substring
+ * @param {number=} start
+ * @return {boolean}
+ */
+export function includes(string, substring, start) {
+  if (typeof start !== 'number') {
+    start = 0;
+  }
+  if (start + substring.length > string.length) {
+    return false;
+  }
+  return string.indexOf(substring, start) !== -1;
+}
+
+/**
  * Expands placeholders in a given template string with values.
  *
  * Placeholders use ${key-name} syntax and are replaced with the value
  * returned from the given getter function.
  *
  * @param {string} template The template string to expand.
- * @param {!function(string):*} getter Function used to retrieve a value for a
+ * @param {function(string):*} getter Function used to retrieve a value for a
  *   placeholder. Returns values will be coerced into strings.
  * @param {number=} opt_maxIterations Number of times to expand the template.
  *   Defaults to 1, but should be set to a larger value your placeholder tokens
@@ -119,11 +136,25 @@ export function expandTemplate(template, getter, opt_maxIterations) {
  * @return {string} 32-bit unsigned hash of the string
  */
 export function stringHash32(str) {
-  const length = str.length;
+  const {length} = str;
   let hash = 5381;
   for (let i = 0; i < length; i++) {
-    hash = hash * 33 ^ str.charCodeAt(i);
+    hash = (hash * 33) ^ str.charCodeAt(i);
   }
   // Convert from 32-bit signed to unsigned.
   return String(hash >>> 0);
-};
+}
+
+/**
+ * Trims a string on the end, removing whitespace characters.
+ * @param {string} str  A string to trim.
+ * @return {string} The string, with trailing whitespace removed.
+ */
+export function trimEnd(str) {
+  // TODO(sparhami) Does this get inlined for an ES2019 build?
+  if (str.trimEnd) {
+    return str.trimEnd();
+  }
+
+  return ('_' + str).trim().slice(1);
+}

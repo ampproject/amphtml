@@ -32,7 +32,7 @@ Document can choose to opt in a certain experiments. To do that, simply put a me
 </head>
 ```
 By doing so, the specified experiments will be enabled for all visitors of the document.
-Note not all experiments allow document level opt-in. For a full list of whitelisted experiments, please see `allow-doc-opt-in` attribute in the project's `prod-config.json` file.
+Note not all experiments allow document level opt-in. For a full list of white listed experiments, please see `allow-doc-opt-in` attribute in the project's `prod-config.json` file.
 Note that document opt-in can be overridden by user opt-out.
 ```javascript
 AMP.toggleExperiment('experiment', false);
@@ -43,7 +43,7 @@ AMP.toggleExperiment('experiment', false);
 To add a new experiment:
 
 1. Add the new experiment to this [list](https://github.com/ampproject/amphtml/blob/master/tools/experiments/experiments.js).
-1. (This is rare, most new experiments can skip this step) Decide if the experiment should allow document level opt-in. One top consideration is that switching the experiment on/off should not break any document. For example, experimental custom elements should never be whitelisted, as any documents start using it will get broken if the we switch it off. Add it to `allow-doc-opt-in` in `prod-config.json` and `canary-config.json` if so.
+1. (This is rare, most new experiments can skip this step) Decide if the experiment should allow document level opt-in. One top consideration is that switching the experiment on/off should not break any document. For example, experimental custom elements should never be white listed, as any documents start using it will get broken if the we switch it off. Add it to `allow-doc-opt-in` in `prod-config.json` and `canary-config.json` if so.
 1. Use it like this:
 
 ```javascript

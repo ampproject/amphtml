@@ -1,3 +1,11 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - stories
+teaser:
+  text: Provides a way to display and update content live.
+---
 <!--
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,15 +22,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-live-list"></a> `amp-live-list`
+# amp-live-list
 
-[TOC]
+A wrapper and minimal UI for content that updates live in the client instance as new content is available in the source document.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>A wrapper and minimal UI for content that updates live in the client instance as new content is available in the source document.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
@@ -47,9 +51,11 @@ limitations under the License.
 
 ## Behavior
 
-`amp-live-list` provides support for content that is updated live on the client,
-so that the user can consume new information as it is available without having
-to refresh or navigate to a different page. The core use case for this component
+`amp-live-list` provides instant content updates from the client.
+Depending on implementation,
+it can update the DOM without user interaction,
+such as refreshing or navigating to a different page.
+The core use case for this component
 is live blogs: coverage for breaking news or live events where the user can stay
 on or keep returning to the same page to see new updates as they come in. Common
 examples are award shows, sporting events, and elections.
@@ -206,55 +212,69 @@ attribute requirements.
 
 ### Attributes on `amp-live-list`
 
-##### id (Required)
+<table>
+  <tr>
+    <td width="40%"><strong>id (Required)</strong></td>
+    <td>To uniquely identify an amp-live-list (since multiple are allowed on a single
+    page).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-poll-interval (Optional)</strong></td>
+    <td>Time (in milliseconds) interval between checks for new content (15000 ms minimum is
+    enforced). If no `data-poll-interval` is provided it will default to the 15000 ms
+    minimum.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-max-items-per-page (Required)</strong></td>
+    <td>Maximum number of child entries. Additional elements are assumed to be on the
+    next "page". If the number of children items is greater than the number
+    provided on the attribute, the number of children items will be the new
+    `data-max-items-per-page`.
+    Once the number of live items on an `amp-live-list` is over the
+    `data-max-items-per-page` limit items below the viewport will be fully
+    removed from the live DOM.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>disabled (Optional)</strong></td>
+    <td>No polling will occur. Recommended when not on page 1 (looking at archival data)
+    and when the article is no longer fresh and should no longer be updated.</td>
+  </tr>
+</table>
 
-To uniquely identify an amp-live-list (since multiple are allowed on a single
-page).
-
-##### data-poll-interval (Optional)
-
-Time (in milliseconds) interval between checks for new content (15000 ms minimum is
-enforced). If no `data-poll-interval` is provided it will default to the 15000 ms
-minimum.
-
-##### data-max-items-per-page (Required)
-
-Maximum number of child entries. Additional elements are assumed to be on the
-next "page". If the number of children items is greater than the number
-provided on the attribute, the number of children items will be the new
-`data-max-items-per-page`.
-Once the number of live items on an `amp-live-list` is over the
-`data-max-items-per-page` limit items below the viewport will be fully
-removed from the live DOM.
-
-##### disabled (Optional)
-
-No polling will occur. Recommended when not on page 1 (looking at archival data)
-and when the article is no longer fresh and should no longer be updated.
 
 ### Attributes on `items` reference point children
 
-##### id (Required)
+<table>
+  <tr>
+    <td width="40%"><strong>id (Required)</strong></td>
+    <td>The ID of the `items` child must never change.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-sort-time (Required)</strong></td>
+    <td>Timestamp used for sorting entries. Higher timestamps will be
+    inserted before older entries. We recommend using Unix time (the number of
+    seconds that have elapsed since Thursday, 1 January 1970).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-update-time (Optional)</strong></td>
+    <td>Timestamp when the entry was last updated.  Use this attribute to trigger an
+    update on an existing item: the client will replace all existing content in
+    this item with the new, updated content, without triggering the appearance of
+    the update reference point. We recommend using Unix time (the number of seconds
+    that have elapsed since Thursday, 1 January 1970).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-tombstone (Optional)</strong></td>
+    <td>If present, the entry is assumed to be deleted.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>sort (Optional)</strong></td>
+    <td>If present and has a value of "ascending" (any other value is currently
+    invalid), newer items will be inserted at the bottom of the live-list instead
+    of the top.</td>
+  </tr>
+</table>
 
-The ID of the `items` child must never change.
-
-##### data-sort-time (Required)
-
-Timestamp used for sorting entries. Higher timestamps will be
-inserted before older entries. We recommend using Unix time (the number of
-seconds that have elapsed since Thursday, 1 January 1970).
-
-##### data-update-time (Optional)
-
-Timestamp when the entry was last updated.  Use this attribute to trigger an
-update on an existing item: the client will replace all existing content in
-this item with the new, updated content, without triggering the appearance of
-the update reference point. We recommend using Unix time (the number of seconds
-that have elapsed since Thursday, 1 January 1970).
-
-##### data-tombstone (Optional)
-
-If present, the entry is assumed to be deleted.
 
 ## Styling
 
@@ -280,7 +300,7 @@ added, and will be removed once the next set of new items are inserted on a subs
 highlighting effect like the css below.
 
 ```css
-.live-list-item-new {
+.amp-live-list-item-new {
   animation: amp-live-list-item-highlight 2s;
 }
 

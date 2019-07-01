@@ -14,44 +14,63 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
-import {isObject} from '../../../src/types';
-import {hasOwn, map} from '../../../src/utils/object';
-import {filterSplice} from '../../../src/utils/array';
-import {appendEncodedParamStringToUrl} from '../../../src/url';
+import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {
-  variableServiceFor,
   ExpansionOptions,
+  getConsentStateStr,
+  variableServiceForDoc,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
+import {cookieReader} from './cookie-reader';
+import {devAssert, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getResourceTiming} from './resource-timing';
+import {isArray, isFiniteNumber, isObject} from '../../../src/types';
 
+const BATCH_INTERVAL_MIN = 200;
 
 export class RequestHandler {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
-   * @param {!function(string, !JsonObject)} handler
+   * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
    */
-  constructor(ampdoc, request, preconnect, handler, isSandbox) {
+  constructor(element, request, preconnect, transport, isSandbox) {
+    /** @const {!Element} */
+    this.element_ = element;
+
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = element.getAmpDoc();
 
     /** @const {!Window} */
-    this.win = ampdoc.win;
+    this.win = this.ampdoc_.win;
+
+    /** @const {string} !if specified, all requests are prepended with this */
+    this.requestOrigin_ = request['origin'];
 
     /** @const {string} */
-    this.baseUrl = dev().assert(request['baseUrl']);
+    this.baseUrl = devAssert(request['baseUrl']);
 
-    /** @private @const {number} */
-    // TODO: to support intervalDelay that start timeout during construction.
-    this.maxDelay_ = Number(request['maxDelay']) || 0; //unit is sec
+    /** @private {Array<number>|number|undefined} */
+    this.batchInterval_ = request['batchInterval']; //unit is sec
+
+    /** @private {?number} */
+    this.reportWindow_ = Number(request['reportWindow']) || null; // unit is sec
+
+    /** @private {?number} */
+    this.batchIntervalPointer_ = null;
 
     /** @private {!./variables.VariableService} */
-    this.variableService_ = variableServiceFor(this.win);
+    this.variableService_ = variableServiceForDoc(element);
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacementService_ = Services.urlReplacementsForDoc(ampdoc);
+    this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
+
+    /** @private {!../../../src/service/url-impl.Url} */
+    this.urlService_ = Services.urlForDoc(element);
 
     /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
@@ -59,26 +78,41 @@ export class RequestHandler {
     /** @private {?Promise<string>} */
     this.baseUrlTemplatePromise_ = null;
 
-    /** @private {!Array<!Promise<string>>}*/
-    this.extraUrlParamsPromise_ = [];
+    /** @private {?Promise<string>} */
+    this.requestOriginPromise_ = null;
+
+    /** @private {!Array<!Promise<!BatchSegmentDef>>} */
+    this.batchSegmentPromises_ = [];
 
     /** @private {!../../../src/preconnect.Preconnect} */
     this.preconnect_ = preconnect;
 
-    /** @private {!function(string, !JsonObject)} */
-    this.handler_ = handler;
+    /** @private {./transport.Transport} */
+    this.transport_ = transport;
 
     /** @const @private {!Object|undefined} */
     this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
 
     /** @private {?number} */
-    this.timeoutId_ = null;
+    this.batchIntervalTimeoutId_ = null;
+
+    /** @private {?number} */
+    this.reportWindowTimeoutId_ = null;
+
+    /** @private {boolean} */
+    this.reportRequest_ = true;
 
     /** @private {?JsonObject} */
     this.lastTrigger_ = null;
 
-    /** @private {?Promise<string>} */
-    this.sendPromise_ = null;
+    /** @private {number} */
+    this.queueSize_ = 0;
+
+    /** @private @const {number} */
+    this.startTime_ = Date.now();
+
+    this.initReportWindow_();
+    this.initBatchInterval_();
   }
 
   /**
@@ -87,100 +121,170 @@ export class RequestHandler {
    * @param {?JsonObject} configParams
    * @param {!JsonObject} trigger
    * @param {!./variables.ExpansionOptions} expansionOption
-   * @return {!Promise<string>}
    */
   send(configParams, trigger, expansionOption) {
+    const isImportant = trigger['important'] === true;
+    if (!this.reportRequest_ && !isImportant) {
+      // Ignore non important trigger out reportWindow
+      return;
+    }
+
+    this.queueSize_++;
     this.lastTrigger_ = trigger;
-    const triggerParams = trigger['extraUrlParams'];
+    const bindings = this.variableService_.getMacros();
+    bindings['RESOURCE_TIMING'] = getResourceTiming(
+      this.ampdoc_,
+      trigger['resourceTimingSpec'],
+      this.startTime_
+    );
+    // TODO: (@zhouyx) Move to variable service once that becomes
+    // a doc level services
+    bindings['CONSENT_STATE'] = getConsentStateStr(this.element_);
+    bindings['COOKIE'] = name => cookieReader(this.win, this.element_, name);
+
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
-      this.baseUrlTemplatePromise_ =
-          this.variableService_.expandTemplate(this.baseUrl, expansionOption);
+
+      this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
+        this.baseUrl,
+        expansionOption
+      );
+
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
-        return this.urlReplacementService_.expandAsync(
-            baseUrl, undefined, this.whiteList_);
+        return this.urlReplacementService_.expandUrlAsync(
+          baseUrl,
+          bindings,
+          this.whiteList_
+        );
       });
-    };
+    }
 
-    this.extraUrlParamsPromise_.push(
-        this.expandExtraUrlParams_(configParams, triggerParams, expansionOption)
-            .then(expandExtraUrlParams => {
-              return this.urlReplacementService_.expandAsync(
-                  expandExtraUrlParams, undefined, this.whiteList_);
-            })
-            .then(finalExtraUrlParams => {
-              return finalExtraUrlParams;
-            }));
+    // expand requestOrigin if it is declared
+    if (!this.requestOriginPromise_ && this.requestOrigin_) {
+      // do not encode vars in request origin
+      const requestOriginExpansionOpt = new ExpansionOptions(
+        expansionOption.vars,
+        expansionOption.iterations,
+        true // opt_noEncode
+      );
 
-    return this.trigger_();
+      this.requestOriginPromise_ = this.variableService_
+        // expand variables in request origin
+        .expandTemplate(this.requestOrigin_, requestOriginExpansionOpt)
+        // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
+        .then(expandedRequestOrigin => {
+          return this.urlReplacementService_.expandUrlAsync(
+            expandedRequestOrigin,
+            bindings,
+            this.whiteList_,
+            true // opt_noEncode
+          );
+        });
+    }
+
+    const params = Object.assign({}, configParams, trigger['extraUrlParams']);
+    const timestamp = this.win.Date.now();
+    const batchSegmentPromise = expandExtraUrlParams(
+      this.variableService_,
+      this.urlReplacementService_,
+      params,
+      expansionOption,
+      bindings,
+      this.whiteList_
+    ).then(params => {
+      return dict({
+        'trigger': trigger['on'],
+        'timestamp': timestamp,
+        'extraUrlParams': params,
+      });
+    });
+    this.batchSegmentPromises_.push(batchSegmentPromise);
+    this.trigger_(isImportant || !this.batchInterval_);
   }
 
   /**
-   * Dispose function that clear reqeust handler state.
+   * Dispose function that clear request handler state.
    */
   dispose() {
-    if (this.timeoutId_) {
-      this.win.clearTimeout(this.timeoutId_);
-    }
     this.reset_();
+
+    // Clear batchInterval timeout
+    if (this.batchIntervalTimeoutId_) {
+      this.win.clearTimeout(this.batchIntervalTimeoutId_);
+      this.batchIntervalTimeoutId_ = null;
+    }
+
+    if (this.reportWindowTimeoutId_) {
+      this.win.clearTimeout(this.reportWindowTimeoutId_);
+      this.reportWindowTimeoutId_ = null;
+    }
   }
 
   /**
    * Function that schedule the actual request send.
+   * @param {boolean} isImmediate
    * @private
    */
-  trigger_() {
-    if (this.maxDelay_ == 0) {
-      return this.fire_();
-    }
-    // If is batched
-    if (!this.timeoutId_) {
-      // schedule fire_ after certain time
-      return this.sendPromise_ = new Promise(resolve => {
-        this.timeoutId_ = this.win.setTimeout(() => {
-          this.fire_().then(request => {
-            resolve(request);
-          });
-        }, this.maxDelay_ * 1000);
-      });
+  trigger_(isImmediate) {
+    if (this.queueSize_ == 0) {
+      // Do nothing if no request in queue
+      return;
     }
 
-    return this.sendPromise_;
+    if (isImmediate) {
+      // If not batched, or batchInterval scheduler schedule trigger immediately
+      this.fire_();
+    }
   }
 
   /**
-   * Send out request once ready
+   * Send out request. Should only be called by `trigger_` function
    * @private
    */
   fire_() {
-    const extraUrlParamsPromise = this.extraUrlParamsPromise_;
-    const baseUrlTemplatePromise = this.baseUrlTemplatePromise_;
-    const baseUrlPromise = this.baseUrlPromise_;
-    const lastTrigger = /** @type {!JsonObject} */ (this.lastTrigger_);
+    const {
+      requestOriginPromise_: requestOriginPromise,
+      baseUrlTemplatePromise_: baseUrlTemplatePromise,
+      baseUrlPromise_: baseUrlPromise,
+      batchSegmentPromises_: segmentPromises,
+    } = this;
+    const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
-    return Promise.all(extraUrlParamsPromise).then(paramStrs => {
-      filterSplice(paramStrs, item => {return !!item;});
-      const extraUrlParamsStr = paramStrs.join('&');
-      let preUrl = this.baseUrl;
-      if (preUrl.indexOf('${extraUrlParams}') >= 0) {
-        preUrl = preUrl.replace('${extraUrlParams}', extraUrlParamsStr);
-      } else {
-        preUrl = appendEncodedParamStringToUrl(preUrl, extraUrlParamsStr);
+
+    // preconnect to requestOrigin if available, otherwise baseUrlTemplate
+    const preconnectPromise = requestOriginPromise
+      ? requestOriginPromise
+      : baseUrlTemplatePromise;
+
+    preconnectPromise.then(preUrl => {
+      this.preconnect_.url(preUrl, true);
+    });
+
+    Promise.all([
+      baseUrlPromise,
+      Promise.all(segmentPromises),
+      requestOriginPromise,
+    ]).then(results => {
+      const requestUrl = this.composeRequestUrl_(results[0], results[2]);
+
+      const batchSegments = results[1];
+      if (batchSegments.length === 0) {
+        return;
       }
-      return baseUrlTemplatePromise.then(preUrl => {
-        this.preconnect_.url(preUrl, true);
-        return baseUrlPromise.then(request => {
-          if (request.indexOf('${extraUrlParams}') >= 0) {
-            request = request.replace('${extraUrlParams}', extraUrlParamsStr);
-          } else {
-            request = appendEncodedParamStringToUrl(request, extraUrlParamsStr);
-          }
-          return request;
-        }).then(request => {
-          this.handler_(request, lastTrigger);
-          return request;
-        });
-      });
+      // TODO: iframePing will not work with batch. Add a config validation.
+      if (trigger['iframePing']) {
+        userAssert(
+          trigger['on'] == 'visible',
+          'iframePing is only available on page view requests.'
+        );
+        this.transport_.sendRequestUsingIframe(requestUrl, batchSegments[0]);
+      } else {
+        this.transport_.sendRequest(
+          requestUrl,
+          batchSegments,
+          !!this.batchInterval_
+        );
+      }
     });
   }
 
@@ -189,92 +293,204 @@ export class RequestHandler {
    * @private
    */
   reset_() {
+    this.queueSize_ = 0;
     this.baseUrlPromise_ = null;
     this.baseUrlTemplatePromise_ = null;
-    this.extraUrlParamsPromise_ = [];
-    this.timeoutId_ = null;
+    this.batchSegmentPromises_ = [];
     this.lastTrigger_ = null;
-    this.sendPromise_ = null;
   }
 
   /**
-   * Function that handler extraUrlParams from config and trigger.
-   * @param {?JsonObject} configParams
-   * @param {?JsonObject} triggerParams
-   * @param {!./variables.ExpansionOptions} expansionOption
-   * @return {!Promise<string>}
-   * @private
+   * Handle batchInterval
    */
-  expandExtraUrlParams_(configParams, triggerParams, expansionOption) {
-    const requestPromises = [];
-    const params = map();
-    // Don't encode param values here,
-    // as we'll do it later in the getExtraUrlParamsString_ call.
-    const option = new ExpansionOptions(
-        expansionOption.vars,
-        expansionOption.iterations,
-        true /* noEncode */);
-    // Add any given extraUrlParams as query string param
-    if (configParams || triggerParams) {
-      Object.assign(params, configParams, triggerParams);
-      for (const k in params) {
-        if (typeof params[k] == 'string') {
-          requestPromises.push(
-              this.variableService_.expandTemplate(params[k], option)
-                  .then(value => { params[k] = value; }));
-        }
-      }
+  initBatchInterval_() {
+    if (!this.batchInterval_) {
+      return;
     }
-    return Promise.all(requestPromises).then(() => {
-      return this.getExtraUrlParamsString_(params);
-    });
+
+    this.batchInterval_ = isArray(this.batchInterval_)
+      ? this.batchInterval_
+      : [this.batchInterval_];
+
+    for (let i = 0; i < this.batchInterval_.length; i++) {
+      let interval = this.batchInterval_[i];
+      userAssert(
+        isFiniteNumber(interval),
+        'Invalid batchInterval value: %s',
+        this.batchInterval_
+      );
+      interval = Number(interval) * 1000;
+      userAssert(
+        interval >= BATCH_INTERVAL_MIN,
+        'Invalid batchInterval value: %s, ' +
+          'interval value must be greater than %s ms.',
+        this.batchInterval_,
+        BATCH_INTERVAL_MIN
+      );
+      this.batchInterval_[i] = interval;
+    }
+
+    this.batchIntervalPointer_ = 0;
+
+    this.refreshBatchInterval_();
   }
 
   /**
-   * Handle the params map and form the final extraUrlParams string
-   * @param {!Object} params
+   * Initializes report window.
+   */
+  initReportWindow_() {
+    if (this.reportWindow_) {
+      this.reportWindowTimeoutId_ = this.win.setTimeout(() => {
+        // Flush batch queue;
+        this.trigger_(true);
+        this.reportRequest_ = false;
+        // Clear batchInterval timeout
+        if (this.batchIntervalTimeoutId_) {
+          this.win.clearTimeout(this.batchIntervalTimeoutId_);
+          this.batchIntervalTimeoutId_ = null;
+        }
+      }, this.reportWindow_ * 1000);
+    }
+  }
+
+  /**
+   * Schedule sending request regarding to batchInterval
+   */
+  refreshBatchInterval_() {
+    devAssert(
+      this.batchIntervalPointer_ != null,
+      'Should not start batchInterval without pointer'
+    );
+    const interval =
+      this.batchIntervalPointer_ < this.batchInterval_.length
+        ? this.batchInterval_[this.batchIntervalPointer_++]
+        : this.batchInterval_[this.batchInterval_.length - 1];
+
+    this.batchIntervalTimeoutId_ = this.win.setTimeout(() => {
+      this.trigger_(true);
+      this.refreshBatchInterval_();
+    }, interval);
+  }
+
+  /**
+   * Composes a request URL given a base and requestOrigin
+   * @private
+   * @param {string} baseUrl
+   * @param {string=} opt_requestOrigin
    * @return {string}
    */
-  getExtraUrlParamsString_(params) {
-    const s = [];
-    for (const k in params) {
-      const v = params[k];
-      if (v == null) {
-        continue;
-      } else {
-        const sv = this.variableService_.encodeVars(v, k);
-        s.push(`${encodeURIComponent(k)}=${sv}`);
-      }
+  composeRequestUrl_(baseUrl, opt_requestOrigin) {
+    if (opt_requestOrigin) {
+      // We expect requestOrigin to always contain the URL origin. In the case
+      // where requestOrigin has a relative URL, the current page's origin will
+      // be used. We will simply respect the requestOrigin and baseUrl, we don't
+      // check if they form a valid URL and request will fail silently
+      const requestOriginInfo = this.urlService_.parse(opt_requestOrigin);
+      return requestOriginInfo.origin + baseUrl;
     }
-    return s.join('&');
+
+    return baseUrl;
   }
 }
 
 /**
- * Expand config's request to object
- * @param {!JsonObject} config
+ * Expand the postMessage string
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} msg
+ * @param {?JsonObject} configParams
+ * @param {!JsonObject} trigger
+ * @param {!./variables.ExpansionOptions} expansionOption
+ * @param {!Element} element
+ * @return {Promise<string>}
  */
-export function expandConfigRequest(config) {
-  if (!config['requests']) {
-    return config;
+export function expandPostMessage(
+  ampdoc,
+  msg,
+  configParams,
+  trigger,
+  expansionOption,
+  element
+) {
+  const variableService = variableServiceForDoc(ampdoc);
+  const urlReplacementService = Services.urlReplacementsForDoc(element);
+
+  const bindings = variableService.getMacros();
+  expansionOption.freezeVar('extraUrlParams');
+
+  const basePromise = variableService
+    .expandTemplate(msg, expansionOption)
+    .then(base => {
+      return urlReplacementService.expandStringAsync(base, bindings);
+    });
+  if (msg.indexOf('${extraUrlParams}') < 0) {
+    // No need to append extraUrlParams
+    return basePromise;
   }
-  for (const k in config['requests']) {
-    if (hasOwn(config['requests'], k)) {
-      config['requests'][k] = expandRequestStr(config['requests'][k]);
-    }
-  }
-  return config;
+
+  return basePromise.then(expandedMsg => {
+    const params = Object.assign({}, configParams, trigger['extraUrlParams']);
+    //return base url with the appended extra url params;
+    return expandExtraUrlParams(
+      variableService,
+      urlReplacementService,
+      params,
+      expansionOption,
+      bindings
+    ).then(extraUrlParams => {
+      return defaultSerializer(expandedMsg, [
+        dict({'extraUrlParams': extraUrlParams}),
+      ]);
+    });
+  });
 }
 
 /**
- * Expand single request to an object
- * @param {!JsonObject} request
+ * Function that handler extraUrlParams from config and trigger.
+ * @param {!./variables.VariableService} variableService
+ * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
+ * @param {!Object} params
+ * @param {!./variables.ExpansionOptions} expansionOption
+ * @param {!Object} bindings
+ * @param {!Object=} opt_whitelist
+ * @return {!Promise<!Object>}
+ * @private
  */
-function expandRequestStr(request) {
-  if (isObject(request)) {
-    return request;
-  }
-  return {
-    'baseUrl': request,
+function expandExtraUrlParams(
+  variableService,
+  urlReplacements,
+  params,
+  expansionOption,
+  bindings,
+  opt_whitelist
+) {
+  const requestPromises = [];
+  // Don't encode param values here,
+  // as we'll do it later in the getExtraUrlParamsString call.
+  const option = new ExpansionOptions(
+    expansionOption.vars,
+    expansionOption.iterations,
+    true /* noEncode */
+  );
+
+  const expandObject = (params, key) => {
+    const value = params[key];
+
+    if (typeof value === 'string') {
+      const request = variableService
+        .expandTemplate(value, option)
+        .then(value =>
+          urlReplacements.expandStringAsync(value, bindings, opt_whitelist)
+        )
+        .then(value => (params[key] = value));
+      requestPromises.push(request);
+    } else if (isArray(value)) {
+      value.forEach((_, index) => expandObject(value, index));
+    } else if (isObject(value) && value !== null) {
+      Object.keys(value).forEach(key => expandObject(value, key));
+    }
   };
+
+  Object.keys(params).forEach(key => expandObject(params, key));
+
+  return Promise.all(requestPromises).then(() => params);
 }

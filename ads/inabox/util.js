@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * Executes a "restricted" read/write vsync cycle.
  * This function exists mainly since the vsync service is not available for the
@@ -29,8 +28,8 @@
  * @param {{measure: (Function|undefined), mutate: (Function|undefined)}} task
  * @param {!Object=} opt_state
  * @visibleForTesting
+ * TODO(alanorozco): Figure out a longer-term solution
  */
-// TODO(alanorozco): Figure out a longer-term solution
 export function restrictedVsync(win, task, opt_state) {
   win.requestAnimationFrame(() => {
     if (task.measure) {
@@ -41,7 +40,6 @@ export function restrictedVsync(win, task, opt_state) {
     }
   });
 }
-
 
 /**
  * Executes a function after a certain time.

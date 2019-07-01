@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {parseUrl, resolveRelativeUrl} from '../src/url';
-
+import {parseUrlDeprecated, resolveRelativeUrl} from '../src/url';
 
 /**
  * @typedef {{
@@ -30,15 +29,12 @@ import {parseUrl, resolveRelativeUrl} from '../src/url';
  */
 export let FakeWindowSpec;
 
-
 /** @extends {!Window} */
 export class FakeWindow {
-
   /**
    * @param {!FakeWindowSpec=} opt_spec
    */
   constructor(opt_spec) {
-
     const spec = opt_spec || {};
 
     /**
@@ -64,6 +60,8 @@ export class FakeWindow {
     this.DOMTokenList = window.DOMTokenList;
     /** @const */
     this.Math = window.Math;
+    /** @const */
+    this.Promise = window.Promise;
 
     /** @const */
     this.crypto = window.crypto || window.msCrypto;
@@ -97,7 +95,7 @@ export class FakeWindow {
     let fontStatus = 'loaded';
     Object.defineProperty(this.document.fonts, 'status', {
       get: () => fontStatus,
-      set: val => fontStatus = val,
+      set: val => (fontStatus = val),
     });
 
     EventListeners.intercept(this.document);
@@ -117,18 +115,31 @@ export class FakeWindow {
 
     /** @private {!Array<string>} */
     this.cookie_ = [];
+    this.document.publicSuffixList = [];
+    this.document.lastSetCookieRaw; // used to verify cookie settings like expiration time etc
     Object.defineProperty(this.document, 'cookie', {
       get: () => {
-        let cookie = [];
+        const cookie = [];
         for (let i = 0; i < this.cookie_.length; i += 2) {
           cookie.push(`${this.cookie_[i]}=${this.cookie_[i + 1]}`);
         }
         return cookie.join(';');
       },
       set: value => {
-        const semi = value.indexOf(';');
-        const cookie = value.match(/^([^=]*)=([^;]*)/);
+        this.document.lastSetCookieRaw = value;
+        let cookie = value.match(/^([^=]*)=([^;]*)/);
+        if (!cookie) {
+          // couldn't find the match. Treat cookie as single value.
+          cookie = [value, null];
+        }
         const expiresMatch = value.match(/expires=([^;]*)(;|$)/);
+        const domainMatch = value.match(/domain=([^;]*)/);
+        const domain = domainMatch ? domainMatch[1] : '';
+        if (this.document.publicSuffixList.indexOf(domain) >= 0) {
+          // Can't set cookie to etld
+          this.document.lastSetCookieRaw = '';
+          return;
+        }
         const expires = expiresMatch ? Date.parse(expiresMatch[1]) : Infinity;
         let i = 0;
         for (; i < this.cookie_.length; i += 2) {
@@ -141,7 +152,7 @@ export class FakeWindow {
         } else {
           this.cookie_.splice(i, 2, cookie[1], cookie[2]);
         }
-      }
+      },
     });
 
     // Create element to enhance test elements.
@@ -163,8 +174,10 @@ export class FakeWindow {
     // Location.
     /** @private @const {!FakeLocation} */
     this.location_ = new FakeLocation(
-        spec.location || window.location.href,
-        this, this.history);
+      spec.location || window.location.href,
+      this,
+      this.history
+    );
     Object.defineProperty(this, 'location', {
       get: () => this.location_,
       set: href => this.location_.assign(href),
@@ -173,59 +186,43 @@ export class FakeWindow {
     // Navigator.
     /** @const {!Navigator} */
     this.navigator = {
-      userAgent: spec.navigator && spec.navigator.userAgent ||
-          window.navigator.userAgent,
+      userAgent:
+        (spec.navigator && spec.navigator.userAgent) ||
+        window.navigator.userAgent,
     };
 
     // Storage.
     /** @const {!FakeStorage|undefined} */
-    this.localStorage = spec.localStorageOff ?
-        undefined : new FakeStorage(this);
+    this.localStorage = spec.localStorageOff
+      ? undefined
+      : new FakeStorage(this);
 
     // Timers and animation frames.
     /** @const */
     this.Date = window.Date;
 
-    /**
-     * @param {function()} handler
-     * @param {number=} timeout
-     * @param {...*} var_args
-     * @return {number}
-     * @const
-     */
-    this.setTimeout = function () {
+    /** polyfill setTimeout. */
+    this.setTimeout = function() {
       return window.setTimeout.apply(window, arguments);
     };
 
-    /**
-     * @param {number} id
-     * @const
-     */
-    this.clearTimeout = function () {
+    /** polyfill clearTimeout. */
+    this.clearTimeout = function() {
       return window.clearTimeout.apply(window, arguments);
     };
 
-    /**
-     * @param {function()} handler
-     * @param {number=} timeout
-     * @param {...*} var_args
-     * @return {number}
-     * @const
-     */
-    this.setInterval = function () {
+    /** polyfill setInterval. */
+    this.setInterval = function() {
       return window.setInterval.apply(window, arguments);
     };
 
-    /**
-     * @param {number} id
-     * @const
-     */
-    this.clearInterval = function () {
+    /** polyfill clearInterval. */
+    this.clearInterval = function() {
       return window.clearInterval.apply(window, arguments);
     };
 
-    let raf = window.requestAnimationFrame
-        || window.webkitRequestAnimationFrame;
+    let raf =
+      window.requestAnimationFrame || window.webkitRequestAnimationFrame;
     if (raf) {
       raf = raf.bind(window);
     } else {
@@ -240,21 +237,12 @@ export class FakeWindow {
     this.requestAnimationFrame = raf;
   }
 
-  /**
-   * @param {string} type
-   * @param {function(!Event)} handler
-   * @param {(boolean|!Object)=} captureOrOpts
-   */
+  /** polyfill addEventListener. */
   addEventListener() {}
 
-  /**
-   * @param {string} type
-   * @param {function(!Event)} handler
-   * @param {(boolean|!Object)=} captureOrOpts
-   */
+  /** polyfill removeEventListener. */
   removeEventListener() {}
 }
-
 
 /**
  * @typedef {{
@@ -266,20 +254,20 @@ export class FakeWindow {
  */
 export let EventListener;
 
-
 /**
  * Helper for testing event listeners.
  */
 class EventListeners {
-
   /**
    * @param {!EventTarget} target
    * @return {!EventListeners}
    */
   static intercept(target) {
     target.eventListeners = new EventListeners();
-    const originalAdd = target.addEventListener;
-    const originalRemove = target.removeEventListener;
+    const {
+      addEventListener: originalAdd,
+      removeEventListener: originalRemove,
+    } = target;
     target.addEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
       if (originalAdd) {
@@ -294,6 +282,7 @@ class EventListeners {
     };
   }
 
+  /** Create empty instance. */
   constructor() {
     /** @const {!Array<!EventListener>} */
     this.listeners = [];
@@ -309,9 +298,12 @@ class EventListeners {
     return {
       type,
       handler,
-      capture: typeof captureOrOpts == 'boolean' ? captureOrOpts :
-          typeof captureOrOpts == 'object' ? captureOrOpts.capture || false :
-          false,
+      capture:
+        typeof captureOrOpts == 'boolean'
+          ? captureOrOpts
+          : typeof captureOrOpts == 'object'
+          ? captureOrOpts.capture || false
+          : false,
       options: typeof captureOrOpts == 'object' ? captureOrOpts : null,
     };
   }
@@ -335,9 +327,11 @@ class EventListeners {
     const toRemove = this.listener_(type, handler, captureOrOpts);
     for (let i = this.listeners.length - 1; i >= 0; i--) {
       const listener = this.listeners[i];
-      if (listener.type == toRemove.type &&
-          listener.handler == toRemove.handler &&
-          listener.capture == toRemove.capture) {
+      if (
+        listener.type == toRemove.type &&
+        listener.handler == toRemove.handler &&
+        listener.capture == toRemove.capture
+      ) {
         this.listeners.splice(i, 1);
       }
     }
@@ -369,7 +363,6 @@ class EventListeners {
   }
 }
 
-
 /**
  * @param {!EventTarget} target
  */
@@ -377,19 +370,16 @@ export function interceptEventListeners(target) {
   EventListeners.intercept(target);
 }
 
-
 /**
  * @extends {!Location}
  */
 export class FakeLocation {
-
   /**
    * @param {string} href
    * @param {!FakeWindow} win
    * @param {?History} history
    */
   constructor(href, win, history) {
-
     /** @const {!Window} */
     this.win = win;
 
@@ -400,7 +390,7 @@ export class FakeLocation {
     this.changes = [];
 
     /** @private {!Location} */
-    this.url_ = parseUrl(href, true);
+    this.url_ = parseUrlDeprecated(href, true);
 
     // href
     Object.defineProperty(this, 'href', {
@@ -408,8 +398,16 @@ export class FakeLocation {
       set: href => this.assign(href),
     });
 
-    const properties = ['protocol', 'host', 'hostname', 'port', 'pathname',
-        'search', 'hash', 'origin'];
+    const properties = [
+      'protocol',
+      'host',
+      'hostname',
+      'port',
+      'pathname',
+      'search',
+      'hash',
+      'origin',
+    ];
     properties.forEach(property => {
       Object.defineProperty(this, property, {
         get: () => this.url_[property],
@@ -417,8 +415,12 @@ export class FakeLocation {
     });
 
     if (this.history_) {
-      this.history_.replaceState(null, '', this.url_.href,
-          /* fireEvent */ false);
+      this.history_.replaceState(
+        null,
+        '',
+        this.url_.href,
+        /* fireEvent */ false
+      );
     }
   }
 
@@ -427,7 +429,7 @@ export class FakeLocation {
    */
   set_(href) {
     const oldHash = this.url_.hash;
-    this.url_ = parseUrl(resolveRelativeUrl(href, this.url_));
+    this.url_ = parseUrlDeprecated(resolveRelativeUrl(href, this.url_));
     if (this.url_.hash != oldHash) {
       this.win.eventListeners.fire({type: 'hashchange'});
     }
@@ -437,7 +439,7 @@ export class FakeLocation {
    * @param {!Object} args
    */
   change_(args) {
-    const change = parseUrl(this.url_.href);
+    const change = parseUrlDeprecated(this.url_.href);
     Object.assign({}, change, args);
     this.changes.push(change);
   }
@@ -448,8 +450,7 @@ export class FakeLocation {
   assign(href) {
     this.set_(href);
     if (this.history_) {
-      this.history_.pushState(null, '', this.url_.href,
-          /* fireEvent */ true);
+      this.history_.pushState(null, '', this.url_.href, /* fireEvent */ true);
     }
     this.change_({assign: true});
   }
@@ -460,8 +461,12 @@ export class FakeLocation {
   replace(href) {
     this.set_(href);
     if (this.history_) {
-      this.history_.replaceState(null, '', this.url_.href,
-          /* fireEvent */ true);
+      this.history_.replaceState(
+        null,
+        '',
+        this.url_.href,
+        /* fireEvent */ true
+      );
     }
     this.change_({replace: true});
   }
@@ -479,16 +484,14 @@ export class FakeLocation {
    * @param {string} href
    */
   resetHref(href) {
-    this.url_ = parseUrl(resolveRelativeUrl(href, this.url_));
+    this.url_ = parseUrlDeprecated(resolveRelativeUrl(href, this.url_));
   }
 }
-
 
 /**
  * @extends {!History}
  */
 export class FakeHistory {
-
   /** @param {!FakeWindow} win */
   constructor(win) {
     /** @const */
@@ -528,10 +531,10 @@ export class FakeHistory {
       return;
     }
     if (newIndex < 0) {
-      throw new Error('can\'t go back');
+      throw new Error("can't go back");
     }
     if (newIndex >= this.stack.length) {
-      throw new Error('can\'t go forward');
+      throw new Error("can't go forward");
     }
     this.index = newIndex;
     // Make sure to restore the location href before firing popstate to match
@@ -550,7 +553,7 @@ export class FakeHistory {
     this.index++;
     if (this.index < this.stack.length) {
       // Remove tail.
-      this.stack.splice(this.index, thius.stack.length - this.index);
+      this.stack.splice(this.index, this.stack.length - this.index);
     }
     this.stack[this.index] = {
       state: state ? freeze(state) : null,
@@ -577,12 +580,10 @@ export class FakeHistory {
   }
 }
 
-
 /**
  * @extends {Storage}
  */
 export class FakeStorage {
-
   /** @param {!Window} win */
   constructor(win) {
     /** @const */
@@ -641,12 +642,10 @@ export class FakeStorage {
   }
 }
 
-
 /**
  * @extends {CustomElementRegistry}
  */
 export class FakeCustomElements {
-
   /** @param {!Window} win */
   constructor(win) {
     /** @const */
@@ -686,6 +685,53 @@ export class FakeCustomElements {
   }
 }
 
+export class FakeMutationObserver {
+  /**
+   * @param {function(!Array<!Object>)} callback
+   */
+  constructor(callback) {
+    this.callback_ = callback;
+
+    /** @type {!Array{!Object}} */
+    this.mutations_ = [];
+
+    /** @type {Promise} */
+    this.scheduled_ = null;
+  }
+
+  observe() {
+    // I'm not implementing this. Wayyyy to complicated.
+  }
+
+  disconnect() {
+    // If observe isn't implemnted, this doesn't need to be.
+  }
+
+  takeRecords() {
+    return this.takeRecords_();
+  }
+
+  takeRecords_() {
+    return this.mutations_.splice(0, Infinity);
+  }
+
+  /**
+   * This is a non-standard method that allows you to queue a mutation.
+   *
+   * @param {!Object} mutation
+   * @return {!Promise}
+   */
+  __mutate(mutation) {
+    this.mutations_.push(mutation);
+    if (this.scheduled_) {
+      return this.scheduled_;
+    }
+    return (this.scheduled_ = Promise.resolve().then(() => {
+      this.scheduled_ = null;
+      this.callback_(this.takeRecords_());
+    }));
+  }
+}
 
 /**
  * @param {!Object} obj

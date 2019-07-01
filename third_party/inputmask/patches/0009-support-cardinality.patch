@@ -1,0 +1,29 @@
+diff --git a/third_party/inputmask/inputmask.js b/third_party/inputmask/inputmask.js
+index c7181aabf..b4c16f310 100644
+--- a/third_party/inputmask/inputmask.js
++++ b/third_party/inputmask/inputmask.js
+@@ -306,6 +306,24 @@ export function factory($, window, document, undefined) {
+                 } else {
+                     var maskdef = (opts.definitions ? opts.definitions[element] : undefined) || Inputmask.prototype.definitions[element];
+                     if (maskdef && !escaped) {
++                        // This for-loop implements "cardinality"
++                        // Removed in 4.x for unknown reasons.
++                        // Backported from https://github.com/RobinHerbots/Inputmask/blob/8d0c60f8/js/inputmask.js#L371
++                        for (var prevalidators = maskdef.prevalidator, prevalidatorsL = prevalidators ? prevalidators.length : 0, i = 1; i < maskdef.cardinality; i++) {
++                            var prevalidator = prevalidatorsL >= i ? prevalidators[i - 1] : [], validator = prevalidator.validator, cardinality = prevalidator.cardinality;
++                            mtoken.matches.splice(position++, 0, {
++                                fn: validator ? "string" == typeof validator ? new RegExp(validator, opts.casing ? "i" : "") : new function() {
++                                    this.test = validator;
++                                }() : new RegExp("."),
++                                cardinality: cardinality || 1,
++                                optionality: mtoken.isOptional,
++                                newBlockMarker: prevMatch === undefined || prevMatch.def !== (maskdef.definitionSymbol || element),
++                                casing: maskdef.casing,
++                                def: maskdef.definitionSymbol || element,
++                                placeholder: maskdef.placeholder,
++                                nativeDef: element
++                            }), prevMatch = mtoken.matches[position - 1];
++                        }
+                         mtoken.matches.splice(position++, 0, {
+                             fn: maskdef.validator ? typeof maskdef.validator == "string" ? new RegExp(maskdef.validator, opts.casing ? "i" : "") : new function() {
+                                 this.test = maskdef.validator;

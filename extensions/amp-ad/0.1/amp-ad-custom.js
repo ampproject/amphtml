@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {AmpAdUIHandler} from './amp-ad-ui';
+import {CommonSignals} from '../../../src/common-signals';
+import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
-import {ancestorElementsByTag} from '../../../src/dom';
-import {removeChildren} from '../../../src/dom';
-import {AmpAdUIHandler} from './amp-ad-ui';
+import {
+  childElementByTag,
+  closestAncestorElementBySelector,
+  removeChildren,
+} from '../../../src/dom';
+import {hasOwn} from '../../../src/utils/object';
+import {userAssert} from '../../../src/log';
 
-/** @const {!string} Tag name for custom ad implementation. */
+/** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
 
 /** @var {Object} A map of promises for each value of data-url. The promise
@@ -36,7 +41,6 @@ const ampCustomadXhrPromises = {};
 let ampCustomadFullUrls = null;
 
 export class AmpAdCustom extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -47,32 +51,34 @@ export class AmpAdCustom extends AMP.BaseElement {
      *  responses will be keyed by slot */
     this.slot_ = null;
 
-    /** {?AmpAdUIHandler} */
+    /** @type {?AmpAdUIHandler} */
     this.uiHandler = null;
   }
 
   /** @override */
-  getPriority() {
-    // Loads ads after other content.
-    return 2;
+  getLayoutPriority() {
+    // Since this is AMPHTML we are trusting that it will load responsibly
+    return LayoutPriority.CONTENT;
   }
 
-  /** @override **/
+  /** @override */
   isLayoutSupported(layout) {
     /** @TODO Add proper support for more layouts, and figure out which ones
      *  we're permitting */
     return isLayoutSizeDefined(layout);
   }
 
+  /**
+   * Builds AmpAdUIHandler callback
+   */
   buildCallback() {
     this.url_ = this.element.getAttribute('data-url');
     this.slot_ = this.element.getAttribute('data-slot');
-    // Ensure that there are templates in this ad
-    const templates = this.element.querySelectorAll('template');
-    user().assert(templates.length > 0, 'Missing template in custom ad');
-    // And ensure that the slot value is legal
-    user().assert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
-        'custom ad slot should be alphanumeric: ' + this.slot_);
+    // Ensure that the slot value is legal
+    userAssert(
+      this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
+      'custom ad slot should be alphanumeric: ' + this.slot_
+    );
 
     this.uiHandler = new AmpAdUIHandler(this);
   }
@@ -81,35 +87,104 @@ export class AmpAdCustom extends AMP.BaseElement {
   layoutCallback() {
     /** @const {string} fullUrl */
     const fullUrl = this.getFullUrl_();
-    // If this promise has no URL yet, create one for it.
-    if (!(fullUrl in ampCustomadXhrPromises)) {
-      // Here is a promise that will return the data for this URL
-      ampCustomadXhrPromises[fullUrl] =
-          Services.xhrFor(this.win).fetchJson(fullUrl).then(res => res.json());
+    // if we have cached the response, find it, otherwise fetch
+    const responsePromise =
+      ampCustomadXhrPromises[fullUrl] ||
+      Services.xhrFor(this.win)
+        .fetchJson(fullUrl)
+        .then(res => res.json());
+    if (this.slot_ !== null) {
+      // Cache this response if using `data-slot` feature so only one request
+      // is made per url
+      ampCustomadXhrPromises[fullUrl] = responsePromise;
     }
-    return ampCustomadXhrPromises[fullUrl].then(data => {
-      const element = this.element;
+    return responsePromise.then(data => {
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
-        templateData = data.hasOwnProperty(this.slot_) ? data[this.slot_] :
-            null;
+        templateData = hasOwn(data, this.slot_) ? data[this.slot_] : null;
       }
-      // Set UI state
-      if (templateData !== null && typeof templateData == 'object') {
-        this.renderStarted();
+
+      if (!templateData || typeof templateData != 'object') {
+        this.uiHandler.applyNoContentUI();
+        return;
+      }
+
+      templateData = this.handleTemplateData_(templateData);
+
+      this.renderStarted();
+
+      try {
         Services.templatesFor(this.win)
-            .findAndRenderTemplate(element, templateData)
-            .then(renderedElement => {
-              // Get here when the template has been rendered
-              // Clear out the template and replace it by the rendered version
-              removeChildren(element);
-              element.appendChild(renderedElement);
-            });
-      } else {
+          .findAndRenderTemplate(this.element, templateData)
+          .then(renderedElement => {
+            // Get here when the template has been rendered Clear out the
+            // child template and replace it by the rendered version Note that
+            // we can't clear templates that's not ad's child because they
+            // maybe used by other ad component.
+            removeChildren(this.element);
+            this.element.appendChild(renderedElement);
+            this.signals().signal(CommonSignals.INI_LOAD);
+          });
+      } catch (e) {
         this.uiHandler.applyNoContentUI();
       }
     });
+  }
+
+  /**
+   * Handles the template data response.
+   * There are two types of templateData format
+   * Format option 1
+   * {
+   *   'templateId': {},
+   *   'vars': {},
+   *   'data': {
+   *     'a': '1',
+   *     'b': '2'
+   *   }
+   * }
+   * or format option 2
+   * {
+   *  'a': '1',
+   *  'b': '2'
+   * }
+   * if `templateId` or `vars` are not specified.
+   *
+   * @param {!JsonObject} templateData
+   * @return {!JsonObject}
+   */
+  handleTemplateData_(templateData) {
+    if (childElementByTag(this.element, 'template')) {
+      // Need to check for template attribute if it's allowed in amp-ad tag
+      return templateData;
+    }
+
+    // If use remote template specified by response
+    userAssert(templateData['templateId'], 'TemplateId not specified');
+
+    userAssert(
+      templateData['data'] && typeof templateData['data'] == 'object',
+      'Template data not specified'
+    );
+
+    this.element.setAttribute('template', templateData['templateId']);
+
+    if (templateData['vars'] && typeof templateData['vars'] == 'object') {
+      // Support for vars
+      const vars = templateData['vars'];
+      const keys = Object.keys(vars);
+      for (let i = 0; i < keys.length; i++) {
+        const attrName = 'data-vars-' + keys[i];
+        try {
+          this.element.setAttribute(attrName, vars[keys[i]]);
+        } catch (e) {
+          this.user().error(TAG_AD_CUSTOM, 'Fail to set attribute: ', e);
+        }
+      }
+    }
+
+    return templateData['data'];
   }
 
   /** @override  */
@@ -126,7 +201,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   /**
    * @private getFullUrl_ Get a URL which includes a parameter indicating
    * all slots to be fetched from this web server URL
-   * @returns {string} The URL with the "ampslots" parameter appended
+   * @return {string} The URL with the "ampslots" parameter appended
    */
   getFullUrl_() {
     // If this ad doesn't have a slot defined, just return the base URL
@@ -140,7 +215,7 @@ export class AmpAdCustom extends AMP.BaseElement {
 
       // Get the parent body of this amp-ad element. It could be the body of
       // the main document, or it could be an enclosing iframe.
-      const body = ancestorElementsByTag(this.element, 'BODY')[0];
+      const body = closestAncestorElementBySelector(this.element, 'BODY');
       const elements = body.querySelectorAll('amp-ad[type=custom]');
       for (let index = 0; index < elements.length; index++) {
         const elem = elements[index];
@@ -154,8 +229,11 @@ export class AmpAdCustom extends AMP.BaseElement {
         }
       }
       for (const baseUrl in slots) {
-        ampCustomadFullUrls[baseUrl] = addParamToUrl(baseUrl, 'ampslots',
-            slots[baseUrl].join(','));
+        ampCustomadFullUrls[baseUrl] = addParamToUrl(
+          baseUrl,
+          'ampslots',
+          slots[baseUrl].join(',')
+        );
       }
     }
     return ampCustomadFullUrls[this.url_];

@@ -16,22 +16,20 @@
 
 import {loadScript} from '../3p/3p';
 
-/* global asmi: true */
-
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
-
 export function mediaimpact(global, data) {
   global.fif = false;
   /* eslint google-camelcase/google-camelcase: 0 */
   global.sas_loadHandler = function(f) {
     if (f.hasAd) {
-      f.crea1 || (f.crea1 = {
-        width: 300,
-        height: 250,
-      });
+      f.crea1 ||
+        (f.crea1 = {
+          width: 300,
+          height: 250,
+        });
       global.context.renderStart({
         width: f.crea1.width,
         height: f.crea1.height,
@@ -40,25 +38,35 @@ export function mediaimpact(global, data) {
       global.context.noContentAvailable();
     }
   };
-  window.addEventListener('load', function() {
-    asmi.sas.call(data.site + '/(' + data.page + ')',
+  window.addEventListener(
+    'load',
+    function() {
+      // eslint-disable-next-line no-undef
+      asmi.sas.call(
+        data.site + '/(' + data.page + ')',
         data.format,
         data.target + ';googleAMP=1;',
         '',
-        'sas_' + data.slot.replace('sas_',''),
-        1);
-  }, false);
-  /* global asmiSetup: true */
-  /* eslint no-unused-vars: 0 */
+        'sas_' + data.slot.replace('sas_', ''),
+        1
+      );
+    },
+    false
+  );
+  // eslint-disable-next-line no-unused-vars, no-undef
   asmiSetup = {
     view: 'm',
     async: true,
   };
-  loadScript(global, 'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js', () => {
-    if (!document.getElementById('sas_' + data.slot.replace('sas_',''))) {
-      const adContainer = global.document.createElement('div');
-      adContainer.id = 'sas_' + data.slot.replace('sas_','');
-      global.document.body.appendChild(adContainer);
+  loadScript(
+    global,
+    'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js',
+    () => {
+      if (!document.getElementById('sas_' + data.slot.replace('sas_', ''))) {
+        const adContainer = global.document.createElement('div');
+        adContainer.id = 'sas_' + data.slot.replace('sas_', '');
+        global.document.body.appendChild(adContainer);
+      }
     }
-  });
+  );
 }

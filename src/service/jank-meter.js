@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../experiments';
 import {Services} from '../services';
 import {dev, user} from '../log';
+import {htmlFor} from '../static-template';
+import {isExperimentOn} from '../experiments';
 
 /** @const {number} */
 const NTH_FRAME = 200;
 
 export class JankMeter {
-
   /**
    * @param {!Window} win
    */
@@ -53,6 +53,9 @@ export class JankMeter {
     this.initializeLongTaskObserver_();
   }
 
+  /**
+   * Callback for scheduled.
+   */
   onScheduled() {
     if (!this.isEnabled_()) {
       return;
@@ -63,6 +66,9 @@ export class JankMeter {
     }
   }
 
+  /**
+   * Callback for run.
+   */
   onRun() {
     if (!this.isEnabled_() || this.scheduledTime_ == null) {
       return;
@@ -91,9 +97,13 @@ export class JankMeter {
         this.longTaskObserver_ = null;
       }
       let batteryDrop = 0;
-      if (this.batteryManager_ && (this.batteryLevelStart_ != null)) {
-        batteryDrop = this.win_.Math.max(0, this.win_.Math.floor(
-            this.batteryManager_.level * 100 - this.batteryLevelStart_));
+      if (this.batteryManager_ && this.batteryLevelStart_ != null) {
+        batteryDrop = this.win_.Math.max(
+          0,
+          this.win_.Math.floor(
+            this.batteryManager_.level * 100 - this.batteryLevelStart_
+          )
+        );
         // bd: Battery Drop
         this.perf_.tickDelta('bd', batteryDrop);
       }
@@ -104,11 +114,18 @@ export class JankMeter {
     }
   }
 
+  /**
+   * Returns if is enabled
+   *
+   * @return {?boolean}
+   */
   isEnabled_() {
-    return isJankMeterEnabled(this.win_)
-        || (this.perf_
-            && this.perf_.isPerformanceTrackingOn()
-            && this.totalFrameCnt_ < NTH_FRAME);
+    return (
+      isJankMeterEnabled(this.win_) ||
+      (this.perf_ &&
+        this.perf_.isPerformanceTrackingOn() &&
+        this.totalFrameCnt_ < NTH_FRAME)
+    );
   }
 
   /**
@@ -116,24 +133,29 @@ export class JankMeter {
    * @private
    */
   displayMeterDisplay_(batteryDrop) {
-    const display = this.win_.document.createElement('div');
-    display.classList.add('i-amphtml-jank-meter');
+    const doc = this.win_.document;
+    const display = htmlFor(doc)`
+      <div class="i-amphtml-jank-meter"></div>`;
     display.textContent =
-        `bf:${this.badFrameCnt_}, lts: ${this.longTaskSelf_}, ` +
-        `ltc:${this.longTaskChild_}, bd:${batteryDrop}`;
-    this.win_.document.body.appendChild(display);
+      `bf:${this.badFrameCnt_}, lts: ${this.longTaskSelf_}, ` +
+      `ltc:${this.longTaskChild_}, bd:${batteryDrop}`;
+    doc.body.appendChild(display);
   }
 
   /**
    * Calculate Good Frame Probability, which is a value range from 0 to 100.
-   * @returns {number}
+   * @return {number}
    * @private
    */
   calculateGfp_() {
     return this.win_.Math.floor(
-        (this.totalFrameCnt_ - this.badFrameCnt_) / this.totalFrameCnt_ * 100);
+      ((this.totalFrameCnt_ - this.badFrameCnt_) / this.totalFrameCnt_) * 100
+    );
   }
 
+  /**
+   * Initializes long task observer.
+   */
   initializeLongTaskObserver_() {
     if (!this.isEnabled_() || !isLongTaskApiSupported(this.win_)) {
       return;
@@ -148,7 +170,9 @@ export class JankMeter {
           if (entries[i].name == 'cross-origin-descendant') {
             this.longTaskChild_ += span;
             user().info(
-                'LONGTASK', `from child frame ${entries[i].duration}ms`);
+              'LONGTASK',
+              `from child frame ${entries[i].duration}ms`
+            );
           } else {
             this.longTaskSelf_ += span;
             dev().info('LONGTASK', `from self frame ${entries[i].duration}ms`);
@@ -159,6 +183,9 @@ export class JankMeter {
     this.longTaskObserver_.observe({entryTypes: ['longtask']});
   }
 
+  /**
+   * Initializes battery manager.
+   */
   initializeBatteryManager_() {
     if (isBatteryApiSupported(this.win_)) {
       this.win_.navigator.getBattery().then(battery => {
@@ -171,7 +198,7 @@ export class JankMeter {
 
 /**
  * @param {!Window} win
- * @returns {boolean}
+ * @return {boolean}
  */
 function isJankMeterEnabled(win) {
   return isExperimentOn(win, 'jank-meter');
@@ -179,17 +206,19 @@ function isJankMeterEnabled(win) {
 
 /**
  * @param {!Window} win
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isLongTaskApiSupported(win) {
-  return !!win.PerformanceObserver
-      && !!win.TaskAttributionTiming
-      && ('containerName' in win.TaskAttributionTiming.prototype);
+  return (
+    !!win.PerformanceObserver &&
+    !!win['TaskAttributionTiming'] &&
+    'containerName' in win['TaskAttributionTiming'].prototype
+  );
 }
 
 /**
  * @param {!Window} unusedWin
- * @returns {boolean}
+ * @return {boolean}
  */
 function isBatteryApiSupported(unusedWin) {
   // TODO: (@lannka, #9749)

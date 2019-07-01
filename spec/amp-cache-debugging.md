@@ -30,7 +30,7 @@ If you still have a problem after following these steps, check the table below.
   <tbody>
     <tr>
       <td>Web fonts do not appear (fallback fonts are used)</td>
-      <td>The AMP Cache is not whitelisted by the font provider.</td>
+      <td>The AMP Cache is not white listed by the font provider.</td>
       <td>Contact the font provider and ask them to whitelist <a href="https://www.ampproject.org/docs/guides/amp-cors-requests.html#cors-security-in-amp">all caches</a>.</td>
     </tr>
     <tr>
@@ -55,7 +55,7 @@ If you still have a problem after following these steps, check the table below.
     <tr>
       <td>Content is being served that must be removed due to a legal takedown notice.</td>
       <td>The AMP Cache has not yet picked up the removal.</td>
-      <td>Follow the guidelines for each AMP Cache to refresh the content. For Google AMP Cache, see <a href="https://developers.google.com/amp/cache/update-ping">update ping</a>.</td>
+      <td>Follow the guidelines for each AMP Cache to refresh the content. For Google AMP Cache, see <a href="https://developers.google.com/amp/cache/update-cache">Update AMP Content</a>.</td>
     </tr>
 </tbody>
 </table>

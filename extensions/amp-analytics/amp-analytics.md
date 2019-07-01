@@ -1,5 +1,14 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+  - ads
+  - stories
+teaser:
+  text: Captures analytics data from an AMP document.
+---
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,13 +23,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-analytics"></a>`amp-analytics`
+# amp-analytics
+Capture analytics data from an AMP document.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Capture analytics data from an AMP document.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code></td>
@@ -35,22 +41,22 @@ limitations under the License.
 
 ## Sending analytics to a vendor or in-house?
 
-Before you start using AMP analytics on your site, you need to decide whether you will you use third-party analytics tools to analyze user engagement, or your own in-house solution.
+Before you start using AMP analytics on your site, you need to decide whether you will use third-party analytics tools to analyze user engagement, or your own in-house solution.
 
 {% call callout('Read on', type='read') %}
-Learn all about AMP analytics in the [Configure Analytics](https://www.ampproject.org/docs/guides/analytics_amp) guide.
+Learn all about AMP analytics in the [Configure Analytics](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/) guide.
 {% endcall %}
 
 ### Sending data to an analytics vendor <a name="analytics-vendors"></a>
 
-AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) to see if they’ve integrated their solution with AMP.
+AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors]() to see if they’ve integrated their solution with AMP.
 
 For integrated AMP analytics vendors:
 
-1.  In the `<amp-analytics>` tag, add the `type`attribute and set its value to the specified [vendor](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html).
+1.  In the `<amp-analytics>` tag, add the `type`attribute and set its value to the specified [vendor](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics-vendors).
 2. Determine what data you want to capture and track, and specify those details in the configuration data. See the vendor's documentation for  instructions on how to capture analytics data.
 
-If the analytics vendor hasn’t integrated with AMP, reach out to the vendor to ask for their support. We also encourage you to create an issue in the AMP project requesting that the vendor be added. See also [Integrating your analytics tools in AMP HTML](../amp-analytics/integrating-analytics.md). Alternatively, work with your vendor to send the data to their specified URL. Learn more in the [Sending data in-house](#sending-data-in-house) section below.
+If the analytics vendor hasn’t integrated with AMP, reach out to the vendor to ask for their support. We also encourage you to let us know by [filing an issue](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#report-a-bug) requesting that the vendor be added. See also [Integrating your analytics tools in AMP HTML](../amp-analytics/integrating-analytics.md). Alternatively, work with your vendor to send the data to their specified URL. Learn more in the [Sending data in-house](#sending-data-in-house) section below.
 
 *Example: Sending data to a third-party analytics provider*
 
@@ -88,6 +94,10 @@ To send data to a specific URL:
 1.  Determine what data you want to capture and track, and [specify those details in the configuration data](#specifying-configuration-data).
 2.  In the [`requests`](#requests) configuration object, specify the type of request to track (e.g., pageview, specific triggered events) and the url(s) of where you want to send the tracking data to.
 
+{% call callout('Note', type='note') %}
+When processing AMP URLs in the referrer header of analytics requests, strip out or ignore the `usqp` parameter. This parameter is used by Google to trigger experiments for the Google AMP Cache.
+{% endcall %}
+
 *Example: Sending data to a URL*
 
 Here's a simple example that tracks page views.  Every time a page is visible, the trigger event fires, and sends the pageview data to a defined URL along with a random ID.
@@ -97,7 +107,7 @@ Here's a simple example that tracks page views.  Every time a page is visible, t
 <script type="application/json">
 {
   "requests": {
-    "pageview": "https://foo.com/pixel?RANDOM",
+    "pageview": "https://foo.com/pixel?RANDOM"
   },
   "triggers": {
     "trackPageview": {
@@ -111,7 +121,7 @@ Here's a simple example that tracks page views.  Every time a page is visible, t
 ```
 
 {% call callout('Tip', type='success') %}
-For some common tracking use cases (e.g., page views, page clicks, scrolling, etc.) see [Analytics: Use Cases](https://www.ampproject.org/docs/guides/analytics/use_cases).
+For some common tracking use cases (e.g., page views, page clicks, scrolling, etc.) see [Analytics: Use Cases](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/use_cases).
 {% endcall %}
 
 
@@ -142,7 +152,7 @@ The configuration object for `<amp-analytics>` uses the following format:
   "transport": {
     "beacon": *boolean*,
     "xhrpost": *boolean*,
-    "image": *boolean*
+    "image": *boolean*,
   }
 }
 ```
@@ -169,19 +179,167 @@ In this example, we specify the `config` attribute to load the configuration dat
 <amp-analytics config="https://example.com/analytics.account.config.json">
 ```
 
+#### Configuration Rewriter
+
+The configuration rewriter feature is designed to allow analytics providers to dynamically rewrite a provided configuration. This is similar to the remote configuration feature but additionally includes any user-provided configuration in the request made to the sever. This currently can only be enabled by an analytics vendor.
+
+An analytics vendor specifies a configRewriter property with a server url.
+```js
+export const VENDOR_ANALYTICS_CONFIG = {
+    ...
+    'configRewriter': {
+      'url': 'https://www.vendor.com/amp-config-rewriter',
+    },
+    ...
+}
+```
+
+The runtime sends a request containing the inlined configuration, merged with the provided remote configuration, to the configRewriter endpoint given by the vendor. The vendor uses this data server side to construction and return a new rewritten configuration.
+
+The runtime then merges all the provided configuration to determine the final configuration in order of highest to lowest precedence:
+1. Rewritten Configuration
+1. Inlined Configuration
+1. Vendor defined configuration
+
+##### Variable Groups
+
+Variable Groups is a feature that allows analytics providers to group a predefined set of variables that can easily be enabled by a user. These variables will then be resolved and sent along to the specified `configRewriter` endpoint.
+
+Analytics providers need to create a new `varGroups` object inside of the `configRewriter` configuration to enable this feature. Publishers can then include any named analytic provider created `varGroups` they wish to enable in their analytics configuration. All of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) can be used. _Important note_: the ${varName} variants will not work.
+
+For example we may have a vendor whose configuration looks like this:
+```js
+// This is predefined by vendor.
+export const VENDOR_ANALYTICS_CONFIG = {
+    ...
+    'configRewriter': {
+      'url': 'https://www.vendor.com/amp-config-rewriter',
+      'varGroups' : {
+        'group1': {
+          'referrer': 'DOCUMENT_REFERRER',
+          'source': 'SOURCE_URL',
+        'group2': {
+          'title': 'TITLE',
+        },
+      },
+    },
+    ...
+}
+```
+
+You can specify which variable groups are enabled by including `{enabled: true}` for the specified `varGroups` within the provider's `<amp-analytics>` configuration. `enabled` is a reserved keyword, and can not be used as a variable name.
+
+In the example below, both `group1` and `group2` have been enabled. Any groups that have not been specifically enabled will be ignored. The runtime will then resolve all of these enabled variables, and merge them into a single `configRewriter.vars` object that will be sent to the configuration rewriter url.
+
+```html
+/* Included on publisher page */
+<amp-analytics type="myVendor" id="myVendor" data-credentials="include">
+  <script type="application/json">
+  {
+    "configRewriter": {
+      "varGroups": {
+        "group1": {
+          "enabled": true
+        },
+        "group2": {
+          "enabled": true
+        }
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+```
+
+In this example the request body would look something like this:
+```json
+/* Sent to configuration rewriter server. */
+"configRewriter": {
+  "vars": {
+    "referrer": "https://www.example.com",
+    "source": "https://www.amp.dev",
+    "title": "Cool Amp Tips"
+  }
+}
+```
+
 ###  Configuration data objects
 
 ####  Requests
-The `requests` configuration object specifies the URLs used to transmit data to an analytics platform. The `request-name` specifies what request should be sent in response to a particular event (e.g., `pageview`, `event`, etc.) . The `request-value` is an https URL. These values may include placeholder tokens that can reference other requests or variables.
+The `requests` configuration object specifies the URLs used to transmit data to an analytics platform as well as batching or reporting behavior of the request. The `request-name` specifies what request should be sent in response to a particular event (e.g., `pageview`, `event`, etc.) . The `request-value` contains an https URL, the value may include placeholder tokens that can reference other requests or variables. The `request-value` can also be an object that contains optional request configs.
+
+##### Request configs
+The properties for defining a request with an object are:
+ - `baseUrl`: Defines the url of the request (required).
+ - `reportWindow`: An optional property to specify the time (in seconds) to stop reporting requests. The trigger with `important: true` overrides the maximum report window constraint.
+
+In this example, all requests are valid.
 
 ```javascript
 "requests": {
   "base": "https://example.com/analytics?a=${account}&u=${canonicalUrl}&t=${title}",
-  "pageview": "${base}&type=pageview",
-  "event": "${base}&type=event&eventId=${eventId}"
+  "pageview": {
+    "baseUrl": "${base}&type=pageview"
+  },
+  "event": {
+    "baseUrl": "${base}&type=event&eventId=${eventId}",
+    "batchInterval": 5,
+    "reportWindow" : 30
+  }
 }
 ```
+
 Some analytics providers have an already-provided configuration, which you use via the `type` attribute. If you are using an analytics provider, you may not need to include requests information. See your vendor documentation to find out if requests need to be configured, and how.
+
+##### Batching configs
+To reduce the number of request pings, you can specify batching behaviors in the request configuration. Any [`extraUrlParams`](#extra-url-params) from `triggers` that use the same request are appended to the `baseUrl` of the request.
+
+The batching properties are:
+  - `batchInterval`: This property specifies the time interval (in seconds) to flush request pings in the batching queue. `batchInterval` can be a number or an array of numbers (the minimum time interval is 200ms). The request will respect every value in the array, and then repeat the last interval value (or the single value) when it reaches the end of the array.
+
+For example, the following config sends out a single request ping every 2 seconds, with one sample request ping looking like `https://example.com/analytics?rc=1&rc=2`.
+```javascript
+"requests": {
+  "timer": {
+    "baseUrl": "https://example.com/analytics?",
+    "batchInterval": 2,
+  }
+}
+"triggers": {
+  "timer": {
+    "on": "timer",
+    "request" : "timer",
+    "timerSpec": {
+      "interval": 1
+    },
+    "extraUrlParams": {
+      "rc": "${requestCount}"
+    }
+  }
+}
+```
+
+The following config sends out the first request ping after 1 second and then sends out a request every 3 seconds. The first request ping looks like `https://example.com/analytics?rc=1`, the second request ping looks like `https://example.com/analytics?rc=2&rc=3&rc=4`.
+```javascript
+"requests": {
+  "timer": {
+    "baseUrl": "https://example.com/analytics?",
+    "batchInterval": [1, 3],
+  }
+}
+"triggers": {
+  "timer": {
+    "on": "timer",
+    "request" : "timer",
+    "timerSpec": {
+      "interval": 1
+    },
+    "extraUrlParams": {
+      "rc": "${requestCount}"
+    }
+  }
+}
+```
 
 #### Vars
 
@@ -199,7 +357,7 @@ The `vars` configuration object can be used to define new key-value pairs or ove
 
 #### Extra URL Params
 
-The `extraUrlParams` configuration object specifies additional parameters to append to the query string of a request URL via the usual "&foo=baz" convention.
+The `extraUrlParams` configuration object specifies additional parameters to be included in the request. By default, extra URL params are appended to the query string of a request URL via the usual "&foo=baz" convention.
 
 Here's an example that would append `&a=1&b=2&c=3` to a request:
 
@@ -211,9 +369,13 @@ Here's an example that would append `&a=1&b=2&c=3` to a request:
 }
 ```
 
+`extraUrlParams` may be sent via the request body instead of the URL if `useBody` is enabled and the request is sent via the `beacon` or `xhrpost` transport methods. In this case, the parameters are not URL encoded or flattened. See [Use Body for Extra URL Params](#use-body-for-extra-url-params) for more details.
+
 The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that act as parameters to `String.replace()` to pre-process keys in the `extraUrlParams` configuration. For example, if an `extraUrlParams` configuration defines `"page.title": "The title of my page"` and the `extraUrlParamsReplaceMap` defines `"page.": "_p_"`, then `&_p_title=The%20title%20of%20my%20page%20` will be appended to the request.
 
 `extraUrlParamsReplaceMap` is not required to use `extraUrlParams`. If `extraUrlParamsReplaceMap` is not defined, then no string substitution will happens and the strings defined in `extraUrlParams` are used as-is.
+
+If `useBody` is enabled and the request is sent via the `beacon` or `xhrpost` transport methods, `extraUrlParamsReplaceMap` string substitution will only be performed on the top-level keys in `extraUrlParams`.
 
 #### Triggers
 
@@ -222,6 +384,7 @@ The `triggers` configuration object describes when an analytics request should b
   - `on` (required) The event to listen for. Valid values are `render-start`, `ini-load`, `click`, `scroll`, `timer`, `visible`, `hidden`, `user-error`, [`access-*`](../amp-access/amp-access-analytics.md), and [`video-*`](./amp-video-analytics.md)
   - `request` (required) Name of the request to send (as specified in the `requests` section).
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify vars unique to this trigger.
+  - `important` can be specified to work with requests that support the batching behavior or the report window. Setting `important` to `true` can help to flush batched request queue with some certain triggers. In this case, it's possible to reduce the request pings number without losing important trigger events. Setting `important` to `true` can also override the request's `reportWindow` value to send out important request pings regardless.
   - `selector` and `selectionMethod` can be specified for some triggers, such as `click` and `visible`. See [Element selector](#element-selector) for details.
   - `scrollSpec` (required when `on` is set to `scroll`) This configuration is used in conjunction with the `scroll` trigger. Please see below for details.
   - `timerSpec` (required when `on` is set to `timer`) This configuration is used in conjunction with the `timer` trigger. Please see below for details.
@@ -351,13 +514,12 @@ The element visibility trigger can be configured for any AMP element or a docume
 Notice that selector can be used to only specify a single element, not a collection. The element can be either an [AMP extended  element](https://github.com/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags) or a document root.
 
 The element visibility trigger waits for the signal specified by the `waitFor` property in `visibilitySpec` before tracking element visibility. If `waitFor` is not specified, it waits for element's [`ini-load`](#initial-load-trigger) signal. See `waitFor` docs for more details.
+If `reportWhen` is specified, the trigger waits for that signal before sending the event. This is useful, for example, in sending analytics events when the page is closed.
 
 
 ##### Error trigger
 
 The user error event (`"on": "user-error"`) is triggered when an error occurs that is attributable to the author of the page or to software that is used in publishing the page. This includes, but not limited to, misconfiguration of an AMP component, misconfigured ads, or failed assertions. User errors are also reported in the developer console.
-
-The trigger is intended to exclude errors generated by the A4A iframe embed. NOTE: There is currently a [known issue](https://github.com/ampproject/amphtml/issues/10891) that still allows errors from A4A iframe embeds to be reported.
 
 ```javascript
 "triggers": {
@@ -368,13 +530,67 @@ The trigger is intended to exclude errors generated by the A4A iframe embed. NOT
 }
 ```
 
+NOTE: There is a [known issue](https://github.com/ampproject/amphtml/issues/10891) that it still reports errors from A4A iframe embeds, which are irrelevant to the page.
+
 <strong><a id="visibility-spec"></a>Visibility Spec</strong>
 
 The `visibilitySpec` is a set of conditions and properties that can be applied to `visible` or `hidden` triggers to change when they fire. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
-  - `waitFor` This property indicates that the visibility trigger should wait for a certain signal before tracking visibility. The supported values are     `none`, `ini-load` and `render-start`. If `waitFor` is undefined, it is defaulted to [`ini-load`](#initial-load-trigger) when selector is specified, or to `none` otherwise.
-  - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
-  - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `totalTimeMin` is defaulted to 0 when not specified.
-  - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the lower bound (`visiblePercentageMin`) is inclusive while the upper bound (`visiblePercentageMax`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. They default to 0 and 100 when not specified.
+
+  - `waitFor`: This property indicates that the visibility trigger should wait for a certain signal before tracking visibility. The supported values are `none`, `ini-load` and `render-start`. If `waitFor` is undefined, it is defaulted to [`ini-load`](#initial-load-trigger) when selector is specified, or to `none` otherwise.
+  - `reportWhen`: This property indicates that the visibility trigger should wait for a certain signal before sending the trigger. The only supported value is `documentExit`. `reportWhen` and `repeat` may not both be used in the same visibilitySpec. Note that when `reportWhen` is specified, the report will be sent at the time of the signal even if visibility requirements are not met at that time or have not been met previously. Any relevant variables (`totalVisibleTime`, etc.) will be populated according to the visibility requirements in this `visibilitySpec`.
+  - `continuousTimeMin` and `continuousTimeMax`: These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
+  - `totalTimeMin` and `totalTimeMax`: These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `totalTimeMin` is defaulted to 0 when not specified.
+  - `visiblePercentageMin` and `visiblePercentageMax`: These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the upper bound (`visiblePercentageMax`) is inclusive. The lower bound (`visiblePercentageMin`) is exclusive, unless both bounds are set to 0 or both are set to 100. If both bounds are set to 0, then the trigger fires when the element is not visible. If both bounds are set to 100, the trigger fires when the element is fully visible. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. The default values for `visiblePercentageMin` and `visiblePercentageMax` are  0 and 100, respectively.
+  - `repeat`: If this property is set to `true`, the trigger fires each time that the `visibilitySpec` conditions are met. In the following example, if the element is scrolled to 51% in view, then 49%, then 51% again, the trigger fires twice. However, if `repeat` was `false`, the trigger fires once. The default value of `repeat` is `false`. `reportWhen` and `repeat` may not both be used in the same visibilitySpec.
+
+```javascript
+visibilitySpec: {
+  visiblePercentageMin: 50,
+  repeat: true,
+}
+```
+
+`visiblePercentageThresholds` may be used as a shorthand for creating multiple `visibilitySpec` instances that differ only in `visiblePercentageMin` and `visiblePercentageMax`. For example the following are equivalent:
+
+```javascript
+// Two triggers with visibilitySpecs that only differ in visiblePercentageMin and visiblePercentageMax:
+"triggers": {
+  "pageView_30_to_40": {
+    "on": "visible",
+    "request": "pageview",
+    "selector": "#ad1",
+    "visibilitySpec": {
+      "visiblePercentageMin": 30,
+      "visiblePercentageMax": 40,
+      "continuousTimeMin": 1000,
+    }
+  }
+
+  "pageView_40_to_50": {
+    "on": "visible",
+    "request": "pageview",
+    "selector": "#ad1",
+    "visibilitySpec": {
+      "visiblePercentageMin": 40,
+      "visiblePercentageMax": 50,
+      "continuousTimeMin": 1000,
+    }
+  }
+}
+
+// A single trigger equivalent to both of the above:
+"triggers": {
+  "pageView": {
+    "on": "visible",
+    "request": "pageview",
+    "selector": "#ad1",
+    "visibilitySpec": {
+      "visiblePercentageThresholds": [[30, 40], [40, 50]],
+      "continuousTimeMin": 1000,
+    }
+  }
+}
+```
 
 In addition to the conditions above, `visibilitySpec` also enables certain variables which are documented [here](./analytics-vars.md#visibility-variables).
 
@@ -386,6 +602,7 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
     "selector": "#ad1",
     "visibilitySpec": {
       "waitFor": "ini-load",
+      "reportWhen": "documentExit",
       "visiblePercentageMin": 20,
       "totalTimeMin": 500,
       "continuousTimeMin": 200
@@ -441,9 +658,9 @@ Use the scroll trigger (`"on": "scroll"`) to fire a request under certain condit
 
 ##### Timer trigger
 Use the timer trigger (`"on": "timer"`) to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
-  - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
+  - `timerSpec` Specification for triggers of type `timer`. The unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
-    - `maxTimerLength` Maximum duration for which the timer will fire, in seconds.
+    - `maxTimerLength` Maximum duration for which the timer will fire, in seconds. An addtional request will be triggered when the `maxTimerLength` has been reached. The default is 2 hours. When a `stopSpec` is present, but no maxTimerLength is specified, the default will be infinity.
     - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
 ```javascript
@@ -458,6 +675,32 @@ Use the timer trigger (`"on": "timer"`) to fire a request on a regular time inte
   }
 }
 ```
+
+To configure a timer which times user events use:
+  - `startSpec` Specification for triggering when a timer starts. Use the value of `on` and `selector` to track specific events. A config with a `startSpec` but no `stopSpec` will only stop after `maxTimerLength` has been reached.
+  - `stopSpec` Specification for triggering when a timer stops. A config with a `stopSpec` but no `startSpec` will start immediately but only stop on the specified event.
+
+```javascript
+"triggers": {
+  "videoPlayTimer": {
+    "on": "timer",
+    "timerSpec": {
+      "interval": 5,
+      "startSpec": {
+        "on": "video-play",
+        "selector": "amp-video"
+      },
+      "stopSpec": {
+        "on": "video-pause",
+        "selector": "amp-video"
+      }
+    },
+    "request": "videoRequest"
+  }
+}
+```
+
+See the spec on [triggers](#triggers) for details on creating nested timer triggers. Note that using a timer trigger to start or stop a timer is not allowed.
 
 ##### Hidden trigger
 
@@ -495,7 +738,7 @@ The above configuration translates to:
 AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
 
 
-#### Video analytics triggers
+##### Video analytics triggers
 
 Video analytics provides several triggers (`"on": "video-*"`) that publishers can use to track different events occurring during a video's lifecycle. More details are available in [AMP Video Analytics](./amp-video-analytics.md).
 
@@ -505,13 +748,15 @@ Video analytics provides several triggers (`"on": "video-*"`) that publishers ca
 The `transport` configuration object specifies how to send a request. The value is an object with fields that
 indicate which transport methods are acceptable.
 
-  - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)  can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
-  - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
-  - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request.
+  - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon) can be used to transmit the request. This will send a POST request with credentials. The request will be sent with an empty body unless `useBody` is true. See [Use Body for Extra URL Params](#use-body-for-extra-url-params) for more information about `useBody`.
+  - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request with credentials. The request will be sent with an empty body unless `useBody` is true. See [Use Body for Extra URL Params](#use-body-for-extra-url-params) for more information about `useBody`.
+  - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request. To suppress console warnings due to empty responses or request failures, set `"image": {"suppressWarnings": true}`.
 
-If more than one of the above transport methods are enabled, the precedence is `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all three methods above are enabled.
+MRC-accredited vendors may utilize a fourth transport mechanism, "iframe transport", by adding a URL string to iframe-transport-vendors.js. This indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `iframe-transport-vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration. Furthermore, the vendor frame may send a response, to be used by amp-ad-exit. See [analytics-iframe-transport-remote-frame.html](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [fake_amp_ad_with_iframe_transport.html](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html): the former file sends a response JSON object of {'collected-data': 'abc'}, and the latter file uses that object to substitute 'abc' for 'bar_' in finalUrl.
 
-In the example below, `beacon` and `xhrpost` are set to `false`, so they will not be used even though they have higher precedence than `image`. `image` would be set `true` by default, but it is explicitly declared here. If the client's user agent supports the `image` method, then it will be used; otherwise, no request would be sent.
+If more than one of the above transport methods are enabled, the precedence is `iframe` > `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all four methods above are enabled.
+
+In the example below, an `iframe` URL is not specified, and `beacon` and `xhrpost` are set to `false`, so they will not be used even though they have higher precedence than `image`. `image` would be set `true` by default, but it is explicitly declared here. If the client's user agent supports the `image` method, then it will be used; otherwise, no request would be sent.
 
 ```javascript
 "transport": {
@@ -520,6 +765,53 @@ In the example below, `beacon` and `xhrpost` are set to `false`, so they will no
   "image": true
 }
 ```
+
+To learn more, see [this example that implements iframe transport client API](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [this example page that incorporates that iframe](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.amp.html). The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed.
+
+##### Use Body for Extra URL Params
+
+The `useBody` configuration option indicates whether or not to include `extraUrlParams` in the POST request body instead of in the URL as URL-encoded query parameters.
+
+`useBody` is only available for the `beacon` and `xhrpost` transport methods. If `useBody` is true and used in conjunction with either of these transport methods, `extraUrlParams` are sent in the POST request body. Otherwise, the request is sent with an empty body and the `extraUrlParams` are included as URL parameters.
+
+With `useBody`, you can include nested objects in `extraUrlParams`. However, if the request falls back to other transport options that don't support `useBody` (e.g. `image`), then those nested objects will be stringified into the URL as `[object Object]`.
+
+```javascript
+"transport": {
+  "beacon": true,
+  "xhrpost": true,
+  "useBody": true,
+  "image": false
+}
+```
+
+##### Referrer Policy
+
+Referrer policy can be specified as `referrerPolicy` field in the `transport` config. Currently only `no-referrer` is supported.
+Referrer policy is only available for `image` transport. If `referrerPolicy: no-referrer` is specified, the `beacon` & `xhrpost` transports are overridden to `false`.
+
+```javascript
+"transport": {
+  "beacon": false,
+  "xhrpost": false,
+  "image": true,
+  "referrerPolicy": "no-referrer"
+}
+```
+
+#### Linkers
+
+The `linkers` feature is used to enable cross domain ID syncing. `amp-analytics` will use a [configuration object](./linker-id-forwarding.md#format) to create a "linker string" which will be appended to the specified outgoing links on the page as URL param. When a user clicks on one of these links, the destination page will read the linker string from the URL param to perform ID syncing. This is typically used to join user sessions across an AMP proxy domain and publisher domain.
+
+Detials on setting up your linker configuration are outlined in [Linker ID Forwarding](./linker-id-forwarding.md)
+
+If you need to ingest this paramter, information on how this parameter is created is illistrated in [Linker ID Receiving](./linker-id-receiving.md).
+
+#### Cookies
+
+The `cookies` feature supports writing cookies to the origin domain by extracting [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](./linker-id-receiving.md#linker-param) information from the document url. It can be used along with `linkers` features to perform ID syncing from the AMP proxied domain to AMP pages on a publisher's domain.
+
+Details on setting up the `cookies` configuration can be found at [Receiving Linker Params on AMP Pages](./linker-id-receiving.md#receiving-linker-params-on-amp-pages)
 
 ## Validation
 
@@ -532,7 +824,7 @@ These are the valid attributes for the `amp-analytics` component:
 
 **type**
 
-Specifies the type of vendor.  For details, see the list of [Analytics vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html).
+Specifies the type of vendor.  For details, see the list of [Analytics vendors](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics-vendors).
 
 Example:
 

@@ -22,17 +22,19 @@
 
 import {
   MANUAL_EXPERIMENT_ID,
-  extractUrlExperimentId,
   addExperimentIdToElement,
+  extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  getExperimentBranch,
-  forceExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {dev} from '../../../src/log';
+import {
+  forceExperimentBranch,
+  getExperimentBranch,
+} from '../../../src/experiments';
+import {
+  isCdnProxy,
+  isGoogleAdsA4AValidEnvironment,
+} from '../../../ads/google/a4a/utils';
+import {selectAndSetExperiments} from '../../../ads/google/a4a/experiment-utils';
 
 /** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
@@ -46,28 +48,82 @@ export const URL_EXPERIMENT_MAPPING = {
   '0': null,
 };
 
+/** @const @type {!Object<string, string>} */
+export const ADSENSE_EXPERIMENTS = {
+  UNCONDITIONED_CANONICAL_EXP: '21062154',
+  UNCONDITIONED_CANONICAL_CTL: '21062155',
+  CANONICAL_EXP: '21062158',
+  CANONICAL_CTL: '21062159',
+};
+
+/** @const @type {!Object<string, string>} */
+export const ADSENSE_EXP_NAMES = {
+  UNCONDITIONED_CANONICAL: 'expAdsenseUnconditionedCanonical',
+  CANONICAL: 'expAdsenseCanonical',
+};
+
 /**
+ * Attempts to select into Adsense experiments.
  * @param {!Window} win
  * @param {!Element} element
- * @param {!boolean} useRemoteHtml
- * @returns {boolean}
  */
-export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
-  if (useRemoteHtml || !isGoogleAdsA4AValidEnvironment(win) ||
-      !element.getAttribute('data-ad-client')) {
-    return false;
-  }
+function selectExperiments(win, element) {
+  selectAndSetExperiments(
+    win,
+    element,
+    [
+      ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP,
+      ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_CTL,
+    ],
+    ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL,
+    true
+  );
+
   // See if in holdback control/experiment.
-  let experimentId;
   const urlExperimentId = extractUrlExperimentId(win, element);
-  if (urlExperimentId != undefined) {
-    experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-    dev().info(
-        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-  }
+  const experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId || ''];
   if (experimentId) {
     addExperimentIdToElement(experimentId, element);
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
+    dev().info(
+      TAG,
+      `url experiment selection ${urlExperimentId}: ${experimentId}.`
+    );
   }
-  return true;
+
+  // If not in the unconditioned canonical experiment, attempt to
+  // select into the undiluted canonical experiment.
+  const inUnconditionedCanonicalExp = !!getExperimentBranch(
+    win,
+    ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL
+  );
+  if (!inUnconditionedCanonicalExp && !isCdnProxy(win)) {
+    selectAndSetExperiments(
+      win,
+      element,
+      [ADSENSE_EXPERIMENTS.CANONICAL_EXP, ADSENSE_EXPERIMENTS.CANONICAL_CTL],
+      ADSENSE_EXP_NAMES.CANONICAL,
+      true
+    );
+  }
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @param {boolean} useRemoteHtml
+ * @return {boolean}
+ */
+export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
+  if (useRemoteHtml || !element.getAttribute('data-ad-client')) {
+    return false;
+  }
+  selectExperiments(win, element);
+  return (
+    isGoogleAdsA4AValidEnvironment(win) ||
+    getExperimentBranch(win, ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL) ==
+      ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP ||
+    getExperimentBranch(win, ADSENSE_EXP_NAMES.CANONICAL) ==
+      ADSENSE_EXPERIMENTS.CANONICAL_EXP
+  );
 }

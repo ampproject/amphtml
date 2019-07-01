@@ -34,9 +34,9 @@
     Sed sed augue auctor, porta turpis ultrices, cursus diam. In venenatis aliquet porta. Sed volutpat fermentum quam, ac
     molestie nulla porttitor ac. Donec porta risus ut enim pellentesque, id placerat elit ornare.
   </p>
-  <h2>Friendly IFrame</h2>
+   <h2>Friendly IFrame</h2>
     <div class="ad-container">
-    <amp-ad layout="responsive" width="350" height="250" type="fake" data-use-a4a="true" force3p="false" fakesig="true" disable3pfallback="true"
+    <amp-ad layout="responsive" width="350" height="250" id="i-amphtml-demo-1" type="fake" a4a-conversion="true"
       src="//ads.localhost:8000/test/manual/amp-animation/embeds/scrollbound/clock.a4a.html?inabox=1">
       </amp-ad>
   </div>
@@ -60,8 +60,10 @@
   </p>
 
    <h4>3P IFrame in-a-box</h4>
+   <h4> (Note: Please build with `--with_inabox` flag)</h4>
+   <h4> (Note: The example won't work due to a safeframe bug #13326)</h4>
   <div class="ad-container">
-    <amp-ad layout="responsive" width="350" height="250" type="fake" data-use-a4a="true" force3p="true" fakesig="true" disable3pfallback="false"
+    <amp-ad layout="responsive" width="350" height="250" id="i-amphtml-demo-2" type="fake" checksig="true"
       src="//ads.localhost:8000/test/manual/amp-animation/embeds/scrollbound/clock.a4a.html?inabox=1">
       </amp-ad>
   </div>

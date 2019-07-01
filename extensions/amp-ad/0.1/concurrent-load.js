@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * Store loading ads info within window to ensure it can be properly stored
@@ -23,12 +24,22 @@ import {user} from '../../../src/log';
  */
 const LOADING_ADS_WIN_ID_ = '3pla';
 
+/** @private {?Promise} resolves when no 3p throttle */
+let throttlePromise_ = null;
+/** @private {?Function} resolver for throttle promise */
+let throttlePromiseResolver_ = null;
+
 /**
  * @param {!Window} win
  * @return {boolean} Whether 3p is currently throttled.
  */
 export function is3pThrottled(win) {
   return !!win[LOADING_ADS_WIN_ID_];
+}
+
+/** @return {!Promise} resolves when no 3p throttle */
+export function waitFor3pThrottle() {
+  return throttlePromise_ || Promise.resolve();
 }
 
 /**
@@ -47,11 +58,14 @@ export function getAmpAdRenderOutsideViewport(element) {
     return 1.25;
   }
   const errorMessage =
-      'Value of data-loading-strategy should be a float number in range ' +
-      'of [0, 3], but got ' + rawValue;
-  const viewportNumber =
-      user().assertNumber(parseFloat(rawValue), errorMessage);
-  user().assert(viewportNumber >= 0 && viewportNumber <= 3, errorMessage);
+    'Value of data-loading-strategy should be a float number in range ' +
+    'of [0, 3], but got ' +
+    rawValue;
+  const viewportNumber = user().assertNumber(
+    parseFloat(rawValue),
+    errorMessage
+  );
+  userAssert(viewportNumber >= 0 && viewportNumber <= 3, errorMessage);
   return viewportNumber;
 }
 
@@ -65,10 +79,21 @@ export function incrementLoadingAds(win, opt_loadingPromise) {
     win[LOADING_ADS_WIN_ID_] = 0;
   }
   win[LOADING_ADS_WIN_ID_]++;
+
+  if (!throttlePromise_) {
+    const deferred = new Deferred();
+    throttlePromise_ = deferred.promise;
+    throttlePromiseResolver_ = deferred.resolve;
+  }
+
   Services.timerFor(win)
-      .timeoutPromise(1000, opt_loadingPromise)
-      .catch(() => {})
-      .then(() => {
-        win[LOADING_ADS_WIN_ID_]--;
-      });
+    .timeoutPromise(1000, opt_loadingPromise)
+    .catch(() => {})
+    .then(() => {
+      if (!--win[LOADING_ADS_WIN_ID_]) {
+        throttlePromiseResolver_();
+        throttlePromise_ = null;
+        throttlePromiseResolver_ = null;
+      }
+    });
 }

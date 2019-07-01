@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -33,7 +33,8 @@ export function bidtellect(global, data) {
     'videotypeid',
     'videocloseicon',
     'targetid',
-    'bustframe'];
+    'bustframe',
+  ];
   validateData(data, requiredParams, optionalParams);
   let params = '?t=' + encodeURIComponent(data.t);
   params += '&pid=' + encodeURIComponent(data.pid);

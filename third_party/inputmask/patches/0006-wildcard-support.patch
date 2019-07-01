@@ -1,0 +1,16 @@
+diff --git a/third_party/inputmask/inputmask.js b/third_party/inputmask/inputmask.js
+index 11baa083a..412be8d43 100644
+--- a/third_party/inputmask/inputmask.js
++++ b/third_party/inputmask/inputmask.js
+@@ -99,6 +99,11 @@ export function factory($, window, document, undefined) {
+                 validator: "[A-Za-z\u0410-\u044f\u0401\u0451\xc0-\xff\xb5]",
+                 definitionSymbol: "*"
+             },
++            "?": {
++                validator: ".",
++                cardinality: 1,
++                definitionSymbol: "*"
++            },
+             "*": {
+                 validator: "[0-9\uff11-\uff19A-Za-z\u0410-\u044f\u0401\u0451\xc0-\xff\xb5]"
+             }

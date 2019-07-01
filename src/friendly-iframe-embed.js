@@ -16,13 +16,14 @@
 
 import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
-import {Signals} from './utils/signals';
-import {dev, rethrowAsync} from './log';
-import {disposeServicesForEmbed, getTopWindow} from './service';
-import {escapeHtml} from './dom';
 import {Services} from './services';
+import {Signals} from './utils/signals';
+import {closestAncestorElementBySelector, escapeHtml} from './dom';
+import {dev, rethrowAsync, userAssert} from './log';
+import {disposeServicesForEmbed, getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
-import {layoutRectLtwh} from './layout-rect';
+import {isExperimentOn} from './experiments';
+import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
   px,
@@ -33,13 +34,16 @@ import {
 } from './style';
 import {toWin} from './types';
 
-
 /** @const {string} */
 const EMBED_PROP = '__AMP_EMBED__';
 
 /** @const {!Array<string>} */
-const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
-
+const EXCLUDE_INI_LOAD = [
+  'AMP-AD',
+  'AMP-ANALYTICS',
+  'AMP-PIXEL',
+  'AMP-AD-EXIT',
+];
 
 /**
  * Parameters used to create the new "friendly iframe" embed.
@@ -60,16 +64,15 @@ const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
  */
 export let FriendlyIframeSpec;
 
-
 /**
  * @type {boolean|undefined}
- * @visiblefortesting
+ * @visibleForTesting
  */
 let srcdocSupported;
 
 /**
  * @param {boolean|undefined} val
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function setSrcdocSupportedForTesting(val) {
   srcdocSupported = val;
@@ -86,30 +89,29 @@ function isSrcdocSupported() {
   return srcdocSupported;
 }
 
-
 /**
  * Sets whether the embed is currently visible. The interpretation of visibility
  * is up to the embed parent. However, most of typical cases would rely on
  * whether the embed is currently in the viewport.
  * @param {!FriendlyIframeEmbed} embed
  * @param {boolean} visible
- * @restricted
  * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
  */
 export function setFriendlyIframeEmbedVisible(embed, visible) {
   embed.setVisible_(visible);
 }
 
-
 /**
  * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
+ * Caution: This will only return the FIE after the iframe has 'loaded'. If you
+ * are checking before this signal you may be in a race condition that returns
+ * null.
  * @param {!HTMLIFrameElement} iframe
  * @return {?FriendlyIframeEmbed}
  */
 export function getFriendlyIframeEmbedOptional(iframe) {
   return /** @type {?FriendlyIframeEmbed} */ (iframe[EMBED_PROP]);
 }
-
 
 /**
  * Creates the requested "friendly iframe" embed. Returns the promise that
@@ -119,23 +121,33 @@ export function getFriendlyIframeEmbedOptional(iframe) {
  * @param {!HTMLIFrameElement} iframe
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
- * @param {function(!Window)=} opt_preinstallCallback
+ * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
-export function installFriendlyIframeEmbed(iframe, container, spec,
-    opt_preinstallCallback) {
+export function installFriendlyIframeEmbed(
+  iframe,
+  container,
+  spec,
+  opt_preinstallCallback // TODO(#22733): remove "window" argument.
+) {
   /** @const {!Window} */
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
+  const ampdocFieExperimentOn = isExperimentOn(win, 'ampdoc-fie');
+  /** @const {?./service/ampdoc-impl.AmpDocService} */
+  const ampdocService = ampdocFieExperimentOn
+    ? Services.ampdocServiceFor(win)
+    : null;
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
 
   // Pre-load extensions.
   if (spec.extensionIds) {
-    spec.extensionIds.forEach(
-        extensionId => extensions.preloadExtension(extensionId));
+    spec.extensionIds.forEach(extensionId =>
+      extensions.preloadExtension(extensionId)
+    );
   }
 
   const html = mergeHtml(spec);
@@ -146,10 +158,12 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     iframe.readyState = 'complete';
   };
   const registerViolationListener = () => {
-    iframe.contentWindow.addEventListener('securitypolicyviolation',
-        violationEvent => {
-          dev().warn('FIE', 'security policy violation', violationEvent);
-        });
+    iframe.contentWindow.addEventListener(
+      'securitypolicyviolation',
+      violationEvent => {
+        dev().warn('FIE', 'security policy violation', violationEvent);
+      }
+    );
   };
   let loadedPromise;
   if (isSrcdocSupported()) {
@@ -191,29 +205,45 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
 
       // For safety, make sure we definitely stop polling when child doc is
       // loaded.
-      loadedPromise.catch(error => {
-        rethrowAsync(error);
-      }).then(() => {
-        resolve();
-        win.clearInterval(interval);
-      });
+      loadedPromise
+        .catch(error => {
+          rethrowAsync(error);
+        })
+        .then(() => {
+          resolve();
+          win.clearInterval(interval);
+        });
     });
   }
 
   return readyPromise.then(() => {
-    const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise);
+    const childWin = /** @type {!Window} */ (iframe.contentWindow);
+    const ampdoc =
+      ampdocFieExperimentOn && ampdocService
+        ? ampdocService.installFieDoc(spec.url, childWin)
+        : null;
+    const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise, ampdoc);
     iframe[EMBED_PROP] = embed;
 
-    const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
-    extensions.installExtensionsInChildWindow(
-        childWin, spec.extensionIds || [], opt_preinstallCallback);
+    if (ampdoc && ampdocFieExperimentOn) {
+      extensions.installExtensionsInFie(
+        ampdoc,
+        spec.extensionIds || [],
+        opt_preinstallCallback
+      );
+    } else {
+      extensions.installExtensionsInChildWindow(
+        childWin,
+        spec.extensionIds || [],
+        opt_preinstallCallback
+      );
+    }
     // Ready to be shown.
     embed.startRender_();
     return embed;
   });
 }
-
 
 /**
  * Returns `true` when iframe is ready.
@@ -227,12 +257,13 @@ function isIframeReady(iframe) {
   // no other reliable signal for `readyState` in a child window and thus
   // the best way to check is to see the contents of the body.
   const childDoc = iframe.contentWindow && iframe.contentWindow.document;
-  return !!(childDoc &&
-      isDocumentReady(childDoc) &&
-      childDoc.body &&
-      childDoc.body.firstChild);
+  return !!(
+    childDoc &&
+    isDocumentReady(childDoc) &&
+    childDoc.body &&
+    childDoc.body.firstChild
+  );
 }
-
 
 /**
  * Merges base and fonts into html document.
@@ -271,13 +302,16 @@ function mergeHtml(spec) {
   if (spec.fonts) {
     spec.fonts.forEach(font => {
       result.push(
-          `<link href="${escapeHtml(font)}" rel="stylesheet" type="text/css">`);
+        `<link href="${escapeHtml(font)}" rel="stylesheet" type="text/css">`
+      );
     });
   }
 
   // Load CSP
-  result.push('<meta http-equiv=Content-Security-Policy ' +
-      'content="script-src \'none\';object-src \'none\';child-src \'none\'">');
+  result.push(
+    '<meta http-equiv=Content-Security-Policy ' +
+      "content=\"script-src 'none';object-src 'none';child-src 'none'\">"
+  );
 
   // Postambule.
   if (ip > 0) {
@@ -289,7 +323,6 @@ function mergeHtml(spec) {
   return result.join('');
 }
 
-
 /**
  * Exposes `mergeHtml` for testing purposes.
  * @param {!FriendlyIframeSpec} spec
@@ -298,7 +331,6 @@ function mergeHtml(spec) {
 export function mergeHtmlForTesting(spec) {
   return mergeHtml(spec);
 }
-
 
 /**
  * A "friendly iframe" embed. This is the iframe that's fully accessible to
@@ -311,18 +343,21 @@ export function mergeHtmlForTesting(spec) {
  * resources.
  */
 export class FriendlyIframeEmbed {
-
   /**
    * @param {!HTMLIFrameElement} iframe
    * @param {!FriendlyIframeSpec} spec
    * @param {!Promise} loadedPromise
+   * @param {?./service/ampdoc-impl.AmpDocFie} ampdoc
    */
-  constructor(iframe, spec, loadedPromise) {
+  constructor(iframe, spec, loadedPromise, ampdoc) {
     /** @const {!HTMLIFrameElement} */
     this.iframe = iframe;
 
     /** @const {!Window} */
-    this.win = /** @type{!Window} */(iframe.contentWindow);
+    this.win = /** @type {!Window} */ (iframe.contentWindow);
+
+    /** @const {?./service/ampdoc-impl.AmpDocFie} */
+    this.ampdoc = ampdoc;
 
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;
@@ -348,6 +383,9 @@ export class FriendlyIframeEmbed {
 
     /** @private @const {!Promise} */
     this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
+    if (this.ampdoc) {
+      this.whenReady().then(() => this.ampdoc.setReady());
+    }
   }
 
   /**
@@ -406,13 +444,17 @@ export class FriendlyIframeEmbed {
     return this.signals_.whenSignal(CommonSignals.INI_LOAD);
   }
 
-  /** @private */
+  /**
+   * @private
+   * @restricted
+   */
   startRender_() {
     if (this.host) {
       this.host.renderStarted();
     } else {
       this.signals_.signal(CommonSignals.RENDER_START);
     }
+    // Common signal RENDER_START indicates time to toggle visibility
     setStyle(this.iframe, 'visibility', '');
     if (this.win.document && this.win.document.body) {
       this.win.document.documentElement.classList.add('i-amphtml-fie');
@@ -429,9 +471,11 @@ export class FriendlyIframeEmbed {
       rect = this.host.getLayoutBox();
     } else {
       rect = layoutRectLtwh(
-          0, 0,
-          this.win./*OK*/innerWidth,
-          this.win./*OK*/innerHeight);
+        0,
+        0,
+        this.win./*OK*/ innerWidth,
+        this.win./*OK*/ innerHeight
+      );
     }
     Promise.all([
       this.whenReady(),
@@ -464,6 +508,7 @@ export class FriendlyIframeEmbed {
   /**
    * @param {boolean} visible
    * @private
+   * @restricted
    */
   setVisible_(visible) {
     if (this.visible_ != visible) {
@@ -477,96 +522,100 @@ export class FriendlyIframeEmbed {
    * @visibleForTesting
    */
   getBodyElement() {
-    return /** @type {!HTMLBodyElement} */ (
-        (this.iframe.contentDocument || this.iframe.contentWindow.document)
-            .body);
-  }
-
-  /**
-   * @return {!./service/vsync-impl.Vsync}
-   * @visibleForTesting
-   */
-  getVsync() {
-    return Services.vsyncFor(this.win);
+    return /** @type {!HTMLBodyElement} */ ((
+      this.iframe.contentDocument || this.iframe.contentWindow.document
+    ).body);
   }
 
   /**
    * @return {!./service/resources-impl.Resources}
-   * @visibleForTesting
+   * @private
    */
-  getResources() {
+  getResources_() {
     return Services.resourcesForDoc(this.iframe);
   }
 
   /**
    * Runs a measure/mutate cycle ensuring that the iframe change is propagated
    * to the resource manager.
-   * @param {{measure: (Function|undefined), mutate: (Function|undefined)}} task
-   * @param {!Object=} opt_state
+   * @param {{measure: (function()|undefined), mutate: function()}} task
    * @return {!Promise}
    * @private
    */
-  runVsyncOnIframe_(task, opt_state) {
-    if (task.mutate && !task.measure) {
-      return this.getResources().mutateElement(this.iframe, () => {
-        task.mutate(opt_state);
-      });
-    }
-    return new Promise(resolve => {
-      this.getVsync().measure(() => {
-        task.measure(opt_state);
-
-        if (!task.mutate) {
-          return resolve();
-        }
-
-        this.runVsyncOnIframe_({mutate: task.mutate}, opt_state)
-            .then(resolve);
-      });
-    });
+  measureMutate_(task) {
+    return this.getResources_().measureMutateElement(
+      this.iframe,
+      task.measure || null,
+      task.mutate
+    );
   }
 
   /**
    * @return {!Promise}
    */
   enterFullOverlayMode() {
-    return this.runVsyncOnIframe_({
-      measure: state => {
-        const iframeRect = this.iframe./*OK*/getBoundingClientRect();
+    const ampAdParent = dev().assertElement(this.iframe.parentNode);
 
-        state.bodyStyle = {
-          'background': 'transparent',
-          'position': 'absolute',
-          'top': px(iframeRect.top),
-          'left': px(iframeRect.left),
-          'width': px(iframeRect.width),
-          'height': px(iframeRect.height),
-          'bottom': 'auto',
-          'right': 'auto',
+    // Security assertion. Otherwise any 3p frame could request lighbox mode.
+    userAssert(
+      ampAdParent.tagName.toLowerCase() == 'amp-ad',
+      'Only <amp-ad> is allowed to enter lightbox mode.'
+    );
+
+    let bodyStyle;
+
+    return this.measureMutate_({
+      measure: () => {
+        const rect = this.host
+          ? this.host.getLayoutBox()
+          : this.iframe./*OK*/ getBoundingClientRect();
+
+        // Offset by scroll top as iframe will be position: fixed.
+        const dy = -Services.viewportForDoc(this.iframe).getScrollTop();
+        const {top, left, width, height} = moveLayoutRect(rect, /* dx */ 0, dy);
+
+        // Offset body by header height to prevent visual jump.
+        bodyStyle = {
+          top: px(top),
+          left: px(left),
+          width: px(width),
+          height: px(height),
         };
       },
-      mutate: state => {
-        setStyles(this.iframe, {
+      mutate: () => {
+        // !important to prevent abuse e.g. box @ ltwh = 0, 0, 0, 0
+        setImportantStyles(this.iframe, {
           'position': 'fixed',
           'left': 0,
           'right': 0,
-          'top': 0,
           'bottom': 0,
           'width': '100vw',
+          'top': 0,
           'height': '100vh',
         });
 
         // We need to override runtime-level !important rules
-        setImportantStyles(this.getBodyElement(), state.bodyStyle);
+        setImportantStyles(this.getBodyElement(), {
+          'background': 'transparent',
+          'position': 'absolute',
+          'bottom': 'auto',
+          'right': 'auto',
+
+          // Read during vsync measure phase.
+          'top': bodyStyle.top,
+          'left': bodyStyle.left,
+          'width': bodyStyle.width,
+          'height': bodyStyle.height,
+        });
       },
-    }, {});
+    });
   }
 
   /**
    * @return {!Promise}
    */
   leaveFullOverlayMode() {
-    return this.runVsyncOnIframe_({
+    return this.measureMutate_({
       mutate: () => {
         resetStyles(this.iframe, [
           'position',
@@ -579,7 +628,7 @@ export class FriendlyIframeEmbed {
         ]);
 
         // we're not resetting background here as we need to set it to
-        // transparent permanently (see TODO)
+        // transparent permanently.
         resetStyles(this.getBodyElement(), [
           'position',
           'top',
@@ -594,25 +643,35 @@ export class FriendlyIframeEmbed {
   }
 }
 
-
 /**
  * Returns the promise that will be resolved when all content elements
  * have been loaded in the initially visible set.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {!Window} hostWin
  * @param {!./layout-rect.LayoutRectDef} rect
  * @return {!Promise}
  */
-export function whenContentIniLoad(context, hostWin, rect) {
-  return Services.resourcesForDoc(context)
-      .getResourcesInRect(hostWin, rect)
-      .then(resources => {
-        const promises = [];
-        resources.forEach(r => {
-          if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
-            promises.push(r.loadedOnce());
-          }
-        });
-        return Promise.all(promises);
+export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
+  return Services.resourcesForDoc(elementOrAmpDoc)
+    .getResourcesInRect(hostWin, rect)
+    .then(resources => {
+      const promises = [];
+      resources.forEach(r => {
+        if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
+          promises.push(r.loadedOnce());
+        }
       });
+      return Promise.all(promises);
+    });
+}
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isInFie(element) {
+  return (
+    element.classList.contains('i-amphtml-fie') ||
+    !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
+  );
 }

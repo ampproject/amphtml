@@ -15,12 +15,11 @@
  */
 
 export class ImaPlayerData {
-
   /**
    * Create a new ImaPlayerData object.
    *
-   * @param {!Number} curentTime
-   * @param {!Number} duration
+   * @param {number} currentTime
+   * @param {number} duration
    * @param {!Array} playedRanges
    */
   constructor(currentTime = 0, duration = 1, playedRanges = []) {
@@ -44,8 +43,8 @@ export class ImaPlayerData {
     this.duration = videoPlayer.duration;
 
     // Adapt videoPlayer.played for the playedRanges format AMP wants.
-    const played = videoPlayer.played;
-    const length = played.length;
+    const {played} = videoPlayer;
+    const {length} = played;
     this.playedRanges = [];
     for (let i = 0; i < length; i++) {
       this.playedRanges.push([played.start(i), played.end(i)]);

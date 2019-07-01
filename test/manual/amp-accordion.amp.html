@@ -19,11 +19,13 @@
   }
   </style>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
+
 </head>
 <body>
   <h1>AMP #0</h1>
-  <amp-accordion>
+  <amp-accordion animate expand-single-section>
     <section>
       <h2 tabindex="0">Section 1</h2>
       <div>
@@ -61,5 +63,15 @@
     </section>
   </amp-accordion>
 
+  <h1>AMP Accordion Media Query Test</h1>
+
+  <amp-accordion media="(min-width: 600px)">
+    <section>
+      <h1>
+        Title
+      </h1>
+      <p>Bunch of awesome content</p>
+    </section>
+  </amp-accordion>
 </body>
 </html>

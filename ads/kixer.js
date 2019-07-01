@@ -15,7 +15,7 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
-import {parseUrl} from '../src/url';
+import {parseUrlDeprecated} from '../src/url';
 
 /* global
 __kxamp: false,
@@ -28,7 +28,6 @@ __kx_viewability: false,
  * @param {!Window} global
  * @param {!Object} data
  */
-
 export function kixer(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
 
@@ -55,11 +54,13 @@ export function kixer(global, data) {
   const kxviewCheck = function(intersectionEntry) {
     inView = intersectionEntry.intersectionRatio > 0.5; // Half of the unit is in the viewport
     if (inView) {
-      if (!viewed && viewTimer == null) { // If the ad hasn't been viewed and the timer is not set
+      if (!viewed && viewTimer == null) {
+        // If the ad hasn't been viewed and the timer is not set
         viewTimer = setTimeout(kxviewFire, 900); // Set a Timeout to check the ad in 900ms and fire the view
       }
     } else {
-      if (viewTimer) { // If the Timeout is set
+      if (viewTimer) {
+        // If the Timeout is set
         clearTimeout(viewTimer); // Clear the Timeout
         viewTimer = null;
       }
@@ -67,7 +68,8 @@ export function kixer(global, data) {
   };
 
   const kxviewFire = function() {
-    if (inView) { // if the ad is still in the viewport
+    if (inView) {
+      // if the ad is still in the viewport
       if (typeof __kx_viewability.process_locked === 'function') {
         viewed = true;
         __kx_viewability.process_locked(data.adslot); // Fire kixer view
@@ -82,7 +84,7 @@ export function kixer(global, data) {
   });
 
   loadScript(global, 'https://cdn.kixer.com/ad/load.js', () => {
-    global.__kx_domain = parseUrl(global.context.sourceUrl).hostname; // Get domain
+    global.__kx_domain = parseUrlDeprecated(global.context.sourceUrl).hostname; // Get domain
     __kxamp[data.adslot] = 1;
     __kx_ad_slots.push(data.adslot);
     __kx_ad_start();

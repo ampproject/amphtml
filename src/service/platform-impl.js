@@ -16,13 +16,11 @@
 
 import {registerServiceBuilder} from '../service';
 
-
 /**
  * A helper class that provides information about device/OS/browser currently
  * running.
  */
 export class Platform {
-
   /**
    * @param {!Window} win
    */
@@ -52,9 +50,14 @@ export class Platform {
    * @return {boolean}
    */
   isSafari() {
-    return /Safari/i.test(this.navigator_.userAgent) &&
-        !this.isChrome() && !this.isIe() && !this.isEdge() && !this.isFirefox()
-        && !this.isOpera();
+    return (
+      /Safari/i.test(this.navigator_.userAgent) &&
+      !this.isChrome() &&
+      !this.isIe() &&
+      !this.isEdge() &&
+      !this.isFirefox() &&
+      !this.isOpera()
+    );
   }
 
   /**
@@ -63,8 +66,11 @@ export class Platform {
    */
   isChrome() {
     // Also true for MS Edge :)
-    return /Chrome|CriOS/i.test(this.navigator_.userAgent) && !this.isEdge()
-        && !this.isOpera();
+    return (
+      /Chrome|CriOS/i.test(this.navigator_.userAgent) &&
+      !this.isEdge() &&
+      !this.isOpera()
+    );
   }
 
   /**
@@ -111,6 +117,14 @@ export class Platform {
   }
 
   /**
+   * Whether the current browser is running on Windows.
+   * @return {boolean}
+   */
+  isWindows() {
+    return /Windows/i.test(this.navigator_.userAgent);
+  }
+
+  /**
    * Whether the current browser is isStandalone.
    * @return {boolean}
    */
@@ -119,13 +133,22 @@ export class Platform {
   }
 
   /**
+   * Whether the current platform matches a bot user agent.
+   * @return {boolean}
+   */
+  isBot() {
+    return /bot/i.test(this.navigator_.userAgent);
+  }
+
+  /**
    * Returns the major version of the browser.
    * @return {number}
    */
   getMajorVersion() {
     if (this.isSafari()) {
-      return this.isIos() ? (this.getIosMajorVersion() || 0) :
-          this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
+      return this.isIos()
+        ? this.getIosMajorVersion() || 0
+        : this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
     }
     if (this.isChrome()) {
       return this.evalMajorVersion_(/(Chrome|CriOS)\/(\d+)/, 2);
@@ -166,7 +189,7 @@ export class Platform {
    * Returns the minor ios version in string.
    * The ios version can contain two numbers (10.2) or three numbers (10.2.1).
    * Direct string equality check is not suggested, use startWith instead.
-   * @returns {string}
+   * @return {string}
    */
   getIosVersionString() {
     if (!this.navigator_.userAgent) {
@@ -175,8 +198,9 @@ export class Platform {
     if (!this.isIos()) {
       return '';
     }
-    let version = this.navigator_.userAgent
-        .match(/OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/);
+    let version = this.navigator_.userAgent.match(
+      /OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/
+    );
     if (!version) {
       return '';
     }
@@ -195,12 +219,11 @@ export class Platform {
     }
     return Number(currentIosVersion.split('.')[0]);
   }
-};
-
+}
 
 /**
  * @param {!Window} window
  */
 export function installPlatformService(window) {
   return registerServiceBuilder(window, 'platform', Platform);
-};
+}

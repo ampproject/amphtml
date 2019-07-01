@@ -18,15 +18,17 @@ import {AmpA4A} from '../amp-a4a';
 import {dict} from '../../../../src/utils/object';
 
 /** @type {string} @private */
-export const TEST_URL = 'http://iframe.localhost:' + location.port +
-    '/test/fixtures/served/iframe.html?args';
+export const TEST_URL =
+  'http://iframe.localhost:' +
+  location.port +
+  '/test/fixtures/served/iframe.html?args';
 
 export class MockA4AImpl extends AmpA4A {
   getAdUrl() {
     return Promise.resolve(TEST_URL);
   }
 
-  updatePriority() {
+  updateLayoutPriority() {
     // Do nothing.
   }
 
@@ -38,7 +40,7 @@ export class MockA4AImpl extends AmpA4A {
     // Do nothing.
   }
 
-  deferMutate(callback) {
+  mutateElement(callback) {
     callback();
   }
 

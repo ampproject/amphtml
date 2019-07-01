@@ -4,20 +4,21 @@ package org.ampproject;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
-import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerPass;
-import com.google.javascript.jscomp.Es6CompilerTestCase;
+import com.google.javascript.jscomp.CompilerTestCase;
+import org.junit.Test;
 
 
 /**
  * Tests {@link AmpPass}.
  */
-public class AmpPassTestEnvTest extends Es6CompilerTestCase {
+public class AmpPassTestEnvTest extends CompilerTestCase {
 
-  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of();
+  ImmutableSet<String> suffixTypes = ImmutableSet.of();
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
       "IS_MINIFIED",
       IR.trueNode());
@@ -28,7 +29,7 @@ public class AmpPassTestEnvTest extends Es6CompilerTestCase {
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
     return new AmpPass(compiler, /* isProd */ false, suffixTypes, assignmentReplacements,
-        prodAssignmentReplacements);
+        prodAssignmentReplacements, "123");
   }
 
   @Override protected int getNumRepetitions() {
@@ -36,7 +37,7 @@ public class AmpPassTestEnvTest extends Es6CompilerTestCase {
     return 1;
   }
 
-  public void testGetModeLocalDevPropertyReplacementInTestingEnv() throws Exception {
+  @Test public void testGetModeLocalDevPropertyReplacementInTestingEnv() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -56,7 +57,7 @@ public class AmpPassTestEnvTest extends Es6CompilerTestCase {
             "})()"));
   }
 
-  public void testGetModeTestPropertyReplacementInTestingEnv() throws Exception {
+  @Test public void testGetModeTestPropertyReplacementInTestingEnv() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -76,7 +77,7 @@ public class AmpPassTestEnvTest extends Es6CompilerTestCase {
             "})()"));
   }
 
-  public void testGetModeMinifiedPropertyReplacementInTestingEnv() throws Exception {
+  @Test public void testGetModeMinifiedPropertyReplacementInTestingEnv() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -96,8 +97,8 @@ public class AmpPassTestEnvTest extends Es6CompilerTestCase {
             "})()"));
   }
 
-  public void testOptimizeGetModeFunction() throws Exception {
-    testEs6(
+  @Test public void testOptimizeGetModeFunction() throws Exception {
+    test(
         LINE_JOINER.join(
              "(function() {",
              "const IS_DEV = true;",

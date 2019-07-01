@@ -16,18 +16,21 @@ limitations under the License.
 
 # 24smi
 
+Provides support for [24smi](https://partner.24smi.info/) widgets.
+
 ## Example
 
 ```html
-  <amp-embed width="250" height="250"
-      type="24smi"
-      src="https://jsn.24smi.net/c/2/11232.js">
-  </amp-embed>
+<amp-embed width="250" height="250"
+    type="24smi"
+    src="https://jsn.24smi.net/c/2/11232.js">
+</amp-embed>
 ```
 
 ## Configuration
 
-For semantics of configuration, please contact [24smi](https://partner.24smi.info).
+For details on the configuration semantics, please contact [24smi](https://partner.24smi.info).
 
-Required parameters:
-- src
+### Required parameters
+
+- `src`

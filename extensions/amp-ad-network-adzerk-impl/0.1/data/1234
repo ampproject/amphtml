@@ -1,0 +1,9 @@
+{
+  "ampCreativeTemplateId": 456,
+  "templateMacroValues": {
+    "USER_NAME": "foo",
+    "USER_NUM": 9876,
+    "HTML_CONTENT": "<img src=https://img.com/>",
+    "IMG_SRC": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRESOzSW5espRF3Peen04hLpWZUVL5KY5ig9SYSdI19jN6ty0XB"
+  }
+}

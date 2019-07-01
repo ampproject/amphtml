@@ -14,12 +14,38 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
-import {getSourceOrigin, getSourceUrl} from '../src/url';
+import {loadScript, validateData} from '../3p/3p';
 
-const pubmineOptional = ['adsafe', 'section', 'wordads'],
-    pubmineRequired = ['siteid'],
-    pubmineURL = 'https://s.pubmine.com/head.js';
+const pubmineOptional = ['section', 'pt', 'ht'],
+  pubmineRequired = ['siteid'],
+  pubmineURL = 'https://s.pubmine.com/head.js';
+
+/**
+ * @param {!Object} data
+ * @param {!Window} global
+ */
+function initMasterFrame(data, global) {
+  global['__ATA_PP'] = {
+    pt: data['pt'] || 1,
+    ht: data['ht'] || 1,
+    tn: 'amp',
+    amp: true,
+  };
+  global['__ATA'] = global['__ATA'] || {};
+  global['__ATA']['cmd'] = global['__ATA']['cmd'] || [];
+  loadScript(global, pubmineURL);
+}
+
+/**
+ * @param {string} slotId
+ * @param {!Window} global
+ */
+function createSlot(slotId, global) {
+  const containerEl = global.document.getElementById('c');
+  const adSlot = global.document.createElement('div');
+  adSlot.setAttribute('id', slotId);
+  containerEl.appendChild(adSlot);
+}
 
 /**
  * @param {!Window} global
@@ -28,28 +54,25 @@ const pubmineOptional = ['adsafe', 'section', 'wordads'],
 export function pubmine(global, data) {
   validateData(data, pubmineRequired, pubmineOptional);
 
-  global._ipw_custom = { // eslint-disable-line google-camelcase/google-camelcase
-    adSafe: 'adsafe' in data ? data.adsafe : '0',
-    amznPay: [],
-    domain: getSourceOrigin(global.context.location.href),
-    pageURL: getSourceUrl(global.context.location.href),
-    wordAds: 'wordads' in data ? data.wordads : '0',
-    renderStartCallback: () => global.context.renderStart(),
+  const sectionId = data['siteid'] + (data['section'] || '1');
+
+  const slotConfig = {
+    sectionId,
+    height: data.height == 250 ? 250 : data.height - 15,
+    width: data.width,
+    window: global,
   };
-  writeScript(global, pubmineURL);
 
-  const o = {
-        sectionId: data['siteid'] + ('section' in data ? data.section : '1'),
-        height: data.height,
-        width: data.width,
-      },
-      wr = global.document.write;
+  const slotId = `atatags-${sectionId}`;
 
-  wr.call(global.document,
-      `<script type="text/javascript">
-      (function(g){g.__ATA.initAd(
-        {sectionId:${o.sectionId}, width:${o.width}, height:${o.height}});
-      })(window);
-    </script>`
-  );
+  createSlot(slotId, global);
+  const {isMaster} = global.context;
+  if (isMaster) {
+    initMasterFrame(data, global);
+  }
+  const master = isMaster ? global : global.context.master;
+  master['__ATA']['cmd']['push'](function() {
+    master['__ATA']['insertStyles'](global);
+    master['__ATA']['initSlot'](slotId, slotConfig);
+  });
 }

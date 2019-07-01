@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-
-import {rethrowAsync} from './../../../src/log';
 import {dict} from './../../../src/utils/object';
-import {parseJson} from './../../../src/json';
 import {getData} from './../../../src/event-helper';
+import {parseJson} from './../../../src/json';
 import {
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
+import {rethrowAsync} from './../../../src/log';
 
 /**
  * Returns a function, that, as long as it continues to be invoked, will not
@@ -37,23 +36,27 @@ import {
 export function debounce(func, wait, immediate) {
   let timeout;
   return function() {
-    const context = this, args = arguments;
+    const context = this,
+      args = arguments;
     clearTimeout(timeout);
     timeout = setTimeout(function() {
       timeout = null;
-      if (!immediate) { func.apply(context, args); };
+      if (!immediate) {
+        func.apply(context, args);
+      }
     }, wait);
-    if (immediate && !timeout) { func.apply(context, args); }
+    if (immediate && !timeout) {
+      func.apply(context, args);
+    }
   };
-};
-
+}
 
 /**
  *
  * Gets an element creator using a given document to create elements.
  * @export getElementCreator
  * @param {Document} document
- * @returns {!Function}
+ * @return {!Function}
  */
 export function getElementCreator(document) {
   return function createElement(name, className, children) {
@@ -64,11 +67,16 @@ export function getElementCreator(document) {
   };
 }
 
+/**
+ * Appends children to element
+ *
+ * @param {!Element} element
+ * @param {!Array<!Element>} children
+ */
 function appendChildren(element, children) {
-  children = (!children) ? [] : Array.isArray(children) ? children : [children];
+  children = !children ? [] : Array.isArray(children) ? children : [children];
   children.forEach(child => element.appendChild(child));
-};
-
+}
 
 /**
  * Handles a message from element by a given message name
@@ -98,12 +106,11 @@ function handlePlaybuzzItemEvent(event, eventName, handler) {
   }
 }
 
-
 /**
  * Parses Playbuzz Event Data
  *
  * @param {?JsonObject|string|undefined} data
- * @returns {?JsonObject|undefined} parsedObject
+ * @return {?JsonObject|undefined} parsedObject
  */
 function parsePlaybuzzEventData(data) {
   if (typeof data === 'object') {
@@ -114,8 +121,7 @@ function parsePlaybuzzEventData(data) {
     if (typeof data === 'string') {
       return parseJson(/** @type {string} */ (data));
     }
-  }
-  catch (e) {
+  } catch (e) {
     rethrowAsync('amp-playbuzz', err, e);
     return dict({});
   }
@@ -124,41 +130,57 @@ function parsePlaybuzzEventData(data) {
   return dict({});
 }
 
-
 /**
  * @param {Object} options
- * @returns {string} playbuzzEmbedUrl
+ * @return {string} playbuzzEmbedUrl
  */
 export function composeEmbedUrl(options) {
-  const embedUrl = options.itemUrl + '?' + serializeQueryString(dict({
-    'feed': true,
-    'implementation': 'amp',
-    'src': options.itemUrl,
-    'embedBy': '00000000-0000-0000-0000-000000000000',
-    'game': options.relativeUrl,
-    'comments': undefined,
-    'useComments': options.displayComments,
-    'gameInfo': options.displayItemInfo,
-    'useShares': options.displayShareBar,
-    'socialReferrer': false, //always false - will use parent url for sharing
-    'height': 'auto', //must pass as is - if not, makes problems in trivia (iframe height scrolling)
-    'parentUrl': options.parentUrl, //used for sharing
-    'parentHost': options.parentHost,
-  }));
+  const embedUrl =
+    options.itemUrl +
+    '?' +
+    serializeQueryString(
+      dict({
+        'feed': true,
+        'implementation': 'amp',
+        'src': options.itemUrl,
+        'embedBy': '00000000-0000-0000-0000-000000000000',
+        'game': options.relativeUrl,
+        'comments': undefined,
+        'useComments': options.displayComments,
+        'gameInfo': options.displayItemInfo,
+        'useShares': options.displayShareBar,
+        'socialReferrer': false, //always false - will use parent url for sharing
+        'height': 'auto', //must pass as is - if not, makes problems in trivia (iframe height scrolling)
+        'parentUrl': options.parentUrl, //used for sharing
+        'parentHost': options.parentHost,
+      })
+    );
   return embedUrl;
 }
 
+/**
+ * Satizes URL
+ *
+ * @param {*} localtion
+ * @return {string}
+ */
 function sanitizeUrl(localtion) {
-  return removeFragment(localtion.href)
-      .replace(localtion.protocol, ''); //remove scheme (cors) & fragment
+  return removeFragment(localtion.href).replace(localtion.protocol, ''); //remove scheme (cors) & fragment
 }
 
+/**
+ * Conposes src url
+ *
+ * @param {string} src
+ * @param {string} itemId
+ * @return {string}
+ */
 export function composeItemSrcUrl(src, itemId) {
   const DEFAULT_BASE_URL = '//www.playbuzz.com/';
 
-  const iframeSrcUrl = itemId ?
-    DEFAULT_BASE_URL + 'item/' + itemId :
-    sanitizeUrl(parseUrl(src));
+  const iframeSrcUrl = itemId
+    ? DEFAULT_BASE_URL + 'item/' + itemId
+    : sanitizeUrl(parseUrlDeprecated(src));
 
   return iframeSrcUrl;
 }

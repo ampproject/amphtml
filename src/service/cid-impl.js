@@ -22,38 +22,61 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
-import {getCookie, setCookie} from '../cookies';
-import {
-  registerServiceBuilderForDoc,
-  getServiceForDoc,
-} from '../service';
-import {
-  getSourceOrigin,
-  isProxyOrigin,
-  parseUrl,
-} from '../url';
-import {dict} from '../utils/object';
-import {isIframed} from '../dom';
-import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {Services} from '../services';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {parseJson, tryParseJson} from '../json';
-import {dev, user, rethrowAsync} from '../log';
-import {ViewerCidApi} from './viewer-cid-api';
+import {CacheCidApi} from './cache-cid-api';
 import {GoogleCidApi, TokenStatus} from './cid-api';
+import {Services} from '../services';
+import {ViewerCidApi} from './viewer-cid-api';
+import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {dev, rethrowAsync, user, userAssert} from '../log';
+import {dict} from '../utils/object';
+import {getCookie, setCookie} from '../cookies';
+import {getCryptoRandomBytesArray} from '../utils/bytes';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
+import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
+import {isIframed} from '../dom';
+import {parseJson, tryParseJson} from '../json';
+import {tryResolve} from '../utils/promise';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
 /**
  * We ignore base cids that are older than (roughly) one year.
  */
-const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
+export const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
 
 const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
 
 const CID_OPTOUT_STORAGE_KEY = 'amp-cid-optout';
 
 const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptOut';
+
+/**
+ * Tag for debug logging.
+ * @const @private {string}
+ */
+const TAG_ = 'CID';
+
+/**
+ * The name of the Google CID API as it appears in the meta tag to opt-in.
+ * @const @private {string}
+ */
+const GOOGLE_CID_API_META_NAME = 'amp-google-client-id-api';
+
+/**
+ * The mapping from analytics providers to CID scopes.
+ * @const @private {Object<string, string>}
+ */
+const CID_API_SCOPE_WHITELIST = {
+  'googleanalytics': 'AMP_ECID_GOOGLE',
+};
+
+/**
+ * The mapping from analytics providers to their CID API service keys.
+ * @const @private {Object<string, string>}
+ */
+const API_KEYS = {
+  'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
+};
 
 /**
  * A base cid string value and the time it was last read / stored.
@@ -73,39 +96,14 @@ let BaseCidInfoDef;
  */
 let GetCidDef;
 
-
-export class Cid {
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
-  constructor(ampdoc) {
-    /** @const */
-    this.ampdoc = ampdoc;
-
-    /**
-     * Cached base cid once read from storage to avoid repeated
-     * reads.
-     * @private {?Promise<string>}
-     */
-    this.baseCid_ = null;
-
-    /**
-     * Cache to store external cids. Scope is used as the key and cookie value
-     * is the value.
-     * @private {!Object<string, !Promise<string>>}
-     */
-    this.externalCidCache_ = Object.create(null);
-
-    /**
-     * @private {!ViewerCidApi}
-     */
-    this.viewerCidApi_ = new ViewerCidApi(ampdoc);
-
-    this.cidApi_ = new GoogleCidApi(ampdoc.win);
-  }
-
+/**
+ * @interface
+ */
+export class CidDef {
   /**
-   * @param {!GetCidDef} getCidStruct an object provides CID scope name for
+   * @param {!GetCidDef} unusedGetCidStruct an object provides CID scope name for
    *     proxy case and cookie name for non-proxy case.
-   * @param {!Promise} consent Promise for when the user has given consent
+   * @param {!Promise} unusedConsent Promise for when the user has given consent
    *     (if deemed necessary by the publisher) for use of the client
    *     identifier.
    * @param {!Promise=} opt_persistenceConsent Dedicated promise for when
@@ -124,47 +122,7 @@ export class Cid {
    *      This promise may take a long time to resolve if consent isn't
    *      given.
    */
-  get(getCidStruct, consent, opt_persistenceConsent) {
-    user().assert(
-        SCOPE_NAME_VALIDATOR.test(getCidStruct.scope)
-            && SCOPE_NAME_VALIDATOR.test(getCidStruct.cookieName),
-        'The CID scope and cookie name must only use the characters ' +
-        '[a-zA-Z0-9-_.]+\nInstead found: %s',
-        getCidStruct.scope);
-    const viewer = Services.viewerForDoc(this.ampdoc);
-    // TODO(zhouyx, #11888): Cleanup after tracing error
-    const trace = new Error('CID trace for: ');
-    return consent.then(() => {
-      return viewer.whenFirstVisible();
-    }).then(() => {
-      // Check if user has globally opted out of CID, we do this after
-      // consent check since user can optout during consent process.
-      return isOptedOutOfCid(this.ampdoc);
-    }).then(optedOut => {
-      if (optedOut) {
-        return '';
-      }
-      return viewer.whenNextVisible().then(() => {
-        const cidPromise = this.getExternalCid_(
-            getCidStruct, opt_persistenceConsent || consent);
-        // Getting the CID might involve an HTTP request. We timeout after 10s.
-        // NOTE: If viewer gets invisible afterwards we also timeout after 10s now. May need improvement
-        return Services.timerFor(this.ampdoc.win)
-            .timeoutPromise(10000, cidPromise,
-            `Getting cid for "${getCidStruct.scope}" timed out`)
-            .catch(error => {
-              const docVisible = viewer.isVisible();
-              const hasVisible = viewer.hasBeenVisible();
-              trace.message += error.message;
-              trace.message +=
-                  ` EXTRA INFO: doc isVisible: ${docVisible},` +
-                  ` doc hasBeenVisible ${hasVisible}`;
-              dev().error('CID', trace);
-              rethrowAsync(error);
-            });
-      });
-    });
-  }
+  get(unusedGetCidStruct, unusedConsent, opt_persistenceConsent) {}
 
   /**
    * User will be opted out of Cid issuance for all scopes.
@@ -172,24 +130,108 @@ export class Cid {
    *
    * @return {!Promise}
    */
+  optOut() {}
+}
+
+/**
+ * @implements {CidDef}
+ */
+class Cid {
+  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /** @const */
+    this.ampdoc = ampdoc;
+
+    /**
+     * Cached base cid once read from storage to avoid repeated
+     * reads.
+     * @private {?Promise<string>}
+     * @restricted
+     */
+    this.baseCid_ = null;
+
+    /**
+     * Cache to store external cids. Scope is used as the key and cookie value
+     * is the value.
+     * @private {!Object<string, !Promise<string>>}
+     * @restricted
+     */
+    this.externalCidCache_ = Object.create(null);
+
+    /**
+     * @private @const {!CacheCidApi}
+     */
+    this.cacheCidApi_ = new CacheCidApi(ampdoc);
+
+    /**
+     * @private {!ViewerCidApi}
+     */
+    this.viewerCidApi_ = new ViewerCidApi(ampdoc);
+
+    this.cidApi_ = new GoogleCidApi(ampdoc);
+
+    /** @private {?Object<string, string>} */
+    this.apiKeyMap_ = null;
+  }
+
+  /** @override */
+  get(getCidStruct, consent, opt_persistenceConsent) {
+    userAssert(
+      SCOPE_NAME_VALIDATOR.test(getCidStruct.scope) &&
+        SCOPE_NAME_VALIDATOR.test(getCidStruct.cookieName),
+      'The CID scope and cookie name must only use the characters ' +
+        '[a-zA-Z0-9-_.]+\nInstead found: %s',
+      getCidStruct.scope
+    );
+    return consent
+      .then(() => {
+        return Services.viewerForDoc(this.ampdoc).whenFirstVisible();
+      })
+      .then(() => {
+        // Check if user has globally opted out of CID, we do this after
+        // consent check since user can optout during consent process.
+        return isOptedOutOfCid(this.ampdoc);
+      })
+      .then(optedOut => {
+        if (optedOut) {
+          return '';
+        }
+        const cidPromise = this.getExternalCid_(
+          getCidStruct,
+          opt_persistenceConsent || consent
+        );
+        // Getting the CID might involve an HTTP request. We timeout after 10s.
+        return Services.timerFor(this.ampdoc.win)
+          .timeoutPromise(
+            10000,
+            cidPromise,
+            `Getting cid for "${getCidStruct.scope}" timed out`
+          )
+          .catch(error => {
+            rethrowAsync(error);
+          });
+      });
+  }
+
+  /** @override */
   optOut() {
     return optOutOfCid(this.ampdoc);
   }
 
   /**
    * Returns the "external cid". This is a cid for a specific purpose
-   * (Say Analytics provider X). It is unique per user, that purpose
+   * (Say Analytics provider X). It is unique per user, userAssert, that purpose
    * and the AMP origin site.
    * @param {!GetCidDef} getCidStruct
    * @param {!Promise} persistenceConsent
    * @return {!Promise<?string>}
    */
   getExternalCid_(getCidStruct, persistenceConsent) {
-    const scope = getCidStruct.scope;
+    const {scope} = getCidStruct;
     /** @const {!Location} */
-    const url = parseUrl(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     if (!isProxyOrigin(url)) {
-      const apiKey = this.viewerCidApi_.isScopeOptedIn(scope);
+      const apiKey = this.isScopeOptedIn_(scope);
       if (apiKey) {
         return this.cidApi_.getScopedCid(apiKey, scope).then(scopedCid => {
           if (scopedCid == TokenStatus.OPT_OUT) {
@@ -205,16 +247,88 @@ export class Cid {
       }
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
+
     return this.viewerCidApi_.isSupported().then(supported => {
       if (supported) {
-        return this.viewerCidApi_.getScopedCid(scope);
+        const apiKey = this.isScopeOptedIn_(scope);
+        return this.viewerCidApi_.getScopedCid(apiKey, scope);
       }
-      return getBaseCid(this, persistenceConsent)
-          .then(baseCid => {
-            return Services.cryptoFor(this.ampdoc.win).sha384Base64(
-                baseCid + getProxySourceOrigin(url) + scope);
-          });
+
+      if (this.cacheCidApi_.isSupported() && this.isScopeOptedIn_(scope)) {
+        return this.cacheCidApi_.getScopedCid(scope).then(scopedCid => {
+          if (scopedCid) {
+            return scopedCid;
+          }
+          return this.scopeBaseCid_(persistenceConsent, scope, url);
+        });
+      }
+      return this.scopeBaseCid_(persistenceConsent, scope, url);
     });
+  }
+
+  /**
+   *
+   * @param {!Promise} persistenceConsent
+   * @param {*} scope
+   * @param {!Location} url
+   * @return {*}
+   */
+  scopeBaseCid_(persistenceConsent, scope, url) {
+    return getBaseCid(this, persistenceConsent).then(baseCid => {
+      return Services.cryptoFor(this.ampdoc.win).sha384Base64(
+        baseCid + getProxySourceOrigin(url) + scope
+      );
+    });
+  }
+
+  /**
+   * Checks if the page has opted in CID API for the given scope.
+   * Returns the API key that should be used, or null if page hasn't opted in.
+   *
+   * @param {string} scope
+   * @return {string|undefined}
+   */
+  isScopeOptedIn_(scope) {
+    if (!this.apiKeyMap_) {
+      this.apiKeyMap_ = this.getOptedInScopes_();
+    }
+    return this.apiKeyMap_[scope];
+  }
+
+  /**
+   * Reads meta tags for opted in scopes.  Meta tags will have the form
+   * <meta name="provider-api-name" content="provider-name">
+   * @return {!Object<string, string>}
+   */
+  getOptedInScopes_() {
+    const apiKeyMap = {};
+    const optInMeta = this.ampdoc.win.document.head./*OK*/ querySelector(
+      `meta[name=${GOOGLE_CID_API_META_NAME}]`
+    );
+    if (optInMeta && optInMeta.hasAttribute('content')) {
+      const list = optInMeta.getAttribute('content').split(',');
+      list.forEach(item => {
+        item = item.trim();
+        if (item.indexOf('=') > 0) {
+          const pair = item.split('=');
+          const scope = pair[0].trim();
+          apiKeyMap[scope] = pair[1].trim();
+        } else {
+          const clientName = item;
+          const scope = CID_API_SCOPE_WHITELIST[clientName];
+          if (scope) {
+            apiKeyMap[scope] = API_KEYS[clientName];
+          } else {
+            user().warn(
+              TAG_,
+              `Unsupported client for Google CID API: ${clientName}.` +
+                `Please remove or correct ${optInMeta./*OK*/ outerHTML}`
+            );
+          }
+        }
+      });
+    }
+    return apiKeyMap;
   }
 }
 
@@ -222,14 +336,16 @@ export class Cid {
  * User will be opted out of Cid issuance for all scopes.
  * When opted-out Cid service will reject all `get` requests.
  *
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise}
  * @visibleForTesting
  */
 export function optOutOfCid(ampdoc) {
-
   // Tell the viewer that user has opted out.
-  Services.viewerForDoc(ampdoc)./*OK*/sendMessage(
-      CID_OPTOUT_VIEWER_MESSAGE, dict());
+  Services.viewerForDoc(ampdoc)./*OK*/ sendMessage(
+    CID_OPTOUT_VIEWER_MESSAGE,
+    dict()
+  );
 
   // Store the optout bit in storage
   return Services.storageForDoc(ampdoc).then(storage => {
@@ -245,12 +361,14 @@ export function optOutOfCid(ampdoc) {
  * @visibleForTesting
  */
 export function isOptedOutOfCid(ampdoc) {
-  return Services.storageForDoc(ampdoc).then(storage => {
-    return storage.get(CID_OPTOUT_STORAGE_KEY).then(val => !!val);
-  }).catch(() => {
-    // If we fail to read the flag, assume not opted out.
-    return false;
-  });
+  return Services.storageForDoc(ampdoc)
+    .then(storage => {
+      return storage.get(CID_OPTOUT_STORAGE_KEY).then(val => !!val);
+    })
+    .catch(() => {
+      // If we fail to read the flag, assume not opted out.
+      return false;
+    });
 }
 
 /**
@@ -276,8 +394,8 @@ function setCidCookie(win, scope, cookie) {
  * @return {!Promise<?string>}
  */
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
-  const win = cid.ampdoc.win;
-  const scope = getCidStruct.scope;
+  const {win} = cid.ampdoc;
+  const {scope} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
   const existingCookie = getCookie(win, cookieName);
 
@@ -294,27 +412,25 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
     if (/^amp-/.test(existingCookie)) {
       setCidCookie(win, cookieName, existingCookie);
     }
-    return /** @type {!Promise<?string>} */ (
-        Promise.resolve(existingCookie));
+    return /** @type {!Promise<?string>} */ (Promise.resolve(existingCookie));
   }
 
   const newCookiePromise = getNewCidForCookie(win)
-      // Create new cookie, always prefixed with "amp-", so that we can see from
-      // the value whether we created it.
-      .then(randomStr => 'amp-' + randomStr);
+    // Create new cookie, always prefixed with "amp-", so that we can see from
+    // the value whether we created it.
+    .then(randomStr => 'amp-' + randomStr);
 
   // Store it as a cookie based on the persistence consent.
-  Promise.all([newCookiePromise, persistenceConsent])
-      .then(results => {
-        // The initial CID generation is inherently racy. First one that gets
-        // consent wins.
-        const newCookie = results[0];
-        const relookup = getCookie(win, cookieName);
-        if (!relookup) {
-          setCidCookie(win, cookieName, newCookie);
-        }
-      });
-  return cid.externalCidCache_[scope] = newCookiePromise;
+  Promise.all([newCookiePromise, persistenceConsent]).then(results => {
+    // The initial CID generation is inherently racy. First one that gets
+    // consent wins.
+    const newCookie = results[0];
+    const relookup = getCookie(win, cookieName);
+    if (!relookup) {
+      setCidCookie(win, cookieName, newCookie);
+    }
+  });
+  return (cid.externalCidCache_[scope] = newCookiePromise);
 }
 
 /**
@@ -326,7 +442,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
  *     factored into its own package.
  */
 export function getProxySourceOrigin(url) {
-  user().assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
+  userAssert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
   return getSourceOrigin(url);
 }
 
@@ -344,9 +460,9 @@ function getBaseCid(cid, persistenceConsent) {
   if (cid.baseCid_) {
     return cid.baseCid_;
   }
-  const win = cid.ampdoc.win;
+  const {win} = cid.ampdoc;
 
-  return cid.baseCid_ = read(cid.ampdoc).then(stored => {
+  return (cid.baseCid_ = read(cid.ampdoc).then(stored => {
     let needsToStore = false;
     let baseCid;
 
@@ -370,7 +486,7 @@ function getBaseCid(cid, persistenceConsent) {
     }
 
     return baseCid;
-  });
+  }));
 }
 
 /**
@@ -381,9 +497,7 @@ function getBaseCid(cid, persistenceConsent) {
  * @param {string} cidString Actual cid string to store.
  */
 function store(ampdoc, persistenceConsent, cidString) {
-  const win = ampdoc.win;
-  // TODO(lannka, #4457): ideally, we should check if viewer has the capability
-  // of CID storage, rather than if it is iframed.
+  const {win} = ampdoc;
   if (isIframed(win)) {
     // If we are being embedded, try to save the base cid to the viewer.
     viewerBaseCid(ampdoc, createCidData(cidString));
@@ -414,17 +528,19 @@ export function viewerBaseCid(ampdoc, opt_data) {
     if (!trusted) {
       return undefined;
     }
-    return viewer.whenNextVisible().then(() => {
-      return viewer.sendMessageAwaitResponse('cid', opt_data);
-    }).then(data => {
-      // TODO(dvoytenko, #9019): cleanup the legacy CID format.
+    // TODO(lannka, #11060): clean up when all Viewers get migrated
+    dev().expectedError('CID', 'Viewer does not provide cap=cid');
+    return viewer.sendMessageAwaitResponse('cid', opt_data).then(data => {
       // For backward compatibility: #4029
       if (data && !tryParseJson(data)) {
-        // TODO(dvoytenko, #9019): use this for reporting: dev().error('cid', 'invalid cid format');
-        return JSON.stringify(dict({
-          'time': Date.now(), // CID returned from old API is always fresh
-          'cid': data,
-        }));
+        // TODO(lannka, #11060): clean up when all Viewers get migrated
+        dev().expectedError('CID', 'invalid cid format');
+        return JSON.stringify(
+          dict({
+            'time': Date.now(), // CID returned from old API is always fresh
+            'cid': data,
+          })
+        );
       }
       return data;
     });
@@ -438,10 +554,12 @@ export function viewerBaseCid(ampdoc, opt_data) {
  * @return {string}
  */
 function createCidData(cidString) {
-  return JSON.stringify(dict({
-    'time': Date.now(),
-    'cid': cidString,
-  }));
+  return JSON.stringify(
+    dict({
+      'time': Date.now(),
+      'cid': cidString,
+    })
+  );
 }
 
 /**
@@ -452,7 +570,7 @@ function createCidData(cidString) {
  * @return {!Promise<?BaseCidInfoDef>}
  */
 function read(ampdoc) {
-  const win = ampdoc.win;
+  const {win} = ampdoc;
   let data;
   try {
     data = win.localStorage.getItem('amp-cid');
@@ -516,8 +634,13 @@ function getEntropy(win) {
   }
 
   // Support for legacy browsers.
-  return String(win.location.href + Date.now() +
-      win.Math.random() + win.screen.width + win.screen.height);
+  return String(
+    win.location.href +
+      Date.now() +
+      win.Math.random() +
+      win.screen.width +
+      win.screen.height
+  );
 }
 
 /**
@@ -532,9 +655,12 @@ function getNewCidForCookie(win) {
   } else {
     // If our entropy is a pure random number, we can just directly turn it
     // into base 64
-    return Promise.resolve(base64UrlEncodeFromBytes(entropy)
+    const cast = /** @type {!Uint8Array} */ (entropy);
+    return tryResolve(() =>
+      base64UrlEncodeFromBytes(cast)
         // Remove trailing padding
-        .replace(/\.+$/, ''));
+        .replace(/\.+$/, '')
+    );
   }
 }
 

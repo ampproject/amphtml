@@ -27,7 +27,6 @@ const LABEL_MAP = {
  * "start to layout" of an element.
  */
 export class LayoutDelayMeter {
-
   /**
    * @param {!Window} win
    * @param {number} priority
@@ -47,6 +46,9 @@ export class LayoutDelayMeter {
     this.label_ = LABEL_MAP[priority];
   }
 
+  /**
+   *
+   */
   enterViewport() {
     if (!this.label_ || this.firstInViewportTime_) {
       return;
@@ -55,6 +57,9 @@ export class LayoutDelayMeter {
     this.tryMeasureDelay_();
   }
 
+  /**
+   * starts layout
+   */
   startLayout() {
     if (!this.label_ || this.firstLayoutTime_) {
       return;
@@ -63,6 +68,9 @@ export class LayoutDelayMeter {
     this.tryMeasureDelay_();
   }
 
+  /**
+   * Tries to measure delay
+   */
   tryMeasureDelay_() {
     if (!this.performance_ || !this.performance_.isPerformanceTrackingOn()) {
       return;
@@ -76,7 +84,9 @@ export class LayoutDelayMeter {
       return;
     }
     const delay = this.win_.Math.max(
-        this.firstLayoutTime_ - this.firstInViewportTime_, 0);
+      this.firstLayoutTime_ - this.firstInViewportTime_,
+      0
+    );
     this.performance_.tickDelta(dev().assertString(this.label_), delay);
     this.performance_.throttledFlush();
     this.done_ = true;

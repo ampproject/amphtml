@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Displays a dismissable notification to the user.
+---
 <!--
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,15 +21,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-user-notification"></a> `amp-user-notification`
+# amp-user-notification
 
 [TOC]
 
+Displays a dismissable notification to the user.
+
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a dismissable notification to the user. </td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
@@ -100,7 +105,7 @@ You can add it as a query string field (e.g.,
 If the `data-show-if-href` attribute is not specified, AMP will only check if the notification with the specified ID has been "dismissed" by the user locally. If not, the notification will be shown.
 
 {% call callout('Important', type='caution') %}
-For handling CORS requests and responses, see the [AMP CORS spec](../../spec/amp-cors-requests.md).
+For handling CORS requests and responses, see the [AMP CORS spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).
 {% endcall %}
 
 **CORS GET request** query string fields: `elementId`, `ampUserId`
@@ -119,6 +124,70 @@ Example:
 { "showNotification": true }
 ```
 
+##### data-show-if-geo
+
+When specified `amp-user-notification` will only trigger if an `amp-geo` country group for matches one of the comma delimited list of country groups.
+
+Example:
+
+In this example if the user is located in Mexico (`mx`) the `amp-geo` will return the `nafta` country group.  `nafta` is in the `data-show-if-geo` attribute so the notification will display.
+
+```html
+<amp-geo layout=nodisplay>
+  <script type="application/json">
+    {
+      "ISOCountryGroups": {
+      "nafta": [ "ca", "mx", "us" ],
+      "waldo": [ "unknown" ],
+      "anz": [ "au", "nz" ]
+      }
+    }
+  </script>
+</amp-geo>
+
+<amp-user-notification
+    layout=nodisplay
+    id="amp-user-notification1"
+    data-show-if-geo="nafta, anz"
+    data-dismiss-href="https://example.com/api/echo/post">
+    This notice is only shown in Canada, Mexico and USA.
+    <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
+</amp-user-notification>
+```
+
+##### data-show-if-not-geo
+
+This is the opposite of `data-show-if-geo`.  When specified `amp-user-notification` will only trigger if the `amp-geo` country group does not match the supplied list.
+
+Example:
+
+In this example user in Mexico would not trigger the notification, but a user in an unknon country (assigned to the  `whereIsWaldo` group) would trigger the notifcation.
+
+```html
+<amp-geo layout=nodisplay>
+  <script type="application/json">
+    {
+      "ISOCountryGroups": {
+      "nafta": [ "ca", "mx", "us" ],
+      "whereIsWaldo": [ "unknown" ],
+      "anz": [ "au", "nz" ]
+      }
+    }
+  </script>
+</amp-geo>
+
+<amp-user-notification
+    layout=nodisplay
+    id="amp-user-notification1"
+    data-show-if-not-geo="anz, nafta"
+    data-dismiss-href="https://example.com/api/echo/post">
+    This notice is only shown in Canada, Mexico and USA.
+    <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
+</amp-user-notification>
+```
+
+Only one `data-show-if-*` attribute may be set.
+
 ##### data-dismiss-href (optional)
 
 When specified, AMP will make a CORS POST request to the specified URL transmitting the `elementId` and `ampUserId` only when the user has explicitly agreed.
@@ -126,7 +195,7 @@ When specified, AMP will make a CORS POST request to the specified URL transmitt
 If this attribute is not specified, AMP will not send a request upon dismissal, and will only store the "dismissed" flag for the specified ID locally.
 
 {% call callout('Important', type='caution') %}
-For handling CORS requests and responses, see the [AMP CORS spec](../../spec/amp-cors-requests.md).
+For handling CORS requests and responses, see the [AMP CORS spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).
 {% endcall %}
 
 **POST request** JSON fields: `elementId`, `ampUserId`
@@ -191,6 +260,7 @@ This notification should ALWAYS show - if shouldShow endpoint response was true.
 <a href="#learn-more">Learn more.</a>
 <button on="tap:amp-user-notification7.dismiss">Dismiss</button>
 </amp-user-notification>
+```
 
 ## JSON Fields
 
@@ -247,7 +317,7 @@ amp-user-notification.amp-active {
 ```
 
 ## Actions
-The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
+The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events):
 
 <table>
   <tr>
@@ -258,10 +328,6 @@ The `amp-user-notification` exposes the following actions that you can use [AMP 
     <td>dismiss (default)</td>
     <td>Closes the user notification; see <a href="#usage">usage</a> for more details.</td>
   </tr>
-  <tr>
-    <td>optoutOfCid</td>
-    <td>User will be opted out of Client ID generation for all scopes.</td>
-  </tr>
 </table>
 
 ## Delaying Client ID generation until the notification is acknowledged
@@ -269,8 +335,8 @@ The `amp-user-notification` exposes the following actions that you can use [AMP 
 Optionally, you can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 
 - [CLIENT_ID URL substitution](../../spec/amp-var-substitutions.md#client-id)
-- [`amp-ad`](../amp-ad/amp-ad.md)
-- [`amp-analytics`](../amp-analytics/amp-analytics.md)
+- [`amp-ad`](https://www.ampproject.org/docs/reference/components/amp-ad)
+- [`amp-analytics`](https://www.ampproject.org/docs/reference/components/amp-analytics)
 
 ## Validation
 

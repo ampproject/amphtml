@@ -13,30 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {urls} from './config';
+import {DomFingerprint} from './utils/dom-fingerprint';
 import {Services} from './services';
+import {dict} from './utils/object.js';
 import {experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
-import {DomFingerprint} from './utils/dom-fingerprint';
-import {dict} from './utils/object.js';
+import {internalRuntimeVersion} from './internal-version';
+import {urls} from './config';
 
 /**
  * Produces the attributes for the ad template.
  * @param {!Window} parentWindow
  * @param {!AmpElement} element
- * @param {!string} sentinel
+ * @param {string} sentinel
  * @param {!JsonObject=} attributes
  * @return {!JsonObject}
  */
 export function getContextMetadata(
-    parentWindow, element, sentinel, attributes) {
+  parentWindow,
+  element,
+  sentinel,
+  attributes
+) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   attributes = attributes ? attributes : dict();
   attributes['width'] = getLengthNumeral(width);
   attributes['height'] = getLengthNumeral(height);
+  if (element.getAttribute('title')) {
+    attributes['title'] = element.getAttribute('title');
+  }
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
   // see us as the logical origin, so telling them we are about:srcdoc
@@ -52,10 +60,20 @@ export function getContextMetadata(
   // TODO(alanorozco): Redesign data structure so that fields not exposed by
   // AmpContext are not part of this object.
   const layoutRect = element.getPageLayoutBox();
+
+  // Use JsonObject to preserve field names so that ampContext can access
+  // values with name
+  // ampcontext.js and this file are compiled in different compilation unit
+
+  // Note: Field names can by perserved by using JsonObject, or by adding
+  // perserved name to extern. We are doing both right now.
+  // Please also add new introduced variable
+  // name to the extern list.
   attributes['_context'] = dict({
-    'ampcontextVersion': '$internalRuntimeVersion$',
-    'ampcontextFilepath': urls.thirdParty + '/$internalRuntimeVersion$' +
-        '/ampcontext-v0.js',
+    'ampcontextVersion': internalRuntimeVersion(),
+    'ampcontextFilepath': `${
+      urls.thirdParty
+    }/${internalRuntimeVersion()}/ampcontext-v0.js`,
     'sourceUrl': docInfo.sourceUrl,
     'referrer': referrer,
     'canonicalUrl': docInfo.canonicalUrl,
@@ -68,12 +86,14 @@ export function getContextMetadata(
     'mode': getModeObject(),
     'canary': isCanary(parentWindow),
     'hidden': !viewer.isVisible(),
-    'initialLayoutRect': layoutRect ? {
-      'left': layoutRect.left,
-      'top': layoutRect.top,
-      'width': layoutRect.width,
-      'height': layoutRect.height,
-    } : null,
+    'initialLayoutRect': layoutRect
+      ? {
+          'left': layoutRect.left,
+          'top': layoutRect.top,
+          'width': layoutRect.width,
+          'height': layoutRect.height,
+        }
+      : null,
     'initialIntersection': element.getIntersectionChangeEntry(),
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),

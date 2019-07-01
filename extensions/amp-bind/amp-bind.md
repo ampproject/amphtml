@@ -1,4 +1,15 @@
-# <a name="amp-bind"></a> `amp-bind`
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - email
+  - ads
+teaser:
+  text: Allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.
+---
+# amp-bind
+
+Adds custom interactivity with data binding and expressions.
 
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
@@ -16,11 +27,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+[TOC]
+
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Adds custom interactivity with data binding and expressions.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
@@ -63,20 +72,23 @@ In the following example, tapping the button changes the `<p>` element's text fr
 ```html
 <p [text]="'Hello ' + foo">Hello World</p>
 
-<button on="tap:AMP.setState({foo: 'amp-bind'})">
+<button on="tap:AMP.setState({foo: 'amp-bind'})">Say "Hello amp-bind"</button>
 ```
+
+{% call callout('Note', type='note') %}
+For performance and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means that the visual elements should be given a default state and not rely `amp-bind` for initial render.
+{% endcall %}
 
 ### How does it work?
 
 `amp-bind` has three main components:
 
 1. [State](#state): A document-scope, mutable JSON state. In the example above, the state is empty before tapping the button.  After tapping the button, the state is `{foo: 'amp-bind'}`.
-2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello' + foo`, which concatenates the string literal `'Hello '` and the variable state `foo`.
+2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello ' + foo`, which concatenates the string literal `'Hello '` and the state variable `foo`.
+There is a limit of 100 operands what can be used in an expression.
 3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes.
 
-{% call callout('Note', type='note') %}
-`amp-bind` does not evaluate expressions on page load, so there's no risk of content jumping unexpectedly. `amp-bind` also takes special care to ensure speed, security and performance on AMP pages.
-{% endcall %}
+`amp-bind` takes special care to ensure speed, security and performance on AMP pages.
 
 ### A slightly more complex example
 
@@ -156,6 +168,17 @@ Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or 
 - An `<amp-state>` element's child JSON has a maximum size of 100KB.
 - An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [Appendix](#amp-state-specification) for details.
 
+#### Refreshing state
+
+The `refresh` action is supported by this component and can be used to refresh the
+state's contents.
+
+```html
+<amp-state id="amp-state" ...></amp-state>
+<!-- Clicking the button will refresh and refetch the json in amp-state. -->
+<button on="tap:amp-state.refresh"></button>
+```
+
 #### Updating state with `AMP.setState()`
 
 The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges an object literal into the state. For example, when the below button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state.
@@ -225,7 +248,7 @@ null || 'default' // 'default'
     <th>Example</th>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods"><code>Array</code><sup>2</sup></a></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods"><code>Array</code></a><sup>1</sup></td>
     <td class="col-thirty">
       <code>concat</code><br>
       <code>filter</code><br>
@@ -237,12 +260,12 @@ null || 'default' // 'default'
       <code>reduce</code><br>
       <code>slice</code><br>
       <code>some</code><br>
+      <code>sort</code> (not-in-place)<br>
+      <code>splice</code> (not-in-place)<br>
     </td>
     <td>
-      <pre>// Returns true.
-[1, 2, 3].includes(1)</pre>
-      <pre>// Returns [2, 3].
-[1, 2, 3].filter(x => x >= 2)</pre>
+      <pre>// Returns [1, 2, 3].
+[3, 2, 1].sort()</pre>
       <pre>// Returns [1, 3, 5].
 [1, 2, 3].map((x, i) => x + i)</pre>
       <pre>// Returns 6.
@@ -283,7 +306,7 @@ null || 'default' // 'default'
     </td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math"><code>Math</code></a><sup>3</sup></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math"><code>Math</code></a><sup>2</sup></td>
     <td>
       <code>abs</code><br>
       <code>ceil</code><br>
@@ -299,7 +322,7 @@ abs(-1)</pre>
     </td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object"><code>Object</code></a><sup>3</sup></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object"><code>Object</code></a><sup>2</sup></td>
     <td>
       <code>keys</code><br>
       <code>values</code>
@@ -312,7 +335,7 @@ values({a: 1, b: 2}</pre>
   </tr>
   <tr>
     <td>
-      <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects"><code>Global</code></a><sup>3</sup>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects"><code>Global</code></a><sup>2</sup>
     </td>
     <td>
       <code>encodeURI</code><br>
@@ -323,33 +346,32 @@ values({a: 1, b: 2}</pre>
 encodeURIComponent('Hello world')</pre>
     </td>
   </tr>
-  <tr>
-    <td>
-      <a href="#custom-built-in-functions">Custom built-ins</a><sup>3</sup>
-    </td>
-    <td>
-      <code>splice</code><br>
-      <code>sort</code>
-    </td>
-    <td>
-      <pre>// Returns a new array [1, 47 ,3]. Does not splice in-place.
-splice([1, 2, 3], 1, 1, 47)</pre>
-      <pre>// Returns a new array: [1, 2, 3]. Does not sort in-place.
-sort([2, 1, 3])</pre>
-    </td>
-  </tr>
 </table>
 
-<sup>2</sup>Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`.<br>
-<sup>3</sup>Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
+<sup>1</sup>Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`. Also, `sort()` and `splice()` return modified copies instead of operating in-place.<br>
+<sup>2</sup>Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
+
+#### Defining macros with `amp-bind-macro`
+
+`amp-bind` expression fragments can be reused by defining an `amp-bind-macro`. The `amp-bind-macro` element allows you to define an expression that takes zero or more arguments and references the current state. A macro can be invoked like a function by referencing its `id` attribute value from anywhere in your doc.
+
+```html
+<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius"></amp-bind-macro>
+
+<div>
+  The circle has an area of <span [text]="circleArea(myCircle.radius)">0</span>.
+</div>
+```
+
+A macro can also call other macros <i>defined before itself</i>. A macro cannot call itself recursively.
 
 ### Bindings
 
-A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions).
+A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions). An alternative, XML-compatible syntax can also be used in the form of `data-amp-bind-property`.
 
 When the **state** changes, expressions are re-evaluated and the bound elements' properties are updated with the new expression results.
 
-`amp-bind` supports data bindings on four types of element state:
+`amp-bind` supports data bindings on five types of element state:
 
 <table>
   <tr>
@@ -368,7 +390,7 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Expression result must be a space-delimited string.</td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class">The <code>hidden</code> attribute</a></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden">The <code>hidden</code> attribute</a></td>
     <td><code>[hidden]</code></td>
     <td>Should be a boolean expression.</td>
   </tr>
@@ -378,18 +400,23 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Changes the width and/or height of the AMP element.</td>
   </tr>
   <tr>
+    <td>Accessibility states and properties</td>
+    <td><code>[aria-hidden]</code><br><code>[aria-label]</code><br>etc.</td>
+    <td>Used for dynamically updating information available to assistive technologies like screen readers.</td>
+  </tr>
+  <tr>
     <td>Element-specific attributes</td>
     <td><a href="#element-specific-attributes">Various</a></td>
     <td></td>
   </tr>
 </table>
 
-Notes on Bindings:
+Notes on bindings:
 
 - For security reasons, binding to `innerHTML` is disallowed.
 - All attribute bindings are sanitized for unsafe values (e.g., `javascript:`).
 - Boolean expression results toggle boolean attributes. For example: `<amp-video [controls]="expr"...>`. When `expr` evaluates to `true`, the `<amp-video>` element has the `controls` attribute. When `expr` evaluates to `false`, the `controls` attribute is removed.
-
+- Bracket characters `[` and `]` in attribute names can be problematic when writing XML (e.g. XHTML, JSX) or writing attributes via DOM APIs. In these cases, use the alternative syntax `data-amp-bind-x="foo"` instead of `[x]="foo"`.
 
 #### Element-specific attributes
 
@@ -408,8 +435,24 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;amp-carousel type=slides&gt;</code></td>
-    <td><code>[slide]</code><sup>1</sup></td>
+    <td><code>[slide]</code><sup>*</sup></td>
     <td>Changes the currently displayed slide index. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
+  </tr>
+  <tr>
+    <td><code>&lt;amp-date-picker&gt;</code></td>
+    <td>
+      <code>[min]</code><br>
+      <code>[max]</code>
+    </td>
+    <td>
+      Sets the earliest selectable date<br>
+      Sets the latest selectable date
+    </td>
+  </tr>
+  <tr>
+    <td><code>&lt;amp-google-document-embed&gt;</code></td>
+    <td><code>[src]</code><br><code>[title]</code></td>
+    <td>Displays the document at the updated URL.<br>Changes the document's title.</td>
   </tr>
   <tr>
     <td><code>&lt;amp-iframe&gt;</code></td>
@@ -422,6 +465,13 @@ Only binding to the following components and attributes are allowed:
     <td>When binding to <code>[src]</code>, make sure you also bind to <code>[srcset]</code> in order to make the binding work on cache.<br>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
   </tr>
   <tr>
+    <td><code>&lt;amp-lightbox&gt;</code></td>
+    <td><code>[open]</code><sup>*</sup></td>
+    <td>
+      Toggles display of the lightbox. Tip: Use <code>on="lightboxClose: AMP.setState(...)"</code> to update variables when the lightbox is closed.
+    </td>
+  </tr>
+  <tr>
     <td><code>&lt;amp-list&gt;</code></td>
     <td><code>[src]</code></td>
     <td>
@@ -431,7 +481,7 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;amp-selector&gt;</code></td>
-    <td><code>[selected]</code><sup>1</sup></td>
+    <td><code>[selected]</code><sup>*</sup><br><code>[disabled]</code></td>
     <td>Changes the currently selected children element(s)<br>identified by their <code>option</code> attribute values. Supports a comma-separated list of values for multiple selection. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
@@ -460,9 +510,19 @@ Only binding to the following components and attributes are allowed:
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes">button attributes</a>.</td>
   </tr>
   <tr>
+    <td><code>&lt;details&gt;</code></td>
+    <td><code>[open]</code></td>
+    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#Attributes">details attributes</a>.</td>
+  </tr>
+  <tr>
     <td><code>&lt;fieldset&gt;</code></td>
     <td><code>[disabled]</code></td>
     <td>Enables or disables the fieldset.</td>
+  </tr>
+  <tr>
+    <td><code>&lt;image&gt;</code></td>
+    <td><code>[xlink:href]</code><br>
+    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image">image attributes</a>.</td>
   </tr>
   <tr>
     <td><code>&lt;input&gt;</code></td>
@@ -478,6 +538,11 @@ Only binding to the following components and attributes are allowed:
     <td><code>&lt;optgroup&gt;</code></td>
     <td><code>[disabled]</code><br><code>[label]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes">optgroup attributes</a></td>
+  </tr>
+  <tr>
+    <td><code>&lt;section&gt;</code></td>
+    <td><code>[data-expand]</code></td>
+    <td>Changes the expansion of a <code>section</code> in an <a href="https://amp.dev/documentation/components/amp-accordion">amp-accordion</a>.</td>
   </tr>
   <tr>
     <td><code>&lt;select&gt;</code></td>
@@ -496,11 +561,11 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;textarea&gt;</code></td>
-    <td><code>[autocomplete]</code><br><code>[autofocus]</code><br><code>[cols]</code><br><code>[disabled]</code><br><code>[maxlength]</code><br><code>[minlength]</code><br><code>[placeholder]</code><br><code>[readonly]</code><br><code>[required]</code><br><code>[rows]</code><br><code>[selectiondirection]</code><br><code>[selectionend]</code><br><code>[selectionstart]</code><br><code>[spellcheck]</code><br><code>[wrap]</code></td>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes">textarea attributes</a>.</td>
+    <td><code>[autocomplete]</code><br><code>[autofocus]</code><br><code>[cols]</code><br><code>[disabled]</code><br><code>[defaultText]</code><br><code>[maxlength]</code><br><code>[minlength]</code><br><code>[placeholder]</code><br><code>[readonly]</code><br><code>[required]</code><br><code>[rows]</code><br><code>[selectiondirection]</code><br><code>[selectionend]</code><br><code>[selectionstart]</code><br><code>[spellcheck]</code><br><code>[wrap]</code></td>
+    <td>Use <code>[defaultText]</code> to update initial text, and <code>[text]</code> to update current text.<br>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes">textarea attributes</a>.</td>
   </tr>
 </table>
-<sup>1</sup>Denotes bindable attributes that don't have a non-bindable counterpart.
+<sup>*</sup>Denotes bindable attributes that don't have a non-bindable counterpart.
 
 ## Debugging
 
@@ -569,7 +634,7 @@ There are several types of runtime errors that may be encountered when working w
 
 ### Debugging State
 
-In development mode, use `AMP.printState()` to print the current state to the console.
+Use `AMP.printState()` to print the current state to the console.
 
 ## Appendix
 
@@ -596,25 +661,25 @@ AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a sin
 
 #### Attributes
 
-**src**
-
-The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service.
-
-The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
-
-{% call callout('Important', type='caution') %}
-The endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
-{% endcall %}
-
-
-**credentials** (optional)
-
-Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
-
-* Supported values: `omit`, `include`
-* Default: `omit`
-
-To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+<table>
+  <tr>
+    <td width="40%"><strong>src</strong></td>
+    <td><p>The URL of the remote endpoint that will return the JSON that will update this <code>amp-state</code>. This must be a CORS HTTP service.</p>
+<p>The <code>src</code> attribute allows all standard URL variable substitutions. See the <a href="../../spec/amp-var-substitutions.md">Substitutions Guide</a> for more info.</p>
+<p>{% call callout('Important', type='caution') %}
+  The endpoint must implement the requirements specified in the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests">CORS Requests in AMP</a> spec.
+  {% endcall %}</p></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>credentials (optional)</strong></td>
+    <td><p>Defines a <code>credentials</code> option as specified by the <a href="https://fetch.spec.whatwg.org/">Fetch API</a>.</p>
+<ul>
+  <li>Supported values: `omit`, `include`</li>
+  <li>Default: `omit`</li>
+</ul>
+<p>To send credentials, pass the value of <code>include</code>. If this value is set, the response must follow the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp">AMP CORS security guidelines</a>.</p></td>
+  </tr>
+</table>
 
 ### Deep-merge with `AMP.setState()`
 

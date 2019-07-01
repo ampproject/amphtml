@@ -19,31 +19,41 @@
  */
 
 import '../polyfills';
+import {Navigation} from '../service/navigation';
 import {Services} from '../services';
-import {startupChunk} from '../chunk';
+import {adopt} from '../runtime';
+import {cssText as ampDocCss} from '../../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../../build/ampshared.css';
+import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
-import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
-import {installPerformanceService} from '../service/performance-impl';
-import {installStylesForDoc, makeBodyVisible} from '../style-installer';
-import {installErrorReporting} from '../error';
-import {installDocService} from '../service/ampdoc-impl';
-import {installCacheServiceWorker} from '../service-worker/install';
-import {stubElementsForDoc} from '../service/custom-element-registry';
-import {
-    installAmpdocServices,
-    installBuiltins,
-    installRuntimeServices,
-    adopt,
-} from '../runtime';
-import {cssText} from '../../build/css';
-import {maybeValidate} from '../validator-integration';
-import {maybeTrackImpression} from '../impression';
-import {installViewerServiceForDoc} from '../service/viewer-impl';
-import {installInaboxViewportService} from './inabox-viewport';
-import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
+import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
+import {
+  installAmpdocServices,
+  installBuiltinElements,
+  installRuntimeServices,
+} from '../service/core-services';
+import {installDocService} from '../service/ampdoc-impl';
+import {installErrorReporting} from '../error';
+import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
+import {installInaboxCidService} from './inabox-cid';
+import {installInaboxViewportService} from './inabox-viewport';
+import {installPerformanceService} from '../service/performance-impl';
+import {
+  installStylesForDoc,
+  makeBodyVisible,
+  makeBodyVisibleRecovery,
+} from '../style-installer';
+import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {internalRuntimeVersion} from '../internal-version';
+import {isExperimentOn} from '../experiments';
+import {maybeValidate} from '../validator-integration';
+import {rejectServicePromiseForDoc} from '../service';
+import {startupChunk} from '../chunk';
+import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
+getMode(self).a4aId = getA4AId(self);
 
 // TODO(lannka): only install the necessary services.
 
@@ -54,15 +64,15 @@ let ampdocService;
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(self);  // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisibleRecovery on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  installDocService(self,  /* isSingleDoc */ true);
+  installDocService(self, /* isSingleDoc */ true);
   ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
-  makeBodyVisible(self.document);
+  makeBodyVisibleRecovery(self.document);
   throw e;
 }
 startupChunk(self.document, function initial() {
@@ -74,59 +84,85 @@ startupChunk(self.document, function initial() {
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
-  const fullCss = cssText
-      + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}'
-      + 'html.i-amphtml-inabox>body{position:initial!important}';
-  installStylesForDoc(ampdoc, fullCss, () => {
-    startupChunk(self.document, function services() {
-      // Core services.
-      installRuntimeServices(self);
-      fontStylesheetTimeout(self);
-      installIframeMessagingClient(self);
-      // Install inabox specific Viewport service before
-      // runtime tries to install the normal one.
-      installViewerServiceForDoc(ampdoc);
-      installInaboxViewportService(ampdoc);
-      installAmpdocServices(ampdoc);
-      // We need the core services (viewer/resources) to start instrumenting
-      perf.coreServicesAvailable();
-      maybeTrackImpression(self);
-    });
-    startupChunk(self.document, function builtins() {
-      // Builtins.
-      installBuiltins(self);
-    });
-    startupChunk(self.document, function adoptWindow() {
-      adopt(self);
-    });
-    startupChunk(self.document, function stub() {
-      // Pre-stub already known elements.
-      stubElementsForDoc(ampdoc);
-    });
-    startupChunk(self.document, function final() {
-      installAnchorClickInterceptor(ampdoc, self);
-
-      maybeValidate(self);
-      makeBodyVisible(self.document, /* waitForServices */ true);
-      installCacheServiceWorker(self);
-    });
-    startupChunk(self.document, function finalTick() {
-      perf.tick('e_is');
-      Services.resourcesForDoc(ampdoc).ampInitComplete();
-      // TODO(erwinm): move invocation of the `flush` method when we have the
-      // new ticks in place to batch the ticks properly.
-      perf.flush();
-    });
-  }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+  const fullCss =
+    (isExperimentOn(self, 'inabox-css-cleanup')
+      ? ampSharedCss
+      : ampDocCss + ampSharedCss) +
+    'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
+  installStylesForDoc(
+    ampdoc,
+    fullCss,
+    () => {
+      startupChunk(self.document, function services() {
+        // For security, storage is not supported in inabox.
+        // Fail early with console errors for any attempt of access.
+        unsupportedService(ampdoc, 'storage');
+        // Core services.
+        installRuntimeServices(self);
+        fontStylesheetTimeout(self);
+        installIframeMessagingClient(self);
+        // Install inabox specific services.
+        installInaboxCidService(ampdoc);
+        installViewerServiceForDoc(ampdoc);
+        installInaboxViewportService(ampdoc);
+        installAmpdocServices(ampdoc, undefined, true);
+        // We need the core services (viewer/resources) to start instrumenting
+        perf.coreServicesAvailable();
+        doNotTrackImpression();
+        registerIniLoadListener(ampdoc);
+      });
+      startupChunk(self.document, function builtins() {
+        // Builtins.
+        installBuiltinElements(self);
+      });
+      startupChunk(self.document, function adoptWindow() {
+        adopt(self);
+      });
+      startupChunk(self.document, function stub() {
+        // Pre-stub already known elements.
+        stubElementsForDoc(ampdoc);
+      });
+      startupChunk(self.document, function final() {
+        Navigation.installAnchorClickInterceptor(ampdoc, self);
+        maybeValidate(self);
+        makeBodyVisible(self.document);
+      });
+      startupChunk(self.document, function finalTick() {
+        perf.tick('e_is');
+        Services.resourcesForDoc(ampdoc).ampInitComplete();
+        // TODO(erwinm): move invocation of the `flush` method when we have the
+        // new ticks in place to batch the ticks properly.
+        perf.flush();
+      });
+    },
+    /* opt_isRuntimeCss */ true,
+    /* opt_ext */ 'amp-runtime'
+  );
 });
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (self.console) {
-  (console.info || console.log).call(console,
-      'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$',
-      self.location.href);
+  (console.info || console.log).call(
+    console,
+    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    self.location.href
+  );
 }
-self.document.documentElement.setAttribute('amp-version',
-    '$internalRuntimeVersion$');
+self.document.documentElement.setAttribute(
+  'amp-version',
+  internalRuntimeVersion()
+);
+
+/**
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} name
+ */
+function unsupportedService(ampdoc, name) {
+  rejectServicePromiseForDoc(
+    ampdoc,
+    name,
+    new Error('Un-supported service: ' + name)
+  );
+}

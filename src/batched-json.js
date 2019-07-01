@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from './url';
 import {Services} from './services';
+import {assertHttpsUrl} from './url';
 import {getValueForExpr} from './json';
+import {user} from './log';
+
+/**
+ * @enum {number}
+ */
+export const UrlReplacementPolicy = {
+  NONE: 0,
+  OPT_IN: 1,
+  ALL: 2,
+};
 
 /**
  * Batch fetches the JSON endpoint at the given element's `src` attribute.
@@ -27,23 +37,86 @@ import {getValueForExpr} from './json';
  * @param {!Element} element
  * @param {string=} opt_expr Dot-syntax reference to subdata of JSON result
  *     to return. If not specified, entire JSON result is returned.
+ * @param {UrlReplacementPolicy=} opt_urlReplacement If ALL, replaces all URL
+ *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand..
+ * @param {boolean=} opt_refresh Forces refresh of browser cache.
+ * @param {string=} opt_token Auth token that forces a POST request.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
-export function fetchBatchedJsonFor(ampdoc, element, opt_expr) {
-  const url = assertHttpsUrl(element.getAttribute('src'), element);
-  return Services.urlReplacementsForDoc(ampdoc).expandAsync(url).then(src => {
-    const opts = {};
+export function batchFetchJsonFor(
+  ampdoc,
+  element,
+  opt_expr = '.',
+  opt_urlReplacement = UrlReplacementPolicy.NONE,
+  opt_refresh = false,
+  opt_token = undefined
+) {
+  assertHttpsUrl(element.getAttribute('src'), element);
+  const xhr = Services.batchedXhrFor(ampdoc.win);
+  return requestForBatchFetch(element, opt_urlReplacement, opt_refresh)
+    .then(data => {
+      if (opt_token !== undefined) {
+        data.fetchOpt['method'] = 'POST';
+        data.fetchOpt['headers'] = {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        };
+        data.fetchOpt['body'] = {
+          'ampViewerAuthToken': opt_token,
+        };
+      }
+      return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data == null) {
+        throw new Error('Response is undefined.');
+      }
+      return getValueForExpr(data, opt_expr || '.');
+    });
+}
+
+/**
+ * Handles url replacement and constructs the FetchInitJsonDef required for a
+ * fetch.
+ * @param {!Element} element
+ * @param {!UrlReplacementPolicy} replacement If ALL, replaces all URL
+ *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
+ * @param {boolean} refresh Forces refresh of browser cache.
+ * @return {!Promise<!FetchRequestDef>}
+ */
+export function requestForBatchFetch(element, replacement, refresh) {
+  const url = element.getAttribute('src');
+
+  // Replace vars in URL if desired.
+  const urlReplacements = Services.urlReplacementsForDoc(element);
+  const promise =
+    replacement >= UrlReplacementPolicy.OPT_IN
+      ? urlReplacements.expandUrlAsync(url)
+      : Promise.resolve(url);
+
+  return promise.then(xhrUrl => {
+    // Throw user error if this element is performing URL substitutions
+    // without the soon-to-be-required opt-in (#12498).
+    if (replacement == UrlReplacementPolicy.OPT_IN) {
+      const invalid = urlReplacements.collectUnwhitelistedVarsSync(element);
+      if (invalid.length > 0) {
+        throw user().createError(
+          'URL variable substitutions in CORS ' +
+            'fetches from dynamic URLs (e.g. via amp-bind) require opt-in. ' +
+            `Please add data-amp-replace="${invalid.join(' ')}" to the ` +
+            `<${element.tagName}> element. See https://bit.ly/amp-var-subs.`
+        );
+      }
+    }
+    const fetchOpt = {};
     if (element.hasAttribute('credentials')) {
-      opts.credentials = element.getAttribute('credentials');
-    } else {
-      opts.requireAmpResponseSourceOrigin = false;
+      fetchOpt.credentials = element.getAttribute('credentials');
     }
-    return Services.batchedXhrFor(ampdoc.win).fetchJson(src, opts);
-  }).then(res => res.json()).then(data => {
-    if (data == null) {
-      throw new Error('Response is undefined.');
+    // https://hacks.mozilla.org/2016/03/referrer-and-cache-control-apis-for-fetch/
+    if (refresh) {
+      fetchOpt.cache = 'reload';
     }
-    return getValueForExpr(data, opt_expr || '.');
+    return {'xhrUrl': xhrUrl, 'fetchOpt': fetchOpt};
   });
 }

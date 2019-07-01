@@ -20,76 +20,97 @@
  */
 
 const childProcess = require('child_process');
-const util = require('gulp-util');
+
+const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/sh';
+const shellFlag = process.platform == 'win32' ? '/C' : '-c';
 
 /**
  * Spawns the given command in a child process with the given options.
  *
  * @param {string} cmd
- * @param {<Object>} options
- * @return {<Object>} Process info.
+ * @param {?Object} options
+ * @return {!Object}
  */
 function spawnProcess(cmd, options) {
-  return childProcess.spawnSync('/bin/sh', ['-c', cmd], options);
+  return childProcess.spawnSync(shellCmd, [shellFlag, cmd], options);
 }
 
 /**
- * Executes the provided command, and prints a message if the command fails.
+ * Executes the provided command with the given options, returning the process
+ * object.
  *
- * @param {string} cmd Command line to execute.
+ * @param {string} cmd
+ * @param {?Object} options
+ * @return {!Object}
  */
-exports.exec = function(cmd) {
-  const p = spawnProcess(cmd, {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console/*OK*/.log(util.colors.yellow('\nCommand failed: ' + cmd));
-  }
-};
+function exec(cmd, options) {
+  options = options || {'stdio': 'inherit'};
+  return spawnProcess(cmd, options);
+}
+
+/**
+ * Executes the provided shell script in an asynchronous process.
+ *
+ * @param {string} script
+ * @param {?Object} options
+ */
+function execScriptAsync(script, options) {
+  return childProcess.spawn(shellCmd, [shellFlag, script], options);
+}
 
 /**
  * Executes the provided command, and terminates the program in case of failure.
  *
- * @param {string} cmd Command line to execute.
+ * @param {string} cmd
+ * @param {?Object} options
  */
-exports.execOrDie = function(cmd) {
-  const p = spawnProcess(cmd, {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console/*OK*/.error(util.colors.red('\nCommand failed: ' + cmd));
+function execOrDie(cmd, options) {
+  const p = exec(cmd, options);
+  if (p.status && p.status != 0) {
     process.exit(p.status);
   }
-};
+}
 
 /**
  * Executes the provided command, returning the process object.
- * This will throw an exception if something goes wrong.
  * @param {string} cmd
+ * @param {?Object} options
  * @return {!Object}
  */
-function getOutput(cmd) {
-  const p = spawnProcess(
-      cmd,
-      {
-        'cwd': process.cwd(),
-        'env': process.env,
-        'stdio': 'pipe',
-        'encoding': 'utf-8',
-      });
+function getOutput(cmd, options = {}) {
+  const p = spawnProcess(cmd, {
+    'cwd': options.cwd || process.cwd(),
+    'env': options.env || process.env,
+    'stdio': options.stdio || 'pipe',
+    'encoding': options.encoding || 'utf-8',
+  });
   return p;
 }
 
 /**
  * Executes the provided command, returning its stdout.
  * @param {string} cmd
+ * @param {?Object} options
  * @return {string}
  */
-exports.getStdout = function(cmd) {
-  return getOutput(cmd).stdout;
-};
+function getStdout(cmd, options) {
+  return getOutput(cmd, options).stdout;
+}
 
 /**
  * Executes the provided command, returning its stderr.
  * @param {string} cmd
+ * @param {?Object} options
  * @return {string}
  */
-exports.getStderr = function(cmd) {
-  return getOutput(cmd).stderr;
+function getStderr(cmd, options) {
+  return getOutput(cmd, options).stderr;
+}
+
+module.exports = {
+  exec,
+  execOrDie,
+  execScriptAsync,
+  getStderr,
+  getStdout,
 };

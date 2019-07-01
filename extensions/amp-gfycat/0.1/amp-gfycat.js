@@ -14,28 +14,21 @@
  * limitations under the License.
  */
 
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
-import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
-import {
-  removeElement,
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
+import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
+import {dev, userAssert} from '../../../src/log';
+import {getData, listen} from '../../../src/event-helper';
+import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {isLayoutSizeDefined} from '../../../src/layout';
+
+const TAG = 'amp-gfycat';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
 class AmpGfycat extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -55,10 +48,10 @@ class AmpGfycat extends AMP.BaseElement {
     this.unlistenMessage_ = null;
   }
 
- /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
     // Gfycat iframe
     this.preconnect.url('https://gfycat.com', opt_onLayout);
@@ -90,13 +83,27 @@ class AmpGfycat extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
     const videoid = dev().assertString(this.videoid_);
-
-    placeholder.setAttribute('src',
-        'https://thumbs.gfycat.com/' +
-        encodeURIComponent(videoid) + '-poster.jpg');
+    this.propagateAttributes(['alt', 'aria-label'], placeholder);
+    placeholder.setAttribute(
+      'src',
+      'https://thumbs.gfycat.com/' + encodeURIComponent(videoid) + '-poster.jpg'
+    );
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
+    if (this.element.hasAttribute('aria-label')) {
+      placeholder.setAttribute(
+        'alt',
+        'Loading gif ' + this.element.getAttribute('aria-label')
+      );
+    } else if (this.element.hasAttribute('alt')) {
+      placeholder.setAttribute(
+        'alt',
+        'Loading gif ' + this.element.getAttribute('alt')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading gif');
+    }
     this.applyFillContent(placeholder);
 
     return placeholder;
@@ -107,10 +114,11 @@ class AmpGfycat extends AMP.BaseElement {
    * @private
    */
   getVideoId_() {
-    return user().assert(
-        this.element.getAttribute('data-gfyid'),
-        'The data-gfyid attribute is required for <amp-gfycat> %s',
-        this.element);
+    return userAssert(
+      this.element.getAttribute('data-gfyid'),
+      'The data-gfyid attribute is required for <amp-gfycat> %s',
+      this.element
+    );
   }
 
   /** @return {string} */
@@ -129,7 +137,7 @@ class AmpGfycat extends AMP.BaseElement {
       params['autoplay'] = '0';
     }
     src = addParamsToUrl(src, params);
-    return this.videoIframeSrc_ = src;
+    return (this.videoIframeSrc_ = src);
   }
 
   /** @override */
@@ -143,9 +151,9 @@ class AmpGfycat extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleGfycatMessages_.bind(this)
+      this.win,
+      'message',
+      this.handleGfycatMessages_.bind(this)
     );
 
     this.element.appendChild(iframe);
@@ -163,7 +171,7 @@ class AmpGfycat extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 
   /**
@@ -175,17 +183,22 @@ class AmpGfycat extends AMP.BaseElement {
   sendCommand_(command, opt_arg) {
     if (this.iframe_ && this.iframe_.contentWindow) {
       const message = command;
-      this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+      this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
     }
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleGfycatMessages_(event) {
     const eventData = /** @type {?string|undefined} */ (getData(event));
 
-    if (event.origin !== 'https://gfycat.com' ||
-        event.source != this.iframe_.contentWindow ||
-        typeof eventData !== 'string') {
+    if (
+      event.origin !== 'https://gfycat.com' ||
+      event.source != this.iframe_.contentWindow ||
+      typeof eventData !== 'string'
+    ) {
       return;
     }
 
@@ -226,7 +239,6 @@ class AmpGfycat extends AMP.BaseElement {
   }
 
   /** @override */
-
   mute() {
     // All Gfycat videos have no sound.
   }
@@ -246,32 +258,24 @@ class AmpGfycat extends AMP.BaseElement {
     // Not supported.
   }
 
-    /**
+  /**
    * @override
    */
   fullscreenEnter() {
-    if (!this.iframe_) {
-      return;
-    }
-    fullscreenEnter(dev().assertElement(this.iframe_));
+    // Won't implement.
   }
 
   /**
    * @override
    */
   fullscreenExit() {
-    if (!this.iframe_) {
-      return;
-    }
-    fullscreenExit(dev().assertElement(this.iframe_));
+    // Won't implement.
   }
 
   /** @override */
   isFullscreen() {
-    if (!this.iframe_) {
-      return false;
-    }
-    return isFullscreenElement(dev().assertElement(this.iframe_));
+    // Won't implement.
+    return false;
   }
 
   /** @override */
@@ -284,7 +288,12 @@ class AmpGfycat extends AMP.BaseElement {
     return false;
   }
 
-    /** @override */
+  /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;
@@ -301,9 +310,13 @@ class AmpGfycat extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
-
-AMP.extension('amp-gfycat', '0.1', AMP => {
-  AMP.registerElement('amp-gfycat', AmpGfycat);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpGfycat);
 });

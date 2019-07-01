@@ -23,8 +23,9 @@ import {yandex} from './yandex';
  */
 export function adfox(global, data) {
   validateData(data, ['adfoxParams', 'ownerId']);
-  loadScript(global, 'https://yastatic.net/pcode/adfox/loader.js',
-      () => initAdFox(global, data));
+  loadScript(global, 'https://yastatic.net/pcode/adfox/loader.js', () =>
+    initAdFox(global, data)
+  );
 }
 
 /**
@@ -54,6 +55,7 @@ function initAdFox(global, data) {
  * @param {!Object} data
  * @param {!Object} onRender
  * @param {!Object} onError
+ * @return {boolean}
  */
 function checkLoading(global, data, onRender, onError) {
   if (data.bundleName === 'banner.direct') {
@@ -67,6 +69,7 @@ function checkLoading(global, data, onRender, onError) {
     yandex(global, dblParams);
     return false;
   }
+  return true;
 }
 
 /**

@@ -7,6 +7,41 @@ requirement: {
   error_message: 'Should not throw a non-Error object.'
 }
 
+# Element
+
+requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use getStyle, setStyle, or setStyles in src/style.js'
+  value: 'Element.prototype.style'
+  whitelist: 'src/style.js'
+  whitelist: 'src/layout.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Use closestAncestorElementBySelector in src/dom.js'
+  value: 'Element.prototype.closest'
+  whitelist: 'src/dom.js'
+}
+
+# CSSStyleDeclaration
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Use setStyle or setStyles in src/style.js'
+  value: 'CSSStyleDeclaration.prototype.setProperty'
+  whitelist: 'src/style.js'
+}
+
+# History
+
+requirement: {
+  type: BANNED_PROPERTY
+  error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/history.js'
+  value: 'History.prototype.state'
+  whitelist: 'src/history.js'
+}
+
 # Strings
 
 requirement: {
@@ -23,7 +58,7 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'string.prototype.startsWith is not allowed'
+  error_message: 'Use string.js#startsWith'
   value: 'string.prototype.startsWith'
 }
 
@@ -37,8 +72,6 @@ requirement: {
   type: BANNED_PROPERTY_CALL
   error_message: 'string.prototype.includes is not allowed'
   value: 'string.prototype.includes'
-  # SW code is modern-browser-only.
-  whitelist: 'src/service-worker/core.js'
 }
 
 requirement: {
@@ -66,13 +99,6 @@ requirement: {
 }
 
 # Object
-
-requirement: {
-  type: BANNED_NAME
-  error_message: 'Object.values is not allowed'
-  value: 'Object.values'
-  whitelist: 'extensions/amp-bind/0.1/bind-expression.js' # Polyfills IE case.
-}
 
 requirement: {
   type: BANNED_NAME
@@ -183,10 +209,12 @@ requirement: {
   error_message: 'Use jsonParse instead. Usage in 3p ads can be whitelisted for now.'
   value: 'JSON.parse'
   whitelist: 'ads/adfox.js'
+  whitelist: 'ads/adincube.js'
   whitelist: 'ads/imedia.js'
   whitelist: 'ads/kargo.js'
   whitelist: 'ads/mads.js'
   whitelist: 'ads/google/imaVideo.js'
+  whitelist: 'ads/zen.js'
   whitelist: 'src/json.js' # Where jsonParse itself is implemented.
 }
 
@@ -204,6 +232,22 @@ requirement: {
   whitelist: 'ads/google/imaVideo.js'
   whitelist: 'ads/netletix.js'
   whitelist: 'ads/yandex.js'
+  whitelist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
+  whitelist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
+  whitelist: 'src/service/history-impl.js' # False-positive
+}
+
+requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use eventHelper#getDetail to read the detail property. OK to whitelist 3p ads for now.'
+  value: 'Event.prototype.detail'
+  value: 'MessageEvent.prototype.detail'
+  whitelist: 'src/event-helper.js' # getDetail is implemented here
+
+  # 3p ads are OK
+  whitelist: 'ads/adhese.js'
+  whitelist: 'ads/loka.js'
+  whitelist: 'ads/xlift.js'
 }
 
 requirement: {
@@ -214,7 +258,8 @@ requirement: {
   whitelist: 'src/web-worker/web-worker.js'
   # Allowing violations in ads code for now.
   # We would have to fix this to property obfuscated the 3p frame code.
-  whitelist: 'ads/google/doubleclick.js'
+  whitelist: '3p/iframe-messaging-client.js'
+  whitelist: 'ads/google/deprecated_doubleclick.js'
   whitelist: 'ads/google/imaVideo.js'
 }
 
@@ -226,5 +271,86 @@ requirement: {
   value: 'JSON.stringify:function((?JsonObject|AmpViewerMessage|string|number|boolean|undefined|Array),!Function=)'
   # Allowing violations in ads code for now.
   # We would have to fix this to property obfuscated the 3p frame code.
-  whitelist: 'ads/google/doubleclick.js'
+  whitelist: 'ads/google/deprecated_doubleclick.js'
+}
+
+# Cookies
+
+requirement: {
+  type: BANNED_PROPERTY
+  error_message: 'Use cookies#getCookie or cookies#setCookie to read or write cookies. Note that usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
+  value: 'Document.prototype.cookie'
+  whitelist: 'src/cookies.js'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
+  value: 'module$src$cookies.getCookie'
+  value: 'module$src$cookies.setCookie'
+  whitelist: 'src/cookies.js'
+  whitelist: 'src/experiments.js'
+  whitelist: 'src/service/cid-api.js'
+  whitelist: 'src/service/cid-impl.js'
+  whitelist: 'extensions/amp-analytics/0.1/cookie-writer.js'
+}
+
+# Function
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Function.prototype.name is not allowed due to IE11 non-support.'
+  value: 'Function.prototype.name'
+}
+
+
+# Bans DOM v4 methods, to limit the surface area of the Custom Elements Polyfill
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.remove() is unusual. Please use Node.p.removeChild()'
+  value: 'DocumentType.prototype.remove'
+  value: 'Element.prototype.remove'
+  value: 'CharacterData.prototype.remove'
+  whitelist: 'extensions/amp-inputmask/0.1/mask-impl.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.replaceWith() is unusual. Please use Node.p.replaceChild()'
+  value: 'DocumentType.prototype.replaceWith'
+  value: 'Element.prototype.replaceWith'
+  value: 'CharacterData.prototype.replaceWith'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ParentNode.p.append() is unusual. Please use Node.p.appendChild()'
+  value: 'Element.prototype.append'
+  value: 'Document.prototype.append'
+  value: 'DocumentFragment.prototype.append'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ParentNode.p.prepend() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.prepend'
+  value: 'Document.prototype.prepend'
+  value: 'DocumentFragment.prototype.prepend'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.before() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.before'
+  value: 'DocumentType.prototype.before'
+  value: 'CharacterData.prototype.before'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.after() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.after'
+  value: 'DocumentType.prototype.after'
+  value: 'CharacterData.prototype.after'
 }

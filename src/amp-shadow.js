@@ -19,29 +19,19 @@
  * multiple AMP Docs in Shadow DOM.
  */
 
-import './polyfills';
-import {Services} from './services';
-import {
-  installDocService,
-  installShadowDocForShell,
-} from './service/ampdoc-impl';
-import {
-  adoptShadowMode,
-  installBuiltins,
-  installRuntimeServices,
-  installAmpdocServices,
-} from './runtime';
-import {
-  installStylesForDoc,
-  makeBodyVisible,
-  bodyAlwaysVisible,
-} from './style-installer';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
+import {adoptShadowMode} from './runtime';
+import {bodyAlwaysVisible} from './style-installer';
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
-import {cssText} from '../build/css';
-import {isExperimentOn} from './experiments';
-import {installPerformanceService} from './service/performance-impl';
-import {stubElementsForDoc} from './service/custom-element-registry';
+import {
+  installBuiltinElements,
+  installRuntimeServices,
+} from './service/core-services';
+import {installDocService} from './service/ampdoc-impl';
+import {internalRuntimeVersion} from './internal-version';
 
 // This feature doesn't make sense in shadow mode as it only applies to
 // background rendered iframes;
@@ -57,43 +47,25 @@ installRuntimeServices(self);
 // has to be unblocked.
 doNotTrackImpression();
 
-if (isExperimentOn(self, 'ampdoc-shell')) {
-  //Shadow mode with an Ampdoc for the shell
-  installPerformanceService(self);
-  const ampdocService = Services.ampdocServiceFor(self);
-  const ampdocShell = installShadowDocForShell(ampdocService);
-  installStylesForDoc(ampdocShell, cssText, () => {
-    installAmpdocServices(ampdocShell);
+// PWA shell manages its own visibility and shadow ampdocs their own.
+bodyAlwaysVisible(self);
 
-    // Builtins.
-    installBuiltins(self);
+// Builtins.
+installBuiltinElements(self);
 
-    // Final configuration and stubbing.
-    adoptShadowMode(self);
-
-    // Pre-stub already known elements.
-    stubElementsForDoc(ampdocShell);
-
-    makeBodyVisible(self.document, /* waitForServices */ true);
-    Services.resourcesForDoc(ampdocShell).ampInitComplete();
-  }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
-} else {
-  // PWA shell manages its own visibility and shadow ampdocs their own.
-  bodyAlwaysVisible(self);
-
-  // Builtins.
-  installBuiltins(self);
-
-  // Final configuration and stubbing.
-  adoptShadowMode(self);
-}
+// Final configuration and stubbing.
+adoptShadowMode(self);
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (self.console) {
-  (console.info || console.log).call(console,
-      'Powered by AMP ⚡ HTML shadows – Version $internalRuntimeVersion$');
+  (console.info || console.log).call(
+    console,
+    `Powered by AMP ⚡ HTML shadows – Version ${internalRuntimeVersion()}`
+  );
 }
-self.document.documentElement.setAttribute('amp-version',
-    '$internalRuntimeVersion$');
+self.document.documentElement.setAttribute(
+  'amp-version',
+  internalRuntimeVersion()
+);

@@ -14,30 +14,25 @@
  * limitations under the License.
  */
 
-import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
-import {FetchMock, networkFailure} from './fetch-mock';
-import {MockA4AImpl, TEST_URL} from './utils';
-import {createIframePromise} from '../../../../testing/iframe';
-import {
-    data as validCSSAmp,
-} from './testdata/valid_css_at_rules_amp.reserialized';
-import {installCryptoService} from '../../../../src/service/crypto-impl';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {adConfig} from '../../../../ads/_config';
-import {getA4ARegistry} from '../../../../ads/_a4a-config';
-import {signingServerURLs} from '../../../../ads/_a4a-config';
-import {
-    resetScheduledElementForTesting,
-    upgradeOrRegisterElement,
-} from '../../../../src/service/custom-element-registry';
-import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {loadPromise} from '../../../../src/event-helper';
-import * as sinon from 'sinon';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
+import {FetchMock, networkFailure} from './fetch-mock';
+import {MockA4AImpl, TEST_URL} from './utils';
+import {createIframePromise} from '../../../../testing/iframe';
+import {getA4ARegistry, signingServerURLs} from '../../../../ads/_a4a-config';
+import {installCryptoService} from '../../../../src/service/crypto-impl';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {loadPromise} from '../../../../src/event-helper';
+import {
+  resetScheduledElementForTesting,
+  upgradeOrRegisterElement,
+} from '../../../../src/service/custom-element-registry';
+import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
 // (e.g., XHR requests and interfaces to ad network-specific code), but
@@ -73,8 +68,10 @@ function expectRenderedInXDomainIframe(element, src) {
   // Note: Unlike expectRenderedInXDomainIframe, this doesn't return a Promise
   // because it doesn't (cannot) inspect the contents of the iframe.
   expect(element, 'ad element').to.be.ok;
-  expect(element.querySelector('iframe[srcdoc]'),
-      'does not have a friendly iframe child').to.not.be.ok;
+  expect(
+    element.querySelector('iframe[srcdoc]'),
+    'does not have a friendly iframe child'
+  ).to.not.be.ok;
   const child = element.querySelector('iframe[src]');
   expect(child, 'iframe child').to.be.ok;
   expect(child.getAttribute('src')).to.contain.string(src);
@@ -90,10 +87,11 @@ describe('integration test: a4a', () => {
   let a4aElement;
   let a4aRegistry;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     a4aRegistry = getA4ARegistry();
-    adConfig['mock'] = {};
-    a4aRegistry['mock'] = () => {return true;};
+    a4aRegistry['mock'] = () => {
+      return true;
+    };
     return createIframePromise().then(f => {
       fixture = f;
       fetchMock = new FetchMock(fixture.win);
@@ -104,17 +102,21 @@ describe('integration test: a4a', () => {
         });
       }
       fetchMock.getOnce(
-          TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
-          {name: 'ad'});
+        TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+        () => adResponse,
+        {name: 'ad'}
+      );
       adResponse = {
-        headers: {'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc'},
         body: validCSSAmp.reserialized,
       };
+      if (!adResponse.headers) {
+        adResponse.headers = {};
+      }
       adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signatureHeader;
       installDocService(fixture.win, /* isSingleDoc */ true);
       installCryptoService(fixture.win);
       upgradeOrRegisterElement(fixture.win, 'amp-a4a', MockA4AImpl);
-      const doc = fixture.doc;
+      const {doc} = fixture;
       a4aElement = doc.createElement('amp-a4a');
       a4aElement.setAttribute('width', 200);
       a4aElement.setAttribute('height', 50);
@@ -123,10 +125,9 @@ describe('integration test: a4a', () => {
   });
 
   afterEach(() => {
-    fetchMock./*OK*/restore();
+    fetchMock./*OK*/ restore();
     sandbox.restore();
     resetScheduledElementForTesting(window, 'amp-a4a');
-    delete adConfig['mock'];
     delete a4aRegistry['mock'];
   });
 
@@ -156,8 +157,10 @@ describe('integration test: a4a', () => {
     // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
-    const forceCollapseStub =
-        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
+    const forceCollapseStub = sandbox.spy(
+      MockA4AImpl.prototype,
+      'forceCollapse'
+    );
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
       expect(error.message).to.contain.string('AMP-A4A-');
@@ -169,50 +172,57 @@ describe('integration test: a4a', () => {
   it('should collapse slot when creative response has code 204', () => {
     adResponse.status = 204;
     adResponse.body = null;
-    const forceCollapseStub =
-        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
+    const forceCollapseStub = sandbox.spy(
+      MockA4AImpl.prototype,
+      'forceCollapse'
+    );
     return fixture.addElement(a4aElement).then(() => {
       expect(forceCollapseStub).to.be.calledOnce;
     });
   });
 
-  it('should collapse slot when creative response.arrayBuffer() is empty',
-      () => {
-        adResponse.body = '';
-        const forceCollapseStub =
-            sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
-        return fixture.addElement(a4aElement).then(unusedElement => {
-          expect(forceCollapseStub).to.be.calledOnce;
-        });
-      });
+  it('should collapse slot when creative response.arrayBuffer() is empty', () => {
+    adResponse.body = '';
+    const forceCollapseStub = sandbox.spy(
+      MockA4AImpl.prototype,
+      'forceCollapse'
+    );
+    return fixture.addElement(a4aElement).then(unusedElement => {
+      expect(forceCollapseStub).to.be.calledOnce;
+    });
+  });
 
   it('should continue to show old creative after refresh and no fill', () => {
     return fixture.addElement(a4aElement).then(() => {
-      return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.')
-          .then(() => {
-            const a4a = new MockA4AImpl(a4aElement);
-            const initiateAdRequestMock = sandbox.stub(
-                MockA4AImpl.prototype,
-                'initiateAdRequest',
-                () => {
-                  a4a.adPromise_ = Promise.resolve();
-                  // This simulates calling forceCollapse, without tripping up
-                  // any unrelated asserts.
-                  a4a.isRefreshing = false;
-                });
-            const tearDownSlotMock =
-                sandbox.stub(MockA4AImpl.prototype, 'tearDownSlot');
-            tearDownSlotMock.returns(undefined);
-            const destroyFrameSpy =
-                sandbox.spy(MockA4AImpl.prototype, 'destroyFrame');
-            const callback = sandbox.spy();
-            return a4a.refresh(callback).then(() => {
-              expect(initiateAdRequestMock).to.be.called;
-              expect(tearDownSlotMock).to.be.called;
-              expect(destroyFrameSpy).to.not.be.called;
-              expect(callback).to.be.called;
+      return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.').then(
+        () => {
+          const a4a = new MockA4AImpl(a4aElement);
+          const initiateAdRequestMock = sandbox
+            .stub(MockA4AImpl.prototype, 'initiateAdRequest')
+            .callsFake(() => {
+              a4a.adPromise_ = Promise.resolve();
+              // This simulates calling forceCollapse, without tripping
+              // up any unrelated asserts.
+              a4a.isRefreshing = false;
             });
+          const tearDownSlotMock = sandbox.stub(
+            MockA4AImpl.prototype,
+            'tearDownSlot'
+          );
+          tearDownSlotMock.returns(undefined);
+          const destroyFrameSpy = sandbox.spy(
+            MockA4AImpl.prototype,
+            'destroyFrame'
+          );
+          const callback = sandbox.spy();
+          return a4a.refresh(callback).then(() => {
+            expect(initiateAdRequestMock).to.be.called;
+            expect(tearDownSlotMock).to.be.called;
+            expect(destroyFrameSpy).to.not.be.called;
+            expect(callback).to.be.called;
           });
+        }
+      );
     });
   });
 

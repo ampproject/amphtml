@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-// Requires polyfills in immediate side effect.
-import '../polyfills';
-
-import {user} from '../log';
-import {registerServiceBuilder} from '../service';
+import {installServiceInEmbedScope, registerServiceBuilder} from '../service';
 import {reportError} from '../error';
+import {user} from '../log';
+
+const TAG = 'timer';
 
 /**
  * Helper with all things Timer.
  */
 export class Timer {
-
   /**
    * @param {!Window} win
    */
@@ -34,7 +32,7 @@ export class Timer {
     this.win = win;
 
     /** @private @const {!Promise}  */
-    this.resolved_ = Promise.resolve();
+    this.resolved_ = this.win.Promise.resolve();
 
     this.taskCount_ = 0;
 
@@ -44,10 +42,10 @@ export class Timer {
     this.startTime_ = Date.now();
   }
 
- /**
-  * Returns time since start in milliseconds.
-  * @return {number}
-  */
+  /**
+   * Returns time since start in milliseconds.
+   * @return {number}
+   */
   timeSinceStart() {
     return Date.now() - this.startTime_;
   }
@@ -58,7 +56,7 @@ export class Timer {
    * be close to 0 and this will NOT yield to the event queue.
    *
    * Returns the timer ID that can be used to cancel the timer (cancel method).
-   * @param {!function()} callback
+   * @param {function()} callback
    * @param {number=} opt_delay
    * @return {number|string}
    */
@@ -67,13 +65,15 @@ export class Timer {
       // For a delay of zero,  schedule a promise based micro task since
       // they are predictably fast.
       const id = 'p' + this.taskCount_++;
-      this.resolved_.then(() => {
-        if (this.canceled_[id]) {
-          delete this.canceled_[id];
-          return;
-        }
-        callback();
-      }).catch(reportError);
+      this.resolved_
+        .then(() => {
+          if (this.canceled_[id]) {
+            delete this.canceled_[id];
+            return;
+          }
+          callback();
+        })
+        .catch(reportError);
       return id;
     }
     const wrapped = () => {
@@ -106,7 +106,7 @@ export class Timer {
    * @return {!Promise}
    */
   promise(opt_delay) {
-    return new Promise(resolve => {
+    return new this.win.Promise(resolve => {
       // Avoid wrapping in closure if no specific result is produced.
       const timerKey = this.delay(resolve, opt_delay);
       if (timerKey == -1) {
@@ -128,7 +128,7 @@ export class Timer {
    */
   timeoutPromise(delay, opt_racePromise, opt_message) {
     let timerKey;
-    const delayPromise = new Promise((_resolve, reject) => {
+    const delayPromise = new this.win.Promise((_resolve, reject) => {
       timerKey = this.delay(() => {
         reject(user().createError(opt_message || 'timeout'));
       }, delay);
@@ -144,7 +144,7 @@ export class Timer {
       this.cancel(timerKey);
     };
     opt_racePromise.then(cancel, cancel);
-    return Promise.race([delayPromise, opt_racePromise]);
+    return this.win.Promise.race([delayPromise, opt_racePromise]);
   }
 
   /**
@@ -155,7 +155,7 @@ export class Timer {
    * @return {!Promise}
    */
   poll(delay, predicate) {
-    return new Promise(resolve => {
+    return new this.win.Promise(resolve => {
       const interval = this.win.setInterval(() => {
         if (predicate()) {
           this.win.clearInterval(interval);
@@ -164,12 +164,18 @@ export class Timer {
       }, delay);
     });
   }
-
 }
 
 /**
  * @param {!Window} window
  */
 export function installTimerService(window) {
-  registerServiceBuilder(window, 'timer', Timer);
-};
+  registerServiceBuilder(window, TAG, Timer);
+}
+
+/**
+ * @param {!Window} embedWin
+ */
+export function installTimerInEmbedWindow(embedWin) {
+  installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
+}

@@ -16,18 +16,21 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const gulp = require('gulp-help')(require('gulp'));
-const util = require('gulp-util');
-
+const log = require('fancy-log');
 
 const year = new Date().getFullYear();
 
 /*eslint "max-len": 0*/
 
 function pascalCase(str) {
-  return str[0].toUpperCase() + str.slice(1).replace(/-([a-z])/g,
-      function(g) { return g[1].toUpperCase(); });
+  return (
+    str[0].toUpperCase() +
+    str.slice(1).replace(/-([a-z])/g, function(g) {
+      return g[1].toUpperCase();
+    })
+  );
 }
 
 function getValidatorFile(name) {
@@ -50,48 +53,19 @@ function getValidatorFile(name) {
 tags: {  # ${name}
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "${name} extension .js script"
-  satisfies: "${name} extension .js script"
-  requires: "${name}"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "${name}"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "${name}"
+    version: "0.1"
+    version: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "${name}"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/${name}-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/${name}"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <${name}>
   html_format: AMP
   tag_name: "${name.toUpperCase()}"
-  satisfies: "${name}"
-  requires: "${name} extension .js script"
+  requires_extension: "${name}"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
+  spec_url: "https://amp.dev/documentation/components/${name}"
   amp_layout: {
     supported_layouts: RESPONSIVE
   }
@@ -101,6 +75,28 @@ tags: {  # <${name}>
 
 function getMarkdownExtensionFile(name) {
   return `<!--
+  1. Change "category" below to one of:
+       ads-analytics
+       dynamic-content
+       layout
+       media
+       presentation
+       social
+
+  2. Remove any of the "formats" that don't apply.
+     You can also add the "ads" and "stories" formats if they apply.
+
+  3. And remove this comment! (no empty lines before "---")
+-->
+---
+$category: presentation
+formats:
+  - websites
+  - email
+teaser:
+  text: FILL THIS IN.
+---
+<!--
 Copyright ${year} The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -116,7 +112,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="\`${name}\`"></a> \`${name}\`
+# \`${name}\`
 
 <table>
   <tr>
@@ -129,10 +125,10 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/${name}-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="${name}" src="https://cdn.ampproject.org/v0/${name}-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>FILL THIS IN</td>
   </tr>
   <tr>
@@ -149,13 +145,19 @@ FILL THIS IN. What does this extension do?
 
 FILL THIS IN. Does this extension allow for properties to configure?
 
+<table>
+  <tr>
+    <td width="40%"><strong>data-my-attribute</strong></td>
+    <td>FILL THIS IN. This table <strong>must</strong> be written in HTML.</td>
+  </tr>
+</table>
+
 ## Validation
 See [${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/validator-${name}.protoascii) in the AMP validator specification.
 `;
 }
 
 function getJsTestExtensionFile(name) {
-  const className = pascalCase(name);
   return `/**
  * Copyright ${year} The AMP HTML Authors. All Rights Reserved.
  *
@@ -172,12 +174,12 @@ function getJsTestExtensionFile(name) {
  * limitations under the License.
  */
 
-import {${className}} from '../${name}';
+import '../${name}';
 
 describes.realWin('${name}', {
   amp: {
     extensions: ['${name}'],
-  }
+  },
 }, env => {
 
   let win;
@@ -226,12 +228,13 @@ export class ${className} extends AMP.BaseElement {
     /** @private {string} */
     this.myText_ = 'hello world';
 
-    /** @private {!Element} */
-    this.container_ = this.win.document.createElement('div');
+    /** @private {?Element} */
+    this.container_ = null;
   }
 
   /** @override */
   buildCallback() {
+    this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.textContent = this.myText_;
     this.element.appendChild(this.container_);
     this.applyFillContent(this.container_, /* replacedContent */ true);
@@ -243,7 +246,9 @@ export class ${className} extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('${name}', ${className});
+AMP.extension('${name}', '0.1', AMP => {
+  AMP.registerElement('${name}', ${className});
+});
 `;
 }
 
@@ -271,31 +276,54 @@ function getExamplesFile(name) {
 `;
 }
 
-function makeExtension() {
+async function makeExtension() {
   if (!argv.name) {
-    util.log(util.colors.red(
-        'Error! Please pass in the "--name" flag with a value'));
+    log(colors.red('Error! Please pass in the "--name" flag with a value'));
   }
-  const name = argv.name;
+  const {name} = argv;
+  const examplesFile = getExamplesFile(name);
 
   fs.mkdirpSync(`extensions/${name}/0.1/test`);
-  fs.writeFileSync(`extensions/${name}/${name}.md`,
-      getMarkdownExtensionFile(name));
-  fs.writeFileSync(`extensions/${name}/validator-${name}.protoascii`,
-      getValidatorFile(name));
-  fs.writeFileSync(`extensions/${name}/0.1/${name}.js`,
-      getJsExtensionFile(name));
-  fs.writeFileSync(`extensions/${name}/0.1/test/test-${name}.js`,
-      getJsTestExtensionFile(name));
-  fs.writeFileSync(`examples/${name}.amp.html`,
-      getExamplesFile(name));
-  fs.writeFileSync(`validator/testdata/feature_tests/${name}.html`,
-      getExamplesFile(name));
-  fs.writeFileSync(`validator/testdata/feature_tests/${name}.out`, 'PASS');
+  fs.writeFileSync(
+    `extensions/${name}/${name}.md`,
+    getMarkdownExtensionFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/validator-${name}.protoascii`,
+    getValidatorFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/0.1/${name}.js`,
+    getJsExtensionFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/0.1/test/test-${name}.js`,
+    getJsTestExtensionFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/0.1/test/validator-${name}.html`,
+    examplesFile
+  );
+
+  const examplesFileValidatorOut = examplesFile
+    .trim()
+    .split('\n')
+    .map(line => `|  ${line}`)
+    .join('\n');
+
+  fs.writeFileSync(
+    `extensions/${name}/0.1/test/validator-${name}.out`,
+    ['PASS', examplesFileValidatorOut].join('\n')
+  );
+
+  fs.writeFileSync(`examples/${name}.amp.html`, examplesFile);
 }
 
-gulp.task('make-extension', 'Create an extension skeleton', makeExtension, {
-  options: {
-    name: '  The name of the extension. Preferable prefixed with `amp-*`',
-  },
-});
+module.exports = {
+  makeExtension,
+};
+
+makeExtension.description = 'Create an extension skeleton';
+makeExtension.flags = {
+  name: '  The name of the extension. Preferable prefixed with `amp-*`',
+};

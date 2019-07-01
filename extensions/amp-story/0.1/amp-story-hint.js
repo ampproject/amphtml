@@ -14,65 +14,99 @@
  * limitations under the License.
  */
 
-import {renderSimpleTemplate} from './simple-template';
+import {CSS} from '../../../build/amp-story-hint-0.1.css';
+import {LocalizedStringId} from '../../../src/localized-strings';
+import {Services} from '../../../src/services';
+import {StateProperty} from './amp-story-store-service';
+import {createShadowRootWithStyle} from './utils';
 import {dict} from '../../../src/utils/object';
-import {debounce} from '../../../src/utils/rate-limit';
-import {Animation} from '../../../src/animation';
-import {setImportantStyles, resetStyles} from '../../../src/style';
-import {dev} from '../../../src/log';
+import {renderAsElement} from './simple-template';
 
-/** @private @const {!Array<!./simple-template.ElementDef>} */
-const NAVIGATION_HELP_OVERLAY = [
-  {
-    tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-navigation-help-overlay'}),
-    children: [
-      {
-        tag: 'div',
-        attrs: dict({'class': 'i-amphtml-story-navigation-help-section'
-            + ' prev-page'}),
-        children: [
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-icons-container'}),
-            children: [
-              {
-                tag: 'div',
-                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
-              },
-              {
-                tag: 'div',
-                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
-              },
-            ],
-          },
-        ],
-      },
-      {
-        tag: 'div',
-        attrs: dict({'class': 'i-amphtml-story-navigation-help-section'
-            + ' next-page'}),
-        children: [
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-icons-container'}),
-            children: [
-              {
-                tag: 'div',
-                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
-              },
-              {
-                tag: 'div',
-                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
-                text: 'Next page',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
+/** @private @const {!./simple-template.ElementDef} */
+const TEMPLATE = {
+  tag: 'aside',
+  attrs: dict({
+    'class':
+      'i-amphtml-story-hint-container ' +
+      'i-amphtml-story-system-reset i-amphtml-hidden',
+  }),
+  children: [
+    {
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-navigation-help-overlay'}),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-navigation-help-section prev-page',
+          }),
+          children: [
+            {
+              tag: 'div',
+              attrs: dict({'class': 'i-amphtml-story-hint-placeholder'}),
+              children: [
+                {
+                  tag: 'div',
+                  attrs: dict({'class': 'i-amphtml-story-hint-tap-button'}),
+                  children: [
+                    {
+                      tag: 'div',
+                      attrs: dict({
+                        'class': 'i-amphtml-story-hint-tap-button-icon',
+                      }),
+                    },
+                  ],
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({
+                    'class': 'i-amphtml-story-hint-tap-button-text',
+                  }),
+                  localizedStringId:
+                    LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-navigation-help-section next-page',
+          }),
+          children: [
+            {
+              tag: 'div',
+              attrs: dict({'class': 'i-amphtml-story-hint-placeholder'}),
+              children: [
+                {
+                  tag: 'div',
+                  attrs: dict({'class': 'i-amphtml-story-hint-tap-button'}),
+                  children: [
+                    {
+                      tag: 'div',
+                      attrs: dict({
+                        'class': 'i-amphtml-story-hint-tap-button-icon',
+                      }),
+                    },
+                  ],
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({
+                    'class': 'i-amphtml-story-hint-tap-button-text',
+                  }),
+                  localizedStringId:
+                    LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
 
 /** @type {string} */
 const NAVIGATION_OVERLAY_CLASS = 'show-navigation-overlay';
@@ -83,74 +117,113 @@ const FIRST_PAGE_OVERLAY_CLASS = 'show-first-page-overlay';
 /** @type {number} */
 const NAVIGATION_OVERLAY_TIMEOUT = 3000;
 
+/** @type {number} */
+const FIRST_PAGE_NAVIGATION_OVERLAY_TIMEOUT = 275;
+
 /**
  * User Hint Layer for <amp-story>.
  */
 export class AmpStoryHint {
-
   /**
    * @param {!Window} win
+   * @param {!Element} parentEl Element where to append the component
    */
-  constructor(win) {
+  constructor(win, parentEl) {
     /** @private {!Window} */
     this.win_ = win;
+
+    /** @private {boolean} Whether the component is built. */
+    this.isBuilt_ = false;
 
     /** @private {!Document} */
     this.document_ = this.win_.document;
 
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win_);
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win_);
+
     /** @private {?Element} */
     this.hintContainer_ = null;
 
-    /** @private {?number} */
+    /** @private {?(number|string)} */
     this.hintTimeout_ = null;
 
-    this.fadeoutHints_ = debounce(this.win_, () => {
-      Animation.animate(dev().assertElement(this.hintContainer_), () => {
-        setImportantStyles(
-            dev().assertElement(this.hintContainer_), {'opacity': '0'});
-      }, 200).thenAlways(() => {
-        this.resetContainerStyle_();
-        resetStyles(dev().assertElement(this.hintContainer_), ['opacity']);
-      });
-    }, NAVIGATION_OVERLAY_TIMEOUT);
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
+
+    /** @private @const {!Element} */
+    this.parentEl_ = parentEl;
   }
 
   /**
    * Builds the hint layer DOM.
-   * @return {!Element}
    */
-  buildHintContainer() {
-    this.hintContainer_ = this.document_.createElement('aside');
-    this.hintContainer_.classList.add('i-amphtml-story-hint-container');
-    this.buildNavigationOverlay_();
-    return this.hintContainer_;
-  }
-
-  /**
-   * Builds navigation overlay DOM.
-   * @private
-   */
-  buildNavigationOverlay_() {
-    this.hintContainer_.appendChild(
-        renderSimpleTemplate(this.document_, NAVIGATION_HELP_OVERLAY));
-  }
-
-  /**
-   * Shows the given hint
-   */
-  showHint_(hintClass) {
-    if (this.hintContainer_.classList.contains(hintClass)) {
+  build() {
+    if (this.isBuilt()) {
       return;
     }
 
-    this.hideAllNavigationHint();
-    this.hintContainer_.classList.add(hintClass);
+    this.isBuilt_ = true;
+
+    const root = this.document_.createElement('div');
+    this.hintContainer_ = renderAsElement(this.document_, TEMPLATE);
+    createShadowRootWithStyle(root, this.hintContainer_, CSS);
+
+    this.vsync_.mutate(() => {
+      this.parentEl_.appendChild(root);
+    });
+  }
+
+  /**
+   * Whether the component is built.
+   * @return {boolean}
+   */
+  isBuilt() {
+    return this.isBuilt_;
+  }
+
+  /**
+   * Shows the given hint, only if not desktop.
+   * @param {string} hintClass
+   * @private
+   */
+  showHint_(hintClass) {
+    if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
+      return;
+    }
+
+    this.build();
+
+    this.vsync_.mutate(() => {
+      this.hintContainer_.classList.toggle(
+        NAVIGATION_OVERLAY_CLASS,
+        hintClass == NAVIGATION_OVERLAY_CLASS
+      );
+      this.hintContainer_.classList.toggle(
+        FIRST_PAGE_OVERLAY_CLASS,
+        hintClass == FIRST_PAGE_OVERLAY_CLASS
+      );
+      this.hintContainer_.classList.remove('i-amphtml-hidden');
+
+      const hideTimeout =
+        hintClass == NAVIGATION_OVERLAY_CLASS
+          ? NAVIGATION_OVERLAY_TIMEOUT
+          : FIRST_PAGE_NAVIGATION_OVERLAY_TIMEOUT;
+      this.hideAfterTimeout(hideTimeout);
+    });
   }
 
   /**
    * Show navigation overlay DOM.
    */
   showNavigationOverlay() {
+    // Don't show the overlay if the share menu is open.
+    if (this.storeService_.get(StateProperty.SHARE_MENU_STATE)) {
+      return;
+    }
+
     this.showHint_(NAVIGATION_OVERLAY_CLASS);
   }
 
@@ -162,17 +235,33 @@ export class AmpStoryHint {
   }
 
   /**
+   * Hides the overlay after a given time
+   * @param {number} timeout
+   */
+  hideAfterTimeout(timeout) {
+    this.hintTimeout_ = this.timer_.delay(() => this.hideInternal_(), timeout);
+  }
+
+  /**
    * Hide all navigation hints.
    */
   hideAllNavigationHint() {
-    this.resetContainerStyle_();
-    this.fadeoutHints_();
+    this.hideInternal_();
+
+    if (this.hintTimeout_ !== null) {
+      this.timer_.cancel(this.hintTimeout_);
+      this.hintTimeout_ = null;
+    }
   }
 
   /** @private */
-  resetContainerStyle_() {
-    this.hintContainer_.classList.remove(NAVIGATION_OVERLAY_CLASS);
-    this.hintContainer_.classList.remove(FIRST_PAGE_OVERLAY_CLASS);
+  hideInternal_() {
+    if (!this.isBuilt()) {
+      return;
+    }
+
+    this.vsync_.mutate(() => {
+      this.hintContainer_.classList.add('i-amphtml-hidden');
+    });
   }
 }
-

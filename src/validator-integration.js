@@ -15,39 +15,58 @@
  */
 
 import {getMode} from './mode';
-import {urls} from './config';
-import {startsWith} from './string';
 import {loadPromise} from './event-helper';
+import {parseQueryString} from './url';
+import {startsWith} from './string';
+import {urls} from './config';
 
 /**
  * Triggers validation for the current document if there is a script in the
- * page that has a "development" attribute.
+ * page that has a "development" attribute and the bypass validation via
+ * #validate=0 is absent.
  *
  * @param {!Window} win Destination window for the new element.
  */
 export function maybeValidate(win) {
   const filename = win.location.href;
-  if (startsWith(filename, 'about:')) {  // Should only happen in tests.
+  if (startsWith(filename, 'about:')) {
+    // Should only happen in tests.
     return;
   }
-
+  let validator = false;
   if (getMode().development) {
+    const hash = parseQueryString(
+      win.location.originalHash || win.location.hash
+    );
+    validator = hash['validate'] !== '0';
+  }
+
+  if (validator) {
     loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
       /* global amp: false */
-      amp.validator.validateUrlAndLog(
-          filename, win.document, getMode().filter);
+      amp.validator.validateUrlAndLog(filename, win.document, getMode().filter);
     });
   } else if (getMode().examiner) {
     loadScript(win.document, `${urls.cdn}/examiner.js`);
   }
 }
 
+/**
+ * Loads script
+ *
+ * @param {Document} doc
+ * @param {string} url
+ * @return {!Promise}
+ */
 function loadScript(doc, url) {
   const script = doc.createElement('script');
   script.src = url;
-  const promise = loadPromise(script).then(() => {
-    doc.head.removeChild(script);
-  }, () => {});
+  const promise = loadPromise(script).then(
+    () => {
+      doc.head.removeChild(script);
+    },
+    () => {}
+  );
   doc.head.appendChild(script);
   return promise;
 }

@@ -16,13 +16,13 @@
 
 package org.ampproject;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.javascript.jscomp.ClosureCodingConvention.AssertFunctionByTypeName;
+import com.google.javascript.jscomp.ClosureCodingConvention;
 import com.google.javascript.jscomp.CodingConvention;
 import com.google.javascript.jscomp.CodingConvention.AssertionFunctionSpec;
 import com.google.javascript.jscomp.CodingConventions;
-import com.google.javascript.jscomp.ClosureCodingConvention;
-import com.google.javascript.jscomp.newtypes.JSType;
+import com.google.javascript.rhino.jstype.JSType;
 import com.google.javascript.rhino.jstype.JSTypeNative;
 
 import java.util.ArrayList;
@@ -33,6 +33,7 @@ import java.util.Collection;
  * A coding convention for AMP.
  */
 public final class AmpCodingConvention extends CodingConventions.Proxy {
+
   /** By default, decorate the ClosureCodingConvention. */
   public AmpCodingConvention() {
     this(new ClosureCodingConvention());
@@ -41,17 +42,6 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
   /** Decorates a wrapped CodingConvention. */
   public AmpCodingConvention(CodingConvention convention) {
     super(convention);
-  }
-
-  @Override public Collection<AssertionFunctionSpec> getAssertionFunctions() {
-    return ImmutableList.of(
-        new AssertionFunctionSpec("user.assert", JSTypeNative.TRUTHY),
-        new AssertionFunctionSpec("dev.assert", JSTypeNative.TRUTHY),
-        new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSTypeNative.TRUTHY),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "Element"),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertString", "string"),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertNumber", "number")
-    );
   }
 
   /**
@@ -71,7 +61,8 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     // Bad hack, but we should really not try to inline CSS as these strings can
     // be very long.
     // See https://github.com/ampproject/amphtml/issues/10118
-    if (name.equals("cssText$$module$build$css")) {
+    // cssText is defined in build-system/tasks/css.js#writeCss
+    if (name.startsWith("cssText$$module$build$")) {
       return true;
     }
 

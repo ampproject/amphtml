@@ -6,5 +6,4 @@ Description:
 Fork of mustache.js library.
 
 Local Modifications:
-None yet, but expected changes for restricting instructions and sanitizing
-of the output.
+* Convert UMD to ESM by removing the UMD wrapper and adding export statements

@@ -14,25 +14,34 @@
  * limitations under the License.
  */
 
+import {Deferred, tryResolve} from '../utils/promise';
 import {Observable} from '../observable';
-import {findIndex} from '../utils/array';
-import {dict, map} from '../utils/object';
 import {Services} from '../services';
-import {registerServiceBuilderForDoc} from '../service';
+import {VisibilityState} from '../visibility-state';
 import {dev, duplicateErrorIfNecessary} from '../log';
-import {isIframed} from '../dom';
+import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
-  parseQueryString,
-  parseUrl,
-  removeFragment,
   isProxyOrigin,
+  parseQueryString,
+  parseUrlDeprecated,
+  removeFragment,
+  serializeQueryString,
 } from '../url';
+import {isIframed} from '../dom';
+import {map} from '../utils/object';
+import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
-import {VisibilityState} from '../visibility-state';
+import {startsWith} from '../string';
+import {urls} from '../config';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
+
+/** @enum {string} */
+export const Capability = {
+  VIEWER_RENDER_TEMPLATE: 'viewerRenderTemplate',
+};
 
 /**
  * Duration in milliseconds to wait for viewerOrigin to be set before an empty
@@ -43,49 +52,16 @@ const SENTINEL_ = '__AMP__';
 const VIEWER_ORIGIN_TIMEOUT_ = 1000;
 
 /**
- * These domains are trusted with more sensitive viewer operations such as
- * propagating the referrer. If you believe your domain should be here,
- * file the issue on GitHub to discuss. The process will be similar
- * (but somewhat more stringent) to the one described in the [3p/README.md](
- * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
- *
- * @export {!Array<!RegExp>}
+ * Prefixes to remove when trimming a hostname for comparison.
+ * @const
+ * @private {!RegExp}
  */
-const TRUSTED_VIEWER_HOSTS = [
-  /**
-   * Google domains, including country-codes and subdomains:
-   * - google.com
-   * - www.google.com
-   * - google.co
-   * - www.google.co
-   * - google.az
-   * - www.google.az
-   * - google.com.az
-   * - www.google.com.az
-   * - google.co.az
-   * - www.google.co.az
-   * - google.cat
-   * - www.google.cat
-   */
-  /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
-];
+const TRIM_ORIGIN_PATTERN_ = /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
- * These domains are trusted with more sensitive viewer operations such as
- * sending impression requests. If you believe your domain should be here,
- * file the issue on GitHub to discuss. The process will be similar
- * (but somewhat more stringent) to the one described in the [3p/README.md](
- * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
- *
- * @export {!Array<!RegExp>}
+ * @typedef {function(!JsonObject):(!Promise|undefined)}
  */
-const TRUSTED_REFERRER_HOSTS = [
-  /**
-   * Twitter's link wrapper domains:
-   * - t.co
-   */
-  /^t.co$/,
-];
+let RequestResponderDef;
 
 /**
  * An AMP representation of the Viewer. This class doesn't do any work itself
@@ -95,7 +71,6 @@ const TRUSTED_REFERRER_HOSTS = [
  * @package Visible for type.
  */
 export class Viewer {
-
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!Object<string, string>=} opt_initParams
@@ -111,7 +86,7 @@ export class Viewer {
     this.isIframed_ = isIframed(this.win);
 
     /** @const {!./document-state.DocumentState} */
-    this.docState_ = Services.documentStateFor(this.win);
+    this.docState_ = Services.globalDocumentStateFor(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = true;
@@ -130,6 +105,9 @@ export class Viewer {
 
     /** @private {!Object<string, !Observable<!JsonObject>>} */
     this.messageObservables_ = map();
+
+    /** @private {!Object<string, !RequestResponderDef>} */
+    this.messageResponders_ = map();
 
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
@@ -163,8 +141,12 @@ export class Viewer {
     /** @const @private {!Object<string, string>} */
     this.params_ = {};
 
-    /** @private {?function()} */
-    this.whenFirstVisibleResolve_ = null;
+    /**
+     * Subset of this.params_ that only contains parameters in the URL hash,
+     * e.g. "#foo=bar".
+     * @const @private {!Object<string, string>}
+     */
+    this.hashParams_ = {};
 
     /** @private {?Promise} */
     this.nextVisiblePromise_ = null;
@@ -178,24 +160,17 @@ export class Viewer {
     /** @private {?time} */
     this.lastVisibleTime_ = null;
 
-    /** @private {?Function} */
-    this.messagingReadyResolver_ = null;
-
-    /** @private {?Function} */
-    this.viewerOriginResolver_ = null;
-
-    /** @private {?Function} */
-    this.trustedViewerResolver_ = null;
-
+    const deferred = new Deferred();
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
      * `this.onVisibilityChange_()`.
      * @private @const {!Promise}
      */
-    this.whenFirstVisiblePromise_ = new Promise(resolve => {
-      this.whenFirstVisibleResolve_ = resolve;
-    });
+    this.whenFirstVisiblePromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.whenFirstVisibleResolve_ = deferred.resolve;
 
     // Params can be passed either directly in multi-doc environment or via
     // iframe hash/name with hash taking precedence.
@@ -206,7 +181,8 @@ export class Viewer {
         parseParams_(this.win.name.substring(SENTINEL_.length), this.params_);
       }
       if (this.win.location.hash) {
-        parseParams_(this.win.location.hash, this.params_);
+        parseParams_(this.win.location.hash, this.hashParams_);
+        Object.assign(this.params_, this.hashParams_);
       }
     }
 
@@ -215,45 +191,31 @@ export class Viewer {
     this.isRuntimeOn_ = !parseInt(this.params_['off'], 10);
     dev().fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
 
-    this.overtakeHistory_ = !!(parseInt(this.params_['history'], 10) ||
-        this.overtakeHistory_);
+    this.overtakeHistory_ = !!(
+      parseInt(this.params_['history'], 10) || this.overtakeHistory_
+    );
     dev().fine(TAG_, '- history:', this.overtakeHistory_);
 
     this.setVisibilityState_(this.params_['visibilityState']);
     dev().fine(TAG_, '- visibilityState:', this.getVisibilityState());
 
-    this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
-        this.prerenderSize_;
+    this.prerenderSize_ =
+      parseInt(this.params_['prerenderSize'], 10) || this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     /**
-     * Whether the AMP document is embedded in a webview.
-     * @private @const {boolean}
+     * Whether the AMP document is embedded in a Chrome Custom Tab.
+     * @private {?boolean}
      */
-    this.isWebviewEmbedded_ = !this.isIframed_ &&
-        this.params_['webview'] == '1';
+    this.isCctEmbedded_ = null;
 
     /**
-     * Whether the AMP document is embedded in a viewer, such as an iframe, or
-     * a web view, or a shadow doc in PWA.
+     * Whether the AMP document was served by a proxy.
      * @private @const {boolean}
      */
-    this.isEmbedded_ = !!(
-        this.isIframed_ && !this.win.AMP_TEST_IFRAME
-        // Checking param "origin", as we expect all viewers to provide it.
-        // See https://github.com/ampproject/amphtml/issues/4183
-        // There appears to be a bug under investigation where the
-        // origin is sometimes failed to be detected. Since failure mode
-        // if we fail to initialize communication is very bad, we also check
-        // for visibilityState.
-        // After https://github.com/ampproject/amphtml/issues/6070
-        // is fixed we should probably only keep the amp_js_v check here.
-        && (this.params_['origin']
-            || this.params_['visibilityState']
-            // Parent asked for viewer JS. We must be embedded.
-            || (this.win.location.search.indexOf('amp_js_v') != -1))
-        || this.isWebviewEmbedded_
-        || !ampdoc.isSingleDoc());
+    this.isProxyOrigin_ = isProxyOrigin(
+      parseUrlDeprecated(this.ampdoc.win.location.href)
+    );
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -261,100 +223,46 @@ export class Viewer {
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
 
-    /**
-     * This promise will resolve when communications channel has been
-     * established or timeout in 20 seconds. The timeout is needed to avoid
-     * this promise becoming a memory leak with accumulating undelivered
-     * messages. The promise is only available when the document is embedded.
-     * @private @const {?Promise}
-     */
-    this.messagingReadyPromise_ = this.isEmbedded_ ?
-        Services.timerFor(this.win).timeoutPromise(
-            20000,
-            new Promise(resolve => {
-              this.messagingReadyResolver_ = resolve;
-            })).catch(reason => {
-              throw getChannelError(/** @type {!Error|string|undefined} */ (
-                  reason));
-            }) : null;
+    const messagingDeferred = new Deferred();
+    /** @const @private {!Function} */
+    this.messagingReadyResolver_ = messagingDeferred.resolve;
+    /** @const @private {?Promise} */
+    this.messagingReadyPromise_ = this.initMessagingChannel_(
+      messagingDeferred.promise
+    );
 
-    /**
-     * A promise for non-essential messages. These messages should not fail
-     * if there's no messaging channel set up. But ideally viewer would try to
-     * deliver if at all possible. This promise is only available when the
-     * document is embedded.
-     * @private @const {?Promise}
-     */
-    this.messagingMaybePromise_ = this.isEmbedded_ ?
-        this.messagingReadyPromise_
-            .catch(reason => {
-              // Don't fail promise, but still report.
-              reportError(getChannelError(
-                  /** @type {!Error|string|undefined} */ (reason)));
-            }) : null;
+    /** @private {?Promise<boolean>} */
+    this.isTrustedViewer_ = null;
 
-    // Trusted viewer and referrer.
-    let trustedViewerResolved;
-    let trustedViewerPromise;
-    if (!this.isEmbedded_) {
-      // Not embedded in IFrame - can't trust the viewer.
-      trustedViewerResolved = false;
-      trustedViewerPromise = Promise.resolve(false);
-    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded_) {
-      // Ancestors when available take precedence. This is the main API used
-      // for this determination. Fallback is only done when this API is not
-      // supported by the browser.
-      trustedViewerResolved = (this.win.location.ancestorOrigins.length > 0 &&
-          this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
-      trustedViewerPromise = Promise.resolve(trustedViewerResolved);
-    } else {
-      // Wait for comms channel to confirm the origin.
-      trustedViewerResolved = undefined;
-      trustedViewerPromise = new Promise(resolve => {
-        this.trustedViewerResolver_ = resolve;
-      });
-    }
-
-    /** @const @private {!Promise<boolean>} */
-    this.isTrustedViewer_ = trustedViewerPromise;
-
-    /** @const @private {!Promise<string>} */
-    this.viewerOrigin_ = new Promise(resolve => {
-      if (!this.isEmbedded()) {
-        // Viewer is only determined for iframed documents at this time.
-        resolve('');
-      } else if (this.win.location.ancestorOrigins &&
-          this.win.location.ancestorOrigins.length > 0) {
-        resolve(this.win.location.ancestorOrigins[0]);
-      } else {
-        // Race to resolve with a timer.
-        Services.timerFor(this.win).delay(
-            () => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
-        this.viewerOriginResolver_ = resolve;
-      }
-    });
+    /** @private {?Promise<string>} */
+    this.viewerOrigin_ = null;
 
     /** @private {string} */
     this.unconfirmedReferrerUrl_ =
-        this.isEmbedded() && 'referrer' in this.params_ &&
-            trustedViewerResolved !== false ?
-        this.params_['referrer'] :
-        this.win.document.referrer;
+      this.isEmbedded() &&
+      'referrer' in this.params_ &&
+      this.isTrustedAncestorOrigins_() !== false
+        ? this.params_['referrer']
+        : this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise(resolve => {
       if (this.isEmbedded() && 'referrer' in this.params_) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer_.then(isTrusted => {
+        this.isTrustedViewer().then(isTrusted => {
           if (isTrusted) {
             resolve(this.params_['referrer']);
           } else {
             resolve(this.win.document.referrer);
             if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
-              dev().expectedError(TAG_, 'Untrusted viewer referrer override: ' +
-                  this.unconfirmedReferrerUrl_ + ' at ' +
-                  this.messagingOrigin_);
+              dev().expectedError(
+                TAG_,
+                'Untrusted viewer referrer override: ' +
+                  this.unconfirmedReferrerUrl_ +
+                  ' at ' +
+                  this.messagingOrigin_
+              );
               this.unconfirmedReferrerUrl_ = this.win.document.referrer;
             }
           }
@@ -374,13 +282,17 @@ export class Viewer {
       if (this.isEmbedded() && viewerUrlOverride) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer_.then(isTrusted => {
+        this.isTrustedViewer().then(isTrusted => {
           if (isTrusted) {
             this.resolvedViewerUrl_ = viewerUrlOverride;
           } else {
-            dev().error(TAG_, 'Untrusted viewer url override: ' +
-                viewerUrlOverride + ' at ' +
-                this.messagingOrigin_);
+            dev().expectedError(
+              TAG_,
+              'Untrusted viewer url override: ' +
+                viewerUrlOverride +
+                ' at ' +
+                this.messagingOrigin_
+            );
           }
           resolve(this.resolvedViewerUrl_);
         });
@@ -395,11 +307,12 @@ export class Viewer {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
-        // This is currently used my mode.js to infer development mode.
+        // This is currently used by mode.js to infer development mode.
         if (!this.win.location.originalHash) {
           this.win.location.originalHash = this.win.location.hash;
         }
         this.win.history.replaceState({}, '', newUrl);
+        delete this.hashParams_['click'];
         dev().fine(TAG_, 'replace fragment:' + this.win.location.href);
       }
     }
@@ -408,6 +321,58 @@ export class Viewer {
     // instance is constructed, the document is already `visible`.
     this.recheckVisibilityState_();
     this.onVisibilityChange_();
+
+    // This fragment may get cleared by impression tracking. If so, it will be
+    // restored afterward.
+    this.whenFirstVisible().then(() => {
+      this.maybeUpdateFragmentForCct();
+    });
+  }
+
+  /**
+   * Initialize messaging channel with Viewer host.
+   * This promise will resolve when communications channel has been
+   * established or timeout in 20 seconds. The timeout is needed to avoid
+   * this promise becoming a memory leak with accumulating undelivered
+   * messages. The promise is only available when the document is embedded.
+   *
+   * @param {!Promise} messagingPromise
+   * @return {?Promise}
+   * @private
+   */
+  initMessagingChannel_(messagingPromise) {
+    const isEmbedded = !!(
+      (this.isIframed_ &&
+        !this.win.AMP_TEST_IFRAME &&
+        // Checking param "origin", as we expect all viewers to provide it.
+        // See https://github.com/ampproject/amphtml/issues/4183
+        // There appears to be a bug under investigation where the
+        // origin is sometimes failed to be detected. Since failure mode
+        // if we fail to initialize communication is very bad, we also check
+        // for visibilityState.
+        // After https://github.com/ampproject/amphtml/issues/6070
+        // is fixed we should probably only keep the amp_js_v check here.
+        (this.params_['origin'] ||
+          this.params_['visibilityState'] ||
+          // Parent asked for viewer JS. We must be embedded.
+          this.win.location.search.indexOf('amp_js_v') != -1)) ||
+      this.isWebviewEmbedded() ||
+      this.isCctEmbedded() ||
+      !this.ampdoc.isSingleDoc()
+    );
+
+    if (!isEmbedded) {
+      return null;
+    }
+    return Services.timerFor(this.win)
+      .timeoutPromise(20000, messagingPromise)
+      .catch(reason => {
+        const error = getChannelError(
+          /** @type {!Error|string|undefined} */ (reason)
+        );
+        reportError(error);
+        throw error;
+      });
   }
 
   /**
@@ -455,32 +420,11 @@ export class Viewer {
   }
 
   /**
-   * Requests A2A navigation to the given destination. If the viewer does
-   * not support this operation, will navigate the top level window
-   * to the destination.
-   * The URL is assumed to be in AMP Cache format already.
-   * @param {string} url An AMP article URL.
-   * @param {string} requestedBy Informational string about the entity that
-   *     requested the navigation.
-   */
-  navigateTo(url, requestedBy) {
-    dev().assert(isProxyOrigin(url), 'Invalid A2A URL %s %s', url, requestedBy);
-    if (this.hasCapability('a2a')) {
-      this.sendMessage('a2a', dict({
-        'url': url,
-        'requestedBy': requestedBy,
-      }));
-    } else {
-      this.win.top.location.href = url;
-    }
-  }
-
-  /**
    * Whether the document is embedded in a viewer.
    * @return {boolean}
    */
   isEmbedded() {
-    return this.isEmbedded_;
+    return !!this.messagingReadyPromise_;
   }
 
   /**
@@ -488,7 +432,77 @@ export class Viewer {
    * @return {boolean}
    */
   isWebviewEmbedded() {
-    return this.isWebviewEmbedded_;
+    return !this.isIframed_ && this.params_['webview'] == '1';
+  }
+
+  /**
+   * Whether the document is embedded in a Chrome Custom Tab.
+   * @return {boolean}
+   */
+  isCctEmbedded() {
+    if (this.isCctEmbedded_ != null) {
+      return this.isCctEmbedded_;
+    }
+    this.isCctEmbedded_ = false;
+    if (!this.isIframed_) {
+      const queryParams = parseQueryString(this.win.location.search);
+      this.isCctEmbedded_ =
+        queryParams['amp_gsa'] === '1' &&
+        startsWith(queryParams['amp_js_v'] || '', 'a');
+    }
+    return this.isCctEmbedded_;
+  }
+
+  /**
+   * Whether the document was served by a proxy.
+   * @return {boolean}
+   */
+  isProxyOrigin() {
+    return this.isProxyOrigin_;
+  }
+
+  /**
+   * Update the URL fragment with data needed to support custom tabs. This will
+   * not clear query string parameters, but will clear the fragment.
+   */
+  maybeUpdateFragmentForCct() {
+    if (!this.isCctEmbedded()) {
+      return;
+    }
+    // CCT only works with versions of Chrome that support the history API.
+    if (!this.win.history.replaceState) {
+      return;
+    }
+    const sourceOrigin = getSourceOrigin(this.win.location.href);
+    const {canonicalUrl} = Services.documentInfoForDoc(this.ampdoc);
+    const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
+    if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
+      this.hashParams_['ampshare'] = canonicalUrl;
+      this.win.history.replaceState(
+        {},
+        '',
+        '#' +
+          serializeQueryString(/** @type {!JsonObject} */ (this.hashParams_))
+      );
+    }
+  }
+
+  /**
+   * Compares URLs to determine if they match once common subdomains are
+   * removed. Everything else must match.
+   * @param {string} first Origin to compare.
+   * @param {string} second Origin to compare.
+   * @return {boolean} Whether the origins match without subdomains.
+   * @private
+   */
+  hasRoughlySameOrigin_(first, second) {
+    const trimOrigin = origin => {
+      if (origin.split('.').length > 2) {
+        return origin.replace(TRIM_ORIGIN_PATTERN_, '$1');
+      }
+      return origin;
+    };
+    return trimOrigin(first) == trimOrigin(second);
   }
 
   /**
@@ -556,16 +570,17 @@ export class Viewer {
     // viewer). Unfortunately, the viewer sends HIDDEN instead of PRERENDER or
     // INACTIVE, though we know better.
     if (state === VisibilityState.HIDDEN) {
-      state = this.hasBeenVisible_ ?
-        VisibilityState.INACTIVE :
-        VisibilityState.PRERENDER;
+      state = this.hasBeenVisible_
+        ? VisibilityState.INACTIVE
+        : VisibilityState.PRERENDER;
     }
 
     this.viewerVisibilityState_ = state;
 
-    if (this.docState_.isHidden() &&
-        (state === VisibilityState.VISIBLE ||
-         state === VisibilityState.PAUSED)) {
+    if (
+      this.docState_.isHidden() &&
+      (state === VisibilityState.VISIBLE || state === VisibilityState.PAUSED)
+    ) {
       state = VisibilityState.HIDDEN;
     }
 
@@ -622,9 +637,9 @@ export class Viewer {
       return this.nextVisiblePromise_;
     }
 
-    return this.nextVisiblePromise_ = new Promise(resolve => {
-      this.nextVisibleResolve_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.nextVisibleResolve_ = deferred.resolve;
+    return (this.nextVisiblePromise_ = deferred.promise);
   }
 
   /**
@@ -680,6 +695,7 @@ export class Viewer {
    * the current page's URL. The trusted viewers are allowed to override this
    * value.
    * @return {!Promise<string>}
+   * @visibleForTesting
    */
   getViewerUrl() {
     return this.viewerUrl_;
@@ -692,19 +708,6 @@ export class Viewer {
    */
   maybeGetMessagingOrigin() {
     return this.messagingOrigin_;
-  }
-
-  /**
-   * @param {string} referrer
-   * @return {boolean}
-   * @private
-   */
-  isTrustedReferrer_(referrer) {
-    const url = parseUrl(referrer);
-    if (url.protocol != 'https:') {
-      return false;
-    }
-    return TRUSTED_REFERRER_HOSTS.some(th => th.test(url.hostname));
   }
 
   /**
@@ -733,17 +736,40 @@ export class Viewer {
    * @return {!Promise<boolean>}
    */
   isTrustedViewer() {
-    return this.isTrustedViewer_;
+    if (!this.isTrustedViewer_) {
+      const isTrustedAncestorOrigins = this.isTrustedAncestorOrigins_();
+      this.isTrustedViewer_ =
+        isTrustedAncestorOrigins !== undefined
+          ? Promise.resolve(isTrustedAncestorOrigins)
+          : this.messagingReadyPromise_.then(origin => {
+              return origin ? this.isTrustedViewerOrigin_(origin) : false;
+            });
+    }
+    return /** @type {!Promise<boolean>} */ (this.isTrustedViewer_);
   }
 
   /**
-   * Whether the referrer has been whitelisted for CORS impression
-   * @return {!Promise<boolean>}
+   * Whether the viewer is has been whitelisted for more sensitive operations
+   * by looking at the ancestorOrigins.
+   * @return {boolean|undefined}
    */
-  isTrustedReferrer() {
-    return this.referrerUrl_.then(referrer => {
-      return this.isTrustedReferrer_(referrer);
-    });
+  isTrustedAncestorOrigins_() {
+    if (!this.isEmbedded()) {
+      // Not embedded in IFrame - can't trust the viewer.
+      return false;
+    } else if (
+      this.win.location.ancestorOrigins &&
+      !this.isWebviewEmbedded() &&
+      !this.isCctEmbedded()
+    ) {
+      // Ancestors when available take precedence. This is the main API used
+      // for this determination. Fallback is only done when this API is not
+      // supported by the browser.
+      return (
+        this.win.location.ancestorOrigins.length > 0 &&
+        this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0])
+      );
+    }
   }
 
   /**
@@ -753,7 +779,28 @@ export class Viewer {
    * @return {!Promise<string>}
    */
   getViewerOrigin() {
-    return this.viewerOrigin_;
+    if (!this.viewerOrigin_) {
+      let origin;
+      if (!this.isEmbedded()) {
+        // Viewer is only determined for iframed documents at this time.
+        origin = '';
+      } else if (
+        this.win.location.ancestorOrigins &&
+        this.win.location.ancestorOrigins.length > 0
+      ) {
+        origin = this.win.location.ancestorOrigins[0];
+      }
+      this.viewerOrigin_ =
+        origin !== undefined
+          ? Promise.resolve(origin)
+          : Services.timerFor(this.win)
+              .timeoutPromise(
+                VIEWER_ORIGIN_TIMEOUT_,
+                this.messagingReadyPromise_
+              )
+              .catch(() => '');
+    }
+    return /** @type {!Promise<string>} */ (this.viewerOrigin_);
   }
 
   /**
@@ -762,19 +809,18 @@ export class Viewer {
    * @private
    */
   isTrustedViewerOrigin_(urlString) {
-    // TEMPORARY HACK due to a misbehaving native app. See b/32626673
-    // In native apps all security bets are off anyway, and in browser
-    // origins never take the form that is matched here.
-    if (this.isWebviewEmbedded_ && /^www\.[.a-z]+$/.test(urlString)) {
-      return TRUSTED_VIEWER_HOSTS.some(th => th.test(urlString));
-    }
     /** @const {!Location} */
-    const url = parseUrl(urlString);
-    if (url.protocol != 'https:') {
+    const url = parseUrlDeprecated(urlString);
+    const {protocol} = url;
+    // Mobile WebView x-thread is allowed.
+    if (protocol == 'x-thread:') {
+      return true;
+    }
+    if (protocol != 'https:') {
       // Non-https origins are never trusted.
       return false;
     }
-    return TRUSTED_VIEWER_HOSTS.some(th => th.test(url.hostname));
+    return urls.trustedViewerHosts.some(th => th.test(url.hostname));
   }
 
   /**
@@ -804,6 +850,21 @@ export class Viewer {
   }
 
   /**
+   * Adds a eventType listener for viewer events.
+   * @param {string} eventType
+   * @param {!RequestResponderDef} responder
+   * @return {!UnlistenDef}
+   */
+  onMessageRespond(eventType, responder) {
+    this.messageResponders_[eventType] = responder;
+    return () => {
+      if (this.messageResponders_[eventType] === responder) {
+        delete this.messageResponders_[eventType];
+      }
+    };
+  }
+
+  /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {!JsonObject} data
@@ -822,12 +883,18 @@ export class Viewer {
     }
     if (eventType == 'broadcast') {
       this.broadcastObservable_.fire(
-          /** @type {!JsonObject|undefined} */ (data));
+        /** @type {!JsonObject|undefined} */ (data)
+      );
       return Promise.resolve();
     }
     const observable = this.messageObservables_[eventType];
     if (observable) {
       observable.fire(data);
+    }
+    const responder = this.messageResponders_[eventType];
+    if (responder) {
+      return responder(data);
+    } else if (observable) {
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
@@ -852,25 +919,17 @@ export class Viewer {
     dev().fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
     this.messagingOrigin_ = origin;
-    if (this.messagingReadyResolver_) {
-      this.messagingReadyResolver_();
-    }
-    if (this.trustedViewerResolver_) {
-      this.trustedViewerResolver_(
-          origin ? this.isTrustedViewerOrigin_(origin) : false);
-    }
-    if (this.viewerOriginResolver_) {
-      this.viewerOriginResolver_(origin || '');
-    }
+    this.messagingReadyResolver_(origin);
 
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
       queue.forEach(message => {
         const responsePromise = this.messageDeliverer_(
-            message.eventType,
-            message.data,
-            message.awaitResponse);
+          message.eventType,
+          message.data,
+          message.awaitResponse
+        );
 
         if (message.awaitResponse) {
           message.responseResolver(responsePromise);
@@ -924,11 +983,14 @@ export class Viewer {
       // Certain message deliverers return fake "Promise" instances called
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
-      return /** @type {!Promise<?JsonObject|string|undefined>} */ (
-          Promise.resolve(this.messageDeliverer_(
-              eventType,
-              /** @type {?JsonObject|string|undefined} */ (data),
-              awaitResponse)));
+      return /** @type {!Promise<?JsonObject|string|undefined>} */ (tryResolve(
+        () =>
+          this.messageDeliverer_(
+            eventType,
+            /** @type {?JsonObject|string|undefined} */ (data),
+            awaitResponse
+          )
+      ));
     }
 
     if (!this.messagingReadyPromise_) {
@@ -945,8 +1007,7 @@ export class Viewer {
       });
     }
 
-    const found = findIndex(this.messageQueue_,
-        m => m.eventType == eventType);
+    const found = findIndex(this.messageQueue_, m => m.eventType == eventType);
 
     let message;
     if (found != -1) {
@@ -954,10 +1015,9 @@ export class Viewer {
       message.data = data;
       message.awaitResponse = message.awaitResponse || awaitResponse;
     } else {
-      let responseResolver;
-      const responsePromise = new Promise(r => {
-        responseResolver = r;
-      });
+      const deferred = new Deferred();
+      const {promise: responsePromise, resolve: responseResolver} = deferred;
+
       message = {
         eventType,
         data,
@@ -976,14 +1036,18 @@ export class Viewer {
    * established, but it will not fail if the channel is timed out.
    *
    * @param {!JsonObject} message
+   * @return {!Promise<boolean>} a Promise of success or not
    */
   broadcast(message) {
-    if (!this.messagingMaybePromise_) {
+    if (!this.messagingReadyPromise_) {
       // Messaging is not expected.
-      return;
+      return Promise.resolve(false);
     }
 
-    this.sendMessage('broadcast', message);
+    return this.sendMessageInternal_('broadcast', message, false, false).then(
+      () => true,
+      () => false
+    );
   }
 
   /**
@@ -998,10 +1062,12 @@ export class Viewer {
   /**
    * Resolves when there is a messaging channel established with the viewer.
    * Will be null if no messaging is needed like in an non-embedded document.
+   * Deprecated: do not use. sendMessage and sendMessageAwaitResponse already
+   *             wait for messaging channel ready.
    * @return {?Promise}
    */
   whenMessagingReady() {
-    return this.messagingMaybePromise_;
+    return this.messagingReadyPromise_;
   }
 
   /**
@@ -1009,19 +1075,24 @@ export class Viewer {
    * @param {?string} newUrl
    */
   replaceUrl(newUrl) {
-    if (!newUrl ||
-        !this.ampdoc.isSingleDoc() ||
-        !this.win.history.replaceState) {
+    if (
+      !newUrl ||
+      !this.ampdoc.isSingleDoc() ||
+      !this.win.history.replaceState
+    ) {
       return;
     }
 
     try {
       // The origin and source origin must match.
-      const url = parseUrl(this.win.location.href);
-      const replaceUrl = parseUrl(
-          removeFragment(newUrl) + this.win.location.hash);
-      if (url.origin == replaceUrl.origin &&
-          getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
+      const url = parseUrlDeprecated(this.win.location.href);
+      const replaceUrl = parseUrlDeprecated(
+        removeFragment(newUrl) + this.win.location.hash
+      );
+      if (
+        url.origin == replaceUrl.origin &&
+        getSourceOrigin(url) == getSourceOrigin(replaceUrl)
+      ) {
         this.win.history.replaceState({}, '', replaceUrl.href);
         this.win.location.originalHref = url.href;
         dev().fine(TAG_, 'replace url:' + replaceUrl.href);
@@ -1031,7 +1102,6 @@ export class Viewer {
     }
   }
 }
-
 
 /**
  * Parses the viewer parameters as a string.
@@ -1049,7 +1119,6 @@ function parseParams_(str, allParams) {
   }
 }
 
-
 /**
  * Creates an error for the case where a channel cannot be established.
  * @param {*=} opt_reason
@@ -1064,9 +1133,9 @@ function getChannelError(opt_reason) {
   return new Error('No messaging channel: ' + opt_reason);
 }
 
-
 /**
  * Sets the viewer visibility state. This calls is restricted to runtime only.
+ * @param {!Viewer} viewer
  * @param {!VisibilityState} state
  * @restricted
  */
@@ -1074,16 +1143,17 @@ export function setViewerVisibilityState(viewer, state) {
   viewer.setVisibilityState_(state);
 }
 
-
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installViewerServiceForDoc(ampdoc, opt_initParams) {
-  registerServiceBuilderForDoc(ampdoc,
-      'viewer',
-      function() {
-        return new Viewer(ampdoc, opt_initParams);
-      },
-      /* opt_instantiate */ true);
+  registerServiceBuilderForDoc(
+    ampdoc,
+    'viewer',
+    function() {
+      return new Viewer(ampdoc, opt_initParams);
+    },
+    /* opt_instantiate */ true
+  );
 }

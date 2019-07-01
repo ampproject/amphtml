@@ -49,9 +49,9 @@ i-amphtml-app-banner-top-padding {
   background-color: #fff;
   background-repeat: no-repeat;
   z-index: 14;
-  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2);
+  box-shadow: 0 -1px 1px 0 rgba(0,0,0, 0.2);
   border: none;
-  border-top-left-radius: 12px;
+  border-radius: 12px 0 0 0;
 }
 
 /* Increase tapping area of the dismiss button */

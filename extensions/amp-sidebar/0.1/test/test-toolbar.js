@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,51 +14,48 @@
  * limitations under the License.
  */
 
-import {adopt} from '../../../../src/runtime';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {createIframePromise} from '../../../../testing/iframe';
 import {Services} from '../../../../src/services';
-import {toArray} from '../../../../src/types';
-import * as sinon from 'sinon';
 import {Toolbar} from '../toolbar';
+import {adopt} from '../../../../src/runtime';
+import {createIframePromise} from '../../../../testing/iframe';
+import {toArray} from '../../../../src/types';
 
 adopt(window);
 
 describe('amp-sidebar - toolbar', () => {
   let sandbox;
   let timer;
-  let vsync;
 
   function getToolbars(options) {
     options = options || {};
     return createIframePromise().then(iframe => {
-      vsync = Services.vsyncFor(iframe.win);
-      timer = Services.timerFor(iframe.win);
-      const ampdoc = new AmpDocSingle(iframe.win);
+      const {win} = iframe;
+      const {document: doc} = win;
 
-       // Create toolbar elements
-      const toolbarContainerElement =
-        ampdoc.win.document.createElement('div');
-      const toolbars = [];
-      ampdoc.win.document.body.appendChild(toolbarContainerElement);
-       // Stub our toolbar operations, doing this here as it will
-       // Ease testing our media queries
-      sandbox.stub(vsync,
-          'mutate', callback => {
-            callback();
-          });
-      sandbox.stub(vsync,
-          'mutatePromise', callback => {
-            callback();
-            return Promise.resolve();
-          });
-      sandbox.stub(timer, 'delay', function(callback) {
+      timer = Services.timerFor(win);
+
+      const ampdoc = new AmpDocSingle(win);
+      const contextElement = {
+        getAmpDoc: () => ampdoc,
+        mutateElement: cb => {
+          cb();
+          return Promise.resolve();
+        },
+      };
+
+      sandbox.stub(timer, 'delay').callsFake(function(callback) {
         callback();
       });
 
-       // Create our individual toolbars
+      // Create toolbar elements
+      const toolbarContainerElement = doc.createElement('div');
+      const toolbars = [];
+      doc.body.appendChild(toolbarContainerElement);
+
+      // Create our individual toolbars
       options.forEach(toolbarObj => {
-        const navToolbar = ampdoc.win.document.createElement('nav');
+        const navToolbar = doc.createElement('nav');
         if (toolbarObj.media) {
           navToolbar.setAttribute('toolbar', toolbar.media);
         } else {
@@ -68,7 +64,7 @@ describe('amp-sidebar - toolbar', () => {
         if (toolbarObj.toolbarOnlyOnNav) {
           navToolbar.setAttribute('toolbar-only', '');
         }
-        const toolbarTarget = ampdoc.win.document.createElement('div');
+        const toolbarTarget = doc.createElement('div');
         if (toolbarObj.toolbarTarget) {
           toolbarTarget.setAttribute('id', toolbarObj.toolbarTarget);
           navToolbar.setAttribute('toolbar-target', toolbarObj.toolbarTarget);
@@ -78,16 +74,16 @@ describe('amp-sidebar - toolbar', () => {
           toolbarTarget.setAttribute('id', 'toolbar-target');
           navToolbar.setAttribute('toolbar-target', 'toolbar-target');
         }
-        ampdoc.win.document.body.appendChild(toolbarTarget);
-        const toolbarList = ampdoc.win.document.createElement('ul');
+        doc.body.appendChild(toolbarTarget);
+        const toolbarList = doc.createElement('ul');
         for (let i = 0; i < 3; i++) {
-          const li = ampdoc.win.document.createElement('li');
+          const li = doc.createElement('li');
           li.innerHTML = 'Toolbar item ' + i;
           toolbarList.appendChild(li);
         }
         navToolbar.appendChild(toolbarList);
         toolbarContainerElement.appendChild(navToolbar);
-        toolbars.push(new Toolbar(navToolbar, vsync, ampdoc));
+        toolbars.push(new Toolbar(navToolbar, contextElement));
       });
 
       return {iframe, ampdoc, toolbarContainerElement, toolbars};
@@ -96,13 +92,13 @@ describe('amp-sidebar - toolbar', () => {
 
   function resizeIframeToWidth(iframeObject, width, callback) {
     iframeObject.iframe.setAttribute('width', width);
-     // Force the browser to re-draw
+    // Force the browser to re-draw
     iframeObject.win.innerWidth;
     callback();
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
@@ -111,34 +107,40 @@ describe('amp-sidebar - toolbar', () => {
 
   it('toolbar header should error if target element \
    could not be found as it is required.', () => {
-    return getToolbars([{
-      targetError: true,
-    }]).then(() => {
-      expect(false).to.be.equal(true, 'Toolbar \
-       should not be created when the target element is not found');
-    }).catch(() => {
-      expect(true).to.be.ok;
-    });
+    return getToolbars([
+      {
+        targetError: true,
+      },
+    ])
+      .then(() => {
+        expect(false).to.be.equal(
+          true,
+          'Toolbar \
+       should not be created when the target element is not found'
+        );
+      })
+      .catch(() => {
+        expect(true).to.be.ok;
+      });
   });
 
   it('toolbar header should be hidden for a \
    non-matching window size for (min-width: 768px)', () => {
     return getToolbars([{}]).then(obj => {
-      const toolbars = obj.toolbars;
+      const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '1024px', () => {
         toolbars.forEach(toolbar => {
           toolbar.onLayoutChange();
         });
-        const toolbarElements =
-                toArray(obj.ampdoc.getRootNode()
-                .getElementsByClassName('i-amphtml-toolbar'));
+        const toolbarElements = toArray(
+          obj.ampdoc.getRootNode().getElementsByClassName('i-amphtml-toolbar')
+        );
         resizeIframeToWidth(obj.iframe, '1px', () => {
           toolbars.forEach(toolbar => {
             toolbar.onLayoutChange();
           });
           expect(toolbarElements.length).to.be.above(0);
-          expect(toolbarElements[0].parentElement.style.display)
-              .to.be.equal('none');
+          expect(toolbarElements[0].parentElement).to.have.display('none');
         });
       });
     });
@@ -147,17 +149,16 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar header should be shown for a \
    matching window size for (min-width: 768px)', () => {
     return getToolbars([{}]).then(obj => {
-      const toolbars = obj.toolbars;
+      const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '4000px', () => {
         toolbars.forEach(toolbar => {
           toolbar.onLayoutChange();
         });
-        const toolbarElements =
-                toArray(obj.ampdoc.getRootNode()
-                .getElementsByClassName('i-amphtml-toolbar'));
+        const toolbarElements = toArray(
+          obj.ampdoc.getRootNode().getElementsByClassName('i-amphtml-toolbar')
+        );
         expect(toolbarElements.length).to.be.above(0);
-        expect(toolbarElements[0].parentElement.style.display)
-            .to.be.equal('');
+        expect(toolbarElements[0].parentElement).to.not.have.display('none');
       });
     });
   });
@@ -165,18 +166,20 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar should be placed into a target, with the \
    target attrbiute', () => {
     const targetId = 'toolbar-target';
-    return getToolbars([{
-      'toolbar-target': targetId,
-    }]).then(obj => {
-      const toolbars = obj.toolbars;
+    return getToolbars([
+      {
+        'toolbar-target': targetId,
+      },
+    ]).then(obj => {
+      const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '1024px', () => {
         toolbars.forEach(toolbar => {
           toolbar.onLayoutChange();
         });
         const toolbarQuery = `#${targetId} > nav[toolbar]`;
-        const toolbarTargetElements =
-                toArray(obj.ampdoc.getRootNode()
-                .querySelectorAll(toolbarQuery));
+        const toolbarTargetElements = toArray(
+          obj.ampdoc.getRootNode().querySelectorAll(toolbarQuery)
+        );
         expect(toolbars.length).to.be.equal(1);
         expect(toolbarTargetElements.length).to.be.equal(1);
       });
@@ -186,21 +189,22 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar should be placed into a target, and shown for a \
    matching window size for (min-width: 768px)', () => {
     const targetId = 'toolbar-target';
-    return getToolbars([{
-      'toolbar-target': targetId,
-    }]).then(obj => {
-      const toolbars = obj.toolbars;
-      const toolbarTargets =
-                toArray(obj.ampdoc.getRootNode()
-               .querySelectorAll(`#${targetId}`));
+    return getToolbars([
+      {
+        'toolbar-target': targetId,
+      },
+    ]).then(obj => {
+      const {toolbars} = obj;
+      const toolbarTargets = toArray(
+        obj.ampdoc.getRootNode().querySelectorAll(`#${targetId}`)
+      );
       resizeIframeToWidth(obj.iframe, '4000px', () => {
         toolbars.forEach(toolbar => {
           toolbar.onLayoutChange();
         });
         expect(toolbars.length).to.be.equal(1);
         expect(toolbarTargets.length).to.be.equal(1);
-        expect(toolbarTargets[0].style.display)
-            .to.be.equal('');
+        expect(toolbarTargets[0]).to.not.have.display('none');
       });
     });
   });
@@ -208,40 +212,43 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar should be placed into a target, and hidden for a \
    non-matching window size for (min-width: 768px)', () => {
     const targetId = 'toolbar-target';
-    return getToolbars([{
-      'toolbar-target': targetId,
-    }]).then(obj => {
-      const toolbars = obj.toolbars;
-      const toolbarTargets =
-                toArray(obj.ampdoc.getRootNode()
-               .querySelectorAll(`#${targetId}`));
+    return getToolbars([
+      {
+        'toolbar-target': targetId,
+      },
+    ]).then(obj => {
+      const {toolbars} = obj;
+      const toolbarTargets = toArray(
+        obj.ampdoc.getRootNode().querySelectorAll(`#${targetId}`)
+      );
       resizeIframeToWidth(obj.iframe, '200px', () => {
         toolbars.forEach(toolbar => {
           toolbar.onLayoutChange();
         });
         expect(toolbars.length).to.be.equal(1);
         expect(toolbarTargets.length).to.be.equal(1);
-        expect(toolbarTargets[0].style.display)
-            .to.be.equal('none');
+        expect(toolbarTargets[0]).to.have.display('none');
       });
     });
   });
 
   it('should add the "amp-sidebar-toolbar-target-shown" state class, \
    for matching window size of (min-width: 768px)', () => {
-    return getToolbars([{
-      toolbarOnlyOnNav: true,
-    }]).then(obj => {
-      const toolbars = obj.toolbars;
+    return getToolbars([
+      {
+        toolbarOnlyOnNav: true,
+      },
+    ]).then(obj => {
+      const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '4000px', () => {
         toolbars.forEach(toolbar => {
           toolbar.onLayoutChange();
         });
-        const toolbarNavElementsWithState =
-                toArray(obj.ampdoc.getRootNode()
-                .querySelectorAll(
-                    'nav[toolbar].amp-sidebar-toolbar-target-shown'
-                ));
+        const toolbarNavElementsWithState = toArray(
+          obj.ampdoc
+            .getRootNode()
+            .querySelectorAll('nav[toolbar].amp-sidebar-toolbar-target-shown')
+        );
         expect(toolbarNavElementsWithState.length).to.be.equal(1);
         expect(toolbars.length).to.be.equal(1);
       });
@@ -250,19 +257,21 @@ describe('amp-sidebar - toolbar', () => {
 
   it('should add the "amp-sidebar-toolbar-target-hidden" state class, \
    for non-matching window size of (min-width: 768px)', () => {
-    return getToolbars([{
-      toolbarOnlyOnNav: true,
-    }]).then(obj => {
-      const toolbars = obj.toolbars;
+    return getToolbars([
+      {
+        toolbarOnlyOnNav: true,
+      },
+    ]).then(obj => {
+      const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '0px', () => {
         toolbars.forEach(toolbar => {
           toolbar.onLayoutChange();
         });
-        const toolbarNavElementsWithState =
-                toArray(obj.ampdoc.getRootNode()
-                .querySelectorAll(
-                    'nav[toolbar].amp-sidebar-toolbar-target-hidden'
-                ));
+        const toolbarNavElementsWithState = toArray(
+          obj.ampdoc
+            .getRootNode()
+            .querySelectorAll('nav[toolbar].amp-sidebar-toolbar-target-hidden')
+        );
         expect(toolbarNavElementsWithState.length).to.be.equal(1);
         expect(toolbars.length).to.be.equal(1);
       });
@@ -272,7 +281,7 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar should be in the hidden state \
    when it is not being displayed', () => {
     return getToolbars([{}]).then(obj => {
-      const toolbars = obj.toolbars;
+      const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '1px', () => {
         toolbars.forEach(toolbar => {
           toolbar.onLayoutChange();
@@ -285,7 +294,7 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar should be in the shown state \
    when it is being displayed', () => {
     return getToolbars([{}]).then(obj => {
-      const toolbars = obj.toolbars;
+      const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '4000px', () => {
         toolbars.forEach(toolbar => {
           toolbar.onLayoutChange();
@@ -298,11 +307,11 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar should not be able to be shown \
    if already in the shown state', () => {
     return getToolbars([{}]).then(obj => {
-      const toolbars = obj.toolbars;
+      const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '4000px', () => {
         toolbars.forEach(toolbar => {
           toolbar.onLayoutChange();
-          expect(toolbar.attemptShow_()).to.be.undefined;
+          expect(toolbar.isToolbarShown_()).to.be.true;
         });
       });
     });
@@ -311,7 +320,7 @@ describe('amp-sidebar - toolbar', () => {
   it('toolbar should be able to be shown \
    if not in the shown state, and return a promise', () => {
     return getToolbars([{}]).then(obj => {
-      const toolbars = obj.toolbars;
+      const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '1px', () => {
         toolbars.forEach(toolbar => {
           toolbar.onLayoutChange();

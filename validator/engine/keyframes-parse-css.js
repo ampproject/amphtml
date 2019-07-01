@@ -1,5 +1,5 @@
 /**
- * @license
+ * @license DEDUPE_ON_MINIFY
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,14 +16,11 @@
  */
 
 goog.provide('parse_css.validateKeyframesCss');
-
-goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError');
 goog.require('parse_css.ErrorToken');
 goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.Stylesheet');
 goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
-
 
 /**
  * Fills an ErrorToken with the provided position, code, and params.
@@ -56,27 +53,19 @@ class KeyframesVisitor extends parse_css.RuleVisitor {
   /** @inheritDoc */
   visitQualifiedRule(qualifiedRule) {
     if (!this.parentIsKeyframesAtRule) {
-      if (amp.validator.LIGHT) {
-        this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
-      } else {
-        this.errors.push(createErrorTokenAt(
-            qualifiedRule,
-            amp.validator.ValidationError.Code
-                .CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME,
-            ['style', qualifiedRule.ruleName()]));
-      }
-      return;
-    }
-    if (qualifiedRule.declarations.length > 0) return;
-    if (amp.validator.LIGHT) {
-      this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
-    } else {
       this.errors.push(createErrorTokenAt(
           qualifiedRule,
           amp.validator.ValidationError.Code
-              .CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS,
+              .CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME,
           ['style', qualifiedRule.ruleName()]));
+      return;
     }
+    if (qualifiedRule.declarations.length > 0) {return;}
+    this.errors.push(createErrorTokenAt(
+        qualifiedRule,
+        amp.validator.ValidationError.Code
+            .CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS,
+        ['style', qualifiedRule.ruleName()]));
   }
 
   /** @inheritDoc */
@@ -87,15 +76,11 @@ class KeyframesVisitor extends parse_css.RuleVisitor {
       case '-o-keyframes':
       case '-webkit-keyframes':
         if (this.parentIsKeyframesAtRule) {
-          if (amp.validator.LIGHT) {
-            this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
-          } else {
-            this.errors.push(createErrorTokenAt(
-                atRule,
-                amp.validator.ValidationError.Code
-                    .CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME,
-                ['style']));
-          }
+          this.errors.push(createErrorTokenAt(
+              atRule,
+              amp.validator.ValidationError.Code
+                  .CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME,
+              ['style']));
         }
         this.parentIsKeyframesAtRule = true;
         return;

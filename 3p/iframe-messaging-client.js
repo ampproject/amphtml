@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Observable} from '../src/observable';
-import {map} from '../src/utils/object';
 import {
+  CONSTANTS,
+  deserializeMessage,
   listen,
   serializeMessage,
-  deserializeMessage,
 } from '../src/3p-frame-messaging';
+import {Observable} from '../src/observable';
+import {dev} from '../src/log';
+import {dict, map} from '../src/utils/object';
 import {getData} from '../src/event-helper';
 import {getMode} from '../src/mode';
-import {dev} from '../src/log';
 
 export class IframeMessagingClient {
-
   /**
    *  @param {!Window} win A window object.
    */
@@ -38,6 +38,8 @@ export class IframeMessagingClient {
     this.hostWindow_ = win.parent;
     /** @private {?string} */
     this.sentinel_ = null;
+    /** @type {number} */
+    this.nextMessageId_ = 1;
     /**
      * Map messageType keys to observables to be fired when messages of that
      * type are received.
@@ -48,11 +50,33 @@ export class IframeMessagingClient {
   }
 
   /**
+   * Retrieves data from host.
+   *
+   * @param {string} requestType
+   * @param {?Object} payload
+   * @param {function(*)} callback
+   */
+  getData(requestType, payload, callback) {
+    const responseType = requestType + CONSTANTS.responseTypeSuffix;
+    const messageId = this.nextMessageId_++;
+    const unlisten = this.registerCallback(responseType, result => {
+      if (result[CONSTANTS.messageIdFieldName] === messageId) {
+        unlisten();
+        callback(result[CONSTANTS.contentFieldName]);
+      }
+    });
+    const data = dict();
+    data[CONSTANTS.payloadFieldName] = payload;
+    data[CONSTANTS.messageIdFieldName] = messageId;
+    this.sendMessage(requestType, data);
+  }
+
+  /**
    * Make an event listening request to the host window.
    *
    * @param {string} requestType The type of the request message.
    * @param {string} responseType The type of the response message.
-   * @param {function(Object)} callback The callback function to call
+   * @param {function(JsonObject)} callback The callback function to call
    *   when a message with type responseType is received.
    */
   makeRequest(requestType, responseType, callback) {
@@ -96,16 +120,39 @@ export class IframeMessagingClient {
   }
 
   /**
-   *  Send a postMessage to Host Window
-   *  @param {string} type The type of message to send.
-   *  @param {JsonObject=} opt_payload The payload of message to send.
+   * Send a postMessage to Host Window
+   * @param {string} type The type of message to send.
+   * @param {JsonObject=} opt_payload The payload of message to send.
    */
   sendMessage(type, opt_payload) {
-    this.hostWindow_.postMessage/*OK*/(
-        serializeMessage(
-            type, dev().assertString(this.sentinel_),
-            opt_payload, this.rtvVersion_),
-        '*');
+    const msg = serializeMessage(
+      type,
+      dev().assertString(this.sentinel_),
+      opt_payload,
+      this.rtvVersion_
+    );
+
+    // opt in the userActivation feature
+    // see https://github.com/dtapuska/useractivation
+    if (this.isMessageOptionsSupported_()) {
+      this.postMessageWithUserActivation_(msg);
+    } else {
+      this.hostWindow_./*OK*/ postMessage(msg, '*');
+    }
+  }
+
+  /**
+   * @param {string} msg
+   * @suppress {checkTypes} // Can be removed after closure compiler update their externs.
+   */
+  postMessageWithUserActivation_(msg) {
+    this.hostWindow_./*OK*/ postMessage(
+      msg,
+      dict({
+        'targetOrigin': '*',
+        'includeUserActivation': true,
+      })
+    );
   }
 
   /**
@@ -128,6 +175,8 @@ export class IframeMessagingClient {
       if (!message || message['sentinel'] != this.sentinel_) {
         return;
       }
+
+      message['origin'] = event.origin;
 
       this.fireObservable_(message['type'], message);
     });
@@ -166,5 +215,13 @@ export class IframeMessagingClient {
     if (messageType in this.observableFor_) {
       this.observableFor_[messageType].fire(message);
     }
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isMessageOptionsSupported_() {
+    // Learned from https://github.com/dtapuska/useractivation
+    return this.hostWindow_ && this.hostWindow_.postMessage.length == 1;
   }
 }

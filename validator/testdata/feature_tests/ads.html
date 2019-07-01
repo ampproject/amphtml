@@ -20,6 +20,8 @@
   <title>Ad examples</title>
   <link rel="canonical" href="http://nonblocking.io/" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="amp-ad-enable-refresh" content="doubleclick=30">
+  <meta name="amp-ad-doubleclick-sra">
   <style amp-custom>
     .broken {
       color: red;
@@ -61,7 +63,7 @@
   </style>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -89,6 +91,7 @@
         <option>adhese</option>
         <option>adman</option>
         <option>admanmedia</option>
+        <option>adplugg</option>
         <option>adreactor</option>
         <option>adsense</option>
         <option>adsnative</option>
@@ -105,6 +108,7 @@
         <option>amoad</option>
         <option>appnexus</option>
         <option>atomx</option>
+        <option>baidu</option>
         <option>bidtellect</option>
         <option>brainy</option>
         <option>bringhub</option>
@@ -300,6 +304,13 @@
       data-id="8e916419">
   </amp-ad>
 
+  <h2>AdPlugg</h2>
+  <amp-ad width="300" height="250"
+      type="adplugg"
+      data-access-code="A48214096"
+      data-zone="my_amp_zone_300x250">
+  </amp-ad>
+
   <h2>AdReactor</h2>
   <amp-ad width="728" height="90"
       type="adreactor"
@@ -441,6 +452,12 @@
       data-id="1234">
   </amp-ad>
 
+  <h2>Baidu</h2>
+  <amp-ad width="300" height="250"
+      type="baidu"
+      data-cproid="u2697398">
+  </amp-ad>
+
   <h2 id="bidtellect">Bidtellect</h2>
   <amp-ad width=320 height=200
       type="bidtellect"
@@ -536,17 +553,6 @@
       data-zone="314159">
   </amp-ad>
 
-  <h2>Criteo RTA</h2>
-  <p>Due to ad targeting, the slot might not load ad.</p>
-
-  <amp-ad width="300" height="250"
-      type="criteo"
-      data-tagtype="rta"
-      data-slot="/2729856/iframe_test_new_tag"
-      data-adserver="DFP"
-      data-networkid="1976">
-  </amp-ad>
-
   <h2>CSA</h2>
   <amp-ad width="auto" height="300"
       type="csa"
@@ -627,6 +633,13 @@
   <amp-ad width="320" height="50"
       type="doubleclick"
       data-slot="/4119129/mobile_ad_banner">
+  </amp-ad>
+
+  <h2>Doubleclick with RTC config</h2>
+  <amp-ad width="320" height="50"
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      rtc-config="{foo: bar}">
   </amp-ad>
 
   <h2>Doubleclick with JSON based parameters</h2>
@@ -1099,17 +1112,6 @@
       data-size="43"
       data-kw="amp-test, test"
       json='{"visitor":{"age":"18-24","gender":"male"},"inventory":{"section":"amp"}}'>
-  </amp-ad>
-
-  <h2>Rubicon Project FastLane Single Slot</h2>
-  <amp-ad width="320" height="50"
-      type="rubicon"
-      data-slot="/5300653/amp_test"
-      data-method="fastLane"
-      data-account="14062"
-      data-pos="atf"
-      data-kw="amp-test"
-      json='{"targeting":{"kw":"amp-test","age":"18-24","gender":"male","section":"amp"},"visitor":{"age":"18-24","gender":"male"},"inventory":{"section":"amp"}}'>
   </amp-ad>
 
   <h2>Sharethrough</h2>

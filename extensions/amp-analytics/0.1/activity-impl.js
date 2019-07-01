@@ -20,9 +20,9 @@
  */
 
 import {Services} from '../../../src/services';
+import {hasOwn} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
 import {registerServiceBuilderForDoc} from '../../../src/service';
-
 
 /**
  * The amount of time after an activity the user is considered engaged.
@@ -64,7 +64,9 @@ function findEngagedTimeBetween(activityEvent, time) {
 }
 
 class ActivityHistory {
-
+  /**
+   * Creates an instance of ActivityHistory.
+   */
   constructor() {
     /** @private {number} */
     this.totalEngagedTime_ = 0;
@@ -86,8 +88,10 @@ class ActivityHistory {
     }
 
     if (this.prevActivityEvent_.time < activityEvent.time) {
-      this.totalEngagedTime_ +=
-          findEngagedTimeBetween(this.prevActivityEvent_, activityEvent.time);
+      this.totalEngagedTime_ += findEngagedTimeBetween(
+        this.prevActivityEvent_,
+        activityEvent.time
+      );
       this.prevActivityEvent_ = activityEvent;
     }
   }
@@ -101,13 +105,13 @@ class ActivityHistory {
   getTotalEngagedTime(time) {
     let totalEngagedTime = 0;
     if (this.prevActivityEvent_ !== undefined) {
-      totalEngagedTime = this.totalEngagedTime_ +
-          findEngagedTimeBetween(this.prevActivityEvent_, time);
+      totalEngagedTime =
+        this.totalEngagedTime_ +
+        findEngagedTimeBetween(this.prevActivityEvent_, time);
     }
     return totalEngagedTime;
   }
 }
-
 
 /**
  * Array of event types which will be listened for on the document to indicate
@@ -116,7 +120,11 @@ class ActivityHistory {
  * @private @const {Array<string>}
  */
 const ACTIVE_EVENT_TYPES = [
-  'mousedown', 'mouseup', 'mousemove', 'keydown', 'keyup',
+  'mousedown',
+  'mouseup',
+  'mousemove',
+  'keydown',
+  'keyup',
 ];
 
 /**
@@ -127,7 +135,6 @@ export function installActivityServiceForTesting(ampDoc) {
 }
 
 export class Activity {
-
   /**
    * Activity tracks basic user activity on the page.
    *  - Listeners are not registered on the activity event types until the
@@ -158,10 +165,17 @@ export class Activity {
     this.boundHandleActivity_ = this.handleActivity_.bind(this);
 
     /** @private @const {function()} */
-    this.boundHandleInactive_ = this.handleInactive_.bind(this);
-
-    /** @private @const {function()} */
     this.boundHandleVisibilityChange_ = this.handleVisibilityChange_.bind(this);
+
+    /**
+     * Contains the incrementalEngagedTime timestamps for named triggers.
+     * @private {Object<string, number>}
+     */
+    this.totalEngagedTimeByTrigger_ = {
+      /*
+       * "$triggerName" : ${lastRequestTimestamp}
+       */
+    };
 
     /** @private {Array<!UnlistenDef>} */
     this.unlistenFuncs_ = [];
@@ -199,7 +213,7 @@ export class Activity {
     // Ensure that a negative time is never returned. This may cause loss of
     // data if there is a time change during the session but it will decrease
     // the likelyhood of errors in that situation.
-    return (timeSinceStart > 0 ? timeSinceStart : 0);
+    return timeSinceStart > 0 ? timeSinceStart : 0;
   }
 
   /**
@@ -215,12 +229,18 @@ export class Activity {
   /** @private */
   setUpActivityListeners_() {
     for (let i = 0; i < ACTIVE_EVENT_TYPES.length; i++) {
-      this.unlistenFuncs_.push(listen(this.ampdoc.getRootNode(),
-          ACTIVE_EVENT_TYPES[i], this.boundHandleActivity_));
+      this.unlistenFuncs_.push(
+        listen(
+          this.ampdoc.getRootNode(),
+          ACTIVE_EVENT_TYPES[i],
+          this.boundHandleActivity_
+        )
+      );
     }
 
     this.unlistenFuncs_.push(
-        this.viewer_.onVisibilityChanged(this.boundHandleVisibilityChange_));
+      this.viewer_.onVisibilityChanged(this.boundHandleVisibilityChange_)
+    );
 
     // Viewport.onScroll does not return an unlisten function.
     // TODO(britice): If Viewport is updated to return an unlisten function,
@@ -293,7 +313,10 @@ export class Activity {
     this.unlistenFuncs_ = [];
   }
 
-  /** @private */
+  /**
+   * @private
+   * @visibleForTesting
+   */
   cleanup_() {
     this.unlisten_();
   }
@@ -306,4 +329,27 @@ export class Activity {
     const secondsSinceStart = Math.floor(this.getTimeSinceStart_() / 1000);
     return this.activityHistory_.getTotalEngagedTime(secondsSinceStart);
   }
-};
+
+  /**
+   * Get the incremental engaged time since the last push and reset it if asked.
+   * @param {string} name
+   * @param {boolean=} reset
+   * @return {number}
+   */
+  getIncrementalEngagedTime(name, reset = true) {
+    if (!hasOwn(this.totalEngagedTimeByTrigger_, name)) {
+      if (reset) {
+        this.totalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
+      }
+      return this.getTotalEngagedTime();
+    }
+    const currentIncrementalEngagedTime = this.totalEngagedTimeByTrigger_[name];
+    if (reset === false) {
+      return this.getTotalEngagedTime() - currentIncrementalEngagedTime;
+    }
+    this.totalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
+    return (
+      this.totalEngagedTimeByTrigger_[name] - currentIncrementalEngagedTime
+    );
+  }
+}

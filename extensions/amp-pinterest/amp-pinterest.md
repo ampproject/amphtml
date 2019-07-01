@@ -1,3 +1,10 @@
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Displays a Pinterest widget or Save button.
+---
 <!---
 Copyright 2015 The AMP HTML Authors.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name=”amp-pinterest”></a> `amp-pinterest`
+# amp-pinterest
+
+Displays a Pinterest widget, Save button, or Follow button.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Pinterest widget, Pin It button, or Follow button.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-pinterest" src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js">&lt;/script></code></td>
@@ -39,9 +44,9 @@ limitations under the License.
 
 ## Examples
 
-Use the `amp-pinterest` component to display a Pin It button, Pin widget, or Follow button.
+Use the `amp-pinterest` component to display a Save button, Pin widget, or Follow button.
 
-**Example: Pin It button**
+**Example: Save button**
 
 ```html
 <amp-pinterest
@@ -77,7 +82,7 @@ Use the `amp-pinterest` component to display a Pin It button, Pin widget, or Fol
 </amp-pinterest>
 ```
 
-## Pin It Button
+## Save Button
 
 ##### data-do (required)
 
@@ -85,17 +90,17 @@ Must be set to `buttonPin`.
 
 ##### data-url (required)
 
-Contains the fully-qualified URL intended to be pinned or re-made into a widget.
+Contains the fully-qualified URL intended to be saved as a pin or re-made into a widget.
 
 ##### data-media (required)
 
-Contains the fully-qualified URL of the image intended to be pinned. If the pin will eventually contain multimedia (such as YouTube), it should point to a high-resolution thumbnail.
+Contains the fully-qualified URL of the image intended to be saved as a pin. If the pin will eventually contain multimedia (such as YouTube), it should point to a high-resolution thumbnail.
 
 ##### data-description (required)
 
 Contains the default description that appears in the pin create form; please choose carefully, since many Pinners will close the form without pinning if it doesn't make sense.
 
-### Sizing the Pin It button
+### Sizing the Save button
 
 Default small rectangular button:
 
@@ -106,7 +111,7 @@ height=20 width=40
 Small rectangular button with pin count to the right, using `data-count="beside"`:
 
 ```html
-height=28 width=85
+height=20 width=85
 ```
 
 Small rectangular button with pin count on top, using `data-count="above"`:
@@ -115,7 +120,7 @@ Small rectangular button with pin count on top, using `data-count="above"`:
 height=50 width=40
 ```
 
-Large rectangular button using `data-height="tall"`:
+Large rectangular button using `data-tall="true"`:
 
 ```html
 height=28 width=56
@@ -127,7 +132,7 @@ Large rectangular button with pin count to the right, using `data-tall="true"` a
 height=28 width=107
 ```
 
-Large rectangular button with pin count on top, using `data-height="tall"` and `data-count="above"`:
+Large rectangular button with pin count on top, using `data-tall="true"` and `data-count="above"`:
 
 ```html
 height=66 width=56
@@ -139,7 +144,7 @@ Small circular button using `data-round="true"`:
 height=16 width=16
 ```
 
-Large circular button using `data-round="true"` and `data-height="tall"`:
+Large circular button using `data-round="true"` and `data-tall="true"`:
 
 ```html
 height=32 width=32
@@ -172,6 +177,10 @@ Must contain the fully-qualified URL of the Pinterest resource to be shown as a 
 ```html
 data-url="https://www.pinterest.com/pin/99360735500167749/"
 ```
+
+##### alt
+
+This property like the the `alt` attribute on an `<img>` tag specifies the alternate text. If not provided it will be infered from the pin data provided by the Pinterest API.
 
 ## Validation
 

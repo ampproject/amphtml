@@ -1,3 +1,10 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+teaser:
+  text: The share tracking feature is under development.
+---
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,15 +21,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-social-share"></a>`amp-social-share`
+# amp-social-share
+
+Displays a social share button.
 
 [TOC]
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Displays a social share button.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
@@ -69,19 +74,27 @@ Linkedin is one of the pre-configured providers, so you do not need to provide t
 
 ## Attributes
 
-##### type (required)
-
-Selects a provider type. This is required for both pre-configured and non-configured providers.
-
-##### data-share-endpoint
-
-This attribute is **required for non-configured providers**.
-
-Some popular providers have pre-configured share endpoints. For details, see the [Pre-configured Providers](#pre-configured-providers) section.  For non-configured providers, you'll need to specify the share endpoint.
-
-##### data-param-*
-
-All `data-param-*` prefixed attributes are turned into URL parameters and passed to the share endpoint.
+<table>
+  <tr>
+    <td width="40%"><strong>type (required)</strong></td>
+    <td>Selects a provider type. This is required for both pre-configured and non-configured providers.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-target</strong></td>
+    <td><p>Specifies the target in which to open the target. The default is <code>_blank</code> for all cases other than email/SMS on iOS, in which case the target is set to <code>_top</code>.</p>
+<p>Please note that we only suggest using this override for email.</p></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-share-endpoint</strong></td>
+    <td>This attribute is <strong>required for non-configured providers</strong>.
+<br>
+Some popular providers have pre-configured share endpoints. For details, see the <a href="#pre-configured-providers">Pre-configured Providers</a> section. For non-configured providers, you'll need to specify the share endpoint.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-param-*</strong></td>
+    <td>All <code>data-param-*</code> prefixed attributes are turned into URL parameters and passed to the share endpoint.</td>
+  </tr>
+</table>
 
 ## Pre-configured providers
 The `amp-social-share` component provides [some pre-configured providers](0.1/amp-social-share-config.js) that know their sharing endpoints as well as some default parameters.
@@ -181,6 +194,16 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>
       <ul>
         <li><code>data-param-text</code>: optional, defaults to: "Current page title - current page URL"</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>LINE</td>
+    <td><code>line</code></td>
+    <td>
+      <ul>
+        <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
+        <li><code>data-param-text</code>: optional, defaults to: Current page title</li>
       </ul>
     </td>
   </tr>

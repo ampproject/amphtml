@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adhese(global, data) {
-  validateData(data, ['location','format', 'account', 'requestType']);
+  validateData(data, ['location', 'format', 'account', 'requestType']);
   let targetParam = '';
   if (data['targeting']) {
     const targetList = data['targeting'];
@@ -29,18 +29,27 @@ export function adhese(global, data) {
       targetParam += encodeURIComponent(category);
       const targets = targetList[category];
       for (let x = 0; x < targets.length; x++) {
-        targetParam += encodeURIComponent(targets[x]) +
-            (targets.length - 1 > x ? ';' : '');
+        targetParam +=
+          encodeURIComponent(targets[x]) + (targets.length - 1 > x ? ';' : '');
       }
       targetParam += '/';
     }
   }
   targetParam += '?t=' + Date.now();
-  writeScript(window, 'https://ads-' + encodeURIComponent(data['account']) +
-      '.adhese.com/' + encodeURIComponent(data['requestType']) + '/sl' +
+  writeScript(
+    window,
+    'https://ads-' +
+      encodeURIComponent(data['account']) +
+      '.adhese.com/' +
+      encodeURIComponent(data['requestType']) +
+      '/sl' +
       encodeURIComponent(data['location']) +
-      encodeURIComponent(data['position']) + '-' +
-      encodeURIComponent(data['format']) + '/' + targetParam);
+      encodeURIComponent(data['position']) +
+      '-' +
+      encodeURIComponent(data['format']) +
+      '/' +
+      targetParam
+  );
   const co = global.document.querySelector('#c');
   co.width = data['width'];
   co.height = data['height'];
@@ -48,17 +57,24 @@ export function adhese(global, data) {
 }
 
 /**
- * @param {!Object} e
  * @param {!Window} global
+ * @param {!Object} e
  */
 function getAdInfo(global, e) {
-  if (e.detail.isReady && e.detail.width == e.target.width &&
-      e.detail.height == e.target.height) {
+  if (
+    e.detail.isReady &&
+    e.detail.width == e.target.width &&
+    e.detail.height == e.target.height
+  ) {
     global.context.renderStart();
-  } else if (e.detail.isReady && (e.detail.width != e.target.width ||
-      e.detail.height != e.target.height)) {
-    global.context.renderStart({width: e.detail.width,
-      height: e.detail.height});
+  } else if (
+    e.detail.isReady &&
+    (e.detail.width != e.target.width || e.detail.height != e.target.height)
+  ) {
+    global.context.renderStart({
+      width: e.detail.width,
+      height: e.detail.height,
+    });
   } else {
     global.context.noContentAvailable();
   }

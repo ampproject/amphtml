@@ -27,13 +27,12 @@
  * </code>
  */
 
+import {Layout} from '../../../src/layout';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {Layout} from '../../../src/layout';
 
 export class AmpGist extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -43,9 +42,9 @@ export class AmpGist extends AMP.BaseElement {
   }
 
   /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
     this.preconnect.url('https://gist.github.com/', opt_onLayout);
   }
@@ -61,15 +60,23 @@ export class AmpGist extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'github');
     this.applyFillContent(iframe);
     // Triggered by window.context.requestResize() inside the iframe.
-    listenFor(iframe, 'embed-size', data => {
-      this./*OK*/changeHeight(data['height']);
-    }, /* opt_is3P */true);
+    listenFor(
+      iframe,
+      'embed-size',
+      data => {
+        this./*OK*/ changeHeight(data['height']);
+      },
+      /* opt_is3P */ true
+    );
 
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 
+  /**
+   * @override
+   */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
@@ -78,7 +85,6 @@ export class AmpGist extends AMP.BaseElement {
     return true;
   }
 }
-
 
 AMP.extension('amp-gist', '0.1', AMP => {
   AMP.registerElement('amp-gist', AmpGist);

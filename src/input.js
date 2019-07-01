@@ -15,17 +15,15 @@
  */
 
 import {Observable} from './observable';
-import {dev} from './log';
 import {Services} from './services';
+import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
 import {registerServiceBuilder} from './service';
-
 
 const TAG_ = 'Input';
 
 const MAX_MOUSE_CONFIRM_ATTEMPS_ = 3;
 const CLICK_TIMEOUT_ = 300;
-
 
 /**
  * Detects and maintains different types of input such as touch, mouse or
@@ -55,10 +53,11 @@ export class Input {
     this.boundMouseConfirmed_ = null;
 
     /** @private {boolean} */
-    this.hasTouch_ = ('ontouchstart' in win ||
-        (win.navigator['maxTouchPoints'] !== undefined &&
-            win.navigator['maxTouchPoints'] > 0) ||
-        win['DocumentTouch'] !== undefined);
+    this.hasTouch_ =
+      'ontouchstart' in win ||
+      (win.navigator['maxTouchPoints'] !== undefined &&
+        win.navigator['maxTouchPoints'] > 0) ||
+      win['DocumentTouch'] !== undefined;
     dev().fine(TAG_, 'touch detected:', this.hasTouch_);
 
     /** @private {boolean} */
@@ -85,16 +84,11 @@ export class Input {
     // mouse events.
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
-      this.boundOnMouseMove_ =
-          /** @private {function(!Event)} */ (this.onMouseMove_.bind(this));
+      this.boundOnMouseMove_ = /** @type {function(!Event)} */ (this.onMouseMove_.bind(
+        this
+      ));
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
-  }
-
-  /** @private */
-  cleanup_() {
-    this.win.document.removeEventListener('keydown', this.boundOnKeyDown_);
-    this.win.document.removeEventListener('mousedown', this.boundOnMouseDown_);
   }
 
   /**
@@ -174,12 +168,15 @@ export class Input {
     }
 
     // Ignore inputs.
-    const target = e.target;
-    if (target && (target.tagName == 'INPUT' ||
-          target.tagName == 'TEXTAREA' ||
-          target.tagName == 'SELECT' ||
-          target.tagName == 'OPTION' ||
-          target.hasAttribute('contenteditable'))) {
+    const {target} = e;
+    if (
+      target &&
+      (target.tagName == 'INPUT' ||
+        target.tagName == 'TEXTAREA' ||
+        target.tagName == 'SELECT' ||
+        target.tagName == 'OPTION' ||
+        target.hasAttribute('contenteditable'))
+    ) {
       return;
     }
 
@@ -217,18 +214,22 @@ export class Input {
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.
     let unlisten;
-    const listenPromise = listenOncePromise(this.win.document, 'click',
-        /* capture */ undefined, unlistener => {
-          unlisten = unlistener;
-        });
+    const listenPromise = listenOncePromise(
+      this.win.document,
+      'click',
+      /* capture */ undefined,
+      unlistener => {
+        unlisten = unlistener;
+      }
+    );
     return Services.timerFor(this.win)
-        .timeoutPromise(CLICK_TIMEOUT_, listenPromise)
-        .then(this.boundMouseCanceled_, () => {
-          if (unlisten) {
-            unlisten();
-          }
-          this.boundMouseConfirmed_();
-        });
+      .timeoutPromise(CLICK_TIMEOUT_, listenPromise)
+      .then(this.boundMouseCanceled_, () => {
+        if (unlisten) {
+          unlisten();
+        }
+        this.boundMouseConfirmed_();
+      });
   }
 
   /** @private */
@@ -243,8 +244,11 @@ export class Input {
     // Repeat, if attempts allow.
     this.mouseConfirmAttemptCount_++;
     if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
-      listenOnce(this.win.document, 'mousemove',
-          /** @type {function(!Event)} */ (this.boundOnMouseMove_));
+      listenOnce(
+        this.win.document,
+        'mousemove',
+        /** @type {function(!Event)} */ (this.boundOnMouseMove_)
+      );
     } else {
       dev().fine(TAG_, 'mouse detection failed');
     }

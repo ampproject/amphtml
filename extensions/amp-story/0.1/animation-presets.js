@@ -14,9 +14,63 @@
  * limitations under the License.
  */
 
-import {px} from '../../../src/style';
+import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
 import {StoryAnimationPresetDef} from './animation-types';
+import {
+  calculateTargetScalingFactor,
+  rotateAndTranslate,
+  scaleAndTranslate,
+  translate2d,
+  whooshIn,
+} from './animation-presets-utils';
+import {px} from '../../../src/style';
 
+const FULL_BLEED_CATEGORY = 'full-bleed';
+const FILL_TEMPLATE_LAYOUT = 'fill';
+
+/**
+ * A list of animations that are full bleed.
+ * @private @const {!Array<string>}
+ */
+const FULL_BLEED_ANIMATION_NAMES = [
+  'pan-up',
+  'pan-down',
+  'pan-right',
+  'pan-left',
+  'zoom-in',
+  'zoom-out',
+];
+
+/**
+ * A mapping of animation categories to corresponding CSS class names.
+ * @private @const {!Object<string, string>}
+ */
+const ANIMATION_CSS_CLASS_NAMES = {
+  [FULL_BLEED_CATEGORY]:
+    'i-amphtml-story-grid-template-with-full-bleed-animation',
+};
+
+/**
+ * Perform style-specific operations for presets.
+ * @param {!Element} el
+ * @param {string} presetName
+ */
+export function setStyleForPreset(el, presetName) {
+  // For full bleed animations.
+  if (FULL_BLEED_ANIMATION_NAMES.indexOf(presetName) >= 0) {
+    const parent = el.parentElement;
+    if (
+      parent.classList.contains(
+        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
+      )
+    ) {
+      parent.classList.remove(
+        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
+      );
+    }
+    parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
+  }
+}
 
 /** @const {!Object<string, !StoryAnimationPresetDef>} */
 // First keyframe will always be considered offset: 0 and will be applied to the
@@ -49,11 +103,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
-
-      return [
-        {transform: `translate(${px(offsetX)}, 0)`},
-        {transform: 'translate(0, 0)'},
-      ];
+      return translate2d(offsetX, 0, 0, 0);
     },
   },
   'fly-in-right': {
@@ -61,11 +111,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
-
-      return [
-        {transform: `translate(${px(offsetX)}, 0)`},
-        {transform: 'translate(0, 0)'},
-      ];
+      return translate2d(offsetX, 0, 0, 0);
     },
   },
   'fly-in-top': {
@@ -73,11 +119,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetY = -(dimensions.targetY + dimensions.targetHeight);
-
-      return [
-        {transform: `translate(0, ${px(offsetY)})`},
-        {transform: 'translate(0, 0)'},
-      ];
+      return translate2d(0, offsetY, 0, 0);
     },
   },
   'fly-in-bottom': {
@@ -85,11 +127,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetY = dimensions.pageHeight - dimensions.targetY;
-
-      return [
-        {transform: `translate(0, ${px(offsetY)})`},
-        {transform: 'translate(0, 0)'},
-      ];
+      return translate2d(0, offsetY, 0, 0);
     },
   },
   'rotate-in-left': {
@@ -97,11 +135,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
-
-      return [
-        {transform: `translate(${px(offsetX)}, 0) rotate(-360deg)`},
-        {transform: 'translate(0, 0) rotate(0)'},
-      ];
+      return rotateAndTranslate(offsetX, 0, 0, 0, -1);
     },
   },
   'rotate-in-right': {
@@ -109,11 +143,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
-
-      return [
-        {transform: `translate(${px(offsetX)}, 0) rotate(360deg)`},
-        {transform: 'translate(0, 0) rotate(0)'},
-      ];
+      return rotateAndTranslate(offsetX, 0, 0, 0, 1);
     },
   },
   'fade-in': {
@@ -131,8 +161,10 @@ export const PRESETS = {
   'drop': {
     duration: 1600,
     keyframes(dimensions) {
-      const maxBounceHeight =
-          Math.max(160, dimensions.targetY + dimensions.targetHeight);
+      const maxBounceHeight = Math.max(
+        160,
+        dimensions.targetY + dimensions.targetHeight
+      );
 
       return [
         {
@@ -187,17 +219,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
-
-      return [
-        {
-          opacity: 0,
-          transform: `translate(${px(offsetX)}, 0) scale(0.15)`,
-        },
-        {
-          opacity: 1,
-          transform: 'translate(0, 0) scale(1)',
-        },
-      ];
+      return whooshIn(offsetX, 0, 0, 0);
     },
   },
   'whoosh-in-right': {
@@ -205,17 +227,73 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
-
-      return [
-        {
-          opacity: 0,
-          transform: `translate(${px(offsetX)}, 0) scale(0.15)`,
-        },
-        {
-          opacity: 1,
-          transform: 'translate(0, 0) scale(1)',
-        },
-      ];
+      return whooshIn(offsetX, 0, 0, 0);
     },
+  },
+  'pan-left': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes(dimensions) {
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
+
+      const offsetX = dimensions.pageWidth - dimensions.targetWidth;
+      const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
+
+      return scaleAndTranslate(offsetX, offsetY, 0, offsetY, scalingFactor);
+    },
+  },
+  'pan-right': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes(dimensions) {
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
+
+      const offsetX = dimensions.pageWidth - dimensions.targetWidth;
+      const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
+
+      return scaleAndTranslate(0, offsetY, offsetX, offsetY, scalingFactor);
+    },
+  },
+  'pan-down': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes(dimensions) {
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
+
+      const offsetX = -dimensions.targetWidth / 2;
+      const offsetY = dimensions.pageHeight - dimensions.targetHeight;
+
+      return scaleAndTranslate(offsetX, 0, offsetX, offsetY, scalingFactor);
+    },
+  },
+  'pan-up': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes(dimensions) {
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
+
+      const offsetX = -dimensions.targetWidth / 2;
+      const offsetY = dimensions.pageHeight - dimensions.targetHeight;
+
+      return scaleAndTranslate(offsetX, offsetY, offsetX, 0, scalingFactor);
+    },
+  },
+  'zoom-in': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes: [{transform: 'scale(1,1)'}, {transform: 'scale(3,3)'}],
+  },
+  'zoom-out': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes: [{transform: 'scale(3,3)'}, {transform: 'scale(1,1)'}],
   },
 };

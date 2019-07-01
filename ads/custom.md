@@ -16,7 +16,7 @@ limitations under the License.
 
 # Custom (experimental)
 
-Custom does not represent a specific network. Rather, it provides a way for 
+Custom does not represent a specific network. Rather, it provides a way for
 a site to display simple ads on a self-service basis. You must provide
 your own ad server to deliver the ads in json format as shown below.
 
@@ -50,27 +50,25 @@ understood by the ad server(s) which you are calling.
 ```
 
 ### Two ads with different slots
+The template can be specified outside the `amp-ad` tag for sharing. You can refer to the template using its ID via the `template` attribute of `amp-ad`. You can also provide a `data-slot` attribute for each `amp-ad`, so they can share one single remote request to fetch the ads data.
 
 ```html
+<template type="amp-mustache" id="amp-template-id">
+  <a href="{{href}}">
+    <amp-img layout='fixed' height="300" width="250" src="{{src}}" data-info="{{info}}"></amp-img>
+  </a>
+</template>
 <amp-ad width=300 height=250
     type="custom"
+    template="amp-template-id"
     data-url="https://mysite/my-ad-server?someparam=somevalue"
     data-slot="1">
-    <template type="amp-mustache" id="amp-template-id">
-      <a href="{{href}}">
-        <amp-img layout='fixed' height="300" width="250" src="{{src}}" data-info="{{info}}"></amp-img>
-      </a>
-    </template>
 </amp-ad>
 <amp-ad width=400 height=300
     type="custom"
+    template="amp-template-id"
     data-url="https://mysite/my-ad-server?someparam=somevalue"
     data-slot="2">
-    <template type="amp-mustache" id="amp-template-id">
-      <a href="{{href}}">
-        <amp-img layout='fixed' height="400" width="300" src="{{src}}" data-info="{{info}}"></amp-img>
-      </a>
-    </template>
 </amp-ad>
 <!-- The ad server will be called with the URL https://mysite/my-ad-server?someparam=somevalue&ampslots=1,2 -->
 ```
@@ -117,7 +115,8 @@ understood by the ad server(s) which you are calling.
 ### data-url (mandatory)
 
 This must be starting with `https://`, and it must be the address of an ad
-server returning json in the format defined below.
+server returning json in the format defined below. This endpoint must be available
+cross-origin. (See [CORS in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).)
 
 ### data-slot (optional)
 
@@ -130,7 +129,7 @@ specified and the other does not.
 
 ## Ad server
 
-The ad server will be called once for each value of `data-url` on the page: for the vast 
+The ad server will be called once for each value of `data-url` on the page: for the vast
 majority of applications, all your ads will be from a single server so it will be
 called only once.
 
@@ -141,7 +140,7 @@ The ad server should return a json object containing a record for each slot in t
 slot id in `data-slot`. The record format is defined by your template. For the examples above,
 the record contains three fields:
 
-* src - string to go into the source parameter of the image to be displayed. This can be a 
+* src - string to go into the source parameter of the image to be displayed. This can be a
 web reference (in which case it must be `https:` or a `data:` URI including the base64-encoded image.
 * href - URL to which the user is to be directed when he clicks on the ad
 * info - A string with additional info about the ad that was served, mmaybe for use with analytics
@@ -174,26 +173,24 @@ If no slot was specified, the server returns a single template rather than an ar
 The ad server must enforce [AMP CORS](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
 Here is an example set of the relevant response headers:
 ```
-Access-Control-Allow-Origin:https://cdn.ampproject.org
-Access-Control-Expose-Headers:AMP-Access-Control-Allow-Source-Origin
-AMP-Access-Control-Allow-Source-Origin:https://my-ad-server.com
+Access-Control-Allow-Origin:https://my--ad--server-com.cdn.ampproject.org
 ```
 
 ## Analytics
 
-To get analytics of how your ads are performing, use the [amp-analyics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md) tag.
+To get analytics of how your ads are performing, use the [amp-analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md) tag.
 
 Here is an example of how to make it work with Google Analytics events. Note that the variables can be set either by the code
 that displays the page (as in `eventAction`) or in variables passed back by the ad server (as in `eventCategory` and `eventLabel`).
 
 ```html
-<amp-ad type="custom" layout="responsive" width="300" height="250" 
+<amp-ad type="custom" layout="responsive" width="300" height="250"
     data-url="https://mysite/my-ad-server">
     <template type="amp-mustache" id="my-amp-template-id">
         <a href="{{href}}" data-vars-event-label="{{evehtLabel}}" data-vars-event-category="{{category}}">
             <amp-img layout='responsive' width="300" height="250" src="{{artwork}}"></amp-img>
         </a>
-    </template>  
+    </template>
 </amp-ad>
 <amp-analytics type='googleanalytics'>
 <script type='application/json'>

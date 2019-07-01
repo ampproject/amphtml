@@ -16,7 +16,6 @@
 
 import {stringHash32} from '../string';
 
-
 /**
  * Gets a string of concatenated element names and relative positions
  * of the DOM element and its parentElement's (up to 25).  Relative position
@@ -61,8 +60,7 @@ export function domFingerprintPlain(element) {
     element = element.parentElement;
   }
   return ids.join();
-};
-
+}
 
 export class DomFingerprint {
   /**
@@ -80,7 +78,6 @@ export class DomFingerprint {
   }
 }
 
-
 /**
  * Gets a string showing the index of an element within
  * the children of its parent, counting only nodes with the same tag.
@@ -89,7 +86,7 @@ export class DomFingerprint {
  * @return {string} '.<index>' or ''.
  */
 function indexWithinParent(element) {
-  const nodeName = element.nodeName;
+  const {nodeName} = element;
   // Find my index within my parent's children
   let i = 0;
   let count = 0;
@@ -107,4 +104,4 @@ function indexWithinParent(element) {
   }
   // If we got to the end, then the count is accurate; otherwise skip count.
   return count < 25 && i < 100 ? `.${count}` : '';
-};
+}

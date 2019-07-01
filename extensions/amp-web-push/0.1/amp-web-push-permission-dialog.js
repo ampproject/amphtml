@@ -14,10 +14,15 @@
  * the License.
  */
 
-import {tryDecodeUriComponent, parseQueryString} from '../../../src/url.js';
+import {NotificationPermission, StorageKeys} from './vars';
 import {WindowMessenger} from './window-messenger';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
-import {StorageKeys, NotificationPermission} from './vars';
+import {
+  parseQueryString,
+  parseUrlDeprecated,
+  tryDecodeUriComponent,
+} from '../../../src/url.js';
 
 /** @typedef {{
  *    debug: boolean,
@@ -131,9 +136,7 @@ export class AmpWebPushPermissionDialog {
       const winLocation = this.window_.fakeLocation || this.window_.location;
       const queryParams = parseQueryString(winLocation.search);
       if (!queryParams['return']) {
-        throw new Error(
-          'Expecting return URL query parameter to redirect back.'
-        );
+        throw new Error('Missing required parameter.');
       }
       const redirectLocation = tryDecodeUriComponent(queryParams['return']);
       this.redirectToUrl(redirectLocation);
@@ -143,18 +146,18 @@ export class AmpWebPushPermissionDialog {
   /** @private */
   onPermissionDenied_() {
     navigator.permissions
-        .query({name: 'notifications'})
-        .then(permissionStatus => {
-          permissionStatus.onchange = () => {
-            this.storeNotificationPermission_();
-            switch (this.window_.Notification.permission) {
-              case NotificationPermission.DEFAULT:
-              case NotificationPermission.GRANTED:
-                this.onPermissionDefaultOrGranted_();
-                break;
-            }
-          };
-        });
+      .query({name: 'notifications'})
+      .then(permissionStatus => {
+        permissionStatus.onchange = () => {
+          this.storeNotificationPermission_();
+          switch (this.window_.Notification.permission) {
+            case NotificationPermission.DEFAULT:
+            case NotificationPermission.GRANTED:
+              this.onPermissionDefaultOrGranted_();
+              break;
+          }
+        };
+      });
   }
 
   /**
@@ -164,9 +167,9 @@ export class AmpWebPushPermissionDialog {
    */
   storeNotificationPermission_() {
     this.window_.localStorage.setItem(
-        StorageKeys.NOTIFICATION_PERMISSION,
-        this.window_.Notification.permission
-     );
+      StorageKeys.NOTIFICATION_PERMISSION,
+      this.window_.Notification.permission
+    );
   }
 
   /** @private */
@@ -180,7 +183,9 @@ export class AmpWebPushPermissionDialog {
 
     // Show the section that matches the current permission
     const section = this.window_.document.querySelector(
-        `[permission=${this.window_.Notification.permission}]`
+      `[permission=${escapeCssSelectorIdent(
+        this.window_.Notification.permission
+      )}]`
     );
 
     if (section) {
@@ -231,16 +236,16 @@ export class AmpWebPushPermissionDialog {
         this.ampMessenger_.connect(opener, '*');
 
         return this.ampMessenger_
-            .send(
+          .send(
             WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
             permission
           )
-            .then(result => {
-              const message = result[0];
-              if (message && message.closeFrame) {
-                this.closeDialog();
-              }
-            });
+          .then(result => {
+            const message = result[0];
+            if (message && message.closeFrame) {
+              this.closeDialog();
+            }
+          });
       } else {
         this.closeDialog();
       }
@@ -255,7 +260,13 @@ export class AmpWebPushPermissionDialog {
    * @param {string} url
    */
   redirectToUrl(url) {
-    this.window_.location.href = url;
+    const parsedUrl = parseUrlDeprecated(url);
+    if (
+      parsedUrl &&
+      (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:')
+    ) {
+      this.window_.location.href = url;
+    }
   }
 }
 

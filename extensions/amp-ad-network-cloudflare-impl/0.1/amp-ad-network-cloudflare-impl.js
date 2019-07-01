@@ -15,9 +15,9 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {startsWith} from '../../../src/string';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {NETWORKS} from './vendors';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {startsWith} from '../../../src/string';
 
 /**
  * This is a minimalistic AmpA4A implementation that primarily gets an Ad
@@ -27,7 +27,6 @@ import {NETWORKS} from './vendors';
  * additional guidance on other implementation details.
  */
 export class AmpAdNetworkCloudflareImpl extends AmpA4A {
-
   /**
    * Validate the tag parameters.  If invalid, ad ad will not be displayed.
    * @override
@@ -80,7 +79,7 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
 
     const network = NETWORKS[el.getAttribute('data-cf-network')];
     const a4a = el.getAttribute('data-cf-a4a') !== 'false';
-    const base = network.base;
+    const {base} = network;
 
     // Get URL for ad creative
     let url = el.getAttribute('src') || network.src;
@@ -103,10 +102,16 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
     let pre = url.indexOf('?') < 0 ? '?' : '&';
     for (let i = 0; i < el.attributes.length; i++) {
       const attrib = el.attributes[i];
-      if (attrib.specified && startsWith(attrib.name, 'data-')
-          && !startsWith(attrib.name, 'data-cf-')) {
-        url += pre + encodeURIComponent(attrib.name.substring(5)) +
-          '=' + encodeURIComponent(this.replacements(attrib.value, values));
+      if (
+        attrib.specified &&
+        startsWith(attrib.name, 'data-') &&
+        !startsWith(attrib.name, 'data-cf-')
+      ) {
+        url +=
+          pre +
+          encodeURIComponent(attrib.name.substring(5)) +
+          '=' +
+          encodeURIComponent(this.replacements(attrib.value, values));
         pre = '&';
       }
     }
@@ -115,8 +120,9 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
   }
 }
 
-
 AMP.extension('amp-ad-network-cloudflare-impl', '0.1', AMP => {
-  AMP.registerElement('amp-ad-network-cloudflare-impl',
-      AmpAdNetworkCloudflareImpl);
+  AMP.registerElement(
+    'amp-ad-network-cloudflare-impl',
+    AmpAdNetworkCloudflareImpl
+  );
 });

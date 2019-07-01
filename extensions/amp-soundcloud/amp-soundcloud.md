@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a Soundcloud clip.
+---
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-soundcloud"></a>amp-soundcloud
+# amp-soundcloud
+
+Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td> Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-soundcloud" src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js">&lt;/script></code></td>
@@ -57,31 +62,34 @@ Classic Mode:
 
 ## Attributes
 
-##### data-trackid 
-
-This attribute is required if `data-playlistid` is not defined.  
-The value for this attribute is the ID of a track, an integer.
-
-##### data-playlistid
-
-This attribute is required if `data-trackid` is not defined.
-The value for this attribute is the ID of a playlist, an integer.
-
-##### data-secret-token (optional)
-
-The secret token of the track, if it is private.
-
-##### data-visual (optional)
-
-If set to `true`, displays full-width "Visual" mode; otherwise, it displays as "Classic" mode. The default value is `false`.
-
-##### data-color (optional)
-
-This attribute is a custom color override for the "Classic" mode. The attribute is ignored in "Visual" mode. Specify a hexadecimal color value, without the leading # (e.g., `data-color="e540ff"`).
-
-##### width and height
-
-The layout for `amp-soundcloud` is set to `fixed-height` and it fills all of the available horizontal space. This is ideal for the "Classic" mode, but for "Visual" mode, it's recommended that the height is 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.
+<table>
+  <tr>
+    <td width="40%"><strong>data-trackid</strong></td>
+    <td>This attribute is required if <code>data-playlistid</code> is not defined.<br />
+The value for this attribute is the ID of a track, an integer.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-playlistid</strong></td>
+    <td>This attribute is required if <code>data-trackid</code> is not defined.
+The value for this attribute is the ID of a playlist, an integer.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-secret-token (optional)</strong></td>
+    <td>The secret token of the track, if it is private.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-visual (optional)</strong></td>
+    <td>If set to <code>true</code>, displays full-width "Visual" mode; otherwise, it displays as "Classic" mode. The default value is <code>false</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-color (optional)</strong></td>
+    <td>This attribute is a custom color override for the "Classic" mode. The attribute is ignored in "Visual" mode. Specify a hexadecimal color value, without the leading # (e.g., <code>data-color="e540ff"</code>).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>width and height</strong></td>
+    <td>The layout for <code>amp-soundcloud</code> is set to <code>fixed-height</code> and it fills all of the available horizontal space. This is ideal for the "Classic" mode, but for "Visual" mode, it's recommended that the height is 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.</td>
+  </tr>
+</table>
 
 ## Validation
 

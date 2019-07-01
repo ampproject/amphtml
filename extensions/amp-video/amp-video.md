@@ -1,3 +1,12 @@
+---
+$category@: media
+formats:
+  - websites
+  - ads
+  - stories
+teaser:
+  text: Replaces the HTML5 video tag.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,15 +23,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-video"></a> `amp-video`
+# amp-video
 
 [TOC]
 
+A replacement for the HTML5 <code>video</code> tag; only to be used for direct HTML5 video file embeds.
+
 <table>
-   <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>A replacement for the HTML5 <code>video</code> tag; only to be used for direct HTML5 video file embeds.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js">&lt;/script></code></td>
@@ -65,93 +72,109 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 </div>
 
+## Analytics
+
+`amp-video` supports analytics out of the box. See [video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md) for more information.
+
 ## Attributes
 
-##### src
-
-Required if no `<source>` children are present. Must be HTTPS.
-
-##### poster
-
-The image for the frame to be displayed before video playback has started. By
+<table>
+  <tr>
+    <td width="40%"><strong>src</strong></td>
+    <td>Required if no <code>&lt;source&gt;</code> children are present. Must be HTTPS.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>poster</strong></td>
+    <td>The image for the frame to be displayed before video playback has started. By
 default, the first frame is displayed.
+<br>
+Alternatively, you can present a click-to-play overlay. For details, see the <a href="#click-to-play-overlay">Click-to-Play overlay</a> section below.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>autoplay</strong></td>
+    <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>controls</strong></td>
+    <td>This attribute is similar to the <code>controls</code> attribute in the HTML5 <code>video</code>. If this attribute is present, the browser offers controls to allow the user to control video playback.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>controlsList</strong></td>
+    <td>Same as <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">controlsList</a> attribute of HTML5 video element. Only supported by certain browsers. Please see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList</a> for details.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>dock</strong></td>
+    <td><strong>Requires <code>amp-video-docking</code> extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+    For more details, see <a href="https://amp.dev/documentation/components/amp-video-docking">documentation on the docking extension itself.</a></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>loop</strong></td>
+    <td>If present, the video will automatically loop back to the start upon reaching the end.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>crossorigin</strong></td>
+    <td>Required if a <code>track</code> resource is hosted on a different origin than the document.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>disableremoteplayback</strong></td>
+    <td>Determines whether the media element is allowed to have a remote playback UI such as Chromecast or AirPlay.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>muted (deprecated)</strong></td>
+    <td>The <code>muted</code> attribute is deprecated and no longer has any effect. The <code>autoplay</code> attribute automatically controls the mute behavior.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>noaudio</strong></td>
+    <td>Annotates the video as having no audio. This hides the equalizer icon that is displayed
+when the video has autoplay.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>rotate-to-fullscreen</strong></td>
+    <td>If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#rotate-to-fullscreen">Video in AMP spec</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
-Alternatively, you can present a click-to-play overlay. For details, see the [Click-to-Play overlay](#click-to-play-overlay) section below.
+## Media Session API attributes
 
-##### autoplay
+The `amp-video` component implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session), which enables developers to specify more information about the video file. The additional information for the video displays in the notification center of the user's device (along with the play/pause controls).
 
-If this attribute is present, and the browser supports autoplay:
-
-* the video is automatically muted before autoplay starts
-* when the video is scrolled out of view, the video is paused
-* when the video is scrolled into view, the video resumes playback
-* when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
-
-##### controls
-
-This attribute is similar to the `controls` attribute in the HTML5 `video`. If this attribute is present, the browser offers controls to allow the user to control video playback.
-
-##### controlsList
-
-Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 video element. Only supported by certain browsers. Please see [https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) for details.
-
-##### loop
-
-If present, the video will automatically loop back to the start upon reaching the end.
-
-##### crossorigin
-
-Required if a `track` resource is hosted on a different origin than the document.
-
-##### disableremoteplayback
-
-Determines whether the media element is allowed to have a remote playback UI such as Chromecast or AirPlay.
-
-##### muted (deprecated)
-
-The `muted` attribute is deprecated and no longer has any effect. The `autoplay` attribute automatically controls the mute behavior.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
-
-
-## Media Session API Attributes
-
-`amp-video` implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session) enabling developers to specify more information about the video file that is playing to be displayed in the notification center of user's devices (along with play/pause controls).
-
-##### artwork
-
-URL to a PNG/JPG/ICO image serving as the video's artwork. If not present, the MediaSessionAPI Helper will use either the `image` field in the `schema.org` definition, the `og:image` or the website's `favicon`.
-
-##### artist
-
-(string) indicates the author of the video file
-
-##### album
-
-(string) indicates the album/collection the video was taken from
-
-##### title
-
-(string) part of the [common attributes](https://www.ampproject.org/docs/reference/common_attributes), doubles as the video's name/title displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.
+<table>
+  <tr>
+    <td width="40%"><strong>artwork</strong></td>
+    <td>Specifies a URL to a PNG/JPG/ICO image serving as the video's artwork. If `artwork` is not present, the Media Session API helper uses either the `image` field in the `schema.org` definition, the `og:image`, or the website's `favicon`.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>artist</strong></td>
+    <td>Indicates the author of the video file, specified as a string.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>album</strong></td>
+    <td>Indicates the album/collection the video was taken from, specified as a string.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>title</strong></td>
+    <td>Indicates the name/title of the video, specified as a string. If not provided, the Media Session API helper uses either the `aria-label` attribute or falls back to the page's title.</td>
+  </tr>
+</table>
 
 Example:
 
-Note that this example has both the `poster` and `artwork` attributes, poster will be used as the
-placeholder before the video plays while `artwork` is the image that will be displayed in the
-notification throught the MediaSessionAPI.
+This example contains both the `poster` and `artwork` attributes. The `poster` serves as the placeholder image before the video plays, while `artwork` is the image that displays in the notification via the MediaSession API.
 
 ```html
-<amp-audio width="400" height="300"
-  src="https://yourhost.com/audios/myaudio.mp3"
+<amp-video width="720" height="305" layout="responsive"
+  src="https://yourhost.com/videos/myvideo.mp4"
   poster="https://yourhost.com/posters/poster.png"
   artwork="https://yourhost.com/artworks/artwork.png"
-  title="Awesome music" artist="Awesome singer"
+  title="Awesome video" artist="Awesome artist"
   album="Amazing album">
-  <source type="audio/mpeg" src="foo.mp3">
-</amp-audio>
+</amp-video>
 ```
 
 ## Click-to-Play overlay

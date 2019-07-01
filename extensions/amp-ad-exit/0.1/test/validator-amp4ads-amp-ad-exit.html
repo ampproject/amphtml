@@ -1,0 +1,68 @@
+<!doctype html>
+<html amp4ads>
+<head>
+  <title>amp-ad-exit example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-ad-exit" src="https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js"></script>
+</head>
+<body>
+<amp-ad-exit id="exit-api" layout="nodisplay">
+<script type="application/json">
+{
+  "targets": {
+    "target1": {
+      "finalUrl": "http://example.com/?x=CLICK_X&y=CLICK_Y&e=_elem",
+      "vars": {
+        "_elem": {"defaultValue": "headline"}
+      },
+      "filters": ["longDelay", "borderProtection"]
+    }
+  },
+  "filters": {
+    "longDelay": {
+      "type": "clickDelay",
+      "delay": 10000
+    },
+    "borderProtection": {
+      "type": "clickLocation",
+      "bottom": 10,
+      "left": 10,
+      "right": 10,
+      "relativeTo": "#ad"
+    }
+  },
+  "transport": {
+    "beacon": true,
+    "image": true
+  }
+}
+</script>
+</amp-ad-exit>
+<h1 on="tap:exit-api.exit(target='target1')" role="button" tabindex="1">amp-ad-exit example</h1>
+
+<amp-ad-exit id="exit-api-nolayout">
+<script type="application/json">
+{"targets": {"target1": {"finalUrl": "http://example.com/"}}}
+</script>
+</amp-ad-exit>
+
+<!-- Invalid: wrong layout -->
+<amp-ad-exit id="exit-api-layoutfill" layout="fill">
+<script type="application/json">
+{"targets": {"target1": {"finalUrl": "http://example.com/"}}}
+</script>
+
+<!-- Invalid: non-script children -->
+<amp-ad-exit id="exit-api-children">
+<script type="application/json">
+{"targets": {"target1": {"finalUrl": "http://example.com/"}}}
+</script>
+<p>p</p>
+</amp-ad-exit>
+
+</amp-ad-exit>
+</body>
+</html>
