@@ -1493,10 +1493,12 @@ export class Resources {
           // 7. The new height (or one of the margins) is smaller than the
           // current one.
         } else if (
-            request.newHeight == box.height &&
-            this.isWidthOnlyReflowFreeExpansion_(
-                resource.element, request.newWidth)
-        ){
+          request.newHeight == box.height &&
+          this.isWidthOnlyReflowFreeExpansion_(
+            resource.element,
+            request.newWidth
+          )
+        ) {
           // 8. Element is in viewport, but this is a width-only expansion that
           // should not cause reflow.
           resize = true;
@@ -1607,7 +1609,8 @@ export class Resources {
     if (!parent || parent.childElementCount > 1) {
       return false;
     }
-    const parentWidth = parent.getImpl && parent.getImpl().getLayoutWidth();
+    const parentWidth =
+      (parent.getImpl && parent.getImpl().getLayoutWidth()) || -1;
     // Reflow will not happen if the parent element is at least as wide as the
     // new width.
     return parentWidth >= width;

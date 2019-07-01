@@ -2703,35 +2703,37 @@ describe('Resources changeSize', () => {
       });
     });
 
-    it('should change size if in viewport, but only modifying width and ' +
-         'reflow is impossible', () => {
-      const parent = document.createElement('div');
-      parent.getImpl = () => ({getLayoutWidth: () => 222});
-      const element = document.createElement('div');
-      element.overflowCallback = () => {};
-      parent.appendChild(element);
-      resource1.element = element;
-      viewportMock
-        .expects('getContentHeight')
-        .returns(10000)
-        .atLeast(1);
-      resources.scheduleChangeSize_(
-        resource1,
-        50,
-        222,
-        {top: 1, right: 2, bottom: 3, left: 4},
-        false
-      );
+    it(
+      'should change size if in viewport, but only modifying width and ' +
+        'reflow is impossible',
+      () => {
+        const parent = document.createElement('div');
+        parent.getImpl = () => ({getLayoutWidth: () => 222});
+        const element = document.createElement('div');
+        element.overflowCallback = () => {};
+        parent.appendChild(element);
+        resource1.element = element;
+        viewportMock
+          .expects('getContentHeight')
+          .returns(10000)
+          .atLeast(1);
+        resources.scheduleChangeSize_(
+          resource1,
+          50,
+          222,
+          {top: 1, right: 2, bottom: 3, left: 4},
+          false
+        );
 
-      expect(vsyncSpy).to.be.calledOnce;
-      const task = vsyncSpy.lastCall.args[0];
-      task.measure({});
+        expect(vsyncSpy).to.be.calledOnce;
+        const task = vsyncSpy.lastCall.args[0];
+        task.measure({});
 
-      resources.mutateWork_();
-      expect(resource1.changeSize).to.be.calledOnce;
-      expect(resource1.changeSize).to.be.calledWith(50, 222);
-    });
-
+        resources.mutateWork_();
+        expect(resource1.changeSize).to.be.calledOnce;
+        expect(resource1.changeSize).to.be.calledWith(50, 222);
+      }
+    );
 
     it(
       'should NOT change size when resized margin in viewport and should ' +
