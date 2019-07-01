@@ -41,7 +41,6 @@ import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
-import {scopedQuerySelectorAll} from './dom';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from '../src/consent';
 import {toWin} from './types';
