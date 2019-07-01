@@ -52,9 +52,7 @@ function medyanetAds(global, data) {
   f.onload = function() {
     window.context.renderStart();
   };
-  f.src = `https://app.medyanetads.com/amp/medyanetads.html?bidderData=${
-    global.domain
-  }&adunit=${global.adunit}&size=${global.size}`;
+  f.src = `https://app.medyanetads.com/amp/medyanetads.html?bidderData=${global.domain}&adunit=${global.adunit}&size=${global.size}`;
   const url = window.top.location.search.substring(1);
   if (url && url.indexOf('hb=true') !== -1) {
     f.src = f.src + '&hb=true';
