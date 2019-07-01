@@ -337,9 +337,7 @@ function validateAndParsePubControlParams(params) {
   }
   if (numberOfPubControlParams < 3) {
     return {
-      validationError: `Tags ${ExternalCorePubVars.UI_TYPE}, ${
-        ExternalCorePubVars.COLUMNS_NUM
-      } and ${ExternalCorePubVars.ROWS_NUM} should be set together.`,
+      validationError: `Tags ${ExternalCorePubVars.UI_TYPE}, ${ExternalCorePubVars.COLUMNS_NUM} and ${ExternalCorePubVars.ROWS_NUM} should be set together.`,
     };
   }
 
@@ -355,26 +353,16 @@ function validateAndParsePubControlParams(params) {
     layoutTypes.length !== numberOfColumns.length
   ) {
     return {
-      validationError: `Lengths of parameters ${ExternalCorePubVars.UI_TYPE}, ${
-        ExternalCorePubVars.COLUMNS_NUM
-      } and ${
-        ExternalCorePubVars.ROWS_NUM
-      } must match. Example: ${PUB_CONTROL_EXAMPLE}`,
+      validationError: `Lengths of parameters ${ExternalCorePubVars.UI_TYPE}, ${ExternalCorePubVars.COLUMNS_NUM} and ${ExternalCorePubVars.ROWS_NUM} must match. Example: ${PUB_CONTROL_EXAMPLE}`,
     };
   }
 
   if (layoutTypes.length > 2) {
     return {
       validationError:
-        `The parameter length of attribute ${ExternalCorePubVars.UI_TYPE}, ${
-          ExternalCorePubVars.COLUMNS_NUM
-        } and ${
-          ExternalCorePubVars.ROWS_NUM
-        } is too long. At most 2 parameters for each ` +
+        `The parameter length of attribute ${ExternalCorePubVars.UI_TYPE}, ${ExternalCorePubVars.COLUMNS_NUM} and ${ExternalCorePubVars.ROWS_NUM} is too long. At most 2 parameters for each ` +
         'attribute are needed: one for mobile and one for desktop, while ' +
-        `you are providing ${
-          layoutTypes.length
-        } parameters. Example: ${PUB_CONTROL_EXAMPLE}.`,
+        `you are providing ${layoutTypes.length} parameters. Example: ${PUB_CONTROL_EXAMPLE}.`,
     };
   }
 
@@ -384,18 +372,14 @@ function validateAndParsePubControlParams(params) {
     const row = Number(numberOfRows[i]);
     if (isNaN(row) || row === 0) {
       return {
-        validationError: `Wrong value '${numberOfRows[i]}' for ${
-          ExternalCorePubVars.ROWS_NUM
-        }.`,
+        validationError: `Wrong value '${numberOfRows[i]}' for ${ExternalCorePubVars.ROWS_NUM}.`,
       };
     }
     numberOfRowsAsNumbers.push(row);
     const col = Number(numberOfColumns[i]);
     if (isNaN(col) || col === 0) {
       return {
-        validationError: `Wrong value '${numberOfColumns[i]}' for ${
-          ExternalCorePubVars.COLUMNS_NUM
-        }.`,
+        validationError: `Wrong value '${numberOfColumns[i]}' for ${ExternalCorePubVars.COLUMNS_NUM}.`,
       };
     }
     numberOfColumnsAsNumbers.push(col);

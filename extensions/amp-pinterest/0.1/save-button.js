@@ -90,9 +90,7 @@ export class SaveButton {
    * @return {Promise}
    */
   fetchCount() {
-    const url = `https://widgets.pinterest.com/v1/urls/count.json?return_jsonp=false&url=${
-      this.url
-    }`;
+    const url = `https://widgets.pinterest.com/v1/urls/count.json?return_jsonp=false&url=${this.url}`;
     return this.xhr.fetchJson(url, {}).then(res => res.json());
   }
 
