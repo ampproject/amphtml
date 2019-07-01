@@ -232,6 +232,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'third_party/inputmask/**/*.js',
       'node_modules/dompurify/dist/purify.es.js',
       'node_modules/promise-pjs/promise.js',
+      'node_modules/rrule/dist/esm/src/index.js',
       'node_modules/set-dom/src/**/*.js',
       'node_modules/web-animations-js/web-animations.install.js',
       'node_modules/web-activities/activity-ports.js',
