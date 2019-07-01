@@ -531,3 +531,197 @@ amp-accordion > section > :last-child {
 amp-accordion > section[expanded] > :last-child {
   display: block !important;
 }
+
+/* New Loaders */
+
+ /* Placeholder */
+.i-amphtml-default-placeholder {
+  background-color: #f8f8f8;
+}
+
+ /* Container and sizes */
+.i-amphtml-new-loader {
+  display: inline-block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+.i-amphtml-new-loader-size-default {
+  margin-left: -36px;
+  margin-top: -36px;
+  width: 72px;
+  height: 72px;
+}
+
+.i-amphtml-new-loader-size-small {
+  margin-left: -24px;
+  margin-top: -24px;
+  width: 48px;
+  height: 48px;
+}
+
+ /* Logo */
+.i-amphtml-new-loader-logo {
+  transform-origin: 60px 60px;
+  opacity: 0;
+  animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in 0.6s forwards,
+    i-amphtml-new-loader-fade-out 0.8s ease-out 1.8s forwards;
+}
+
+ /* Spinner and its segments*/
+.i-amphtml-new-loader-spinner {
+  transform-origin: 60px 60px;
+  opacity: 0;
+  fill: transparent;
+  stroke: #aaa;
+  stroke-width: 1.5px;
+  animation: i-amphtml-new-loader-fade-in 0.8s ease-in 1.8s forwards;
+}
+
+.i-amphtml-new-loader-size-default .i-amphtml-new-loader-spinner {
+  stroke-dasharray: 36 118;
+  stroke-dashoffset: 52;
+}
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner {
+  stroke-dasharray: 18 59;
+  stroke-dashoffset: 26;
+  /*
+   * Small loader does not have a logo but its spinner appears at the same
+   * time as the logo for the default spinner does.
+   */
+  animation-delay: 0.8s;
+}
+
+.i-amphtml-new-loader-spinner-segment {
+  transform-origin: 60px 60px;
+  animation: none 0.6s cubic-bezier(0.5, 0, 0.8, 1) 2.8s forwards,
+    none 1.2s linear 3.4s infinite forwards;
+}
+
+.i-amphtml-new-loader-size-default .i-amphtml-new-loader-spinner-segment {
+  r: 22;
+}
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner-segment {
+  r: 11;
+}
+
+.i-amphtml-new-loader-spinner-segment:nth-child(1) {
+  transform: rotate(90deg);
+  animation-name: i-amphtml-new-loader-first-spin-1, i-amphtml-new-loader-spin-1;
+}
+.i-amphtml-new-loader-spinner-segment:nth-child(2) {
+  transform: rotate(180deg);
+  animation-name: i-amphtml-new-loader-first-spin-2, i-amphtml-new-loader-spin-2;
+}
+.i-amphtml-new-loader-spinner-segment:nth-child(3) {
+  transform: rotate(270deg);
+  animation-name: i-amphtml-new-loader-first-spin-3, i-amphtml-new-loader-spin-3;
+}
+.i-amphtml-new-loader-spinner-segment:nth-child(4) {
+  animation-name: i-amphtml-new-loader-first-spin-4, none;
+}
+
+ /* Animations only run when active */
+.i-amphtml-new-loader * {
+  animation-play-state: paused;
+}
+.i-amphtml-new-loader.amp-active * {
+  animation-play-state: running;
+}
+
+ /* Animation keyframes */
+@keyframes i-amphtml-new-loader-spin-1 {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-spin-2 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-spin-3 {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(270deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-first-spin-1 {
+  0% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-first-spin-2 {
+  0% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-first-spin-3 {
+  0% {
+    transform: rotate(270deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes i-amphtml-new-loader-first-spin-4 {
+  0% {
+    transform: rotate(0deg);
+  }
+  99% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0;
+  }
+}
+@keyframes i-amphtml-new-loader-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes i-amphtml-new-loader-fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes i-amphtml-new-loader-scale-and-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+  }
+}
