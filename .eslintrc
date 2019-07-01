@@ -27,19 +27,24 @@
   "settings": {
     "jsdoc": {
       "tagNamePreference": {
-        "returns": "return",
+        "augments": "extends",
         "constant": "const",
-        "class": "constructor"
+        "class": "constructor",
+        "file": "fileoverview",
+        "returns": "return"
       },
       "additionalTagNames": {
         "customTags": [
           "closurePrimitive",
           "deprecated",
+          "dict",
           "export",
           "final",
-	  "nocollapse",
+	        "nocollapse",
           "package",
+          "record",
           "restricted",
+          "struct",
           "suppress",
           "template",
           "visibleForTesting"
