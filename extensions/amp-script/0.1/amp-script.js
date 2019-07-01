@@ -141,7 +141,7 @@ export class AmpScript extends AMP.BaseElement {
       : `amp-script[script=#${this.element.getAttribute('script')}].js`;
 
     const sandbox = this.element.getAttribute('sandbox') || '';
-    const sandboxKeywords = sandbox.split(' ').map(s => s.trim());
+    const sandboxTokens = sandbox.split(' ').map(s => s.trim());
 
     // @see src/main-thread/configuration.WorkerDOMConfiguration in worker-dom.
     const config = {
@@ -151,7 +151,7 @@ export class AmpScript extends AMP.BaseElement {
         this.userActivation_.expandLongTask(promise);
         // TODO(dvoytenko): consider additional "progress" UI.
       },
-      sanitizer: new SanitizerImpl(this.win, sandboxKeywords),
+      sanitizer: new SanitizerImpl(this.win, sandboxTokens),
       // Callbacks.
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
@@ -284,9 +284,9 @@ class AmpScriptService {
 export class SanitizerImpl {
   /**
    * @param {!Window} win
-   * @param {!Array<string>} sandboxKeywords
+   * @param {!Array<string>} sandboxTokens
    */
-  constructor(win, sandboxKeywords) {
+  constructor(win, sandboxTokens) {
     /** @private {!DomPurifyDef} */
     this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
 
@@ -300,7 +300,7 @@ export class SanitizerImpl {
     this.allowedTags_['amp-pixel'] = false;
 
     // "allow-forms" enables tags in HTMLFormElement.elements.
-    const allowForms = sandboxKeywords.includes('allow-forms');
+    const allowForms = sandboxTokens.includes('allow-forms');
     const formElements = [
       'form',
       'button',
