@@ -140,6 +140,9 @@ export class AmpScript extends AMP.BaseElement {
       ? `amp-script[src="${this.element.getAttribute('src')}"].js`
       : `amp-script[script=#${this.element.getAttribute('script')}].js`;
 
+    const sandbox = this.element.getAttribute('sandbox') || '';
+    const sandboxKeywords = sandbox.split(' ').map(s => s.trim());
+
     // @see src/main-thread/configuration.WorkerDOMConfiguration in worker-dom.
     const config = {
       authorURL: sourceURL,
@@ -148,7 +151,7 @@ export class AmpScript extends AMP.BaseElement {
         this.userActivation_.expandLongTask(promise);
         // TODO(dvoytenko): consider additional "progress" UI.
       },
-      sanitizer: new SanitizerImpl(this.win),
+      sanitizer: new SanitizerImpl(this.win, sandboxKeywords),
       // Callbacks.
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
@@ -281,8 +284,9 @@ class AmpScriptService {
 export class SanitizerImpl {
   /**
    * @param {!Window} win
+   * @param {!Array<string>} sandboxKeywords
    */
-  constructor(win) {
+  constructor(win, sandboxKeywords) {
     /** @private {!DomPurifyDef} */
     this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
 
@@ -290,12 +294,13 @@ export class SanitizerImpl {
     this.allowedTags_ = getAllowedTags();
 
     // TODO(choumx): Support opt-in for variable substitutions and forms.
-    // For now, only allow built-in AMP components except amp-pixel...
+    // For now, only allow built-in AMP components except amp-pixel.
     this.allowedTags_['amp-img'] = true;
     this.allowedTags_['amp-layout'] = true;
     this.allowedTags_['amp-pixel'] = false;
-    // ...and other elements that support variable substitutions, including
-    // form elements (tags included in HTMLFormElement.elements).
+
+    // "allow-forms" enables tags in HTMLFormElement.elements.
+    const allowForms = sandboxKeywords.includes('allow-forms');
     const formElements = [
       'form',
       'button',
@@ -307,7 +312,7 @@ export class SanitizerImpl {
       'textarea',
     ];
     formElements.forEach(fe => {
-      this.allowedTags_[fe] = false;
+      this.allowedTags_[fe] = allowForms;
     });
 
     /** @const @private {!Element} */
