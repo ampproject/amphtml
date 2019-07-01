@@ -1607,7 +1607,7 @@ export class Resources {
     if (!parent || parent.childElementCount > 1) {
       return false;
     }
-    const parentWidth = parseInt(computedStyle(this.win, parent).width, 10);
+    const parentWidth = parent.getImpl && parent.getImpl().getLayoutWidth();
     // Reflow will not happen if the parent element is at least as wide as the
     // new width.
     return parentWidth >= width;

@@ -2706,7 +2706,7 @@ describe('Resources changeSize', () => {
     it('should change size if in viewport, but only modifying width and ' +
          'reflow is impossible', () => {
       const parent = document.createElement('div');
-      parent.fakeComputedStyle = {width: '222px'};
+      parent.getImpl = () => ({getLayoutWidth: () => 222});
       const element = document.createElement('div');
       element.overflowCallback = () => {};
       parent.appendChild(element);
