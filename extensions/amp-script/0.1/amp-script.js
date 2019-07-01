@@ -293,7 +293,7 @@ export class SanitizerImpl {
     /** @private {!Object<string, boolean>} */
     this.allowedTags_ = getAllowedTags();
 
-    // TODO(choumx): Support opt-in for variable substitutions and forms.
+    // TODO(choumx): Support opt-in for variable substitutions.
     // For now, only allow built-in AMP components except amp-pixel.
     this.allowedTags_['amp-img'] = true;
     this.allowedTags_['amp-layout'] = true;
