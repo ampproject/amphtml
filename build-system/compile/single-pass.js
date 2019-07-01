@@ -735,7 +735,7 @@ function eliminateIntermediateBundles() {
 function removeInvalidSourcemaps() {
   const maps = deglob.sync(['dist/**/*.js.map']);
   maps.forEach(map => {
-    fs.removeSync(map);
+    fs.truncateSync(map);
   });
 }
 
