@@ -33,10 +33,15 @@
   </amp-script>
 
   <h1>Example: #local-script</h1>
-  <amp-script width=400 height=100 script="local-script">
-  </amp-script>
+  <amp-script width=300 height=50 script="local-script"></amp-script>
   <script type="text/plain" target="amp-script" id="local-script">
     document.body.textContent = 'Hi there!';
+  </script>
+
+  <h1>Example: sandbox=""</h1>
+  <amp-script width=300 height=50 script="no-sandbox"></amp-script>
+  <script type="text/plain" target="amp-script" id="no-sandbox">
+    document.body.appendChild(document.createElement('input'));
   </script>
 
   <h1>Example: empty.js</h1>

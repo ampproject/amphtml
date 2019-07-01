@@ -314,42 +314,24 @@ export class SanitizerImpl {
     formElements.forEach(fe => {
       this.allowedTags_[fe] = allowForms;
     });
-
-    /** @const @private {!Element} */
-    this.wrapper_ = win.document.createElement('div');
   }
 
   /**
-   * TODO(choumx): This is currently called by worker-dom on node creation,
-   * so all invocations are on super-simple nodes like <p></p>.
-   * Either it should be moved to node insertion to justify the more expensive
-   * sanitize() call, or this method should be a simple string lookup.
+   * This is called by worker-dom on node creation, so all invocations are on
+   * super-simple nodes like <p></p>.
    *
    * @param {!Node} node
    * @return {boolean}
    */
   sanitize(node) {
-    // DOMPurify sanitizes unsafe nodes by detaching them from parents.
-    // So, an unsafe `node` that has no parent will cause a runtime error.
-    // To avoid this, wrap `node` in a <div> if it has no parent.
-    const useWrapper = !node.parentNode;
-    if (useWrapper) {
-      this.wrapper_.appendChild(node);
-    }
-    const parent = node.parentNode || this.wrapper_;
-    this.purifier_.sanitize(parent);
-    const clean = parent.firstChild;
+    // TODO(choumx): allowedTags_[] is more strict than purifier.sanitize()
+    // because the latter has attribute-specific allowances.
+    const tag = node.nodeName.toLowerCase();
+    const clean = this.allowedTags_[tag];
     if (!clean) {
       user().warn(TAG, 'Sanitized node:', node);
-      return false;
     }
-    // Detach `node` if we used a wrapper div.
-    if (useWrapper) {
-      while (this.wrapper_.firstChild) {
-        this.wrapper_.removeChild(this.wrapper_.firstChild);
-      }
-    }
-    return true;
+    return clean;
   }
 
   /**
@@ -365,7 +347,6 @@ export class SanitizerImpl {
     const tag = node.nodeName.toLowerCase();
     // DOMPurify's attribute validation is tag-agnostic, so we need to check
     // that the tag itself is valid. E.g. a[href] is ok, but base[href] is not.
-    // TODO(choumx): This is actually more strict than sanitize().
     if (this.allowedTags_[tag]) {
       const attr = attribute.toLowerCase();
       if (validateAttributeChange(this.purifier_, node, attr, value)) {
