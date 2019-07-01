@@ -19,6 +19,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
 const conf = require('../build.conf');
+const deglob = require('globs-to-files');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -582,6 +583,7 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
     .then(thirdPartyConcat)
+    .then(removeInvalidSourcemaps)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       return Promise.reject(err);
@@ -727,6 +729,13 @@ function eliminateIntermediateBundles() {
       }).code;
       fs.outputFileSync(path, compressed);
     });
+  });
+}
+
+function removeInvalidSourcemaps() {
+  const maps = deglob.sync(['dist/**/*.js.map']);
+  maps.forEach(map => {
+    fs.truncateSync(map);
   });
 }
 
