@@ -44,7 +44,7 @@ import {user, userAssert} from '../../../src/log';
 
 /**
  * AMP Pinterest
- * @attr data-do
+ * data-do
  *    - buttonPin: Save button
  *    - buttonFollow: User follow button
  */

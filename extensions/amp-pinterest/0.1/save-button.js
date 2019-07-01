@@ -28,16 +28,16 @@ const POP =
 
 /**
  * Pinterest Save Button
- * @attr data-url: the source url for the Pin
- * @attr data-media: the url of the Pin image/media
- * @attr data-description: the description of the Pin
+ * data-url: the source url for the Pin
+ * data-media: the url of the Pin image/media
+ * data-description: the description of the Pin
  *
  * OPTIONAL
- * @attr data-color: the button color from [red, white, gray]
- * @attr data-count: the position of the Pin count from [beside, above]
- * @attr data-lang:  the language of the button from [en, ja]
- * @attr data-round: should the button be round (true if set)
- * @attr data-tall:  should the button be tall  (true if set)
+ * data-color: the button color from [red, white, gray]
+ * data-count: the position of the Pin count from [beside, above]
+ * data-lang:  the language of the button from [en, ja]
+ * data-round: should the button be round (true if set)
+ * data-tall:  should the button be tall  (true if set)
  */
 export class SaveButton {
   /** @param {!Element} rootElement */
