@@ -299,6 +299,18 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function() {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.before = function(unusedDt, unusedInc) {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.after = function(unusedDt, unusedInc) {};
 
 /**
  * @dict
@@ -688,6 +700,12 @@ let BindEvaluateBindingsResultDef;
  * @typedef {{result: BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
  */
 let BindEvaluateExpressionResultDef;
+
+/**
+ * Options for Bind.rescan().
+ * @typedef {{update: (boolean|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
+ */
+let BindRescanOptionsDef;
 
 /////////////////////////////
 ////// Web Anmomation externs

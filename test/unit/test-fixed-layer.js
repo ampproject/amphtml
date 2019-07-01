@@ -42,6 +42,7 @@ describes.sandboxed('FixedLayer', {}, () => {
   let timer;
 
   beforeEach(() => {
+    documentApi = {};
     allRules = {};
 
     docBody = createElement('docBody');
@@ -65,7 +66,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       element1,
       element3,
     ]);
-    documentApi = {
+    Object.assign(documentApi, {
       styleSheets: [
         // Will be ignored due to being a link.
         {
@@ -164,10 +165,10 @@ describes.sandboxed('FixedLayer', {}, () => {
       },
       documentElement: docElem,
       body: docBody,
-    };
+    });
     documentApi.defaultView.document = documentApi;
     installDocService(documentApi.defaultView, /* isSingleDoc */ true);
-    ampdoc = Services.ampdocServiceFor(documentApi.defaultView).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(documentApi.defaultView).getSingleDoc();
     installHiddenObserverForDoc(ampdoc);
     installPlatformService(documentApi.defaultView);
     installTimerService(documentApi.defaultView);
@@ -408,6 +409,10 @@ describes.sandboxed('FixedLayer', {}, () => {
         this.firstElementChild = createElement('i-amphtml-fpa');
         toggle(this.firstElementChild, false);
       },
+      getRootNode() {
+        return documentApi;
+      },
+      dispatchEvent() {},
     };
     return elem;
   }
