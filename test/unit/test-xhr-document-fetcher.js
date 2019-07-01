@@ -35,6 +35,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     ampdocServiceForStub.returns({
       isSingleDoc: () => false,
       getAmpDoc: () => ampdocViewerStub,
+      getSingleDoc: () => ampdocViewerStub,
     });
   });
 
@@ -139,9 +140,11 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
       setupMockXhr();
       optedInDoc = window.document.implementation.createHTMLDocument('');
       optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
+      const ampdoc = {getRootNode: () => optedInDoc};
       ampdocServiceForStub.returns({
         isSingleDoc: () => true,
-        getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+        getAmpDoc: () => ampdoc,
+        getSingleDoc: () => ampdoc,
       });
       viewer = {
         hasCapability: () => true,

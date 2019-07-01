@@ -169,6 +169,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
         cookie: '',
         documentElement: {
           nodeType: /* element */ 1,
+          getRootNode() {
+            return win.document;
+          },
         },
       },
       Math: {
@@ -190,9 +193,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
       // Fake query selectors needed to bypass <meta> tag checks.
       querySelector: () => null,
       querySelectorAll: () => [],
+      getRootNode() {
+        return win.document;
+      },
     };
     installDocService(win, /* isSingleDoc */ true);
-    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+    const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     installUrlReplacementsServiceForDoc(ampdoc);
@@ -955,14 +961,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
           delete eventListeners[eventType];
         }
       };
-      const timerMock = {
-        promise: () => {
-          return Promise.resolve();
-        },
-      };
-      registerServiceBuilder(win, 'timer', function() {
-        return timerMock;
-      });
     });
 
     it('is replaced if timing info is not available', () => {
