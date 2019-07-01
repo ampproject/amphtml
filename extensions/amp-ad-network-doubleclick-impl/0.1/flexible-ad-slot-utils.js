@@ -65,7 +65,7 @@ function getElementWidth(element, style) {
  * A Dom visitor callback that will computed the 'fws' request parameter.
  * @param {!Element} element
  * @param {!Object<string, string>} style
- * @return {!FULL_WIDTH_SIGNAL=}
+ * @return {?FULL_WIDTH_SIGNALS}
  */
 function getFullWidthSignal(element, style) {
   if (style.overflowY && style.overflowY != 'visible') {
