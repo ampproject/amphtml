@@ -81,7 +81,8 @@ export class DatesList {
     }
     const rruleDates = this.rrulestrs_
       .map((/** {RRule} */ rrule) => rrule.after(date))
-      .filter(Boolean);
+      .filter(Boolean)
+      .map(normalizeRruleReturn);
     firstDatesAfter.concat(rruleDates);
 
     return firstDatesAfter.sort((a, b) => a.toDate() - b.toDate())[0];
@@ -110,8 +111,13 @@ export class DatesList {
       .add(1, 'day')
       .toDate();
     return this.rrulestrs_.some((/** {RRule} */ rrule) => {
-      const rruleDay = this.moment_(rrule.before(nextDate));
-      return this.ReactDates_['isSameDay'](rruleDay, date);
+      const rruleUTCDate = rrule.before(nextDate);
+      if (!rruleUTCDate) {
+        return false;
+      }
+      const rruleLocalDate = normalizeRruleReturn(rruleUTCDate);
+      const rruleMoment = this.moment_(rruleLocalDate);
+      return this.ReactDates_['isSameDay'](rruleMoment, date);
     });
   }
 
@@ -133,6 +139,24 @@ export class DatesList {
 
     return DateType.INVALID;
   }
+}
+
+/**
+ * RRULE returns dates as local time formatted at UTC, so the
+ * Date.prototype.getUTC* methods must be used to create a new date object.
+ * {@link https://github.com/jakubroztocil/rrule#important-use-utc-dates}
+ * @param {!Date} rruleDate
+ * @return {!DateType}
+ */
+function normalizeRruleReturn(rruleDate) {
+  const year = rruleDate.getUTCFullYear();
+  const month = rruleDate.getUTCMonth();
+  const day = rruleDate.getUTCDate();
+  const hours = rruleDate.getUTCHours();
+  const minutes = rruleDate.getUTCMinutes();
+  const seconds = rruleDate.getUTCSeconds();
+  const ms = rruleDate.getUTCMilliseconds();
+  return new Date(year, month, day, hours, minutes, seconds, ms);
 }
 
 /**
