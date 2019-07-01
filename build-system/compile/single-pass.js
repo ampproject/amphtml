@@ -19,7 +19,6 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
 const conf = require('../build.conf');
-const deglob = require('globs-to-files');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -30,7 +29,6 @@ const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const rename = require('gulp-rename');
-const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
 const terser = require('terser');
 const through = require('through2');
@@ -110,8 +108,6 @@ exports.getFlags = function(config) {
     compilation_level: 'ADVANCED',
     use_types_for_optimization: true,
     rewrite_polyfills: false,
-    source_map_include_content: !!argv.full_sourcemaps,
-    source_map_location_mapping: ['|/'],
     //new_type_inf: true,
     language_in: 'ES6',
     // By default closure puts all of the public exports on the global, but
@@ -583,7 +579,6 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
     .then(thirdPartyConcat)
-    .then(removeInvalidSourcemaps)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       return Promise.reject(err);
@@ -685,13 +680,11 @@ function compile(flagsArray) {
     return gulp
       .src(srcs, {base: transformDir})
       .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
-      .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(gulpClosureCompile(flagsArray))
       .on('error', err => {
         handleSinglePassCompilerError();
         reject(err);
       })
-      .pipe(sourcemaps.write('.'))
       .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
       .pipe(gulp.dest('.'))
       .on('end', resolve);
@@ -729,13 +722,6 @@ function eliminateIntermediateBundles() {
       }).code;
       fs.outputFileSync(path, compressed);
     });
-  });
-}
-
-function removeInvalidSourcemaps() {
-  const maps = deglob.sync(['dist/**/*.js.map']);
-  maps.forEach(map => {
-    fs.truncateSync(map);
   });
 }
 
