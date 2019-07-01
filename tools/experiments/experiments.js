@@ -408,6 +408,7 @@ const EXPERIMENTS = [
       'Enable "xhrInterceptor" capability for untrusted viewers. ' +
       'For development use only',
     spec: 'N/A',
+    cleanupIssue: 'N/A',
   },
   {
     id: 'new-loaders',
