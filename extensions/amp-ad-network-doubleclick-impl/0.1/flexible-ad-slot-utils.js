@@ -62,18 +62,18 @@ function getElementWidth(element, style) {
 }
 
 /**
- * Returns a callback function that can be passed as a visitor for computing the
- * 'fws' request parameter.
+ * A Dom visitor callback that will computed the 'fws' request parameter.
+ * @param {!Element} element
+ * @param {!Object<string, string>} style
+ * @return {!FULL_WIDTH_SIGNAL=}
  */
-function getFullWidthSignalVisitor() {
-  return (el, style) => {
-    if (style.overflowY && style.overflowY != 'visible') {
-      return FULL_WIDTH_SIGNALS.OVERFLOW_HIDDEN;
-    }
-    if (style.display == 'none') {
-      return FULL_WIDTH_SIGNALS.ELEMENT_HIDDEN;
-    }
-  };
+function getFullWidthSignalVisitor(element, style) {
+  if (style.overflowY && style.overflowY != 'visible') {
+    return FULL_WIDTH_SIGNALS.OVERFLOW_HIDDEN;
+  }
+  if (style.display == 'none') {
+    return FULL_WIDTH_SIGNALS.ELEMENT_HIDDEN;
+  }
 }
 
 /** @typedef {{
@@ -97,7 +97,7 @@ export function getFlexibleAdSlotRequestParams(win, element) {
   return /** @type {!ParamsTypeDef} */ (new DomAncestorVisitor(win)
     .addVisitor('parentWidth', getElementWidth, 100 /* maxDepth */)
     .addVisitor('slotWidth', getElementWidth, 1 /* maxDepth */)
-    .addVisitor('fwSignal', getFullWidthSignalVisitor(), 100 /* maxDepth */)
+    .addVisitor('fwSignal', getFullWidthSignalVisitor, 100 /* maxDepth */)
     .visitAncestorsStartingFrom(element)
     .getAllResults());
 }
