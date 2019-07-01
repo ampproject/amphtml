@@ -24,27 +24,28 @@ describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
     domAncestorVisitor = new DomAncestorVisitor(win);
   });
 
-  it('should return empty object when no visitors given', () => {
-    expect(domAncestorVisitor.getAllResults()).to.deep.equal({});
-  });
-
   it('should respect maxAncestorsToVisit', () => {
     const parent = doc.createElement('div');
     const child = doc.createElement('div');
     parent.appendChild(child);
     parent.id = 'parent';
 
+    let result = false;
     const callback = el => {
       if (el.id == 'parent') {
+        result = true;
         return true;
       }
     };
+
     domAncestorVisitor
-      .addVisitor('vis1', callback, 1)
-      .addVisitor('vis2', callback, 2)
+      .addVisitor(callback, 1)
       .visitAncestorsStartingFrom(child);
-    expect(domAncestorVisitor.getResultFor('vis1')).to.be.undefined;
-    expect(domAncestorVisitor.getResultFor('vis2')).to.be.true;
+    expect(result).to.be.false;
+    domAncestorVisitor
+      .addVisitor(callback, 2)
+      .visitAncestorsStartingFrom(child);
+    expect(result).to.be.true;
   });
 
   it('should not re-run completed visitors', () => {
@@ -52,24 +53,33 @@ describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
     const child = doc.createElement('div');
     parent.appendChild(child);
 
-    const callback = el => {
+    let result1 = false;
+    const callback1 = el => {
       if (el.id == 'parent') {
+        result1 = true;
+        return true;
+      }
+    };
+    let result2 = false;
+    const callback2 = el => {
+      if (el.id == 'parent') {
+        result2 = true;
         return true;
       }
     };
 
     domAncestorVisitor
-      .addVisitor('vis1', callback)
+      .addVisitor(callback1)
       .visitAncestorsStartingFrom(child);
-    expect(domAncestorVisitor.getResultFor('vis1')).to.be.undefined;
+    expect(result1).to.be.false;
 
     parent.id = 'parent';
 
     domAncestorVisitor
-      .addVisitor('vis2', callback)
+      .addVisitor(callback)
       .visitAncestorsStartingFrom(child);
-    expect(domAncestorVisitor.getResultFor('vis1')).to.be.undefined;
-    expect(domAncestorVisitor.getResultFor('vis2')).to.be.true;
+    expect(result1).to.be.false;
+    expect(result2).to.be.true;
   });
 
   it('should cease visiting once visitor returns', () => {
@@ -89,7 +99,6 @@ describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
         }
       })
       .visitAncestorsStartingFrom(elements[elements.length - 1]);
-    expect(domAncestorVisitor.getResultFor('vis1')).to.be.true;
     elements.forEach((element, index) => {
       if (index >= 50) {
         expect(element.classList.contains('visited')).to.be.true;

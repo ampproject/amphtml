@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {DomAncestorVisitor} from '../../../src/utils/dom-ancestor-visitor';
+import {DomAncestorVisitor, VisitorCallbackTypeDef} from '../../../src/utils/dom-ancestor-visitor';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
@@ -25,55 +25,69 @@ const FULL_WIDTH_SIGNALS = {
 };
 
 /**
- * Gets the maximum width the given element may occupy.
- * @param {!Element} element
- * @param {!Object<string, string>} style
- * @return {?number} The width if it was found, null otherwise.
+ * Returns a visitor callback that gets the maximum width the given element may
+ * occupy.
+ * @param {function(?number): undefined} setWidth Callback to set the value of
+ *   the width.
+ * @return {!VisitorCallbackTypeDef} Visitor callback.
  */
-function getElementWidth(element, style) {
-  const layout = element.getAttribute('layout');
-  switch (layout) {
-    case Layout.FIXED:
-      return parseInt(element.getAttribute('width'), 10) || 0;
-    case Layout.RESPONSIVE:
-    case Layout.FILL:
-    case Layout.FIXED_HEIGHT:
-    case Layout.FLUID:
+function getElementWidthVis(setWidth) {
+  return (element, style) => {
+    const layout = element.getAttribute('layout');
+    switch (layout) {
+      case Layout.FIXED:
+        setWidth(parseInt(element.getAttribute('width'), 10) || 0;
+        return true;
+      case Layout.RESPONSIVE:
+      case Layout.FILL:
+      case Layout.FIXED_HEIGHT:
+      case Layout.FLUID:
       // The above layouts determine the width of the element by the
       // containing element, or by CSS max-width property.
       const maxWidth = parseInt(style.maxWidth, 10);
       if (maxWidth || maxWidth == 0) {
-        return maxWidth;
+        setWidth(maxWidth);
+        return true;
       }
-      return null;
-    case Layout.CONTAINER:
-      // Container layout allows the container's size to be determined by
-      // the children within it, so in principle we can grow as large as the
-      // viewport.
-      const viewport = Services.viewportForDoc(dev().assertElement(element));
-      return viewport.getSize().width;
-    case Layout.NODISPLAY:
-    case Layout.FLEX_ITEM:
-      return 0;
-    default:
-      // If no layout is provided, we must use getComputedStyle.
-      return parseInt(style.width, 10) || 0;
-  }
+      setWidth(null);
+      return true;
+      case Layout.CONTAINER:
+        // Container layout allows the container's size to be determined by
+        // the children within it, so in principle we can grow as large as the
+        // viewport.
+        const viewport = Services.viewportForDoc(dev().assertElement(element));
+        setWidth(viewport.getSize().width);
+        return true;
+      case Layout.NODISPLAY:
+      case Layout.FLEX_ITEM:
+        setWidth(0);
+        return true;
+      default:
+        // If no layout is provided, we must use getComputedStyle.
+        setWidth(parseInt(style.width, 10) || 0);
+        return true;
+    }
+  };
 }
 
 /**
- * A Dom visitor callback that will computed the 'fws' request parameter.
- * @param {!Element} element
- * @param {!Object<string, string>} style
- * @return {?FULL_WIDTH_SIGNALS}
+ * Returns a Dom visitor callback that will compute the 'fws' request
+ * parameter.
+ * @param {!function(!FULL_WIDTH_SIGNALS): undefined} setSignal Callback to set
+ *   the 'fws' value.
+ * @return {!VisitorCallbackTypeDef}
  */
-function getFullWidthSignal(element, style) {
-  if (style.overflowY && style.overflowY != 'visible') {
-    return FULL_WIDTH_SIGNALS.OVERFLOW_HIDDEN;
-  }
-  if (style.display == 'none') {
-    return FULL_WIDTH_SIGNALS.ELEMENT_HIDDEN;
-  }
+function getFullWidthSignalVis(element, style) {
+  return (element, style) => {
+    if (style.overflowY && style.overflowY != 'visible') {
+      setSignal(FULL_WIDTH_SIGNALS.OVERFLOW_HIDDEN);
+      return true;
+    }
+    if (style.display == 'none') {
+      setSignal(FULL_WIDTH_SIGNALS.ELEMENT_HIDDEN);
+      return true;
+    }
+  };
 }
 
 /** @typedef {{
@@ -94,10 +108,16 @@ let ParamsTypeDef;
  *    element has none.
  */
 export function getFlexibleAdSlotRequestParams(win, element) {
-  return /** @type {!ParamsTypeDef} */ (new DomAncestorVisitor(win)
-    .addVisitor('parentWidth', getElementWidth, 100 /* maxDepth */)
-    .addVisitor('slotWidth', getElementWidth, 1 /* maxDepth */)
-    .addVisitor('fwSignal', getFullWidthSignal, 100 /* maxDepth */)
-    .visitAncestorsStartingFrom(element)
-    .getAllResults());
+  let fwSignal = 0;
+  let slotWidth = 0;
+  let parentWidth = 0;
+  const setFws = val => fwSignal = val;
+  const setMsz = val => slotWidth = val;
+  const setPsz = val => parentWidth = val;
+  new DomAncestorVisitor(win)
+    .addVisitor(getElementWidthVisitor(setMsz), 1 /* maxDepth */)
+    .addVisitor(getElementWidthVisitor(setPsz), 100 /* maxDepth */)
+    .addVisitor(getFullWidthSignalVisitor(setFws), 100 /* maxDepth */)
+    .visitAncestorsStartingFrom(element);
+  return {fwSignal, slotWidth, parentWidth};
 }
