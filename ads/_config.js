@@ -954,6 +954,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'tracdelight': {
+    prefetch: 'https://scripts.tracdelight.com/amp.js',
+    renderStartImplemented: true,
+  },
+
   'triplelift': {},
 
   'trugaze': {
