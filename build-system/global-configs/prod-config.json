@@ -1,11 +1,9 @@
 {
   "allow-doc-opt-in": [
-    "amp-date-picker",
     "amp-img-auto-sizes",
     "amp-next-page",
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
-    "inabox-remove-height-auto",
     "inabox-css-cleanup"
   ],
   "allow-url-opt-in": [
@@ -26,14 +24,11 @@
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-auto-lightbox": 1,
   "amp-consent-v2": 1,
-  "amp-date-picker": 1,
   "amp-force-prerender-visible-elements": 1,
   "amp-img-auto-sizes": 1,
   "amp-list-load-more": 1,
   "amp-list-viewport-resize": 1,
-  "amp-live-list-sorting": 1,
   "amp-playbuzz": 1,
-  "amp-sidebar toolbar": 1,
   "amp-story-responsive-units": 1,
   "amp-story-v1": 1,
   "ampdoc-closest": 1,
@@ -47,10 +42,8 @@
   "expAdsenseUnconditionedCanonical": 0.01,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.01,
-  "font-display-swap": 1,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
-  "inabox-remove-height-auto": 1,
   "margin-bottom-in-content-height": 1,
   "pump-early-frame": 1,
   "version-locking": 1

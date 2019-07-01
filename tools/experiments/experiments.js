@@ -186,11 +186,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
-    id: 'font-display-swap',
-    name: 'Use font-display: swap as the default for fonts.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
-  },
-  {
     id: 'pump-early-frame',
     name:
       'If applicable, let the browser paint the current frame before ' +
@@ -269,12 +264,6 @@ const EXPERIMENTS = [
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
-  },
-  {
-    id: 'amp-live-list-sorting',
-    name: 'Allows "newest last" insertion algorithm to be used',
-    spec: 'https://github.com/ampproject/amphtml/issues/5396',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13552',
   },
   {
     id: 'amp-story-branching',
@@ -376,15 +365,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'inabox-remove-height-auto',
-    name:
-      'Experiment to allow slowly removing the height: auto!' +
-      ' for inabox amp4ads. By adding the ' +
-      '.i-amphtml-inabox-preserve-height-auto class on <html>',
-    spec: 'https://github.com/ampproject/amphtml/issues/22059',
-    cleanupIssue: 'TODO',
-  },
-  {
     id: 'fie-css-cleanup',
     name:
       'Experiment to prevent regression after a major CSS clean up' +
@@ -421,6 +401,14 @@ const EXPERIMENTS = [
     name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
     spec: 'https://github.com/ampproject/amphtml/issues/22718',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
+  },
+  {
+    id: 'untrusted-xhr-interception',
+    name:
+      'Enable "xhrInterceptor" capability for untrusted viewers. ' +
+      'For development use only',
+    spec: 'N/A',
+    cleanupIssue: 'N/A',
   },
 ];
 

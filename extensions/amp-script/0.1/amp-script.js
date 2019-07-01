@@ -25,7 +25,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
@@ -104,15 +104,18 @@ export class AmpScript extends AMP.BaseElement {
   layoutCallback() {
     this.userActivation_ = new UserActivationTracker(this.element);
 
-    // Create worker and hydrate.
-    const authorUrl = this.element.getAttribute('src');
-    const workerUrl = this.workerThreadUrl_();
-    dev().info(TAG, 'Author URL:', authorUrl, ', worker URL:', workerUrl);
+    const authorScriptPromise = this.getAuthorScript_();
+    if (!authorScriptPromise) {
+      const error = user().createError(
+        '[%s] "src" or "script" attribute is required.',
+        TAG
+      );
+      return Promise.reject(error);
+    }
 
-    const xhr = Services.xhrFor(this.win);
-    const fetchPromise = Promise.all([
-      xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text()),
-      xhr.fetchText(authorUrl, {ampCors: false}).then(r => r.text()),
+    const workerAndAuthorScripts = Promise.all([
+      this.getWorkerScript_(),
+      authorScriptPromise,
       getElementServiceForDoc(this.element, TAG, TAG),
     ]).then(results => {
       const workerScript = results[0];
@@ -132,9 +135,14 @@ export class AmpScript extends AMP.BaseElement {
       return [workerScript, authorScript];
     });
 
+    // The displayed name of the combined script in dev tools.
+    const sourceURL = this.element.hasAttribute('src')
+      ? `amp-script[src="${this.element.getAttribute('src')}"].js`
+      : `amp-script[script=#${this.element.getAttribute('script')}].js`;
+
     // @see src/main-thread/configuration.WorkerDOMConfiguration in worker-dom.
-    const workerConfig = {
-      authorURL: authorUrl,
+    const config = {
+      authorURL: sourceURL,
       mutationPump: this.mutationPump_.bind(this),
       longTask: promise => {
         this.userActivation_.expandLongTask(promise);
@@ -153,29 +161,61 @@ export class AmpScript extends AMP.BaseElement {
       },
     };
 
-    upgrade(this.element, fetchPromise, workerConfig).then(workerDom => {
+    // Create worker and hydrate.
+    upgrade(this.element, workerAndAuthorScripts, config).then(workerDom => {
       this.workerDom_ = workerDom;
     });
     return Promise.resolve();
   }
 
   /**
-   * @return {string}
+   * @return {!Promise<string>}
    * @private
    */
-  workerThreadUrl_() {
+  getWorkerScript_() {
     // Use `testLocation` for testing with iframes. @see testing/iframe.js.
     const location =
       getMode().test && this.win.testLocation
         ? this.win.testLocation
         : this.win.location;
     const useLocal = getMode().localDev || getMode().test;
-    return calculateExtensionScriptUrl(
+    const workerUrl = calculateExtensionScriptUrl(
       location,
       'amp-script-worker',
       '0.1',
       useLocal
     );
+    const xhr = Services.xhrFor(this.win);
+    return xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text());
+  }
+
+  /**
+   * Query local or fetch remote author script. Returns promise that resolves
+   * with the script contents. Returns null if script reference is missing.
+   * @return {?Promise<string>}
+   * @private
+   */
+  getAuthorScript_() {
+    const authorUrl = this.element.getAttribute('src');
+    if (authorUrl) {
+      return Services.xhrFor(this.win)
+        .fetchText(authorUrl, {ampCors: false})
+        .then(r => r.text());
+    } else {
+      const id = this.element.getAttribute('script');
+      if (id) {
+        const local = this.getAmpDoc().getElementById(id);
+        const target = local.getAttribute('target');
+        userAssert(
+          target === 'amp-script',
+          '[%s] script#%s must have target="amp-script".',
+          TAG,
+          id
+        );
+        return Promise.resolve(local.textContent);
+      }
+    }
+    return null;
   }
 
   /**

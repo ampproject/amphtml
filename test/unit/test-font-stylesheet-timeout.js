@@ -15,7 +15,6 @@
  */
 
 import {fontStylesheetTimeout} from '../../src/font-stylesheet-timeout';
-import {toggleExperiment} from '../../src/experiments';
 
 describes.realWin(
   'font-stylesheet-timeout',
@@ -210,14 +209,6 @@ describes.realWin(
                 };
               },
             });
-            toggleExperiment(win, 'font-display-swap', true);
-          });
-
-          it('should not do anything with experiment off', () => {
-            toggleExperiment(win, 'font-display-swap', false);
-            fontStylesheetTimeout(win);
-            clock.tick(250);
-            expect(fonts[1].display).to.equal('auto');
           });
 
           it('should not change loaded fonts', () => {
