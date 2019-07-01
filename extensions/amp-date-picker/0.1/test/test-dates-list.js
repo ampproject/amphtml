@@ -21,11 +21,12 @@ import {requireExternal} from '../../../../src/module';
 describes.sandboxed('DatesList', {}, () => {
   const moment = requireExternal('moment');
 
-  it('should accept date strings and RRULE strings', () => {
+  it('should accept date strings and RRULE strings', function() {
+    this.timeout(3000);
     const containedDate = '09/04/1998';
     const notContainedDate = '09/03/1998';
     const containedRrule =
-      'FREQ=WEEKLY;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
+      'FREQ=WEEKLY;COUNT=10;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
     const matchesRrule = '01/02/2018';
     const datesList = new DatesList([containedDate, containedRrule]);
 
@@ -66,7 +67,7 @@ describes.sandboxed('DatesList', {}, () => {
     const dateBefore = '01/01/1998';
     // const notContainedDate = '09/03/1998';
     const containedRrule =
-      'FREQ=WEEKLY;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
+      'FREQ=WEEKLY;COUNT=10;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
     // const matchesRrule = '01/02/2018';
     const datesList = new DatesList([containedDate, containedRrule]);
 
