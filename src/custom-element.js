@@ -1537,12 +1537,15 @@ function createBaseCustomElementClass(win) {
      * @package @final @this {!Element}
      */
     getPlaceholder() {
-      const candidates = scopedQuerySelectorAll(this, '> [placeholder]');
-      // Take the last match
-      const candidate = candidates[candidates.length - 1];
-      if (candidate && !isInputPlaceholder(candidate)) {
-        return candidate;
-      }
+      return dom.lastChildElement(this, el => {
+        return (
+          el.hasAttribute('placeholder') &&
+          // Blacklist elements that has a native placeholder property
+          // like input and textarea. These are not allowed to be AMP
+          // placeholders.
+          !isInputPlaceholder(el)
+        );
+      });
     }
 
     /**
