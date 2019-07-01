@@ -93,7 +93,7 @@
     "google-closure-compiler": "20190618.0.0",
     "gulp": "4.0.2",
     "gulp-ava": "1.0.0",
-    "gulp-eslint": "5.0.0",
+    "gulp-eslint": "6.0.0",
     "gulp-eslint-if-fixed": "1.0.0",
     "gulp-file": "0.4.0",
     "gulp-git": "2.9.0",
