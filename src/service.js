@@ -75,32 +75,23 @@ export class EmbeddableService {
  *
  * @param {!Element|!ShadowRoot} element
  * @param {string} id
- * @param {boolean=} opt_fallbackToTopWin
  * @return {?Object}
  */
-export function getExistingServiceForDocInEmbedScope(
-  element,
-  id,
-  opt_fallbackToTopWin
-) {
+export function getExistingServiceForDocInEmbedScope(element, id) {
   const document = element.ownerDocument;
   const win = toWin(document.defaultView);
   // First, try to resolve via local embed window (if applicable).
   const isEmbed = win != getTopWindow(win);
   if (isEmbed) {
     if (isServiceRegistered(win, id)) {
-      const embedService = getServiceInternal(win, id);
-      if (embedService) {
-        return embedService;
-      }
+      return getServiceInternal(win, id);
     }
-    // Don't continue if fallback is not allowed.
-    if (!opt_fallbackToTopWin) {
-      return null;
-    }
+    // Fallback from FIE to parent is intentionally unsupported for safety.
+    return null;
+  } else {
+    // Resolve via the element's ampdoc.
+    return getServiceForDocOrNullInternal(element, id);
   }
-  // Resolve via the element's ampdoc. This falls back to the top-level service.
-  return getServiceForDocOrNullInternal(element, id);
 }
 
 /**
