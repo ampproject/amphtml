@@ -41,7 +41,7 @@ let IndividualResourceSpecDef;
 /**
  * A parsed resource spec for a specific host or sets of hosts (as defined by
  * the hostPattern).
- * @typedef{{
+ * @typedef {{
  *   hostPattern: !RegExp,
  *   resources: !Array<{
  *     name: string,

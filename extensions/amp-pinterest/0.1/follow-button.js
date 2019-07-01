@@ -28,8 +28,8 @@ const POP_FOLLOW = `status=no,resizable=yes,scrollbars=yes,
 
 /**
  * Pinterest Follow Button
- * @attr data-href:  the url of the user's profile to follow
- * @attr data-label: the text to display (user's full name)
+ * data-href:  the url of the user's profile to follow
+ * data-label: the text to display (user's full name)
  */
 export class FollowButton {
   /** @param {!Element} rootElement */
