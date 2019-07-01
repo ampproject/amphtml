@@ -33,8 +33,8 @@
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
+ *   ampCors: (boolean|undefined),
+ *   bypassInterceptorForDev: (boolean|undefined)
  * }}
  */
 var FetchInitDef;
@@ -52,10 +52,6 @@ FormDataWrapperInterface.prototype.entries = function() {};
 FormDataWrapperInterface.prototype.getFormData = function() {};
 
 FormData.prototype.entries = function () {};
-/**
- * @param {string} unusedName
- */
-FormData.prototype.delete = function (unusedName) {};
 
 /**
  * A type for Objects that can be JSON serialized or that come from
@@ -303,6 +299,18 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function() {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.before = function(unusedDt, unusedInc) {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.after = function(unusedDt, unusedInc) {};
 
 /**
  * @dict
@@ -692,6 +700,12 @@ let BindEvaluateBindingsResultDef;
  * @typedef {{result: BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
  */
 let BindEvaluateExpressionResultDef;
+
+/**
+ * Options for Bind.rescan().
+ * @typedef {{update: (boolean|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
+ */
+let BindRescanOptionsDef;
 
 /////////////////////////////
 ////// Web Anmomation externs

@@ -67,8 +67,11 @@ const INFO_CLASS = 'i-amphtml-story-info-control';
 /** @private @const {string} */
 const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 
+/** @private @const {string} */
+const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
+
 /** @private @const {number} */
-const HIDE_AUDIO_MESSAGE_TIMEOUT_MS = 1500;
+const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -77,6 +80,35 @@ const TEMPLATE = {
     'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
   }),
   children: [
+    {
+      tag: 'div',
+      attrs: dict({
+        'class': 'i-amphtml-story-has-new-page-notification-container',
+      }),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-has-new-page-text-wrapper',
+          }),
+          children: [
+            {
+              tag: 'span',
+              attrs: dict({
+                'class': 'i-amphtml-story-has-new-page-circle-icon',
+              }),
+            },
+            {
+              tag: 'div',
+              attrs: dict({
+                'class': 'i-amphtml-story-has-new-page-text',
+              }),
+              localizedStringId: LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
+            },
+          ],
+        },
+      ],
+    },
     {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
@@ -166,7 +198,11 @@ const TEMPLATE = {
  * Chrome contains:
  *   - mute/unmute button
  *   - story progress bar
- *   - bookend close butotn
+ *   - bookend close button
+ *   - share button
+ *   - domain info button
+ *   - sidebar
+ *   - story updated label (for live stories)
  */
 export class SystemLayer {
   /**
@@ -177,7 +213,7 @@ export class SystemLayer {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!Element} */
+    /** @protected @const {!Element} */
     this.parentEl_ = parentEl;
 
     /** @private {boolean} */
@@ -221,10 +257,9 @@ export class SystemLayer {
   }
 
   /**
-   * @param {!Array<string>} pageIds the ids of each page in the story
    * @return {!Element}
    */
-  build(pageIds) {
+  build() {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -237,7 +272,7 @@ export class SystemLayer {
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
     this.systemLayerEl_.insertBefore(
-      this.progressBar_.build(pageIds),
+      this.progressBar_.build(),
       this.systemLayerEl_.firstChild
     );
 
@@ -274,6 +309,7 @@ export class SystemLayer {
     }
 
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
+    this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
     return this.getRoot();
   }
 
@@ -392,6 +428,10 @@ export class SystemLayer {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
+
+    this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, () => {
+      this.onNewPageAvailable_();
+    });
   }
 
   /**
@@ -498,6 +538,7 @@ export class SystemLayer {
           );
     });
   }
+
   /**
    * Reacts to muted state updates.
    * @param {boolean} isMuted
@@ -512,29 +553,31 @@ export class SystemLayer {
   }
 
   /**
-   * Hides audio message after elapsed time.
+   * Hides message after elapsed time.
+   * @param {string} message
    * @private
    */
-  hideAudioMessageAfterTimeout_() {
+  hideMessageAfterTimeout_(message) {
     if (this.timeoutId_) {
       this.timer_.cancel(this.timeoutId_);
     }
     this.timeoutId_ = this.timer_.delay(
-      () => this.hideAudioMessageInternal_(),
-      HIDE_AUDIO_MESSAGE_TIMEOUT_MS
+      () => this.hideMessageInternal_(message),
+      HIDE_MESSAGE_TIMEOUT_MS
     );
   }
 
   /**
-   * Hides audio message.
+   * Hides message.
+   * @param {string} message
    * @private
    */
-  hideAudioMessageInternal_() {
+  hideMessageInternal_(message) {
     if (!this.isBuilt_) {
       return;
     }
     this.vsync_.mutate(() => {
-      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
+      this.getShadowRoot().setAttribute(message, 'noshow');
     });
   }
 
@@ -581,7 +624,16 @@ export class SystemLayer {
    */
   onPageIndexUpdate_(index) {
     this.vsync_.mutate(() => {
-      this.getShadowRoot().classList.toggle('first-page-active', index === 0);
+      const lastIndex =
+        this.storeService_.get(StateProperty.PAGE_IDS).length - 1;
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-first-page-active',
+        index === 0
+      );
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-last-page-active',
+        index === lastIndex
+      );
     });
   }
 
@@ -607,7 +659,7 @@ export class SystemLayer {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
-      this.hideAudioMessageAfterTimeout_();
+      this.hideMessageAfterTimeout_(MESSAGE_DISPLAY_CLASS);
     });
   }
 
@@ -635,6 +687,17 @@ export class SystemLayer {
    */
   onSidebarClick_() {
     this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+  }
+
+  /**
+   * Shows the "story updated" label when a new page was added to the story.
+   * @private
+   */
+  onNewPageAvailable_() {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'show');
+      this.hideMessageAfterTimeout_(HAS_NEW_PAGE_ATTRIBUTE);
+    });
   }
 
   /**

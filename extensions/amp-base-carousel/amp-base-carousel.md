@@ -4,6 +4,7 @@ formats:
   - websites
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis or vertical axis.
+experimental: true
 ---
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
@@ -28,7 +29,7 @@ A generic carousel for displaying multiple similar pieces of content along a hor
 <table>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; You must turn on the `amp-base-carousel` experiment to use this component.</div></td>
+    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; You must turn on the <code>amp-base-carousel</code> experiment to use this component.</div></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -121,7 +122,7 @@ The media queries are evaluated from left to right, with the first matching medi
   <tr>
     <td width="40%"><strong><code>snap-by</code></strong></td>
     <td>A number, defaults to <code>1</code>. This determines the granularity of snapping and is useful when using
-    <code>visible-count</code>. This 
+    <code>visible-count</code>. This
   </tr>
 </table>
 
@@ -138,7 +139,7 @@ The media queries are evaluated from left to right, with the first matching medi
   </tr>
   <tr>
     <td width="40%"><strong><code>horizontal</code></strong></td>
-    <td>Either <code>true</code> or <code>false</code>, defaults to <code>false</code>. When true the carousel will lay out horizontally, with the user being able to swipe left and right. When false, the carousel lays out vertically, with the user being able to swipe up and down.
+    <td>Either <code>true</code> or <code>false</code>, defaults to <code>true</code>. When true the carousel will lay out horizontally, with the user being able to swipe left and right. When false, the carousel lays out vertically, with the user being able to swipe up and down.
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>

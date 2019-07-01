@@ -223,12 +223,14 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AdmanMedia](../../ads/admanmedia.md)
 - [Admixer](../../ads/admixer.md)
 - [AdOcean](../../ads/adocean.md)
+- [Adop](../../ads/adop.md)
 - [AdPicker](../../ads/adpicker.md)
 - [AdPlugg](../../ads/adplugg.md)
 - [Adpon](../../ads/adpon.md)
 - [AdReactor](../../ads/adreactor.md)
 - [AdSense](../../ads/google/adsense.md)
 - [AdSensor](../../ads/adsensor.md)
+- [AdsLoom](../../ads/adsloom.md)
 - [AdsNative](../../ads/adsnative.md)
 - [AdSpeed](../../ads/adspeed.md)
 - [AdSpirit](../../ads/adspirit.md)
@@ -397,7 +399,9 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 
 ## Supported embed types
 
+- [1wo](../../ads/1wo.md)
 - [24smi](../../ads/24smi.md)
+- [AdsLoom](../../ads/adsloom.md)
 - [Bringhub](../../ads/bringhub.md)
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
@@ -408,6 +412,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [PubExchange](../../ads/pubexchange.md)
 - [Smi2](../../ads/smi2.md)
 - [SVK-Native](../../ads/svknative.md)
+- [Strossle](../../ads/strossle.md)
 - [Taboola](../../ads/taboola.md)
 - [Zen](../../ads/zen.md)
 - [ZergNet](../../ads/zergnet.md)

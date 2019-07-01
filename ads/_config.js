@@ -70,6 +70,8 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  '1wo': {},
+
   '24smi': {
     prefetch: 'https://jsn.24smi.net/smi.js',
     preconnect: 'https://data.24smi.net',
@@ -146,6 +148,8 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  'adop': {},
+
   'adpicker': {
     renderStartImplemented: true,
   },
@@ -171,6 +175,7 @@ export const adConfig = {
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
     consentHandlingOverride: true,
+    renderStartImplemented: true,
   },
 
   'adsensor': {
@@ -178,7 +183,9 @@ export const adConfig = {
     clientIdScope: 'amp_ecid_adensor',
     renderStartImplemented: true,
   },
-
+  'adsloom': {
+    clientIdScope: 'AMP_ECID_ADSLOOM',
+  },
   'adsnative': {
     prefetch: 'https://static.adsnative.com/static/js/render.v1.js',
     preconnect: 'https://api.adsnative.com',
@@ -899,6 +906,14 @@ export const adConfig = {
   'spotx': {
     preconnect: 'https://js.spotx.tv',
     renderStartImplemented: true,
+  },
+
+  'strossle': {
+    preconnect: [
+      'https://amp.spklw.com',
+      'https://widgets.sprinklecontent.com',
+      'https://images.sprinklecontent.com',
+    ],
   },
 
   'sunmedia': {

@@ -205,50 +205,6 @@ describes.realWin(
           expect(expandAndWriteSpy).to.not.be.called;
         });
       });
-
-      it('Resolve when cookie value is not supported', () => {
-        const config = dict({
-          'cookies': {
-            'testId': {
-              'value': 'RANDOM',
-            },
-            'testId1': {
-              'value': 'static',
-            },
-            'testId2': {
-              'value': 'QUERY_PARAM(abc)-suf',
-            },
-            'testId3': {
-              'value': 'pre-QUERY_PARAM(abc)',
-            },
-          },
-        });
-        const cookieWriter = new CookieWriter(win, element, config);
-        expectAsyncConsoleError(
-          TAG +
-            ' cookie value RANDOM not supported. ' +
-            'Only QUERY_PARAM and LINKER_PARAM is supported'
-        );
-        expectAsyncConsoleError(
-          TAG +
-            ' cookie value static not supported. ' +
-            'Only QUERY_PARAM and LINKER_PARAM is supported'
-        );
-        expectAsyncConsoleError(
-          TAG +
-            ' cookie value QUERY_PARAM(abc)-suf not ' +
-            'supported. Only QUERY_PARAM and LINKER_PARAM is supported'
-        );
-        expectAsyncConsoleError(
-          TAG +
-            ' cookie value pre-QUERY_PARAM(abc) not ' +
-            'supported. Only QUERY_PARAM and LINKER_PARAM is supported'
-        );
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
-        return cookieWriter.write().then(() => {
-          expect(expandAndWriteSpy).to.not.be.called;
-        });
-      });
     });
   }
 );
@@ -293,6 +249,15 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
           'bCookie': {
             'value': 'LINKER_PARAM(b,c)',
           },
+          'testId1': {
+            'value': 'static',
+          },
+          'testId2': {
+            'value': '$SUBSTR(QUERY_PARAM(a),1)-suf',
+          },
+          'testId3': {
+            'value': 'pre-TIMESTAMPQUERY_PARAM(abc)',
+          },
         },
       })
     );
@@ -300,6 +265,9 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
       const cookies = win.document.cookie.split(';');
       expect(cookies).to.include('aCookie=123');
       expect(cookies).to.include('bCookie=b-c');
+      expect(cookies).to.include('testId1=static');
+      expect(cookies).to.include('testId2=23-suf');
+      expect(cookies).to.include('testId3=pre-1514793600000');
     });
   });
 
@@ -321,6 +289,141 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
         'aCookie=123; path=/; domain=example.com; ' +
           'expires=Tue, 01 Jan 2019 08:00:00 GMT'
       );
+    });
+  });
+
+  it('should write cookie with custom expiration (number value)', () => {
+    win.location = 'https://www.example.com/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 604800, // 1 week in seconds
+          'aCookie': {
+            'value': 'testValue',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; domain=example.com; ' +
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT'
+      );
+    });
+  });
+
+  it('should write cookie with custom expiration (string value)', () => {
+    win.location = 'https://www.example.com/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': '604800', // 1 week in seconds
+          'aCookie': {
+            'value': 'testValue',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; domain=example.com; ' +
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT'
+      );
+    });
+  });
+
+  it('should write cookie with custom expiration (decimal value)', () => {
+    win.location = 'https://www.example.com/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 604800.000123,
+          'aCookie': {
+            'value': 'testValue',
+          },
+        },
+      })
+    );
+
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; domain=example.com; ' +
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT'
+      );
+    });
+  });
+
+  it('should write cookie with custom expiration (zero value)', () => {
+    win.location = 'https://www.example.com/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 0,
+          'aCookie': {
+            'value': 'testValue',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; domain=example.com; ' +
+          'expires=Mon, 01 Jan 2018 08:00:00 GMT'
+      );
+    });
+  });
+
+  it('should write cookie with custom expiration (negative value)', () => {
+    win.location = 'https://www.example.com/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': -604800,
+          'aCookie': {
+            'value': 'testValue',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; domain=example.com; ' +
+          'expires=Mon, 25 Dec 2017 08:00:00 GMT'
+      );
+    });
+  });
+
+  it('should write cookie with default expiration (invalid string value)', () => {
+    win.location = 'https://www.example.com/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 'invalid',
+          'aCookie': {
+            'value': 'testValue',
+          },
+        },
+      })
+    );
+    return allowConsoleError(() => {
+      return cookieWriter.write().then(() => {
+        expect(win.document.lastSetCookieRaw).to.equal(
+          'aCookie=testValue; path=/; domain=example.com; ' +
+            'expires=Tue, 01 Jan 2019 08:00:00 GMT'
+        );
+      });
     });
   });
 

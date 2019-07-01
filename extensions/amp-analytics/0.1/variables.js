@@ -21,6 +21,7 @@ import {dict} from '../../../src/utils/object';
 import {getConsentPolicyState} from '../../../src/consent';
 import {
   getServiceForDoc,
+  getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
@@ -88,14 +89,14 @@ export class ExpansionOptions {
 }
 
 /**
- * @param {string} str
+ * @param {string} value
  * @param {string} s
  * @param {string=} opt_l
  * @return {string}
  */
-function substrMacro(str, s, opt_l) {
+function substrMacro(value, s, opt_l) {
   const start = Number(s);
-  let {length} = str;
+  let {length} = value;
   userAssert(
     isFiniteNumber(start),
     'Start index ' + start + 'in substr macro should be a number'
@@ -108,7 +109,7 @@ function substrMacro(str, s, opt_l) {
     );
   }
 
-  return str.substr(start, length);
+  return value.substr(start, length);
 }
 
 /**
@@ -118,7 +119,7 @@ function substrMacro(str, s, opt_l) {
  */
 function defaultMacro(value, defaultValue) {
   if (!value || !value.length) {
-    return user().assertString(defaultValue);
+    return defaultValue;
   }
   return value;
 }
@@ -167,9 +168,13 @@ export class VariableService {
     this.register_('$BASE64', value => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
     this.register_('$IF', (value, thenValue, elseValue) =>
-      value ? thenValue : elseValue
+      stringToBool(value) ? thenValue : elseValue
     );
     this.register_('$REPLACE', replaceMacro);
+    this.register_(
+      '$EQUALS',
+      (firstValue, secValue) => firstValue === secValue
+    );
     // TODO(ccordry): Make sure this stays a window level service when this
     // VariableService is migrated to document level.
     this.register_('LINKER_PARAM', (name, id) =>
@@ -318,6 +323,17 @@ export function variableServiceForDoc(elementOrAmpDoc) {
 }
 
 /**
+ * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!Promise<!VariableService>}
+ */
+export function variableServicePromiseForDoc(elementOrAmpDoc) {
+  return /** @type {!Promise<!VariableService>} */ (getServicePromiseForDoc(
+    elementOrAmpDoc,
+    'amp-analytics-variables'
+  ));
+}
+
+/**
  * @param {string} key
  * @return {{name, argList}|!FunctionNameArgsDef}
  * @visibleForTesting
@@ -338,4 +354,20 @@ export function getConsentStateStr(element) {
     }
     return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
   });
+}
+
+/**
+ * Converts string to boolean
+ * @param {string} str
+ * @return {boolean}
+ */
+export function stringToBool(str) {
+  return (
+    str !== 'false' &&
+    str !== '' &&
+    str !== '0' &&
+    str !== 'null' &&
+    str !== 'NaN' &&
+    str !== 'undefined'
+  );
 }

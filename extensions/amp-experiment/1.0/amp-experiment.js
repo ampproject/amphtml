@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '../../../src/layout';
-import {Variants, allocateVariant} from './variant';
+import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {
   installOriginExperimentsForDoc,
@@ -27,6 +29,9 @@ import {parseJson} from '../../../src/json';
 import {parseMutation} from './mutation-parser';
 
 const TAG = 'amp-experiment';
+
+/** @const {number} */
+const MAX_MUTATIONS = 70;
 
 export class AmpExperiment extends AMP.BaseElement {
   /** @override */
@@ -45,34 +50,77 @@ export class AmpExperiment extends AMP.BaseElement {
       const variantsService = responses[0];
       const enabled = responses[1];
 
-      if (!enabled) {
-        user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
-
-        // Ensure downstream consumers don't wait for the promise forever.
-        variantsService.init(Promise.resolve({}));
-
-        return Promise.reject('Experiment amp-experiment-1.0 is not enabled.');
-      }
+      let config = dict({});
 
       try {
-        const config = this.getConfig_();
-        const results = Object.create(null);
+        config = this.getConfig_();
+
+        if (!enabled) {
+          user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
+
+          // Ensure downstream consumers don't wait for the promise forever.
+          variantsService.init(
+            Promise.resolve(this.getEmptyExperimentToVariant_(config))
+          );
+
+          return Promise.reject(
+            'Experiment amp-experiment-1.0 is not enabled.'
+          );
+        }
+
+        const ampdoc = this.getAmpDoc();
+
+        // All experiments can be disabled by a hash param
+        const viewer = Services.viewerForDoc(ampdoc);
+        const override = viewer.getParam(
+          ATTR_PREFIX + 'disable-all-experiments'
+        );
+        if (override !== undefined) {
+          variantsService.init(
+            Promise.resolve(this.getEmptyExperimentToVariant_(config))
+          );
+          return;
+        }
+
+        const experimentToVariant = Object.create(null);
         const variants = Object.keys(config).map(experimentName => {
           return allocateVariant(
-            this.getAmpDoc(),
+            ampdoc,
+            viewer,
             experimentName,
             config[experimentName]
           ).then(variantName => {
-            results[experimentName] = variantName;
+            experimentToVariant[experimentName] = variantName;
           });
         });
 
         /** @private @const {!Promise<!Object<string, ?string>>} */
         const experimentVariants = Promise.all(variants)
-          .then(() => results)
-          .then(this.applyExperimentVariants_.bind(this, config));
+          .then(() => {
+            this.validateExperimentToVariant_(config, experimentToVariant);
+            const applyExperimentsPromise = this.applyExperimentVariants_(
+              config,
+              experimentToVariant
+            );
+            variantsService.init(applyExperimentsPromise);
+            return applyExperimentsPromise;
+          })
+          .catch(e => {
+            // Ensure downstream consumers don't wait for the promise forever.
+            variantsService.init(
+              Promise.resolve(this.getEmptyExperimentToVariant_(config))
+            );
+            throw e;
+          });
 
-        variantsService.init(experimentVariants);
+        /**
+         * Returning the experimentVariants promise here
+         * So that the buildCallback that is waiting for
+         * the parent promise, will wait for this promise as well.
+         * And wait for the variants to be applied before finishing
+         * our buildCallback.
+         */
+        return experimentVariants;
       } catch (e) {
         // Ensure downstream consumers don't wait for the promise forever.
         variantsService.init(Promise.resolve({}));
@@ -108,9 +156,59 @@ export class AmpExperiment extends AMP.BaseElement {
         '<script type="application/json"> child.'
     );
 
-    return /** @type {!JsonObject} */ (devAssert(
-      parseJson(children[0].textContent)
-    ));
+    return devAssert(parseJson(children[0].textContent));
+  }
+
+  /**
+   * Function to return an empty experiment to variant
+   * Object. This is useful for type checking in analytics
+   * and disabling all experiments manually.
+   * @param {!JsonObject} config
+   * @return {!Object<string, ?string>}
+   */
+  getEmptyExperimentToVariant_(config) {
+    const experimentToVariant = Object.create(null);
+    Object.keys(config).map(experimentName => {
+      experimentToVariant[experimentName] = null;
+    });
+
+    return experimentToVariant;
+  }
+
+  /**
+   * Function to run validations and limitations on the current
+   * chosen Experiment / variant combination.
+   *
+   * @param {!JsonObject} config
+   * @param {!Object<string, ?string>} experimentToVariant
+   */
+  validateExperimentToVariant_(config, experimentToVariant) {
+    // Ensure that the current experiment / variant
+    // combination does not exceed the maximum mutations.
+    // NOTE: We are not validating the entire config,
+    // As that would take more time, and affect the user,
+    // vs. help the developer.
+    let totalMutations = 0;
+    const experimentToVariantKeys = Object.keys(experimentToVariant);
+
+    for (let i = 0; i < experimentToVariantKeys.length; i++) {
+      const experimentKey = experimentToVariantKeys[i];
+      const variantKey = experimentToVariant[experimentKey];
+      const variant =
+        /** @type {!JsonObject} */ (config[experimentKey]['variants'][
+          variantKey
+        ]);
+      totalMutations += variant['mutations'].length;
+    }
+
+    if (totalMutations > MAX_MUTATIONS) {
+      const numMutationsError =
+        'Max number of mutations for the total ' +
+        `applied experiments exceeded: ${totalMutations} > ` +
+        MAX_MUTATIONS;
+      user().error(TAG, numMutationsError);
+      throw new Error(numMutationsError);
+    }
   }
 
   /**

@@ -170,12 +170,6 @@ export class Resources {
     this.queue_ = new TaskQueue();
 
     /** @private @const {boolean} */
-    this.useForcePrerender_ = isExperimentOn(
-      this.win,
-      'amp-force-prerender-visible-elements'
-    );
-
-    /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     /** @private @const {boolean} */
@@ -1785,7 +1779,6 @@ export class Resources {
         // scheduleLayoutOrPreload_ method below.
         // Force build for all resources visible, measured, and in the viewport.
         if (
-          this.useForcePrerender_ &&
           !r.isBuilt() &&
           !r.hasOwner() &&
           r.hasBeenMeasured() &&

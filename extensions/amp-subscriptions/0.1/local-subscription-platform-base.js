@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Action} from './analytics';
 import {Actions} from './actions';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {UrlBuilder} from './url-builder';
@@ -40,6 +41,11 @@ export class LocalSubscriptionBasePlatform {
 
     /** @protected {!JsonObject} */
     this.serviceConfig_ = platformConfig;
+
+    /** @private @const {boolean} */
+    this.pingbackAllEntitlements_ = !!this.serviceConfig_[
+      'pingbackAllEntitlements'
+    ];
 
     /** @protected @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
@@ -88,11 +94,11 @@ export class LocalSubscriptionBasePlatform {
    */
   validateActionMap(actionMap) {
     userAssert(
-      actionMap['login'],
+      actionMap[Action.LOGIN],
       'Action "login" is not present in action map'
     );
     userAssert(
-      actionMap['subscribe'],
+      actionMap[Action.SUBSCRIBE],
       'Action "subscribe" is not present in action map'
     );
     return actionMap;
@@ -124,7 +130,7 @@ export class LocalSubscriptionBasePlatform {
       if (serviceAttr == 'local') {
         this.executeAction(action);
       } else if ((serviceAttr || 'auto') == 'auto') {
-        if (action == 'login') {
+        if (action == Action.LOGIN) {
           // The "login" action is somewhat special b/c viewers can
           // enhance this action, e.g. to provide save/link feature.
           const platform = this.serviceAdapter_.selectPlatformForLogin();
@@ -183,17 +189,25 @@ export class LocalSubscriptionBasePlatform {
   }
 
   /**
-   * @abstract @override
+   * @override
    * @return {!Promise<?./entitlement.Entitlement>}
    */
   getEntitlements() {}
 
   /**
-   * @abstract @override
+   * @override
    * @param {?./entitlement.Entitlement} unusedEntitlement
    * @return {!Promise|undefined}
    */
   pingback(unusedEntitlement) {}
+
+  /**
+   * @override
+   * @return {boolean}
+   */
+  pingbackReturnsAllEntitlements() {
+    return this.pingbackAllEntitlements_;
+  }
 
   /** @override */
   isPingbackEnabled() {

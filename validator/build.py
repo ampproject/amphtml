@@ -16,16 +16,15 @@
 #
 """A build script which (thus far) works on Ubuntu 14."""
 
+from __future__ import print_function
 import argparse
 import glob
 import logging
 import os
 import platform
 import re
-import shutil
 import subprocess
 import sys
-import tempfile
 
 
 def Die(msg):
@@ -34,7 +33,7 @@ def Die(msg):
   Args:
     msg: The error message to emit
   """
-  print >> sys.stderr, msg
+  print(msg, file=sys.stderr)
   sys.exit(1)
 
 
@@ -83,12 +82,12 @@ def CheckPrereqs():
     Die('Expected libprotoc 2.5.0 or newer, saw: %s' % libprotoc_version)
 
   # Ensure that the Python protobuf package is installed.
-  for m in ['descriptor', 'text_format']:
+  for m in ['descriptor', 'text_format', 'json_format']:
     module = 'google.protobuf.%s' % m
     try:
       __import__(module)
     except ImportError:
-      Die('%s not found. Try "apt-get install python-protobuf" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation' % module)
+      Die('%s not found. Try "pip install protobuf" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation' % module)
 
   # Ensure that yarn is installed.
   try:
@@ -217,7 +216,7 @@ def GenValidatorProtoGeneratedJs(out_dir):
 
 
 def GenValidatorGeneratedJs(out_dir):
-  """Calls validator_gen_js to generate validator-generated.js.
+  """Calls validator_gen_js to generate validator-generated.js and validator-generated.json.
 
   Args:
     out_dir: directory name of the output directory. Must not have slashes,
@@ -231,6 +230,7 @@ def GenValidatorGeneratedJs(out_dir):
   # are checked by CheckPrereqs.
   # pylint: disable=g-import-not-at-top
   from google.protobuf import text_format
+  from google.protobuf import json_format
   from google.protobuf import descriptor
   from dist import validator_pb2
   import validator_gen_js
@@ -247,6 +247,18 @@ def GenValidatorGeneratedJs(out_dir):
       out=out)
   out.append('')
   f = open('%s/validator-generated.js' % out_dir, 'w')
+  f.write('\n'.join(out))
+  f.close()
+
+  out = []
+  validator_gen_js.GenerateValidatorGeneratedJson(
+      specfile='%s/validator.protoascii' % out_dir,
+      validator_pb2=validator_pb2,
+      text_format=text_format,
+      json_format=json_format,
+      out=out)
+  out.append('')
+  f = open('%s/validator-generated.json' % out_dir, 'w')
   f.write('\n'.join(out))
   f.close()
   logging.info('... done')
@@ -552,7 +564,7 @@ def GenerateTestRunner(out_dir):
              });
              jasmine.execute();
           """ % extensions_dir)
-  os.chmod('%s/test_runner' % out_dir, 0750)
+  os.chmod('%s/test_runner' % out_dir, 0o750)
   logging.info('... success')
 
 

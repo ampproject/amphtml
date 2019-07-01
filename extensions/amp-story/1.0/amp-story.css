@@ -15,10 +15,12 @@
  */
 
 @import './amp-story-access.css';
+@import './amp-story-bling-link.css';
 @import './amp-story-desktop-panels.css';
 @import './amp-story-page-attachment.css';
 @import './amp-story-templates.css';
 @import './amp-story-user-overridable.css';
+@import './amp-story-vertical.css';
 @import './pagination-buttons.css';
 
 /** Common */
@@ -66,12 +68,12 @@ amp-story {
 }
 
 html.i-amphtml-story-standalone {
-  font-size: calc(2.5 * var(--i-amphtml-story-vmax, 8px));
+  font-size: calc(2.5 * var(--story-page-vmax, 8px));
 }
 
 html.i-amphtml-story-standalone,
 html.i-amphtml-story-standalone body {
-  font-size: calc(2.5 * var(--i-amphtml-story-vh, 8px));
+  font-size: calc(2.5 * var(--story-page-vh, 8px));
   height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -124,6 +126,11 @@ amp-story[standalone] {
   max-width: initial !important;
   min-height: initial !important;
   min-width: initial !important;
+}
+
+amp-story[standalone].amp-notbuilt {
+  /* Ensures amp-story has a height and is prerendered. */
+  min-height: 1px !important;
 }
 
 amp-story[standalone]:-webkit-full-screen {
@@ -193,8 +200,9 @@ amp-story-page[active] {
 }
 
 .i-amphtml-story-sidebar[open] {
-  transform: translate3d(0, 0, 0) !important;
-  transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  animation-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  animation-duration: 0.3s !important;
+  animation-name: i-amphtml-sidebar-slide-in-right;
 }
 
 [desktop] .i-amphtml-story-sidebar[open] {
@@ -205,9 +213,9 @@ amp-story-page[active] {
   max-width: 280px !important;
   min-width: 280px !important;
   width: 280px !important;
-  transform: translate3d(100%, 0, 0) !important;
-  transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
-  display: block !important;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 1, 1)  !important;
+  animation-duration: 0.2s !important;
+  animation-name: i-amphtml-sidebar-slide-out-right;
 }
 
 .i-amphtml-story-fallback amp-story-page {
@@ -229,7 +237,7 @@ amp-story-page:not([active]) {
 
 /**
  * Note: If updating the [active] or [distance] attributes names, please also
- * update them in the amp.css file.
+ * update them in the ampdoc.css file.
  */
 amp-story-page[active],
 amp-story-page[distance="0"],
@@ -241,7 +249,7 @@ amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
 }
 
-amp-story-page [text-background-color] {
+amp-story-page [data-text-background-color] {
   border-radius: 3px !important;
   line-height: 1.5em !important;
   padding: 2px 4px !important;

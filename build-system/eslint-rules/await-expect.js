@@ -40,6 +40,12 @@ module.exports = function(context) {
         return;
       }
 
+      const comments = context.getCommentsBefore(callee);
+      const ok = comments.some(comment => comment.value === 'OK');
+      if (ok) {
+        return;
+      }
+
       if (hasAwaitParent(node)) {
         return;
       }
@@ -66,4 +72,3 @@ function hasAwaitParent(node) {
   }
   return false;
 }
-

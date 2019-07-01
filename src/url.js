@@ -159,13 +159,15 @@ export function parseUrlWithA(a, url, opt_cache) {
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
+  let origin;
   if (a.origin && a.origin != 'null') {
-    info.origin = a.origin;
+    origin = a.origin;
   } else if (info.protocol == 'data:' || !info.host) {
-    info.origin = info.href;
+    origin = info.href;
   } else {
-    info.origin = info.protocol + '//' + info.host;
+    origin = info.protocol + '//' + info.host;
   }
+  info.origin = origin;
 
   // Freeze during testing to avoid accidental mutation.
   const frozen = getMode().test && Object.freeze ? Object.freeze(info) : info;

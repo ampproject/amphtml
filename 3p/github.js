@@ -26,11 +26,11 @@ import {writeScript} from './3p';
  *
  * @param {!Window} global
  * @param {string} scriptSource The source of the script, different for post and comment embeds.
- * @param {function(*)} cb
+ * @param {function()} cb
  */
 function getGistJs(global, scriptSource, cb) {
   writeScript(global, scriptSource, function() {
-    cb(global.gist);
+    cb();
   });
 }
 

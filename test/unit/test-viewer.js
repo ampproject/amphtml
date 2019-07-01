@@ -19,7 +19,7 @@ import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
+import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {parseUrlDeprecated, removeFragment} from '../../src/url';
@@ -93,8 +93,8 @@ describe('Viewer', () => {
         windowApi.location.href = url;
       });
     installDocService(windowApi, /* isSingleDoc */ true);
-    installDocumentStateService(windowApi);
-    ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
+    installGlobalDocumentStateService(windowApi);
+    ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);
     installDocumentInfoServiceForDoc(windowApi.document);
@@ -1057,6 +1057,14 @@ describe('Viewer', () => {
     it('should consider trusted by ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = ['https://google.com'];
+      return new Viewer(ampdoc).isTrustedViewer().then(res => {
+        expect(res).to.be.true;
+      });
+    });
+
+    it('should consider trusted by ancestor', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = ['https://gmail.dev'];
       return new Viewer(ampdoc).isTrustedViewer().then(res => {
         expect(res).to.be.true;
       });

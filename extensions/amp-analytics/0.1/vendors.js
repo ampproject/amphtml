@@ -98,6 +98,7 @@ import {UPSCORE_CONFIG} from './vendors/upscore';
 import {REPPUBLIKA_CONFIG} from './vendors/reppublika';
 import {NAVEGG_CONFIG} from './vendors/navegg';
 import {VPONANALYTICS_CONFIG} from './vendors/vponanalytics';
+import {WEBENGAGE_CONFIG} from './vendors/webengage';
 
 /**
  * @const {!JsonObject}
@@ -112,6 +113,8 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
       'ampGeo': 'AMP_GEO',
+      'ampUserLocation': 'AMP_USER_LOCATION',
+      'ampUserLocationPoll': 'AMP_USER_LOCATION_POLL',
       'ampState': 'AMP_STATE',
       'ampVersion': 'AMP_VERSION',
       'ancestorOrigin': 'ANCESTOR_ORIGIN',
@@ -127,6 +130,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'clientId': 'CLIENT_ID',
       'consentState': 'CONSENT_STATE',
       'contentLoadTime': 'CONTENT_LOAD_TIME',
+      'cookie': 'COOKIE',
       'counter': 'COUNTER',
       'documentCharset': 'DOCUMENT_CHARSET',
       'documentReferrer': 'DOCUMENT_REFERRER',
@@ -243,6 +247,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'umenganalytics': UMENGANALYTICS_CONFIG,
   'upscore': UPSCORE_CONFIG,
   'vponanalytics': VPONANALYTICS_CONFIG,
+  'webengage': WEBENGAGE_CONFIG,
   'webtrekk': WEBTREKK_CONFIG,
   'webtrekk_v2': WEBTREKK_V2_CONFIG,
 });

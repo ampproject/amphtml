@@ -15,9 +15,9 @@
  */
 
 import {Deferred} from '../utils/promise';
-import {dev, devAssert, userAssert} from '../log';
-import {getMode} from '../mode';
-import {getService, getServiceForDoc, registerServiceBuilder} from '../service';
+import {Services} from '../services';
+import {dev, userAssert} from '../log';
+import {getService, registerServiceBuilder} from '../service';
 import {rootNodeFor, scopedQuerySelector} from '../dom';
 
 /**
@@ -53,7 +53,7 @@ export class BaseTemplate {
     this.win = element.ownerDocument.defaultView || win;
 
     /** @private @const */
-    this.viewer_ = getServiceForDoc(this.element, 'viewer');
+    this.viewer_ = Services.viewerForDoc(this.element);
 
     this.compileCallback();
   }
@@ -371,17 +371,6 @@ export class Templates {
       delete this.templateClassResolvers_[type];
       resolver(templateClass);
     }
-  }
-
-  /**
-   * For testing only.
-   * @param {string} type
-   * @visibleForTesting
-   */
-  unregisterTemplate(type) {
-    devAssert(getMode().test, 'Should only be used in test mode.');
-    delete this.templateClassMap_[type];
-    delete this.templateClassResolvers_[type];
   }
 
   /**

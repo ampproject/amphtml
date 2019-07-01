@@ -97,14 +97,11 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/mustache/',
     'third_party/vega/',
     'third_party/webcomponentsjs/',
-    'third_party/rrule/',
     'third_party/react-dates/',
     'third_party/amp-toolbox-cache-url/',
     'third_party/inputmask/',
     'node_modules/',
     'build/patched-module/',
-    // Can't seem to suppress `(0, win.eval)` suspicious code warning
-    '3p/environment.js',
     // Generated code.
     'extensions/amp-access/0.1/access-expr-impl.js',
   ];
@@ -173,7 +170,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'ads/google/**/*.js',
       'ads/inabox/**/*.js',
       // Files under build/. Should be sparse.
-      'build/css.js',
       'build/*.css.js',
       'build/fake-module/**/*.js',
       'build/patched-module/**/*.js',
@@ -224,13 +220,13 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'third_party/caja/html-sanitizer.js',
       'third_party/closure-library/sha384-generated.js',
       'third_party/css-escape/css-escape.js',
+      'third_party/fuzzysearch/index.js',
       'third_party/mustache/**/*.js',
       'third_party/timeagojs/**/*.js',
       'third_party/vega/**/*.js',
       'third_party/d3/**/*.js',
       'third_party/subscriptions-project/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
-      'third_party/rrule/rrule.js',
       'third_party/react-dates/bundle.js',
       'third_party/amp-toolbox-cache-url/**/*.js',
       'third_party/inputmask/**/*.js',
@@ -240,8 +236,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'node_modules/web-animations-js/web-animations.install.js',
       'node_modules/web-activities/activity-ports.js',
       'node_modules/@ampproject/animations/dist/animations.mjs',
-      'node_modules/@ampproject/worker-dom/dist/' +
-        'unminified.index.safe.mjs.patched.js',
+      'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
       'node_modules/document-register-element/build/' +
         'document-register-element.patched.js',
       // 'node_modules/core-js/modules/**.js',
@@ -358,13 +353,18 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       jscomp_error: [],
       // moduleLoad: Demote "module not found" errors to ignore missing files
       //     in type declarations in the swg.js bundle.
-      jscomp_warning: ['moduleLoad'],
+      // accessControls: Demote "Access to private variable" errors to allow
+      //     AMP code to access variables in other files.
+      jscomp_warning: ['moduleLoad', 'accessControls'],
       // Turn off warning for "Unknown @define" since we use define to pass
       // args such as FORTESTING to our runner.
       jscomp_off: ['unknownDefines'],
       define,
       hide_warnings_for: hideWarningsFor,
     };
+    if (argv.pretty_print) {
+      compilerOptions.formatting = 'PRETTY_PRINT';
+    }
 
     // For now do type check separately
     if (options.typeCheckOnly) {
@@ -372,6 +372,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
       compilerOptions.jscomp_error.push(
+        'conformanceViolations',
         'checkTypes',
         'accessControls',
         'const',

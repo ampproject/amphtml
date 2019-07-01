@@ -166,7 +166,7 @@ export class SafeframeHostApi {
       creativeSize
     ));
 
-    /** @private {?Promise} */
+    /** @protected {?Promise} */
     this.delay_ = null;
 
     /** @private {../../../src/service/viewport/viewport-impl.Viewport} */

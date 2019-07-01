@@ -91,7 +91,6 @@ exports.rules = [
       'third_party/timeagojs/timeago.js->' +
         'third_party/timeagojs/timeago-locales.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
-      'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
       'extensions/amp-subscriptions/**/*.js->' +
         'third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions/**/*.js->' +
@@ -104,6 +103,8 @@ exports.rules = [
         'third_party/subscriptions-project/swg.js',
       'extensions/amp-recaptcha-input/**/*.js->' +
         'third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
+      'extensions/amp-autocomplete/**/*.js->' +
+        'third_party/fuzzysearch/index.js',
     ],
   },
   // Rules for 3p

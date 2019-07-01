@@ -40,28 +40,35 @@ describes.realWin(
   },
   env => {
     let win;
-    let storyElem;
+    let storyEl;
     let ampStory;
 
     beforeEach(() => {
       win = env.win;
 
-      sandbox
-        .stub(Services, 'storyStoreService')
-        .callsFake(() => new AmpStoryStoreService(win));
+      sandbox.stub(win.history, 'replaceState');
 
-      storyElem = win.document.createElement('amp-story');
-      win.document.body.appendChild(storyElem);
+      const viewer = Services.viewerForDoc(env.ampdoc);
+      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+
+      const storeService = new AmpStoryStoreService(win);
+      registerServiceBuilder(win, 'story-store', () => storeService);
+
+      storyEl = win.document.createElement('amp-story');
+      win.document.body.appendChild(storyEl);
 
       const localizationService = new LocalizationService(win);
       registerServiceBuilder(win, 'localization', () => localizationService);
 
       AmpStory.isBrowserSupported = () => true;
-      ampStory = new AmpStory(storyElem);
+
+      return storyEl.getImpl().then(impl => {
+        ampStory = impl;
+      });
     });
 
     afterEach(() => {
-      storyElem.remove();
+      storyEl.remove();
     });
 
     /**

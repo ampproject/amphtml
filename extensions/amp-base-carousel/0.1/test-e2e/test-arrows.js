@@ -25,6 +25,7 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/custom-arrows.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
+    browsers: ['chrome', 'firefox'],
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
   },

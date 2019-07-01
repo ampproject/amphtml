@@ -21,7 +21,8 @@ import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
   VariableService,
-  variableServiceForDoc,
+  stringToBool,
+  variableServicePromiseForDoc,
 } from './variables';
 import {
   InstrumentationService,
@@ -121,8 +122,6 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.variableService_ = variableServiceForDoc(this.element);
-
     this.isSandbox_ = this.element.hasAttribute('sandbox');
 
     this.element.setAttribute('aria-hidden', 'true');
@@ -214,14 +213,16 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then(() => Services.timerFor(this.win).promise(1))
       .then(() => this.consentPromise_)
       .then(() => Services.ampdocServiceFor(this.win))
-      .then(ampDocService => {
-        return ampDocService.getAmpDoc(this.element, {
-          closestAmpDoc: true,
-        });
-      })
-      .then(instrumentationServicePromiseForDoc)
-      .then(instrumentation => {
-        this.instrumentation_ = instrumentation;
+      .then(ampDocService => ampDocService.getAmpDoc(this.element))
+      .then(ampdoc =>
+        Promise.all([
+          instrumentationServicePromiseForDoc(ampdoc),
+          variableServicePromiseForDoc(ampdoc),
+        ])
+      )
+      .then(services => {
+        this.instrumentation_ = services[0];
+        this.variableService_ = services[1];
         return new AnalyticsConfig(this.element).loadConfig();
       })
       .then(config => {
@@ -718,17 +719,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve(spec);
     }
 
-    return this.expandTemplateWithUrlParams_(spec, expansionOptions).then(
-      val => {
-        return (
-          val !== '' &&
-          val !== '0' &&
-          val !== 'false' &&
-          val !== 'null' &&
-          val !== 'NaN' &&
-          val !== 'undefined'
-        );
-      }
+    return this.expandTemplateWithUrlParams_(spec, expansionOptions).then(val =>
+      stringToBool(val)
     );
   }
 

@@ -96,7 +96,6 @@ describes.repeated(
             isSupported: () => false,
             fetchAndRenderTemplate: () => Promise.resolve(),
             renderTemplate: sandbox.stub(),
-            verifySsrResponse: () => Promise.resolve(),
           };
 
           list = new AmpList(element);
@@ -387,11 +386,11 @@ describes.repeated(
             });
           });
 
-          it('fetch should not be called if `src` is missing or empty', () => {
+          it('fetch should resolve if `src` is empty', () => {
             const spy = sandbox.spy(list, 'fetchList_');
             element.setAttribute('src', '');
             return list.layoutCallback().then(() => {
-              expect(spy).to.not.be.called;
+              expect(spy).to.be.called;
             });
           });
 
@@ -624,7 +623,6 @@ describes.repeated(
                 fetchOpt: sinon.match({
                   headers: {Accept: 'application/json'},
                   method: 'GET',
-                  requireAmpResponseSourceOrigin: false,
                   responseType: 'application/json',
                 }),
               });
@@ -700,7 +698,7 @@ describes.repeated(
 
           beforeEach(() => {
             bind = {
-              scanAndApply: sandbox.stub().returns(Promise.resolve()),
+              rescan: sandbox.stub().returns(Promise.resolve()),
               signals: () => {
                 return {get: unusedName => false};
               },
@@ -721,9 +719,10 @@ describes.repeated(
             );
           });
 
-          it('should not render if [src] mutates with data (before layout)', () => {
-            // Not allowed before layout.
-            listMock.expects('scheduleRender_').never();
+          // Unlike [src] mutations with URLs, local data mutations should
+          // always render immediately.
+          it('should render if [src] mutates with data (before layout)', () => {
+            listMock.expects('scheduleRender_').once();
 
             element.setAttribute('src', 'https://new.com/list.json');
             list.mutatedAttributesCallback({'src': [{title: 'Title1'}]});
@@ -825,8 +824,8 @@ describes.repeated(
                 'src': 'https://new.com/list.json',
               });
 
-              expect(bind.scanAndApply).to.be.calledTwice;
-              expect(bind.scanAndApply).to.be.calledWith([], sinon.match.array);
+              expect(bind.rescan).to.be.calledOnce;
+              expect(bind.rescan).to.be.calledWith([], sinon.match.array);
             });
           });
 
@@ -905,11 +904,24 @@ describes.repeated(
           });
 
           describe('no `binding` attribute', () => {
-            it('should call scanAndApply()', function*() {
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
-              expect(bind.scanAndApply).to.have.been.calledOnce;
+            it('should rescan()', async () => {
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {update: true, fast: true}
+              );
+            });
+
+            it('should not rescan() if new children have no bindings', async () => {
+              const child = doc.createElement('div');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.not.be.called;
             });
           });
 
@@ -918,11 +930,17 @@ describes.repeated(
               element.setAttribute('binding', 'always');
             });
 
-            it('should call scanAndApply()', function*() {
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
-              expect(bind.scanAndApply).to.have.been.calledOnce;
+            it('should rescan()', async () => {
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {update: true, fast: true}
+              );
             });
           });
 
@@ -931,24 +949,35 @@ describes.repeated(
               element.setAttribute('binding', 'refresh');
             });
 
-            it('should not call scanAndApply() before FIRST_MUTATE', function*() {
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
-              expect(bind.scanAndApply).to.not.have.been.called;
+            it('should rescan() with {update: false} before FIRST_MUTATE', async () => {
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly([child], [], {
+                update: false,
+                fast: true,
+              });
             });
 
-            it('should call scanAndApply() after FIRST_MUTATE', function*() {
+            it('should rescan() with {update: true} after FIRST_MUTATE', async () => {
               bind.signals = () => {
                 return {get: name => name === 'FIRST_MUTATE'};
               };
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
-              expect(bind.scanAndApply).to.have.been.calledOnce;
-              expect(bind.scanAndApply).calledWithExactly(output, [
-                list.container_,
-              ]);
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {
+                  update: true,
+                  fast: true,
+                }
+              );
             });
           });
 
@@ -957,11 +986,11 @@ describes.repeated(
               element.setAttribute('binding', 'no');
             });
 
-            it('should not call scanAndApply()', function*() {
+            it('should not rescan()', async () => {
               const output = [doc.createElement('div')];
               expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
-              expect(bind.scanAndApply).to.not.have.been.called;
+              await list.layoutCallback();
+              expect(bind.rescan).to.not.have.been.called;
             });
           });
         }); // with amp-bind

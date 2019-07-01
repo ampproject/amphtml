@@ -91,3 +91,7 @@
   z-index: 0 !important;
   transition: background-color ease-in 0.4s !important;
 }
+
+.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-caption {
+  display: none;
+}

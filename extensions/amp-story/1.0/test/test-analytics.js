@@ -26,12 +26,22 @@ describes.fakeWin('amp-story analytics', {}, env => {
   });
 
   it('should trigger `story-page-visible` on change', () => {
-    const trigger = sandbox.stub(analytics, 'triggerEvent_');
+    const trigger = sandbox.stub(analytics, 'triggerEvent');
 
     analytics.onNavigationStateChange({
       type: StateChangeType.ACTIVE_PAGE,
     });
 
     expect(trigger).to.have.been.calledWith('story-page-visible');
+  });
+
+  it('should trigger `story-last-page-visible` when last page is visible', () => {
+    const trigger = sandbox.stub(analytics, 'triggerEvent');
+
+    analytics.onNavigationStateChange({
+      type: StateChangeType.LAST_PAGE,
+    });
+
+    expect(trigger).to.have.been.calledWith('story-last-page-visible');
   });
 });
