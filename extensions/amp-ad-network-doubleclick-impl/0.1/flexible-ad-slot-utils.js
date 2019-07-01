@@ -67,7 +67,7 @@ function getElementWidth(element, style) {
  * @param {!Object<string, string>} style
  * @return {!FULL_WIDTH_SIGNAL=}
  */
-function getFullWidthSignalVisitor(element, style) {
+function getFullWidthSignal(element, style) {
   if (style.overflowY && style.overflowY != 'visible') {
     return FULL_WIDTH_SIGNALS.OVERFLOW_HIDDEN;
   }
@@ -97,7 +97,7 @@ export function getFlexibleAdSlotRequestParams(win, element) {
   return /** @type {!ParamsTypeDef} */ (new DomAncestorVisitor(win)
     .addVisitor('parentWidth', getElementWidth, 100 /* maxDepth */)
     .addVisitor('slotWidth', getElementWidth, 1 /* maxDepth */)
-    .addVisitor('fwSignal', getFullWidthSignalVisitor, 100 /* maxDepth */)
+    .addVisitor('fwSignal', getFullWidthSignal, 100 /* maxDepth */)
     .visitAncestorsStartingFrom(element)
     .getAllResults());
 }
