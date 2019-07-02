@@ -323,6 +323,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       delete compilerOptions.define;
     }
 
+    if (!argv.single_pass && !options.typeCheckOnly) {
+      compilerOptions.js_module_root.push(process.env.AMP_TMP_DIR);
+    }
+
     const compilerOptionsArray = [];
     Object.keys(compilerOptions).forEach(function(option) {
       const value = compilerOptions[option];
@@ -339,16 +343,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       }
     });
 
-    if (!argv.single_pass) {
-      // Only push AMP_TMP_DIR if multi pass
-      compilerOptions.js_module_root.push(process.env.AMP_TMP_DIR);
-    }
-    const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
-    const gulpBase = argv.single_pass ? '.' : process.env.AMP_TMP_DIR;
-
     if (options.typeCheckOnly) {
       return gulp
-        .src(gulpSrcs, {base: gulpBase})
+        .src(srcs, {base: '.'})
         .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', err => {
           handleTypeCheckError();
@@ -357,6 +354,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .pipe(nop())
         .on('end', resolve);
     } else {
+      const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
+      const gulpBase = argv.single_pass ? '.' : process.env.AMP_TMP_DIR;
       return gulp
         .src(gulpSrcs, {base: gulpBase})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
