@@ -30,7 +30,7 @@ const POP =
 
 /**
  * Pinterest Pin Widget
- * @attr data-url: the source url for the Pin
+ * data-url: the source url for the Pin
  */
 export class PinWidget {
   /** @param {!Element} rootElement */
