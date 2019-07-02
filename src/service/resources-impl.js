@@ -1603,7 +1603,7 @@ export class Resources {
    * @return {boolean}
    */
   isWidthOnlyReflowFreeExpansion_(element, width) {
-    const parent = element && element.parentElement;
+    const parent = element.parentElement;
     // If the element has siblings, it's possible that a width-expansion will
     // cause some of them to be pushed down.
     if (!parent || parent.childElementCount > 1) {
