@@ -56,22 +56,6 @@ module.exports = {
         require.resolve('./babel-plugins/babel-plugin-amp-mode-transformer'),
       ]);
     }
-    //if (experiment) {
-      //pluginsToApply = pluginsToApply.concat([
-        //[
-        //"minify-replace", {
-          //"replacements": [
-            //{
-              //"identifierName": 'EXP_A',
-              //"replacement": {
-              //"type": "booleanLiteral",
-              //"value": true
-            //}
-          //}]
-        //}
-        //]
-      //]);
-    //}
     return pluginsToApply;
   },
 

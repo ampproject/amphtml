@@ -33,7 +33,7 @@ const argv = minimist(process.argv.slice(2));
 module.exports = function(api) {
   api.cache(true);
   // Single pass builds do not use any of the default settings below.
-  if (argv._.includes('dist') && argv.single_pass) {
+  if (argv._.includes('dist') || argv.single_pass) {
     return {};
   }
   return {

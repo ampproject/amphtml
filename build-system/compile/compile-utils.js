@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-//exports.SRC_DIRS = ['src', 'builtins', '3p', 'ads', 'extensions'];
-
 exports.SRC_GLOBS = [
   'src/**/*.js',
   'builtins/**/*.js',
@@ -29,6 +27,7 @@ exports.SRC_GLOBS = [
   'build/experiments/**/*.js',
   'node_modules/dompurify/dist/purify.es.js',
   'node_modules/promise-pjs/promise.js',
+  'node_modules/rrule/dist/esm/src/index.js',
   'node_modules/set-dom/src/**/*.js',
   'node_modules/web-animations-js/web-animations.install.js',
   'node_modules/web-activities/activity-ports.js',
