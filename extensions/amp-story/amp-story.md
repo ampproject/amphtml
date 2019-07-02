@@ -1581,5 +1581,5 @@ Additionally, for right-to-left languages, you may include the `dir="rtl"` attri
 ## Related resources
 
 * [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
-* [Samples on AMP By Example](https://ampbyexample.com/stories/#stories/introduction)
+* [Samples on AMP By Example](https://amp.dev/documentation/examples/?format=stories)
 * [Best practices for creating an AMP story](https://amp.dev/documentation/guides-and-tutorials/develop/amp_story_best_practices)

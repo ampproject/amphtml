@@ -44,7 +44,7 @@ limitations under the License.
       <ul>
         <li><a href="https://amp.dev/documentation/examples/components/amp-bind/">Introductory code example with annotations</a></li>
         <li><a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">Linked image carousels example with annotations</a></li>
-        <li><a href="https://ampbyexample.com/samples_templates/product/">E-commerce product page example with annotations</a></li>
+        <li><a href="https://amp.dev/documentation/examples/e-commerce/product_page/">E-commerce product page example with annotations</a></li>
       </ul>
     </td>
   </tr>
