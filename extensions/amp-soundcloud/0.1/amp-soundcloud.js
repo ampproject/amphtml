@@ -50,7 +50,7 @@ class AmpSoundcloud extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return layout == Layout.FIXED_HEIGHT || layout == Layout.RESPONSIVE;
   }
 
   /**@override*/

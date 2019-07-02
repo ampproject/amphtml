@@ -32,7 +32,7 @@ Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fixed-height</td>
+    <td>fixed-height, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -44,18 +44,20 @@ Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
 
 ## Examples
 
+With the responsive layout, the `width` and `height` from the example should yield correct layouts for 1:1 aspect ratio videos:
+
 Visual Mode:
 ```html
-<amp-soundcloud height=657
-    layout="fixed-height"
+<amp-soundcloud width="480" height="480"
+    layout="responsive"
     data-trackid="243169232"
     data-visual="true"></amp-soundcloud>
 ```
 
 Classic Mode:
 ```html
-<amp-soundcloud height=657
-    layout="fixed-height"
+<amp-soundcloud width="480" height="480"
+    layout="responsive"
     data-trackid="243169232"
     data-color="ff5500"></amp-soundcloud>
 ```
