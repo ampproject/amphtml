@@ -868,6 +868,8 @@
   version "7.4.4"
   resolved "https://registry.yarnpkg.com/@babel/plugin-transform-destructuring/-/plugin-transform-destructuring-7.4.4.tgz#9d964717829cc9e4b601fc82a26a71a4d8faf20f"
   integrity sha512-/aOx+nW0w8eHiEHm+BTERB2oJn5D127iye/SUQl7NjHy0lf+j7h4MKMMSOwdazGq9OxgiNADncE+SRJkCxjZpQ==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.0.0"
 
 "@babel/plugin-transform-dotall-regex@^7.0.0", "@babel/plugin-transform-dotall-regex@^7.2.0":
   version "7.2.0"
@@ -2769,11 +2771,6 @@ babel-plugin-syntax-object-rest-spread@^6.13.0:
   version "6.13.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-syntax-object-rest-spread/-/babel-plugin-syntax-object-rest-spread-6.13.0.tgz#fd6536f2bce13836ffa3a5458c4903a597bb3bf5"
   integrity sha1-/WU28rzhODb/o6VFjEkDpZe7O/U=
-
-babel-plugin-transform-commonjs-es2015-modules@4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/babel-plugin-transform-commonjs-es2015-modules/-/babel-plugin-transform-commonjs-es2015-modules-4.0.1.tgz#06cc33d655ac2b263ca6e4ec4393672013bf20d6"
-  integrity sha512-8h493ia3xNH5oQmckkQKl/Owtgk+wT6fCT0ZNAjos60YBNDu64UCAtd0mCWJg6N4lGvnmP++CIxWblxaJBdPwg==
 
 babel-plugin-transform-es2015-modules-commonjs@6.26.2:
   version "6.26.2"
@@ -12551,6 +12548,11 @@ promise-pjs@1.1.3:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/promise-pjs/-/promise-pjs-1.1.3.tgz#c004936f110c66d3d116f82b181bd6a197e080d1"
   integrity sha1-wASTbxEMZtPRFvgrGBvWoZfggNE=
+
+promise-pjs@1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/promise-pjs/-/promise-pjs-1.1.4.tgz#69a69cb43fb2e58811a53a43e3eff8a216b5eabc"
+  integrity sha512-OyH4v6sheTi8DPVixLuV2oSpXjiY89pbhRLVJIs1xotO4iWnADX4xxMdqWzIUba4WJ71AnOMmb0WpLbu0lX4bA==
 
 promise@7.1.1:
   version "7.1.1"
