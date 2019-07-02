@@ -56,7 +56,7 @@ export class DomAncestorVisitor {
    * @private
    */
   getActiveVisitors_() {
-    return this.visitors_.filter(visitor => !visitor.isComplete());
+    return this.visitors_.filter(visitor => !visitor.complete);
   }
 
   /**
@@ -83,7 +83,7 @@ export class DomAncestorVisitor {
       );
       el = el.parentElement;
     }
-    this.visitors_.forEach(visitor => visitor.setComplete());
+    this.visitors_.forEach(visitor => (visitor.complete = true));
   }
 }
 
@@ -104,8 +104,8 @@ class Visitor {
     /** @private {number} */
     this.maxAncestorsToVisit_ = maxAncestorsToVisit;
 
-    /** @private {boolean} */
-    this.complete_ = false;
+    /** @type {boolean} */
+    this.complete = false;
   }
 
   /**
@@ -114,7 +114,7 @@ class Visitor {
    */
   callback(element, style) {
     devAssert(
-      !this.complete_,
+      !this.complete,
       'Attempted to execute callback on completed visitor.'
     );
     let result;
@@ -127,17 +127,7 @@ class Visitor {
       );
     }
     if (!--this.maxAncestorsToVisit_ || result != undefined) {
-      this.complete_ = true;
+      this.complete = true;
     }
-  }
-
-  /** @return {boolean} */
-  isComplete() {
-    return this.complete_;
-  }
-
-  /** Marks the visitor as complete. */
-  setComplete() {
-    this.complete_ = true;
   }
 }
