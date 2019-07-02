@@ -37,7 +37,7 @@ A replacement for the HTML5 <code>video</code> tag; only to be used for direct H
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>AMP By Example's:<ul>
-      <li><a href="https://ampbyexample.com/components/amp-video/">amp-video example</a></li>
+      <li><a href="https://amp.dev/documentation/examples/components/amp-video/">amp-video example</a></li>
       <li><a href="https://ampbyexample.com/advanced/click-to-play_overlay_for_amp-video/">Click-to-play overlay for amp-video</a></td>
   </tr>
   <tr>

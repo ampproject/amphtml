@@ -42,7 +42,7 @@ limitations under the License.
     <td class="col-fourty"><strong>Examples</strong></td>
     <td>
       <ul>
-        <li><a href="https://ampbyexample.com/components/amp-bind/">Introductory code example with annotations</a></li>
+        <li><a href="https://amp.dev/documentation/examples/components/amp-bind/">Introductory code example with annotations</a></li>
         <li><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">Linked image carousels example with annotations</a></li>
         <li><a href="https://ampbyexample.com/samples_templates/product/">E-commerce product page example with annotations</a></li>
       </ul>
@@ -139,7 +139,7 @@ When the button is pressed:
     - The `amp-img` element will show the image of a cat.
 
 {% call callout('Tip', type='success') %}
-[Try out the **live demo**](https://ampbyexample.com/components/amp-bind/) for this example with code annotations!
+[Try out the **live demo**](https://amp.dev/documentation/examples/components/amp-bind/) for this example with code annotations!
 {% endcall %}
 
 
