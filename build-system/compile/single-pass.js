@@ -64,16 +64,6 @@ const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
 const transformDir = tempy.directory();
 const srcs = [];
 
-// Since we no longer pass the process_common_js_modules flag to closure
-// compiler, we must now tranform these common JS node_modules to ESM before
-// passing them to closure.
-// TODO(rsimha, erwinmombay): Derive this list programmatically if possible.
-const commonJsModules = [
-  'node_modules/dompurify/',
-  'node_modules/promise-pjs/',
-  'node_modules/set-dom/',
-];
-
 const mainBundle = 'src/amp.js';
 const extensionsInfo = {};
 let extensions = extensionBundles
@@ -466,16 +456,6 @@ function setupBundles(graph) {
 }
 
 /**
- * Returns true if the file is known to be a common JS module.
- * @param {string} file
- */
-function isCommonJsModule(file) {
-  return commonJsModules.some(function(module) {
-    return file.startsWith(module);
-  });
-}
-
-/**
  * Takes all of the nodes in the dependency graph and transfers them
  * to a temporary directory where we can run babel transformations.
  *
@@ -488,17 +468,13 @@ function transformPathsToTempDir(graph, config) {
   }
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
-    // For now, just copy node_module files instead of transforming them. The
-    // exceptions are common JS modules that need to be transformed to ESM
-    // because we now no longer use the process_common_js_modules flag for
-    // closure compiler.
-    if (f.startsWith('node_modules/') && !isCommonJsModule(f)) {
+    // For now, just copy node_module files instead of transforming them.
+    if (f.startsWith('node_modules/')) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
       const {code} = babel.transformFileSync(f, {
         plugins: conf.plugins({
           isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
-          isCommonJsModule: isCommonJsModule(f),
           isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
         }),
         retainLines: true,
