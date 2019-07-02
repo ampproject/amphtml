@@ -48,7 +48,6 @@ const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('../compile-wrappers');
-const {isCommonJsModule} = require('./compile-utils');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const argv = minimist(process.argv.slice(2));
@@ -64,6 +63,16 @@ const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
 // Used to store transforms and compile v0.js
 const transformDir = tempy.directory();
 const srcs = [];
+
+// Since we no longer pass the process_common_js_modules flag to closure
+// compiler, we must now tranform these common JS node_modules to ESM before
+// passing them to closure.
+// TODO(rsimha, erwinmombay): Derive this list programmatically if possible.
+const commonJsModules = [
+  'node_modules/dompurify/',
+  'node_modules/promise-pjs/',
+  'node_modules/set-dom/',
+];
 
 const mainBundle = 'src/amp.js';
 const extensionsInfo = {};
@@ -102,7 +111,7 @@ exports.getFlags = function(config) {
     use_types_for_optimization: true,
     rewrite_polyfills: false,
     source_map_include_content: !!argv.full_sourcemaps,
-    //source_map_location_mapping: ['|/'],
+    source_map_location_mapping: ['|/'],
     //new_type_inf: true,
     language_in: 'ES6',
     // By default closure puts all of the public exports on the global, but
@@ -457,6 +466,16 @@ function setupBundles(graph) {
 }
 
 /**
+ * Returns true if the file is known to be a common JS module.
+ * @param {string} file
+ */
+function isCommonJsModule(file) {
+  return commonJsModules.some(function(module) {
+    return file.startsWith(module);
+  });
+}
+
+/**
  * Takes all of the nodes in the dependency graph and transfers them
  * to a temporary directory where we can run babel transformations.
  *
@@ -659,23 +678,19 @@ function postPrepend(extension, prependContents) {
 function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
-    return (
-      gulp
-        .src(srcs, {base: transformDir})
-        .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
-        //.pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(gulpClosureCompile(flagsArray))
-        .on('error', err => {
-          handleSinglePassCompilerError();
-          reject(err);
-        })
-        //.pipe(sourcemaps.write('.'))
-        .pipe(
-          gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0')))
-        )
-        .pipe(gulp.dest('.'))
-        .on('end', resolve)
-    );
+    return gulp
+      .src(srcs, {base: transformDir})
+      .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
+      .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(gulpClosureCompile(flagsArray))
+      .on('error', err => {
+        handleSinglePassCompilerError();
+        reject(err);
+      })
+      .pipe(sourcemaps.write('.'))
+      .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
+      .pipe(gulp.dest('.'))
+      .on('end', resolve);
   });
 }
 
