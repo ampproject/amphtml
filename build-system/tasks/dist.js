@@ -38,7 +38,6 @@ const {
 const {
   WEB_PUSH_PUBLISHER_FILES,
   WEB_PUSH_PUBLISHER_VERSIONS,
-  BABEL_SRC_GLOBS,
   buildAlp,
   buildExaminer,
   buildWebPushPublisherFiles,
@@ -53,6 +52,7 @@ const {
   printNobuildHelp,
   toPromise,
 } = require('./helpers');
+const {BABEL_SRC_GLOBS} = require('../sources');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
