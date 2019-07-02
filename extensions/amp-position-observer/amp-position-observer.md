@@ -40,7 +40,7 @@ other AMP components.
     <td width="40%"><strong>Examples</strong></td>
     <td>
       <ul>
-        <li><a href="https://ampbyexample.com/visual_effects/basics_of_scrollbound_effects/">Basics of scrollbound effects tutorial</a></li>
+        <li><a href="https://amp.dev/documentation/examples/visual-effects/basics_of_scrollbound_effects/">Basics of scrollbound effects tutorial</a></li>
         <li><a href="https://codepen.io/collection/nMJYrv/">CodePen collection with samples</a></li>
       </ul>
     </td>
