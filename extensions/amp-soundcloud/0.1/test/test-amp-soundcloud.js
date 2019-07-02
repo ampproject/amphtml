@@ -27,7 +27,7 @@ describes.realWin(
     const trackEmbedUrl =
       'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F243169232';
     const playlistEmbedUrl =
-      'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F173211206';
+      'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F1595551';
 
     let win, doc;
 
