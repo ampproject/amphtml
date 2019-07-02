@@ -42,6 +42,12 @@ const BUILTINS = dict({
       'href': 'CANONICAL_URL',
     },
   },
+  'facebook-url': {
+    'shareEndpoint': 'https://www.facebook.com/sharer.php',
+    'defaultParams': {
+      'u': 'CANONICAL_URL',
+    },
+  },
   'pinterest': {
     'shareEndpoint': 'https://www.pinterest.com/pin/create/button/',
     'defaultParams': {

@@ -41,6 +41,11 @@ amp-social-share {
   background-color: #32529f;
 }
 
+/* Facebook Styling */
+.amp-social-share-facebook-url {
+  background-color: #32529f;
+}
+
 /* Pinterest Styling */
 .amp-social-share-pinterest {
   background-color: #e60023;
