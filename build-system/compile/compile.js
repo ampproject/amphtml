@@ -179,7 +179,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         internalRuntimeVersion +
         '/';
     }
-    const srcs = CLOSURE_SRC_GLOBS.slice(0);
+    const srcs = [...CLOSURE_SRC_GLOBS];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.

@@ -301,10 +301,6 @@ window.vg;
 let ReactRender = function() {};
 
 /**
- * @constructor
- */
-let RRule = function() {};
-/**
  * @param {Date} unusedDt
  * @param {boolean} unusedInc
  * @return {?Date}
