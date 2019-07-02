@@ -225,20 +225,6 @@ function compile(watch, shouldMinify) {
     );
   }
 
-  if (argv.with_inabox_lite) {
-    promises.push(
-      // Entry point for inabox runtime.
-      compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
-        toName: 'amp-inabox-lite.js',
-        minifiedName: 'amp4ads-lite-v0.js',
-        includePolyfills: true,
-        extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
-
   thirdPartyFrames.forEach(frameObject => {
     promises.push(
       thirdPartyBootstrap(frameObject.max, frameObject.min, shouldMinify)

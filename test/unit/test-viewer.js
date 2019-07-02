@@ -94,7 +94,7 @@ describe('Viewer', () => {
       });
     installDocService(windowApi, /* isSingleDoc */ true);
     installGlobalDocumentStateService(windowApi);
-    ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);
     installDocumentInfoServiceForDoc(windowApi.document);
@@ -1057,6 +1057,14 @@ describe('Viewer', () => {
     it('should consider trusted by ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = ['https://google.com'];
+      return new Viewer(ampdoc).isTrustedViewer().then(res => {
+        expect(res).to.be.true;
+      });
+    });
+
+    it('should consider trusted by ancestor', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = ['https://gmail.dev'];
       return new Viewer(ampdoc).isTrustedViewer().then(res => {
         expect(res).to.be.true;
       });

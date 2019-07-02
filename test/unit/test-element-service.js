@@ -417,17 +417,17 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
     embedWin = new FakeWindow();
     setParentWindow(embedWin, win);
 
+    const doc = {defaultView: win};
+    const embedDoc = {defaultView: embedWin};
     nodeInEmbedWin = {
       nodeType: Node.ELEMENT_NODE,
-      ownerDocument: {
-        defaultView: embedWin,
-      },
+      ownerDocument: embedDoc,
+      getRootNode: () => embedDoc,
     };
     nodeInTopWin = {
       nodeType: Node.ELEMENT_NODE,
-      ownerDocument: {
-        defaultView: win,
-      },
+      ownerDocument: doc,
+      getRootNode: () => doc,
     };
 
     service = {name: 'fake-service-object'};

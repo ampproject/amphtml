@@ -233,7 +233,7 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
   const minifiedName = fileName + '.js';
   return toPromise(
     gulp
-      .src(basePath + '/*.js', {base: '.'})
+      .src(basePath + '/*.js', {base: basePath})
       .pipe(file(builtName, js))
       .pipe(gulp.dest(tempBuildDir))
   )

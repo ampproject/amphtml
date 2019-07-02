@@ -314,9 +314,9 @@ The ENUM values for the `pos` field in the `placements` configuration object:
   </tr>
 </table>
 
-#### PlacementTypeEnum
+#### AttributesEnum
 
-The ENUM values for the `type` field in the `placements` configuration object:
+The ENUM value indicates attributes from configuration object for different ad formats:
 
 <table>
   <tr>
@@ -336,9 +336,9 @@ The ENUM values for the `type` field in the `placements` configuration object:
   </tr>
 </table>
 
-#### AttributesEnum
+#### PlacementTypeEnum
 
-The ENUM value indicate from configuration object for different ad formats:
+The ENUM values for the `type` field in the `placements` configuration object:
 
 <table>
   <tr>
