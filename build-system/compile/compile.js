@@ -38,7 +38,6 @@ const queue = [];
 let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
 
-
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
  * preprocess by babel in the `dist` task.

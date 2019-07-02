@@ -711,7 +711,6 @@ function buildAlp(options) {
  * @param {!Object} options
  */
 function buildExaminer(options) {
-  options = options || {};
   return compileJs('./src/examiner/', 'examiner.js', './dist/', {
     toName: 'examiner.max.js',
     watch: options.watch,
@@ -727,13 +726,12 @@ function buildExaminer(options) {
  * @param {!Object} options
  */
 function buildWebWorker(options) {
-  const opts = Object.assign({}, options);
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
     toName: 'ww.max.js',
     minifiedName: 'ww.js',
     includePolyfills: true,
-    watch: opts.watch,
-    minify: opts.minify || argv.minify,
+    watch: options.watch,
+    minify: options.minify || argv.minify,
   });
 }
 
@@ -743,7 +741,6 @@ function buildWebWorker(options) {
  * @param {!Object} options
  */
 function buildExperiments(options) {
-  const opts = Object.assign({}, options);
   return compileJs(
     './build/experiments/',
     'experiments.max.js',
