@@ -50,7 +50,6 @@ exports.SRC_GLOBS = [
   'third_party/inputmask/**/*.js',
 ];
 
-
 // Since we no longer pass the process_common_js_modules flag to closure
 // compiler, we must now tranform these common JS node_modules to ESM before
 // passing them to closure.
@@ -69,4 +68,4 @@ exports.isCommonJsModule = function(file) {
   return commonJsModules.some(function(module) {
     return file.startsWith(module);
   });
-}
+};

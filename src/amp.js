@@ -48,7 +48,6 @@ import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import './symbols';
 
 
 /**
