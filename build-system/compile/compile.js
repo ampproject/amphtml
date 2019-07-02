@@ -339,7 +339,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       }
     });
 
-    if (argv.single_pass) {
+    if (!argv.single_pass) {
+      // Only push AMP_TMP_DIR if multi pass
       compilerOptions.js_module_root.push(process.env.AMP_TMP_DIR);
     }
     const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
