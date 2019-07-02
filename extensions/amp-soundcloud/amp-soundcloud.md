@@ -32,7 +32,7 @@ Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fixed-height, responsive</td>
+    <td>fixed-height, intrinsic, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>

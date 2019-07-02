@@ -49,10 +49,13 @@ amp-soundcloud/0.1/test/validator-amp-soundcloud.html:42:2 The attribute 'data-t
 |    <!-- valid: responsive layout -->
 |    <amp-soundcloud height=166 width=42 data-trackid="243169232" data-visual="true"
 |                    layout="responsive"></amp-soundcloud>
+|    <!-- valid: intrinsic layout -->
+|    <amp-soundcloud height=166 width=42 data-trackid="243169232" data-visual="true"
+|                    layout="intrinsic"></amp-soundcloud>
 |    <!-- invalid: flex-item	 layout -->
 |    <amp-soundcloud height=166 width=42 data-trackid="243169232" data-visual="true"
 >>   ^~~~~~~~~
-amp-soundcloud/0.1/test/validator-amp-soundcloud.html:48:2 The specified layout 'FLEX_ITEM' is not supported by tag 'amp-soundcloud'. (see https://amp.dev/documentation/components/amp-soundcloud) [AMP_LAYOUT_PROBLEM]
+amp-soundcloud/0.1/test/validator-amp-soundcloud.html:51:2 The specified layout 'FLEX_ITEM' is not supported by tag 'amp-soundcloud'. (see https://amp.dev/documentation/components/amp-soundcloud) [AMP_LAYOUT_PROBLEM]
 |                    layout="flex-item"></amp-soundcloud>
 |    <!-- valid: classic mode with three letter color -->
 |    <amp-soundcloud height=166 data-trackid="243169232" data-color="fff"

@@ -56,6 +56,7 @@ tags: {  # <amp-soundcloud>
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: INTRINSIC
     supported_layouts: RESPONSIVE
   }
 }
