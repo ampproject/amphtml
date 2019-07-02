@@ -1496,7 +1496,7 @@ export class Resources {
           request.newHeight == box.height &&
           this.isWidthOnlyReflowFreeExpansion_(
             resource.element,
-            request.newWidth
+            request.newWidth || 0
           )
         ) {
           // 8. Element is in viewport, but this is a width-only expansion that
