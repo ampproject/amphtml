@@ -329,8 +329,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
     const sizeToSend = this.isSinglePageStoryAd
-        ? {width: 1, height: 1}
-        : this.size_;
+      ? {width: 1, height: 1}
+      : this.size_;
     const format = `${sizeToSend.width}x${sizeToSend.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
@@ -398,8 +398,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Package code (also known as URL group) that was used to
       // create ad.
       'pwprc': this.element.getAttribute('data-package'),
-      'spsa': this.isSinglePageStoryAd ?
-        `${viewportSize.width}x${viewportSize.height}` : null,
+      'spsa': this.isSinglePageStoryAd
+        ? `${viewportSize.width}x${viewportSize.height}`
+        : null,
     };
 
     const experimentIds = [];

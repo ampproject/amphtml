@@ -805,7 +805,7 @@ describes.realWin(
           expect(url).to.match(/h=1/);
           expect(url).to.match(/w=1/);
           expect(url).to.match(/spsa=\d+?x\d+?/);
-	});
+        });
       });
     });
 
