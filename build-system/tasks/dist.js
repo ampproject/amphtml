@@ -65,17 +65,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const deglob = require('globs-to-files');
 
-const commonJsModules = [
-  'node_modules/dompurify/',
-  'node_modules/promise-pjs/',
-  'node_modules/set-dom/',
-];
-
-function isCommonJsModule(file) {
-  return commonJsModules.some(function(module) {
-    return file.startsWith(module);
-  });
-}
 
 function transferSrcsToTempDir() {
   const tmp = `${tempy.directory()}/amphtml`;
@@ -96,7 +85,6 @@ function transferSrcsToTempDir() {
     const {code} = babel.transformFileSync(file, {
       plugins: conf.plugins({
         isEsmBuild: argv.esm,
-        isCommonJsModule: isCommonJsModule(file),
         isForTesting: argv.fortesting,
       }),
       retainLines: true,
