@@ -88,7 +88,7 @@ describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
       elements.push(el);
     }
     domAncestorVisitor
-      .addVisitor('vis1', el => {
+      .addVisitor(el => {
         el.classList.add('visited');
         if (el.id == '50') {
           return true;

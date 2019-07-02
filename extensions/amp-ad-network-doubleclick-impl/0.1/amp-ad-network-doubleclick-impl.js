@@ -531,10 +531,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win,
         this.element.parentElement
       );
-      // If slotWidth were undefined, that means its layout was fluid, and thus
-      // its available width depends on its parent element, and so should have
-      // the same value as parentWidth.
-      msz = `${slotWidth == undefined ? parentWidth : slotWidth}x-1`;
+      // If slotWidth is -1, that means its width must be determined by its
+      // parent container, and so should have the same value as parentWidth.
+      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
       psz = `${parentWidth}x-1`;
       fws = fwSignal ? fwSignal : '0';
     }

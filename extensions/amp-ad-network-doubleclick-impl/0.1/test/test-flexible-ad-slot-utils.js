@@ -170,18 +170,20 @@ describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
     );
   });
 
-  it('should return null for non-fixed layouts', () => {
+  it('should return msz=-1 for non-fixed layouts', () => {
     ['fill', 'fixed-height', 'fluid', 'responsive'].forEach(layout => {
       const parent = document.createElement('div');
       parent.setAttribute('width', 300);
       parent.setAttribute('layout', 'fixed');
       doc.body.appendChild(parent);
       const element = createResource({height: 250}, layout, 'amp-ad', parent);
-      expect(getFlexibleAdSlotRequestParams(win, element).slotWidth).to.be.null;
+      expect(getFlexibleAdSlotRequestParams(win, element).slotWidth).to.equal(
+        -1
+      );
     });
   });
 
-  it('should have fwSignal=undefined by default', () => {
+  it('should have fwSignal=0 by default', () => {
     const element = document.createElement('div');
     const parent = document.createElement('div');
     parent.appendChild(element);
@@ -189,8 +191,7 @@ describes.realWin('#getFlexibleAdSlotRequestParams', {amp: true}, env => {
     for (let el = parent.parentElement; el != null; el = el.parentElement) {
       el.setAttribute('style', 'overflow: visible !important;');
     }
-    expect(getFlexibleAdSlotRequestParams(win, element).fwSignal).to.be
-      .undefined;
+    expect(getFlexibleAdSlotRequestParams(win, element).fwSignal).to.equal(0);
   });
 
   it('should have fwSignal=128 when ancestor is hidden', () => {

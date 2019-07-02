@@ -52,8 +52,7 @@ function getElementWidthVisitor(setWidth) {
           setWidth(maxWidth);
           return true;
         }
-        setWidth(null);
-        return true;
+        break;
       case Layout.CONTAINER:
         // Container layout allows the container's size to be determined by
         // the children within it, so in principle we can grow as large as the
@@ -112,8 +111,8 @@ let ParamsTypeDef;
  */
 export function getFlexibleAdSlotRequestParams(win, element) {
   let fwSignal = 0;
-  let slotWidth = 0;
-  let parentWidth = 0;
+  let slotWidth = -1;
+  let parentWidth = -1;
   const setFws = val => (fwSignal = val);
   const setMsz = val => (slotWidth = val);
   const setPsz = val => (parentWidth = val);
