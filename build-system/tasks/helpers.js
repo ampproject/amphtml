@@ -48,6 +48,132 @@ const argv = require('minimist')(process.argv.slice(2));
  */
 const NOBUILD_HELP_TASKS = new Set(['test', 'visual-diff']);
 
+/**
+ * NOTE: Keep the globs here in sync with the `CLOSURE_SRC_GLOBS`.
+ */
+const BABEL_SRC_GLOBS = [
+  'src/**/*.js',
+  'builtins/**/*.js',
+  'build/**/*.js',
+  'extensions/**/*.js',
+  '3p/**/*.js',
+  'ads/**/*.js',
+  'build/*.css.js',
+  'build/fake-module/**/*.js',
+  'build/patched-module/**/*.js',
+  'build/experiments/**/*.js',
+  'node_modules/dompurify/dist/purify.es.js',
+  'node_modules/promise-pjs/promise.js',
+  'node_modules/rrule/dist/esm/src/index.js',
+  'node_modules/set-dom/src/**/*.js',
+  'node_modules/web-animations-js/web-animations.install.js',
+  'node_modules/web-activities/activity-ports.js',
+  'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
+  'node_modules/document-register-element/build/' +
+    'document-register-element.patched.js',
+  'third_party/caja/html-sanitizer.js',
+  'third_party/closure-library/sha384-generated.js',
+  'third_party/css-escape/css-escape.js',
+  'third_party/fuzzysearch/index.js',
+  'third_party/mustache/**/*.js',
+  'third_party/timeagojs/**/*.js',
+  'third_party/vega/**/*.js',
+  'third_party/d3/**/*.js',
+  'third_party/subscriptions-project/*.js',
+  'third_party/webcomponentsjs/ShadowCSS.js',
+  'third_party/react-dates/bundle.js',
+  'third_party/amp-toolbox-cache-url/**/*.js',
+  'third_party/inputmask/**/*.js',
+];
+
+/**
+ * NOTE: Keep the globs here in sync with the `BABEL_SRC_GLOBS`.
+ */
+const CLOSURE_SRC_GLOBS = [
+  '3p/3p.js',
+  // Ads config files.
+  'ads/_*.js',
+  'ads/alp/**/*.js',
+  'ads/google/**/*.js',
+  'ads/inabox/**/*.js',
+  // Files under build/. Should be sparse.
+  'build/*.css.js',
+  'build/fake-module/**/*.js',
+  'build/patched-module/**/*.js',
+  'build/experiments/**/*.js',
+  // A4A has these cross extension deps.
+  'extensions/amp-ad-network*/**/*-config.js',
+  'extensions/amp-ad/**/*.js',
+  'extensions/amp-a4a/**/*.js',
+  // Currently needed for crypto.js and visibility.js.
+  // Should consider refactoring.
+  'extensions/amp-analytics/**/*.js',
+  // Needed for WebAnimationService
+  'extensions/amp-animation/**/*.js',
+  // For amp-bind in the web worker (ww.js).
+  'extensions/amp-bind/**/*.js',
+  // Needed to access to Variant interface from other extensions
+  'extensions/amp-experiment/**/*.js',
+  // Needed to access form impl from other extensions
+  'extensions/amp-form/**/*.js',
+  // Needed to access inputmask impl from other extensions
+  'extensions/amp-inputmask/**/*.js',
+  // Needed for AccessService
+  'extensions/amp-access/**/*.js',
+  // Needed for AmpStoryVariableService
+  'extensions/amp-story/**/*.js',
+  // Needed for SubscriptionsService
+  'extensions/amp-subscriptions/**/*.js',
+  // Needed to access UserNotificationManager from other extensions
+  'extensions/amp-user-notification/**/*.js',
+  // Needed for VideoService
+  'extensions/amp-video-service/**/*.js',
+  // Needed to access ConsentPolicyManager from other extensions
+  'extensions/amp-consent/**/*.js',
+  // Needed to access AmpGeo type for service locator
+  'extensions/amp-geo/**/*.js',
+  // Needed for AmpViewerAssistanceService
+  'extensions/amp-viewer-assistance/**/*.js',
+  // Needed for AmpViewerIntegrationVariableService
+  'extensions/amp-viewer-integration/**/*.js',
+  // Needed for amp-smartlinks dep on amp-skimlinks
+  'extensions/amp-skimlinks/0.1/**/*.js',
+  'src/*.js',
+  'src/**/*.js',
+  '!third_party/babel/custom-babel-helpers.js',
+  // Exclude since it's not part of the runtime/extension binaries.
+  '!extensions/amp-access/0.1/amp-login-done.js',
+  'builtins/**.js',
+  'third_party/caja/html-sanitizer.js',
+  'third_party/closure-library/sha384-generated.js',
+  'third_party/css-escape/css-escape.js',
+  'third_party/fuzzysearch/index.js',
+  'third_party/mustache/**/*.js',
+  'third_party/timeagojs/**/*.js',
+  'third_party/vega/**/*.js',
+  'third_party/d3/**/*.js',
+  'third_party/subscriptions-project/*.js',
+  'third_party/webcomponentsjs/ShadowCSS.js',
+  'third_party/react-dates/bundle.js',
+  'third_party/amp-toolbox-cache-url/**/*.js',
+  'third_party/inputmask/**/*.js',
+  'node_modules/dompurify/dist/purify.es.js',
+  'node_modules/promise-pjs/promise.js',
+  'node_modules/rrule/dist/esm/src/index.js',
+  'node_modules/set-dom/src/**/*.js',
+  'node_modules/web-animations-js/web-animations.install.js',
+  'node_modules/web-activities/activity-ports.js',
+  'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
+  'node_modules/document-register-element/build/' +
+    'document-register-element.patched.js',
+  // 'node_modules/core-js/modules/**.js',
+  // Not sure what these files are, but they seem to duplicate code
+  // one level below and confuse the compiler.
+  '!node_modules/core-js/modules/library/**.js',
+];
+
 const MODULE_SEPARATOR = ';';
 const EXTENSION_BUNDLE_MAP = {
   'amp-viz-vega.js': [
@@ -832,6 +958,8 @@ module.exports = {
   BABELIFY_GLOBAL_TRANSFORM,
   WEB_PUSH_PUBLISHER_FILES,
   WEB_PUSH_PUBLISHER_VERSIONS,
+  BABEL_SRC_GLOBS,
+  CLOSURE_SRC_GLOBS,
   buildAlp,
   buildLoginDone,
   buildExaminer,
