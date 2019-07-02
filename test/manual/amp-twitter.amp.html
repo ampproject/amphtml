@@ -23,11 +23,30 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <h1>Tweet with super wide aspect ratio</h1>
+  <h1>Tweets</h1>
+  <h2>Tweet with super wide aspect ratio</h2>
   <amp-twitter width=886 height=256
       layout="responsive"
       data-tweetID="585110598171631616"
       data-cards="hidden">
+  </amp-twitter>
+
+  <h2>Twitter timeline</h2>
+  <amp-twitter width="1"
+             height="5"
+             layout="responsive"
+             data-timeline-source-type="profile"
+             data-timeline-user-id="15534471"
+             data-link-color="#55acee"
+             data-tweet-limit="3"
+             data-chrome="noheader, nofooter, noscrollbar">
+  </amp-twitter>
+
+  <h2>Twitter Moment</h2>
+  <amp-twitter width=886 height=256
+      layout="responsive"
+      data-momentid="650667182356082688"
+      data-limit="3">
   </amp-twitter>
 </body>
 </html>

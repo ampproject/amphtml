@@ -49,21 +49,9 @@ tags: {  # <amp-twitter>
     }
   }
   attrs: {
-    name: "data-link-color"
-    trigger: {
-      also_requires_attr: "data-tweetid"
-    }
-  }
-  attrs: {
     name: "data-momentid"
     mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
     value_regex: "\\d+"
-  }
-  attrs: {
-    name: "data-theme"
-    trigger: {
-      also_requires_attr: "data-tweetid"
-    }
   }
   attrs: {
     name: "data-timeline-id"
