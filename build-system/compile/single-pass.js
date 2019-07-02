@@ -64,16 +64,6 @@ const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
 const transformDir = tempy.directory();
 const srcs = [];
 
-// Since we no longer pass the process_common_js_modules flag to closure
-// compiler, we must now tranform these common JS node_modules to ESM before
-// passing them to closure.
-// TODO(rsimha, erwinmombay): Derive this list programmatically if possible.
-const commonJsModules = [
-  'node_modules/dompurify/',
-  'node_modules/promise-pjs/',
-  'node_modules/set-dom/',
-];
-
 const mainBundle = 'src/amp.js';
 const extensionsInfo = {};
 let extensions = extensionBundles
@@ -462,16 +452,6 @@ function setupBundles(graph) {
       };
     }
     graph.bundles[dest].modules.push(id);
-  });
-}
-
-/**
- * Returns true if the file is known to be a common JS module.
- * @param {string} file
- */
-function isCommonJsModule(file) {
-  return commonJsModules.some(function(module) {
-    return file.startsWith(module);
   });
 }
 
