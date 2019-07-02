@@ -50,10 +50,6 @@ import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 import './symbols';
 
-var IS_DEV = true;
-if (IS_DEV) {
-  console.log('hello world');
-}
 
 /**
  * self.IS_AMP_ALT (is AMP alternative binary) is undefined by default in the

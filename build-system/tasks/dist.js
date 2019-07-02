@@ -82,7 +82,6 @@ function transferSrcsToTempDir() {
       plugins: conf.plugins({
         isEsmBuild: argv.esm,
         isForTesting: argv.fortesting,
-        experiment: argv.experiment,
       }),
       retainLines: true,
       compact: false,
