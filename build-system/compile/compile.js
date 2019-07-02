@@ -48,9 +48,9 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
  */
 function convertPathsToTmpRoot(paths) {
   return paths.map(path => {
-      const hasNegation = path.charAt(0) === '!';
-      const newPath = hasNegation ? path.substr(1) : path;
-      return `${hasNegation ? '!' : ''}${process.env.AMP_TMP_DIR}/${newPath}`;
+    const hasNegation = path.charAt(0) === '!';
+    const newPath = hasNegation ? path.substr(1) : path;
+    return `${hasNegation ? '!' : ''}${process.env.AMP_TMP_DIR}/${newPath}`;
     return path;
   });
 }
@@ -106,6 +106,10 @@ function cleanupBuildDir() {
 exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
+  let tmpDir = '';
+  if (!argv.single_pass) {
+    tmpDir = process.env.AMP_TMP_DIR;
+  }
   const hideWarningsFor = [
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
@@ -351,21 +355,12 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // respective top level polyfills.js files.
       rewrite_polyfills: false,
       externs,
-      //js_module_root: [
-        //// Do _not_ include 'node_modules/' in js_module_root with 'NODE'
-        //// resolution or bad things will happen (#18600).
-        //process.env.AMP_TMP_DIR + 'build/patched-module/',
-        //process.env.AMP_TMP_DIR + 'build/fake-module/',
-        //process.env.AMP_TMP_DIR + 'build/fake-polyfills/',
-        //process.env.AMP_TMP_DIR,
-      //],
       js_module_root: [
         // Do _not_ include 'node_modules/' in js_module_root with 'NODE'
         // resolution or bad things will happen (#18600).
         'build/patched-module/',
         'build/fake-module/',
         'build/fake-polyfills/',
-        process.env.AMP_TMP_DIR,
       ],
       entry_point: entryModuleFilenames,
       module_resolution: 'NODE',
@@ -430,9 +425,15 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       }
     });
 
+    if (argv.single_pass) {
+      compilerOptions.js_module_root.push(tmpDir);
+    }
+    const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
+    const gulpBase = argv.single_pass ? '.' : tmpDir;
+
     if (options.typeCheckOnly) {
       return gulp
-        .src(convertPathsToTmpRoot(srcs), {base: '.'})
+        .src(gulpSrcs, {base: gulpBase})
         .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', err => {
           handleTypeCheckError();
@@ -442,7 +443,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .on('end', resolve);
     } else {
       return gulp
-        .src(convertPathsToTmpRoot(srcs), {base: process.env.AMP_TMP_DIR})
+        .src(gulpSrcs, {base: gulpBase})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray))

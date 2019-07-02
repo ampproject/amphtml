@@ -104,7 +104,7 @@ exports.getFlags = function(config) {
     use_types_for_optimization: true,
     rewrite_polyfills: false,
     source_map_include_content: !!argv.full_sourcemaps,
-    source_map_location_mapping: ['|/'],
+    //source_map_location_mapping: ['|/'],
     //new_type_inf: true,
     language_in: 'ES6',
     // By default closure puts all of the public exports on the global, but
@@ -479,7 +479,6 @@ function transformPathsToTempDir(graph, config) {
         plugins: conf.plugins({
           isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
           isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
-          experiment: argv.experiment,
         }),
         retainLines: true,
       });
@@ -665,13 +664,13 @@ function compile(flagsArray) {
     return gulp
       .src(srcs, {base: transformDir})
       .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
-      .pipe(sourcemaps.init({loadMaps: true}))
+      //.pipe(sourcemaps.init({loadMaps: true}))
       .pipe(gulpClosureCompile(flagsArray))
       .on('error', err => {
         handleSinglePassCompilerError();
         reject(err);
       })
-      .pipe(sourcemaps.write('.'))
+      //.pipe(sourcemaps.write('.'))
       .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
       .pipe(gulp.dest('.'))
       .on('end', resolve);
