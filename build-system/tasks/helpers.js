@@ -81,10 +81,7 @@ const WEB_PUSH_PUBLISHER_FILES = [
   'amp-web-push-permission-dialog',
 ];
 
-const WEB_PUSH_PUBLISHER_VERSIONS = [
-  '0.1',
-];
-
+const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
 
 const BABELIFY_GLOBAL_TRANSFORM = {
   global: true, // Transform node_modules
@@ -761,7 +758,6 @@ function buildExperiments(options) {
  * @param {!Object} options
  */
 function buildLoginDone(version, options) {
-  const opts = Object.assign({}, options);
   const buildDir = `build/all/amp-access-${version}/`;
   const builtName = `amp-login-done-${version}.max.js`;
   const minifiedName = `amp-login-done-${version}.js`;
@@ -782,12 +778,10 @@ function buildLoginDone(version, options) {
 /**
  * Build amp-web-push publisher files HTML page.
  *
- * @param {string} version
  * @param {!Object} options
  */
 function buildWebPushPublisherFiles(options) {
   const distDir = 'dist/v0';
-  const opts = Object.assign({}, options);
   const promises = [];
   WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
     WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {

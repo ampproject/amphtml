@@ -45,7 +45,6 @@ const {
   buildExperiments,
   buildWebWorker,
   compileAllMinifiedTargets,
-  compileJs,
   endBuildStep,
   hostname,
   mkdirSync,
@@ -56,7 +55,6 @@ const {
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {isCommonJsModule, SRC_GLOBS} = require('../compile/compile-utils');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
@@ -65,6 +63,54 @@ const argv = require('minimist')(process.argv.slice(2));
 
 const babel = require('@babel/core');
 const deglob = require('globs-to-files');
+
+const SRC_GLOBS = [
+  'src/**/*.js',
+  'builtins/**/*.js',
+  'build/**/*.js',
+  'extensions/**/*.js',
+  '3p/**/*.js',
+  'ads/**/*.js',
+  'build/*.css.js',
+  'build/fake-module/**/*.js',
+  'build/patched-module/**/*.js',
+  'build/experiments/**/*.js',
+  'node_modules/dompurify/dist/purify.es.js',
+  'node_modules/promise-pjs/promise.js',
+  'node_modules/rrule/dist/esm/src/index.js',
+  'node_modules/set-dom/src/**/*.js',
+  'node_modules/web-animations-js/web-animations.install.js',
+  'node_modules/web-activities/activity-ports.js',
+  'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
+  'node_modules/document-register-element/build/' +
+    'document-register-element.patched.js',
+  'third_party/caja/html-sanitizer.js',
+  'third_party/closure-library/sha384-generated.js',
+  'third_party/css-escape/css-escape.js',
+  'third_party/fuzzysearch/index.js',
+  'third_party/mustache/**/*.js',
+  'third_party/timeagojs/**/*.js',
+  'third_party/vega/**/*.js',
+  'third_party/d3/**/*.js',
+  'third_party/subscriptions-project/*.js',
+  'third_party/webcomponentsjs/ShadowCSS.js',
+  'third_party/react-dates/bundle.js',
+  'third_party/amp-toolbox-cache-url/**/*.js',
+  'third_party/inputmask/**/*.js',
+];
+
+const commonJsModules = [
+  'node_modules/dompurify/',
+  'node_modules/promise-pjs/',
+  'node_modules/set-dom/',
+];
+
+function isCommonJsModule(file) {
+  return commonJsModules.some(function(module) {
+    return file.startsWith(module);
+  });
+}
 
 function transferSrcsToTempDir() {
   const tmp = `${tempy.directory()}/amphtml`;
@@ -77,11 +123,8 @@ function transferSrcsToTempDir() {
   const files = deglob.sync(SRC_GLOBS);
   log(green('Executing babel transforms'));
   files.forEach(file => {
-    if (
-      (file.startsWith('node_modules/') || file.startsWith('third_party/')) &&
-      !isCommonJsModule(file)
-    ) {
-      fs.copySync(f, `${tmp}/${file}`);
+    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
+      fs.copySync(file, `${tmp}/${file}`);
       return;
     }
 
@@ -258,7 +301,6 @@ async function preBuildWebPushPublisherFiles() {
       // Build Helper Frame JS
       const js = fs.readFileSync(basePath + fileName + '.js', 'utf8');
       const builtName = fileName + '.js';
-      const minifiedName = fileName + '.js';
       const promise = toPromise(
         gulp
           .src(basePath + '/*.js', {base: basePath})
@@ -273,15 +315,12 @@ async function preBuildWebPushPublisherFiles() {
 
 /**
  * post Build amp-web-push publisher files HTML page.
- *
- * @param {string} version
  */
 function postBuildWebPushPublisherFilesVersion() {
   const distDir = 'dist/v0';
   WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
     const basePath = `extensions/amp-web-push/${version}/`;
     WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
-      const builtName = fileName + '.js';
       const minifiedName = fileName + '.js';
       if (!fs.existsSync(distDir + '/' + minifiedName)) {
         throw new Error(`Cannot find ${distDir}/${minifiedName}`);
