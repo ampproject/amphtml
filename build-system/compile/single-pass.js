@@ -59,8 +59,6 @@ if (!singlePassDest.endsWith('/')) {
   singlePassDest = `${singlePassDest}/`;
 }
 
-console.log('experiment singlepass', argv.experiment);
-
 const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
 
 // Used to store transforms and compile v0.js

@@ -48,7 +48,6 @@ import {maybeValidate} from './validator-integration';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 
-
 /**
  * self.IS_AMP_ALT (is AMP alternative binary) is undefined by default in the
  * main v0.js since it is the "main" js.
