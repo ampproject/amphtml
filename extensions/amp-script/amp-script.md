@@ -118,9 +118,9 @@ The `id` of a `script[type=text/plain][target=amp-script]` element whose text co
 
 **sandbox (optional)**
 
-Applies extra restrictions to the DOM that may be mutated by this `<amp-script>`. Similar to the `iframe[sandbox]` attribute, the value of the attribute can either be empty to apply all restrictions, or space-separated tokens to lift particular restrictions:
+Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Similar to the `iframe[sandbox]` attribute, the value of the attribute can either be empty to apply all restrictions, or space-separated tokens to lift particular restrictions:
 
-- `allow-forms`: Allows mutation of [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements).
+- `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
 
 **common attributes**
 
