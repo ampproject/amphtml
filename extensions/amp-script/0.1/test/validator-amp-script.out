@@ -33,6 +33,8 @@ FAIL
 |    <!-- Valid: With 'script' attribute. -->
 |    <amp-script layout=container script=hello></amp-script>
 |    <script type=text/plain target=amp-script id=hello>
+>>   ^~~~~~~~~
+amp-script/0.1/test/validator-amp-script.html:34:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |      document.body.textContent = "Hello world!";
 |    </script>
 |
@@ -68,7 +70,7 @@ amp-script/0.1/test/validator-amp-script.html:55:2 Custom JavaScript is not allo
 |    <!-- Invalid: Local script with invalid 'type'. -->
 |    <script type=text/amp-script target=amp-script id=hello>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:60:2 The attribute 'type' in tag 'amp-script extension local script' is set to the invalid value 'text/amp-script'. (see https://amp.dev/documentation/components/amp-script) [DISALLOWED_HTML]
+amp-script/0.1/test/validator-amp-script.html:60:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |      document.body.textContent = "Hello World!";
 |    </script>
 |
@@ -89,7 +91,7 @@ amp-script/0.1/test/validator-amp-script.html:70:2 Custom JavaScript is not allo
 |    <!-- Invalid: Local script without 'id' attribute. -->
 |    <script type=text/plain target=amp-script>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:75:2 The mandatory attribute 'id' is missing in tag 'amp-script extension local script'. (see https://amp.dev/documentation/components/amp-script) [AMP_TAG_PROBLEM]
+amp-script/0.1/test/validator-amp-script.html:75:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |      document.body.textContent = "Hello World!";
 |    </script>
 |  </body>
