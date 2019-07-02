@@ -48,8 +48,8 @@ const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('../compile-wrappers');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
 const {isCommonJsModule} = require('./compile-utils');
+const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest =
@@ -661,19 +661,23 @@ function postPrepend(extension, prependContents) {
 function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
-    return gulp
-      .src(srcs, {base: transformDir})
-      .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
-      //.pipe(sourcemaps.init({loadMaps: true}))
-      .pipe(gulpClosureCompile(flagsArray))
-      .on('error', err => {
-        handleSinglePassCompilerError();
-        reject(err);
-      })
-      //.pipe(sourcemaps.write('.'))
-      .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
-      .pipe(gulp.dest('.'))
-      .on('end', resolve);
+    return (
+      gulp
+        .src(srcs, {base: transformDir})
+        .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
+        //.pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(gulpClosureCompile(flagsArray))
+        .on('error', err => {
+          handleSinglePassCompilerError();
+          reject(err);
+        })
+        //.pipe(sourcemaps.write('.'))
+        .pipe(
+          gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0')))
+        )
+        .pipe(gulp.dest('.'))
+        .on('end', resolve)
+    );
   });
 }
 

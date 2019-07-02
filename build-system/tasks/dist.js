@@ -15,10 +15,26 @@
  */
 
 const colors = require('ansi-colors');
+const conf = require('../build.conf');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
+const tempy = require('tempy');
+const {
+  buildExtensions,
+  extensionAliasFilePath,
+  getExtensionsToBuild,
+  parseExtensionFlags,
+} = require('./extension-helpers');
+const {
+  closureNailgunPort,
+  startNailgunServer,
+  stopNailgunServer,
+} = require('./nailgun');
+const {
+  createModuleCompatibleES5Bundle,
+} = require('./create-module-compatible-es5-bundle');
 const {
   WEB_PUSH_PUBLISHER_FILES,
   WEB_PUSH_PUBLISHER_VERSIONS,
@@ -37,35 +53,18 @@ const {
   printNobuildHelp,
   toPromise,
 } = require('./helpers');
-const {
-  buildExtensions,
-  extensionAliasFilePath,
-  getExtensionsToBuild,
-  parseExtensionFlags,
-} = require('./extension-helpers');
-const {
-  closureNailgunPort,
-  startNailgunServer,
-  stopNailgunServer,
-} = require('./nailgun');
-const {
-  createModuleCompatibleES5Bundle,
-} = require('./create-module-compatible-es5-bundle');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {isCommonJsModule, SRC_GLOBS} = require('../compile/compile-utils');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
-const tempy = require('tempy');
-const conf = require('../build.conf');
-const {isCommonJsModule, SRC_GLOBS} = require('../compile/compile-utils');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
-
+const babel = require('@babel/core');
 const deglob = require('globs-to-files');
-const babel = require("@babel/core");
 
 function transferSrcsToTempDir() {
   const tmp = `${tempy.directory()}/amphtml`;
@@ -78,8 +77,10 @@ function transferSrcsToTempDir() {
   const files = deglob.sync(SRC_GLOBS);
   log(green('Executing babel transforms'));
   files.forEach(file => {
-    if ((file.startsWith('node_modules/') || file.startsWith('third_party/'))
-      && !isCommonJsModule(file)) {
+    if (
+      (file.startsWith('node_modules/') || file.startsWith('third_party/')) &&
+      !isCommonJsModule(file)
+    ) {
       fs.copySync(f, `${tmp}/${file}`);
       return;
     }
@@ -134,7 +135,6 @@ async function dist() {
       await startNailgunServer(closureNailgunPort, /* detached */ false);
     })
     .then(() => {
-
       // Single pass has its own tmp directory processing. Only do this for
       // multipass.
       // We need to execute this after `compileCss` so that we can copy that
@@ -153,8 +153,9 @@ async function dist() {
         buildExtensions({minify: true, watch: false}),
         buildExperiments({minify: true, watch: false}),
         buildLoginDone('0.1', {minify: true, watch: false}),
-        buildWebPushPublisherFiles({minify: true, watch: false})
-            .then(postBuildWebPushPublisherFilesVersion),
+        buildWebPushPublisherFiles({minify: true, watch: false}).then(
+          postBuildWebPushPublisherFilesVersion
+        ),
         copyCss(),
       ]);
     })
@@ -263,7 +264,7 @@ async function preBuildWebPushPublisherFiles() {
           .src(basePath + '/*.js', {base: basePath})
           .pipe(file(builtName, js))
           .pipe(gulp.dest(tempBuildDir))
-      )
+      );
       promises.push(promise);
     });
   });
@@ -287,10 +288,7 @@ function postBuildWebPushPublisherFilesVersion() {
       }
 
       // Build Helper Frame HTML
-      let fileContents = fs.readFileSync(
-        basePath + fileName + '.html',
-        'utf8'
-      );
+      let fileContents = fs.readFileSync(basePath + fileName + '.html', 'utf8');
       fileContents = fileContents.replace(
         '<!-- [GULP-MAGIC-REPLACE ' + fileName + '.js] -->',
         '<script>' +
@@ -379,7 +377,7 @@ function preBuildLoginDoneVersion(version) {
       .src(path + '/*.js', {base: path})
       .pipe(file(builtName, js))
       .pipe(gulp.dest(buildDir))
-  )
+  );
 }
 
 module.exports = {
