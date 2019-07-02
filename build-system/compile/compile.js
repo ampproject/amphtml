@@ -105,10 +105,6 @@ function cleanupBuildDir() {
 exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
-  let tmpDir = '';
-  if (!argv.single_pass) {
-    tmpDir = process.env.AMP_TMP_DIR;
-  }
   const hideWarningsFor = [
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
@@ -425,10 +421,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     });
 
     if (argv.single_pass) {
-      compilerOptions.js_module_root.push(tmpDir);
+      compilerOptions.js_module_root.push(process.env.AMP_TMP_DIR);
     }
     const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
-    const gulpBase = argv.single_pass ? '.' : tmpDir;
+    const gulpBase = argv.single_pass ? '.' : process.env.AMP_TMP_DIR;
 
     if (options.typeCheckOnly) {
       return gulp
