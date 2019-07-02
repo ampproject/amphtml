@@ -54,7 +54,6 @@ describe('Layout', () => {
       'AMP-EMBED',
       'AMP-FACEBOOK',
       'AMP-FACEBOOK-COMMENTS',
-      'AMP-FACEBOOK-LIKE',
       'AMP-FACEBOOK-PAGE',
       'AMP-GOOGLE-DOCUMENT-EMBED',
       'AMP-IFRAME',
@@ -63,6 +62,7 @@ describe('Layout', () => {
       'AMP-LIST',
       'AMP-PINTEREST',
       'AMP-PLAYBUZZ',
+      'AMP-TWITTER',
 
       // matched by video player naming convention (fake)
       'AMP-FOO-PLAYER',
@@ -71,7 +71,6 @@ describe('Layout', () => {
       // matched by video player naming convention (actual)
       'AMP-JWPLAYER',
       'AMP-OOYALA-PLAYER',
-      'AMP-VIDEO',
       'AMP-VIDEO-IFRAME',
       'AMP-YOUTUBE',
       'AMP-VIMEO',
@@ -88,7 +87,7 @@ describe('Layout', () => {
     const elementsInvalidTagNames = [
       'AMP-POSITION-OBSERVER',
       'AMP-BODYMOVIN-ANIMATION',
-      'AMP-TWITTER',
+      'AMP-VIDEO',
       'AMP-REDDIT',
       'AMP-GITHUB',
     ];
