@@ -138,6 +138,15 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     </td>
   </tr>
   <tr>
+    <td>Facebook (URL Sharing)</td>
+    <td><code>facebook-url</code></td>
+    <td>
+      <ul>
+       <li><code>data-param-u</code>: <strong>required</strong>, defaults to: current url. This parameter should be the url to be sent to Facebook for sharing.</li>
+        </ul>
+    </td>
+  </tr>
+  <tr>
     <td>LinkedIn</td>
     <td><code>linkedin</code></td>
     <td>
