@@ -119,8 +119,9 @@ export const RTC_VENDORS = {
     disableKeyAppend: true,
   },
   navegg: {
-    url: 'https://amp.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
+    url: 'https://usr.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
     macros: ['NVG_ACC'],
+	disableKeyAppend: true,
   },
   sonobi: {
     url:
