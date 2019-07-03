@@ -204,7 +204,8 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   const whenFirstVisible = viewer.whenFirstVisible();
   const urlIsProxy = isProxyOrigin(input);
   const viewerCanIntercept = viewer.hasCapability('xhrInterceptor');
-  const interceptorDisabledForLocalDev = init.bypassInterceptorForDev && getMode(win).localDev;
+  const interceptorDisabledForLocalDev =
+    init.bypassInterceptorForDev && getMode(win).localDev;
   if (urlIsProxy || !viewerCanIntercept || interceptorDisabledForLocalDev) {
     return whenFirstVisible;
   }

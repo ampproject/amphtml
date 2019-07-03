@@ -139,10 +139,12 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     it('should not intercept if viewer can not intercept', () => {
       viewer.hasCapability = unusedParam => false;
 
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(() => {
-        // Expect no interception.
-        expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-      });
+      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
+        () => {
+          // Expect no interception.
+          expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+        }
+      );
     });
 
     it('should not intercept if request is initialized to bypass for local development', () => {
@@ -152,28 +154,34 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       };
       win.AMP_MODE = {localDev: true};
 
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(() => {
-        // Expect no interception.
-        expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-      });
+      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
+        () => {
+          // Expect no interception.
+          expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+        }
+      );
     });
 
     it('should not intercept if amp doc does not support xhr interception', () => {
       doc.removeAttribute('allow-xhr-interception');
 
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(() => {
-        // Expect no interception.
-        expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-      });
+      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
+        () => {
+          // Expect no interception.
+          expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+        }
+      );
     });
 
     it('should not intercept if URL is known as a proxy URL', () => {
       input = 'https://cdn.ampproject.org';
 
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(() => {
-        // Expect no interception.
-        expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-      });
+      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
+        () => {
+          // Expect no interception.
+          expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+        }
+      );
     });
 
     it('should send xhr request to viewer', () => {
