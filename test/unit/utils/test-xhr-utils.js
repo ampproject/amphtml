@@ -125,85 +125,73 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       };
     });
 
-    it('should be no-op if amp doc is absent', () => {
+    it('should be no-op if amp doc is absent', async () => {
       ampDocSingle = null;
 
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
-        () => {
-          // Expect no-op.
-          expect(viewerForDoc).to.not.have.been.called;
-        }
-      );
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      // Expect no-op.
+      expect(viewerForDoc).to.not.have.been.called;
     });
 
-    it('should not intercept if viewer can not intercept', () => {
+    it('should not intercept if viewer can not intercept', async () => {
       viewer.hasCapability = unusedParam => false;
 
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
-        () => {
-          // Expect no interception.
-          expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-        }
-      );
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      // Expect no interception.
+      expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
     });
 
-    it('should not intercept if request is initialized to bypass for local development', () => {
+    it('should not intercept if request is initialized to bypass for local development', async () => {
       // Given the bypass flag and localDev being true.
       init = {
         bypassInterceptorForDev: true,
       };
       win.AMP_MODE = {localDev: true};
 
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
-        () => {
-          // Expect no interception.
-          expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-        }
-      );
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      // Expect no interception.
+      expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
     });
 
-    it('should not intercept if amp doc does not support xhr interception', () => {
+    it('should not intercept if amp doc does not support xhr interception', async () => {
       doc.removeAttribute('allow-xhr-interception');
 
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
-        () => {
-          // Expect no interception.
-          expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-        }
-      );
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      // Expect no interception.
+      expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
     });
 
-    it('should not intercept if URL is known as a proxy URL', () => {
+    it('should not intercept if URL is known as a proxy URL', async () => {
       input = 'https://cdn.ampproject.org';
 
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
-        () => {
-          // Expect no interception.
-          expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-        }
-      );
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      // Expect no interception.
+      expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
     });
 
-    it('should send xhr request to viewer', () => {
+    it('should send xhr request to viewer', async () => {
       init = {body: {}};
       input = 'https://www.shouldsendxhrrequesttoviewer.org';
 
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
-        () => {
-          const msgPayload = dict({
-            'originalRequest': {
-              'input': 'https://www.shouldsendxhrrequesttoviewer.org',
-              'init': {
-                'body': {},
-              },
-            },
-          });
-          expect(viewer.sendMessageAwaitResponse).to.have.been.calledOnce;
-          expect(viewer.sendMessageAwaitResponse).to.have.been.calledWith(
-            'xhr',
-            msgPayload
-          );
-        }
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      const msgPayload = dict({
+        'originalRequest': {
+          'input': 'https://www.shouldsendxhrrequesttoviewer.org',
+          'init': {
+            'body': {},
+          },
+        },
+      });
+      expect(viewer.sendMessageAwaitResponse).to.have.been.calledOnce;
+      expect(viewer.sendMessageAwaitResponse).to.have.been.calledWith(
+        'xhr',
+        msgPayload
       );
     });
   });
