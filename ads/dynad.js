@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {validateSrcContains, validateSrcPrefix, writeScript} from '../3p/3p';
+import {validateData, validateSrcContains, validateSrcPrefix, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function dynad(global, data) {
-  const adsrc = data.src;
-  if (typeof adsrc != 'undefined') {
-    validateSrcPrefix('https:', adsrc);
-    validateSrcContains('/t.dynad.net/', adsrc);
-    writeScript(global, adsrc);
-  }
+  validateData(data, ['src'], []);
+  validateSrcPrefix('https:', data.src);
+  validateSrcContains('/t.dynad.net/', data.src);
+  writeScript(global, data.src);
 }
