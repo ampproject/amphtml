@@ -202,11 +202,11 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
 
   const viewer = Services.viewerForDoc(ampdocSingle);
   const whenFirstVisible = viewer.whenFirstVisible();
-  const isProxy = isProxyOrigin(input);
-  const canIntercept = viewer.hasCapability('xhrInterceptor');
-  const bypassInterceptorForLocalDev = init.bypassInterceptorForDev && getMode(win).localDev;
+  const urlIsProxy = isProxyOrigin(input);
+  const viewerCanIntercept = viewer.hasCapability('xhrInterceptor');
+  const interceptorDisabledForLocalDev = init.bypassInterceptorForDev && getMode(win).localDev;
 
-  if (isProxy || !canIntercept || bypassInterceptorForLocalDev) {
+  if (urlIsProxy || !viewerCanIntercept || interceptorDisabledForLocalDev) {
     return whenFirstVisible;
   }
   const htmlElement = ampdocSingle.getRootNode().documentElement;
