@@ -24,7 +24,7 @@ describe('SanitizerImpl', () => {
 
   beforeEach(() => {
     win = new FakeWindow();
-    s = new SanitizerImpl(win);
+    s = new SanitizerImpl(win, []);
     el = win.document.createElement('div');
   });
 
@@ -86,6 +86,20 @@ describe('SanitizerImpl', () => {
       const input = win.document.createElement('input');
       s.mutateAttribute(input, 'value', 'foo');
       expect(input.getAttribute('value')).to.be.null;
+    });
+
+    it('should allow changes to form elements if sandbox=allow-forms', () => {
+      s = new SanitizerImpl(win, ['allow-forms']);
+
+      const form = win.document.createElement('form');
+      s.mutateAttribute(form, 'action-xhr', 'https://example.com/post');
+      expect(form.getAttribute('action-xhr')).to.equal(
+        'https://example.com/post'
+      );
+
+      const input = win.document.createElement('input');
+      s.mutateAttribute(input, 'value', 'foo');
+      expect(input.getAttribute('value')).to.equal('foo');
     });
   });
 });
