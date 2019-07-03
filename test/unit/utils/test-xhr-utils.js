@@ -135,7 +135,16 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       );
     });
 
-    it('should be no-op if request is initialized to bypass', () => {
+    it('should wait for viewer visibility if viewer can NOT intercept', () => {
+      viewer.hasCapability = unusedParam => false;
+
+      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(() => {
+        // Expect no interception.
+        expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+      });
+    });
+
+    it('should wait for viewer visibility if request is initialized to bypass', () => {
       // Given the bypass flag and localDev being true.
       init = {
         bypassInterceptorForDev: true,
@@ -148,7 +157,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       });
     });
 
-    it('should be no-op if amp doc does not support xhr interception', () => {
+    it('should wait for viewer visibility if amp doc does not support xhr interception', () => {
       doc.removeAttribute('allow-xhr-interception');
 
       return getViewerInterceptResponse(win, ampDocSingle, input, init).then(() => {
@@ -157,7 +166,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       });
     });
 
-    it('should be no-op if URL is known as a proxy URL', () => {
+    it('should wait for viewer visibility if URL is known as a proxy URL', () => {
       input = 'https://cdn.ampproject.org';
 
       return getViewerInterceptResponse(win, ampDocSingle, input, init).then(() => {
