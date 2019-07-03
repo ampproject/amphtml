@@ -633,7 +633,7 @@ In addition to following the details in the [AMP CORS spec](https://www.ampproje
 In general, keep in mind the following points when accepting input from the user:
 
 * Only use POST for state changing requests.
-* Use non-XHR GET for navigational purposes only (e.g., Search).
-    * non-XHR GET requests are not going to receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism.
+* Use non-XHR GET for navigational purposes only (e.g. search).
+    * Non-XHR GET requests are will not receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism.
     * In general, use XHR/non-XHR GET requests for navigational or information retrieval only.
-* non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers. And the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later, please file an issue if you think this is needed.
+* Non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers, and the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later &mdash; please file an issue if you think this is needed.
