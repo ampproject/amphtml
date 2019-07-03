@@ -497,7 +497,7 @@ describe('service', () => {
       });
     });
 
-    describe.only('embed service', () => {
+    describe('embed service', () => {
       let childWin, grandchildWin;
       let childWinNode, grandChildWinNode;
       let topService;
