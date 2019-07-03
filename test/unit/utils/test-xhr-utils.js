@@ -148,7 +148,9 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       init = {
         bypassInterceptorForDev: true,
       };
-      win.AMP_MODE = {localDev: true};
+      win.AMP_MODE = {
+        localDev: true,
+      };
 
       await getViewerInterceptResponse(win, ampDocSingle, input, init);
 
@@ -175,7 +177,9 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     });
 
     it('should send xhr request to viewer', async () => {
-      init = {body: {}};
+      init = {
+        body: {},
+      };
       input = 'https://www.shouldsendxhrrequesttoviewer.org';
 
       await getViewerInterceptResponse(win, ampDocSingle, input, init);
