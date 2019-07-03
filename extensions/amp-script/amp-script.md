@@ -98,15 +98,33 @@ For additional code samples, see [`examples/amp-script/`](https://github.com/amp
 For design details, see the ["Intent to Implement" issue](https://github.com/ampproject/amphtml/issues/13471).
 For more information on `worker-dom`, see the [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/) repository.
 
-### Mutations and user actions
+### Mutations and user gestures
 
-`amp-script` generally requires a user action to perform mutates to avoid unexpected UI jumps without user's input, but there are some exception to this rule.
+`amp-script` generally requires a user gesture to perform mutations. This avoids content jumps that are not triggered by user gesture, but there are some exceptions:
 
-Overall mutation rules are:
+1. Mutations are always accepted for five seconds after a user gesture.
+2. The five second interval is extended if the author script performs a `fetch()` as a result of the user gesture.
+3. Mutations are always accepted for `amp-script` elements with `[layout!="container"]` and `height < 300px`.
 
-1. Mutations are always accepted after a user action for a user action interval of 5 seconds.
-2. The 5 seconds interval is extended if the user script performs a `fetch()` operation.
-3. Smaller `amp-script` elements with height under `300px` and non-`container` layout are allowed unlimited mutations.
+## Attributes
+
+**src**
+
+The URL of a JS file that will be executed in the context of this `<amp-script>`.
+
+**script**
+
+The `id` of a `script[type=text/plain][target=amp-script]` element whose text content contains JS that will be executed in the context of this `<amp-script>`.
+
+**sandbox (optional)**
+
+Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Similar to the `iframe[sandbox]` attribute, the value of the attribute can either be empty to apply all restrictions, or space-separated tokens to lift particular restrictions:
+
+- `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Interested in using `<amp-script>`?
 
