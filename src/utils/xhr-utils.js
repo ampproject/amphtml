@@ -205,15 +205,16 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   const urlIsProxy = isProxyOrigin(input);
   const viewerCanIntercept = viewer.hasCapability('xhrInterceptor');
   const interceptorDisabledForLocalDev = init.bypassInterceptorForDev && getMode(win).localDev;
-
   if (urlIsProxy || !viewerCanIntercept || interceptorDisabledForLocalDev) {
     return whenFirstVisible;
   }
+
   const htmlElement = ampdocSingle.getRootNode().documentElement;
   const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
   if (!docOptedIn) {
     return whenFirstVisible;
   }
+
   return whenFirstVisible
     .then(() => {
       return viewer.isTrustedViewer();
