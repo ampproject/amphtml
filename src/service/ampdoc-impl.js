@@ -52,7 +52,7 @@ export class AmpDocService {
       win.document[AMPDOC_PROP] = this.singleDoc_;
     }
 
-    /** @private @const */
+    /** @private {boolean} */
     this.ampdocFieExperimentOn_ = isExperimentOn(win, 'ampdoc-fie');
   }
 

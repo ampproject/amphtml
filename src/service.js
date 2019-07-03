@@ -620,7 +620,7 @@ export function installServiceInEmbedIfEmbeddable(embedWin, serviceClass) {
  */
 export function adoptServiceForEmbedDoc(ampdoc, id) {
   const service = getServiceInternal(
-    getAmpdocServiceHolder(ampdoc.getParent()),
+    getAmpdocServiceHolder(devAssert(ampdoc.getParent())),
     id
   );
   registerServiceInternal(

@@ -795,7 +795,7 @@ export function installStandardServicesInEmbed(childWin) {
 
 /**
  * Adopt predefined core services for the embedded ampdoc (friendly iframe).
- * @param {!AmpDoc} ampdoc
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @visibleForTesting
  */
 export function installStandardServicesInEmbeddedDoc(ampdoc) {
