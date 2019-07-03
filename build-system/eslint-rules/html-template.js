@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 'use strict';
+
 const {
   staticTemplateFactories,
   staticTemplateTags,
   staticTemplateFactoryFns,
 } = require('../static-template-metadata');
 
-/**
- *
- */
 module.exports = function(context) {
   function tagCannotBeCalled(node) {
     const {name} = node.callee;
