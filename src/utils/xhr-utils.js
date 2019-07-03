@@ -199,13 +199,14 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   if (!ampdocSingle) {
     return Promise.resolve();
   }
+
   const viewer = Services.viewerForDoc(ampdocSingle);
   const whenFirstVisible = viewer.whenFirstVisible();
-  if (
-    isProxyOrigin(input) ||
-    !viewer.hasCapability('xhrInterceptor') ||
-    (init.bypassInterceptorForDev && getMode(win).localDev)
-  ) {
+  const isProxy = isProxyOrigin(input);
+  const canIntercept = viewer.hasCapability('xhrInterceptor');
+  const bypassInterceptorForLocalDev = init.bypassInterceptorForDev && getMode(win).localDev;
+
+  if (isProxy || !canIntercept || bypassInterceptorForLocalDev) {
     return whenFirstVisible;
   }
   const htmlElement = ampdocSingle.getRootNode().documentElement;

@@ -96,31 +96,38 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
   });
 
   describe('getViewerInterceptResponse', () => {
-    let ampDocSingle = null;
-    let doc;
-    let init = {};
-    let input = '';
-    let viewer;
-    let viewerForDoc;
-    let win = {};
+    let ampDocSingle, doc, init, input, viewer, viewerForDoc, win;
+
     beforeEach(() => {
-      viewer = {
-        hasCapability: unusedParam => false,
-        whenFirstVisible: () => Promise.resolve(),
-        sendMessageAwaitResponse: sandbox.stub(),
-      };
-      doc = document.createElement('html');
-      doc.setAttribute('allow-xhr-interception', 'true');
       ampDocSingle = {
         getRootNode: () => {
           return {documentElement: doc};
         },
       };
+      doc = document.createElement('html');
+      doc.setAttribute('allow-xhr-interception', 'true');
+      init = {};
+      input = 'https://sample.com';
+      viewer = {
+        hasCapability: unusedParam => true,
+        isTrustedViewer: () => Promise.resolve(true),
+        sendMessageAwaitResponse: sandbox.stub().returns(Promise.resolve({})),
+        whenFirstVisible: () => Promise.resolve(),
+      };
       viewerForDoc = sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+      win = {
+        AMP_MODE: {
+          localDev: false,
+        },
+        location: {
+          hash: '',
+        },
+      };
     });
 
     it('should be no-op if amp doc is absent', () => {
       ampDocSingle = null;
+
       return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
         () => {
           expect(viewerForDoc).to.not.have.been.called;
@@ -129,39 +136,45 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     });
 
     it('should be no-op if request is initialized to bypass', () => {
-      ampDocSingle = null;
-      // Given the bypass flag and since the context of this running
-      // is a test, thus mode.localDev is true.
-      return getViewerInterceptResponse(win, ampDocSingle, input, {
-        bypassInterceptorDev: true,
-      }).then(() => {
+      // Given the bypass flag and localDev being true.
+      init = {
+        bypassInterceptorForDev: true,
+      };
+      win.AMP_MODE = {localDev: true};
+
+      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(() => {
         // Expect no interception.
-        expect(viewerForDoc).to.not.have.been.called;
+        expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
       });
     });
 
     it('should be no-op if amp doc does not support xhr interception', () => {
       doc.removeAttribute('allow-xhr-interception');
-      input = 'https://www.googz.org';
-      return getViewerInterceptResponse(win, ampDocSingle, input, {
-        bypassInterceptorDev: false,
-      }).then(() => {
+
+      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(() => {
+        // Expect no interception.
+        expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+      });
+    });
+
+    it('should be no-op if URL is known as a proxy URL', () => {
+      input = 'https://cdn.ampproject.org';
+
+      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(() => {
+        // Expect no interception.
         expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
       });
     });
 
     it('should send xhr request to viewer', () => {
-      win = {AMP_MODE: {development: false}};
-      viewer.hasCapability = () => true;
-      viewer.isTrustedViewer = () => Promise.resolve(true);
-      input = 'https://www.googz.org';
       init = {body: {}};
-      viewer.sendMessageAwaitResponse.returns(Promise.resolve({}));
+      input = 'https://www.shouldsendxhrrequesttoviewer.org';
+
       return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
         () => {
           const msgPayload = dict({
             'originalRequest': {
-              'input': 'https://www.googz.org',
+              'input': 'https://www.shouldsendxhrrequesttoviewer.org',
               'init': {
                 'body': {},
               },
