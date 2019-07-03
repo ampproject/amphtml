@@ -57,10 +57,10 @@ module.exports = function({types: t}) {
    * @return {boolean}
    */
   const isTagOrFactoryByName = tag =>
-    (t.isIdentifier(tag) && staticTemplateTags.includes(tag.name)) ||
+    (t.isIdentifier(tag) && staticTemplateTags.has(tag.name)) ||
     (t.isCallExpression(tag) &&
       t.isIdentifier(tag.callee) &&
-      staticTemplateFactoryFns.includes(tag.callee.name));
+      staticTemplateFactoryFns.has(tag.callee.name));
 
   return {
     name: 'transform-html-templates',

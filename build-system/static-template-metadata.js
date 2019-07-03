@@ -29,10 +29,14 @@ exports.staticTemplateFactories = {
  * Names of tags, like `html` and `svg`.
  * @type {Array<string>}
  */
-exports.staticTemplateTags = Object.values(exports.staticTemplateFactories);
+exports.staticTemplateTags = new Set(
+  Object.values(exports.staticTemplateFactories)
+);
 
 /**
  * Names of tag factory functions, like `htmlFor` and `svgFor`.
  * @type {Array<string>}
  */
-exports.staticTemplateFactoryFns = Object.keys(exports.staticTemplateFactories);
+exports.staticTemplateFactoryFns = new Set(
+  Object.keys(exports.staticTemplateFactories)
+);

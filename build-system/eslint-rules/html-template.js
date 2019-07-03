@@ -145,17 +145,17 @@ module.exports = function(context) {
         return;
       }
 
-      if (staticTemplateTags.includes(callee.name)) {
+      if (staticTemplateTags.has(callee.name)) {
         return tagCannotBeCalled(node);
       }
-      if (staticTemplateFactoryFns.includes(callee.name)) {
+      if (staticTemplateFactoryFns.has(callee.name)) {
         return factoryUsage(node);
       }
     },
 
     TaggedTemplateExpression(node) {
       const {tag} = node;
-      if (tag.type !== 'Identifier' || !staticTemplateTags.includes(tag.name)) {
+      if (tag.type !== 'Identifier' || !staticTemplateTags.has(tag.name)) {
         return;
       }
 
