@@ -1,0 +1,14 @@
+{
+  "experimentA": {
+    "name": "ANALYTICS_VENDOR_SPLIT",
+    "command": "gulp dist --define=ANALYTICS_VENDOR_SPLIT",
+    "issue": "",
+    "define": "ANALYTICS_VENDOR_SPLIT"
+  },
+  "experimentB": {
+    "name": "SINGLE_PASS",
+    "command": "gulp dist --single_pass",
+    "issue": ""
+  },
+  "experimentC": {}
+}

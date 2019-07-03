@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
+const experimentsConfig = require('./global-configs/experiments-config.json');
+
 const defaultPlugins = [
   require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts'),
   require.resolve('./babel-plugins/babel-plugin-transform-html-template'),
@@ -26,6 +29,56 @@ const defaultPlugins = [
   require.resolve('./babel-plugins/babel-plugin-transform-amp-extension-call'),
   require.resolve('./babel-plugins/babel-plugin-transform-version-call'),
 ];
+
+/**
+ * @return {Array<string|Object>} the minify-replace plugin options that can be
+ * pushed into the babel plugins array
+ */
+function getReplacePlugin_() {
+  /**
+   * @param {string} defineStr the define flag to parse
+   * @return {Object} replacement options used by minify-replace plugin
+   */
+  function createReplacement(defineStr) {
+    const strSplit = defineStr.split('=');
+    const identifierName = strSplit[0];
+    // if no value is defined, set to true
+    const value = strSplit.length > 1 ? strSplit[1] === 'true' : true;
+
+    return {
+      identifierName,
+      replacement: {
+        type: 'booleanLiteral',
+        value,
+      },
+    };
+  }
+
+  const replacements = [];
+  // default each experiment flag constant to false
+  Object.keys(experimentsConfig).forEach(experiment => {
+    const experimentDefine = experimentsConfig[experiment]['define'];
+    if (experimentDefine) {
+      replacements.push(createReplacement(experimentDefine + '=false'));
+    }
+  });
+
+  // override define values from passed in flags
+  if (Array.isArray(argv.define)) {
+    argv.define.forEach(defineStr => {
+      replacements.push(createReplacement(defineStr));
+    });
+  } else if (argv.define) {
+    replacements.push(createReplacement(argv.define));
+  }
+
+  const replacePlugin = [
+    require.resolve('babel-plugin-minify-replace'),
+    {replacements},
+  ];
+
+  return replacePlugin;
+}
 
 module.exports = {
   plugins({isEsmBuild, isCommonJsModule, isForTesting}) {
@@ -61,6 +114,7 @@ module.exports = {
         require.resolve('./babel-plugins/babel-plugin-amp-mode-transformer'),
       ]);
     }
+    pluginsToApply.push(getReplacePlugin_());
     return pluginsToApply;
   },
 
@@ -68,5 +122,9 @@ module.exports = {
     return [
       require.resolve('./babel-plugins/babel-plugin-transform-prune-namespace'),
     ];
+  },
+
+  getReplacePlugin() {
+    return getReplacePlugin_();
   },
 };
