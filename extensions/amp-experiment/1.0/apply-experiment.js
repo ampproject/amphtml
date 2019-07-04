@@ -115,7 +115,7 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
         throw new Error(
           `Mutation ${JSON.stringify(
             mutationRecord
-          )} has an unsupported attributeName.`
+          )} has an unsupported attributeName for the specified element.`
         );
       }
     } else {
