@@ -46,8 +46,7 @@ const MAX_MUTATIONS = 70;
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} config
  * @param {!Object<string, ?string>} experimentToVariant
- * @return {!Promise<!Object<string, ?string>>} a promise of the original
- *     param passed in
+ * @return {!Promise}
  * @private
  */
 export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
@@ -150,6 +149,5 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     mutations.forEach(mutation => {
       mutation.mutate();
     });
-    return experimentToVariant;
   });
 }
