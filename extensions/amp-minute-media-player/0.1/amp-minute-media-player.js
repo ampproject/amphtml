@@ -15,6 +15,7 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -35,7 +36,6 @@ import {
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const */
 const TAG = 'amp-minute-media-player';
@@ -53,8 +53,11 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.contentType_ = null;
 
+    /*
     /** @private {?string} */
+    /*
     this.playerId_ = null;
+    */
 
     /** @private {?string} */
     this.contentId_ = '';
@@ -74,8 +77,11 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
+    /*
     /** @private {?Function} */
+    /*
     this.playerReadyResolver_ = null;
+    */
 
     /** @private {?number} */
     this.readyTimeout_ = null;
@@ -92,9 +98,6 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // Get attributes, assertions of values, assign instance variables.
-    // Build lightweight DOM and append to this.element.
-
     const {element} = this;
 
     this.contentType_ = userAssert(
@@ -137,11 +140,14 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    //Define which layouts our element support
-
-    //Size-defined layouts: fixed, fixed height, responsive and fill
-    return isLayoutSizeDefined(layout);
-    //return layout == Layout.RESPONSIVE;
+    return (
+      layout == Layout.FILL ||
+      layout == Layout.FIXED ||
+      layout == Layout.FIXED_HEIGHT ||
+      layout == Layout.FLEX_ITEM ||
+      layout == Layout.NODISPLAY ||
+      layout == Layout.RESPONSIVE
+    );
   }
 
   /**
@@ -154,7 +160,6 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     this.tags_ = element.getAttribute('data-tags') || '';
     this.minimumDateFactor_ =
       element.getAttribute('data-minimum-date-factor') || '';
-    //console.log(element.getAttribute('data-scanned-element-type'));
     this.scannedElementType_ =
       element.getAttribute('data-scanned-element-type') || '';
   }
@@ -178,13 +183,11 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       return;
     }
     const data = objOrParseJson(eventData);
-    //console.log(data); DONT GET HERE
     if (data === undefined) {
       return; // We only process valid JSON.
     }
 
     const eventType = data['event'];
-    //console.log(eventType);
     if (eventType == 'ready') {
       /*** NECESSARY?? ***/
       Services.timerFor(this.win).cancel(this.readyTimeout_);
@@ -235,9 +238,6 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    console.log('THE IFRAME SOURCE IS ------------------->');
-    console.log(this.iframeSource_() + '\n');
-
     const iframe = createFrameFor(this, this.iframeSource_());
     this.iframe_ = iframe;
 
@@ -335,7 +335,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
   }
 
   /**
-   * Plays the video..
+   * Plays the video.
    *
    * @param {boolean} unusedIsAutoplay Whether the call to the `play` method is
    * triggered by the autoplay functionality. Video players can use this hint
