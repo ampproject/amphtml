@@ -38,6 +38,13 @@ Please see [nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/
 
 Please see [webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/webui/README.md).
 
+## JSON
+
+The validator rules are exported in the JSON format and hosted on: `https://cdn.ampproject.org/v0/validator.json`
+
+The JSON rules are provided on best-effort basis and it's not recommended to
+rely on them in a production environment.
+
 ## Building a Custom Validator
 
 This is only useful for development - e.g. when making changes to
