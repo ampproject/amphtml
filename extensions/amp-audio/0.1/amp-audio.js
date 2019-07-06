@@ -27,6 +27,7 @@ import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 const TAG = 'amp-audio';
 
@@ -108,6 +109,9 @@ export class AmpAudio extends AMP.BaseElement {
     this.audio_ = audio;
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
+
+    listen(this.audio_, 'playing', () => this.analyticsEvent_('audio-play'));
+    listen(this.audio_, 'pause', () => this.analyticsEvent_('audio-pause'));
   }
 
   /** @override */
@@ -249,6 +253,14 @@ export class AmpAudio extends AMP.BaseElement {
       playHandler,
       pauseHandler
     );
+  }
+
+  /**
+   * @param {string} eventType
+   * @private
+   */
+  analyticsEvent_(eventType) {
+    triggerAnalyticsEvent(this.audio_, eventType);
   }
 }
 
