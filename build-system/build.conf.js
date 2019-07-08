@@ -15,7 +15,6 @@
  */
 
 const defaultPlugins = [
-  require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts'),
   require.resolve('./babel-plugins/babel-plugin-transform-html-template'),
   require.resolve(
     './babel-plugins/babel-plugin-transform-parenthesize-expression'
@@ -28,8 +27,12 @@ const defaultPlugins = [
 ];
 
 module.exports = {
-  plugins({isEsmBuild, isForTesting}) {
+  plugins({isEsmBuild, isForTesting, isSinglePass}) {
     let pluginsToApply = defaultPlugins;
+    if (isSinglePass) {
+      pluginsToApply.push(
+        require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts'));
+    }
     if (isEsmBuild) {
       pluginsToApply = pluginsToApply.concat([
         [
