@@ -45,8 +45,8 @@ Displays a dismissable notification to the user.
     <td width="40%"><strong>Examples</strong></td>
     <td>
       <ul>
-        <li><a href="https://ampbyexample.com/components/amp-user-notification/">Annotated code example for amp-user-notification (with local storage)</a></li>
-        <li><a href="https://ampbyexample.com/advanced/amp-user-notification_with_server_endpoint/">Annotated code example for amp-user-notification (with Server Endpoint)</a></li>
+        <li><a href="https://amp.dev/documentation/examples/components/amp-user-notification/#basic-usage-with-local-storage">Annotated code example for amp-user-notification (with local storage)</a></li>
+        <li><a href="https://amp.dev/documentation/examples/components/amp-user-notification/#advanced-usage-with-a-server-endpoint">Annotated code example for amp-user-notification (with Server Endpoint)</a></li>
       </ul>
     </td>
   </tr>

@@ -36,7 +36,7 @@ Displays a Pinterest widget, Save button, or Follow button.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-pinterest/">Annotated code example for amp-pinterest</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-pinterest/">Annotated code example for amp-pinterest</a></td>
   </tr>
 </table>
 
