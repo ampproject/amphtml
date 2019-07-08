@@ -65,7 +65,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const deglob = require('globs-to-files');
 
-
 function transferSrcsToTempDir() {
   const tmp = `${tempy.directory()}/amphtml`;
   process.env.AMP_TMP_DIR = tmp;

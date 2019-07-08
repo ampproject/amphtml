@@ -298,6 +298,17 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       define,
       hide_warnings_for: hideWarningsFor,
     };
+    if (argv.pseudo_names) {
+      // Some optimizations get turned off when pseudo_names is on.
+      // This causes some errors caused by the babel transformations
+      // that we apply like unreachable code because we turn a conditional
+      // falsey.
+      compilerOptions.jscomp_off.push(
+        'uselessCode',
+        'suspiciousCode',
+        'externsValidation'
+      );
+    }
     if (argv.pretty_print) {
       compilerOptions.formatting = 'PRETTY_PRINT';
     }

@@ -139,4 +139,4 @@ const CLOSURE_SRC_GLOBS = [
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
-}
+};
