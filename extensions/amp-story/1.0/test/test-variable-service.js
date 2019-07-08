@@ -29,8 +29,8 @@ describes.fakeWin('amp-story variable service', {}, env => {
 
   it('should update pageIndex and pageId on change', () => {
     storeService.dispatch(Action.CHANGE_PAGE, {
-      id: 'test-page',
-      index: 1,
+      id: 'my-page-id',
+      index: 123,
     });
 
     const variables = variableService.get();
