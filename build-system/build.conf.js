@@ -31,7 +31,8 @@ module.exports = {
     let pluginsToApply = defaultPlugins;
     if (isSinglePass) {
       pluginsToApply.push(
-        require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts'));
+        require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts')
+      );
     }
     if (isEsmBuild) {
       pluginsToApply = pluginsToApply.concat([

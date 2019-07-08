@@ -305,9 +305,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // falsey. (ex. is IS_DEV transformation which causes some conditionals
       // to be unreachable/suspicious code since the whole expression is
       // falsey)
-      compilerOptions.jscomp_off.push(
-        'uselessCode',
-      );
+      compilerOptions.jscomp_off.push('uselessCode', 'externsValidation');
     }
     if (argv.pretty_print) {
       compilerOptions.formatting = 'PRETTY_PRINT';
