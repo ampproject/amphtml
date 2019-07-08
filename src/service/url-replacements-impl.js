@@ -37,7 +37,6 @@ import {
   removeFragment,
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
-import {getMode} from '../mode';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
 import {
@@ -278,20 +277,14 @@ export class GlobalVariableSource extends VariableSource {
         if (!clientIds) {
           return null;
         }
-        return clientIds[dev().assertString(scope)];
+        return clientIds[scope];
       },
       (scope, opt_userNotificationId, opt_cookieName) => {
-        user().assertString(
+        userAssert(
           scope,
           'The first argument to CLIENT_ID, the fallback' +
             /*OK*/ ' Cookie name, is required'
         );
-
-        if (getMode().runtime == 'inabox') {
-          return /** @type {!Promise<ResolverReturnDef>} */ (Promise.resolve(
-            null
-          ));
-        }
 
         let consent = Promise.resolve();
 
@@ -308,7 +301,7 @@ export class GlobalVariableSource extends VariableSource {
           .then(cid => {
             return cid.get(
               {
-                scope: dev().assertString(scope),
+                /** @type {string} */ scope,
                 createCookieIfNotPresent: true,
                 cookieName: opt_cookieName,
               },
@@ -773,7 +766,7 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Return the QUERY_PARAM from the current location href
-   * @param {*} param
+   * @param {string} param
    * @param {string} defaultValue
    * @return {string}
    * @private
@@ -788,13 +781,12 @@ export class GlobalVariableSource extends VariableSource {
       removeAmpJsParamsFromUrl(this.ampdoc.win.location.href)
     );
     const params = parseQueryString(url.search);
-    const key = user().assertString(param);
     const {replaceParams} = this.getDocInfo_();
-    if (typeof params[key] !== 'undefined') {
-      return params[key];
+    if (typeof params[param] !== 'undefined') {
+      return params[param];
     }
-    if (replaceParams && typeof replaceParams[key] !== 'undefined') {
-      return /** @type {string} */ (replaceParams[key]);
+    if (replaceParams && typeof replaceParams[param] !== 'undefined') {
+      return /** @type {string} */ (replaceParams[param]);
     }
     return defaultValue;
   }
@@ -1019,15 +1011,17 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *     that can be substituted.
+   * @param {boolean=} opt_noEncode should not encode URL
    * @return {!Promise<string>}
    */
-  expandUrlAsync(url, opt_bindings, opt_whiteList) {
+  expandUrlAsync(url, opt_bindings, opt_whiteList, opt_noEncode) {
     return /** @type {!Promise<string>} */ (new Expander(
       this.variableSource_,
       opt_bindings,
       /* opt_collectVars */ undefined,
       /* opt_sync */ undefined,
-      opt_whiteList
+      opt_whiteList,
+      opt_noEncode
     )
       ./*OK*/ expand(url)
       .then(replacement => this.ensureProtocolMatches_(url, replacement)));

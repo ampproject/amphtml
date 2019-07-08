@@ -33,7 +33,7 @@ A runtime-managed animated image, typically a GIF.
     <td><code>&lt;script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
   </tr>
   <tr>
@@ -46,7 +46,7 @@ A runtime-managed animated image, typically a GIF.
 
 ## Behavior
 
-The `amp-anim` component is almost identical to the `amp-img` element, but allows the AMP runtime to reduce CPU usage when the animation is off-screen. Like [other elements](https://www.ampproject.org/docs/guides/author-develop/responsive/placeholders), it supports an optional `placeholder` child, to display while the `src` file is loading:
+The `amp-anim` component is almost identical to the `amp-img` element, but allows the AMP runtime to reduce CPU usage when the animation is off-screen. Like [other elements](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders), it supports an optional `placeholder` child, to display while the `src` file is loading:
 
 ```html
 <amp-anim width=400 height=300 src="my-gif.gif">
@@ -83,7 +83,7 @@ URLs when ingesting AMP files to point to a cached version of the image.</td>
       </tr>
       <tr>
          <td width="40%"><strong>common attributes</strong></td>
-         <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+         <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
        </tr>
 </table>
 

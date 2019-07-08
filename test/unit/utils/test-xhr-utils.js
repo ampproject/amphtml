@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
 import {
-  ALLOW_SOURCE_ORIGIN_HEADER,
   getViewerAuthTokenIfAvailable,
   getViewerInterceptResponse,
   setupAMPCors,
   setupInit,
   setupJsonFetchInit,
-  verifyAmpCORSHeaders,
 } from '../../../src/utils/xhr-utils';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
 
 describes.sandboxed('utils/xhr-utils', {}, env => {
   let sandbox;
@@ -33,63 +31,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     sandbox = env.sandbox;
   });
 
-  describe('verifyAmpCORSHeaders', () => {
-    it('should verify allowed source origin', () => {
-      const sourceOrigin = 'https://www.da-original.org';
-      const headers = {};
-      headers[ALLOW_SOURCE_ORIGIN_HEADER] = sourceOrigin;
-      const response = new Response({}, {headers: new Headers(headers)});
-      const win = {
-        location: {
-          href: sourceOrigin,
-        },
-      };
-      expect(() => {
-        verifyAmpCORSHeaders(win, response, /* init */ {});
-      }).to.not.throw;
-    });
-
-    it('should throw error if invalid origin', () => {
-      const sourceOrigin = 'https://www.da-original.org';
-      const headers = {};
-      headers[ALLOW_SOURCE_ORIGIN_HEADER] = 'https://www.original.org';
-      const response = new Response({}, {headers: new Headers(headers)});
-      const win = {
-        location: {
-          href: sourceOrigin,
-        },
-      };
-      expect(() => {
-        verifyAmpCORSHeaders(win, response, {} /* init */);
-      }).to.throw(
-        'Returned AMP-Access-Control-Allow-Source-Origin ' +
-          'is not equal to the current: https://www.original.org vs ' +
-          'https://www.da-original.org'
-      );
-    });
-  });
-
   describe('setupAMPCors', () => {
-    describe('requireAmpResponseSourceOrigin', () => {
-      it('should be false if ampCors is false', () => {
-        const fetchInitDef = setupAMPCors(
-          {origin: 'http://www.origin.org'},
-          'http://www.origin.org',
-          {ampCors: false}
-        );
-        expect(fetchInitDef.requireAmpResponseSourceOrigin).to.equal(false);
-      });
-
-      it('should be set if not defined', () => {
-        const fetchInitDef = setupAMPCors(
-          {origin: 'http://www.origin.org'},
-          'http://www.origin.org',
-          {}
-        );
-        expect(fetchInitDef.requireAmpResponseSourceOrigin).to.equal(true);
-      });
-    });
-
     it('should set AMP-Same-Origin header', () => {
       // Given a same origin request.
       const fetchInitDef = setupAMPCors(
@@ -154,71 +96,106 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
   });
 
   describe('getViewerInterceptResponse', () => {
-    let ampDocSingle = null;
-    let doc;
-    let init = {};
-    let input = '';
-    let viewer;
-    let viewerForDoc;
-    let win = {};
+    let ampDocSingle, doc, init, input, viewer, viewerForDoc, win;
+
     beforeEach(() => {
-      viewer = {
-        hasCapability: unusedParam => false,
-        whenFirstVisible: () => Promise.resolve(),
-        sendMessageAwaitResponse: sandbox.stub(),
-      };
-      doc = document.createElement('html');
-      doc.setAttribute('allow-xhr-interception', 'true');
       ampDocSingle = {
         getRootNode: () => {
           return {documentElement: doc};
         },
       };
+      doc = document.createElement('html');
+      doc.setAttribute('allow-xhr-interception', 'true');
+      init = {};
+      input = 'https://sample.com';
+      viewer = {
+        hasCapability: unusedParam => true,
+        isTrustedViewer: () => Promise.resolve(true),
+        sendMessageAwaitResponse: sandbox.stub().returns(Promise.resolve({})),
+        whenFirstVisible: () => Promise.resolve(),
+      };
       viewerForDoc = sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+      win = {
+        AMP_MODE: {
+          localDev: false,
+        },
+        location: {
+          hash: '',
+        },
+      };
     });
 
-    it('should be no-op if amp doc is absent', () => {
+    it('should be no-op if amp doc is absent', async () => {
       ampDocSingle = null;
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
-        () => {
-          expect(viewerForDoc).to.not.have.been.called;
-        }
-      );
+
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      // Expect no-op.
+      expect(viewerForDoc).to.not.have.been.called;
     });
 
-    it('should be no-op if amp doc does not support xhr interception', () => {
+    it('should not intercept if viewer can not intercept', async () => {
+      viewer.hasCapability = unusedParam => false;
+
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      // Expect no interception.
+      expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+    });
+
+    it('should not intercept if request is initialized to bypass for local development', async () => {
+      // Given the bypass flag and localDev being true.
+      init = {
+        bypassInterceptorForDev: true,
+      };
+      win.AMP_MODE = {
+        localDev: true,
+      };
+
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      // Expect no interception.
+      expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+    });
+
+    it('should not intercept if amp doc does not support xhr interception', async () => {
       doc.removeAttribute('allow-xhr-interception');
-      input = 'https://www.googz.org';
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
-        () => {
-          expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-        }
-      );
+
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      // Expect no interception.
+      expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
     });
 
-    it('should send xhr request to viewer', () => {
-      win = {AMP_MODE: {development: false}};
-      viewer.hasCapability = () => true;
-      viewer.isTrustedViewer = () => Promise.resolve(true);
-      input = 'https://www.googz.org';
-      init = {body: {}};
-      viewer.sendMessageAwaitResponse.returns(Promise.resolve({}));
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
-        () => {
-          const msgPayload = dict({
-            'originalRequest': {
-              'input': 'https://www.googz.org',
-              'init': {
-                'body': {},
-              },
-            },
-          });
-          expect(viewer.sendMessageAwaitResponse).to.have.been.calledOnce;
-          expect(viewer.sendMessageAwaitResponse).to.have.been.calledWith(
-            'xhr',
-            msgPayload
-          );
-        }
+    it('should not intercept if URL is known as a proxy URL', async () => {
+      input = 'https://cdn.ampproject.org';
+
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      // Expect no interception.
+      expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+    });
+
+    it('should send xhr request to viewer', async () => {
+      init = {
+        body: {},
+      };
+      input = 'https://www.shouldsendxhrrequesttoviewer.org';
+
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      const msgPayload = dict({
+        'originalRequest': {
+          'input': 'https://www.shouldsendxhrrequesttoviewer.org',
+          'init': {
+            'body': {},
+          },
+        },
+      });
+      expect(viewer.sendMessageAwaitResponse).to.have.been.calledOnce;
+      expect(viewer.sendMessageAwaitResponse).to.have.been.calledWith(
+        'xhr',
+        msgPayload
       );
     });
   });

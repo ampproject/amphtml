@@ -101,12 +101,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
-    id: 'amp-auto-ads',
-    name: 'AMP Auto Ads',
-    spec: 'https://github.com/ampproject/amphtml/issues/6196',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
-  },
-  {
     id: 'amp-base-carousel',
     name: 'AMP extension for a basic, flexible, carousel',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
@@ -125,6 +119,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
+    id: 'ampdoc-fie',
+    name: 'Install AmpDoc on FIE level',
+    spec: 'https://github.com/ampproject/amphtml/issues/22734',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22733',
+  },
+  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
@@ -141,12 +141,6 @@ const EXPERIMENTS = [
     name: 'AMP Visualization using Vega grammar',
     spec: 'https://github.com/ampproject/amphtml/issues/3991',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
-  },
-  {
-    id: 'amp-apester-media',
-    name: 'AMP extension for Apester media (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/3233',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
   },
   {
     id: 'cache-service-worker',
@@ -190,11 +184,6 @@ const EXPERIMENTS = [
     id: 'chunked-amp',
     name: "Split AMP's loading phase into chunks",
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
-  },
-  {
-    id: 'font-display-swap',
-    name: 'Use font-display: swap as the default for fonts.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
   },
   {
     id: 'pump-early-frame',
@@ -277,28 +266,10 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
-    id: 'amp-live-list-sorting',
-    name: 'Allows "newest last" insertion algorithm to be used',
-    spec: 'https://github.com/ampproject/amphtml/issues/5396',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13552',
-  },
-  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
-  },
-  {
-    id: 'no-sync-xhr-in-ads',
-    name: 'Disables syncronous XHR requests in 3p iframes.',
-    spec: 'TODO',
-    cleanupIssue: 'TODO',
-  },
-  {
-    id: 'sandbox-ads',
-    name: 'Applies a sandbox to ad iframes.',
-    spec: 'https://github.com/ampproject/amphtml/issues/14240',
-    cleanupIssue: 'TODO',
   },
   {
     id: 'iframe-messaging',
@@ -323,14 +294,6 @@ const EXPERIMENTS = [
     name: 'Enables DOM diffing of amp-list renders via set-dom',
     spec: 'https://github.com/ampproject/amphtml/pull/17000',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
-  },
-  {
-    id: 'no-initial-intersection',
-    name:
-      'Do not invoke context.observeIntersection callback with ' +
-      'initialintersection',
-    spec: 'https://github.com/ampproject/amphtml/issues/8562',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
   },
   {
     id: 'custom-elements-v1',
@@ -360,16 +323,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
-    id: 'linker-form',
-    name: 'Enables form support in linker',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18068',
-  },
-  {
-    id: 'fie-metadata-extension',
-    name: 'Use version supporting extension field in amp-ad-metadata.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18737',
-  },
-  {
     id: 'amp-list-load-more',
     name: 'Enables load-more related functionality in amp-list',
     spec: 'https://github.com/ampproject/amphtml/issues/13575',
@@ -386,30 +339,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
-    id: 'amp-auto-lightbox',
-    name: 'Automatically detects images to place in a lightbox.',
-    spec: 'https://github.com/ampproject/amphtml/issues/20395',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
-  },
-  {
-    id: 'amp-auto-lightbox-carousel',
-    name: 'Automatically detects carousels to group in a lightbox.',
-    spec: 'https://github.com/ampproject/amphtml/issues/20395',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
-  },
-  {
     id: 'amp-img-auto-sizes',
     name: 'Automatically generates sizes for amp-img if not given',
     spec: 'https://github.com/ampproject/amphtml/issues/19513',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
-  },
-  {
-    id: 'amp-autocomplete',
-    name:
-      'AMP Autocomplete provides a set of suggestions to' +
-      ' complete a user query in an input field.',
-    spec: 'https://github.com/ampproject/amphtml/issues/9785',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21021',
   },
   {
     id: 'inabox-viewport-friendly',
@@ -420,13 +353,20 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'inabox-remove-height-auto',
+    id: 'fie-css-cleanup',
     name:
-      'Experiment to allow slowly removing the height: auto!' +
-      ' for inabox amp4ads. By adding the ' +
-      '.i-amphtml-inabox-preserve-height-auto class on <html>',
-    spec: 'https://github.com/ampproject/amphtml/issues/22059',
-    cleanupIssue: 'TODO',
+      'Experiment to prevent regression after a major CSS clean up' +
+      ' for AMPHTML Ads in FIE rendering mode',
+    spec: 'https://github.com/ampproject/amphtml/issues/22418',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
+  },
+  {
+    id: 'inabox-css-cleanup',
+    name:
+      'Experiment to prevent regression after a major CSS clean up' +
+      ' for AMPHTML Ads in inabox rendering mode',
+    spec: 'https://github.com/ampproject/amphtml/issues/22418',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
     id: 'amp-force-prerender-visible-elements',
@@ -443,6 +383,26 @@ const EXPERIMENTS = [
       'access after user interaction and approval',
     spec: 'https://github.com/ampproject/amphtml/issues/8929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
+  },
+  {
+    id: 'margin-bottom-in-content-height',
+    name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
+    spec: 'https://github.com/ampproject/amphtml/issues/22718',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
+  },
+  {
+    id: 'untrusted-xhr-interception',
+    name:
+      'Enable "xhrInterceptor" capability for untrusted viewers. ' +
+      'For development use only',
+    spec: 'N/A',
+    cleanupIssue: 'N/A',
+  },
+  {
+    id: 'new-loaders',
+    name: 'New default loaders',
+    spec: 'https://github.com/ampproject/amphtml/issues/20237',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
   },
 ];
 

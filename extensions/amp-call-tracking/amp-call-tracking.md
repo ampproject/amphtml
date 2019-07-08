@@ -32,7 +32,7 @@ tracking. Executes a CORS request to substitute the number.
     <td><code>&lt;script async custom-element="amp-call-tracking" src="https://cdn.ampproject.org/v0/amp-call-tracking-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>container, fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
   <tr>
@@ -71,7 +71,7 @@ Each unique CORS endpoint is called only once per page.
   <li>`formattedPhoneNumber` (optional): Specifies the phone number to display. If not specified, the value in `phoneNumber` is used.</li>
 </ul>
 <p>{% call callout('Important', type='caution') %}
-  Your XHR endpoint must implement the requirements specified in the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests">CORS Requests in AMP</a> spec.
+  Your XHR endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests">CORS Requests in AMP</a> spec.
   {% endcall %}</p></td>
   </tr>
 </table>

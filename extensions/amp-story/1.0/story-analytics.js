@@ -15,15 +15,18 @@
  */
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
-import {dev} from '../../../src/log';
+import {getVariableService} from './variable-service';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @enum {string} */
-export const StoryEventType = {
-  PAGE_VISIBLE: 'story-page-visible',
+export const AnalyticsEvent = {
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
+  LAST_PAGE_VISIBLE: 'story-last-page-visible',
+  PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
+  PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
+  PAGE_VISIBLE: 'story-page-visible',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
 };
@@ -65,11 +68,14 @@ export class StoryAnalyticsService {
    * @param {!Element} element
    */
   constructor(win, element) {
-    /** @private @const {!Window} */
+    /** @protected @const {!Window} */
     this.win_ = win;
 
     /** @private @const {!Element} */
     this.element_ = element;
+
+    /** @const @private {!./variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(win);
   }
 
   /**
@@ -78,44 +84,28 @@ export class StoryAnalyticsService {
   onNavigationStateChange(stateChangeEvent) {
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
-        this.triggerEvent_(StoryEventType.PAGE_VISIBLE);
+        this.triggerEvent(AnalyticsEvent.PAGE_VISIBLE);
         break;
       case StateChangeType.BOOKEND_ENTER:
-        this.triggerEvent_(StoryEventType.BOOKEND_ENTER);
+        this.triggerEvent(AnalyticsEvent.BOOKEND_ENTER);
         break;
       case StateChangeType.BOOKEND_EXIT:
-        this.triggerEvent_(StoryEventType.BOOKEND_EXIT);
+        this.triggerEvent(AnalyticsEvent.BOOKEND_EXIT);
+        break;
+      case StateChangeType.LAST_PAGE:
+        this.triggerEvent(AnalyticsEvent.LAST_PAGE_VISIBLE);
         break;
     }
   }
 
   /**
-   * @param {boolean} isMuted
+   * @param {!AnalyticsEvent} eventType
    */
-  onMutedStateChange(isMuted) {
-    const event = isMuted
-      ? StoryEventType.STORY_MUTED
-      : StoryEventType.STORY_UNMUTED;
-    this.triggerEvent_(event);
-  }
-
-  /**
-   * @param {!StoryEventType} eventType
-   * @private
-   */
-  triggerEvent_(eventType) {
-    const variablesPromise = Services.storyVariableServiceForOrNull(this.win_);
-    variablesPromise.then(
-      variables => {
-        triggerAnalyticsEvent(
-          this.element_,
-          eventType,
-          /** @type {!JsonObject} */ (variables)
-        );
-      },
-      reason => {
-        dev().error('AMP-STORY', 'Could not get analytics variables', reason);
-      }
+  triggerEvent(eventType) {
+    triggerAnalyticsEvent(
+      this.element_,
+      eventType,
+      this.variableService_.get()
     );
   }
 }

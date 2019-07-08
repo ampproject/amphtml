@@ -15,16 +15,18 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {ConfigLoader} from './config-loader';
 import {Layout} from '../../../src/layout';
 import {PositionError} from './position-error';
 import {Services} from '../../../src/services';
-import {UserLocationService} from './user-location-service';
+import {
+  UserLocationConfigDef,
+  UserLocationService,
+} from './user-location-service';
 import {createCustomEvent} from '../../../src/event-helper';
+import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {isJsonScriptTag} from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
-import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-user-location';
 const SERVICE_TAG = 'user-location';
@@ -46,8 +48,8 @@ export class AmpUserLocation extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?./user-location-service.UserLocationConfigDef} */
-    this.config_ = null;
+    /** @private {?ConfigLoader} */
+    this.configLoader_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -65,7 +67,8 @@ export class AmpUserLocation extends AMP.BaseElement {
       'The "amp-user-location" experiment must be enabled ' +
         'to use amp-user-location'
     );
-    this.config_ = this.parse_();
+
+    this.configLoader_ = new ConfigLoader(this.getAmpDoc(), this.element);
 
     this.action_ = Services.actionServiceForDoc(this.element);
 
@@ -76,55 +79,14 @@ export class AmpUserLocation extends AMP.BaseElement {
     );
   }
 
-  /**
-   * Parse a JSON script tag for configuration, if present.
-   * @return {?./user-location-service.UserLocationConfigDef}
-   */
-  parse_() {
-    const {children} = this.element;
-    if (children.length == 0) {
-      return null;
-    }
+  /** @override */
+  layoutCallback() {
+    devAssert(this.configLoader_, 'config loader has not been initialized');
+    // When the framework calls layout on amp-user-location, the config
+    // can be prefetched to improve latency.
+    this.configLoader_.fetchConfig();
 
-    userAssert(
-      children.length == 1,
-      'amp-user-location may only have one configuration json <script> tag'
-    );
-
-    const firstChild = children[0];
-    if (!isJsonScriptTag(firstChild)) {
-      this.user().error(
-        TAG,
-        'amp-user-location config should be in a <script> tag ' +
-          'with type="application/json".'
-      );
-      return null;
-    }
-
-    const json = tryParseJson(firstChild.textContent, e => {
-      this.user().error(
-        TAG,
-        'Failed to parse amp-user-location config. Is it valid JSON?',
-        e
-      );
-    });
-    if (json === null) {
-      return null;
-    }
-
-    let jsonFallback = json['fallback'];
-    let fallback;
-    if (jsonFallback) {
-      jsonFallback = jsonFallback.split(',');
-      fallback = {lat: Number(jsonFallback[0]), lon: Number(jsonFallback[1])};
-    }
-
-    return {
-      fallback,
-      maximumAge: json['maximumAge'],
-      precision: json['precision'],
-      timeout: json['timeout'],
-    };
+    return Promise.resolve();
   }
 
   /**
@@ -133,13 +95,13 @@ export class AmpUserLocation extends AMP.BaseElement {
    * @private
    */
   userLocationInteraction_() {
-    const servicePromise = Services.userLocationForDocOrNull(this.element);
-
-    return servicePromise
-      .then(userLocationService => {
-        const config =
-          this.config_ ||
-          /** @type {./user-location-service.UserLocationConfigDef} */ ({});
+    return Promise.all([
+      Services.userLocationForDocOrNull(this.element),
+      this.getConfig_(),
+    ])
+      .then(results => {
+        const userLocationService = results[0];
+        const config = results[1];
         return userLocationService.requestLocation(config);
       })
       .then(
@@ -165,6 +127,46 @@ export class AmpUserLocation extends AMP.BaseElement {
           }
         }
       );
+  }
+
+  /**
+   * Retrieve and normalize the element's config
+   */
+  getConfig_() {
+    return this.configLoader_
+      .getConfig()
+      .then(config => this.normalizeConfig_(config))
+      .catch(() => {
+        const error = new Error(
+          'Failed to parse amp-user-location config. Is it valid JSON?'
+        );
+        this.user().error(TAG, error);
+        throw error;
+      });
+  }
+
+  /**
+   * Turn a config json into a dict of approved properties only
+   * @param {!JsonObject} json
+   * @return {?./user-location-service.UserLocationConfigDef}
+   */
+  normalizeConfig_(json) {
+    const jsonFallback = json['fallback'];
+    let fallback;
+    if (typeof jsonFallback === 'string') {
+      const fallbackParts = jsonFallback.split(',');
+      fallback = {lat: Number(fallbackParts[0]), lon: Number(fallbackParts[1])};
+    }
+    if (typeof jsonFallback === 'object') {
+      fallback = {lat: jsonFallback['lat'], lon: jsonFallback['lon']};
+    }
+
+    return {
+      fallback,
+      maximumAge: json['maximumAge'],
+      precision: json['precision'],
+      timeout: json['timeout'],
+    };
   }
 
   /**

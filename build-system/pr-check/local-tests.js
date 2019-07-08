@@ -43,14 +43,12 @@ function main() {
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp test --integration --nobuild --headless --coverage');
+    timedExecOrDie('gulp integration --nobuild --headless --coverage');
     timedExecOrDie('gulp unit --nobuild --headless --coverage');
     timedExecOrDie('gulp codecov-upload');
   } else {
     printChangeSummary(FILENAME);
-    const buildTargets = new Set();
-    determineBuildTargets(buildTargets, FILENAME);
-
+    const buildTargets = determineBuildTargets(FILENAME);
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('FLAG_CONFIG') &&
@@ -79,7 +77,7 @@ function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
-      timedExecOrDie('gulp test --integration --nobuild --headless --coverage');
+      timedExecOrDie('gulp integration --nobuild --headless --coverage');
     }
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {

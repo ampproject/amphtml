@@ -43,8 +43,6 @@ describes.endtoend(
       await expect(controller.getElementText(renderedTemplate)).to.equal(
         'Here are the results for the search:\nResult 1\nResult 2\nResult 3'
       );
-
-      await controller.takeScreenshot('screenshots/amp-form-ssr.png');
     });
   }
 );
@@ -81,8 +79,6 @@ describes.endtoend(
         await expect(controller.getElementText(renderedTemplate)).to.equal(
           'SSR response'
         );
-
-        await controller.takeScreenshot('screenshots/amp-form.png');
       });
   }
 );

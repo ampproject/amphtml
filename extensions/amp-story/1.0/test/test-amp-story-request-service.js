@@ -50,7 +50,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
     xhrMock
       .expects('fetchJson')
-      .withExactArgs(bookendUrl, {requireAmpResponseSourceOrigin: false})
+      .withExactArgs(bookendUrl, {})
       .resolves({
         ok: true,
         json() {
@@ -115,7 +115,6 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     xhrMock
       .expects('fetchJson')
       .withExactArgs(bookendUrl, {
-        requireAmpResponseSourceOrigin: false,
         credentials: 'include',
       })
       .resolves({

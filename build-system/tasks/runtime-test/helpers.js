@@ -16,12 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const deglob = require('globs-to-files');
-const findImports = require('find-imports');
 const fs = require('fs');
 const gulp = require('gulp');
 const log = require('fancy-log');
-const minimatch = require('minimatch');
 const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
@@ -29,58 +26,32 @@ const webserver = require('gulp-webserver');
 const {
   reportTestErrored,
   reportTestFinished,
-  reportTestSkipped,
-  reportTestStarted,
+  reportTestRunComplete,
 } = require('../report-test-status');
 const {app} = require('../../test-server');
-const {exec} = require('../../exec');
-const {gitDiffNameOnlyMaster} = require('../../git');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {Server} = require('karma');
 
 const BATCHSIZE = 4; // Number of Sauce Lab browsers
-const EXTENSIONSCSSMAP = 'EXTENSIONS_CSS_MAP';
-const LARGE_REFACTOR_THRESHOLD = 50;
-const ROOT_DIR = path.resolve(__dirname, '../../../');
-
 const CHROMEBASE = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
 const chromeFlags = [];
 
 /**
- * Extracts a mapping from CSS files to JS files from a well known file
- * generated during `gulp css`.
- *
- * @return {!Object<string, string>}
+ * Validates arguments before test runs
+ * @return {boolean}
  */
-function extractCssJsFileMap() {
-  const extensionsCssMap = fs.readFileSync(EXTENSIONSCSSMAP, 'utf8');
-  const extensionsCssMapJson = JSON.parse(extensionsCssMap);
-  const extensions = Object.keys(extensionsCssMapJson);
-  const cssJsFileMap = {};
-
-  // Adds an entry that maps a CSS file to a JS file
-  function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
-    const cssFilePath =
-      `extensions/${cssData['name']}/${cssData['version']}/` +
-      `${cssBinaryName}.css`;
-    const jsFilePath = `build/${cssBinaryName}-${cssData['version']}.css.js`;
-    cssJsFileMap[cssFilePath] = jsFilePath;
+function shouldNotRun() {
+  if (argv.saucelabs) {
+    if (!process.env.SAUCE_USERNAME) {
+      throw new Error('Missing SAUCE_USERNAME Env variable');
+    }
+    if (!process.env.SAUCE_ACCESS_KEY) {
+      throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
+    }
   }
 
-  extensions.forEach(extension => {
-    const cssData = extensionsCssMapJson[extension];
-    if (cssData['hasCss']) {
-      addCssJsEntry(cssData, cssData['name'], cssJsFileMap);
-      if (cssData.hasOwnProperty('cssBinaries')) {
-        const cssBinaries = cssData['cssBinaries'];
-        cssBinaries.forEach(cssBinary => {
-          addCssJsEntry(cssData, cssBinary, cssJsFileMap);
-        });
-      }
-    }
-  });
-  return cssJsFileMap;
+  return false;
 }
 
 /**
@@ -123,228 +94,10 @@ function getAdTypes() {
 }
 
 /**
- * Returns the list of files imported by a JS file
- *
- * @param {string} jsFile
- * @return {!Array<string>}
- */
-function getImports(jsFile) {
-  const imports = findImports([jsFile], {
-    flatten: true,
-    packageImports: false,
-    absoluteImports: true,
-    relativeImports: true,
-  });
-  const files = [];
-  const jsFileDir = path.dirname(jsFile);
-  imports.forEach(function(file) {
-    const fullPath = path.resolve(jsFileDir, `${file}.js`);
-    if (fs.existsSync(fullPath)) {
-      const relativePath = path.relative(ROOT_DIR, fullPath);
-      files.push(relativePath);
-    }
-  });
-  return files;
-}
-
-/**
- * Retrieves the set of JS source files that import the given CSS file.
- *
- * @param {string} cssFile
- * @param {!Object<string, string>} cssJsFileMap
- * @return {!Array<string>}
- */
-function getJsFilesFor(cssFile, cssJsFileMap) {
-  const jsFiles = [];
-  if (cssJsFileMap.hasOwnProperty(cssFile)) {
-    const cssFileDir = path.dirname(cssFile);
-    const jsFilesInDir = fs.readdirSync(cssFileDir).filter(file => {
-      return path.extname(file) == '.js';
-    });
-    jsFilesInDir.forEach(jsFile => {
-      const jsFilePath = `${cssFileDir}/${jsFile}`;
-      if (getImports(jsFilePath).includes(cssJsFileMap[cssFile])) {
-        jsFiles.push(jsFilePath);
-      }
-    });
-  }
-  return jsFiles;
-}
-
-function getUnitTestsToRun(unitTestPaths) {
-  if (isLargeRefactor()) {
-    log(
-      green('INFO:'),
-      'Skipping tests on local changes because this is a large refactor.'
-    );
-    reportTestSkipped();
-    return;
-  }
-
-  const tests = unitTestsToRun(unitTestPaths);
-  if (tests.length == 0) {
-    log(
-      green('INFO:'),
-      'No unit tests were directly affected by local changes.'
-    );
-    reportTestSkipped();
-    return;
-  }
-
-  log(green('INFO:'), 'Running the following unit tests:');
-  tests.forEach(test => {
-    log(cyan(test));
-  });
-
-  return tests;
-}
-
-/**
- * Extracts the list of unit tests to run based on the changes in the local
- * branch.
- *
- * @param {!Array<string>} unitTestPaths
- * @return {!Array<string>}
- */
-function unitTestsToRun(unitTestPaths) {
-  const cssJsFileMap = extractCssJsFileMap();
-  const filesChanged = gitDiffNameOnlyMaster();
-  const testsToRun = [];
-  let srcFiles = [];
-
-  function isUnitTest(file) {
-    return unitTestPaths.some(pattern => {
-      return minimatch(file, pattern);
-    });
-  }
-
-  function shouldRunTest(testFile, srcFiles) {
-    const filesImported = getImports(testFile);
-    return (
-      filesImported.filter(function(file) {
-        return srcFiles.includes(file);
-      }).length > 0
-    );
-  }
-
-  // Retrieves the set of unit tests that should be run
-  // for a set of source files.
-  function getTestsFor(srcFiles) {
-    const allUnitTests = deglob.sync(unitTestPaths);
-    return allUnitTests
-      .filter(testFile => {
-        return shouldRunTest(testFile, srcFiles);
-      })
-      .map(fullPath => path.relative(ROOT_DIR, fullPath));
-  }
-
-  filesChanged.forEach(file => {
-    if (!fs.existsSync(file)) {
-      if (!isTravisBuild()) {
-        log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
-      }
-    } else if (isUnitTest(file)) {
-      testsToRun.push(file);
-    } else if (path.extname(file) == '.js') {
-      srcFiles.push(file);
-    } else if (path.extname(file) == '.css') {
-      srcFiles = srcFiles.concat(getJsFilesFor(file, cssJsFileMap));
-    }
-  });
-
-  if (srcFiles.length > 0) {
-    log(green('INFO:'), 'Determining which unit tests to run...');
-    const moreTestsToRun = getTestsFor(srcFiles);
-    moreTestsToRun.forEach(test => {
-      if (!testsToRun.includes(test)) {
-        testsToRun.push(test);
-      }
-    });
-  }
-  return testsToRun;
-}
-
-/**
- * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
- * by refreshing the wd cache so that Karma can launch without an error.
- */
-function refreshKarmaWdCache() {
-  exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
-}
-
-/**
- * Returns true if the PR is a large refactor.
- * (Used to skip testing local changes.)
- * @return {boolean}
- */
-function isLargeRefactor() {
-  const filesChanged = gitDiffNameOnlyMaster();
-  return filesChanged.length >= LARGE_REFACTOR_THRESHOLD;
-}
-
-function getBrowserConfig() {
-  const chromeFlags = [];
-  if (argv.chrome_flags) {
-    argv.chrome_flags.split(',').forEach(flag => {
-      chromeFlags.push('--'.concat(flag));
-    });
-  }
-
-  const options = new Map();
-  options
-    .set('chrome_canary', {browsers: ['ChromeCanary']})
-    .set('chrome_flags', {
-      browsers: ['Chrome_flags'],
-      customLaunchers: {
-        // eslint-disable-next-line
-        Chrome_flags: {
-          base: 'Chrome',
-          flags: chromeFlags,
-        },
-      },
-    })
-    .set('edge', {browsers: ['Edge']})
-    .set('firefox', {browsers: ['Firefox']})
-    .set('headless', {browsers: ['Chrome_no_extensions_headless']})
-    .set('ie', {
-      browsers: ['IE'],
-      customLaunchers: {
-        IeNoAddOns: {
-          base: 'IE',
-          flags: ['-extoff'],
-        },
-      },
-    })
-    .set('safari', {browsers: ['Safari']})
-    .set('saucelabs', {
-      browsers: [
-        'SL_Chrome',
-        'SL_Firefox',
-        'SL_Edge_17',
-        'SL_Safari_12',
-        'SL_IE_11',
-        // TODO(amp-infra): Evaluate and add more platforms here.
-        //'SL_Chrome_Android_7',
-        //'SL_iOS_11',
-        //'SL_iOS_12',
-        'SL_Chrome_Beta',
-        'SL_Firefox_Beta',
-      ],
-    })
-    .set('saucelabs_lite', {browsers: ['SL_Safari_12', 'SL_Firefox']});
-
-  for (const key of Array.from(options.keys())) {
-    if (argv[key]) {
-      return options.get(key);
-    }
-  }
-}
-
-/**
  * Prints help messages for args if tests are being run for local development.
  */
 function maybePrintArgvMessages() {
-  if (argv.nohelp) {
+  if (argv.nohelp || isTravisBuild()) {
     return;
   }
 
@@ -353,9 +106,9 @@ function maybePrintArgvMessages() {
     firefox: 'Running tests on Firefox.',
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
-    'chrome_canary': 'Running tests on Chrome Canary.',
-    saucelabs: 'Running integration tests on Sauce Labs browsers.',
-    saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.', // eslint-disable-line google-camelcase/google-camelcase
+    // eslint-disable-next-line
+    chrome_canary: 'Running tests on Chrome Canary.',
+    saucelabs: 'Running tests on Sauce Labs browsers.',
     nobuild: 'Skipping build.',
     watch:
       'Enabling watch mode. Editing and saving a file will cause the' +
@@ -363,11 +116,6 @@ function maybePrintArgvMessages() {
     verbose: 'Enabling verbose mode. Expect lots of output!',
     testnames: 'Listing the names of all tests being run.',
     files: 'Running tests in the file(s): ' + cyan(argv.files),
-    integration:
-      'Running only the integration tests. Prerequisite: ' +
-      cyan('gulp dist --fortesting'),
-    unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
-    a4a: 'Running only A4A tests.',
     compiled: 'Running tests against minified code.',
     grep:
       'Only running tests that match the pattern "' + cyan(argv.grep) + '".',
@@ -386,42 +134,41 @@ function maybePrintArgvMessages() {
       cyan(chromeFlags)
     );
   }
-  if (!isTravisBuild()) {
-    log(
-      green('Run'),
-      cyan('gulp help'),
-      green('to see a list of all test flags.')
-    );
-    log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));
+
+  log(
+    green('Run'),
+    cyan('gulp help'),
+    green('to see a list of all test flags.')
+  );
+  log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));
+  log(
+    green('⤷ Use'),
+    cyan('--local_changes'),
+    green('to run unit tests from files commited to the local branch.')
+  );
+  if (!argv.testnames && !argv.files && !argv.local_changes) {
     log(
       green('⤷ Use'),
-      cyan('--local_changes'),
-      green('to run unit tests from files commited to the local branch.')
+      cyan('--testnames'),
+      green('to see the names of all tests being run.')
     );
-    if (!argv.testnames && !argv.files && !argv.local_changes) {
-      log(
-        green('⤷ Use'),
-        cyan('--testnames'),
-        green('to see the names of all tests being run.')
-      );
-    }
-    if (!argv.headless) {
-      log(
-        green('⤷ Use'),
-        cyan('--headless'),
-        green('to run tests in a headless Chrome window.')
-      );
-    }
-    if (!argv.compiled) {
-      log(green('Running tests against unminified code.'));
-    }
-    Object.keys(argv).forEach(arg => {
-      const message = argvMessages[arg];
-      if (message) {
-        log(yellow(`--${arg}:`), green(message));
-      }
-    });
   }
+  if (!argv.headless) {
+    log(
+      green('⤷ Use'),
+      cyan('--headless'),
+      green('to run tests in a headless Chrome window.')
+    );
+  }
+  if (!argv.compiled) {
+    log(green('Running tests against unminified code.'));
+  }
+  Object.keys(argv).forEach(arg => {
+    const message = argvMessages[arg];
+    if (message) {
+      log(yellow(`--${arg}:`), green(message));
+    }
+  });
 }
 
 function maybePrintCoverageMessage() {
@@ -434,36 +181,9 @@ function maybePrintCoverageMessage() {
   opn(url, {wait: false});
 }
 
-function maybeSetCoverageConfig(config, reportName) {
-  if (!argv.coverage) {
-    return;
-  }
-
-  config.plugins.push('karma-coverage-istanbul-reporter');
-  config.coverageIstanbulReporter = {
-    dir: 'test/coverage',
-    reports: isTravisBuild() ? ['lcovonly'] : ['html', 'text', 'text-summary'],
-    'report-config': {lcovonly: {file: reportName}},
-  };
-
-  const plugin = [
-    'istanbul',
-    {
-      exclude: [
-        'ads/**/*.js',
-        'third_party/**/*.js',
-        'test/**/*.js',
-        'extensions/**/test/**/*.js',
-        'testing/**/*.js',
-      ],
-    },
-  ];
-
-  config.browserify.transform = [['babelify', {plugins: [plugin]}]];
-}
-
 function karmaBrowserComplete(browser) {
   const result = browser.lastResult;
+  result.total = result.success + result.failed + result.skipped;
   // Prevent cases where Karma detects zero tests and still passes. #16851.
   if (result.total == 0) {
     log(red('ERROR: Zero tests detected by Karma.'));
@@ -494,19 +214,10 @@ function karmaBrowsersReady() {
   log(green('Done. Running tests...'));
 }
 
-function karmaRunComplete(results) {
-  if (results.error) {
-    reportTestErrored();
-  } else {
-    reportTestFinished(results.success, results.failed);
-  }
-}
-
 function karmaRunStart() {
-  if (!argv.saucelabs && !argv.saucelabs_lite) {
+  if (!argv.saucelabs) {
     log(green('Running tests locally...'));
   }
-  reportTestStarted();
 }
 
 function startTestServer(port) {
@@ -543,13 +254,32 @@ async function runTestInBatches(config) {
       browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable'
     ].push(browserId);
   }
+
+  let errored = false;
+  let totalStableSuccess = 0;
+  let totalStableFailed = 0;
+  const partialTestRunCompleteFn = async (browsers, results) => {
+    if (results.error) {
+      errored = true;
+    } else {
+      totalStableSuccess += results.success;
+      totalStableFailed += results.failed;
+    }
+  };
+
   if (browsers.stable.length) {
     const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
       'stable',
       browsers.stable,
-      config
+      config,
+      partialTestRunCompleteFn
     );
-    if (allBatchesExitCodes) {
+    if (errored) {
+      await reportTestErrored();
+    } else {
+      await reportTestFinished(totalStableSuccess, totalStableFailed);
+    }
+    if (allBatchesExitCodes || errored) {
       log(
         yellow('Some tests have failed on'),
         cyan('stable'),
@@ -557,14 +287,16 @@ async function runTestInBatches(config) {
         cyan('beta'),
         yellow('browsers.')
       );
-      return allBatchesExitCodes;
+      return allBatchesExitCodes || Number(errored);
     }
   }
 
   if (browsers.beta.length) {
     const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
       'beta',
-      browsers.beta
+      browsers.beta,
+      config,
+      /* runCompleteFn */ () => {}
     );
     if (allBatchesExitCodes) {
       log(
@@ -588,11 +320,19 @@ async function runTestInBatches(config) {
  *
  * @param {string} batchName a human readable name for the batch.
  * @param {!Array{string}} browsers list of SauceLabs browsers as
- *     customLaunchers IDs.
+ *     customLaunchers IDs. *
  * @param {Object} config karma config
+ * @param {function()} runCompleteFn a function to execute on the
+ *     `run_complete` event. It should take two arguments, (browser, results),
+ *     and return nothing.
  * @return {number} processExitCode
  */
-async function runTestInBatchesWithBrowsers(batchName, browsers, config) {
+async function runTestInBatchesWithBrowsers(
+  batchName,
+  browsers,
+  config,
+  runCompleteFn
+) {
   let batch = 1;
   let startIndex = 0;
   let endIndex = BATCHSIZE;
@@ -614,7 +354,7 @@ async function runTestInBatchesWithBrowsers(batchName, browsers, config) {
       cyan(configBatch.browsers.length),
       green('Sauce Labs browser(s)...')
     );
-    batchExitCodes.push(await createKarmaServer(configBatch));
+    batchExitCodes.push(await createKarmaServer(configBatch, runCompleteFn));
     startIndex = batch * BATCHSIZE;
     batch++;
     endIndex = Math.min(batch * BATCHSIZE, browsers.length);
@@ -623,13 +363,24 @@ async function runTestInBatchesWithBrowsers(batchName, browsers, config) {
   return batchExitCodes.every(exitCode => exitCode == 0) ? 0 : 1;
 }
 
-async function createKarmaServer(config) {
+/**
+ * Creates and starts karma server
+ * @param {!Object} configBatch
+ * @param {function()} runCompleteFn a function to execute on the
+ *     `run_complete` event. It should take two arguments, (browser, results),
+ *     and return nothing.
+ * @return {!Promise<number>}
+ */
+async function createKarmaServer(
+  configBatch,
+  runCompleteFn = reportTestRunComplete
+) {
   let resolver;
   const deferred = new Promise(resolverIn => {
     resolver = resolverIn;
   });
 
-  const karmaServer = new Server(config, exitCode => {
+  const karmaServer = new Server(configBatch, exitCode => {
     maybePrintCoverageMessage();
     resolver(exitCode);
   });
@@ -638,7 +389,7 @@ async function createKarmaServer(config) {
     .on('run_start', () => karmaRunStart())
     .on('browsers_ready', () => karmaBrowsersReady())
     .on('browser_complete', browser => karmaBrowserComplete(browser))
-    .on('run_complete', (unusedBrowsers, results) => karmaRunComplete(results));
+    .on('run_complete', runCompleteFn);
 
   karmaServer.start();
 
@@ -648,13 +399,8 @@ async function createKarmaServer(config) {
 module.exports = {
   createKarmaServer,
   getAdTypes,
-  getBrowserConfig,
-  getUnitTestsToRun,
-  isLargeRefactor,
-  maybeSetCoverageConfig,
   maybePrintArgvMessages,
-  refreshKarmaWdCache,
   runTestInBatches,
+  shouldNotRun,
   startTestServer,
-  unitTestsToRun,
 };

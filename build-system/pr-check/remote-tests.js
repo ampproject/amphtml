@@ -47,15 +47,13 @@ async function main() {
     timedExecOrDie('gulp update-packages');
 
     await startSauceConnect(FILENAME);
-    timedExecOrDie('gulp unit --nobuild --saucelabs_lite');
-    timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
+    timedExecOrDie('gulp unit --nobuild --saucelabs');
+    timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
 
     stopSauceConnect(FILENAME);
   } else {
     printChangeSummary(FILENAME);
-    const buildTargets = new Set();
-    determineBuildTargets(buildTargets, FILENAME);
-
+    const buildTargets = determineBuildTargets(FILENAME);
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('FLAG_CONFIG') &&
@@ -76,7 +74,7 @@ async function main() {
     await startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit --nobuild --saucelabs_lite');
+      timedExecOrDie('gulp unit --nobuild --saucelabs');
     }
 
     if (
@@ -84,9 +82,7 @@ async function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
-      timedExecOrDie(
-        'gulp test --integration --nobuild --compiled --saucelabs'
-      );
+      timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
     }
     stopSauceConnect(FILENAME);
   }

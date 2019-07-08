@@ -33,7 +33,7 @@ A replacement for the HTML5 <code>audio</code> tag. The <code>amp-audio</code> c
     <td><code>&lt;script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js">&lt;/script></code></td>
   </tr>
    <tr>
-     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
      <td>fixed, fixed-height, nodisplay</td>
   </tr>
   <tr>
@@ -115,7 +115,7 @@ it is ready.</td>
   </tr>
   <tr>
     <td width="40%"><strong>title</strong></td>
-    <td>(string) part of the [common attributes](https://www.ampproject.org/docs/reference/common_attributes), doubles as the audio's name displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.</td>
+    <td>(string) part of the [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes), doubles as the audio's name displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.</td>
   </tr>
 </table>
 

@@ -38,7 +38,7 @@ Displays a dismissable notification to the user.
     </td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
@@ -105,7 +105,7 @@ You can add it as a query string field (e.g.,
 If the `data-show-if-href` attribute is not specified, AMP will only check if the notification with the specified ID has been "dismissed" by the user locally. If not, the notification will be shown.
 
 {% call callout('Important', type='caution') %}
-For handling CORS requests and responses, see the [AMP CORS spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).
+For handling CORS requests and responses, see the [AMP CORS spec](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests).
 {% endcall %}
 
 **CORS GET request** query string fields: `elementId`, `ampUserId`
@@ -317,7 +317,7 @@ amp-user-notification.amp-active {
 ```
 
 ## Actions
-The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events):
+The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
 <table>
   <tr>
@@ -335,8 +335,8 @@ The `amp-user-notification` exposes the following actions that you can use [AMP 
 Optionally, you can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 
 - [CLIENT_ID URL substitution](../../spec/amp-var-substitutions.md#client-id)
-- [`amp-ad`](https://www.ampproject.org/docs/reference/components/amp-ad)
-- [`amp-analytics`](https://www.ampproject.org/docs/reference/components/amp-analytics)
+- [`amp-ad`](https://amp.dev/documentation/components/amp-ad)
+- [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
 
 ## Validation
 
