@@ -17,7 +17,6 @@
 import {ChunkPriority, chunk} from './chunk';
 import {Services} from './services';
 import {dev} from './log';
-import {isExperimentOn} from './experiments';
 
 /** @const @enum {string} */
 export const AutoLightboxEvents = {
@@ -30,14 +29,10 @@ export const AutoLightboxEvents = {
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installAutoLightboxExtension(ampdoc) {
-  const {win} = ampdoc;
-  if (!isExperimentOn(win, 'amp-auto-lightbox')) {
-    return;
-  }
   chunk(
     ampdoc,
     () => {
-      Services.extensionsFor(win).installExtensionForDoc(
+      Services.extensionsFor(ampdoc.win).installExtensionForDoc(
         ampdoc,
         'amp-auto-lightbox'
       );
