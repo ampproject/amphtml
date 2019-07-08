@@ -40,10 +40,8 @@ const {
   WEB_PUSH_PUBLISHER_VERSIONS,
   buildAlp,
   buildExaminer,
-  buildWebPushPublisherFiles,
-  buildLoginDone,
-  buildExperiments,
   buildWebWorker,
+  compileJs,
   compileAllMinifiedTargets,
   endBuildStep,
   hostname,
@@ -91,7 +89,6 @@ function transferSrcsToTempDir() {
     const name = `${tmp}${file.replace(process.cwd(), '')}`;
     fs.outputFileSync(name, code);
   });
-  log(green('babel transforms done!'));
 }
 
 /**
@@ -180,6 +177,75 @@ async function dist() {
     .then(() => {
       return exitCtrlcHandler(handlerProcess);
     });
+}
+
+/**
+ * Build AMP experiments.js.
+ *
+ * @param {!Object} options
+ */
+function buildExperiments(options) {
+  return compileJs(
+    './build/experiments/',
+    'experiments.max.js',
+    './dist.tools/experiments/',
+    {
+      watch: false,
+      minify: options.minify || argv.minify,
+      includePolyfills: true,
+      minifiedName: 'experiments.js',
+    }
+  );
+}
+
+/**
+ * Build amp-login-done-${version}.js file.
+ *
+ * @param {string} version
+ * @param {!Object} options
+ */
+function buildLoginDone(version, options) {
+  const buildDir = `build/all/amp-access-${version}/`;
+  const builtName = `amp-login-done-${version}.max.js`;
+  const minifiedName = `amp-login-done-${version}.js`;
+  const latestName = 'amp-login-done-latest.js';
+  return compileJs('./' + buildDir, builtName, './dist/v0/', {
+    watch: false,
+    includePolyfills: true,
+    minify: options.minify || argv.minify,
+    minifiedName,
+    latestName,
+    extraGlobs: [
+      buildDir + 'amp-login-done-0.1.max.js',
+      buildDir + 'amp-login-done-dialog.js',
+    ],
+  });
+}
+
+/**
+ * Build amp-web-push publisher files HTML page.
+ *
+ * @param {!Object} options
+ */
+function buildWebPushPublisherFiles(options) {
+  const distDir = 'dist/v0';
+  const promises = [];
+  WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
+    WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
+      const tempBuildDir = `build/all/amp-web-push-${version}/`;
+      const builtName = fileName + '.js';
+      const minifiedName = fileName + '.js';
+      const p = compileJs('./' + tempBuildDir, builtName, './' + distDir, {
+        watch: options.watch,
+        includePolyfills: true,
+        minify: options.minify || argv.minify,
+        minifiedName,
+        extraGlobs: [tempBuildDir + '*.js'],
+      });
+      promises.push(p);
+    });
+  });
+  return Promise.all(promises);
 }
 
 async function prebuild() {
