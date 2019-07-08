@@ -36,7 +36,7 @@ Displays an Instagram embed.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-instagram/">Annotated code example for amp-instagram</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-instagram/">Annotated code example for amp-instagram</a></td>
   </tr>
 </table>
 

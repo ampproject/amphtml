@@ -40,7 +40,7 @@ limitations under the License.
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td><ul>
-      <li>See AMP By Example's <a href="https://ampbyexample.com/stories/introduction/amp_story_hello_world/">Hello World</a> sample.</li>
+      <li>See AMP By Example's <a href="https://amp.dev/documentation/examples/introduction/stories_in_amp/">Hello World</a> sample.</li>
       <li>Learn from the <a href="https://amp.dev/documentation/guides-and-tutorials/start/visual_story/">Create a visual AMP story</a> tutorial.</li>
     </ul></td>
   </tr>
@@ -485,7 +485,7 @@ Example:
 The following are available templates to specify for the layout of the grid layer.
 
 {% call callout('Tip', type='success') %}
-To see the layout templates in use, check out the [layouts demo on AMP By Example](https://ampbyexample.com/stories/features/layouts/).
+To see the layout templates in use, check out the [layouts demo on AMP By Example](https://amp.dev/documentation/examples/style-layout/amp_story_layouts/).
 {% endcall %}
 
 ##### fill
@@ -1089,7 +1089,7 @@ The following animation effects are available as presets for AMP stories:
 
 
 {% call callout('Tip', type='success') %}
-See a [live demo of all the AMP story animations](https://ampbyexample.com/stories/features/animations/) on AMP By Example.
+See a [live demo of all the AMP story animations](https://amp.dev/documentation/examples/visual-effects/amp_story_animations/) on AMP By Example.
 {% endcall %}
 
 
@@ -1581,5 +1581,5 @@ Additionally, for right-to-left languages, you may include the `dir="rtl"` attri
 ## Related resources
 
 * [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
-* [Samples on AMP By Example](https://ampbyexample.com/stories/#stories/introduction)
+* [Samples on AMP By Example](https://amp.dev/documentation/examples/?format=stories)
 * [Best practices for creating an AMP story](https://amp.dev/documentation/guides-and-tutorials/develop/amp_story_best_practices)

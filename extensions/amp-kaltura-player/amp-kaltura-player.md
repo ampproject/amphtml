@@ -36,7 +36,7 @@ An <code>amp-kaltura-player</code> component displays the Kaltura Player as used
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-kaltura-player/">Annotated code example for amp-kaltura-player</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-kaltura-player/">Annotated code example for amp-kaltura-player</a></td>
   </tr>
 </table>
 

@@ -38,7 +38,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-google-document-embed/">amp-google-document-embed example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-google-document-embed/">amp-google-document-embed example</a>.</td>
   </tr>
 </table>
 

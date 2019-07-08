@@ -50,7 +50,7 @@ Dynamically loads more documents recommended for the user.
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-next-page/">amp-next-page example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-next-page/">amp-next-page example</a>.</td>
   </tr>
 </table>
 

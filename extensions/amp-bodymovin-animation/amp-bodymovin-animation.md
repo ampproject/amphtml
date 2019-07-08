@@ -36,7 +36,7 @@ Displays an <a href="http://airbnb.io/lottie/ ">AirBnB Bodymovin animation playe
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-bodymovin-animation/">amp-bodymovin-animation example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-bodymovin-animation/">amp-bodymovin-animation example</a>.</td>
   </tr>
 </table>
 

@@ -45,8 +45,8 @@ Provides the ability to collect and store a user's consent through a UI control.
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-      <li><a href="https://ampbyexample.com/user_consent/basic_user_consent_flow/">Basic user consent flow</a></li>
-      <li><a href="https://ampbyexample.com/user_consent/advanced_user_consent_flow/">Advanced user consent flow</a></li>
+      <li><a href="https://amp.dev/documentation/examples/user-consent/basic_user_consent_flow/">Basic user consent flow</a></li>
+      <li><a href="https://amp.dev/documentation/examples/user-consent/advanced_user_consent_flow/">Advanced user consent flow</a></li>
     </td>
   </tr>
 </table>
@@ -418,7 +418,7 @@ The table below lists the vendors and components that are integrated with amp-co
 | ------------- |------------------| -----| -----|
 | DoubleClick & AdSense Integration      | 05/10/18 | [Link](https://support.google.com/dfp_premium/answer/7678538) |Yes|
 | AMP IMA Video Integration   |  05/15/18  |   [Link](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/consent-blocking.md) |Yes|
-| AMP Geo |  05/10/18      |  [Link](https://ampbyexample.com/user_consent/geolocation-based_consent_flow/) |Yes|
+| AMP Geo |  05/10/18      |  [Link](https://amp.dev/documentation/examples/user-consent/geolocation-based_consent_flow/) |Yes|
 | AMP Stories |   05/15/18     |[Link](#prompt-ui-for-stories)|Yes|
 
 
@@ -486,11 +486,11 @@ The response on `checkConsentHref` also accepts values for the key [`sharedData`
 
 ##### I have a complicated consent UI, will it work?
 
-You should try out the [advanced consent flows](https://ampbyexample.com/user_consent/advanced_user_consent_flow/) to see how it's implemented. You could also consider using the [`<amp-selector>`](https://amp.dev/documentation/components/amp-selector) component.
+You should try out the [advanced consent flows](https://amp.dev/documentation/examples/user-consent/advanced_user_consent_flow/) to see how it's implemented. You could also consider using the [`<amp-selector>`](https://amp.dev/documentation/components/amp-selector) component.
 
 ##### How can I show a persistent UX element for users to update their consent preferences?
 
-You can use the optional [post-prompt UI](#post-prompt) to accomplish this. View this [sample on AMP By Example](https://ampbyexample.com/user_consent/basic_user_consent_flow/) for a similar implementation.
+You can use the optional [post-prompt UI](#post-prompt) to accomplish this. View this [sample on AMP By Example](https://amp.dev/documentation/examples/user-consent/basic_user_consent_flow/) for a similar implementation.
 
 ##### Can I keep the non-EU experience unchanged and just deliver an "opt-out" experience to all EU users?
 
@@ -508,7 +508,7 @@ You can use the response of `checkConsentHref` to show a consent to the user if 
 
 ##### Can amp-geo work with amp-consent so that it only shows consent for a user that's accessing my content from a certain country?
 
-Yes. See example [here](https://ampbyexample.com/user_consent/geolocation-based_consent_flow/).
+Yes. See example [here](https://amp.dev/documentation/examples/user-consent/geolocation-based_consent_flow/).
 
 ##### I can't see feature X being supported, what can I do?
 

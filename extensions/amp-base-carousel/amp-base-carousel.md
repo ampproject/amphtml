@@ -44,7 +44,7 @@ A generic carousel for displaying multiple similar pieces of content along a hor
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-      <a href="https://ampbyexample.com/components/amp-base-carousel/">amp-carousel example</a>
+      <a href="https://amp.dev/documentation/examples/components/amp-base-carousel/">amp-carousel example</a>
     </td>
   </tr>
 </table>

@@ -36,7 +36,7 @@ Displays a Vine simple embed.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-vine/">Annotated code example for amp-vine</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-vine/">Annotated code example for amp-vine</a></td>
   </tr>
 </table>
 

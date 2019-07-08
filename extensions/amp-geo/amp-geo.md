@@ -36,7 +36,7 @@ Provides an approximate country-level geolocation interface.
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-geo/">amp-geo example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-geo/">amp-geo example</a>.</td>
   </tr>
 </table>
 

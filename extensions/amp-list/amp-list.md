@@ -39,7 +39,7 @@ using a supplied template.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-list/">amp-list example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-list/">amp-list example</a>.</td>
   </tr>
 </table>
 

@@ -36,7 +36,7 @@ Displays the Springboard Player used in the <a href="http://publishers.springboa
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-springboard-player/">Annotated code example for amp-springboard-player</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-springboard-player/">Annotated code example for amp-springboard-player</a></td>
   </tr>
   </tr>
 </table>

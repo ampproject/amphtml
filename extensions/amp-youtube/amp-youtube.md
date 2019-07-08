@@ -37,7 +37,7 @@ Displays a <a href="https://www.youtube.com/">YouTube</a> video.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-youtube/">Annotated code example for amp-youtube</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-youtube/">Annotated code example for amp-youtube</a></td>
   </tr>
 </table>
 

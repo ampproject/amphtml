@@ -38,7 +38,7 @@ Displays the Reach Player configured in the <a href="http://beachfrontreach.com"
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-    <a href="https://ampbyexample.com/components/amp-reach-player/">Annotated code example for amp-reach-player</a>
+    <a href="https://amp.dev/documentation/examples/components/amp-reach-player/">Annotated code example for amp-reach-player</a>
     </td>
   </tr>
 </table>

@@ -32,7 +32,7 @@ A flying carpet wraps its children in a unique full-screen scrolling container. 
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-fx-flying-carpet/">Annotated code example for amp-fx-flying-carpet</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-fx-flying-carpet/">Annotated code example for amp-fx-flying-carpet</a></td>
   </tr>
 </table>
 

@@ -43,7 +43,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-sidebar/">amp-sidebar example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-sidebar/">amp-sidebar example</a>.</td>
   </tr>
 </table>
 
@@ -206,7 +206,7 @@ In the following example, we display a `toolbar` if the window width is less tha
 
 
 {% call callout('Tip', type='success') %}
-See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sidebar/).
+See live demos at [AMP By Example](https://amp.dev/documentation/examples/components/amp-sidebar/).
 {% endcall %}
 
 ## Sidebar for Stories

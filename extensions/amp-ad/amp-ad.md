@@ -47,7 +47,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-ad/">amp-ad example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-ad/">amp-ad example</a>.</td>
   </tr>
 </table>
 
@@ -145,7 +145,7 @@ There are 3 ways to monetize videos in AMP with video ads:
 
 2. Use the [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video.html) component that comes with a built-in IMA SDK and HTML5 video player
 
-3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
+3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://amp.dev/documentation/examples/components/amp-iframe/).
 When using `amp-iframe` approach:
     * Make sure there is a poster if loading the player in the first viewport. [Details](https://amp.dev/documentation/components/amp-iframe#iframe-with-placeholder).
     * Video and poster must be served over HTTPS.

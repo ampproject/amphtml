@@ -35,7 +35,7 @@ An <code>amp-brid-player</code> displays the Brid Player used in <a href="https:
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-brid-player/"> Annotated code example for amp-brid-player</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-brid-player/"> Annotated code example for amp-brid-player</a></td>
   </tr>
 </table>
 

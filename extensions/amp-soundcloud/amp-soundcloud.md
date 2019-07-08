@@ -36,7 +36,7 @@ Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-soundcloud/">Annotated code example for amp-soundcloud</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-soundcloud/">Annotated code example for amp-soundcloud</a></td>
   </tr>
 </table>
 

@@ -36,7 +36,7 @@ Displays a Twitter Tweet or Moment.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-twitter/">Annotated code example for amp-twitter</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-twitter/">Annotated code example for amp-twitter</a></td>
   </tr>
 </table>
 

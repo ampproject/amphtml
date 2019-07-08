@@ -36,7 +36,7 @@ Displays a simple embedded <a href="http://www.hulu.com">Hulu</a> video.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-hulu/">Annotated code example for amp-hulu</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-hulu/">Annotated code example for amp-hulu</a></td>
   </tr>
 </table>
 

@@ -36,7 +36,7 @@ Displays a Facebook post, video or comment.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-facebook/">annotated amp-facebook</a> example.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-facebook/">annotated amp-facebook</a> example.</td>
   </tr>
 </table>
 
@@ -107,7 +107,7 @@ Renders as:
 <br><br>
 Both posts and videos can be embedded as a post. Setting <code>data-embed-as="video"</code> for Facebook videos embeds the player of the video, and adds the accompanying post card with it. Setting <code>data-embed-as="post"</code> ignores the caption card. This is done to make sure we are zooming in on videos correctly.
 <br><br>
-The <code>comment</code> value embeds a single comment (or reply to a comment) on a post. This is not to be confused with <a href="https://ampbyexample.com/components/amp-facebook-comments/">amp-facebook-comments</a>.
+The <code>comment</code> value embeds a single comment (or reply to a comment) on a post. This is not to be confused with <a href="https://amp.dev/documentation/examples/components/amp-facebook-comments/">amp-facebook-comments</a>.
 <br><br>
 Check out the documentation for differences between <a href="https://developers.facebook.com/docs/plugins/embedded-posts">post embeds</a>, <a href="https://developers.facebook.com/docs/plugins/embedded-video-player">video embeds</a>, and <a href="https://developers.facebook.com/docs/plugins/embedded-comments">comment embeds</a>.</td>
   </tr>

@@ -37,7 +37,7 @@ Trigger and monitor the loading of custom fonts on AMP pages.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-font/">Annotated code example for amp-font</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-font/">Annotated code example for amp-font</a></td>
   </tr>
 </table>
 

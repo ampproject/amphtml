@@ -38,7 +38,7 @@ Expands or shrinks its font size to fit the content within the space given to it
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-fit-text/">amp-fit-text example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-fit-text/">amp-fit-text example</a>.</td>
   </tr>
 </table>
 
