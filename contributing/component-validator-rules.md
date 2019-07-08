@@ -1,7 +1,7 @@
 # Contributing Validator Rules for an AMP Extended Component
 
 This doc describes how to create a basic validator ruleset for a new [AMP
-Extended Component](https://www.ampproject.org/docs/reference/components). It
+Extended Component](https://amp.dev/documentation/components/). It
 does not describe every possible validator feature, but rather goes over some
 of the most common rules used when creating a new AMP Extended Component.
 
@@ -474,7 +474,7 @@ following, with errors specific to your test cases.
 
 ```
 FAIL
-amp-iframe/0.1/test/validator-amp-iframe.html:41:2 The attribute 'src' in tag 'amp-iframe' is missing or incorrect, but required by attribute '[src]'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [DISALLOWED_HTML]
+amp-iframe/0.1/test/validator-amp-iframe.html:41:2 The attribute 'src' in tag 'amp-iframe' is missing or incorrect, but required by attribute '[src]'. (see https://amp.dev/documentation/components/amp-iframe) [DISALLOWED_HTML]
 ```
 
 To test your changes, from the `amphtml/validator/` path, run `python build.py`.

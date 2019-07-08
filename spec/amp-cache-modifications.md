@@ -107,8 +107,8 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 
 #### All relative `href` , `src`, `bookend-config-src`, `data-iframe-src` and `data-no-service-worker-fallback-shell-url` URLs are rewritten as absolute URLs
 
-`bookend-confg-src` is part of `<amp-story>` [spec](https://www.ampproject.org/docs/reference/components/amp-story)
-`data-iframe-src` and `data-no-service-worker-fallback-shell-url` are part of `<amp-install-serviceworker>` [spec](https://www.ampproject.org/docs/reference/components/amp-install-serviceworker)
+`bookend-confg-src` is part of `<amp-story>` [spec](https://amp.dev/documentation/components/amp-story)
+`data-iframe-src` and `data-no-service-worker-fallback-shell-url` are part of `<amp-install-serviceworker>` [spec](https://amp.dev/documentation/components/amp-install-serviceworker)
 
 <details>
 <summary>example</summary>

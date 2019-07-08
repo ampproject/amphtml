@@ -29,4 +29,4 @@ AMP provides the following CSS classes that are set on the document's `body` to 
 
 ## Component-specific classes
 
-See the *Styling* section in the AMP component's reference documentation to learn about specific `amp-` classes used for that component (for example, `amp-carousel-button-prev` in [`amp-carousel`](https://www.ampproject.org/docs/reference/components/amp-carousel#styling)).
+See the *Styling* section in the AMP component's reference documentation to learn about specific `amp-` classes used for that component (for example, `amp-carousel-button-prev` in [`amp-carousel`](https://amp.dev/documentation/components/amp-carousel#styling)).

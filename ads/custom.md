@@ -116,7 +116,7 @@ The template can be specified outside the `amp-ad` tag for sharing. You can refe
 
 This must be starting with `https://`, and it must be the address of an ad
 server returning json in the format defined below. This endpoint must be available
-cross-origin. (See [CORS in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).)
+cross-origin. (See [CORS in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests).)
 
 ### data-slot (optional)
 

@@ -504,7 +504,7 @@ The integration with *amp-analytics* is documented in the [amp-access-analytics.
 ## CORS Origin Security
 
 Authorization and Pingback endpoints are CORS endpoints and they must implement the security protocol described in the
-[AMP CORS Security Spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
+[AMP CORS Security Spec](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp).
 
 ## Metering
 
