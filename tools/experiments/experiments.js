@@ -339,18 +339,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
-    id: 'amp-auto-lightbox',
-    name: 'Automatically detects images to place in a lightbox.',
-    spec: 'https://github.com/ampproject/amphtml/issues/20395',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
-  },
-  {
-    id: 'amp-auto-lightbox-carousel',
-    name: 'Automatically detects carousels to group in a lightbox.',
-    spec: 'https://github.com/ampproject/amphtml/issues/20395',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
-  },
-  {
     id: 'amp-img-auto-sizes',
     name: 'Automatically generates sizes for amp-img if not given',
     spec: 'https://github.com/ampproject/amphtml/issues/19513',

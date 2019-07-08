@@ -67,8 +67,7 @@ describes.realWin(
     }
 
     const stubAllCriteriaMet = () => env.sandbox.stub(Criteria, 'meetsAll');
-    const mockAllCriteriaMet = isMet =>
-      stubAllCriteriaMet().returns(tryResolve(() => isMet));
+    const mockAllCriteriaMet = isMet => stubAllCriteriaMet().returns(isMet);
 
     function mockCandidates(candidates) {
       env.sandbox.stub(Scanner, 'getCandidates').returns(candidates);
@@ -514,11 +513,9 @@ describes.realWin(
 
         const allCriteriaMet = stubAllCriteriaMet();
 
-        allCriteriaMet.withArgs(matchEquals(a)).returns(tryResolve(() => true));
-        allCriteriaMet
-          .withArgs(matchEquals(b))
-          .returns(tryResolve(() => false));
-        allCriteriaMet.withArgs(matchEquals(c)).returns(tryResolve(() => true));
+        allCriteriaMet.withArgs(matchEquals(a)).returns(true);
+        allCriteriaMet.withArgs(matchEquals(b)).returns(false);
+        allCriteriaMet.withArgs(matchEquals(c)).returns(true);
 
         mockCandidates([a, b, c]);
         mockIsProxyOrigin(true);
