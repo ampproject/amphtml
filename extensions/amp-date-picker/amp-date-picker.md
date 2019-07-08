@@ -35,7 +35,7 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td><ul>
       <li>For static mode: <code>fixed</code>, <code>fixed-height</code>, <code>responsive</code>, <code>fill</code> or <code>flex-item</code></li>
       <li>For overlay mode: <code>container</code></li>
@@ -572,7 +572,7 @@ If present, keeps the date picker open after the user clears the date or dates. 
 
 ##### common attributes
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 
 ## Events
@@ -580,7 +580,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 These events may trigger actions on other AMP components using the `on` attribute.
 e.g. `on="activate: my-lightbox.open"`
 
-Read more about [AMP Actions and Events](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
+Read more about [AMP Actions and Events](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events).
 
 ##### activate
 

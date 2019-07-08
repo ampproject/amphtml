@@ -35,7 +35,7 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td><strong><a href="https://www.ampproject.org/docs/design/responsive/control_layout.html#the-layout-attribute">Supported Layouts</a></strong></td>
+    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute">Supported Layouts</a></strong></td>
     <td>N/A</td>
   </tr>
   <tr>
@@ -51,7 +51,7 @@ limitations under the License.
 The `amp-form` extension allows you to create forms (`<form>`) to submit input fields in an AMP document. The  `amp-form` extension also provides [polyfills](#polyfills) for some missing behaviors in browsers.
 
 {% call callout('Important', type='caution') %}
-If you're submitting data in your form, your server endpoint must implement the requirements for [CORS security](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
+If you're submitting data in your form, your server endpoint must implement the requirements for [CORS security](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp).
 {% endcall %}
 
 
@@ -142,7 +142,7 @@ The `amp-form` element exposes the following actions:
 | `clear` | Empties the values from each input in the form. This can allow users to quickly fill out forms a second time. |
 
 {% call callout('Read on', type='read') %}
-Learn more about [Actions and Events in AMP](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events.html).
+Learn more about [Actions and Events in AMP](/docs/interaction_dynamic/amp-actions-and-events).
 {% endcall %}
 
 ## Events
@@ -159,7 +159,7 @@ The `amp-form` exposes the following events:
 | `valid` | The form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)). |
 | `invalid` | The form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)). |
 
-These events can be used via the [`on` attribute](https://www.ampproject.org/docs/fundamentals/spec#on).
+These events can be used via the [`on` attribute](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on).
 
 For example, the following listens to both the `submit-success` and `submit-error` events and shows different lightboxes depending on the event:
 
@@ -350,7 +350,7 @@ See the [full example here](../../examples/forms.amp.html).
 
 ### To render a successful response with data binding
 
-* Use the [on attribute](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events) to bind the form *submit-success* attribute to [`AMP.setState()`](https://amp.dev/documentation/components/amp-bind#updating-state-with-amp.setstate()).
+* Use the [on attribute](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events) to bind the form *submit-success* attribute to [`AMP.setState()`](https://amp.dev/documentation/components/amp-bind#updating-state-with-amp.setstate()).
 * Use the `event` property to capture the response data.
 * Add the state attribute to the desired element to bind the form response.
 
@@ -628,7 +628,7 @@ Visit [AMP Start](https://ampstart.com/components#form-elements) for responsive,
 ## Security considerations
 
 ### Protecting against XSRF
-In addition to following the details in the [AMP CORS spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests.html), please pay extra attention to the section on ["Processing state changing requests" ](https://www.ampproject.org/docs/fundamentals/amp-cors-requests.html#processing-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
+In addition to following the details in the [AMP CORS spec](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests), please pay extra attention to the section on ["Processing state changing requests" ](https://www.ampproject.org/docs/fundamentals/amp-cors-requests.html#processing-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
 
 In general, keep in mind the following points when accepting input from the user:
 

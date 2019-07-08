@@ -1,7 +1,7 @@
 # Contributing Validator Rules for an AMP Extended Component
 
 This doc describes how to create a basic validator ruleset for a new [AMP
-Extended Component](https://www.ampproject.org/docs/reference/components). It
+Extended Component](https://amp.dev/documentation/components/). It
 does not describe every possible validator feature, but rather goes over some
 of the most common rules used when creating a new AMP Extended Component.
 
