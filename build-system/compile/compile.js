@@ -37,7 +37,11 @@ const {VERSION: internalRuntimeVersion} = require('../internal-version');
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
+// NOTE(erwinm): Theres a weird race condition where when we use `pseudo_names`
+// we get "Error parsing json encoded files". turning the closure invocations
+// to 1 seems to fix the issue.
+const MAX_PARALLEL_CLOSURE_INVOCATIONS =
+  argv.single_pass || argv.pseudo_names ? 1 : 4;
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
