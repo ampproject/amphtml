@@ -69,7 +69,7 @@ In the following example, we display an image that responds to the size of the v
 </div>
 
 {% call callout('Read on', type='read') %}
-Learn about responsive AMP pages in the [Create Responsive AMP Pages](/docs/design/responsive/responsive_design.html) guide.
+Learn about responsive AMP pages in the [Create Responsive AMP Pages](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/responsive_design) guide.
 {% endcall %}
 
 If the resource requested by the `amp-img` component fails to load, the space will be blank unless a [`fallback`](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#fallback) child is provided. A fallback is only executed on the initial layout and subsequent src changes after the fact (through resize + srcset for example) will not have a fallback for performance implications.

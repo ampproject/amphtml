@@ -29,7 +29,7 @@ limitations under the License.
 
 ## Overview
 
-The `amp-layout` component allows you to apply aspect-ratio based responsive layouts to any element. The `amp-layout` component works similarly to the [layout](https://amp.dev/documentation/guides-and-tutorials/responsive/control_layout#the-layout-attribute) attribute on existing AMP components, but supports any HTML markup as children. Other supported layouts all work with `amp-layout` (e.g., fixed-height, fixed, etc.).
+The `amp-layout` component allows you to apply aspect-ratio based responsive layouts to any element. The `amp-layout` component works similarly to the [layout](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute) attribute on existing AMP components, but supports any HTML markup as children. Other supported layouts all work with `amp-layout` (e.g., fixed-height, fixed, etc.).
 
 **Example**
 

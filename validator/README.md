@@ -94,7 +94,7 @@ Dependencies:
 Then, run `python build.py`. This creates `dist/validator_minified.js`, which is
 equivalent to the validator deployed at cdn.ampproject.org. You may now
 use the `--validator_js` command line flag to
-[amphtml-validator](https://amp.dev/documentation/guides-and-tutorials/validate.html#command-line-tool) to use this validator.
+[amphtml-validator](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp#command-line-tool) to use this validator.
 
 For use for testing with extensions, you can simply run `python build.py`
 to run all of the validator tests in the amphtml repo.
