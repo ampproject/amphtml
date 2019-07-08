@@ -44,8 +44,8 @@ A generic carousel for displaying multiple similar pieces of content along a hor
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>AMP By Example's:<ul>
-      <li><a href="https://ampbyexample.com/components/amp-carousel/">amp-carousel example</a></li>
-      <li><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/">Image galleries with amp-carousel</a></td>
+      <li><a href="https://amp.dev/documentation/examples/components/amp-carousel/">amp-carousel example</a></li>
+      <li><a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/">Image galleries with amp-carousel</a></td>
   </tr>
 </table>
 

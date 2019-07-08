@@ -33,7 +33,7 @@ Conduct user experience experiments (such as A/B testing and multivariate testin
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-experiment/">amp-experiment example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-experiment/">amp-experiment example</a>.</td>
   </tr>
 </table>
 

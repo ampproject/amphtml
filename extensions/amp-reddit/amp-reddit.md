@@ -36,7 +36,7 @@ Displays a Reddit comment or post embed.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-reddit/">amp-reddit example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-reddit/">amp-reddit example</a>.</td>
   </tr>
 </table>
 

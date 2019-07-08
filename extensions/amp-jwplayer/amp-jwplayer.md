@@ -36,7 +36,7 @@ Displays a cloud-hosted <a href="https://www.jwplayer.com/">JW Player</a>.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-jwplayer/">Annotated code example for amp-jwplayer</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-jwplayer/">Annotated code example for amp-jwplayer</a></td>
   </tr>
 </table>
 

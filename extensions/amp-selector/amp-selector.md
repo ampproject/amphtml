@@ -37,7 +37,7 @@ Represents a control that presents a menu of options and lets the user choose fr
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-selector/">amp-selector example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-selector/">amp-selector example</a>.</td>
   </tr>
 </table>
 
@@ -106,7 +106,7 @@ Example:
 ```
 
 {% call callout('Tip', type='success') %}
-See live demos at [AMP By Example](https://ampbyexample.com/components/amp-selector/).
+See live demos at [AMP By Example](https://amp.dev/documentation/examples/components/amp-selector/).
 {% endcall %}
 
 ## Attributes

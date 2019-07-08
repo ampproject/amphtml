@@ -40,7 +40,7 @@ If this attribute is present, and the browser supports autoplay:
 - when the user taps the video, the video is unmuted
 - if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
-For an example, visit [AMP By Example](https://ampbyexample.com/components/amp-video/#autoplay).
+For an example, visit [AMP By Example](https://amp.dev/documentation/examples/components/amp-video/#autoplay).
 
 <a id="docking"></a>
 

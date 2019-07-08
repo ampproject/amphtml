@@ -377,7 +377,7 @@ When you are testing your AMP pages, make sure to include tests from the cached 
 
 To ensure your cached AMP page renders and functions correctly:
 
-1.  From your browser, open the URL that the AMP Cache would use to access your AMP page. You can determine the cache URL format from this [tool on AMP By Example](https://ampbyexample.com/advanced/using_the_google_amp_cache/).
+1.  From your browser, open the URL that the AMP Cache would use to access your AMP page. You can determine the cache URL format from this [tool on AMP By Example](https://amp.dev/documentation/examples/guides/using_the_google_amp_cache/).
 
     For example:
     * URL: `https://amp.dev/documentation/guides-and-tutorials/start/create/`
@@ -400,7 +400,7 @@ In a same-origin request, the AMP system adds the custom `AMP-Same-Origin:true` 
 Here's our curl command for testing a request from `https://ampbyexample.com` to the `examples.json` file (on the same domain):
 
 ```shell
-curl 'https://ampbyexample.com/json/examples.json?__amp_source_origin=https%3A%2F%2Fampbyexample.com' -H 'AMP-Same-Origin: true' -I
+curl 'https://amp.dev/static/samples/json/examples.json?__amp_source_origin=https%3A%2F%2Fampbyexample.com' -H 'AMP-Same-Origin: true' -I
 ```
 
 The results from the command show the correct response headers (note: extra information was trimmed):
@@ -420,7 +420,7 @@ In a CORS request not from the same domain (i.e., cache), the `origin` header is
 Here's our curl command for testing a request from the cached AMP page on the Google AMP Cache to the `examples.json` file:
 
 ```shell
-curl 'https://ampbyexample.com/json/examples.json?__amp_source_origin=https%3A%2F%2Fampbyexample.com' -H 'origin: https://ampbyexample-com.cdn.ampproject.org' -I
+curl 'https://amp.dev/static/samples/json/examples.json?__amp_source_origin=https%3A%2F%2Fampbyexample.com' -H 'origin: https://ampbyexample-com.cdn.ampproject.org' -I
 ```
 
 The results from the command show the correct response headers:

@@ -36,7 +36,7 @@ Displays a <a href="https://vimeo.com">Vimeo</a> video.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-vimeo/">Annotated code example for amp-vimeo</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-vimeo/">Annotated code example for amp-vimeo</a></td>
   </tr>
 </table>
 

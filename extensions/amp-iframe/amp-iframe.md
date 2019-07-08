@@ -38,7 +38,7 @@ Displays an iframe.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-iframe/">Annotated code example for amp-iframe</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-iframe/">Annotated code example for amp-iframe</a></td>
   </tr>
 </table>
 
@@ -72,7 +72,7 @@ Renders as:
 </amp-iframe>
 
 {% call callout('Tip', type='success') %}
-To see more demos of the `amp-iframe`, visit [AMP By Example](https://ampbyexample.com/components/amp-iframe/).
+To see more demos of the `amp-iframe`, visit [AMP By Example](https://amp.dev/documentation/examples/components/amp-iframe/).
 {% endcall %}
 
 ## Usage of amp-iframe for advertising

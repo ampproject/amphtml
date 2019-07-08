@@ -35,7 +35,7 @@ Functionality for videos that minimize ("dock") to a corner or a custom position
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>AMP By Example's:<ul>
-      <li><a href="https://ampbyexample.com/advanced/advanced_video_docking/">Advanced video docking</a> with multiple targets, event triggers and media queries.</li>
+      <li><a href="https://amp.dev/documentation/examples/multimedia-animations/advanced_video_docking/">Advanced video docking</a> with multiple targets, event triggers and media queries.</li>
     </ul></td>
   </tr>
   <tr>
@@ -112,7 +112,7 @@ In order for custom positioning to work properly, the slot element must be [`pos
 
 ### <a id="combined-targets"></a> Combining corner and custom position behavior
 
-Custom positioning will be rejected when the element target is not visible. This means that corner targets or slot elements can be picked depending on layout by [CSS media queries.](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries) For an example where target types are combined and applied in different layout conditions, [see AMP by Example.](https://ampbyexample.com/advanced/advanced_video_docking/)
+Custom positioning will be rejected when the element target is not visible. This means that corner targets or slot elements can be picked depending on layout by [CSS media queries.](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries) For an example where target types are combined and applied in different layout conditions, [see AMP by Example.](https://amp.dev/documentation/examples/multimedia-animations/advanced_video_docking/)
 
 ## Events
 
@@ -120,7 +120,7 @@ Custom positioning will be rejected when the element target is not visible. This
 
 When the video becomes docked or undocked by scrolling, the [low-trust events](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events) `dock` and `undock` are triggered respectively.
 
-These can, for example, trigger an [`amp-animation`](https://amp.dev/documentation/components/amp-animation) that slides content in order to make room for the docked element. For an example where events trigger animations required for docking, [see AMP by Example.](https://ampbyexample.com/advanced/advanced_video_docking/)
+These can, for example, trigger an [`amp-animation`](https://amp.dev/documentation/components/amp-animation) that slides content in order to make room for the docked element. For an example where events trigger animations required for docking, [see AMP by Example.](https://amp.dev/documentation/examples/multimedia-animations/advanced_video_docking/)
 
 ### Event source
 

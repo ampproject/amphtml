@@ -37,7 +37,7 @@ Displays a <a href="https://gist.github.com/">GitHub Gist</a>.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-gist/">Annotated code example for amp-gist</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-gist/">Annotated code example for amp-gist</a></td>
   </tr>
 </table>
 

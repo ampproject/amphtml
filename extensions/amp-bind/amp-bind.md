@@ -42,9 +42,9 @@ limitations under the License.
     <td class="col-fourty"><strong>Examples</strong></td>
     <td>
       <ul>
-        <li><a href="https://ampbyexample.com/components/amp-bind/">Introductory code example with annotations</a></li>
-        <li><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">Linked image carousels example with annotations</a></li>
-        <li><a href="https://ampbyexample.com/samples_templates/product/">E-commerce product page example with annotations</a></li>
+        <li><a href="https://amp.dev/documentation/examples/components/amp-bind/">Introductory code example with annotations</a></li>
+        <li><a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">Linked image carousels example with annotations</a></li>
+        <li><a href="https://amp.dev/documentation/examples/e-commerce/product_page/">E-commerce product page example with annotations</a></li>
       </ul>
     </td>
   </tr>
@@ -139,7 +139,7 @@ When the button is pressed:
     - The `amp-img` element will show the image of a cat.
 
 {% call callout('Tip', type='success') %}
-[Try out the **live demo**](https://ampbyexample.com/components/amp-bind/) for this example with code annotations!
+[Try out the **live demo**](https://amp.dev/documentation/examples/components/amp-bind/) for this example with code annotations!
 {% endcall %}
 
 
@@ -436,7 +436,7 @@ Only binding to the following components and attributes are allowed:
   <tr>
     <td><code>&lt;amp-carousel type=slides&gt;</code></td>
     <td><code>[slide]</code><sup>*</sup></td>
-    <td>Changes the currently displayed slide index. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
+    <td>Changes the currently displayed slide index. <a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
     <td><code>&lt;amp-date-picker&gt;</code></td>
@@ -482,7 +482,7 @@ Only binding to the following components and attributes are allowed:
   <tr>
     <td><code>&lt;amp-selector&gt;</code></td>
     <td><code>[selected]</code><sup>*</sup><br><code>[disabled]</code></td>
-    <td>Changes the currently selected children element(s)<br>identified by their <code>option</code> attribute values. Supports a comma-separated list of values for multiple selection. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
+    <td>Changes the currently selected children element(s)<br>identified by their <code>option</code> attribute values. Supports a comma-separated list of values for multiple selection. <a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
     <td><code>&lt;amp-state&gt;</code></td>

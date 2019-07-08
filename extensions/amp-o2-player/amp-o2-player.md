@@ -36,7 +36,7 @@ Displays the AOL O2Player.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-o2-player/">Annotated code example for amp-o2-player</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-o2-player/">Annotated code example for amp-o2-player</a></td>
   </tr>
 </table>
 

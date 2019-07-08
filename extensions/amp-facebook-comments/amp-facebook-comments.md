@@ -35,7 +35,7 @@ Embeds the Facebook comments plugin.
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-facebook-comments/">amp-facebook-comments example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-facebook-comments/">amp-facebook-comments example</a>.</td>
   </tr>
 </table>
 

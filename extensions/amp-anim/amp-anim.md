@@ -38,7 +38,7 @@ A runtime-managed animated image, typically a GIF.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-anim/">Annotated code example for amp-anim</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-anim/">Annotated code example for amp-anim</a></td>
   </tr>
 </table>
 

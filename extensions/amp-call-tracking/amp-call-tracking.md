@@ -37,7 +37,7 @@ tracking. Executes a CORS request to substitute the number.
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-call-tracking/">amp-call-tracking example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-call-tracking/">amp-call-tracking example</a>.</td>
   </tr>
 </table>
 

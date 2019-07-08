@@ -38,7 +38,7 @@ A replacement for the HTML5 <code>audio</code> tag. The <code>amp-audio</code> c
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-audio/">Annotated code example for amp-audio</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-audio/">Annotated code example for amp-audio</a></td>
   </tr>
 </table>
 

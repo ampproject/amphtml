@@ -35,7 +35,7 @@ Displays GL Transmission Format (gITF) 3D models.
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-3d-gltf/">amp-3d-gltf example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-3d-gltf/">amp-3d-gltf example</a>.</td>
   </tr>
 </table>
 

@@ -42,7 +42,7 @@ VR image
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-google-vrview-image/">amp-google-vrview-image example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-google-vrview-image/">amp-google-vrview-image example</a>.</td>
   </tr>
 </table>
 

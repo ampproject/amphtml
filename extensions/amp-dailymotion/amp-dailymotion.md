@@ -36,7 +36,7 @@ Displays a <a href="http://www.dailymotion.com/">Dailymotion</a> video.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-dailymotion/">Annotated code example for amp-dailymotion</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-dailymotion/">Annotated code example for amp-dailymotion</a></td>
   </tr>
 </table>
 
