@@ -14,26 +14,7 @@
  * limitations under the License.
  */
 
-/**
- * NOTE: Keep the globs here in sync with the `CLOSURE_SRC_GLOBS`.
- */
-const BABEL_SRC_GLOBS = [
-  'src/**/*.js',
-  'builtins/**/*.js',
-  'build/**/*.js',
-  'extensions/**/*.js',
-  '3p/**/*.js',
-  'ads/**/*.js',
-  'node_modules/dompurify/dist/purify.es.js',
-  'node_modules/promise-pjs/promise.mjs',
-  'node_modules/rrule/dist/esm/src/index.js',
-  'node_modules/set-dom/dist/set-dom.js',
-  'node_modules/web-animations-js/web-animations.install.js',
-  'node_modules/web-activities/activity-ports.js',
-  'node_modules/@ampproject/animations/dist/animations.mjs',
-  'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
-  'node_modules/document-register-element/build/' +
-    'document-register-element.patched.js',
+const COMMON_GLOBS = [
   'third_party/caja/html-sanitizer.js',
   'third_party/closure-library/sha384-generated.js',
   'third_party/css-escape/css-escape.js',
@@ -47,7 +28,29 @@ const BABEL_SRC_GLOBS = [
   'third_party/react-dates/bundle.js',
   'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/inputmask/**/*.js',
+  'node_modules/dompurify/dist/purify.es.js',
+  'node_modules/promise-pjs/promise.mjs',
+  'node_modules/rrule/dist/esm/src/index.js',
+  'node_modules/set-dom/dist/set-dom.js',
+  'node_modules/web-animations-js/web-animations.install.js',
+  'node_modules/web-activities/activity-ports.js',
+  'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
+  'node_modules/document-register-element/build/' +
+    'document-register-element.patched.js',
 ];
+
+/**
+ * NOTE: Keep the globs here in sync with the `CLOSURE_SRC_GLOBS`.
+ */
+const BABEL_SRC_GLOBS = [
+  'src/**/*.js',
+  'builtins/**/*.js',
+  'build/**/*.js',
+  'extensions/**/*.js',
+  '3p/**/*.js',
+  'ads/**/*.js',
+].concat(COMMON_GLOBS);
 
 /**
  * NOTE: Keep the globs here in sync with the `BABEL_SRC_GLOBS`.
@@ -107,34 +110,11 @@ const CLOSURE_SRC_GLOBS = [
   // Exclude since it's not part of the runtime/extension binaries.
   '!extensions/amp-access/0.1/amp-login-done.js',
   'builtins/**.js',
-  'third_party/caja/html-sanitizer.js',
-  'third_party/closure-library/sha384-generated.js',
-  'third_party/css-escape/css-escape.js',
-  'third_party/fuzzysearch/index.js',
-  'third_party/mustache/**/*.js',
-  'third_party/timeagojs/**/*.js',
-  'third_party/vega/**/*.js',
-  'third_party/d3/**/*.js',
-  'third_party/subscriptions-project/*.js',
-  'third_party/webcomponentsjs/ShadowCSS.js',
-  'third_party/react-dates/bundle.js',
-  'third_party/amp-toolbox-cache-url/**/*.js',
-  'third_party/inputmask/**/*.js',
-  'node_modules/dompurify/dist/purify.es.js',
-  'node_modules/promise-pjs/promise.js',
-  'node_modules/rrule/dist/esm/src/index.js',
-  'node_modules/set-dom/src/**/*.js',
-  'node_modules/web-animations-js/web-animations.install.js',
-  'node_modules/web-activities/activity-ports.js',
-  'node_modules/@ampproject/animations/dist/animations.mjs',
-  'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
-  'node_modules/document-register-element/build/' +
-    'document-register-element.patched.js',
   // 'node_modules/core-js/modules/**.js',
   // Not sure what these files are, but they seem to duplicate code
   // one level below and confuse the compiler.
   '!node_modules/core-js/modules/library/**.js',
-];
+].concat(COMMON_GLOBS);
 
 module.exports = {
   BABEL_SRC_GLOBS,
