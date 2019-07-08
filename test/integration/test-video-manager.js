@@ -194,6 +194,27 @@ describe
           expect(videoManager.userInteracted(impl)).to.be.false;
         });
 
+        it('autoplay - there should be user interaction if the ad was unmuted', () => {
+          video.setAttribute('autoplay', '');
+
+          videoManager.register(impl);
+          const entry = videoManager.getEntryForVideo_(impl);
+          entry.isVisible_ = true;
+          entry.loaded_ = true;
+          entry.videoVisibilityChanged_();
+
+          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+            expect(videoManager.userInteracted(impl)).to.be.false;
+
+            listenOncePromise(video, VideoEvents.UNMUTED).then(() => {
+              expect(videoManager.userInteracted(impl)).to.be.true;
+            });
+
+            video.dispatchCustomEvent(VideoEvents.AD_START);
+            video.dispatchCustomEvent(VideoEvents.UNMUTED);
+          });
+        });
+
         it('autoplay - PAUSED if autoplaying and video is outside of view', () => {
           video.setAttribute('autoplay', '');
 

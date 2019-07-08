@@ -824,8 +824,15 @@ class VideoEntry {
 
     [
       listen(mask, 'click', () => userInteractedWith(video)),
-      listen(element, VideoEvents.AD_START, () => setMaskDisplay(false)),
-      listen(element, VideoEvents.AD_END, () => setMaskDisplay(true)),
+      listen(element, VideoEvents.AD_START, () => {
+        setMaskDisplay(false);
+        video.showControls();
+      }),
+      listen(element, VideoEvents.AD_END, () => {
+        setMaskDisplay(true);
+        video.hideControls();
+      }),
+      listen(element, VideoEvents.UNMUTED, () => userInteractedWith(video)),
     ].forEach(unlistener => unlisteners.push(unlistener));
   }
 
