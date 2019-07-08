@@ -340,15 +340,15 @@ A URL to the [story poster](#posters) in landscape format (4x3 aspect ratio).
 
 ##### live-story [optional]
 
-Enables the [Live story](#Live-story) functionality. Read more on that section.
+Enables the [Live story](#Live-story) functionality.
 
 ##### live-story-disabled [optional]
 
-Disables the [Live story](#Live-story) functionality. Read more on that section.
+Disables the [Live story](#Live-story) functionality.
 
 ##### data-poll-interval [optional]
 
-To be used together with the `live-story` attribute. Time (in milliseconds) interval between checks for new content (15000 ms minimum is enforced). If no `data-poll-interval` is provided it will default to the 15000 ms minimum.
+Used with the live-story attribute. Time interval (in milliseconds) between checks for new content. If no data-poll-interval is provided it with default to the 15000 millisecond minimum. A value under 15000 milliseconds is invalid.
 
 ### Posters
 
@@ -376,9 +376,11 @@ Usage: `<amp-story ... supports-landscape>...</amp-story>`
 
 ### Live story
 
-Using the `live-story` attribute, you can append new pages to a story for users to see in real-time. If the user is on the last page it will show a notification saying there are new pages and the progress bar will be updated.
+Use the `live-story` attribute to append new pages to a story for users to see in real-time.
 
-The core use cases for this are: coverage for breaking news or live events where the user can stay on to see new pages as they come in. Common examples are award shows, sporting events, and elections.
+This attribute will show a notification of new pages and update the progress bar to users on the last page.
+
+Core use cases for live-story include coverage for breaking news or live events, enabling real-time updates to users without exiting the story. Award shows, sporting events, and elections are some examples.
 
 #### How it works
 
@@ -388,7 +390,13 @@ In the background, while an AMP Story using `live-story` is displayed on the cli
 
 In most implementations for live blogs, content is either pushed by the server to the client instance of a page, or the client polls a JSON endpoint to receive updates. The implementation here is different, in that the client instance of the story polls the server copy of the story document for updates inside the `<amp-story>` element. For instance: if the user is viewing a story served from an AMP cache, the client will poll that document hosted on that AMP cache for updates; if the user is viewing a document served from a web publisher's origin domain (e.g. "example.com"), then the client will poll the document hosted on that origin domain for updates.
 
-This means that publishers of stories do not need to set up a JSON endpoint or push mechanism for this functionality to work. New content just needs to be published to the same URL, with a valid amp-story markup, and the user will have that content pulled into their client instance during the next poll (poll intervals are configurable in the component, and are valid above the minimum of 15 seconds).
+This means that publishers of stories do not need to set up a JSON endpoint or push mechanism for this functionality to work.
+
+New content just needs to be published to the same URL with a valid amp-story markup. The user will then have that content pulled into their client instance during the next poll (poll intervals are configurable in the component, and are valid above the minimum of 15000 milliseconds).
+
+#### Stop polling
+
+As long as the `live-story` attribute is present on the `<amp-story>` element, the client will make continuous polls to the server copy of the document. Make sure to set the `live-story-disabled` attribute to make the polling stop once you're finished with the live broadcast of your story.
 
 <figure class="centered-fig">
   <amp-anim alt="Live story example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif">
@@ -398,13 +406,11 @@ This means that publishers of stories do not need to set up a JSON endpoint or p
   </amp-anim>
 </figure>
 
-**Note**: As long as the `live-story` attribute is present on the `<amp-story>` element, the client will make continuous polls to the server copy of the document. Make sure to set the `live-story-disabled` attribute to make the polling stop once you're finished with the live broadcast of your story. Learn more on the [polling section](#polling).
-
 Usage:
 * Specify an `id` on the `<amp-story>` element.
 * Add the `live-story` attribute to the `<amp-story>` element.
 * [Optional] Add the [`data-poll-interval`](#data-poll-interval-[optional]) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
-* [Optional] Add the [`live-story-disabled`](#live-story-disabled-[optional]) attribute to the `<amp-story>` element to disable the polling.
+* [Optional] When finishing the live broadcst, add the [`live-story-disabled`](#live-story-disabled-[optional]) attribute to the `<amp-story>` element to disable the polling.
 * On each `<amp-story-page>`:
   * Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
 
