@@ -33,23 +33,6 @@
         "file": "fileoverview",
         "returns": "return"
       },
-      "additionalTagNames": {
-        "customTags": [
-          "closurePrimitive",
-          "deprecated",
-          "dict",
-          "export",
-          "final",
-	        "nocollapse",
-          "package",
-          "record",
-          "restricted",
-          "struct",
-          "suppress",
-          "template",
-          "visibleForTesting"
-        ]
-      },
       "allowOverrideWithoutParam" : true
     }
   },
@@ -90,7 +73,23 @@
     "curly": 2,
     "google-camelcase/google-camelcase": 2,
     "jsdoc/check-param-names": 2,
-    "jsdoc/check-tag-names": 2,
+    "jsdoc/check-tag-names": [2, {
+      "definedTags": [
+        "closurePrimitive",
+        "deprecated",
+        "dict",
+        "export",
+        "final",
+        "nocollapse",
+        "package",
+        "record",
+        "restricted",
+        "struct",
+        "suppress",
+        "template",
+        "visibleForTesting"
+      ]
+    }],
     "jsdoc/check-types": [2, { "noDefaults": true }],
     "jsdoc/require-param": 2,
     "jsdoc/require-param-name": 2,
