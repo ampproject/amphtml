@@ -31,7 +31,7 @@ Embeds a <a href="https://vk.com/">VK</a> post or poll widget.
     <td><code>&lt;script async custom-element="amp-vk" src="https://cdn.ampproject.org/v0/amp-vk-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fixed, responsive, flex-item</td>
   </tr>
 </table>
@@ -96,7 +96,7 @@ For additional information about widgets attributes, please see [VK post widget 
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+    <td>This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.</td>
   </tr>
 </table>
 

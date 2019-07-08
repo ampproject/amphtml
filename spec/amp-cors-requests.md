@@ -87,7 +87,7 @@ cross-origin requests, you need to handle CORS, otherwise, the request fails.
 Most AMP components that use CORS requests either automatically set the
 [credentials mode](https://fetch.spec.whatwg.org/#concept-request-credentials-mode)
 or allow the author to optionally enable it. For example, the
-[`amp-list`](https://www.ampproject.org/docs/reference/components/amp-list)
+[`amp-list`](https://amp.dev/documentation/components/amp-list)
 component fetches dynamic content from a CORS JSON endpoint, and allows the
 author to set the credential mode through the `credentials` attribute.
 
@@ -380,7 +380,7 @@ To ensure your cached AMP page renders and functions correctly:
 1.  From your browser, open the URL that the AMP Cache would use to access your AMP page. You can determine the cache URL format from this [tool on AMP By Example](https://ampbyexample.com/advanced/using_the_google_amp_cache/).
 
     For example:
-    * URL: `https://www.ampproject.org/docs/tutorials/create.html`
+    * URL: `https://amp.dev/documentation/guides-and-tutorials/start/create/`
     * AMP Cache URL format: `https://www-ampproject-org.cdn.ampproject.org/c/s/www.ampproject.org/docs/tutorials/create.html`
 
 1.  Open your browser's development tools and verify that there are no errors and that all resources loaded correctly.

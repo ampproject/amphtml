@@ -32,7 +32,7 @@ Provides a collection of preset visual effects, such as parallax.
     <td><code>&lt;script async custom-element="amp-fx-collection" src="https://cdn.ampproject.org/v0/amp-fx-collection-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
@@ -169,7 +169,7 @@ An element with `amp-fx="float-in-top"` or `...bottom` must have the following C
 - **if it's `bottom`**, `bottom: 0`
 
 If any of these is not set, the effect will not be applied and a warning will be
-thrown in [development mode.](https://www.ampproject.org/docs/fundamentals/validate#browser-developer-console)
+thrown in [development mode.](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp#browser-developer-console)
 
 ### fly-in-bottom, fly-in-left, fly-in-right, fly-in-top
 

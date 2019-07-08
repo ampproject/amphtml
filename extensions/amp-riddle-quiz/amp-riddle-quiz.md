@@ -31,7 +31,7 @@ Displays any <a href="https://www.riddle.com/">Riddle</a> item content (e.g., qu
     <td><code>&lt;script async custom-element="amp-riddle-quiz" src="https://cdn.ampproject.org/v0/amp-riddle-quiz-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>responsive</td>
   </tr>
 </table>
@@ -58,7 +58,7 @@ This component embeds <a href="https://www.riddle.com/">Riddle</a> content (e.g.
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP component.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP component.</td>
   </tr>
 </table>
 

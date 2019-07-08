@@ -29,14 +29,14 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Provides configurable behavior for ad exits for <a href="https://www.ampproject.org/docs/ads/amphtml_ads">AMPHTML ads</a>.</td>
+    <td>Provides configurable behavior for ad exits for <a href="https://amp.dev/documentation/guides-and-tutorials/learn/intro-to-amphtml-ads">AMPHTML ads</a>.</td>
   </tr>
   <tr>
     <td><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ad-exit" src="https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay or do not specify a layout</td>
   </tr>
 </table>
@@ -44,7 +44,7 @@ limitations under the License.
 ## Overview
 
 The `amp-ad-exit` element is configured with a JSON child script element and
-exposes an "exit" action to other elements in the [AMPHTML ad)](https://www.ampproject.org/docs/ads/a4a_spec). Elements can be annotated to exit when tapped, passing a target name and extra URL parameter values to insert. The exit action performs these steps:
+exposes an "exit" action to other elements in the [AMPHTML ad)](https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec). Elements can be annotated to exit when tapped, passing a target name and extra URL parameter values to insert. The exit action performs these steps:
 
 1. Parse the JSON config (if it hasn't yet been parsed).
 2. Find the requested exit target.

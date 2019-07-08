@@ -37,7 +37,7 @@ Provides zooming and panning for arbitrary content.
     <td><code>&lt;script async custom-element="amp-pan-zoom" src="https://cdn.ampproject.org/v0/amp-pan-zoom-0.1.js">&lt;/script></code></td>
   </tr>
     <tr>
-    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html#the-layout-attribute">Supported Layouts</a></strong></td>
+    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, responsive</td>
   </tr>
 </table>
@@ -83,7 +83,7 @@ The `<amp-pan-zoom>` component takes one child of arbitrary content and enables 
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

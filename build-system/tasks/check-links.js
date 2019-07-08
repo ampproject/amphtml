@@ -160,6 +160,12 @@ function filterWhitelistedLinks(markdown) {
     ''
   );
 
+  // https://github.com/ampproject/amphtml/issues/23203
+  filteredMarkdown = filteredMarkdown.replace(
+    /\(https:\/\/developer.microsoft.com\/en-us\/microsoft-edge\/platform\/issues\/1173754\/\)/g,
+    ''
+  );
+
   // After all whitelisting is done, clean up any remaining empty blocks bounded
   // by backticks. Otherwise, `` will be treated as the start of a code block
   // and confuse the link extractor.
