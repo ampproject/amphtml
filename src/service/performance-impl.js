@@ -146,9 +146,7 @@ export class Performance {
      */
     this.supportsLayoutInstabilityAPI_ =
       this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes(
-        'layoutShift'
-      );
+      this.win.PerformanceObserver.supportedEntryTypes.includes('layoutShift');
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
@@ -218,7 +216,7 @@ export class Performance {
       this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
     }
 
-      if (this.supportsLayoutInstabilityAPI_) {
+    if (this.supportsLayoutInstabilityAPI_) {
       // Register a handler to record the layout shift metric when the page
       // enters the hidden lifecycle state.
       this.win.addEventListener(
