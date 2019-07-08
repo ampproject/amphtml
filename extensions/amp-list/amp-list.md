@@ -60,7 +60,7 @@ For more details on templates, see [AMP HTML Templates](../../spec/amp-html-temp
 
 *Example: Displaying a dynamic list*
 
-In the following example, we retrieve JSON data that contains URLs and titles, and render the content in a nested [amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache).
+In the following example, we retrieve JSON data that contains URLs and titles, and render the content in a nested [amp-mustache template](https://amp.dev/documentation/components/amp-mustache).
 
 <!--embedded example - displays in ampproject.org -->
 <div>

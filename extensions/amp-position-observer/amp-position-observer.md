@@ -53,7 +53,7 @@ other AMP components.
 
 The `amp-position-observer` component monitors the position of an
 element within the viewport as a user scrolls, and dispatches
-`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**), which can be used to trigger actions (**Only Low Trust Actions**) on other components (e.g., [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation).
+`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**), which can be used to trigger actions (**Only Low Trust Actions**) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation).
 
 {% call callout('Note', type='note') %}
 The `amp-position-observer` component is only useful when used with other components and does not do anything on its own.
@@ -61,7 +61,7 @@ The `amp-position-observer` component is only useful when used with other compon
 
 ## What can I do with amp-position-observer?
 
-Currently, [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
+Currently, [amp-animation](https://amp.dev/documentation/components/amp-animation)
 and several video players in AMP are the only components that allow low-trust events
 to trigger their actions (e.g., starting an animation, seeking to a position
 within the animation, pausing a video, etc.).

@@ -3,8 +3,8 @@
 **This feature is experimental and activated by the `amp-auto-lightbox` experiment.**
 This will be gradually rolled out to production in the upcoming weeks.
 
-The standard AMP runtime finds elligible [`amp-img`](https://www.ampproject.org/docs/reference/components/amp-img)
-elements and automatically makes them clickable in order to open an [`amp-lightbox-gallery`](https://www.ampproject.org/docs/reference/components/amp-lightbox-gallery)
+The standard AMP runtime finds elligible [`amp-img`](https://amp.dev/documentation/components/amp-img)
+elements and automatically makes them clickable in order to open an [`amp-lightbox-gallery`](https://amp.dev/documentation/components/amp-lightbox-gallery)
 for enhanced user experience that includes panning and pinch-to-zoom.
 
 Please note that this treatment is only applied on documents loaded from `http://*.cdn.ampproject.org`,
@@ -69,5 +69,5 @@ Or to disable it for your entire document altogether:
 ```
 
 If you'd like manual tuning of disabled/enabled images and/or grouping, please use
-[`amp-lightbox-gallery`](https://www.ampproject.org/docs/reference/components/amp-lightbox-gallery)
+[`amp-lightbox-gallery`](https://amp.dev/documentation/components/amp-lightbox-gallery)
 directly.

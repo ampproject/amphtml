@@ -50,7 +50,7 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-date-display` component displays time data that you can render in your AMP page. By providing specific [attributes](#attributes) in the  `amp-date-display` tag, the `amp-date-display` extension returns a list of time parameters, which you can pass to [an amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache) for rendering. Refer to the [list below for each returned time parameter](#returned-time-parameters).
+The `amp-date-display` component displays time data that you can render in your AMP page. By providing specific [attributes](#attributes) in the  `amp-date-display` tag, the `amp-date-display` extension returns a list of time parameters, which you can pass to [an amp-mustache template](https://amp.dev/documentation/components/amp-mustache) for rendering. Refer to the [list below for each returned time parameter](#returned-time-parameters).
 
 ### Example
 

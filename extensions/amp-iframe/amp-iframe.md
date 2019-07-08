@@ -79,7 +79,7 @@ To see more demos of the `amp-iframe`, visit [AMP By Example](https://ampbyexamp
 
 `amp-iframe` **must not** be used for the primary purpose of displaying advertising. It is OK to use `amp-iframe` for the purpose of displaying videos, where part of the videos are advertising. This AMP policy may be enforced by not rendering the respective iframes.
 
-Advertising use cases should use [`amp-ad`](https://www.ampproject.org/docs/reference/components/amp-ad) instead.
+Advertising use cases should use [`amp-ad`](https://amp.dev/documentation/components/amp-ad) instead.
 
 The reasons for this policy are that:
 
@@ -228,7 +228,7 @@ The intersection message would be sent by the parent to the iframe when the ifra
 
 ## Tracking/analytics iframes
 
-We strongly recommend using [`amp-analytics`](https://www.ampproject.org/docs/reference/components/amp-analytics) for analytics purposes, because it is significantly more robust, complete and an efficient solution which can be configured for a wide range of analytics vendors.
+We strongly recommend using [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics) for analytics purposes, because it is significantly more robust, complete and an efficient solution which can be configured for a wide range of analytics vendors.
 
 AMP only allows a single iframe that is used for analytics and tracking purposes, per page. To conserve resources, these iframes will be removed from the DOM 5 seconds after they loaded, which should be sufficient time to complete whatever work is needed to be done.
 

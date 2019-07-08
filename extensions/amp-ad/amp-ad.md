@@ -97,7 +97,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
   </tr>
   <tr>
     <td width="40%"><strong>data-consent-notification-id (optional)</strong></td>
-    <td>If provided, requires confirming the <a href="https://www.ampproject.org/docs/reference/components/amp-user-notification.html">amp-user-notification</a> with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. This means that ad rendering is delayed until the user confirms the notification.</td>
+    <td>If provided, requires confirming the <a href="https://amp.dev/documentation/components/amp-user-notification.html">amp-user-notification</a> with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. This means that ad rendering is delayed until the user confirms the notification.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-loading-strategy (optional)</strong></td>
@@ -143,11 +143,11 @@ Example with fallback:
 There are 3 ways to monetize videos in AMP with video ads:
 1. AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
 
-2. Use the [amp-ima-video](https://www.ampproject.org/docs/reference/components/amp-ima-video.html) component that comes with a built-in IMA SDK and HTML5 video player
+2. Use the [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video.html) component that comes with a built-in IMA SDK and HTML5 video player
 
 3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
 When using `amp-iframe` approach:
-    * Make sure there is a poster if loading the player in the first viewport. [Details](https://www.ampproject.org/docs/reference/components/amp-iframe#iframe-with-placeholder).
+    * Make sure there is a poster if loading the player in the first viewport. [Details](https://amp.dev/documentation/components/amp-iframe#iframe-with-placeholder).
     * Video and poster must be served over HTTPS.
 
 

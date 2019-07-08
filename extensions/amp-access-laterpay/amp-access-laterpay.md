@@ -22,7 +22,7 @@ limitations under the License.
 -->
 
 # amp-access-laterpay
-Allows publishers to easily integrate with the <a href="https://www.laterpay.net">LaterPay</a> micropayments platform. <code>amp-access-laterpay</code> is based on, and requires <a href="https://www.ampproject.org/docs/reference/components/amp-access">AMP Access</a>.
+Allows publishers to easily integrate with the <a href="https://www.laterpay.net">LaterPay</a> micropayments platform. <code>amp-access-laterpay</code> is based on, and requires <a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.
 
 <table>
   <tr>
@@ -68,7 +68,7 @@ You can refer to the documentation on configuring the [LaterPay Connector](https
 
 The generated list can be styled and presented according to the publisher's preference.
 
-This component also relies on [Access Content Markup](https://www.ampproject.org/docs/reference/components/amp-access#access-content-markup) to show and hide content.
+This component also relies on [Access Content Markup](https://amp.dev/documentation/components/amp-access#access-content-markup) to show and hide content.
 
 ## Configuration
 
@@ -265,7 +265,7 @@ The following message keys can be translated or customized, but be aware that th
 
 ## Analytics
 
-Given that `amp-access-laterpay` is based on `amp-access` it supports all the [analytics events](https://www.ampproject.org/docs/reference/components/amp-access#integration-with-amp-analytics) sent by `amp-access`.
+Given that `amp-access-laterpay` is based on `amp-access` it supports all the [analytics events](https://amp.dev/documentation/components/amp-access#integration-with-amp-analytics) sent by `amp-access`.
 
 The examples at https://ampexample.laterpay.net/ are all configured to send these analytics events if you'd like to see a more complete example as to how this would look in practice.
 
@@ -273,9 +273,9 @@ The examples at https://ampexample.laterpay.net/ are all configured to send thes
 
 If you have an existing subscription system and you intend to use LaterPay only for individual article sales, it's possible to have both sale methods coexist in the same page, using both AMP Access and AMP Access LaterPay together.
 
-First of, please refer to the [AMP Access](https://www.ampproject.org/docs/reference/components/amp-access) documentation to learn how to configure AMP Access with your existing paywall.
+First of, please refer to the [AMP Access](https://amp.dev/documentation/components/amp-access) documentation to learn how to configure AMP Access with your existing paywall.
 
-The [multiple providers](https://www.ampproject.org/docs/reference/components/amp-access#multiple-access-providers) section explains how to setup multiple providers with namespaces.
+The [multiple providers](https://amp.dev/documentation/components/amp-access#multiple-access-providers) section explains how to setup multiple providers with namespaces.
 
 When using it with LaterPay and an existing paywall integration, the necessary configuration can look something like this:
 
@@ -328,7 +328,7 @@ You can find a more complete example at https://ampexample.laterpay.net/dual-amp
 
 ## Related Documentation
 
-* [AMP Access](https://www.ampproject.org/docs/reference/components/amp-access)
+* [AMP Access](https://amp.dev/documentation/components/amp-access)
 * [LaterPay](https://www.laterpay.net)
 * [LaterPay: How we do MicroPayments](https://docs.laterpay.net/how_we_do_micropayments/)
 * [LaterPay Connector](https://connectormwi.laterpay.net/docs/index.html) - Similar to AMP Access LaterPay but for non AMP pages.

@@ -335,8 +335,8 @@ The `amp-user-notification` exposes the following actions that you can use [AMP 
 Optionally, you can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 
 - [CLIENT_ID URL substitution](../../spec/amp-var-substitutions.md#client-id)
-- [`amp-ad`](https://www.ampproject.org/docs/reference/components/amp-ad)
-- [`amp-analytics`](https://www.ampproject.org/docs/reference/components/amp-analytics)
+- [`amp-ad`](https://amp.dev/documentation/components/amp-ad)
+- [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
 
 ## Validation
 
