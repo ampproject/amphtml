@@ -229,7 +229,7 @@ class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
  * support `FormData.prototype.entries`.
  *
  * @interface
- * @note Subclassing `FormData` doesn't work in this case as the transpiler
+ * Subclassing `FormData` doesn't work in this case as the transpiler
  *     generates code that calls the super constructor directly using
  *     `Function.prototype.call`. WebKit (Safari) doesn't allow this and
  *     enforces that constructors be called with the `new` operator.
