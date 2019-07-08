@@ -179,3 +179,14 @@ function getScrollingElement(win) {
 function isWebKit(ua) {
   return /WebKit/i.test(ua) && !/Edge/i.test(ua);
 }
+
+/**
+ * @param {!Window} win
+ * @return {!PositionObserver}
+ */
+export function getPublicPositionObserver(win) {
+  const AMP_INABOX_POSITION_OBSERVER = 'ampInaboxPositionObserver';
+  win[AMP_INABOX_POSITION_OBSERVER] =
+    win[AMP_INABOX_POSITION_OBSERVER] || new PositionObserver(win);
+  return win[AMP_INABOX_POSITION_OBSERVER];
+}

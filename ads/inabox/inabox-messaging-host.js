@@ -20,11 +20,11 @@ import {
   deserializeMessage,
   serializeMessage,
 } from '../../src/3p-frame-messaging';
-import {PositionObserver} from './position-observer';
 import {canInspectWindow} from '../../src/iframe-helper';
 import {dev, devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
+import {getPublicPositionObserver} from './position-observer';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';
@@ -87,7 +87,7 @@ export class InaboxMessagingHost {
     this.iframeMap_ = Object.create(null);
 
     /** @private {!PositionObserver} */
-    this.positionObserver_ = new PositionObserver(win);
+    this.positionObserver_ = getPublicPositionObserver(win);
 
     /** @private {!NamedObservable} */
     this.msgObservable_ = new NamedObservable();

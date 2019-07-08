@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {PositionObserver} from '../../../ads/inabox/position-observer';
+import {
+  PositionObserver,
+  getPublicPositionObserver,
+} from '../../../ads/inabox/position-observer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 
 describes.realWin('inabox-host:position-observer', {}, env => {
@@ -105,5 +108,13 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     expect(observer.getTargetRect(element)).to.deep.equal(
       layoutRectLtwh(14, 18, 30, 40)
     );
+  });
+
+  it('should get existing observer', () => {
+    const observer1 = getPublicPositionObserver(win);
+    const observer2 = getPublicPositionObserver(win);
+    const observer3 = new PositionObserver(win);
+    expect(observer1).to.equal(observer2);
+    expect(observer2).to.not.equal(observer3);
   });
 });
