@@ -37,7 +37,7 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-date-display" src="https://cdn.ampproject.org/v0/amp-date-display-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td width="40%"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td width="40%"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
@@ -50,7 +50,7 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-date-display` component displays time data that you can render in your AMP page. By providing specific [attributes](#attributes) in the  `amp-date-display` tag, the `amp-date-display` extension returns a list of time parameters, which you can pass to [an amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache) for rendering. Refer to the [list below for each returned time parameter](#returned-time-parameters).
+The `amp-date-display` component displays time data that you can render in your AMP page. By providing specific [attributes](#attributes) in the  `amp-date-display` tag, the `amp-date-display` extension returns a list of time parameters, which you can pass to [an amp-mustache template](https://amp.dev/documentation/components/amp-mustache) for rendering. Refer to the [list below for each returned time parameter](#returned-time-parameters).
 
 ### Example
 
