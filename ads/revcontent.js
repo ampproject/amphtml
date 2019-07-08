@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../3p/3p';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -25,6 +25,7 @@ export function revcontent(global, data) {
     'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
   const required = ['id', 'width', 'height', 'wrapper'];
   const optional = [
+    'loadscript',
     'api',
     'key',
     'ssl',
@@ -47,5 +48,9 @@ export function revcontent(global, data) {
 
   validateData(data, required, optional);
   global.data = data;
-  writeScript(window, endpoint);
+  if (data.loadscript) {
+    loadScript(window, endpoint);
+  } else {
+    writeScript(window, endpoint);
+  }
 }
