@@ -908,6 +908,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'streamrail': {
+    prefetch: 'https://sdk.streamrail.com/blade/sr.blade.js',
+    renderStartImplemented: true,
+  },
+
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',
