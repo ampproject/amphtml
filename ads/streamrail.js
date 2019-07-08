@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData,loadScript} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 import {tryParseJson} from '../src/json';
 
 /**
@@ -23,7 +23,13 @@ import {tryParseJson} from '../src/json';
  */
 export function streamrail(global, data) {
   // ensure mandatory fields
-  validateData(data, ['streamrail_player_id', 'streamrail_api_key', 'streamrail_player_type', 'width', 'height']);
+  validateData(data, [
+    'width',
+    'height',
+    'streamrail_api_key',
+    'streamrail_player_id',
+    'streamrail_player_type',
+  ]);
 
   const marcosObj = tryParseJson(data['streamrail_macros']) || {};
   marcosObj['rand'] = Math.random().toString();
@@ -32,42 +38,47 @@ export function streamrail(global, data) {
   macros.width = data.width;
   macros.height = data.height;
 
- 
   const ctx = window.context;
   global.srAsyncInit = function() {
-  	const playerId = `player-${data['streamrail_api_key']}`;
-	
-	createContainer(playerId)
-	const p = SR(playerId, {
-       "playerId": data['streamrail_player_id'],
-       "apiKey": data['streamrail_api_key'],
-       "version": "1.0",
-       "macros": macros
-	});
+    const playerId = `player-${data['streamrail_api_key']}`;
 
-	p.then(function(player){
-		if(player && !player.hasAds && player.options && player.options.content && !player.options.content.length){
- 			ctx.noContentAvailable();
- 			return;
-		} 
-		player.on('playerReady', function(){
-			ctx.reportRenderedEntityIdentifier(playerId);
-			ctx.renderStart({
-	          width: player.width,
-	          height: player.height
-	        });
-		});
-	})
-	.catch(function(){
-		ctx.noContentAvailable();
-	})
-  }
+    createContainer(playerId);
+    // eslint-disable-next-line no-undef
+    const p = SR(playerId, {
+      'playerId': data['streamrail_player_id'],
+      'apiKey': data['streamrail_api_key'],
+      'version': '1.0',
+      'macros': macros,
+    });
+
+    p.then(function(player) {
+      if (
+        player &&
+        !player.hasAds &&
+        player.options &&
+        player.options.content &&
+        !player.options.content.length
+      ) {
+        ctx.noContentAvailable();
+        return;
+      }
+      player.on('playerReady', function() {
+        ctx.reportRenderedEntityIdentifier(playerId);
+        ctx.renderStart({
+          width: player.width,
+          height: player.height,
+        });
+      });
+    }).catch(function() {
+      ctx.noContentAvailable();
+    });
+  };
 
   const type = data['streamrail_player_type'];
-  if(type === 'bladex'){
-  	loadScript(global, 'https://sdk.streamrail.com/blade/sr.bladex.js');
-  } else if (type === 'blade'){
-  	loadScript(global, 'https://sdk.streamrail.com/blade/sr.blade.js');
+  if (type === 'bladex') {
+    loadScript(global, 'https://sdk.streamrail.com/blade/sr.bladex.js');
+  } else if (type === 'blade') {
+    loadScript(global, 'https://sdk.streamrail.com/blade/sr.blade.js');
   }
 }
 
