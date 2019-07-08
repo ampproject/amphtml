@@ -19,6 +19,7 @@ import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
+import {cookieReader} from './cookie-reader';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
@@ -219,6 +220,12 @@ export class LinkerManager {
    */
   expandTemplateWithUrlParams_(template, expansionOptions) {
     const bindings = this.variableService_.getMacros();
+
+    // TODO: (@zhouyx) Duplicate of binding in requests and linker.
+    // Move to varaible Servie once there's a way to detect FIE in that service
+    bindings['COOKIE'] = name =>
+      cookieReader(this.ampdoc_.win, this.element_, name);
+
     return this.variableService_
       .expandTemplate(template, expansionOptions)
       .then(expanded => {
