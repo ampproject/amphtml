@@ -40,7 +40,7 @@ limitations under the License.
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-form/">amp-form</a> examples.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-form/">amp-form</a> examples.</td>
   </tr>
 </table>
 
@@ -406,7 +406,7 @@ Access-Control-Expose-Headers: AMP-Redirect-To
 
 
 {% call callout('Tip', type='success') %}
-Check out AMP By Example's [Form Submission with Update](https://ampbyexample.com/components/amp-form/#form-submission-with-page-update) and [Product Page](https://ampbyexample.com/samples_templates/product_page/#product-page) that demonstrate using redirection after a form submission.
+Check out AMP By Example's [Form Submission with Update](https://amp.dev/documentation/examples/components/amp-form/#form-submission-with-page-update) and [Product Page](https://amp.dev/documentation/examples/e-commerce/product_page/#product-page) that demonstrate using redirection after a form submission.
 {% endcall %}
 
 

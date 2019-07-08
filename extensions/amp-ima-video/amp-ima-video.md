@@ -40,7 +40,7 @@ the
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-ima-video/">amp-ima-video example</a>.</td></td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-ima-video/">amp-ima-video example</a>.</td></td>
   </tr>
 </table>
 

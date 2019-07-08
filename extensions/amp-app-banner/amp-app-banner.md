@@ -40,7 +40,7 @@ A wrapper and minimal UI for a cross-platform, fixed-position banner showing a c
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-app-banner/">Annotated code example for amp-app-banner</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-app-banner/">Annotated code example for amp-app-banner</a></td>
   </tr>
 </table>
 

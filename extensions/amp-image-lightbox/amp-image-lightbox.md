@@ -37,7 +37,7 @@ Provides a lightbox effect for a specified image.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-image-lightbox/">amp-image-lightbox</a> sample.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-image-lightbox/">amp-image-lightbox</a> sample.</td>
   </tr>
 </table>
 
