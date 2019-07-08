@@ -48,16 +48,16 @@ export function invibes(global, data) {
 /**
  * @param {string} url
  * @param {string} param
- * @param {*} value
+ * @param {string} value
  * @return {string}
  */
 function addQueryParam(url, param, value) {
   const paramValue =
     encodeURIComponent(param) + '=' + encodeURIComponent(value);
-  if (!url.includes('?')) {
-    url += '?' + paramValue;
-  } else {
+  if (url.indexOf('?') > -1) {
     url += '&' + paramValue;
+  } else {
+    url += '?' + paramValue;
   }
   return url;
 }
