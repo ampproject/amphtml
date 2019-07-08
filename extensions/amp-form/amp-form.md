@@ -35,7 +35,7 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td><strong><a href="https://www.ampproject.org/docs/design/responsive/control_layout.html#the-layout-attribute">Supported Layouts</a></strong></td>
+    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute">Supported Layouts</a></strong></td>
     <td>N/A</td>
   </tr>
   <tr>
@@ -51,7 +51,7 @@ limitations under the License.
 The `amp-form` extension allows you to create forms (`<form>`) to submit input fields in an AMP document. The  `amp-form` extension also provides [polyfills](#polyfills) for some missing behaviors in browsers.
 
 {% call callout('Important', type='caution') %}
-If you're submitting data in your form, your server endpoint must implement the requirements for [CORS security](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
+If you're submitting data in your form, your server endpoint must implement the requirements for [CORS security](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp).
 {% endcall %}
 
 
@@ -121,7 +121,7 @@ See the [Custom Validation](#custom-validations) section for more details.
 
 * Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
 * `<input type=password>` and `<input type=file>` inside of `<form method=POST action-xhr>`.
-* [`amp-selector`](https://www.ampproject.org/docs/reference/components/amp-selector)
+* [`amp-selector`](https://amp.dev/documentation/components/amp-selector)
 
 **Not Allowed**:
 
@@ -142,7 +142,7 @@ The `amp-form` element exposes the following actions:
 | `clear` | Empties the values from each input in the form. This can allow users to quickly fill out forms a second time. |
 
 {% call callout('Read on', type='read') %}
-Learn more about [Actions and Events in AMP](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events.html).
+Learn more about [Actions and Events in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events).
 {% endcall %}
 
 ## Events
@@ -159,7 +159,7 @@ The `amp-form` exposes the following events:
 | `valid` | The form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)). |
 | `invalid` | The form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)). |
 
-These events can be used via the [`on` attribute](https://www.ampproject.org/docs/fundamentals/spec#on).
+These events can be used via the [`on` attribute](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on).
 
 For example, the following listens to both the `submit-success` and `submit-error` events and shows different lightboxes depending on the event:
 
@@ -192,7 +192,7 @@ See the [full example here](../../examples/forms.amp.html).
 
 ### Analytics triggers
 
-The `amp-form` extension triggers the following events that you can track in your [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics) config:
+The `amp-form` extension triggers the following events that you can track in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
 
 | Event                     | Fired when                        |
 |---------------------------|-----------------------------------|
@@ -253,7 +253,7 @@ When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error
 
 ## Success/error response rendering
 
-You can render success or error responses in your form by using [extended templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates), such as [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache), or success responses through data binding with [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind) and the following response attributes:
+You can render success or error responses in your form by using [extended templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates), such as [amp-mustache](https://amp.dev/documentation/components/amp-mustache), or success responses through data binding with [amp-bind](https://amp.dev/documentation/components/amp-bind) and the following response attributes:
 
 | Response attribute | Description |
 |-----------|---------------------|
@@ -350,11 +350,11 @@ See the [full example here](../../examples/forms.amp.html).
 
 ### To render a successful response with data binding
 
-* Use the [on attribute](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events) to bind the form *submit-success* attribute to [`AMP.setState()`](https://www.ampproject.org/docs/reference/components/amp-bind#updating-state-with-amp.setstate()).
+* Use the [on attribute](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events) to bind the form *submit-success* attribute to [`AMP.setState()`](https://amp.dev/documentation/components/amp-bind#updating-state-with-amp.setstate()).
 * Use the `event` property to capture the response data.
 * Add the state attribute to the desired element to bind the form response.
 
-The following example demonstrates a form `submit-success` response with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind):
+The following example demonstrates a form `submit-success` response with [`amp-bind`](https://amp.dev/documentation/components/amp-bind):
 ```html
   <p [text]="'Thanks, ' + subscribe +'! You have successfully subscribed.'">Subscribe to our newsletter</p>
   <form method="post"
@@ -628,7 +628,7 @@ Visit [AMP Start](https://ampstart.com/components#form-elements) for responsive,
 ## Security considerations
 
 ### Protecting against XSRF
-In addition to following the details in the [AMP CORS spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests.html), please pay extra attention to the section on ["Processing state changing requests" ](https://www.ampproject.org/docs/fundamentals/amp-cors-requests.html#processing-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
+In addition to following the details in the [AMP CORS spec](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests), please pay extra attention to the section on ["Processing state changing requests" ](https://www.ampproject.org/docs/fundamentals/amp-cors-requests.html#processing-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
 
 In general, keep in mind the following points when accepting input from the user:
 

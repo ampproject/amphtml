@@ -36,7 +36,7 @@ A wrapper and minimal UI for content that updates live in the client instance as
     </td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>container, fixed-height</td>
   </tr>
   <tr>
@@ -60,7 +60,7 @@ is live blogs: coverage for breaking news or live events where the user can stay
 on or keep returning to the same page to see new updates as they come in. Common
 examples are award shows, sporting events, and elections.
 
-To learn how to use `amp-live-list` in a blog, see the [Create a Live Blog](https://www.ampproject.org/docs/get_started/live_blog) tutorial.
+To learn how to use `amp-live-list` in a blog, see the [Create a Live Blog](https://amp.dev/documentation/guides-and-tutorials/develop/live_blog) tutorial.
 
 ## How it works
 
