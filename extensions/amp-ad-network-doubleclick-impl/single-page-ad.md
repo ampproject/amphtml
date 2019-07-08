@@ -54,7 +54,7 @@ A third meta tag should also be included to indicate the [landing page type](htt
 See the above link for allowed call-to-action buttons. By design, these will be the only clickable elements of the creative unit. This means that while things like AMP carousels are allowed within a single page story ad, they will not be clickable.
 
 ## Example
-You can find a fully working example hosted on [ampbyexample.com](https://ampbyexample.com/stories/monetization/doubleclick/).
+You can find a fully working example hosted on [ampbyexample.com](https://amp.dev/documentation/examples/advertising-analytics/doubleclick_amp_story_ads/).
 
 Google Ad Manager trafficking instructions can be found in the [DFP Help Center](https://support.google.com/dfp_premium/answer/9038178).
 

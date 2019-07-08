@@ -37,7 +37,7 @@ Provides a collection of preset visual effects, such as parallax.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-fx-collection/">amp-fx-collection</a> example.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-fx-collection/">amp-fx-collection</a> example.</td>
   </tr>
 </table>
 

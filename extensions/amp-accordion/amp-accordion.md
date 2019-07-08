@@ -37,7 +37,7 @@ Provides a way for viewers to glance at the content outline and jump to any sect
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-accordion/">Annotated code example for amp-accordion</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-accordion/">Annotated code example for amp-accordion</a></td>
   </tr>
 </table>
 
@@ -71,7 +71,7 @@ In this example, we display three sections, where the third section is expanded 
 </div>
 
 {% call callout('Tip', type='success') %}
-To see more demos of the `amp-accordion`, visit [AMP By Example](https://ampbyexample.com/components/amp-accordion/).
+To see more demos of the `amp-accordion`, visit [AMP By Example](https://amp.dev/documentation/examples/components/amp-accordion/).
 {% endcall %}
 
 ### Events

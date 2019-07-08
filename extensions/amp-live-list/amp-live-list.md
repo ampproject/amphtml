@@ -42,8 +42,8 @@ A wrapper and minimal UI for content that updates live in the client instance as
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td><ul>
-    <li><a href="https://ampbyexample.com/components/amp-live-list/">Annotated code example for amp-live-list</a></li>
-    <li><a href="https://ampbyexample.com/samples_templates/live_blog/">Annotated code example with amp-live-list for a live blog</a></li>
+    <li><a href="https://amp.dev/documentation/examples/components/amp-live-list/">Annotated code example for amp-live-list</a></li>
+    <li><a href="https://amp.dev/documentation/examples/news-publishing/live_blog/">Annotated code example with amp-live-list for a live blog</a></li>
     </ul>
     </td>
   </tr>

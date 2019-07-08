@@ -37,7 +37,7 @@ Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-timeago/">amp-timeago example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-timeago/">amp-timeago example</a>.</td>
   </tr>
 </table>
 

@@ -37,7 +37,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-img/">amp-img example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-img/">amp-img example</a>.</td>
   </tr>
 </table>
 
@@ -201,7 +201,7 @@ See the guide on [creating responsive AMP pages](https://amp.dev/documentation/g
 
 #### Maintaining the aspect ratio for images with unknown dimensions
 
-The AMP layout system requires the aspect ratio of an image in advance before fetching the image; however, in some cases you might not know the image's dimensions. To display images with unknown dimensions and maintain the aspect ratios, combine AMP's [`fill`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout) layout with the [`object-fit`](https://css-tricks.com/almanac/properties/o/object-fit/) CSS property. For more information, see AMP By Example's [How to support images with unknown dimensions](https://ampbyexample.com/advanced/how_to_support_images_with_unknown_dimensions).
+The AMP layout system requires the aspect ratio of an image in advance before fetching the image; however, in some cases you might not know the image's dimensions. To display images with unknown dimensions and maintain the aspect ratios, combine AMP's [`fill`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout) layout with the [`object-fit`](https://css-tricks.com/almanac/properties/o/object-fit/) CSS property. For more information, see AMP By Example's [How to support images with unknown dimensions](https://amp.dev/documentation/examples/style-layout/how_to_support_images_with_unknown_dimensions/).
 
 ## Validation
 
