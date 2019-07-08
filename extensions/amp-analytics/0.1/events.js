@@ -437,7 +437,8 @@ class AmpStoryEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const storySpec = config['storySpec'] || {};
-    const selector = config['selector'] || ':root';
+    userAssert(!config['selector'], 'Selector not supporting in AmpStorySpec');
+    const selector = ':root';
     const selectionMethod = config['selectionMethod'] || null;
     const targetReady = this.root.getElement(
       context,
