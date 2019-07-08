@@ -88,7 +88,7 @@ export class AmpStoryVariableService {
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       pageId => {
-        if (pageId.length <= 0) {
+        if (!pageId) {
           return;
         }
 
