@@ -85,25 +85,32 @@ export class AmpStoryVariableService {
       this.variables_[Variable.STORY_PAGE_COUNT] = pageIds.length;
     });
 
-    // Using pageId instead of pageIndex since it's guaranteed to be called at
-    // the beginning.
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
-      this.variables_[Variable.STORY_PREVIOUS_PAGE_ID] = this.variables_[
-        Variable.STORY_PAGE_ID
-      ];
-      this.variables_[Variable.STORY_PAGE_ID] = pageId;
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      pageId => {
+        if (pageId.length <= 0) {
+          return;
+        }
 
-      const pageIndex = /** @type {number} */ (this.storeService_.get(
-        StateProperty.CURRENT_PAGE_INDEX
-      ));
-      this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
+        this.variables_[Variable.STORY_PREVIOUS_PAGE_ID] = this.variables_[
+          Variable.STORY_PAGE_ID
+        ];
 
-      const numberOfPages = this.storeService_.get(StateProperty.PAGE_IDS)
-        .length;
-      if (numberOfPages > 0) {
-        this.variables_[Variable.STORY_PROGRESS] = pageIndex / numberOfPages;
-      }
-    });
+        this.variables_[Variable.STORY_PAGE_ID] = pageId;
+
+        const pageIndex = /** @type {number} */ (this.storeService_.get(
+          StateProperty.CURRENT_PAGE_INDEX
+        ));
+        this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
+
+        const numberOfPages = this.storeService_.get(StateProperty.PAGE_IDS)
+          .length;
+        if (numberOfPages > 0) {
+          this.variables_[Variable.STORY_PROGRESS] = pageIndex / numberOfPages;
+        }
+      },
+      true /* callToInitialize */
+    );
   }
 
   /**

@@ -91,19 +91,25 @@ export class StoryAnalyticsService {
       );
     });
 
-    // Using pageId instead of pageIndex since it's guaranteed to be called at
-    // the beginning.
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
-      this.triggerEvent(AnalyticsEvent.PAGE_VISIBLE);
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      pageId => {
+        if (pageId.length <= 0) {
+          return;
+        }
 
-      const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
-      const pageIndex = this.storeService_.get(
-        StateProperty.CURRENT_PAGE_INDEX
-      );
-      if (pageIndex === pageIds.length - 1) {
-        this.triggerEvent(AnalyticsEvent.LAST_PAGE_VISIBLE);
-      }
-    });
+        this.triggerEvent(AnalyticsEvent.PAGE_VISIBLE);
+
+        const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
+        const pageIndex = this.storeService_.get(
+          StateProperty.CURRENT_PAGE_INDEX
+        );
+        if (pageIndex === pageIds.length - 1) {
+          this.triggerEvent(AnalyticsEvent.LAST_PAGE_VISIBLE);
+        }
+      },
+      true /* callToInitialize */
+    );
   }
 
   /**
