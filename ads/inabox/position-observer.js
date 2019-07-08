@@ -181,6 +181,7 @@ function isWebKit(ua) {
 }
 
 /**
+ * Use an existing position observer within the window, if any.
  * @param {!Window} win
  * @return {!PositionObserver}
  */

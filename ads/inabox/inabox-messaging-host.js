@@ -86,7 +86,7 @@ export class InaboxMessagingHost {
     /** @private {!Object<string,!AdFrameDef>} */
     this.iframeMap_ = Object.create(null);
 
-    /** @private {!PositionObserver} */
+    /** @private {!./position-observer.PositionObserver} */
     this.positionObserver_ = getPublicPositionObserver(win);
 
     /** @private {!NamedObservable} */
