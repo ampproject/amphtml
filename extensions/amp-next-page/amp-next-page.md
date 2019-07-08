@@ -43,7 +43,7 @@ Dynamically loads more documents recommended for the user.
   <tr>
     <td>
       <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a>
+        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a>
       </strong>
     </td>
     <td>N/A</td>

@@ -302,7 +302,7 @@ Technically, the `<amp-ad>` tag loads an iframe to a generic bootstrap URL that 
 
 ### 1st party cookies
 
-Access to a publisher's 1st party cookies may be achieved through a custom ad bootstrap file. See ["Running ads from a custom domain"](https://www.ampproject.org/docs/reference/components/amp-ad#running-ads-from-a-custom-domain) in the ad documentation for details.
+Access to a publisher's 1st party cookies may be achieved through a custom ad bootstrap file. See ["Running ads from a custom domain"](https://amp.dev/documentation/components/amp-ad#running-ads-from-a-custom-domain) in the ad documentation for details.
 
 If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. For example, if the publisher hosts a webpage on `https://nytimes.com`, then the remote file should be hosted on something similar to `https://sub-domain.nytimes.com` for the custom JavaScript to have the ability to read or write cookies for nytimes.com.
 

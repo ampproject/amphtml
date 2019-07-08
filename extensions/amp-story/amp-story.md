@@ -34,14 +34,14 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>none</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td><ul>
       <li>See AMP By Example's <a href="https://ampbyexample.com/stories/introduction/amp_story_hello_world/">Hello World</a> sample.</li>
-      <li>Learn from the <a href="https://www.ampproject.org/docs/tutorials/visual_story">Create a visual AMP story</a> tutorial.</li>
+      <li>Learn from the <a href="https://amp.dev/documentation/guides-and-tutorials/start/visual_story/">Create a visual AMP story</a> tutorial.</li>
     </ul></td>
   </tr>
 </table>
@@ -260,7 +260,7 @@ The content in the body creates a story with two pages.  Each page has a full bl
 
 ### Required markup for amp-story
 
-The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
+The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup), along with the following additional requirements:
 
 
 | RULE | DESCRIPTION |
@@ -1492,9 +1492,9 @@ This field should contain a string, where each string respresents a share provid
 
 When extra parameters are required, an object with key-value pairs should be used. The object should contain a key `provider` with a value (e.g. `facebook`) corresponding to the provider's name. The next key-values will depend on the share provider.
 
-The list of available providers is the same as in the [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share) component.
+The list of available providers is the same as in the [amp-social-share](https://amp.dev/documentation/components/amp-social-share) component.
 
-Each of these providers has a different set of available parameters ([see `data-param-*`](https://www.ampproject.org/docs/reference/components/amp-social-share#data-param-*)). The configuration object takes these parameters without the `data-param-` prefix (for example, the `data-param-app_id` would appear in the configuration object as `app_id`).
+Each of these providers has a different set of available parameters ([see `data-param-*`](https://amp.dev/documentation/components/amp-social-share#data-param-*)). The configuration object takes these parameters without the `data-param-` prefix (for example, the `data-param-app_id` would appear in the configuration object as `app_id`).
 
 #### JSON configuration
 The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON configuration of the bookend. It is described as a URL endpoint that accepts GET requests and returns a JSON response with the contents of the bookend.  If omitted, the amp-story component renders a default UI for the end screen. The system is responsible for fetching the data necessary to render related and trending articles.  This can be served from a static JSON file, or dynamically-generated (e.g., to calculate what is currently trending).
@@ -1539,11 +1539,11 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ## Other components usable in AMP stories
 The following are other components usable in AMP stories that require some story-specific caveats.
 
-- [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
-- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar#sidebar-for-stories)
+- [amp-consent](https://amp.dev/documentation/components/amp-consent#prompt-ui-for-stories)
+- [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar#sidebar-for-stories)
 - [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
 
-For more generally usable components see the [list of allowed children](https://www.ampproject.org/docs/reference/components/amp-story#children).
+For more generally usable components see the [list of allowed children](https://amp.dev/documentation/components/amp-story#children).
 
 ## Validation
 
@@ -1582,4 +1582,4 @@ Additionally, for right-to-left languages, you may include the `dir="rtl"` attri
 
 * [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
 * [Samples on AMP By Example](https://ampbyexample.com/stories/#stories/introduction)
-* [Best practices for creating an AMP story](https://www.ampproject.org/docs/guides/amp_story_best_practices)
+* [Best practices for creating an AMP story](https://amp.dev/documentation/guides-and-tutorials/develop/amp_story_best_practices)
