@@ -417,7 +417,7 @@ export function apply(ampdoc, element) {
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Array<!Element>} candidates
- * @return {!Array<!Promise<Element|undefined>>}
+ * @return {!Array<!Promise<!Element|undefined>>}
  */
 export function runCandidates(ampdoc, candidates) {
   return candidates.map(candidate =>
