@@ -17,7 +17,7 @@
 import {ChunkPriority, chunk} from './chunk';
 import {Services} from './services';
 import {dev} from './log';
-import {isAmp4Email} from './format';
+import {isAmphtml} from './format';
 
 /** @const @enum {string} */
 export const AutoLightboxEvents = {
@@ -31,7 +31,7 @@ export const AutoLightboxEvents = {
  */
 export function installAutoLightboxExtension(ampdoc) {
   const {win} = ampdoc;
-  if (isAmp4Email(win.document)) {
+  if (!isAmphtml(win.document)) {
     return;
   }
   chunk(

@@ -33,3 +33,11 @@ function isAmpFormatType(formats, doc) {
 export function isAmp4Email(doc) {
   return isAmpFormatType(['⚡4email', 'amp4email'], doc);
 }
+
+/**
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isStdAmp(doc) {
+  return isAmpFormatType(['⚡', 'amp'], doc);
+}
