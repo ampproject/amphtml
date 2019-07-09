@@ -72,6 +72,9 @@ export function getBinaryType(win) {
  * @return {boolean}
  */
 export function isExperimentOn(win, experimentId) {
+  if (experimentId == 'ampdoc-fie') {
+    return true;
+  }
   const toggles = experimentToggles(win);
   return !!toggles[experimentId];
 }
