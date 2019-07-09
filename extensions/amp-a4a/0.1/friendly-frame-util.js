@@ -79,11 +79,13 @@ export function renderCreativeIntoFriendlyFrame(
       extensionIds: creativeMetadata.customElementExtensions || [],
       fonts: fontsArray,
     },
-    embedWin => {
+    (embedWin, ampdoc) => {
+      const parentAmpdoc = element.getAmpDoc();
       installUrlReplacementsForEmbed(
-        element.getAmpDoc(),
+        // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
+        ampdoc || parentAmpdoc,
         embedWin,
-        new A4AVariableSource(element.getAmpDoc(), embedWin)
+        new A4AVariableSource(parentAmpdoc, embedWin)
       );
     }
   ).then(friendlyIframeEmbed => {

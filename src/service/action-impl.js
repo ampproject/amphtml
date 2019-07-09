@@ -238,6 +238,8 @@ export class ActionService {
    * @param {(!Document|!ShadowRoot)=} opt_root
    */
   constructor(ampdoc, opt_root) {
+    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
+
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 

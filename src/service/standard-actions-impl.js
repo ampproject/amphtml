@@ -63,6 +63,8 @@ export class StandardActions {
    * @param {!Window=} opt_win
    */
   constructor(ampdoc, opt_win) {
+    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
+
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 

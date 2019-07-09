@@ -116,6 +116,8 @@ export class Bind {
    * @param {!Window=} opt_win
    */
   constructor(ampdoc, opt_win) {
+    // TODO(#22733): remove opt_win subroooting once ampdoc-fie is launched.
+
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 

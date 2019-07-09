@@ -1502,11 +1502,13 @@ export class AmpA4A extends AMP.BaseElement {
         extensionIds: creativeMetaData.customElementExtensions || [],
         fonts: fontsArray,
       },
-      embedWin => {
+      (embedWin, ampdoc) => {
+        const parentAmpdoc = this.getAmpDoc();
         installUrlReplacementsForEmbed(
-          this.getAmpDoc(),
+          // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
+          ampdoc || parentAmpdoc,
           embedWin,
-          new A4AVariableSource(this.getAmpDoc(), embedWin)
+          new A4AVariableSource(parentAmpdoc, embedWin)
         );
       }
     ).then(friendlyIframeEmbed => {
