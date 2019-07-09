@@ -5772,10 +5772,10 @@ eslint-plugin-jasmine@2.10.1:
   resolved "https://registry.yarnpkg.com/eslint-plugin-jasmine/-/eslint-plugin-jasmine-2.10.1.tgz#5733b709e751f4bc40e31e1c16989bd2cdfbec97"
   integrity sha1-VzO3CedR9LxA4x4cFpib0s377Jc=
 
-eslint-plugin-jsdoc@15.2.0:
-  version "15.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-15.2.0.tgz#320dde36b9cb0802163bfb02f801fdebdb22825e"
-  integrity sha512-J4cxzr45/3u/3qBTJezJB5ntNZQDhxS5CzAgJYP7TJ1w7/wdwwSC9x7ia1WjVkSgDicqflNgr8kDf3gr8Hwfag==
+eslint-plugin-jsdoc@15.3.2:
+  version "15.3.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-15.3.2.tgz#222e3013101c59ebf10b49fb2d2accf5e5eae677"
+  integrity sha512-EpdXvRO5oS1mxsD8Jhkq4f3f5ZwM+OxJl7J93cw2H+XlZpu41Gl5n+dohDnG1poq7x6HRp3ONXHFWNHZ5n4Wnw==
   dependencies:
     comment-parser "^0.5.5"
     debug "^4.1.1"
@@ -5783,6 +5783,7 @@ eslint-plugin-jsdoc@15.2.0:
     flat-map-polyfill "^0.3.8"
     jsdoctypeparser "5.0.1"
     lodash "^4.17.11"
+    regextras "^0.6.1"
 
 eslint-plugin-notice@0.8.8:
   version "0.8.8"
@@ -13442,6 +13443,11 @@ regexpu-core@^4.5.4:
     regjsparser "^0.6.0"
     unicode-match-property-ecmascript "^1.0.4"
     unicode-match-property-value-ecmascript "^1.1.0"
+
+regextras@^0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/regextras/-/regextras-0.6.1.tgz#9689641bbb338e0ff7001a5c507c6a2008df7b36"
+  integrity sha512-EzIHww9xV2Kpqx+corS/I7OBmf2rZ0pKKJPsw5Dc+l6Zq1TslDmtRIP9maVn3UH+72MIXmn8zzDgP07ihQogUA==
 
 registry-auth-token@^3.0.1:
   version "3.3.2"
