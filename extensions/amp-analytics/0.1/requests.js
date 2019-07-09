@@ -164,7 +164,11 @@ export class RequestHandler {
 
       this.requestOriginPromise_ = this.variableService_
         // expand variables in request origin
-        .expandTemplate(this.requestOrigin_, requestOriginExpansionOpt)
+        .expandTemplate(
+          this.requestOrigin_,
+          requestOriginExpansionOpt,
+          this.element_
+        )
         // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
         .then(expandedRequestOrigin => {
           return this.urlReplacementService_.expandUrlAsync(

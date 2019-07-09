@@ -189,11 +189,6 @@ export class VariableService {
     /** @const @private {!./linker-reader.LinkerReader} */
     this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);
 
-    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacementService_ = Services.urlReplacementsForDoc(
-      this.ampdoc_.getHeadNode()
-    );
-
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
     this.register_('$TRIM', value => value.trim());
@@ -211,8 +206,6 @@ export class VariableService {
       '$EQUALS',
       (firstValue, secValue) => firstValue === secValue
     );
-    // TODO(ccordry): Make sure this stays a window level service when this
-    // VariableService is migrated to document level.
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
@@ -285,7 +278,7 @@ export class VariableService {
       }
 
       const bindings = this.getMacros();
-      const urlReplacements = this.urlReplacementService_;
+      const urlReplacements = Services.urlReplacementsForDoc(element);
       const whitelist = element.hasAttribute('sandbox')
         ? SANDBOX_AVAILABLE_VARS
         : undefined;
