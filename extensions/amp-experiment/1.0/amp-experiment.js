@@ -101,8 +101,9 @@ export class AmpExperiment extends AMP.BaseElement {
               experimentToVariant
             );
 
-            const experimentToVariantPromise =
-              applyExperimentsPromise.then(() => experimentToVariant);
+            const experimentToVariantPromise = applyExperimentsPromise.then(
+              () => experimentToVariant
+            );
             variantsService.init(experimentToVariantPromise);
             return experimentToVariantPromise;
           })

@@ -49,10 +49,12 @@ const MAX_MUTATIONS = 70;
  * @return {!Promise}
  */
 export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
-
   // Get all of our mutation records across all experiments
   // That are being applied
-  const mutationRecords = getMutationRecordsFromExperimentToVariant(config, experimentToVariant);
+  const mutationRecords = getMutationRecordsFromExperimentToVariant(
+    config,
+    experimentToVariant
+  );
 
   // Assert the formats of the mutation record,
   // find its respective elements,
@@ -84,7 +86,9 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
   }
 
   // Create the mutations
-  const mutations = createMutationsFromMutationRecordsAndElements(mutationRecordsAndElements);
+  const mutations = createMutationsFromMutationRecordsAndElements(
+    mutationRecordsAndElements
+  );
 
   // Validate all mutations
   mutations.forEach(mutation => {
@@ -103,16 +107,19 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
   });
 }
 
-
 /**
  *  Get all of our mutation records across all chosen variants
  *  in the respected experiments
  *
  * @param {!JsonObject} config
  * @param {!Object<string, ?string>} experimentToVariant
- * @return {!Array<JsonObject>}
+ * @return {!Array<!JsonObject>}
  */
-export function getMutationRecordsFromExperimentToVariant(config, experimentToVariant) {
+export function getMutationRecordsFromExperimentToVariant(
+  config,
+  experimentToVariant
+) {
+  /** {Array<JsonObject>} */
   let mutationRecords = [];
   for (const experimentName in experimentToVariant) {
     const variantName = experimentToVariant[experimentName];
@@ -130,10 +137,12 @@ export function getMutationRecordsFromExperimentToVariant(config, experimentToVa
  * mutation records, and their selected elements,
  * Into Mutation objects.
  *
- * @param {!Array<Object>} mutationRecordAndElements
- * @returns {!Array<./mutation.Mutation>}
+ * @param {!Array<Object>} mutationRecordsAndElements
+ * @return {!Array<Object>}
  */
-export function createMutationsFromMutationRecordsAndElements(mutationRecordAndElements) {
+export function createMutationsFromMutationRecordsAndElements(
+  mutationRecordsAndElements
+) {
   const mutations = [];
   mutationRecordsAndElements.forEach(mutationRecordAndElements => {
     const {mutationRecord, elements} = mutationRecordAndElements;

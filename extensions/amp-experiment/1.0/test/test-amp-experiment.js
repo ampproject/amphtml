@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as variant from '../variant';
 import * as applyExperiment from '../apply-experiment';
+import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -178,7 +178,6 @@ describes.realWin(
       const applyStub = sandbox
         .stub(applyExperiment, 'applyExperimentToVariant')
         .returns(Promise.resolve());
-
 
       experiment.buildCallback();
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())

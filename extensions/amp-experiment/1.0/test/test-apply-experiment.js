@@ -16,7 +16,6 @@
 
 import * as applyExperiment from '../apply-experiment';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {Services} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const TEST_ELEMENT_CLASS = 'experiment-test-element';
@@ -31,15 +30,11 @@ describes.realWin(
   env => {
     let win, doc;
     let ampdoc;
-    let sandbox;
-    let experiment;
-    let el;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;
-      sandbox = env.sandbox;
 
       toggleExperiment(win, 'amp-experiment-1.0', true);
     });
@@ -60,123 +55,103 @@ describes.realWin(
           variants: {
             'variant-a': {
               weight: 50,
-              mutations: mutations,
+              mutations,
             },
           },
-        }
+        },
       };
 
       // Create an experimentToVariant selecting
       // the variant with our mutations
       const experimentToVariant = {
-        'experiment-1': 'variant-a'
+        'experiment-1': 'variant-a',
       };
 
       // Return our params
-      return [
-        ampdoc,
-        config,
-        experimentToVariant
-      ];
+      return [ampdoc, config, experimentToVariant];
     }
 
-    it('should get all/correct number of ' +
-      'mutation records from our experimentToVariant', () => {
-
-      // Create a mutation record
-      const mutations = [];
-      mutations.push({
-        "type": "attributes",
-        "target": `.${TEST_ELEMENT_CLASS}`,
-        "attributeName": "style",
-        "value": "background-color: red; width: 100px;"
-      });
-
-      const config = {
-        'experiment-1': {
-          variants: {
-            'variant-a': {
-              weight: 50,
-              mutations: mutations,
-            },
-            'variant-b': {
-              weight: 50,
-              mutations: mutations,
-            },
-          },
-        },
-        'experiment-2': {
-          variants: {
-            'variant-a': {
-              weight: 50,
-              mutations: mutations,
-            },
-            'variant-b': {
-              weight: 50,
-              mutations: mutations,
-            },
-          },
-        },
-        'experiment-3': {
-          variants: {
-            'variant-a': {
-              weight: 50,
-              mutations: mutations,
-            },
-            'variant-b': {
-              weight: 50,
-              mutations: mutations,
-            },
-          },
-        }
-      };
-
-      // Create an experimentToVariant selecting
-      // the variant with our mutations
-      const experimentToVariant = {
-        'experiment-1': 'variant-b',
-        'experiment-2': 'variant-a',
-        'experiment-3': 'variant-b'
-      };
-
-      expect(
-        applyExperiment.getMutationRecordsFromExperimentToVariant(
-          config, experimentToVariant
-        ).length
-      ).to.be.equal(3);
-    });
-
-    it('Does not allow more than the max number of mutations, ' +
-      'by number of mutation objects', () => {
-      addTestElementsToDocument(1);
-      const mutations = [];
-      for (let i = 0; i < 100; i++) {
-        mutations.push({
-          "type": "attributes",
-          "target": `.${TEST_ELEMENT_CLASS}`,
-          "attributeName": "style",
-          "value": "background-color: red; width: 100px;"
-        });
-      }
-      const params = getApplyExperimentToVariantParams(mutations);
-
-      allowConsoleError(() => {
-        expect(() => {
-          applyExperiment.applyExperimentToVariant.apply(null, params);
-        }).to.throw(/Max number of mutations/);
-      });
-    });
-
-    it('Does not allow more than the max number of mutations, ' +
-      'by number of elements selected', () => {
-        addTestElementsToDocument(100);
+    it(
+      'should get all/correct number of ' +
+        'mutation records from our experimentToVariant',
+      () => {
+        // Create a mutation record
         const mutations = [];
-        for (let i = 0; i < 1; i++) {
+        mutations.push({
+          'type': 'attributes',
+          'target': `.${TEST_ELEMENT_CLASS}`,
+          'attributeName': 'style',
+          'value': 'background-color: red; width: 100px;',
+        });
+
+        const config = {
+          'experiment-1': {
+            variants: {
+              'variant-a': {
+                weight: 50,
+                mutations,
+              },
+              'variant-b': {
+                weight: 50,
+                mutations,
+              },
+            },
+          },
+          'experiment-2': {
+            variants: {
+              'variant-a': {
+                weight: 50,
+                mutations,
+              },
+              'variant-b': {
+                weight: 50,
+                mutations,
+              },
+            },
+          },
+          'experiment-3': {
+            variants: {
+              'variant-a': {
+                weight: 50,
+                mutations,
+              },
+              'variant-b': {
+                weight: 50,
+                mutations,
+              },
+            },
+          },
+        };
+
+        // Create an experimentToVariant selecting
+        // the variant with our mutations
+        const experimentToVariant = {
+          'experiment-1': 'variant-b',
+          'experiment-2': 'variant-a',
+          'experiment-3': 'variant-b',
+        };
+
+        expect(
+          applyExperiment.getMutationRecordsFromExperimentToVariant(
+            config,
+            experimentToVariant
+          ).length
+        ).to.be.equal(3);
+      }
+    );
+
+    it(
+      'Does not allow more than the max number of mutations, ' +
+        'by number of mutation objects',
+      () => {
+        addTestElementsToDocument(1);
+        const mutations = [];
+        for (let i = 0; i < 100; i++) {
           mutations.push({
-            "type": "attributes",
-            "target": `.${TEST_ELEMENT_CLASS}`,
-            "attributeName": "style",
-            "value": "background-color: red; width: 100px;"
+            'type': 'attributes',
+            'target': `.${TEST_ELEMENT_CLASS}`,
+            'attributeName': 'style',
+            'value': 'background-color: red; width: 100px;',
           });
         }
         const params = getApplyExperimentToVariantParams(mutations);
@@ -186,6 +161,31 @@ describes.realWin(
             applyExperiment.applyExperimentToVariant.apply(null, params);
           }).to.throw(/Max number of mutations/);
         });
-      });
+      }
+    );
+
+    it(
+      'Does not allow more than the max number of mutations, ' +
+        'by number of elements selected',
+      () => {
+        addTestElementsToDocument(100);
+        const mutations = [];
+        for (let i = 0; i < 1; i++) {
+          mutations.push({
+            'type': 'attributes',
+            'target': `.${TEST_ELEMENT_CLASS}`,
+            'attributeName': 'style',
+            'value': 'background-color: red; width: 100px;',
+          });
+        }
+        const params = getApplyExperimentToVariantParams(mutations);
+
+        allowConsoleError(() => {
+          expect(() => {
+            applyExperiment.applyExperimentToVariant.apply(null, params);
+          }).to.throw(/Max number of mutations/);
+        });
+      }
+    );
   }
 );

@@ -16,10 +16,9 @@
 
 import {
   assertMutationRecordFormat,
-  getElementsFromMutationRecordSelector
+  getElementsFromMutationRecordSelector,
 } from '../mutation-record';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {Services} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const TEST_ELEMENT_CLASS = 'experiment-test-element';
@@ -33,14 +32,10 @@ describes.realWin(
   },
   env => {
     let win, doc;
-    let ampdoc;
-    let experiment;
-    let el;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      ampdoc = env.ampdoc;
 
       toggleExperiment(win, 'amp-experiment-1.0', true);
 
@@ -58,49 +53,47 @@ describes.realWin(
     }
 
     function getAttributeMutation(opt_attributeName, opt_value) {
-    const selector = setupMutationSelector();
+      const selector = setupMutationSelector();
 
-    return {
-      type: 'attributes',
-      target: selector,
-      attributeName: opt_attributeName || 'style',
-      value: opt_value || 'color: #FF0000',
-    };
-  }
-
-
+      return {
+        type: 'attributes',
+        target: selector,
+        attributeName: opt_attributeName || 'style',
+        value: opt_value || 'color: #FF0000',
+      };
+    }
 
     it('should allow a valid mutation', () => {
       const mutation = getAttributeMutation();
       expect(() => {
-        assertMutationRecordFormat(mutation, doc)
+        assertMutationRecordFormat(mutation, doc);
       }).to.not.throw();
-  });
-
-  it('should error when no mutation', () => {
-    allowConsoleError(() => {
-      expect(() => {
-        assertMutationRecordFormat(null, doc)
-      }).to.throw(/object/);
     });
-  });
 
-  it('should error when no type', () => {
-    const mutation = getAttributeMutation();
-    delete mutation['type'];
-    allowConsoleError(() => {
-      expect(() => {
-        assertMutationRecordFormat(mutation, doc)
-      }).to.throw(/type/);
+    it('should error when no mutation', () => {
+      allowConsoleError(() => {
+        expect(() => {
+          assertMutationRecordFormat(null, doc);
+        }).to.throw(/object/);
+      });
     });
-  });
+
+    it('should error when no type', () => {
+      const mutation = getAttributeMutation();
+      delete mutation['type'];
+      allowConsoleError(() => {
+        expect(() => {
+          assertMutationRecordFormat(mutation, doc);
+        }).to.throw(/type/);
+      });
+    });
 
     it('should error when invalid type', () => {
       const mutation = getAttributeMutation();
       mutation['type'] = 'test';
       allowConsoleError(() => {
         expect(() => {
-          assertMutationRecordFormat(mutation, doc)
+          assertMutationRecordFormat(mutation, doc);
         }).to.throw(/type/);
       });
     });
@@ -110,17 +103,17 @@ describes.realWin(
       delete mutation['target'];
       allowConsoleError(() => {
         expect(() => {
-          assertMutationRecordFormat(mutation, doc)
+          assertMutationRecordFormat(mutation, doc);
         }).to.throw(/type/);
       });
     });
 
-  it('should error when no target element', () => {
+    it('should error when no target element', () => {
       const mutation = getAttributeMutation();
       doc.body.querySelector(mutation['target']).remove();
       allowConsoleError(() => {
         expect(() => {
-          getElementsFromMutationRecordSelector(doc, mutation)
+          getElementsFromMutationRecordSelector(doc, mutation);
         }).to.throw(/selector/);
       });
     });
