@@ -66,7 +66,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
     };
     windowApi.document.defaultView = windowApi;
     installDocService(windowApi, /* isSingleDoc */ true);
-    ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
   });
 
   afterEach(() => {
@@ -205,7 +205,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
     windowApi.document.defaultView = windowApi;
     windowMock = sandbox.mock(windowApi);
     installDocService(windowApi, /* isSingleDoc */ true);
-    ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
 
     dialogUrl = null;
     dialog = {

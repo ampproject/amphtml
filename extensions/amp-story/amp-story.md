@@ -34,14 +34,14 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>none</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td><ul>
-      <li>See AMP By Example's <a href="https://ampbyexample.com/stories/introduction/amp_story_hello_world/">Hello World</a> sample.</li>
-      <li>Learn from the <a href="https://www.ampproject.org/docs/tutorials/visual_story">Create a visual AMP story</a> tutorial.</li>
+      <li>See AMP By Example's <a href="https://amp.dev/documentation/examples/introduction/stories_in_amp/">Hello World</a> sample.</li>
+      <li>Learn from the <a href="https://amp.dev/documentation/guides-and-tutorials/start/visual_story/">Create a visual AMP story</a> tutorial.</li>
     </ul></td>
   </tr>
 </table>
@@ -260,7 +260,7 @@ The content in the body creates a story with two pages.  Each page has a full bl
 
 ### Required markup for amp-story
 
-The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
+The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup), along with the following additional requirements:
 
 
 | RULE | DESCRIPTION |
@@ -485,7 +485,7 @@ Example:
 The following are available templates to specify for the layout of the grid layer.
 
 {% call callout('Tip', type='success') %}
-To see the layout templates in use, check out the [layouts demo on AMP By Example](https://ampbyexample.com/stories/features/layouts/).
+To see the layout templates in use, check out the [layouts demo on AMP By Example](https://amp.dev/documentation/examples/style-layout/amp_story_layouts/).
 {% endcall %}
 
 ##### fill
@@ -733,7 +733,57 @@ An `amp-story-grid-layer` can contain any of the following elements:
   </tr>
 </table>
 
+#### Pre templated UI
+
+##### Landscape half-half UI
+
+The landscape half-half pre templated UI will resize the `<amp-story-grid-layer>` element to take half of the screen rather than the full screen, and be positioned either on the half left or half right of the viewport. This attribute only affects landscape viewports, and is ignored on portrait viewports.
+This template makes it easier to design full bleed landscape stories: splitting the screen in two halves gives each half a portrait ratio on most devices, allowing re-using the portrait assets, design, and templates already built for portrait stories.
+
+The `position` attribute on the `<amp-story-grid-layer>` element accepts two values: `landscape-half-left` or `landscape-half-right`.
+
+Note: your story needs to enable the `supports-landscape` mode to use this template.
+
+Example:
+
+<amp-img alt="Landscape half-half UI template" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" width="600" height="287">
+  <noscript>
+    <img alt="Landscape half-half UI template" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" />
+  </noscript>
+</amp-img>
+
+```html
+<amp-story-page id="foo">
+  <amp-story-grid-layer template="fill" position="landscape-half-left">
+    <amp-img src="cat.jpg"></amp-img>
+  </amp-story-grid-layer>
+  <amp-story-grid-layer template="vertical" position="landscape-half-right">
+    <h2>Cat ipsum dolor sit amet...</h2>
+  </amp-story-grid-layer>
+</amp-story-page>
+```
+
 #### Optional customization
+
+##### Crop `amp-img` and `amp-video` assets using `object-position`
+
+The `object-position` attribute can be used on `<amp-img>` and `<amp-video>` elements to specify the alignment of the asset within its container (crop).
+By default these assets are centered and, depending on the viewport ratio, have their edges are cropped out of the container. Because the zone of interest of an asset is not always its center, the `object-position` allows specifying what part of the image has to remain visible.
+This attribute accepts any value accepted by the `object-position` CSS property.
+
+Example:
+
+<amp-img alt="Custom crop on amp-img and amp-video assets" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-object-position.gif" width="600" height="689">
+  <noscript>
+    <img alt="Custom crop on amp-img and amp-video assets" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-object-position.gif" />
+  </noscript>
+</amp-img>
+
+This same image can be used for both mobile portrait and landscape desktop using the `object-position` this way:
+
+```html
+<amp-img src="cat.jpg" object-position="75% 40%"></amp-img>
+```
 
 ##### `data-text-background-color`
 
@@ -1039,7 +1089,7 @@ The following animation effects are available as presets for AMP stories:
 
 
 {% call callout('Tip', type='success') %}
-See a [live demo of all the AMP story animations](https://ampbyexample.com/stories/features/animations/) on AMP By Example.
+See a [live demo of all the AMP story animations](https://amp.dev/documentation/examples/visual-effects/amp_story_animations/) on AMP By Example.
 {% endcall %}
 
 
@@ -1442,9 +1492,9 @@ This field should contain a string, where each string respresents a share provid
 
 When extra parameters are required, an object with key-value pairs should be used. The object should contain a key `provider` with a value (e.g. `facebook`) corresponding to the provider's name. The next key-values will depend on the share provider.
 
-The list of available providers is the same as in the [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share) component.
+The list of available providers is the same as in the [amp-social-share](https://amp.dev/documentation/components/amp-social-share) component.
 
-Each of these providers has a different set of available parameters ([see `data-param-*`](https://www.ampproject.org/docs/reference/components/amp-social-share#data-param-*)). The configuration object takes these parameters without the `data-param-` prefix (for example, the `data-param-app_id` would appear in the configuration object as `app_id`).
+Each of these providers has a different set of available parameters ([see `data-param-*`](https://amp.dev/documentation/components/amp-social-share#data-param-*)). The configuration object takes these parameters without the `data-param-` prefix (for example, the `data-param-app_id` would appear in the configuration object as `app_id`).
 
 #### JSON configuration
 The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON configuration of the bookend. It is described as a URL endpoint that accepts GET requests and returns a JSON response with the contents of the bookend.  If omitted, the amp-story component renders a default UI for the end screen. The system is responsible for fetching the data necessary to render related and trending articles.  This can be served from a static JSON file, or dynamically-generated (e.g., to calculate what is currently trending).
@@ -1489,11 +1539,11 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ## Other components usable in AMP stories
 The following are other components usable in AMP stories that require some story-specific caveats.
 
-- [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
-- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar#sidebar-for-stories)
+- [amp-consent](https://amp.dev/documentation/components/amp-consent#prompt-ui-for-stories)
+- [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar#sidebar-for-stories)
 - [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
 
-For more generally usable components see the [list of allowed children](https://www.ampproject.org/docs/reference/components/amp-story#children).
+For more generally usable components see the [list of allowed children](https://amp.dev/documentation/components/amp-story#children).
 
 ## Validation
 
@@ -1531,5 +1581,5 @@ Additionally, for right-to-left languages, you may include the `dir="rtl"` attri
 ## Related resources
 
 * [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
-* [Samples on AMP By Example](https://ampbyexample.com/stories/#stories/introduction)
-* [Best practices for creating an AMP story](https://www.ampproject.org/docs/guides/amp_story_best_practices)
+* [Samples on AMP By Example](https://amp.dev/documentation/examples/?format=stories)
+* [Best practices for creating an AMP story](https://amp.dev/documentation/guides-and-tutorials/develop/amp_story_best_practices)

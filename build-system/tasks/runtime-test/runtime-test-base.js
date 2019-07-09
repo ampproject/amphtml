@@ -227,15 +227,21 @@ class RuntimeTestConfig {
         {
           exclude: [
             'ads/**/*.js',
+            'build-system/**/*.js',
+            'extensions/**/test/**/*.js',
             'third_party/**/*.js',
             'test/**/*.js',
-            'extensions/**/test/**/*.js',
             'testing/**/*.js',
           ],
         },
       ];
 
-      this.browserify.transform = [['babelify', {plugins: [plugin]}]];
+      this.browserify.transform = [
+        [
+          'babelify',
+          Object.assign({}, this.babelifyConfig, {plugins: [plugin]}),
+        ],
+      ];
     }
   }
 }

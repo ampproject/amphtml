@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {dev} from '../../../src/log';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
@@ -22,9 +23,10 @@ import {map} from '../../../src/utils/object';
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 
 /** @private {!Object<string, boolean>} */
-const SUPPORTED_TYPES = {
-  'text': true,
-  'textarea': true,
+const SUPPORTED_TAG_NAMES = {
+  'INPUT': true,
+  'SELECT': true,
+  'TEXTAREA': true,
 };
 
 export class FormDirtiness {
@@ -107,6 +109,13 @@ export class FormDirtiness {
   installEventHandlers_() {
     this.form_.addEventListener('input', this.onInput_.bind(this));
     this.form_.addEventListener('reset', this.onReset_.bind(this));
+
+    // `amp-bind` dispatches the custom event `FORM_VALUE_CHANGE` when it
+    // mutates the value of a form field (e.g. textarea, input, etc)
+    this.form_.addEventListener(
+      AmpEvents.FORM_VALUE_CHANGE,
+      this.onInput_.bind(this)
+    );
   }
 
   /**
@@ -211,10 +220,9 @@ export class FormDirtiness {
  * @return {boolean}
  */
 function shouldSkipDirtinessCheck(field) {
-  const {type, name, hidden} = field;
+  const {tagName, name, hidden} = field;
 
-  // TODO: add support for radio buttons, checkboxes, and dropdown menus
-  if (!SUPPORTED_TYPES[type]) {
+  if (!SUPPORTED_TAG_NAMES[tagName]) {
     return true;
   }
 

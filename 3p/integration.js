@@ -60,6 +60,7 @@ import {yotpo} from './yotpo';
 import {_ping_} from '../ads/_ping_';
 
 // 3P Ad Networks - please keep in alphabetic order
+import {_1wo} from '../ads/1wo';
 import {_24smi} from '../ads/24smi';
 import {a8} from '../ads/a8';
 import {a9} from '../ads/a9';
@@ -84,6 +85,7 @@ import {adpon} from '../ads/adpon';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adsensor} from '../ads/adsensor';
+import {adsloom} from '../ads/adsloom';
 import {adsnative} from '../ads/adsnative';
 import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
@@ -151,6 +153,7 @@ import {imonomy} from '../ads/imonomy';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
+import {invibes} from '../ads/invibes';
 import {ix} from '../ads/ix';
 import {jubna} from '../ads/jubna';
 import {kargo} from '../ads/kargo';
@@ -268,7 +271,9 @@ import {zucks} from '../ads/zucks';
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
+  '1wo': true,
   '24smi': true,
+  adsloom: true,
   bringhub: true,
   dable: true,
   engageya: true,
@@ -302,6 +307,7 @@ if (getMode().test || getMode().localDev) {
 }
 
 // Keep the list in alphabetic order
+register('1wo', _1wo);
 register('24smi', _24smi);
 register('3d-gltf', gltfViewer);
 register('a8', a8);
@@ -327,6 +333,7 @@ register('adpon', adpon);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adsensor', adsensor);
+register('adsloom', adsloom);
 register('adsnative', adsnative);
 register('adspeed', adspeed);
 register('adspirit', adspirit);
@@ -400,6 +407,7 @@ register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('innity', innity);
+register('invibes', invibes);
 register('ix', ix);
 register('jubna', jubna);
 register('kargo', kargo);

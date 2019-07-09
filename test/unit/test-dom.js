@@ -152,9 +152,55 @@ describes.sandboxed('DOM', {}, env => {
       const c = document.createElement('div');
       b.appendChild(c);
       expect(dom.rootNodeFor(c)).to.equal(a);
+
+      const polyfill = document.createElement('i-amphtml-shadow-root');
+      const e = document.createElement('div');
+      polyfill.appendChild(e);
+      a.appendChild(polyfill);
+      expect(dom.rootNodeFor(e)).to.equal(polyfill);
     } finally {
       Object.defineProperty(Node.prototype, 'getRootNode', desc);
     }
+  });
+
+  describe('isShadowRoot', () => {
+    it('should yield false for non-nodes', () => {
+      expect(dom.isShadowRoot(null)).to.be.false;
+      expect(dom.isShadowRoot(undefined)).to.be.false;
+      expect(dom.isShadowRoot('')).to.be.false;
+      expect(dom.isShadowRoot(11)).to.be.false;
+    });
+
+    it('should yield false for other types of nodes', () => {
+      expect(dom.isShadowRoot(document.createElement('div'))).to.be.false;
+      expect(dom.isShadowRoot(document.createTextNode('abc'))).to.be.false;
+    });
+
+    it('should yield true for natively-supported createShadowRoot API', () => {
+      const element = document.createElement('div');
+      if (element.createShadowRoot) {
+        const shadowRoot = element.createShadowRoot();
+        expect(dom.isShadowRoot(shadowRoot)).to.be.true;
+      }
+    });
+
+    it('should yield true for natively-supported attachShadow API', () => {
+      const element = document.createElement('div');
+      if (element.attachShadow) {
+        const shadowRoot = element.attachShadow({mode: 'open'});
+        expect(dom.isShadowRoot(shadowRoot)).to.be.true;
+      }
+    });
+
+    it('should yield false for document-fragment non-shadow-root node', () => {
+      const fragment = document.createDocumentFragment();
+      expect(dom.isShadowRoot(fragment)).to.be.false;
+    });
+
+    it('should yield true for polyfill', () => {
+      expect(dom.isShadowRoot(document.createElement('i-amphtml-shadow-root')))
+        .to.be.true;
+    });
   });
 
   it('closest should find itself', () => {

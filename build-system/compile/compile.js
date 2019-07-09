@@ -97,7 +97,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/mustache/',
     'third_party/vega/',
     'third_party/webcomponentsjs/',
-    'third_party/rrule/',
     'third_party/react-dates/',
     'third_party/amp-toolbox-cache-url/',
     'third_party/inputmask/',
@@ -228,18 +227,17 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'third_party/d3/**/*.js',
       'third_party/subscriptions-project/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
-      'third_party/rrule/rrule.js',
       'third_party/react-dates/bundle.js',
       'third_party/amp-toolbox-cache-url/**/*.js',
       'third_party/inputmask/**/*.js',
       'node_modules/dompurify/dist/purify.es.js',
-      'node_modules/promise-pjs/promise.js',
-      'node_modules/set-dom/src/**/*.js',
+      'node_modules/promise-pjs/promise.mjs',
+      'node_modules/rrule/dist/esm/src/index.js',
+      'node_modules/set-dom/dist/set-dom.js',
       'node_modules/web-animations-js/web-animations.install.js',
       'node_modules/web-activities/activity-ports.js',
       'node_modules/@ampproject/animations/dist/animations.mjs',
-      'node_modules/@ampproject/worker-dom/dist/' +
-        'unminified.index.safe.mjs.patched.js',
+      'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
       'node_modules/document-register-element/build/' +
         'document-register-element.patched.js',
       // 'node_modules/core-js/modules/**.js',
@@ -365,6 +363,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       define,
       hide_warnings_for: hideWarningsFor,
     };
+    if (argv.pretty_print) {
+      compilerOptions.formatting = 'PRETTY_PRINT';
+    }
 
     // For now do type check separately
     if (options.typeCheckOnly) {
@@ -372,6 +373,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
       compilerOptions.jscomp_error.push(
+        'conformanceViolations',
         'checkTypes',
         'accessControls',
         'const',

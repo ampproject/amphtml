@@ -174,7 +174,6 @@ const forbiddenTerms = {
   'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/action-impl.js',
       'src/service/core-services.js',
@@ -223,7 +222,6 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
-      'src/inabox/amp-inabox-lite.js',
       'src/service/ampdoc-impl.js',
       'testing/describes.js',
       'testing/iframe.js',
@@ -235,14 +233,12 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
-      'src/inabox/amp-inabox-lite.js',
       'src/service/performance-impl.js',
     ],
   },
   'installStorageServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/core-services.js',
       'src/service/storage-impl.js',
@@ -259,7 +255,6 @@ const forbiddenTerms = {
   'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/core-services.js',
       'src/service/url-replacements-impl.js',
@@ -270,7 +265,6 @@ const forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/inabox/amp-inabox.js',
-      'src/inabox/amp-inabox-lite.js',
       'src/service/core-services.js',
       'src/service/viewer-impl.js',
     ],
@@ -304,7 +298,6 @@ const forbiddenTerms = {
   'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/core-services.js',
       'src/service/resources-impl.js',
@@ -421,6 +414,9 @@ const forbiddenTerms = {
   'cidForDoc|cidForDocOrNull': {
     message: requiresReviewPrivacy,
     whitelist: [
+      // CID service is not allowed in amp4ads. No usage should there be
+      // in extensions listed in the amp4ads spec:
+      // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/ad-cid.js',
       'src/services.js',
       'src/service/cid-impl.js',
@@ -468,6 +464,9 @@ const forbiddenTerms = {
   'storageForDoc': {
     message: requiresReviewPrivacy,
     whitelist: [
+      // Storage service is not allowed in amp4ads. No usage should there be
+      // in extensions listed in the amp4ads spec:
+      // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/services.js',
       'src/service/cid-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
@@ -633,6 +632,8 @@ const forbiddenTerms = {
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
+      // TODO: @jonathantyng cleanup #22757
+      'build-system/tasks/generate-vendor-jsons.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -687,7 +688,6 @@ const forbiddenTerms = {
       'src/amp-shadow.js',
       'src/style-installer.js',
       'src/inabox/amp-inabox.js',
-      'src/inabox/amp-inabox-lite.js',
     ],
   },
 };
