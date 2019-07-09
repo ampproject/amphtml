@@ -491,7 +491,7 @@ export class AmpStory extends AMP.BaseElement {
       this.initializeMediaQueries_(mediaQueryEls);
     }
 
-    const styleEl = document.querySelector('style[amp-custom]');
+    const styleEl = this.win.document.querySelector('style[amp-custom]');
 
     if (styleEl) {
       this.rewriteStyles_(styleEl);
@@ -537,10 +537,10 @@ export class AmpStory extends AMP.BaseElement {
     // ../../../extensions/amp-animation/0.1/web-animations.js
     this.mutateElement(() => {
       styleEl.textContent = styleEl.textContent
-        .replace(/([\d.]+)vh/gim, 'calc($1 * var(--story-page-vh))')
-        .replace(/([\d.]+)vw/gim, 'calc($1 * var(--story-page-vw))')
-        .replace(/([\d.]+)vmin/gim, 'calc($1 * var(--story-page-vmin))')
-        .replace(/([\d.]+)vmax/gim, 'calc($1 * var(--story-page-vmax))');
+        .replace(/(-?[\d.]+)vh/gim, 'calc($1 * var(--story-page-vh))')
+        .replace(/(-?[\d.]+)vw/gim, 'calc($1 * var(--story-page-vw))')
+        .replace(/(-?[\d.]+)vmin/gim, 'calc($1 * var(--story-page-vmin))')
+        .replace(/(-?[\d.]+)vmax/gim, 'calc($1 * var(--story-page-vmax))');
     });
   }
 
