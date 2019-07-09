@@ -1821,6 +1821,16 @@ export class AmpStory extends AMP.BaseElement {
             this.element.appendChild(pageAttachments[i]);
           }
         });
+
+        this.signals()
+          .whenSignal(CommonSignals.LOAD_END)
+          .then(() => {
+            this.vsync_.mutate(() => {
+              this.pages_.forEach(page =>
+                page.element.setAttribute('active', '')
+              );
+            });
+          });
         break;
     }
   }
