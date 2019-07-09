@@ -158,9 +158,10 @@ export class AmpAdUIHandler {
    * @param {number|string|undefined} width
    * @param {number} iframeHeight
    * @param {number} iframeWidth
+   * @param {!MessageEvent} event
    * @return {!Promise<!Object>}
    */
-  updateSize(height, width, iframeHeight, iframeWidth) {
+  updateSize(height, width, iframeHeight, iframeWidth, event) {
     // Calculate new width and height of the container to include the padding.
     // If padding is negative, just use the requested width and height directly.
     let newHeight, newWidth;
@@ -195,11 +196,18 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
+    // QQQQ: ask Hongfei where to report!?
     return this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(
       () => {
         return resizeInfo;
       },
       () => {
+        // QQQQ: report total # of negatives
+        const activated =
+            event.userActivation && event.userActivation.hasBeenActive;
+        if (activated) {
+          // QQQQ: report false negative
+        }
         resizeInfo.success = false;
         return resizeInfo;
       }
