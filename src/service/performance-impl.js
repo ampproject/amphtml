@@ -145,6 +145,7 @@ export class Performance {
      * @private {boolean}
      */
     this.supportsLayoutInstabilityAPI_ =
+      this.win.PerformanceObserver &&
       this.win.PerformanceObserver.supportedEntryTypes &&
       this.win.PerformanceObserver.supportedEntryTypes.includes('layoutShift');
 
