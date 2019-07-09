@@ -65,7 +65,7 @@ limitations under the License.
 
 ## Overview
 
-The `amp-script` component allows you run custom JavaScript to render UI e.g. React components.
+The `amp-script` component allows you run custom JavaScript to render UI elements, such as a React component.
 
 {% call callout('Important', type='caution') %}
 `amp-script` is in active development and under [experimental availability](https://amp.dev/documentation/guides-and-tutorials/learn/experimental). It's subject to breaking API changes and should not yet be used in production.
@@ -134,7 +134,7 @@ Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/am
 - Maximum of 10,000 bytes per `amp-script` element that uses a local script via `script[type=text/plain][target=amp-script]`.
 - Maximum total of 150,000 bytes for all `amp-script` elements on the page.
 
-#### Required user gestures
+#### User gestures
 
 `amp-script` generally requires a user gesture to apply changes triggered by your JavaScript code to the page (we call these "mutations"). This requirement helps avoid poor user experience from unexpected content jumping.
 
