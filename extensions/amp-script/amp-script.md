@@ -46,6 +46,21 @@ Allows rendering of custom UI components running on third-party JavaScript.
       </div>
     </td>
   </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td>
+      Coming soon!
+    </td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Tutorials</strong></td>
+    <td>
+      <ul>
+        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript">Getting started with amp-script</a></li>
+        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript-tutorial?format=websites">Custom password requirements with amp-script</a></li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
 ## Overview
