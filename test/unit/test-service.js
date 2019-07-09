@@ -36,6 +36,7 @@ import {
   setParentWindow,
 } from '../../src/service';
 import {loadPromise} from '../../src/event-helper';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('service', () => {
   let sandbox;
@@ -228,6 +229,7 @@ describe('service', () => {
 
   describe('ampdoc singletons', () => {
     let windowApi;
+    let ampdocServiceApi;
     let ampdoc;
     let ampdocMock;
     let node;
@@ -244,13 +246,17 @@ describe('service', () => {
       factory = sandbox.spy(function() {
         return new Class();
       });
-      windowApi = {};
+      windowApi = {
+        location: {
+          hostname: 'example.com',
+        },
+      };
       ampdoc = {
         isSingleDoc: () => false,
         win: windowApi,
       };
       ampdocMock = sandbox.mock(ampdoc);
-      const ampdocServiceApi = {getAmpDoc: () => ampdoc};
+      ampdocServiceApi = {getAmpDoc: () => ampdoc};
       registerServiceBuilder(windowApi, 'ampdoc', function() {
         return ampdocServiceApi;
       });
@@ -498,20 +504,32 @@ describe('service', () => {
 
       beforeEach(() => {
         // A child.
-        childWin = {};
-        childWinNode = {nodeType: 1, ownerDocument: {defaultView: childWin}};
+        childWin = {
+          document: {nodeType: /* DOCUMENT */ 9},
+          frameElement: {ownerDocument: {defaultView: windowApi}},
+        };
+        childWin.document.defaultView = childWin;
+        childWinNode = {nodeType: 1, ownerDocument: childWin.document};
         setParentWindow(childWin, windowApi);
 
         // A grandchild.
-        grandchildWin = {};
+        grandchildWin = {
+          document: {nodeType: /* DOCUMENT */ 9},
+        };
+        grandchildWin.document.defaultView = grandchildWin;
         grandChildWinNode = {
           nodeType: 1,
-          ownerDocument: {defaultView: grandchildWin},
+          ownerDocument: grandchildWin.document,
+          frameElement: {ownerDocument: {defaultView: childWin}},
         };
         setParentWindow(grandchildWin, childWin);
 
         registerServiceBuilderForDoc(ampdoc, 'c', factory);
         topService = getServiceForDoc(ampdoc, 'c');
+      });
+
+      afterEach(() => {
+        toggleExperiment(windowApi, 'ampdoc-fie', false);
       });
 
       it('should return the service via node', () => {
@@ -520,6 +538,7 @@ describe('service', () => {
       });
 
       it('should not fallback from FIE to parent service', () => {
+        // TODO(#22733): remove once ampdoc-fie migration is done.
         const fromChildNode = getExistingServiceForDocInEmbedScope(
           childWinNode,
           'c'
@@ -533,7 +552,76 @@ describe('service', () => {
         expect(fromGrandchildNode).to.be.null;
       });
 
+      it('should find ampdoc and return its service', () => {
+        toggleExperiment(windowApi, 'ampdoc-fie', true);
+        const fromChildNode = getExistingServiceForDocInEmbedScope(
+          childWinNode,
+          'c'
+        );
+        expect(fromChildNode).to.equal(topService);
+
+        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
+          grandChildWinNode,
+          'c'
+        );
+        expect(fromGrandchildNode).to.equal(topService);
+      });
+
+      it('should not fallback embedded ampdoc to parent', () => {
+        toggleExperiment(windowApi, 'ampdoc-fie', true);
+        const childAmpdoc = {
+          isSingleDoc: () => false,
+          win: windowApi,
+        };
+        sandbox.stub(ampdocServiceApi, 'getAmpDoc').callsFake(node => {
+          if (node == childWinNode || node == grandChildWinNode) {
+            return childAmpdoc;
+          }
+          return ampdoc;
+        });
+        const fromChildNode = getExistingServiceForDocInEmbedScope(
+          childWinNode,
+          'c'
+        );
+        expect(fromChildNode).to.equal(null);
+
+        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
+          grandChildWinNode,
+          'c'
+        );
+        expect(fromGrandchildNode).to.equal(null);
+      });
+
+      it('should override services on embedded ampdoc', () => {
+        toggleExperiment(windowApi, 'ampdoc-fie', true);
+        const childAmpdoc = {
+          isSingleDoc: () => false,
+          win: windowApi,
+        };
+        registerServiceBuilderForDoc(childAmpdoc, 'c', factory);
+        sandbox.stub(ampdocServiceApi, 'getAmpDoc').callsFake(node => {
+          if (node == childWinNode || node == grandChildWinNode) {
+            return childAmpdoc;
+          }
+          return ampdoc;
+        });
+        const fromChildNode = getExistingServiceForDocInEmbedScope(
+          childWinNode,
+          'c'
+        );
+        expect(fromChildNode).to.deep.equal({count: 2});
+        expect(fromChildNode).to.not.equal(topService);
+
+        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
+          grandChildWinNode,
+          'c'
+        );
+        expect(fromGrandchildNode).to.deep.equal({count: 2});
+        expect(fromGrandchildNode).to.not.equal(topService);
+      });
+
       it('should return overriden service', () => {
+        // TODO(#22733): remove once ampdoc-fie migration is done.
         const overridenService = {};
         installServiceInEmbedScope(childWin, 'c', overridenService);
         expect(
