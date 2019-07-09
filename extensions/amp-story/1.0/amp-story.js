@@ -71,7 +71,6 @@ import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
 import {LocalizationService} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
-import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
@@ -244,12 +243,6 @@ export class AmpStory extends AMP.BaseElement {
     if (isRTL(this.win.document)) {
       this.storeService_.dispatch(Action.TOGGLE_RTL, true);
     }
-
-    // TODO(#19768): Avoid passing a private function here.
-    /** @private {!NavigationState} */
-    this.navigationState_ = new NavigationState(this.win, () =>
-      this.hasBookend_()
-    );
 
     /** @private {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, this.element);
@@ -433,11 +426,6 @@ export class AmpStory extends AMP.BaseElement {
     if (this.viewer_.hasCapability('swipe')) {
       this.storeService_.dispatch(Action.TOGGLE_CAN_SHOW_BOOKEND, false);
     }
-
-    this.navigationState_.observe(stateChangeEvent => {
-      this.variableService_.onNavigationStateChange(stateChangeEvent);
-      this.analyticsService_.onNavigationStateChange(stateChangeEvent);
-    });
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
@@ -1448,16 +1436,6 @@ export class AmpStory extends AMP.BaseElement {
             );
           }
         }
-
-        const oldPageId = oldPage ? oldPage.element.id : null;
-        // TODO(alanorozco): check if autoplay
-        this.navigationState_.updateActivePage(
-          pageIndex,
-          this.getPageCount(),
-          targetPage.element.id,
-          oldPageId,
-          targetPage.getNextPageId() === null /* isFinalPage */
-        );
 
         // If first navigation.
         if (!oldPage) {
@@ -2659,11 +2637,6 @@ export class AmpStory extends AMP.BaseElement {
         ctaAnchorEl.setAttribute('data-vars-story-page-index', pageIndex);
       });
     });
-  }
-
-  /** @return {!NavigationState} */
-  getNavigationState() {
-    return this.navigationState_;
   }
 
   /**
