@@ -15,7 +15,6 @@
  */
 
 const defaultPlugins = [
-  require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts'),
   require.resolve('./babel-plugins/babel-plugin-transform-html-template'),
   require.resolve(
     './babel-plugins/babel-plugin-transform-parenthesize-expression'
@@ -28,8 +27,20 @@ const defaultPlugins = [
 ];
 
 module.exports = {
-  plugins({isEsmBuild, isForTesting}) {
+  plugins({isEsmBuild, isForTesting, isSinglePass}) {
     let pluginsToApply = defaultPlugins;
+    // TODO(erwinm): This is temporary until we remove the assert/log removals
+    // from the java transformation to the babel transformation.
+    // There is currently a weird interaction where when we do the transform
+    // in babel and leave a bare "string", Closure Compiler does not remove
+    // the dead string expression statements. We cannot just outright remove
+    // the argument of the assert/log calls since we would need to inspect
+    // if the arguments have any method calls (which might have side effects).
+    if (isSinglePass) {
+      pluginsToApply.push(
+        require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts')
+      );
+    }
     if (isEsmBuild) {
       pluginsToApply = pluginsToApply.concat([
         [

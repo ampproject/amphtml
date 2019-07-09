@@ -32,8 +32,9 @@ const argv = minimist(process.argv.slice(2));
 // eslint-disable-next-line amphtml-internal/no-module-exports
 module.exports = function(api) {
   api.cache(true);
-  // Single pass builds do not use any of the default settings below.
-  if (argv._.includes('dist') && argv.single_pass) {
+  // `dist` builds do not use any of the default settings below. (Both
+  // Multipass and Singlepass)
+  if (argv._.includes('dist')) {
     return {};
   }
   return {
