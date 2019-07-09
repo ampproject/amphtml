@@ -23,6 +23,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
+import {urls} from '../../../src/config';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';
@@ -42,9 +43,9 @@ export class AnalyticsConfig {
      * @const {!JsonObject} Copied here for tests.
      * @private
      */
-     this.predefinedConfig_ = RtvExperiment.ANALYTICS_VENDOR_SPLIT
-       ? dict()
-       : ANALYTICS_CONFIG;
+    this.predefinedConfig_ = RtvExperiment.ANALYTICS_VENDOR_SPLIT
+      ? dict()
+      : ANALYTICS_CONFIG;
 
     /**
      * @private {JsonObject}
@@ -66,7 +67,6 @@ export class AnalyticsConfig {
   loadConfig() {
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
-    console.log(RtvExperiment.ANALYTICS_VENDOR_SPLIT);
     const fetchVendorConfigPromise = RtvExperiment.ANALYTICS_VENDOR_SPLIT
       ? this.fetchVendorConfig_()
       : Promise.resolve();
@@ -74,6 +74,22 @@ export class AnalyticsConfig {
     return Promise.all([this.fetchRemoteConfig_(), fetchVendorConfigPromise])
       .then(this.processConfigs_.bind(this))
       .then(() => this.config_);
+  }
+
+  /**
+   * Constructs the URL where the given vendor config is located
+   * @private
+   * @param {string}
+   * @return {string}
+   */
+  getVendorUrl_(vendor) {
+    const rtv = getMode().rtvVersion;
+    const baseUrl = getMode().localDev
+      ? `/dist`
+      : `${urls.cdn}/rtv/${rtv}`;
+    const max = getMode().minified ? '' : '.max';
+
+    return `${baseUrl}/v0/analytics-vendors/${vendor}${max}.json`;
   }
 
   /**
@@ -91,9 +107,7 @@ export class AnalyticsConfig {
     const fetchConfig = {
       requireAmpResponseSourceOrigin: false,
     };
-
-    const baseUrl = getMode().localDev ? '/dist' : 'https://cdn.ampproject.org';
-    const vendorUrl = baseUrl + '/v0/analytics-vendors/' + type + '.json';
+    const vendorUrl = this.getVendorUrl_(type);
 
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching vendor config', vendorUrl);

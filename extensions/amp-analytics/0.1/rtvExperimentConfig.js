@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-/** @define {boolean} */
-const ANALYTICS_VENDOR_SPLIT = goog.define('ANALYTICS_VENDOR_SPLIT', false);
+const ANALYTICS_VENDOR_SPLIT = false;
 
 export const RtvExperiment = {
-  ANALYTICS_VENDOR_SPLIT: self.ANALYTICS_VENDOR_SPLIT,
+  ANALYTICS_VENDOR_SPLIT,
 };
