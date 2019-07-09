@@ -59,10 +59,14 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {
+  installDocService,
+  updateFieModeForTesting,
+} from '../../../../src/service/ampdoc-impl';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
+import {toggleExperiment} from '../../../../src/experiments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 
 describe('amp-a4a', () => {
@@ -2173,6 +2177,8 @@ describe('amp-a4a', () => {
       });
     });
     it('should render correctly', () => {
+      // TODO(#22733): remove this test once ampdoc-fie is launched.
+      const parentWin = a4aElement.ownerDocument.defaultView;
       return a4a.renderAmpCreative_(metaData).then(() => {
         // Verify iframe presence.
         expect(a4aElement.children.length).to.equal(1);
@@ -2192,6 +2198,38 @@ describe('amp-a4a', () => {
         expect(
           Services.urlReplacementsForDoc(frameDoc.documentElement)
         ).to.not.equal(Services.urlReplacementsForDoc(a4aElement));
+        expect(
+          Services.urlReplacementsForDoc(frameDoc.documentElement).ampdoc.win
+        ).to.equal(parentWin);
+      });
+    });
+    it('should render correctly in ampdoc-fie mode', () => {
+      const parentWin = a4aElement.ownerDocument.defaultView;
+      const ampdocService = Services.ampdocServiceFor(parentWin);
+      toggleExperiment(parentWin, 'ampdoc-fie', true);
+      updateFieModeForTesting(ampdocService, true);
+      return a4a.renderAmpCreative_(metaData).then(() => {
+        // Verify iframe presence.
+        expect(a4aElement.children.length).to.equal(1);
+        const friendlyIframe = a4aElement.children[0];
+        expect(friendlyIframe.tagName).to.equal('IFRAME');
+        expect(friendlyIframe.src).to.not.be.ok;
+        expect(friendlyIframe.srcdoc).to.be.ok;
+        const frameDoc = friendlyIframe.contentDocument;
+        const styles = frameDoc.querySelectorAll('style[amp-custom]');
+        expect(
+          Array.prototype.some.call(styles, s => {
+            return s.innerHTML == 'p { background: green }';
+          }),
+          'Some style is "background: green"'
+        ).to.be.true;
+        expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
+        expect(
+          Services.urlReplacementsForDoc(frameDoc.documentElement)
+        ).to.not.equal(Services.urlReplacementsForDoc(a4aElement));
+        expect(
+          Services.urlReplacementsForDoc(frameDoc.documentElement).ampdoc.win
+        ).to.equal(frameDoc.defaultView);
       });
     });
   });

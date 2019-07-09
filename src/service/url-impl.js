@@ -41,6 +41,8 @@ export class Url {
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
   constructor(ampdoc, opt_rootNode) {
+    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
+
     const root = opt_rootNode || ampdoc.getRootNode();
     const doc = root.ownerDocument || root;
 

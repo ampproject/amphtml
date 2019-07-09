@@ -81,7 +81,7 @@ export function installStylesForDoc(
 
 /**
  * Adds the given css text to the given document.
- * TODO(dvoytenko, #10705): Remove this method once FIE/ampdoc migration is
+ * TODO(dvoytenko, #22733): Remove this method once FIE/ampdoc migration is
  * done.
  *
  * @param {!Document} doc The document that should get the new styles.
