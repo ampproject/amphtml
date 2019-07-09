@@ -24,7 +24,7 @@ import {canInspectWindow} from '../../src/iframe-helper';
 import {dev, devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
-import {getPublicPositionObserver} from './position-observer';
+import {getPositionObserver} from './position-observer';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';
@@ -87,7 +87,7 @@ export class InaboxMessagingHost {
     this.iframeMap_ = Object.create(null);
 
     /** @private {!./position-observer.PositionObserver} */
-    this.positionObserver_ = getPublicPositionObserver(win);
+    this.positionObserver_ = getPositionObserver(win);
 
     /** @private {!NamedObservable} */
     this.msgObservable_ = new NamedObservable();

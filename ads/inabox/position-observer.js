@@ -34,6 +34,9 @@ let PositionEntryDef;
 /** @const */
 const MIN_EVENT_INTERVAL_IN_MS = 100;
 
+/** @const */
+const AMP_INABOX_POSITION_OBSERVER = 'ampInaboxPositionObserver';
+
 export class PositionObserver {
   /**
    * @param {!Window} win
@@ -185,8 +188,7 @@ function isWebKit(ua) {
  * @param {!Window} win
  * @return {!PositionObserver}
  */
-export function getPublicPositionObserver(win) {
-  const AMP_INABOX_POSITION_OBSERVER = 'ampInaboxPositionObserver';
+export function getPositionObserver(win) {
   win[AMP_INABOX_POSITION_OBSERVER] =
     win[AMP_INABOX_POSITION_OBSERVER] || new PositionObserver(win);
   return win[AMP_INABOX_POSITION_OBSERVER];

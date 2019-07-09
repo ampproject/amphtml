@@ -21,7 +21,7 @@ import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
-import {getPublicPositionObserver} from '../../ads/inabox/position-observer';
+import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
 import {layoutRectLtwh, moveLayoutRect} from '../layout-rect';
@@ -198,7 +198,7 @@ export class ViewportBindingInabox {
     return Services.resourcesPromiseForDoc(
       this.win.document.documentElement
     ).then(() => {
-      this.topWindowPositionObserver_ = getPublicPositionObserver(this.win.top);
+      this.topWindowPositionObserver_ = getPositionObserver(this.win.top);
       this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
         /** @type {!HTMLIFrameElement|!HTMLElement} */
         (this.win.frameElement || this.getScrollingElement()),
