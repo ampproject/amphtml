@@ -23,6 +23,7 @@ import {
   WHITELISTED_TARGETS,
   isValidAttr,
 } from './sanitation';
+import {isAmp4Email} from './format';
 import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
 import {user} from './log';
