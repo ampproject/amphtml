@@ -79,7 +79,7 @@ export function getElementsFromMutationRecordSelector(
   const targetElements = document.querySelectorAll(mutationRecord['target']);
 
   userAssert(
-    targetElements !== null,
+    targetElements.length > 0,
     'No element on the document matches the selector, %s .',
     mutationRecord['target']
   );

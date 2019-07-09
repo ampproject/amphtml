@@ -24,7 +24,7 @@ import {
 } from './mutation-record';
 import {user, userAssert} from '../../../src/log';
 
-const TAG = 'amp-experiment mutation';
+const TAG = 'amp-experiment apply-experiment';
 
 /** @const {number} */
 const MAX_MUTATIONS = 70;
@@ -47,20 +47,12 @@ const MAX_MUTATIONS = 70;
  * @param {!JsonObject} config
  * @param {!Object<string, ?string>} experimentToVariant
  * @return {!Promise}
- * @private
  */
 export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
+
   // Get all of our mutation records across all experiments
   // That are being applied
-  /** {Array<JsonObject>} */
-  let mutationRecords = [];
-  for (const experimentName in experimentToVariant) {
-    const variantName = experimentToVariant[experimentName];
-    if (variantName) {
-      const variantObject = config[experimentName]['variants'][variantName];
-      mutationRecords = mutationRecords.concat(variantObject['mutations']);
-    }
-  }
+  const mutationRecords = getMutationRecordsFromExperimentToVariant(config, experimentToVariant);
 
   // Assert the formats of the mutation record,
   // find its respective elements,
@@ -92,6 +84,56 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
   }
 
   // Create the mutations
+  const mutations = createMutationsFromMutationRecordsAndElements(mutationRecordsAndElements);
+
+  // Validate all mutations
+  mutations.forEach(mutation => {
+    userAssert(
+      mutation.validate(),
+      'Mutation %s has an an unsupported value.',
+      mutation.toString()
+    );
+  });
+
+  return ampdoc.whenReady().then(() => {
+    // Apply all the mutations
+    mutations.forEach(mutation => {
+      mutation.mutate();
+    });
+  });
+}
+
+
+/**
+ *  Get all of our mutation records across all chosen variants
+ *  in the respected experiments
+ *
+ * @param {!JsonObject} config
+ * @param {!Object<string, ?string>} experimentToVariant
+ * @return {!Array<JsonObject>}
+ */
+export function getMutationRecordsFromExperimentToVariant(config, experimentToVariant) {
+  let mutationRecords = [];
+  for (const experimentName in experimentToVariant) {
+    const variantName = experimentToVariant[experimentName];
+    if (variantName) {
+      const variantObject = config[experimentName]['variants'][variantName];
+      mutationRecords = mutationRecords.concat(variantObject['mutations']);
+    }
+  }
+
+  return mutationRecords;
+}
+
+/**
+ * Function to convert all of the individual JSON
+ * mutation records, and their selected elements,
+ * Into Mutation objects.
+ *
+ * @param {!Array<Object>} mutationRecordAndElements
+ * @returns {!Array<./mutation.Mutation>}
+ */
+export function createMutationsFromMutationRecordsAndElements(mutationRecordAndElements) {
   const mutations = [];
   mutationRecordsAndElements.forEach(mutationRecordAndElements => {
     const {mutationRecord, elements} = mutationRecordAndElements;
@@ -133,21 +175,5 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
 
     mutations.push(mutation);
   });
-
-  // Validate all mutations
-  // Apply all the mutations
-  mutations.forEach(mutation => {
-    userAssert(
-      mutation.validate(),
-      'Mutation %s has an an unsupported value.',
-      mutation.toString()
-    );
-  });
-
-  return ampdoc.whenReady().then(() => {
-    // Apply all the mutations
-    mutations.forEach(mutation => {
-      mutation.mutate();
-    });
-  });
+  return mutations;
 }
