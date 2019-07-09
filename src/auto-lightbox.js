@@ -31,6 +31,10 @@ export const AutoLightboxEvents = {
  */
 export function installAutoLightboxExtension(ampdoc) {
   const {win} = ampdoc;
+  // Only enabled on proxy origins for which the document is tagged as
+  // <html amp> or <html ⚡>
+  // The auto-lightbox extension does a proxy origin check, so this just
+  // short-circuits loading the extension.
   if (!isAmphtml(win.document)) {
     return;
   }
