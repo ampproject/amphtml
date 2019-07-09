@@ -16,14 +16,14 @@
 
 const defaultPlugins = [
   require.resolve('./babel-plugins/babel-plugin-transform-html-template'),
-  require.resolve(
-    './babel-plugins/babel-plugin-transform-parenthesize-expression'
-  ),
-  require.resolve(
-    './babel-plugins/babel-plugin-is_minified-constant-transformer'
-  ),
-  require.resolve('./babel-plugins/babel-plugin-transform-amp-extension-call'),
-  require.resolve('./babel-plugins/babel-plugin-transform-version-call'),
+  //require.resolve(
+    //'./babel-plugins/babel-plugin-transform-parenthesize-expression'
+  //),
+  //require.resolve(
+    //'./babel-plugins/babel-plugin-is_minified-constant-transformer'
+  //),
+  //require.resolve('./babel-plugins/babel-plugin-transform-amp-extension-call'),
+  //require.resolve('./babel-plugins/babel-plugin-transform-version-call'),
 ];
 
 module.exports = {
@@ -36,43 +36,43 @@ module.exports = {
     // the dead string expression statements. We cannot just outright remove
     // the argument of the assert/log calls since we would need to inspect
     // if the arguments have any method calls (which might have side effects).
-    if (isSinglePass) {
-      pluginsToApply.push(
-        require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts')
-      );
-    }
-    if (isEsmBuild) {
-      pluginsToApply = pluginsToApply.concat([
-        [
-          require.resolve('babel-plugin-filter-imports'),
-          {
-            'imports': {
-              './polyfills/fetch': ['installFetch'],
-              './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
-              './polyfills/document-contains': ['installDocContains'],
-              './polyfills/math-sign': ['installMathSign'],
-              './polyfills/object-assign': ['installObjectAssign'],
-              './polyfills/object-values': ['installObjectValues'],
-              './polyfills/promise': ['installPromise'],
-            },
-          },
-        ],
-      ]);
-    }
-    if (!isForTesting) {
-      pluginsToApply = pluginsToApply.concat([
-        require.resolve(
-          './babel-plugins/babel-plugin-is_dev-constant-transformer'
-        ),
-        require.resolve('./babel-plugins/babel-plugin-amp-mode-transformer'),
-      ]);
-    }
+    //if (isSinglePass) {
+      //pluginsToApply.push(
+        //require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts')
+      //);
+    //}
+    //if (isEsmBuild) {
+      //pluginsToApply = pluginsToApply.concat([
+        //[
+          //require.resolve('babel-plugin-filter-imports'),
+          //{
+            //'imports': {
+              //'./polyfills/fetch': ['installFetch'],
+              //'./polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
+              //'./polyfills/document-contains': ['installDocContains'],
+              //'./polyfills/math-sign': ['installMathSign'],
+              //'./polyfills/object-assign': ['installObjectAssign'],
+              //'./polyfills/object-values': ['installObjectValues'],
+              //'./polyfills/promise': ['installPromise'],
+            //},
+          //},
+        //],
+      //]);
+    //}
+    //if (!isForTesting) {
+      //pluginsToApply = pluginsToApply.concat([
+        //require.resolve(
+          //'./babel-plugins/babel-plugin-is_dev-constant-transformer'
+        //),
+        //require.resolve('./babel-plugins/babel-plugin-amp-mode-transformer'),
+      //]);
+    //}
     return pluginsToApply;
   },
 
   eliminateIntermediateBundles() {
     return [
-      require.resolve('./babel-plugins/babel-plugin-transform-prune-namespace'),
+      //require.resolve('./babel-plugins/babel-plugin-transform-prune-namespace'),
     ];
   },
 };

@@ -134,6 +134,7 @@ async function dist() {
       if (!argv.single_pass) {
         transferSrcsToTempDir();
       }
+      return;
       return Promise.all([
         compileAllMinifiedTargets(),
         // NOTE: When adding a line here,
