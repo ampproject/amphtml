@@ -27,4 +27,14 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!background.disabled) {
     switchButton.checked = true;
   }
+
+  const baseUrlInput = document.getElementById('base-url');
+  baseUrlInput.placeholder = background.defaultBaseUrl;
+  baseUrlInput.value = background.baseUrl;
+  baseUrlInput.addEventListener('input', () => {
+    background.baseUrl = document.getElementById('base-url').value;
+    if ( '/' !== background.baseUrl.substr( -1 ) ) {
+      background.baseUrl += '/';
+    }
+  });
 });
