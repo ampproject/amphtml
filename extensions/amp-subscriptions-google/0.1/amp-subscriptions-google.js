@@ -44,18 +44,18 @@ const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
-//TODO(mborof): actually handle the event mapping
 const SWG_EVENTS_TO_SUPPRESS = {
-  [AnalyticsEvent.IMPRESSION_PAYWALL]: false,
+  [AnalyticsEvent.IMPRESSION_PAYWALL]: true,
 };
 
 const AMP_EVENT_TO_SWG_EVENT = {
-  [SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED]: null,
+  [SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED]:
+    AnalyticsEvent.IMPRESSION_PAYWALL,
 };
 
 const AMP_ACTION_TO_SWG_EVENT = {
   [Action.SHOW_OFFERS]: {
-    [ActionStatus.SUCCESS]: null,
+    [ActionStatus.STARTED]: AnalyticsEvent.IMPRESSION_OFFERS,
   },
 };
 

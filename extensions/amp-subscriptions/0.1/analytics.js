@@ -78,7 +78,16 @@ export class SubscriptionAnalytics {
   }
 
   /**
-   * Notified of any event sent to SubscriptionAnalytics.
+   * Notified of any event sent to SubscriptionAnalytics.  The parameters
+   * passed to the listener are:
+   *  1) The type of event.  This should eventually always be an enum value but
+   *     may not be in some circumstances for historic reasons.
+   *  2) The optional parameters passed into the framework by the publisher
+   *  3) An internal variables object which be populated for the
+   *     SUBSCRIPTIONS_ACTION event type: {
+   *       action: (Action|undefined),
+   *       status: (ActionStatus|undefined),
+   *     }
    * @param {function((!SubscriptionAnalyticsEvents|string),!JsonObject,!JsonObject)} listener
    */
   registerEventListener(listener) {
