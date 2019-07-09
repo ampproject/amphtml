@@ -28,6 +28,7 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
+const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
@@ -36,7 +37,27 @@ const {VERSION: internalRuntimeVersion} = require('../internal-version');
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
+// TODO(erwinm/rsima, #23238): Theres a weird race condition where when we use
+// `pseudo_names` we get "Error parsing json encoded files". turning the closure
+// invocations to 1 seems to fix the issue.
+const MAX_PARALLEL_CLOSURE_INVOCATIONS =
+  argv.single_pass || argv.pseudo_names ? 1 : 4;
+
+/**
+ * Prefixes the the tmp directory if we need to shadow files that have been
+ * preprocess by babel in the `dist` task.
+ *
+ * @param {!Array<string>} paths
+ * @return {!Array<string>}
+ */
+function convertPathsToTmpRoot(paths) {
+  return paths.map(path => {
+    const hasNegation = path.charAt(0) === '!';
+    const newPath = hasNegation ? path.substr(1) : path;
+    return `${hasNegation ? '!' : ''}${SRC_TEMP_DIR}/${newPath}`;
+    return path;
+  });
+}
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
@@ -162,89 +183,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         internalRuntimeVersion +
         '/';
     }
-    const srcs = [
-      '3p/3p.js',
-      // Ads config files.
-      'ads/_*.js',
-      'ads/alp/**/*.js',
-      'ads/google/**/*.js',
-      'ads/inabox/**/*.js',
-      // Files under build/. Should be sparse.
-      'build/*.css.js',
-      'build/fake-module/**/*.js',
-      'build/patched-module/**/*.js',
-      'build/experiments/**/*.js',
-      // A4A has these cross extension deps.
-      'extensions/amp-ad-network*/**/*-config.js',
-      'extensions/amp-ad/**/*.js',
-      'extensions/amp-a4a/**/*.js',
-      // Currently needed for crypto.js and visibility.js.
-      // Should consider refactoring.
-      'extensions/amp-analytics/**/*.js',
-      // Needed for WebAnimationService
-      'extensions/amp-animation/**/*.js',
-      // For amp-bind in the web worker (ww.js).
-      'extensions/amp-bind/**/*.js',
-      // Needed to access to Variant interface from other extensions
-      'extensions/amp-experiment/**/*.js',
-      // Needed to access form impl from other extensions
-      'extensions/amp-form/**/*.js',
-      // Needed to access inputmask impl from other extensions
-      'extensions/amp-inputmask/**/*.js',
-      // Needed for AccessService
-      'extensions/amp-access/**/*.js',
-      // Needed for AmpStoryVariableService
-      'extensions/amp-story/**/*.js',
-      // Needed for SubscriptionsService
-      'extensions/amp-subscriptions/**/*.js',
-      // Needed to access UserNotificationManager from other extensions
-      'extensions/amp-user-notification/**/*.js',
-      // Needed for VideoService
-      'extensions/amp-video-service/**/*.js',
-      // Needed to access ConsentPolicyManager from other extensions
-      'extensions/amp-consent/**/*.js',
-      // Needed to access AmpGeo type for service locator
-      'extensions/amp-geo/**/*.js',
-      // Needed for AmpViewerAssistanceService
-      'extensions/amp-viewer-assistance/**/*.js',
-      // Needed for AmpViewerIntegrationVariableService
-      'extensions/amp-viewer-integration/**/*.js',
-      // Needed for amp-smartlinks dep on amp-skimlinks
-      'extensions/amp-skimlinks/0.1/**/*.js',
-      'src/*.js',
-      'src/**/*.js',
-      '!third_party/babel/custom-babel-helpers.js',
-      // Exclude since it's not part of the runtime/extension binaries.
-      '!extensions/amp-access/0.1/amp-login-done.js',
-      'builtins/**.js',
-      'third_party/caja/html-sanitizer.js',
-      'third_party/closure-library/sha384-generated.js',
-      'third_party/css-escape/css-escape.js',
-      'third_party/fuzzysearch/index.js',
-      'third_party/mustache/**/*.js',
-      'third_party/timeagojs/**/*.js',
-      'third_party/vega/**/*.js',
-      'third_party/d3/**/*.js',
-      'third_party/subscriptions-project/*.js',
-      'third_party/webcomponentsjs/ShadowCSS.js',
-      'third_party/react-dates/bundle.js',
-      'third_party/amp-toolbox-cache-url/**/*.js',
-      'third_party/inputmask/**/*.js',
-      'node_modules/dompurify/dist/purify.es.js',
-      'node_modules/promise-pjs/promise.mjs',
-      'node_modules/rrule/dist/esm/src/index.js',
-      'node_modules/set-dom/dist/set-dom.js',
-      'node_modules/web-animations-js/web-animations.install.js',
-      'node_modules/web-activities/activity-ports.js',
-      'node_modules/@ampproject/animations/dist/animations.mjs',
-      'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
-      'node_modules/document-register-element/build/' +
-        'document-register-element.patched.js',
-      // 'node_modules/core-js/modules/**.js',
-      // Not sure what these files are, but they seem to duplicate code
-      // one level below and confuse the compiler.
-      '!node_modules/core-js/modules/library/**.js',
-    ];
+    const srcs = [...CLOSURE_SRC_GLOBS];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
@@ -363,6 +302,15 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       define,
       hide_warnings_for: hideWarningsFor,
     };
+    if (argv.pseudo_names) {
+      // Some optimizations get turned off when pseudo_names is on.
+      // This causes some errors caused by the babel transformations
+      // that we apply like unreachable code because we turn a conditional
+      // falsey. (ex. is IS_DEV transformation which causes some conditionals
+      // to be unreachable/suspicious code since the whole expression is
+      // falsey)
+      compilerOptions.jscomp_off.push('uselessCode', 'externsValidation');
+    }
     if (argv.pretty_print) {
       compilerOptions.formatting = 'PRETTY_PRINT';
     }
@@ -386,6 +334,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
 
     if (compilerOptions.define.length == 0) {
       delete compilerOptions.define;
+    }
+
+    if (!argv.single_pass && !options.typeCheckOnly) {
+      compilerOptions.js_module_root.push(SRC_TEMP_DIR);
     }
 
     const compilerOptionsArray = [];
@@ -415,8 +367,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .pipe(nop())
         .on('end', resolve);
     } else {
+      const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
+      const gulpBase = argv.single_pass ? '.' : SRC_TEMP_DIR;
       return gulp
-        .src(srcs, {base: '.'})
+        .src(gulpSrcs, {base: gulpBase})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray))

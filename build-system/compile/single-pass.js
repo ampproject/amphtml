@@ -476,6 +476,7 @@ function transformPathsToTempDir(graph, config) {
         plugins: conf.plugins({
           isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
           isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
+          isSinglePass: true,
         }),
         retainLines: true,
       });

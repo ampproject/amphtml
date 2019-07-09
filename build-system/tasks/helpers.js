@@ -76,6 +76,13 @@ const MINIFIED_TARGETS = [
   'f.js',
 ];
 
+const WEB_PUSH_PUBLISHER_FILES = [
+  'amp-web-push-helper-frame',
+  'amp-web-push-permission-dialog',
+];
+
+const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
+
 const BABELIFY_GLOBAL_TRANSFORM = {
   global: true, // Transform node_modules
   ignore: devDependencies(), // Ignore devDependencies
@@ -701,7 +708,6 @@ function buildAlp(options) {
  * @param {!Object} options
  */
 function buildExaminer(options) {
-  options = options || {};
   return compileJs('./src/examiner/', 'examiner.js', './dist/', {
     toName: 'examiner.max.js',
     watch: options.watch,
@@ -717,13 +723,12 @@ function buildExaminer(options) {
  * @param {!Object} options
  */
 function buildWebWorker(options) {
-  const opts = Object.assign({}, options);
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
     toName: 'ww.max.js',
     minifiedName: 'ww.js',
     includePolyfills: true,
-    watch: opts.watch,
-    minify: opts.minify || argv.minify,
+    watch: options.watch,
+    minify: options.minify || argv.minify,
   });
 }
 
@@ -756,6 +761,8 @@ function toPromise(readable) {
 
 module.exports = {
   BABELIFY_GLOBAL_TRANSFORM,
+  WEB_PUSH_PUBLISHER_FILES,
+  WEB_PUSH_PUBLISHER_VERSIONS,
   buildAlp,
   buildExaminer,
   buildWebWorker,
