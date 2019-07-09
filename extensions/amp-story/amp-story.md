@@ -348,7 +348,7 @@ Disables the [Live story](#Live-story) functionality.
 
 ##### data-poll-interval [optional]
 
-Used with the live-story attribute. Time interval (in milliseconds) between checks for new content. If no data-poll-interval is provided it with default to the 15000 millisecond minimum. A value under 15000 milliseconds is invalid.
+Used with the live-story attribute. Time interval (in milliseconds) between checks for new content. If no `data-poll-interval` is provided it with default to the 15000 millisecond minimum. A value under 15000 milliseconds is invalid.
 
 ### Posters
 
@@ -378,7 +378,7 @@ Usage: `<amp-story ... supports-landscape>...</amp-story>`
 
 Use the `live-story` attribute to append new pages to a story for users to see in real-time.
 
-This attribute will show a notification of new pages and update the progress bar to users on the last page.
+This attribute shows a notification of new pages to users on the last page, and updates the progress bar.
 
 Core use cases for live-story include coverage for breaking news or live events, enabling real-time updates to users without exiting the story. Award shows, sporting events, and elections are some examples.
 
@@ -392,11 +392,11 @@ In most implementations for live blogs, content is either pushed by the server t
 
 This means that publishers of stories do not need to set up a JSON endpoint or push mechanism for this functionality to work.
 
-New content just needs to be published to the same URL with a valid amp-story markup. The user will then have that content pulled into their client instance during the next poll (poll intervals are configurable in the component, and are valid above the minimum of 15000 milliseconds).
+Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](#data-poll-interval-[optional]) attribute.
 
 #### Stop polling
 
-As long as the `live-story` attribute is present on the `<amp-story>` element, the client will make continuous polls to the server copy of the document. Make sure to set the `live-story-disabled` attribute to make the polling stop once you're finished with the live broadcast of your story.
+As long as the `live-story` attribute is present on the `<amp-story>` element, the client will make continuous polls to the server copy of the document. Make sure to set the `live-story-disabled` attribute to the `<amp-story>` element when you publish your last update to the story. This will make the polling stop.
 
 <figure class="centered-fig">
   <amp-anim alt="Live story example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif">
@@ -406,11 +406,12 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
   </amp-anim>
 </figure>
 
-Usage:
+#### Usage
+
 * Specify an `id` on the `<amp-story>` element.
 * Add the `live-story` attribute to the `<amp-story>` element.
 * [Optional] Add the [`data-poll-interval`](#data-poll-interval-[optional]) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
-* [Optional] When finishing the live broadcst, add the [`live-story-disabled`](#live-story-disabled-[optional]) attribute to the `<amp-story>` element to disable the polling.
+* [Optional] When finishing the live broadcast, add the [`live-story-disabled`](#live-story-disabled-[optional]) attribute to the `<amp-story>` element to disable the polling.
 * On each `<amp-story-page>`:
   * Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
 
