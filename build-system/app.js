@@ -1304,7 +1304,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
 }
 
 function getUrlPrefix(req) {
-  return req.protocol + '://' + req.headers.host;
+  return '//' + req.headers.host;
 }
 
 function generateInfo(filePath) {
