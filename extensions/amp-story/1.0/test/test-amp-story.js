@@ -1549,6 +1549,50 @@ describes.realWin(
       });
     });
 
+    describe('amp-story rewriteStyles', () => {
+      beforeEach(() => {
+        toggleExperiment(win, 'amp-story-responsive-units', true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'amp-story-responsive-units', false);
+      });
+
+      it('should rewrite vw styles', () => {
+        createPages(story.element, 1, ['cover']);
+        const styleEl = win.document.createElement('style');
+        styleEl.setAttribute('amp-custom', '');
+        styleEl.textContent = 'foo {transform: translate3d(100vw, 0, 0);}';
+        win.document.head.appendChild(styleEl);
+
+        story.buildCallback();
+
+        return story.layoutCallback().then(() => {
+          expect(styleEl.textContent).to.equal(
+            'foo {transform: ' +
+              'translate3d(calc(100 * var(--story-page-vw)), 0, 0);}'
+          );
+        });
+      });
+
+      it('should rewrite negative vh styles', () => {
+        createPages(story.element, 1, ['cover']);
+        const styleEl = win.document.createElement('style');
+        styleEl.setAttribute('amp-custom', '');
+        styleEl.textContent = 'foo {transform: translate3d(-100vh, 0, 0);}';
+        win.document.head.appendChild(styleEl);
+
+        story.buildCallback();
+
+        return story.layoutCallback().then(() => {
+          expect(styleEl.textContent).to.equal(
+            'foo {transform: ' +
+              'translate3d(calc(-100 * var(--story-page-vh)), 0, 0);}'
+          );
+        });
+      });
+    });
+
     describe('amp-story branching', () => {
       beforeEach(() => {
         toggleExperiment(win, 'amp-story-branching', true);
