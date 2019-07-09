@@ -15,27 +15,40 @@
  */
 'use strict';
 
+const {
+  staticTemplateFactories,
+  staticTemplateTags,
+  staticTemplateFactoryFns,
+} = require('../static-template-metadata');
+
 module.exports = function(context) {
-  function htmlCannotBeCalled(node) {
+  function tagCannotBeCalled(node) {
+    const {name} = node.callee;
     context.report({
       node,
       message:
-        'The html helper MUST NOT be called directly. ' +
-        'Instead, use it as a template literal tag: ``` html`<div />` ```',
+        `The ${name} helper MUST NOT be called directly. ` +
+        'Instead, use it as a template literal tag: ``` ' +
+        name +
+        '`<div />` ```',
     });
   }
 
-  function htmlForUsage(node) {
+  function factoryUsage(node) {
     const {parent} = node;
+    const {name} = node.callee;
+
+    const expectedTagName = staticTemplateFactories[name];
+
     if (parent.type === 'TaggedTemplateExpression' && parent.tag === node) {
-      return htmlTagUsage(parent);
+      return tagUsage(parent, `${name}()`);
     }
 
     if (
       parent.type === 'VariableDeclarator' &&
       parent.init === node &&
       parent.id.type === 'Identifier' &&
-      parent.id.name === 'html'
+      parent.id.name === expectedTagName
     ) {
       return;
     }
@@ -44,7 +57,7 @@ module.exports = function(context) {
       parent.type === 'AssignmentExpression' &&
       parent.right === node &&
       parent.left.type === 'Identifier' &&
-      parent.left.name === 'html'
+      parent.left.name === expectedTagName
     ) {
       return;
     }
@@ -52,19 +65,20 @@ module.exports = function(context) {
     context.report({
       node,
       message:
-        'htmlFor result must be stored into a variable ' +
-        'named "html", or used as the tag of a tagged template literal.',
+        `${name} result must be stored into a variable named ` +
+        `"${expectedTagName}", or used as the tag of a tagged template ` +
+        'literal.',
     });
   }
 
-  function htmlTagUsage(node) {
-    const {quasi} = node;
+  function tagUsage(node, opt_name) {
+    const {quasi, tag} = node;
     if (quasi.expressions.length !== 0) {
       context.report({
         node,
         message:
-          'The html template tag CANNOT accept expression. ' +
-          'The template MUST be static only.',
+          `The ${opt_name || tag.name} template tag CANNOT accept expression.` +
+          ' The template MUST be static only.',
       });
     }
 
@@ -131,21 +145,21 @@ module.exports = function(context) {
         return;
       }
 
-      if (callee.name === 'html') {
-        return htmlCannotBeCalled(node);
+      if (staticTemplateTags.has(callee.name)) {
+        return tagCannotBeCalled(node);
       }
-      if (callee.name === 'htmlFor') {
-        return htmlForUsage(node);
+      if (staticTemplateFactoryFns.has(callee.name)) {
+        return factoryUsage(node);
       }
     },
 
     TaggedTemplateExpression(node) {
       const {tag} = node;
-      if (tag.type !== 'Identifier' || tag.name !== 'html') {
+      if (tag.type !== 'Identifier' || !staticTemplateTags.has(tag.name)) {
         return;
       }
 
-      htmlTagUsage(node);
+      tagUsage(node);
     },
   };
 };

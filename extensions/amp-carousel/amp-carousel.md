@@ -33,7 +33,7 @@ A generic carousel for displaying multiple similar pieces of content along a hor
     <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>
       <ul>
         <li>carousel: fixed, fixed-height, and nodisplay.</li>
@@ -44,8 +44,8 @@ A generic carousel for displaying multiple similar pieces of content along a hor
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>AMP By Example's:<ul>
-      <li><a href="https://ampbyexample.com/components/amp-carousel/">amp-carousel example</a></li>
-      <li><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/">Image galleries with amp-carousel</a></td>
+      <li><a href="https://amp.dev/documentation/examples/components/amp-carousel/">amp-carousel example</a></li>
+      <li><a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/">Image galleries with amp-carousel</a></td>
   </tr>
 </table>
 
@@ -154,7 +154,7 @@ The visibility of arrows can also be controlled via styling, and a media query c
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
