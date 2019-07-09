@@ -334,7 +334,7 @@ export class SanitizerImpl {
     const tag = node.nodeName.toLowerCase();
     const clean = this.allowedTags_[tag];
     if (!clean) {
-      if (this.warnIfFormsAreDisallowed_(tag)) {
+      if (!this.warnIfFormsAreDisallowed_(tag)) {
         user().warn(TAG, 'Sanitized node:', node);
       }
     }
