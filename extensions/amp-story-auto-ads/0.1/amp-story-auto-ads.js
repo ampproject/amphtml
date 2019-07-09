@@ -23,10 +23,6 @@ import {
 } from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {
-  StateChangeEventDef,
-  StateChangeType,
-} from '../../amp-story/1.0/navigation-state';
-import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
@@ -195,9 +191,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {?../../amp-story/1.0/amp-story.AmpStory} */
     this.ampStory_ = null;
 
-    /** @private {?../../amp-story/1.0/navigation-state.NavigationState} */
-    this.navigationState_ = null;
-
     /** @private {number} */
     this.uniquePagesCount_ = 0;
 
@@ -327,11 +320,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    // TODO(ccordry): Move all this to use store service. We would like to
-    // eventually deprecate navigationState.
-    this.navigationState_ = this.ampStory_.getNavigationState();
-    this.navigationState_.observe(this.handleStateChange_.bind(this));
-
     return this.ampStory_
       .signals()
       .whenSignal(CommonSignals.INI_LOAD)
@@ -377,6 +365,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       },
       true /** callToInitialize */
     );
+
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
+      const pageIndex = this.storeService_.get(
+        StateProperty.CURRENT_PAGE_INDEX
+      );
+
+      this.handleActivePageChange_(
+        dev().assertNumber(pageIndex),
+        dev().assertString(pageId)
+      );
+    });
   }
 
   /**
@@ -708,22 +707,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     ctaLayer.appendChild(a);
     adPageElement.appendChild(ctaLayer);
     return true;
-  }
-
-  /**
-   * @param {!StateChangeEventDef} stateChangeEvent
-   * @private
-   */
-  handleStateChange_(stateChangeEvent) {
-    switch (stateChangeEvent.type) {
-      case StateChangeType.ACTIVE_PAGE:
-        const {pageIndex, pageId} = stateChangeEvent.value;
-        this.handleActivePageChange_(
-          dev().assertNumber(pageIndex),
-          dev().assertString(pageId)
-        );
-        break;
-    }
   }
 
   /**

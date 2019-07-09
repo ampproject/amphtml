@@ -165,24 +165,6 @@ describes.realWin(
         });
     });
 
-    it('should update the navigation state when built', () => {
-      const firstPageId = 'cover';
-      const pageCount = 2;
-      createPages(story.element, pageCount, [firstPageId, 'page-1']);
-      const updateActivePageStub = sandbox.stub(
-        story.navigationState_,
-        'updateActivePage'
-      );
-
-      return story.layoutCallback().then(() => {
-        expect(updateActivePageStub).to.have.been.calledWith(
-          0,
-          pageCount,
-          firstPageId
-        );
-      });
-    });
-
     it('should remove text child nodes when built', () => {
       createPages(story.element, 1, ['cover']);
       const textToRemove = 'this should be removed';
@@ -321,10 +303,7 @@ describes.realWin(
       createPages(story.element, 2, ['cover', 'page-1']);
 
       return story.layoutCallback().then(() => {
-        const paginationButtonsStub = {
-          attach: sandbox.spy(),
-          onNavigationStateChange: sandbox.spy(),
-        };
+        const paginationButtonsStub = {attach: sandbox.spy()};
         sandbox
           .stub(PaginationButtons, 'create')
           .returns(paginationButtonsStub);
