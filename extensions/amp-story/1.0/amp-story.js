@@ -71,7 +71,6 @@ import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
 import {LocalizationService} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
-import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
@@ -244,12 +243,6 @@ export class AmpStory extends AMP.BaseElement {
     if (isRTL(this.win.document)) {
       this.storeService_.dispatch(Action.TOGGLE_RTL, true);
     }
-
-    // TODO(#19768): Avoid passing a private function here.
-    /** @private {!NavigationState} */
-    this.navigationState_ = new NavigationState(this.win, () =>
-      this.hasBookend_()
-    );
 
     /** @private {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, this.element);
@@ -434,11 +427,6 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(Action.TOGGLE_CAN_SHOW_BOOKEND, false);
     }
 
-    this.navigationState_.observe(stateChangeEvent => {
-      this.variableService_.onNavigationStateChange(stateChangeEvent);
-      this.analyticsService_.onNavigationStateChange(stateChangeEvent);
-    });
-
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
     this.element.removeAttribute('title');
@@ -503,7 +491,7 @@ export class AmpStory extends AMP.BaseElement {
       this.initializeMediaQueries_(mediaQueryEls);
     }
 
-    const styleEl = document.querySelector('style[amp-custom]');
+    const styleEl = this.win.document.querySelector('style[amp-custom]');
 
     if (styleEl) {
       this.rewriteStyles_(styleEl);
@@ -549,10 +537,10 @@ export class AmpStory extends AMP.BaseElement {
     // ../../../extensions/amp-animation/0.1/web-animations.js
     this.mutateElement(() => {
       styleEl.textContent = styleEl.textContent
-        .replace(/([\d.]+)vh/gim, 'calc($1 * var(--story-page-vh))')
-        .replace(/([\d.]+)vw/gim, 'calc($1 * var(--story-page-vw))')
-        .replace(/([\d.]+)vmin/gim, 'calc($1 * var(--story-page-vmin))')
-        .replace(/([\d.]+)vmax/gim, 'calc($1 * var(--story-page-vmax))');
+        .replace(/(-?[\d.]+)vh/gim, 'calc($1 * var(--story-page-vh))')
+        .replace(/(-?[\d.]+)vw/gim, 'calc($1 * var(--story-page-vw))')
+        .replace(/(-?[\d.]+)vmin/gim, 'calc($1 * var(--story-page-vmin))')
+        .replace(/(-?[\d.]+)vmax/gim, 'calc($1 * var(--story-page-vmax))');
     });
   }
 
@@ -1449,16 +1437,6 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
-        const oldPageId = oldPage ? oldPage.element.id : null;
-        // TODO(alanorozco): check if autoplay
-        this.navigationState_.updateActivePage(
-          pageIndex,
-          this.getPageCount(),
-          targetPage.element.id,
-          oldPageId,
-          targetPage.getNextPageId() === null /* isFinalPage */
-        );
-
         // If first navigation.
         if (!oldPage) {
           this.registerAndPreloadBackgroundAudio_();
@@ -1843,6 +1821,16 @@ export class AmpStory extends AMP.BaseElement {
             this.element.appendChild(pageAttachments[i]);
           }
         });
+
+        this.signals()
+          .whenSignal(CommonSignals.LOAD_END)
+          .then(() => {
+            this.vsync_.mutate(() => {
+              this.pages_.forEach(page =>
+                page.element.setAttribute('active', '')
+              );
+            });
+          });
         break;
     }
   }
@@ -2659,11 +2647,6 @@ export class AmpStory extends AMP.BaseElement {
         ctaAnchorEl.setAttribute('data-vars-story-page-index', pageIndex);
       });
     });
-  }
-
-  /** @return {!NavigationState} */
-  getNavigationState() {
-    return this.navigationState_;
   }
 
   /**

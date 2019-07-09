@@ -79,7 +79,7 @@ Let’s examine each of these situations more closely.
 
 **Context #1: the publisher’s origin.** AMP pages are deployed so that they are originally hosted from and accessible via the publisher’s site, e.g. on `https://example.com` one might find `https://example.com/article.amp.html`.
 
-Publishers can choose to publish exclusively in AMP, or to publish two versions of content (that is, AMP content “paired” with non-AMP content). The “paired” model requires some [particular steps](https://www.ampproject.org/docs/fundamentals/discovery) to ensure the AMP versions of pages are discoverable to search engines, social media sites, and other platforms. Both publishing approaches are fully supported; it's up to the publisher to decide on which approach to take.
+Publishers can choose to publish exclusively in AMP, or to publish two versions of content (that is, AMP content “paired” with non-AMP content). The “paired” model requires some [particular steps](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/discovery) to ensure the AMP versions of pages are discoverable to search engines, social media sites, and other platforms. Both publishing approaches are fully supported; it's up to the publisher to decide on which approach to take.
 
 > **NOTE:**
 >
@@ -214,7 +214,7 @@ The use of “`user_id`” here should be determined by what your analytics serv
 
 Turning now to AMP pages, let's look at how you can establish and transmit an identifier for analytics. This will be applicable regardless of the context the AMP page is presented in, so this covers any AMP page on the publisher origin, served via an AMP cache, or displayed in AMP viewer.
 
-Through usage of features that require Client ID, AMP will do the “under the hood” work to generate and store client ID values and surface them to the features that require them. One of the principal features that can use AMP’s Client ID is [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics), which happens to be exactly what we’ll need to implement our analytics use case example.
+Through usage of features that require Client ID, AMP will do the “under the hood” work to generate and store client ID values and surface them to the features that require them. One of the principal features that can use AMP’s Client ID is [amp-analytics](https://amp.dev/documentation/components/amp-analytics), which happens to be exactly what we’ll need to implement our analytics use case example.
 
 On AMP pages, construct an amp-analytics ping containing the Client ID:
 
@@ -231,7 +231,7 @@ On AMP pages, construct an amp-analytics ping containing the Client ID:
 
 Take note of the fact that the parameter passed into the Client ID substitution, `${clientId(uid)`, is `uid`. This was a deliberate choice that matches the same cookie name used on the publisher origin as described in [Task 1](#task1). For the most seamless integration, you should apply the same technique.
 
-Concerning the rest of the amp-analytics implementation, see the documentation for [amp-analytics configuration](https://www.ampproject.org/docs/analytics/analytics_amp) for more detail on how to set up amp-analytics requests or to modify those of your analytics vendor. The ping can be further modified to transport additional data that you either directly define or by taking advantage of other [AMP substitutions](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md).
+Concerning the rest of the amp-analytics implementation, see the documentation for [amp-analytics configuration](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/) for more detail on how to set up amp-analytics requests or to modify those of your analytics vendor. The ping can be further modified to transport additional data that you either directly define or by taking advantage of other [AMP substitutions](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md).
 
 > **Good to know:**
 >

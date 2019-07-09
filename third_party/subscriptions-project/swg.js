@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.57 */
+/** Version: 0.1.22.59 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -2091,7 +2091,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.23';
+    this.version = '1.24';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -3510,7 +3510,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.57',
+    '_client': 'SwG 0.1.22.59',
   });
 }
 
@@ -3570,7 +3570,7 @@ class SmartSubscriptionButtonApi {
   /**
    * @param {!./deps.DepsDef} deps
    * @param {!Element} button
-   * @param {!../api/subscriptions.ButtonOptions} options
+   * @param {!../api/subscriptions.SmartButtonOptions} options
    * @param {function()=} callback
    */
   constructor(deps, button, options, callback) {
@@ -3594,7 +3594,7 @@ class SmartSubscriptionButtonApi {
     /** @private @const {!Element} */
     this.button_ = button;
 
-    /** @private {!../api/subscriptions.ButtonOptions} */
+    /** @private {!../api/subscriptions.SmartButtonOptions} */
     this.options_ = options;
 
     /** @private const {function()=} */
@@ -3603,13 +3603,19 @@ class SmartSubscriptionButtonApi {
     /** @private @const {string} */
     this.src_ = feUrl('/smartboxiframe');
 
-    /** @private @const {!Object} */
-    this.args_ = feArgs({
+    const frontendArguments = {
       'productId': this.deps_.pageConfig().getProductId(),
       'publicationId': this.deps_.pageConfig().getPublicationId(),
       'theme': this.options_ && this.options_.theme || 'light',
       'lang': this.options_ && this.options_.lang || 'en',
-    });
+    };
+    const messageTextColor = this.options_ && this.options_.messageTextColor;
+    if (messageTextColor) {
+      frontendArguments['messageTextColor'] = messageTextColor;
+    }
+
+    /** @private @const {!Object} */
+    this.args_ = feArgs(frontendArguments);
   }
 
   /**
@@ -3636,6 +3642,8 @@ class SmartSubscriptionButtonApi {
       'width': '100%',
     });
     this.button_.appendChild(this.iframe_);
+    const analyticsContext = this.deps_.analytics().getContext().toArray();
+    this.args_['analyticsContext'] = analyticsContext;
     this.activityPorts_.openIframe(this.iframe_, this.src_, this.args_)
         .then(port => {
           port.onMessageDeprecated(result => {
@@ -3755,7 +3763,8 @@ class ButtonApi {
    * @return {!Element}
    */
   attach(button, optionsOrCallback, opt_callback) {
-    const options = this.getOptions_(optionsOrCallback);
+    const options = /** @type {!../api/subscriptions.ButtonOptions} */
+        (this.getOptions_(optionsOrCallback));
     const callback = this.getCallback_(optionsOrCallback, opt_callback);
 
     const theme = options['theme'];
@@ -3771,12 +3780,12 @@ class ButtonApi {
 
   /**
    *
-   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
-   * @return {!../api/subscriptions.ButtonOptions}
+   * @param {../api/subscriptions.ButtonOptions|../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
+   * @return {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions}
    * @private
    */
   getOptions_(optionsOrCallback) {
-    const options = /** @type {!../api/subscriptions.ButtonOptions} */
+    const options = /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */
         (optionsOrCallback && typeof optionsOrCallback != 'function' ?
         optionsOrCallback : {'theme': Theme.LIGHT});
 
@@ -3789,7 +3798,7 @@ class ButtonApi {
 
   /**
    *
-   * @param {?../api/subscriptions.ButtonOptions|function()} optionsOrCallback
+   * @param {?../api/subscriptions.ButtonOptions|?../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {function()|function(Event):boolean}
    * @private
@@ -3804,12 +3813,13 @@ class ButtonApi {
   /**
    * @param {!./deps.DepsDef} deps
    * @param {!Element} button
-   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
+   * @param {../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {!Element}
    */
   attachSmartButton(deps, button, optionsOrCallback, opt_callback) {
-    const options = this.getOptions_(optionsOrCallback);
+    const options = /** @type {!../api/subscriptions.SmartButtonOptions} */
+        (this.getOptions_(optionsOrCallback));
     const callback = /** @type {function()} */
         (this.getCallback_(optionsOrCallback, opt_callback));
 
@@ -13378,6 +13388,13 @@ class AnalyticsService {
    */
   close() {
     this.doc_.getBody().removeChild(this.getElement());
+  }
+
+  /**
+   * @return {!AnalyticsContext}
+   */
+  getContext() {
+    return this.context_;
   }
 
   /**

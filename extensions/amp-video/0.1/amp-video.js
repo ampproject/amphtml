@@ -60,7 +60,7 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
 ];
 
 /**
- * @note Do not propagate `autoplay`. Autoplay behavior is managed by
+ * Do not propagate `autoplay`. Autoplay behavior is managed by
  *       video manager since amp-video implements the VideoInterface.
  * @private {!Array<string>}
  */

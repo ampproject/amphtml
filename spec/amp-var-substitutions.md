@@ -48,7 +48,7 @@ The following table lists the features that enable variable substitutions, as we
   <tr>
     <td width="25%"><code>amp-list</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md#substitutions">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
-    <td width="25%">Yes, if fetching cross-origin resources via <code>[src]</code> <a href="https://www.ampproject.org/docs/reference/components/amp-bind#element-specific-attributes">attribute binding</a>. Otherwise, no. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
+    <td width="25%">Yes, if fetching cross-origin resources via <code>[src]</code> <a href="https://amp.dev/documentation/components/amp-bind#element-specific-attributes">attribute binding</a>. Otherwise, no. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
     <td width="25%">None</td>
   </tr>
   <tr>
@@ -60,7 +60,7 @@ The following table lists the features that enable variable substitutions, as we
   <tr>
     <td width="25%"><code>amp-state</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-bind/amp-bind.md#attributes">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
-    <td width="25%">Yes, if fetching cross-origin resources via <code>[src]</code> <a href="https://www.ampproject.org/docs/reference/components/amp-bind#element-specific-attributes">attribute binding</a>. Otherwise, no. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
+    <td width="25%">Yes, if fetching cross-origin resources via <code>[src]</code> <a href="https://amp.dev/documentation/components/amp-bind#element-specific-attributes">attribute binding</a>. Otherwise, no. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
     <td width="25%">None</td>
   </tr>
   <tr>
