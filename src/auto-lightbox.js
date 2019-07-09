@@ -17,6 +17,7 @@
 import {ChunkPriority, chunk} from './chunk';
 import {Services} from './services';
 import {dev} from './log';
+import {isAmp4Email} from './format';
 
 /** @const @enum {string} */
 export const AutoLightboxEvents = {
@@ -29,10 +30,14 @@ export const AutoLightboxEvents = {
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installAutoLightboxExtension(ampdoc) {
+  const {win} = ampdoc;
+  if (isAmp4Email(win.document)) {
+    return;
+  }
   chunk(
     ampdoc,
     () => {
-      Services.extensionsFor(ampdoc.win).installExtensionForDoc(
+      Services.extensionsFor(win).installExtensionForDoc(
         ampdoc,
         'amp-auto-lightbox'
       );
