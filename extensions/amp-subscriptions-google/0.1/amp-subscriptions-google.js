@@ -252,7 +252,9 @@ export class GoogleSubscriptionsPlatform {
      * for the page to be visible to avoid leaking that the
      * page was prerendered
      */
-    return this.isGoogleViewer_;
+    // TODO(#23102): restore safe prerendering mode. Instead of `false`,
+    // return `this.isGoogleViewer_`.
+    return false;
   }
 
   /** @override */
@@ -415,21 +417,19 @@ export class GoogleSubscriptionsPlatform {
         break;
       case 'subscribe-smartbutton':
       case 'subscribe-smartbutton-light':
-        element.textContent = '';
-        opts.theme = 'light';
-        opts.lang = userAssert(
-          element.getAttribute('subscriptions-lang'),
-          'subscribe-smartbutton must have a language attribute'
-        );
-        this.runtime_.attachSmartButton(element, opts, () => {});
-        break;
       case 'subscribe-smartbutton-dark':
         element.textContent = '';
-        opts.theme = 'dark';
+        opts.theme = action === 'subscribe-smartbutton-dark' ? 'dark' : 'light';
         opts.lang = userAssert(
           element.getAttribute('subscriptions-lang'),
           'subscribe-smartbutton must have a language attribute'
         );
+        const messageTextColor = element.getAttribute(
+          'subscriptions-message-text-color'
+        );
+        if (messageTextColor) {
+          opts.messageTextColor = messageTextColor;
+        }
         this.runtime_.attachSmartButton(element, opts, () => {});
         break;
       default:

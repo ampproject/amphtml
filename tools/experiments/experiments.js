@@ -186,11 +186,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
-    id: 'font-display-swap',
-    name: 'Use font-display: swap as the default for fonts.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
-  },
-  {
     id: 'pump-early-frame',
     name:
       'If applicable, let the browser paint the current frame before ' +
@@ -271,22 +266,10 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
-    id: 'amp-live-list-sorting',
-    name: 'Allows "newest last" insertion algorithm to be used',
-    spec: 'https://github.com/ampproject/amphtml/issues/5396',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13552',
-  },
-  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
-  },
-  {
-    id: 'no-sync-xhr-in-ads',
-    name: 'Disables syncronous XHR requests in 3p iframes.',
-    spec: 'TODO',
-    cleanupIssue: 'TODO',
   },
   {
     id: 'iframe-messaging',
@@ -356,18 +339,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
-    id: 'amp-auto-lightbox',
-    name: 'Automatically detects images to place in a lightbox.',
-    spec: 'https://github.com/ampproject/amphtml/issues/20395',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
-  },
-  {
-    id: 'amp-auto-lightbox-carousel',
-    name: 'Automatically detects carousels to group in a lightbox.',
-    spec: 'https://github.com/ampproject/amphtml/issues/20395',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
-  },
-  {
     id: 'amp-img-auto-sizes',
     name: 'Automatically generates sizes for amp-img if not given',
     spec: 'https://github.com/ampproject/amphtml/issues/19513',
@@ -379,15 +350,6 @@ const EXPERIMENTS = [
       'Inabox viewport measures the host window directly if ' +
       'within friendly iframe',
     spec: 'https://github.com/ampproject/amphtml/issues/19869',
-    cleanupIssue: 'TODO',
-  },
-  {
-    id: 'inabox-remove-height-auto',
-    name:
-      'Experiment to allow slowly removing the height: auto!' +
-      ' for inabox amp4ads. By adding the ' +
-      '.i-amphtml-inabox-preserve-height-auto class on <html>',
-    spec: 'https://github.com/ampproject/amphtml/issues/22059',
     cleanupIssue: 'TODO',
   },
   {
@@ -427,6 +389,20 @@ const EXPERIMENTS = [
     name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
     spec: 'https://github.com/ampproject/amphtml/issues/22718',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
+  },
+  {
+    id: 'untrusted-xhr-interception',
+    name:
+      'Enable "xhrInterceptor" capability for untrusted viewers. ' +
+      'For development use only',
+    spec: 'N/A',
+    cleanupIssue: 'N/A',
+  },
+  {
+    id: 'new-loaders',
+    name: 'New default loaders',
+    spec: 'https://github.com/ampproject/amphtml/issues/20237',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
   },
 ];
 

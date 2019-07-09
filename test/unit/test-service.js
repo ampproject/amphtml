@@ -519,7 +519,7 @@ describe('service', () => {
         expect(fromNode).to.equal(topService);
       });
 
-      it('should not fallback when opt_fallbackToTopWin is false', () => {
+      it('should not fallback from FIE to parent service', () => {
         const fromChildNode = getExistingServiceForDocInEmbedScope(
           childWinNode,
           'c'
@@ -533,31 +533,6 @@ describe('service', () => {
         expect(fromGrandchildNode).to.be.null;
       });
 
-      it('should fallback when opt_fallbackToTopWin is true', () => {
-        const fallbackToTopWin = true;
-
-        const fromNode = getExistingServiceForDocInEmbedScope(
-          node,
-          'c',
-          fallbackToTopWin
-        );
-        expect(fromNode).to.equal(topService);
-
-        const fromChildNode = getExistingServiceForDocInEmbedScope(
-          childWinNode,
-          'c',
-          fallbackToTopWin
-        );
-        expect(fromChildNode).to.equal(topService);
-
-        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
-          grandChildWinNode,
-          'c',
-          fallbackToTopWin
-        );
-        expect(fromGrandchildNode).to.equal(topService);
-      });
-
       it('should return overriden service', () => {
         const overridenService = {};
         installServiceInEmbedScope(childWin, 'c', overridenService);
@@ -566,26 +541,17 @@ describe('service', () => {
         ).to.equal(overridenService);
 
         // Top-level service doesn't change.
-        expect(
-          getExistingServiceForDocInEmbedScope(
-            node,
-            'c',
-            /* opt_fallbackToTopWin */ true
-          )
-        ).to.equal(topService);
+        const fromNode = getExistingServiceForDocInEmbedScope(node, 'c');
+        expect(fromNode).to.equal(topService);
 
         // Notice that only direct overrides are allowed for now. This is
         // arbitrary can change in the future to allow hierarchical lookup
         // up the window chain.
-        expect(getExistingServiceForDocInEmbedScope(grandChildWinNode, 'c')).to
-          .be.null;
-        expect(
-          getExistingServiceForDocInEmbedScope(
-            grandChildWinNode,
-            'c',
-            /* opt_fallbackToTopWin */ true
-          )
-        ).to.equal(topService);
+        const fromGrandchildNode = getExistingServiceForDocInEmbedScope(
+          grandChildWinNode,
+          'c'
+        );
+        expect(fromGrandchildNode).to.be.null;
       });
     });
 
