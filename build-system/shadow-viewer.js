@@ -144,7 +144,7 @@ const SCRIPT = `
 };
 `;
 
-const renderShadowViewer = ({src, baseHref, port = 8000}) =>
+const renderShadowViewer = ({src, baseHref}) =>
   html`
     <!DOCTYPE html>
     <html>

@@ -1260,7 +1260,7 @@ app.use('/shadow/', (req, res) => {
     : `${path.dirname(url)}/`;
 
   const viewerHtml = renderShadowViewer({
-    src: req.url.replace(/^\//, ''),
+    src: '//' + req.hostname + '/' + req.url.replace(/^\//, ''),
     baseHref,
   });
 
