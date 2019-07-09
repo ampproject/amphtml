@@ -28,7 +28,7 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
-const {CLOSURE_SRC_GLOBS} = require('../sources');
+const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
@@ -54,7 +54,7 @@ function convertPathsToTmpRoot(paths) {
   return paths.map(path => {
     const hasNegation = path.charAt(0) === '!';
     const newPath = hasNegation ? path.substr(1) : path;
-    return `${hasNegation ? '!' : ''}${process.env.AMP_TMP_DIR}/${newPath}`;
+    return `${hasNegation ? '!' : ''}${SRC_TEMP_DIR}/${newPath}`;
     return path;
   });
 }
@@ -337,7 +337,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
 
     if (!argv.single_pass && !options.typeCheckOnly) {
-      compilerOptions.js_module_root.push(process.env.AMP_TMP_DIR);
+      compilerOptions.js_module_root.push(SRC_TEMP_DIR);
     }
 
     const compilerOptionsArray = [];
@@ -368,7 +368,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .on('end', resolve);
     } else {
       const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
-      const gulpBase = argv.single_pass ? '.' : process.env.AMP_TMP_DIR;
+      const gulpBase = argv.single_pass ? '.' : SRC_TEMP_DIR;
       return gulp
         .src(gulpSrcs, {base: gulpBase})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))

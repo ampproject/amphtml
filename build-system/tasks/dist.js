@@ -20,7 +20,6 @@ const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
-const tempy = require('tempy');
 const {
   buildExtensions,
   extensionAliasFilePath,
@@ -50,7 +49,7 @@ const {
   printNobuildHelp,
   toPromise,
 } = require('./helpers');
-const {BABEL_SRC_GLOBS} = require('../sources');
+const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
@@ -64,16 +63,13 @@ const babel = require('@babel/core');
 const deglob = require('globs-to-files');
 
 function transferSrcsToTempDir() {
-  const tmp = `${tempy.directory()}/amphtml`;
-  process.env.AMP_TMP_DIR = tmp;
-
   if (!isTravisBuild()) {
-    log('Transforming and executing JS files to', cyan(tmp));
+    log('Transforming and executing JS files to', cyan(SRC_TEMP_DIR));
   }
   const files = deglob.sync(BABEL_SRC_GLOBS);
   files.forEach(file => {
     if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
-      fs.copySync(file, `${tmp}/${file}`);
+      fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
       return;
     }
 
@@ -85,7 +81,7 @@ function transferSrcsToTempDir() {
       retainLines: true,
       compact: false,
     });
-    const name = `${tmp}${file.replace(process.cwd(), '')}`;
+    const name = `${SRC_TEMP_DIR}${file.replace(process.cwd(), '')}`;
     fs.outputFileSync(name, code);
   });
 }

@@ -20,6 +20,10 @@
  * for both the babel and closure sources to be as close as possible.
  */
 
+const tempy = require('tempy');
+
+const SRC_TEMP_DIR = tempy.directory();
+
 const COMMON_GLOBS = [
   'third_party/caja/html-sanitizer.js',
   'third_party/closure-library/sha384-generated.js',
@@ -125,4 +129,5 @@ const CLOSURE_SRC_GLOBS = [
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
+  SRC_TEMP_DIR,
 };
