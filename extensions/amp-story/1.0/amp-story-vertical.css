@@ -24,6 +24,12 @@ amp-story[standalone][i-amphtml-vertical] {
   contain: initial !important;
 }
 
+/* Overrides publishers custom CSS animations, if any. */
+[i-amphtml-vertical] * {
+  transition-delay: 0s !important;
+  transition-duration: 0s !important;
+}
+
 [i-amphtml-vertical] amp-story-page {
   position: relative !important;
   /* iPhone 6/7/8 ratio. */
