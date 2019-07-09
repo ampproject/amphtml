@@ -689,7 +689,8 @@ class AmpFixture {
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
     }
-    maybeTrackImpression(self);
+    // QQQQ: re-enable?
+    // maybeTrackImpression(self);
     const extensionIds = [];
     if (spec.extensions) {
       spec.extensions.forEach(extensionIdWithVersion => {
