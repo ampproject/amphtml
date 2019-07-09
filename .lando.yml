@@ -1,0 +1,21 @@
+name: amphtml
+services:
+  appserver:
+    type: node:10
+    build_as_root:
+      - curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
+      - yarn global add gulp-cli
+    build:
+      - yarn
+    run_as_root:
+      - echo "127.0.0.1 amphtml.lndo.site" >> /etc/hosts
+    command: yarn gulp serve --port=80
+tooling:
+  yarn:
+    service: appserver
+  gulp:
+    service: appserver
+    cmd: "yarn gulp"
+  watch:
+    service: appserver
+    cmd: "yarn gulp watch"
