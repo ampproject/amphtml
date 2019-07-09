@@ -38,6 +38,6 @@ export function isAmp4Email(doc) {
  * @param {!Document} doc
  * @return {boolean}
  */
-export function isStdAmp(doc) {
+export function isAmphtml(doc) {
   return isAmpFormatType(['⚡', 'amp'], doc);
 }
