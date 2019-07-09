@@ -1262,9 +1262,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         return performanceObserver;
       });
 
-      fakeWin.PerformanceObserver.supportedEntryTypes = env.sandbox.stub();
-
-      fakeWin.PerformanceObserver.supportedEntryTypes.returns(['layoutShift']);
+      fakeWin.PerformanceObserver.supportedEntryTypes = ['layoutShift'];
 
       // Install services on fakeWin so some behaviors can be stubbed.
       installRuntimeServices(fakeWin);
