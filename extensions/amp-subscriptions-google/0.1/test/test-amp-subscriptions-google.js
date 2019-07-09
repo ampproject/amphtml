@@ -491,6 +491,21 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(attachStub).to.be.calledWith(elem, {theme: 'dark', lang: 'en'});
   });
 
+  it('should use message text color', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('subscriptions-lang', 'en');
+    elem.setAttribute('subscriptions-message-text-color', '#09f');
+    platform.decorateUI(elem, 'subscribe-smartbutton');
+    expect(elem.textContent).to.be.equal('');
+    expect(attachStub).to.be.calledWith(elem, {
+      lang: 'en',
+      messageTextColor: '#09f',
+      theme: 'light',
+    });
+  });
+
   it('should throw if smartButton language is missing', () => {
     //expectAsyncConsoleError(/must have a language attrbiute​​​/);
     const elem = env.win.document.createElement('div');
