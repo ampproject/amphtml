@@ -1,4 +1,5 @@
 name: amphtml
+
 services:
   appserver:
     type: node:10
@@ -9,7 +10,8 @@ services:
       - yarn
     run_as_root:
       - echo "127.0.0.1 amphtml.lndo.site" >> /etc/hosts
-    command: yarn gulp serve --port=80
+    command: cd /app && yarn gulp serve --port=80 --host=0.0.0.0
+
 tooling:
   yarn:
     service: appserver
@@ -19,3 +21,7 @@ tooling:
   watch:
     service: appserver
     cmd: "yarn gulp watch"
+
+proxy:
+  appserver:
+    - amphtml.lndo.site
