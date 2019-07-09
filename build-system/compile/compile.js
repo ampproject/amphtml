@@ -37,9 +37,9 @@ const {VERSION: internalRuntimeVersion} = require('../internal-version');
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
-// NOTE(erwinm): Theres a weird race condition where when we use `pseudo_names`
-// we get "Error parsing json encoded files". turning the closure invocations
-// to 1 seems to fix the issue.
+// TODO(erwinm/rsima, #23238): Theres a weird race condition where when we use
+// `pseudo_names` we get "Error parsing json encoded files". turning the closure
+// invocations to 1 seems to fix the issue.
 const MAX_PARALLEL_CLOSURE_INVOCATIONS =
   argv.single_pass || argv.pseudo_names ? 1 : 4;
 

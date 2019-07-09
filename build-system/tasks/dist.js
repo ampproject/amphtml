@@ -66,13 +66,11 @@ const deglob = require('globs-to-files');
 function transferSrcsToTempDir() {
   const tmp = `${tempy.directory()}/amphtml`;
   process.env.AMP_TMP_DIR = tmp;
-  log(green(`creating temp directory: ${tmp}`));
 
   if (!isTravisBuild()) {
-    log('Writing transforms to', colors.cyan(tmp));
+    log('Transforming and executing JS files to', cyan(tmp));
   }
   const files = deglob.sync(BABEL_SRC_GLOBS);
-  log(green('Executing babel transforms'));
   files.forEach(file => {
     if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
       fs.copySync(file, `${tmp}/${file}`);
@@ -85,6 +83,7 @@ function transferSrcsToTempDir() {
         isForTesting: argv.fortesting,
       }),
       retainLines: true,
+      compact: false,
     });
     const name = `${tmp}${file.replace(process.cwd(), '')}`;
     fs.outputFileSync(name, code);

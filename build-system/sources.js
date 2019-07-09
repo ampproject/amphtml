@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview This file contains all the globs required for babel
+ * transformation and for closure compilation. Try and maintain the glob
+ * for both the babel and closure sources to be as close as possible.
+ */
+
 const COMMON_GLOBS = [
   'third_party/caja/html-sanitizer.js',
   'third_party/closure-library/sha384-generated.js',
