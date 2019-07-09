@@ -1,4 +1,6 @@
-# Getting Support	See our [README.md](README.md) for ways to get help with AMP.
+<!-- DO NOT RENAME OR REMOVE THIS FILE - it's hosted here https://amp.dev/support/ -->
+
+# Getting Support
 
  There are many ways to get help for questions and issues related to AMP:	
 
