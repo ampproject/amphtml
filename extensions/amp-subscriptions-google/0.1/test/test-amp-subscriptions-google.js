@@ -499,7 +499,11 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     elem.setAttribute('subscriptions-message-text-color', '#09f');
     platform.decorateUI(elem, 'subscribe-smartbutton');
     expect(elem.textContent).to.be.equal('');
-    expect(attachStub).to.be.calledWith(elem, {lang: 'en', messageTextColor: '#09f', theme: 'light'});
+    expect(attachStub).to.be.calledWith(elem, {
+      lang: 'en',
+      messageTextColor: '#09f',
+      theme: 'light',
+    });
   });
 
   it('should throw if smartButton language is missing', () => {
