@@ -169,11 +169,17 @@ export class AmpAdXOriginIframeHandler {
       listenFor(
         this.iframe,
         'embed-size',
-        (data, source, origin) => {
+        (data, source, origin, event) => {
           if (!!data['hasOverflow']) {
             this.element_.warnOnMissingOverflow = false;
           }
-          this.handleResize_(data['height'], data['width'], source, origin);
+          this.handleResize_(
+            data['height'],
+            data['width'],
+            source,
+            origin,
+            event
+          );
         },
         true,
         true
@@ -348,7 +354,8 @@ export class AmpAdXOriginIframeHandler {
       data['height'],
       data['width'],
       info['source'],
-      info['origin']
+      info['origin'],
+      info['event']
     );
   }
 
@@ -412,9 +419,10 @@ export class AmpAdXOriginIframeHandler {
    * @param {number|string|undefined} width
    * @param {!Window} source
    * @param {string} origin
+   * @param {!MessageEvent} event
    * @private
    */
-  handleResize_(height, width, source, origin) {
+  handleResize_(height, width, source, origin, event) {
     this.baseInstance_.getVsync().mutate(() => {
       if (!this.iframe) {
         // iframe can be cleanup before vsync.
@@ -422,18 +430,20 @@ export class AmpAdXOriginIframeHandler {
       }
       const iframeHeight = this.iframe./*OK*/ offsetHeight;
       const iframeWidth = this.iframe./*OK*/ offsetWidth;
-      this.uiHandler_.updateSize(height, width, iframeHeight, iframeWidth).then(
-        info => {
-          this.sendEmbedSizeResponse_(
-            info.success,
-            info.newWidth,
-            info.newHeight,
-            source,
-            origin
-          );
-        },
-        () => {}
-      );
+      this.uiHandler_
+        .updateSize(height, width, iframeHeight, iframeWidth, event)
+        .then(
+          info => {
+            this.sendEmbedSizeResponse_(
+              info.success,
+              info.newWidth,
+              info.newHeight,
+              source,
+              origin
+            );
+          },
+          () => {}
+        );
     });
   }
 
