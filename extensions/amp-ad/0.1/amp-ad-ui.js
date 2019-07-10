@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-ad';
 
 export class AmpAdUIHandler {
   /**
@@ -197,21 +199,18 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
-    const performance = Services.performanceForOrNull(this.baseInstance_.win);
-    const activated =
-      event && event.userActivation && event.userActivation.hasBeenActive;
+    user().expectedError(TAG, 'RESIZE_REQUEST');
     return this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(
       () => {
-        if (performance) {
-          // Report false positives.
-          performance.tickDelta('rsfp', activated ? 1 : 1000);
-        }
         return resizeInfo;
       },
       () => {
-        if (performance) {
+        user().expectedError(TAG, 'RESIZE_REJECT');
+        const activated =
+          event && event.userActivation && event.userActivation.hasBeenActive;
+        if (activated) {
           // Report false negatives.
-          performance.tickDelta('rsfn', activated ? 1000 : 1);
+          user().expectedError(TAG, 'RESIZE_REJECT_ACTIVE');
         }
         resizeInfo.success = false;
         return resizeInfo;
