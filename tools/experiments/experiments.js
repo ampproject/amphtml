@@ -336,12 +336,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
-    id: 'amp-img-auto-sizes',
-    name: 'Automatically generates sizes for amp-img if not given',
-    spec: 'https://github.com/ampproject/amphtml/issues/19513',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
-  },
-  {
     id: 'inabox-viewport-friendly',
     name:
       'Inabox viewport measures the host window directly if ' +
