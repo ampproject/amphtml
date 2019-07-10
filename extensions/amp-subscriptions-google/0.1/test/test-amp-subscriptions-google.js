@@ -450,9 +450,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should allow prerender if in a google viewer', () => {
     viewer.params_['viewerUrl'] = 'https://www.google.com/other';
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
-    // TODO(#23102): restore safe prerendering mode. This will be `true` once
-    // it's restored.
-    expect(platform.isPrerenderSafe()).to.be.false;
+    expect(platform.isPrerenderSafe()).to.be.true;
   });
 
   it('should attach button given to decorateUI', () => {
