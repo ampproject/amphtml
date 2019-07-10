@@ -32,12 +32,12 @@ Provides a way for viewers to glance at the content outline and jump to any sect
     <td><code>&lt;script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>container</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-accordion/">Annotated code example for amp-accordion</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-accordion/">Annotated code example for amp-accordion</a></td>
   </tr>
 </table>
 
@@ -71,7 +71,7 @@ In this example, we display three sections, where the third section is expanded 
 </div>
 
 {% call callout('Tip', type='success') %}
-To see more demos of the `amp-accordion`, visit [AMP By Example](https://ampbyexample.com/components/amp-accordion/).
+To see more demos of the `amp-accordion`, visit [AMP By Example](https://amp.dev/documentation/examples/components/amp-accordion/).
 {% endcall %}
 
 ### Events

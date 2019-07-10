@@ -299,6 +299,7 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function() {};
+let RRule;
 /**
  * @param {Date} unusedDt
  * @param {boolean} unusedInc
