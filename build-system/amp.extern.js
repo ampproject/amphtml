@@ -34,6 +34,7 @@
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
  *   ampCors: (boolean|undefined),
+ *   prerenderSafe: (boolean|undefined),
  *   bypassInterceptorForDev: (boolean|undefined)
  * }}
  */

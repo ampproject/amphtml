@@ -201,25 +201,25 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   }
 
   const viewer = Services.viewerForDoc(ampdocSingle);
-  const whenFirstVisible = viewer.whenFirstVisible();
+  const whenUnblocked = init.prerenderSafe
+    ? Promise.resolve()
+    : viewer.whenFirstVisible();
   const urlIsProxy = isProxyOrigin(input);
   const viewerCanIntercept = viewer.hasCapability('xhrInterceptor');
   const interceptorDisabledForLocalDev =
     init.bypassInterceptorForDev && getMode(win).localDev;
   if (urlIsProxy || !viewerCanIntercept || interceptorDisabledForLocalDev) {
-    return whenFirstVisible;
+    return whenUnblocked;
   }
 
   const htmlElement = ampdocSingle.getRootNode().documentElement;
   const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
   if (!docOptedIn) {
-    return whenFirstVisible;
+    return whenUnblocked;
   }
 
-  return whenFirstVisible
-    .then(() => {
-      return viewer.isTrustedViewer();
-    })
+  return whenUnblocked
+    .then(() => viewer.isTrustedViewer())
     .then(viewerTrusted => {
       if (
         !(
