@@ -457,7 +457,13 @@ const forbiddenTerms = {
       'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
-  'prerenderSafe': requiresReviewPrivacy,
+  'prerenderSafe': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'build-system/amp.extern.js',
+      'src/utils/xhr-utils.js',
+    ],
+  },
   'eval\\(': {
     message: shouldNeverBeUsed,
     whitelist: ['extension/amp-bind/0.1/test/test-bind-expr.js'],
