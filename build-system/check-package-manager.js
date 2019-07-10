@@ -238,7 +238,8 @@ function runGulpChecks() {
   }).trim();
   const wrongGulp =
     !defaultGulpPath.includes('yarn') &&
-    !defaultGulpPath.includes('amphtml/node_modules');
+    !firstInstall &&
+    !defaultGulpPath.includes(fs.realpathSync('node_modules'));
   if (globalGulp) {
     console.log(
       yellow('WARNING: Detected a global install of'),
