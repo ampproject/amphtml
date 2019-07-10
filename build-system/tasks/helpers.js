@@ -269,6 +269,7 @@ function compile(watch, shouldMinify) {
           watch,
           minify: shouldMinify,
           wrapper: wrappers.mainBinary,
+          esmPassCompilation: true,
         });
       } else {
         return Promise.resolve();

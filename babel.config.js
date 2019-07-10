@@ -31,24 +31,18 @@ const argv = minimist(process.argv.slice(2));
 
 // eslint-disable-next-line amphtml-internal/no-module-exports
 module.exports = function(api) {
+  const isDist = argv._.includes('dist');
   api.cache(true);
-  // `dist` builds do not use any of the default settings below. (Both
-  // Multipass and Singlepass)
-  if (argv._.includes('dist')) {
-    return {};
-  }
   return {
     'presets': [
       [
-        '@babel/env',
+        '@babel/preset-env',
         {
-          'modules': 'commonjs',
+          'modules': isDist ? false: 'commonjs',
           'loose': true,
           'targets': {
-            'browsers': isTravisBuild()
-              ? ['Last 2 versions', 'safari >= 9']
-              : ['Last 2 versions'],
-          },
+            'esmodules': true,
+          }
         },
       ],
     ],
