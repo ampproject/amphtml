@@ -251,7 +251,7 @@ export function setModalAsClosed(element) {
 }
 
 /**
- * @pacakge Visible for testing
+ * @package Visible for testing
  */
 export function clearModalStack() {
   modalEntryStack.length = 0;
