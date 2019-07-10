@@ -232,8 +232,12 @@ export class AmpSidebar extends AMP.BaseElement {
         this.element,
         candidate.parentNode
       );
+      const inToolbar = closestAncestorElementBySelector(
+        candidate,
+        '[toolbar]'
+      );
 
-      if (hasAction) {
+      if (hasAction && !inToolbar) {
         return candidate;
       }
     }
