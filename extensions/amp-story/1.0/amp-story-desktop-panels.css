@@ -89,6 +89,8 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   transform: scale(0.9) translateX(calc(250% + 192px)) translateY(0%) !important;
   opacity: 0.05 !important;
   transform-origin: left !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page.i-amphtml-element {
