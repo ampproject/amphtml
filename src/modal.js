@@ -103,17 +103,26 @@ function getPotentiallyFocusableElements(element) {
 
   while (cur) {
     const root = rootNodeFor(cur);
+    /*
+     *  Based on https://html.spec.whatwg.org/multipage/interaction.html#the-tabindex-attribute
+     * - Excludes `<frame>`, `<frameset>` since those are deprecated.
+     * - Excludes `<link>`, those don't actually seem to be focusable in
+     *   practice, even if you give them a `display` that is not `none`.
+     * - Includes `<area>`, which is missing (perhaps they meant area instead
+     *   of link?).
+     */
     const potentiallyFocusable = root.querySelectorAll(
       [
         'a[href]',
         'area[href]',
         'button',
-        'details',
+        'details summary',
         'iframe',
         'input',
         'select',
         'textarea',
         '[contenteditable]',
+        '[draggable]',
         '[tabindex]',
       ].join(',')
     );
@@ -122,7 +131,9 @@ function getPotentiallyFocusableElements(element) {
     cur = root.host;
   }
 
-  return arr.filter(e => !element.contains(e));
+  return arr.filter(e => {
+    return !element.contains(e) && element.tabIndex >= 0;
+  });
 }
 
 /**
@@ -172,7 +183,7 @@ export function setModalAsOpen(element) {
 /**
  * Undoes the effectsof `setModalAsOpen`. This should only be called with the
  * currently open modal.
- * @param {*} element
+ * @param {!Element} element
  */
 export function setModalAsClosed(element) {
   const {
