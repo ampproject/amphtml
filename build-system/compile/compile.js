@@ -291,14 +291,14 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       source_map_location_mapping: '|' + sourceMapBase,
       warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
       jscomp_error: [],
-      // moduleLoad: Demote "module not found" errors to ignore missing files
-      //     in type declarations in the swg.js bundle.
       // accessControls: Demote "Access to private variable" errors to allow
       //     AMP code to access variables in other files.
-      jscomp_warning: ['moduleLoad', 'accessControls'],
-      // Turn off warning for "Unknown @define" since we use define to pass
-      // args such as FORTESTING to our runner.
-      jscomp_off: ['unknownDefines'],
+      jscomp_warning: ['accessControls'],
+      // moduleLoad: Demote "module not found" type check errors until
+      //     https://github.com/google/closure-compiler/issues/3041 is fixed.
+      // unknownDefines: Demote warning for "Unknown @define" since we use
+      //     define to pass args such as FORTESTING to our runner.
+      jscomp_off: ['moduleLoad', 'unknownDefines'],
       define,
       hide_warnings_for: hideWarningsFor,
     };
