@@ -116,8 +116,6 @@ export function installServiceInEmbedScope(embedWin, id, service) {
     'Service override has already been installed: %s',
     id
   );
-  registerServiceInternal(embedWin, embedWin, id, () => service);
-  getServiceInternal(embedWin, id); // Force service to build.
   const ampdocFieExperimentOn = isExperimentOn(topWin, 'ampdoc-fie');
   if (ampdocFieExperimentOn) {
     const ampdoc = getAmpdoc(embedWin.document);
@@ -127,6 +125,9 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       id,
       () => service
     );
+  } else {
+    registerServiceInternal(embedWin, embedWin, id, () => service);
+    getServiceInternal(embedWin, id); // Force service to build.
   }
 }
 
