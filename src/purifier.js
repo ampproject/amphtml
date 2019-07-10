@@ -21,7 +21,6 @@ import {
   WHITELISTED_ATTRS,
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
-  isAmp4Email,
   isValidAttr,
 } from './sanitation';
 import {rewriteAttributeValue} from './url-rewrite';
@@ -314,10 +313,10 @@ function addPurifyHooks(purifier, diffing, doc) {
   };
 
   /**
-   * @param {!Node} node
+   * @param {!Node} unusedNode
    * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
    */
-  const afterSanitizeAttributes = function(node) {
+  const afterSanitizeAttributes = function(unusedNode) {
     // DOMPurify doesn't have a tag-specific attribute whitelist API and
     // `allowedAttributes` has a per-invocation scope, so we need to undo
     // changes after sanitizing attributes.
@@ -325,20 +324,6 @@ function addPurifyHooks(purifier, diffing, doc) {
       delete allowedAttributes[attr];
     });
     allowedAttributesChanges.length = 0;
-
-    // TODO(alabiaga): Revert this change once DOM Purifier patch to make
-    // this work is live. https://github.com/cure53/DOMPurify/pull/329
-    // Remove input type file if applicable. The purifier will actually
-    // not remove this attribute because of a Safari bug where removing it
-    // will result in not being able to add it programmatically afterwards.
-    // For AMP HTML's usage, this is fine.
-    const nodeName = node.nodeName.toLowerCase();
-    if (nodeName == 'input') {
-      const inputType = node.getAttribute('type');
-      if (inputType && inputType.toLowerCase() == 'file' && isAmp4Email(doc)) {
-        node.removeAttribute('type');
-      }
-    }
   };
 
   purifier.addHook('uponSanitizeElement', uponSanitizeElement);
