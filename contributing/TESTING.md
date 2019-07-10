@@ -34,7 +34,6 @@ This document provides details for testing and building your AMP code.
   * [Running Visual Diff Tests Locally](#running-visual-diff-tests-locally)
 - [Testing on devices](#testing-on-devices)
   * [Testing with ngrok](#testing-with-ngrok)
-  * [Testing with Heroku](#testing-with-heroku)
   * [Testing with Firebase](#testing-with-firebase)
 - [End-to-end Tests](#end-to-end-tests)
 
@@ -289,17 +288,6 @@ ngrok http 8000
 
 Once started, the ngrok will print URLs for both `http` and `https`. E.g. `http://73774d8c.ngrok.io/` and `https://73774d8c.ngrok.io/`. These URLs can be used to debug on iOS and elsewhere.
 
-
-### Testing with Heroku
-
-For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) , please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
-
-In the meantime you can also use our automatic build on Heroku [link](http://amphtml-nightly.herokuapp.com/), which is normally built with latest head on master branch (please allow delay). The first time load is normally slow due to Heroku's free account throttling policy.
-
-To correctly get ads and third party working when testing on hosted services
-you will need set the `AMP_TESTING_HOST` environment variable. (On heroku this
-is done through
-`heroku config:set AMP_TESTING_HOST=my-heroku-subdomain.herokuapp.com`)
 
 ### Testing with Firebase
 For deploying and testing local AMP builds on [Firebase](https://firebase.google.com/), install firebase and initialize firebase within this directory* (a `firebase` folder can be generated with the command, `gulp firebase`).
