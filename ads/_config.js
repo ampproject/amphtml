@@ -175,6 +175,7 @@ export const adConfig = {
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
     consentHandlingOverride: true,
+    renderStartImplemented: true,
   },
 
   'adsensor': {
@@ -524,6 +525,12 @@ export const adConfig = {
     prefetch: 'https://cdn.innity.net/admanager.js',
     preconnect: 'https://as.innity.com',
     renderStartImplemented: true,
+  },
+
+  'invibes': {
+    prefetch: 'https://k.r66net.com/GetAmpLink',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
   },
 
   'ix': {

@@ -525,6 +525,39 @@ describes.realWin(
         });
       });
 
+      [
+        {noFill: 'true'},
+        {noFill: 'ignore', notPresent: true},
+        {noFill: 'True'},
+      ].forEach(({noFill, notPresent}) => {
+        it(
+          notPresent
+            ? `should not contain aanf for ${noFill}`
+            : `should have aanf equal to ${noFill}`,
+          () => {
+            const ampStickyAd = createElementWithAttributes(
+              doc,
+              'amp-sticky-ad',
+              {
+                'layout': 'nodisplay',
+              }
+            );
+            element.setAttribute('data-no-fill', `${noFill}`);
+            ampStickyAd.appendChild(element);
+            doc.body.appendChild(ampStickyAd);
+            return impl.getAdUrl().then(url => {
+              if (notPresent) {
+                expect(url).to.not.match(
+                  new RegExp(`(\\?|&)aanf=${noFill}(&|$)`)
+                );
+              } else {
+                expect(url).to.match(new RegExp(`(\\?|&)aanf=${noFill}(&|$)`));
+              }
+            });
+          }
+        );
+      });
+
       it('formats client properly', () => {
         element.setAttribute('data-ad-client', 'SoMeClient');
         return impl.getAdUrl().then(url => {
@@ -765,6 +798,15 @@ describes.realWin(
         impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then(url => {
           expect(url).to.not.match(/(\?|&)npa=(&|$)/);
         }));
+      it('should have spsa and size 1x1 when single page story ad', () => {
+        impl.isSinglePageStoryAd = true;
+        return impl.getAdUrl().then(url => {
+          expect(url).to.match(/format=1x1/);
+          expect(url).to.match(/h=1/);
+          expect(url).to.match(/w=1/);
+          expect(url).to.match(/spsa=\d+?x\d+?/);
+        });
+      });
     });
 
     describe('#unlayoutCallback', () => {
@@ -1182,6 +1224,61 @@ describes.realWin(
             mockHeaders
           )
         ).to.eventually.not.be.ok;
+      });
+    });
+
+    describe('#letCreativeTriggerRenderStart', () => {
+      it('should return true for sticky ad', () => {
+        const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
+          'layout': 'nodisplay',
+        });
+        ampStickyAd.appendChild(element);
+        doc.body.appendChild(ampStickyAd);
+        const letCreativeTriggerRenderStart = impl.letCreativeTriggerRenderStart();
+        expect(letCreativeTriggerRenderStart).to.equal(true);
+      });
+
+      it('should trigger renderStarted on fill msg from sticky ad', () => {
+        const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
+          'layout': 'nodisplay',
+        });
+        let promiseResolver;
+        const renderPromise = new Promise(resolve => {
+          promiseResolver = resolve;
+        });
+        ampStickyAd.appendChild(element);
+        doc.body.appendChild(ampStickyAd);
+        impl.letCreativeTriggerRenderStart();
+        impl.renderStarted = () => {
+          promiseResolver();
+        };
+        let key, val;
+        impl.iframe = {
+          contentWindow: window,
+          setAttribute: (k, v) => {
+            key = k;
+            val = v;
+          },
+        };
+        win.postMessage('fill_sticky', '*');
+        return renderPromise.then(() => {
+          expect(key).to.equal('visible');
+          expect(val).to.equal('');
+        });
+      });
+
+      it('should return false for non-sticky ad', () => {
+        const ampStickyAd = createElementWithAttributes(
+          doc,
+          'something-random',
+          {
+            'layout': 'nodisplay',
+          }
+        );
+        ampStickyAd.appendChild(element);
+        doc.body.appendChild(ampStickyAd);
+        const letCreativeTriggerRenderStart = impl.letCreativeTriggerRenderStart();
+        expect(letCreativeTriggerRenderStart).to.equal(false);
       });
     });
   }

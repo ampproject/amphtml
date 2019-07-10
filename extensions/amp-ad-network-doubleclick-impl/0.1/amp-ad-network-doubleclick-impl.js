@@ -29,7 +29,6 @@ import {
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
-  getContainerWidth,
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
@@ -74,6 +73,7 @@ import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {getFlexibleAdSlotRequestParams} from './flexible-ad-slot-utils';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -154,10 +154,10 @@ let TroubleshootDataDef;
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
 
-/**
- * @typedef
- * {({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)}
- */
+/** @typedef {{width: number, height: number}} */
+let SizeDef;
+
+/** @typedef {(SizeDef|../../../src/layout-rect.LayoutRectDef)} */
 let LayoutRectOrDimsDef;
 
 /** @final */
@@ -523,21 +523,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const pageLayoutBox = this.isSinglePageStoryAd
       ? this.element.getPageLayoutBox()
       : null;
-    let psz = null;
     let msz = null;
+    let psz = null;
+    let fws = null;
     if (this.sendFlexibleAdSlotParams_) {
-      const parentWidth = getContainerWidth(
+      const {fwSignal, slotWidth, parentWidth} = getFlexibleAdSlotRequestParams(
         this.win,
         this.element.parentElement
       );
-      let slotWidth = getContainerWidth(
-        this.win,
-        this.element,
-        1 /* maxDepth */
-      );
-      slotWidth = slotWidth == -1 ? parentWidth : slotWidth;
+      // If slotWidth is -1, that means its width must be determined by its
+      // parent container, and so should have the same value as parentWidth.
+      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
       psz = `${parentWidth}x-1`;
-      msz = `${slotWidth}x-1`;
+      fws = fwSignal ? fwSignal : '0';
     }
     return Object.assign(
       {
@@ -559,6 +557,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // disallowed in AMP.
         'msz': msz,
         'psz': psz,
+        'fws': fws,
         'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
@@ -877,15 +876,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Returns the width and height of the slot as defined by the width and height
    * attributes, or the dimensions as computed by
    * getIntersectionElementLayoutBox.
-   * @return {{width: number, height: number}|../../../src/layout-rect.LayoutRectDef}
+   * @return {!LayoutRectOrDimsDef}
    */
   getSlotSize() {
-    const width = Number(this.element.getAttribute('width'));
-    const height = Number(this.element.getAttribute('height'));
+    const {width, height} = this.getDeclaredSlotSize_();
     return width && height
       ? {width, height}
       : // width/height could be 'auto' in which case we fallback to measured.
         this.getIntersectionElementLayoutBox();
+  }
+
+  /**
+   * Returns the width and height, as defined by the slot element's width and
+   * height attributes.
+   * @return {!SizeDef}
+   */
+  getDeclaredSlotSize_() {
+    const width = Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('height'));
+    return {width, height};
   }
 
   /**
@@ -1201,22 +1210,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Attempts to resize the ad, if the returned size is smaller than the primary
    * dimensions.
-   * @param {number} width
-   * @param {number} height
+   * @param {number} newWidth
+   * @param {number} newHeight
    * @private
    */
-  handleResize_(width, height) {
-    const pWidth = this.element.getAttribute('width');
-    const pHeight = this.element.getAttribute('height');
-    // We want to resize only if neither returned dimension is larger than its
-    // primary counterpart, and if at least one of the returned dimensions
-    // differ from its primary counterpart.
+  handleResize_(newWidth, newHeight) {
+    const isFluidRequestAndFixedResponse = !!(
+      this.isFluidRequest_ &&
+      newWidth &&
+      newHeight
+    );
+    const {width, height} = this.getDeclaredSlotSize_();
+    const returnedSizeDifferent = newWidth != width || newHeight != height;
+    const heightNotIncreased = newHeight <= height;
     if (
-      (this.isFluidRequest_ && width && height) ||
-      ((width != pWidth || height != pHeight) &&
-        (width <= pWidth && height <= pHeight))
+      isFluidRequestAndFixedResponse ||
+      (returnedSizeDifferent && heightNotIncreased)
     ) {
-      this.attemptChangeSize(height, width).catch(() => {});
+      this.attemptChangeSize(newHeight, newWidth).catch(() => {});
     }
   }
 
