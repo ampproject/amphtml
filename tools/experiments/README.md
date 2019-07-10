@@ -4,17 +4,20 @@ AMP experiments are features that are released but not yet ready for wide use, s
 
 Developers and users can opt-in into these features before they are fully released. However, experimental components should be used with caution, as they may contain bugs or have unexpected side effects.
 
-## Enable an experiment for yourself
+## Enable an experimental component
 
-Experimental components can be served from `https://cdn.ampproject.org` or any other domain.
+#### Served from cdn.ampproject.org
 
-### Served from cdn.ampproject.org
+For content served from `https://*.cdn.ampproject.org`,
+go to `/experiments.html` on a Google AMP Cache subdomain and enable (or disable) any experimental component by toggling them on (or off).
 
-For content served from `https://cdn.ampproject.org`, go to the [AMP experiments page](https://cdn.ampproject.org/experiments.html) and enable (or disable) any experimental component by toggling them on (or off). Opting in will set a cookie on your browser that will enable the experiment on all AMP pages served through the Google AMP Cache.
+For example, to enable experiments on cached AMP pages whose source origin is `www.example.com`, go to `www-example-com.cdn.ampproject.org/experiments.html`.
 
-### Served from other domains
+Experiment opt-ins are saved to `localStorage` and only enables the experiment on AMP pages served from the current domain.
 
-For content served from any other domain, you can toggle experiments in the Chrome DevTools Console when development mode is enabled by using:
+#### Served from other domains
+
+For content served from non-CDN domains, experiments can be toggled in the devtools console using:
 
 ```javascript
 AMP.toggleExperiment('experiment')
