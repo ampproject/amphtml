@@ -33,6 +33,7 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   opacity: 0.05 !important;
   transform-origin: left !important;
   border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page.i-amphtml-element {
@@ -128,8 +129,4 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   max-width: calc(3/5 * 75vh) !important;
   min-width: 320px !important;
   min-height: 533px !important;
-}
-
-.i-amphtml-story-desktop-panels > amp-story-page {
-  box-shadow: 0 50px 200px rgba(0, 0, 0, 0.7) !important
 }
