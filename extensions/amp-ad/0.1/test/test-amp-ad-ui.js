@@ -282,10 +282,12 @@ describes.realWin(
 
         it('should reject on special case undefined sizes', () => {
           const attemptChangeSizeSpy = sandbox.spy(adImpl, 'attemptChangeSize');
-          return uiHandler.updateSize(undefined, undefined, 0, 0, {}).catch(e => {
-            expect(e.message).to.equal('undefined width and height');
-            expect(attemptChangeSizeSpy).to.not.be.called;
-          });
+          return uiHandler
+            .updateSize(undefined, undefined, 0, 0, {})
+            .catch(e => {
+              expect(e.message).to.equal('undefined width and height');
+              expect(attemptChangeSizeSpy).to.not.be.called;
+            });
         });
 
         it('should reject on special case inside sticky ad', () => {
