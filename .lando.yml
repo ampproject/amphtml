@@ -5,8 +5,8 @@ services:
     type: node:10
     build_as_root:
       - curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
-      - yarn global add gulp-cli
     build:
+      - yarn global add gulp-cli
       - yarn
     run_as_root:
       - echo "127.0.0.1 amphtml.lndo.site" >> /etc/hosts
