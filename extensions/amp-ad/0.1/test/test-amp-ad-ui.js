@@ -254,7 +254,7 @@ describes.realWin(
               expect(width).to.equal(450);
               return Promise.resolve();
             });
-          return uiHandler.updateSize(100, 400, 50, 300).then(sizes => {
+          return uiHandler.updateSize(100, 400, 50, 300, {}).then(sizes => {
             expect(sizes).to.deep.equal({
               success: true,
               newWidth: 450,
@@ -271,7 +271,7 @@ describes.realWin(
               expect(width).to.equal(400);
               return Promise.resolve();
             });
-          return uiHandler.updateSize('100', 400, 0, 0).then(sizes => {
+          return uiHandler.updateSize('100', 400, 0, 0, {}).then(sizes => {
             expect(sizes).to.deep.equal({
               success: true,
               newWidth: 400,
@@ -282,16 +282,18 @@ describes.realWin(
 
         it('should reject on special case undefined sizes', () => {
           const attemptChangeSizeSpy = sandbox.spy(adImpl, 'attemptChangeSize');
-          return uiHandler.updateSize(undefined, undefined, 0, 0).catch(e => {
-            expect(e.message).to.equal('undefined width and height');
-            expect(attemptChangeSizeSpy).to.not.be.called;
-          });
+          return uiHandler
+            .updateSize(undefined, undefined, 0, 0, {})
+            .catch(e => {
+              expect(e.message).to.equal('undefined width and height');
+              expect(attemptChangeSizeSpy).to.not.be.called;
+            });
         });
 
         it('should reject on special case inside sticky ad', () => {
           adContainer = 'AMP-STICKY-AD';
           const attemptChangeSizeSpy = sandbox.spy(adImpl, 'attemptChangeSize');
-          return uiHandler.updateSize(100, 400, 0, 0).then(sizes => {
+          return uiHandler.updateSize(100, 400, 0, 0, {}).then(sizes => {
             expect(sizes).to.deep.equal({
               success: false,
               newWidth: 400,
@@ -305,7 +307,7 @@ describes.realWin(
           sandbox.stub(adImpl, 'attemptChangeSize').callsFake(() => {
             return Promise.reject();
           });
-          return uiHandler.updateSize(100, 400, 0, 0).then(sizes => {
+          return uiHandler.updateSize(100, 400, 0, 0, {}).then(sizes => {
             expect(sizes).to.deep.equal({
               success: false,
               newWidth: 400,
