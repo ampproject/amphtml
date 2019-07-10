@@ -618,6 +618,9 @@ describe('service', () => {
         );
         expect(fromGrandchildNode).to.deep.equal({count: 2});
         expect(fromGrandchildNode).to.not.equal(topService);
+
+        // The service is NOT also registered on the embed window.
+        expect(childWin.services && childWin.services['c']).to.not.exist;
       });
 
       it('should return overriden service', () => {
@@ -640,6 +643,9 @@ describe('service', () => {
           'c'
         );
         expect(fromGrandchildNode).to.be.null;
+
+        // The service is also registered on the embed window.
+        expect(childWin.services['c']).to.exist;
       });
     });
 
