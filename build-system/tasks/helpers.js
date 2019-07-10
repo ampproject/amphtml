@@ -69,7 +69,6 @@ const UNMINIFIED_TARGETS = [
 
 const MINIFIED_TARGETS = [
   'v0.js',
-  'v0-esm.js',
   'shadow-v0.js',
   'amp4ads-v0.js',
   'alp.js',
@@ -258,22 +257,6 @@ function compile(watch, shouldMinify) {
         singlePassCompilation: argv.single_pass,
         esmPassCompilation: argv.esm,
       });
-    })
-    .then(() => {
-      if (!argv.single_pass) {
-        return compileJs('./src/', 'amp.js', './dist', {
-          toName: 'amp-esm.js',
-          minifiedName: 'v0-esm.js',
-          includePolyfills: true,
-          includeOnlyESMLevelPolyfills: true,
-          watch,
-          minify: shouldMinify,
-          wrapper: wrappers.mainBinary,
-          esmPassCompilation: true,
-        });
-      } else {
-        return Promise.resolve();
-      }
     });
 }
 
