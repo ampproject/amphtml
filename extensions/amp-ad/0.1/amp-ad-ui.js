@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
 
@@ -196,17 +197,21 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
-    // QQQQ: ask Hongfei where to report!?
+    const performance = Services.performanceForOrNull(this.baseInstance_.win);
+    const activated =
+      event && event.userActivation && event.userActivation.hasBeenActive;
     return this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(
       () => {
+        if (performance) {
+          // Report false positives.
+          performance.tickDelta('rsfp', activated ? 1 : 1000);
+        }
         return resizeInfo;
       },
       () => {
-        // QQQQ: report total # of negatives
-        const activated =
-          event.userActivation && event.userActivation.hasBeenActive;
-        if (activated) {
-          // QQQQ: report false negative
+        if (performance) {
+          // Report false negatives.
+          performance.tickDelta('rsfn', activated ? 1000 : 1);
         }
         resizeInfo.success = false;
         return resizeInfo;
