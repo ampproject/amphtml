@@ -134,27 +134,6 @@ export function isInManualExperiment(element) {
 }
 
 /**
- * Predicate to check whether A4A has launched yet or not.
- * If it has not yet launched, then the experimental branch serves A4A, and
- * control/filler do not. If it has not, then the filler and control branch do
- * serve A4A, and the experimental branch does not.
- *
- * @param {!Window} win  Host window for the ad.
- * @param {!Element} element  Element to check for pre-launch membership.
- * @return {boolean}
- */
-export function hasLaunched(win, element) {
-  switch (element.getAttribute('type')) {
-    case 'adsense':
-      return isExperimentOn(win, 'a4aFastFetchAdSenseLaunched');
-    case 'doubleclick':
-      return isExperimentOn(win, 'a4aFastFetchDoubleclickLaunched');
-    default:
-      return false;
-  }
-}
-
-/**
  * Checks that all string experiment IDs in a list are syntactically valid
  * (integer base 10).
  *
