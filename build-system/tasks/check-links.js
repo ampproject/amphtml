@@ -148,12 +148,6 @@ function filterWhitelistedLinks(markdown) {
   // Links inside a <pre> block (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/<pre>([^]*?)<\/pre>/g, '');
 
-  // The heroku nightly build page is not always acccessible by the checker.
-  filteredMarkdown = filteredMarkdown.replace(
-    /\(http:\/\/amphtml-nightly\.herokuapp\.com\/\)/g,
-    ''
-  );
-
   // The Googlebot help page is currently only available to signed-in users.
   filteredMarkdown = filteredMarkdown.replace(
     /\(https:\/\/support\.google\.com\/webmasters\/answer\/182072\)/g,
