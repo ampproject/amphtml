@@ -376,6 +376,14 @@ Usage: `<amp-story ... supports-landscape>...</amp-story>`
 
 ### Live story
 
+<figure class="centered-fig">
+  <amp-anim alt="Live story example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif">
+  <noscript>
+    <img alt="Live story example" width="200" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif" />
+  </noscript>
+  </amp-anim>
+</figure>
+
 Use the `live-story` attribute to append new pages to a story for users to see in real-time.
 
 This attribute shows a notification of new pages to users on the last page, and updates the progress bar.
@@ -397,14 +405,6 @@ Content is updated by publishing to the same URL with valid `<amp-story>` markup
 #### Stop polling
 
 As long as the `live-story` attribute is present on the `<amp-story>` element, the client will make continuous polls to the server copy of the document. Make sure to set the `live-story-disabled` attribute to the `<amp-story>` element when you publish your last update to the story. This will make the polling stop.
-
-<figure class="centered-fig">
-  <amp-anim alt="Live story example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif">
-  <noscript>
-    <img alt="Live story example" width="200" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif" />
-  </noscript>
-  </amp-anim>
-</figure>
 
 #### Usage
 
