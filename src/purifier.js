@@ -21,7 +21,6 @@ import {
   WHITELISTED_ATTRS,
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
-  isAmp4Email,
   isValidAttr,
 } from './sanitation';
 import {rewriteAttributeValue} from './url-rewrite';
