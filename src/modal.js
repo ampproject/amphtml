@@ -36,7 +36,8 @@ let ElementAttributeInfoDef;
  * @type {{
  *   element: !Element,
  *   hiddenElementInfos: !Array<!ElementAttributeInfoDef>,
- *   focusableElementInfos: !Array<!ElementAttributeInfoDef>,
+ *   focusableExternalElements: !Array<!Element>,
+ *   focusableInternalElements: !Array<!Element>,
  * }}
  */
 let ModalEntryDef;
@@ -45,6 +46,11 @@ let ModalEntryDef;
  * @type {!Array<!ModalEntryDef>}
  */
 const modalEntryStack = [];
+
+/**
+ * A property name for keeping track of the saved tab index on an Element.
+ */
+const SAVED_TAB_INDEX = '__AMP_MODAL_SAVED_TAB_INDEX';
 
 /**
  * Given a target element, finds the Elements to hide for accessibility.
@@ -88,9 +94,9 @@ function getAncestors(element) {
 }
 
 /**
- * Gets the potentially focusable elements, assuming something within the
- * Element has focus. Note that we do not need to go into ShadowRoots, giving
- * their host `tabindex="-1"` is sufficient.
+ * Gets the potentially focusable elements, relative to a given element. Not
+ * that we do not need to go into ShadowRoots, giving their host
+ * `tabindex="-1"` is sufficient.
  *
  * Note that some of these Elements may not be focusable (e.g. is a button
  * that is `disabled` or has an ancestor that is `display: none`).
@@ -131,14 +137,31 @@ function getPotentiallyFocusableElements(element) {
     cur = root.host;
   }
 
-  return arr.filter(e => {
-    return !element.contains(e) && element.tabIndex >= 0;
-  });
+  return arr;
+}
+
+/**
+ *
+ * @param {!Element} element The Element top operate on.
+ * @param {string} attribute  The name of the attribute.
+ * @param {?string} value The value of the attribute.
+ */
+function restoreAttributeValue(element, attribute, value) {
+  if (value === null) {
+    element.removeAttribute(attribute);
+  } else {
+    element.setAttribute(attribute, value);
+  }
 }
 
 /**
  * Sets an Element as an open modal, making all Elements outside of the page
  * hidden from the tab order and screenreaders.
+ *
+ * This is done by making other subtrees 'aria-hidden', as well as giving a
+ * negative `tabindex` to all focusable elements outside the modal. When
+ * opening a modal, the ancestry has `aria-hidden` removed any any `tabindex`
+ * values within the modal restored.
  *
  * Note: this does not block click events on things outside of the modal. It is
  * assumed that a backdrop Element blocking clicks is present.
@@ -153,16 +176,20 @@ export function setModalAsOpen(element) {
     n => n.nodeType == Node.ELEMENT_NODE
   );
   const focusableElements = getPotentiallyFocusableElements(element);
+  // Get the elements that are internally focusable, and have been made
+  // non-focusable; we want to unhide these.
+  const focusableInternalElements = focusableElements.filter(e => {
+    return element.contains(e) && e[SAVED_TAB_INDEX] !== undefined;
+  });
+  // Get the elements that are externally focusable, and have not yet been made
+  // non-focusable; we want to hide these.
+  const focusableExternalElements = focusableElements.filter(e => {
+    return !element.contains(e) && e[SAVED_TAB_INDEX] === undefined;
+  });
   const hiddenElementInfos = elements.concat(ancestry).map(element => {
     return {
       element,
       prevValue: element.getAttribute('aria-hidden'),
-    };
-  });
-  const focusableElementInfos = focusableElements.map(element => {
-    return {
-      element,
-      prevValue: element.getAttribute('tabindex'),
     };
   });
 
@@ -170,13 +197,23 @@ export function setModalAsOpen(element) {
   ancestry.forEach(e => e.removeAttribute('aria-hidden'));
   // Hide everything else.
   elements.forEach(e => e.setAttribute('aria-hidden', 'true'));
-  // Make everything outside of the dialog non-focusable via tab.
-  focusableElements.forEach(e => e.setAttribute('tabindex', '-1'));
+  // Make everything outside of the modal non-focusable via tab.
+  focusableExternalElements.forEach(e => {
+    e[SAVED_TAB_INDEX] = e.getAttribute('tabindex');
+    e.setAttribute('tabindex', '-1');
+  });
+  // Restore the focusability of everything inside of the modal that was made
+  // non-focusable.
+  focusableInternalElements.forEach(e => {
+    devAssert(e[SAVED_TAB_INDEX] !== undefined);
+    restoreAttributeValue(e, 'tabindex', e[SAVED_TAB_INDEX]);
+  });
 
   modalEntryStack.push({
     element,
     hiddenElementInfos,
-    focusableElementInfos,
+    focusableExternalElements,
+    focusableInternalElements,
   });
 }
 
@@ -189,7 +226,8 @@ export function setModalAsClosed(element) {
   const {
     element: topModalElement,
     hiddenElementInfos,
-    focusableElementInfos,
+    focusableExternalElements,
+    focusableInternalElements,
   } = modalEntryStack.pop();
 
   devAssert(isConnectedNode(element));
@@ -197,18 +235,18 @@ export function setModalAsClosed(element) {
 
   // Put aria-hidden back to how it was before the call.
   hiddenElementInfos.forEach(({element, prevValue}) => {
-    if (prevValue == null) {
-      element.removeAttribute('aria-hidden');
-    } else {
-      element.setAttribute('aria-hidden', prevValue);
-    }
+    restoreAttributeValue(element, 'aria-hidden', prevValue);
   });
-  focusableElementInfos.forEach(({element, prevValue}) => {
-    if (prevValue == null) {
-      element.removeAttribute('tabindex');
-    } else {
-      element.setAttribute('tabindex', prevValue);
-    }
+  // Re-hide any internal elements that should be hidden.
+  focusableInternalElements.forEach(e => {
+    e.setAttribute('tabindex', '-1');
+  });
+  // Re-show any external elements that were hidden, and clear the saved
+  // tabindex.
+  focusableExternalElements.forEach(e => {
+    devAssert(e[SAVED_TAB_INDEX] !== undefined);
+    restoreAttributeValue(e, 'tabindex', e[SAVED_TAB_INDEX]);
+    e[SAVED_TAB_INDEX] = undefined;
   });
 }
 

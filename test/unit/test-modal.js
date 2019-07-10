@@ -438,7 +438,7 @@ describes.fakeWin('modal', {}, env => {
   });
 
   describe('nested opens/closes', () => {
-    it('should handle nested opens', () => {
+    it('should handle nested opens for aria-hidden', () => {
       const root = container.appendChild(html`
         <div>
           <div id="targetOneParent">
@@ -483,6 +483,54 @@ describes.fakeWin('modal', {}, env => {
       expect(targetOneParent.getAttribute('aria-hidden')).to.equal(null);
       expect(targetTwoParent.getAttribute('aria-hidden')).to.equal(null);
       expect(otherElement.getAttribute('aria-hidden')).to.equal(null);
+    });
+
+    it('should handle nested opens for tabindex', () => {
+      const root = container.appendChild(html`
+        <div>
+          <div id="targetOne">
+            <a href="#foo" id="targetOneLink">foo</a>
+          </div>
+          <div id="targetTwo">
+            <a href="#foo" id="targetTwoLink">foo</a>
+          </div>
+          <div id="targetThree">
+            <a href="#foo" id="targetThreeLink">foo</a>
+          </div>
+        </div>
+      `);
+      const targetOne = root.querySelector('#targetOne');
+      const targetTwo = root.querySelector('#targetTwo');
+      const targetOneLink = root.querySelector('#targetOneLink');
+      const targetTwoLink = root.querySelector('#targetTwoLink');
+      const targetThreeLink = root.querySelector('#targetThreeLink');
+
+      setModalAsOpen(targetOne);
+
+      expect(root.getAttribute('tabindex')).to.be.null;
+      expect(targetOneLink.getAttribute('tabindex')).to.be.null;
+      expect(targetTwoLink.getAttribute('tabindex')).to.equal('-1');
+      expect(targetThreeLink.getAttribute('tabindex')).to.equal('-1');
+
+      setModalAsOpen(targetTwo);
+
+      expect(root.getAttribute('tabindex')).to.be.null;
+      expect(targetOneLink.getAttribute('tabindex')).to.equal('-1');
+      expect(targetTwoLink.getAttribute('tabindex')).to.be.null;
+      expect(targetThreeLink.getAttribute('tabindex')).to.equal('-1');
+
+      setModalAsClosed(targetTwo);
+
+      expect(root.getAttribute('tabindex')).to.be.null;
+      expect(targetOneLink.getAttribute('tabindex')).to.be.null;
+      expect(targetTwoLink.getAttribute('tabindex')).to.equal('-1');
+      expect(targetThreeLink.getAttribute('tabindex')).to.equal('-1');
+
+      setModalAsClosed(targetOne);
+
+      expect(targetOneLink.getAttribute('tabindex')).to.be.null;
+      expect(targetTwoLink.getAttribute('tabindex')).to.be.null;
+      expect(targetThreeLink.getAttribute('tabindex')).to.be.null;
     });
   });
 });
