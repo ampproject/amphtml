@@ -33,7 +33,7 @@ const defaultPlugins = [
  * @return {Array<string|Object>} the minify-replace plugin options that can be
  * pushed into the babel plugins array
  */
-function getReplacePlugin_() {
+function getReplacePlugin() {
   /**
    * @param {string} defineStr the define flag to parse
    * @return {Object} replacement options used by minify-replace plugin
@@ -81,7 +81,7 @@ function getReplacePlugin_() {
 
 module.exports = {
   plugins({isEsmBuild, isForTesting, isSinglePass}) {
-    let pluginsToApply = defaultPlugins;
+    let pluginsToApply = defaultPlugins.slice();
     // TODO(erwinm): This is temporary until we remove the assert/log removals
     // from the java transformation to the babel transformation.
     // There is currently a weird interaction where when we do the transform
@@ -120,7 +120,7 @@ module.exports = {
         require.resolve('./babel-plugins/babel-plugin-amp-mode-transformer'),
       ]);
     }
-    pluginsToApply.push(getReplacePlugin_());
+    pluginsToApply.push(getReplacePlugin());
     return pluginsToApply;
   },
 
@@ -129,8 +129,5 @@ module.exports = {
       require.resolve('./babel-plugins/babel-plugin-transform-prune-namespace'),
     ];
   },
-
-  getReplacePlugin() {
-    return getReplacePlugin_();
-  },
+  getReplacePlugin,
 };
