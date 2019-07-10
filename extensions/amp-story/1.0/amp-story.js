@@ -44,7 +44,6 @@ import {
 } from './story-analytics';
 import {AmpEvents} from '../../../src/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
@@ -308,9 +307,6 @@ export class AmpStory extends AMP.BaseElement {
     this.landscapeOrientationMedia_ = this.win.matchMedia(
       '(orientation: landscape)'
     );
-
-    /** @private {?AmpStoryBackground} */
-    this.background_ = null;
 
     /** @private {?HTMLMediaElement} */
     this.backgroundAudioEl_ = null;
@@ -1446,8 +1442,6 @@ export class AmpStory extends AMP.BaseElement {
           oldPage && oldPage.muteAllMedia();
           this.activePage_.unmuteAllMedia();
         }
-
-        this.updateBackground_(targetPage.element, /* initial */ !oldPage);
       },
       // Third and last step contains all the actions that can be delayed after
       // the navigation happened, like preloading the following pages, or
@@ -1782,16 +1776,6 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
-        if (
-          !this.background_ &&
-          isExperimentOn(this.win, 'amp-story-desktop-background')
-        ) {
-          this.background_ = new AmpStoryBackground(this.win, this.element);
-          this.background_.attach();
-        }
-        if (this.activePage_) {
-          this.updateBackground_(this.activePage_.element, /* initial */ true);
-        }
         break;
       case UIType.DESKTOP_FULLBLEED:
         this.buildPaginationButtons_();
@@ -2049,64 +2033,6 @@ export class AmpStory extends AMP.BaseElement {
         });
       }
     }
-  }
-
-  /**
-   * Get the URL of the given page's background resource.
-   * @param {!Element} pageElement
-   * @return {?string} The URL of the background resource
-   */
-  getBackgroundUrl_(pageElement) {
-    let fillElement = pageElement.querySelector(
-      '[template="fill"]:not(.i-amphtml-hidden-by-media-query)'
-    );
-
-    if (!fillElement) {
-      return null;
-    }
-
-    fillElement = dev().assertElement(fillElement);
-
-    const fillPosterElement = fillElement.querySelector(
-      '[poster]:not(.i-amphtml-hidden-by-media-query)'
-    );
-
-    const srcElement = fillElement.querySelector(
-      '[src]:not(.i-amphtml-hidden-by-media-query)'
-    );
-
-    const fillPoster = fillPosterElement
-      ? fillPosterElement.getAttribute('poster')
-      : '';
-    const src = srcElement ? srcElement.getAttribute('src') : '';
-
-    return fillPoster || src;
-  }
-
-  /**
-   * Update the background to the specified page's background.
-   * @param {!Element} pageElement
-   * @param {boolean=} initial
-   */
-  updateBackground_(pageElement, initial = false) {
-    if (!this.background_) {
-      return;
-    }
-
-    this.getVsync().run(
-      {
-        measure: state => {
-          state.url = this.getBackgroundUrl_(pageElement);
-          state.color = computedStyle(this.win, pageElement).getPropertyValue(
-            'background-color'
-          );
-        },
-        mutate: state => {
-          this.background_.setBackground(state.color, state.url, initial);
-        },
-      },
-      {}
-    );
   }
 
   /**
