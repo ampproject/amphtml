@@ -204,7 +204,7 @@ export class AmpAdUIHandler {
       () => {
         // QQQQ: report total # of negatives
         const activated =
-            event.userActivation && event.userActivation.hasBeenActive;
+          event.userActivation && event.userActivation.hasBeenActive;
         if (activated) {
           // QQQQ: report false negative
         }

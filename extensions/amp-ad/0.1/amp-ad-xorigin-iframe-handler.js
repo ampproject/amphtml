@@ -173,7 +173,13 @@ export class AmpAdXOriginIframeHandler {
           if (!!data['hasOverflow']) {
             this.element_.warnOnMissingOverflow = false;
           }
-          this.handleResize_(data['height'], data['width'], source, origin, event);
+          this.handleResize_(
+            data['height'],
+            data['width'],
+            source,
+            origin,
+            event
+          );
         },
         true,
         true
@@ -424,18 +430,20 @@ export class AmpAdXOriginIframeHandler {
       }
       const iframeHeight = this.iframe./*OK*/ offsetHeight;
       const iframeWidth = this.iframe./*OK*/ offsetWidth;
-      this.uiHandler_.updateSize(height, width, iframeHeight, iframeWidth, event).then(
-        info => {
-          this.sendEmbedSizeResponse_(
-            info.success,
-            info.newWidth,
-            info.newHeight,
-            source,
-            origin
-          );
-        },
-        () => {}
-      );
+      this.uiHandler_
+        .updateSize(height, width, iframeHeight, iframeWidth, event)
+        .then(
+          info => {
+            this.sendEmbedSizeResponse_(
+              info.success,
+              info.newWidth,
+              info.newHeight,
+              source,
+              origin
+            );
+          },
+          () => {}
+        );
     });
   }
 
