@@ -23,6 +23,7 @@ import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
+import {parseUrlDeprecated} from '../../src/url';
 //TODO(@cramforce): For type. Replace with forward declaration.
 import {reportError} from '../../src/error';
 
@@ -59,7 +60,7 @@ const AMP_CANARY_COOKIE = {
 };
 
 /** @const {!Array<!ExperimentDef>} */
-const EXPERIMENTS = [
+const CHANNELS = [
   // Canary (Dev Channel)
   {
     id: CANARY_EXPERIMENT_ID,
@@ -76,6 +77,10 @@ const EXPERIMENTS = [
       'https://github.com/ampproject/amphtml/blob/master/' +
       'contributing/release-schedule.md#amp-release-candidate-rc-channel',
   },
+];
+
+/** @const {!Array<!ExperimentDef>} */
+const EXPERIMENTS = [
   {
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
@@ -411,14 +416,54 @@ if (getMode().localDev) {
  * Builds the expriments tbale.
  */
 function build() {
-  const table = document.getElementById('experiments-table');
-  EXPERIMENTS.forEach(function(experiment) {
-    table.appendChild(buildExperimentRow(experiment));
+  const {host} = window.location;
+
+  const subdomain = document.getElementById('subdomain');
+  subdomain.textContent = host;
+
+  // #redirect contains UI that generates a subdomain experiments page link
+  // given a "google.com/amp/..." viewer URL.
+  const redirect = document.getElementById('redirect');
+  const input = redirect.querySelector('input');
+  const button = redirect.querySelector('button');
+  const anchor = redirect.querySelector('a');
+  button.addEventListener('click', function() {
+    let urlString = input.value.trim();
+    // Avoid protocol-less urlString from being parsed as a relative URL.
+    const hasProtocol = /^https?:\/\//.test(urlString);
+    if (!hasProtocol) {
+      urlString = 'https://' + urlString;
+    }
+    const url = parseUrlDeprecated(urlString);
+    if (url) {
+      const subdomain = url.hostname.replace(/\./g, '-');
+      const href = `https://${subdomain}.cdn.ampproject.org/experiments.html`;
+      anchor.href = href;
+      anchor.textContent = href;
+    }
   });
+
+  const channelsTable = document.getElementById('channels-table');
+  CHANNELS.forEach(function(experiment) {
+    channelsTable.appendChild(buildExperimentRow(experiment));
+  });
+
+  const experimentsTable = document.getElementById('experiments-table');
+  EXPERIMENTS.forEach(function(experiment) {
+    experimentsTable.appendChild(buildExperimentRow(experiment));
+  });
+
+  if (host === 'cdn.ampproject.org') {
+    const experimentsDesc = document.getElementById('experiments-desc');
+    experimentsDesc.setAttribute('hidden', '');
+    experimentsTable.setAttribute('hidden', '');
+  } else {
+    redirect.setAttribute('hidden', '');
+  }
 }
 
 /**
- * Builds one row of the experiments table.
+ * Builds one row in the channel or experiments table.
  * @param {!ExperimentDef} experiment
  */
 function buildExperimentRow(experiment) {
@@ -486,7 +531,7 @@ function buildLinkMaybe(text, link) {
  * Updates states of all experiments in the table.
  */
 function update() {
-  EXPERIMENTS.forEach(function(experiment) {
+  CHANNELS.concat(EXPERIMENTS).forEach(function(experiment) {
     updateExperimentRow(experiment);
   });
 }

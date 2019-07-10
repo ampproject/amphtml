@@ -75,7 +75,8 @@ describe('cid', () => {
           storage[key] = value;
         },
         getItem: key => {
-          expect(key).to.equal('amp-cid');
+          // isExperimentOn() in the code paths causes "amp-experiment-toggles".
+          expect(['amp-cid', 'amp-experiment-toggles']).to.contain(key);
           return storage[key];
         },
       },
