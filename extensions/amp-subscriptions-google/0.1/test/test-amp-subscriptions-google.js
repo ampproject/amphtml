@@ -146,7 +146,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should proxy fetch via AMP fetcher', () => {
     const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake((url, init) => {
       expect(url).to.match(/publication\/example.org/);
-      expect(init).to.deep.equal({credentials: 'include'});
+      expect(init).to.deep.equal({
+        credentials: 'include',
+        prerenderSafe: true,
+      });
       return Promise.resolve({
         json: () => {
           return Promise.resolve({entitlements: entitlementResponse});
