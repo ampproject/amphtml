@@ -835,3 +835,8 @@ var WebAnimationSelectorDef;
  * }}
  */
 var WebAnimationSubtargetDef;
+
+var ampInaboxPositionObserver;
+ampInaboxPositionObserver.observe;
+ampInaboxPositionObserver.getTargetRect;
+ampInaboxPositionObserver.getViewportRect;

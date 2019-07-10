@@ -203,7 +203,7 @@ export class ViewportBindingInabox {
         /** @type {!HTMLIFrameElement|!HTMLElement} */
         (this.win.frameElement || this.getScrollingElement()),
         data => {
-          this.updateLayoutRects_(data.viewportRect, data.targetRect);
+          this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
         }
       );
     });

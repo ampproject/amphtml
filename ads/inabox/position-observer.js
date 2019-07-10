@@ -95,9 +95,9 @@ export class PositionObserver {
    */
   getPositionEntry_(element) {
     return {
-      viewportRect: /** @type {!LayoutRectDef} */ (this.viewportRect_),
+      'viewportRect': /** @type {!LayoutRectDef} */ (this.viewportRect_),
       // relative position to viewport
-      targetRect: this.getTargetRect(element),
+      'targetRect': this.getTargetRect(element),
     };
   }
 
