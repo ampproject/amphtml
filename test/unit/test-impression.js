@@ -27,7 +27,7 @@ import {macroTask} from '../../testing/yield';
 import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 
-describe('impression', () => {
+describe.skip('impression', () => {
   let sandbox;
   let viewer;
   let xhr;

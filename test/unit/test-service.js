@@ -227,7 +227,7 @@ describe('service', () => {
     });
   });
 
-  describe('ampdoc singletons', () => {
+  describe.skip('ampdoc singletons', () => {
     let windowApi;
     let ampdocServiceApi;
     let ampdoc;

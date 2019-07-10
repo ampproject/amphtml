@@ -31,7 +31,7 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {toggleExperiment} from '../../src/experiments';
 
-describe('friendly-iframe-embed', () => {
+describe.skip('friendly-iframe-embed', () => {
   let sandbox;
   let iframe;
   let extensionsMock;
