@@ -200,7 +200,7 @@ export class PinWidget {
           'img': {
             'className': '-amp-pinterest-embed-pin-text-icon-attrib',
             'src': pin['attribution']['provider_icon_url'],
-            'alt': 'from ' + ['attribution']['provider_name'],
+            'alt': 'from ' + pin['attribution']['provider_name'],
           },
         })
       );
@@ -307,7 +307,7 @@ export class PinWidget {
     // listen for clicks
     structure.addEventListener('click', this.handleClick.bind(this));
     // Handle Space and Enter while selected for a11y
-    structure.addEventListener('keydown', this.handleKeyDown.bind(this));
+    structure.addEventListener('keypress', this.handleKeyDown.bind(this));
 
     // done
     return structure;
