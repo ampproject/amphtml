@@ -585,6 +585,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'logly': {
+    preconnect: ['https://l.logly.co.jp', 'https://cdn.logly.co.jp'],
+  },
+
   'loka': {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
     preconnect: [
