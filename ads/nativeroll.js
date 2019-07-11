@@ -21,18 +21,20 @@ import {validateData, loadScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function nativeroll(global, data) {
-    validateData(data, ['gid', 'container', 'desiredOffset']);
+    validateData(data, ['gid']);
     loadScript(global, 'https://cdn01.nativeroll.tv/js/seedr-player.min.js', ()=> {
         initPlayer(data)
     });
 }
+
 /**
+ * @param {!Window} global
  * @param {!Object} data
  */
 function initPlayer(data) {
     const config = {
-        container:data.container,
-        desiredOffset:data.desiredOffset,
+        container:'#c',
+        desiredOffset:50,
         gid:data.gid,
     };
     SeedrPlayer(config);
