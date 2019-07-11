@@ -17,7 +17,7 @@ limitations under the License.
 # SDK integration for AMPHTML ads
 One goal of AMPHTML ads is for advertisers to create ad once and use 
 everywhere. This guide provides details about how an ad network can 
-join us to serve and render AMPHTML ads in various environment, for 
+join us to serve and render AMPHTML ads in various environments, for 
 example regular web & native mobile apps.
 
 ## Terminologies
@@ -110,7 +110,7 @@ up all arriving AMP messages into a global array.
 1. Once host script is fully loaded, ads tag can then hand over the job to
 it to process the queued messages and listen for future messages.
 
-A sample implementation of the above process can be found [here](../../../../examples/inabox-tag-integration.js).
+A sample implementation of the above process can be found [here](../../examples/inabox-tag-integration.js).
 
 ## Mobile SDK integration
 (Working in progress, stay tuned)
