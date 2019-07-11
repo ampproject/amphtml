@@ -200,7 +200,7 @@ export class PinWidget {
           'img': {
             'className': '-amp-pinterest-embed-pin-text-icon-attrib',
             'src': pin['attribution']['provider_icon_url'],
-            'alt': 'Pinterest image attribution icon',
+            'alt': 'from ' + ['attribution']['provider_name'],
           },
         })
       );
