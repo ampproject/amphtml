@@ -397,7 +397,9 @@ export const adConfig = {
     prefetch: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
     preconnect: 'https://bal.ad.dotandad.com',
   },
-
+  'dynad': {
+    preconnect: ['https://t.dynad.net', 'https://tm.jsuol.com.br'],
+  },
   'eadv': {
     renderStartImplemented: true,
     clientIdScope: 'AMP_ECID_EADV',
