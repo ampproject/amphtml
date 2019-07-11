@@ -309,6 +309,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       compilerOptions.formatting = 'PRETTY_PRINT';
     }
 
+    // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
+    // for a full list of closure's default error / warning levels.
     if (options.typeCheckOnly) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
@@ -321,7 +323,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         'constantProperty',
         'globalThis'
       );
-      compilerOptions.jscomp_warning.push('accessControls');
       compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
       compilerOptions.conformance_configs =
         'build-system/conformance-config.textproto';
