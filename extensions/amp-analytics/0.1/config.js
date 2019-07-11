@@ -82,8 +82,16 @@ export class AnalyticsConfig {
     const isRc = rtvVersion ? rtvVersion.substring(0, 2) === '03' : false;
     // eslint-disable-next-line no-undef
     const isExperiment = ANALYTICS_VENDOR_SPLIT;
+    const pageviewExists =
+      this.config_['requests'] &&
+      this.config_['requests']['pageview'] &&
+      this.config_['requests']['pageview']['baseUrl'];
 
-    if (type === 'googleanalytics' && (isRc || isExperiment)) {
+    if (
+      type === 'googleanalytics' &&
+      (isRc || isExperiment) &&
+      pageviewExists
+    ) {
       this.config_['requests']['pageview']['baseUrl'] += `&aae=${isExperiment}`;
     }
   }
