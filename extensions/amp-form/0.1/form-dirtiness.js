@@ -66,7 +66,7 @@ export class FormDirtiness {
    */
   onSubmitting() {
     this.isSubmitting_ = true;
-    this.maybeUpdateClassAndDispatchEvent_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -75,7 +75,7 @@ export class FormDirtiness {
    */
   onSubmitError() {
     this.isSubmitting_ = false;
-    this.maybeUpdateClassAndDispatchEvent_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -86,7 +86,7 @@ export class FormDirtiness {
     this.isSubmitting_ = false;
     this.submittedFormData_ = this.takeFormDataSnapshot_();
     this.clearDirtyFields_();
-    this.maybeUpdateClassAndDispatchEvent_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -103,7 +103,7 @@ export class FormDirtiness {
    * when the form dirtiness state changes. Does nothing otherwise.
    * @private
    */
-  maybeUpdateClassAndDispatchEvent_() {
+  updateClassAndDispatchEventIfDirtyStateChanged_() {
     const isDirty = this.dirtyFieldCount_ > 0 && !this.isSubmitting_;
 
     if (isDirty !== this.wasDirty_) {
@@ -145,7 +145,7 @@ export class FormDirtiness {
   onInput_(event) {
     const field = dev().assertElement(event.target);
     this.checkDirtinessAfterUserInteraction_(field);
-    this.maybeUpdateClassAndDispatchEvent_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -155,7 +155,7 @@ export class FormDirtiness {
    */
   onReset_(unusedEvent) {
     this.clearDirtyFields_();
-    this.maybeUpdateClassAndDispatchEvent_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
