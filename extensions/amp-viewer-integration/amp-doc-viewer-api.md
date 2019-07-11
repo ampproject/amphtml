@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# AMP Viewer/Document API
+# AMP viewer API
 
 ## Introduction
 
@@ -28,7 +28,7 @@ https://cdn.ampproject.org/v/s/www.example.com/article.amp.html?amp_js_v=0.1#ori
 Some parameters are read by the AMP runtime and configure its behavior and others are read by the [viewer integration script](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/0.1/amp-viewer-integration.js) in order to establish the communication channel used by the rest of the API. An initialization parameter is enabled or disabled via the '1' or  '0' value respectively.
 
 #### Viewer Integration Script Parameters
-The viewer integration script is added to documents served via a cache URL, e.g. https://cdn.ampproject.org/v/. This script adds behavior and enables communication with a parent Viewer.
+Documents served via a cache URL, e.g. https://cdn.ampproject.org/v/, will include the viewer integration script. This script adds behavior and enables communication with a parent Viewer.
 
 `cap`<br/>
 A comma delimited list of capabilities supported by the Viewer. Other boolean parameters should be deprecated and replaced with an entry in cap.
@@ -68,10 +68,10 @@ The origin of the Viewer. The Viewer Integration will verify this is an allowed 
 |`webview`|`boolean`|Whether the document is being loaded in a WebView instead of an iframe. This will enable "embedded" mode for the document, which is needed for dialog to work.|
 |`highlight`|`string`|The information to highlight text. JSON-encoded string.|
 |`viewportType`| natural, natural-ios-embed|The viewport type. Natural means that the AMP document can read the window dimensions and they will be correct. natural-ios-embed Viewport mode is for use when the AMP document is displayed in an iframe on Mobile Safari. It works around quirks of Mobile Safari's iframe implementation by making the body scrollable rather than the document.|
-|`visibilityState`|'hidden' (deprecated, use 'inactive'), 'inactive','paused','visible',‘prerender’|The initial visibility state of the AMP document.<ul><li>prerender- AMP document is being pre-rendered before being shown. It may be prerendered according to prerenderSize</li><li>inactive or hidden -The document is not visible to the user.</li><li>paused - this document should stop loading new resources and pause any resources such as video. The document may still be visible to the user, but the viewer may be performing a performance sensitive operation such as a swipe.</li><li>visible- The document is active and visible to the user.</li>|
+|`visibilityState`|`inactive`,`paused`,`visible`,`prerender`,`hidden` (deprecated, use `inactive`), |The initial visibility state of the AMP document.<ul><li>prerender- AMP document is being pre-rendered before being shown. It may be prerendered according to prerenderSize</li><li>inactive or hidden -The document is not visible to the user.</li><li>paused - this document should stop loading new resources and pause any resources such as video. The document may still be visible to the user, but the viewer may be performing a performance sensitive operation such as a swipe.</li><li>visible- The document is active and visible to the user.</li>|
 
 ### Messaging
-The AMP viewer and AMP document can communicate via an RPC-style communication channel. In the AMP runtime and in the Web Viewer, this is implemented using Promises.
+The AMP viewer and AMP document communicate via [postMessage](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
 
 #### Viewer Integration Messages
 The messages in this section are sent by the Viewer Integration Script and are not used by the AMP runtime.
