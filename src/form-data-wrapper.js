@@ -157,7 +157,7 @@ class NativeFormDataWrapper {
     }
 
     const button = getSubmitButtonUsed(opt_form);
-    if (button) {
+    if (button && button.name) {
       this.append(button.name, button.value);
     }
   }
