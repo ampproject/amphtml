@@ -43,6 +43,9 @@ const VALID_TARGETS = ['_top', '_blank'];
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
+/** @const {string} */
+export const AMP_CUSTOM_LINKER_TARGET = '__AMP_CUSTOM_LINKER_TARGET__';
+
 /**
  * @enum {number} Priority reserved for extensions in anchor mutations.
  * The higher the priority, the sooner it's invoked.
@@ -343,7 +346,9 @@ export class Navigation {
     if (e.defaultPrevented) {
       return;
     }
-    const element = dev().assertElement(e.target);
+    const element = dev().assertElement(
+      e[AMP_CUSTOM_LINKER_TARGET] || e.target
+    );
     const target = closestAncestorElementBySelector(element, 'A');
     if (!target || !target.href) {
       return;

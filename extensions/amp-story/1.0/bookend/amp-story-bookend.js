@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AMP_CUSTOM_LINKER_TARGET} from '../../../../src/service/navigation';
 import {
   Action,
   StateProperty,
@@ -500,6 +501,10 @@ export class AmpStoryBookend extends AMP.BaseElement {
       this.close_();
       return;
     }
+
+    // Pass custom target so that linker can see it, otherwise it would see
+    // the entire shadow DOM tree and not know what target to choose.
+    event[AMP_CUSTOM_LINKER_TARGET] = target;
 
     if (target.hasAttribute('on')) {
       const actionService = Services.actionServiceForDoc(this.element);
