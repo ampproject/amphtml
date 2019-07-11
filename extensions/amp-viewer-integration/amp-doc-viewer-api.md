@@ -25,7 +25,7 @@ This document explains the API between an AMP viewer and the AMP document(s) it 
 ### Initialization
 When an AMP viewer opens an AMP document, it can include initialization parameters. The parameters are set as key value pairs encoded as a query string in the hash fragment of the AMP document URL. For example:
 https://cdn.ampproject.org/v/s/www.example.com/article.amp.html?amp_js_v=0.1#origin=https%3A%2F%2Fwww.google.com
-Some parameters are read by the AMP runtime and configure its behavior and others are read by the viewer integration script in order to establish the communication channel used by the rest of the API. An initialization parameter is enabled or disabled via the '1' or  '0' value respectively.
+Some parameters are read by the AMP runtime and configure its behavior and others are read by the [viewer integration script](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/0.1/amp-viewer-integration.js) in order to establish the communication channel used by the rest of the API. An initialization parameter is enabled or disabled via the '1' or  '0' value respectively.
 
 #### Viewer Integration Script Parameters
 The viewer integration script is added to documents served via a cache URL, e.g. https://cdn.ampproject.org/v/. This script adds behavior and enables communication with a parent Viewer.
@@ -71,7 +71,7 @@ The origin of the Viewer. The Viewer Integration will verify this is an allowed 
 |`visibilityState`|'hidden' (deprecated, use 'inactive'), 'inactive','paused','visible',‘prerender’|The initial visibility state of the AMP document.<ul><li>prerender- AMP document is being pre-rendered before being shown. It may be prerendered according to prerenderSize</li><li>inactive or hidden -The document is not visible to the user.</li><li>paused - this document should stop loading new resources and pause any resources such as video. The document may still be visible to the user, but the viewer may be performing a performance sensitive operation such as a swipe.</li><li>visible- The document is active and visible to the user.</li>|
 
 ### Messaging
-The AMP viewer and AMP document can communicate via an RPC-style communication channel. In the AMP runtime and in theWeb Viewer, this is implemented using Promises.
+The AMP viewer and AMP document can communicate via an RPC-style communication channel. In the AMP runtime and in the Web Viewer, this is implemented using Promises.
 
 #### Viewer Integration Messages
 The messages in this section are sent by the Viewer Integration Script and are not used by the AMP runtime.
