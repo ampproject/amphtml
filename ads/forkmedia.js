@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-import { validateData, validateSrcPrefix, loadScript } from '../3p/3p';
+import {loadScript, validateData, validateSrcPrefix} from '../3p/3p';
 
 /** @const {string[]} */
-const validSrcPrefix = [
-    'https://delivery.forkcdn.com',
-];
+const validSrcPrefix = ['https://delivery.forkcdn.com'];
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function forkmedia(global, data) {
-    validateData(data, ['src']);
-    validateSrcPrefix(validSrcPrefix, data.src);
-    loadScript(
-        global,
-        data.src,
-        () => {
-            global.context.renderStart();
-        },
-        () => {
-            global.context.noContentAvailable();
-        }
-    );
+  validateData(data, ['src']);
+  validateSrcPrefix(validSrcPrefix, data.src);
+  loadScript(
+    global,
+    data.src,
+    () => {
+      global.context.renderStart();
+    },
+    () => {
+      global.context.noContentAvailable();
+    }
+  );
 }
