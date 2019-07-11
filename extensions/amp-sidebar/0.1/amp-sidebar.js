@@ -26,10 +26,11 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {descendsFromStory} from '../../../src/utils/story';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
 import {removeFragment} from '../../../src/url';
+import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
@@ -108,6 +109,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.bottomBarCompensated_ = false;
 
     /** @private {?Element} */
+    this.closeButton_ = null;
+
+    /** @private {?Element} */
     this.openerElement_ = null;
 
     /** @private {number} */
@@ -170,22 +174,17 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     });
 
-    // Replacement label for invisible close button set value in amp sidebar
-    const ariaLabel =
-      element.getAttribute('data-close-button-aria-label') ||
-      'Close the sidebar';
+    this.closeButton_ = this.getExistingCloseButton_();
 
-    // Invisible close button at the end of sidebar for screen-readers.
-    const screenReaderCloseButton = this.document_.createElement('button');
-
-    screenReaderCloseButton.textContent = ariaLabel;
-    screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
-    // This is for screen-readers only, should not get a tab stop.
-    screenReaderCloseButton.tabIndex = -1;
-    screenReaderCloseButton.addEventListener('click', () => {
-      this.close_();
-    });
-    element.appendChild(screenReaderCloseButton);
+    // If we do not have a close button provided by the page author, create one
+    // at the start of the sidebar for screen readers.
+    if (!this.closeButton_) {
+      this.closeButton_ = this.createScreenReaderCloseButton();
+      element.insertBefore(this.closeButton_, this.element.firstChild);
+    }
+    // always create a close button at the end of the sidebar for screen
+    // readers.
+    element.appendChild(this.createScreenReaderCloseButton());
     this.registerDefaultAction(invocation => this.open_(invocation), 'open');
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('close', this.close_.bind(this));
@@ -216,6 +215,64 @@ export class AmpSidebar extends AMP.BaseElement {
       },
       true
     );
+  }
+
+  /**
+   * Gets a close button, provided by the page author, if one exists.
+   * @return {?Element} The close button.
+   */
+  getExistingCloseButton_() {
+    const candidates = this.element.querySelectorAll('[on]');
+
+    for (let i = 0; i < candidates.length; i++) {
+      const candidate = candidates[i];
+      const hasAction = this.action_.hasResolvableActionForTarget(
+        candidate,
+        'tap',
+        this.element,
+        devAssert(candidate.parentElement)
+      );
+      const inToolbar = closestAncestorElementBySelector(
+        candidate,
+        '[toolbar]'
+      );
+
+      if (hasAction && !inToolbar) {
+        return candidate;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Creates an "invisible" close button for screen readers to close the
+   * sidebar.
+   * @return {!Element}
+   */
+  createScreenReaderCloseButton() {
+    // Replacement label for invisible close button set value in amp sidebar
+    const ariaLabel =
+      this.element.getAttribute('data-close-button-aria-label') ||
+      'Close the sidebar';
+
+    // Invisible close button at the end of sidebar for screen-readers.
+    const screenReaderCloseButton = this.document_.createElement('button');
+
+    screenReaderCloseButton.textContent = ariaLabel;
+    screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
+    // This is for screen-readers only, should not get a tab stop. Note that
+    // screen readers can still swipe / navigate to this element, it just will
+    // not be reachable via the tab button. Note that for desktop, hitting esc
+    // to close is also an option.
+    // We do not want this in the tab order since it is not really "visible"
+    // and would be confusing to tab to if not using a screen reader.
+    screenReaderCloseButton.tabIndex = -1;
+    screenReaderCloseButton.addEventListener('click', () => {
+      this.close_();
+    });
+
+    return screenReaderCloseButton;
   }
 
   /** @override */
@@ -282,6 +339,11 @@ export class AmpSidebar extends AMP.BaseElement {
   updateForOpening_() {
     toggle(this.element, /* display */ true);
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
+    this.mutateElement(() => {
+      // Wait for mutateElement, so that the element has been transfered to the
+      // fixed layer. This is needed to hide the correct elements.
+      setModalAsOpen(this.element);
+    });
 
     if (this.isIos_ && this.isSafari_) {
       this.compensateIosBottombar_();
@@ -305,7 +367,11 @@ export class AmpSidebar extends AMP.BaseElement {
     this.scheduleResume(children);
     // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
     if (!this.isIosWebView_()) {
-      tryFocus(this.element);
+      // For iOS, we cannot focus the Element itself, since VoiceOver will not
+      // move screen reader focus over (if there is more than one Text Node in)
+      // the sidebar. For Android, focus the sidebar itself is not a very good
+      // experience, so we also just focus the first close button.
+      tryFocus(devAssert(this.closeButton_));
     }
     this.triggerEvent_(SidebarEvents.OPEN);
   }
@@ -315,6 +381,9 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForClosing_() {
     this.closeMask_();
+    this.mutateElement(() => {
+      setModalAsClosed(this.element);
+    });
     this.element.removeAttribute('open');
     this.element.setAttribute('aria-hidden', 'true');
     this.setUpdateFn_(() => this.updateForClosed_(), ANIMATION_TIMEOUT);
