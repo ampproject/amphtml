@@ -455,6 +455,10 @@ export const adConfig = {
     ],
   },
 
+  'forkmedia': {
+    renderStartImplemented: true,
+  },
+
   'freewheel': {
     prefetch: 'https://cdn.stickyadstv.com/prime-time/fw-amp.min.js',
     renderStartImplemented: true,
