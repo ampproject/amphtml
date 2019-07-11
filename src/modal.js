@@ -25,7 +25,7 @@ import {toArray} from './types';
  */
 
 /**
- * @type {{
+ * @typedef {{
  *   element: !Element,
  *   prevValue: ?string,
  * }}
@@ -33,7 +33,7 @@ import {toArray} from './types';
 let ElementAttributeInfoDef;
 
 /**
- * @type {{
+ * @typedef {{
  *   element: !Element,
  *   hiddenElementInfos: !Array<!ElementAttributeInfoDef>,
  *   focusableExternalElements: !Array<!Element>,

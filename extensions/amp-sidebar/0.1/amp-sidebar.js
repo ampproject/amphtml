@@ -26,7 +26,7 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {descendsFromStory} from '../../../src/utils/story';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
 import {removeFragment} from '../../../src/url';
@@ -230,7 +230,7 @@ export class AmpSidebar extends AMP.BaseElement {
         candidate,
         'tap',
         this.element,
-        candidate.parentNode
+        devAssert(candidate.parentElement)
       );
       const inToolbar = closestAncestorElementBySelector(
         candidate,
@@ -371,7 +371,7 @@ export class AmpSidebar extends AMP.BaseElement {
       // move screen reader focus over (if there is more than one Text Node in)
       // the sidebar. For Android, focus the sidebar itself is not a very good
       // experience, so we also just focus the first close button.
-      tryFocus(this.closeButton_);
+      tryFocus(devAssert(this.closeButton_));
     }
     this.triggerEvent_(SidebarEvents.OPEN);
   }
