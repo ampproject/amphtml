@@ -125,7 +125,8 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       getAmpdocServiceHolder(ampdoc),
       ampdoc,
       id,
-      () => service
+      () => service,
+      /* override */ true
     );
   }
 }
@@ -409,8 +410,9 @@ function getServiceInternal(holder, id) {
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
  * @param {?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor Constructor function to new the service. Called with context.
+ * @param {boolean=} opt_override
  */
-function registerServiceInternal(holder, context, id, ctor) {
+function registerServiceInternal(holder, context, id, ctor, opt_override) {
   const services = getServices(holder);
   let s = services[id];
 
@@ -425,7 +427,7 @@ function registerServiceInternal(holder, context, id, ctor) {
     };
   }
 
-  if (s.ctor || s.obj) {
+  if (!opt_override && (s.ctor || s.obj)) {
     // Service already registered.
     return;
   }

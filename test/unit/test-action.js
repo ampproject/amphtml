@@ -512,7 +512,7 @@ describe('Action parseActionMap', () => {
   });
 });
 
-describes.sandboxed('Action adoptEmbedWindow', {}, () => {
+describes.sandboxed.skip('Action adoptEmbedWindow', {}, () => {
   let action;
   let embedWin;
 

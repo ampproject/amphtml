@@ -22,7 +22,7 @@ import {Services} from '../../src/services';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installFriendlyIframeEmbed} from '../../src/friendly-iframe-embed';
 
-describes.realWin('Layers', {amp: true}, env => {
+describes.realWin.skip('Layers', {amp: true}, env => {
   describes.repeated(
     'Layers',
     {
