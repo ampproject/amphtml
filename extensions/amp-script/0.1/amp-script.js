@@ -401,12 +401,13 @@ export class SanitizerImpl {
     // Storage.key(). We could preserve indices by adding empty entries but
     // that might be even more confusing.
     const storage = this.storageFor_(scope);
-    const output = map();
-    Object.keys(storage).forEach(key => {
+    const output = {};
+    for (let i = 0; i < storage.length; i++) {
+      const key = storage.key(i);
       if (!startsWith(key, 'amp-')) {
-        output[key] = storage[key];
+        output[key] = storage.getItem(key);
       }
-    });
+    }
     return output;
   }
 
