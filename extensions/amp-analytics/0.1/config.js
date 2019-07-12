@@ -78,8 +78,8 @@ export class AnalyticsConfig {
    */
   addExperimentParams_() {
     const type = this.element_.getAttribute('type');
-    const {rtvVersion} = getMode();
-    const isRc = rtvVersion ? rtvVersion.substring(0, 2) === '03' : false;
+    const rtv = getMode().rtvVersion;
+    const isRc = rtv ? rtv.substring(0, 2) === '03' : false;
     // eslint-disable-next-line no-undef
     const isExperiment = ANALYTICS_VENDOR_SPLIT;
     const pageviewExists =
