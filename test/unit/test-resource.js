@@ -42,7 +42,7 @@ describes.realWin('Resource', {amp: true}, env => {
     const viewer = Services.viewerForDoc(document);
     sandbox.stub(viewer, 'isRuntimeOn').callsFake(() => false);
     sandbox
-      .stub(Resources.prototype, 'rebuildDomWhenReady')
+      .stub(Resources.prototype, 'rebuildDomWhenReady_')
       .callsFake(() => {});
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
