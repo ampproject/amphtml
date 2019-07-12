@@ -550,7 +550,7 @@ export const adConfig = {
 
   'lentainform': {
     renderStartImplemented: true,
-    prefetch: [
+    preconnect: [
         'https://jsc.lentainform.com',
         'https://servicer.lentainform.com',
         'https://s-img.lentainform.com',
