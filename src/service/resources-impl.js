@@ -2563,7 +2563,7 @@ export class Resources {
         r.unload();
         this.cleanupTasks_(r);
       });
-      this.unselectText();
+      this.unselectText_();
     };
     const resume = () => {
       this.resources_.forEach(r => r.resume());
@@ -2599,8 +2599,9 @@ export class Resources {
 
   /**
    * Unselects any selected text
+   * @private
    */
-  unselectText() {
+  unselectText_() {
     try {
       this.win.getSelection().removeAllRanges();
     } catch (e) {
