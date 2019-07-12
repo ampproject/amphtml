@@ -444,10 +444,10 @@ function beforeTest() {
  */
 afterEach(function() {
   that = this;
-  AmpDocService.prototype.getAmpDoc = window.originalGetAmpDocPrototype;
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
   sinon.sandbox.restore();
+  AmpDocService.prototype.getAmpDoc = window.originalGetAmpDocPrototype;
   restoreConsoleError();
   restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);
