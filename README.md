@@ -14,14 +14,15 @@
 
 ##### Metrics:
 
-[![Absolute Code Coverage](https://img.shields.io/endpoint.svg?logo=Codecov&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FAbsoluteCoverageMetric "Absolute Code Coverage")](https://codecov.io/gh/ampproject/amphtml/)
-[![Presubmit Latency](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FPresubmitLatencyMetric "Presubmit Latency")](https://travis-ci.org/ampproject/amphtml/builds)
-[![Travis Greenness](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FTravisGreennessMetric "Travis Greenness")](https://travis-ci.org/ampproject/amphtml/builds)
+[![Absolute Code Coverage](https://img.shields.io/endpoint.svg?logo=Codecov&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FAbsoluteCoverageMetric "Test coverage for the repository as computed by CodeCov")](https://codecov.io/gh/ampproject/amphtml/)
+[![Presubmit Latency](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FPresubmitLatencyMetric "Average Travis build time over the last 90 days")](https://travis-ci.org/ampproject/amphtml/builds)
+[![Travis Greenness](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FTravisGreennessMetric "Percent of green Travis builds over the last 90 days")](https://travis-ci.org/ampproject/amphtml/builds)
 
 ##### Tooling:
 
-[![Percy](https://img.shields.io/badge/%F0%9F%A6%94%20visual%20testing-percy-violet.svg?style=flat-square "Percy")](https://percy.io/ampproject/amphtml)
-[![Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?logo=Prettier&logoColor=white&style=flat-square "Prettier")](https://github.com/prettier/prettier)
+[![Percy](https://img.shields.io/badge/%F0%9F%A6%94%20visual%20testing-Percy-violet.svg?style=flat-square "Percy")](https://percy.io/ampproject/amphtml)
+[![Prettier](https://img.shields.io/badge/code_style-Prettier-ff69b4.svg?logo=Prettier&logoColor=white&style=flat-square "Prettier")](https://github.com/prettier/prettier)
+[![Codecov](https://img.shields.io/badge/test_coverage-CodeCov-f01f7a.svg?logo=Codecov&logoColor=white&style=flat-square "Codecov")](https://codecov.io/gh/ampproject/amphtml/)
 [![LGTM](https://img.shields.io/lgtm/alerts/github/ampproject/amphtml.svg?logo=lgtm&style=flat-square "LGTM")](https://lgtm.com/projects/g/ampproject/amphtml/)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg?label=🛠️%20renovate&style=flat-square "Renovate")](https://renovateapp.com/)
 
