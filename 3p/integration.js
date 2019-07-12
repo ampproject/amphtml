@@ -279,6 +279,7 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  idealmedia: true,
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
