@@ -24,7 +24,7 @@
 [![Prettier](https://img.shields.io/badge/code_style-Prettier-ff69b4.svg?logo=Prettier&logoColor=white&style=flat-square "Prettier")](https://github.com/prettier/prettier)
 [![Codecov](https://img.shields.io/badge/test_coverage-CodeCov-f01f7a.svg?logo=Codecov&logoColor=white&style=flat-square "Codecov")](https://codecov.io/gh/ampproject/amphtml/)
 [![LGTM](https://img.shields.io/lgtm/alerts/github/ampproject/amphtml.svg?logo=lgtm&style=flat-square "LGTM")](https://lgtm.com/projects/g/ampproject/amphtml/)
-[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg?label=🛠️%20renovate&style=flat-square "Renovate")](https://renovateapp.com/)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg?logo=dependabot&style=flat-square "Renovate")](https://renovateapp.com/)
 
 > **The [AMP Contributor Summit 2019](https://amp.dev/events/amp-cs-2019) will be in NYC October 8-10.** This technical summit is an opportunity for the AMP open source community to meet face-to-face to discuss the latest in AMP and where AMP is going.  It consists of a mix of different formats, including talks, breakout sessions and many opportunities for informal conversations.  **[Apply to attend the summit](https://events.withgoogle.com/ampcs2019/registrations/new/) by July 22, 2019!**
 
