@@ -58,17 +58,26 @@ The `amp-accordion` component allows you to display collapsible and expandable c
 
 In this example, we display three sections, where the third section is expanded on page load.  Also, we opted out of preserving the collapsed/expanded state by setting `disable-session-states`.
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="395"
-    layout="fixed-height"
-    sandbox="allow-scripts allow-forms allow-same-origin"
-    resizable
-    src="https://ampproject-b5f4c.firebaseapp.com/examples/ampaccordion.basic.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true" imports="amp-accordion"]
+```html
+<amp-accordion{% if not format=='email'%} disable-session-states{% endif %}>
+  <section>
+    <h2>Section 1</h2>
+    <p>Content in section 1.</p>
+  </section>
+  <section>
+    <h2>Section 2</h2>
+    <div>Content in section 2.</div>
+  </section>
+  <section expanded>
+    <h2>Section 3</h2>
+    <amp-img src="{{server_for_email}}/static/inline-examples/images/squirrel.jpg"
+      width="320"
+      height="256"></amp-img>
+  </section>
+</amp-accordion>
+```
+[/example]
 
 {% call callout('Tip', type='success') %}
 To see more demos of the `amp-accordion`, visit [AMP By Example](https://amp.dev/documentation/examples/components/amp-accordion/).
