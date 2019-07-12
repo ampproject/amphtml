@@ -57,7 +57,7 @@ const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const {green, cyan} = colors;
-const argv = require('minimist')(process.argv.slice(2));
+let argv = require('minimist')(process.argv.slice(2));
 
 const babel = require('@babel/core');
 const deglob = require('globs-to-files');
@@ -88,9 +88,16 @@ function transferSrcsToTempDir() {
 
 /**
  * Dist Build
+ * @param {Object|Function} args
  * @return {!Promise}
  */
-async function dist() {
+async function dist(args) {
+  // The default 'dist' task passes in a callback of type Function. The testing
+  // tasks ('e2e', 'integration', and 'visual-diff') pass in args via an Object.
+  if (typeof args == 'object') {
+    argv = args;
+  }
+
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';

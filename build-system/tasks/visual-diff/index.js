@@ -37,6 +37,8 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../../git');
+const {clean} = require('../clean');
+const {dist} = require('../dist');
 const {execOrDie, execScriptAsync} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
@@ -840,8 +842,9 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       );
     }
   } else {
-    execOrDie('gulp clean');
-    execOrDie('gulp dist --fortesting');
+    argv.fortesting = true;
+    await clean();
+    await dist(argv);
   }
 }
 
@@ -885,6 +888,7 @@ visualDiff.flags = {
   'master': '  Includes a blank snapshot (baseline for skipped builds)',
   'empty': '  Creates a dummy Percy build with only a blank snapshot',
   'chrome_debug': '  Prints debug info from Chrome',
+  'config': '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   'webserver_debug': '  Prints debug info from the local gulp webserver',
   'debug': '  Prints all the above debug info',
   'grep': '  Runs tests that match the pattern',

@@ -40,7 +40,7 @@ class Runner extends RuntimeTestRunner {
     argv.fortesting = true;
     argv.compiled = true;
     await clean();
-    await dist();
+    await dist(argv);
   }
 }
 
@@ -69,6 +69,7 @@ integration.flags = {
   'chrome_flags': '  Uses the given flags to launch Chrome',
   'compiled':
     '  Changes integration tests to use production JS binaries for execution',
+  'config': '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   'coverage': '  Run tests in code coverage mode',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
