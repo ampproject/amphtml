@@ -25,10 +25,10 @@ This document explains the API between an AMP Viewer and the AMP document(s) it 
 ### Initialization
 When an AMP Viewer opens an AMP document, it can include initialization parameters. The parameters are set as key value pairs encoded as a query string in the hash fragment of the AMP document URL. For example:
 www.example.com/article.amp.html?origin=https%3A%2F%2Fwww.example-site.com
-Some parameters are read by the AMP runtime and configure its behavior and others are read by the [viewer integration script](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/0.1/amp-viewer-integration.js) in order to establish the communication channel used by the rest of the API. An initialization parameter is enabled or disabled via the '1' or  '0' value respectively.
+Some parameters are read by the AMP runtime and configure its behavior and others are read by the [Viewer integration script](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/0.1/amp-viewer-integration.js) in order to establish the communication channel used by the rest of the API. An initialization parameter is enabled or disabled via the '1' or  '0' value respectively.
 
 #### Viewer Integration Script Parameters
-Documents served via a cache URL, e.g. https://cdn.ampproject.org/v/, will include the viewer integration script. This script adds behavior and enables communication with a parent Viewer.
+Documents served via a cache URL, e.g. https://cdn.ampproject.org/v/, will include the Viewer integration script. This script adds behavior and enables communication with a parent Viewer.
 
 `cap`<br/>
 A comma delimited list of capabilities supported by the Viewer. Other boolean parameters should be deprecated and replaced with an entry in cap.
@@ -41,10 +41,10 @@ A comma delimited list of capabilities supported by the Viewer. Other boolean pa
 | `fragment`            | `fragment`            | URL fragment support for the history API. |
 | `handshakepoll`       | `handshake-poll`      | Mobile web handshake.                     |
 | `navigateTo`          | `navigateTo`          | Support for navigating to external URLs.  |
-| `replaceUrl`          | `getReplaceUrl`       | Support for replacing the document URL with one provided by the viewer.|
-| `swipe`               | `touchstart`, `touchmove`, `touchend`| Forwards touch events from the document to the viewer.|
-| `viewerRenderTemplate`| `viewerRenderTemplate`| Proxies all mustache template rendering to the viewer. |
-| `xhrInterceptor`      | `xhr`                 | Proxies all XHRs through the viewer.      |
+| `replaceUrl`          | `getReplaceUrl`       | Support for replacing the document URL with one provided by the Viewer.|
+| `swipe`               | `touchstart`, `touchmove`, `touchend`| Forwards touch events from the document to the Viewer.|
+| `viewerRenderTemplate`| `viewerRenderTemplate`| Proxies all mustache template rendering to the Viewer. |
+| `xhrInterceptor`      | `xhr`                 | Proxies all XHRs through the Viewer.      |
 
 `origin`<br/>
 The origin of the Viewer. The Viewer Integration will verify this is an allowed domain and this will be the target of all messages sent from the AMP document to the Viewer.
@@ -57,7 +57,7 @@ The origin of the Viewer. The Viewer Integration will verify this is an allowed 
 |`csi`|`boolean`|Whether the Viewer will collect latency metrics from the Document.|    
 |`dialog`|`boolean`|Whether the Viewer will take responsibility for opening a dialog for an AMP Access login. If false, opening a login dialog does not involve the Viewer. If true, the Viewer must support openDialog.|
 |`development`| `boolean`|Whether the AMP runtime is in development mode. Development mode will validate the AMP document and show its results in the developer console.|
-|`history`|`boolean`| Whether the AMP Viewer will take over history management. If true, the viewer must support popHistory, pushHistory, and historyPopped.|
+|`history`|`boolean`| Whether the AMP Viewer will take over history management. If true, the Viewer must support popHistory, pushHistory, and historyPopped.|
 |`log`|`boolean`| Whether to turn on logging in the AMP runtime.|
 |`paddingTop`| `integer`|The paddingTop to apply to the document body in pixels. This is used to allow space for a title bar.|
 |`prerenderSize`|`integer`|The number of vertical screens to prerender. Resources within the range may be loaded before the document is visible.|
