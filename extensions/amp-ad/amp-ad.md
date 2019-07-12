@@ -61,17 +61,38 @@ network’s JS inside that iframe sandbox.
 The `<amp-ad>` requires width and height values to be specified according to the [rule](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#(tl;dr)-summary-of-layout-requirements-&-behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
 
 #### Example: Displaying a few ads
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="522"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampad.basic.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+
+[example preview="inline" playground="true" imports="amp-ad"]
+```html
+<amp-ad type="a9"
+  data-amzn_assoc_ad_mode="auto"
+  data-divid="amzn-assoc-ad-fe746097-f142-4f8d-8dfb-45ec747632e5"
+  data-recomtype="async"
+  data-adinstanceid="fe746097-f142-4f8d-8dfb-45ec747632e5"
+    width="300"
+    height="250"
+    data-aax_size="300x250"
+    data-aax_pubname="test123"
+    data-aax_src="302">
+  </amp-ad>
+  <amp-ad width="300"
+    height="250"
+    type="industrybrains"
+    data-width="300"
+    data-height="250"
+    data-cid="19626-3798936394">
+  </amp-ad>
+  <amp-embed type="taboola"
+    width="400"
+    height="300"
+    layout="responsive"
+    data-publisher="amp-demo"
+    data-mode="thumbnails-a"
+    data-placement="Ads Example"
+    data-article="auto">
+  </amp-embed>
+```
+[/example]
 
 ## Attributes
 <table>

@@ -57,16 +57,16 @@ Learn more about layouts in the [AMP HTML Layout System](https://github.com/ampp
 #### Example: Displaying a responsive image
 In the following example, we display an image that responds to the size of the viewport by setting `layout=responsive`.  The image stretches and shrinks according to the aspect ratio specified by the `width` and `height`.
 
-<div>
-<amp-iframe height="193"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampimg.basic.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true"]
+```html
+<amp-img alt="A view of the sea"
+  src="{{server_for_email}}/static/inline-examples/images/sea.jpg"
+  width="900"
+  height="675"
+  layout="responsive">
+</amp-img>
+```
+[/example]
 
 {% call callout('Read on', type='read') %}
 Learn about responsive AMP pages in the [Create Responsive AMP Pages](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/responsive_design) guide.
@@ -77,16 +77,20 @@ If the resource requested by the `amp-img` component fails to load, the space wi
 #### Example: Specifying a fallback image
 In the following example, if the browser doesn't support WebP, the fallback JPG image displays:
 
-<div>
-<amp-iframe height="271"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampimg.fallback.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true"]
+```html
+<amp-img alt="Mountains"
+  width="550"
+  height="368"
+  src="{{server_for_email}}/static/inline-examples/images/mountains.webp">
+  <amp-img alt="Mountains"
+    fallback
+    width="550"
+    height="368"
+    src="{{server_for_email}}/static/inline-examples/images/mountains.jpg"></amp-img>
+</amp-img>
+```
+[/example]
 
 A placeholder background color or other visual can be set using CSS selector and style on the element itself.
 
@@ -180,16 +184,16 @@ For responsive images, the `width` and `height` do not need to match the exact w
 
 For example, instead of specifying `width="900"` and `height="675"`, you can just specify `width="1.33"` and `height="1"`.
 
-<div>
-<amp-iframe height="193"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampimg.aspectratio.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true"]
+```html
+<amp-img alt="A view of the sea"
+  src="{{server_for_email}}/static/inline-examples/images/sea.jpg"
+  width="1.33"
+  height="1"
+  layout="responsive">
+</amp-img>
+```
+[/example]
 
 #### Setting multiple source files for different screen resolutions
 
