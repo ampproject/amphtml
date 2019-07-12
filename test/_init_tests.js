@@ -18,6 +18,7 @@
 import '../src/polyfills';
 import * as describes from '../testing/describes';
 import * as log from '../src/log';
+import {AmpDocService, installDocService} from '../src/service/ampdoc-impl';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
 import {adopt} from '../src/runtime';
@@ -25,7 +26,6 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/service/core-services';
-import {installDocService} from '../src/service/ampdoc-impl';
 import {installYieldIt} from '../testing/yield';
 import {removeElement} from '../src/dom';
 import {
@@ -424,13 +424,15 @@ function beforeTest() {
   installDocService(window, /* isSingleDoc */ true);
   const ampdocService = Services.ampdocServiceFor(window);
   const ampdoc = ampdocService.getSingleDoc();
-  const getAmpDocOrig = ampdocService.getAmpDoc.bind(ampdocService);
-  ampdocService.getAmpDoc = function(node) {
+  if (!window.originalGetAmpDocPrototype) {
+    window.originalGetAmpDocPrototype = AmpDocService.prototype.getAmpDoc;
+  }
+  AmpDocService.prototype.getAmpDoc = function(node) {
     const doc = node.ownerDocument || node;
     if (doc == ampdoc.win.document) {
       return ampdoc;
     }
-    return getAmpDocOrig(node);
+    return window.originalGetAmpDocPrototype.call(ampdocService, node);
   };
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
@@ -442,6 +444,7 @@ function beforeTest() {
  */
 afterEach(function() {
   that = this;
+  AmpDocService.prototype.getAmpDoc = window.originalGetAmpDocPrototype;
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
   sinon.sandbox.restore();
