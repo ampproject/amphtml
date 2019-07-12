@@ -48,17 +48,15 @@ The `amp-twitter` component allows you to embed a Tweet or Moment for the specif
 
 Here's an example of a basic embedded Tweet:
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="164"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/amptwitter.basic.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+```html
+<amp-twitter width="375"
+  height="472"
+  layout="responsive"
+  data-tweetid="885634330868850689">
+</amp-twitter>
+```
+[/example]
 
 ## Appearance
 
@@ -71,30 +69,44 @@ An element marked with a `placeholder` attribute displays while the content for 
 Visit the [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-twitter` component.
 
 *Example: Specifying a placeholder*
-<!--embedded example - displays in ampproject.org -->
-<div>
-  <amp-iframe height="278"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/amptwitter.placeholder.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+
+[example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+```html
+<amp-twitter width="375"
+  height="472"
+  layout="responsive"
+  data-tweetid="638793490521001985">
+  <blockquote placeholder>
+    <p>I only needed to change some CSS.
+      <a href="http://t.co/LvjLbjgY9F">pic.twitter.com/LvjLbjgY9F</a>
+    </p>&mdash; Malte Ubl (@cramforce)
+    <a href="https://twitter.com/cramforce/status/638793490521001985">September 1, 2015</a>
+  </blockquote>
+</amp-twitter>
+```
+[/example]
 
 *Example: Specifying a placeholder and a fallback*
 
-<div>
-  <amp-iframe height="354"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/amptwitter.placeholder-and-fallback.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+```html
+<amp-twitter width="390"
+  height="330"
+  layout="responsive"
+  data-tweetid="855178606556856320">
+  <blockquote placeholder>
+    <p>What are 5 common misconceptions people often have about AMP? Find out on today&#39;s installment of Amplify:
+      <a href="https://t.co/kaSvV8SQtI">https://t.co/kaSvV8SQtI</a>
+      <a href="https://t.co/Cu9VYOmiKV">pic.twitter.com/Cu9VYOmiKV</a>
+    </p>&mdash; AMP Project (@AMPhtml)
+    <a href="https://twitter.com/AMPhtml/status/855178606556856320">April 20, 2017</a>
+  </blockquote>
+  <div fallback>
+    An error occurred while retrieving the Tweet. It might have been deleted.
+  </div>
+</amp-twitter>
+```
+[/example]
 
 ## Attributes
 

@@ -57,17 +57,22 @@ The carousel consists of an arbitrary number of items, as well as optional navig
 
 The carousel advances between items if the user swipes, uses arrow keys, or clicks an optional navigation arrow.
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-  <amp-iframe height="313"
-              layout="fixed-height"
-              sandbox="allow-scripts allow-forms allow-same-origin"
-              resizable
-              src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.basic.embed.html">
-    <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-    <div placeholder></div>
-  </amp-iframe>
-</div>
+[example preview="inline" playground="true" imports="amp-carousel"]
+```html
+<amp-carousel width="450"
+  height="300">
+  <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+    width="450"
+    height="300"></amp-img>
+  <amp-img src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+    width="450"
+    height="300"></amp-img>
+  <amp-img src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+    width="450"
+    height="300"></amp-img>
+</amp-carousel>
+```
+[/example]
 
 
 ### Advancing to a specific slide
@@ -76,17 +81,51 @@ Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSl
 
 In the following example, we have a carousel of three images with preview buttons below the carousel. When a user clicks one of the buttons, the corresponding carousel item displays.
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="878"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.advance-slide.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true" imports="amp-carousel"]
+```html
+<amp-carousel id="carousel-with-preview"
+    width="450"
+    height="300"
+    layout="responsive"
+    type="slides">
+    <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+      width="450"
+      height="300"
+      layout="responsive"
+      alt="apples"></amp-img>
+    <amp-img src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+      width="450"
+      height="300"
+      layout="responsive"
+      alt="lemons"></amp-img>
+    <amp-img src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+      width="450"
+      height="300"
+      layout="responsive"
+      alt="blueberries"></amp-img>
+  </amp-carousel>
+  <div class="carousel-preview">
+    <button on="tap:carousel-with-preview.goToSlide(index=0)">
+      <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+        width="60"
+        height="40"
+        alt="apples"></amp-img>
+    </button>
+    <button on="tap:carousel-with-preview.goToSlide(index=1)">
+      <amp-img src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+        width="60"
+        height="40"
+        alt="lemons"></amp-img>
+    </button>
+    <button on="tap:carousel-with-preview.goToSlide(index=2)">
+      <amp-img src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+        width="60"
+        height="40"
+        alt="blueberries"></amp-img>
+    </button>
+  </div>
+```
+[/example]
 
 ## Attributes
 <table>
@@ -144,13 +183,30 @@ The visibility of arrows can also be controlled via styling, and a media query c
     <td width="40%"><strong>loop (optional)</strong></td>
     <td><p>Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur. The <code>loop</code> attribute is only applicable to carousels with <code>type=slides</code>.</p>
 <p><em>Example: Displays a slides carousel with controls, looping, and delayed autoplay</em></p>
-<!--embedded example - displays in ampproject.org -->
-<div>
-  <amp-iframe height="446" layout="fixed-height" sandbox="allow-scripts allow-forms allow-same-origin" resizable src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.controls.embed.html">
-    <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-    <div placeholder></div>
-  </amp-iframe>
-</div></td>
+
+[example preview="inline" playground="true" imports="amp-carousel"]
+```html
+<amp-carousel type="slides"
+  width="450"
+  height="300"
+  controls
+  loop
+  {% if not format=='email'%}  autoplay
+  delay="3000"{% endif %}
+  data-next-button-aria-label="Go to next slide"
+  data-previous-button-aria-label="Go to previous slide">
+  <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+    width="450"
+    height="300"></amp-img>
+  <amp-img src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+    width="450"
+    height="300"></amp-img>
+  <amp-img src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+    width="450"
+    height="300"></amp-img>
+</amp-carousel>
+```
+[/example]</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
