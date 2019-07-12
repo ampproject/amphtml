@@ -419,8 +419,19 @@ function beforeTest() {
     canary: 'testSentinel',
   };
   window.AMP_TEST = true;
+  delete window.services;
+  delete window.document.__AMPDOC;
   installDocService(window, /* isSingleDoc */ true);
-  const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
+  const ampdocService = Services.ampdocServiceFor(window);
+  const ampdoc = ampdocService.getSingleDoc();
+  const getAmpDocOrig = ampdocService.getAmpDoc.bind(ampdocService);
+  ampdocService.getAmpDoc = function(node) {
+    const doc = node.ownerDocument || node;
+    if (doc == ampdoc.win.document) {
+      return ampdoc;
+    }
+    return getAmpDocOrig(node);
+  };
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
   Services.resourcesForDoc(ampdoc).ampInitComplete();
