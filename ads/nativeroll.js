@@ -21,21 +21,25 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function nativeroll(global, data) {
-    validateData(data, ['gid']);
-    loadScript(global, 'https://cdn01.nativeroll.tv/js/seedr-player.min.js', ()=> {
-        initPlayer(data)
-    });
+  validateData(data, ['gid']);
+  loadScript(
+    global,
+    'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
+    () => {
+      initPlayer(data);
+    }
+  );
 }
 
 /**
- * @param {!Window} global
  * @param {!Object} data
  */
 function initPlayer(data) {
-    const config = {
-        container:'#c',
-        desiredOffset:50,
-        gid:data.gid,
-    };
-    SeedrPlayer(config);
+  const config = {
+    container: '#c',
+    desiredOffset: 50,
+    gid: data.gid,
+  };
+  // eslint-disable-next-line no-undef
+  SeedrPlayer(config);
 }
