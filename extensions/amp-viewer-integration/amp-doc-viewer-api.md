@@ -24,7 +24,7 @@ This document explains the API between an AMP Viewer and the AMP document(s) it 
 
 ### Initialization
 When an AMP Viewer opens an AMP document, it can include initialization parameters. The parameters are set as key value pairs encoded as a query string in the hash fragment of the AMP document URL. For example:
-https://cdn.ampproject.org/v/s/www.example.com/article.amp.html?amp_js_v=0.1#origin=https%3A%2F%2Fwww.google.com
+www.example.com/article.amp.html?origin=https%3A%2F%2Fwww.example-site.com
 Some parameters are read by the AMP runtime and configure its behavior and others are read by the [viewer integration script](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/0.1/amp-viewer-integration.js) in order to establish the communication channel used by the rest of the API. An initialization parameter is enabled or disabled via the '1' or  '0' value respectively.
 
 #### Viewer Integration Script Parameters
