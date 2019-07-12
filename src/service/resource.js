@@ -152,6 +152,9 @@ export class Resource {
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = resources;
 
+    /** @const @private {!./service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(element);
+
     /** @const @private {boolean} */
     this.isPlaceholder_ = element.hasAttribute('placeholder');
 
@@ -496,13 +499,12 @@ export class Resource {
 
   /** Use resources for measurement */
   measureViaResources_() {
-    const viewport = this.resources_.getViewport();
-    const box = this.resources_.getViewport().getLayoutRect(this.element);
+    const box = this.viewport_.getLayoutRect(this.element);
     this.layoutBox_ = box;
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
-    if (viewport.supportsPositionFixed() && this.isDisplayed()) {
+    if (this.viewport_.supportsPositionFixed() && this.isDisplayed()) {
       const {win} = this.resources_;
       const {body} = win.document;
       for (let n = this.element; n && n != body; n = n./*OK*/ offsetParent) {
@@ -511,7 +513,7 @@ export class Resource {
           break;
         }
         if (
-          viewport.isDeclaredFixed(n) &&
+          this.viewport_.isDeclaredFixed(n) &&
           computedStyle(win, n).position == 'fixed'
         ) {
           isFixed = true;
@@ -527,8 +529,8 @@ export class Resource {
       // return the new absolute position.
       this.layoutBox_ = moveLayoutRect(
         box,
-        -viewport.getScrollLeft(),
-        -viewport.getScrollTop()
+        -this.viewport_.getScrollLeft(),
+        -this.viewport_.getScrollTop()
       );
     }
   }
@@ -627,11 +629,10 @@ export class Resource {
     if (!this.isFixed_) {
       return this.layoutBox_;
     }
-    const viewport = this.resources_.getViewport();
     return moveLayoutRect(
       this.layoutBox_,
-      viewport.getScrollLeft(),
-      viewport.getScrollTop()
+      this.viewport_.getScrollLeft(),
+      this.viewport_.getScrollTop()
     );
   }
 
@@ -758,7 +759,7 @@ export class Resource {
 
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
-    const viewportBox = this.resources_.getViewport().getRect();
+    const viewportBox = this.viewport_.getRect();
     const layoutBox = this.getLayoutBox();
     const scrollDirection = this.resources_.getScrollDirection();
     let scrollPenalty = 1;
