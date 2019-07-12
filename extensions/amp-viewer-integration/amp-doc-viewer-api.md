@@ -14,16 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# AMP viewer API
+# AMP Viewer API
 
 ## Introduction
 
-This document explains the API between an AMP viewer and the AMP document(s) it contains.
+This document explains the API between an AMP Viewer and the AMP document(s) it contains.
 
 ## API
 
 ### Initialization
-When an AMP viewer opens an AMP document, it can include initialization parameters. The parameters are set as key value pairs encoded as a query string in the hash fragment of the AMP document URL. For example:
+When an AMP Viewer opens an AMP document, it can include initialization parameters. The parameters are set as key value pairs encoded as a query string in the hash fragment of the AMP document URL. For example:
 https://cdn.ampproject.org/v/s/www.example.com/article.amp.html?amp_js_v=0.1#origin=https%3A%2F%2Fwww.google.com
 Some parameters are read by the AMP runtime and configure its behavior and others are read by the [viewer integration script](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/0.1/amp-viewer-integration.js) in order to establish the communication channel used by the rest of the API. An initialization parameter is enabled or disabled via the '1' or  '0' value respectively.
 
@@ -68,10 +68,10 @@ The origin of the Viewer. The Viewer Integration will verify this is an allowed 
 |`webview`|`boolean`|Whether the document is being loaded in a WebView instead of an iframe. This will enable "embedded" mode for the document, which is needed for dialog to work.|
 |`highlight`|`string`|The information to highlight text. JSON-encoded string.|
 |`viewportType`| natural, natural-ios-embed|The viewport type. Natural means that the AMP document can read the window dimensions and they will be correct. natural-ios-embed Viewport mode is for use when the AMP document is displayed in an iframe on Mobile Safari. It works around quirks of Mobile Safari's iframe implementation by making the body scrollable rather than the document.|
-|`visibilityState`|`inactive`,`paused`,`visible`,`prerender`,`hidden` (deprecated, use `inactive`) |The initial visibility state of the AMP document.<ul><li>prerender- AMP document is being pre-rendered before being shown. It may be prerendered according to prerenderSize</li><li>inactive or hidden -The document is not visible to the user.</li><li>paused - this document should stop loading new resources and pause any resources such as video. The document may still be visible to the user, but the viewer may be performing a performance sensitive operation such as a swipe.</li><li>visible- The document is active and visible to the user.</li>|
+|`visibilityState`|`inactive`,`paused`,`visible`,`prerender`,`hidden` (deprecated, use `inactive`) |The initial visibility state of the AMP document.<ul><li>prerender- AMP document is being pre-rendered before being shown. It may be prerendered according to prerenderSize</li><li>inactive or hidden -The document is not visible to the user.</li><li>paused - this document should stop loading new resources and pause any resources such as video. The document may still be visible to the user, but the Viewer may be performing a performance sensitive operation such as a swipe.</li><li>visible- The document is active and visible to the user.</li>|
 
 ### Messaging
-The AMP viewer and AMP document communicate via [postMessage](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
+The AMP Viewer and AMP document communicate via [postMessage](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
 
 #### Viewer Integration Messages
 The messages in this section are sent by the Viewer Integration Script and are not used by the AMP runtime.
@@ -90,22 +90,22 @@ The messages in this section are sent by the Viewer Integration Script and are n
 | Message             | Description | Request | Response                               |
 |---------------------| ------------|---------|----------------------------------------|
 |`broadcast`|Message that will be broadcast to every other AMP document open in the Viewer.|* (Any value may be broadcast.)|Array<*> (The response is an array of the responses from the other documents.)|
-|`bindReady`|Sent from AMP pages that use the amp-bind extension. Informs the viewer that amp-bind has completed initialization.|undefined|undefined|
-|`cancelFullOverlay`|Requests that Full Overlay mode is cancelled. If the header was hidden, it should be restored.|undefined|undefined (The response is sent once viewer exits Full Overlay mode.)|
+|`bindReady`|Sent from AMP pages that use the amp-bind extension. Informs the Viewer that amp-bind has completed initialization.|undefined|undefined|
+|`cancelFullOverlay`|Requests that Full Overlay mode is cancelled. If the header was hidden, it should be restored.|undefined|undefined (The response is sent once Viewer exits Full Overlay mode.)|
 |`cid`|Requests the scoped  Client ID. See Client identifiers in AMP.|undefined|string (The scoped Client ID.)|
 |`documentHeight`|The AMP runtime sends this request to the Viewer when the height of the document content changes.|{'height’: (number)}|undefined|
 |`documentLoaded`|The AMP runtime sends this request to the Viewer when it has fully loaded and is ready for display.|{'linkRels': (Map<string, Array<string>>),'metaTags': (Map<string, Array<string>>),'title': (string),'sourceUrl': (string)}|Where linkRels maps the document’s <link> tags from rel to hrefs.linkRels['canonical'] is the document’s canonical URL. metaTags maps the document’s <meta> tags from name to contents.metaTags['theme-color'] is the document’s theme-color.title is the document’s page title.|undefined|
 |`loadStore`|Requests the local storage blob for the document's origin.|{'origin': (string)}|{'blob': (string)}|
 |`openDialog`|Requests that the AMP Access dialog with a specified URL is opened by the Viewer.|{'url': (string)}|string(The response is the token string from the dialog if the flow completed successfully. If the dialog is closed without completing the flow, then the response is rejected.)|
 |`popHistory`|Requests that an entry is popped off the history stack down to the new stackIndex value.|{'stackIndex': (string)} (stackIndex specifies the new stack index.)|undefined (The response resolves once the history pop is complete.)|
-|`prerenderComplete`|Notifies the viewer that prerendering of viewport is complete.|undefined|undefined|
+|`prerenderComplete`|Notifies the Viewer that prerendering of viewport is complete.|undefined|undefined|
 |`pushHistory`|Pushes the new stack index onto the history stack.|{'stackIndex': (string)} (stackIndex specifies the new stack index.)|undefined (The response resolves once the history pop is complete. It rejects on an invalid stack index.)|
 |`replaceHistory`|Replaces the fragment value in history state (without pushing or popping). Used to implement share tracking.|{'fragment': (string)} (fragment specifies the new fragment (hash) value in the current history frame.)|undefined 
 *The response resolves once the replacement is complete.)|
-|`requestFullOverlay`|Requests that the Viewer enter Full Overlay mode. In this mode, the title bar may be hidden.|undefined|undefined (The response is resolved once viewer enters Full Overlay mode.)|
+|`requestFullOverlay`|Requests that the Viewer enter Full Overlay mode. In this mode, the title bar may be hidden.|undefined|undefined (The response is resolved once Viewer enters Full Overlay mode.)|
 |`saveStore`|Requests that the specified blob is stored to local storage for the document's origin.|{'origin': (string), 'blob': (string)}|undefined (The response resolves once the blob has been successfully stored.)|
 |`sendCsi`|Requests that the CSI ticks are flushed. See tick.|undefined|undefined|
-|`setFlushParams|Sets arbitrary additional parameters to be included in the CSI flush. See sendCsi.|Object|undefined|
+|`setFlushParams`|Sets arbitrary additional parameters to be included in the CSI flush. See sendCsi.|Object|undefined|
 |`tick`|Records a timing measurement.|{'label': (string)  //The label of this tick, 'from': (string)  //The label of another tick to use timing reference, 'value': (number)  //The time to record.}|undefined|
   
   
@@ -120,5 +120,5 @@ The messages in this section are sent by the Viewer Integration Script and are n
 |`willLikelyUnload`|Notifies the document that it is likely that it will be imminently unloaded, but it may not be.|{}|undefined|
 |`xhr`|Notifies the document that an XHR fires.|{input: (string),init: (!FetchInitDef)}|{response:{JsonObject|string|undefined}}|
 |`viewerRenderTemplate`|Notifies the document that an XHR fires along with mustache template(s) to render the third party endpoint response.|{originalRequest: {input: (string),init: (!FetchInitDef)}, ampComponent: {type: (string),successTemplate: {type: (string),payload: (string),},errorTemplate: {type: (string),payload: (string),}}}|{html: (string),response:{JsonObject|string|undefined}}|
-|`highlightDismiss`|Notifies the document that users selected to dismiss text highlighting by interacting UI on the viewer.|{}|undefined|
-|`highlightShown`|Notifies the viewer that text highlighting is displayed in the document.|{}|undefined|
+|`highlightDismiss`|Notifies the document that users selected to dismiss text highlighting by interacting UI on the Viewer.|{}|undefined|
+|`highlightShown`|Notifies the Viewer that text highlighting is displayed in the document.|{}|undefined|
