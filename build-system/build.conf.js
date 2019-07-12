@@ -36,7 +36,7 @@ const defaultPlugins = [
 function getReplacePlugin() {
   /**
    * @param {string} defineStr the define flag to parse
-   * @return {Object} replacement options used by minify-replace plugin
+   * @return {!Object} replacement options used by minify-replace plugin
    */
   function createReplacement(defineStr) {
     const strSplit = defineStr.split('=');
@@ -54,22 +54,32 @@ function getReplacePlugin() {
   }
 
   const replacements = [];
+  const defineFlag = argv.define;
+
+  // add define flags from arguments
+  if (Array.isArray(defineFlag)) {
+    if (defineFlag.length > 1) {
+      throw new Error('Only one define flag is allowed');
+    } else {
+      replacements.push(createReplacement(defineFlag[0]));
+    }
+  } else if (defineFlag) {
+    replacements.push(createReplacement(defineFlag));
+  }
+
   // default each experiment flag constant to false
   Object.keys(experimentsConfig).forEach(experiment => {
     const experimentDefine = experimentsConfig[experiment]['define'];
-    if (experimentDefine) {
+
+    function flagExists(element) {
+      return element['identifierName'] === experimentDefine;
+    }
+
+    // only add default replacement if it already doesn't exist in array
+    if (experimentDefine && !replacements.some(flagExists)) {
       replacements.push(createReplacement(experimentDefine + '=false'));
     }
   });
-
-  // override define values from passed in flags
-  if (Array.isArray(argv.define)) {
-    argv.define.forEach(defineStr => {
-      replacements.push(createReplacement(defineStr));
-    });
-  } else if (argv.define) {
-    replacements.push(createReplacement(argv.define));
-  }
 
   const replacePlugin = [
     require.resolve('babel-plugin-minify-replace'),
