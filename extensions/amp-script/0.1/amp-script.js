@@ -26,7 +26,7 @@ import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {
@@ -404,7 +404,7 @@ export class SanitizerImpl {
     const output = {};
     for (let i = 0; i < storage.length; i++) {
       const key = storage.key(i);
-      if (!startsWith(key, 'amp-')) {
+      if (key && !startsWith(key, 'amp-')) {
         output[key] = storage.getItem(key);
       }
     }
