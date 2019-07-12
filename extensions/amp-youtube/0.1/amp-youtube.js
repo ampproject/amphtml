@@ -37,6 +37,7 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
+import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -147,6 +148,12 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    if (getMode().runtime === 'inabox') {
+      this.user().error(
+        TAG,
+        'amp-youtube is deprecated in AMPHTML ads. See https://github.com/ampproject/amphtml/issues/21340'
+      );
+    }
     this.videoid_ = this.getVideoId_();
     this.liveChannelid_ = this.getLiveChannelId_();
     this.assertDatasourceExists_();
