@@ -26,7 +26,7 @@ import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, map} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {
@@ -35,6 +35,7 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
+import {startsWith} from '../../../src/string';
 import {upgrade} from '@ampproject/worker-dom/dist/amp/main.mjs';
 
 /** @const {string} */
@@ -287,10 +288,13 @@ export class SanitizerImpl {
    * @param {!Array<string>} sandboxTokens
    */
   constructor(win, sandboxTokens) {
-    /** @private {!DomPurifyDef} */
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!DomPurifyDef} */
     this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
 
-    /** @private {!Object<string, boolean>} */
+    /** @private @const {!Object<string, boolean>} */
     this.allowedTags_ = getAllowedTags();
 
     // TODO(choumx): Support opt-in for variable substitutions.
@@ -340,7 +344,7 @@ export class SanitizerImpl {
    * @param {string|null} value
    * @return {boolean}
    */
-  mutateAttribute(node, attribute, value) {
+  changeAttribute(node, attribute, value) {
     // TODO(choumx): Call mutatedAttributesCallback() on AMP elements e.g.
     // so an amp-img can update its child img when [src] is changed.
 
@@ -376,7 +380,7 @@ export class SanitizerImpl {
    * @param {string} value
    * @return {boolean}
    */
-  mutateProperty(node, property, value) {
+  changeProperty(node, property, value) {
     const prop = property.toLowerCase();
 
     // worker-dom's supported properties and corresponding attribute name
@@ -386,6 +390,61 @@ export class SanitizerImpl {
       return true;
     }
     return false;
+  }
+
+  /**
+   * @param {string} scope
+   * @return {?Object}
+   */
+  getStorage(scope) {
+    // Note that filtering out amp-* keys will affect the predictability of
+    // Storage.key(). We could preserve indices by adding empty entries but
+    // that might be even more confusing.
+    const storage = this.storageFor_(scope);
+    const output = map();
+    Object.keys(storage).forEach(key => {
+      if (!startsWith(key, 'amp-')) {
+        output[key] = storage[key];
+      }
+    });
+    return output;
+  }
+
+  /**
+   * @param {string} scope
+   * @param {?string} key
+   * @param {?string} value
+   */
+  changeStorage(scope, key, value) {
+    const storage = this.storageFor_(scope);
+    if (key === null) {
+      if (value === null) {
+        user().error(TAG, 'Storage.clear() is not supported in amp-script.');
+      }
+    } else {
+      if (startsWith(key, 'amp-')) {
+        user().error(TAG, 'Invalid "amp-" prefix for storage key: %s', key);
+      } else {
+        if (value === null) {
+          storage.removeItem(key);
+        } else {
+          storage.setItem(key, value);
+        }
+      }
+    }
+  }
+
+  /**
+   * @param {string} scope
+   * @return {?Storage}
+   */
+  storageFor_(scope) {
+    if (scope == 'local') {
+      return this.win_.localStorage;
+    } else if (scope == 'session') {
+      return this.win_.sessionStorage;
+    }
+    return null;
   }
 }
 
