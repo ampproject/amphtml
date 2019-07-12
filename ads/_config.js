@@ -486,7 +486,7 @@ export const adConfig = {
 
   'idealmedia': {
     renderStartImplemented: true,
-    prefetch: [
+    preconnect: [
       'https://jsc.idealmedia.io',
       'https://servicer.idealmedia.io',
       'https://s-img.idealmedia.io/',
