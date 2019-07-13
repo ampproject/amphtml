@@ -588,7 +588,6 @@ function wrapMainBinaries() {
     if (x === 'v0') {
       s.prepend(prefix);
       s.append(suffix);
-      fs.writeFileSync(path, s.toString());
       const map = s.generateDecodedMap({
         hires: true,
         source: path,
@@ -599,6 +598,7 @@ function wrapMainBinaries() {
         }
         return null;
       });
+      fs.writeFileSync(path, s.toString());
       fs.writeFileSync(`${path}.map`, remapped.toString());
     } else {
       const bundle = new MagicString.Bundle();
@@ -607,7 +607,6 @@ function wrapMainBinaries() {
       bundle.addSource(mainFile);
       bundle.addSource(s);
       bundle.append(suffix);
-      fs.writeFileSync(path, bundle.toString());
       const map = bundle.generateDecodedMap({ hires: true });
       const remapped = resorcery(map, (path) => {
         if (path.startsWith('dist')) {
@@ -615,6 +614,7 @@ function wrapMainBinaries() {
         }
         return null;
       });
+      fs.writeFileSync(path, bundle.toString());
       fs.writeFileSync(`${path}.map`, remapped.toString());
     }
   });
@@ -622,20 +622,18 @@ function wrapMainBinaries() {
 
 /**
  * Prepends intermediate bundles to the built js binary.
- * TODO(erwinm, #18811): This operation is needed but straight out breaks
- * source maps.
  */
 function intermediateBundleConcat() {
   extensionBundles.forEach(extension => {
     const prependContents = [
       'dist/v0/_base_i.js',
       `dist/v0/${extension.type}.js`,
-    ].map(readFile);
+    ].map(readMagicString);
 
     // If there are third_party libraries to prepend too, ensure we inject a
     // new split marker.
     if (Array.isArray(extension.postPrepend)) {
-      prependContents.push(SPLIT_MARKER);
+      prependContents.push(new MagicString(SPLIT_MARKER));
     }
 
     return postPrepend(extension, prependContents);
@@ -644,8 +642,6 @@ function intermediateBundleConcat() {
 
 /**
  * Prepends the listed file to the built js binary.
- * TODO(erwinm, #18811): This operation is needed but straight out breaks
- * source maps.
  */
 function thirdPartyConcat() {
   extensionBundles.forEach(extension => {
@@ -653,7 +649,7 @@ function thirdPartyConcat() {
     if (!Array.isArray(postPrependPaths)) {
       return;
     }
-    const prependContents = postPrependPaths.map(readFile);
+    const prependContents = postPrependPaths.map(readMagicString);
 
     return postPrepend(extension, prependContents);
   });
@@ -670,15 +666,26 @@ function postPrepend(extension, prependContents) {
   } else {
     targets.push(createFullPath(extension.version));
   }
-  const prependContent = ';' + prependContents.join(';');
   targets.forEach(path => {
-    const content = fs
-      .readFileSync(path, 'utf8')
-      .toString()
-      .split(SPLIT_MARKER);
-    const prefix = content[0];
-    const suffix = content[1];
-    fs.writeFileSync(path, prefix + prependContent + suffix, 'utf8');
+    const bundle = new MagicString.Bundle();
+    const s = readMagicString(path);
+    const index = s.original.indexOf(SPLIT_MARKER);
+    const prefix = s.snip(0, index);
+    const suffix = s.snip(index + SPLIT_MARKER.length, s.length());
+    bundle.addSource(prefix);
+    for (let i = 0; i < prependContents.length; i++) {
+      bundle.addSource(prependContents[i]);
+    }
+    bundle.addSource(suffix);
+    const map = bundle.generateDecodedMap({ hires: true });
+    const remapped = resorcery(map, (path) => {
+      if (path.startsWith('dist')) {
+        return readFile(`${path}.map`);
+      }
+      return null;
+    });
+    fs.writeFileSync(path, bundle.toString(), 'utf8');
+    fs.writeFileSync(path, remapped.toString(), 'utf8');
   });
 }
 
