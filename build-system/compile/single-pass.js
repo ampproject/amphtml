@@ -25,11 +25,13 @@ const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const log = require('fancy-log');
+const MagicString = require('magic-string');
 const minimist = require('minimist');
 const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const rename = require('gulp-rename');
+const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
 const terser = require('terser');
@@ -472,15 +474,17 @@ function transformPathsToTempDir(graph, config) {
     if (f.startsWith('node_modules/')) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
-      const {code} = babel.transformFileSync(f, {
+      const {code, map} = babel.transformFileSync(f, {
         plugins: conf.plugins({
           isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
           isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
           isSinglePass: true,
         }),
         retainLines: true,
+        sourceMaps: true,
       });
       fs.outputFileSync(`${graph.tmp}/${f}`, code);
+      fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
     }
   });
 }
@@ -560,7 +564,6 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
     .then(thirdPartyConcat)
-    .then(removeInvalidSourcemaps)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       return Promise.reject(err);
@@ -572,25 +575,48 @@ exports.singlePassCompile = async function(entryModule, options) {
  * use closures wrapper mechanism for this since theres some concatenation
  * we need to do to build the alternative binaries such as shadow-v0 and
  * amp4ads-v0.
- * TODO(#18811, erwinm): this breaks source maps and we need a way to fix this.
- * magic-string might be part of the solution here so explore that (pre or post
- * process)
  */
 function wrapMainBinaries() {
   const pair = wrappers.mainBinary.split('<%= contents %>');
   const prefix = pair[0];
   const suffix = pair[1];
   // Cache the v0 file so we can prepend it to alternative binaries.
-  const mainFile = fs.readFileSync('dist/v0.js', 'utf8');
+  const mainFile = readMagicString('dist/v0.js');
   jsFilesToWrap.forEach(x => {
     const path = `dist/${x}.js`;
-    const bootstrapCode = path === 'dist/v0.js' ? '' : mainFile;
-    const isAmpAltstring = path === 'dist/v0.js' ? '' : 'self.IS_AMP_ALT=1;';
-    fs.writeFileSync(
-      path,
-      `${isAmpAltstring}${prefix}${bootstrapCode}` +
-        `${fs.readFileSync(path).toString()}${suffix}`
-    );
+    const s = readMagicString(path);
+    if (x === 'v0') {
+      s.prepend(prefix);
+      s.append(suffix);
+      fs.writeFileSync(path, s.toString());
+      const map = s.generateDecodedMap({
+        hires: true,
+        source: path,
+      });
+      const remapped = resorcery(map, (path) => {
+        if (path.startsWith('dist')) {
+          return readFile(`${path}.map`);
+        }
+        return null;
+      });
+      fs.writeFileSync(`${path}.map`, remapped.toString());
+    } else {
+      const bundle = new MagicString.Bundle();
+      bundle.append('self.IS_AMP_ALT=1;');
+      bundle.append(prefix);
+      bundle.addSource(mainFile);
+      bundle.addSource(s);
+      bundle.append(suffix);
+      fs.writeFileSync(path, bundle.toString());
+      const map = bundle.generateDecodedMap({ hires: true });
+      const remapped = resorcery(map, (path) => {
+        if (path.startsWith('dist')) {
+          return readFile(`${path}.map`);
+        }
+        return null;
+      });
+      fs.writeFileSync(`${path}.map`, remapped.toString());
+    }
   });
 }
 
@@ -709,13 +735,14 @@ function eliminateIntermediateBundles() {
   });
 }
 
-function removeInvalidSourcemaps() {
-  const maps = deglob.sync(['dist/**/*.js.map']);
-  maps.forEach(map => {
-    fs.truncateSync(map);
-  });
-}
-
 function readFile(path) {
   return fs.readFileSync(path, 'utf8').toString();
+}
+
+function readMagicString(file) {
+  const contents = readFile(file);
+  return new MagicString(contents, { filename: file });
+}
+
+function splitFileAndInject(file, inject, split) {
 }
