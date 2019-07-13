@@ -721,9 +721,11 @@ function eliminateIntermediateBundles() {
       targets.push(createFullPath(extension.version));
     }
     targets.forEach(path => {
-      const {code} = babel.transformFileSync(path, {
+      const {code, map} = babel.transformFileSync(path, {
+        inputSourceMap: JSON.parse(readFile(`${path}.map`)),
         plugins: conf.eliminateIntermediateBundles(),
         retainLines: true,
+        sourceMaps: true,
       });
       const compressed = terser.minify(code, {
         mangle: false,
@@ -738,6 +740,7 @@ function eliminateIntermediateBundles() {
         },
       }).code;
       fs.outputFileSync(path, compressed);
+      fs.outputFileSync(`${path}.map`, JSON.stringify(map));
     });
   });
 }
