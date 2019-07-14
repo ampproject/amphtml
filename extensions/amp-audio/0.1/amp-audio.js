@@ -262,7 +262,7 @@ export class AmpAudio extends AMP.BaseElement {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.audio_, eventType);
+    triggerAnalyticsEvent(this.element, eventType);
   }
 }
 
