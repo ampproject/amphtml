@@ -281,5 +281,21 @@ describes.realWin(
         });
       }
     );
+
+    it('should trigger audio-play/audio-pause analytics event when `play`/`pause` actions are called', () => {
+      return attachAndRun({
+        'width': '500',
+        src: 'audio.mp3',
+      }).then(ampAudio => {
+        const impl = ampAudio.implementation_;
+        sandbox.spy(impl, 'analyticsEvent_');
+        impl.executeAction({method: 'play', satisfiesTrust: () => true});
+        expect(impl.analyticsEvent_.withArgs('audio-play')).to.have.been
+          .calledOnce;
+        impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+        expect(impl.analyticsEvent_.withArgs('audio-pause')).to.have.been
+          .calledOnce;
+      });
+    });
   }
 );
