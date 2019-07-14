@@ -706,7 +706,6 @@ function eliminateIntermediateBundles() {
       targets.push(createFullPath(extension.version));
     }
     targets.forEach(path => {
-      debugger;
       const {code, map} = babel.transformFileSync(path, {
         inputSourceMap: JSON.parse(readFile(`${path}.map`)),
         plugins: conf.eliminateIntermediateBundles(),
