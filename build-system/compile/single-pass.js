@@ -593,12 +593,7 @@ function wrapMainBinaries() {
         hires: true,
         source: path,
       });
-      const remapped = resorcery(map, path => {
-        if (path.startsWith('dist')) {
-          return readFile(`${path}.map`);
-        }
-        return null;
-      });
+      const remapped = resorcery(map, loadSourceMap, !!argv.full_sourcemaps);
       fs.writeFileSync(path, s.toString());
       fs.writeFileSync(`${path}.map`, remapped.toString());
     } else {
@@ -609,12 +604,7 @@ function wrapMainBinaries() {
       bundle.addSource(s);
       bundle.append(suffix);
       const map = bundle.generateDecodedMap({hires: true});
-      const remapped = resorcery(map, path => {
-        if (path.startsWith('dist')) {
-          return readFile(`${path}.map`);
-        }
-        return null;
-      });
+      const remapped = resorcery(map, loadSourceMap, !!argv.full_sourcemaps);
       fs.writeFileSync(path, bundle.toString());
       fs.writeFileSync(`${path}.map`, remapped.toString());
     }
@@ -679,12 +669,7 @@ function postPrepend(extension, prependContents) {
     }
     bundle.addSource(suffix);
     const map = bundle.generateDecodedMap({hires: true});
-    const remapped = resorcery(map, path => {
-      if (path.startsWith('dist')) {
-        return readFile(`${path}.map`);
-      }
-      return null;
-    });
+    const remapped = resorcery(map, loadSourceMap, !!argv.full_sourcemaps);
     fs.writeFileSync(path, bundle.toString(), 'utf8');
     fs.writeFileSync(path, remapped.toString(), 'utf8');
   });
@@ -753,4 +738,11 @@ function readFile(path) {
 function readMagicString(file) {
   const contents = readFile(file);
   return new MagicString(contents, {filename: file});
+}
+
+function loadSourceMap(file) {
+  if (file.startsWith('dist')) {
+    return readFile(`${file}.map`);
+  }
+  return null;
 }
