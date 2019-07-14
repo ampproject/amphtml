@@ -566,8 +566,7 @@ exports.singlePassCompile = async function(entryModule, options) {
     .catch(err => {
       console.error(err.message);
       console.error(err.stack);
-      err.showStack = false; // Useless node_modules stack
-      return Promise.reject(err);
+      throw err;
     });
 };
 
@@ -594,8 +593,8 @@ function wrapMainBinaries() {
         source: path,
       });
       const remapped = resorcery(map, loadSourceMap, !!argv.full_sourcemaps);
-      fs.writeFileSync(path, s.toString());
-      fs.writeFileSync(`${path}.map`, remapped.toString());
+      fs.writeFileSync(path, s.toString(), 'utf8');
+      fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
     } else {
       const bundle = new MagicString.Bundle();
       bundle.append('self.IS_AMP_ALT=1;');
@@ -605,8 +604,8 @@ function wrapMainBinaries() {
       bundle.append(suffix);
       const map = bundle.generateDecodedMap({hires: true});
       const remapped = resorcery(map, loadSourceMap, !!argv.full_sourcemaps);
-      fs.writeFileSync(path, bundle.toString());
-      fs.writeFileSync(`${path}.map`, remapped.toString());
+      fs.writeFileSync(path, bundle.toString(), 'utf8');
+      fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
     }
   });
 }
@@ -671,7 +670,7 @@ function postPrepend(extension, prependContents) {
     const map = bundle.generateDecodedMap({hires: true});
     const remapped = resorcery(map, loadSourceMap, !!argv.full_sourcemaps);
     fs.writeFileSync(path, bundle.toString(), 'utf8');
-    fs.writeFileSync(path, remapped.toString(), 'utf8');
+    fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
   });
 }
 
@@ -707,6 +706,7 @@ function eliminateIntermediateBundles() {
       targets.push(createFullPath(extension.version));
     }
     targets.forEach(path => {
+      debugger;
       const {code, map} = babel.transformFileSync(path, {
         inputSourceMap: JSON.parse(readFile(`${path}.map`)),
         plugins: conf.eliminateIntermediateBundles(),
