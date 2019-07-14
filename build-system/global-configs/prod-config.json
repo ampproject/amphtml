@@ -1,6 +1,5 @@
 {
   "allow-doc-opt-in": [
-    "amp-img-auto-sizes",
     "amp-next-page",
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
@@ -21,10 +20,8 @@
   "amp-access-iframe": 1,
   "amp-ad-ff-adx-ady": 0.01,
   "amp-auto-ads-adsense-holdout": 0.1,
-  "amp-auto-lightbox": 1,
   "amp-consent-v2": 1,
   "amp-force-prerender-visible-elements": 1,
-  "amp-img-auto-sizes": 1,
   "amp-list-load-more": 1,
   "amp-list-viewport-resize": 1,
   "amp-playbuzz": 1,
@@ -37,8 +34,8 @@
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "expAdsenseA4A": 0.01,
-  "expAdsenseCanonical": 0.01,
-  "expAdsenseUnconditionedCanonical": 0.01,
+  "expAdsenseCanonical": 0.05,
+  "expAdsenseUnconditionedCanonical": 0.05,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.01,
   "hidden-mutation-observer": 1,

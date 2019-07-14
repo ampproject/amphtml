@@ -34,6 +34,7 @@
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
  *   ampCors: (boolean|undefined),
+ *   prerenderSafe: (boolean|undefined),
  *   bypassInterceptorForDev: (boolean|undefined)
  * }}
  */
@@ -299,6 +300,7 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function() {};
+let RRule;
 /**
  * @param {Date} unusedDt
  * @param {boolean} unusedInc
