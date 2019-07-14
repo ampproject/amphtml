@@ -4815,11 +4815,6 @@ escape-html@~1.0.3:
   resolved "https://registry.yarnpkg.com/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
   integrity sha1-Aljq5NPQwJdN4cFpGI7wBR0dGYg=
 
-escape-regex-string@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/escape-regex-string/-/escape-regex-string-1.0.6.tgz#f536d8997ab19ec395385dcf2ea28b4e080899eb"
-  integrity sha512-AcaPwAOKpF52ETT4uu4vmpqQphuQGjIEhdDwG/gAJYah8ixJlrSBFjhtLMT7frc9y3RWgOnLov9E0MsRBdeRbw==
-
 escape-string-regexp@1.0.5, escape-string-regexp@^1.0.0, escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
@@ -4893,17 +4888,16 @@ eslint-plugin-jasmine@2.10.1:
   resolved "https://registry.yarnpkg.com/eslint-plugin-jasmine/-/eslint-plugin-jasmine-2.10.1.tgz#5733b709e751f4bc40e31e1c16989bd2cdfbec97"
   integrity sha1-VzO3CedR9LxA4x4cFpib0s377Jc=
 
-eslint-plugin-jsdoc@15.3.2:
-  version "15.3.2"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-15.3.2.tgz#222e3013101c59ebf10b49fb2d2accf5e5eae677"
-  integrity sha512-EpdXvRO5oS1mxsD8Jhkq4f3f5ZwM+OxJl7J93cw2H+XlZpu41Gl5n+dohDnG1poq7x6HRp3ONXHFWNHZ5n4Wnw==
+eslint-plugin-jsdoc@15.5.1:
+  version "15.5.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-15.5.1.tgz#42e79fe294a51f194a0e021f3111fa5ea7325c2e"
+  integrity sha512-ZE2UyTfikhkS9XatRo+UhTFJVrW0XIpK19XQdlFkgpq/BWcewRPYZdO1nJ3r5Z/o4oITfASCPZMArW9Wjhiukg==
   dependencies:
     comment-parser "^0.5.5"
     debug "^4.1.1"
-    escape-regex-string "^1.0.6"
     flat-map-polyfill "^0.3.8"
     jsdoctypeparser "5.0.1"
-    lodash "^4.17.11"
+    lodash "^4.17.14"
     regextras "^0.6.1"
 
 eslint-plugin-notice@0.8.8:
@@ -8873,6 +8867,11 @@ lodash@^4.1.1, lodash@^4.16.6, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.4,
   version "4.17.11"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
   integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
+
+lodash@^4.17.14:
+  version "4.17.14"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.14.tgz#9ce487ae66c96254fe20b599f21b6816028078ba"
+  integrity sha512-mmKYbW3GLuJeX+iGP+Y7Gp1AiGHGbXHCOh/jZmrawMmsE7MS4znI3RL2FsjbqOyMayHInjOeykW7PEajUk1/xw==
 
 log-symbols@2.2.0, log-symbols@^2.1.0, log-symbols@^2.2.0:
   version "2.2.0"
