@@ -19,7 +19,6 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
 const conf = require('../build.conf');
-const deglob = require('globs-to-files');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -565,6 +564,8 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(eliminateIntermediateBundles)
     .then(thirdPartyConcat)
     .catch(err => {
+      console.error(err.message);
+      console.error(err.stack);
       err.showStack = false; // Useless node_modules stack
       return Promise.reject(err);
     });
@@ -592,7 +593,7 @@ function wrapMainBinaries() {
         hires: true,
         source: path,
       });
-      const remapped = resorcery(map, (path) => {
+      const remapped = resorcery(map, path => {
         if (path.startsWith('dist')) {
           return readFile(`${path}.map`);
         }
@@ -607,8 +608,8 @@ function wrapMainBinaries() {
       bundle.addSource(mainFile);
       bundle.addSource(s);
       bundle.append(suffix);
-      const map = bundle.generateDecodedMap({ hires: true });
-      const remapped = resorcery(map, (path) => {
+      const map = bundle.generateDecodedMap({hires: true});
+      const remapped = resorcery(map, path => {
         if (path.startsWith('dist')) {
           return readFile(`${path}.map`);
         }
@@ -677,8 +678,8 @@ function postPrepend(extension, prependContents) {
       bundle.addSource(prependContents[i]);
     }
     bundle.addSource(suffix);
-    const map = bundle.generateDecodedMap({ hires: true });
-    const remapped = resorcery(map, (path) => {
+    const map = bundle.generateDecodedMap({hires: true});
+    const remapped = resorcery(map, path => {
       if (path.startsWith('dist')) {
         return readFile(`${path}.map`);
       }
@@ -751,8 +752,5 @@ function readFile(path) {
 
 function readMagicString(file) {
   const contents = readFile(file);
-  return new MagicString(contents, { filename: file });
-}
-
-function splitFileAndInject(file, inject, split) {
+  return new MagicString(contents, {filename: file});
 }
