@@ -900,11 +900,10 @@ export class Bind {
    * @private
    */
   skipSubtree_(walker) {
-    while (walker.currentNode) {
-      if (walker.nextSibling()) {
-        return walker.currentNode;
-      } else {
-        walker.parentNode();
+    for (let n = walker.currentNode; n; n = walker.parentNode()) {
+      const sibling = walker.nextSibling();
+      if (sibling) {
+        return sibling;
       }
     }
     return null;
