@@ -79,22 +79,11 @@ class AnimationRunner {
    *    !../../amp-animation/0.1/web-animations.Builder
    * >} webAnimationBuilderPromise
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   * @param {!../../../src/service/timer-impl.Timer} timer
    * @param {!AnimationSequence} sequence
    */
-  constructor(
-    page,
-    animationDef,
-    webAnimationBuilderPromise,
-    vsync,
-    timer,
-    sequence
-  ) {
+  constructor(page, animationDef, webAnimationBuilderPromise, vsync, sequence) {
     /** @private @const */
     this.page_ = page;
-
-    /** @private @const */
-    this.timer_ = timer;
 
     /** @private @const */
     this.vsync_ = vsync;
@@ -114,7 +103,7 @@ class AnimationRunner {
     /** @private @const */
     this.keyframes_ = this.filterKeyframes_(animationDef.preset.keyframes);
 
-    /** @private */
+    /** @private @const */
     this.delay_ = animationDef.delay || this.presetDef_.delay || 0;
 
     /** @private @const */
@@ -141,15 +130,6 @@ class AnimationRunner {
 
     /** @private {?../../amp-animation/0.1/runners/animation-runner.AnimationRunner} */
     this.runner_ = null;
-
-    /** @private {?number} */
-    this.delayId_ = null;
-
-    /** @private {?number} */
-    this.delayStartTime_ = null;
-
-    /** @private {?number} */
-    this.delayElapsedTime_ = null;
 
     /** @private {?PlaybackActivity} */
     this.scheduledActivity_ = null;
@@ -213,6 +193,7 @@ class AnimationRunner {
     return this.keyframes_.then(keyframes => ({
       keyframes,
       target: this.target_,
+      delay: `${this.delay_}ms`,
       duration: `${this.duration_}ms`,
       easing: this.easing_,
       fill: 'forwards',
@@ -242,7 +223,6 @@ class AnimationRunner {
       return;
     }
 
-    this.delay_ = this.animationDef_.delay || this.presetDef_.delay || 0;
     this.playback_(PlaybackActivity.START, this.getStartWaitPromise_());
   }
 
@@ -257,31 +237,6 @@ class AnimationRunner {
       const startAfterId = /** @type {string} */ (this.animationDef_
         .startAfterId);
       promise = promise.then(() => this.sequence_.waitFor(startAfterId));
-    }
-
-    return promise.then(() => this.getDelayWaitPromise_());
-  }
-
-  /**
-   * @return {!Promise}
-   * @private
-   */
-  getDelayWaitPromise_() {
-    let promise = Promise.resolve();
-
-    if (this.delay_) {
-      promise = promise.then(() => {
-        return new Promise(resolve => {
-          this.delayStartTime_ = Date.now();
-          this.delayId_ = /** @type {number} */ (this.timer_.delay(
-            resolve,
-            this.delay_
-          ));
-        }).then(() => {
-          this.delayId_ = null;
-          this.delayElapsedTime_ = null;
-        });
-      });
     }
 
     return promise;
@@ -314,22 +269,12 @@ class AnimationRunner {
 
   /** Pauses the animation. */
   pause() {
-    // Animation waiting for a sequenced animation.
-    if (this.scheduledActivity_ !== null && !this.delayId_) {
+    // Animation hasn't started yet since it's waiting for a sequenced
+    // animation.
+    if (this.scheduledActivity_ !== null) {
       return;
     }
 
-    // Check if animation is still waiting for a delay animation.
-    if (this.delayId_) {
-      // Delete the waiting promise that the animation is waiting for to keep it
-      // from starting.
-      this.timer_.cancel(this.delayId_);
-      this.delayId_ = null;
-
-      // Set delay elapsed time passed before pausing.
-      this.delayElapsedTime_ = Date.now() - this.delayStartTime_;
-      return;
-    }
     if (this.runner_) {
       devAssert(this.runner_).pause();
     }
@@ -337,16 +282,12 @@ class AnimationRunner {
 
   /** Resumes the animation. */
   resume() {
-    // Animation waiting for a sequenced animation.
-    if (this.scheduledActivity_ !== null && !this.delayElapsedTime_) {
+    // Animation hasn't started yet since it's waiting for a sequenced
+    // animation.
+    if (this.scheduledActivity_ !== null) {
       return;
     }
-    if (this.delayElapsedTime_) {
-      // Restart promise with the remaining delay time before it was paused.
-      this.delay_ = this.delay_ - this.delayElapsedTime_;
-      this.playback_(PlaybackActivity.START, this.getDelayWaitPromise_());
-      return;
-    }
+
     if (this.runner_) {
       devAssert(this.runner_).resume();
     }
@@ -368,9 +309,7 @@ class AnimationRunner {
   cancel() {
     this.scheduledActivity_ = null;
     this.scheduledWait_ = null;
-    this.timer_.cancel(this.delayId_);
-    this.delayId_ = null;
-    this.delayElapsedTime_ = null;
+
     if (this.runner_) {
       devAssert(this.runner_).cancel();
     }
@@ -489,9 +428,6 @@ export class AnimationManager {
     this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
 
     /** @private @const */
-    this.timer_ = Services.timerFor(this.ampdoc_.win);
-
-    /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
     /** @private {?Array<!Promise<!AnimationRunner>>} */
@@ -594,7 +530,6 @@ export class AnimationManager {
       animationDef,
       devAssert(this.builderPromise_),
       this.vsync_,
-      this.timer_,
       this.sequence_
     );
   }
