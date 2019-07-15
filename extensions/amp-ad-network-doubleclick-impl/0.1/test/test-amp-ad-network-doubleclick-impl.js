@@ -31,6 +31,7 @@ import {
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
+  MIN_NUM_VIEWPORTS_FOR_FLEX_ADS,
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
@@ -606,10 +607,11 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('handles Single Page Story Ad parameter', () => {
       const impl = new AmpAdNetworkDoubleclickImpl(element);
-      impl.isSinglePageStoryAd_ = true;
-      const urlPromise = impl.getAdUrl();
-      expect(urlPromise).to.eventually.match(/(\?|&)spsa=\d+x\d+(&|$)/);
-      expect(urlPromise).to.eventually.match(/(\?|&)sz=1x1(&|$)/);
+      impl.isSinglePageStoryAd = true;
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/(\?|&)spsa=\d+x\d+(&|$)/);
+        expect(url).to.match(/(\?|&)sz=1x1(&|$)/);
+      });
     });
 
     it('handles tagForChildDirectedTreatment', () => {
@@ -860,10 +862,18 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(url).to.not.match(/(\?|&)npa=(&|$)/);
       }));
 
-    it('should include msz/psz/fws if in experiment', () => {
+    it('should include msz/psz/fws if in experiment ' +
+        'and slot sufficiently below the viewport', () => {
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
       sandbox
         .stub(impl, 'randomlySelectUnsetExperiments_')
         .returns({flexAdSlots: '21063174'});
+      sandbox
+        .stub(impl, 'getViewport')
+        .returns({getRect: () => ({top: 0, height: 100})});
+      sandbox
+        .stub(impl.element, 'getPageLayoutBox')
+        .returns({top: 200});
       impl.setPageLevelExperiments();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
@@ -872,6 +882,21 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(url).to.match(/(=|%2C)21063174(%2C|&|$)/);
       });
     });
+
+    it('should not include msz/psz/fws if in experiment ' +
+        'and not slot sufficiently below the viewport', () => {
+      sandbox
+        .stub(impl, 'randomlySelectUnsetExperiments_')
+        .returns({flexAdSlots: '21063174'});
+      impl.setPageLevelExperiments();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.not.match(/(\?|&)msz=/);
+        expect(url).to.not.match(/(\?|&)psz=/);
+        expect(url).to.not.match(/(\?|&)fws=/);
+        expect(url).to.match(/(=|%2C)21063174(%2C|&|$)/);
+      });
+    });
+
 
     it('should not include msz/psz if not in flexAdSlots control', () => {
       sandbox

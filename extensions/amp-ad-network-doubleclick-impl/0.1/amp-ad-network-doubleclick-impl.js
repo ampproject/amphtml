@@ -134,6 +134,12 @@ const FLEXIBLE_AD_SLOTS_BRANCHES = {
 const DUMMY_FLUID_SIZE = '320x50';
 
 /**
+ * The ad slot must be this many viewports down for us to include flexible ad
+ * slot request parameters.
+ */
+export const MIN_NUM_VIEWPORTS_FOR_FLEX_ADS = 2;
+
+/**
  * Map of pageview tokens to the instances they belong to.
  * @private {!Object<string, !AmpAdNetworkDoubleclickImpl>}
  */
@@ -159,6 +165,8 @@ let SizeDef;
 
 /** @typedef {(SizeDef|../../../src/layout-rect.LayoutRectDef)} */
 let LayoutRectOrDimsDef;
+
+
 
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
@@ -520,22 +528,32 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     this.ifi_ =
       (this.isRefreshing && this.ifi_) || this.win['ampAdGoogleIfiCounter']++;
-    const pageLayoutBox = this.isSinglePageStoryAd
+    let pageLayoutBox = this.isSinglePageStoryAd
       ? this.element.getPageLayoutBox()
       : null;
     let msz = null;
     let psz = null;
     let fws = null;
+
     if (this.sendFlexibleAdSlotParams_) {
-      const {fwSignal, slotWidth, parentWidth} = getFlexibleAdSlotRequestParams(
-        this.win,
-        this.element.parentElement
-      );
-      // If slotWidth is -1, that means its width must be determined by its
-      // parent container, and so should have the same value as parentWidth.
-      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
-      psz = `${parentWidth}x-1`;
-      fws = fwSignal ? fwSignal : '0';
+      const viewportRect = this.getViewport().getRect();
+      pageLayoutBox = pageLayoutBox || this.element.getPageLayoutBox();
+      // Only include flexible ad slot params if slot is sufficiently below the
+      // viewport.
+      const min_viewports = MIN_NUM_VIEWPORTS_FOR_FLEX_ADS;
+      if (viewportRect.top + min_viewports * viewportRect.height <=
+          pageLayoutBox.top) {
+        const {fwSignal, slotWidth, parentWidth} =
+            getFlexibleAdSlotRequestParams(
+                this.win,
+                this.element.parentElement
+            );
+        // If slotWidth is -1, that means its width must be determined by its
+        // parent container, and so should have the same value as parentWidth.
+        msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
+        psz = `${parentWidth}x-1`;
+        fws = fwSignal ? fwSignal : '0';
+      }
     }
     return Object.assign(
       {
