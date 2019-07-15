@@ -323,14 +323,6 @@ export class Resources {
   }
 
   /**
-   * Whether the runtime is currently on.
-   * @return {boolean}
-   */
-  isRuntimeOn() {
-    return this.isRuntimeOn_;
-  }
-
-  /**
    * Signals that the document has been started rendering.
    * @restricted
    */
