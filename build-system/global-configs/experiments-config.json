@@ -1,9 +1,9 @@
 {
   "experimentA": {
     "name": "ANALYTICS_VENDOR_SPLIT",
-    "command": "gulp dist --define=ANALYTICS_VENDOR_SPLIT",
+    "command": "gulp dist --defineExperimentConstant=ANALYTICS_VENDOR_SPLIT",
     "issue": "",
-    "define": "ANALYTICS_VENDOR_SPLIT"
+    "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
   },
   "experimentB": {},
   "experimentC": {}

@@ -10,4 +10,4 @@ besides 1 or 0.
 - `name`: Experiment name
 - `command`: Command used to build the experiment
 - `issue`: The issue tracker URL for this experiment
-- `define`: (Optional) The flag that is used to section out experiment code. This is passed into the `minify-replace` babel plugin and defaults to `false`. If an experiment relies on `minify-replace` to replace its experiment flag, this value must be defined.
+- `defineExperimentConstant`: (Optional) The flag that is used to section out experiment code. This is passed into the `minify-replace` babel plugin and defaults to `false`. If an experiment relies on `minify-replace` to replace its experiment flag, this value must be defined.

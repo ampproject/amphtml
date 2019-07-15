@@ -54,12 +54,12 @@ function getReplacePlugin() {
   }
 
   const replacements = [];
-  const defineFlag = argv.define;
+  const defineFlag = argv.defineExperimentConstant;
 
   // add define flags from arguments
   if (Array.isArray(defineFlag)) {
     if (defineFlag.length > 1) {
-      throw new Error('Only one define flag is allowed');
+      throw new Error('Only one defineExperimentConstant flag is allowed');
     } else {
       replacements.push(createReplacement(defineFlag[0]));
     }
@@ -69,7 +69,8 @@ function getReplacePlugin() {
 
   // default each experiment flag constant to false
   Object.keys(experimentsConfig).forEach(experiment => {
-    const experimentDefine = experimentsConfig[experiment]['define'];
+    const experimentDefine =
+      experimentsConfig[experiment]['defineExperimentConstant'];
 
     function flagExists(element) {
       return element['identifierName'] === experimentDefine;
@@ -91,7 +92,7 @@ function getReplacePlugin() {
 
 module.exports = {
   plugins({isEsmBuild, isForTesting, isSinglePass}) {
-    let pluginsToApply = defaultPlugins.slice();
+    let pluginsToApply = defaultPlugins.slice(0);
     // TODO(erwinm): This is temporary until we remove the assert/log removals
     // from the java transformation to the babel transformation.
     // There is currently a weird interaction where when we do the transform
