@@ -42,7 +42,7 @@ Dynamically injects ads into an AMP page by using a remotely-served configuratio
   <tr>
     <td class="col-fourty">
       <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">
+        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
           Supported Layouts
         </a>
       </strong>
@@ -91,7 +91,7 @@ should be specified on the tag.
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
@@ -314,9 +314,9 @@ The ENUM values for the `pos` field in the `placements` configuration object:
   </tr>
 </table>
 
-#### PlacementTypeEnum
+#### AttributesEnum
 
-The ENUM values for the `type` field in the `placements` configuration object:
+The ENUM value indicates attributes from configuration object for different ad formats:
 
 <table>
   <tr>
@@ -336,9 +336,9 @@ The ENUM values for the `type` field in the `placements` configuration object:
   </tr>
 </table>
 
-#### AttributesEnum
+#### PlacementTypeEnum
 
-The ENUM value indicate from configuration object for different ad formats:
+The ENUM values for the `type` field in the `placements` configuration object:
 
 <table>
   <tr>

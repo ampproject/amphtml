@@ -52,10 +52,7 @@ export class AmpDocService {
       win.document[AMPDOC_PROP] = this.singleDoc_;
     }
 
-    /** @private @const */
-    this.alwaysClosestAmpDoc_ = isExperimentOn(win, 'ampdoc-closest');
-
-    /** @private @const */
+    /** @private {boolean} */
     this.ampdocFieExperimentOn_ = isExperimentOn(win, 'ampdoc-fie');
   }
 
@@ -70,6 +67,17 @@ export class AmpDocService {
   }
 
   /**
+   * Returns the document in the single-doc mode. In a multi-doc mode, an
+   * error will be thrown.
+   * @return {!AmpDoc}
+   */
+  getSingleDoc() {
+    // TODO(#22733): once docroot migration is done, this should be renamed
+    // to `getTopDoc()` method.
+    return devAssert(this.singleDoc_);
+  }
+
+  /**
    * Returns the instance of the ampdoc (`AmpDoc`) that contains the specified
    * node. If the runtime is in the single-doc mode, the one global `AmpDoc`
    * instance is returned, unless specfically looking for a closer `AmpDoc`.
@@ -78,21 +86,11 @@ export class AmpDocService {
    *
    * TODO(#22733): rewrite docs once the ampdoc-fie is launched.
    *
-   * TODO(#17614): We should always look for the closest AmpDoc (make
-   * closestAmpDoc always true).
-   *
-   * @param {!Node=} opt_node
-   * @param {{
-   *  closestAmpDoc: boolean
-   * }=} opt_options
+   * @param {!Node} node
    * @return {?AmpDoc}
    */
-  getAmpDocIfAvailable(opt_node = undefined, {closestAmpDoc = false} = {}) {
+  getAmpDocIfAvailable(node) {
     if (this.ampdocFieExperimentOn_) {
-      // TODO(#22733): make node not optional.
-      const node = opt_node;
-      devAssert(node);
-
       let n = node;
       while (n) {
         // A custom element may already have the reference. If we are looking
@@ -126,25 +124,14 @@ export class AmpDocService {
       return null;
     }
 
-    // Single document: return it immediately.
-    if (this.singleDoc_ && !closestAmpDoc && !this.alwaysClosestAmpDoc_) {
-      return this.singleDoc_;
-    }
-
-    // TODO(sparhami) Should we always require a node to be passed? This will
-    // make sure any functionality that works for a standalone AmpDoc works if
-    // the AmpDoc is loaded in a shadow doc.
-    if (!this.singleDoc_) {
-      devAssert(opt_node);
-    }
     // Otherwise discover and possibly create the ampdoc.
-    let n = opt_node;
+    let n = node;
     while (n) {
       // A custom element may already have the reference. If we are looking
       // for the closest AmpDoc, the element might have a reference to the
       // global AmpDoc, which we do not want. This occurs when using
       // <amp-next-page>.
-      if (n.ampdoc_ && (this.alwaysClosestAmpDoc_ || !closestAmpDoc)) {
+      if (n.ampdoc_) {
         return n.ampdoc_;
       }
 
@@ -156,7 +143,8 @@ export class AmpDocService {
       }
 
       // Shadow doc.
-      const shadowRoot = getShadowRootNode(n);
+      const shadowRoot =
+        n.nodeType == /* DOCUMENT */ 9 ? n : getShadowRootNode(n);
       if (!shadowRoot) {
         break;
       }
@@ -170,11 +158,7 @@ export class AmpDocService {
 
     // If we were looking for the closest AmpDoc, then fall back to the single
     // doc if there is no other AmpDoc that is closer.
-    if (this.singleDoc_) {
-      return this.singleDoc_;
-    }
-
-    return null;
+    return this.singleDoc_;
   }
 
   /**
@@ -185,30 +169,22 @@ export class AmpDocService {
    * node and, if necessary, initializes it.
    *
    * An Error is thrown in development if no `AmpDoc` is found.
-   * @param {!Node=} opt_node
-   * @param {{
-   *  closestAmpDoc: boolean
-   * }=} opt_options
+   * @param {!Node} node
    * @return {!AmpDoc}
    */
-  getAmpDoc(opt_node, opt_options) {
-    // TODO(#22733): make node not optional.
+  getAmpDoc(node) {
     // Ensure that node is attached if specified. This check uses a new and
     // fast `isConnected` API and thus only checked on platforms that have it.
     // See https://www.chromestatus.com/feature/5676110549352448.
-    if (opt_node) {
-      devAssert(
-        opt_node['isConnected'] === undefined ||
-          opt_node['isConnected'] === true,
-        'The node must be attached to request ampdoc.'
-      );
-    }
+    devAssert(
+      node['isConnected'] === undefined || node['isConnected'] === true,
+      'The node must be attached to request ampdoc.'
+    );
 
-    const ampdoc = this.getAmpDocIfAvailable(opt_node, opt_options);
+    const ampdoc = this.getAmpDocIfAvailable(node);
     if (!ampdoc) {
-      throw dev().createError('No ampdoc found for', opt_node);
+      throw dev().createError('No ampdoc found for', node);
     }
-
     return ampdoc;
   }
 
@@ -239,9 +215,7 @@ export class AmpDocService {
   installFieDoc(url, childWin) {
     const doc = childWin.document;
     devAssert(!doc[AMPDOC_PROP], 'The fie already contains ampdoc');
-    const frameElement = /** @type {!Node} */ (devAssert(
-      getParentWindowFrameElement(doc, this.win)
-    ));
+    const frameElement = devAssert(childWin.frameElement);
     const ampdoc = new AmpDocFie(childWin, url, this.getAmpDoc(frameElement));
     doc[AMPDOC_PROP] = ampdoc;
     return ampdoc;
@@ -712,4 +686,14 @@ export function installDocService(win, isSingleDoc) {
   registerServiceBuilder(win, 'ampdoc', function() {
     return new AmpDocService(win, isSingleDoc);
   });
+}
+
+/**
+ * @param {AmpDocService} ampdocService
+ * @param {boolean} value
+ * @visibleForTesting
+ */
+export function updateFieModeForTesting(ampdocService, value) {
+  // TODO(#22733): remove this method once ampdoc-fie is launched.
+  ampdocService.ampdocFieExperimentOn_ = value;
 }

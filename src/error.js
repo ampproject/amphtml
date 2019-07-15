@@ -377,7 +377,7 @@ export function maybeReportErrorToViewer(win, data) {
   if (!ampdocService.isSingleDoc()) {
     return Promise.resolve(false);
   }
-  const ampdocSingle = ampdocService.getAmpDoc();
+  const ampdocSingle = ampdocService.getSingleDoc();
   const htmlElement = ampdocSingle.getRootNode().documentElement;
   const docOptedIn = htmlElement.hasAttribute('report-errors-to-viewer');
   if (!docOptedIn) {
@@ -708,7 +708,7 @@ export function reportErrorToAnalytics(error, win) {
  */
 function getRootElement_(win) {
   const root = Services.ampdocServiceFor(win)
-    .getAmpDoc()
+    .getSingleDoc()
     .getRootNode();
   return dev().assertElement(root.documentElement || root.body || root);
 }

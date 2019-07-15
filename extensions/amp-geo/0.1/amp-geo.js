@@ -107,7 +107,6 @@ export class AmpGeo extends AMP.BaseElement {
     this.matchedGroups_ = [];
     /** @private {Array<string>} */
     this.definedGroups_ = [];
-    /** @Private {} */
   }
 
   /** @override */
