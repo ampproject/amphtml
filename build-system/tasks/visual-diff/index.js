@@ -38,10 +38,10 @@ const {
   shortSha,
 } = require('../../git');
 const {clean} = require('../clean');
-const {dist} = require('../dist');
 const {execOrDie, execScriptAsync} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
+const {performDist} = require('../dist');
 
 // optional dependencies for local development (outside of visual diff tests)
 let puppeteer;
@@ -842,9 +842,8 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       );
     }
   } else {
-    argv.fortesting = true;
     await clean();
-    await dist(argv);
+    await performDist({fortesting: true});
   }
 }
 

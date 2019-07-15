@@ -25,8 +25,8 @@ const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
 const {clean} = require('../clean');
 const {cyan} = require('ansi-colors');
-const {dist} = require('../dist');
 const {execOrDie, execScriptAsync} = require('../../exec');
+const {performDist} = require('../dist');
 const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
 
@@ -43,9 +43,8 @@ function installPackages_() {
 }
 
 async function buildRuntime_() {
-  argv.fortesting = true;
   await clean();
-  await dist(argv);
+  await performDist({fortesting: true});
 }
 
 function launchWebServer_() {

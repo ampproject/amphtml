@@ -57,7 +57,7 @@ const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const {green, cyan} = colors;
-let argv = require('minimist')(process.argv.slice(2));
+const argv = require('minimist')(process.argv.slice(2));
 
 const babel = require('@babel/core');
 const deglob = require('globs-to-files');
@@ -87,17 +87,22 @@ function transferSrcsToTempDir() {
 }
 
 /**
- * Dist Build
- * @param {Object|Function} args
+ * Entry point for the `gulp dist` task
  * @return {!Promise}
  */
-async function dist(args) {
-  // The default 'dist' task passes in a callback of type Function. The testing
-  // tasks ('e2e', 'integration', and 'visual-diff') pass in args via an Object.
-  if (typeof args == 'object') {
-    argv = args;
-  }
+async function dist() {
+  return performDist();
+}
 
+/**
+ * Used by the `gulp dist` task and by other test tasks that compile the runtime
+ * as a pre-requisite step
+ * @param {?Object} extraArgs
+ */
+async function performDist(extraArgs = {}) {
+  Object.keys(extraArgs).forEach(key => {
+    argv[key] = extraArgs[key];
+  });
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
@@ -441,6 +446,7 @@ function preBuildLoginDoneVersion(version) {
 
 module.exports = {
   dist,
+  performDist,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */

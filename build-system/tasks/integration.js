@@ -25,7 +25,7 @@ const {
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {clean} = require('./clean');
-const {dist} = require('./dist');
+const {performDist} = require('./dist');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -37,10 +37,8 @@ class Runner extends RuntimeTestRunner {
     if (argv.nobuild) {
       return;
     }
-    argv.fortesting = true;
-    argv.compiled = true;
     await clean();
-    await dist(argv);
+    await performDist({compiled: true, fortesting: true});
   }
 }
 
