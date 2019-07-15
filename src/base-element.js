@@ -656,7 +656,7 @@ export class BaseElement {
    * @return {number}
    */
   getDpr() {
-    return this.element.getResources().getDpr();
+    return this.win.devicePixelRatio || 1;
   }
 
   /**
