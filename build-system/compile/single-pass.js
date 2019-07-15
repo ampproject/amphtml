@@ -592,7 +592,7 @@ function wrapMainBinaries() {
         hires: true,
         source: path,
       });
-      const remapped = resorcery(map, loadSourceMap, !!argv.full_sourcemaps);
+      const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
       fs.writeFileSync(path, s.toString(), 'utf8');
       fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
     } else {
@@ -603,7 +603,7 @@ function wrapMainBinaries() {
       bundle.addSource(s);
       bundle.append(suffix);
       const map = bundle.generateDecodedMap({hires: true});
-      const remapped = resorcery(map, loadSourceMap, !!argv.full_sourcemaps);
+      const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
       fs.writeFileSync(path, bundle.toString(), 'utf8');
       fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
     }
@@ -668,7 +668,7 @@ function postPrepend(extension, prependContents) {
     }
     bundle.addSource(suffix);
     const map = bundle.generateDecodedMap({hires: true});
-    const remapped = resorcery(map, loadSourceMap, !!argv.full_sourcemaps);
+    const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
     fs.writeFileSync(path, bundle.toString(), 'utf8');
     fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
   });
@@ -706,13 +706,30 @@ function eliminateIntermediateBundles() {
       targets.push(createFullPath(extension.version));
     }
     targets.forEach(path => {
-      const {code, map} = babel.transformFileSync(path, {
-        inputSourceMap: JSON.parse(readFile(`${path}.map`)),
+      const map = loadSourceMap(path);
+      function returnMapFirst(map) {
+        let first = true;
+        return function(file) {
+          if (first) {
+            first = false;
+            return map;
+          }
+          return loadSourceMap(file);
+        };
+      }
+      const {code, map: babelMap} = babel.transformFileSync(path, {
         plugins: conf.eliminateIntermediateBundles(),
         retainLines: true,
         sourceMaps: true,
+        inputSourceMap: false,
       });
-      const compressed = terser.minify(code, {
+      let remapped = resorcery(
+        babelMap,
+        returnMapFirst(map),
+        !argv.full_sourcemaps
+      );
+
+      const {code: compressed, map: terserMap} = terser.minify(code, {
         mangle: false,
         compress: {
           defaults: false,
@@ -723,9 +740,19 @@ function eliminateIntermediateBundles() {
           comments: 'all',
           keep_quoted_props: true,
         },
-      }).code;
+        sourceMap: true,
+      });
+
+      // TODO: Resorcery should support a chain, instead of having to call
+      // multiple times.
+      remapped = resorcery(
+        terserMap,
+        returnMapFirst(remapped),
+        !argv.full_sourcemaps
+      );
+
       fs.outputFileSync(path, compressed);
-      fs.outputFileSync(`${path}.map`, JSON.stringify(map));
+      fs.outputFileSync(`${path}.map`, remapped.toString());
     });
   });
 }
