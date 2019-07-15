@@ -58,6 +58,7 @@ async function prCheck(cb) {
   const buildTargets = determineBuildTargets(FILENAME);
   runCheck('gulp lint --local_changes');
   runCheck('gulp presubmit');
+  runCheck('gulp check-exact-versions');
 
   if (buildTargets.has('AVA')) {
     runCheck('gulp ava');
