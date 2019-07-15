@@ -18,7 +18,7 @@ import {AmpEvents} from '../../../../src/amp-events';
 import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
 import {Services} from '../../../../src/services';
 import {closestAncestorElementBySelector} from '../../../../src/dom';
-import {createCustomEvent} from '../../../../src/event-helper';
+import {createCustomEvent, getDetail} from '../../../../src/event-helper';
 
 function getForm(doc) {
   const form = doc.createElement('form');
@@ -67,6 +67,20 @@ function dispatchFormValueChangeEvent(element, win) {
     {bubbles: true}
   );
   element.dispatchEvent(ampValueChangeEvent);
+}
+
+function captureEventDispatched(eventName, element, dispatchEventFunction) {
+  let eventCaptured = null;
+
+  const handlerToCaptureEvent = e => {
+    eventCaptured = e;
+  };
+
+  element.addEventListener(eventName, handlerToCaptureEvent);
+  dispatchEventFunction();
+  element.removeEventListener(eventName, handlerToCaptureEvent);
+
+  return eventCaptured;
 }
 
 describes.realWin('form-dirtiness', {}, env => {
@@ -390,6 +404,54 @@ describes.realWin('form-dirtiness', {}, env => {
       changeInput(input, 'changed again');
 
       expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+  });
+
+  describe('AmpEvents.FORM_DIRTINESS_CHANGE', () => {
+    let input;
+
+    beforeEach(() => {
+      input = createElement(doc, 'input', {type: 'text', name: 'text'});
+      form.appendChild(input);
+    });
+
+    it('dispatches an event when the form transitions from clean to dirty', () => {
+      const changeToDirty = () => changeInput(input, 'changed');
+      const eventDispatched = captureEventDispatched(
+        AmpEvents.FORM_DIRTINESS_CHANGE,
+        form,
+        changeToDirty
+      );
+
+      expect(eventDispatched).to.exist;
+      expect(getDetail(eventDispatched).isDirty).to.be.true;
+    });
+
+    it('dispatches an event when the form transitions from dirty to clean', () => {
+      changeInput(input, 'changed');
+
+      const changeToClean = () => changeInput(input, '');
+      const eventDispatched = captureEventDispatched(
+        AmpEvents.FORM_DIRTINESS_CHANGE,
+        form,
+        changeToClean
+      );
+
+      expect(eventDispatched).to.exist;
+      expect(getDetail(eventDispatched).isDirty).to.be.false;
+    });
+
+    it('does not dispatch an event when the dirtiness state does not change', () => {
+      changeInput(input, 'changed');
+
+      const remainDirty = () => changeInput(input, 'still dirty');
+      const eventDispatched = captureEventDispatched(
+        AmpEvents.FORM_DIRTINESS_CHANGE,
+        form,
+        remainDirty
+      );
+
+      expect(eventDispatched).to.not.exist;
     });
   });
 });

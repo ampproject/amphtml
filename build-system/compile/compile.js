@@ -37,11 +37,10 @@ const {VERSION: internalRuntimeVersion} = require('../internal-version');
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
-// TODO(erwinm/rsima, #23238): Theres a weird race condition where when we use
-// `pseudo_names` we get "Error parsing json encoded files". turning the closure
-// invocations to 1 seems to fix the issue.
-const MAX_PARALLEL_CLOSURE_INVOCATIONS =
-  argv.single_pass || argv.pseudo_names ? 1 : 4;
+
+// `--pseudo_names` slows down closure compilation and results in a race.
+// See https://github.com/google/closure-compiler-npm/issues/9
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.pseudo_names ? 1 : 4;
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
@@ -290,15 +289,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       source_map_include_content: !!argv.full_sourcemaps,
       source_map_location_mapping: '|' + sourceMapBase,
       warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
+      // These arrays are filled in below.
       jscomp_error: [],
-      // accessControls: Demote "Access to private variable" errors to allow
-      //     AMP code to access variables in other files.
-      jscomp_warning: ['accessControls'],
-      // moduleLoad: Demote "module not found" type check errors until
-      //     https://github.com/google/closure-compiler/issues/3041 is fixed.
-      // unknownDefines: Demote warning for "Unknown @define" since we use
-      //     define to pass args such as FORTESTING to our runner.
-      jscomp_off: ['moduleLoad', 'unknownDefines'],
+      jscomp_warning: [],
+      jscomp_off: [],
       define,
       hide_warnings_for: hideWarningsFor,
     };
@@ -315,7 +309,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       compilerOptions.formatting = 'PRETTY_PRINT';
     }
 
-    // For now do type check separately
+    // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
+    // for a full list of closure's default error / warning levels.
     if (options.typeCheckOnly) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
@@ -328,8 +323,12 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         'constantProperty',
         'globalThis'
       );
+      compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
       compilerOptions.conformance_configs =
         'build-system/conformance-config.textproto';
+    } else {
+      compilerOptions.jscomp_warning.push('accessControls', 'moduleLoad');
+      compilerOptions.jscomp_off.push('unknownDefines');
     }
 
     if (compilerOptions.define.length == 0) {
