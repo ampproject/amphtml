@@ -470,12 +470,13 @@ function buildExtensionJs(path, name, version, latestVersion, options) {
         : wrappers.extension(name, options.loadPriority),
     })
   ).then(() => {
-    // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
+    // Copy @ampproject/worker-dom/dist/amp/worker/worker.js to dist/ folder.
     if (name === 'amp-script') {
       const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
       const file = `dist/v0/amp-script-worker-${version}`;
-      // TODO(choumx): Minified amp-script worker binary?
-      fs.copyFileSync(dir + 'worker.mjs', `${file}.js`);
+      // The "js" output is minified and transpiled to ES5.
+      fs.copyFileSync(dir + 'worker.js', `${file}.js`);
+      // The "mjs" output is unminified ES6 and has debugging flags enabled.
       fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
     }
   });
