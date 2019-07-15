@@ -18,7 +18,7 @@ Traditionally, a feature in experimental mode can only be used in development an
 
 ## Origin Trial - the details
 - No Origin Trial can last more than 3 months.
-- An Origin Trial duration can be prematurely shortened by us (with 7 days of notice) if usage exceeds more than 0.1% of AMP page loads (the deprecation threshold).
+- An Origin Trial duration can be prematurely shortened by us (with 7 days of notice) if usage exceeds 0.1% of AMP page loads.
 - Extending an Origin Trial requires approval from the Approvers Working Group (@ampproject/wg-approvers).
 
 ## Enable an Origin Trial
