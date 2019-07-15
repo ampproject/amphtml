@@ -35,5 +35,12 @@ export function mgid(global, data) {
     `${encodeURIComponent(data.widget)}.js?t=` +
     Math.floor(Date.now() / 36e5);
 
+  window.context.observeIntersection(function(changes) {
+    changes.forEach(function(c) {
+      window['intersectionRect' + data.widget] = c.intersectionRect;
+      window['boundingClientRect' + data.widget] = c.boundingClientRect;
+    });
+  });
+
   loadScript(global, data.url || url);
 }

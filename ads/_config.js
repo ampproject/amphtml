@@ -639,7 +639,12 @@ export const adConfig = {
   },
 
   'mgid': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.mgid.com',
+      'https://servicer.mgid.com',
+      'https://s-img.mgid.com',
+    ],
   },
 
   'microad': {
