@@ -24,8 +24,7 @@ const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {clean} = require('./clean');
-const {performDist} = require('./dist');
+const {execOrDie} = require('../exec');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -37,8 +36,8 @@ class Runner extends RuntimeTestRunner {
     if (argv.nobuild) {
       return;
     }
-    await clean();
-    await performDist({compiled: true, fortesting: true});
+    execOrDie('gulp clean');
+    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
   }
 }
 
@@ -67,7 +66,8 @@ integration.flags = {
   'chrome_flags': '  Uses the given flags to launch Chrome',
   'compiled':
     '  Changes integration tests to use production JS binaries for execution',
-  'config': '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'coverage': '  Run tests in code coverage mode',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',

@@ -23,10 +23,8 @@ const glob = require('glob');
 const log = require('fancy-log');
 const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
-const {clean} = require('../clean');
 const {cyan} = require('ansi-colors');
 const {execOrDie, execScriptAsync} = require('../../exec');
-const {performDist} = require('../dist');
 const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
 
@@ -42,9 +40,9 @@ function installPackages_() {
   execOrDie('npx yarn --cwd build-system/tasks/e2e', {'stdio': 'ignore'});
 }
 
-async function buildRuntime_() {
-  await clean();
-  await performDist({fortesting: true});
+function buildRuntime_() {
+  execOrDie('gulp clean');
+  execOrDie(`gulp dist --fortesting --config ${argv.config}`);
 }
 
 function launchWebServer_() {
@@ -108,7 +106,7 @@ async function e2e() {
 
   // build runtime
   if (!argv.nobuild) {
-    await buildRuntime_();
+    buildRuntime_();
   }
 
   // start up web server
@@ -169,7 +167,8 @@ e2e.flags = {
   'browsers':
     '  Run only the specified browser tests. Options are ' +
     '`chrome`, `firefox`.',
-  'config': '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',

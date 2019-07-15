@@ -87,22 +87,10 @@ function transferSrcsToTempDir() {
 }
 
 /**
- * Entry point for the `gulp dist` task
+ * Dist Build
  * @return {!Promise}
  */
 async function dist() {
-  await performDist();
-}
-
-/**
- * Used by the `gulp dist` task and by other test tasks that compile the runtime
- * as a pre-requisite step
- * @param {?Object} extraArgs
- */
-async function performDist(extraArgs = {}) {
-  Object.keys(extraArgs).forEach(key => {
-    argv[key] = extraArgs[key];
-  });
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
@@ -446,7 +434,6 @@ function preBuildLoginDoneVersion(version) {
 
 module.exports = {
   dist,
-  performDist,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */

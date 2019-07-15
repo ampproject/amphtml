@@ -37,11 +37,9 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../../git');
-const {clean} = require('../clean');
 const {execOrDie, execScriptAsync} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
-const {performDist} = require('../dist');
 
 // optional dependencies for local development (outside of visual diff tests)
 let puppeteer;
@@ -765,7 +763,7 @@ async function createEmptyBuild() {
  * Runs the AMP visual diff tests.
  */
 async function visualDiff() {
-  await ensureOrBuildAmpRuntimeInTestMode_();
+  ensureOrBuildAmpRuntimeInTestMode_();
   installPercy_();
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
@@ -842,8 +840,8 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       );
     }
   } else {
-    await clean();
-    await performDist({fortesting: true});
+    execOrDie('gulp clean');
+    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
   }
 }
 
@@ -887,7 +885,8 @@ visualDiff.flags = {
   'master': '  Includes a blank snapshot (baseline for skipped builds)',
   'empty': '  Creates a dummy Percy build with only a blank snapshot',
   'chrome_debug': '  Prints debug info from Chrome',
-  'config': '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'webserver_debug': '  Prints debug info from the local gulp webserver',
   'debug': '  Prints all the above debug info',
   'grep': '  Runs tests that match the pattern',
