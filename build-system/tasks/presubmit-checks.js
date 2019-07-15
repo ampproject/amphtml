@@ -123,6 +123,7 @@ const forbiddenTerms = {
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
       'build-system/pr-check/yarn-checks.js',
+      'build-system/tasks/check-exact-versions.js',
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
