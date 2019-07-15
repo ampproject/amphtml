@@ -80,8 +80,8 @@ The messages in this section are sent by the Viewer Integration Script and are n
 
 | Message             | Description | Request | Response                               |
 |---------------------| ------------|---------|----------------------------------------|
-| `channelOpen`| This message is sent from the AMP document to the Viewer to tell it that the document is ready to receive messages. | {} | boolean|
-| `touchstart, touchmove, and touchend`|These three messages are sent by the Viewer Integration Script to the Viewer and proxy touch events in the iframe. | Object (A copy of a browser TouchEvent.) | undefined|
+|`channelOpen`| This message is sent from the AMP document to the Viewer to tell it that the document is ready to receive messages. | {} | boolean|
+|`touchstart, touchmove, and touchend`|These three messages are sent by the Viewer Integration Script to the Viewer and proxy touch events in the iframe. | Object (A copy of a browser TouchEvent.) | undefined|
 |`unloaded`|This message is sent in response to a window unloaded event in the document. The Viewer can use this to display an error if an unexpected unload occurs. |true | undefined|
 
 #### AMP Runtime Messages

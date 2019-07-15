@@ -18,7 +18,7 @@ limitations under the License.
 
 ## Introduction
 
-This document explains the communication between a Viewer and AMP documents by using the open-source [AMP Viewer Integration API](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration).  The AMP Viewer Integration API provides a protocol to establish a connection and send messages between the Viewer and AMP documents.
+This document explains the communication between a Viewer and AMP documents by using the open-source [AMP Viewer Integration API](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration). The AMP Viewer Integration API provides a protocol to establish a connection and send [messages](https://github.com/ampproject/amphtml/blob/viewer-doc-api-link/extensions/amp-viewer-integration/amp-doc-viewer-api.md) between the Viewer and AMP documents.
 
 <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/intro.png" height="300px"></img>
 
