@@ -271,7 +271,7 @@ class AnimationRunner {
   pause() {
     // Animation hasn't started yet since it's waiting for a sequenced
     // animation.
-    if (this.scheduledActivity_ !== null) {
+    if (this.scheduledWait_ !== null) {
       return;
     }
 
@@ -284,7 +284,7 @@ class AnimationRunner {
   resume() {
     // Animation hasn't started yet since it's waiting for a sequenced
     // animation.
-    if (this.scheduledActivity_ !== null) {
+    if (this.scheduledWait_ !== null) {
       return;
     }
 
