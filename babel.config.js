@@ -46,12 +46,14 @@ module.exports = function(api) {
   api.cache(true);
   return {
     'presets': [
-      '@babel/preset-env',
-      {
-        'modules': isDist ? false : 'commonjs',
-        'loose': true,
-        'targets': esm ? esmTarget : es5Target,
-      },
+      [
+        '@babel/preset-env',
+        {
+          'modules': isDist ? false : 'commonjs',
+          'loose': true,
+          'targets': esm ? esmTarget : es5Target,
+        },
+      ],
     ],
     'compact': false,
     'sourceType': 'module',
