@@ -28,23 +28,36 @@
 const minimist = require('minimist');
 const {isTravisBuild} = require('./build-system/travis');
 const argv = minimist(process.argv.slice(2));
+const es5Presets = [
+  '@babel/preset-env',
+  {
+    'modules': isDist ? false: 'commonjs',
+    'loose': true,
+    'targets': {
+      'esmodules': true,
+    }
+  },
+];
+
+const esmPresets = [
+  '@babel/preset-env',
+  {
+    'modules': isDist ? false: 'commonjs',
+    'loose': true,
+    'targets': {
+      'esmodules': true,
+    }
+  },
+];
 
 // eslint-disable-next-line amphtml-internal/no-module-exports
 module.exports = function(api) {
   const isDist = argv._.includes('dist');
+  const {esm} = argv;
   api.cache(true);
   return {
     'presets': [
-      [
-        '@babel/preset-env',
-        {
-          'modules': isDist ? false: 'commonjs',
-          'loose': true,
-          'targets': {
-            'esmodules': true,
-          }
-        },
-      ],
+      esm ? esmPresets : es5Presets,
     ],
     'compact': false,
     'sourceType': 'module',

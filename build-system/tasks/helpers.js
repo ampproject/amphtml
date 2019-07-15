@@ -256,6 +256,7 @@ function compile(watch, shouldMinify) {
         wrapper: wrappers.mainBinary,
         singlePassCompilation: argv.single_pass,
         esmPassCompilation: argv.esm,
+        includeOnlyESMLevelPolyfills: argv.esm,
       });
     });
 }
