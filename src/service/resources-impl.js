@@ -427,14 +427,6 @@ export class Resources {
   }
 
   /**
-   * Returns the maximum DPR available on this device.
-   * @return {number}
-   */
-  getMaxDpr() {
-    return this.maxDpr_;
-  }
-
-  /**
    * Returns the most optimal DPR currently recommended.
    * @return {number}
    */
