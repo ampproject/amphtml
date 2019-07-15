@@ -76,6 +76,9 @@ export class PooolVendor {
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc.win);
 
+    /** @const @private {?../../../src/service/navigation.Navigation} */
+    this.navigation_ = Services.navigationForDoc(this.ampdoc);
+
     /** @const @private {!JsonObject} For shape see PooolConfigDef */
     this.pooolConfig_ = this.accessSource_.getAdapterConfig();
 
@@ -196,6 +199,7 @@ export class PooolVendor {
       this.iframe_.src = url;
       listenFor(this.iframe_, 'release', this.onRelease_.bind(this));
       listenFor(this.iframe_, 'resize', this.onResize_.bind(this));
+      listenFor(this.iframe_, 'click', this.onClick_.bind(this));
       pooolContainer.appendChild(this.iframe_);
     });
   }
@@ -217,6 +221,16 @@ export class PooolVendor {
    */
   onResize_(msg) {
     setStyle(this.iframe_, 'height', msg.height);
+  }
+
+  /**
+   * @private
+   * @param {!Object} msg
+   */
+  onClick_(msg) {
+    if (msg.url) {
+      this.navigation_.navigateTo(this.ampdoc.win, msg.url);
+    }
   }
 
   /**
