@@ -157,6 +157,7 @@ class AmpAccordion extends AMP.BaseElement {
         this.toggleExpandMutations_(mutations);
       });
       expandObserver.observe(section, {
+        attributes: true,
         attributeFilter: ['data-expand'],
       });
 
