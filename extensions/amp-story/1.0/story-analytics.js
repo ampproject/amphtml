@@ -17,6 +17,7 @@ import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {getVariableService} from './variable-service';
+import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 
 /** @enum {string} */
@@ -65,6 +66,9 @@ export class StoryAnalyticsService {
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(win);
 
+    /** @private {!Object} */
+    this.eventsPerPage_ = map();
+
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
 
@@ -75,7 +79,9 @@ export class StoryAnalyticsService {
   initializeListeners_() {
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
       this.triggerEvent(
-        isActive ? AnalyticsEvent.BOOKEND_ENTER : AnalyticsEvent.BOOKEND_EXIT
+        isActive
+          ? StoryAnalyticsEvent.BOOKEND_ENTER
+          : StoryAnalyticsEvent.BOOKEND_EXIT
       );
     });
 
@@ -86,14 +92,14 @@ export class StoryAnalyticsService {
           return;
         }
 
-        this.triggerEvent(AnalyticsEvent.PAGE_VISIBLE);
+        this.triggerEvent(StoryAnalyticsEvent.PAGE_VISIBLE);
 
         const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
         const pageIndex = this.storeService_.get(
           StateProperty.CURRENT_PAGE_INDEX
         );
         if (pageIndex === pageIds.length - 1) {
-          this.triggerEvent(AnalyticsEvent.LAST_PAGE_VISIBLE);
+          this.triggerEvent(StoryAnalyticsEvent.LAST_PAGE_VISIBLE);
         }
       },
       true /* callToInitialize */
@@ -104,6 +110,31 @@ export class StoryAnalyticsService {
    * @param {!StoryAnalyticsEvent} eventType
    */
   triggerEvent(eventType) {
-    this.element_.dispatchCustomEvent(eventType, this.variableService_.get());
+    this.element_.dispatchCustomEvent(eventType, this.getDetails_(eventType));
+  }
+
+  /**
+   * Consolidates count of event types per page and variables of the event.
+   * @param {!StoryAnalyticsEvent} eventType
+   * @private
+   * @return {!Object}
+   */
+  getDetails_(eventType) {
+    const details = {};
+    const vars = this.variableService_.get();
+    const pageId = vars['storyPageId'];
+
+    this.eventsPerPage_[pageId] = this.eventsPerPage_[pageId] || {};
+
+    this.eventsPerPage_[pageId][eventType] =
+      this.eventsPerPage_[pageId][eventType] || 0;
+
+    this.eventsPerPage_[pageId][eventType]++;
+
+    if (this.eventsPerPage_[pageId][eventType] > 1) {
+      Object.assign(details, {repeated: true});
+    }
+
+    return Object.assign({detailsForPage: details}, vars);
   }
 }
