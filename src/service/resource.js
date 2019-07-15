@@ -152,7 +152,7 @@ export class Resource {
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = resources;
 
-    /** @const @private {!./service/viewport/viewport-impl.Viewport} */
+    /** @const @private {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(element);
 
     /** @const @private {boolean} */
