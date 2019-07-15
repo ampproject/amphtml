@@ -371,6 +371,36 @@ describe
           });
         });
 
+        it('should skip amp-list children during scan', () => {
+          // <div>
+          //   <amp-list [foo]="1+1">
+          //     <h1 [text]="2+2"></h1>
+          //   </amp-list>
+          // </div>
+          // <p>
+          //   <span [text]="3+3"></span>
+          // </p>
+          const parent = document.createElement('div');
+          container.appendChild(parent);
+
+          const uncle = document.createElement('p');
+          container.appendChild(uncle);
+
+          const list = createElement(env, parent, `[class]="'x'"`, 'amp-list');
+          const child = createElement(env, list, '[text]="2+2"', 'h1');
+          const cousin = createElement(env, uncle, '[text]="3+3"', 'span');
+
+          expect(bind.numberOfBindings()).to.equal(0);
+          return onBindReadyAndSetState(env, bind, {}).then(() => {
+            // Children of amp-list should be skipped.
+            expect(child.textContent).to.equal('');
+
+            // But cousins and the amp-list itself shouldn't be skipped.
+            expect(list.className).to.equal('x');
+            expect(cousin.textContent).to.equal('6');
+          });
+        });
+
         it('should scan fixed layer for bindings', () => {
           // Mimic FixedLayer by creating a sibling <body> element.
           const doc = env.win.document;

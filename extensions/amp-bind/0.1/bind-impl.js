@@ -859,7 +859,7 @@ export class Bind {
       // rescan() with {fast: true} for better performance. Note that only
       // children are opted-out (e.g. amp-list children, not amp-list itself).
       const next = FAST_RESCAN_TAGS.includes(node.nodeName)
-        ? walker.nextSibling()
+        ? this.skipSubtree_(walker)
         : walker.nextNode();
       return !next || limitExceeded;
     };
@@ -890,6 +890,23 @@ export class Bind {
       };
       chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
     });
+  }
+
+  /**
+   * Skips the subtree at the walker's current node and returns the next node
+   * in document order, if any. Otherwise, returns null.
+   * @param {!TreeWalker} walker
+   * @return {?Node}
+   * @private
+   */
+  skipSubtree_(walker) {
+    for (let n = walker.currentNode; n; n = walker.parentNode()) {
+      const sibling = walker.nextSibling();
+      if (sibling) {
+        return sibling;
+      }
+    }
+    return null;
   }
 
   /**
