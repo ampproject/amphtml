@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 
 /**
@@ -39,4 +40,34 @@ export function getUniqueId(win) {
       win.screen.width +
       win.screen.height
   );
+}
+
+/**
+ * Finds a meta tag in document with given name.
+ * @param {Document} doc
+ * @param {string} name
+ */
+function queryForMetaTagName(doc, name) {
+  const escaped = escapeCssSelectorIdent(name);
+  const selector = `meta[name=${escaped}]`;
+  return doc.querySelector(selector);
+}
+
+/**
+ * Gets content from a meta tag in the doc with given name.
+ * @param {!Document} doc
+ * @param {string} name
+ */
+export function getContentFromMetaTag(doc, name) {
+  const tag = queryForMetaTagName(doc, name);
+  return tag && tag.content;
+}
+
+/**
+ * Returns document from given iframe, or null if non FIE.
+ * @param {HTMLIFrameElement} iframe
+ * @return {?Document}
+ */
+export function getFrameDoc(iframe) {
+  return iframe.contentDocument || iframe.contentWindow.document;
 }
