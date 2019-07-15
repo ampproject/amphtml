@@ -562,12 +562,7 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(wrapMainBinaries)
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
-    .then(thirdPartyConcat)
-    .catch(err => {
-      console.error(err.message);
-      console.error(err.stack);
-      throw err;
-    });
+    .then(thirdPartyConcat);
 };
 
 /**
