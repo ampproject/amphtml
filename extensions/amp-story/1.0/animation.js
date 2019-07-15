@@ -114,7 +114,7 @@ class AnimationRunner {
     /** @private @const */
     this.keyframes_ = this.filterKeyframes_(animationDef.preset.keyframes);
 
-    /** @private @const */
+    /** @private */
     this.delay_ = animationDef.delay || this.presetDef_.delay || 0;
 
     /** @private @const */
@@ -273,7 +273,10 @@ class AnimationRunner {
       promise = promise.then(() => {
         return new Promise(resolve => {
           this.delayStartTime_ = Date.now();
-          this.delayId_ = this.timer_.delay(resolve, this.delay_);
+          this.delayId_ = /** @type {number} */ (this.timer_.delay(
+            resolve,
+            this.delay_
+          ));
         }).then(() => {
           this.delayId_ = null;
           this.delayElapsedTime_ = null;
