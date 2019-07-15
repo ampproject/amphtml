@@ -279,11 +279,7 @@ function describeEnv(factory) {
     }
 
     function createBrowserDescribe() {
-      const {browsers} = getConfig();
-
-      const allowedBrowsers = browsers
-        ? new Set(browsers.split(',').map(x => x.trim()))
-        : defaultBrowsers;
+      const allowedBrowsers = getAllowedBrowsers();
 
       spec.browsers
         .filter(x => allowedBrowsers.has(x))
@@ -292,6 +288,20 @@ function describeEnv(factory) {
             createVariantDescribe(browserName);
           });
         });
+    }
+
+    function getAllowedBrowsers() {
+      const {engine, browsers} = getConfig();
+
+      if (engine === 'puppeteer') {
+        return new Set(['chrome']);
+      }
+
+      const allowedBrowsers = browsers
+        ? new Set(browsers.split(',').map(x => x.trim()))
+        : defaultBrowsers;
+
+      return allowedBrowsers;
     }
 
     function createVariantDescribe(browserName) {

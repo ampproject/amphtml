@@ -59,7 +59,8 @@ const DEFAULT_WAIT_TIMEOUT = 10000;
  * @template T
  */
 async function waitFor(page, valueFn, args, condition, opt_mutate) {
-  let value = await evaluate(page, valueFn, ...args);
+  const handle = await evaluate(page, valueFn, ...args);
+  let value = await handle.jsonValue();
   if (opt_mutate) {
     value = await opt_mutate(value);
   }
@@ -70,7 +71,9 @@ async function waitFor(page, valueFn, args, condition, opt_mutate) {
       {timeout: DEFAULT_WAIT_TIMEOUT},
       ...args
     );
-    value = await handle.jsonValue();
+    const prop = await handle.jsonValue();
+    value = 'value' in prop ? prop.value : prop;
+    // console.log('0: ', value);
     if (opt_mutate) {
       value = await opt_mutate(value);
     }
@@ -164,6 +167,17 @@ class PuppeteerController {
   }
 
   /**
+   * Gets the result of a value function which is boxed in an object.
+   * @param {*} fn
+   * @param  {...any} args
+   */
+  async evaluateValue_(fn, ...args) {
+    const value = await this.evaluate(fn, ...args);
+    const json = await value.jsonValue();
+    return json.value;
+  }
+
+  /**
    * @param {string} selector
    * @return {!Promise<!ElementHandle<!PuppeteerHandle>>}
    * @override
@@ -194,7 +208,7 @@ class PuppeteerController {
     const nodeListHandle = await frame.waitForFunction(
       (root, selector) => {
         const nodeList = root./*OK*/ querySelectorAll(selector);
-        return nodeList.length > 0 ? nodeList : null;
+        return nodeList.length > 0 ? Array.prototype.slice.apply(nodeList) : null;
       },
       {timeout: DEFAULT_WAIT_TIMEOUT},
       root,
@@ -312,10 +326,9 @@ class PuppeteerController {
    * @override
    */
   async type(handle, keys) {
-    const frame = await this.getCurrentFrame_();
     const targetElement = handle
       ? handle.getElement()
-      : await frame.$(':focus');
+      : (await this.getActiveElement()).getElement();
 
     const key = KeyToPuppeteerMap[keys];
     if (key) {
@@ -333,9 +346,9 @@ class PuppeteerController {
    */
   getElementText(handle) {
     const element = handle.getElement();
-    const getter = element => element.textContent;
+    const getter = element => ({value: element.innerText.trim()});
     return new ControllerPromise(
-      this.evaluate(getter, element),
+      this.evaluateValue_(getter, element),
       this.getWaitFn_(getter, element)
     );
   }
@@ -349,10 +362,11 @@ class PuppeteerController {
   getElementCssValue(handle, styleProperty) {
     const element = handle.getElement();
     const getter = (element, styleProperty) => {
-      return window /*OK*/['getComputedStyle'](element)[styleProperty];
+      const value = window /*OK*/['getComputedStyle'](element)[styleProperty];
+      return {value};
     };
     return new ControllerPromise(
-      this.evaluate(getter, element, styleProperty),
+      this.evaluateValue_(getter, element, styleProperty),
       this.getWaitFn_(getter, element, styleProperty)
     );
   }
@@ -365,9 +379,11 @@ class PuppeteerController {
    */
   getElementAttribute(handle, attribute) {
     const element = handle.getElement();
-    const getter = (element, attribute) => element.getAttribute(attribute);
+    const getter = (element, attribute) => ({
+      value: element.getAttribute(attribute),
+    });
     return new ControllerPromise(
-      this.evaluate(getter, element, attribute),
+      this.evaluateValue_(getter, element, attribute),
       this.getWaitFn_(getter, element, attribute)
     );
   }
@@ -380,11 +396,9 @@ class PuppeteerController {
    */
   getElementProperty(handle, property) {
     const element = handle.getElement();
-    const getter = (element, property) => {
-      return element[property];
-    };
+    const getter = (element, property) => ({value: element[property]});
     return new ControllerPromise(
-      this.evaluate(getter, element, property),
+      this.evaluateValue_(getter, element, property),
       this.getWaitFn_(getter, element, property)
     );
   }
@@ -422,7 +436,7 @@ class PuppeteerController {
       };
     };
     return new ControllerPromise(
-      this.evaluate(getter, element),
+      this.evaluate(getter, element).then(handle => handle.jsonValue()),
       this.getWaitFn_(getter, element)
     );
   }
@@ -549,7 +563,7 @@ class PuppeteerController {
    * @return {!Promise}
    * @override
    */
-  async scroll(handle, opt_scrollToOptions) {
+  async scrollTo(handle, opt_scrollToOptions) {
     const element = handle.getElement();
     await this.evaluate(
       (element, opt_scrollToOptions) => {
