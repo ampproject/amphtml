@@ -283,6 +283,7 @@ const AMP_EMBED_ALLOWED = {
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
+  mgid: true,
   miximedia: true,
   mywidget: true,
   opinary: true,
