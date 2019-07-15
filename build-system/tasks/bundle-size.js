@@ -121,7 +121,7 @@ function storeBundleSize() {
     })
     .catch(() => {
       return octokit.repos
-        .createFile(
+        .createOrUpdateFile(
           Object.assign(githubApiCallOptions, {
             message: `bundle-size: ${commitHash} (${bundleSize})`,
             content: Buffer.from(bundleSize).toString('base64'),
