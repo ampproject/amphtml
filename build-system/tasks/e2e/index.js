@@ -108,7 +108,7 @@ async function e2e() {
 
   // build runtime
   if (!argv.nobuild) {
-    buildRuntime_();
+    await buildRuntime_();
   }
 
   // start up web server

@@ -765,7 +765,7 @@ async function createEmptyBuild() {
  * Runs the AMP visual diff tests.
  */
 async function visualDiff() {
-  ensureOrBuildAmpRuntimeInTestMode_();
+  await ensureOrBuildAmpRuntimeInTestMode_();
   installPercy_();
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();

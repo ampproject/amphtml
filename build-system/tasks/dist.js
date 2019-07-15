@@ -91,7 +91,7 @@ function transferSrcsToTempDir() {
  * @return {!Promise}
  */
 async function dist() {
-  return performDist();
+  await performDist();
 }
 
 /**
