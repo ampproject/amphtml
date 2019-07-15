@@ -1790,7 +1790,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       }
 
       function stubInA4A(isInA4A) {
-        sandbox.stub(element, 'isInA4A_').callsFake(() => isInA4A);
+        sandbox.stub(element, 'isInA4A').callsFake(() => isInA4A);
       }
 
       beforeEach(() => {
