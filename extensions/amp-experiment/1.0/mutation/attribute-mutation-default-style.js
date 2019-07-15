@@ -53,7 +53,7 @@ export class AttributeMutationDefaultStyle {
       return true;
     }
 
-    return true;
+    return false;
   }
 
   /** @override */

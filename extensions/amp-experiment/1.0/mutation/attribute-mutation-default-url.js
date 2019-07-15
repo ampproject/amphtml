@@ -16,6 +16,9 @@
 
 import {assertAttributeMutationFormat} from './mutation';
 import {assertHttpsUrl} from '../../../../src/url';
+import {user} from '../../../../src/log';
+
+const TAG = 'amp-experiment attribute-mutation-default-url';
 
 /**
  * Mutation for attribute (url) mutations, for both
@@ -37,11 +40,17 @@ export class AttributeMutationDefaultUrl {
 
   /** @override */
   validate() {
-    assertHttpsUrl(
-      this.mutationRecord_['value'],
-      this.mutationRecord_['target'],
-      'attributes mutation'
-    );
+
+    try {
+      assertHttpsUrl(
+        this.mutationRecord_['value'],
+        this.mutationRecord_['target'],
+        'attributes mutation'
+      );
+    } catch(e) {
+      user().error(TAG, e.message);
+      return false;
+    }
     return true;
   }
 
