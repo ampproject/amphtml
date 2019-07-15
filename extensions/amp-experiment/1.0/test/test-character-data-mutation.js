@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  CharacterDataMutation
-} from '../mutation/character-data-mutation';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {CharacterDataMutation} from '../mutation/character-data-mutation';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const TEST_VALUE = 'TEST_VALUE';
@@ -42,14 +39,14 @@ describes.realWin(
     });
 
     function getCharacterDataMutation() {
-      return new CharacterDataMutation({
-        "type": "characterData",
-        "target": ".my-test-element-with-this-class",
-        "value": TEST_VALUE
-      }, [
-        doc.createElement('div'),
-        doc.createElement('div')
-      ]);
+      return new CharacterDataMutation(
+        {
+          'type': 'characterData',
+          'target': '.my-test-element-with-this-class',
+          'value': TEST_VALUE,
+        },
+        [doc.createElement('div'), doc.createElement('div')]
+      );
     }
 
     describe('mutate', () => {

@@ -40,14 +40,13 @@ export class AttributeMutationDefaultUrl {
 
   /** @override */
   validate() {
-
     try {
       assertHttpsUrl(
         this.mutationRecord_['value'],
         this.mutationRecord_['target'],
         'attributes mutation'
       );
-    } catch(e) {
+    } catch (e) {
       user().error(TAG, e.message);
       return false;
     }

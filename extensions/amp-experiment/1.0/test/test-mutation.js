@@ -18,7 +18,6 @@ import {
   assertAttributeMutationFormat,
   assertCharacterDataMutationFormat,
 } from '../mutation/mutation';
-import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -42,24 +41,24 @@ describes.realWin(
 
     function getCharacterDataMutationRecord() {
       return {
-        "type": "characterData",
-        "target": ".my-test-element-with-this-class",
-        "value": "coffee"
+        'type': 'characterData',
+        'target': '.my-test-element-with-this-class',
+        'value': 'coffee',
       };
     }
 
     function getAttributeMutationRecord() {
       return {
-        "type": "attributes",
-        "target": ".my-other-element-with-this-class",
-        "attributeName": "style",
-        "value": "background-color: red; width: 100px;"
+        'type': 'attributes',
+        'target': '.my-other-element-with-this-class',
+        'attributeName': 'style',
+        'value': 'background-color: red; width: 100px;',
       };
     }
 
     describe('characterData', () => {
-      it('should allow a valid attribute mutation record', () => {
-        const mutationRecord = getAttributeMutationRecord();
+      it('should allow a valid characterData mutation record', () => {
+        const mutationRecord = getCharacterDataMutationRecord();
         expect(() => {
           assertCharacterDataMutationFormat(mutationRecord);
         }).to.not.throw();
@@ -74,7 +73,7 @@ describes.realWin(
       });
 
       it('should error when no value', () => {
-        const mutationRecord = getAttributeMutationRecord();
+        const mutationRecord = getCharacterDataMutationRecord();
         delete mutationRecord['value'];
         allowConsoleError(() => {
           expect(() => {
@@ -83,7 +82,6 @@ describes.realWin(
         });
       });
     });
-
 
     describe('attributes', () => {
       it('should allow a valid attribute mutation record', () => {
@@ -121,6 +119,5 @@ describes.realWin(
         });
       });
     });
-
   }
 );

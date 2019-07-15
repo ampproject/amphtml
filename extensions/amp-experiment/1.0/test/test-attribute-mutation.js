@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  AttributeMutationDefaultClass
-} from '../mutation/attribute-mutation-default-class';
-import {
-AttributeMutationDefaultStyle
-} from '../mutation/attribute-mutation-default-style';
-import {
-  AttributeMutationDefaultUrl
-} from '../mutation/attribute-mutation-default-url';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {AttributeMutationDefaultClass} from '../mutation/attribute-mutation-default-class';
+import {AttributeMutationDefaultStyle} from '../mutation/attribute-mutation-default-style';
+import {AttributeMutationDefaultUrl} from '../mutation/attribute-mutation-default-url';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -48,15 +41,12 @@ describes.realWin(
     function getAttributeMutationParamsObject(attributeName, value) {
       return {
         mutationRecord: {
-          "type": "characterData",
-          "target": ".my-test-element-with-this-class",
-          "value": value,
-          "attributeName": attributeName
+          'type': 'characterData',
+          'target': '.my-test-element-with-this-class',
+          'value': value,
+          'attributeName': attributeName,
         },
-        elements: [
-          doc.createElement('div'),
-          doc.createElement('div')
-        ]
+        elements: [doc.createElement('div'), doc.createElement('div')],
       };
     }
 
@@ -85,77 +75,94 @@ describes.realWin(
     }
 
     describe('validate', () => {
-
       describe('default class', () => {
         it('should allow valid mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultClass('my-class');
+          const attributeMutation = getAttributeMutationDefaultClass(
+            'my-class'
+          );
           expect(attributeMutation.validate()).to.be.equal(true);
         });
 
         it('should not allow i-amphtml-*', () => {
-          const attributeMutation = getAttributeMutationDefaultClass('i-amphtml-my-class');
+          const attributeMutation = getAttributeMutationDefaultClass(
+            'i-amphtml-my-class'
+          );
           expect(attributeMutation.validate()).to.be.equal(false);
         });
-
       });
 
       describe('default style', () => {
         it('should allow valid mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultStyle('background-color: #000000');
+          const attributeMutation = getAttributeMutationDefaultStyle(
+            'background-color: #000000'
+          );
           expect(attributeMutation.validate()).to.be.equal(true);
         });
 
         it('should allow background-color mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultStyle('background-color: #000000');
+          const attributeMutation = getAttributeMutationDefaultStyle(
+            'background-color: #000000'
+          );
           expect(attributeMutation.validate()).to.be.equal(true);
         });
 
         it('should allow color mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultStyle('color: #000000');
+          const attributeMutation = getAttributeMutationDefaultStyle(
+            'color: #000000'
+          );
           expect(attributeMutation.validate()).to.be.equal(true);
         });
 
         it('should not allow !important mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultStyle('color: #000000 !important;');
+          const attributeMutation = getAttributeMutationDefaultStyle(
+            'color: #000000 !important;'
+          );
           expect(attributeMutation.validate()).to.be.equal(false);
         });
 
         it('should not allow HTML Comment mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultStyle('<!-- color: #000000;');
+          const attributeMutation = getAttributeMutationDefaultStyle(
+            '<!-- color: #000000;'
+          );
           expect(attributeMutation.validate()).to.be.equal(false);
         });
 
         it('should not allow unallowed style mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultStyle('position: fixed;');
+          const attributeMutation = getAttributeMutationDefaultStyle(
+            'position: fixed;'
+          );
           expect(attributeMutation.validate()).to.be.equal(false);
         });
-
       });
 
       describe('default url', () => {
         it('should allow valid mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultUrl('https://amp.dev/');
+          const attributeMutation = getAttributeMutationDefaultUrl(
+            'https://amp.dev/'
+          );
           expect(attributeMutation.validate()).to.be.equal(true);
         });
 
         it('should not allow http:// mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultUrl('http://amp.dev/');
+          const attributeMutation = getAttributeMutationDefaultUrl(
+            'http://amp.dev/'
+          );
           expect(attributeMutation.validate()).to.be.equal(false);
         });
 
         it('should not allow non HTTPS mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultUrl('tel:555-555-5555');
+          const attributeMutation = getAttributeMutationDefaultUrl(
+            'tel:555-555-5555'
+          );
           expect(attributeMutation.validate()).to.be.equal(false);
         });
       });
     });
 
     describe('mutate', () => {
-
-      it('should mutate default class mutations', () =>  {
+      it('should mutate default class mutations', () => {
         const attributeMutation = getAttributeMutationDefaultClass('my-class');
-        const attributeName = attributeMutation.mutationRecord_.attributeName;
-        const value = attributeMutation.mutationRecord_.value;
+        const {attributeName, value} = attributeMutation.mutationRecord_;
 
         attributeMutation.mutate();
 
@@ -164,10 +171,11 @@ describes.realWin(
         });
       });
 
-      it('should mutate default style mutations', () =>  {
-        const attributeMutation = getAttributeMutationDefaultStyle('background-color: #000000');
-        const attributeName = attributeMutation.mutationRecord_.attributeName;
-        const value = attributeMutation.mutationRecord_.value;
+      it('should mutate default style mutations', () => {
+        const attributeMutation = getAttributeMutationDefaultStyle(
+          'background-color: #000000'
+        );
+        const {attributeName, value} = attributeMutation.mutationRecord_;
 
         attributeMutation.mutate();
 
@@ -176,10 +184,11 @@ describes.realWin(
         });
       });
 
-      it('should mutate default url mutations', () =>  {
-        const attributeMutation = getAttributeMutationDefaultUrl('https://amp.dev/');
-        const attributeName = attributeMutation.mutationRecord_.attributeName;
-        const value = attributeMutation.mutationRecord_.value;
+      it('should mutate default url mutations', () => {
+        const attributeMutation = getAttributeMutationDefaultUrl(
+          'https://amp.dev/'
+        );
+        const {attributeName, value} = attributeMutation.mutationRecord_;
 
         attributeMutation.mutate();
 
@@ -187,7 +196,6 @@ describes.realWin(
           expect(element.getAttribute(attributeName)).to.be.equal(value);
         });
       });
-
     });
   }
 );
