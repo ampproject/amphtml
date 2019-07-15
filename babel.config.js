@@ -46,7 +46,7 @@ module.exports = function(api) {
   api.cache(true);
   // `dist` builds do not use any of the default settings below until its
   // an esm build. (Both Multipass and Singlepass)
-  if (!esm) {
+  if (isDist && !esm) {
     return {};
   }
   return {
