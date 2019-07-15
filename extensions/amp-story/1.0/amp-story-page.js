@@ -266,7 +266,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
 
-    /** @private {string} A textual description of the content of the page. */
+    /** @private {?string} A textual description of the content of the page. */
     this.description_ = null;
   }
 
