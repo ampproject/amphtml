@@ -2176,7 +2176,7 @@ describe('amp-a4a', () => {
         a4a.adUrl_ = 'https://nowhere.org';
       });
     });
-    it('should render correctly', () => {
+    it.skip('should render correctly', () => {
       // TODO(#22733): remove this test once ampdoc-fie is launched.
       const parentWin = a4aElement.ownerDocument.defaultView;
       return a4a.renderAmpCreative_(metaData).then(() => {
