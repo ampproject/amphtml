@@ -623,7 +623,9 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'build-system/app.js',
+      'build-system/tasks/e2e/index.js',
       'build-system/tasks/firebase.js',
+      'build-system/tasks/integration.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
       'build-system/tasks/visual-diff/index.js',
