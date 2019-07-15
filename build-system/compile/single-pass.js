@@ -562,7 +562,11 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(wrapMainBinaries)
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
-    .then(thirdPartyConcat);
+    .then(thirdPartyConcat)
+    .catch(err => {
+      err.showStack = false; // Useless node_modules stack
+      throw err;
+    });
 };
 
 /**
@@ -570,6 +574,7 @@ exports.singlePassCompile = async function(entryModule, options) {
  * use closures wrapper mechanism for this since theres some concatenation
  * we need to do to build the alternative binaries such as shadow-v0 and
  * amp4ads-v0.
+ * TODO This should operate on the gulp stream, not on disk files.
  */
 function wrapMainBinaries() {
   const pair = wrappers.mainBinary.split('<%= contents %>');
@@ -607,6 +612,7 @@ function wrapMainBinaries() {
 
 /**
  * Prepends intermediate bundles to the built js binary.
+ * TODO This should operate on the gulp stream, not on disk files.
  */
 function intermediateBundleConcat() {
   extensionBundles.forEach(extension => {
@@ -627,6 +633,7 @@ function intermediateBundleConcat() {
 
 /**
  * Prepends the listed file to the built js binary.
+ * TODO This should operate on the gulp stream, not on disk files.
  */
 function thirdPartyConcat() {
   extensionBundles.forEach(extension => {
@@ -688,6 +695,9 @@ function compile(flagsArray) {
   });
 }
 
+/**
+ * TODO This should operate on the gulp stream, not on disk files.
+ */
 function eliminateIntermediateBundles() {
   extensionBundles.forEach(extension => {
     function createFullPath(version) {
