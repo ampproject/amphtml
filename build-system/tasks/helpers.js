@@ -46,7 +46,7 @@ const argv = require('minimist')(process.argv.slice(2));
  * Tasks that should print the `--nobuild` help text.
  * @private @const {!Set<string>}
  */
-const NOBUILD_HELP_TASKS = new Set(['test', 'visual-diff']);
+const NOBUILD_HELP_TASKS = new Set(['e2e', 'integration', 'visual-diff']);
 
 const MODULE_SEPARATOR = ';';
 const EXTENSION_BUNDLE_MAP = {

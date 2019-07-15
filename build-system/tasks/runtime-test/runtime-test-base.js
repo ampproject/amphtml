@@ -260,7 +260,11 @@ class RuntimeTestRunner {
   async setup() {
     // TODO(alanorozco): Come up with a more elegant check?
     global.AMP_TESTING = true;
-    process.env.SERVE_MODE = argv.compiled ? 'compiled' : 'default';
+
+    // Run tests against compiled code when explicitly specified via --compiled,
+    // or when the minified runtime is automatically built.
+    process.env.SERVE_MODE =
+      argv.compiled || !argv.nobuild ? 'compiled' : 'default';
 
     await this.maybeBuild();
 
