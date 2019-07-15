@@ -16,7 +16,8 @@
 
 [![Absolute Code Coverage](https://img.shields.io/endpoint.svg?logo=Codecov&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FAbsoluteCoverageMetric "Test coverage for the repository as computed by CodeCov")](https://codecov.io/gh/ampproject/amphtml/)
 [![Presubmit Latency](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FPresubmitLatencyMetric "Average Travis build time over the last 90 days")](https://travis-ci.org/ampproject/amphtml/builds)
-[![Travis Greenness](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FTravisGreennessMetric "Percent of green Travis builds over the last 90 days")](https://travis-ci.org/ampproject/amphtml/builds)
+[![Travis Greenness](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FTravisGreennessMetric "Percentage of green Travis builds over the last 90 days")](https://travis-ci.org/ampproject/amphtml/builds)
+[![Travis Flakiness](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FTravisFlakinessMetric "Percentage of flaky Travis builds over the last 90 days")](https://travis-ci.org/ampproject/amphtml/builds)
 
 ##### Tooling:
 
