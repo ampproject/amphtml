@@ -54,7 +54,7 @@ The process for bringing a design to the design review is:
   * It is recommended that you start the discussion with a brief overview of your design.
   * After the initial overview, lead the attendees through the parts of the design you would like feedback on. If you have a reviewer, they may suggest particular areas to focus on in the discussion. Potential things to think about:
     * What are the performance tradeoffs to think about in the proposed approaches?
-    * How does this feature impact a11y of AMP pages?
+    * How does this feature impact accessibility of AMP pages?
     * Do we need to think about internationalization for this feature?
     * Do we need to conduct user research before going in to the implementation?
   * Working Groups will be represented at the Design Review to allow you to gather feedback across their different areas of expertise. 
