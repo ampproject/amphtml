@@ -710,11 +710,16 @@ describes.sandboxed('Navigation', {}, () => {
           beforeEach(() => {
             win = env.win;
             doc = win.document;
-            ampdoc = env.ampdoc;
+            // TODO(#22733): cleanup `env.ampdoc` part.
+            ampdoc = doc.__AMPDOC || env.ampdoc;
             parentWin = env.parentWin;
             embed = env.embed;
 
-            handler = win.services.navigation.obj;
+            // TODO(#22733): cleanup `win.services.navigation` part.
+            handler = (
+              (ampdoc.services && ampdoc.services.navigation) ||
+              win.services.navigation
+            ).obj;
             winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
               return {};
             });

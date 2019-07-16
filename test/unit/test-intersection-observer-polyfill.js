@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocService} from '../../src/service/ampdoc-impl';
 import {
   DEFAULT_THRESHOLD,
   IntersectionObserverApi,
@@ -37,8 +38,7 @@ const fakeAmpDoc = {
 };
 installHiddenObserverForDoc(fakeAmpDoc);
 
-describe('IntersectionObserverApi', () => {
-  let sandbox;
+describes.sandboxed('IntersectionObserverApi', {}, () => {
   let onScrollSpy;
   let onChangeSpy;
   let testDoc;
@@ -78,14 +78,13 @@ describe('IntersectionObserverApi', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     onScrollSpy = sandbox.spy();
     onChangeSpy = sandbox.spy();
     testIframe = getIframe(iframeSrc);
+    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
     sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
       return mockViewport;
     });
-    sandbox.stub(Services, 'ampdoc').callsFake(() => fakeAmpDoc);
     testDoc = {defaultView: window};
     testEle = {
       isBuilt: () => {
@@ -123,8 +122,8 @@ describe('IntersectionObserverApi', () => {
     insert(testIframe);
     tickSpy = sandbox.spy(ioApi.intersectionObserver_, 'tick');
   });
+
   afterEach(() => {
-    sandbox.restore();
     testIframe.parentNode.removeChild(testIframe);
     if (ioApi) {
       ioApi.destroy();
@@ -187,16 +186,12 @@ describe('IntersectionObserverApi', () => {
   });
 });
 
-describe('getIntersectionChangeEntry', () => {
-  let sandbox;
+describes.sandboxed('getIntersectionChangeEntry', {}, () => {
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     sandbox.stub(performance, 'now').callsFake(() => 100);
+    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
   it('without owner', () => {
     expect(
       getIntersectionChangeEntry(
@@ -242,16 +237,11 @@ describe('getIntersectionChangeEntry', () => {
   });
 });
 
-describe('IntersectionObserverPolyfill', () => {
-  let sandbox;
+describes.sandboxed('IntersectionObserverPolyfill', {}, () => {
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     sandbox.stub(performance, 'now').callsFake(() => 100);
+    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
     sandbox.stub(Services, 'ampdoc').callsFake(() => fakeAmpDoc);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('threshold', () => {

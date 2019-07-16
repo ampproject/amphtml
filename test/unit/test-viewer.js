@@ -24,8 +24,7 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {parseUrlDeprecated, removeFragment} from '../../src/url';
 
-describe('Viewer', () => {
-  let sandbox;
+describes.sandboxed('Viewer', {}, () => {
   let windowMock;
   let viewer;
   let windowApi;
@@ -53,7 +52,6 @@ describe('Viewer', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     const WindowApi = function() {};
     windowApi = new WindowApi();
@@ -79,6 +77,9 @@ describe('Viewer', () => {
       body: {style: {}},
       documentElement: {style: {}},
       title: 'Awesome doc',
+      getRootNode() {
+        return windowApi.document;
+      },
       querySelector() {
         return parseUrlDeprecated('http://www.example.com/');
       },
@@ -107,7 +108,6 @@ describe('Viewer', () => {
 
   afterEach(() => {
     windowMock.verify();
-    sandbox.restore();
   });
 
   it('should configure correctly based on window name and hash', () => {
