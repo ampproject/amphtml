@@ -119,7 +119,7 @@
     "json-stable-stringify": "1.0.1",
     "json5": "2.1.0",
     "karma": "4.2.0",
-    "karma-browserify": "6.0.0",
+    "karma-browserify": "6.1.0",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "2.2.0",
     "karma-coverage-istanbul-reporter": "2.0.5",
