@@ -95,9 +95,6 @@ export class Resources {
      */
     this.isBuildOn_ = false;
 
-    /** @private @const {number} */
-    this.maxDpr_ = this.win.devicePixelRatio || 1;
-
     /** @private {number} */
     this.resourceIdCounter_ = 0;
 
@@ -323,14 +320,6 @@ export class Resources {
   }
 
   /**
-   * Whether the runtime is currently on.
-   * @return {boolean}
-   */
-  isRuntimeOn() {
-    return this.isRuntimeOn_;
-  }
-
-  /**
    * Signals that the document has been started rendering.
    * @restricted
    */
@@ -424,23 +413,6 @@ export class Resources {
         body.classList.toggle(clazz, on);
       });
     });
-  }
-
-  /**
-   * Returns the maximum DPR available on this device.
-   * @return {number}
-   */
-  getMaxDpr() {
-    return this.maxDpr_;
-  }
-
-  /**
-   * Returns the most optimal DPR currently recommended.
-   * @return {number}
-   */
-  getDpr() {
-    // TODO(dvoytenko): return optimal DPR.
-    return this.maxDpr_;
   }
 
   /**

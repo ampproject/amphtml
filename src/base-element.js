@@ -652,19 +652,11 @@ export class BaseElement {
   }
 
   /**
-   * Returns the maximum DPR available on this device.
-   * @return {number}
-   */
-  getMaxDpr() {
-    return this.element.getResources().getMaxDpr();
-  }
-
-  /**
    * Returns the most optimal DPR currently recommended.
    * @return {number}
    */
   getDpr() {
-    return this.element.getResources().getDpr();
+    return this.win.devicePixelRatio || 1;
   }
 
   /**
