@@ -63,6 +63,12 @@ const BOOKEND_VERSION_KEY = 'bookendVersion';
 const DEPRECATED_BOOKEND_VERSION_KEY = 'bookend-version';
 
 /**
+ * Key used for retargeting event target originating from shadow DOM.
+ * @const {string}
+ */
+const AMP_CUSTOM_LINKER_TARGET = '__AMP_CUSTOM_LINKER_TARGET__';
+
+/**
  * @param {string} hidden
  * @return {!../simple-template.ElementDef}
  */
@@ -500,6 +506,10 @@ export class AmpStoryBookend extends AMP.BaseElement {
       this.close_();
       return;
     }
+
+    // Pass custom target so that linker can see it, otherwise it would see
+    // the entire shadow DOM tree and not know what target to choose.
+    event[AMP_CUSTOM_LINKER_TARGET] = target;
 
     if (target.hasAttribute('on')) {
       const actionService = Services.actionServiceForDoc(this.element);
