@@ -52,7 +52,12 @@ The process for bringing a design to the design review is:
   * It can be helpful to present the GitHub issue/design doc during the meeting using the video conference "share your screen" functionality.  (If you have technical trouble doing this, someone else at the meeting can handle it.)
   * You can assume that the people at the meeting have at least skimmed through your design to understand the area being discussed, but they may not be completely familiar with the nuances of your design.
   * It is recommended that you start the discussion with a brief overview of your design.
-  * After the initial overview, lead the attendees through the parts of the design you would like feedback on.  If you have a reviewer, they may suggest particular areas to focus on in the discussion.
+  * After the initial overview, lead the attendees through the parts of the design you would like feedback on. If you have a reviewer, they may suggest particular areas to focus on in the discussion. Potential things to think about:
+    * What are the performance tradeoffs to think about in the proposed approaches?
+    * How does this feature impact accessibility of AMP pages?
+    * Do we need to think about internationalization for this feature?
+    * Do we need to conduct user research before going in to the implementation?
+  * Working Groups will be represented at the Design Review to allow you to gather feedback across their different areas of expertise. 
   * We'll take notes during the design review and post them to the Design Review GitHub issue shortly after the meeting.
 
 * Update your design based on the feedback in the design review and any followup conversations in other channels.  Once your design is finalized, please provide a brief update at the start of a future design review (if you are able to attend).  If you create a design doc submit a PDF version in the [ampproject design-doc](https://github.com/ampproject/design-docs) repository.
