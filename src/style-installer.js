@@ -15,11 +15,13 @@
  */
 
 import {Services} from './services';
+import {getAmpdoc} from './service';
 import {dev, devAssert, rethrowAsync} from './log';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
 import {map} from './utils/object';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
+import {CommonSignals} from './common-signals';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
 const STYLE_MAP_PROP = '__AMP_CSS_SM';
@@ -309,7 +311,8 @@ function setBodyVisibleStyles(doc) {
  */
 function renderStartedNoInline(doc) {
   try {
-    Services.resourcesForDoc(doc.documentElement).renderStarted();
+    const ampdoc = getAmpdoc(doc.documentElement);
+    ampdoc.signals().signal(CommonSignals.RENDER_START);
   } catch (e) {
     // `makeBodyVisible` is called in the error-processing cycle and thus
     // could be triggered when runtime's initialization is incomplete which
