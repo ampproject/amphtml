@@ -124,7 +124,7 @@ describes.sandboxed('Navigation', {}, () => {
           expect(handleCustomProtocolSpy).to.be.calledWith(event, anchor);
         });
 
-        it.only('should select a custom linker target', () => {
+        it('should select a custom linker target', () => {
           const handleClickSpy = sandbox.spy(handler, 'handleClick_');
 
           event.target = null;
