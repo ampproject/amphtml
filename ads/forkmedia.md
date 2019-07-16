@@ -22,7 +22,7 @@ limitations under the License.
 ```html
   <amp-ad width="50" height="66"
       type="forkmedia"
-      src = "https://delivery.forkcdn.com/rappio/inread/v1.1/amp/inread.js"
+      data-product="inread"
       data-html-access-allowed>
   </amp-ad>
 ```
@@ -33,6 +33,6 @@ For details on the configuration semantics, please contact Fork Media.
 
 ### Required parameters
 
-- `src`: Must use `https` protocol and must be from one of the allowed Fork Media hosts.
+- `data-product`
 - `data-html-access-allowed`
 

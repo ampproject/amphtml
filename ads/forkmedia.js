@@ -14,26 +14,32 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData, validateSrcPrefix} from '../3p/3p';
-
-/** @const {string[]} */
-const validSrcPrefix = ['https://delivery.forkcdn.com'];
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function forkmedia(global, data) {
-  validateData(data, ['src']);
-  validateSrcPrefix(validSrcPrefix, data.src);
-  loadScript(
-    global,
-    data.src,
-    () => {
-      global.context.renderStart();
-    },
-    () => {
-      global.context.noContentAvailable();
-    }
-  );
+  validateData(data, ['product']);
+
+  let src = null;
+  if (data.product === 'inread') {
+    src = 'https://delivery.forkcdn.com/rappio/inread/v1.1/amp/inread.js';
+  }
+
+  if (src) {
+    loadScript(
+      global,
+      src,
+      () => {
+        global.context.renderStart();
+      },
+      () => {
+        global.context.noContentAvailable();
+      }
+    );
+  } else {
+    global.context.noContentAvailable();
+  }
 }
