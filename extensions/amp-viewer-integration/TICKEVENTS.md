@@ -38,3 +38,5 @@ As an example if we executed `perf.tick('label')` we assume we have a counterpar
 | First input delay, polyfill value | `fid-polyfill` | Millisecond delay in handling the first user input on the page, reported by [a polyfill](https://github.com/GoogleChromeLabs/first-input-delay) |
 | Layout Jank, first exit | `lj` | The aggregate jank score when the user leaves the page (navigation, tab switching, dismissing application) for the first time. See https://gist.github.com/skobes/2f296da1b0a88cc785a4bf10a42bca07 |
 | Layout Jank, second exit | `lj-2` | The aggregate jank score when the user leaves the page (navigation, tab switching, dismissing application) for the second time. |
+| Cumulative Layout Shift, first exit | `cls` | The aggregate layout shift score when the user leaves the page (navigation, tab switching, dismissing application) for the first time. See https://web.dev/layout-instability-api |
+| Cumulative Layout Shift, second exit | `cls-2` | The aggregate layout shift score when the user leaves the page (navigation, tab switching, dismissing application) for the second time. |
