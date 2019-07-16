@@ -35,15 +35,11 @@ const defaultPlugins = [
  */
 function getReplacePlugin() {
   /**
-   * @param {string} defineStr the define flag to parse
+   * @param {string} identifierName the identifier name to replace
+   * @param {boolean} value the value to replace with
    * @return {!Object} replacement options used by minify-replace plugin
    */
-  function createReplacement(defineStr) {
-    const strSplit = defineStr.split('=');
-    const identifierName = strSplit[0];
-    // if no value is defined, set to true
-    const value = strSplit.length > 1 ? strSplit[1] === 'true' : true;
-
+  function createReplacement(identifierName, value) {
     return {
       identifierName,
       replacement: {
@@ -61,10 +57,10 @@ function getReplacePlugin() {
     if (defineFlag.length > 1) {
       throw new Error('Only one defineExperimentConstant flag is allowed');
     } else {
-      replacements.push(createReplacement(defineFlag[0]));
+      replacements.push(createReplacement(defineFlag[0], true));
     }
   } else if (defineFlag) {
-    replacements.push(createReplacement(defineFlag));
+    replacements.push(createReplacement(defineFlag, true));
   }
 
   // default each experiment flag constant to false
@@ -78,7 +74,7 @@ function getReplacePlugin() {
 
     // only add default replacement if it already doesn't exist in array
     if (experimentDefine && !replacements.some(flagExists)) {
-      replacements.push(createReplacement(experimentDefine + '=false'));
+      replacements.push(createReplacement(experimentDefine, false));
     }
   });
 
