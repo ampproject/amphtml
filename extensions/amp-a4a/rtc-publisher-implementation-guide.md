@@ -32,6 +32,7 @@ To use RTC, you must meet the following requirements:
 *   Rubicon
 *   Salesforce
 *   Yieldbot
+*   Kargo
 
 ### Overview
 
@@ -63,7 +64,7 @@ Example from Figure 1:
 *   RTC Callout 2 starts at 20ms, and returns at 760ms, for a total time of 740ms. It does not timeout.
 *   RTC Callout 3 starts at 50ms, and doesn't return until 1125ms, for a total time of 1075ms. This time surpasses the timeout of 1000ms. Thus, the request is resolved as an empty response by real-time-config-manager at 1050ms, when exactly 1000ms has elapsed from the perspective of RTC Callout 3. The ultimate response from RTC Callout 3 is dropped.
 *   RTC Callout 4 starts at 75ms, and returns at 760ms, for a total time of 685ms. It is not timed out.
-*   RTC Callout 5 starts at 100ms, and returns at 1010ms, for a total time of 910ms. It is not timed out. Note that RTC Callout 5 finishes more than 1000ms after the first RTC Callout is started.  
+*   RTC Callout 5 starts at 100ms, and returns at 1010ms, for a total time of 910ms. It is not timed out. Note that RTC Callout 5 finishes more than 1000ms after the first RTC Callout is started.
 
 The publisher-defined URLs take precedence over the vendor-defined ones, i.e. if a publisher specifies 5 custom URLs, and 5 vendors, only the 5 custom URLs will be called out to. The vendor- and publisher-defined URLs allow for macro substitution to build the callout URL. For instance, a publisher may specify the macro values that they wish to substitute into the vendor-defined url, or a publisher may define macros in their custom URL into which the ad network Fast Fetch implementation may substitute values.
 
@@ -84,7 +85,7 @@ You may use RTC to send callouts to a maximum of 5 different endpoints. Each `am
             "vendors": {
               "vendorA": {"SLOT_ID": "1"},
               "vendorB": {"PAGE_ID": "2"},
-              "vendorC": {"SLOT_W": "320", "SLOT_H": "50"}          
+              "vendorC": {"SLOT_W": "320", "SLOT_H": "50"}
               },
             "URLs": [
               "https://www.AmpPublisher.biz/targetingA",
@@ -225,7 +226,7 @@ Thus, they define their rtc-config:
             "vendors": {
               "vendor-a": {"SLOT_ID": "1"},
               "vendor-b": {"PAGE_ID": "61393", "AD_W": "320"},
-              "vendorc": {}          
+              "vendorc": {}
               },
             "urls": [
               "https://www.AmpPublisher.biz/A",

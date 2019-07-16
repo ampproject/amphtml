@@ -3,7 +3,7 @@
 
 ## Objective
 
-For AMP Fast Fetch, support publisher-specified, multiple, simultaneous callouts in order to augment targeting information included in the ad request.  
+For AMP Fast Fetch, support publisher-specified, multiple, simultaneous callouts in order to augment targeting information included in the ad request.
 ## Background
 
 Remote HTML support was added for Delayed Fetch to support first-party cookie targeting. This was because AMP does not allow custom JavaScript, and pages served from the AMP cache are identical for each user.  However, Remote HTML leverages the fact that custom JavaScript execution occurs as a part of generating an ad request via Delayed Fetch. Fast Fetch allows for sending the ad request early by moving all code related to ad generation within the AMP runtime, disallowing any custom JavaScript as part of ad request creation. Therefore Fast Fetch is incompatible with Remote HTML. Real Time Config (RTC) has been added as an optional feature of Fast Fetch to allow for publishers to add user-targeting information to ad requests from AMP pages in a generic way that can be utilized by any ad networks, and any user-targeting vendors. Common use cases for RTC are to retrieve 1st party or 3rd party data, or to integrate 3rd party demand, also known as Header Bidding.
@@ -20,7 +20,7 @@ The publisher specifies a custom URL that should be called out to. For example, 
 
 RTC supports call-outs to third-party vendors. For example, take VendorFooBar  which provides an API service that returns similar interests when provided a given interest (i.e. "baseball" yields ["sports", "apple-pie"]). If VendorFooBar wants publishers to be able to use them for RTC call outs, they simply add their call-out url with built-in macros to the AMP RTC vendor registry. Then publishers specify that they want to call out to VendorFooBar, and supply the value to substitute into the macro. This gives the Vendor complete control over the actual URL, with the Publisher only needing to supply the relevant inputs. See the [URL Macro Substitution](#url-macro-substitution) section for details.
 
-In both cases, the results of these call-outs are passed to the Fast Fetch implementations as part of ad url construction via the **`getAdUrl`** method. The ad network Fast Fetch implementation then uses results of these callouts to generate the ad URL. The semantics of how the ad network uses the RTC results to general the ad URL is specific to each individual network's implementation of Fast Fetch, so please refer to network-specific documentation for details.   
+In both cases, the results of these call-outs are passed to the Fast Fetch implementations as part of ad url construction via the **`getAdUrl`** method. The ad network Fast Fetch implementation then uses results of these callouts to generate the ad URL. The semantics of how the ad network uses the RTC results to general the ad URL is specific to each individual network's implementation of Fast Fetch, so please refer to network-specific documentation for details.
 
 
 ## Design
@@ -133,6 +133,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 *   Rubicon
 *   Salesforce
 *   Yieldbot
+*   Kargo
 
 ### RTC Callout Request Specification
 
@@ -214,7 +215,7 @@ The error ping will be sent by creating an image pixel in the document. See `sen
 
 The AMP-Consent extension provides publishers the ability to collect and store a user's consent through a UI control, while also providing the ability to block other AMP components based on the user's consent. See [here for documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md).
 
-Real Time Config supports integration with AMP-Consent. If the AMP-consent response is neither `SUFFICIENT` nor `UNKNOWN_NOT_REQUIRED`, then by default all RTC callouts are suppressed. However, you may optionally modify this setting, to whitelist specific RTC callouts that should be sent regardless of the consent state. A publisher can modify this across all RTC requests for a given ad slot or on a per-RTC-callout basis. A publisher also may either whitelist for all consent states, or only specific consent states, using the RTC Config attribute `sendRegardlessOfConsentState`. 
+Real Time Config supports integration with AMP-Consent. If the AMP-consent response is neither `SUFFICIENT` nor `UNKNOWN_NOT_REQUIRED`, then by default all RTC callouts are suppressed. However, you may optionally modify this setting, to whitelist specific RTC callouts that should be sent regardless of the consent state. A publisher can modify this across all RTC requests for a given ad slot or on a per-RTC-callout basis. A publisher also may either whitelist for all consent states, or only specific consent states, using the RTC Config attribute `sendRegardlessOfConsentState`.
 
 The value of `sendRegardlessOfConsentState` should either be the boolean `true` or an array of consent policy state strings as defined in src/consent-state.js (i.e. use the string keys, like`"UNKNOWN"` not its corresponding numeric value). In a case where the RTC callout would normally be supressed (for example if the AMP-consent response is `UNKNOWN`), it will instead be sent if `sendRegardlessOfConsentState` is set to boolean `true` or an array of values that contains a match for the AMP-consent state response (e.g. `['UNKNOWN']`). If set to an array, then only the values in that array (in addition to the defualt values of `SUFFICIENT` and `UNKNOWN_NOT_REQUIRED`) are treated as valid.
 
@@ -282,7 +283,7 @@ By setting `sendRegardlessOfConsentState` to an array, this indicates that only 
 ```
 In this example, `sendRegardlessOfConsentState` is only set for one specific URL, the first URL in the array "urls". Take the case when the page state is `UNKNOWN`. In that case, the only RTC callout that would be sent is the one to `https://www.AmpPublisher.biz/targetingA`.
 
-Is is also possible to set `sendRegardlessOfConsentState` here to an array as well, such as: 
+Is is also possible to set `sendRegardlessOfConsentState` here to an array as well, such as:
 
 ```html
 <amp-ad width="320" height="50"
@@ -346,7 +347,7 @@ In this example, we have a mixture of various settings. In addition to all the c
 
 Let's first take an example where the page consent-state is `SUFFICIENT`. This is a default allowed state, so trivially all the callouts will be sent.
 
-Next, let's take an example where the page consent-state is `UNKNOWN`. The callout to vendorA is set to allow consent-state `INSUFFICIENT`, so it will not be sent. The callouts to vendorB and vendorC do not have individual `sendRegardlessOfConsentState` settings, so the top-level setting of `true` applies to them, and they will each be sent. In the `urls` array, the first URL has an individual setting of `UNKNOWN`, which is the current state, so it will be sent. Lastly, the final url does not have an individual setting, so the top-level setting of `true` applies to it, and it will be sent. 
+Next, let's take an example where the page consent-state is `UNKNOWN`. The callout to vendorA is set to allow consent-state `INSUFFICIENT`, so it will not be sent. The callouts to vendorB and vendorC do not have individual `sendRegardlessOfConsentState` settings, so the top-level setting of `true` applies to them, and they will each be sent. In the `urls` array, the first URL has an individual setting of `UNKNOWN`, which is the current state, so it will be sent. Lastly, the final url does not have an individual setting, so the top-level setting of `true` applies to it, and it will be sent.
 
 
 ### URL Macro Substitution
@@ -461,7 +462,7 @@ Finally, a publisher who wishes to use Vendor1 with AmpAdCom's Fast Fetch implem
             data-slot="/1234/5678"
             rtc-config='{
             "vendors": {
-              "vendor1": {"SLOT_ID": "1234"}         
+              "vendor1": {"SLOT_ID": "1234"}
               }
              }'>
 </amp-ad>
@@ -659,7 +660,7 @@ Thus, they define their rtc-config:
             "vendors": {
               "vendor-a": {"SLOT_ID": "1"},
               "vendor-b": {"PAGE_ID": "61393", "AD_W": "320"},
-              "vendorc": {}          
+              "vendorc": {}
               },
             "urls": [
               "https://www.AmpPublisher.biz/A",
@@ -723,7 +724,7 @@ export class AmpAdNetworkFadNetworkImpl extends AmpA4A {
   /** @override */
   getAdUrl(opt_rtcResponsesPromise) {
     return opt_rtcResponsesPromise.then(rtcResponseArray => {
-      buildAndSendAdUrl(rtcResponseArray);        
+      buildAndSendAdUrl(rtcResponseArray);
     });
   }
 }
