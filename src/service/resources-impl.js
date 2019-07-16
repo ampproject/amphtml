@@ -1205,6 +1205,7 @@ export class Resources {
 
   /**
    * Runs a pass immediately.
+   * @visibleForTesting
    */
   doPass() {
     if (!this.isRuntimeOn_) {
