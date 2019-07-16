@@ -66,7 +66,7 @@ See [Subscribe with Google GitHub repo](https://github.com/subscriptions-project
 
 The `amp-subscriptions-google` is configured as part of `amp-subscriptions` configuration.
 
-```
+```html
 <head>
   ...
   <script async custom-element="amp-subscriptions"
@@ -91,7 +91,7 @@ The `amp-subscriptions-google` is configured as part of `amp-subscriptions` conf
 As described in [amp-subscriptions](../amp-subscriptions/amp-subscriptions.md#pingback-endpoint), if a `pingbackUrl` is specified by the local service, the entitlements response returned by the "winning" service will be sent to the  `pingbackUrl` via a POST request.
 
 If `subscribe.google.com` is the "winning" service, the request to the `pingbackUrl` will be of the following format:
-```
+```json
 {
   "raw":"...",
   "source":"google",
@@ -108,7 +108,7 @@ If `subscribe.google.com` is the "winning" service, the request to the `pingback
 Where `data` matches the [entitlements response](https://github.com/subscriptions-project/swg-js/blob/master/docs/entitlements-flow.md#entitlement-response) format.
 
 ## Example with markup
-```
+```html
 <head>
   ...
   <script async custom-element="amp-subscriptions"
