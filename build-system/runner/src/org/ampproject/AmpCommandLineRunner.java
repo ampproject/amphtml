@@ -62,15 +62,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
       "user$$module$src$log().fine()"
       );
 
-
-  ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
-      "IS_MINIFIED",
-      IR.trueNode());
-
-  ImmutableMap<String, Node> prodAssignmentReplacements = ImmutableMap.of(
-      "IS_DEV",
-      IR.falseNode());
-
   protected AmpCommandLineRunner(String[] args) {
     super(args);
   }
@@ -81,8 +72,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     }
     CompilerOptions options = super.createOptions();
     options.setCollapsePropertiesLevel(CompilerOptions.PropertyCollapseLevel.ALL);
-    AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
-        assignmentReplacements, prodAssignmentReplacements, amp_version);
+    AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes, amp_version);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);

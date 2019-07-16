@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 896
+spec_file_revision: 911
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -993,6 +993,24 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
 }
+# AMP metadata, name=amp4ads-vars-*
+# Allows advertisers to pass information from creatives
+# to be included in amp-ad-metadata.
+tags: {
+  html_format: AMP4ADS
+  tag_name: "META"
+  spec_name: "meta name=amp4ads-vars-*"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_regex: "amp4ads-vars-.+"
+  }
+}
 # 4.2.6 The style
 # Text contents of the style tag will be validated seperately.
 tags: {  # Special custom 'author' spreadsheet for AMP
@@ -1537,6 +1555,17 @@ tags: {
   tag_name: "ARTICLE"
 }
 # 4.3.3 The section element
+attr_lists: {
+  name: "poool-access-attrs"
+  attrs: {
+    name: "poool-access-preview"
+    requires_extension: "amp-access-poool"
+  }
+  attrs: {
+    name: "poool-access-content"
+    requires_extension: "amp-access-poool"
+  }
+}
 tags: {
   html_format: AMP
   html_format: AMP4ADS
@@ -1544,6 +1573,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "SECTION"
   disallowed_ancestor: "AMP-ACCORDION"
+  attr_lists: "poool-access-attrs"
 }
 # 4.3.4 The nav element
 tags: {
@@ -6303,6 +6333,8 @@ attr_lists: {
   attrs: { name: "accesskey" }
   attrs: {
     # attribute "class" for transformed is handled within the Validator engine.
+    # If this changes, please be sure to also update:
+    # amp-experiment 1.0 implementation.
     disabled_by: "transformed"
     name: "class"
     blacklisted_value_regex: "(^|\\W)i-amphtml-"
@@ -6810,6 +6842,10 @@ error_specificity {
   code: CSS_EXCESSIVELY_NESTED
   specificity: 119
 }
+error_specificity {
+  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  specificity: 120
+}
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -7269,4 +7305,8 @@ error_formats {
 error_formats {
   code: CSS_EXCESSIVELY_NESTED
   format: "CSS excessively nested in tag '%1'."
+}
+error_formats {
+  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  format: "Document exceeded %1 bytes limit. Actual size %2 bytes."
 }

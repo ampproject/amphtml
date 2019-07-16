@@ -381,6 +381,30 @@ describes.realWin('FormDataWrapper', {}, env => {
             ]);
           }
         );
+
+        it('excludes the submit input if it has no name attribute', () => {
+          const form = env.win.document.createElement('form');
+
+          const input = env.win.document.createElement('input');
+          input.type = 'text';
+          input.name = 'foo1';
+          input.value = 'bar';
+
+          const submit = env.win.document.createElement('input');
+          submit.type = 'submit';
+          // no name attribute
+          submit.value = 'baz';
+
+          form.appendChild(input);
+          form.appendChild(submit);
+          env.win.document.body.appendChild(form);
+
+          submit.focus();
+          const formData = createFormDataWrapper(env.win, form);
+          expect(fromIterator(formData.entries())).to.have.deep.members([
+            ['foo1', 'bar'],
+          ]);
+        });
       });
     });
 

@@ -18,6 +18,9 @@
 
 const gulp = require('gulp-help')(require('gulp'));
 const {
+  checkExactVersions,
+} = require('./build-system/tasks/check-exact-versions');
+const {
   compileAccessExpr,
   compileBindExpr,
   compileCssExpr,
@@ -78,6 +81,7 @@ gulp.task('bundle-size', bundleSize);
 gulp.task('caches-json', cachesJson);
 gulp.task('changelog', changelog);
 gulp.task('changelog:update', changelogUpdate);
+gulp.task('check-exact-versions', checkExactVersions);
 gulp.task('check-links', checkLinks);
 gulp.task('check-types', checkTypes);
 gulp.task('clean', clean);
@@ -108,9 +112,9 @@ gulp.task('presubmit', presubmit);
 gulp.task('process-3p-github-pr', process3pGithubPr);
 gulp.task('process-github-issues', processGithubIssues);
 gulp.task('release:tag', releaseTag);
-gulp.task('test', test);
 gulp.task('serve', serve);
 gulp.task('size', size);
+gulp.task('test', test);
 gulp.task('todos:find-closed', todosFindClosed);
 gulp.task('unit', unit);
 gulp.task('update-packages', updatePackages);
