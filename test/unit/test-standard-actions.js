@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {AmpDocService, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {Services} from '../../src/services';
 import {
@@ -112,6 +112,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
   beforeEach(() => {
     ampdoc = new AmpDocSingle(window);
+    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
     standardActions = new StandardActions(ampdoc);
     mutateElementStub = stubMutate('mutateElement');
     scrollStub = sandbox.stub(
