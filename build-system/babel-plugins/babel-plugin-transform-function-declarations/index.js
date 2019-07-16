@@ -23,8 +23,8 @@ const BAIL_OUT_CONDITIONS = {
 
   // If this FunctionDeclaration doesn't have a single return statement, bail out on modification
   isNotSingleReturnStatment: (t, path) =>
-    !t.isBlockStatement(path.get('body')) ||
-    !t.isReturnStatement(path.get('body.body.0')),
+    !path.get('body').isBlockStatement() ||
+    !path.get('body.body.0').isReturnStatement(),
 
   // Since we don't know if exported members are 'new'd, bail out on modification.
   isExported: (t, path) =>
