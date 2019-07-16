@@ -30,7 +30,11 @@ import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
-import {createLoaderElement} from '../src/loader';
+import {
+  createLegacyLoaderElement,
+  createNewLoaderElement,
+  isNewLoaderExperimentEnabled,
+} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
@@ -203,6 +207,9 @@ function createBaseCustomElementClass(win) {
 
       /** @private {number} */
       this.layoutWidth_ = -1;
+
+      /** @private {number} */
+      this.layoutHeight_ = -1;
 
       /** @private {number} */
       this.layoutCount_ = 0;
@@ -610,6 +617,7 @@ function createBaseCustomElementClass(win) {
      */
     updateLayoutBox(layoutBox, opt_measurementsChanged) {
       this.layoutWidth_ = layoutBox.width;
+      this.layoutHeight_ = layoutBox.height;
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
@@ -1624,30 +1632,31 @@ function createBaseCustomElementClass(win) {
       // 5. The element is a `placeholder` or a `fallback`;
       // 6. The element's layout is not a size-defining layout.
       // 7. The document is A4A.
-      if (this.isInA4A_()) {
+      if (this.isInA4A()) {
         return false;
       }
       if (this.loadingDisabled_ === undefined) {
         this.loadingDisabled_ = this.hasAttribute('noloading');
       }
+
       if (
         this.loadingDisabled_ ||
         !isLoadingAllowed(this) ||
-        this.layoutWidth_ < MIN_WIDTH_FOR_LOADING ||
+        isTooSmallForLoader(this) ||
         this.layoutCount_ > 0 ||
         isInternalOrServiceNode(this) ||
         !isLayoutSizeDefined(this.layout_)
       ) {
         return false;
       }
+
       return true;
     }
 
     /**
      * @return {boolean}
-     * @private
      */
-    isInA4A_() {
+    isInA4A() {
       return (
         // in FIE
         (this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView) ||
@@ -1668,21 +1677,32 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.loadingContainer_) {
         const doc = this.ownerDocument;
+        const win = toWin(doc.defaultView);
         devAssert(doc);
 
         const container = htmlFor(/** @type {!Document} */ (doc))`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
 
-        const element = createLoaderElement(
-          /** @type {!Document} */ (doc),
-          this.elementName()
-        );
-        container.appendChild(element);
+        let loadingElement;
+        if (isNewLoaderExperimentEnabled(win)) {
+          loadingElement = createNewLoaderElement(
+            this,
+            this.layoutWidth_,
+            this.layoutHeight_
+          );
+        } else {
+          loadingElement = createLegacyLoaderElement(
+            /** @type {!Document} */ (doc),
+            this.elementName()
+          );
+        }
+
+        container.appendChild(loadingElement);
 
         this.appendChild(container);
         this.loadingContainer_ = container;
-        this.loadingElement_ = element;
+        this.loadingElement_ = loadingElement;
       }
     }
 
@@ -1702,6 +1722,10 @@ function createBaseCustomElementClass(win) {
         (this.layoutCount_ > 0 || this.signals_.get(CommonSignals.RENDER_START))
       ) {
         // Loading has already been canceled. Ignore.
+        return;
+      }
+      if (state === this.loadingState_ && !opt_options) {
+        // Loading state is the same.
         return;
       }
       this.loadingState_ = state;
@@ -1871,6 +1895,20 @@ function isInternalOrServiceNode(node) {
     return true;
   }
   return false;
+}
+
+/**
+ * Whether element size is too small to show loader.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function isTooSmallForLoader(element) {
+  if (isNewLoaderExperimentEnabled(toWin(element.ownerDocument.defaultView))) {
+    // New loaders experiments has its own sizing heuristics
+    return false;
+  }
+
+  return element.layoutWidth_ < MIN_WIDTH_FOR_LOADING;
 }
 
 /**

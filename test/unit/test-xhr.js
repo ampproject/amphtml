@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import * as mode from '../../src/mode';
 import {Services} from '../../src/services';
 import {assertSuccess} from '../../src/utils/xhr-utils';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
 import {fetchPolyfill} from '../../src/polyfills/fetch';
 import {getCookie} from '../../src/cookies';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
@@ -83,6 +85,7 @@ describe
       ampdocServiceForStub.returns({
         isSingleDoc: () => false,
         getAmpDoc: () => ampdocViewerStub,
+        getSingleDoc: () => ampdocViewerStub,
       });
 
       location.href = 'https://acme.com/path';
@@ -662,9 +665,11 @@ describe
         optedInDoc = window.document.implementation.createHTMLDocument('');
         optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
 
+        const ampdoc = {getRootNode: () => optedInDoc};
         ampdocServiceForStub.returns({
           isSingleDoc: () => true,
-          getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
         viewer = {
           hasCapability: () => true,
@@ -684,10 +689,20 @@ describe
         };
       });
 
+      afterEach(() => {
+        toggleExperiment(
+          interceptionEnabledWin,
+          'untrusted-xhr-interception',
+          false
+        );
+      });
+
       it('should not intercept if AMP doc is not single', () => {
+        const ampdoc = {getRootNode: () => optedInDoc};
         ampdocServiceForStub.returns({
           isSingleDoc: () => false,
-          getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -700,9 +715,11 @@ describe
         const nonOptedInDoc = window.document.implementation.createHTMLDocument(
           ''
         );
+        const ampdoc = {getRootNode: () => nonOptedInDoc};
         ampdocServiceForStub.returns({
           isSingleDoc: () => true,
-          getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
@@ -751,9 +768,29 @@ describe
           .then(() => expect(sendMessageStub).to.not.have.been.called);
       });
 
-      it('should intercept if viewer untrusted but dev mode', () => {
+      it('should intercept if viewer untrusted but in local dev mode', () => {
         sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
-        interceptionEnabledWin.AMP_DEV_MODE = true;
+        sandbox.stub(mode, 'getMode').returns({localDev: true});
+
+        const xhr = xhrServiceForTesting(interceptionEnabledWin);
+
+        return xhr
+          .fetch('https://www.some-url.org/some-resource/')
+          .then(() => expect(sendMessageStub).to.have.been.called);
+      });
+
+      it('should intercept if untrusted-xhr-interception experiment enabled', () => {
+        sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
+        sandbox.stub(mode, 'getMode').returns({localDev: false});
+        sandbox
+          .stub(viewer, 'hasCapability')
+          .withArgs('xhrInterceptor')
+          .returns(true);
+        toggleExperiment(
+          interceptionEnabledWin,
+          'untrusted-xhr-interception',
+          true
+        );
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 

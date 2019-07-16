@@ -24,13 +24,16 @@ const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const log = require('fancy-log');
+const MagicString = require('magic-string');
 const minimist = require('minimist');
 const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const rename = require('gulp-rename');
+const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
+const terser = require('terser');
 const through = require('through2');
 const {
   extensionBundles,
@@ -61,16 +64,6 @@ const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
 // Used to store transforms and compile v0.js
 const transformDir = tempy.directory();
 const srcs = [];
-
-// Since we no longer pass the process_common_js_modules flag to closure
-// compiler, we must now tranform these common JS node_modules to ESM before
-// passing them to closure.
-// TODO(rsimha, erwinmombay): Derive this list programmatically if possible.
-const commonJsModules = [
-  'node_modules/dompurify/',
-  'node_modules/promise-pjs/',
-  'node_modules/set-dom/',
-];
 
 const mainBundle = 'src/amp.js';
 const extensionsInfo = {};
@@ -139,6 +132,9 @@ exports.getFlags = function(config) {
     ],
     hide_warnings_for: config.hideWarningsFor,
   };
+  if (argv.pretty_print) {
+    flags.formatting = 'PRETTY_PRINT';
+  }
 
   // Turn object into deterministically sorted array.
   const flagsArray = [];
@@ -228,7 +224,8 @@ exports.getBundleFlags = function(g) {
       const configEntry = getExtensionBundleConfig(originalName);
       if (configEntry) {
         cmd += `:${configEntry.type}`;
-        bundleDeps.push('_base_i', configEntry.type);
+        // This is not necessary with intermediate concating.
+        // bundleDeps.push('_base_i', configEntry.type);
       } else {
         // All lower tier bundles depend on _base_i
         if (TYPES_VALUES.includes(name)) {
@@ -252,10 +249,7 @@ exports.getBundleFlags = function(g) {
         jsFilesToWrap.push(name);
       } else {
         const configEntry = getExtensionBundleConfig(originalName);
-        const marker =
-          configEntry && Array.isArray(configEntry.postPrepend)
-            ? SPLIT_MARKER
-            : '';
+        const marker = configEntry ? SPLIT_MARKER : '';
         flagsArray.push(
           '--module_wrapper',
           name +
@@ -463,16 +457,6 @@ function setupBundles(graph) {
 }
 
 /**
- * Returns true if the file is known to be a common JS module.
- * @param {string} file
- */
-function isCommonJsModule(file) {
-  return commonJsModules.some(function(module) {
-    return file.startsWith(module);
-  });
-}
-
-/**
  * Takes all of the nodes in the dependency graph and transfers them
  * to a temporary directory where we can run babel transformations.
  *
@@ -485,22 +469,21 @@ function transformPathsToTempDir(graph, config) {
   }
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
-    // For now, just copy node_module files instead of transforming them. The
-    // exceptions are common JS modules that need to be transformed to ESM
-    // because we now no longer use the process_common_js_modules flag for
-    // closure compiler.
-    if (f.startsWith('node_modules/') && !isCommonJsModule(f)) {
+    // For now, just copy node_module files instead of transforming them.
+    if (f.startsWith('node_modules/')) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
-      const {code} = babel.transformFileSync(f, {
+      const {code, map} = babel.transformFileSync(f, {
         plugins: conf.plugins({
           isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
-          isCommonJsModule: isCommonJsModule(f),
           isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
+          isSinglePass: true,
         }),
         retainLines: true,
+        sourceMaps: true,
       });
       fs.outputFileSync(`${graph.tmp}/${f}`, code);
+      fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
     }
   });
 }
@@ -577,10 +560,12 @@ exports.singlePassCompile = async function(entryModule, options) {
     })
     .then(compile)
     .then(wrapMainBinaries)
-    .then(postProcessConcat)
+    .then(intermediateBundleConcat)
+    .then(eliminateIntermediateBundles)
+    .then(thirdPartyConcat)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
-      return Promise.reject(err);
+      throw err;
     });
 };
 
@@ -589,66 +574,105 @@ exports.singlePassCompile = async function(entryModule, options) {
  * use closures wrapper mechanism for this since theres some concatenation
  * we need to do to build the alternative binaries such as shadow-v0 and
  * amp4ads-v0.
- * TODO(#18811, erwinm): this breaks source maps and we need a way to fix this.
- * magic-string might be part of the solution here so explore that (pre or post
- * process)
+ * TODO This should operate on the gulp stream, not on disk files.
  */
 function wrapMainBinaries() {
   const pair = wrappers.mainBinary.split('<%= contents %>');
   const prefix = pair[0];
   const suffix = pair[1];
   // Cache the v0 file so we can prepend it to alternative binaries.
-  const mainFile = fs.readFileSync('dist/v0.js', 'utf8');
+  const mainFile = readMagicString('dist/v0.js');
   jsFilesToWrap.forEach(x => {
     const path = `dist/${x}.js`;
-    const bootstrapCode = path === 'dist/v0.js' ? '' : mainFile;
-    const isAmpAltstring = path === 'dist/v0.js' ? '' : 'self.IS_AMP_ALT=1;';
-    fs.writeFileSync(
-      path,
-      `${isAmpAltstring}${prefix}${bootstrapCode}` +
-        `${fs.readFileSync(path).toString()}${suffix}`
-    );
+    const s = readMagicString(path);
+    if (x === 'v0') {
+      s.prepend(prefix);
+      s.append(suffix);
+      const map = s.generateDecodedMap({
+        hires: true,
+        source: path,
+      });
+      const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
+      fs.writeFileSync(path, s.toString(), 'utf8');
+      fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
+    } else {
+      const bundle = new MagicString.Bundle();
+      bundle.append('self.IS_AMP_ALT=1;');
+      bundle.append(prefix);
+      bundle.addSource(mainFile);
+      bundle.addSource(s);
+      bundle.append(suffix);
+      const map = bundle.generateDecodedMap({hires: true});
+      const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
+      fs.writeFileSync(path, bundle.toString(), 'utf8');
+      fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
+    }
   });
 }
 
 /**
- * Appends the listed file to the built js binary.
- * TODO(erwinm, #18811): This operation is needed but straight out breaks
- * source maps.
+ * Prepends intermediate bundles to the built js binary.
+ * TODO This should operate on the gulp stream, not on disk files.
  */
-function postProcessConcat() {
-  const extensions = extensionBundles.filter(x => Array.isArray(x.postPrepend));
-  extensions.forEach(extension => {
-    const isAltMainBundle = altMainBundles.some(x => {
-      return x.name === extension.name;
-    });
-    // We assume its in v0 unless its an alternative main binary.
-    const srcTargetDir = isAltMainBundle ? 'dist/' : 'dist/v0/';
+function intermediateBundleConcat() {
+  extensionBundles.forEach(extension => {
+    const prependContents = [
+      'dist/v0/_base_i.js',
+      `dist/v0/${extension.type}.js`,
+    ].map(readMagicString);
 
-    function createFullPath(version) {
-      return `${srcTargetDir}${extension.name}-${version}.js`;
+    // If there are third_party libraries to prepend too, ensure we inject a
+    // new split marker.
+    if (Array.isArray(extension.postPrepend)) {
+      prependContents.push(new MagicString(SPLIT_MARKER));
     }
 
-    let targets = [];
-    if (Array.isArray(extension.version)) {
-      targets = extension.version.map(createFullPath);
-    } else {
-      targets.push(createFullPath(extension.version));
+    return postPrepend(extension, prependContents);
+  });
+}
+
+/**
+ * Prepends the listed file to the built js binary.
+ * TODO This should operate on the gulp stream, not on disk files.
+ */
+function thirdPartyConcat() {
+  extensionBundles.forEach(extension => {
+    const postPrependPaths = extension.postPrepend;
+    if (!Array.isArray(postPrependPaths)) {
+      return;
     }
-    targets.forEach(path => {
-      const prependContent = extension.postPrepend
-        .map(x => {
-          return ';' + fs.readFileSync(x, 'utf8').toString();
-        })
-        .join('');
-      const content = fs
-        .readFileSync(path, 'utf8')
-        .toString()
-        .split(SPLIT_MARKER);
-      const prefix = content[0];
-      const suffix = content[1];
-      fs.writeFileSync(path, prefix + prependContent + suffix, 'utf8');
-    });
+    const prependContents = postPrependPaths.map(readMagicString);
+
+    return postPrepend(extension, prependContents);
+  });
+}
+
+function postPrepend(extension, prependContents) {
+  function createFullPath(version) {
+    return `dist/v0/${extension.name}-${version}.js`;
+  }
+
+  let targets = [];
+  if (Array.isArray(extension.version)) {
+    targets = extension.version.map(createFullPath);
+  } else {
+    targets.push(createFullPath(extension.version));
+  }
+  targets.forEach(path => {
+    const bundle = new MagicString.Bundle();
+    const s = readMagicString(path);
+    const index = s.original.indexOf(SPLIT_MARKER);
+    const prefix = s.snip(0, index);
+    const suffix = s.snip(index + SPLIT_MARKER.length, s.length());
+    bundle.addSource(prefix);
+    for (let i = 0; i < prependContents.length; i++) {
+      bundle.addSource(prependContents[i]);
+    }
+    bundle.addSource(suffix);
+    const map = bundle.generateDecodedMap({hires: true});
+    const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
+    fs.writeFileSync(path, bundle.toString(), 'utf8');
+    fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
   });
 }
 
@@ -669,4 +693,87 @@ function compile(flagsArray) {
       .pipe(gulp.dest('.'))
       .on('end', resolve);
   });
+}
+
+/**
+ * TODO This should operate on the gulp stream, not on disk files.
+ */
+function eliminateIntermediateBundles() {
+  extensionBundles.forEach(extension => {
+    function createFullPath(version) {
+      return `dist/v0/${extension.name}-${version}.js`;
+    }
+
+    let targets = [];
+    if (Array.isArray(extension.version)) {
+      targets = extension.version.map(createFullPath);
+    } else {
+      targets.push(createFullPath(extension.version));
+    }
+    targets.forEach(path => {
+      const map = loadSourceMap(path);
+      function returnMapFirst(map) {
+        let first = true;
+        return function(file) {
+          if (first) {
+            first = false;
+            return map;
+          }
+          return loadSourceMap(file);
+        };
+      }
+      const {code, map: babelMap} = babel.transformFileSync(path, {
+        plugins: conf.eliminateIntermediateBundles(),
+        retainLines: true,
+        sourceMaps: true,
+        inputSourceMap: false,
+      });
+      let remapped = resorcery(
+        babelMap,
+        returnMapFirst(map),
+        !argv.full_sourcemaps
+      );
+
+      const {code: compressed, map: terserMap} = terser.minify(code, {
+        mangle: false,
+        compress: {
+          defaults: false,
+          unused: true,
+        },
+        output: {
+          beautify: !!argv.pretty_print,
+          comments: 'all',
+          keep_quoted_props: true,
+        },
+        sourceMap: true,
+      });
+
+      // TODO: Resorcery should support a chain, instead of having to call
+      // multiple times.
+      remapped = resorcery(
+        terserMap,
+        returnMapFirst(remapped),
+        !argv.full_sourcemaps
+      );
+
+      fs.outputFileSync(path, compressed);
+      fs.outputFileSync(`${path}.map`, remapped.toString());
+    });
+  });
+}
+
+function readFile(path) {
+  return fs.readFileSync(path, 'utf8').toString();
+}
+
+function readMagicString(file) {
+  const contents = readFile(file);
+  return new MagicString(contents, {filename: file});
+}
+
+function loadSourceMap(file) {
+  if (file.startsWith('dist')) {
+    return readFile(`${file}.map`);
+  }
+  return null;
 }

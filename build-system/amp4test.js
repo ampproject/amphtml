@@ -75,6 +75,7 @@ app.use('/compose-doc', function(req, res) {
     head,
     spec,
   });
+  res.cookie('test-cookie', 'test');
   res.send(doc);
 });
 
@@ -210,7 +211,9 @@ app.get('/a4a/:bid', (req, res) => {
             "img": "\${htmlAttr(amp-img,src)}",
             "navTiming": "\${navTiming(requestStart,requestStart)}",
             "navType": "\${navType}",
-            "navRedirectCount": "\${navRedirectCount}"
+            "navRedirectCount": "\${navRedirectCount}",
+            "sourceUrl": "\${sourceUrl}",
+            "cookie": "\${cookie(test-cookie)}"
           }
         }
       }
@@ -224,6 +227,7 @@ app.get('/a4a/:bid', (req, res) => {
     css: 'body { background-color: #f4f4f4; }',
     extensions: ['amp-analytics'],
   });
+  res.cookie('test-cookie', 'test');
   res.send(doc);
 });
 

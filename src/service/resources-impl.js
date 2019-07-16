@@ -95,9 +95,6 @@ export class Resources {
      */
     this.isBuildOn_ = false;
 
-    /** @private @const {number} */
-    this.maxDpr_ = this.win.devicePixelRatio || 1;
-
     /** @private {number} */
     this.resourceIdCounter_ = 0;
 
@@ -168,12 +165,6 @@ export class Resources {
 
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
-
-    /** @private @const {boolean} */
-    this.useForcePrerender_ = isExperimentOn(
-      this.win,
-      'amp-force-prerender-visible-elements'
-    );
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
@@ -276,11 +267,11 @@ export class Resources {
 
     this.schedulePass();
 
-    this.rebuildDomWhenReady();
+    this.rebuildDomWhenReady_();
   }
 
-  /** @visibleForTesting */
-  rebuildDomWhenReady() {
+  /** @private */
+  rebuildDomWhenReady_() {
     // Ensure that we attempt to rebuild things when DOM is ready.
     this.ampdoc.whenReady().then(() => {
       this.documentReady_ = true;
@@ -326,14 +317,6 @@ export class Resources {
    */
   get() {
     return this.resources_.slice(0);
-  }
-
-  /**
-   * Whether the runtime is currently on.
-   * @return {boolean}
-   */
-  isRuntimeOn() {
-    return this.isRuntimeOn_;
   }
 
   /**
@@ -430,23 +413,6 @@ export class Resources {
         body.classList.toggle(clazz, on);
       });
     });
-  }
-
-  /**
-   * Returns the maximum DPR available on this device.
-   * @return {number}
-   */
-  getMaxDpr() {
-    return this.maxDpr_;
-  }
-
-  /**
-   * Returns the most optimal DPR currently recommended.
-   * @return {number}
-   */
-  getDpr() {
-    // TODO(dvoytenko): return optimal DPR.
-    return this.maxDpr_;
   }
 
   /**
@@ -1492,8 +1458,18 @@ export class Resources {
         ) {
           // 7. The new height (or one of the margins) is smaller than the
           // current one.
+        } else if (
+          request.newHeight == box.height &&
+          this.isWidthOnlyReflowFreeExpansion_(
+            resource.element,
+            request.newWidth || 0
+          )
+        ) {
+          // 8. Element is in viewport, but this is a width-only expansion that
+          // should not cause reflow.
+          resize = true;
         } else {
-          // 8. Element is in viewport don't resize and try overflow callback
+          // 9. Element is in viewport don't resize and try overflow callback
           // instead.
           request.resource.overflowCallback(
             /* overflown */ true,
@@ -1583,6 +1559,27 @@ export class Resources {
         );
       }
     }
+  }
+
+  /**
+   * Returns true if reflow will not be caused by expanding the given element's
+   * width to the given amount.
+   * @param {!Element} element
+   * @param {number} width
+   * @return {boolean}
+   */
+  isWidthOnlyReflowFreeExpansion_(element, width) {
+    const parent = element.parentElement;
+    // If the element has siblings, it's possible that a width-expansion will
+    // cause some of them to be pushed down.
+    if (!parent || parent.childElementCount > 1) {
+      return false;
+    }
+    const parentWidth =
+      (parent.getImpl && parent.getImpl().getLayoutWidth()) || -1;
+    // Reflow will not happen if the parent element is at least as wide as the
+    // new width.
+    return parentWidth >= width;
   }
 
   /**
@@ -1785,7 +1782,6 @@ export class Resources {
         // scheduleLayoutOrPreload_ method below.
         // Force build for all resources visible, measured, and in the viewport.
         if (
-          this.useForcePrerender_ &&
           !r.isBuilt() &&
           !r.hasOwner() &&
           r.hasBeenMeasured() &&
@@ -2539,7 +2535,7 @@ export class Resources {
         r.unload();
         this.cleanupTasks_(r);
       });
-      this.unselectText();
+      this.unselectText_();
     };
     const resume = () => {
       this.resources_.forEach(r => r.resume());
@@ -2575,8 +2571,9 @@ export class Resources {
 
   /**
    * Unselects any selected text
+   * @private
    */
-  unselectText() {
+  unselectText_() {
     try {
       this.win.getSelection().removeAllRanges();
     } catch (e) {

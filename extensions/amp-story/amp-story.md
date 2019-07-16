@@ -34,14 +34,14 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>none</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td><ul>
-      <li>See AMP By Example's <a href="https://ampbyexample.com/stories/introduction/amp_story_hello_world/">Hello World</a> sample.</li>
-      <li>Learn from the <a href="https://www.ampproject.org/docs/tutorials/visual_story">Create a visual AMP story</a> tutorial.</li>
+      <li>See AMP By Example's <a href="https://amp.dev/documentation/examples/introduction/stories_in_amp/">Hello World</a> sample.</li>
+      <li>Learn from the <a href="https://amp.dev/documentation/guides-and-tutorials/start/visual_story/">Create a visual AMP story</a> tutorial.</li>
     </ul></td>
   </tr>
 </table>
@@ -260,7 +260,7 @@ The content in the body creates a story with two pages.  Each page has a full bl
 
 ### Required markup for amp-story
 
-The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
+The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup), along with the following additional requirements:
 
 
 | RULE | DESCRIPTION |
@@ -338,6 +338,18 @@ A URL to the [story poster](#posters) in square format (1x1 aspect ratio).
 
 A URL to the [story poster](#posters) in landscape format (4x3 aspect ratio).
 
+##### live-story [optional]
+
+Enables the [Live story](#Live-story) functionality.
+
+##### live-story-disabled [optional]
+
+Disables the [Live story](#Live-story) functionality.
+
+##### data-poll-interval [optional]
+
+Used with the live-story attribute. Time interval (in milliseconds) between checks for new content. If no `data-poll-interval` is provided it with default to the 15000 millisecond minimum. A value under 15000 milliseconds is invalid.
+
 ### Posters
 
 A "poster" is an image that displays in the UI until your story is loaded. The poster can generally be the first screen of your story, although you can use any image that is representative of the story.
@@ -361,6 +373,55 @@ Usage: `<amp-story ... supports-landscape>...</amp-story>`
   <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
   </amp-anim>
 </figure>
+
+### Live story
+
+<figure class="centered-fig">
+  <amp-anim alt="Live story example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif">
+  <noscript>
+    <img alt="Live story example" width="200" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif" />
+  </noscript>
+  </amp-anim>
+</figure>
+
+Use the `live-story` attribute to append new pages to a story for users to see in real-time.
+
+This attribute shows a notification of new pages to users on the last page, and updates the progress bar.
+
+Core use cases for live-story include coverage for breaking news or live events, enabling real-time updates to users without exiting the story. Award shows, sporting events, and elections are some examples.
+
+#### How it works
+
+In the background, while an AMP Story using `live-story` is displayed on the client, the AMP runtime polls the origin document on the host for updates. When the client receives a response, it then filters and dynamically inserts those updates back into the story on the client. Publishers can customize the polling rate in order to control the number of incoming requests, and AMP caches like the Google AMP Cache can perform optimizations to reduce the server response payload, saving client bandwidth and CPU cycles.
+
+#### Polling
+
+In most implementations for live blogs, content is either pushed by the server to the client instance of a page, or the client polls a JSON endpoint to receive updates. The implementation here is different, in that the client instance of the story polls the server copy of the story document for updates inside the `<amp-story>` element. For instance: if the user is viewing a story served from an AMP cache, the client will poll that document hosted on that AMP cache for updates; if the user is viewing a document served from a web publisher's origin domain (e.g. "example.com"), then the client will poll the document hosted on that origin domain for updates.
+
+This means that publishers of stories do not need to set up a JSON endpoint or push mechanism for this functionality to work.
+
+Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](#data-poll-interval-[optional]) attribute.
+
+#### Stop polling
+
+As long as the `live-story` attribute is present on the `<amp-story>` element, the client will make continuous polls to the server copy of the document. Make sure to set the `live-story-disabled` attribute to the `<amp-story>` element when you publish your last update to the story. This will make the polling stop.
+
+#### Usage
+
+* Specify an `id` on the `<amp-story>` element.
+* Add the `live-story` attribute to the `<amp-story>` element.
+* [Optional] Add the [`data-poll-interval`](#data-poll-interval-[optional]) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
+* [Optional] When finishing the live broadcast, add the [`live-story-disabled`](#live-story-disabled-[optional]) attribute to the `<amp-story>` element to disable the polling.
+* On each `<amp-story-page>`:
+  * Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
+
+```html
+<amp-story id="story1" live-story ...>
+  <amp-story-page id="cover" data-sort-time="1552330790"> ... </amp-story-page>
+  <amp-story-page id="page1" data-sort-time="1552330791"> ... </amp-story-page>
+  <amp-story-page id="page2" data-sort-time="1552330792"> ... </amp-story-page>
+</amp-story>
+```
 
 ### Children (of amp-story)
 
@@ -485,7 +546,7 @@ Example:
 The following are available templates to specify for the layout of the grid layer.
 
 {% call callout('Tip', type='success') %}
-To see the layout templates in use, check out the [layouts demo on AMP By Example](https://ampbyexample.com/stories/features/layouts/).
+To see the layout templates in use, check out the [layouts demo on AMP By Example](https://amp.dev/documentation/examples/style-layout/amp_story_layouts/).
 {% endcall %}
 
 ##### fill
@@ -733,7 +794,57 @@ An `amp-story-grid-layer` can contain any of the following elements:
   </tr>
 </table>
 
+#### Pre templated UI
+
+##### Landscape half-half UI
+
+The landscape half-half pre templated UI will resize the `<amp-story-grid-layer>` element to take half of the screen rather than the full screen, and be positioned either on the half left or half right of the viewport. This attribute only affects landscape viewports, and is ignored on portrait viewports.
+This template makes it easier to design full bleed landscape stories: splitting the screen in two halves gives each half a portrait ratio on most devices, allowing re-using the portrait assets, design, and templates already built for portrait stories.
+
+The `position` attribute on the `<amp-story-grid-layer>` element accepts two values: `landscape-half-left` or `landscape-half-right`.
+
+Note: your story needs to enable the `supports-landscape` mode to use this template.
+
+Example:
+
+<amp-img alt="Landscape half-half UI template" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" width="600" height="287">
+  <noscript>
+    <img alt="Landscape half-half UI template" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" />
+  </noscript>
+</amp-img>
+
+```html
+<amp-story-page id="foo">
+  <amp-story-grid-layer template="fill" position="landscape-half-left">
+    <amp-img src="cat.jpg"></amp-img>
+  </amp-story-grid-layer>
+  <amp-story-grid-layer template="vertical" position="landscape-half-right">
+    <h2>Cat ipsum dolor sit amet...</h2>
+  </amp-story-grid-layer>
+</amp-story-page>
+```
+
 #### Optional customization
+
+##### Crop `amp-img` and `amp-video` assets using `object-position`
+
+The `object-position` attribute can be used on `<amp-img>` and `<amp-video>` elements to specify the alignment of the asset within its container (crop).
+By default these assets are centered and, depending on the viewport ratio, have their edges are cropped out of the container. Because the zone of interest of an asset is not always its center, the `object-position` allows specifying what part of the image has to remain visible.
+This attribute accepts any value accepted by the `object-position` CSS property.
+
+Example:
+
+<amp-img alt="Custom crop on amp-img and amp-video assets" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-object-position.gif" width="600" height="689">
+  <noscript>
+    <img alt="Custom crop on amp-img and amp-video assets" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-object-position.gif" />
+  </noscript>
+</amp-img>
+
+This same image can be used for both mobile portrait and landscape desktop using the `object-position` this way:
+
+```html
+<amp-img src="cat.jpg" object-position="75% 40%"></amp-img>
+```
 
 ##### `data-text-background-color`
 
@@ -948,8 +1059,6 @@ Story page attachments allow the same HTML elements as AMP Story along with addi
     <li><code>&lt;amp-jwplayer></code></li>
     <li><code>&lt;amp-kaltura-player></code></li>
     <li><code>&lt;amp-list></code></li>
-    <li><code>&lt;amp-list></code></li>
-    <li><code>&lt;amp-live-list></code></li>
     <li><code>&lt;amp-live-list></code></li>
     <li><code>&lt;amp-mathml></code></li>
     <li><code>&lt;amp-mowplayer></code></li>
@@ -1039,7 +1148,7 @@ The following animation effects are available as presets for AMP stories:
 
 
 {% call callout('Tip', type='success') %}
-See a [live demo of all the AMP story animations](https://ampbyexample.com/stories/features/animations/) on AMP By Example.
+See a [live demo of all the AMP story animations](https://amp.dev/documentation/examples/visual-effects/amp_story_animations/) on AMP By Example.
 {% endcall %}
 
 
@@ -1442,9 +1551,9 @@ This field should contain a string, where each string respresents a share provid
 
 When extra parameters are required, an object with key-value pairs should be used. The object should contain a key `provider` with a value (e.g. `facebook`) corresponding to the provider's name. The next key-values will depend on the share provider.
 
-The list of available providers is the same as in the [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share) component.
+The list of available providers is the same as in the [amp-social-share](https://amp.dev/documentation/components/amp-social-share) component.
 
-Each of these providers has a different set of available parameters ([see `data-param-*`](https://www.ampproject.org/docs/reference/components/amp-social-share#data-param-*)). The configuration object takes these parameters without the `data-param-` prefix (for example, the `data-param-app_id` would appear in the configuration object as `app_id`).
+Each of these providers has a different set of available parameters ([see `data-param-*`](https://amp.dev/documentation/components/amp-social-share#data-param-*)). The configuration object takes these parameters without the `data-param-` prefix (for example, the `data-param-app_id` would appear in the configuration object as `app_id`).
 
 #### JSON configuration
 The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON configuration of the bookend. It is described as a URL endpoint that accepts GET requests and returns a JSON response with the contents of the bookend.  If omitted, the amp-story component renders a default UI for the end screen. The system is responsible for fetching the data necessary to render related and trending articles.  This can be served from a static JSON file, or dynamically-generated (e.g., to calculate what is currently trending).
@@ -1489,11 +1598,11 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ## Other components usable in AMP stories
 The following are other components usable in AMP stories that require some story-specific caveats.
 
-- [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
-- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar#sidebar-for-stories)
+- [amp-consent](https://amp.dev/documentation/components/amp-consent#prompt-ui-for-stories)
+- [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar#sidebar-for-stories)
 - [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
 
-For more generally usable components see the [list of allowed children](https://www.ampproject.org/docs/reference/components/amp-story#children).
+For more generally usable components see the [list of allowed children](https://amp.dev/documentation/components/amp-story#children).
 
 ## Validation
 
@@ -1531,5 +1640,5 @@ Additionally, for right-to-left languages, you may include the `dir="rtl"` attri
 ## Related resources
 
 * [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
-* [Samples on AMP By Example](https://ampbyexample.com/stories/#stories/introduction)
-* [Best practices for creating an AMP story](https://www.ampproject.org/docs/guides/amp_story_best_practices)
+* [Samples on AMP By Example](https://amp.dev/documentation/examples/?format=stories)
+* [Best practices for creating an AMP story](https://amp.dev/documentation/guides-and-tutorials/develop/amp_story_best_practices)

@@ -42,7 +42,7 @@ function installPackages_() {
 
 function buildRuntime_() {
   execOrDie('gulp clean');
-  execOrDie('gulp dist --fortesting');
+  execOrDie(`gulp dist --fortesting --config ${argv.config}`);
 }
 
 function launchWebServer_() {
@@ -167,6 +167,8 @@ e2e.flags = {
   'browsers':
     '  Run only the specified browser tests. Options are ' +
     '`chrome`, `firefox`.',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',

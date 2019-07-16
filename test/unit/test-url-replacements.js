@@ -23,7 +23,6 @@ import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
-import {getMode} from '../../src/mode';
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -170,6 +169,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
         cookie: '',
         documentElement: {
           nodeType: /* element */ 1,
+          getRootNode() {
+            return win.document;
+          },
         },
       },
       Math: {
@@ -191,9 +193,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
       // Fake query selectors needed to bypass <meta> tag checks.
       querySelector: () => null,
       querySelectorAll: () => [],
+      getRootNode() {
+        return win.document;
+      },
     };
     installDocService(win, /* isSingleDoc */ true);
-    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+    const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     installUrlReplacementsServiceForDoc(ampdoc);
@@ -626,20 +631,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
       {withCid: true}
     ).then(res => {
       expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
-    });
-  });
-
-  it('should replace CLIENT_ID with empty string for inabox', () => {
-    setCookie(window, '_ga', 'GA1.2.12345.54321');
-    const origMode = getMode().runtime;
-    getMode().runtime = 'inabox';
-    return expandUrlAsync(
-      '?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)',
-      /*opt_bindings*/ undefined,
-      {withCid: true}
-    ).then(res => {
-      getMode().runtime = origMode;
-      expect(res).to.equal('?a=&b=');
     });
   });
 
@@ -1213,15 +1204,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
 
   it('should replace new substitutions', () => {
-    const {documentElement} = window.document;
-    const replacements = Services.urlReplacementsForDoc(documentElement);
-    replacements.getVariableSource().set('ONE', () => 'a');
-    expect(replacements.expandUrlAsync('?a=ONE')).to.eventually.equal('?a=a');
-    replacements.getVariableSource().set('ONE', () => 'b');
-    replacements.getVariableSource().set('TWO', () => 'b');
-    return expect(
-      replacements.expandUrlAsync('?a=ONE&b=TWO')
-    ).to.eventually.equal('?a=b&b=b');
+    return getReplacements().then(replacements => {
+      replacements.getVariableSource().set('ONE', () => 'a');
+      expect(replacements.expandUrlAsync('?a=ONE')).to.eventually.equal('?a=a');
+      replacements.getVariableSource().set('ONE', () => 'b');
+      replacements.getVariableSource().set('TWO', () => 'b');
+      return expect(
+        replacements.expandUrlAsync('?a=ONE&b=TWO')
+      ).to.eventually.equal('?a=b&b=b');
+    });
   });
 
   // TODO(#16916): Make this test work with synchronous throws.
@@ -1263,46 +1254,46 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should support positional arguments', () => {
-    const {documentElement} = window.document;
-    const replacements = Services.urlReplacementsForDoc(documentElement);
-    replacements.getVariableSource().set('FN', one => one);
-    return expect(
-      replacements.expandUrlAsync('?a=FN(xyz1)')
-    ).to.eventually.equal('?a=xyz1');
+    return getReplacements().then(replacements => {
+      replacements.getVariableSource().set('FN', one => one);
+      return expect(
+        replacements.expandUrlAsync('?a=FN(xyz1)')
+      ).to.eventually.equal('?a=xyz1');
+    });
   });
 
   it('should support multiple positional arguments', () => {
-    const {documentElement} = window.document;
-    const replacements = Services.urlReplacementsForDoc(documentElement);
-    replacements.getVariableSource().set('FN', (one, two) => {
-      return one + '-' + two;
+    return getReplacements().then(replacements => {
+      replacements.getVariableSource().set('FN', (one, two) => {
+        return one + '-' + two;
+      });
+      return expect(
+        replacements.expandUrlAsync('?a=FN(xyz,abc)')
+      ).to.eventually.equal('?a=xyz-abc');
     });
-    return expect(
-      replacements.expandUrlAsync('?a=FN(xyz,abc)')
-    ).to.eventually.equal('?a=xyz-abc');
   });
 
   it('should support multiple positional arguments with dots', () => {
-    const {documentElement} = window.document;
-    const replacements = Services.urlReplacementsForDoc(documentElement);
-    replacements.getVariableSource().set('FN', (one, two) => {
-      return one + '-' + two;
+    return getReplacements().then(replacements => {
+      replacements.getVariableSource().set('FN', (one, two) => {
+        return one + '-' + two;
+      });
+      return expect(
+        replacements.expandUrlAsync('?a=FN(xy.z,ab.c)')
+      ).to.eventually.equal('?a=xy.z-ab.c');
     });
-    return expect(
-      replacements.expandUrlAsync('?a=FN(xy.z,ab.c)')
-    ).to.eventually.equal('?a=xy.z-ab.c');
   });
 
   it('should support promises as replacements', () => {
-    const {documentElement} = window.document;
-    const replacements = Services.urlReplacementsForDoc(documentElement);
-    replacements.getVariableSource().set('P1', () => Promise.resolve('abc '));
-    replacements.getVariableSource().set('P2', () => Promise.resolve('xyz'));
-    replacements.getVariableSource().set('P3', () => Promise.resolve('123'));
-    replacements.getVariableSource().set('OTHER', () => 'foo');
-    return expect(
-      replacements.expandUrlAsync('?a=P1&b=P2&c=P3&d=OTHER')
-    ).to.eventually.equal('?a=abc%20&b=xyz&c=123&d=foo');
+    return getReplacements().then(replacements => {
+      replacements.getVariableSource().set('P1', () => Promise.resolve('abc '));
+      replacements.getVariableSource().set('P2', () => Promise.resolve('xyz'));
+      replacements.getVariableSource().set('P3', () => Promise.resolve('123'));
+      replacements.getVariableSource().set('OTHER', () => 'foo');
+      return expect(
+        replacements.expandUrlAsync('?a=P1&b=P2&c=P3&d=OTHER')
+      ).to.eventually.equal('?a=abc%20&b=xyz&c=123&d=foo');
+    });
   });
 
   it('should override an existing binding', () => {

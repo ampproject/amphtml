@@ -29,7 +29,6 @@ const {
   reportTestRunComplete,
 } = require('../report-test-status');
 const {app} = require('../../test-server');
-const {exec} = require('../../exec');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {Server} = require('karma');
@@ -95,14 +94,6 @@ function getAdTypes() {
 }
 
 /**
- * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
- * by refreshing the wd cache so that Karma can launch without an error.
- */
-function refreshKarmaWdCache() {
-  exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
-}
-
-/**
  * Prints help messages for args if tests are being run for local development.
  */
 function maybePrintArgvMessages() {
@@ -125,7 +116,6 @@ function maybePrintArgvMessages() {
     verbose: 'Enabling verbose mode. Expect lots of output!',
     testnames: 'Listing the names of all tests being run.',
     files: 'Running tests in the file(s): ' + cyan(argv.files),
-    compiled: 'Running tests against minified code.',
     grep:
       'Only running tests that match the pattern "' + cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
@@ -169,7 +159,9 @@ function maybePrintArgvMessages() {
       green('to run tests in a headless Chrome window.')
     );
   }
-  if (!argv.compiled) {
+  if (argv.compiled || !argv.nobuild) {
+    log(green('Running tests against minified code.'));
+  } else {
     log(green('Running tests against unminified code.'));
   }
   Object.keys(argv).forEach(arg => {
@@ -409,7 +401,6 @@ module.exports = {
   createKarmaServer,
   getAdTypes,
   maybePrintArgvMessages,
-  refreshKarmaWdCache,
   runTestInBatches,
   shouldNotRun,
   startTestServer,

@@ -39,10 +39,10 @@ describes.realWin('Resource', {amp: true}, env => {
       .callsFake(() => LayoutPriority.ADS);
     elementMock = sandbox.mock(element);
 
-    const viewer = Services.viewerForDoc(document);
+    const viewer = Services.viewerForDoc(doc);
     sandbox.stub(viewer, 'isRuntimeOn').callsFake(() => false);
     sandbox
-      .stub(Resources.prototype, 'rebuildDomWhenReady')
+      .stub(Resources.prototype, 'rebuildDomWhenReady_')
       .callsFake(() => {});
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
@@ -769,10 +769,10 @@ describes.realWin('Resource', {amp: true}, env => {
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
 
+    /* global fail: false */
     return promise
       .then(
         () => {
-          /* global fail: false */
           fail('should not be here');
         },
         () => {
@@ -786,7 +786,6 @@ describes.realWin('Resource', {amp: true}, env => {
       )
       .then(
         () => {
-          /* global fail: false */
           fail('should not be here');
         },
         reason => {
