@@ -124,7 +124,8 @@ export class Navigation {
       isIframed(this.ampdoc.win) && this.viewer_.isOvertakeHistory();
 
     /** @private @const {boolean} */
-    this.isEmbed_ = this.rootNode_ != this.ampdoc.getRootNode();
+    this.isEmbed_ =
+      this.rootNode_ != this.ampdoc.getRootNode() || !!this.ampdoc.getParent();
 
     /** @private @const {boolean} */
     this.isInABox_ = getMode(this.ampdoc.win).runtime == 'inabox';
