@@ -126,6 +126,7 @@ import {dable} from '../ads/dable';
 import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {dotandads} from '../ads/dotandads';
+import {dynad} from '../ads/dynad';
 import {eadv} from '../ads/eadv';
 import {eas} from '../ads/eas';
 import {engageya} from '../ads/engageya';
@@ -278,9 +279,11 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  idealmedia: true,
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
+  mgid: true,
   miximedia: true,
   mywidget: true,
   opinary: true,
@@ -376,6 +379,7 @@ register('dable', dable);
 register('directadvert', directadvert);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
+register('dynad', dynad);
 register('eadv', eadv);
 register('eas', eas);
 register('embedly', embedly);

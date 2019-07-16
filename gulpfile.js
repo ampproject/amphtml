@@ -18,6 +18,9 @@
 
 const gulp = require('gulp-help')(require('gulp'));
 const {
+  checkExactVersions,
+} = require('./build-system/tasks/check-exact-versions');
+const {
   compileAccessExpr,
   compileBindExpr,
   compileCssExpr,
@@ -78,6 +81,7 @@ gulp.task('bundle-size', bundleSize);
 gulp.task('caches-json', cachesJson);
 gulp.task('changelog', changelog);
 gulp.task('changelog:update', changelogUpdate);
+gulp.task('check-exact-versions', checkExactVersions);
 gulp.task('check-links', checkLinks);
 gulp.task('check-types', checkTypes);
 gulp.task('clean', clean);
