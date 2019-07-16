@@ -207,9 +207,7 @@ class PuppeteerController {
     const nodeListHandle = await frame.waitForFunction(
       (root, selector) => {
         const nodeList = root./*OK*/ querySelectorAll(selector);
-        return nodeList.length > 0
-          ? Array.prototype.slice.call(nodeList)
-          : null;
+        return nodeList.length > 0 ? Array.from(nodeList) : null;
       },
       {timeout: DEFAULT_WAIT_TIMEOUT},
       root,
@@ -400,7 +398,7 @@ class PuppeteerController {
     const getter = (element, property) => {
       let value = element[property];
       if (typeof value !== 'string' && typeof value.length === 'number') {
-        value = Array.prototype.slice.call(value);
+        value = Array.from(value);
       }
 
       return {value};
