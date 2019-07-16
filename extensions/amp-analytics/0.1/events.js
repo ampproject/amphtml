@@ -434,14 +434,8 @@ class AmpStoryEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const storySpec = config['storySpec'] || {};
-    userAssert(!config['selector'], 'Selector not supported in AmpStorySpec');
-    const selector = ':root';
-    const selectionMethod = config['selectionMethod'] || null;
-    const targetReady = this.root.getElement(
-      context,
-      selector,
-      selectionMethod
-    );
+    const rootTarget = this.root.getRootElement();
+
     const repeat = storySpec['repeat'];
     const on = config['on'];
 
@@ -458,15 +452,7 @@ class AmpStoryEventTracker extends EventTracker {
         return;
       }
 
-      const el = dev().assertElement(
-        event.target,
-        'No target specified by story session event.'
-      );
-      targetReady.then(target => {
-        if (target.contains(el)) {
-          listener(new AnalyticsEvent(target, type, details));
-        }
-      });
+      listener(new AnalyticsEvent(rootTarget, type, details));
     });
   }
 }
