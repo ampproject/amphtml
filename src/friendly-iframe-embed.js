@@ -392,7 +392,7 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    Services.resourcesForDoc(this.iframe).removeForChildWindow(this.win);
+    this.removeResources_();
     disposeServicesForEmbed(this.win);
   }
 
@@ -548,6 +548,21 @@ export class FriendlyIframeEmbed {
       task.measure || null,
       task.mutate
     );
+  }
+
+  /**
+   * Removes all resources belonging to the FIE window.
+   * @private
+   */
+  removeResources_() {
+    const resources = this.getResources_();
+    const toRemove = resources
+      .get()
+      .filter(resource => resource.hostWin == this.win);
+    toRemove.forEach(resource => {
+      resources.remove(resource.element);
+      resource.disconnect();
+    });
   }
 
   /**

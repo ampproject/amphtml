@@ -653,10 +653,9 @@ export class Resources {
 
   /**
    * @param {!Resource} resource
-   * @param {boolean=} opt_disconnect
    * @private
    */
-  removeResource_(resource, opt_disconnect) {
+  removeResource_(resource) {
     const index = this.resources_.indexOf(resource);
     if (index != -1) {
       this.resources_.splice(index, 1);
@@ -664,20 +663,8 @@ export class Resources {
     if (resource.isBuilt()) {
       resource.pauseOnRemove();
     }
-    if (opt_disconnect) {
-      resource.disconnect();
-    }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
-  }
-
-  /**
-   * Removes all resources belonging to the specified child window.
-   * @param {!Window} childWin
-   */
-  removeForChildWindow(childWin) {
-    const toRemove = this.resources_.filter(r => r.hostWin == childWin);
-    toRemove.forEach(r => this.removeResource_(r, /* disconnect */ true));
   }
 
   /**
