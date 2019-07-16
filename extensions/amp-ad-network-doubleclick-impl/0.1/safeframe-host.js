@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getStyle, setStyles} from '../../../src/style';
@@ -745,12 +745,7 @@ export class SafeframeHostApi {
         this.checkStillCurrent_();
         this.onFluidResize_(newHeight);
       })
-      .catch(err => {
-        if (err.message == 'CANCELLED') {
-          dev().error(TAG, err);
-          return;
-        }
-      });
+      .catch(err => user().warn(TAG, err));
   }
 
   /**
