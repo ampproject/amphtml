@@ -959,15 +959,16 @@ amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
 
 amp-story-page .i-amphtml-story-page-open-attachment-label {
   position: relative !important;
-  padding: 0 24px !important;
-  height: 40px !important;
-  max-width: calc(100% - 48px) !important;
+  padding: 0 32px !important;
+  margin: 12px 0 20px !important;
+  height: 16px !important;
+  max-width: calc(100% - 64px) !important;
   color: #FFF !important;
   font-family: 'Roboto', sans-serif !important;
-  font-size: 15px !important;
+  font-size: 16px !important;
   font-weight: bold !important;
   letter-spacing: 0.3px;
-  line-height: 40px !important;
+  line-height: 16px !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
