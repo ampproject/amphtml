@@ -356,7 +356,7 @@ class PuppeteerController {
    */
   getElementText(handle) {
     const element = handle.getElement();
-    const getter = element => ({value: element.innerText.trim()});
+    const getter = element => ({value: element./*OK*/ innerText.trim()});
     return new ControllerPromise(
       this.evaluateValue_(getter, element),
       this.getWaitFn_(getter, element)
