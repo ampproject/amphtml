@@ -642,11 +642,14 @@ class PuppeteerController {
       );
       return {
         url: request.url(),
-        body: null,
+        // TODO(cvializ): pass the real request body
+        // It's a challenge for Puppeteer because it stores the postData
+        // as a string, and so we'd need to pass it to a body parser.
+        body: {},
       };
     };
 
-    return new ControllerPromise(matches[0], getter);
+    return new ControllerPromise(matches[0] || getter(), getter);
   }
 
   /**

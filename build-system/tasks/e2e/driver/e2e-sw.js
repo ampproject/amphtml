@@ -22,6 +22,9 @@ self.addEventListener('activate', event => {
     self.clients.claim().then(async () => {
       const {clientId} = event;
       const client = await self.clients.get(clientId);
+      if (!client) {
+        return;
+      }
       client.postMessage(self.requests_.get(clientId));
     })
   );
@@ -31,7 +34,6 @@ self.addEventListener('fetch', event => {
   self.requests_ = self.requests_ || new ClientRequests();
 
   const {clientId, request} = event;
-
   // Exit if we cannot access the client, e.g. if it's cross-origin
   if (!clientId) {
     return;
@@ -95,24 +97,8 @@ async function logRequest(clientId, request) {
     return;
   }
 
+  // TODO(cvializ): Pass the real request body
   const {url} = request;
-  // const contentType = request.headers.get('content-type') || '';
-
-  // let body;
-  // if (contentType.indexOf('multipart/form-data') == 0) {
-  //   const formData = await request.formData();
-
-  //   const result = {};
-  //   for (const [key, value] of formData.entries()) {
-  //     result[key] = value;
-  //   }
-  //   body = result;
-  // } else if (contentType.indexOf('application/json') == 0) {
-  //   body = await request.json();
-  // } else {
-  //   body = await request.text();
-  // }
-
   self.requests_.put(clientId, {url, body: {}});
 
   client.postMessage(self.requests_.get(clientId));

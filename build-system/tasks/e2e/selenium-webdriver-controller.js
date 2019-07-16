@@ -553,15 +553,19 @@ class SeleniumWebDriverController {
    * @param {RegExp|string} matcher
    * @return {!ControllerPromise}
    */
-  getNetworkRequest(matcher) {
+  getNetworkRequest(matcher, property) {
     const getter = matcher => {
       return window.requestService && window.requestService.getRequest(matcher);
     };
 
-    return new ControllerPromise(
+    const p = new ControllerPromise(
       this.evaluate(getter, matcher),
       this.getWaitFn_(() => this.evaluate(getter, matcher))
     );
+    if (property) {
+      return p.then(result => result[property]);
+    }
+    return p;
   }
 
   /**

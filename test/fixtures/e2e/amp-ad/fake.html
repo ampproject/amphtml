@@ -1,0 +1,32 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind : basic</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+</head>
+<body>
+  <amp-ad width="300" height="400"
+      id="i-amphtml-demo-id"
+      type="fake"
+      src="/amp4test/a4a/RANDOM">
+    <div placeholder>Loading...</div>
+    <div fallback>Could not display the fake ad :(</div>
+  </amp-ad>
+
+  <p [text]="foo">123</p>
+  <button on="tap:AMP.setState({foo: 456})"></button>
+  <amp-ad width="300" height="400"
+    id="i-amphtml-demo-id-bind"
+    type="fake"
+    src="/amp4test/compose-doc?body=%0A%20%20%20%20%20%20%3Cp%20%5Btext%5D%3D%22foo%22%3E123%3C%2Fp%3E%0A%20%20%20%20%20%20%3Cbutton%20on%3D%22tap%3AAMP.setState(%7Bfoo%3A%20456%7D)%22%3E%3C%2Fbutton%3E%0A%20%20%20%20%20%20&extensions=amp-bind&spec=amp4ads">
+    <div placeholder>Loading...</div>
+    <div fallback>Could not display the fake ad :(</div>
+  </amp-ad>
+</body>
+</html>
