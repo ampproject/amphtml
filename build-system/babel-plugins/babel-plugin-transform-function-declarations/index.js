@@ -106,19 +106,21 @@ export default function({types: t}) {
         for (const [id, method] of Object.entries(BAIL_OUT_CONDITIONS)) {
           if (method(t, path)) {
             if (DEBUG) {
-              console.log(
-                `Bail on ${
-                  path.get('id') && path.get('id').node.name
-                    ? `function ${path.node.id.name}:`
-                    : 'item:'
-                } Reason ${id}.`
-              );
+              console /*OK*/
+                .log(
+                  `Bail on ${
+                    path.get('id') && path.get('id').node.name
+                      ? `function ${path.node.id.name}:`
+                      : 'item:'
+                  } Reason ${id}.`
+                );
             }
             return;
           }
         }
         if (DEBUG) {
-          console.log(`Success for function ${path.get('id').node.name}.`);
+          console /*OK*/
+            .log(`Success for function ${path.get('id').node.name}.`);
         }
         path.replaceWith(createVariableDeclaration(t, path));
       },
