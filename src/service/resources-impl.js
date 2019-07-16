@@ -320,14 +320,6 @@ export class Resources {
   }
 
   /**
-   * Whether the runtime is currently on.
-   * @return {boolean}
-   */
-  isRuntimeOn() {
-    return this.isRuntimeOn_;
-  }
-
-  /**
    * Signals that the document has been started rendering.
    * @restricted
    */
@@ -1049,7 +1041,7 @@ export class Resources {
         // invalidation (new layer, or removal of old layer)? Right now, we're
         // only dirtying the measurements.
         mutator();
-        this.dirtyElement(element);
+        this.dirtyElement_(element);
       },
     });
   }
@@ -1064,9 +1056,10 @@ export class Resources {
    * amp-element was necessary (only children were mutated, only
    * amp-element's scroll box is affected).
    *
+   * @private
    * @param {!Element} element
    */
-  dirtyElement(element) {
+  dirtyElement_(element) {
     let relayoutAll = false;
     if (this.useLayers_) {
       this.layers_.dirty(element);
@@ -1137,7 +1130,7 @@ export class Resources {
         isExperimentOn(this.win, 'dirty-collapse-element') ||
         this.useLayers_
       ) {
-        this.dirtyElement(element);
+        this.dirtyElement_(element);
       } else {
         this.setRelayoutTop_(box.top);
       }
@@ -1516,7 +1509,7 @@ export class Resources {
 
       if (this.useLayers_) {
         dirtySet.forEach(element => {
-          this.dirtyElement(element);
+          this.dirtyElement_(element);
         });
       } else if (minTop != -1) {
         this.setRelayoutTop_(minTop);
@@ -1548,7 +1541,7 @@ export class Resources {
               });
               if (this.useLayers_) {
                 scrollAdjSet.forEach(request => {
-                  this.dirtyElement(request.resource.element);
+                  this.dirtyElement_(request.resource.element);
                 });
               } else if (minTop != -1) {
                 this.setRelayoutTop_(minTop);
