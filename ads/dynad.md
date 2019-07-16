@@ -14,31 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# MGID
+# DynAd
 
 ## Example
 
-### Basic
-
 ```html
-  <amp-embed width="100" height="283"
-       type="mgid"
-       data-publisher="amp-demo"
-       data-widget="12345"
-       data-container="demo-container">
-  </amp-embed>
+<amp-ad width="300" height="250"
+    type="dynad"
+    src="https://t.dynad.net/script/?dc=5550002445;ord=1561170689208;idt_product=1;aff_source=2710d4ec5b3843f985bd52d768425f5b;coddisplaysupplier=2710d4ec5b3843f985bd52d768425f5b;descrColor=000000;titleColor=000000;urlColor=A6A6A6;borderColor=FFFFFF;bgColor=FFFFFF;altColor=FFFFFF;deslabel=saibatudomt.com.br;click="
+    >
+</amp-ad>
 ```
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
-### Required parameters
+### Direct URL call:
 
-- `data-publisher`
-- `data-widget`
-- `data-container`
+* `src` - Src value from script tag provided by the ad network.
 
-### Optional parameters
-
-- `data-url`

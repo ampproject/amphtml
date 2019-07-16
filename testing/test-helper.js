@@ -118,15 +118,19 @@ export function isAnimationNone(element) {
 /**
  * Asserts that the given element is only visible to screen readers.
  * @param {!Element} node
+ * @param {{
+ *   index: (number|undefined),
+ * }} options
  */
-export function assertScreenReaderElement(element) {
+export function assertScreenReaderElement(element, {index = 0} = {}) {
+  const offset = index * 8;
   expect(element).to.exist;
   expect(element.classList.contains('i-amphtml-screen-reader')).to.be.true;
   const win = element.ownerDocument.defaultView;
   const computedStyle = win.getComputedStyle(element);
   expect(computedStyle.getPropertyValue('position')).to.equal('fixed');
   expect(computedStyle.getPropertyValue('top')).to.equal('0px');
-  expect(computedStyle.getPropertyValue('left')).to.equal('0px');
+  expect(computedStyle.getPropertyValue('left')).to.equal(`${offset}px`);
   expect(computedStyle.getPropertyValue('width')).to.equal('4px');
   expect(computedStyle.getPropertyValue('height')).to.equal('4px');
   expect(computedStyle.getPropertyValue('opacity')).to.equal('0');
