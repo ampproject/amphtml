@@ -29,20 +29,20 @@ const minimist = require('minimist');
 const {isTravisBuild} = require('./build-system/travis');
 const argv = minimist(process.argv.slice(2));
 
+const isDist = argv._.includes('dist');
+const {esm} = argv;
+const noModuleTarget = {
+  'browsers': isTravisBuild()
+    ? ['Last 2 versions', 'safari >= 9']
+    : ['Last 2 versions'],
+};
+
+const moduleTarget = {
+  'esmodules': true,
+};
+
 // eslint-disable-next-line amphtml-internal/no-module-exports
 module.exports = function(api) {
-  const isDist = argv._.includes('dist');
-  const {esm} = argv;
-  const es5Target = {
-    'browsers': isTravisBuild()
-      ? ['Last 2 versions', 'safari >= 9']
-      : ['Last 2 versions'],
-  };
-
-  const esmTarget = {
-    'esmodules': true,
-  };
-
   api.cache(true);
   // `dist` builds do not use any of the default settings below until its
   // an esm build. (Both Multipass and Singlepass)
@@ -56,7 +56,7 @@ module.exports = function(api) {
         {
           'modules': isDist ? false : 'commonjs',
           'loose': true,
-          'targets': esm ? esmTarget : es5Target,
+          'targets': esm ? moduleTarget : noModuleTarget,
         },
       ],
     ],
