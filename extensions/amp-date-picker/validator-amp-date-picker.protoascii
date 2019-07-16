@@ -134,6 +134,10 @@ tags: {
 attr_lists: {
   name: "amp-date-picker-common-attributes"
   attrs: {
+    name: "allow-blocked-end-date"
+    value: ""
+  }
+  attrs: {
     name: "allow-blocked-ranges"
     value: ""
   }

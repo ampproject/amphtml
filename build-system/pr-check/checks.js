@@ -47,6 +47,7 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp check-exact-versions');
     timedExecOrDie('gulp lint');
     timedExecOrDie('gulp presubmit');
     timedExecOrDie('gulp ava');
@@ -62,6 +63,7 @@ function main() {
     reportAllExpectedTests(buildTargets);
     timedExecOrDie('gulp update-packages');
 
+    timedExecOrDie('gulp check-exact-versions');
     timedExecOrDie('gulp lint');
     timedExecOrDie('gulp presubmit');
 

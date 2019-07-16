@@ -39,10 +39,10 @@ describes.realWin('Resource', {amp: true}, env => {
       .callsFake(() => LayoutPriority.ADS);
     elementMock = sandbox.mock(element);
 
-    const viewer = Services.viewerForDoc(document);
+    const viewer = Services.viewerForDoc(doc);
     sandbox.stub(viewer, 'isRuntimeOn').callsFake(() => false);
     sandbox
-      .stub(Resources.prototype, 'rebuildDomWhenReady')
+      .stub(Resources.prototype, 'rebuildDomWhenReady_')
       .callsFake(() => {});
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
