@@ -31,15 +31,16 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {toggleExperiment} from '../../src/experiments';
 
-describe('friendly-iframe-embed', () => {
-  let sandbox;
+describes.realWin('friendly-iframe-embed', {amp: true}, env => {
+  let window, document;
   let iframe;
   let extensionsMock;
   let resourcesMock;
   let ampdocServiceMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
+    window = env.win;
+    document = window.document;
 
     const extensions = Services.extensionsFor(window);
     const resources = Services.resourcesForDoc(window.document);
@@ -799,7 +800,7 @@ describe('friendly-iframe-embed', () => {
           // Body is now not empty.
           contentBody.firstChild = {};
           clock.tick(5);
-          return Promise.race([Promise.resolve(), embedPromise]);
+          return embedPromise;
         })
         .then(() => {
           expect(ready).to.equal(true, 'Finally ready');
