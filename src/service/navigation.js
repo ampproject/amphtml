@@ -43,8 +43,11 @@ const VALID_TARGETS = ['_top', '_blank'];
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
-/** @const {string} */
-export const AMP_CUSTOM_LINKER_TARGET = '__AMP_CUSTOM_LINKER_TARGET__';
+/**
+ * Key used for retargeting event target originating from shadow DOM.
+ * @const {string}
+ */
+const AMP_CUSTOM_LINKER_TARGET = '__AMP_CUSTOM_LINKER_TARGET__';
 
 /**
  * @enum {number} Priority reserved for extensions in anchor mutations.

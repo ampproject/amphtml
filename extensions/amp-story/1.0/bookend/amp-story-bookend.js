@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AMP_CUSTOM_LINKER_TARGET} from '../../../../src/service/navigation';
 import {
   Action,
   StateProperty,
@@ -62,6 +61,12 @@ const BOOKEND_VERSION_KEY = 'bookendVersion';
  * @private @const {string}
  */
 const DEPRECATED_BOOKEND_VERSION_KEY = 'bookend-version';
+
+/**
+ * Key used for retargeting event target originating from shadow DOM.
+ * @const {string}
+ */
+const AMP_CUSTOM_LINKER_TARGET = '__AMP_CUSTOM_LINKER_TARGET__';
 
 /**
  * @param {string} hidden

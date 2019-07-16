@@ -57,6 +57,7 @@ describes.sandboxed('Navigation', {}, () => {
       let anchor;
       let elementWithId;
       let anchorWithName;
+      let customAnchor;
 
       beforeEach(() => {
         win = env.win;
@@ -94,10 +95,15 @@ describes.sandboxed('Navigation', {}, () => {
         doc.body.appendChild(anchor);
         event.target = anchor;
 
+        customAnchor = doc.createElement('a');
+        customAnchor.href = 'https://www.google.com/custom';
+        doc.body.appendChild(customAnchor);
+
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
         sandbox
           .stub(Services, 'urlReplacementsForDoc')
           .withArgs(anchor)
+          .withArgs(customAnchor)
           .returns(urlReplacements);
 
         elementWithId = doc.createElement('div');
@@ -116,6 +122,17 @@ describes.sandboxed('Navigation', {}, () => {
           expect(handleNavSpy).to.be.calledWith(event, anchor);
           expect(handleCustomProtocolSpy).to.be.calledOnce;
           expect(handleCustomProtocolSpy).to.be.calledWith(event, anchor);
+        });
+
+        it.only('should select a custom linker target', () => {
+          const handleClickSpy = sandbox.spy(handler, 'handleClick_');
+
+          event.target = null;
+          event['__AMP_CUSTOM_LINKER_TARGET__'] = customAnchor;
+          handler.handle_(event);
+
+          expect(handleClickSpy).to.be.calledOnce;
+          expect(handleClickSpy).to.be.calledWith(customAnchor, event);
         });
 
         it('should NOT handle custom protocol when not iframed', () => {
