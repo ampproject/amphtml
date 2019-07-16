@@ -758,6 +758,7 @@ export class Resource {
 
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
+    const viewport = Services.viewportForDoc(this.element);
     const viewportBox = viewport.getRect();
     const layoutBox = this.getLayoutBox();
     const scrollDirection = this.resources_.getScrollDirection();
