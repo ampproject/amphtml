@@ -118,6 +118,8 @@ describes.sandboxed('Navigation', {}, () => {
 
       describe('discovery', () => {
         it('should select a direct link', () => {
+          // TODO(alabiaga): throughout the file -- invoke the handler via the
+          // document used to get the navigation service. e.g document.click().
           handler.handle_(event);
           expect(handleNavSpy).to.be.calledOnce;
           expect(handleNavSpy).to.be.calledWith(event, anchor);
