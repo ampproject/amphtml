@@ -60,7 +60,7 @@ const DEFAULT_WAIT_TIMEOUT = 10000;
  */
 async function waitFor(page, valueFn, args, condition, opt_mutate) {
   const handle = await evaluate(page, valueFn, ...args);
-  let value = await handle.jsonValue();
+  let value = await unboxHandle(handle);
   if (opt_mutate) {
     value = await opt_mutate(value);
   }
@@ -71,13 +71,24 @@ async function waitFor(page, valueFn, args, condition, opt_mutate) {
       {timeout: DEFAULT_WAIT_TIMEOUT},
       ...args
     );
-    const prop = await handle.jsonValue();
-    value = 'value' in prop ? prop.value : prop;
+    value = await unboxHandle(handle);
     if (opt_mutate) {
       value = await opt_mutate(value);
     }
   }
   return value;
+}
+
+/**
+ * Remove the jsonValue wrapper from a PuppeteerHandle and
+ * remove an outer object wrapper if present.
+ * @param {!PuppeteerHandle} handle
+ * @return {T}
+ * @template T
+ */
+async function unboxHandle(handle) {
+  const prop = await handle.jsonValue();
+  return 'value' in prop ? prop.value : prop;
 }
 
 /**
