@@ -627,6 +627,7 @@ export class Resource {
     if (!this.isFixed_) {
       return this.layoutBox_;
     }
+    const viewport = Services.viewportForDoc(this.element);
     return moveLayoutRect(
       this.layoutBox_,
       viewport.getScrollLeft(),
