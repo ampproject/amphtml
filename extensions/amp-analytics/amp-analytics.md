@@ -29,7 +29,7 @@ Capture analytics data from an AMP document.
 <table>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"&lt;/script&gt;</code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
@@ -47,7 +47,9 @@ Before you start using AMP analytics on your site, you need to decide whether yo
 Learn all about AMP analytics in the [Configure Analytics](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/) guide.
 {% endcall %}
 
-### Sending data to an analytics vendor <a name="analytics-vendors"></a>
+### Sending data to an analytics vendor
+
+<a name="analytics-vendors"></a>
 
 AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors]() to see if they’ve integrated their solution with AMP.
 
@@ -622,7 +624,7 @@ visibilitySpec: {
     "request": "pageview",
     "selector": "#ad1",
     "visibilitySpec": {
-      "visiblePercentageThresholds": [[30, 40], [40, 50]],
+      "visiblePercentageThresholds": [ [30, 40], [40, 50] ],
       "continuousTimeMin": 1000,
     }
   }
