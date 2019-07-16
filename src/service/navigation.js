@@ -44,6 +44,12 @@ const VALID_TARGETS = ['_top', '_blank'];
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
 /**
+ * Key used for retargeting event target originating from shadow DOM.
+ * @const {string}
+ */
+const AMP_CUSTOM_LINKER_TARGET = '__AMP_CUSTOM_LINKER_TARGET__';
+
+/**
  * @enum {number} Priority reserved for extensions in anchor mutations.
  * The higher the priority, the sooner it's invoked.
  */
@@ -118,7 +124,8 @@ export class Navigation {
       isIframed(this.ampdoc.win) && this.viewer_.isOvertakeHistory();
 
     /** @private @const {boolean} */
-    this.isEmbed_ = this.rootNode_ != this.ampdoc.getRootNode();
+    this.isEmbed_ =
+      this.rootNode_ != this.ampdoc.getRootNode() || !!this.ampdoc.getParent();
 
     /** @private @const {boolean} */
     this.isInABox_ = getMode(this.ampdoc.win).runtime == 'inabox';
@@ -343,7 +350,9 @@ export class Navigation {
     if (e.defaultPrevented) {
       return;
     }
-    const element = dev().assertElement(e.target);
+    const element = dev().assertElement(
+      e[AMP_CUSTOM_LINKER_TARGET] || e.target
+    );
     const target = closestAncestorElementBySelector(element, 'A');
     if (!target || !target.href) {
       return;
