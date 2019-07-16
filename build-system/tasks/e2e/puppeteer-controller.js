@@ -73,7 +73,6 @@ async function waitFor(page, valueFn, args, condition, opt_mutate) {
     );
     const prop = await handle.jsonValue();
     value = 'value' in prop ? prop.value : prop;
-    // console.log('0: ', value);
     if (opt_mutate) {
       value = await opt_mutate(value);
     }
@@ -208,7 +207,9 @@ class PuppeteerController {
     const nodeListHandle = await frame.waitForFunction(
       (root, selector) => {
         const nodeList = root./*OK*/ querySelectorAll(selector);
-        return nodeList.length > 0 ? Array.prototype.slice.apply(nodeList) : null;
+        return nodeList.length > 0
+          ? Array.prototype.slice.call(nodeList)
+          : null;
       },
       {timeout: DEFAULT_WAIT_TIMEOUT},
       root,
@@ -396,7 +397,14 @@ class PuppeteerController {
    */
   getElementProperty(handle, property) {
     const element = handle.getElement();
-    const getter = (element, property) => ({value: element[property]});
+    const getter = (element, property) => {
+      let value = element[property];
+      if (typeof value !== 'string' && typeof value.length === 'number') {
+        value = Array.prototype.slice.call(value);
+      }
+
+      return {value};
+    };
     return new ControllerPromise(
       this.evaluateValue_(getter, element, property),
       this.getWaitFn_(getter, element, property)
