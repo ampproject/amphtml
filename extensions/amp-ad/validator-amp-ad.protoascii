@@ -63,13 +63,7 @@ tags: {  # <amp-ad>
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "template" }
-  attrs: {
-    name: "type"
-    mandatory: true
-    blacklisted_value_regex: "^("
-        "custom|"  # Handled separately below, has specific requirements
-        ")$"
-  }
+  attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-ad"
   amp_layout: {
@@ -93,7 +87,7 @@ tags: {  # <amp-ad type="custom">
   # extensions/amp-auto-ads/*/placement.js
   disallowed_ancestor: "AMP-APP-BANNER"
   attrs: {
-    name: "data-uri"
+    name: "data-url"
     mandatory: true
     value_url: {
       protocol: "https"
@@ -103,6 +97,7 @@ tags: {  # <amp-ad type="custom">
     name: "type"
     mandatory: true
     value: "custom"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/ads/custom.md"
