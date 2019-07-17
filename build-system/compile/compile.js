@@ -130,6 +130,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'build-system/dompurify.extern.js',
     'build-system/event-timing.extern.js',
     'build-system/layout-jank.extern.js',
+    'build-system/performance-observer.extern.js',
     'third_party/closure-compiler/externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
@@ -264,9 +265,12 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      // Transpile from ES6 to ES5.
+      /*
+       * Transpile from ES6 to ES5 if not running with `--esm`
+       * otherwise transpilation is done by Babel
+       */
       language_in: 'ECMASCRIPT6',
-      language_out: 'ECMASCRIPT5',
+      language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
       // respective top level polyfills.js files.
