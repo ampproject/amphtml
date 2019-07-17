@@ -312,6 +312,8 @@ exports.rules = [
       'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-ima-video/0.1/amp-ima-video.js->' +
+      'src/service/video-manager-impl.js',
+      'extensions/amp-minute-media-player/0.1/amp-minute-media-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-vimeo/0.1/amp-vimeo.js->' +
         'src/service/video-manager-impl.js',

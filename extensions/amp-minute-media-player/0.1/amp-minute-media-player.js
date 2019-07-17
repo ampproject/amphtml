@@ -26,7 +26,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -121,7 +121,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * Init params
    * @private
    */
-  initFields_(){
+  initFields_() {
     const {element} = this;
     this.contentType_ = userAssert(
       element.getAttribute('data-content-type'),
@@ -129,13 +129,14 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       element
     );
 
-    if(this.contentType_ != 'semantic'){
+    if (this.contentType_ != 'semantic') {
       this.contentId_ = userAssert(
         element.getAttribute('data-content-id'),
         'The data-content-id must be specified for %s ' +
-        'data-content-type in <amp-minute-media-player> %s',
+          'data-content-type in <amp-minute-media-player> %s',
         this.contentType_,
-        element)
+        element
+      );
     } else {
       this.initSemanticFields_();
     }
@@ -198,7 +199,8 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    */
   iframeSource_() {
     const {element} = this;
-    const baseUrl = 'https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html' +
+    const baseUrl =
+      'https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html' +
       `?content_type=${encodeURIComponent(this.contentType_)}`;
 
     const moreQueryParams = dict({
@@ -225,10 +227,9 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       'message',
       this.handleMinuteMediaPlayerMessage_.bind(this)
     );
-    const loaded = this.loadPromise(this.iframe_).then(
-      () => {
-        element.dispatchCustomEvent(VideoEvents.LOAD);
-      });
+    const loaded = this.loadPromise(this.iframe_).then(() => {
+      element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
     this.playerReadyResolver_(loaded);
     return loaded;
   }

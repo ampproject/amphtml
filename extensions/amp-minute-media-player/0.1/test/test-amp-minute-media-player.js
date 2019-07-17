@@ -19,6 +19,8 @@ import '../amp-minute-media-player';
 const WIDTH = '16';
 const HEIGHT = '9';
 const RESPONSIVE = 'responsive';
+const CURATED = 'curated';
+const SEMANTIC = 'semantic';
 const DATA_CONTENT_ID = 'fSkmeWKF';
 const DATA_MINIMUM_DATE_FACTOR = '10';
 const DATA_SCANNED_ELEMENT_TYPE = 'id';
@@ -51,20 +53,21 @@ describes.realWin(
       doc.body.appendChild(mplayerElement);
       return mplayerElement
         .build()
-        .async(() => {
+        .then(() => {
           mplayerElement.layoutCallback();
         })
-        .async(() => mplayerElement);
+        .then(() => mplayerElement);
     }
 
     it('renders with curated content', () => {
       return getMPlayer({
+        'data-content-type': CURATED,
         'data-content-id': DATA_CONTENT_ID,
-      }).async(mplayerElement => {
+      }).then(mplayerElement => {
         const iframe = mplayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
-          `https://s3-us-west-2.amazonaws.com/syringe/dev/amp/mplayer.html?content_id=${DATA_CONTENT_ID}`
+          `https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html?content_type=${CURATED}&content_id=${DATA_CONTENT_ID}`
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
@@ -72,12 +75,13 @@ describes.realWin(
 
     it('renders with semantic (empty params)', () => {
       return getMPlayer({
+        'data-content-type': SEMANTIC,
         /* no params to semantic */
-      }).async(mplayerElement => {
+      }).then(mplayerElement => {
         const iframe = mplayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
-          'https://s3-us-west-2.amazonaws.com/syringe/dev/amp/mplayer.html'
+          `https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html?content_type=${SEMANTIC}`
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
@@ -85,14 +89,15 @@ describes.realWin(
 
     it('renders with semantic (with params)', () => {
       return getMPlayer({
+        'data-content-type': SEMANTIC,
         'data-minimum-date-factor': DATA_MINIMUM_DATE_FACTOR,
         'data-scanned-element-type': DATA_SCANNED_ELEMENT_TYPE,
-      }).async(mplayerElement => {
+      }).then(mplayerElement => {
         const iframe = mplayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
           //******TO CHANGE******//
-          'https://s3-us-west-2.amazonaws.com/syringe/dev/amp/mplayer.html?minimum_date_factor=10&scanned_element_type=id'
+          `https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html?content_type=${SEMANTIC}&minimum_date_factor=10&scanned_element_type=id`
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
