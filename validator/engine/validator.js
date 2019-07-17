@@ -4689,8 +4689,11 @@ function validateTagAgainstSpec(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag,
         resultForAttempt);
   }
-  validateDescendantTags(
-      encounteredTag, parsedTagSpec, context, resultForAttempt);
+  // Only validate that this is a valid descendant if it's not already invalid.
+  if (resultForAttempt.status === amp.validator.ValidationResult.Status.PASS) {
+    validateDescendantTags(
+        encounteredTag, parsedTagSpec, context, resultForAttempt);
+  }
   validateNoSiblingsAllowedTags(parsedTagSpec, context, resultForAttempt);
   validateLastChildTags(context, resultForAttempt);
   // If we haven't reached the body element yet, we may not have seen the
