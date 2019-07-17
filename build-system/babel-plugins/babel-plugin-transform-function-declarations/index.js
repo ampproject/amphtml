@@ -67,13 +67,13 @@ const BAIL_OUT_CONDITIONS = {
 
   // If the FunctionDeclaration identifier is newed in the scope of this program, bail out on modification.
   isNewedInProgramScope: (t, path) => {
-    const methodName = path.get('id').node.name;
+    const {name} = path.get('id').node;
     let isNewed = false;
     path
       .findParent(path => path.isProgram())
       .traverse({
         NewExpression(path) {
-          if (t.isIdentifier(path.node.callee, {name: methodName})) {
+          if (t.isIdentifier(path.node.callee, {name})) {
             isNewed = true;
             path.stop();
           }
