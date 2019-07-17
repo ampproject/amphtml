@@ -2,15 +2,11 @@
 package org.ampproject;
 
 
-import java.util.Set;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerPass;
 import com.google.javascript.jscomp.CompilerTestCase;
-import com.google.javascript.rhino.IR;
-import com.google.javascript.rhino.Node;
 import org.junit.Test;
 
 
@@ -25,17 +21,8 @@ public class AmpPassTest extends CompilerTestCase {
       "devAssert$$module$src$log()"
       );
 
-  ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
-      "IS_MINIFIED",
-      IR.trueNode());
-
-  ImmutableMap<String, Node> prodAssignmentReplacements = ImmutableMap.of(
-      "IS_DEV",
-      IR.falseNode());
-
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, /* isProd */ true, suffixTypes, assignmentReplacements,
-        prodAssignmentReplacements, "123");
+    return new AmpPass(compiler, /* isProd */ true, suffixTypes, "123");
   }
 
   @Override protected int getNumRepetitions() {
@@ -316,22 +303,6 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  @Test public void testOptimizeGetModeFunction() throws Exception {
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "const IS_DEV = true;",
-             "const IS_MINIFIED = false;",
-             "const IS_SOMETHING = true;",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "const IS_DEV = false;",
-             "const IS_MINIFIED = true;",
-             "const IS_SOMETHING = true;",
-            "})()"));
-  }
-
   @Test public void testRemoveAmpAddExtensionCallWithExplicitContext() throws Exception {
     test(
         LINE_JOINER.join(
@@ -366,17 +337,5 @@ public class AmpPassTest extends CompilerTestCase {
             "  console.log(a);",
             "})(self.AMP);",
             "console.log(a);"));
-  }
-
-  @Test public void testAmpVersionReplacement() throws Exception {
-    test(
-        LINE_JOINER.join(
-            "var a = `test${internalRuntimeVersion$$module$src$internal_version()}ing`;",
-            "var b = 'test' + internalRuntimeVersion$$module$src$internal_version() + 'ing';",
-            "var c = internalRuntimeVersion$$module$src$internal_version();"),
-        LINE_JOINER.join(
-            "var a = `test${'123'}ing`;",
-            "var b = 'test' + '123' + 'ing';",
-            "var c = '123';"));
   }
 }
