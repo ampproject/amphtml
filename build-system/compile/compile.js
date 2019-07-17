@@ -324,12 +324,15 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       compilerOptions.jscomp_error.push(
         'conformanceViolations',
         'checkTypes',
-        'accessControls',
         'const',
         'constantProperty',
         'globalThis'
       );
-      compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
+      compilerOptions.jscomp_off.push(
+        'accessControls',
+        'moduleLoad',
+        'unknownDefines'
+      );
       compilerOptions.conformance_configs =
         'build-system/conformance-config.textproto';
     } else {
