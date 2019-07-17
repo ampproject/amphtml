@@ -15,7 +15,6 @@
  */
 
 import {ANALYTICS_CONFIG} from './vendors';
-import {RtvExperiment} from './rtvExperimentConfig';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
@@ -43,9 +42,7 @@ export class AnalyticsConfig {
      * @const {!JsonObject} Copied here for tests.
      * @private
      */
-    this.predefinedConfig_ = RtvExperiment.ANALYTICS_VENDOR_SPLIT
-      ? dict()
-      : ANALYTICS_CONFIG;
+    this.predefinedConfig_ = ANALYTICS_CONFIG;
 
     /**
      * @private {JsonObject}
@@ -67,7 +64,8 @@ export class AnalyticsConfig {
   loadConfig() {
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
-    const fetchVendorConfigPromise = RtvExperiment.ANALYTICS_VENDOR_SPLIT
+    // eslint-disable-next-line no-undef
+    const fetchVendorConfigPromise = ANALYTICS_VENDOR_SPLIT
       ? this.fetchVendorConfig_()
       : Promise.resolve();
 
@@ -79,14 +77,12 @@ export class AnalyticsConfig {
   /**
    * Constructs the URL where the given vendor config is located
    * @private
-   * @param {string}
-   * @return {string}
+   * @param {string} vendor the vendor name
+   * @return {string} the URL to request the vendor config file from
    */
   getVendorUrl_(vendor) {
     const rtv = getMode().rtvVersion;
-    const baseUrl = getMode().localDev
-      ? `/dist`
-      : `${urls.cdn}/rtv/${rtv}`;
+    const baseUrl = getMode().localDev ? `/dist` : `${urls.cdn}/rtv/${rtv}`;
     const max = getMode().minified ? '' : '.max';
 
     return `${baseUrl}/v0/analytics-vendors/${vendor}${max}.json`;

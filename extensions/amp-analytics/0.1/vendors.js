@@ -18,7 +18,6 @@ import {
   IFRAME_TRANSPORTS,
   IFRAME_TRANSPORTS_CANARY,
 } from './iframe-transport-vendors';
-import {RtvExperiment} from './rtvExperimentConfig';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
 import {isCanary} from '../../../src/experiments';
@@ -104,7 +103,8 @@ import {WEBENGAGE_CONFIG} from './vendors/webengage';
 /**
  * @const {!JsonObject}
  */
-export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ RtvExperiment.ANALYTICS_VENDOR_SPLIT
+// eslint-disable-next-line no-undef
+export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ANALYTICS_VENDOR_SPLIT
   ? {}
   : ({
       // Default parent configuration applied to all amp-analytics tags.
@@ -255,7 +255,8 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ RtvExperiment.ANALYTI
       'webtrekk_v2': WEBTREKK_V2_CONFIG,
     });
 
-if (!RtvExperiment.ANALYTICS_VENDOR_SPLIT) {
+// eslint-disable-next-line no-undef
+if (!ANALYTICS_VENDOR_SPLIT) {
   if (getMode().test || getMode().localDev) {
     ANALYTICS_CONFIG['_fake_'] = _FAKE_;
   }
