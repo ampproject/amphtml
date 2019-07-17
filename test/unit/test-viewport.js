@@ -1706,9 +1706,7 @@ describe('createViewport', () => {
         sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(
-          ViewportBindingNatural_
-        );
+        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
       });
 
       it('should bind to "natural" when in dev mode, but iOS supports scrollable iframes', () => {
@@ -1717,9 +1715,7 @@ describe('createViewport', () => {
         sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(
-          ViewportBindingNatural_
-        );
+        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
       });
     }
   );

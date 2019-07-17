@@ -1418,9 +1418,11 @@ function getViewportType(win, viewer) {
   const isIosIframeScrollableOn = isExperimentOn(win, 'ios-scrollable-iframe');
   // Enable iOS Embedded mode so that it's easy to test against a more
   // realistic iOS environment w/o an iframe.
-  if (!isIframed(win)
-      && (getMode(win).localDev || getMode(win).development)
-      && !isIosIframeScrollableOn) {
+  if (
+    !isIframed(win) &&
+    (getMode(win).localDev || getMode(win).development) &&
+    !isIosIframeScrollableOn
+  ) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
 
@@ -1430,9 +1432,7 @@ function getViewportType(win, viewer) {
   }
 
   // Override to ios-embed for iframe-viewer mode.
-  if (isIframed(win)
-      && viewer.isEmbedded()
-      && !isIosIframeScrollableOn) {
+  if (isIframed(win) && viewer.isEmbedded() && !isIosIframeScrollableOn) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
   return viewportType;
