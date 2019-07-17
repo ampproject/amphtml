@@ -126,8 +126,11 @@ The `<amp-ad>` requires width and height values to be specified according to the
   </tr>
   <tr>
     <td width="40%"><strong>data-ad-container-id (optional)</strong></td>
-    <td>Informs the ad of the container component id in the case of attempting to collapse. The container component must be an <code>&lt;amp-layout&gt;</code> component that's parent of the ad. When the <code>data-ad-container-id</code> is specified, and such a <code>&lt;amp-layout&gt;</code> container component is found, AMP runtime will try to collapse the container component instead of the ad component during no fill. This feature can be useful when an ad indicator is in presence.
-</td>
+    <td>Informs the ad of the container component id in the case of attempting to collapse. The container component must be an <code>&lt;amp-layout&gt;</code> component that's parent of the ad. When the <code>data-ad-container-id</code> is specified, and such a <code>&lt;amp-layout&gt;</code> container component is found, AMP runtime will try to collapse the container component instead of the ad component during no fill. This feature can be useful when an ad indicator is in presence.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-on-no-content (optional)</strong></td>
+    <td>When set to <code>fallback</code>, the fallback child element will always be shown when no ad available</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
@@ -150,7 +153,7 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 If no ad is availabel for the slot, AMP attempts to collapse the `amp-ad` element (that is, set to `display: none`). AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
 
-In the case that the attempt to collapse fails. The `amp-ad` component supports a child element with the `fallback` attribute. If there is a fallback element in presence, the customized fallback element is shown. Otherwise AMP will apply a default fallback.
+In the case that the attempt to collapse fails, or `data-on-no-content` attribute is set to `fallback`. The `amp-ad` component supports a child element with the `fallback` attribute. If there is a fallback element in presence, the customized fallback element is shown. Otherwise AMP will apply a default fallback.
 
 Example with fallback:
 

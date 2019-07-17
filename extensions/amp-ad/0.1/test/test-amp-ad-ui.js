@@ -214,6 +214,32 @@ describes.realWin(
         });
       });
 
+      it('should always toggle fallback if desired', () => {
+        let resolve = null;
+        const promise = new Promise(resolve_ => {
+          resolve = resolve_;
+        });
+        const placeholderSpy = sandbox.spy(adImpl, 'togglePlaceholder');
+        const attemptCollapseSy = sandbox
+          .spy(uiHandler.baseInstance_, 'attemptCollapse');
+        const fallbackSpy = sandbox
+          .stub(adImpl, 'toggleFallback')
+          .callsFake(() => {});        
+        sandbox
+          .stub(uiHandler.baseInstance_, 'mutateElement')
+          .callsFake(callback => {
+            callback();
+            resolve();
+          });
+        adElement.setAttribute('data-on-no-content', 'fallback');
+        uiHandler.applyNoContentUI();
+        return promise.then(() => {
+          expect(attemptCollapseSy).not.to.be.called;
+          expect(placeholderSpy).to.be.calledWith(false);
+          expect(fallbackSpy).to.be.calledWith(true);          
+        });
+      });
+
       it('should apply default holder if not provided', () => {
         sandbox.stub(adImpl, 'getFallback').callsFake(() => {
           return false;

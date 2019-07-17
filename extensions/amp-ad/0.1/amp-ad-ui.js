@@ -103,6 +103,13 @@ export class AmpAdUIHandler {
       return;
     }
 
+    // Always show fallback if desired
+    const onNoContent = this.element_.getAttribute('data-on-no-content');
+    if(onNoContent === 'fallback') {
+      this.applyFallback_();
+      return;
+    }
+
     let attemptCollapsePromise;
     if (this.containerElement_) {
       // Collapse the container element if there's one
@@ -116,10 +123,17 @@ export class AmpAdUIHandler {
 
     // The order here is collapse > user provided fallback > default fallback
     attemptCollapsePromise.catch(() => {
-      this.baseInstance_.mutateElement(() => {
-        this.baseInstance_.togglePlaceholder(false);
-        this.baseInstance_.toggleFallback(true);
-      });
+      this.applyFallback_();      
+    });
+  }
+
+  /**
+   * @private
+   */
+  applyFallback_() {
+    this.baseInstance_.mutateElement(() => {
+      this.baseInstance_.togglePlaceholder(false);
+      this.baseInstance_.toggleFallback(true);
     });
   }
 
