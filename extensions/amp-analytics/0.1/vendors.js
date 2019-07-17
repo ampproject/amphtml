@@ -104,9 +104,9 @@ import {WEBENGAGE_CONFIG} from './vendors/webengage';
  * @const {!JsonObject}
  */
 // eslint-disable-next-line no-undef
-export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ANALYTICS_VENDOR_SPLIT
-  ? {}
-  : ({
+export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
+  ? /** @type {!JsonObject} */ ({})
+  : /** @type {!JsonObject} */ ({
       // Default parent configuration applied to all amp-analytics tags.
       'default': {
         'transport': {'beacon': true, 'xhrpost': true, 'image': true},
