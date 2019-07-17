@@ -18,6 +18,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
+const conf = require('../build.conf');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
@@ -421,9 +422,17 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     options.browserifyOptions
   );
 
+  const babelifyOptions = Object.assign({}, BABELIFY_GLOBAL_TRANSFORM);
+  const replacePlugin = conf.getReplacePlugin();
+  if ('plugins' in babelifyOptions) {
+    babelifyOptions['plugins'].push(replacePlugin);
+  } else {
+    babelifyOptions['plugins'] = [replacePlugin];
+  }
+
   let bundler = browserify(browserifyOptions).transform(
     babelify,
-    BABELIFY_GLOBAL_TRANSFORM
+    babelifyOptions
   );
 
   if (options.watch) {
