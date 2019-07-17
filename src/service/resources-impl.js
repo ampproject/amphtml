@@ -553,7 +553,7 @@ export class Resources {
 
     // During prerender mode, don't build elements that aren't allowed to be
     // prerendered. This avoids wasting our prerender build quota.
-    // See hasFreePrerenderQuota() for more details.
+    // See isUnderBuildQuota_() for more details.
     const shouldBuildResource =
       this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
       resource.prerenderAllowed();
