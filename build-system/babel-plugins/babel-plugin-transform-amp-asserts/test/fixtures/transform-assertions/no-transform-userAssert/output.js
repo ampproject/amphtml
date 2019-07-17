@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-1 + 1;
-2 + 2;
-undefined;
-let result = dev();
-let result2 = undefined;
+userAssert(1 + 1);
+userAssert(2 + 2);
+userAssert();
+let result = userAssert(dev(), 'hello', 'world');
+let result2 = userAssert();

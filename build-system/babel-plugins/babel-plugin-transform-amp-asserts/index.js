@@ -53,8 +53,7 @@ module.exports = function(babel) {
         const {parenthesized} = node.extra || {};
 
         const isDirectCallExpression =
-          t.isIdentifier(callee, {name: 'devAssert'}) ||
-          t.isIdentifier(callee, {name: 'userAssert'});
+          t.isIdentifier(callee, {name: 'devAssert'});
         const isMemberAndCallExpression =
           t.isMemberExpression(callee) && t.isCallExpression(callee.object);
 
@@ -90,16 +89,6 @@ module.exports = function(babel) {
           }
           args = path.node.arguments[0];
           type = typeMap[property.name];
-        }
-
-        // If the CallExpression's direct parent is a ExpressionStatement
-        // we can remove the whole call. Closure Compiler doesn't seem to
-        // DCE the arguments that we leave behind even though they might be
-        // raw strings without any side effects.
-        const isParentDirectExpStatement = t.isExpressionStatement(path.parent);
-        if (isParentDirectExpStatement) {
-          path.remove();
-          return;
         }
 
         if (args) {
