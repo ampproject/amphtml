@@ -35,7 +35,7 @@ Display a sequence of backward counting to indicate the time remaining before an
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-date-countdown/">amp-date-countdown example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-date-countdown/">amp-date-countdown example</a>.</td>
   </tr>
 </table>
 

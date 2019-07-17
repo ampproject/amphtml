@@ -22,6 +22,7 @@
 
 import {Deferred} from './utils/promise';
 import {dev, devAssert} from './log';
+import {isExperimentOn} from './experiments';
 import {toWin} from './types';
 
 /**
@@ -78,11 +79,14 @@ export class EmbeddableService {
  * @return {?Object}
  */
 export function getExistingServiceForDocInEmbedScope(element, id) {
+  // TODO(#22733): completely remove this method once ampdoc-fie launches.
   const document = element.ownerDocument;
   const win = toWin(document.defaultView);
+  const topWin = getTopWindow(win);
   // First, try to resolve via local embed window (if applicable).
-  const isEmbed = win != getTopWindow(win);
-  if (isEmbed) {
+  const isEmbed = win != topWin;
+  const ampdocFieExperimentOn = isExperimentOn(topWin, 'ampdoc-fie');
+  if (isEmbed && !ampdocFieExperimentOn) {
     if (isServiceRegistered(win, id)) {
       return getServiceInternal(win, id);
     }
@@ -112,8 +116,20 @@ export function installServiceInEmbedScope(embedWin, id, service) {
     'Service override has already been installed: %s',
     id
   );
-  registerServiceInternal(embedWin, embedWin, id, () => service);
-  getServiceInternal(embedWin, id); // Force service to build.
+  const ampdocFieExperimentOn = isExperimentOn(topWin, 'ampdoc-fie');
+  if (ampdocFieExperimentOn) {
+    const ampdoc = getAmpdoc(embedWin.document);
+    registerServiceInternal(
+      getAmpdocServiceHolder(ampdoc),
+      ampdoc,
+      id,
+      () => service,
+      /* override */ true
+    );
+  } else {
+    registerServiceInternal(embedWin, embedWin, id, () => service);
+    getServiceInternal(embedWin, id); // Force service to build.
+  }
 }
 
 /**
@@ -395,8 +411,9 @@ function getServiceInternal(holder, id) {
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
  * @param {?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor Constructor function to new the service. Called with context.
+ * @param {boolean=} opt_override
  */
-function registerServiceInternal(holder, context, id, ctor) {
+function registerServiceInternal(holder, context, id, ctor, opt_override) {
   const services = getServices(holder);
   let s = services[id];
 
@@ -411,7 +428,7 @@ function registerServiceInternal(holder, context, id, ctor) {
     };
   }
 
-  if (s.ctor || s.obj) {
+  if (!opt_override && (s.ctor || s.obj)) {
     // Service already registered.
     return;
   }
@@ -598,6 +615,23 @@ export function installServiceInEmbedIfEmbeddable(embedWin, serviceClass) {
   const ampdoc = getAmpdoc(frameElement);
   serviceClass.installInEmbedWindow(embedWin, ampdoc);
   return true;
+}
+
+/**
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} id
+ */
+export function adoptServiceForEmbedDoc(ampdoc, id) {
+  const service = getServiceInternal(
+    getAmpdocServiceHolder(devAssert(ampdoc.getParent())),
+    id
+  );
+  registerServiceInternal(
+    getAmpdocServiceHolder(ampdoc),
+    ampdoc,
+    id,
+    () => service
+  );
 }
 
 /**

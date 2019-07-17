@@ -42,7 +42,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-access/">Annotated code example for amp-access</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-access/">Annotated code example for amp-access</a></td>
   </tr>
 </table>
 

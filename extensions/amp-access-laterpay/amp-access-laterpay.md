@@ -42,7 +42,7 @@ Allows publishers to easily integrate with the <a href="https://www.laterpay.net
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-access-laterpay/">annotated amp-access-laterpay</a> example.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-access-laterpay/">annotated amp-access-laterpay</a> example.</td>
   </tr>
 </table>
 

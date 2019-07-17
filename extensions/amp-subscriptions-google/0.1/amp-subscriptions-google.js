@@ -417,21 +417,19 @@ export class GoogleSubscriptionsPlatform {
         break;
       case 'subscribe-smartbutton':
       case 'subscribe-smartbutton-light':
-        element.textContent = '';
-        opts.theme = 'light';
-        opts.lang = userAssert(
-          element.getAttribute('subscriptions-lang'),
-          'subscribe-smartbutton must have a language attribute'
-        );
-        this.runtime_.attachSmartButton(element, opts, () => {});
-        break;
       case 'subscribe-smartbutton-dark':
         element.textContent = '';
-        opts.theme = 'dark';
+        opts.theme = action === 'subscribe-smartbutton-dark' ? 'dark' : 'light';
         opts.lang = userAssert(
           element.getAttribute('subscriptions-lang'),
           'subscribe-smartbutton must have a language attribute'
         );
+        const messageTextColor = element.getAttribute(
+          'subscriptions-message-text-color'
+        );
+        if (messageTextColor) {
+          opts.messageTextColor = messageTextColor;
+        }
         this.runtime_.attachSmartButton(element, opts, () => {});
         break;
       default:

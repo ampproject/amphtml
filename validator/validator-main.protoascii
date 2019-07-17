@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 905
+spec_file_revision: 911
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -1555,6 +1555,17 @@ tags: {
   tag_name: "ARTICLE"
 }
 # 4.3.3 The section element
+attr_lists: {
+  name: "poool-access-attrs"
+  attrs: {
+    name: "poool-access-preview"
+    requires_extension: "amp-access-poool"
+  }
+  attrs: {
+    name: "poool-access-content"
+    requires_extension: "amp-access-poool"
+  }
+}
 tags: {
   html_format: AMP
   html_format: AMP4ADS
@@ -1562,6 +1573,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "SECTION"
   disallowed_ancestor: "AMP-ACCORDION"
+  attr_lists: "poool-access-attrs"
 }
 # 4.3.4 The nav element
 tags: {

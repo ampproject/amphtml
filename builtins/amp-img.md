@@ -37,7 +37,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-img/">amp-img example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-img/">amp-img example</a>.</td>
   </tr>
 </table>
 
@@ -57,16 +57,16 @@ Learn more about layouts in the [AMP HTML Layout System](https://github.com/ampp
 #### Example: Displaying a responsive image
 In the following example, we display an image that responds to the size of the viewport by setting `layout=responsive`.  The image stretches and shrinks according to the aspect ratio specified by the `width` and `height`.
 
-<div>
-<amp-iframe height="193"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampimg.basic.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true"]
+```html
+<amp-img alt="A view of the sea"
+  src="{{server_for_email}}/static/inline-examples/images/sea.jpg"
+  width="900"
+  height="675"
+  layout="responsive">
+</amp-img>
+```
+[/example]
 
 {% call callout('Read on', type='read') %}
 Learn about responsive AMP pages in the [Create Responsive AMP Pages](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/responsive_design) guide.
@@ -77,16 +77,20 @@ If the resource requested by the `amp-img` component fails to load, the space wi
 #### Example: Specifying a fallback image
 In the following example, if the browser doesn't support WebP, the fallback JPG image displays:
 
-<div>
-<amp-iframe height="271"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampimg.fallback.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true"]
+```html
+<amp-img alt="Mountains"
+  width="550"
+  height="368"
+  src="{{server_for_email}}/static/inline-examples/images/mountains.webp">
+  <amp-img alt="Mountains"
+    fallback
+    width="550"
+    height="368"
+    src="{{server_for_email}}/static/inline-examples/images/mountains.jpg"></amp-img>
+</amp-img>
+```
+[/example]
 
 A placeholder background color or other visual can be set using CSS selector and style on the element itself.
 
@@ -180,16 +184,16 @@ For responsive images, the `width` and `height` do not need to match the exact w
 
 For example, instead of specifying `width="900"` and `height="675"`, you can just specify `width="1.33"` and `height="1"`.
 
-<div>
-<amp-iframe height="193"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampimg.aspectratio.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true"]
+```html
+<amp-img alt="A view of the sea"
+  src="{{server_for_email}}/static/inline-examples/images/sea.jpg"
+  width="1.33"
+  height="1"
+  layout="responsive">
+</amp-img>
+```
+[/example]
 
 #### Setting multiple source files for different screen resolutions
 
@@ -201,7 +205,7 @@ See the guide on [creating responsive AMP pages](https://amp.dev/documentation/g
 
 #### Maintaining the aspect ratio for images with unknown dimensions
 
-The AMP layout system requires the aspect ratio of an image in advance before fetching the image; however, in some cases you might not know the image's dimensions. To display images with unknown dimensions and maintain the aspect ratios, combine AMP's [`fill`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout) layout with the [`object-fit`](https://css-tricks.com/almanac/properties/o/object-fit/) CSS property. For more information, see AMP By Example's [How to support images with unknown dimensions](https://ampbyexample.com/advanced/how_to_support_images_with_unknown_dimensions).
+The AMP layout system requires the aspect ratio of an image in advance before fetching the image; however, in some cases you might not know the image's dimensions. To display images with unknown dimensions and maintain the aspect ratios, combine AMP's [`fill`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout) layout with the [`object-fit`](https://css-tricks.com/almanac/properties/o/object-fit/) CSS property. For more information, see AMP By Example's [How to support images with unknown dimensions](https://amp.dev/documentation/examples/style-layout/how_to_support_images_with_unknown_dimensions/).
 
 ## Validation
 
