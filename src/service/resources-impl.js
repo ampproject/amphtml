@@ -1116,7 +1116,7 @@ export class Resources {
             resource.completeCollapse();
             resolve();
           } else {
-            reject(new Error('collapse attempt denied'));
+            reject(dev().createExpectedError('collapse attempt denied'));
           }
         }
       );
