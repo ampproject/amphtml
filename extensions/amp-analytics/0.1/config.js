@@ -123,7 +123,7 @@ export class AnalyticsConfig {
     const configRewriterUrl = this.getConfigRewriter_()['url'];
 
     const config = dict({});
-    const inlineConfig = this.getInlineConfigNoInline();
+    const inlineConfig = this.getInlineConfig_();
     this.validateTransport_(inlineConfig);
     mergeObjects(inlineConfig, config);
     mergeObjects(this.remoteConfig_, config);
@@ -301,8 +301,9 @@ export class AnalyticsConfig {
   /**
    * @private
    * @return {!JsonObject}
+   * @noinline
    */
-  getInlineConfigNoInline() {
+  getInlineConfig_() {
     if (this.element_.CONFIG) {
       // If the analytics element is created by runtime, return cached config.
       return this.element_.CONFIG;

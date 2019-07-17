@@ -254,7 +254,7 @@ export function makeBodyVisible(doc) {
   const set = () => {
     bodyMadeVisible = true;
     setBodyVisibleStyles(doc);
-    renderStartedNoInline(doc);
+    renderStarted_(doc);
   };
 
   waitForBodyOpenPromise(doc)
@@ -306,8 +306,9 @@ function setBodyVisibleStyles(doc) {
 
 /**
  * @param {!Document} doc
+ * @noinline
  */
-function renderStartedNoInline(doc) {
+function renderStarted_(doc) {
   try {
     Services.resourcesForDoc(doc.documentElement).renderStarted();
   } catch (e) {
