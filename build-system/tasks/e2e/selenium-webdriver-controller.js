@@ -89,9 +89,6 @@ class SeleniumWebDriverController {
 
     /** @private {boolean} */
     this.isXpathInstalled_ = false;
-
-    /** @private {boolean} */
-    this.isRequestProxyInstalled_ = false;
   }
 
   /**

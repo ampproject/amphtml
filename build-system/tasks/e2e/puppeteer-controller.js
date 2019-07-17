@@ -29,6 +29,7 @@ const {
 } = require('./functional-test-controller');
 const {ControllerPromise} = require('./controller-promise');
 const {dirname, join} = require('path');
+const {parseQueryParams} = require('./parse-query-params');
 
 /**
  * For a list of all possible key strings, see
@@ -640,16 +641,18 @@ class PuppeteerController {
       const request = await page.waitForRequest(req =>
         req.url().includes(matcher)
       );
+      const url = request.url();
+      const queryParams = parseQueryParams(url);
       return {
-        url: request.url(),
+        url,
+        queryParams,
         // TODO(cvializ): pass the real request body
         // It's a challenge for Puppeteer because it stores the postData
         // as a string, and so we'd need to pass it to a body parser.
         body: {},
       };
     };
-
-    return new ControllerPromise(matches[0] || getter(), getter);
+    return new ControllerPromise(Promise.resolve(matches[0]), getter);
   }
 
   /**

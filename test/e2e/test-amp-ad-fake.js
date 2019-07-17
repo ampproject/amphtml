@@ -35,15 +35,22 @@ describes.endtoend(
         // const imageReq = await controller.getNetworkRequest('image');
         // const pixelReq = await controller.getNetworkRequest('pixel');
         // const analyticsReq = await controller.getNetworkRequest('analytics');
-        console.log(await controller.getNetworkRequest('doc'));
-        await expect(controller.getNetworkRequest('doc', 'url')).to.match(
-          /\//g
+        await expect(controller.getNetworkRequest('image', 'url')).to.equal(
+          '/'
         );
-        // await expect(controller.getNetworkRequest('pixel')).to.include({
-        //   url: '/foo?cid=',
-        // });
+        await expect(controller.getNetworkRequest('pixel', 'url')).to.include(
+          '/foo?cid='
+        );
         // await expect(analyticsReq.url).to.match(/^\/bar\?/);
+        console.log(await controller.getNetworkRequest('analytics'));
 
+        await expect(controller.getNetworkRequest('analytics')).to.include({
+          title: 'AMP TEST', // ${title},
+          cid: '', // ${clientId(a)}
+          navTiming: '0', // ${navTiming(requestStart,requestStart)}
+          navType: '0', // ${navType}
+          navRedirectCount: '0', // ${navRedirectCount}
+        });
         // const queries = parseQueryString(
         //   analyticsReq.url.substr('/bar'.length)
         // );
