@@ -15,7 +15,6 @@
  */
 
 import '../amp-minute-media-player';
-//import {Services} from '../../../../src/services';
 
 const WIDTH = '16';
 const HEIGHT = '9';
@@ -33,12 +32,10 @@ describes.realWin(
   },
   env => {
     let win, doc;
-    //let timer;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      //timer = Services.timerFor(win);
     });
 
     function getMPlayer(attributes, opt_beforeLayoutCallback) {
@@ -52,32 +49,18 @@ describes.realWin(
       mplayerElement.setAttribute('layout', RESPONSIVE);
 
       doc.body.appendChild(mplayerElement);
-      /*
-    return mplayerElement.build().then(() => {
-      if (opt_beforeLayoutCallback) {
-        opt_beforeLayoutCallback(mplayerElement);
-      }
-      return mplayerElement.layoutCallback();
-    }).than(e => {
-      // Ignore failed to load errors since sources are fake.
-      if (e.toString().indexOf('Failed to load') > -1) {
-        return mplayerElement;
-      } else {
-        throw e;
-      }
-    });*/
       return mplayerElement
         .build()
-        .then(() => {
+        .async(() => {
           mplayerElement.layoutCallback();
         })
-        .then(() => mplayerElement);
+        .async(() => mplayerElement);
     }
 
     it('renders with curated content', () => {
       return getMPlayer({
         'data-content-id': DATA_CONTENT_ID,
-      }).then(mplayerElement => {
+      }).async(mplayerElement => {
         const iframe = mplayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
@@ -90,7 +73,7 @@ describes.realWin(
     it('renders with semantic (empty params)', () => {
       return getMPlayer({
         /* no params to semantic */
-      }).then(mplayerElement => {
+      }).async(mplayerElement => {
         const iframe = mplayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
@@ -104,7 +87,7 @@ describes.realWin(
       return getMPlayer({
         'data-minimum-date-factor': DATA_MINIMUM_DATE_FACTOR,
         'data-scanned-element-type': DATA_SCANNED_ELEMENT_TYPE,
-      }).then(mplayerElement => {
+      }).async(mplayerElement => {
         const iframe = mplayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(

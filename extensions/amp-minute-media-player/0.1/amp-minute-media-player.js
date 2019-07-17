@@ -77,14 +77,11 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
-    /*
     /** @private {?Function} */
-    /*
     this.playerReadyResolver_ = null;
-    */
 
-    /** @private {?number} */
-    this.readyTimeout_ = null;
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /**
@@ -92,50 +89,20 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
+    this.preconnect.url(this.iframeSource_());
     // Host that serves player configuration and content redirects
     this.preconnect.url('https://www.oo-syringe.com', onLayout);
   }
 
   /** @override */
   buildCallback() {
-    const {element} = this;
-
-    this.contentType_ = userAssert(
-      element.getAttribute('data-content-type'),
-      'The data-content-type must be specified for <amp-minute-media-player> %s',
-      element
-    );
-
-    this.contentId_ =
-      this.contentType_ != 'semantic'
-        ? userAssert(
-            element.getAttribute('data-content-id'),
-            'The data-content-id must be specified for %s ' +
-              'data-content-type in <amp-minute-media-player> %s',
-            this.contentType_,
-            element
-          )
-        : '';
-
-    this.initSemanticFields_();
+    this.initFields_();
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
     installVideoManagerForDoc(this.element);
-    Services.videoManagerForDoc(this.element).register(this);
-
-    // Warn if the player does not have video interface support
-    this.readyTimeout_ /*** NECESSARY?? ***/ /** @type {number} */ = Services.timerFor(
-      window
-    ).delay(function() {
-      user().warn(
-        TAG,
-        'Did not receive ready callback from player, ' +
-          'ensure it has the videojs-amp-support plugin.'
-      );
-    }, 3000);
   }
 
   /** @override */
@@ -148,6 +115,30 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       layout == Layout.NODISPLAY ||
       layout == Layout.RESPONSIVE
     );
+  }
+
+  /**
+   * Init params
+   * @private
+   */
+  initFields_(){
+    const {element} = this;
+    this.contentType_ = userAssert(
+      element.getAttribute('data-content-type'),
+      'The data-content-type must be specified for <amp-minute-media-player> %s',
+      element
+    );
+
+    if(this.contentType_ != 'semantic'){
+      this.contentId_ = userAssert(
+        element.getAttribute('data-content-id'),
+        'The data-content-id must be specified for %s ' +
+        'data-content-type in <amp-minute-media-player> %s',
+        this.contentType_,
+        element)
+    } else {
+      this.initSemanticFields_();
+    }
   }
 
   /**
@@ -168,7 +159,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleMPlayerMessage_(event) {
+  handleMinuteMediaPlayerMessage_(event) {
     if (
       !originMatches(
         event,
@@ -188,10 +179,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     }
 
     const eventType = data['event'];
-    if (eventType == 'ready') {
-      /*** NECESSARY?? ***/
-      Services.timerFor(this.win).cancel(this.readyTimeout_);
-    }
+
     redispatch(this.element, eventType, {
       'playing': VideoEvents.PLAYING,
       'paused': VideoEvents.PAUSE,
@@ -210,44 +198,39 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    */
   iframeSource_() {
     const {element} = this;
-    const source =
-      'https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html' +
-      `?content_type=${encodeURIComponent(this.contentType_)}` +
-      (this.contentId_ !== ''
-        ? `&content_id=${encodeURIComponent(this.contentId_)}`
-        : (this.scannedElement_ != ''
-            ? '&scanned_element=' +
-              `${encodeURIComponent(this.scannedElement_)}`
-            : '') +
-          (this.tags_ != '' ? `&tags=${encodeURIComponent(this.tags_)}` : '') +
-          (this.minimumDateFactor_ != ''
-            ? '&minimum_date_factor=' +
-              `${encodeURIComponent(this.minimumDateFactor_)}`
-            : '') +
-          (this.scannedElementType_
-            ? '&scanned_element_type=' +
-              `${encodeURIComponent(this.scannedElementType_)}`
-            : ''));
+    const baseUrl = 'https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html' +
+      `?content_type=${encodeURIComponent(this.contentType_)}`;
 
     const moreQueryParams = dict({
+      'content_id': this.contentId_ || undefined,
+      'scanned_element': this.scannedElement_ || undefined,
+      'tags': this.tags_ || undefined,
+      'minimum_date_factor': this.minimumDateFactor_ || undefined,
+      'scanned_element_type': this.scannedElementType_ || undefined,
       'player_id': element.getAttribute('data-player-id') || undefined,
     });
 
-    return addParamsToUrl(source, moreQueryParams);
+    return addParamsToUrl(baseUrl, moreQueryParams);
   }
 
   /** @override */
   layoutCallback() {
+    const {element} = this;
     const iframe = createFrameFor(this, this.iframeSource_());
     this.iframe_ = iframe;
 
-    //Services.videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
     this.unlistenMessage_ = listen(
       this.win,
       'message',
-      this.handleMPlayerMessage_.bind(this)
+      this.handleMinuteMediaPlayerMessage_.bind(this)
     );
-    return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
+    const loaded = this.loadPromise(this.iframe_).then(
+      () => {
+        element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
+    this.playerReadyResolver_(loaded);
+    return loaded;
   }
 
   /** @override */
@@ -256,6 +239,11 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
@@ -305,10 +293,8 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    */
   /** @override */
   getCurrentTime() {
-    if (this.info_) {
-      return this.info_.currentTime;
-    }
-    return NaN;
+    // Not supported.
+    return 0;
   }
 
   /**
@@ -317,11 +303,8 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    */
   /** @override */
   getDuration() {
-    if (this.info_) {
-      return this.info_.duration;
-    }
     // Not supported.
-    return NaN;
+    return 0;
   }
 
   /**
@@ -359,7 +342,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    */
   /** @override */
   mute() {
-    this.sendCommand_('mute'); // setMute?????
+    this.sendCommand_('mute');
   }
 
   /**
@@ -367,7 +350,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    */
   /** @override */
   unmute() {
-    this.sendCommand_('unMute'); // setMute?????
+    this.sendCommand_('unMute');
   }
 
   /**
