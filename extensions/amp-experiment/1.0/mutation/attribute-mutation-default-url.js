@@ -20,6 +20,8 @@ import {user} from '../../../../src/log';
 
 const TAG = 'amp-experiment attribute-mutation-default-url';
 
+const SUPPORTED_TAG_NAMES = ['AMP-IMG', 'AMP-IFRAME', 'A'];
+
 /**
  * Mutation for attribute (url) mutations, for both
  * the 'href' and 'src' attributes,
@@ -40,6 +42,13 @@ export class AttributeMutationDefaultUrl {
 
   /** @override */
   validate() {
+    for (let i = 0; i < this.elements_.length; i++) {
+      const element = this.elements_[i];
+      if (SUPPORTED_TAG_NAMES.indexOf(element.tagName) < 0) {
+        return false;
+      }
+    }
+
     try {
       assertHttpsUrl(
         this.mutationRecord_['value'],

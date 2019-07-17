@@ -21,7 +21,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 const TEST_ELEMENT_CLASS = 'experiment-test-element';
 
 describes.realWin(
-  'amp-experiment',
+  'amp-experiment apply-experiment',
   {
     amp: {
       extensions: ['amp-experiment:1.0'],
@@ -156,11 +156,11 @@ describes.realWin(
         }
         const params = getApplyExperimentToVariantParams(mutations);
 
-        allowConsoleError(() => {
-          expect(() => {
-            applyExperiment.applyExperimentToVariant.apply(null, params);
-          }).to.throw(/Max number of mutations/);
-        });
+        return applyExperiment.applyExperimentToVariant
+          .apply(null, params)
+          .catch(err => {
+            expect(err).to.match(/Max number of mutations/);
+          });
       }
     );
 
@@ -180,12 +180,32 @@ describes.realWin(
         }
         const params = getApplyExperimentToVariantParams(mutations);
 
-        allowConsoleError(() => {
-          expect(() => {
-            applyExperiment.applyExperimentToVariant.apply(null, params);
-          }).to.throw(/Max number of mutations/);
-        });
+        return applyExperiment.applyExperimentToVariant
+          .apply(null, params)
+          .catch(err => {
+            expect(err).to.match(/Max number of mutations/);
+          });
       }
     );
+
+    it('Does not create unsupported attribute mutations', () => {
+      const mutationRecordAndElements = [
+        {
+          mutationRecord: {
+            'type': 'attributes',
+            'target': `.${TEST_ELEMENT_CLASS}`,
+            'attributeName': 'async',
+            'value': 'true',
+          },
+          elements: [doc.createElement('script')],
+        },
+      ];
+
+      expect(() => {
+        applyExperiment.createMutationsFromMutationRecordsAndElements(
+          mutationRecordAndElements
+        );
+      }).to.throw(/unsupported attributeName/);
+    });
   }
 );

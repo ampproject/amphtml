@@ -56,50 +56,52 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     experimentToVariant
   );
 
-  // Assert the formats of the mutation record,
-  // find its respective elements,
-  // count the number of mutations that will applied
-  const mutationRecordsAndElements = [];
-  let totalMutations = 0;
-  mutationRecords.forEach(mutationRecord => {
-    assertMutationRecordFormat(mutationRecord);
-
-    // Select the elements from the mutation record
-    const elements = getElementsFromMutationRecordSelector(
-      ampdoc.win.document,
-      mutationRecord
-    );
-    totalMutations += elements.length;
-    mutationRecordsAndElements.push({
-      mutationRecord,
-      elements,
-    });
-  });
-
-  if (totalMutations > MAX_MUTATIONS) {
-    const numMutationsError =
-      'Max number of mutations for the total ' +
-      `applied experiments exceeded: ${totalMutations} > ` +
-      MAX_MUTATIONS;
-    user().error(TAG, numMutationsError);
-    throw new Error(numMutationsError);
-  }
-
-  // Create the mutations
-  const mutations = createMutationsFromMutationRecordsAndElements(
-    mutationRecordsAndElements
-  );
-
-  // Validate all mutations
-  mutations.forEach(mutation => {
-    userAssert(
-      mutation.validate(),
-      'Mutation %s has an an unsupported value.',
-      mutation.toString()
-    );
-  });
-
+  // Need to wait until the document is ready
+  // before selecting and mutating from the document.
   return ampdoc.whenReady().then(() => {
+    // Assert the formats of the mutation record,
+    // find its respective elements,
+    // count the number of mutations that will applied
+    const mutationRecordsAndElements = [];
+    let totalMutations = 0;
+    mutationRecords.forEach(mutationRecord => {
+      assertMutationRecordFormat(mutationRecord);
+
+      // Select the elements from the mutation record
+      const elements = getElementsFromMutationRecordSelector(
+        ampdoc.win.document,
+        mutationRecord
+      );
+      totalMutations += elements.length;
+      mutationRecordsAndElements.push({
+        mutationRecord,
+        elements,
+      });
+    });
+
+    if (totalMutations > MAX_MUTATIONS) {
+      const numMutationsError =
+        'Max number of mutations for the total ' +
+        `applied experiments exceeded: ${totalMutations} > ` +
+        MAX_MUTATIONS;
+      user().error(TAG, numMutationsError);
+      throw new Error(numMutationsError);
+    }
+
+    // Create the mutations
+    const mutations = createMutationsFromMutationRecordsAndElements(
+      mutationRecordsAndElements
+    );
+
+    // Validate all mutations
+    mutations.forEach(mutation => {
+      userAssert(
+        mutation.validate(),
+        'Mutation %s has an an unsupported value.',
+        mutation.toString()
+      );
+    });
+
     // Apply all the mutations
     mutations.forEach(mutation => {
       mutation.mutate();
@@ -165,7 +167,7 @@ export function createMutationsFromMutationRecordsAndElements(
         throw new Error(
           `Mutation ${JSON.stringify(
             mutationRecord
-          )} has an unsupported attributeName for the specified element.`
+          )} has an unsupported attributeName.`
         );
       }
     } else {

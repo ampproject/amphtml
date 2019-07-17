@@ -38,7 +38,7 @@ describes.realWin(
       doc.body.innerHTML = '';
     });
 
-    function getAttributeMutationParamsObject(attributeName, value) {
+    function getAttributeMutationParamsObject(attributeName, value, tagName) {
       return {
         mutationRecord: {
           'type': 'characterData',
@@ -46,12 +46,16 @@ describes.realWin(
           'value': value,
           'attributeName': attributeName,
         },
-        elements: [doc.createElement('div'), doc.createElement('div')],
+        elements: [doc.createElement(tagName), doc.createElement(tagName)],
       };
     }
 
     function getAttributeMutationDefaultClass(value) {
-      const paramsObject = getAttributeMutationParamsObject('class', value);
+      const paramsObject = getAttributeMutationParamsObject(
+        'class',
+        value,
+        'div'
+      );
       return new AttributeMutationDefaultClass(
         paramsObject.mutationRecord,
         paramsObject.elements
@@ -59,7 +63,11 @@ describes.realWin(
     }
 
     function getAttributeMutationDefaultStyle(value) {
-      const paramsObject = getAttributeMutationParamsObject('style', value);
+      const paramsObject = getAttributeMutationParamsObject(
+        'style',
+        value,
+        'div'
+      );
       return new AttributeMutationDefaultStyle(
         paramsObject.mutationRecord,
         paramsObject.elements
@@ -67,7 +75,7 @@ describes.realWin(
     }
 
     function getAttributeMutationDefaultUrl(value) {
-      const paramsObject = getAttributeMutationParamsObject('src', value);
+      const paramsObject = getAttributeMutationParamsObject('href', value, 'a');
       return new AttributeMutationDefaultUrl(
         paramsObject.mutationRecord,
         paramsObject.elements
@@ -154,6 +162,14 @@ describes.realWin(
           const attributeMutation = getAttributeMutationDefaultUrl(
             'tel:555-555-5555'
           );
+          expect(attributeMutation.validate()).to.be.equal(false);
+        });
+
+        it('should not allow unsupported element mutations', () => {
+          const attributeMutation = getAttributeMutationDefaultUrl(
+            'tel:555-555-5555'
+          );
+          attributeMutation.elements = [doc.createElement('div')];
           expect(attributeMutation.validate()).to.be.equal(false);
         });
       });
