@@ -16,9 +16,7 @@ FAIL
 |  -->
 |  <!--
 |    Test Description:
-|    This test demonstrates the error message for an amp-carousel containing
-|    an invalid `autoplay` attribute. There are multiple tagspecs for amp-carousel
-|    and we are interested in which error is generated.
+|    Tests the additional restrictions AMP4EMAIL sets on AMP-CAROUSEL.
 |  -->
 |  <!doctype html>
 |  <html ⚡4email>
@@ -30,12 +28,28 @@ FAIL
 |       src='https://cdn.ampproject.org/v0/amp-carousel-0.1.js'></script>
 |  </head>
 |  <body>
-|    <amp-carousel
->>   ^~~~~~~~~
-amp4email_feature_tests/amp_carousel.html:32:2 The attribute 'autoplay' may not appear in tag 'AMP-CAROUSEL [type=slides]'. (see https://amp.dev/documentation/components/amp-carousel) [DISALLOWED_HTML]
-|      autoplay
-|      width="800" height="600"
-|      layout="responsive"
-|      type="slides"></amp-carousel
+|
+|  <!-- Valid example. -->
+|  <amp-carousel
+|    autoplay
+|    delay="2000"
+|    width="800" height="600"
+|    layout="responsive"
+|    type="slides">
+|  </amp-carousel>
+|
+|  <!--
+|    The error message for an amp-carousel containing an invalid `arrows` attribute. There are multiple
+|    tagspecs for amp-carousel and we are interested in which error is generated.
+|  -->
+|  <amp-carousel
+>> ^~~~~~~~~
+amp4email_feature_tests/amp_carousel.html:44:0 The attribute 'arrows' may not appear in tag 'AMP-CAROUSEL [type=slides]'. (see https://amp.dev/documentation/components/amp-carousel) [DISALLOWED_HTML]
+|    arrows
+|    width="800" height="600"
+|    layout="responsive"
+|    type="slides">
+|  </amp-carousel>
+|
 |  </body>
 |  </html>

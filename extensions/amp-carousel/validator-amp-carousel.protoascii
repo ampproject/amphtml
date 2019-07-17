@@ -37,13 +37,11 @@ attr_lists: {
     value: ""
   }
   attrs: {
-    disabled_by: "amp4email"
     name: "autoplay"
     value_regex: "(|[0-9]+)"
   }
   attrs: { name: "controls" }
   attrs: {
-    disabled_by: "amp4email"
     name: "delay"
     value_regex: "[0-9]+"
   }
