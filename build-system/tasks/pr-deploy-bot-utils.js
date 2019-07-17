@@ -38,8 +38,8 @@ async function replace(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
 
   const inabox = false;
-  const storyV1 = true;  
-  let result = replaceUrlsAppUtil('compiled', data, '', inabox, storyV1);
+  const storyV1 = true;
+  const result = replaceUrlsAppUtil('compiled', data, '', inabox, storyV1);
 
   await fs.writeFile(filePath, result, 'utf8');
 }
@@ -54,4 +54,4 @@ async function replaceUrls(dir) {
 
 module.exports = {
   replaceUrls,
-}
+};
