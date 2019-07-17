@@ -40,10 +40,6 @@ FAIL
 |      <amp-story-grid-layer template="vertical">
 |        <p><not-a-real-tag></p>
 >>          ^~~~~~~~~
-feature_tests/stamp-descendant.html:40:9 The tag 'not-a-real-tag' may not appear as a descendant of tag 'amp-story-grid-layer'. (see https://amp.dev/documentation/components/amp-story) [AMP_TAG_PROBLEM]
->>          ^~~~~~~~~
-feature_tests/stamp-descendant.html:40:9 The tag 'not-a-real-tag', a child tag of 'AMP-STORY-GRID-LAYER default', does not satisfy the reference point 'AMP-STORY-GRID-LAYER animate-in'. (see https://amp.dev/documentation/components/amp-story) [AMP_TAG_PROBLEM]
->>          ^~~~~~~~~
 feature_tests/stamp-descendant.html:40:9 The tag 'not-a-real-tag' is disallowed. [DISALLOWED_HTML]
 |      </amp-story-grid-layer>
 |    </amp-story-page>
