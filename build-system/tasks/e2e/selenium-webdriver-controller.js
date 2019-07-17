@@ -521,25 +521,6 @@ class SeleniumWebDriverController {
    * @return {!Promise}
    * @override
    */
-  async scroll(handle, opt_scrollToOptions) {
-    const webElement = handle.getElement();
-    const scrollTo = (element, opt_scrollToOptions) => {
-      element./*OK*/ scrollTo(opt_scrollToOptions);
-    };
-
-    return await this.driver.executeScript(
-      scrollTo,
-      webElement,
-      opt_scrollToOptions
-    );
-  }
-
-  /**
-   * @param {!ElementHandle<!WebElement>} handle
-   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
-   * @return {!Promise}
-   * @override
-   */
   async scrollBy(handle, opt_scrollToOptions) {
     const webElement = handle.getElement();
     const scrollBy = (element, opt_scrollToOptions) => {
