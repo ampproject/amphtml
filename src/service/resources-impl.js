@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../common-signals';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
