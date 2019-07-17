@@ -1515,20 +1515,6 @@ describe('Resources discoverWork', () => {
     expect(setInViewport).to.have.been.calledWith(true);
   });
 
-  it('should not grant permission to build when threshold reached', () => {
-    let hasBeenVisible = false;
-    sandbox
-      .stub(resources.viewer_, 'hasBeenVisible')
-      .callsFake(() => hasBeenVisible);
-
-    for (let i = 0; i < 20; i++) {
-      expect(resources.grantBuildPermission()).to.be.true;
-    }
-    expect(resources.grantBuildPermission()).to.be.false;
-    hasBeenVisible = true;
-    expect(resources.grantBuildPermission()).to.be.true;
-  });
-
   it('should build resource when not built', () => {
     const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
     sandbox.stub(resources, 'schedule_');
@@ -1595,6 +1581,21 @@ describe('Resources discoverWork', () => {
     expect(resource1.build).to.not.be.called;
   });
 
+  it('should NOT build when quota reached', () => {
+    sandbox.stub(resources.viewer_, 'hasBeenVisible').callsFake(() => false);
+    sandbox.stub(resources, 'schedule_');
+    resources.documentReady_ = true;
+    resources.buildAttemptsCount_ = 21; // quota is 20
+
+    resource1.element.isBuilt = () => false;
+    resource1.prerenderAllowed = () => true;
+    resource1.state_ = ResourceState.NOT_BUILT;
+    resource1.build = sandbox.spy();
+
+    resources.buildOrScheduleBuildForResource_(resource1);
+    expect(resource1.build).to.not.be.called;
+  });
+
   it('should layout resource if outside viewport but idle', () => {
     const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     resources.documentReady_ = true;
@@ -1615,8 +1616,7 @@ describe('Resources discoverWork', () => {
     const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
-    // Emulates a resource not building, maybe because grantBuildPermission()
-    // returned false.
+    // Emulates a resource not building.
     resource1.element.isBuilt = sandbox.stub().returns(false);
     resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
