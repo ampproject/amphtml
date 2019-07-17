@@ -67,7 +67,7 @@ export class AnalyticsConfig {
     // temporary line to test travis test
     // eslint-disable-next-line no-undef
     if (ANALYTICS_VENDOR_SPLIT) {
-      return;
+      return Promise.resolve();
     }
 
     return this.fetchRemoteConfig_()
