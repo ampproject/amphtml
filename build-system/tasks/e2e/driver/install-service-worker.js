@@ -69,17 +69,21 @@ class RequestLoggingService {
    * and listen for messages.
    * @return {!Promise}
    */
-  onLoad_() {
+  async onLoad_() {
     const register = serviceWorker.controller
       ? Promise.resolve()
       : serviceWorker
           .register(SW_PATH, {scope: '/'})
           .then(() => serviceWorker.ready);
 
-    return register.then(() => {
-      serviceWorker.addEventListener('message', e => this.onMessage_(e));
-      this.ready_ = true;
-    });
+    await register;
+
+    serviceWorker.addEventListener('message', e => this.onMessage_(e));
+    this.ready_ = true;
+    const {controller} = serviceWorker;
+    if (controller) {
+      controller.postMessage('wow');
+    }
   }
 
   /**

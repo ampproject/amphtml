@@ -563,7 +563,7 @@ class SeleniumWebDriverController {
       this.getWaitFn_(() => this.evaluate(getter, matcher))
     );
     if (property) {
-      return p.then(result => result[property]);
+      return p.then(result => result && result[property]);
     }
     return p;
   }

@@ -42,6 +42,13 @@ self.addEventListener('fetch', event => {
   event.waitUntil(logRequest(clientId, request));
 });
 
+self.addEventListener('message', event => {
+  const {source, data} = event;
+  const {id} = source;
+  console.log('SW Received Message: ' + data);
+  source.postMessage(self.requests_.get(id));
+});
+
 /**
  * A simple keyed store of Client IDs to lists of requests.
  * @template T

@@ -35,8 +35,8 @@ describes.endtoend(
         // const imageReq = await controller.getNetworkRequest('image');
         // const pixelReq = await controller.getNetworkRequest('pixel');
         // const analyticsReq = await controller.getNetworkRequest('analytics');
-
-        await expect(controller.getNetworkRequest('image', 'url')).to.match(
+        console.log(await controller.getNetworkRequest('doc'));
+        await expect(controller.getNetworkRequest('doc', 'url')).to.match(
           /\//g
         );
         // await expect(controller.getNetworkRequest('pixel')).to.include({
