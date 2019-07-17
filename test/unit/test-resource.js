@@ -116,27 +116,6 @@ describes.realWin('Resource', {amp: true}, env => {
     });
   });
 
-  it('should not build if permission is not granted', () => {
-    let permission = false;
-    elementMock
-      .expects('isUpgraded')
-      .returns(true)
-      .atLeast(1);
-    sandbox.stub(resources, 'grantBuildPermission').callsFake(() => permission);
-    elementMock.expects('updateLayoutBox').never();
-    expect(resource.build()).to.be.null;
-    expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
-
-    permission = true;
-    elementMock
-      .expects('build')
-      .returns(Promise.resolve())
-      .once();
-    return resource.build().then(() => {
-      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
-    });
-  });
-
   it('should blacklist on build failure', () => {
     sandbox
       .stub(resource, 'maybeReportErrorOnBuildFailure')
