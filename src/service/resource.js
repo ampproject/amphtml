@@ -322,15 +322,10 @@ export class Resource {
   /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
-   * @param {boolean=} force
    * @return {?Promise}
    */
-  build(force = false) {
-    if (
-      this.isBuilding_ ||
-      !this.element.isUpgraded() ||
-      (!force && !this.resources_.grantBuildPermission())
-    ) {
+  build() {
+    if (this.isBuilding_ || !this.element.isUpgraded()) {
       return null;
     }
     this.isBuilding_ = true;
@@ -537,7 +532,18 @@ export class Resource {
   measureViaLayers_() {
     const {element} = this;
     const layers = element.getLayers();
-    layers.remeasure(element);
+    /**
+     * TODO(jridgewell): This force remeasure shouldn't be necessary. We
+     * essentially have 3 phases of measurements:
+     * 1. Initial measurements during page load, where we're not mutating
+     * 2. Remeasurements after page load, where we might have mutated (but
+     *    really shouldn't, it's a bug we haven't fixed yet)
+     * 3. Mutation remeasurements
+     *
+     * We can optimize the initial measurements by not forcing remeasure. But
+     * for both 2 and 3, we need for force it.
+     */
+    layers.remeasure(element, /* opt_force */ true);
     this.layoutBox_ = this.getPageLayoutBox();
   }
 
@@ -594,10 +600,6 @@ export class Resource {
    */
   requestMeasure() {
     this.isMeasureRequested_ = true;
-    if (this.useLayers_) {
-      const {element} = this;
-      element.getLayers().dirty(element);
-    }
   }
 
   /**

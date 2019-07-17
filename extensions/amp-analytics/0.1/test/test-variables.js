@@ -272,7 +272,39 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       return check('$BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
     });
 
-    it('if works', () => check('$IF(hey, truthy, falsey)', 'truthy'));
+    it('if works with true', () =>
+      check('$IF(true, truthy, falsey)', 'truthy'));
+
+    it('if works with other string', () =>
+      check('$IF(test, truthy, falsey)', 'truthy'));
+
+    it('if works with false', () =>
+      check('$IF(false, truthy, falsey)', 'falsey'));
+
+    it('if works with empty string', () =>
+      check('$IF(, truthy, falsey)', 'falsey'));
+
+    it('if works with null', () =>
+      check('$IF(null, truthy, falsey)', 'falsey'));
+
+    it('if works with undefined', () =>
+      check('$IF(undefined, truthy, falsey)', 'falsey'));
+
+    it('equals works (truth-y test)', () => {
+      return check('$EQUALS(testValue, testValue)', 'true');
+    });
+
+    it('equals works (false-y test)', () => {
+      return check('$EQUALS(testValue, otherValue)', 'false');
+    });
+
+    it('equals works with if (truth-y test)', () => {
+      return check('$IF($EQUALS(A, A), truthy, falsey)', 'truthy');
+    });
+
+    it('equals works with if (false-y test)', () => {
+      return check('$IF($EQUALS(A, B), truthy, falsey)', 'falsey');
+    });
 
     it('chaining works', () => {
       return check('$SUBSTR(Hello world!, 6)', 'world!')
@@ -329,6 +361,62 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         'LINKER_PARAM(gl, cid)&LINKER_PARAM(gl, gclid)',
         'a1b2c3&123'
       );
+    });
+
+    describe('$MATCH', () => {
+      it('handles default index', () => {
+        return check('$MATCH(thisisatest, thisisatest)', 'thisisatest');
+      });
+
+      it('matches full match', () => {
+        return check('$MATCH(thisisatest, thisisatest, 0)', 'thisisatest');
+      });
+
+      it('matches partial match', () => {
+        return check('$MATCH(thisisatest, test, 0)', 'test');
+      });
+
+      it('matches 1st group match', () => {
+        return check('$MATCH(thisisatest, `thisisa(test)`, 1)', 'test');
+      });
+
+      it('matches 2nd group match', () => {
+        return check('$MATCH(thisisatest, `this(is)a(test)`, 2)', 'test');
+      });
+
+      it('does not match non-matching group', () => {
+        return check('$MATCH(thisisatest, `thisisa(?:test)`, 1)', '');
+      });
+
+      it('handles escaped regex chars', () => {
+        return check('$MATCH(1, \\d, 0)', '1');
+      });
+
+      it('handles no full match', () => {
+        return check('$MATCH(invalid, thisisatest, 0)', '');
+      });
+
+      it('handles no group match', () => {
+        return check('$MATCH(thisisatest, `thisisa(\\d+)?test`, 1)', '');
+      });
+
+      it('handles large index', () => {
+        return check('$MATCH(thisisatest, thisisatest, 100)', '');
+      });
+
+      it('handles negative index', () => {
+        expectAsyncConsoleError(
+          /Third argument in MATCH macro must be a number >= 0/
+        );
+        return check('$MATCH(thisisatest, thisisatest, -1)', 'thisisatest');
+      });
+
+      it('handles NaN index', () => {
+        expectAsyncConsoleError(
+          /Third argument in MATCH macro must be a number >= 0/
+        );
+        return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
+      });
     });
   });
 

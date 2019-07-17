@@ -32,6 +32,7 @@ import {
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {AmpEvents} from '../../../src/amp-events';
+import {AmpStoryBlingLink, BLING_LINK_SELECTOR} from './amp-story-bling-link';
 import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
@@ -305,6 +306,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.emitProgress_(progress)
     );
     this.setDescendantCssTextStyles_();
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      uiState => this.onUIStateUpdate_(uiState),
+      true /* callToInitialize */
+    );
   }
 
   /**
@@ -457,6 +463,23 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.findAndPrepareEmbeddedComponents_(true /* forceResize */);
   }
 
+  /**
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    // On vertical rendering, render all the animations with their final state.
+    if (uiState === UIType.VERTICAL && this.animationManager_) {
+      this.signals()
+        .whenSignal(CommonSignals.LOAD_END)
+        .then(() => this.maybeApplyFirstAnimationFrame())
+        .then(() => {
+          this.animationManager_.finishAll();
+        });
+    }
+  }
+
   /** @return {!Promise} */
   beforeVisible() {
     return this.maybeApplyFirstAnimationFrame();
@@ -510,6 +533,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   findAndPrepareEmbeddedComponents_(forceResize = false) {
     this.addClickShieldToEmbeddedComponents_();
     this.resizeInteractiveEmbeddedComponents_(forceResize);
+    this.addStylesToBlingLinks_();
   }
 
   /**
@@ -560,6 +584,15 @@ export class AmpStoryPage extends AMP.BaseElement {
         // Run in case target never changes size.
         debouncePrepareForAnimation(el, null /* unlisten */);
       }
+    });
+  }
+
+  /**
+   * Adds icon and pulse animation to bling links
+   */
+  addStylesToBlingLinks_() {
+    scopedQuerySelectorAll(this.element, BLING_LINK_SELECTOR).forEach(el => {
+      AmpStoryBlingLink.build(el);
     });
   }
 

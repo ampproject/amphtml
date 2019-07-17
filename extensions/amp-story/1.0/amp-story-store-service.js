@@ -50,6 +50,7 @@ export const UIType = {
   MOBILE: 0,
   DESKTOP_PANELS: 1, // Default desktop UI.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
+  VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
 };
 
 /**
@@ -155,10 +156,10 @@ export const StateProperty = {
 /** @private @const @enum {string} */
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
-  ADD_TO_PAGE_IDS: 'addToPageIds',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
+  SET_PAGE_IDS: 'addToPageIds',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
@@ -217,11 +218,6 @@ const actions = (state, action, data) => {
       );
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
-      }));
-    case Action.ADD_TO_PAGE_IDS:
-      const newPageIds = [].concat(state[StateProperty.PAGE_IDS], data);
-      return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.PAGE_IDS]: newPageIds,
       }));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
@@ -322,6 +318,13 @@ const actions = (state, action, data) => {
         [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data,
       }));
     case Action.TOGGLE_UI:
+      if (
+        state[StateProperty.UI_STATE] === UIType.VERTICAL &&
+        data !== UIType.VERTICAL
+      ) {
+        dev().error(TAG, 'Cannot switch away from UIType.VERTICAL');
+        return state;
+      }
       return /** @type {!State} */ (Object.assign({}, state, {
         // Keep DESKTOP_STATE for compatiblity with v0.1.
         [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
@@ -343,6 +346,10 @@ const actions = (state, action, data) => {
     case Action.SET_ADVANCEMENT_MODE:
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ADVANCEMENT_MODE]: data,
+      }));
+    case Action.SET_PAGE_IDS:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAGE_IDS]: data,
       }));
     default:
       dev().error(TAG, 'Unknown action %s.', action);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {adoptServiceForEmbedDoc} from '../service';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
@@ -73,22 +74,47 @@ export function installRuntimeServices(global) {
  * Install ampdoc-level services.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
+ * @param {boolean=} opt_inabox
  * @restricted
  */
-export function installAmpdocServices(ampdoc, opt_initParams) {
+export function installAmpdocServices(ampdoc, opt_initParams, opt_inabox) {
+  const isEmbedded = !!ampdoc.getParent();
+
   // Order is important!
   installUrlForDoc(ampdoc);
-  installCidService(ampdoc);
-  installDocumentInfoServiceForDoc(ampdoc);
-  installViewerServiceForDoc(ampdoc, opt_initParams);
-  installViewportServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'documentInfo')
+    : installDocumentInfoServiceForDoc(ampdoc);
+  if (!opt_inabox) {
+    // those services are installed in amp-inabox.js
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'cid')
+      : installCidService(ampdoc);
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'viewer')
+      : installViewerServiceForDoc(ampdoc, opt_initParams);
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'viewport')
+      : installViewportServiceForDoc(ampdoc);
+  }
   installHiddenObserverForDoc(ampdoc);
-  installHistoryServiceForDoc(ampdoc);
-  installResourcesServiceForDoc(ampdoc);
-  installUrlReplacementsServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'history')
+    : installHistoryServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'resources')
+    : installResourcesServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
+    : installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
-  installStorageServiceForDoc(ampdoc);
+  if (!opt_inabox) {
+    // For security, Storage is not supported in inabox.
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'storage')
+      : installStorageServiceForDoc(ampdoc);
+  }
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }

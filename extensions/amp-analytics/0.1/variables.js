@@ -142,6 +142,35 @@ function replaceMacro(string, matchPattern, opt_newSubStr) {
 }
 
 /**
+ * Applies the match function to the given string with the given regex
+ * @param {string} string input to be replaced
+ * @param {string} matchPattern string representation of regex pattern
+ * @param {string=} opt_matchingGroupIndexStr the matching group to return.
+ *                  Index of 0 indicates the full match. Defaults to 0
+ * @return {string} returns the matching group given by opt_matchingGroupIndexStr
+ */
+function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
+  if (!matchPattern) {
+    user().warn(TAG, 'MATCH macro must have two or more arguments');
+  }
+
+  let index = 0;
+  if (opt_matchingGroupIndexStr) {
+    index = parseInt(opt_matchingGroupIndexStr, 10);
+
+    // if given a non-number or negative number
+    if ((index != 0 && !index) || index < 0) {
+      user().error(TAG, 'Third argument in MATCH macro must be a number >= 0');
+      index = 0;
+    }
+  }
+
+  const regex = new RegExp(matchPattern);
+  const matches = string.match(regex);
+  return matches && matches[index] ? matches[index] : '';
+}
+
+/**
  * Provides support for processing of advanced variable syntax like nested
  * expansions macros etc.
  */
@@ -168,9 +197,14 @@ export class VariableService {
     this.register_('$BASE64', value => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
     this.register_('$IF', (value, thenValue, elseValue) =>
-      value ? thenValue : elseValue
+      stringToBool(value) ? thenValue : elseValue
     );
     this.register_('$REPLACE', replaceMacro);
+    this.register_('$MATCH', matchMacro);
+    this.register_(
+      '$EQUALS',
+      (firstValue, secValue) => firstValue === secValue
+    );
     // TODO(ccordry): Make sure this stays a window level service when this
     // VariableService is migrated to document level.
     this.register_('LINKER_PARAM', (name, id) =>
@@ -350,4 +384,20 @@ export function getConsentStateStr(element) {
     }
     return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
   });
+}
+
+/**
+ * Converts string to boolean
+ * @param {string} str
+ * @return {boolean}
+ */
+export function stringToBool(str) {
+  return (
+    str !== 'false' &&
+    str !== '' &&
+    str !== '0' &&
+    str !== 'null' &&
+    str !== 'NaN' &&
+    str !== 'undefined'
+  );
 }

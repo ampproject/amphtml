@@ -18,6 +18,12 @@ const imports = ['sinon'];
 module.exports = function(context) {
   return {
     ImportDeclaration(node) {
+      const comments = context.getCommentsBefore(node);
+      const ok = comments.some(comment => comment.value === 'OK');
+      if (ok) {
+        return;
+      }
+
       const name = node.source.value;
       if (imports.includes(name)) {
         context.report({node, message: `Importing ${name} is forbidden.`});

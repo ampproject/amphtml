@@ -81,7 +81,7 @@ export function installStylesForDoc(
 
 /**
  * Adds the given css text to the given document.
- * TODO(dvoytenko, #10705): Remove this method once FIE/ampdoc migration is
+ * TODO(dvoytenko, #22733): Remove this method once FIE/ampdoc migration is
  * done.
  *
  * @param {!Document} doc The document that should get the new styles.
@@ -254,7 +254,7 @@ export function makeBodyVisible(doc) {
   const set = () => {
     bodyMadeVisible = true;
     setBodyVisibleStyles(doc);
-    renderStartedNoInline(doc);
+    renderStarted_(doc);
   };
 
   waitForBodyOpenPromise(doc)
@@ -306,8 +306,9 @@ function setBodyVisibleStyles(doc) {
 
 /**
  * @param {!Document} doc
+ * @noinline
  */
-function renderStartedNoInline(doc) {
+function renderStarted_(doc) {
   try {
     Services.resourcesForDoc(doc.documentElement).renderStarted();
   } catch (e) {
