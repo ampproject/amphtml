@@ -28,7 +28,7 @@ const BAIL_OUT_CONDITIONS = {
 
   // Since we don't know if exported members are 'new'd, bail out on modification.
   isExported: (t, path) =>
-    path.find(
+    path.findParent(
       path =>
         path.isExportNamedDeclaration() || path.isExportDefaultDeclaration()
     ),
