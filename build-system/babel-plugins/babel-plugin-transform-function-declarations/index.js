@@ -22,9 +22,13 @@ const BAIL_OUT_CONDITIONS = {
   isGenerator: (t, path) => path.node.generator,
 
   // If this FunctionDeclaration doesn't have a single return statement, bail out on modification
-  isNotSingleReturnStatment: (t, path) =>
-    !path.get('body').isBlockStatement() ||
-    !path.get('body.body.0').isReturnStatement(),
+  isNotSingleReturnStatment: (t, path) => {
+    if (!path.get('body').isBlockStatement()) {
+      return false;
+    }
+    const body = path.get('body.body.0');
+    return !body || !body.isReturnStatement();
+  },
 
   // Since we don't know if exported members are 'new'd, bail out on modification.
   isExported: (t, path) =>
@@ -80,15 +84,14 @@ const BAIL_OUT_CONDITIONS = {
 };
 
 function createVariableDeclaration(t, path) {
-  const params = path.node.params.map(param => t.identifier(param.name));
-  const isAsync = path.node.async;
+  const {params, body, async, id} = t.cloneNode(path.node);
   const arrowFunction = t.arrowFunctionExpression(
     params,
-    t.cloneNode(path.get('body.body.0').node.argument),
-    isAsync
+    body.body[0].argument,
+    async
   );
   const declarations = t.variableDeclarator(
-    t.identifier(path.get('id').node.name),
+    t.identifier(id.name),
     arrowFunction
   );
 
