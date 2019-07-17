@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from './common-signals';
 import {Services} from './services';
-import {getAmpdoc} from './service';
 import {dev, devAssert, rethrowAsync} from './log';
+import {getAmpdoc} from './service';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
 import {map} from './utils/object';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
-import {CommonSignals} from './common-signals';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
 const STYLE_MAP_PROP = '__AMP_CSS_SM';
