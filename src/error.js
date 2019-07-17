@@ -333,9 +333,18 @@ function onError(message, filename, line, col, error) {
     hasNonAmpJs
   );
   if (data) {
-    reportingBackoff(() =>
-      reportErrorToServerOrViewer(this, /** @type {!JsonObject} */ (data))
-    );
+    reportingBackoff(() => {
+      try {
+        return reportErrorToServerOrViewer(
+          this,
+          /** @type {!JsonObject} */ (data)
+        ).catch(() => {
+          // catch async errors to avoid recursive errors.
+        });
+      } catch (e) {
+        // catch async errors to avoid recursive errors.
+      }
+    });
   }
 }
 
