@@ -105,7 +105,7 @@ export class AmpAdUIHandler {
 
     // Always show fallback if desired
     const onNoContent = this.element_.getAttribute('data-on-no-content');
-    if(onNoContent === 'fallback') {
+    if (onNoContent === 'fallback') {
       this.applyFallback_();
       return;
     }
@@ -123,7 +123,7 @@ export class AmpAdUIHandler {
 
     // The order here is collapse > user provided fallback > default fallback
     attemptCollapsePromise.catch(() => {
-      this.applyFallback_();      
+      this.applyFallback_();
     });
   }
 

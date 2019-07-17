@@ -220,11 +220,13 @@ describes.realWin(
           resolve = resolve_;
         });
         const placeholderSpy = sandbox.spy(adImpl, 'togglePlaceholder');
-        const attemptCollapseSy = sandbox
-          .spy(uiHandler.baseInstance_, 'attemptCollapse');
+        const attemptCollapseSy = sandbox.spy(
+          uiHandler.baseInstance_,
+          'attemptCollapse'
+        );
         const fallbackSpy = sandbox
           .stub(adImpl, 'toggleFallback')
-          .callsFake(() => {});        
+          .callsFake(() => {});
         sandbox
           .stub(uiHandler.baseInstance_, 'mutateElement')
           .callsFake(callback => {
@@ -236,7 +238,7 @@ describes.realWin(
         return promise.then(() => {
           expect(attemptCollapseSy).not.to.be.called;
           expect(placeholderSpy).to.be.calledWith(false);
-          expect(fallbackSpy).to.be.calledWith(true);          
+          expect(fallbackSpy).to.be.calledWith(true);
         });
       });
 
