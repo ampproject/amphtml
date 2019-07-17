@@ -38,9 +38,11 @@ const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 
-// `--pseudo_names` slows down closure compilation and results in a race.
+// There's a race in the gulp plugin of closure compiler that gets exposed
+// during slower compilation operations.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.pseudo_names ? 1 : 4;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS =
+  argv.pseudo_names || argv.full_sourcemaps ? 1 : 4;
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
