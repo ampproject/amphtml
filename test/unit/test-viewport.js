@@ -1699,6 +1699,24 @@ describe('createViewport', () => {
           ViewportBindingIosEmbedWrapper_
         );
       });
+
+      it('should bind to "natural" when iframed, but iOS supports scrollable iframes', () => {
+        toggleExperiment(win, 'ios-scrollable-iframe', true);
+        win.parent = {};
+        sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+        installViewportServiceForDoc(ampDoc);
+        const viewport = Services.viewportForDoc(ampDoc);
+        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+      });
+
+      it('should bind to "natural" when in dev mode, but iOS supports scrollable iframes', () => {
+        toggleExperiment(win, 'ios-scrollable-iframe', true);
+        getMode(win).development = true;
+        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
+        installViewportServiceForDoc(ampDoc);
+        const viewport = Services.viewportForDoc(ampDoc);
+        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+      });
     }
   );
 });
