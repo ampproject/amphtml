@@ -6,6 +6,7 @@
     "inabox-css-cleanup"
   ],
   "allow-url-opt-in": [
+    "ios-scrollable-iframe",
     "pump-early-frame",
     "twitter-default-placeholder",
     "twitter-default-placeholder-fade",
@@ -40,6 +41,7 @@
   "flexAdSlots": 0.01,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
+  "ios-scrollable-iframe": 0,
   "margin-bottom-in-content-height": 1,
   "pump-early-frame": 1,
   "version-locking": 1
