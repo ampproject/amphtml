@@ -522,7 +522,7 @@ export class Resources {
    * a finite number. Returns false if the number has been reached.
    * @return {boolean}
    */
-  grantBuildPermission() {
+  isUnderBuildQuota_() {
     // For pre-render we want to limit the amount of CPU used, so we limit
     // the number of elements build. For pre-render to "seem complete"
     // we only need to build elements in the first viewport. We can't know
@@ -531,7 +531,7 @@ export class Resources {
     // Most documents have 10 or less AMP tags. By building 20 we should not
     // change the behavior for the vast majority of docs, and almost always
     // catch everything in the first viewport.
-    return this.buildAttemptsCount_++ < 20 || this.viewer_.hasBeenVisible();
+    return this.buildAttemptsCount_ < 20 || this.viewer_.hasBeenVisible();
   }
 
   /**
@@ -553,7 +553,7 @@ export class Resources {
 
     // During prerender mode, don't build elements that aren't allowed to be
     // prerendered. This avoids wasting our prerender build quota.
-    // See grantBuildPermission() for more details.
+    // See isUnderBuildQuota_() for more details.
     const shouldBuildResource =
       this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
       resource.prerenderAllowed();
@@ -621,8 +621,15 @@ export class Resources {
    * @private
    */
   buildResourceUnsafe_(resource, schedulePass, force = false) {
-    const promise = resource.build(force);
-    if (!promise || !schedulePass) {
+    if (!this.isUnderBuildQuota_() && !force) {
+      return null;
+    }
+    const promise = resource.build();
+    if (!promise) {
+      return null;
+    }
+    this.buildAttemptsCount_++;
+    if (!schedulePass) {
       return promise;
     }
     return promise.then(
