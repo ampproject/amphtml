@@ -63,9 +63,49 @@ tags: {  # <amp-ad>
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "template" }
-  attrs: { name: "type" mandatory: true }
+  attrs: {
+    name: "type"
+    mandatory: true
+    blacklisted_value_regex: "^("
+        "custom|"  # Handled separately below, has specific requirements
+        ")$"
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-ad"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: FLUID
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-ad type="custom">
+  html_format: AMP  # Ads are not allowed inside ads
+  tag_name: "AMP-AD"
+  spec_name: "amp-ad with type=custom"
+  requires_extension: "amp-ad"  # See note at top of file
+  also_requires_tag_warning: "amp-ad extension .js script"
+  # If modifying disallowed_ancestors, then please also edit
+  # extensions/amp-auto-ads/*/placement.js
+  disallowed_ancestor: "AMP-APP-BANNER"
+  attrs: {
+    name: "data-uri"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "custom"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/ads/custom.md"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
