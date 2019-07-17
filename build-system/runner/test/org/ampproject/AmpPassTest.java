@@ -1,8 +1,6 @@
 
 package org.ampproject;
 
-
-
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerPass;
@@ -22,7 +20,7 @@ public class AmpPassTest extends CompilerTestCase {
       );
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, /* isProd */ true, suffixTypes, "123");
+    return new AmpPass(compiler, /* isProd */ true, suffixTypes);
   }
 
   @Override protected int getNumRepetitions() {
@@ -162,110 +160,6 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  @Test public void testGetModeLocalDevPropertyReplacement() throws Exception {
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "function getMode() { return { localDev: true } }",
-             "var $mode = { getMode: getMode };",
-             "  if ($mode.getMode().localDev) {",
-             "    console.log('hello world');",
-             "  }",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "function getMode() { return { localDev: true }; }",
-             "var $mode = { getMode: getMode };",
-             "  if (false) {",
-             "    console.log('hello world');",
-             "  }",
-            "})()"));
-  }
-
-  @Test public void testGetModeTestPropertyReplacement() throws Exception {
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "function getMode() { return { test: true } }",
-             "var $mode = { getMode: getMode };",
-             "  if ($mode.getMode().test) {",
-             "    console.log('hello world');",
-             "  }",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "function getMode() { return { test: true }; }",
-             "var $mode = { getMode: getMode };",
-             "  if (false) {",
-             "    console.log('hello world');",
-             "  }",
-            "})()"));
-  }
-
-  @Test public void testGetModeMinifiedPropertyReplacement() throws Exception {
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "function getMode() { return { minified: false } }",
-             "var $mode = { getMode: getMode };",
-             "  if ($mode.getMode().minified) {",
-             "    console.log('hello world');",
-             "  }",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "function getMode() { return { minified: false }; }",
-             "var $mode = { getMode: getMode };",
-             "  if (true) {",
-             "    console.log('hello world');",
-             "  }",
-            "})()"));
-  }
-
-  @Test public void testGetModeWinTestPropertyReplacement() throws Exception {
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "function getMode() { return { test: true } }",
-             "var win = {};",
-             "var $mode = { getMode: getMode };",
-             "  if ($mode.getMode(win).test) {",
-             "    console.log('hello world');",
-             "  }",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "function getMode() { return { test: true }; }",
-             "var win = {};",
-             "var $mode = { getMode: getMode };",
-             "  if (false) {",
-             "    console.log('hello world');",
-             "  }",
-            "})()"));
-  }
-
-  @Test public void testGetModeWinMinifiedPropertyReplacement() throws Exception {
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "function getMode() { return { minified: false } }",
-             "var win = {};",
-             "var $mode = { getMode: getMode };",
-             "  if ($mode.getMode(win).minified) {",
-             "    console.log('hello world');",
-             "  }",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "function getMode() { return { minified: false }; }",
-             "var win = {};",
-             "var $mode = { getMode: getMode };",
-             "  if (true) {",
-             "    console.log('hello world');",
-             "  }",
-            "})()"));
-  }
-
   @Test public void testGetModePreserve() throws Exception {
     test(
         LINE_JOINER.join(
@@ -301,41 +195,5 @@ public class AmpPassTest extends CompilerTestCase {
              "    console.log('hello world');",
              "  }",
             "})()"));
-  }
-
-  @Test public void testRemoveAmpAddExtensionCallWithExplicitContext() throws Exception {
-    test(
-        LINE_JOINER.join(
-            "var a = 'hello';",
-            "self.AMP.extension('hello', '0.1', function(AMP) {",
-            "  var a = 'world';",
-            "  console.log(a);",
-            "});",
-            "console.log(a);"),
-        LINE_JOINER.join(
-            "var a = 'hello';",
-            "(function(AMP) {",
-            "  var a = 'world';",
-            "  console.log(a);",
-            "})(self.AMP);",
-            "console.log(a);"));
-  }
-
-  @Test public void testRemoveAmpAddExtensionCallWithNoContext() throws Exception {
-    test(
-        LINE_JOINER.join(
-            "var a = 'hello';",
-            "AMP.extension('hello', '0.1', function(AMP) {",
-            "  var a = 'world';",
-            "  console.log(a);",
-            "});",
-            "console.log(a);"),
-        LINE_JOINER.join(
-            "var a = 'hello';",
-            "(function(AMP) {",
-            "  var a = 'world';",
-            "  console.log(a);",
-            "})(self.AMP);",
-            "console.log(a);"));
   }
 }
