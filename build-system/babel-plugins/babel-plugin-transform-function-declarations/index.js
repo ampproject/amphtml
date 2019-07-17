@@ -40,6 +40,7 @@ const BAIL_OUT_CONDITIONS = {
       Identifier(path) {
         if (t.isIdentifier(path.node, {name: 'arguments'})) {
           containsArgumentsUsage = true;
+          path.stop();
         }
       },
     });
@@ -54,6 +55,7 @@ const BAIL_OUT_CONDITIONS = {
     path.traverse({
       ThisExpression() {
         containsThis = true;
+        path.stop();
       },
     });
     return containsThis;
@@ -69,6 +71,7 @@ const BAIL_OUT_CONDITIONS = {
         NewExpression(path) {
           if (t.isIdentifier(path.node.callee, {name: methodName})) {
             isNewed = true;
+            path.stop();
           }
         },
       });
