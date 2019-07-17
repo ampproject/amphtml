@@ -253,12 +253,6 @@ export function setBodyMadeVisibleForTesting(value) {
 export function makeBodyVisible(doc) {
   devAssert(doc.defaultView, 'Passed in document must have a defaultView');
   const win = /** @type {!Window} */ (doc.defaultView);
-  const set = () => {
-    bodyMadeVisible = true;
-    setBodyVisibleStyles(doc);
-    renderStarted_(doc);
-  };
-
   waitForBodyOpenPromise(doc)
     .then(() => {
       return waitForServices(win);
@@ -268,7 +262,10 @@ export function makeBodyVisible(doc) {
       return [];
     })
     .then(services => {
-      set();
+      bodyMadeVisible = true;
+      setBodyVisibleStyles(doc);
+      const ampdoc = getAmpdoc(doc);
+      ampdoc.signals().signal(CommonSignals.RENDER_START);
       if (services.length > 0) {
         const resources = Services.resourcesForDoc(doc.documentElement);
         resources./*OK*/ schedulePass(1, /* relayoutAll */ true);
@@ -304,21 +301,6 @@ function setBodyVisibleStyles(doc) {
     visibility: 'visible',
     'animation': 'none',
   });
-}
-
-/**
- * @param {!Document} doc
- * @noinline
- */
-function renderStarted_(doc) {
-  try {
-    const ampdoc = getAmpdoc(doc.documentElement);
-    ampdoc.signals().signal(CommonSignals.RENDER_START);
-  } catch (e) {
-    // `makeBodyVisible` is called in the error-processing cycle and thus
-    // could be triggered when runtime's initialization is incomplete which
-    // would cause unrelated errors to be thrown here.
-  }
 }
 
 /**
