@@ -452,8 +452,8 @@
     "event": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=!licence_key&en=UTF-8&ctid=_client_id_&ev=!ev_name&pl=!payload&is_amp=1&page_id=_page_view_id_"
   },
   "webengage": {
-    "base": "https://c.webengage.com/amp?licenseCode=!licenseCode&luid=_client_id_&pageUrl=_canonical_url_&pageTitle=_title_&referrer=_document_referrer_&vh=_viewport_height_&vw=_viewport_width_&category=application&isAmp=1",
-    "wePageview": "https://c.webengage.com/amp?licenseCode=!licenseCode&luid=_client_id_&pageUrl=_canonical_url_&pageTitle=_title_&referrer=_document_referrer_&vh=_viewport_height_&vw=_viewport_width_&category=application&eventName=Page Viewed&isAmp=1"
+    "base": "https://c.!region.webengage.com/amp?licenseCode=!licenseCode&luid=_client_id_&pageUrl=_canonical_url_&pageTitle=_title_&referrer=_document_referrer_&vh=_viewport_height_&vw=_viewport_width_&category=application&isAmp=1",
+    "wePageview": "https://c.!region.webengage.com/amp?licenseCode=!licenseCode&luid=_client_id_&pageUrl=_canonical_url_&pageTitle=_title_&referrer=_document_referrer_&vh=_viewport_height_&vw=_viewport_width_&category=application&eventName=Page Viewed&isAmp=1"
   },
   "webtrekk": {
     "trackURL": "https://!trackDomain/!trackId/wt",
