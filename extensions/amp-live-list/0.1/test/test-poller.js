@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {Poller} from '../poller';
 import {Services} from '../../../../src/services';
 
-describe('Poller', () => {
-  let sandbox;
+describes.realWin('Poller', {amp: true}, env => {
+  let window, document;
   let clock;
   let poller;
   let workStub;
-  const timer = Services.timerFor(window);
+  let timer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    window = env.win;
+    document = window.document;
+    timer = Services.timerFor(window);
+    clock = lolex.install({target: window});
     const obj = {
       work() {},
     };
@@ -34,10 +37,6 @@ describe('Poller', () => {
     sandbox.stub(Math, 'random').callsFake(() => 1);
     const wait = 5000;
     poller = new Poller(window, wait, workStub);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should be initialized in stopped state', () => {
@@ -248,51 +247,71 @@ describe('Poller', () => {
       });
   });
 
-  it('should clear timeout ids if stopped', () => {
+  it.only('should clear timeout ids if stopped', () => {
+    console.log('QQQQ: 0');
     const delaySpy = sandbox.spy(timer, 'delay');
     const retriableErr = new Error('HTTP Error');
-    retriableErr.retriable = true;
+    console.log('QQQQ: 1');
+    console.log('QQQQ: 1: ', workStub.onCall(0).returns);
+    // debugger; //QQQQQQ
     workStub.onCall(0).returns(Promise.reject(retriableErr));
     workStub.onCall(1).returns(Promise.reject(retriableErr));
     workStub.returns(Promise.resolve());
+    console.log('QQQQ: 2');
     const clearSpy = sandbox.spy(timer, 'cancel');
-
+    console.log('QQQQ: 3');
     expect(poller.lastTimeoutId_).to.be.null;
 
+    console.log('QQQQ: 4');
     poller.start();
+    console.log('QQQQ: 4b');
     expect(delaySpy.lastCall.args[1]).to.equal(4000);
+    console.log('QQQQ: 5');
+
     clock.tick(4000);
 
     expect(poller.lastTimeoutId_).to.be.a('number');
     let {lastTimeoutId_} = poller;
 
+    console.log('QQQQ: 6: ', poller.lastWorkPromise_);
     // Reject 1
     return poller.lastWorkPromise_.then(() => {
+      console.log('QQQQ: 7');
+      /*QQQQQQ
       expect(delaySpy.lastCall.args[1]).to.equal(700);
       expect(poller.lastTimeoutId_).to.not.equal(lastTimeoutId_);
       expect(poller.lastTimeoutId_).to.be.a('number');
       lastTimeoutId_ = poller.lastTimeoutId_;
+      console.log('QQQQ: 8');
       clock.tick(700);
       // Reject 2
       return poller.lastWorkPromise_.then(() => {
+        console.log('QQQQ: 9');
         expect(delaySpy.lastCall.args[1]).to.equal(1400);
         // Should have cancelled next queued exponential tick
         expect(poller.lastTimeoutId_).to.not.equal(lastTimeoutId_);
         expect(poller.lastTimeoutId_).to.be.a('number');
         lastTimeoutId_ = poller.lastTimeoutId_;
+        console.log('QQQQ: 10');
         clock.tick(1400);
         return poller.lastWorkPromise_.then(() => {
+          console.log('QQQQ: 11');
           expect(delaySpy.lastCall.args[1]).to.equal(4000);
           expect(clearSpy.getCall(2)).to.be.null;
           expect(poller.lastTimeoutId_).to.not.equal(lastTimeoutId_);
           expect(poller.lastTimeoutId_).to.be.a('number');
+          console.log('QQQQ: 12');
           lastTimeoutId_ = poller.lastTimeoutId_;
           expect(clearSpy).to.have.not.been.called;
+          console.log('QQQQ: 13');
           poller.stop();
+          console.log('QQQQ: 14');
           expect(clearSpy).to.be.calledOnce;
           expect(clearSpy.getCall(0).args[0]).to.equal(lastTimeoutId_);
+          console.log('QQQQ: 15');
         });
       });
+      */
     });
   });
 });

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+//QQQQQ
+// import * as lolex from 'lolex';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -26,20 +28,20 @@ import {loadPromise} from '../../src/event-helper';
 import {toggleExperiment} from '../../src/experiments';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
-describe('Resources', () => {
-  let sandbox;
+describes.realWin('Resources', {amp: true}, env => {
+  let window, document;
   let clock;
   let resources;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
+    window = env.win;
+    document = window.document;
+    //QQQQQ:  clock = lolex.install({target: window});
     clock = sandbox.useFakeTimers();
-    resources = new Resources(new AmpDocSingle(window));
-    resources.isRuntimeOn_ = false;
+    resources = Services.resourcesForDoc(env.ampdoc);
   });
 
   afterEach(() => {
-    sandbox.restore();
     resources.pass_.cancel();
   });
 
@@ -1083,7 +1085,12 @@ describes.realWin('Resources schedulePreload', {amp: true}, env => {
   });
 });
 
-describe('Resources discoverWork', () => {
+describes.realWin.only('Resources discoverWork', {amp: true}, env => {
+  let window, document;
+  let viewportMock;
+  let resources;
+  let resource1, resource2;
+
   function createElement(rect) {
     const signals = new Signals();
     return {
@@ -1135,15 +1142,11 @@ describe('Resources discoverWork', () => {
     return resource;
   }
 
-  let sandbox;
-  let viewportMock;
-  let resources;
-  let resource1, resource2;
-
   beforeEach(() => {
-    sandbox = sinon.sandbox;
+    window = env.win;
+    document = window.document;
     toggleExperiment(window, 'amp-force-prerender-visible-elements', true);
-    resources = new Resources(new AmpDocSingle(window));
+    resources = Services.resourcesForDoc(env.ampdoc);
     viewportMock = sandbox.mock(resources.viewport_);
 
     resources.win = {
@@ -1167,7 +1170,6 @@ describe('Resources discoverWork', () => {
   afterEach(() => {
     toggleExperiment(window, 'amp-force-prerender-visible-elements', false);
     viewportMock.verify();
-    sandbox.restore();
   });
 
   it('should set ready-scan signal on first ready pass after amp init', () => {
