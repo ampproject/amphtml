@@ -67,8 +67,10 @@ export class AnalyticsRoot {
     /** @private {?./scroll-manager.ScrollManager} */
     this.scrollManager_ = null;
 
+    /** @private {?Promise} */
     this.usingHostAPIPromise_ = null;
 
+    /** @restricted {!../../../src/inabox/host-services.VisibilityInterface} */
     this.hostVisibilityService_ = null;
   }
 
@@ -472,7 +474,6 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
   createVisibilityManager() {
     if (this.hostVisibilityService_) {
       // If there is hostAPI (hostAPI never exist with the FIE case)
-      fetch('http://localhost:8000/visiblityManagerForMAPP');
       return new VisibilityManagerForMApp(
         this.ampdoc,
         this.hostVisibilityService_

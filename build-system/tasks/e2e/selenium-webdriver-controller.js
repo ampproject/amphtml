@@ -16,12 +16,12 @@
 
 const fs = require('fs');
 const {
-  ControllerPromise,
   DOMRectDef,
   ElementHandle,
   Key,
 } = require('./functional-test-controller');
 const {By, Condition, Key: SeleniumKey, error} = require('selenium-webdriver');
+const {ControllerPromise} = require('./controller-promise');
 const {expect} = require('chai');
 
 const {NoSuchElementError} = error;

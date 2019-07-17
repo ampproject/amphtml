@@ -38,7 +38,7 @@ export class CarouselAccessibility {
    * }} config
    */
   constructor({win, element, scrollContainer, runMutate, stoppable}) {
-    /** @private @const */
+    /** @protected @const */
     this.win_ = win;
 
     /** @private @const */

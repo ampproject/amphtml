@@ -55,15 +55,10 @@ async function prCheck(cb) {
   }
 
   printChangeSummary(FILENAME);
-  const buildTargets = new Set();
-  if (!determineBuildTargets(buildTargets, FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
-    return;
-  }
-
-  runCheck('gulp lint --local-changes');
+  const buildTargets = determineBuildTargets(FILENAME);
+  runCheck('gulp lint --local_changes');
   runCheck('gulp presubmit');
+  runCheck('gulp check-exact-versions');
 
   if (buildTargets.has('AVA')) {
     runCheck('gulp ava');

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {StateChangeType} from './navigation-state';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {getVariableService} from './variable-service';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -23,6 +23,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 export const AnalyticsEvent = {
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
+  LAST_PAGE_VISIBLE: 'story-last-page-visible',
   PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
   PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
   PAGE_VISIBLE: 'story-page-visible',
@@ -67,7 +68,7 @@ export class StoryAnalyticsService {
    * @param {!Element} element
    */
   constructor(win, element) {
-    /** @private @const {!Window} */
+    /** @protected @const {!Window} */
     this.win_ = win;
 
     /** @private @const {!Element} */
@@ -75,23 +76,40 @@ export class StoryAnalyticsService {
 
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(win);
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(win);
+
+    this.initializeListeners_();
   }
 
-  /**
-   * @param {!./navigation-state.StateChangeEventDef} stateChangeEvent
-   */
-  onNavigationStateChange(stateChangeEvent) {
-    switch (stateChangeEvent.type) {
-      case StateChangeType.ACTIVE_PAGE:
+  /** @private */
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      this.triggerEvent(
+        isActive ? AnalyticsEvent.BOOKEND_ENTER : AnalyticsEvent.BOOKEND_EXIT
+      );
+    });
+
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      pageId => {
+        if (!pageId) {
+          return;
+        }
+
         this.triggerEvent(AnalyticsEvent.PAGE_VISIBLE);
-        break;
-      case StateChangeType.BOOKEND_ENTER:
-        this.triggerEvent(AnalyticsEvent.BOOKEND_ENTER);
-        break;
-      case StateChangeType.BOOKEND_EXIT:
-        this.triggerEvent(AnalyticsEvent.BOOKEND_EXIT);
-        break;
-    }
+
+        const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
+        const pageIndex = this.storeService_.get(
+          StateProperty.CURRENT_PAGE_INDEX
+        );
+        if (pageIndex === pageIds.length - 1) {
+          this.triggerEvent(AnalyticsEvent.LAST_PAGE_VISIBLE);
+        }
+      },
+      true /* callToInitialize */
+    );
   }
 
   /**
