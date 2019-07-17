@@ -412,12 +412,10 @@ class AmpCarousel extends AMP.BaseElement {
    */
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
-    const loop = this.carousel_.getLoop();
     const bothDisabled =
       this.hadTouch_ && !this.element.hasAttribute('controls');
-    const prevDisabled = (!loop && index == 0) || bothDisabled;
-    const nextDisabled =
-      (!loop && index == this.slides_.length - 1) || bothDisabled;
+    const prevDisabled = bothDisabled || this.carousel_.isAtStart();
+    const nextDisabled = bothDisabled || this.carousel_.isAtEnd();
 
     this.prevButton_.classList.toggle('amp-disabled', prevDisabled);
     this.prevButton_.setAttribute('aria-disabled', prevDisabled);
@@ -509,7 +507,7 @@ class AmpCarousel extends AMP.BaseElement {
     // they moved less than half the distance when looping. We could change the
     // logic to check on every scroll for the index to change, if this is a
     // problem in practuce.
-    const isNext = this.carousel_.getLoop()
+    const isNext = this.carousel_.isLooping()
       ? (delta > 0 && delta / total < 0.5) ||
         (delta < 0 && delta / total < -0.5)
       : delta > 0;
