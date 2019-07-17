@@ -543,6 +543,11 @@ class SeleniumWebDriverController {
    * @return {!Promise}
    */
   async enableNetworkLogging() {
+    // Install the service worker
+    await this.maybeInstallRequestProxy_();
+    // Reload to activate and log requests
+    await this.driver.navigate().refresh();
+    // Installs the request service
     await this.maybeInstallRequestProxy_();
   }
 

@@ -109,8 +109,8 @@ class AmpDriver {
     const ampEnv = EnvironmentBehaviorMap[environment];
     await this.controller_.navigateTo(ampEnv.url(url));
     await ampEnv.ready(this.controller_);
-    await this.controller_.navigateTo(ampEnv.url(url));
-    await ampEnv.ready(this.controller_);
+    // await this.controller_.navigateTo(ampEnv.url(url));
+    // await ampEnv.ready(this.controller_);
   }
 }
 
