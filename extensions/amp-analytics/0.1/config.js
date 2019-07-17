@@ -64,6 +64,12 @@ export class AnalyticsConfig {
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
 
+    // temporary line to test travis test
+    // eslint-disable-next-line no-undef
+    if (ANALYTICS_VENDOR_SPLIT) {
+      return;
+    }
+
     return this.fetchRemoteConfig_()
       .then(this.processConfigs_.bind(this))
       .then(() => this.config_);

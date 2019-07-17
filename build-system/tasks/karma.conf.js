@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const conf = require('../build.conf');
 const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
 const {gitCommitterEmail} = require('../git');
 const {isTravisBuild, travisJobNumber} = require('../travis');
@@ -39,6 +40,14 @@ const SAUCE_TIMEOUT_CONFIG = {
 const BABELIFY_CONFIG = Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {
   sourceMapsAbsolute: true,
 });
+
+// minify-replace babel plugin used to replace experiment constants
+const replacePlugin = conf.getReplacePlugin();
+if ('plugins' in BABELIFY_CONFIG) {
+  BABELIFY_CONFIG['plugins'].push(replacePlugin);
+} else {
+  BABELIFY_CONFIG['plugins'] = [replacePlugin];
+}
 
 const preprocessors = ['browserify'];
 
