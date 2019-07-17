@@ -1,9 +1,6 @@
 package org.ampproject;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.javascript.rhino.IR;
-import com.google.javascript.rhino.Node;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerPass;
 import com.google.javascript.jscomp.CompilerTestCase;
@@ -18,7 +15,7 @@ public class AmpPassTestEnvTest extends CompilerTestCase {
   ImmutableSet<String> suffixTypes = ImmutableSet.of();
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, /* isProd */ false, suffixTypes, "123");
+    return new AmpPass(compiler, /* isProd */ false, suffixTypes);
   }
 
   @Override protected int getNumRepetitions() {
