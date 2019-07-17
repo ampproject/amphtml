@@ -52,14 +52,6 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
    * delivery), this could go away there.
    */
   @Override public boolean isExported(String name, boolean local) {
-    // Bad hack, but we should really not try to inline CSS as these strings can
-    // be very long.
-    // See https://github.com/ampproject/amphtml/issues/10118
-    // cssText is defined in build-system/tasks/css.js#writeCss
-    if (name.startsWith("cssText$$module$build$")) {
-      return true;
-    }
-
     if (local) {
       return false;
     }
