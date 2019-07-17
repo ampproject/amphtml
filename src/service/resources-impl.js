@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../common-signals';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
@@ -317,14 +316,6 @@ export class Resources {
    */
   get() {
     return this.resources_.slice(0);
-  }
-
-  /**
-   * Signals that the document has been started rendering.
-   * @restricted
-   */
-  renderStarted() {
-    this.ampdoc.signals().signal(CommonSignals.RENDER_START);
   }
 
   /**
