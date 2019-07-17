@@ -24,7 +24,11 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
-    experiments: ['amp-base-carousel', 'layers'],
+    experiments: [
+      'amp-base-carousel',
+      'amp-lightbox-gallery-base-carousel',
+      'layers',
+    ],
     initialRect: {width: pageWidth, height: pageHeight},
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
@@ -73,7 +77,7 @@ describes.endtoend(
       const snappedScrollLeft = scrollLeft + slideWidth;
       const requestedScrollLeft = snappedScrollLeft + 1;
 
-      await controller.scroll(el, {left: requestedScrollLeft});
+      await controller.scrollTo(el, {left: requestedScrollLeft});
       // We should have snapped to the edge of the slide rather than the
       // requested scroll position.
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
@@ -93,7 +97,7 @@ describes.endtoend(
       const snappedScrollLeft = scrollLeft + slideWidth;
       const requestedScrollLeft = snappedScrollLeft + 1;
 
-      await controller.scroll(el, {left: requestedScrollLeft});
+      await controller.scrollTo(el, {left: requestedScrollLeft});
       // Wait for the scrolling to settle
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
       // The new scroll width/left should eventually be the same as before,
@@ -146,7 +150,7 @@ describes.endtoend(
         const restingScrollLeft = await prop(el, 'scrollLeft');
         const snappedScrollLeft = restingScrollLeft - slideWidth;
         const requestedScrollLeft = snappedScrollLeft - 1;
-        await controller.scroll(el, {left: requestedScrollLeft});
+        await controller.scrollTo(el, {left: requestedScrollLeft});
 
         await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
       });
@@ -163,14 +167,14 @@ describes.endtoend(
         const slideWidth = await prop(lastSlide, 'offsetWidth');
         const restingScrollLeft = await prop(el, 'scrollLeft');
         const lastSlideScrollPos = restingScrollLeft - slideWidth;
-        await controller.scroll(el, {left: lastSlideScrollPos});
+        await controller.scrollTo(el, {left: lastSlideScrollPos});
         await expect(prop(el, 'scrollLeft')).to.equal(lastSlideScrollPos);
         await expect(prop(el, 'scrollLeft')).to.equal(restingScrollLeft);
 
         // Go to the next slide by moving the slides width to the right.
         const snappedScrollLeft = restingScrollLeft + slideWidth;
         const requestedScrollLeft = snappedScrollLeft + 1;
-        await controller.scroll(el, {left: requestedScrollLeft});
+        await controller.scrollTo(el, {left: requestedScrollLeft});
 
         await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
       });
