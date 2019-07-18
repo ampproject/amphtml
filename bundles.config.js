@@ -692,7 +692,7 @@ exports.extensionBundles = [
     options: {
       hasCss: true,
       cssBinaries: [
-        'amp-story-auto-ads-ad-choices',
+        'amp-story-auto-ads-ad-badge',
         'amp-story-auto-ads-attribution',
       ],
     },

@@ -26,7 +26,7 @@ import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {CSS as adChoicesCSS} from '../../../build/amp-story-auto-ads-ad-choices-0.1.css';
+import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -482,11 +482,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adBadgeContainer_.className = 'i-amphtml-ad-overlay-container';
 
     const badge = this.doc_.createElement('p');
-    badge.className = 'i-amphtml-story-ad-attribution';
+    badge.className = 'i-amphtml-story-ad-badge';
     badge.textContent = 'Ad';
 
     this.adBadgeContainer_.appendChild(badge);
-    createShadowRootWithStyle(root, this.adBadgeContainer_, attributionCSS);
+    createShadowRootWithStyle(root, this.adBadgeContainer_, adBadgeCSS);
     this.ampStory_.element.appendChild(root);
   }
 
@@ -936,7 +936,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.FAILED;
     }
 
-    this.maybeCreateAdChoices_(nextAdPageEl);
+    this.maybeCreateAttribution_(nextAdPageEl);
 
     this.ampStory_.insertPage(pageBeforeAdId, nextAdPageEl.id);
 
@@ -953,7 +953,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    *
    * @param {Element} adPageElement
    */
-  maybeCreateAdChoices_(adPageElement) {
+  maybeCreateAttribution_(adPageElement) {
     const {iframe} = this.lastCreatedAdImpl_;
     const iframeDoc = getFrameDoc(iframe);
     const href = getContentFromMetaTag(iframeDoc, Meta.ATTRIBUTION_URL);
@@ -981,17 +981,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.doc_,
       'img',
       dict({
-        'class': 'i-amphtml-ad-choices-icon',
+        'class': 'i-amphtml-story-ad-attribution',
         'src': src,
       })
     );
 
     adChoicesIcon.addEventListener(
       'click',
-      this.handleAdChoicesClick_.bind(this, href)
+      this.handleAttributionClick_.bind(this, href)
     );
 
-    createShadowRootWithStyle(root, adChoicesIcon, adChoicesCSS);
+    createShadowRootWithStyle(root, adChoicesIcon, attributionCSS);
     adPageElement.appendChild(root);
   }
 
@@ -1000,7 +1000,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {string} href
    * @param {!Event} unusedEvent
    */
-  handleAdChoicesClick_(href, unusedEvent) {
+  handleAttributionClick_(href, unusedEvent) {
     this.win.open(href);
   }
 
