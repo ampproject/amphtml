@@ -47,7 +47,7 @@ export function getUniqueId(win) {
  * @param {Document} doc
  */
 export function getA4AMetaTags(doc) {
-  const selector = `meta[name^=amp4ads-vars-]`;
+  const selector = 'meta[name^=amp4ads-vars-]';
   return doc.querySelectorAll(selector);
 }
 

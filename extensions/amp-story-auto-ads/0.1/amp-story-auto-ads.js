@@ -960,7 +960,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     return AD_STATE.INSERTED;
   }
 
-  /** */
+  /**
+   * Find all `amp4ads-vars-` prefixed meta tags and return all kv pairs
+   * in a single object.
+   * @private
+   * @return {!Object}
+   */
   extractA4AVars_() {
     const {iframe} = this.lastCreatedAdImpl_;
     const iframeDoc = getFrameDoc(iframe);
