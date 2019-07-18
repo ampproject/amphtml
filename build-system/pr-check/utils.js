@@ -31,8 +31,11 @@ const {
   travisBuildNumber,
   travisPullRequestSha,
 } = require('../travis');
+const {
+  replaceUrls,
+  signalDistUploadComplete,
+} = require('../tasks/pr-deploy-bot-utils');
 const {execOrDie, exec} = require('../exec');
-const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
 const BUILD_OUTPUT_FILE = isTravisBuild()
   ? `amp_build_${travisBuildNumber()}.zip`
@@ -294,9 +297,19 @@ function uploadBuildOutput(functionName) {
  * @param {string} functionName
  */
 async function uploadDistOutput(functionName) {
+  uploadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
+}
+
+/**
+ * Replaces URLS in HTML files, zips and uploads dist output,
+ * and signals to the AMP PR Deploy bot that the upload is complete.
+ * @param {string} functionName
+ */
+async function processAndUploadDistOutput(functionName) {
   await replaceUrls('test/manual');
   await replaceUrls('examples');
-  uploadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
+  uploadDistOutput(functionName);
+  await signalDistUploadComplete();
 }
 
 /**
@@ -316,6 +329,7 @@ module.exports = {
   downloadBuildOutput,
   downloadDistOutput,
   printChangeSummary,
+  processAndUploadDistOutput,
   startTimer,
   stopTimer,
   startSauceConnect,

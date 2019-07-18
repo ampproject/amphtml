@@ -25,6 +25,7 @@
 const colors = require('ansi-colors');
 const {
   printChangeSummary,
+  processAndUploadDistOutput,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
@@ -66,7 +67,7 @@ function main() {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting');
       timedExecOrDie('gulp bundle-size --on_pr_build');
-      uploadDistOutput(FILENAME);
+      processAndUploadDistOutput(FILENAME);
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
       console.log(
