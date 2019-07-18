@@ -386,6 +386,11 @@ export function validateAttributeChange(purifier, node, attr, value) {
       return false;
     }
   }
+  // By now, the attribute is safe to remove.  DOMPurify.isValidAttribute()
+  // expects non-null values.
+  if (value == null) {
+    return true;
+  }
   // Don't allow binding attributes for now.
   if (bindingTypeForAttr(attr) !== BindingType.NONE) {
     return false;
@@ -399,12 +404,10 @@ export function validateAttributeChange(purifier, node, attr, value) {
     // TODO(choumx): This opts out of DOMPurify's attribute _value_ sanitization
     // for the above, which assumes that the attributes don't have security
     // implications beyond URLs etc. that are covered by isValidAttr().
-    // This is OK for now, but we should instead somehow modify ALLOWED_ATTR
-    // to preserve value sanitization.
-    const whitelisted = WHITELISTED_ATTRS.includes(attr);
+    // This is OK but we ought to contribute new hooks and remove this.
     const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tag];
     const whitelistedForTag = attrsByTags && attrsByTags.includes(attr);
-    if (!whitelisted && !whitelistedForTag && !startsWith(tag, 'amp-')) {
+    if (!whitelistedForTag && !startsWith(tag, 'amp-')) {
       return false;
     }
   }
