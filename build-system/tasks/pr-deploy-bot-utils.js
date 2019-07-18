@@ -18,8 +18,9 @@
 const fs = require('fs-extra');
 const path = require('path');
 const request = require('request');
-const {gitCommitHash, travisBuildNumber} = require('../git');
+const {gitCommitHash} = require('../git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../app-utils');
+const {travisBuildNumber} = require('../travis');
 
 async function walk(dest) {
   const filelist = [];
