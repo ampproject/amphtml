@@ -15,13 +15,14 @@
  */
 
 import {Services} from '../../../src/services';
+import {toWin} from '../../../src/types';
 
 /**
  * Returns a promise to the layoutBox for the element. If the element is
  * resource-backed then makes use of the resource layoutBox, otherwise
  * measures the element directly.
  * @param {!Element} element
- * @return {!Promise<!../../../layout-rect.LayoutRectDef>}
+ * @return {!Promise<!../../../src/layout-rect.LayoutRectDef>}
  */
 export function getElementLayoutBox(element) {
   const resources = Services.resourcesForDoc(element);
@@ -29,7 +30,7 @@ export function getElementLayoutBox(element) {
   if (resource) {
     return resource.getPageLayoutBoxAsync();
   }
-  const vsync = Services.vsyncFor(element.ownerDocument.defaultView);
+  const vsync = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
   return vsync.measurePromise(() => {
     const viewport = Services.viewportForDoc(element);
     return viewport.getLayoutRect(element);
