@@ -32,7 +32,7 @@ const HOST = 'localhost';
 const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const SLOW_TEST_THRESHOLD_MS = 2500;
-const TEST_RETRIES = 2;
+const TEST_RETRIES = 0;
 
 let webServerProcess_;
 

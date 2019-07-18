@@ -23,6 +23,7 @@ const {
 const {By, Condition, Key: SeleniumKey, error} = require('selenium-webdriver');
 const {ControllerPromise} = require('./controller-promise');
 const {expect} = require('chai');
+const {parseQueryParams} = require('./parse-query-params');
 
 const {NoSuchElementError} = error;
 
@@ -560,12 +561,19 @@ class SeleniumWebDriverController {
       return window.requestService && window.requestService.getRequest(matcher);
     };
 
-    const p = new ControllerPromise(
+    let p = new ControllerPromise(
       this.evaluate(getter, matcher),
       this.getWaitFn_(() => this.evaluate(getter, matcher))
     );
+    // p = p.then(result => {
+    //   if (result && result.url) {
+    //     console.log(result);
+    //     result.queryParams = parseQueryParams(result.url);
+    //   }
+    //   return result;
+    // });
     if (property) {
-      return p.then(result => result && result[property]);
+      p = p.then(result => result && result[property]);
     }
     return p;
   }
