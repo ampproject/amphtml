@@ -34,6 +34,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getContentFromMetaTag, getFrameDoc, getUniqueId} from './utils';
 import {isObject} from '../../../src/types';
+import {loadPromise} from '../../../src/event-helper.js';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
@@ -61,7 +62,7 @@ import LocalizedStringsZhCn from './_locales/zh-CN';
 import LocalizedStringsZhTw from './_locales/zh-TW';
 
 /** @const {number} */
-const FIRST_AD_MIN = 1;
+const FIRST_AD_MIN = 7;
 
 /** @const {number} */
 const MIN_INTERVAL = 7;
@@ -92,7 +93,7 @@ export const Attributes = {
 };
 
 /** @enum {string} */
-const DATA_ATTR = {
+const DataAttrs = {
   CTA_TYPE: 'data-vars-ctatype',
   CTA_URL: 'data-vars-ctaurl',
 };
@@ -293,7 +294,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
+  buildCallback(opt_mockStoryForTesting) {
     return Services.storyStoreServiceForOrNull(this.win).then(storeService => {
       devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
       this.storeService_ = storeService;
@@ -314,7 +315,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       extensionService./*OK*/ installExtensionForDoc(ampdoc, MUSTACHE_TAG);
 
       return ampStoryElement.getImpl().then(impl => {
-        this.ampStory_ = impl;
+        this.ampStory_ = opt_mockStoryForTesting || impl;
       });
     });
   }
@@ -341,8 +342,33 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       });
   }
 
-  // eslint-disable-next-line require-jsdoc
-  forceRender() {}
+  /**
+   * Force this extension to behave as if ad is about to be shown.
+   * Used for testing but should be extended to force an ad to show in a real story.
+   * @param {string} pageBeforeAdId
+   * @param {string} iframeContent
+   * @visibleForTesting
+   */
+  forceRender(pageBeforeAdId, iframeContent = '') {
+    this.isCurrentAdLoaded_ = true;
+
+    // TODO(ccordry): inject ctaButtons dynamically for testing.
+    this.lastCreatedAdElement_.setAttribute(DataAttrs.CTA_TYPE, 'SHOP');
+    this.lastCreatedAdElement_.setAttribute(
+      DataAttrs.CTA_URL,
+      'https://amp.dev'
+    );
+
+    // Mock creation of iframe that is normally handled by amp-ad.
+    const iframe = this.doc.createElement('iframe');
+    iframe.srcdoc = iframeContent;
+    this.lastCreatedAdElement_.appendChild(iframe);
+    this.lastCreatedAdImpl_.iframe = iframe;
+
+    return loadPromise(iframe).then(() =>
+      this.tryToPlaceAdAfterPage_(pageBeforeAdId)
+    );
+  }
 
   /**
    * Determines whether or not ad insertion is allowed based on how the story
@@ -550,7 +576,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         // TODO(ccordry): Investigate using a better signal waiting for video loads.
         return signals.whenSignal(CommonSignals.INI_LOAD);
       })
-      .then(iniLoadTime => {
+      .then(() => {
         // Ensures the video-manager does not follow the autoplay attribute on
         // amp-video tags, which would play the ad in the background before it is
         // displayed.
@@ -562,7 +588,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         currentPageEl.removeAttribute(Attributes.LOADING);
 
         this.analyticsEventWithCurrentAd_(Events.AD_LOADED, {
-          [Vars.AD_LOADED]: iniLoadTime,
+          [Vars.AD_LOADED]: Date.now(),
         });
         this.isCurrentAdLoaded_ = true;
       });
@@ -652,8 +678,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   maybeCreateCtaLayer_(adPageElement) {
     // if making a CTA layer we need a button name & outlink url
-    const ctaUrl = this.lastCreatedAdElement_.getAttribute(DATA_ATTR.CTA_URL);
-    const ctaType = this.lastCreatedAdElement_.getAttribute(DATA_ATTR.CTA_TYPE);
+    const ctaUrl = this.lastCreatedAdElement_.getAttribute(DataAttrs.CTA_URL);
+    const ctaType = this.lastCreatedAdElement_.getAttribute(DataAttrs.CTA_TYPE);
 
     if (!ctaUrl || !ctaType) {
       user().error(

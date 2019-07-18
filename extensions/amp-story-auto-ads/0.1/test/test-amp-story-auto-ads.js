@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as analytics from '../../../../src/analytics';
 import {
   Action,
@@ -22,24 +23,18 @@ import {
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
 import {CommonSignals} from '../../../../src/common-signals';
+import {
+  MockStoryImpl,
+  addStoryAutoAdsConfig,
+  addStoryPages,
+  fireBuildSignals,
+} from './test-helpers';
 import {Services} from '../../../../src/services';
 import {macroTask} from '../../../../testing/yield';
 
 const NOOP = () => {};
 
-function addStoryAutoAdsConfig(doc, autoAdsEl) {
-  const config = {
-    'ad-attributes': {
-      type: 'doubleclick',
-      'data-slot': '/30497360/a4a/fake_ad_unit',
-    },
-  };
-  const child = doc.createElement('script');
-  child.setAttribute('type', 'application/json');
-  child.innerText = JSON.stringify(config);
-  autoAdsEl.append(child);
-}
-
+// TODO(ccordry): Continue to refactor the rest of this file to use new test helpers.
 describes.realWin(
   'amp-story-auto-ads',
   {
@@ -49,6 +44,7 @@ describes.realWin(
   },
   env => {
     let win;
+    let doc;
     let adElement;
     let storyElement;
     let autoAds;
@@ -56,6 +52,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+      doc = win.document;
       const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       adElement = win.document.createElement('amp-story-auto-ads');
@@ -64,28 +61,23 @@ describes.realWin(
       storyElement.appendChild(adElement);
       story = new AmpStory(storyElement);
       autoAds = new AmpStoryAutoAds(adElement);
-      autoAds.config_ = {
-        'ad-attributes': {
-          type: 'doubleclick',
-          'data-slot': '/30497360/a4a/fake_ad_unit',
-        },
-      };
     });
 
     describe('glass pane', () => {
-      let page;
-      let pane;
-
-      beforeEach(() => {
-        page = autoAds.createAdPage_();
-        pane = page.querySelector('.i-amphtml-glass-pane');
+      beforeEach(async () => {
+        const storyImpl = new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(doc, adElement);
+        await autoAds.buildCallback(storyImpl);
+        autoAds.layoutCallback();
       });
 
       it('should create glassPane', () => {
+        const pane = doc.querySelector('.i-amphtml-glass-pane');
         expect(pane).to.exist;
       });
 
       it('glass pane should have full viewport grid parent', () => {
+        const pane = doc.querySelector('.i-amphtml-glass-pane');
         const parent = pane.parentElement;
         expect(parent.tagName).to.equal('AMP-STORY-GRID-LAYER');
         expect(parent.getAttribute('template')).to.equal('fill');
@@ -167,6 +159,38 @@ describes.realWin(
           Attributes.DIR,
           'rtl'
         );
+      });
+    });
+
+    describe('ad choices', () => {
+      beforeEach(async () => {
+        addStoryAutoAdsConfig(doc, adElement);
+        const storyImpl = new MockStoryImpl(storyElement);
+        await addStoryPages(doc, storyImpl);
+        await autoAds.buildCallback(storyImpl);
+        await autoAds.layoutCallback();
+        fireBuildSignals(doc);
+        return Promise.resolve();
+      });
+
+      it('renders the ad choices icon', async () => {
+        const windowOpenStub = sandbox.stub(win, 'open');
+        const icon =
+          'https://tpc.googlesyndication.com/pagead/images/adchoices/icon.png';
+        const url = 'https://amp.dev';
+        const iframeContent = `
+          <meta name="amp4ads-vars-attribution-icon" content="${icon}">
+          <meta name="amp4ads-vars-attribution-url" content="${url}">
+        `;
+        await autoAds.forceRender(
+          'story-page-0' /* pageBeforeAdId */,
+          iframeContent
+        );
+        const adChoices = doc.querySelector('.i-amphtml-ad-choices-icon');
+        expect(adChoices).to.exist;
+        expect(adChoices.getAttribute('src')).to.equal(icon);
+        adChoices.click();
+        expect(windowOpenStub).to.be.calledWith(url);
       });
     });
 
@@ -332,24 +356,40 @@ describes.realWin(
       });
     });
 
-    describe('creation of attributes', () => {
-      it('should not allow blacklisted attributes', () => {
-        Object.assign(autoAds.config_['ad-attributes'], {
+    describe('creation of amp-ad with attributes', () => {
+      let config;
+
+      beforeEach(() => {
+        config = {
+          'ad-attributes': {
+            type: 'doubleclick',
+            'data-slot': 'abcd',
+          },
+        };
+      });
+
+      it('should not allow blacklisted attributes', async () => {
+        Object.assign(config['ad-attributes'], {
           height: 100,
           width: 100,
           layout: 'responsive',
         });
 
-        const adElement = autoAds.createAdElement_();
-        expect(adElement.hasAttribute('type')).to.be.true;
-        expect(adElement.hasAttribute('data-slot')).to.be.true;
-        expect(adElement.hasAttribute('width')).to.be.false;
-        expect(adElement.hasAttribute('height')).to.be.false;
-        expect(adElement.getAttribute('layout')).to.equal('fill');
+        addStoryAutoAdsConfig(doc, adElement, config);
+        const storyImpl = new MockStoryImpl(storyElement);
+        await autoAds.buildCallback(storyImpl);
+        await autoAds.layoutCallback();
+
+        const ampAd = doc.querySelector('amp-ad');
+        expect(ampAd.hasAttribute('type')).to.be.true;
+        expect(ampAd.hasAttribute('data-slot')).to.be.true;
+        expect(ampAd.getAttribute('layout')).to.equal('fill');
+        expect(ampAd.hasAttribute('width')).to.be.false;
+        expect(ampAd.hasAttribute('height')).to.be.false;
       });
 
-      it('should stringify attributes given as objects', () => {
-        Object.assign(autoAds.config_['ad-attributes'], {
+      it('should stringify attributes given as objects', async () => {
+        Object.assign(config['ad-attributes'], {
           'rtc-config': {
             vendors: {
               vendor1: {'SLOT_ID': 1},
@@ -358,8 +398,13 @@ describes.realWin(
           },
         });
 
-        const adElement = autoAds.createAdElement_();
-        expect(adElement.getAttribute('rtc-config')).to.equal(
+        addStoryAutoAdsConfig(doc, adElement, config);
+        const storyImpl = new MockStoryImpl(storyElement);
+        await autoAds.buildCallback(storyImpl);
+        await autoAds.layoutCallback();
+
+        const ampAd = doc.querySelector('amp-ad');
+        expect(ampAd.getAttribute('rtc-config')).to.equal(
           '{"vendors":{"vendor1":{"SLOT_ID":1},' +
             '"vendor2":{"PAGE_ID":"abc"}}}'
         );
