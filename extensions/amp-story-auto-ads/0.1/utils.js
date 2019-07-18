@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {escapeCssSelectorIdent} from '../../../src/css';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 
 /**

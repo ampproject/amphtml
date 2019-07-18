@@ -996,13 +996,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return;
     }
 
-    assertHttpsUrl(href, this.element);
-    assertHttpsUrl(src, this.element);
-
     if (!href || !src) {
-      dev().warn(TAG, 'Both icon and URL must be supplied for Ad Choices.');
+      user().warn(TAG, 'Both icon and URL must be supplied for Ad Choices.');
       return;
     }
+
+    assertHttpsUrl(href, this.element);
+    assertHttpsUrl(src, this.element);
 
     const root = createElementWithAttributes(
       this.doc_,

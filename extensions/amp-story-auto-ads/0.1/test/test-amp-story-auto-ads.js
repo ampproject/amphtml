@@ -176,6 +176,26 @@ describes.realWin(
         return Promise.resolve();
       });
 
+      it('does not render the ad choices icon if no meta tags present', async () => {
+        addCtaValues(autoAds, 'SHOP', 'https://example.com');
+        await insertAdContent(autoAds, ''); // No ad content.
+        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
+        expect(adChoices).not.to.exist;
+      });
+
+      it('does not render if only one tag present', async () => {
+        const url = 'https://amp.dev';
+        const iframeContent = `
+          <meta name="amp4ads-vars-attribution-url" content="${url}">
+        `;
+        addCtaValues(autoAds, 'SHOP', 'https://example.com');
+        await insertAdContent(autoAds, iframeContent);
+        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
+        expect(adChoices).not.to.exist;
+      });
+
       it('renders the ad choices icon if meta tags present', async () => {
         const windowOpenStub = sandbox.stub(win, 'open');
         const icon =
@@ -194,10 +214,6 @@ describes.realWin(
         adChoices.click();
         expect(windowOpenStub).to.be.calledWith(url);
       });
-
-      // Doesn't render without meta tag
-      // Throws if only one value.
-      // Throws if not https.
     });
 
     describe('analytics triggers', () => {
