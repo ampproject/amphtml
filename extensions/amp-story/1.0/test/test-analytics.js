@@ -54,26 +54,33 @@ describes.fakeWin('amp-story analytics', {}, env => {
     expect(trigger).to.have.been.calledWith('story-last-page-visible');
   });
 
-  it('should mark event as repeated', () => {
-    const trigger = sandbox.spy(analytics, 'triggerEvent');
-    const detailsStub = sandbox.spy(analytics, 'getDetails_');
+  it('should not mark an event as repeated the first time', () => {
     analytics.element_.dispatchCustomEvent = () => {};
+    const dispatchStub = sandbox.stub(
+      analytics.element_,
+      'dispatchCustomEvent'
+    );
 
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
       index: 1,
     });
 
-    expect(trigger).to.have.been.calledWith('story-page-visible');
-    expect(detailsStub).to.have.returned({
+    expect(dispatchStub).to.have.been.calledWithMatch('story-page-visible', {
       'detailsForPage': {},
-      'storyAdvancementMode': null,
-      'storyIsMuted': null,
-      'storyPageCount': null,
-      'storyPageId': 'test-page',
-      'storyPageIndex': 1,
-      'storyPreviousPageId': null,
-      'storyProgress': null,
+    });
+  });
+
+  it('should mark event as repeated', () => {
+    analytics.element_.dispatchCustomEvent = () => {};
+    const dispatchStub = sandbox.stub(
+      analytics.element_,
+      'dispatchCustomEvent'
+    );
+
+    storeService.dispatch(Action.CHANGE_PAGE, {
+      id: 'test-page',
+      index: 1,
     });
 
     storeService.dispatch(Action.CHANGE_PAGE, {
@@ -81,31 +88,13 @@ describes.fakeWin('amp-story analytics', {}, env => {
       index: 2,
     });
 
-    expect(detailsStub).to.have.returned({
-      'detailsForPage': {},
-      'storyAdvancementMode': null,
-      'storyIsMuted': null,
-      'storyPageCount': null,
-      'storyPageId': 'test-page2',
-      'storyPageIndex': 2,
-      'storyPreviousPageId': 'test-page',
-      'storyProgress': null,
-    });
-
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
       index: 1,
     });
 
-    expect(detailsStub).to.have.returned({
+    expect(dispatchStub).to.have.been.calledWithMatch('story-page-visible', {
       'detailsForPage': {'repeated': true},
-      'storyAdvancementMode': null,
-      'storyIsMuted': null,
-      'storyPageCount': null,
-      'storyPageId': 'test-page',
-      'storyPageIndex': 1,
-      'storyPreviousPageId': 'test-page2',
-      'storyProgress': null,
     });
   });
 });
