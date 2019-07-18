@@ -346,14 +346,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
-   * @visibleForTesting
-   * @param {!../../amp-story/1.0/amp-story.AmpStory} mockStory
-   */
-  injectStoryDependency(mockStory) {
-    this.ampStory_ = mockStory;
-  }
-
-  /**
    * Force this extension to behave as if ad is about to be shown.
    * Used for testing but should be extended to force an ad to show in a real story.
    * @param {string} pageBeforeAdId

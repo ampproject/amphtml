@@ -28,7 +28,7 @@ import {
   addStoryAutoAdsConfig,
   addStoryPages,
   fireBuildSignals,
-} from './test-helpers';
+} from './story-mock';
 import {Services} from '../../../../src/services';
 import {macroTask} from '../../../../testing/yield';
 
@@ -65,10 +65,9 @@ describes.realWin(
 
     describe('glass pane', () => {
       beforeEach(async () => {
-        const storyImpl = new MockStoryImpl(storyElement);
+        new MockStoryImpl(storyElement);
         addStoryAutoAdsConfig(doc, adElement);
         await autoAds.buildCallback();
-        autoAds.injectStoryDependency(storyImpl);
         autoAds.layoutCallback();
       });
 
@@ -167,9 +166,9 @@ describes.realWin(
       beforeEach(async () => {
         addStoryAutoAdsConfig(doc, adElement);
         const storyImpl = new MockStoryImpl(storyElement);
+        storyElement.getImpl = () => Promise.resolve(storyImpl);
         await addStoryPages(doc, storyImpl);
         await autoAds.buildCallback();
-        autoAds.injectStoryDependency(storyImpl);
         await autoAds.layoutCallback();
         fireBuildSignals(doc);
         return Promise.resolve();
@@ -379,8 +378,8 @@ describes.realWin(
 
         addStoryAutoAdsConfig(doc, adElement, config);
         const storyImpl = new MockStoryImpl(storyElement);
+        storyElement.getImpl = () => Promise.resolve(storyImpl);
         await autoAds.buildCallback();
-        autoAds.injectStoryDependency(storyImpl);
         await autoAds.layoutCallback();
 
         const ampAd = doc.querySelector('amp-ad');
@@ -403,8 +402,8 @@ describes.realWin(
 
         addStoryAutoAdsConfig(doc, adElement, config);
         const storyImpl = new MockStoryImpl(storyElement);
+        storyElement.getImpl = () => Promise.resolve(storyImpl);
         await autoAds.buildCallback();
-        autoAds.injectStoryDependency(storyImpl);
         await autoAds.layoutCallback();
 
         const ampAd = doc.querySelector('amp-ad');
