@@ -14,17 +14,29 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData, writeScript} from '../3p/3p';
+import { loadScript, validateData, writeScript } from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function revcontent(global, data) {
-  const endpoint =
-    'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
-  const required = ['id', 'width', 'height', 'wrapper'];
+  let endpoint = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
+
+  if (typeof data.revcontent !== 'undefined') {
+    if (typeof data.env === 'undefined') {
+      endpoint = 'https://assets.revcontent.com/master/delivery.js';
+    } else if (data.env == 'dev') {
+      endpoint = 'https://performante.revcontent.dev/delivery.js';
+    } else {
+      endpoint = 'https://assets.revcontent.com/' + data.env + '/delivery.js';
+    }
+  }
+
+  const required = ['id', 'height'];
   const optional = [
+    'revcontent',
+    'env',
     'loadscript',
     'api',
     'key',
@@ -45,6 +57,8 @@ export function revcontent(global, data) {
     'debug',
     'ampcreative',
   ];
+
+  data.endpoint = data.endpoint ? data.endpoint : 'trends.revcontent.com';
 
   validateData(data, required, optional);
   global.data = data;
