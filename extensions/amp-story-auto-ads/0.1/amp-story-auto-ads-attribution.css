@@ -15,7 +15,7 @@
  */
 
 .i-amphtml-story-ad-attribution {
-  position: fixed;
+  position: absolute;
   bottom: 0 !important;
   max-height: 15px !important;
   /* 1 greater than cta layer. */
