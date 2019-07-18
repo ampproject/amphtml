@@ -18,6 +18,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
+const conf = require('../build.conf');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
@@ -46,7 +47,7 @@ const argv = require('minimist')(process.argv.slice(2));
  * Tasks that should print the `--nobuild` help text.
  * @private @const {!Set<string>}
  */
-const NOBUILD_HELP_TASKS = new Set(['test', 'visual-diff']);
+const NOBUILD_HELP_TASKS = new Set(['e2e', 'integration', 'visual-diff']);
 
 const MODULE_SEPARATOR = ';';
 const EXTENSION_BUNDLE_MAP = {
@@ -69,7 +70,6 @@ const UNMINIFIED_TARGETS = [
 
 const MINIFIED_TARGETS = [
   'v0.js',
-  'v0-esm.js',
   'shadow-v0.js',
   'amp4ads-v0.js',
   'alp.js',
@@ -246,34 +246,19 @@ function compile(watch, shouldMinify) {
     });
   }
 
-  return Promise.all(promises)
-    .then(() => {
-      return compileJs('./src/', 'amp.js', './dist', {
-        toName: 'amp.js',
-        minifiedName: 'v0.js',
-        includePolyfills: true,
-        watch,
-        minify: shouldMinify,
-        wrapper: wrappers.mainBinary,
-        singlePassCompilation: argv.single_pass,
-        esmPassCompilation: argv.esm,
-      });
-    })
-    .then(() => {
-      if (!argv.single_pass) {
-        return compileJs('./src/', 'amp.js', './dist', {
-          toName: 'amp-esm.js',
-          minifiedName: 'v0-esm.js',
-          includePolyfills: true,
-          includeOnlyESMLevelPolyfills: true,
-          watch,
-          minify: shouldMinify,
-          wrapper: wrappers.mainBinary,
-        });
-      } else {
-        return Promise.resolve();
-      }
+  return Promise.all(promises).then(() => {
+    return compileJs('./src/', 'amp.js', './dist', {
+      toName: 'amp.js',
+      minifiedName: 'v0.js',
+      includePolyfills: true,
+      watch,
+      minify: shouldMinify,
+      wrapper: wrappers.mainBinary,
+      singlePassCompilation: argv.single_pass,
+      esmPassCompilation: argv.esm,
+      includeOnlyESMLevelPolyfills: argv.esm,
     });
+  });
 }
 
 /**
@@ -437,9 +422,17 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     options.browserifyOptions
   );
 
+  const babelifyOptions = Object.assign({}, BABELIFY_GLOBAL_TRANSFORM);
+  const replacePlugin = conf.getReplacePlugin();
+  if ('plugins' in babelifyOptions) {
+    babelifyOptions['plugins'].push(replacePlugin);
+  } else {
+    babelifyOptions['plugins'] = [replacePlugin];
+  }
+
   let bundler = browserify(browserifyOptions).transform(
     babelify,
-    BABELIFY_GLOBAL_TRANSFORM
+    babelifyOptions
   );
 
   if (options.watch) {
