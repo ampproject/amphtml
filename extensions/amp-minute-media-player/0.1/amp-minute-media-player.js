@@ -165,7 +165,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       !originMatches(
         event,
         this.iframe_,
-        'https://syringe.s3-us-west-2.amazonaws.com'
+        'https://www.oo-syringe.com'
       )
     ) {
       return;
@@ -183,9 +183,8 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
 
     redispatch(this.element, eventType, {
       'playing': VideoEvents.PLAYING,
-      'paused': VideoEvents.PAUSE,
+      'pause': VideoEvents.PAUSE,
       'muted': VideoEvents.MUTED,
-      'unmuted': VideoEvents.UNMUTED,
       'ended': [VideoEvents.ENDED, VideoEvents.PAUSE],
       'ads-ad-started': VideoEvents.AD_START,
       'ads-ad-ended': VideoEvents.AD_END,
@@ -200,7 +199,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
   iframeSource_() {
     const {element} = this;
     const baseUrl =
-      'https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html' +
+      'https://www.oo-syringe.com/dev/amp/mplayer.html' +
       `?content_type=${encodeURIComponent(this.contentType_)}`;
 
     const moreQueryParams = dict({
@@ -225,9 +224,10 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     this.unlistenMessage_ = listen(
       this.win,
       'message',
-      this.handleMinuteMediaPlayerMessage_.bind(this)
+      event => this.handleMinuteMediaPlayerMessage_(event)
     );
-    const loaded = this.loadPromise(this.iframe_).then(() => {
+    const loaded = this.loadPromise(this.iframe_)/*.then(() => Services.timerFor(this.win).promise(300))*/
+      .then(() => {
       element.dispatchCustomEvent(VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
