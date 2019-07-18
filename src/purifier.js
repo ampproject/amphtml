@@ -390,20 +390,20 @@ export function validateAttributeChange(purifier, node, attr, value) {
   if (whitelist) {
     const {attribute, values} = whitelist;
     if (attribute === attr) {
-      if (value === null || !values.includes(value)) {
+      if (value == null || !values.includes(value)) {
         return false;
       }
     }
   }
   // a[target] is required and only certain values are allowed.
   if (tag === 'a' && attr === 'target') {
-    if (value === null || !WHITELISTED_TARGETS.includes(value)) {
+    if (value == null || !WHITELISTED_TARGETS.includes(value)) {
       return false;
     }
   }
   // By now, the attribute is safe to remove.  DOMPurify.isValidAttribute()
   // expects non-null values.
-  if (value === null) {
+  if (value == null) {
     return true;
   }
   // Don't allow binding attributes for now.
