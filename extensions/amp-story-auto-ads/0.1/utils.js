@@ -43,24 +43,12 @@ export function getUniqueId(win) {
 }
 
 /**
- * Finds a meta tag in document with given name.
+ * Finds all meta tags starting with `amp4ads-vars-`.
  * @param {Document} doc
- * @param {string} name
  */
-function queryForMetaTagName(doc, name) {
-  const escaped = escapeCssSelectorIdent(name);
-  const selector = `meta[name=${escaped}]`;
-  return doc.querySelector(selector);
-}
-
-/**
- * Gets content from a meta tag in the doc with given name.
- * @param {Document} doc
- * @param {string} name
- */
-export function getContentFromMetaTag(doc, name) {
-  const tag = queryForMetaTagName(doc, name);
-  return tag && tag.content;
+export function getA4AMetaTags(doc) {
+  const selector = `meta[name^=amp4ads-vars-]`;
+  return doc.querySelectorAll(selector);
 }
 
 /**

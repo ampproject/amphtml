@@ -188,7 +188,7 @@ describes.realWin(
         addCtaValues(autoAds, 'SHOP', 'https://example.com');
         await insertAdContent(autoAds, iframeContent);
         autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
-        const adChoices = doc.querySelector('.i-amphtml-ad-choices-icon');
+        const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
         expect(adChoices).to.exist;
         expect(adChoices.getAttribute('src')).to.equal(icon);
         adChoices.click();

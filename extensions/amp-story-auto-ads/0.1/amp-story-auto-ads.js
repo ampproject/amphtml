@@ -32,7 +32,7 @@ import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
-import {getContentFromMetaTag, getFrameDoc, getUniqueId} from './utils';
+import {getA4AMetaTags, getFrameDoc, getUniqueId} from './utils';
 import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
@@ -98,9 +98,11 @@ const DataAttrs = {
 };
 
 /** @enum {string} */
-const Meta = {
-  ATTRIBUTION_ICON: 'amp4ads-vars-attribution-icon',
-  ATTRIBUTION_URL: 'amp4ads-vars-attribution-url',
+const A4AVarNames = {
+  ATTRIBUTION_ICON: 'attribution-icon',
+  ATTRIBUTION_URL: 'attribution-url',
+  CTA_TYPE: 'cta-type',
+  CTA_URL: 'cta-url',
 };
 
 /** @const */
@@ -660,11 +662,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Validate ad-server response has requirements to build outlink
    * @param {!Element} adPageElement
+   * @param {!Object} a4aVars
    */
-  maybeCreateCtaLayer_(adPageElement) {
+  maybeCreateCtaLayer_(adPageElement, a4aVars) {
     // if making a CTA layer we need a button name & outlink url
-    const ctaUrl = this.lastCreatedAdElement_.getAttribute(DataAttrs.CTA_URL);
-    const ctaType = this.lastCreatedAdElement_.getAttribute(DataAttrs.CTA_TYPE);
+    const ctaUrl =
+      a4aVars[A4AVarNames.CTA_URL] ||
+      this.lastCreatedAdElement_.getAttribute(DataAttrs.CTA_URL);
+    const ctaType =
+      a4aVars[A4AVarNames.CTA_TYPE] ||
+      this.lastCreatedAdElement_.getAttribute(DataAttrs.CTA_TYPE);
 
     if (!ctaUrl || !ctaType) {
       user().error(
@@ -928,15 +935,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.PENDING;
     }
 
+    const a4aVars = this.extractA4AVars_();
+
     const ctaCreated = this.maybeCreateCtaLayer_(
-      dev().assertElement(nextAdPageEl)
+      dev().assertElement(nextAdPageEl),
+      a4aVars
     );
     if (!ctaCreated) {
       // failed on ad-server response format
       return AD_STATE.FAILED;
     }
 
-    this.maybeCreateAttribution_(nextAdPageEl);
+    this.maybeCreateAttribution_(nextAdPageEl, a4aVars);
 
     this.ampStory_.insertPage(pageBeforeAdId, nextAdPageEl.id);
 
@@ -949,15 +959,27 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     return AD_STATE.INSERTED;
   }
 
-  /**
-   *
-   * @param {Element} adPageElement
-   */
-  maybeCreateAttribution_(adPageElement) {
+  /** */
+  extractA4AVars_() {
     const {iframe} = this.lastCreatedAdImpl_;
     const iframeDoc = getFrameDoc(iframe);
-    const href = getContentFromMetaTag(iframeDoc, Meta.ATTRIBUTION_URL);
-    const src = getContentFromMetaTag(iframeDoc, Meta.ATTRIBUTION_ICON);
+    const tags = getA4AMetaTags(iframeDoc);
+    const vars = {};
+    tags.forEach(tag => {
+      const name = tag.name.split('amp4ads-vars-')[1];
+      const {content} = tag;
+      vars[name] = content;
+    });
+    return vars;
+  }
+
+  /**
+   * @param {Element} adPageElement
+   * @param {!Object} a4aVars
+   */
+  maybeCreateAttribution_(adPageElement, a4aVars) {
+    const href = a4aVars[A4AVarNames.ATTRIBUTION_URL];
+    const src = a4aVars[A4AVarNames.ATTRIBUTION_ICON];
 
     // Ad Choices is optional, but need both to render.
     if (!href && !src) {
