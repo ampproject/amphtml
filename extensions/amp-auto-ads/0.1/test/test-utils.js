@@ -18,6 +18,8 @@ import {Services} from '../../../../src/services';
 import {getElementLayoutBox} from '../utils';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
+const BOX = layoutRectLtwh(1, 5, 10, 10);
+
 describes.realWin('amp-auto-ads utils', {amp: true}, env => {
   let win;
   let sandbox;
@@ -37,15 +39,13 @@ describes.realWin('amp-auto-ads utils', {amp: true}, env => {
       const viewport = Services.viewportForDoc(element);
       measureStub = sandbox.stub(viewport, 'getLayoutRect').callsFake(el => {
         if (el === element) {
-          return layoutRectLtwh(0, 0, 10, 10);
+          return BOX;
         }
       });
     });
 
     it('should measure the element', () => {
-      return expect(getElementLayoutBox(element)).to.eventually.eql(
-        layoutRectLtwh(0, 0, 10, 10)
-      );
+      return expect(getElementLayoutBox(element)).to.eventually.eql(BOX);
     });
 
     it('should only measure once for resource backed element', () => {
@@ -53,14 +53,14 @@ describes.realWin('amp-auto-ads utils', {amp: true}, env => {
       resources.add(element);
       return getElementLayoutBox(element)
         .then(layoutBox => {
-          expect(layoutBox).to.eql(layoutRectLtwh(0, 0, 10, 10));
+          expect(layoutBox).to.eql(BOX);
           expect(measureStub).to.be.calledOnce;
         })
         .then(() => {
           return getElementLayoutBox(element);
         })
         .then(layoutBox => {
-          expect(layoutBox).to.eql(layoutRectLtwh(0, 0, 10, 10));
+          expect(layoutBox).to.eql(BOX);
           expect(measureStub).to.be.calledOnce;
         });
     });
