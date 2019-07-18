@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as setDOM from 'set-dom/src/index';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-list-0.1.css';
@@ -45,6 +44,7 @@ import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
 import {removeChildren} from '../../../src/dom';
+import setDOM from 'set-dom/dist/set-dom.js';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -1083,8 +1083,7 @@ export class AmpList extends AMP.BaseElement {
       .getClientRectAsync(dev().assertElement(endoOfListMarker))
       .then(positionRect => {
         const viewportHeight = this.viewport_.getHeight();
-        const viewportTop = this.viewport_.getScrollTop();
-        if (viewportTop + 3 * viewportHeight > positionRect.bottom) {
+        if (3 * viewportHeight > positionRect.bottom) {
           return this.loadMoreCallback_();
         }
       });

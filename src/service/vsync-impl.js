@@ -406,7 +406,7 @@ export class Vsync {
     this.states_ = this.nextStates_;
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].measure) {
-        if (!callTaskNoInline(tasks[i].measure, states[i])) {
+        if (!callTask_(tasks[i].measure, states[i])) {
           // Ensure that the mutate is not executed when measure fails.
           tasks[i].mutate = undefined;
         }
@@ -414,7 +414,7 @@ export class Vsync {
     }
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].mutate) {
-        callTaskNoInline(tasks[i].mutate, states[i]);
+        callTask_(tasks[i].mutate, states[i]);
       }
     }
     // Swap last arrays into double buffer.
@@ -452,8 +452,9 @@ export class Vsync {
  * For optimization reasons to stop try/catch from blocking optimization.
  * @param {function(!VsyncStateDef):undefined|undefined} callback
  * @param {!VsyncStateDef} state
+ * @noinline
  */
-function callTaskNoInline(callback, state) {
+function callTask_(callback, state) {
   devAssert(callback);
   try {
     const ret = callback(state);

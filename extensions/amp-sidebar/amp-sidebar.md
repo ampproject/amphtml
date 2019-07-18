@@ -38,12 +38,12 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-sidebar/">amp-sidebar example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-sidebar/">amp-sidebar example</a>.</td>
   </tr>
 </table>
 
@@ -206,7 +206,7 @@ In the following example, we display a `toolbar` if the window width is less tha
 
 
 {% call callout('Tip', type='success') %}
-See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sidebar/).
+See live demos at [AMP By Example](https://amp.dev/documentation/examples/components/amp-sidebar/).
 {% endcall %}
 
 ## Sidebar for Stories
@@ -281,7 +281,7 @@ This attribute is present on child `<nav toolbar="(media-query)" toolbar-target=
 
 ##### common attributes<a name="common"></a>
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Styling
 

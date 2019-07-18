@@ -9,16 +9,16 @@ these players implement.
 
 These players include:
 
-- [amp-3q-player](https://www.ampproject.org/docs/reference/components/amp-3q-player)
-- [amp-brid-player](https://www.ampproject.org/docs/reference/components/amp-brid-player)
-- [amp-dailymotion](https://www.ampproject.org/docs/reference/components/amp-dailymotion)
-- [amp-gfycat](https://www.ampproject.org/docs/reference/components/amp-gfycat)
-- [amp-ima-video](https://www.ampproject.org/docs/reference/components/amp-ima-video)
-- [amp-nexxtv-player](https://www.ampproject.org/docs/reference/components/amp-nexxtv-player)
-- [amp-ooyala-player](https://www.ampproject.org/docs/reference/components/amp-ooyala-player)
-- [amp-video](https://www.ampproject.org/docs/reference/components/amp-video)
-- [amp-wistia-player](https://www.ampproject.org/docs/reference/components/amp-wistia-player)
-- [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube)
+- [amp-3q-player](https://amp.dev/documentation/components/amp-3q-player)
+- [amp-brid-player](https://amp.dev/documentation/components/amp-brid-player)
+- [amp-dailymotion](https://amp.dev/documentation/components/amp-dailymotion)
+- [amp-gfycat](https://amp.dev/documentation/components/amp-gfycat)
+- [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video)
+- [amp-nexxtv-player](https://amp.dev/documentation/components/amp-nexxtv-player)
+- [amp-ooyala-player](https://amp.dev/documentation/components/amp-ooyala-player)
+- [amp-video](https://amp.dev/documentation/components/amp-video)
+- [amp-wistia-player](https://amp.dev/documentation/components/amp-wistia-player)
+- [amp-youtube](https://amp.dev/documentation/components/amp-youtube)
 
 <a id="analytics"></a>
 
@@ -40,7 +40,7 @@ If this attribute is present, and the browser supports autoplay:
 - when the user taps the video, the video is unmuted
 - if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
-For an example, visit [AMP By Example](https://ampbyexample.com/components/amp-video/#autoplay).
+For an example, visit [AMP By Example](https://amp.dev/documentation/examples/components/amp-video/#autoplay).
 
 <a id="docking"></a>
 
