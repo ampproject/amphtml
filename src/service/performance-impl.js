@@ -147,7 +147,7 @@ export class Performance {
     this.supportsLayoutInstabilityAPI_ =
       this.win.PerformanceObserver &&
       this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes('layoutShift');
+      this.win.PerformanceObserver.supportedEntryTypes.includes('layout-shift');
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
@@ -301,7 +301,7 @@ export class Performance {
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layoutJank') {
         this.aggregateJankScore_ += entry.fraction;
-      } else if (entry.entryType === 'layoutShift') {
+      } else if (entry.entryType === 'layout-shift') {
         this.aggregateShiftScore_ += entry.value;
       }
     };
@@ -336,9 +336,9 @@ export class Performance {
       // report past entries as of Chrome 61.
       // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
       this.win.performance
-        .getEntriesByType('layoutShift')
+        .getEntriesByType('layout-shift')
         .forEach(processEntry);
-      entryTypesToObserve.push('layoutShift');
+      entryTypesToObserve.push('layout-shift');
     }
 
     if (entryTypesToObserve.length === 0) {

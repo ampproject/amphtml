@@ -1262,7 +1262,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         return performanceObserver;
       });
 
-      fakeWin.PerformanceObserver.supportedEntryTypes = ['layoutShift'];
+      fakeWin.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
 
       // Install services on fakeWin so some behaviors can be stubbed.
       installRuntimeServices(fakeWin);
@@ -1310,12 +1310,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       // Document should be initially visible.
       expect(fakeWin.document.visibilityState).to.equal('visible');
 
-      // Fake layoutShift that occured before the Performance service is started.
+      // Fake layout-shift that occured before the Performance service is started.
       fakeWin.performance.getEntriesByType
-        .withArgs('layoutShift')
+        .withArgs('layout-shift')
         .returns([
-          {entryType: 'layoutShift', value: 0.25},
-          {entryType: 'layoutShift', value: 0.3},
+          {entryType: 'layout-shift', value: 0.25},
+          {entryType: 'layout-shift', value: 0.3},
         ]);
 
       const perf = getPerformance();
@@ -1335,8 +1335,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       const list = {
         getEntries() {
           return [
-            {entryType: 'layoutShift', value: 1},
-            {entryType: 'layoutShift', value: 0.0001},
+            {entryType: 'layout-shift', value: 1},
+            {entryType: 'layout-shift', value: 0.0001},
           ];
         },
       };
@@ -1365,12 +1365,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       // Document should be initially visible.
       expect(fakeWin.document.visibilityState).to.equal('visible');
 
-      // Fake layoutShift that occured before the Performance service is started.
+      // Fake layout-shift that occured before the Performance service is started.
       fakeWin.performance.getEntriesByType
-        .withArgs('layoutShift')
+        .withArgs('layout-shift')
         .returns([
-          {entryType: 'layoutShift', value: 0.25},
-          {entryType: 'layoutShift', value: 0.3},
+          {entryType: 'layout-shift', value: 0.25},
+          {entryType: 'layout-shift', value: 0.3},
         ]);
 
       const perf = getPerformance();
@@ -1395,12 +1395,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
       sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
 
-      // Fake layoutShift that occured before the Performance service is started.
+      // Fake layout-shift that occured before the Performance service is started.
       fakeWin.performance.getEntriesByType
-        .withArgs('layoutShift')
+        .withArgs('layout-shift')
         .returns([
-          {entryType: 'layoutShift', value: 0.25},
-          {entryType: 'layoutShift', value: 0.3},
+          {entryType: 'layout-shift', value: 0.25},
+          {entryType: 'layout-shift', value: 0.3},
         ]);
       const perf = getPerformance();
       perf.coreServicesAvailable();
