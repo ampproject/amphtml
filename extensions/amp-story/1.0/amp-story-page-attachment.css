@@ -44,9 +44,17 @@ amp-story-page-attachment.i-amphtml-story-page-attachment-open {
   transition: background 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
+.i-amphtml-story-page-attachment-theme-dark .i-amphtml-story-page-attachment-container {
+  background: rgba(32, 33, 37, 1) !important;
+}
+
 .i-amphtml-story-page-attachment-container[hidden] {
   display: block !important;
   background: rgba(255, 255, 255, 0.92) !important;
+}
+
+.i-amphtml-story-page-attachment-theme-dark .i-amphtml-story-page-attachment-container[hidden] {
+  background: rgba(32, 33, 37, 0.82) !important;
 }
 
 .i-amphtml-story-page-attachment-content {

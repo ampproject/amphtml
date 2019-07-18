@@ -98,7 +98,7 @@ function objToJsonSegments(obj, out, cmpFn) {
         // We hack the non-standard "'" into place here because the
         // Javascript style guide prefers them (and git5 lint reports
         // double quotes as errors).
-        out.push('\'' + candidate.slice(1, -1).replace('\'', '\\\'') + '\'');
+        out.push('\'' + candidate.slice(1, -1).replace(/\'/g, '\\\'') + '\'');
       } else {
         out.push(candidate);
       }

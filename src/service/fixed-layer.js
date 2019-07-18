@@ -32,7 +32,6 @@ import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {isExperimentOn} from '../experiments';
 import {remove} from '../utils/array';
-import {toWin} from '../types';
 
 const TAG = 'FixedLayer';
 
@@ -130,11 +129,7 @@ export class FixedLayer {
       transferLayer.setLightboxMode(true);
     }
 
-    if (
-      isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox') &&
-      opt_lightbox &&
-      opt_onComplete
-    ) {
+    if (opt_lightbox && opt_onComplete) {
       opt_onComplete.then(() => {
         this.scanNode_(
           dev().assertElement(opt_lightbox),
@@ -153,12 +148,10 @@ export class FixedLayer {
       transferLayer.setLightboxMode(false);
     }
 
-    if (isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox')) {
-      const fes = remove(this.elements_, fe => !!fe.lightboxed);
-      this.returnFixedElements_(fes);
-      if (!this.elements_.length) {
-        this.unobserveHiddenMutations_();
-      }
+    const fes = remove(this.elements_, fe => !!fe.lightboxed);
+    this.returnFixedElements_(fes);
+    if (!this.elements_.length) {
+      this.unobserveHiddenMutations_();
     }
   }
 
@@ -334,12 +327,15 @@ export class FixedLayer {
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
-    this.setupElement_(
+    const added = this.setupElement_(
       element,
       /* selector */ '*',
       /* position */ 'fixed',
       opt_forceTransfer
     );
+    if (!added) {
+      return Promise.resolve();
+    }
     this.sortInDomOrder_();
 
     // If this is the first element, we need to start the mutation observer.
@@ -658,6 +654,7 @@ export class FixedLayer {
    *    be forcibly transferred to the transfer layer.
    * @param {boolean=} opt_lightboxMode If true, then descendants of lightboxes
    *    are allowed to be set up. Default is false.
+   * @return {boolean}
    * @private
    */
   setupElement_(
@@ -673,16 +670,40 @@ export class FixedLayer {
     // Ignore lightboxes because FixedLayer can interfere with their
     // opening/closing animations (#19149).
     if (isLightbox(element)) {
-      return;
+      return false;
     }
     const isLightboxDescendant = closest(element, isLightbox);
     if (!opt_lightboxMode && isLightboxDescendant) {
-      return;
+      return false;
+    }
+
+    const elements = this.elements_;
+
+    // Avoid ancestor-descendant relationships in tracked elements to prevent
+    // "double top-offset" (#22860).
+    const removals = [];
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i].element;
+      if (el === element) {
+        break;
+      }
+      // Early exit if element is a child of an already-tracked element...
+      if (el.contains(element)) {
+        return false;
+      }
+      // Remove the already-tracked element if it is a child of the new
+      // element...
+      if (element.contains(el)) {
+        removals.push(el);
+      }
+    }
+    for (let i = 0; i < removals.length; i++) {
+      this.removeElement(removals[i]);
     }
 
     let fe = null;
-    for (let i = 0; i < this.elements_.length; i++) {
-      const el = this.elements_[i];
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
       if (el.element == element && el.position == position) {
         fe = el;
         break;
@@ -712,10 +733,11 @@ export class FixedLayer {
         stickyNow: false,
         lightboxed: !!isLightboxDescendant,
       };
-      this.elements_.push(fe);
+      elements.push(fe);
     }
 
     fe.forceTransfer = isFixed ? opt_forceTransfer : false;
+    return true;
   }
 
   /**
@@ -941,12 +963,6 @@ class TransferLayerBody {
     /** @private @const {!./vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
-    /** @private @const {boolean} */
-    this.isLightboxExperimentOn_ = isExperimentOn(
-      toWin(doc.defaultView),
-      'fixed-elements-in-lightbox'
-    );
-
     /** @private @const {!Element} */
     this.layer_ = doc.body.cloneNode(/* deep */ false);
     this.layer_.removeAttribute('style');
@@ -972,13 +988,7 @@ class TransferLayerBody {
       padding: 'none',
       transform: 'none',
       transition: 'none',
-      visibility: 'visible',
     };
-    // This experiment uses a CSS rule for toggling transfer layer visibility,
-    // which has lower specificity than an inline style.
-    if (this.isLightboxExperimentOn_) {
-      delete styles.visibility;
-    }
     setStyles(this.layer_, assertDoesNotContainDisplay(styles));
     setInitialDisplay(this.layer_, 'block');
     doc.documentElement.appendChild(this.layer_);
@@ -993,16 +1003,10 @@ class TransferLayerBody {
   setLightboxMode(on) {
     this.vsync_.mutate(() => {
       const root = this.getRoot();
-      if (this.isLightboxExperimentOn_) {
-        if (on) {
-          root.setAttribute(LIGHTBOX_MODE_ATTR, '');
-        } else {
-          root.removeAttribute(LIGHTBOX_MODE_ATTR);
-        }
+      if (on) {
+        root.setAttribute(LIGHTBOX_MODE_ATTR, '');
       } else {
-        // Legacy behavior is to hide transfer layer when entering lightbox
-        // and unhide when exiting.
-        setStyle(root, 'visibility', on ? 'hidden' : 'visible');
+        root.removeAttribute(LIGHTBOX_MODE_ATTR);
       }
     });
   }

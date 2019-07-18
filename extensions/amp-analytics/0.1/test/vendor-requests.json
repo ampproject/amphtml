@@ -324,7 +324,8 @@
     "track": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
     "pageview": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=Pageview&_ep_isp_info=%24ip_isp_info&_ep_geo_info=%24ip_geo_info&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
     "engagement": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=PageviewEngagement&_ep_engaged_time=5&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
-    "completion": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=PageviewEngagement&_ep_completion=0.25&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_"
+    "completion": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=PageviewEngagement&_ep_completion=0.25&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
+    "custom": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=!event&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
   },
   "piStats": {
     "host": "https://events.pi-stats.com",
@@ -449,6 +450,10 @@
     "scroll": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=!licence_key&en=UTF-8&ctid=_client_id_&ev=element_interact&pl={\"name\":\"!category\",\"action\":\"!action\",\"value\":\"_document_referrer_\"}&is_amp=1&page_id=_page_view_id_",
     "elementInteract": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=!licence_key&en=UTF-8&ctid=_client_id_&ev=element_interact&pl={\"name\":\"!category\",\"action\":\"!action\",\"value\":\"!label\"}&is_amp=1&page_id=_page_view_id_",
     "event": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=!licence_key&en=UTF-8&ctid=_client_id_&ev=!ev_name&pl=!payload&is_amp=1&page_id=_page_view_id_"
+  },
+  "webengage": {
+    "base": "https://c.webengage.com/amp?licenseCode=!licenseCode&luid=_client_id_&pageUrl=_canonical_url_&pageTitle=_title_&referrer=_document_referrer_&vh=_viewport_height_&vw=_viewport_width_&category=application&isAmp=1",
+    "wePageview": "https://c.webengage.com/amp?licenseCode=!licenseCode&luid=_client_id_&pageUrl=_canonical_url_&pageTitle=_title_&referrer=_document_referrer_&vh=_viewport_height_&vw=_viewport_width_&category=application&eventName=Page Viewed&isAmp=1"
   },
   "webtrekk": {
     "trackURL": "https://!trackDomain/!trackId/wt",

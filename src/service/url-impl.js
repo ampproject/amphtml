@@ -41,6 +41,8 @@ export class Url {
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
   constructor(ampdoc, opt_rootNode) {
+    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
+
     const root = opt_rootNode || ampdoc.getRootNode();
     const doc = root.ownerDocument || root;
 
@@ -51,7 +53,11 @@ export class Url {
     this.cache_ = new LruCache(100);
   }
 
-  /** @override @nocollapse */
+  /**
+   * @param {!Window} embedWin
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @nocollapse
+   */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
       embedWin,

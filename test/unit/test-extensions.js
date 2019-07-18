@@ -16,8 +16,8 @@
 
 import {
   AmpDocShadow,
-  AmpDocShell,
   installDocService,
+  updateFieModeForTesting,
 } from '../../src/service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
@@ -27,10 +27,16 @@ import {
   installStandardServicesInEmbed,
 } from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
-import {getServiceForDoc, registerServiceBuilder} from '../../src/service';
+import {
+  getService,
+  getServiceForDoc,
+  registerServiceBuilder,
+  setParentWindow,
+} from '../../src/service';
 import {installTimerService} from '../../src/service/timer-impl';
 import {loadPromise} from '../../src/event-helper';
 import {resetScheduledElementForTesting} from '../../src/service/custom-element-registry';
+import {toggleExperiment} from '../../src/experiments';
 
 class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}
@@ -221,7 +227,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install auto undeclared elements for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test']).to
         .be.undefined;
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test-sub'])
@@ -244,7 +250,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should skip non-auto undeclared elements for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test']).to
         .be.undefined;
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test-sub'])
@@ -272,7 +278,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install declared elements for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       ampdoc.declareExtension('amp-test');
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test']).to
         .be.undefined;
@@ -297,7 +303,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install non-auto declared elements for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       ampdoc.declareExtension('amp-test');
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test']).to
         .be.undefined;
@@ -361,57 +367,6 @@ describes.sandboxed('Extensions', {}, () => {
         expect(ampdoc.declaresExtension('amp-test')).to.be.true;
       });
     });
-
-    // TODO(dvoytenko, #11827): Make this test work on Safari.
-    it.configure()
-      .skipSafari()
-      .run(
-        'should install declared elements for AmpDocShell in shadow-doc',
-        () => {
-          const ampdocShell = new AmpDocShell(win);
-          const ampdocServiceMock = sandbox.mock(
-            Services.ampdocServiceFor(win)
-          );
-
-          ampdocServiceMock
-            .expects('isSingleDoc')
-            .returns(false)
-            .twice();
-          ampdocServiceMock
-            .expects('hasAmpDocShell')
-            .returns(true)
-            .twice();
-          ampdocServiceMock
-            .expects('getAmpDoc')
-            .withExactArgs(win.document)
-            .returns(ampdocShell)
-            .twice();
-
-          ampdocShell.declareExtension('amp-test');
-          expect(win.ampExtendedElements && win.ampExtendedElements['amp-test'])
-            .to.be.undefined;
-          expect(
-            win.ampExtendedElements && win.ampExtendedElements['amp-test-sub']
-          ).to.be.undefined;
-          expect(win.customElements.elements['amp-test']).to.not.exist;
-          expect(win.services['amp-test']).to.not.exist;
-
-          // Resolve the promise.
-          extensions.registerExtension(
-            'amp-test',
-            () => {
-              extensions.addElement('amp-test', AmpTest);
-              extensions.addElement('amp-test-sub', AmpTestSub);
-            },
-            {}
-          );
-          expect(win.ampExtendedElements['amp-test']).to.equal(AmpTest);
-          expect(win.ampExtendedElements['amp-test-sub']).to.equal(AmpTestSub);
-          expect(win.customElements.elements['amp-test']).to.exist;
-          expect(win.services['amp-test']).to.exist;
-          ampdocServiceMock.verify();
-        }
-      );
 
     it('should add doc factory in registration', () => {
       const factory = function() {};
@@ -504,7 +459,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install auto undeclared services for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       const factory1Spy = sandbox.spy();
       const factory2Spy = sandbox.spy();
       const factory1 = function() {
@@ -533,7 +488,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should skip non-auto undeclared services for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       const factory1 = sandbox.spy();
       const factory2 = sandbox.spy();
 
@@ -563,7 +518,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install declared services for single-doc', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       ampdoc.declareExtension('amp-test');
 
       const factory1Spy = sandbox.spy();
@@ -626,52 +581,6 @@ describes.sandboxed('Extensions', {}, () => {
         expect(factory3).to.be.calledOnce;
         expect(factory3.args[0][0]).to.equal(ampdoc);
       });
-    });
-
-    it('should install declared services for AmpDocShell in shadow-doc', () => {
-      const ampdocShell = new AmpDocShell(win);
-      const ampdocServiceMock = sandbox.mock(Services.ampdocServiceFor(win));
-
-      ampdocServiceMock
-        .expects('isSingleDoc')
-        .returns(false)
-        .twice();
-      ampdocServiceMock
-        .expects('hasAmpDocShell')
-        .returns(true)
-        .twice();
-      ampdocServiceMock
-        .expects('getAmpDoc')
-        .withExactArgs(win.document)
-        .returns(ampdocShell)
-        .twice();
-
-      ampdocShell.declareExtension('amp-test');
-
-      const factory1Spy = sandbox.spy();
-      const factory2Spy = sandbox.spy();
-      const factory1 = function() {
-        factory1Spy();
-        return {a: 1};
-      };
-      const factory2 = function() {
-        factory2Spy();
-        return {a: 2};
-      };
-
-      // Resolve the promise.
-      extensions.registerExtension(
-        'amp-test',
-        () => {
-          extensions.addService('service1', factory1);
-          extensions.addService('service2', factory2);
-        },
-        {}
-      );
-      expect(factory1Spy).to.be.calledOnce;
-      expect(factory2Spy).to.be.calledOnce;
-      expect(getServiceForDoc(ampdocShell, 'service1').a).to.equal(1);
-      expect(getServiceForDoc(ampdocShell, 'service2').a).to.equal(2);
     });
 
     it('should load extension class via load extension', () => {
@@ -1015,6 +924,7 @@ describes.sandboxed('Extensions', {}, () => {
     }
   );
 
+  // TODO(#22733): remove once ampdoc-fie is launched.
   describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     let parentWin;
     let extensions;
@@ -1058,6 +968,7 @@ describes.sandboxed('Extensions', {}, () => {
       parentWin.document.body.appendChild(iframe);
       return promise.then(() => {
         iframeWin = iframe.contentWindow;
+        setParentWindow(iframeWin, parentWin);
       });
     });
 
@@ -1104,13 +1015,13 @@ describes.sandboxed('Extensions', {}, () => {
       const actions = Services.actionServiceForDoc(any);
       const standardActions = Services.standardActionsForDoc(any);
       const navigation = Services.navigationForDoc(any);
-      const timer = Services.timerFor(any);
 
       expect(url.constructor.installInEmbedWindow).to.be.called;
       expect(actions.constructor.installInEmbedWindow).to.be.called;
       expect(standardActions.constructor.installInEmbedWindow).to.be.called;
       expect(navigation.constructor.installInEmbedWindow).to.be.called;
-      expect(timer.constructor.installInEmbedWindow).to.be.called;
+
+      expect(getService(iframeWin, 'timer')).to.exist;
     });
 
     it('should install extensions in child window', () => {
@@ -1254,27 +1165,272 @@ describes.sandboxed('Extensions', {}, () => {
 
     describe('installStandardServicesInEmbed', () => {
       it('verify order of adopted services for embed', () => {
-        installStandardServicesInEmbed(iframeWin, parentWin);
+        installStandardServicesInEmbed(iframeWin);
 
         const any = {}; // Input doesn't matter since services are stubbed.
         const url = Services.urlForDoc(any);
         const actions = Services.actionServiceForDoc(any);
         const standardActions = Services.standardActionsForDoc(any);
         const navigation = Services.navigationForDoc(any);
-        const timer = Services.timerFor(any);
 
         // Expected order: url, action, standard-actions, navigation, timer.
         const one = url.constructor.installInEmbedWindow;
         const two = actions.constructor.installInEmbedWindow;
         const three = standardActions.constructor.installInEmbedWindow;
         const four = navigation.constructor.installInEmbedWindow;
-        const five = timer.constructor.installInEmbedWindow;
 
         expect(one).to.be.calledBefore(two);
         expect(two).to.be.calledBefore(three);
         expect(three).to.be.calledBefore(four);
-        expect(four).to.be.calledBefore(five);
-        expect(five).to.be.called;
+        expect(four).to.be.called;
+      });
+    });
+  });
+
+  describes.realWin('installExtensionsInFie', {amp: true}, env => {
+    let parentWin;
+    let extensions;
+    let extensionsMock;
+    let iframe;
+    let iframeWin, iframeDocEl;
+    let ampdoc;
+
+    beforeEach(() => {
+      parentWin = env.win;
+      toggleExperiment(parentWin, 'ampdoc-fie', true);
+      resetScheduledElementForTesting(parentWin, 'amp-test');
+      installExtensionsService(parentWin);
+      extensions = Services.extensionsFor(parentWin);
+      extensionsMock = sandbox.mock(extensions);
+      const ampdocService = Services.ampdocServiceFor(parentWin);
+      updateFieModeForTesting(ampdocService, true);
+
+      iframe = parentWin.document.createElement('iframe');
+      const promise = loadPromise(iframe);
+      const html = '<div id="one"></div>';
+      if ('srcdoc' in iframe) {
+        iframe.srcdoc = html;
+      } else {
+        iframe.src = 'about:blank';
+        const childDoc = iframe.contentWindow.document;
+        childDoc.open();
+        childDoc.write(html);
+        childDoc.close();
+      }
+      parentWin.document.body.appendChild(iframe);
+      return promise.then(() => {
+        iframeWin = iframe.contentWindow;
+        iframeDocEl = iframeWin.document.documentElement;
+        setParentWindow(iframeWin, parentWin);
+        ampdoc = ampdocService.installFieDoc(
+          'https://example.com/embed',
+          iframeWin
+        );
+      });
+    });
+
+    afterEach(() => {
+      toggleExperiment(parentWin, 'ampdoc-fie', false);
+      if (iframe.parentElement) {
+        iframe.parentElement.removeChild(iframe);
+      }
+      extensionsMock.verify();
+    });
+
+    it('should set window hierarchy', () => {
+      extensions.installExtensionsInFie(ampdoc, []);
+      expect(iframeWin.__AMP_PARENT).to.equal(parentWin);
+      expect(iframeWin.__AMP_TOP).to.equal(parentWin);
+    });
+
+    it('should install runtime styles', () => {
+      extensions.installExtensionsInFie(ampdoc, []);
+      expect(iframeWin.document.querySelector('style[amp-runtime]')).to.exist;
+    });
+
+    it('should install built-ins', () => {
+      extensions.installExtensionsInFie(ampdoc, []);
+      expect(iframeWin.ampExtendedElements).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img']).to.not.equal(
+        ElementStub
+      );
+      expect(iframeWin.ampExtendedElements['amp-pixel']).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-pixel']).to.not.equal(
+        ElementStub
+      );
+      // Legacy elements are installed as well.
+      expect(iframeWin.ampExtendedElements['amp-ad']).to.equal(ElementStub);
+      expect(iframeWin.ampExtendedElements['amp-embed']).to.equal(ElementStub);
+      expect(iframeWin.ampExtendedElements['amp-video']).to.equal(ElementStub);
+    });
+
+    it('should create new standard services', () => {
+      extensions.installExtensionsInFie(ampdoc, []);
+
+      const url = Services.urlForDoc(iframeDocEl);
+      const actions = Services.actionServiceForDoc(iframeDocEl);
+      const standardActions = Services.standardActionsForDoc(iframeDocEl);
+      const navigation = Services.navigationForDoc(iframeDocEl);
+
+      expect(url).to.exist;
+      expect(actions).to.exist;
+      expect(standardActions).to.exist;
+      expect(navigation).to.exist;
+      expect(Services.timerFor(iframeWin)).to.exist;
+
+      const parentUrl = Services.urlForDoc(parentWin.document.head);
+      expect(parentUrl).to.exist;
+      expect(url).to.not.equal(parentUrl);
+    });
+
+    it('should adopt parent standard services', () => {
+      extensions.installExtensionsInFie(ampdoc, []);
+
+      const viewer = Services.urlForDoc(iframeDocEl);
+      const parentViewer = Services.urlForDoc(parentWin.document.head);
+      expect(viewer).to.exist;
+      expect(parentViewer).to.exist;
+      expect(viewer).to.not.equal(parentViewer);
+    });
+
+    it('should install extensions in child window', () => {
+      const extHolder = extensions.getExtensionHolder_('amp-test');
+      extHolder.scriptPresent = true;
+      const promise = extensions.installExtensionsInFie(ampdoc, ['amp-test']);
+      // Must be stubbed already.
+      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
+      expect(
+        iframeWin.document.createElement('amp-test').implementation_
+      ).to.be.instanceOf(ElementStub);
+      expect(iframeWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
+      // Resolve the promise.
+      extensions.registerExtension(
+        'amp-test',
+        AMP => {
+          // Main extension with CSS.
+          AMP.registerElement('amp-test', AmpTest, 'a{}');
+          // Secondary extension w/o CSS.
+          AMP.registerElement('amp-test-sub', AmpTestSub);
+        },
+        parentWin.AMP
+      );
+      return promise.then(() => {
+        // Main extension.
+        expect(parentWin.ampExtendedElements['amp-test']).to.be.undefined;
+        expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+        expect(
+          iframeWin.document.querySelector('style[amp-extension=amp-test]')
+        ).to.exist;
+        // Must be upgraded already.
+        expect(
+          iframeWin.document.createElement('amp-test').implementation_
+        ).to.be.instanceOf(AmpTest);
+
+        // Secondary extension.
+        expect(parentWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
+        expect(iframeWin.ampExtendedElements['amp-test-sub']).to.equal(
+          AmpTestSub
+        );
+        expect(
+          iframeWin.document.querySelector('style[amp-extension=amp-test-sub]')
+        ).to.not.exist;
+        // Must be upgraded already.
+        expect(
+          iframeWin.document.createElement('amp-test-sub').implementation_
+        ).to.be.instanceOf(AmpTestSub);
+      });
+    });
+
+    it('should adopt extension services', () => {
+      const fooConstructorSpy = sandbox.spy();
+      class FooService {
+        constructor(arg) {
+          fooConstructorSpy(arg);
+        }
+      }
+      registerServiceBuilder(
+        parentWin,
+        'fake-service-foo',
+        FooService,
+        /* opt_instantiate */ false
+      );
+
+      const barConstructorSpy = sandbox.spy();
+      class BarService {
+        constructor(arg) {
+          barConstructorSpy(arg);
+        }
+      }
+      registerServiceBuilder(
+        parentWin,
+        'fake-service-bar',
+        BarService,
+        /* opt_instantiate */ false
+      );
+
+      const extHolder = extensions.getExtensionHolder_('amp-test');
+      extHolder.scriptPresent = true;
+      const install = extensions.installExtensionsInFie(ampdoc, ['amp-test']);
+
+      // Resolve the promise `install`.
+      extensions.registerExtension(
+        'amp-test',
+        AMP => {
+          AMP.registerServiceForDoc('fake-service-foo', FooService);
+        },
+        parentWin.AMP
+      );
+
+      return install.then(() => {
+        expect(fooConstructorSpy).calledOnce.calledWith(ampdoc);
+        expect(barConstructorSpy).to.not.be.called;
+      });
+    });
+
+    it('should call pre-install callback before other installs', () => {
+      let preinstallCount = 0;
+      const extHolder = extensions.getExtensionHolder_('amp-test');
+      extHolder.scriptPresent = true;
+      const promise = extensions.installExtensionsInFie(
+        ampdoc,
+        ['amp-test'],
+        function(winArg, ampdocArg) {
+          expect(winArg).to.equal(iframeWin);
+          expect(ampdocArg).to.equal(ampdoc);
+          // Built-ins not installed yet.
+          expect(
+            iframeWin.ampExtendedElements &&
+              iframeWin.ampExtendedElements['amp-img']
+          ).to.not.exist;
+          // Extension is not loaded yet.
+          expect(
+            iframeWin.ampExtendedElements &&
+              iframeWin.ampExtendedElements['amp-test']
+          ).to.not.exist;
+          preinstallCount++;
+        }
+      );
+      expect(preinstallCount).to.equal(1);
+      expect(iframeWin.ampExtendedElements).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img']).to.not.equal(
+        ElementStub
+      );
+      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
+
+      // Resolve the promise.
+      extensions.registerExtension(
+        'amp-test',
+        AMP => {
+          AMP.registerElement('amp-test', AmpTest);
+        },
+        parentWin.AMP
+      );
+      return promise.then(() => {
+        // Extension elements are stubbed immediately, but registered only
+        // after extension is loaded.
+        expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
       });
     });
   });

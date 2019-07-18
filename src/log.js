@@ -340,13 +340,25 @@ export class Log {
    *   elements in an array. When e.g. passed to console.error this yields
    *   native displays of things like HTML elements.
    *
+   * NOTE: for an explanation of the tempate R implementation see
+   * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
+   *
    * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
    *     not evaluate to true.
    * @param {!Array|string=} opt_message The assertion message
    * @param {...*} var_args Arguments substituted into %s in the message.
-   * @return {T} The value of shouldBeTrueish.
+   * @return {R} The value of shouldBeTrueish.
+   * @throws {!Error} When `value` is `null` or `undefined`.
    * @template T
-   * eslint "google-camelcase/google-camelcase": 0
+   * @template R :=
+   *     mapunion(T, (V) =>
+   *         cond(eq(V, 'null'),
+   *             none(),
+   *             cond(eq(V, 'undefined'),
+   *                 none(),
+   *                 V)))
+   *  =:
+   * @closurePrimitive {asserts.matchesReturn}
    */
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
@@ -395,7 +407,7 @@ export class Log {
    * @param {!Array|string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
    * @template T
-   * eslint "google-camelcase/google-camelcase": 2
+   * @closurePrimitive {asserts.matchesReturn}
    */
   assertElement(shouldBeElement, opt_message) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
@@ -416,7 +428,7 @@ export class Log {
    * @param {*} shouldBeString
    * @param {!Array|string=} opt_message The assertion message
    * @return {string} The string value. Can be an empty string.
-   * eslint "google-camelcase/google-camelcase": 2
+   * @closurePrimitive {asserts.matchesReturn}
    */
   assertString(shouldBeString, opt_message) {
     this.assert(
@@ -437,6 +449,7 @@ export class Log {
    * @param {!Array|string=} opt_message The assertion message
    * @return {number} The number value. The allowed values include `0`
    *   and `NaN`.
+   * @closurePrimitive {asserts.matchesReturn}
    */
   assertNumber(shouldBeNumber, opt_message) {
     this.assert(
@@ -454,6 +467,7 @@ export class Log {
    * @param {*} shouldBeArray
    * @param {!Array|string=} opt_message The assertion message
    * @return {!Array} The array value
+   * @closurePrimitive {asserts.matchesReturn}
    */
   assertArray(shouldBeArray, opt_message) {
     this.assert(
@@ -472,6 +486,7 @@ export class Log {
    * @param {*} shouldBeBoolean
    * @param {!Array|string=} opt_message The assertion message
    * @return {boolean} The boolean value.
+   * @closurePrimitive {asserts.matchesReturn}
    */
   assertBoolean(shouldBeBoolean, opt_message) {
     this.assert(
@@ -491,7 +506,7 @@ export class Log {
    * @param {string=} opt_enumName
    * @return {T}
    * @template T
-   * eslint "google-camelcase/google-camelcase": 2
+   * @closurePrimitive {asserts.matchesReturn}
    */
   assertEnumValue(enumObj, s, opt_enumName) {
     if (isEnumValue(enumObj, s)) {
@@ -799,6 +814,9 @@ export function isFromEmbed(win, opt_element) {
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
  *
+ * NOTE: for an explanation of the tempate R implementation see
+ * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
+ *
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {!Array|string=} opt_message The assertion message
@@ -811,9 +829,18 @@ export function isFromEmbed(win, opt_element) {
  * @param {*=} opt_7 Optional argument
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
- * @return {T} The value of shouldBeTrueish.
+ * @return {R} The value of shouldBeTrueish.
  * @template T
- * eslint "google-camelcase/google-camelcase": 0
+ * @template R :=
+ *     mapunion(T, (V) =>
+ *         cond(eq(V, 'null'),
+ *             none(),
+ *             cond(eq(V, 'undefined'),
+ *                 none(),
+ *                 V)))
+ *  =:
+ * @throws {!Error} When `value` is `null` or `undefined`.
+ * @closurePrimitive {asserts.matchesReturn}
  */
 export function devAssert(
   shouldBeTrueish,
@@ -858,6 +885,9 @@ export function devAssert(
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
  *
+ * NOTE: for an explanation of the tempate R implementation see
+ * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
+ *
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {!Array|string=} opt_message The assertion message
@@ -870,9 +900,18 @@ export function devAssert(
  * @param {*=} opt_7 Optional argument
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
- * @return {T} The value of shouldBeTrueish.
+ * @return {R} The value of shouldBeTrueish.
  * @template T
- * eslint "google-camelcase/google-camelcase": 0
+ * @template R :=
+ *     mapunion(T, (V) =>
+ *         cond(eq(V, 'null'),
+ *             none(),
+ *             cond(eq(V, 'undefined'),
+ *                 none(),
+ *                 V)))
+ *  =:
+ * @throws {!Error} When `value` is `null` or `undefined`.
+ * @closurePrimitive {asserts.matchesReturn}
  */
 export function userAssert(
   shouldBeTrueish,

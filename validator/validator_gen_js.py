@@ -894,3 +894,26 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
     out.PopIndent()
     out.Line('}')
     out.Line('')
+
+
+def GenerateValidatorGeneratedJson(specfile, validator_pb2, text_format,
+                                   json_format, out):
+  """Generates a JSON file with definitions from validator.protoascii.
+
+  This method reads the specfile and emits JSON to out.
+
+  Args:
+    specfile: Path to validator.protoascii, the specfile to generate
+        Javascript from.
+    validator_pb2: The proto2 Python module generated from validator.proto.
+    text_format: The text_format module from the protobuf package, e.g.
+        google.protobuf.text_format.
+    json_format: The json_format module from the protobuf package, e.g.
+        google.protobuf.json_format.
+    out: a list of lines to output (without the newline characters), to
+        which this function will append.
+  """
+
+  rules = validator_pb2.ValidatorRules()
+  text_format.Merge(open(specfile).read(), rules)
+  out.append(json_format.MessageToJson(rules))

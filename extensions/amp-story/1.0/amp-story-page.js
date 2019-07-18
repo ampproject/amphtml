@@ -15,12 +15,13 @@
  */
 
 /**
- * @fileoverview Embeds a story
+ * @fileoverview Embeds a single page in a story
  *
  * Example:
  * <code>
  * <amp-story-page>
- * </amp-story>
+ *   ...
+ * </amp-story-page>
  * </code>
  */
 import {
@@ -31,6 +32,7 @@ import {
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {AmpEvents} from '../../../src/amp-events';
+import {AmpStoryBlingLink, BLING_LINK_SELECTOR} from './amp-story-bling-link';
 import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
@@ -226,14 +228,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
 
-    /** @private @const {!Promise} */
-    this.mediaLayoutPromise_ = this.waitForMediaLayout_();
-
-    /** @private @const {!Promise} */
-    this.pageLoadPromise_ = this.mediaLayoutPromise_.then(() => {
-      this.markPageAsLoaded_();
-    });
-
     const deferred = new Deferred();
 
     /** @private @const {!Promise<!MediaPool>} */
@@ -312,6 +306,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.emitProgress_(progress)
     );
     this.setDescendantCssTextStyles_();
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      uiState => this.onUIStateUpdate_(uiState),
+      true /* callToInitialize */
+    );
   }
 
   /**
@@ -382,7 +381,11 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.state_ = state;
         break;
       case PageState.PAUSED:
-        this.advancement_.stop(true /** canResume */);
+        // canResume keeps the time advancement timer if set to true, and resets
+        // it when set to false. If the bookend if open, reset the timer. If
+        // user is long pressing, don't reset it.
+        const canResume = !this.storeService_.get(StateProperty.BOOKEND_STATE);
+        this.advancement_.stop(canResume);
         this.pauseAllMedia_(false /** rewindToBeginning */);
         if (this.animationManager_) {
           this.animationManager_.pauseAll();
@@ -448,7 +451,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     return Promise.all([
       this.beforeVisible(),
-      this.mediaLayoutPromise_,
+      this.waitForMediaLayout_(),
       this.mediaPoolPromise_,
     ]);
   }
@@ -458,6 +461,23 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   onResize_() {
     this.findAndPrepareEmbeddedComponents_(true /* forceResize */);
+  }
+
+  /**
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    // On vertical rendering, render all the animations with their final state.
+    if (uiState === UIType.VERTICAL && this.animationManager_) {
+      this.signals()
+        .whenSignal(CommonSignals.LOAD_END)
+        .then(() => this.maybeApplyFirstAnimationFrame())
+        .then(() => {
+          this.animationManager_.finishAll();
+        });
+    }
   }
 
   /** @return {!Promise} */
@@ -502,8 +522,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.addEventListener('error', resolve, true /* useCapture */);
       });
     });
-
-    return Promise.all(mediaPromises);
+    return Promise.all(mediaPromises).then(() => this.markPageAsLoaded_());
   }
 
   /**
@@ -514,6 +533,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   findAndPrepareEmbeddedComponents_(forceResize = false) {
     this.addClickShieldToEmbeddedComponents_();
     this.resizeInteractiveEmbeddedComponents_(forceResize);
+    this.addStylesToBlingLinks_();
   }
 
   /**
@@ -567,9 +587,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
   }
 
-  /** @return {!Promise} */
-  whenLoaded() {
-    return this.pageLoadPromise_;
+  /**
+   * Adds icon and pulse animation to bling links
+   */
+  addStylesToBlingLinks_() {
+    scopedQuerySelectorAll(this.element, BLING_LINK_SELECTOR).forEach(el => {
+      AmpStoryBlingLink.build(el);
+    });
   }
 
   /** @private */
@@ -1091,20 +1115,20 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Navigates to the previous page in the story.
    */
   previous() {
-    const targetPageId = this.getPreviousPageId();
+    const pageId = this.getPreviousPageId();
 
-    if (targetPageId === null) {
+    if (pageId === null) {
       dispatch(
         this.win,
         this.element,
-        EventType.SHOW_NO_PREVIOUS_PAGE_HELP,
+        EventType.NO_PREVIOUS_PAGE,
         /* payload */ undefined,
         {bubbles: true}
       );
       return;
     }
 
-    this.switchTo_(targetPageId, NavigationDirection.PREVIOUS);
+    this.switchTo_(pageId, NavigationDirection.PREVIOUS);
   }
 
   /**
@@ -1116,6 +1140,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     const pageId = this.getNextPageId(isAutomaticAdvance);
 
     if (!pageId) {
+      dispatch(
+        this.win,
+        this.element,
+        EventType.NO_NEXT_PAGE,
+        /* payload */ undefined,
+        {bubbles: true}
+      );
       return;
     }
 

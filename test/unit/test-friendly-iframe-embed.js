@@ -29,20 +29,27 @@ import {installServiceInEmbedScope} from '../../src/service';
 import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('friendly-iframe-embed', () => {
   let sandbox;
   let iframe;
   let extensionsMock;
   let resourcesMock;
+  let ampdocServiceMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
 
     const extensions = Services.extensionsFor(window);
     const resources = Services.resourcesForDoc(window.document);
+    const ampdocService = {
+      installFieDoc: () => {},
+    };
     extensionsMock = sandbox.mock(extensions);
     resourcesMock = sandbox.mock(resources);
+    ampdocServiceMock = sandbox.mock(ampdocService);
+    sandbox.stub(Services, 'ampdocServiceFor').callsFake(() => ampdocService);
 
     iframe = document.createElement('iframe');
   });
@@ -53,7 +60,9 @@ describe('friendly-iframe-embed', () => {
     }
     extensionsMock.verify();
     resourcesMock.verify();
+    ampdocServiceMock.verify();
     setSrcdocSupportedForTesting(undefined);
+    toggleExperiment(window, 'ampdoc-fie', false);
     sandbox.restore();
   });
 
@@ -136,6 +145,74 @@ describe('friendly-iframe-embed', () => {
       expect(embed.win.document.querySelector('base')).to.exist;
       expect(embed.win.document.querySelector('a')).to.exist;
     });
+  });
+
+  it('should create ampdoc and install extensions', () => {
+    toggleExperiment(window, 'ampdoc-fie', true);
+
+    // AmpDoc is created.
+    const ampdoc = {
+      setReady: sandbox.spy(),
+    };
+    let childWinForAmpDoc;
+    ampdocServiceMock
+      .expects('installFieDoc')
+      .withExactArgs(
+        'https://acme.org/url1',
+        sinon.match(arg => {
+          childWinForAmpDoc = arg;
+          return true;
+        })
+      )
+      .returns(ampdoc)
+      .once();
+
+    // Extensions preloading have been requested.
+    extensionsMock
+      .expects('preloadExtension')
+      .withExactArgs('amp-test')
+      .returns(Promise.resolve())
+      .once();
+
+    // Extensions are installed.
+    let installExtDoc;
+    extensionsMock
+      .expects('installExtensionsInFie')
+      .withExactArgs(
+        sinon.match(arg => {
+          installExtDoc = arg;
+          return true;
+        }),
+        ['amp-test'],
+        /* preinstallCallback */ undefined
+      )
+      .once();
+
+    let readyResolver = null;
+    const readyPromise = new Promise(resolve => {
+      readyResolver = resolve;
+    });
+    sandbox
+      .stub(FriendlyIframeEmbed.prototype, 'whenReady')
+      .callsFake(() => readyPromise);
+
+    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+      url: 'https://acme.org/url1',
+      html: '<amp-test></amp-test>',
+      extensionIds: ['amp-test'],
+    });
+    return embedPromise
+      .then(embed => {
+        expect(childWinForAmpDoc).to.equal(embed.win);
+        expect(ampdoc).to.equal(embed.ampdoc);
+        expect(installExtDoc).to.equal(ampdoc);
+        expect(ampdoc.setReady).to.not.be.called;
+        readyResolver();
+        return readyPromise;
+      })
+      .then(() => {
+        expect(ampdoc.setReady).to.be.calledOnce;
+      });
   });
 
   it('should install extensions', () => {
@@ -842,34 +919,36 @@ describe('friendly-iframe-embed', () => {
       });
     });
 
-    it('resizes body and fixed container when entering', function*() {
-      const bodyElementMock = document.createElement('div');
-      const fie = createFie(bodyElementMock);
+    it.configure()
+      .skipFirefox()
+      .run('resizes body and fixed container when entering', function*() {
+        const bodyElementMock = document.createElement('div');
+        const fie = createFie(bodyElementMock);
 
-      const scrollTop = 45;
-      stubViewportScrollTop(scrollTop);
+        const scrollTop = 45;
+        stubViewportScrollTop(scrollTop);
 
-      yield fie.enterFullOverlayMode();
+        yield fie.enterFullOverlayMode();
 
-      expect(bodyElementMock.style.background).to.equal('transparent');
-      expect(bodyElementMock.style.position).to.equal('absolute');
-      expect(bodyElementMock.style.width).to.equal(`${w}px`);
-      expect(bodyElementMock.style.height).to.equal(`${h}px`);
-      expect(bodyElementMock.style.top).to.equal(`${y - scrollTop}px`);
-      expect(bodyElementMock.style.left).to.equal(`${x}px`);
-      expect(bodyElementMock.style.right).to.equal('auto');
-      expect(bodyElementMock.style.bottom).to.equal('auto');
+        expect(bodyElementMock.style.background).to.equal('transparent');
+        expect(bodyElementMock.style.position).to.equal('absolute');
+        expect(bodyElementMock.style.width).to.equal(`${w}px`);
+        expect(bodyElementMock.style.height).to.equal(`${h}px`);
+        expect(bodyElementMock.style.top).to.equal(`${y - scrollTop}px`);
+        expect(bodyElementMock.style.left).to.equal(`${x}px`);
+        expect(bodyElementMock.style.right).to.equal('auto');
+        expect(bodyElementMock.style.bottom).to.equal('auto');
 
-      const {iframe} = fie;
+        const {iframe} = fie;
 
-      expect(iframe.style.position).to.equal('fixed');
-      expect(iframe.style.left).to.equal('0px');
-      expect(iframe.style.right).to.equal('0px');
-      expect(iframe.style.top).to.equal('0px');
-      expect(iframe.style.bottom).to.equal('0px');
-      expect(iframe.style.width).to.equal('100vw');
-      expect(iframe.style.height).to.equal('100vh');
-    });
+        expect(iframe.style.position).to.equal('fixed');
+        expect(iframe.style.left).to.equal('0px');
+        expect(iframe.style.right).to.equal('0px');
+        expect(iframe.style.top).to.equal('0px');
+        expect(iframe.style.bottom).to.equal('0px');
+        expect(iframe.style.width).to.equal('100vw');
+        expect(iframe.style.height).to.equal('100vh');
+      });
 
     it('should reset body and fixed container when leaving', function*() {
       const bodyElementMock = document.createElement('div');

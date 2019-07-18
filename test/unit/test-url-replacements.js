@@ -23,7 +23,6 @@ import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
-import {getMode} from '../../src/mode';
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -170,6 +169,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
         cookie: '',
         documentElement: {
           nodeType: /* element */ 1,
+          getRootNode() {
+            return win.document;
+          },
         },
       },
       Math: {
@@ -191,9 +193,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
       // Fake query selectors needed to bypass <meta> tag checks.
       querySelector: () => null,
       querySelectorAll: () => [],
+      getRootNode() {
+        return win.document;
+      },
     };
     installDocService(win, /* isSingleDoc */ true);
-    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+    const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     installUrlReplacementsServiceForDoc(ampdoc);
@@ -209,7 +214,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       // Restrict the number of replacement params to globalVaraibleSource
       // Please consider adding the logic to amp-analytics instead.
       // Please contact @lannka or @zhouyx if the test fail.
-      expect(variables.length).to.equal(69);
+      expect(variables.length).to.equal(71);
     });
   });
 
@@ -227,35 +232,47 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace CANONICAL_URL', () => {
-    return expandUrlAsync('?href=CANONICAL_URL').then(res => {
-      expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
+  it.configure()
+    .skipFirefox()
+    .run('should replace CANONICAL_URL', () => {
+      return expandUrlAsync('?href=CANONICAL_URL').then(res => {
+        expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
+      });
     });
-  });
 
-  it('should replace CANONICAL_HOST', () => {
-    return expandUrlAsync('?host=CANONICAL_HOST').then(res => {
-      expect(res).to.equal('?host=pinterest.com%3A8080');
+  it.configure()
+    .skipFirefox()
+    .run('should replace CANONICAL_HOST', () => {
+      return expandUrlAsync('?host=CANONICAL_HOST').then(res => {
+        expect(res).to.equal('?host=pinterest.com%3A8080');
+      });
     });
-  });
 
-  it('should replace CANONICAL_HOSTNAME', () => {
-    return expandUrlAsync('?host=CANONICAL_HOSTNAME').then(res => {
-      expect(res).to.equal('?host=pinterest.com');
+  it.configure()
+    .skipFirefox()
+    .run('should replace CANONICAL_HOSTNAME', () => {
+      return expandUrlAsync('?host=CANONICAL_HOSTNAME').then(res => {
+        expect(res).to.equal('?host=pinterest.com');
+      });
     });
-  });
 
-  it('should replace CANONICAL_PATH', () => {
-    return expandUrlAsync('?path=CANONICAL_PATH').then(res => {
-      expect(res).to.equal('?path=%2Fpin1');
+  it.configure()
+    .skipFirefox()
+    .run('should replace CANONICAL_PATH', () => {
+      return expandUrlAsync('?path=CANONICAL_PATH').then(res => {
+        expect(res).to.equal('?path=%2Fpin1');
+      });
     });
-  });
 
-  it('should replace DOCUMENT_REFERRER', () => {
-    return expandUrlAsync('?ref=DOCUMENT_REFERRER').then(res => {
-      expect(res).to.equal('?ref=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html');
+  it.configure()
+    .skipFirefox()
+    .run('should replace DOCUMENT_REFERRER', () => {
+      return expandUrlAsync('?ref=DOCUMENT_REFERRER').then(res => {
+        expect(res).to.equal(
+          '?ref=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html'
+        );
+      });
     });
-  });
 
   it('should replace EXTERNAL_REFERRER', () => {
     const windowInterface = mockWindowInterface(sandbox);
@@ -614,20 +631,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
       {withCid: true}
     ).then(res => {
       expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
-    });
-  });
-
-  it('should replace CLIENT_ID with empty string for inabox', () => {
-    setCookie(window, '_ga', 'GA1.2.12345.54321');
-    const origMode = getMode().runtime;
-    getMode().runtime = 'inabox';
-    return expandUrlAsync(
-      '?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)',
-      /*opt_bindings*/ undefined,
-      {withCid: true}
-    ).then(res => {
-      getMode().runtime = origMode;
-      expect(res).to.equal('?a=&b=');
     });
   });
 
@@ -1172,11 +1175,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
     ).to.eventually.equal('?sh=2&s');
   });
 
-  it('should accept $expressions', () => {
-    return expandUrlAsync('?href=$CANONICAL_URL').then(res => {
-      expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
+  it.configure()
+    .skipFirefox()
+    .run('should accept $expressions', () => {
+      return expandUrlAsync('?href=$CANONICAL_URL').then(res => {
+        expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
+      });
     });
-  });
 
   it('should ignore unknown substitutions', () => {
     return expandUrlAsync('?a=UNKNOWN').then(res => {
@@ -1184,17 +1189,19 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace several substitutions', () => {
-    return expandUrlAsync('?a=UNKNOWN&href=CANONICAL_URL&title=TITLE').then(
-      res => {
-        expect(res).to.equal(
-          '?a=UNKNOWN' +
-            '&href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1' +
-            '&title=Pixel%20Test'
-        );
-      }
-    );
-  });
+  it.configure()
+    .skipFirefox()
+    .run('should replace several substitutions', () => {
+      return expandUrlAsync('?a=UNKNOWN&href=CANONICAL_URL&title=TITLE').then(
+        res => {
+          expect(res).to.equal(
+            '?a=UNKNOWN' +
+              '&href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1' +
+              '&title=Pixel%20Test'
+          );
+        }
+      );
+    });
 
   it('should replace new substitutions', () => {
     const {documentElement} = window.document;

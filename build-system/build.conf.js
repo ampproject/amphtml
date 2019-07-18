@@ -22,7 +22,6 @@ const defaultPlugins = [
   [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
   localPlugin('transform-parenthesize-expression'),
   localPlugin('is_minified-constant-transformer'),
-  localPlugin('transform-amp-asserts'),
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
@@ -38,18 +37,29 @@ const esmRemovedImports = {
   './polyfills/promise': ['installPromise'],
 };
 
+const eliminateIntermediateBundles = () => [
+  localPlugin('transform-prune-namespace'),
+];
+
 /**
  * Resolves babel plugin set to apply before compiling on singlepass.
  * @param {!Object<string, boolean>} buildFlags
  * @return {!Array<string|!Array<string|!Object>>}
  */
-function plugins({isCommonJsModule, isEsmBuild, isForTesting}) {
+function plugins({isEsmBuild, isForTesting, isSinglePass}) {
   const applied = [...defaultPlugins];
+  // TODO(erwinm): This is temporary until we remove the assert/log removals
+  // from the java transformation to the babel transformation.
+  // There is currently a weird interaction where when we do the transform
+  // in babel and leave a bare "string", Closure Compiler does not remove
+  // the dead string expression statements. We cannot just outright remove
+  // the argument of the assert/log calls since we would need to inspect
+  // if the arguments have any method calls (which might have side effects).
+  if (isSinglePass) {
+    applied.push(localPlugin('transform-amp-asserts'));
+  }
   if (isEsmBuild) {
     applied.push(['filter-imports', {imports: esmRemovedImports}]);
-  }
-  if (isCommonJsModule) {
-    applied.push('transform-commonjs-es2015-modules');
   }
   if (!isForTesting) {
     applied.push(
@@ -60,4 +70,4 @@ function plugins({isCommonJsModule, isEsmBuild, isForTesting}) {
   return applied;
 }
 
-module.exports = {plugins};
+module.exports = {plugins, eliminateIntermediateBundles};

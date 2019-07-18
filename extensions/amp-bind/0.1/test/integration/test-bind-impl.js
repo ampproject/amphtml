@@ -113,13 +113,14 @@ function onBindReadyAndSetStateWithExpression(env, bind, expression, scope) {
  * @param {!Bind} bind
  * @param {!Array<!Element>} added
  * @param {!Array<!Element>} removed
+ * @param {!BindRescanOptions=} options
  * @return {!Promise}
  */
-function onBindReadyAndScanAndApply(env, bind, added, removed) {
+function onBindReadyAndRescan(env, bind, added, removed, options) {
   return bind
     .initializePromiseForTesting()
     .then(() => {
-      return bind.scanAndApply(added, removed);
+      return bind.rescan(added, removed, options);
     })
     .then(() => {
       env.flushVsync();
@@ -140,6 +141,11 @@ function waitForEvent(env, name) {
     env.win.addEventListener(name, callback);
   });
 }
+
+const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
+  type: AmpEvents.FORM_VALUE_CHANGE,
+  bubbles: true,
+};
 
 describe
   .configure()
@@ -1111,32 +1117,184 @@ describe
           });
         });
 
-        it('should scanAndApply()', function*() {
-          const foo = createElement(env, container, '[text]="foo"');
-          yield onBindReadyAndSetState(env, bind, {foo: 'foo'});
-          expect(foo.textContent).to.equal('foo');
+        describe('rescan()', () => {
+          let toRemove;
+          let toAdd;
 
-          // The new `onePlusOne` element should be scanned and evaluated despite
-          // not being attached to the DOM.
-          const onePlusOne = createElement(
-            env,
-            /* container */ null,
-            '[text]="1+1"'
-          );
-          // Required marker attribute for elements with bindings.
-          onePlusOne.setAttribute('i-amphtml-binding', '');
-          yield onBindReadyAndScanAndApply(
-            env,
-            bind,
-            /* added */ [onePlusOne],
-            /* removed */ [foo]
-          );
-          expect(onePlusOne.textContent).to.equal('2');
+          beforeEach(async () => {
+            toRemove = createElement(env, container, '[text]="foo"');
+            // New elements to rescan() don't need to be attached to DOM.
+            toAdd = createElement(env, /* container */ null, '[text]="1+1"');
+          });
 
-          // The binding for the `foo` element should have been removed, so
-          // performing AMP.setState({foo: ...}) should not change it.
-          yield onBindReadyAndSetState(env, bind, {foo: 'bar'});
-          expect(foo.textContent).to.not.equal('bar');
+          it('{update: true, fast: true}', async () => {
+            const options = {update: true, fast: true};
+
+            await onBindReadyAndSetState(env, bind, {foo: 'foo'});
+            expect(toRemove.textContent).to.equal('foo');
+
+            // [i-amphtml-binding] necessary in {fast: true}.
+            toAdd.setAttribute('i-amphtml-binding', '');
+
+            // `toAdd` should be scanned and updated.
+            await onBindReadyAndRescan(env, bind, [toAdd], [toRemove], options);
+            expect(toAdd.textContent).to.equal('2');
+
+            await onBindReadyAndSetState(env, bind, {foo: 'bar'});
+            // The `toRemove` element's bindings should have been removed.
+            expect(toRemove.textContent).to.not.equal('bar');
+          });
+
+          it('{update: true, fast: false}', async () => {
+            const options = {update: true, fast: false};
+
+            await onBindReadyAndSetState(env, bind, {foo: 'foo'});
+            expect(toRemove.textContent).to.equal('foo');
+
+            // `toAdd` should be scanned and updated.
+            await onBindReadyAndRescan(env, bind, [toAdd], [toRemove], options);
+            expect(toAdd.textContent).to.equal('2');
+
+            await onBindReadyAndSetState(env, bind, {foo: 'bar'});
+            // The `toRemove` element's bindings should have been removed.
+            expect(toRemove.textContent).to.not.equal('bar');
+          });
+
+          it('{update: false, fast: true}', async () => {
+            const options = {update: false, fast: true};
+
+            await onBindReadyAndSetState(env, bind, {foo: 'foo'});
+            expect(toRemove.textContent).to.equal('foo');
+
+            // [i-amphtml-binding] necessary in {fast: true}.
+            toAdd.setAttribute('i-amphtml-binding', '');
+
+            // `toAdd` should be scanned but not updated.
+            await onBindReadyAndRescan(env, bind, [toAdd], [toRemove], options);
+            expect(toAdd.textContent).to.equal('');
+
+            await onBindReadyAndSetState(env, bind, {foo: 'bar'});
+            // Now that `toAdd` is scanned, it should be updated on setState().
+            expect(toAdd.textContent).to.equal('2');
+            // The `toRemove` element's bindings should have been removed.
+            expect(toRemove.textContent).to.not.equal('bar');
+          });
+
+          it('{update: false, fast: false}', async () => {
+            const options = {update: false, fast: false};
+
+            await onBindReadyAndSetState(env, bind, {foo: 'foo'});
+            expect(toRemove.textContent).to.equal('foo');
+
+            // `toAdd` should be scanned but not updated.
+            await onBindReadyAndRescan(env, bind, [toAdd], [toRemove], options);
+            expect(toAdd.textContent).to.equal('');
+
+            await onBindReadyAndSetState(env, bind, {foo: 'bar'});
+            // Now that `toAdd` is scanned, it should be updated on setState().
+            expect(toAdd.textContent).to.equal('2');
+            // The `toRemove` element's bindings should have been removed.
+            expect(toRemove.textContent).to.not.equal('bar');
+          });
+        });
+
+        describe('AmpEvents.FORM_VALUE_CHANGE', () => {
+          it('should dispatch FORM_VALUE_CHANGE on <input [value]> changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[value]="foo"',
+              'input'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
+              expect(spy).to.have.been.calledOnce;
+              expect(spy).calledWithMatch(FORM_VALUE_CHANGE_EVENT_ARGUMENTS);
+            });
+          });
+
+          it('should dispatch FORM_VALUE_CHANGE on <input [checked]> changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[checked]="foo"',
+              'input'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'checked'}).then(
+              () => {
+                expect(spy).to.have.been.calledOnce;
+                expect(spy).calledWithMatch(FORM_VALUE_CHANGE_EVENT_ARGUMENTS);
+              }
+            );
+          });
+
+          it('should dispatch FORM_VALUE_CHANGE at parent <select> on <option [selected]> changes', () => {
+            const select = env.win.document.createElement('select');
+            select.innerHTML = `
+              <optgroup>
+                <option [selected]="foo"></option>
+              </optgroup>
+            `;
+            container.appendChild(select);
+
+            const spy = sandbox.spy(select, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'selected'}).then(
+              () => {
+                expect(spy).to.have.been.calledOnce;
+                expect(spy).calledWithMatch({
+                  type: AmpEvents.FORM_VALUE_CHANGE,
+                  bubbles: true,
+                });
+              }
+            );
+          });
+
+          it('should dispatch FORM_VALUE_CHANGE on <textarea [text]> changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[text]="foo"',
+              'textarea'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
+              expect(spy).to.have.been.calledOnce;
+              expect(spy).calledWithMatch({
+                type: AmpEvents.FORM_VALUE_CHANGE,
+                bubbles: true,
+              });
+            });
+          });
+
+          it('should NOT dispatch FORM_VALUE_CHANGE on other attributes changes', () => {
+            const element = createElement(
+              env,
+              container,
+              '[name]="foo"',
+              'input'
+            );
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'name'}).then(() => {
+              expect(spy).to.not.have.been.called;
+            });
+          });
+
+          it('should NOT dispatch FORM_VALUE_CHANGE on other element changes', () => {
+            const element = createElement(env, container, '[text]="foo"', 'p');
+            const spy = sandbox.spy(element, 'dispatchEvent');
+
+            return onBindReadyAndSetState(env, bind, {foo: 'selected'}).then(
+              () => {
+                expect(spy).to.not.have.been.called;
+              }
+            );
+          });
         });
       }
     ); // in single ampdoc

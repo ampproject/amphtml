@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {StateChangeType} from './navigation-state';
-import {dev} from '../../../src/log';
+import {StateProperty, getStoreService} from './amp-story-store-service';
+import {getVariableService} from './variable-service';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @enum {string} */
-export const StoryEventType = {
-  PAGE_VISIBLE: 'story-page-visible',
+export const AnalyticsEvent = {
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
+  LAST_PAGE_VISIBLE: 'story-last-page-visible',
+  PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
+  PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
+  PAGE_VISIBLE: 'story-page-visible',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
 };
@@ -65,57 +68,58 @@ export class StoryAnalyticsService {
    * @param {!Element} element
    */
   constructor(win, element) {
-    /** @private @const {!Window} */
+    /** @protected @const {!Window} */
     this.win_ = win;
 
     /** @private @const {!Element} */
     this.element_ = element;
+
+    /** @const @private {!./variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(win);
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(win);
+
+    this.initializeListeners_();
   }
 
-  /**
-   * @param {!./navigation-state.StateChangeEventDef} stateChangeEvent
-   */
-  onNavigationStateChange(stateChangeEvent) {
-    switch (stateChangeEvent.type) {
-      case StateChangeType.ACTIVE_PAGE:
-        this.triggerEvent_(StoryEventType.PAGE_VISIBLE);
-        break;
-      case StateChangeType.BOOKEND_ENTER:
-        this.triggerEvent_(StoryEventType.BOOKEND_ENTER);
-        break;
-      case StateChangeType.BOOKEND_EXIT:
-        this.triggerEvent_(StoryEventType.BOOKEND_EXIT);
-        break;
-    }
-  }
+  /** @private */
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      this.triggerEvent(
+        isActive ? AnalyticsEvent.BOOKEND_ENTER : AnalyticsEvent.BOOKEND_EXIT
+      );
+    });
 
-  /**
-   * @param {boolean} isMuted
-   */
-  onMutedStateChange(isMuted) {
-    const event = isMuted
-      ? StoryEventType.STORY_MUTED
-      : StoryEventType.STORY_UNMUTED;
-    this.triggerEvent_(event);
-  }
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      pageId => {
+        if (!pageId) {
+          return;
+        }
 
-  /**
-   * @param {!StoryEventType} eventType
-   * @private
-   */
-  triggerEvent_(eventType) {
-    const variablesPromise = Services.storyVariableServiceForOrNull(this.win_);
-    variablesPromise.then(
-      variables => {
-        triggerAnalyticsEvent(
-          this.element_,
-          eventType,
-          /** @type {!JsonObject} */ (variables)
+        this.triggerEvent(AnalyticsEvent.PAGE_VISIBLE);
+
+        const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
+        const pageIndex = this.storeService_.get(
+          StateProperty.CURRENT_PAGE_INDEX
         );
+        if (pageIndex === pageIds.length - 1) {
+          this.triggerEvent(AnalyticsEvent.LAST_PAGE_VISIBLE);
+        }
       },
-      reason => {
-        dev().error('AMP-STORY', 'Could not get analytics variables', reason);
-      }
+      true /* callToInitialize */
+    );
+  }
+
+  /**
+   * @param {!AnalyticsEvent} eventType
+   */
+  triggerEvent(eventType) {
+    triggerAnalyticsEvent(
+      this.element_,
+      eventType,
+      this.variableService_.get()
     );
   }
 }

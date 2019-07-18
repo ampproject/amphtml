@@ -298,7 +298,6 @@ describes.realWin(
             mode: 'cors',
             method: 'GET',
             credentials: 'omit',
-            requireAmpResponseSourceOrigin: false,
           }
         );
         expect(xhr.fetchJson).to.be.calledOnce;
@@ -399,6 +398,32 @@ describes.realWin(
                 return parent.firstChild.tagName == 'AMP-STICKY-AD';
               },
               () => {
+                resolve();
+              }
+            );
+          });
+        });
+      });
+
+      it('should insert anchor anchor ad with provided anchor ad attributes.', () => {
+        configObj = {
+          optInStatus: [2],
+        };
+        configObj.stickyAdAttributes = {
+          'data-no-fill': 'true',
+        };
+
+        return getAmpAutoAds().then(() => {
+          return new Promise(resolve => {
+            waitForChild(
+              env.win.document.body,
+              parent => {
+                return parent.firstChild.tagName == 'AMP-STICKY-AD';
+              },
+              () => {
+                const stickyAd = env.win.document.body.firstChild;
+                const ampAd = stickyAd.firstChild;
+                expect(ampAd.getAttribute('data-no-fill')).to.equal('true');
                 resolve();
               }
             );

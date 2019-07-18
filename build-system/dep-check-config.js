@@ -91,7 +91,6 @@ exports.rules = [
       'third_party/timeagojs/timeago.js->' +
         'third_party/timeagojs/timeago-locales.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
-      'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
       'extensions/amp-subscriptions/**/*.js->' +
         'third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions/**/*.js->' +
@@ -104,6 +103,8 @@ exports.rules = [
         'third_party/subscriptions-project/swg.js',
       'extensions/amp-recaptcha-input/**/*.js->' +
         'third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
+      'extensions/amp-autocomplete/**/*.js->' +
+        'third_party/fuzzysearch/index.js',
     ],
   },
   // Rules for 3p
@@ -254,7 +255,6 @@ exports.rules = [
       'extensions/amp-story/1.0/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
-      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/navigation-state.js',
       // TODO(ccordry): remove this after createShadowRootWithStyle is moved to src
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/utils.js',
 

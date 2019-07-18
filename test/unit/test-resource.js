@@ -769,10 +769,10 @@ describes.realWin('Resource', {amp: true}, env => {
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
 
+    /* global fail: false */
     return promise
       .then(
         () => {
-          /* global fail: false */
           fail('should not be here');
         },
         () => {
@@ -786,7 +786,6 @@ describes.realWin('Resource', {amp: true}, env => {
       )
       .then(
         () => {
-          /* global fail: false */
           fail('should not be here');
         },
         reason => {

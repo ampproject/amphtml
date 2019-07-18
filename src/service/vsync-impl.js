@@ -60,7 +60,7 @@ export class Vsync {
     this.ampdocService_ = Services.ampdocServiceFor(this.win);
 
     /** @private @const {!./document-state.DocumentState} */
-    this.docState_ = Services.documentStateFor(this.win);
+    this.docState_ = Services.globalDocumentStateFor(this.win);
 
     /** @private @const {function(function())}  */
     this.raf_ = this.getRaf_();
@@ -98,7 +98,7 @@ export class Vsync {
     /** @private {?Promise} */
     this.nextFramePromise_ = null;
 
-    /** @private {?function()} */
+    /** @protected {?function()} */
     this.nextFrameResolver_ = null;
 
     /** @const {!Function} */
@@ -141,7 +141,7 @@ export class Vsync {
     if (this.ampdocService_.isSingleDoc()) {
       // In a single-doc mode, the visibility of the doc == global visibility.
       // Thus, it's more efficient to only listen to it once.
-      Services.viewerPromiseForDoc(this.ampdocService_.getAmpDoc()).then(
+      Services.viewerPromiseForDoc(this.ampdocService_.getSingleDoc()).then(
         viewer => {
           this.singleDocViewer_ = viewer;
           viewer.onVisibilityChanged(boundOnVisibilityChanged);

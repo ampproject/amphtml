@@ -22,7 +22,6 @@ import com.google.javascript.jscomp.ClosureCodingConvention;
 import com.google.javascript.jscomp.CodingConvention;
 import com.google.javascript.jscomp.CodingConvention.AssertionFunctionSpec;
 import com.google.javascript.jscomp.CodingConventions;
-import com.google.javascript.jscomp.ClosureCodingConvention;
 import com.google.javascript.rhino.jstype.JSType;
 import com.google.javascript.rhino.jstype.JSTypeNative;
 
@@ -45,26 +44,6 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     super(convention);
   }
 
-  @Override
-  public ImmutableCollection<AssertionFunctionSpec> getAssertionFunctions() {
-    return ImmutableList.of(
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "module$src$log.devAssert"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "devAssert$$module$src$log"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "module$src$log.userAssert"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "userAssert$$module$src$log"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "assertService$$module$src$element_service"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "module$src$layout.assertLength"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "assertLength$$module$src$layout")
-    );
-  }
-
   /**
    * {@inheritDoc}
    * Because AMP objects can travel between compilation units, we consider
@@ -82,7 +61,8 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     // Bad hack, but we should really not try to inline CSS as these strings can
     // be very long.
     // See https://github.com/ampproject/amphtml/issues/10118
-    if (name.equals("cssText$$module$build$css")) {
+    // cssText is defined in build-system/tasks/css.js#writeCss
+    if (name.startsWith("cssText$$module$build$")) {
       return true;
     }
 

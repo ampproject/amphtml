@@ -21,18 +21,16 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {getCookie, setCookie} from './cookies';
+import {dev, user} from './log';
+import {getMode} from './mode';
 import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
 
 /** @const {string} */
-const COOKIE_NAME = 'AMP_EXP';
+const TAG = 'EXPERIMENTS';
 
-/** @const {number} */
-const COOKIE_MAX_AGE_DAYS = 180; // 6 month
-
-/** @const {time} */
-const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+/** @const {string} */
+const LOCAL_STORAGE_KEY = 'amp-experiment-toggles';
 
 /** @const {string} */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
@@ -84,7 +82,7 @@ export function isExperimentOn(win, experimentId) {
  * @param {boolean=} opt_on
  * @param {boolean=} opt_transientExperiment  Whether to toggle the
  *     experiment state "transiently" (i.e., for this page load only) or
- *     durably (by saving the experiment IDs to the cookie after toggling).
+ *     durably (by saving the experiment IDs after toggling).
  *     Default: false (save durably).
  * @return {boolean} New state for experimentId.
  */
@@ -101,17 +99,27 @@ export function toggleExperiment(
     toggles[experimentId] = on;
 
     if (!opt_transientExperiment) {
-      const cookieToggles = getExperimentTogglesFromCookie(win);
-      cookieToggles[experimentId] = on;
-      saveExperimentTogglesToCookie(win, cookieToggles);
+      const storedToggles = getExperimentToggles(win);
+      storedToggles[experimentId] = on;
+      saveExperimentToggles(win, storedToggles);
+      // Avoid affecting tests that spy/stub warn().
+      if (!getMode().test) {
+        user().warn(
+          TAG,
+          '"%s" experiment %s for the domain "%s". See: https://amp.dev/documentation/guides-and-tutorials/learn/experimental',
+          experimentId,
+          on ? 'enabled' : 'disabled',
+          win.location.hostname
+        );
+      }
     }
   }
   return on;
 }
 
 /**
- * Calculate whether the experiment is on or off based off of the
- * cookieFlag or the global config frequency given.
+ * Calculate whether the experiment is on or off based off of its default value,
+ * stored overriden value, or the global config frequency given.
  * @param {!Window} win
  * @return {!Object<string, boolean>}
  */
@@ -151,7 +159,7 @@ export function experimentToggles(win) {
     }
   }
 
-  Object.assign(toggles, getExperimentTogglesFromCookie(win));
+  Object.assign(toggles, getExperimentToggles(win));
 
   if (
     win.AMP_CONFIG &&
@@ -189,9 +197,16 @@ export function experimentTogglesOrNull(win) {
  * @param {!Window} win
  * @return {!Object<string, boolean>}
  */
-function getExperimentTogglesFromCookie(win) {
-  const experimentCookie = getCookie(win, COOKIE_NAME);
-  const tokens = experimentCookie ? experimentCookie.split(/\s*,\s*/g) : [];
+function getExperimentToggles(win) {
+  let experimentsString = '';
+  try {
+    if ('localStorage' in win) {
+      experimentsString = win.localStorage.getItem(LOCAL_STORAGE_KEY);
+    }
+  } catch (e) {
+    dev().expectedError(TAG, 'localStorage not supported.');
+  }
+  const tokens = experimentsString ? experimentsString.split(/\s*,\s*/g) : [];
 
   const toggles = Object.create(null);
   for (let i = 0; i < tokens.length; i++) {
@@ -204,7 +219,6 @@ function getExperimentTogglesFromCookie(win) {
       toggles[tokens[i]] = true;
     }
   }
-
   return toggles;
 }
 
@@ -213,33 +227,28 @@ function getExperimentTogglesFromCookie(win) {
  * @param {!Window} win
  * @param {!Object<string, boolean>} toggles
  */
-function saveExperimentTogglesToCookie(win, toggles) {
+function saveExperimentToggles(win, toggles) {
   const experimentIds = [];
   for (const experiment in toggles) {
     experimentIds.push((toggles[experiment] === false ? '-' : '') + experiment);
   }
-
-  setCookie(
-    win,
-    COOKIE_NAME,
-    experimentIds.join(','),
-    Date.now() + COOKIE_EXPIRATION_INTERVAL,
-    {
-      // Set explicit domain, so the cookie gets send to sub domains.
-      domain: win.location.hostname,
-      allowOnProxyOrigin: true,
+  try {
+    if ('localStorage' in win) {
+      win.localStorage.setItem(LOCAL_STORAGE_KEY, experimentIds.join(','));
     }
-  );
+  } catch (e) {
+    user().error(TAG, 'Failed to save experiments to localStorage.');
+  }
 }
 
 /**
- * See getExperimentTogglesFromCookie().
+ * See getExperimentToggles().
  * @param {!Window} win
  * @return {!Object<string, boolean>}
  * @visibleForTesting
  */
-export function getExperimentToglesFromCookieForTesting(win) {
-  return getExperimentTogglesFromCookie(win);
+export function getExperimentTogglesForTesting(win) {
+  return getExperimentToggles(win);
 }
 
 /**
@@ -248,9 +257,7 @@ export function getExperimentToglesFromCookieForTesting(win) {
  * @visibleForTesting
  */
 export function resetExperimentTogglesForTesting(win) {
-  setCookie(win, COOKIE_NAME, '', 0, {
-    domain: win.location.hostname,
-  });
+  saveExperimentToggles(win, {});
   win[TOGGLES_WINDOW_PROPERTY] = null;
 }
 

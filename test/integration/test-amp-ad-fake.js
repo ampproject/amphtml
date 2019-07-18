@@ -34,7 +34,7 @@ describe('A4A', function() {
       extensions: ['amp-ad'],
     },
     () => {
-      // TODO(#21545): Unskip flaky test
+      // TODO(@zombifer, #21545): Unskip flaky test
       it.configure()
         .skipFirefox()
         .run('should layout amp-img, amp-pixel, amp-analytics', () => {

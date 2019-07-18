@@ -30,6 +30,7 @@ import {
   isRTL,
   iterateCursor,
   scopedQuerySelector,
+  tryFocus,
 } from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, listen} from '../../../src/event-helper';
@@ -37,7 +38,7 @@ import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {once} from '../../../src/utils/function';
@@ -99,8 +100,11 @@ const DatePickerMode = {
   OVERLAY: 'overlay',
 };
 
-/** @enum {string} */
-const DatePickerState = {
+/**
+ * @enum {string}
+ * @private visible for testing
+ */
+export const DatePickerState = {
   OVERLAY_CLOSED: 'overlay-closed',
   OVERLAY_OPEN_INPUT: 'overlay-open-input',
   OVERLAY_OPEN_PICKER: 'overlay-open-picker',
@@ -183,6 +187,10 @@ const FULLSCREEN_CSS = 'i-amphtml-date-picker-fullscreen';
 
 const MIN_PICKER_YEAR = 1900;
 
+const AMP_READONLY_DATA_ATTR = 'iAmphtmlReadonly';
+
+const AMP_DATE_BLUR_DATA_ATTR = 'iAmphtmlDateBlur';
+
 export class AmpDatePicker extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -225,6 +233,9 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     /** @private @const */
     this.templates_ = Services.templatesFor(this.win);
+
+    /** @private @const */
+    this.input_ = Services.inputFor(this.win);
 
     /** @const */
     this.onDateChange = this.onDateChange.bind(this);
@@ -335,7 +346,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
 
-    /** @private {?FiniteStateMachine} */
+    /** @private {?FiniteStateMachine} visible for testing */
     this.stateMachine_ = null;
 
     /** @private */
@@ -532,7 +543,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.setupTemplates_();
     }
 
-    Promise.resolve(p).then(() => this.setState_(newState));
+    return Promise.resolve(p).then(() => this.setState_(newState));
   }
 
   /** @override */
@@ -663,10 +674,10 @@ export class AmpDatePicker extends AMP.BaseElement {
       return;
     }
 
-    if (!this.stateMachine_) {
-      return;
-    }
-
+    devAssert(
+      this.stateMachine_,
+      'transitonTo called before state machine is initialized'
+    );
     this.stateMachine_.setState(state);
   }
 
@@ -874,7 +885,6 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @return {?Element}
    */
   setupDateField_(type) {
-    const input = Services.inputFor(this.win);
     const fieldSelector = this.element.getAttribute(`${type}-selector`);
     const existingField = this.getAmpDoc()
       .getRootNode()
@@ -883,9 +893,9 @@ export class AmpDatePicker extends AMP.BaseElement {
       if (
         !this.element.hasAttribute('touch-keyboard-editable') &&
         this.mode_ == DatePickerMode.OVERLAY &&
-        input.isTouchDetected()
+        this.input_.isTouchDetected()
       ) {
-        existingField.readOnly = true;
+        setTouchNonValidationReadonly(existingField, true);
       }
       return existingField;
     }
@@ -949,6 +959,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.listen_(root, 'input', this.handleInput_.bind(this));
     // TODO(cvializ): Add aria message to use down arrow to trigger calendar.
     this.listen_(root, 'focusin', this.handleFocus_.bind(this));
+    this.listen_(root, 'focusout', this.removeTouchReadonly_.bind(this));
     this.listen_(root, 'keydown', this.handleKeydown_.bind(this));
   }
 
@@ -983,11 +994,77 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
+   * Suppress the touch keyboard on focus.
+   * The `readonly` property on input elements prevents the touch keyboard from
+   * appearing when the input receives focus.
+   * However, `readonly` also prevents form validation from triggering.
+   * To suppress the touch keyboard and also allow validation to occur, this
+   * method adds `readonly` when focus occurs, and removes it on blur.
+   * @param {!Event} e
+   * @private
+   */
+  addTouchReadonly_(e) {
+    const target = dev().assertElement(e.target);
+
+    if (!this.isDateField_(target)) {
+      return;
+    }
+
+    if (!isTouchNonValidationReadonly(target)) {
+      return;
+    }
+
+    if (target.readOnly) {
+      return;
+    }
+
+    target.readOnly = true;
+    // This data-attribute prevents an infinite loop between blur and focus
+    target.dataset[AMP_DATE_BLUR_DATA_ATTR] = true;
+
+    // Force blur to close the keyboard. When focus returns, the field will
+    // have `readonly` set and the mobile keyboard will not open.
+    target.blur();
+
+    // Return focus to the field
+    tryFocus(target);
+
+    // Clean this up since it isn't needed after this point.
+    delete target.dataset[AMP_DATE_BLUR_DATA_ATTR];
+  }
+
+  /**
+   * Remove the behavior added by `addTouchReadonly`.
+   * @param {!Event} e
+   * @private
+   */
+  removeTouchReadonly_(e) {
+    const target = dev().assertElement(e.target);
+
+    if (!this.isDateField_(target)) {
+      return;
+    }
+
+    if (!isTouchNonValidationReadonly(target)) {
+      return;
+    }
+
+    // If the blur was caused by the forced blur in addTouchReadonly_,
+    // don't remove readonly yet. We want to wait until the user navigates away.
+    if (target.dataset[AMP_DATE_BLUR_DATA_ATTR]) {
+      return;
+    }
+
+    target.readOnly = false;
+  }
+
+  /**
    * Handle focus events in the document.
    * @param {!Event} e
    * @private
    */
   handleFocus_(e) {
+    this.addTouchReadonly_(e);
     this.maybeTransitionWithFocusChange_(dev().assertElement(e.target));
   }
 
@@ -1799,10 +1876,10 @@ export class AmpDatePicker extends AMP.BaseElement {
   onMount() {
     if (this.mode_ == DatePickerMode.OVERLAY) {
       // REVIEW: this should be ok, since opening the overlay requires a
-      // user interaction, and this won't run until then
+      // user interaction, and this won't run until then.
       Services.bindForDocOrNull(this.element).then(bind => {
         if (bind) {
-          return bind.scanAndApply([this.element], [this.element]);
+          return bind.rescan([this.element], [this.element], {'apply': true});
         }
       });
     } else {
@@ -1920,6 +1997,31 @@ export class AmpDatePicker extends AMP.BaseElement {
       });
     });
   }
+}
+
+/**
+ * Mark an element to receive the `readonly` property on focus.
+ * That will prevent the touch keyboard from appearing when it is not desired.
+ * @param {!Element} element
+ * @param {boolean} toggle
+ */
+function setTouchNonValidationReadonly(element, toggle) {
+  if (!toggle) {
+    delete element.dataset[AMP_READONLY_DATA_ATTR];
+    return;
+  }
+
+  element.dataset[AMP_READONLY_DATA_ATTR] = true;
+}
+
+/**
+ * Detect if an element has been marked to receive the
+ * `readonly` property on focus.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function isTouchNonValidationReadonly(element) {
+  return Boolean(element.dataset[AMP_READONLY_DATA_ATTR]);
 }
 
 AMP.extension(TAG, '0.1', AMP => {
