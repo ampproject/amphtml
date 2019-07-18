@@ -57,6 +57,7 @@ describe('Resources', () => {
     element.getLayoutPriority = () => LayoutPriority.CONTENT;
     element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
+    document.body.appendChild(element);
     return element;
   }
 
@@ -444,7 +445,8 @@ describe('Resources', () => {
       .stub(element, 'getBoundingClientRect')
       .callsFake(() => layoutRectLtwh(0, 0, 100, 100));
     const resource = new Resource(1, element, resources);
-    const measureSpy = sandbox.spy(resource, 'measure');
+    sandbox.stub(resource, 'isDisplayed').returns(true);
+    const measureStub = sandbox.stub(resource, 'measure');
     const scheduleStub = sandbox
       .stub(resources, 'scheduleLayoutOrPreload_')
       .callsFake(() => resource.loadPromiseResolve_());
@@ -452,7 +454,7 @@ describe('Resources', () => {
     resource.build();
     return Promise.all([promise, resource.whenBuilt()]).then(() => {
       expect(scheduleStub).to.be.calledOnce;
-      expect(measureSpy).to.be.calledOnce;
+      expect(measureStub).to.be.calledOnce;
     });
   });
 
@@ -480,13 +482,14 @@ describe('Resources', () => {
       .stub(element, 'getBoundingClientRect')
       .callsFake(() => layoutRectLtwh(0, 0, 0, 0));
     const resource = new Resource(1, element, resources);
-    const measureSpy = sandbox.spy(resource, 'measure');
+    sandbox.stub(resource, 'isDisplayed').returns(false);
+    const measureStub = sandbox.stub(resource, 'measure');
     const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
     const promise = resources.requireLayout(resource.element);
     resource.build();
     return Promise.all([promise, resource.whenBuilt()]).then(() => {
       expect(scheduleStub).to.not.be.called;
-      expect(measureSpy).to.be.calledOnce;
+      expect(measureStub).to.be.calledOnce;
     });
   });
 
@@ -507,22 +510,21 @@ describe('Resources', () => {
     });
   });
 
-  it('should schedule immediately when element is built', () => {
+  it('should schedule immediately when resource is READY_FOR_LAYOUT', () => {
     const parentElement = createAmpElement();
     const element = createAmpElement();
     parentElement.appendChild(element);
     sandbox
       .stub(element, 'getBoundingClientRect')
       .callsFake(() => layoutRectLtwh(0, 0, 10, 10));
-    sandbox.stub(element, 'isBuilt').callsFake(() => true);
-    const parentResource = new Resource(1, parentElement, resources);
+    new Resource(1, parentElement, resources);
     const resource = new Resource(2, element, resources);
-    const measureSpy = sandbox.spy(resource, 'measure');
+    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    sandbox.stub(resource, 'isDisplayed').returns(true);
+    const measureStub = sandbox.stub(resource, 'measure');
     const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
-    resources.scheduleLayoutOrPreloadForSubresources_(parentResource, true, [
-      element,
-    ]);
-    expect(measureSpy).to.be.calledOnce;
+    resources.scheduleLayout(parentElement, element);
+    expect(measureStub).to.be.calledOnce;
     expect(scheduleStub).to.be.calledOnce;
   });
 
@@ -534,14 +536,16 @@ describe('Resources', () => {
       .stub(element, 'getBoundingClientRect')
       .callsFake(() => layoutRectLtwh(0, 0, 10, 10));
     sandbox.stub(element, 'isBuilt').callsFake(() => false);
-    const parentResource = new Resource(1, parentElement, resources);
+    new Resource(1, parentElement, resources);
     const resource = new Resource(2, element, resources);
-    const measureSpy = sandbox.spy(resource, 'measure');
+    resource.state_ = ResourceState.NOT_BUILT;
+    sandbox.stub(resource, 'isDisplayed').returns(true);
+    const measureStub = sandbox.stub(resource, 'measure').callsFake(() => {
+      resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    });
     const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
-    resources.scheduleLayoutOrPreloadForSubresources_(parentResource, true, [
-      element,
-    ]);
-    expect(measureSpy).to.not.be.called;
+    resources.scheduleLayout(parentElement, element);
+    expect(measureStub).to.not.be.called;
     expect(scheduleStub).to.not.be.called;
     return resource
       .build()
@@ -549,7 +553,7 @@ describe('Resources', () => {
         return element.whenBuilt();
       })
       .then(() => {
-        expect(measureSpy).to.be.calledOnce;
+        expect(measureStub).to.be.calledOnce;
         expect(scheduleStub).to.be.calledOnce;
       });
   });
@@ -729,7 +733,7 @@ describes.fakeWin(
   }
 );
 
-describes.realWin('getElementLayoutBox', {}, env => {
+describes.realWin('getElementLayoutBox', {amp: true}, env => {
   let win;
   let sandbox;
   let resources;
@@ -755,7 +759,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
   beforeEach(() => {
     win = env.win;
     sandbox = sinon.sandbox;
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new Resources(env.ampdoc);
     resources.isRuntimeOn_ = false;
     vsyncSpy = sandbox.stub(resources.vsync_, 'run').callsFake(task => {
       task.measure({});
@@ -767,7 +771,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
   });
 
   it('should measure the element in a vsync measure', () => {
-    const element = document.createElement('div');
+    const element = win.document.createElement('div');
     element.getLayout = () => 'fixed';
     element.style.position = 'absolute';
     element.style.top = '5px';
@@ -786,7 +790,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
   });
 
   it('should measure the element via its resource in a vsync measure', () => {
-    const element = document.createElement('div');
+    const element = win.document.createElement('div');
     element.getLayout = () => 'fluid';
     element.style.position = 'absolute';
     element.style.top = '5px';
@@ -809,7 +813,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
   });
 
   it('should use the already measured value from the resource', () => {
-    const element = document.createElement('div');
+    const element = win.document.createElement('div');
     element.getLayout = () => 'fixed';
     element.style.position = 'absolute';
     element.style.top = '5px';
@@ -1083,55 +1087,50 @@ describes.realWin('Resources schedulePreload', {amp: true}, env => {
   });
 });
 
-describe('Resources discoverWork', () => {
+describes.realWin('Resources discoverWork', {amp: true}, env => {
   function createElement(rect) {
-    const signals = new Signals();
-    return {
-      ownerDocument: {defaultView: window},
-      tagName: 'amp-test',
-      isBuilt: () => {
-        return true;
-      },
-      isUpgraded: () => {
-        return true;
-      },
-      isInViewport: () => {
-        return false;
-      },
-      getAttribute: () => {
-        return null;
-      },
-      hasAttribute: () => false,
-      getBoundingClientRect: () => rect,
-      updateLayoutBox: () => {},
-      applySizesAndMediaQuery: () => {},
-      layoutCallback: () => Promise.resolve(),
-      viewportCallback: sandbox.spy(),
-      prerenderAllowed: () => true,
-      renderOutsideViewport: () => true,
-      isRelayoutNeeded: () => true,
-      pauseCallback: () => {},
-      unlayoutCallback: () => true,
-      unlayoutOnPause: () => true,
-      togglePlaceholder: () => sandbox.spy(),
-      getLayoutPriority: () => LayoutPriority.METADATA,
-      signals() {
-        return signals;
-      },
-      fakeComputedStyle: {
-        marginTop: '0px',
-        marginRight: '0px',
-        marginBottom: '0px',
-        marginLeft: '0px',
-      },
-      getLayout: () => 'fixed',
+    const element = env.win.document.createElement('amp-test');
+    element.classList.add('i-amphtml-element');
+    element.signals = () => new Signals();
+    element.whenBuilt = () => Promise.resolve();
+    element.isBuilt = () => true;
+    element.build = () => Promise.resolve();
+    element.isUpgraded = () => true;
+    element.updateLayoutBox = () => {};
+    element.getPlaceholder = () => null;
+    element.getLayoutPriority = () => LayoutPriority.CONTENT;
+    element.dispatchCustomEvent = () => {};
+    element.getLayout = () => 'fixed';
+
+    element.isInViewport = () => false;
+    element.getAttribute = () => null;
+    element.hasAttribute = () => false;
+    element.getBoundingClientRect = () => rect;
+    element.applySizesAndMediaQuery = () => {};
+    element.layoutCallback = () => Promise.resolve();
+    element.viewportCallback = sandbox.spy();
+    element.prerenderAllowed = () => true;
+    element.renderOutsideViewport = () => true;
+    element.isRelayoutNeeded = () => true;
+    element.pauseCallback = () => {};
+    element.unlayoutCallback = () => true;
+    element.unlayoutOnPause = () => true;
+    element.togglePlaceholder = () => sandbox.spy();
+    element.fakeComputedStyle = {
+      marginTop: '0px',
+      marginRight: '0px',
+      marginBottom: '0px',
+      marginLeft: '0px',
     };
+    env.win.document.body.appendChild(element);
+    return element;
   }
 
   function createResource(id, rect) {
     const resource = new Resource(id, createElement(rect), resources);
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
+    // sandbox.stub(resource, 'isDisplayed').returns(true);
     return resource;
   }
 
@@ -1141,19 +1140,18 @@ describe('Resources discoverWork', () => {
   let resource1, resource2;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
+    sandbox = env.sandbox;
     toggleExperiment(window, 'amp-force-prerender-visible-elements', true);
-    resources = new Resources(new AmpDocSingle(window));
+    const viewer = Services.viewerForDoc(env.ampdoc);
+    sandbox.stub(viewer, 'isRuntimeOn').returns(true);
+    resources = new Resources(env.ampdoc);
     viewportMock = sandbox.mock(resources.viewport_);
 
-    resources.win = {
-      document,
-      getComputedStyle: el => {
-        return el.fakeComputedStyle
-          ? el.fakeComputedStyle
-          : window.getComputedStyle(el);
-      },
-    };
+    sandbox.stub(env.win, 'getComputedStyle').callsFake(el => {
+      return el.fakeComputedStyle
+        ? el.fakeComputedStyle
+        : window.getComputedStyle(el);
+    });
 
     resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
     resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
@@ -1543,7 +1541,7 @@ describe('Resources discoverWork', () => {
     const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = false;
-    resource1.element.nextSibling = {};
+    sandbox.stub(resource1.element, 'nextSibling').returns({});
     resource1.element.isBuilt = sandbox
       .stub()
       .onFirstCall()
@@ -1599,7 +1597,7 @@ describe('Resources discoverWork', () => {
   it('should layout resource if outside viewport but idle', () => {
     const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     resources.documentReady_ = true;
-    resource1.element.nextSibling = {};
+    sandbox.stub(resource1.element, 'nextSibling').returns({});
     resource1.element.isBuilt = () => true;
     resource1.element.renderOutsideViewport = () => false;
     resource1.element.idleRenderOutsideViewport = () => true;
@@ -1665,7 +1663,7 @@ describe('Resources discoverWork', () => {
       resource1.measure();
       const stub1 = sandbox.stub(resource1, 'measure');
       const stub2 = sandbox.stub(resource2, 'measure');
-      return resources.getResourcesInRect(window, rect).then(() => {
+      return resources.getResourcesInRect(env.win, rect).then(() => {
         expect(stub1).to.not.be.called;
         expect(stub2).to.be.calledOnce;
       });
@@ -1679,7 +1677,7 @@ describe('Resources discoverWork', () => {
       resource2.hasOwner = () => true;
       const stub1 = sandbox.stub(resource1, 'measure');
       const stub2 = sandbox.stub(resource2, 'measure');
-      return resources.getResourcesInRect(window, rect).then(() => {
+      return resources.getResourcesInRect(env.win, rect).then(() => {
         expect(stub1).to.not.be.called;
         expect(stub2).to.not.be.called;
       });
@@ -1687,7 +1685,7 @@ describe('Resources discoverWork', () => {
 
     it('should resolve visible elements', () => {
       const rect = layoutRectLtwh(0, 0, 100, 1500);
-      return resources.getResourcesInRect(window, rect).then(res => {
+      return resources.getResourcesInRect(env.win, rect).then(res => {
         expect(res).to.have.length(2);
         expect(res[0]).to.equal(resource1);
         expect(res[1]).to.equal(resource2);
@@ -1698,7 +1696,7 @@ describe('Resources discoverWork', () => {
       const rect = layoutRectLtwh(0, 0, 100, 1500);
       resource2.element.getBoundingClientRect = () =>
         layoutRectLtwh(0, 0, 0, 0);
-      return resources.getResourcesInRect(window, rect).then(res => {
+      return resources.getResourcesInRect(env.win, rect).then(res => {
         expect(res).to.have.length(1);
         expect(res[0]).to.equal(resource1);
       });
@@ -1706,7 +1704,7 @@ describe('Resources discoverWork', () => {
 
     it('should ignore out-of-rect elements', () => {
       const rect = layoutRectLtwh(0, 0, 100, 100);
-      return resources.getResourcesInRect(window, rect).then(res => {
+      return resources.getResourcesInRect(env.win, rect).then(res => {
         expect(res).to.have.length(1);
         expect(res[0]).to.equal(resource1);
       });
@@ -1715,7 +1713,7 @@ describe('Resources discoverWork', () => {
     it('should allow out-of-rect fixed elements', () => {
       const rect = layoutRectLtwh(0, 0, 100, 100);
       resource2.isFixed = () => true;
-      return resources.getResourcesInRect(window, rect).then(res => {
+      return resources.getResourcesInRect(env.win, rect).then(res => {
         expect(res).to.have.length(2);
         expect(res[0]).to.equal(resource1);
         expect(res[1]).to.equal(resource2);
@@ -1726,7 +1724,7 @@ describe('Resources discoverWork', () => {
       const rect = layoutRectLtwh(0, 0, 100, 1500);
       resource1.hostWin = {};
       resource2.hasOwner = () => true;
-      return resources.getResourcesInRect(window, rect).then(res => {
+      return resources.getResourcesInRect(env.win, rect).then(res => {
         expect(res).to.have.length(0);
       });
     });
@@ -2920,43 +2918,40 @@ describe('Resources changeSize', () => {
   });
 });
 
-describe('Resources mutateElement and collapse', () => {
+describes.realWin('Resources mutateElement and collapse', {amp: true}, env => {
   function createElement(rect, isAmp) {
-    const signals = new Signals();
-    return {
-      ownerDocument: {defaultView: window},
-      tagName: isAmp ? 'amp-test' : 'div',
-      classList: {
-        contains: className => isAmp && className == 'i-amphtml-element',
-      },
-      getElementsByClassName: () => [],
-      isBuilt: () => {
-        return true;
-      },
-      isUpgraded: () => {
-        return true;
-      },
-      getAttribute: () => {
-        return null;
-      },
-      hasAttribute: () => null,
-      getBoundingClientRect: () => rect,
-      applySizesAndMediaQuery: () => {},
-      layoutCallback: () => Promise.resolve(),
-      viewportCallback: sandbox.spy(),
-      prerenderAllowed: () => true,
-      renderOutsideViewport: () => false,
-      isRelayoutNeeded: () => true,
-      contains: unused_otherElement => false,
-      updateLayoutBox: () => {},
-      overflowCallback: (unused_overflown, unused_requestedHeight) => {},
-      unlayoutOnPause: () => false,
-      pauseCallback: () => {},
-      unlayoutCallback: () => {},
-      getLayoutPriority: () => LayoutPriority.CONTENT,
-      signals: () => signals,
-      getLayout: () => 'fixed',
-    };
+    const element = env.win.document.createElement(isAmp ? 'amp-test' : 'div');
+    if (isAmp) {
+      element.classList.add('i-amphtml-element');
+    }
+    element.signals = () => new Signals();
+    element.whenBuilt = () => Promise.resolve();
+    element.isBuilt = () => true;
+    element.build = () => Promise.resolve();
+    element.isUpgraded = () => true;
+    element.updateLayoutBox = () => {};
+    element.getPlaceholder = () => null;
+    element.getLayoutPriority = () => LayoutPriority.CONTENT;
+    element.dispatchCustomEvent = () => {};
+    element.getLayout = () => 'fixed';
+
+    element.isInViewport = () => false;
+    element.getAttribute = () => null;
+    element.hasAttribute = () => false;
+    element.getBoundingClientRect = () => rect;
+    element.applySizesAndMediaQuery = () => {};
+    element.layoutCallback = () => Promise.resolve();
+    element.viewportCallback = sandbox.spy();
+    element.prerenderAllowed = () => true;
+    element.renderOutsideViewport = () => true;
+    element.isRelayoutNeeded = () => true;
+    element.pauseCallback = () => {};
+    element.unlayoutCallback = () => true;
+    element.unlayoutOnPause = () => true;
+    element.togglePlaceholder = () => sandbox.spy();
+
+    env.win.document.body.appendChild(element);
+    return element;
   }
 
   function createResource(id, rect) {
@@ -2983,7 +2978,7 @@ describe('Resources mutateElement and collapse', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new Resources(env.ampdoc);
     resources.isRuntimeOn_ = false;
     viewportMock = sandbox.mock(resources.viewport_);
     resources.vsync_ = {
