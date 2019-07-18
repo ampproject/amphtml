@@ -217,9 +217,6 @@ export class ViewportBindingDef {
  * @return {number}
  */
 export function marginBottomOfLastChild(win, element) {
-  if (!isExperimentOn(win, 'margin-bottom-in-content-height')) {
-    return 0;
-  }
   let style;
   for (let n = element.lastElementChild; n; n = n.previousElementSibling) {
     const r = n./*OK*/ getBoundingClientRect();
