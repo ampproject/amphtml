@@ -388,11 +388,11 @@ describes.realWin(
         await autoAds.layoutCallback();
 
         const ampAd = doc.querySelector('amp-ad');
-        expect(ampAd.hasAttribute('type')).to.be.true;
-        expect(ampAd.hasAttribute('data-slot')).to.be.true;
+        expect(ampAd).to.have.attribute('type');
+        expect(ampAd).to.have.attribute('data-slot');
+        expect(ampAd).not.to.have.attribute('width');
+        expect(ampAd).not.to.have.attribute('height');
         expect(ampAd.getAttribute('layout')).to.equal('fill');
-        expect(ampAd.hasAttribute('width')).to.be.false;
-        expect(ampAd.hasAttribute('height')).to.be.false;
       });
 
       it('should stringify attributes given as objects', async () => {
