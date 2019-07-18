@@ -196,7 +196,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {Document} */
+    /** @private */
     this.doc_ = this.win.document;
 
     /** @private {?../../amp-story/1.0/amp-story.AmpStory} */
@@ -296,11 +296,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     );
   }
 
-  /**
-   * @override
-   * @return {Promise}
-   */
-  buildCallback(opt_mockStoryForTesting) {
+  /** @override */
+  buildCallback() {
     return Services.storyStoreServiceForOrNull(this.win).then(storeService => {
       devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
       this.storeService_ = storeService;
@@ -321,7 +318,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       extensionService./*OK*/ installExtensionForDoc(ampdoc, MUSTACHE_TAG);
 
       return ampStoryElement.getImpl().then(impl => {
-        this.ampStory_ = opt_mockStoryForTesting || impl;
+        this.ampStory_ = impl;
       });
     });
   }
@@ -346,6 +343,14 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         this.readConfig_();
         this.schedulePage_();
       });
+  }
+
+  /**
+   * @visibleForTesting
+   * @param {!../../amp-story/1.0/amp-story.AmpStory} mockStory
+   */
+  injectStoryDependency(mockStory) {
+    this.ampStory_ = mockStory;
   }
 
   /**
@@ -832,7 +837,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {Element} adElement
    */
   setVisibleAttribute_(adElement) {
-    const friendlyIframeEmbed = adElement.querySelector('iframe');
+    const friendlyIframeEmbed = /** @type {HTMLIFrameElement} */ (adElement.querySelector(
+      'iframe'
+    ));
     // TODO(calebcordry): Properly handle visible trigger for custom ads.
     if (!friendlyIframeEmbed) {
       return;
@@ -988,14 +995,22 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return;
     }
 
-    const root = createElementWithAttributes(this.doc_, 'div', {
-      role: 'button',
-    });
+    const root = createElementWithAttributes(
+      this.doc_,
+      'div',
+      dict({
+        'role': 'button',
+      })
+    );
 
-    const adChoicesIcon = createElementWithAttributes(this.doc_, 'img', {
-      class: 'i-amphtml-ad-choices-icon',
-      src,
-    });
+    const adChoicesIcon = createElementWithAttributes(
+      this.doc_,
+      'img',
+      dict({
+        'class': 'i-amphtml-ad-choices-icon',
+        'src': src,
+      })
+    );
 
     adChoicesIcon.addEventListener(
       'click',

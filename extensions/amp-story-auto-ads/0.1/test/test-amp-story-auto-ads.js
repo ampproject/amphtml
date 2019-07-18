@@ -67,7 +67,8 @@ describes.realWin(
       beforeEach(async () => {
         const storyImpl = new MockStoryImpl(storyElement);
         addStoryAutoAdsConfig(doc, adElement);
-        await autoAds.buildCallback(storyImpl);
+        await autoAds.buildCallback();
+        autoAds.injectStoryDependency(storyImpl);
         autoAds.layoutCallback();
       });
 
@@ -167,7 +168,8 @@ describes.realWin(
         addStoryAutoAdsConfig(doc, adElement);
         const storyImpl = new MockStoryImpl(storyElement);
         await addStoryPages(doc, storyImpl);
-        await autoAds.buildCallback(storyImpl);
+        await autoAds.buildCallback();
+        autoAds.injectStoryDependency(storyImpl);
         await autoAds.layoutCallback();
         fireBuildSignals(doc);
         return Promise.resolve();
@@ -377,7 +379,8 @@ describes.realWin(
 
         addStoryAutoAdsConfig(doc, adElement, config);
         const storyImpl = new MockStoryImpl(storyElement);
-        await autoAds.buildCallback(storyImpl);
+        await autoAds.buildCallback();
+        autoAds.injectStoryDependency(storyImpl);
         await autoAds.layoutCallback();
 
         const ampAd = doc.querySelector('amp-ad');
@@ -400,7 +403,8 @@ describes.realWin(
 
         addStoryAutoAdsConfig(doc, adElement, config);
         const storyImpl = new MockStoryImpl(storyElement);
-        await autoAds.buildCallback(storyImpl);
+        await autoAds.buildCallback();
+        autoAds.injectStoryDependency(storyImpl);
         await autoAds.layoutCallback();
 
         const ampAd = doc.querySelector('amp-ad');
