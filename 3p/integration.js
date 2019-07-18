@@ -213,6 +213,7 @@ import {relap} from '../ads/relap';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
+import {rnetplus} from '../ads/rnetplus';
 import {rubicon} from '../ads/rubicon';
 import {runative} from '../ads/runative';
 import {sas} from '../ads/sas';
@@ -279,9 +280,11 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  idealmedia: true,
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
+  mgid: true,
   miximedia: true,
   mywidget: true,
   opinary: true,
@@ -472,6 +475,7 @@ register('relap', relap);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rfp', rfp);
+register('rnetplus', rnetplus);
 register('rubicon', rubicon);
 register('runative', runative);
 register('sas', sas);

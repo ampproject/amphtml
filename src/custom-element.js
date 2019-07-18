@@ -1631,7 +1631,7 @@ function createBaseCustomElementClass(win) {
       // 5. The element is a `placeholder` or a `fallback`;
       // 6. The element's layout is not a size-defining layout.
       // 7. The document is A4A.
-      if (this.isInA4A_()) {
+      if (this.isInA4A()) {
         return false;
       }
       if (this.loadingDisabled_ === undefined) {
@@ -1654,9 +1654,8 @@ function createBaseCustomElementClass(win) {
 
     /**
      * @return {boolean}
-     * @private
      */
-    isInA4A_() {
+    isInA4A() {
       return (
         // in FIE
         (this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView) ||
