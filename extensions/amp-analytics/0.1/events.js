@@ -399,7 +399,7 @@ export class CustomEventTracker extends EventTracker {
   }
 }
 
-class AmpStoryEventTracker extends EventTracker {
+export class AmpStoryEventTracker extends EventTracker {
   /**
    * @param {!./analytics-root.AnalyticsRoot} root
    */
