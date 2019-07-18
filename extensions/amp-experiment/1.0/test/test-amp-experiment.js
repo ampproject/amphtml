@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as applyExperiment from '../apply-experiment';
 import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
@@ -170,50 +171,13 @@ describes.realWin(
       );
     });
 
-    it(
-      'should throw if the chosen experiment / ' +
-        'variant config has too many mutations',
-      () => {
-        const tooManyMutationsConfig = {
-          'experiment-1': {
-            variants: {
-              'variant-a': {
-                weight: 50,
-                mutations: new Array(200).fill({}),
-              },
-              'variant-b': {
-                weight: 50,
-                mutations: new Array(200).fill({}),
-              },
-            },
-          },
-        };
-
-        addConfigElement(
-          'script',
-          'application/json',
-          JSON.stringify(tooManyMutationsConfig)
-        );
-        stubAllocateVariant(sandbox, tooManyMutationsConfig);
-
-        expectAsyncConsoleError(/Max number of mutations/);
-        return experiment.buildCallback().then(
-          () => {
-            throw new Error('must have failed');
-          },
-          e => {
-            expect(e).to.match(/Max number of mutations/);
-          }
-        );
-      }
-    );
-
     it('should match the variant to the experiment', () => {
       addConfigElement('script');
-      stubAllocateVariant(sandbox, config);
 
-      const applyStub = sandbox.stub(experiment, 'applyMutations_');
-      sandbox.stub(experiment, 'validateExperimentToVariant_');
+      stubAllocateVariant(sandbox, config);
+      const applyStub = sandbox
+        .stub(applyExperiment, 'applyExperimentToVariant')
+        .returns(Promise.resolve());
 
       experiment.buildCallback();
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())
@@ -225,7 +189,7 @@ describes.realWin(
             'experiment-3': null,
           });
 
-          expect(applyStub).to.be.calledTwice;
+          expect(applyStub).to.be.calledOnce;
         });
     });
 
@@ -234,9 +198,11 @@ describes.realWin(
         '_disable_all_experiments_ is enabled',
       () => {
         addConfigElement('script');
-        stubAllocateVariant(sandbox, config);
 
-        const applyStub = sandbox.stub(experiment, 'applyMutations_');
+        stubAllocateVariant(sandbox, config);
+        const applyStub = sandbox
+          .stub(applyExperiment, 'applyExperimentToVariant')
+          .returns(Promise.resolve());
 
         sandbox.stub(Services, 'viewerForDoc').returns({
           getParam: () => true,
