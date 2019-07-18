@@ -196,8 +196,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @visibleForTesting {!document} */
-    this.doc = this.element.ownerDocument;
+    /** @private {Document} */
+    this.doc_ = this.win.document;
 
     /** @private {?../../amp-story/1.0/amp-story.AmpStory} */
     this.ampStory_ = null;
@@ -222,6 +222,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.lastCreatedAdElement_ = null;
+
+    /** @private */
+    this.lastCreatedAdImpl_ = null;
 
     /** @private {?Element}} */
     this.visibleAdBody_ = null;
@@ -293,7 +296,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     );
   }
 
-  /** @override */
+  /**
+   * @override
+   * @return {Promise}
+   */
   buildCallback(opt_mockStoryForTesting) {
     return Services.storyStoreServiceForOrNull(this.win).then(storeService => {
       devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
@@ -352,7 +358,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   forceRender(pageBeforeAdId, iframeContent = '') {
     this.isCurrentAdLoaded_ = true;
 
-    // TODO(ccordry): inject ctaButtons dynamically for testing.
+    // TODO(ccordry): Inject ctaButtons dynamically for testing.
     this.lastCreatedAdElement_.setAttribute(DataAttrs.CTA_TYPE, 'SHOP');
     this.lastCreatedAdElement_.setAttribute(
       DataAttrs.CTA_URL,
@@ -360,7 +366,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     );
 
     // Mock creation of iframe that is normally handled by amp-ad.
-    const iframe = this.doc.createElement('iframe');
+    const iframe = this.doc_.createElement('iframe');
     iframe.srcdoc = iframeContent;
     this.lastCreatedAdElement_.appendChild(iframe);
     this.lastCreatedAdImpl_.iframe = iframe;
@@ -491,12 +497,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdOverlay_() {
-    const root = this.doc.createElement('div');
+    const root = this.doc_.createElement('div');
 
-    this.adBadgeContainer_ = this.doc.createElement('aside');
+    this.adBadgeContainer_ = this.doc_.createElement('aside');
     this.adBadgeContainer_.className = 'i-amphtml-ad-overlay-container';
 
-    const badge = this.doc.createElement('p');
+    const badge = this.doc_.createElement('p');
     badge.className = 'i-amphtml-story-ad-attribution';
     badge.textContent = 'Ad';
 
@@ -551,10 +557,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const ampStoryAdPage = this.createPageElement_();
     const ampAd = this.createAdElement_();
 
-    const glassPane = this.doc.createElement('div');
+    const glassPane = this.doc_.createElement('div');
     glassPane.classList.add(GLASS_PANE_CLASS);
 
-    const gridLayer = this.doc.createElement('amp-story-grid-layer');
+    const gridLayer = this.doc_.createElement('amp-story-grid-layer');
     gridLayer.setAttribute('template', 'fill');
 
     const paneGridLayer = gridLayer.cloneNode(false);
@@ -621,7 +627,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       'i-amphtml-loading': '',
     });
 
-    return createElementWithAttributes(this.doc, 'amp-story-page', attributes);
+    return createElementWithAttributes(this.doc_, 'amp-story-page', attributes);
   }
 
   /**
@@ -669,7 +675,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       requiredAttrs
     ));
 
-    return createElementWithAttributes(this.doc, 'amp-ad', attributes);
+    return createElementWithAttributes(this.doc_, 'amp-ad', attributes);
   }
 
   /**
@@ -713,7 +719,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   createCtaLayer_(adPageElement, ctaText, ctaUrl) {
     // TODO(ccordry): Move button to shadow root.
-    const a = this.doc.createElement('a');
+    const a = this.doc_.createElement('a');
     a.className = 'i-amphtml-story-ad-link';
     a.setAttribute('target', '_blank');
     setStyles(a, {
@@ -740,7 +746,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.analyticsEvent_(Events.AD_CLICKED, vars);
     });
 
-    const ctaLayer = this.doc.createElement('amp-story-cta-layer');
+    const ctaLayer = this.doc_.createElement('amp-story-cta-layer');
     ctaLayer.appendChild(a);
     adPageElement.appendChild(ctaLayer);
     return true;
@@ -982,11 +988,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return;
     }
 
-    const root = createElementWithAttributes(this.doc, 'div', {
+    const root = createElementWithAttributes(this.doc_, 'div', {
       role: 'button',
     });
 
-    const adChoicesIcon = createElementWithAttributes(this.doc, 'img', {
+    const adChoicesIcon = createElementWithAttributes(this.doc_, 'img', {
       class: 'i-amphtml-ad-choices-icon',
       src,
     });

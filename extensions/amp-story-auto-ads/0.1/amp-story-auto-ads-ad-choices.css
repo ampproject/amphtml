@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-  .i-amphtml-ad-choices-icon  {
-    position: fixed;
-    bottom: 0 !important;
-    max-height: 15px !important;
-    /* 1 greater than cta layer. */
-    z-index: 4 !important;
-  }
-  
+.i-amphtml-ad-choices-icon  {
+  position: fixed;
+  bottom: 0 !important;
+  max-height: 15px !important;
+  /* 1 greater than cta layer. */
+  z-index: 4 !important;
+}

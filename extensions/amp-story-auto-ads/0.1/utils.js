@@ -55,7 +55,7 @@ function queryForMetaTagName(doc, name) {
 
 /**
  * Gets content from a meta tag in the doc with given name.
- * @param {!Document} doc
+ * @param {Document} doc
  * @param {string} name
  */
 export function getContentFromMetaTag(doc, name) {
@@ -66,7 +66,7 @@ export function getContentFromMetaTag(doc, name) {
 /**
  * Returns document from given iframe, or null if non FIE.
  * @param {HTMLIFrameElement} iframe
- * @return {?Document}
+ * @return {Document}
  */
 export function getFrameDoc(iframe) {
   return iframe.contentDocument || iframe.contentWindow.document;
