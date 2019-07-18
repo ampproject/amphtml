@@ -1,5 +1,3 @@
-import {Services} from '../../../src/services';
-
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -16,6 +14,8 @@ import {Services} from '../../../src/services';
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+
 /**
  * Returns a promise to the layoutBox for the element. If the element is
  * resource-backed then makes use of the resource layoutBox, otherwise
@@ -31,7 +31,7 @@ export function getElementLayoutBox(element) {
   }
   const vsync = Services.vsyncFor(element.ownerDocument.defaultView);
   return vsync.measurePromise(() => {
-    const viewport = Services.viewerForDoc(element);
+    const viewport = Services.viewportForDoc(element);
     return viewport.getLayoutRect(element);
   });
 }
