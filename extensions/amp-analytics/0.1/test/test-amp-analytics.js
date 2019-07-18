@@ -741,7 +741,7 @@ describes.realWin(
 
     describe('expand selector', () => {
       it('expands selector with config variable', () => {
-        const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+        const tracker = ins.root_.getTracker('click', ClickEventTracker);
         const addStub = sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag({
           requests: {foo: 'https://example.com/bar'},
@@ -757,7 +757,7 @@ describes.realWin(
 
       function selectorExpansionTest(selector) {
         it('expand selector value: ' + selector, () => {
-          const tracker = ins.ampdocRoot_.getTracker(
+          const tracker = ins.root_.getTracker(
             'click',
             ClickEventTracker
           );
@@ -800,7 +800,7 @@ describes.realWin(
       ].map(selectorExpansionTest);
 
       it('does not expands selector with platform variable', () => {
-        const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+        const tracker = ins.root_.getTracker('click', ClickEventTracker);
         const addStub = sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag({
           requests: {foo: 'https://example.com/bar'},
@@ -1488,7 +1488,7 @@ describes.realWin(
       it('should not add listener when eventType is not whitelist', function() {
         expectAsyncConsoleError(clickTrackerNotSupportedError);
         // Right now we only whitelist VISIBLE & HIDDEN
-        const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+        const tracker = ins.root_.getTracker('click', ClickEventTracker);
         const addStub = sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag(
           {
@@ -1506,7 +1506,7 @@ describes.realWin(
       });
 
       it('replace selector and selectionMethod when in scope', () => {
-        const tracker = ins.ampdocRoot_.getTracker(
+        const tracker = ins.root_.getTracker(
           'visible',
           VisibilityTracker
         );
