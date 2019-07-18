@@ -439,7 +439,7 @@ export class Resources {
       return this.ensuredMeasured_(resource);
     }
     return this.vsync_.measurePromise(() => {
-      return this.getViewport().getLayoutRect(element);
+      return this.viewport_.getLayoutRect(element);
     });
   }
 
@@ -456,14 +456,6 @@ export class Resources {
       resource.measure();
       return resource.getPageLayoutBox();
     });
-  }
-
-  /**
-   * Returns the viewport instance
-   * @return {!./viewport/viewport-impl.Viewport}
-   */
-  getViewport() {
-    return this.viewport_;
   }
 
   /**

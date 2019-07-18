@@ -27,13 +27,13 @@ describes.realWin('Resource', {amp: true}, env => {
   let elementMock;
   let resources;
   let resource;
-  let viewportMock;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
 
     element = env.createAmpElement('amp-ad');
+    doc.body.appendChild(element);
     sandbox
       .stub(element, 'getLayoutPriority')
       .callsFake(() => LayoutPriority.ADS);
@@ -44,9 +44,8 @@ describes.realWin('Resource', {amp: true}, env => {
     sandbox
       .stub(Resources.prototype, 'rebuildDomWhenReady_')
       .callsFake(() => {});
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new Resources(env.ampdoc);
     resource = new Resource(1, element, resources);
-    viewportMock = sandbox.mock(resources.viewport_);
 
     const vsync = Services.vsyncFor(win);
     sandbox.stub(vsync, 'mutate').callsFake(mutator => {
@@ -64,7 +63,6 @@ describes.realWin('Resource', {amp: true}, env => {
   });
 
   afterEach(() => {
-    viewportMock.verify();
     elementMock.verify();
   });
 
@@ -240,18 +238,12 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('isUpgraded')
       .returns(false)
       .atLeast(1);
-    const viewport = {
-      getLayoutRect() {
-        return layoutRectLtwh(0, 100, 300, 100);
-      },
-      isDeclaredFixed() {
-        return false;
-      },
-      supportsPositionFixed() {
-        return true;
-      },
-    };
-    resource.resources_.getViewport = () => viewport;
+    const viewport = Services.viewportForDoc(resource.element);
+    sandbox
+      .stub(viewport, 'getLayoutRect')
+      .returns(layoutRectLtwh(0, 100, 300, 100));
+    sandbox.stub(viewport, 'isDeclaredFixed').returns(false);
+    sandbox.stub(viewport, 'supportsPositionFixed').returns(true);
     expect(() => {
       resource.measure();
     }).to.not.throw();
@@ -453,10 +445,8 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('getBoundingClientRect')
       .returns(layoutRectLtwh(0, 0, 10, 10))
       .once();
-    viewportMock
-      .expects('getScrollTop')
-      .returns(11)
-      .atLeast(0);
+    const viewport = Services.viewportForDoc(resource.element);
+    sandbox.stub(viewport, 'getScrollTop').returns(11);
     Object.defineProperty(element, 'offsetParent', {
       value: {
         isAlwaysFixed: () => true,
@@ -478,24 +468,22 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('getBoundingClientRect')
       .returns(layoutRectLtwh(0, 0, 10, 10))
       .once();
-    viewportMock
-      .expects('getScrollTop')
-      .returns(11)
-      .atLeast(0);
+
+    const viewport = Services.viewportForDoc(resource.element);
+    sandbox.stub(viewport, 'getScrollTop').returns(11);
+
     const fixedParent = doc.createElement('div');
     fixedParent.style.position = 'fixed';
     doc.body.appendChild(fixedParent);
     fixedParent.appendChild(element);
-    viewportMock
-      .expects('isDeclaredFixed')
-      .withExactArgs(element)
-      .returns(false)
-      .once();
-    viewportMock
-      .expects('isDeclaredFixed')
-      .withExactArgs(fixedParent)
-      .returns(true)
-      .once();
+    sandbox.stub(viewport, 'isDeclaredFixed').callsFake(el => {
+      if (el == element) {
+        return false;
+      }
+      if (el == fixedParent) {
+        return true;
+      }
+    });
     resource.measure();
     expect(resource.isFixed()).to.be.true;
     // layoutBox != pageLayoutBox
@@ -1191,7 +1179,7 @@ describe('Resource idleRenderOutsideViewport', () => {
   });
 });
 
-describe('Resource renderOutsideViewport', () => {
+describes.realWin('Resource renderOutsideViewport', {amp: true}, env => {
   let sandbox;
   let element;
   let resources;
@@ -1201,43 +1189,20 @@ describe('Resource renderOutsideViewport', () => {
   let resolveWithinViewportSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
+    sandbox = env.sandbox;
 
-    element = {
-      ownerDocument: {defaultView: window},
-      tagName: 'AMP-AD',
-      hasAttribute: () => false,
-      isBuilt: () => false,
-      isUpgraded: () => false,
-      prerenderAllowed: () => false,
-      renderOutsideViewport: () => true,
-      build: () => false,
-      getBoundingClientRect: () => null,
-      updateLayoutBox: () => {},
-      isRelayoutNeeded: () => false,
-      layoutCallback: () => {},
-      changeSize: () => {},
-      unlayoutOnPause: () => false,
-      unlayoutCallback: () => true,
-      pauseCallback: () => false,
-      resumeCallback: () => false,
-      viewportCallback: () => {},
-      getLayoutPriority: () => LayoutPriority.CONTENT,
-    };
+    element = env.createAmpElement('amp-ad');
+    env.win.document.body.appendChild(element);
 
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new Resources(env.ampdoc);
     resource = new Resource(1, element, resources);
-    viewport = resources.viewport_;
+    viewport = Services.viewportForDoc(env.ampdoc);
     renderOutsideViewport = sandbox.stub(element, 'renderOutsideViewport');
     sandbox.stub(viewport, 'getRect').returns(layoutRectLtwh(0, 0, 100, 100));
     resolveWithinViewportSpy = sandbox.spy(
       resource,
       'resolveDeferredsWhenWithinViewports_'
     );
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('boolean API', () => {
