@@ -25,9 +25,11 @@ import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   MockStoryImpl,
+  addCtaValues,
   addStoryAutoAdsConfig,
   addStoryPages,
   fireBuildSignals,
+  insertAdContent,
 } from './story-mock';
 import {Services} from '../../../../src/services';
 import {macroTask} from '../../../../testing/yield';
@@ -174,7 +176,7 @@ describes.realWin(
         return Promise.resolve();
       });
 
-      it('renders the ad choices icon', async () => {
+      it('renders the ad choices icon if meta tags present', async () => {
         const windowOpenStub = sandbox.stub(win, 'open');
         const icon =
           'https://tpc.googlesyndication.com/pagead/images/adchoices/icon.png';
@@ -183,16 +185,18 @@ describes.realWin(
           <meta name="amp4ads-vars-attribution-icon" content="${icon}">
           <meta name="amp4ads-vars-attribution-url" content="${url}">
         `;
-        await autoAds.forceRender(
-          'story-page-0' /* pageBeforeAdId */,
-          iframeContent
-        );
+        addCtaValues(autoAds, 'SHOP', 'https://example.com');
+        await insertAdContent(autoAds, iframeContent);
+        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
         const adChoices = doc.querySelector('.i-amphtml-ad-choices-icon');
         expect(adChoices).to.exist;
         expect(adChoices.getAttribute('src')).to.equal(icon);
         adChoices.click();
         expect(windowOpenStub).to.be.calledWith(url);
       });
+
+      // Doesn't render without meta tag
+      // Throws if only one value.
     });
 
     describe('analytics triggers', () => {

@@ -112,3 +112,27 @@ export function fireBuildSignals(doc, additonalSelectors = []) {
     .querySelectorAll(selectors)
     .forEach(element => element.signals().signal(CommonSignals.BUILT));
 }
+
+/**
+ * Add specified CTA values to most recently created ad.
+ * @param {!../amp-story-auto-autoAds.AmpStoryAutoAds} autoAdsImpl
+ * @param {string} ctaType
+ * @param {string} ctaUrl
+ */
+export function addCtaValues(autoAdsImpl, ctaType, ctaUrl) {
+  autoAdsImpl.lastCreatedAdElement_.setAttribute('data-vars-ctatype', ctaType);
+  autoAdsImpl.lastCreatedAdElement_.setAttribute('data-vars-ctaurl', ctaUrl);
+}
+
+/**
+ * Mock creation of iframe that is normally handled by amp-ad.
+ * @param {!../amp-story-auto-autoAds.AmpStoryAutoAds} autoAdsImpl
+ * @param {string} content
+ */
+export function insertAdContent(autoAdsImpl, content) {
+  const iframe = autoAdsImpl.doc_.createElement('iframe');
+  iframe.srcdoc = content;
+  autoAdsImpl.lastCreatedAdElement_.appendChild(iframe);
+  autoAdsImpl.lastCreatedAdImpl_.iframe = iframe;
+  return autoAdsImpl.loadPromise(iframe);
+}

@@ -34,7 +34,6 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getContentFromMetaTag, getFrameDoc, getUniqueId} from './utils';
 import {isObject} from '../../../src/types';
-import {loadPromise} from '../../../src/event-helper.js';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
@@ -349,28 +348,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * Force this extension to behave as if ad is about to be shown.
    * Used for testing but should be extended to force an ad to show in a real story.
    * @param {string} pageBeforeAdId
-   * @param {string} iframeContent
    * @visibleForTesting
    */
-  forceRender(pageBeforeAdId, iframeContent = '') {
+  forceRender(pageBeforeAdId) {
     this.isCurrentAdLoaded_ = true;
-
-    // TODO(ccordry): Inject ctaButtons dynamically for testing.
-    this.lastCreatedAdElement_.setAttribute(DataAttrs.CTA_TYPE, 'SHOP');
-    this.lastCreatedAdElement_.setAttribute(
-      DataAttrs.CTA_URL,
-      'https://amp.dev'
-    );
-
-    // Mock creation of iframe that is normally handled by amp-ad.
-    const iframe = this.doc_.createElement('iframe');
-    iframe.srcdoc = iframeContent;
-    this.lastCreatedAdElement_.appendChild(iframe);
-    this.lastCreatedAdImpl_.iframe = iframe;
-
-    return loadPromise(iframe).then(() =>
-      this.tryToPlaceAdAfterPage_(pageBeforeAdId)
-    );
+    this.tryToPlaceAdAfterPage_(pageBeforeAdId);
   }
 
   /**
