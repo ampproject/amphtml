@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {StateChangeType} from './navigation-state';
+import {Services} from '../../../src/services';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {dict} from '../../../src/utils/object';
+import {registerServiceBuilder} from '../../../src/service';
 
 /**
  * @typedef {!JsonObject}
@@ -22,7 +24,7 @@ import {dict} from '../../../src/utils/object';
 export let StoryVariableDef;
 
 /** @enum {string} */
-const Variable = {
+export const Variable = {
   STORY_PAGE_ID: 'storyPageId',
   STORY_PAGE_INDEX: 'storyPageIndex',
   STORY_PAGE_COUNT: 'storyPageCount',
@@ -33,14 +35,33 @@ const Variable = {
 };
 
 /**
+ * Util function to retrieve the variable service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param {!Window} win
+ * @return {!AmpStoryVariableService}
+ */
+export const getVariableService = win => {
+  let service = Services.storyVariableService(win);
+
+  if (!service) {
+    service = new AmpStoryVariableService(win);
+    registerServiceBuilder(win, 'story-variable', () => service);
+  }
+
+  return service;
+};
+
+/**
  * Variable service for amp-story.
  * Used for URL replacement service. See usage in src/url-replacements-impl.
  */
 export class AmpStoryVariableService {
   /**
+   * @param {!Window} win
    * @public
    */
-  constructor() {
+  constructor(win) {
     /** @private {!StoryVariableDef} */
     this.variables_ = dict({
       [Variable.STORY_PAGE_INDEX]: null,
@@ -51,28 +72,45 @@ export class AmpStoryVariableService {
       [Variable.STORY_PREVIOUS_PAGE_ID]: null,
       [Variable.STORY_ADVANCEMENT_MODE]: null,
     });
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(win);
+
+    this.initializeListeners_();
   }
 
-  /**
-   * @param {!./navigation-state.StateChangeEventDef} stateChangeEvent
-   */
-  onNavigationStateChange(stateChangeEvent) {
-    switch (stateChangeEvent.type) {
-      case StateChangeType.ACTIVE_PAGE:
-        const {
-          pageIndex,
-          pageId,
-          storyProgress,
-          totalPages,
-          previousPageId,
-        } = stateChangeEvent.value;
-        this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
+  /** @private */
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.PAGE_IDS, pageIds => {
+      this.variables_[Variable.STORY_PAGE_COUNT] = pageIds.length;
+    });
+
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      pageId => {
+        if (!pageId) {
+          return;
+        }
+
+        this.variables_[Variable.STORY_PREVIOUS_PAGE_ID] = this.variables_[
+          Variable.STORY_PAGE_ID
+        ];
+
         this.variables_[Variable.STORY_PAGE_ID] = pageId;
-        this.variables_[Variable.STORY_PROGRESS] = storyProgress;
-        this.variables_[Variable.STORY_PAGE_COUNT] = totalPages;
-        this.variables_[Variable.STORY_PREVIOUS_PAGE_ID] = previousPageId;
-        break;
-    }
+
+        const pageIndex = /** @type {number} */ (this.storeService_.get(
+          StateProperty.CURRENT_PAGE_INDEX
+        ));
+        this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
+
+        const numberOfPages = this.storeService_.get(StateProperty.PAGE_IDS)
+          .length;
+        if (numberOfPages > 0) {
+          this.variables_[Variable.STORY_PROGRESS] = pageIndex / numberOfPages;
+        }
+      },
+      true /* callToInitialize */
+    );
   }
 
   /**

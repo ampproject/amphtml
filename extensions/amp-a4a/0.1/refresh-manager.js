@@ -201,7 +201,7 @@ export class RefreshManager {
     /** @const @private {!Element} */
     this.element_ = a4a.element;
 
-    /** @const @private {string} */
+    /** @const @protected {string} */
     this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
@@ -213,7 +213,7 @@ export class RefreshManager {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    /** @private {?(number|string)} */
+    /** @protected {?(number|string)} */
     this.refreshTimeoutId_ = null;
 
     /** @private {?(number|string)} */

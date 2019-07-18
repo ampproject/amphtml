@@ -15,6 +15,11 @@
  */
 
 import {
+  Action,
+  ActionStatus,
+  SubscriptionAnalytics,
+} from '../../../amp-subscriptions/0.1/analytics';
+import {
   ConfiguredRuntime,
   Entitlements,
   SubscribeResponse,
@@ -27,7 +32,6 @@ import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
-import {SubscriptionAnalytics} from '../../../amp-subscriptions/0.1/analytics';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
 
 const PLATFORM_ID = 'subscribe.google.com';
@@ -269,7 +273,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should delegate login when linking not requested', () => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs('login')
+      .withExactArgs(Action.LOGIN)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -280,7 +284,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     platform.isGoogleViewer_ = false;
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs('login')
+      .withExactArgs(Action.LOGIN)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.loginRequest)({linkRequested: true});
@@ -295,7 +299,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should reauthorize on complete linking', () => {
     analyticsMock
       .expects('actionEvent')
-      .withExactArgs(PLATFORM_ID, 'link', 'success')
+      .withExactArgs(PLATFORM_ID, Action.LINK, ActionStatus.SUCCESS)
       .once();
     serviceAdapterMock.expects('resetPlatforms').once();
     callback(callbacks.linkComplete)();
@@ -304,7 +308,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should reauthorize on canceled linking', () => {
     analyticsMock
       .expects('actionEvent')
-      .withExactArgs(PLATFORM_ID, 'link', 'rejected')
+      .withExactArgs(PLATFORM_ID, Action.LINK, ActionStatus.REJECTED)
       .once();
     serviceAdapterMock.expects('resetPlatforms').once();
     callback(callbacks.flowCanceled)({flow: 'linkAccount'});
@@ -313,23 +317,23 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should log subscribe start', () => {
     analyticsMock
       .expects('actionEvent')
-      .withExactArgs(PLATFORM_ID, 'subscribe', 'started')
+      .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.STARTED)
       .once();
-    callback(callbacks.flowStarted)({flow: 'subscribe'});
+    callback(callbacks.flowStarted)({flow: Action.SUBSCRIBE});
   });
 
   it('should log subscribe cancel', () => {
     analyticsMock
       .expects('actionEvent')
-      .withExactArgs(PLATFORM_ID, 'subscribe', 'rejected')
+      .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.REJECTED)
       .once();
-    callback(callbacks.flowCanceled)({flow: 'subscribe'});
+    callback(callbacks.flowCanceled)({flow: Action.SUBSCRIBE});
   });
 
   it('should reauthorize on complete subscribe', () => {
     analyticsMock
       .expects('actionEvent')
-      .withExactArgs(PLATFORM_ID, 'subscribe', 'success')
+      .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.SUCCESS)
       .once();
     const promise = Promise.resolve();
     const response = new SubscribeResponse(
@@ -353,7 +357,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should delegate native subscribe request', () => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs('subscribe')
+      .withExactArgs(Action.SUBSCRIBE)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.subscribeRequest)();
@@ -363,7 +367,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs('login')
+      .withExactArgs(Action.LOGIN)
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -376,7 +380,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const loginResult = Promise.resolve(false);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs('login')
+      .withExactArgs(Action.LOGIN)
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -389,7 +393,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs('subscribe')
+      .withExactArgs(Action.SUBSCRIBE)
       .returns(loginResult)
       .once();
     callback(callbacks.subscribeRequest)();
@@ -443,7 +447,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should allow prerender if in a google viewer', () => {
     viewer.params_['viewerUrl'] = 'https://www.google.com/other';
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
-    expect(platform.isPrerenderSafe()).to.be.true;
+    // TODO(#23102): restore safe prerendering mode. This will be `true` once
+    // it's restored.
+    expect(platform.isPrerenderSafe()).to.be.false;
   });
 
   it('should attach button given to decorateUI', () => {
@@ -455,21 +461,77 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(decorateStub).to.be.calledWith(elem);
   });
 
+  it('should attach smartbutton given to decorateUI', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('subscriptions-lang', 'en');
+    platform.decorateUI(elem, 'subscribe-smartbutton');
+    expect(elem.textContent).to.be.equal('');
+    expect(attachStub).to.be.calledWith(elem, {lang: 'en', theme: 'light'});
+  });
+
+  it('should use light smartbutton theme', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('subscriptions-lang', 'en');
+    platform.decorateUI(elem, 'subscribe-smartbutton-light');
+    expect(elem.textContent).to.be.equal('');
+    expect(attachStub).to.be.calledWith(elem, {theme: 'light', lang: 'en'});
+  });
+
+  it('should use dark smartbutton theme', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('subscriptions-lang', 'en');
+    platform.decorateUI(elem, 'subscribe-smartbutton-dark');
+    expect(elem.textContent).to.be.equal('');
+    expect(attachStub).to.be.calledWith(elem, {theme: 'dark', lang: 'en'});
+  });
+
+  it('should use message text color', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('subscriptions-lang', 'en');
+    elem.setAttribute('subscriptions-message-text-color', '#09f');
+    platform.decorateUI(elem, 'subscribe-smartbutton');
+    expect(elem.textContent).to.be.equal('');
+    expect(attachStub).to.be.calledWith(elem, {
+      lang: 'en',
+      messageTextColor: '#09f',
+      theme: 'light',
+    });
+  });
+
+  it('should throw if smartButton language is missing', () => {
+    //expectAsyncConsoleError(/must have a language attrbiute​​​/);
+    const elem = env.win.document.createElement('div');
+    elem.textContent = 'some html';
+    expect(() => {
+      allowConsoleError(() => {
+        platform.decorateUI(elem, 'subscribe-smartbutton');
+      });
+    }).to.throw(/language/);
+  });
+
   it('should show offers if subscribe action is delegated', () => {
     const executeStub = platform.runtime_.showOffers;
-    platform.executeAction('subscribe');
+    platform.executeAction(Action.SUBSCRIBE);
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
   it('should show contributions if contribute action is delegated', () => {
     const executeStub = platform.runtime_.showContributionOptions;
-    platform.executeAction('contribute');
+    platform.executeAction(Action.CONTRIBUTE);
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
   it('should link accounts if login action is delegated', () => {
     const executeStub = platform.runtime_.linkAccount;
-    platform.executeAction('login');
+    platform.executeAction(Action.LOGIN);
     expect(executeStub).to.be.calledWith();
   });
 

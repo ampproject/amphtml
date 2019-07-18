@@ -39,6 +39,7 @@ describes.realWin(
 
     async function newUserLocation(opt_config) {
       const userLocation = doc.createElement('amp-user-location');
+      userLocation.setAttribute('layout', 'nodisplay');
       doc.body.appendChild(userLocation);
 
       if (opt_config) {
@@ -53,6 +54,7 @@ describes.realWin(
       }
 
       await userLocation.build();
+      await userLocation.layoutCallback();
       return userLocation;
     }
 
@@ -61,38 +63,40 @@ describes.realWin(
       expect(element.tagName).to.equal('AMP-USER-LOCATION');
     });
 
-    it('should not build if experiment is off', () => {
+    it('should not build if experiment is off', async () => {
+      expectAsyncConsoleError(/experiment must be enabled/);
       toggleExperiment(env.win, 'amp-user-location', false);
-
-      allowConsoleError(() => {
-        try {
-          newUserLocation();
-        } catch (e) {
-          expect(e.message).to.include('experiment must be enabled');
-        }
-      });
+      await expect(newUserLocation()).to.eventually.be.rejectedWith(
+        /experiment must be enabled/
+      );
     });
 
     it('should parse config when built, if present', async () => {
+      const DEFAULT_CONFIG = {
+        fallback: undefined,
+        maximumAge: undefined,
+        precision: undefined,
+        timeout: undefined,
+      };
       const elementNoConfig = await newUserLocation();
       const implNoConfig = await elementNoConfig.getImpl();
-      expect(implNoConfig.config_).to.be.null;
+      const noConfig = await implNoConfig.getConfig_();
+      expect(noConfig).to.deep.equal(DEFAULT_CONFIG);
 
       const elementWithConfig = await newUserLocation({});
       const implWithConfig = await elementWithConfig.getImpl();
-      expect(implWithConfig.config_).to.not.be.null;
+      const config = await implWithConfig.getConfig_();
+      expect(config).to.deep.equal(DEFAULT_CONFIG);
     });
 
-    it('should error with invalid config', () => {
-      return allowConsoleError(() => {
-        try {
-          newUserLocation('this is not valid json');
-        } catch (err) {
-          expect(err.message).to.include(
-            'Failed to parse amp-user-location config'
-          );
-        }
-      });
+    it('should error with invalid config', async () => {
+      expectAsyncConsoleError(/Failed to parse/);
+      const element = await newUserLocation('this is not valid json');
+      const impl = await element.getImpl();
+
+      await expect(impl.getConfig_()).to.eventually.be.rejectedWith(
+        'Failed to parse amp-user-location config'
+      );
     });
 
     it('should parse recognized fields in the config', async () => {
@@ -106,12 +110,13 @@ describes.realWin(
 
       const element = await newUserLocation(testConfig);
       const impl = await element.getImpl();
-      expect(impl.config_).to.deep.include({
+      const config = await impl.getConfig_();
+      expect(config).to.deep.include({
         fallback: {lat: 40, lon: -22},
         maximumAge: 60000,
         timeout: 10000,
       });
-      expect(impl.config_).to.not.have.property('doNotExpose');
+      expect(config).to.not.have.property('doNotExpose');
     });
 
     it('should trigger the "approve" event if user approves geolocation', async () => {

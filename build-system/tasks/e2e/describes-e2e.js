@@ -34,9 +34,17 @@ const SUB = ' ';
 const TEST_TIMEOUT = 20000;
 const SETUP_TIMEOUT = 30000;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
+const defaultBrowsers = new Set(['chrome', 'firefox']);
+/**
+ * TODO(cvializ): Firefox now experimentally supports puppeteer.
+ * When it's more mature we might want to support it.
+ * {@link https://github.com/GoogleChrome/puppeteer/blob/master/experimental/puppeteer-firefox/README.md}
+ */
+const PUPPETEER_BROWSERS = new Set(['chrome']);
 
 /**
  * @typedef {{
+ *  browsers: string,
  *  headless: boolean,
  *  engine: string,
  * }}
@@ -277,11 +285,36 @@ function describeEnv(factory) {
     }
 
     function createBrowserDescribe() {
-      spec.browsers.forEach(browserName => {
-        describe(browserName, function() {
-          createVariantDescribe(browserName);
+      const allowedBrowsers = getAllowedBrowsers();
+
+      spec.browsers
+        .filter(x => allowedBrowsers.has(x))
+        .forEach(browserName => {
+          describe(browserName, function() {
+            createVariantDescribe(browserName);
+          });
         });
-      });
+    }
+
+    function getAllowedBrowsers() {
+      const {engine, browsers} = getConfig();
+
+      const allowedBrowsers = browsers
+        ? new Set(browsers.split(',').map(x => x.trim()))
+        : defaultBrowsers;
+
+      if (engine === 'puppeteer') {
+        const result = intersect(allowedBrowsers, PUPPETEER_BROWSERS);
+        if (result.size === 0) {
+          const browsersList = Array.from(allowedBrowsers).join(',');
+          throw new Error(
+            `browsers ${browsersList} not supported by Puppeteer`
+          );
+        }
+        return result;
+      }
+
+      return allowedBrowsers;
     }
 
     function createVariantDescribe(browserName) {
@@ -441,6 +474,17 @@ async function toggleExperiments(ampDriver, testUrl, experiments) {
   for (const experiment of experiments) {
     await ampDriver.toggleExperiment(experiment, true);
   }
+}
+
+/**
+ * Intersection of two sets
+ * @param {Set<T>} a
+ * @param {Set<T>} b
+ * @return {Set<T>}
+ * @template T
+ */
+function intersect(a, b) {
+  return new Set(Array.from(a).filter(aItem => b.has(aItem)));
 }
 
 module.exports = {

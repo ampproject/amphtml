@@ -737,7 +737,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.onLayoutMeasure();
       return impl
         .getAdUrl()
-        .then(url => expect(url).to.match(/sz=300x250%7C320x50&/));
+        .then(url => expect(url).to.match(/sz=320x50%7C300x250&/));
     });
     it('should have the correct ifi numbers - no refresh', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
@@ -860,7 +860,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(url).to.not.match(/(\?|&)npa=(&|$)/);
       }));
 
-    it('should include msz/psz if in experiment', () => {
+    it('should include msz/psz/fws if in experiment', () => {
       sandbox
         .stub(impl, 'randomlySelectUnsetExperiments_')
         .returns({flexAdSlots: '21063174'});
@@ -868,6 +868,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
         expect(url).to.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
+        expect(url).to.match(/(\?|&)fws=[0-9]+(&|$)/);
         expect(url).to.match(/(=|%2C)21063174(%2C|&|$)/);
       });
     });
@@ -880,6 +881,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       return impl.getAdUrl().then(url => {
         expect(url).to.not.match(/(\?|&)msz=/);
         expect(url).to.not.match(/(\?|&)psz=/);
+        expect(url).to.not.match(/(\?|&)fws=/);
         expect(url).to.match(/(=|%2C)21063173(%2C|&|$)/);
       });
     });
@@ -888,6 +890,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       return impl.getAdUrl().then(url => {
         expect(url).to.not.match(/(\?|&)msz=/);
         expect(url).to.not.match(/(\?|&)psz=/);
+        expect(url).to.not.match(/(\?|&)fws=/);
         expect(url).to.not.match(/(=|%2C)2106317(3|4)(%2C|&|$)/);
       });
     });
@@ -1083,8 +1086,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         };
       });
       sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
-        impl.element.setAttribute('height', height);
-        impl.element.setAttribute('width', width);
+        impl.element.style.height = `${height}px`;
+        impl.element.style.width = `${width}px`;
         return Promise.resolve();
       });
       sandbox.stub(impl, 'getAmpAdMetadata').callsFake(() => {
@@ -1205,6 +1208,25 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(impl.adUrl_).to.be.ok;
         expect(impl.adUrl_.length).to.be.ok;
       });
+    });
+
+    it('should attempt resize for fluid request + fixed response case', () => {
+      impl.isFluidRequest_ = true;
+      impl.handleResize_(350, 300);
+      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
+      expect(impl.element.getAttribute('style')).to.match(/height: 300/);
+    });
+
+    it('should attempt resize for larger width response', () => {
+      impl.handleResize_(350, 50);
+      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
+      expect(impl.element.getAttribute('style')).to.match(/height: 50/);
+    });
+
+    it('should not attempt resize for larger height response', () => {
+      impl.handleResize_(350, 300);
+      expect(impl.element.getAttribute('style')).to.match(/width: 200/);
+      expect(impl.element.getAttribute('style')).to.match(/height: 50/);
     });
   });
 

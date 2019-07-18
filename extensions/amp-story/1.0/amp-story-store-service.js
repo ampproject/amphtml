@@ -50,6 +50,7 @@ export const UIType = {
   MOBILE: 0,
   DESKTOP_PANELS: 1, // Default desktop UI.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
+  VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
 };
 
 /**
@@ -103,7 +104,6 @@ export let InteractiveComponentDef;
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
- *    pagesCount: number,
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
  * }}
@@ -148,7 +148,6 @@ export const StateProperty = {
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
-  PAGES_COUNT: 'pagesCount',
   ADVANCEMENT_MODE: 'advancementMode',
   PAGE_IDS: 'pageIds',
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
@@ -157,14 +156,14 @@ export const StateProperty = {
 /** @private @const @enum {string} */
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
-  ADD_TO_PAGE_IDS: 'addToPageIds',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
-  SET_PAGES_COUNT: 'setPagesCount',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
+  SET_PAGE_IDS: 'addToPageIds',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
+  TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
@@ -220,11 +219,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
       }));
-    case Action.ADD_TO_PAGE_IDS:
-      const newPageIds = [].concat(state[StateProperty.PAGE_IDS], data);
-      return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.PAGE_IDS]: newPageIds,
-      }));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
       // Don't change the PAUSED_STATE if ACCESS_STATE is not changed.
@@ -249,6 +243,10 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.BOOKEND_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
+      }));
+    case Action.TOGGLE_CAN_SHOW_BOOKEND:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.CAN_SHOW_BOOKEND]: !!data,
       }));
     case Action.TOGGLE_INTERACTIVE_COMPONENT:
       data = /** @type {InteractiveComponentDef} */ (data);
@@ -320,6 +318,13 @@ const actions = (state, action, data) => {
         [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data,
       }));
     case Action.TOGGLE_UI:
+      if (
+        state[StateProperty.UI_STATE] === UIType.VERTICAL &&
+        data !== UIType.VERTICAL
+      ) {
+        dev().error(TAG, 'Cannot switch away from UIType.VERTICAL');
+        return state;
+      }
       return /** @type {!State} */ (Object.assign({}, state, {
         // Keep DESKTOP_STATE for compatiblity with v0.1.
         [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
@@ -338,13 +343,13 @@ const actions = (state, action, data) => {
         [StateProperty.CURRENT_PAGE_ID]: data.id,
         [StateProperty.CURRENT_PAGE_INDEX]: data.index,
       }));
-    case Action.SET_PAGES_COUNT:
-      return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.PAGES_COUNT]: data,
-      }));
     case Action.SET_ADVANCEMENT_MODE:
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ADVANCEMENT_MODE]: data,
+      }));
+    case Action.SET_PAGE_IDS:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAGE_IDS]: data,
       }));
     default:
       dev().error(TAG, 'Unknown action %s.', action);
@@ -474,8 +479,6 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
-      // TODO(#22398): replace usage of PAGES_COUNT with PAGE_IDS.length.
-      [StateProperty.PAGES_COUNT]: 0,
       [StateProperty.ADVANCEMENT_MODE]: '',
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.NEW_PAGE_AVAILABLE_ID]: '',

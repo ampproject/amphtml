@@ -23,10 +23,9 @@ import {
 } from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {
-  StateChangeEventDef,
-  StateChangeType,
-} from '../../amp-story/1.0/navigation-state';
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+  StateProperty,
+  UIType,
+} from '../../amp-story/1.0/amp-story-store-service';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -81,14 +80,15 @@ const TIMEOUT_LIMIT = 10000; // 10 seconds
 /** @const */
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
-/** @const */
-const LOADING_ATTR = 'i-amphtml-loading';
-
-/** @const {string} */
-const NEXT_PAGE_NO_AD = 'next-page-no-ad';
-
-/** @const {string} */
-const IFRAME_BODY_VISIBLE_ATTR = 'amp-story-visible';
+/** @enum {string} */
+export const Attributes = {
+  AD_SHOWING: 'ad-showing',
+  DESKTOP_PANELS: 'desktop-panels',
+  DIR: 'dir',
+  IFRAME_BODY_VISIBLE: 'amp-story-visible',
+  LOADING: 'i-amphtml-loading',
+  NEXT_PAGE_NO_AD: 'next-page-no-ad',
+};
 
 /** @const */
 const DATA_ATTR = {
@@ -191,9 +191,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {?../../amp-story/1.0/amp-story.AmpStory} */
     this.ampStory_ = null;
 
-    /** @private {?../../amp-story/1.0/navigation-state.NavigationState} */
-    this.navigationState_ = null;
-
     /** @private {number} */
     this.uniquePagesCount_ = 0;
 
@@ -238,6 +235,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.pendingAdView_ = false;
+
+    /** @private {?Element} */
+    this.adBadgeContainer_ = null;
 
     /**
      * Version of the story store service depends on which version of amp-story
@@ -320,14 +320,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    this.navigationState_ = this.ampStory_.getNavigationState();
-    this.navigationState_.observe(this.handleStateChange_.bind(this));
-
     return this.ampStory_
       .signals()
       .whenSignal(CommonSignals.INI_LOAD)
       .then(() => {
         this.createAdOverlay_();
+        this.initializeListeners_();
         this.readConfig_();
         this.schedulePage_();
       });
@@ -341,6 +339,96 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   isAutomaticAdInsertionAllowed_() {
     return !!this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
+  }
+
+  /**
+   * Subscribes to all relevant state changes from the containing story.
+   * @private
+   */
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
+      this.onAdStateUpdate_(isAd);
+    });
+
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      rtlState => {
+        this.onRtlStateUpdate_(rtlState);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      uiState => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
+      const pageIndex = this.storeService_.get(
+        StateProperty.CURRENT_PAGE_INDEX
+      );
+
+      this.handleActivePageChange_(
+        dev().assertNumber(pageIndex),
+        dev().assertString(pageId)
+      );
+    });
+  }
+
+  /**
+   * Reacts to the ad state updates and passes the information along as
+   * attributes to the shadowed ad badge.
+   * @param {boolean} isAd
+   */
+  onAdStateUpdate_(isAd) {
+    this.mutateElement(() => {
+      isAd
+        ? this.adBadgeContainer_.setAttribute(Attributes.AD_SHOWING, '')
+        : this.adBadgeContainer_.removeAttribute(Attributes.AD_SHOWING);
+    });
+  }
+
+  /**
+   * Reacts to the rtl state updates and passes the information along as
+   * attributes to the shadowed ad badge.
+   * @param {boolean} rtlState
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.mutateElement(() => {
+      rtlState
+        ? this.adBadgeContainer_.setAttribute(Attributes.DIR, 'rtl')
+        : this.adBadgeContainer_.removeAttribute(Attributes.DIR);
+    });
+  }
+
+  /**
+   * Reacts to UI state updates and passes the information along as
+   * attributes to the shadowed ad badge.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    this.mutateElement(() => {
+      const {DESKTOP_PANELS} = Attributes;
+      const root = this.adBadgeContainer_;
+
+      root.removeAttribute(DESKTOP_PANELS);
+
+      if (uiState === UIType.DESKTOP_PANELS) {
+        root.setAttribute(DESKTOP_PANELS, '');
+      }
+    });
+  }
+
+  /**
+   * @visibleForTesting
+   * @return {Element}
+   */
+  getAdBadgeRoot() {
+    return this.adBadgeContainer_;
   }
 
   /**
@@ -364,15 +452,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdOverlay_() {
-    const container = this.win.document.createElement('aside');
-    container.className = 'i-amphtml-ad-overlay-container';
+    const root = this.win.document.createElement('div');
 
-    const span = this.win.document.createElement('p');
-    span.className = 'i-amphtml-story-ad-attribution';
-    span.textContent = 'Ad';
+    this.adBadgeContainer_ = this.win.document.createElement('aside');
+    this.adBadgeContainer_.className = 'i-amphtml-ad-overlay-container';
 
-    createShadowRootWithStyle(container, span, attributionCSS);
-    this.ampStory_.element.appendChild(container);
+    const badge = this.win.document.createElement('p');
+    badge.className = 'i-amphtml-story-ad-attribution';
+    badge.textContent = 'Ad';
+
+    this.adBadgeContainer_.appendChild(badge);
+    createShadowRootWithStyle(root, this.adBadgeContainer_, attributionCSS);
+    this.ampStory_.element.appendChild(root);
   }
 
   /**
@@ -453,7 +544,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         // remove loading attribute once loaded so that desktop CSS will position
         // offscren with all other pages
         const currentPageEl = this.adPageEls_[this.adPageEls_.length - 1];
-        currentPageEl.removeAttribute(LOADING_ATTR);
+        currentPageEl.removeAttribute(Attributes.LOADING);
 
         this.analyticsEventWithCurrentAd_(Events.AD_LOADED, {
           [Vars.AD_LOADED]: Date.now(),
@@ -584,6 +675,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @return {boolean}
    */
   createCtaLayer_(adPageElement, ctaText, ctaUrl) {
+    // TODO(ccordry): Move button to shadow root.
     const a = this.win.document.createElement('a');
     a.className = 'i-amphtml-story-ad-link';
     a.setAttribute('target', '_blank');
@@ -615,22 +707,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     ctaLayer.appendChild(a);
     adPageElement.appendChild(ctaLayer);
     return true;
-  }
-
-  /**
-   * @param {!StateChangeEventDef} stateChangeEvent
-   * @private
-   */
-  handleStateChange_(stateChangeEvent) {
-    switch (stateChangeEvent.type) {
-      case StateChangeType.ACTIVE_PAGE:
-        const {pageIndex, pageId} = stateChangeEvent.value;
-        this.handleActivePageChange_(
-          dev().assertNumber(pageIndex),
-          dev().assertString(pageId)
-        );
-        break;
-    }
   }
 
   /**
@@ -714,11 +790,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   setVisibleAttribute_(adElement) {
     const friendlyIframeEmbed = adElement.querySelector('iframe');
+    // TODO(calebcordry): Properly handle visible trigger for custom ads.
+    if (!friendlyIframeEmbed) {
+      return;
+    }
+
     const frameDoc =
       friendlyIframeEmbed.contentDocument || friendlyIframeEmbed.win.document;
     const {body} = frameDoc;
     this.mutateElement(() => {
-      body.setAttribute(IFRAME_BODY_VISIBLE_ATTR, '');
+      body.setAttribute(Attributes.IFRAME_BODY_VISIBLE, '');
       this.visibleAdBody_ = body;
     });
   }
@@ -729,7 +810,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   removeVisibleAttribute_() {
     this.mutateElement(() => {
       if (this.visibleAdBody_) {
-        this.visibleAdBody_.removeAttribute(IFRAME_BODY_VISIBLE_ATTR);
+        this.visibleAdBody_.removeAttribute(Attributes.IFRAME_BODY_VISIBLE);
         this.visibleAdBody_ = null;
       }
     });
@@ -867,7 +948,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   nextPageNoAd_(page) {
-    return page.element.hasAttribute(NEXT_PAGE_NO_AD);
+    return page.element.hasAttribute(Attributes.NEXT_PAGE_NO_AD);
   }
 
   /**

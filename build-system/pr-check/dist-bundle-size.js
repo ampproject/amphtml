@@ -54,19 +54,14 @@ function main() {
     uploadDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
-    const buildTargets = new Set();
-    if (!determineBuildTargets(buildTargets, FILENAME)) {
-      stopTimer(FILENAME, FILENAME, startTime);
-      process.exitCode = 1;
-      return;
-    }
-
+    const buildTargets = determineBuildTargets(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST') ||
       buildTargets.has('E2E_TEST') ||
-      buildTargets.has('VISUAL_DIFF')
+      buildTargets.has('VISUAL_DIFF') ||
+      buildTargets.has('UNIT_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting');

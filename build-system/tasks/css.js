@@ -53,7 +53,12 @@ const cssEntryPoints = [
   {
     path: 'video-autoplay.css',
     outJs: 'video-autoplay.css.js',
-    outCss: 'video-autoplay.css',
+    // When the .css.js files are imported, the .js extension is omitted
+    // e.g. '../../build/file.css' attempts to load 'build/file.css.js'
+    // but if a file which matches without the .js extension, it will
+    // be preferred. We should rename the out.css to have a different name
+    // than the JS file to avoid loading CSS as JS
+    outCss: 'video-autoplay-out.css',
   },
 ];
 
@@ -81,10 +86,13 @@ function compileCss(watch, opt_compileAll) {
    */
   function writeCss(css, jsFilename, cssFilename, append) {
     return toPromise(
-      // cssText is hardcoded in AmpCodingConvention.java
-      file(jsFilename, 'export const cssText = ' + JSON.stringify(css), {
-        src: true,
-      })
+      file(
+        jsFilename,
+        '/** @noinline */ export const cssText = ' + JSON.stringify(css),
+        {
+          src: true,
+        }
+      )
         .pipe(gulp.dest('build'))
         .on('end', function() {
           mkdirSync('build');
@@ -112,7 +120,7 @@ function compileCss(watch, opt_compileAll) {
 
   const startTime = Date.now();
 
-  // Used by `gulp test --local-changes` to map CSS files to JS files.
+  // Used by `gulp unit --local_changes` to map CSS files to JS files.
   fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
 
   let promise = Promise.resolve();
@@ -127,7 +135,6 @@ function compileCss(watch, opt_compileAll) {
   return promise
     .then(() =>
       buildExtensions({
-        bundleOnlyIfListedInFiles: false,
         compileOnlyCss: true,
         compileAll: opt_compileAll,
       })

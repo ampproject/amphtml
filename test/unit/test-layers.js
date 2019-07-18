@@ -89,7 +89,7 @@ describes.realWin('Layers', {amp: true}, env => {
         }
 
         installDocService(win, true);
-        const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+        const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
         installLayersServiceForDoc(ampdoc, scrollingElement, impl === 'native');
       });
 
@@ -147,9 +147,9 @@ describes.realWin('Layers', {amp: true}, env => {
             layout.forgetParentLayer();
             expect(layout.getParentLayer()).to.equal(rootLayout);
 
-            const spy = sinon.sandbox.spy(div, 'getBoundingClientRect');
-            rootLayout.dirtyMeasurements();
             rootLayout.remeasure();
+            const spy = sinon.sandbox.spy(layout, 'dirtyMeasurements');
+            rootLayout.dirtyMeasurements();
 
             expect(spy).to.have.callCount(1);
           });

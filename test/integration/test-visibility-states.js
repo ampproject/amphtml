@@ -110,13 +110,13 @@ t.run('Viewer Visibility State', () => {
         return Services.viewerPromiseForDoc(win.document)
           .then(v => {
             viewer = v;
-            const docState = Services.documentStateFor(win);
+            const docState = Services.globalDocumentStateFor(win);
             docHidden = sandbox.stub(docState, 'isHidden').returns(false);
 
             resources = Services.resourcesForDoc(win.document);
             doPass_ = resources.doPass;
             sandbox.stub(resources, 'doPass').callsFake(doPass);
-            unselect = sandbox.stub(resources, 'unselectText');
+            unselect = sandbox.stub(resources, 'unselectText_');
 
             const img = win.document.createElement('amp-img');
             img.setAttribute('width', 100);

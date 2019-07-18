@@ -123,6 +123,7 @@ const forbiddenTerms = {
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
       'build-system/pr-check/yarn-checks.js',
+      'build-system/tasks/check-exact-versions.js',
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
@@ -174,10 +175,10 @@ const forbiddenTerms = {
   'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/inabox/amp-inabox-lite.js',
-      'src/service/action-impl.js',
-      'src/service/standard-actions-impl.js',
       'src/runtime.js',
+      'src/service/action-impl.js',
+      'src/service/core-services.js',
+      'src/service/standard-actions-impl.js',
     ],
   },
   'installActionHandler': {
@@ -202,11 +203,19 @@ const forbiddenTerms = {
   },
   'installCryptoService': {
     message: privateServiceFactory,
-    whitelist: ['src/service/crypto-impl.js', 'src/runtime.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/crypto-impl.js',
+    ],
   },
-  'installDocumentStateService': {
+  'installGlobalDocumentStateService': {
     message: privateServiceFactory,
-    whitelist: ['src/service/document-state.js', 'src/runtime.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/document-state.js',
+    ],
   },
   'installDocService': {
     message: privateServiceFactory,
@@ -214,7 +223,6 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
-      'src/inabox/amp-inabox-lite.js',
       'src/service/ampdoc-impl.js',
       'testing/describes.js',
       'testing/iframe.js',
@@ -226,27 +234,30 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
-      'src/inabox/amp-inabox-lite.js',
       'src/service/performance-impl.js',
     ],
   },
   'installStorageServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
+      'src/service/core-services.js',
       'src/service/storage-impl.js',
     ],
   },
   'installTemplatesService': {
     message: privateServiceFactory,
-    whitelist: ['src/runtime.js', 'src/service/template-impl.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/template-impl.js',
+    ],
   },
   'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
+      'src/service/core-services.js',
       'src/service/url-replacements-impl.js',
     ],
   },
@@ -255,22 +266,31 @@ const forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/inabox/amp-inabox.js',
-      'src/inabox/amp-inabox-lite.js',
+      'src/service/core-services.js',
       'src/service/viewer-impl.js',
     ],
   },
   'setViewerVisibilityState': {
     message: privateServiceFactory,
-    whitelist: ['src/runtime.js', 'src/service/viewer-impl.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/viewer-impl.js',
+    ],
   },
   'installViewportServiceForDoc': {
     message: privateServiceFactory,
-    whitelist: ['src/runtime.js', 'src/service/viewport/viewport-impl.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/viewport/viewport-impl.js',
+    ],
   },
   'installVsyncService': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
+      'src/service/core-services.js',
       'src/service/resources-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/vsync-impl.js',
@@ -279,15 +299,19 @@ const forbiddenTerms = {
   'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
+      'src/service/core-services.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
     ],
   },
   'installXhrService': {
     message: privateServiceFactory,
-    whitelist: ['src/runtime.js', 'src/service/xhr-impl.js'],
+    whitelist: [
+      'src/runtime.js',
+      'src/service/core-services.js',
+      'src/service/xhr-impl.js',
+    ],
   },
   'installPositionObserverServiceForDoc': {
     message: privateServiceFactory,
@@ -305,7 +329,7 @@ const forbiddenTerms = {
   },
   'getServiceForDoc': {
     message:
-      'Synchronous access to element services is unreliable. ' +
+      'Synchronous access to element services is unreliable (#22414). ' +
       'Use getServicePromiseForDoc() instead.',
     whitelist: [
       // Do not whitelist additional "extensions/*" paths.
@@ -313,13 +337,6 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
-      'extensions/amp-live-list/0.1/live-list-manager.js',
-      'extensions/amp-next-page/0.1/next-page-service.js',
-      'extensions/amp-position-observer/0.1/amp-position-observer.js',
-      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
-      'extensions/amp-user-notification/0.1/test/test-amp-user-notification.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js',
-      'extensions/amp-web-push/0.1/amp-web-push-config.js',
       'src/chunk.js',
       'src/service.js',
       'src/service/cid-impl.js',
@@ -398,6 +415,9 @@ const forbiddenTerms = {
   'cidForDoc|cidForDocOrNull': {
     message: requiresReviewPrivacy,
     whitelist: [
+      // CID service is not allowed in amp4ads. No usage should there be
+      // in extensions listed in the amp4ads spec:
+      // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/ad-cid.js',
       'src/services.js',
       'src/service/cid-impl.js',
@@ -409,6 +429,15 @@ const forbiddenTerms = {
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
+    ],
+  },
+  // Global documentState service.
+  'globalDocumentStateFor': {
+    message: 'Global document API. In the process of being deprecated.',
+    whitelist: [
+      'src/services.js',
+      'src/service/viewer-impl.js',
+      'src/service/vsync-impl.js',
     ],
   },
   'getBaseCid': {
@@ -429,6 +458,10 @@ const forbiddenTerms = {
       'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
+  'prerenderSafe': {
+    message: requiresReviewPrivacy,
+    whitelist: ['build-system/amp.extern.js', 'src/utils/xhr-utils.js'],
+  },
   'eval\\(': {
     message: shouldNeverBeUsed,
     whitelist: ['extension/amp-bind/0.1/test/test-bind-expr.js'],
@@ -436,6 +469,9 @@ const forbiddenTerms = {
   'storageForDoc': {
     message: requiresReviewPrivacy,
     whitelist: [
+      // Storage service is not allowed in amp4ads. No usage should there be
+      // in extensions listed in the amp4ads spec:
+      // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/services.js',
       'src/service/cid-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
@@ -446,6 +482,7 @@ const forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'src/experiments.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/fake-dom.js',
@@ -586,7 +623,9 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'build-system/app.js',
+      'build-system/tasks/e2e/index.js',
       'build-system/tasks/firebase.js',
+      'build-system/tasks/integration.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
       'build-system/tasks/visual-diff/index.js',
@@ -600,6 +639,8 @@ const forbiddenTerms = {
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
+      // TODO: @jonathantyng cleanup #22757
+      'build-system/tasks/generate-vendor-jsons.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -654,7 +695,6 @@ const forbiddenTerms = {
       'src/amp-shadow.js',
       'src/style-installer.js',
       'src/inabox/amp-inabox.js',
-      'src/inabox/amp-inabox-lite.js',
     ],
   },
 };
@@ -891,23 +931,24 @@ const forbiddenTermsSrcInclusive = {
       'code. Use a property of urls from src/config.js instead.',
     whitelist: [
       'ads/_a4a-config.js',
-      'build-system/app.js',
-      'build-system/app-index/amphtml-helpers.js',
       'build-system/amp4test.js',
+      'build-system/app-index/amphtml-helpers.js',
+      'build-system/app-video-testbench.js',
+      'build-system/app.js',
+      'build-system/shadow-viewer.js',
+      'build-system/tasks/check-links.js',
+      'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/helpers.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
+      'tools/experiments/experiments.js',
       'validator/engine/validator-in-browser.js',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
-      'build-system/app-video-testbench.js',
-      'build-system/shadow-viewer.js',
-      'build-system/tasks/check-links.js',
-      'build-system/tasks/extension-generator/index.js',
-      'build-system/tasks/helpers.js',
     ],
   },
   '\\<\\<\\<\\<\\<\\<': {

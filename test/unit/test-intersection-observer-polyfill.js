@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocService} from '../../src/service/ampdoc-impl';
 import {
   DEFAULT_THRESHOLD,
   IntersectionObserverApi,
@@ -37,10 +38,10 @@ const fakeAmpDoc = {
 };
 installHiddenObserverForDoc(fakeAmpDoc);
 
-describe('IntersectionObserverApi', () => {
-  let sandbox;
+describes.sandboxed('IntersectionObserverApi', {}, () => {
   let onScrollSpy;
   let onChangeSpy;
+  let testDoc;
   let testEle;
   let baseElement;
   let ioApi;
@@ -77,14 +78,14 @@ describe('IntersectionObserverApi', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     onScrollSpy = sandbox.spy();
     onChangeSpy = sandbox.spy();
     testIframe = getIframe(iframeSrc);
+    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
     sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
       return mockViewport;
     });
-    sandbox.stub(Services, 'ampdoc').callsFake(() => fakeAmpDoc);
+    testDoc = {defaultView: window};
     testEle = {
       isBuilt: () => {
         return true;
@@ -96,7 +97,8 @@ describe('IntersectionObserverApi', () => {
         return layoutRectLtwh(50, 100, 150, 200);
       },
       win: window,
-      ownerDocument: {defaultView: window},
+      ownerDocument: testDoc,
+      getRootNode: () => testDoc,
       nodeType: 1,
     };
 
@@ -120,8 +122,8 @@ describe('IntersectionObserverApi', () => {
     insert(testIframe);
     tickSpy = sandbox.spy(ioApi.intersectionObserver_, 'tick');
   });
+
   afterEach(() => {
-    sandbox.restore();
     testIframe.parentNode.removeChild(testIframe);
     if (ioApi) {
       ioApi.destroy();
@@ -184,16 +186,12 @@ describe('IntersectionObserverApi', () => {
   });
 });
 
-describe('getIntersectionChangeEntry', () => {
-  let sandbox;
+describes.sandboxed('getIntersectionChangeEntry', {}, () => {
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     sandbox.stub(performance, 'now').callsFake(() => 100);
+    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
   it('without owner', () => {
     expect(
       getIntersectionChangeEntry(
@@ -239,16 +237,11 @@ describe('getIntersectionChangeEntry', () => {
   });
 });
 
-describe('IntersectionObserverPolyfill', () => {
-  let sandbox;
+describes.sandboxed('IntersectionObserverPolyfill', {}, () => {
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     sandbox.stub(performance, 'now').callsFake(() => 100);
+    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
     sandbox.stub(Services, 'ampdoc').callsFake(() => fakeAmpDoc);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('threshold', () => {
@@ -334,6 +327,7 @@ describe('IntersectionObserverPolyfill', () => {
   });
 
   describe('tick function', () => {
+    let testDoc;
     let element;
     let callbackSpy;
 
@@ -357,6 +351,7 @@ describe('IntersectionObserverPolyfill', () => {
         };
       });
 
+      testDoc = {defaultView: window};
       element = {
         isBuilt: () => {
           return true;
@@ -364,7 +359,8 @@ describe('IntersectionObserverPolyfill', () => {
         getOwner: () => {
           return null;
         },
-        ownerDocument: {defaultView: window},
+        ownerDocument: testDoc,
+        getRootNode: () => testDoc,
         nodeType: 1,
       };
     });

@@ -34,6 +34,7 @@ import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {poll} from '../../../../testing/iframe';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -86,16 +87,30 @@ describes.realWin(
       return eventObj;
     }
 
+    function waitFor(callback, errorMessage) {
+      return poll(
+        errorMessage,
+        () => {
+          return callback();
+        },
+        undefined /** opt_onError */,
+        200 /** opt_timeout */
+      );
+    }
+
     beforeEach(() => {
       win = env.win;
 
       replaceStateStub = sandbox.stub(win.history, 'replaceState');
+      // Required by the bookend code.
+      win.document.title = 'Story';
 
       const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox
         .stub(viewer, 'hasCapability')
         .withArgs('swipe')
         .returns(hasSwipeCapability);
+      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);
@@ -150,21 +165,14 @@ describes.realWin(
         });
     });
 
-    it('should update the navigation state when built', () => {
-      const firstPageId = 'cover';
-      const pageCount = 2;
-      createPages(story.element, pageCount, [firstPageId, 'page-1']);
-      const updateActivePageStub = sandbox.stub(
-        story.navigationState_,
-        'updateActivePage'
-      );
-
+    it('should remove text child nodes when built', () => {
+      createPages(story.element, 1, ['cover']);
+      const textToRemove = 'this should be removed';
+      const textNode = win.document.createTextNode(textToRemove);
+      story.element.appendChild(textNode);
+      story.buildCallback();
       return story.layoutCallback().then(() => {
-        expect(updateActivePageStub).to.have.been.calledWith(
-          0,
-          pageCount,
-          firstPageId
-        );
+        expect(story.element.innerText).to.not.have.string(textToRemove);
       });
     });
 
@@ -295,10 +303,7 @@ describes.realWin(
       createPages(story.element, 2, ['cover', 'page-1']);
 
       return story.layoutCallback().then(() => {
-        const paginationButtonsStub = {
-          attach: sandbox.spy(),
-          onNavigationStateChange: sandbox.spy(),
-        };
+        const paginationButtonsStub = {attach: sandbox.spy()};
         sandbox
           .stub(PaginationButtons, 'create')
           .returns(paginationButtonsStub);
@@ -688,9 +693,9 @@ describes.realWin(
       it('should pause the story when tab becomes inactive', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.documentState_, 'isHidden').returns(true);
+        sandbox.stub(story.viewer_, 'isVisible').returns(false);
         const onVisibilityChangedStub = sandbox.stub(
-          story.documentState_,
+          story.viewer_,
           'onVisibilityChanged'
         );
 
@@ -710,9 +715,9 @@ describes.realWin(
       it('should play the story when tab becomes active', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.documentState_, 'isHidden').returns(false);
+        sandbox.stub(story.viewer_, 'isVisible').returns(true);
         const onVisibilityChangedStub = sandbox.stub(
-          story.documentState_,
+          story.viewer_,
           'onVisibilityChanged'
         );
 
@@ -1116,6 +1121,96 @@ describes.realWin(
       });
     });
 
+    describe('amp-story NO_NEXT_PAGE', () => {
+      describe('without #cap=swipe', () => {
+        it('should open the bookend when tapping on the last page', () => {
+          createPages(story.element, 1, ['cover']);
+
+          return story.layoutCallback().then(() => {
+            // Click on right side of the screen to trigger page advancement.
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            story.activePage_.element.dispatchEvent(clickEvent);
+            return waitFor(() => {
+              return !!story.storeService_.get(StateProperty.BOOKEND_STATE);
+            }, 'BOOKEND_STATE should be true');
+          });
+        });
+      });
+
+      describe('with #cap=swipe', () => {
+        before(() => (hasSwipeCapability = true));
+        after(() => (hasSwipeCapability = false));
+
+        it('should send a message when tapping on last page in viewer', () => {
+          createPages(story.element, 1, ['cover']);
+          const sendMessageStub = sandbox.stub(story.viewer_, 'sendMessage');
+
+          return story.layoutCallback().then(() => {
+            // Click on right side of the screen to trigger page advancement.
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            story.activePage_.element.dispatchEvent(clickEvent);
+            return waitFor(() => {
+              if (sendMessageStub.calledOnce) {
+                expect(sendMessageStub).to.be.calledWithExactly(
+                  'selectDocument',
+                  {next: true}
+                );
+                return true;
+              }
+              return false;
+            }, 'sendMessageStub should be called');
+          });
+        });
+      });
+    });
+
+    describe('amp-story NO_PREVIOUS_PAGE', () => {
+      describe('without #cap=swipe', () => {
+        it('should open the bookend when tapping on the last page', () => {
+          createPages(story.element, 1, ['cover']);
+          const showPageHintStub = sandbox.stub(
+            story.ampStoryHint_,
+            'showFirstPageHintOverlay'
+          );
+
+          return story.layoutCallback().then(() => {
+            // Click on left side of the screen to trigger page advancement.
+            const clickEvent = new MouseEvent('click', {clientX: 10});
+            story.activePage_.element.dispatchEvent(clickEvent);
+            return waitFor(() => {
+              return showPageHintStub.calledOnce;
+            }, 'showPageHintStub should be called');
+          });
+        });
+      });
+
+      describe('with #cap=swipe', () => {
+        before(() => (hasSwipeCapability = true));
+        after(() => (hasSwipeCapability = false));
+
+        it('should send a message when tapping on last page in viewer', () => {
+          createPages(story.element, 1, ['cover']);
+          const sendMessageStub = sandbox.stub(story.viewer_, 'sendMessage');
+
+          return story.layoutCallback().then(() => {
+            // Click on left side of the screen to trigger page advancement.
+            const clickEvent = new MouseEvent('click', {clientX: 10});
+            story.activePage_.element.dispatchEvent(clickEvent);
+            return waitFor(() => {
+              if (sendMessageStub.calledOnce) {
+                expect(sendMessageStub).to.be.calledWithExactly(
+                  'selectDocument',
+                  {previous: true}
+                );
+                return true;
+              }
+              return false;
+            }, 'sendMessageStub should be called');
+          });
+        });
+      });
+    });
+
     describe('amp-story navigation', () => {
       it('should navigate when performing a navigational click', () => {
         createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
@@ -1450,6 +1545,50 @@ describes.realWin(
             );
             expect(hintEl).to.not.exist;
           });
+        });
+      });
+    });
+
+    describe('amp-story rewriteStyles', () => {
+      beforeEach(() => {
+        toggleExperiment(win, 'amp-story-responsive-units', true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'amp-story-responsive-units', false);
+      });
+
+      it('should rewrite vw styles', () => {
+        createPages(story.element, 1, ['cover']);
+        const styleEl = win.document.createElement('style');
+        styleEl.setAttribute('amp-custom', '');
+        styleEl.textContent = 'foo {transform: translate3d(100vw, 0, 0);}';
+        win.document.head.appendChild(styleEl);
+
+        story.buildCallback();
+
+        return story.layoutCallback().then(() => {
+          expect(styleEl.textContent).to.equal(
+            'foo {transform: ' +
+              'translate3d(calc(100 * var(--story-page-vw)), 0, 0);}'
+          );
+        });
+      });
+
+      it('should rewrite negative vh styles', () => {
+        createPages(story.element, 1, ['cover']);
+        const styleEl = win.document.createElement('style');
+        styleEl.setAttribute('amp-custom', '');
+        styleEl.textContent = 'foo {transform: translate3d(-100vh, 0, 0);}';
+        win.document.head.appendChild(styleEl);
+
+        story.buildCallback();
+
+        return story.layoutCallback().then(() => {
+          expect(styleEl.textContent).to.equal(
+            'foo {transform: ' +
+              'translate3d(calc(-100 * var(--story-page-vh)), 0, 0);}'
+          );
         });
       });
     });

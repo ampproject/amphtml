@@ -206,10 +206,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/cid-impl.Cid>}
+   * @return {!Promise<!./service/cid-impl.CidDef>}
    */
   static cidForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/cid-impl.Cid>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/cid-impl.CidDef>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'cid'
     ));
@@ -250,14 +250,6 @@ export class Services {
 
   /**
    * @param {!Window} window
-   * @return {!./service/document-state.DocumentState}
-   */
-  static documentStateFor(window) {
-    return getService(window, 'documentState');
-  }
-
-  /**
-   * @param {!Window} window
    * @return {!./service/extensions-impl.Extensions}
    */
   static extensionsFor(window) {
@@ -268,31 +260,25 @@ export class Services {
   }
 
   /**
-   * TODO(#22414): Remove this in favor of the async API.
    * Returns a service to register callbacks we wish to execute when an
-   * amp-form is submitted. This is the sync version used by amp-form only, all
-   * other extensions should use `formSubmitPromiseForDoc` below.
+   * amp-form is submitted.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {../extensions/amp-form/0.1/form-submit-service.FormSubmitService}
+   * @return {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>}
    */
   static formSubmitForDoc(elementOrAmpDoc) {
-    return /** @type {!../extensions/amp-form/0.1/form-submit-service.FormSubmitService} */ (getServiceForDoc(
+    return /** @type {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'form-submit-service'
     ));
   }
 
   /**
-   * Returns a service to register callbacks we wish to execute when an
-   * amp-form is submitted.
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>}
+   * @param {!Window} window
+   * @return {!./service/document-state.DocumentState}
+   * @restricted  Only to be used for global document services, such as vsync.
    */
-  static formSubmitPromiseForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
-      'form-submit-service'
-    ));
+  static globalDocumentStateFor(window) {
+    return getService(window, 'documentState');
   }
 
   /**
@@ -385,6 +371,19 @@ export class Services {
   }
 
   /**
+   * Not installed by default; must be installed in extension code before use.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/position-observer/position-observer-impl.PositionObserver}
+   * @throws If the service is not installed.
+   */
+  static positionObserverForDoc(element) {
+    return /** @type {!./service/position-observer/position-observer-impl.PositionObserver} */ (getServiceForDoc(
+      element,
+      'position-observer'
+    ));
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/resources-impl.Resources}
    */
@@ -420,6 +419,7 @@ export class Services {
   }
 
   /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
    * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
    */
@@ -427,6 +427,17 @@ export class Services {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
       (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', true))
+    );
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService}
+   */
+  static storyVariableService(win) {
+    return (
+      /** @type {?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService} */
+      (getExistingServiceOrNull(win, 'story-variable'))
     );
   }
 
@@ -496,6 +507,7 @@ export class Services {
   }
 
   /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
    * @return {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>}
    */

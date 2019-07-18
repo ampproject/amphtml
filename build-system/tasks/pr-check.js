@@ -55,15 +55,10 @@ async function prCheck(cb) {
   }
 
   printChangeSummary(FILENAME);
-  const buildTargets = new Set();
-  if (!determineBuildTargets(buildTargets, FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
-    return;
-  }
-
-  runCheck('gulp lint --local-changes');
+  const buildTargets = determineBuildTargets(FILENAME);
+  runCheck('gulp lint --local_changes');
   runCheck('gulp presubmit');
+  runCheck('gulp check-exact-versions');
 
   if (buildTargets.has('AVA')) {
     runCheck('gulp ava');
@@ -92,7 +87,7 @@ async function prCheck(cb) {
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-    runCheck('gulp test --unit --local-changes --headless');
+    runCheck('gulp unit --local_changes --headless');
   }
 
   if (
@@ -104,7 +99,7 @@ async function prCheck(cb) {
       runCheck('gulp clean');
       runCheck('gulp dist --fortesting');
     }
-    runCheck('gulp test --nobuild --compiled --integration --headless');
+    runCheck('gulp integration --nobuild --compiled --headless');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
