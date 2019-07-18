@@ -63,8 +63,24 @@ function getReplacePlugin() {
     replacements.push(createReplacement(defineFlag, true));
   }
 
+  const currentTimestampMs = new Date().getTime();
+
   // default each experiment flag constant to false
   Object.keys(experimentsConfig).forEach(experiment => {
+    const expirationStr =
+      experimentsConfig[experiment]['expirationTimestampMs'];
+    const expirationDate = new Date(parseInt(expirationStr, 10));
+    const expirationTimestampMs = expirationDate.getTime();
+
+    // check experiment expiration times
+    if (experimentsConfig[experiment]['name'] && !expirationTimestampMs) {
+      throw new Error(`Invalid expiration date for ${experiment}`);
+    } else if (expirationTimestampMs < currentTimestampMs) {
+      throw new Error(
+        `${experiment} has expired on ${expirationDate.toDateString()}. Please remove from experiments-config.json and cleanup relevant code.`
+      );
+    }
+
     const experimentDefine =
       experimentsConfig[experiment]['defineExperimentConstant'];
 
