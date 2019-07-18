@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { loadScript, validateData, writeScript } from '../3p/3p';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function revcontent(global, data) {
-  let endpoint = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
+  let endpoint =
+    'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
 
   if (typeof data.revcontent !== 'undefined') {
     if (typeof data.env === 'undefined') {
