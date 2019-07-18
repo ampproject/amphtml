@@ -278,6 +278,21 @@ class AmpScriptService {
 }
 
 /**
+ * sandbox="allow-forms" enables tags in HTMLFormElement.elements.
+ * @const {!Array<string>}
+ */
+const FORM_ELEMENTS = [
+  'form',
+  'button',
+  'fieldset',
+  'input',
+  'object',
+  'output',
+  'select',
+  'textarea',
+];
+
+/**
  * A DOMPurify wrapper that implements the worker-dom.Sanitizer interface.
  * @visibleForTesting
  */
@@ -287,10 +302,10 @@ export class SanitizerImpl {
    * @param {!Array<string>} sandboxTokens
    */
   constructor(win, sandboxTokens) {
-    /** @private {!DomPurifyDef} */
+    /** @private @const {!DomPurifyDef} */
     this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
 
-    /** @private {!Object<string, boolean>} */
+    /** @private @const {!Object<string, boolean>} */
     this.allowedTags_ = getAllowedTags();
 
     // TODO(choumx): Support opt-in for variable substitutions.
@@ -299,20 +314,10 @@ export class SanitizerImpl {
     this.allowedTags_['amp-layout'] = true;
     this.allowedTags_['amp-pixel'] = false;
 
-    // "allow-forms" enables tags in HTMLFormElement.elements.
-    const allowForms = sandboxTokens.includes('allow-forms');
-    const formElements = [
-      'form',
-      'button',
-      'fieldset',
-      'input',
-      'object',
-      'output',
-      'select',
-      'textarea',
-    ];
-    formElements.forEach(fe => {
-      this.allowedTags_[fe] = allowForms;
+    /** @private @const {boolean} */
+    this.allowForms_ = sandboxTokens.includes('allow-forms');
+    FORM_ELEMENTS.forEach(fe => {
+      this.allowedTags_[fe] = this.allowForms_;
     });
   }
 
@@ -329,7 +334,9 @@ export class SanitizerImpl {
     const tag = node.nodeName.toLowerCase();
     const clean = this.allowedTags_[tag];
     if (!clean) {
-      user().warn(TAG, 'Sanitized node:', node);
+      if (!this.warnIfFormsAreDisallowed_(tag)) {
+        user().warn(TAG, 'Sanitized node:', node);
+      }
     }
     return clean;
   }
@@ -366,7 +373,25 @@ export class SanitizerImpl {
         return true;
       }
     }
-    user().warn(TAG, 'Sanitized [%s]="%s":', attribute, value, node);
+    if (!this.warnIfFormsAreDisallowed_(tag)) {
+      user().warn(TAG, 'Sanitized [%s]="%s":', attribute, value, node);
+    }
+    return false;
+  }
+
+  /**
+   * @param {string} tag
+   * @return {boolean}
+   */
+  warnIfFormsAreDisallowed_(tag) {
+    if (!this.allowForms_ && FORM_ELEMENTS.includes(tag)) {
+      user().warn(
+        TAG,
+        'Form elements (%s) are not allowed without sandbox="allow-forms".',
+        tag
+      );
+      return true;
+    }
     return false;
   }
 
