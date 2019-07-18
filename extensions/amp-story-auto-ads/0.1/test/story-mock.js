@@ -71,7 +71,7 @@ export function addStoryAutoAdsConfig(doc, autoAdsEl, customConfig) {
   };
   const child = doc.createElement('script');
   child.setAttribute('type', 'application/json');
-  child.innerText = JSON.stringify(config);
+  child./*OK*/ innerText = JSON.stringify(config);
   autoAdsEl.append(child);
 }
 

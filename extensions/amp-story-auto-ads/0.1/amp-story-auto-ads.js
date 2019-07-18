@@ -29,7 +29,11 @@ import {
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
-import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  isJsonScriptTag,
+  openWindowDialog,
+} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
@@ -996,7 +1000,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     assertHttpsUrl(src, this.element);
 
     if (!href || !src) {
-      dev().warn('Both icon and URL must be supplied for Ad Choices.');
+      dev().warn(TAG, 'Both icon and URL must be supplied for Ad Choices.');
       return;
     }
 
@@ -1032,7 +1036,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {!Event} unusedEvent
    */
   handleAttributionClick_(href, unusedEvent) {
-    this.win.open(href);
+    openWindowDialog(this.win, href, '_blank');
   }
 
   /**
