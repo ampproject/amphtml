@@ -27,6 +27,7 @@ import {
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
+import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -981,10 +982,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const href = a4aVars[A4AVarNames.ATTRIBUTION_URL];
     const src = a4aVars[A4AVarNames.ATTRIBUTION_ICON];
 
-    // Ad Choices is optional, but need both to render.
+    // Ad attribution is optional, but need both to render.
     if (!href && !src) {
       return;
     }
+
+    assertHttpsUrl(href, this.element);
+    assertHttpsUrl(src, this.element);
 
     if (!href || !src) {
       dev().warn('Both icon and URL must be supplied for Ad Choices.');

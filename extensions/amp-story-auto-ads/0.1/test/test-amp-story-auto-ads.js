@@ -197,6 +197,7 @@ describes.realWin(
 
       // Doesn't render without meta tag
       // Throws if only one value.
+      // Throws if not https.
     });
 
     describe('analytics triggers', () => {
