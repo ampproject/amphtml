@@ -43,7 +43,7 @@ const DIST_OUTPUT_FILE = isTravisBuild()
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const DIST_OUTPUT_DIRS =
-  'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP examples/ test/manual/';
+  'build/ dist/ dist.3p/ dist.tools/ EXTENSIONS_CSS_MAP examples/ test/manual/';
 
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
