@@ -225,7 +225,8 @@ export class VariableService {
       'COOKIE': name => cookieReader(this.ampdoc_.win, element, name),
       'CONSENT_STATE': getConsentStateStr(element),
     };
-    return Object.assign({}, this.macros_, elementMacros);
+    const merged = Object.assign({}, this.macros_, elementMacros);
+    return /** @type {JsonObject} */ (merged);
   }
 
   /**
