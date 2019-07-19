@@ -5714,10 +5714,10 @@ fbjs@^0.8.4:
     setimmediate "^1.0.5"
     ua-parser-js "^0.7.18"
 
-fetch-mock@7.3.6:
-  version "7.3.6"
-  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-7.3.6.tgz#81c002bfbf11db185e14d20221541bf90560269e"
-  integrity sha512-o/TgQDn9IVdZlpZcQCg/JytEh+fliDQGiF9HSVDj161OJ3dnrLvHomD4F3gDcqXuDePlRYQ2iz0gtEQ/oG3Wfg==
+fetch-mock@7.3.7:
+  version "7.3.7"
+  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-7.3.7.tgz#689fe1a52d0bba05cfbc3413e19e7970d6528a98"
+  integrity sha512-Tl2OEdsLXaXwv+V61s6Ar38FiGrhKGzokLtToiW1Otu6ei0e+g8Apoug5Zc/AFBipAfuiO/4vXV5IP6/lVApBA==
   dependencies:
     babel-polyfill "^6.26.0"
     core-js "^2.6.9"
