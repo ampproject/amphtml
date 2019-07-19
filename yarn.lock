@@ -1316,6 +1316,13 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^12.0.9"
 
+"@jridgewell/doctrine@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@jridgewell/doctrine/-/doctrine-3.0.2.tgz#ef6bf4c213a4867b6decf02a462618aabe668bb4"
+  integrity sha512-DwZ/uJmyCQcYkMNoIwB24O0SAyq0R0MYovAxxHecdNfencCWDK2PYkNnlVv50e/0nDkBawBpcWNp9behpRzQDA==
+  dependencies:
+    esutils "^2.0.2"
+
 "@jridgewell/resorcery@0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@jridgewell/resorcery/-/resorcery-0.0.3.tgz#7d1bfd66cddf02718421ff882b505ed497ee623d"
