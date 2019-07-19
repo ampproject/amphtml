@@ -118,6 +118,7 @@ export class LinkerManager {
           }
         });
         this.resolvedIds_[name] = expandedIds;
+        return expandedIds;
       });
     });
 
@@ -219,7 +220,6 @@ export class LinkerManager {
    */
   expandTemplateWithUrlParams_(template, expansionOptions) {
     const bindings = this.variableService_.getMacros(this.element_);
-
     return this.variableService_
       .expandTemplate(template, expansionOptions)
       .then(expanded => {
