@@ -545,7 +545,7 @@ class ManualAdvancement extends AdvancementConfig {
       StateProperty.INTERACTIVE_COMPONENT_STATE
     ));
     const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
-
+    console.log('expanded mode', inExpandedMode);
     return (
       inExpandedMode ||
       (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&

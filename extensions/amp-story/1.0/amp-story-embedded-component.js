@@ -23,6 +23,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
+import {AmpStoryBlingLink, BLING_LINK_SELECTOR} from './amp-story-bling-link';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -529,6 +530,18 @@ export class AmpStoryEmbeddedComponent {
       return;
     }
 
+    //if component is a bling link, expand it instead of building a tooltip
+    if (component.element.matches(BLING_LINK_SELECTOR)) {
+      addAttributesToElement(
+        dev().assertElement(component.element),
+        dict({
+          'href': this.getElementHref_(component.element),
+        })
+      );
+      AmpStoryBlingLink.expand(component.element);
+      return;
+    }
+
     this.triggeringTarget_ = component.element;
 
     // First time attaching the overlay. Runs only once.
@@ -633,25 +646,7 @@ export class AmpStoryEmbeddedComponent {
     this.updateTooltipText_(component.element, embedConfig);
     this.updateTooltipComponentIcon_(component.element, embedConfig);
     this.updateTooltipActionIcon_(embedConfig);
-
-    if (component.element.classList.contains('i-amphtml-story-bling-link')) {
-      // no arrow
-
-      // style
-      setImportantStyles(devAssert(this.tooltip_), {
-        'border-radius': '20px',
-        'width': '200px',
-      });
-
-      // position on top of bling link
-      const elementRect = component.element.getBoundingClientRect();
-      setImportantStyles(devAssert(this.tooltip_), {
-        top: `${elementRect.top}px`,
-        left: `${elementRect.left}px`,
-      });
-    } else {
-      this.positionTooltip_(component);
-    }
+    this.positionTooltip_(component);
   }
 
   /**

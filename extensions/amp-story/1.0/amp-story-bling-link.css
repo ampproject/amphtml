@@ -18,6 +18,12 @@
   position: relative !important;
   width: 50px !important;
   height: 50px !important;
+  font-size: 0 !important;
+}
+
+.i-amphtml-story-bling-link[expanded], .i-amphtml-story-bling-link[expanded] .i-amphtml-story-bling-link-circle {
+  width: 150px !important;
+  transition: width 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-bling-link-circle {
@@ -27,6 +33,37 @@
   margin: 5px !important;
   width: 40px !important;
   height: 40px !important;  
+}
+
+.i-amphtml-story-bling-link[expanded] .i-amphtml-story-bling-link-circle {  
+  border-radius: 20px !important;  
+  overflow: hidden !important;
+}
+
+.i-amphtml-story-bling-link-text {
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden;
+  float: left;
+  white-space: nowrap !important;
+  max-width: 70px !important;
+  width: 70px !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 14px !important;
+  color: #3C4043 !important;
+  letter-spacing: 0 !important;
+  line-height: 40px !important;
+}
+
+.i-amphtml-story-bling-link-launch {
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: 18px 18px !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  float: right !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 48 48" fill="%23757575"><path d="M0 0h48v48H0z" fill="none"/><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"/></svg>') !important;
 }
 
 amp-story-page[active] .i-amphtml-story-bling-link-pulse {
@@ -64,6 +101,7 @@ amp-story-page[active] .i-amphtml-story-bling-link-pulse {
   width: 40px !important;
   height: 40px !important;
   display: flex !important;
+  float: left !important;
 }
 
 .i-amphtml-story-bling-link-shopping-cart {

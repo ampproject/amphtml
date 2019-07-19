@@ -45,6 +45,33 @@ export class AmpStoryBlingLink {
   }
 
   /**
+   * Expands bling link
+   * @param {!Element} element
+   */
+  static expand(element) {
+    element.toggleAttribute('expanded', true);
+
+    const pulseEl = element.getElementsByClassName(
+      'i-amphtml-story-bling-link-pulse'
+    )[0];
+    pulseEl.toggleAttribute('hidden', true);
+
+    const circleEl = element.getElementsByClassName(
+      'i-amphtml-story-bling-link-circle'
+    )[0];
+
+    const textEl = htmlFor(circleEl)`
+      <span class="i-amphtml-story-bling-link-text">
+      </span>`;
+    textEl.innerText = element.innerText;
+    circleEl.appendChild(textEl);
+
+    const launchEl = htmlFor(circleEl)`
+      <i class="i-amphtml-story-bling-link-launch"></i>`;
+    circleEl.appendChild(launchEl);
+  }
+
+  /**
    * Adds icon as a child element of <amp-story-bling-link>
    * @param {!Element} element
    * @private
