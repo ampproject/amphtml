@@ -93,6 +93,7 @@ tags: {  # <amp-ad type="custom">
       protocol: "https"
     }
   }
+  attrs: { name: "template" }
   attrs: {
     name: "type"
     mandatory: true
@@ -220,7 +221,6 @@ tags: {  # <amp-embed>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attrs: { name: "template" }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-ad"
