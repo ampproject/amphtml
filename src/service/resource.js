@@ -322,15 +322,10 @@ export class Resource {
   /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
-   * @param {boolean=} force
    * @return {?Promise}
    */
-  build(force = false) {
-    if (
-      this.isBuilding_ ||
-      !this.element.isUpgraded() ||
-      (!force && !this.resources_.grantBuildPermission())
-    ) {
+  build() {
+    if (this.isBuilding_ || !this.element.isUpgraded()) {
       return null;
     }
     this.isBuilding_ = true;
@@ -496,8 +491,8 @@ export class Resource {
 
   /** Use resources for measurement */
   measureViaResources_() {
-    const viewport = this.resources_.getViewport();
-    const box = this.resources_.getViewport().getLayoutRect(this.element);
+    const viewport = Services.viewportForDoc(this.element);
+    const box = viewport.getLayoutRect(this.element);
     this.layoutBox_ = box;
 
     // Calculate whether the element is currently is or in `position:fixed`.
@@ -627,7 +622,7 @@ export class Resource {
     if (!this.isFixed_) {
       return this.layoutBox_;
     }
-    const viewport = this.resources_.getViewport();
+    const viewport = Services.viewportForDoc(this.element);
     return moveLayoutRect(
       this.layoutBox_,
       viewport.getScrollLeft(),
@@ -758,7 +753,8 @@ export class Resource {
 
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
-    const viewportBox = this.resources_.getViewport().getRect();
+    const viewport = Services.viewportForDoc(this.element);
+    const viewportBox = viewport.getRect();
     const layoutBox = this.getLayoutBox();
     const scrollDirection = this.resources_.getScrollDirection();
     let scrollPenalty = 1;

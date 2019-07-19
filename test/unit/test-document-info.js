@@ -80,6 +80,9 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
+          getRootNode() {
+            return win.document;
+          },
         },
         Math: {
           random() {
@@ -104,6 +107,9 @@ describe
           nodeType: /* document */ 9,
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
+          },
+          getRootNode() {
+            return win.document;
           },
         },
         Math: {
@@ -287,6 +293,9 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
+          getRootNode() {
+            return win.document;
+          },
         },
         Math: {
           random() {
@@ -313,6 +322,9 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
+          getRootNode() {
+            return win.document;
+          },
         },
         Math: {
           random() {
@@ -337,6 +349,9 @@ describe
           nodeType: /* document */ 9,
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
+          },
+          getRootNode() {
+            return win.document;
           },
         },
         Math: {

@@ -140,6 +140,9 @@ export class AmpScript extends AMP.BaseElement {
       ? `amp-script[src="${this.element.getAttribute('src')}"].js`
       : `amp-script[script=#${this.element.getAttribute('script')}].js`;
 
+    const sandbox = this.element.getAttribute('sandbox') || '';
+    const sandboxTokens = sandbox.split(' ').map(s => s.trim());
+
     // @see src/main-thread/configuration.WorkerDOMConfiguration in worker-dom.
     const config = {
       authorURL: sourceURL,
@@ -148,7 +151,7 @@ export class AmpScript extends AMP.BaseElement {
         this.userActivation_.expandLongTask(promise);
         // TODO(dvoytenko): consider additional "progress" UI.
       },
-      sanitizer: new SanitizerImpl(this.win),
+      sanitizer: new SanitizerImpl(this.win, sandboxTokens),
       // Callbacks.
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
@@ -275,76 +278,67 @@ class AmpScriptService {
 }
 
 /**
+ * sandbox="allow-forms" enables tags in HTMLFormElement.elements.
+ * @const {!Array<string>}
+ */
+const FORM_ELEMENTS = [
+  'form',
+  'button',
+  'fieldset',
+  'input',
+  'object',
+  'output',
+  'select',
+  'textarea',
+];
+
+/**
  * A DOMPurify wrapper that implements the worker-dom.Sanitizer interface.
  * @visibleForTesting
  */
 export class SanitizerImpl {
   /**
    * @param {!Window} win
+   * @param {!Array<string>} sandboxTokens
    */
-  constructor(win) {
-    /** @private {!DomPurifyDef} */
+  constructor(win, sandboxTokens) {
+    /** @private @const {!DomPurifyDef} */
     this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
 
-    /** @private {!Object<string, boolean>} */
+    /** @private @const {!Object<string, boolean>} */
     this.allowedTags_ = getAllowedTags();
 
-    // TODO(choumx): Support opt-in for variable substitutions and forms.
-    // For now, only allow built-in AMP components except amp-pixel...
+    // TODO(choumx): Support opt-in for variable substitutions.
+    // For now, only allow built-in AMP components except amp-pixel.
     this.allowedTags_['amp-img'] = true;
     this.allowedTags_['amp-layout'] = true;
     this.allowedTags_['amp-pixel'] = false;
-    // ...and other elements that support variable substitutions, including
-    // form elements (tags included in HTMLFormElement.elements).
-    const formElements = [
-      'form',
-      'button',
-      'fieldset',
-      'input',
-      'object',
-      'output',
-      'select',
-      'textarea',
-    ];
-    formElements.forEach(fe => {
-      this.allowedTags_[fe] = false;
-    });
 
-    /** @const @private {!Element} */
-    this.wrapper_ = win.document.createElement('div');
+    /** @private @const {boolean} */
+    this.allowForms_ = sandboxTokens.includes('allow-forms');
+    FORM_ELEMENTS.forEach(fe => {
+      this.allowedTags_[fe] = this.allowForms_;
+    });
   }
 
   /**
-   * TODO(choumx): This is currently called by worker-dom on node creation,
-   * so all invocations are on super-simple nodes like <p></p>.
-   * Either it should be moved to node insertion to justify the more expensive
-   * sanitize() call, or this method should be a simple string lookup.
+   * This is called by worker-dom on node creation, so all invocations are on
+   * super-simple nodes like <p></p>.
    *
    * @param {!Node} node
    * @return {boolean}
    */
   sanitize(node) {
-    // DOMPurify sanitizes unsafe nodes by detaching them from parents.
-    // So, an unsafe `node` that has no parent will cause a runtime error.
-    // To avoid this, wrap `node` in a <div> if it has no parent.
-    const useWrapper = !node.parentNode;
-    if (useWrapper) {
-      this.wrapper_.appendChild(node);
-    }
-    const parent = node.parentNode || this.wrapper_;
-    this.purifier_.sanitize(parent);
-    const clean = parent.firstChild;
+    // TODO(choumx): allowedTags_[] is more strict than purifier.sanitize()
+    // because the latter has attribute-specific allowances.
+    const tag = node.nodeName.toLowerCase();
+    const clean = this.allowedTags_[tag];
     if (!clean) {
-      user().warn(TAG, 'Sanitized node:', node);
-      return false;
-    }
-    // Detach `node` if we used a wrapper div.
-    if (useWrapper) {
-      while (this.wrapper_.firstChild) {
-        this.wrapper_.removeChild(this.wrapper_.firstChild);
+      if (!this.warnIfFormsAreDisallowed_(tag)) {
+        user().warn(TAG, 'Sanitized node:', node);
       }
     }
-    return true;
+    return clean;
   }
 
   /**
@@ -360,7 +354,6 @@ export class SanitizerImpl {
     const tag = node.nodeName.toLowerCase();
     // DOMPurify's attribute validation is tag-agnostic, so we need to check
     // that the tag itself is valid. E.g. a[href] is ok, but base[href] is not.
-    // TODO(choumx): This is actually more strict than sanitize().
     if (this.allowedTags_[tag]) {
       const attr = attribute.toLowerCase();
       if (validateAttributeChange(this.purifier_, node, attr, value)) {
@@ -380,7 +373,25 @@ export class SanitizerImpl {
         return true;
       }
     }
-    user().warn(TAG, 'Sanitized [%s]="%s":', attribute, value, node);
+    if (!this.warnIfFormsAreDisallowed_(tag)) {
+      user().warn(TAG, 'Sanitized [%s]="%s":', attribute, value, node);
+    }
+    return false;
+  }
+
+  /**
+   * @param {string} tag
+   * @return {boolean}
+   */
+  warnIfFormsAreDisallowed_(tag) {
+    if (!this.allowForms_ && FORM_ELEMENTS.includes(tag)) {
+      user().warn(
+        TAG,
+        'Form elements (%s) are not allowed without sandbox="allow-forms".',
+        tag
+      );
+      return true;
+    }
     return false;
   }
 

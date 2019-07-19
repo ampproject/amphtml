@@ -15,9 +15,7 @@
 -->
 <!--
   Test Description:
-  This test demonstrates the error message for an amp-carousel containing
-  an invalid `autoplay` attribute. There are multiple tagspecs for amp-carousel
-  and we are interested in which error is generated.
+  Tests the additional restrictions AMP4EMAIL sets on AMP-CAROUSEL.
 -->
 <!doctype html>
 <html ⚡4email>
@@ -29,10 +27,26 @@
      src='https://cdn.ampproject.org/v0/amp-carousel-0.1.js'></script>
 </head>
 <body>
-  <amp-carousel
-    autoplay
-    width="800" height="600"
-    layout="responsive"
-    type="slides"></amp-carousel
+
+<!-- Valid example. -->
+<amp-carousel
+  autoplay
+  delay="2000"
+  width="800" height="600"
+  layout="responsive"
+  type="slides">
+</amp-carousel>
+
+<!--
+  The error message for an amp-carousel containing an invalid `arrows` attribute. There are multiple
+  tagspecs for amp-carousel and we are interested in which error is generated.
+-->
+<amp-carousel
+  arrows
+  width="800" height="600"
+  layout="responsive"
+  type="slides">
+</amp-carousel>
+
 </body>
 </html>

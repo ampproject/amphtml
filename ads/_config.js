@@ -397,7 +397,9 @@ export const adConfig = {
     prefetch: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
     preconnect: 'https://bal.ad.dotandad.com',
   },
-
+  'dynad': {
+    preconnect: ['https://t.dynad.net', 'https://tm.jsuol.com.br'],
+  },
   'eadv': {
     renderStartImplemented: true,
     clientIdScope: 'AMP_ECID_EADV',
@@ -490,7 +492,12 @@ export const adConfig = {
   'ibillboard': {},
 
   'idealmedia': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.idealmedia.io',
+      'https://servicer.idealmedia.io',
+      'https://s-img.idealmedia.io/',
+    ],
   },
 
   'imedia': {
@@ -525,6 +532,12 @@ export const adConfig = {
     prefetch: 'https://cdn.innity.net/admanager.js',
     preconnect: 'https://as.innity.com',
     renderStartImplemented: true,
+  },
+
+  'invibes': {
+    prefetch: 'https://k.r66net.com/GetAmpLink',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
   },
 
   'ix': {
@@ -626,7 +639,12 @@ export const adConfig = {
   },
 
   'mgid': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.mgid.com',
+      'https://servicer.mgid.com',
+      'https://s-img.mgid.com',
+    ],
   },
 
   'microad': {
@@ -830,6 +848,8 @@ export const adConfig = {
     preconnect: 'https://ad.rfp.fout.jp',
     renderStartImplemented: true,
   },
+
+  'rnetplus': {},
 
   'rubicon': {},
 

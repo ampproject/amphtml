@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from './common-signals';
 import {Services} from './services';
 import {dev, devAssert, rethrowAsync} from './log';
+import {getAmpdoc} from './service';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
 import {map} from './utils/object';
 import {setStyles} from './style';
@@ -81,7 +83,7 @@ export function installStylesForDoc(
 
 /**
  * Adds the given css text to the given document.
- * TODO(dvoytenko, #10705): Remove this method once FIE/ampdoc migration is
+ * TODO(dvoytenko, #22733): Remove this method once FIE/ampdoc migration is
  * done.
  *
  * @param {!Document} doc The document that should get the new styles.
@@ -251,12 +253,6 @@ export function setBodyMadeVisibleForTesting(value) {
 export function makeBodyVisible(doc) {
   devAssert(doc.defaultView, 'Passed in document must have a defaultView');
   const win = /** @type {!Window} */ (doc.defaultView);
-  const set = () => {
-    bodyMadeVisible = true;
-    setBodyVisibleStyles(doc);
-    renderStartedNoInline(doc);
-  };
-
   waitForBodyOpenPromise(doc)
     .then(() => {
       return waitForServices(win);
@@ -266,7 +262,10 @@ export function makeBodyVisible(doc) {
       return [];
     })
     .then(services => {
-      set();
+      bodyMadeVisible = true;
+      setBodyVisibleStyles(doc);
+      const ampdoc = getAmpdoc(doc);
+      ampdoc.signals().signal(CommonSignals.RENDER_START);
       if (services.length > 0) {
         const resources = Services.resourcesForDoc(doc.documentElement);
         resources./*OK*/ schedulePass(1, /* relayoutAll */ true);
@@ -302,19 +301,6 @@ function setBodyVisibleStyles(doc) {
     visibility: 'visible',
     'animation': 'none',
   });
-}
-
-/**
- * @param {!Document} doc
- */
-function renderStartedNoInline(doc) {
-  try {
-    Services.resourcesForDoc(doc.documentElement).renderStarted();
-  } catch (e) {
-    // `makeBodyVisible` is called in the error-processing cycle and thus
-    // could be triggered when runtime's initialization is incomplete which
-    // would cause unrelated errors to be thrown here.
-  }
 }
 
 /**

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
+const experimentsConfig = require('./global-configs/experiments-config.json');
+
 const defaultPlugins = [
-  require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts'),
   require.resolve('./babel-plugins/babel-plugin-transform-html-template'),
   require.resolve(
     './babel-plugins/babel-plugin-transform-parenthesize-expression'
@@ -27,9 +29,78 @@ const defaultPlugins = [
   require.resolve('./babel-plugins/babel-plugin-transform-version-call'),
 ];
 
+/**
+ * @return {Array<string|Object>} the minify-replace plugin options that can be
+ * pushed into the babel plugins array
+ */
+function getReplacePlugin() {
+  /**
+   * @param {string} identifierName the identifier name to replace
+   * @param {boolean} value the value to replace with
+   * @return {!Object} replacement options used by minify-replace plugin
+   */
+  function createReplacement(identifierName, value) {
+    return {
+      identifierName,
+      replacement: {
+        type: 'booleanLiteral',
+        value,
+      },
+    };
+  }
+
+  const replacements = [];
+  const defineFlag = argv.defineExperimentConstant;
+
+  // add define flags from arguments
+  if (Array.isArray(defineFlag)) {
+    if (defineFlag.length > 1) {
+      throw new Error('Only one defineExperimentConstant flag is allowed');
+    } else {
+      replacements.push(createReplacement(defineFlag[0], true));
+    }
+  } else if (defineFlag) {
+    replacements.push(createReplacement(defineFlag, true));
+  }
+
+  // default each experiment flag constant to false
+  Object.keys(experimentsConfig).forEach(experiment => {
+    const experimentDefine =
+      experimentsConfig[experiment]['defineExperimentConstant'];
+
+    function flagExists(element) {
+      return element['identifierName'] === experimentDefine;
+    }
+
+    // only add default replacement if it already doesn't exist in array
+    if (experimentDefine && !replacements.some(flagExists)) {
+      replacements.push(createReplacement(experimentDefine, false));
+    }
+  });
+
+  const replacePlugin = [
+    require.resolve('babel-plugin-minify-replace'),
+    {replacements},
+  ];
+
+  return replacePlugin;
+}
+
 module.exports = {
-  plugins({isEsmBuild, isForTesting}) {
-    let pluginsToApply = defaultPlugins;
+  plugins({isEsmBuild, isForTesting, isSinglePass}) {
+    let pluginsToApply = defaultPlugins.slice(0);
+    // TODO(erwinm): This is temporary until we remove the assert/log removals
+    // from the java transformation to the babel transformation.
+    // There is currently a weird interaction where when we do the transform
+    // in babel and leave a bare "string", Closure Compiler does not remove
+    // the dead string expression statements. We cannot just outright remove
+    // the argument of the assert/log calls since we would need to inspect
+    // if the arguments have any method calls (which might have side effects).
+    if (isSinglePass) {
+      pluginsToApply.push(
+        require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts')
+      );
+    }
     if (isEsmBuild) {
       pluginsToApply = pluginsToApply.concat([
         [
@@ -56,6 +127,7 @@ module.exports = {
         require.resolve('./babel-plugins/babel-plugin-amp-mode-transformer'),
       ]);
     }
+    pluginsToApply.push(getReplacePlugin());
     return pluginsToApply;
   },
 
@@ -64,4 +136,5 @@ module.exports = {
       require.resolve('./babel-plugins/babel-plugin-transform-prune-namespace'),
     ];
   },
+  getReplacePlugin,
 };
