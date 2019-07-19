@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const conf = require('../build.conf');
 const {
   BABELIFY_GLOBAL_TRANSFORM,
   BABELIFY_REPLACE_PLUGIN,

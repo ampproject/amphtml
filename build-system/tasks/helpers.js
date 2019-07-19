@@ -426,13 +426,11 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     options.browserifyOptions
   );
 
-  const babelifyOptions = Object.assign({}, BABELIFY_GLOBAL_TRANSFORM);
-  const replacePlugin = conf.getReplacePlugin();
-  if ('plugins' in babelifyOptions) {
-    babelifyOptions['plugins'].push(replacePlugin);
-  } else {
-    babelifyOptions['plugins'] = [replacePlugin];
-  }
+  const babelifyOptions = Object.assign(
+    {},
+    BABELIFY_GLOBAL_TRANSFORM,
+    BABELIFY_REPLACE_PLUGIN
+  );
 
   let bundler = browserify(browserifyOptions).transform(
     babelify,
