@@ -1,5 +1,4 @@
 import {computedStyle} from '../../style';
-import {isExperimentOn} from '../../experiments';
 
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
