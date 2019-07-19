@@ -24,6 +24,12 @@ amp-story[standalone][i-amphtml-vertical] {
   contain: initial !important;
 }
 
+/* Overrides publishers custom CSS animations, if any. */
+[i-amphtml-vertical] * {
+  transition-delay: 0s !important;
+  transition-duration: 0s !important;
+}
+
 [i-amphtml-vertical] amp-story-page {
   position: relative !important;
   /* iPhone 6/7/8 ratio. */
@@ -49,4 +55,14 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
   position: relative !important;
   height: 178vw !important;
   transform: none !important;
+}
+
+[i-amphtml-vertical].i-amphtml-story-bookend-active amp-story-page[active]::after {
+  content: none !important;
+}
+
+[i-amphtml-vertical] amp-story-bookend {
+  position: relative !important;
+  display: block !important;
+  height: 178vw !important;
 }

@@ -740,9 +740,9 @@ export class AmpStoryEmbeddedComponent {
       `Failed to look up embed style element with ID ${embedId}`
     );
 
-    embedStyleEl[AMP_EMBED_DATA].transform = `scale(${
-      embedStyleEl[AMP_EMBED_DATA].scaleFactor
-    })`;
+    embedStyleEl[
+      AMP_EMBED_DATA
+    ].transform = `scale(${embedStyleEl[AMP_EMBED_DATA].scaleFactor})`;
     updateEmbedStyleEl(embedStyleEl, embedStyleEl[AMP_EMBED_DATA]);
   }
 

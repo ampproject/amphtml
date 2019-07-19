@@ -170,7 +170,7 @@ export class VideoInterface {
  * Components implementing the VideoInterface are expected to support
  * the following attributes.
  *
- * @constant {!Object<string, string>}
+ * @const {!Object<string, string>}
  */
 export const VideoAttributes = {
   /**
@@ -228,7 +228,7 @@ export const VideoAttributes = {
  * Components implementing the VideoInterface are expected to dispatch
  * the following DOM events.
  *
- * @constant {!Object<string, string>}
+ * @const {!Object<string, string>}
  */
 export const VideoEvents = {
   /**
@@ -361,7 +361,7 @@ export let PlayingStateDef;
  * Internal playing states used to distinguish between video playing on user's
  * command and videos playing automatically
  *
- * @constant {!Object<string, PlayingStateDef>}
+ * @const {!Object<string, PlayingStateDef>}
  */
 export const PlayingStates = {
   /**
