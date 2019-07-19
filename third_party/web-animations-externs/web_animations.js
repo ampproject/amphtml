@@ -22,57 +22,6 @@
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/Animation
  * @interface
- * @extend {EventTarget}
- */
-class Animation {
-  constructor() {
-    /**
-     * Current time of the animation.
-     * @type {number}
-     */
-    this.currentTime;
-
-    /**
-     * Current state of the animation.
-     * @type {string}
-     */
-    this.playState;
-  }
-
-  /**
-   * Starts or resumes playing of an animation, or begins the animation again
-   * if it previously finished.
-   */
-  play() {}
-
-  /**
-   * Clears all keyframeEffects caused by this animation and aborts its
-   * playback.
-   */
-  cancel() {}
-
-  /**
-   * Seeks either end of an animation, depending on whether the animation is
-   * playing or reversing.
-   */
-  finish() {}
-
-  /**
-   * Suspends playing of an animation.
-   */
-  pause() {}
-
-  /**
-   * Reverses playback direction, stopping at the start of the animation.
-   * If the animation is finished or unplayed, it will play from end to
-   * beginning.
-   */
-  reverse() {}
-}
-
-/**
- * See https://developer.mozilla.org/en-US/docs/Web/API/Animation
- * @interface
  */
 class WorkletAnimation {
   constructor() {
@@ -129,18 +78,6 @@ class CSSSupportsRule {
     this.cssRules;
   }
 }
-
-// JS externs for CSSKeyframeRule and CSSKeyframesRule have since been added to
-// closure compiler with https://github.com/google/closure-compiler/commit/de33b2e79,
-// so they can be removed from this file.
-
-/**
- * See https://developer.mozilla.org/en-US/docs/Web/API/Element/animate
- * @param {!Object} keyframes
- * @param {(!Object|number)=} opt_timing
- * @return {!Animation}
- */
-Element.prototype.animate = function(keyframes, opt_timing) {};
 
 /**
  */

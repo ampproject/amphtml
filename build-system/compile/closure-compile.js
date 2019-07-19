@@ -78,10 +78,8 @@ exports.gulpClosureCompile = function(compilerOptions) {
 
   if (compilerOptions.includes('SINGLE_FILE_COMPILATION=true')) {
     // For single-pass compilation, use the default compiler.jar
-    // TODO(rsimha): Use the native compiler instead of compiler.jar once a fix
-    // is checked in for https://github.com/google/closure-compiler/issues/3041
     closureCompiler.compiler.JAR_PATH = require.resolve(
-      '../../third_party/closure-compiler/compiler.jar'
+      '../../node_modules/google-closure-compiler-java/compiler.jar'
     );
   } else {
     // On Mac OS and Linux, speed up compilation using nailgun.
