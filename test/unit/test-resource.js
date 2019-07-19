@@ -491,6 +491,29 @@ describes.realWin('Resource', {amp: true}, env => {
     expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
+  describe('getPageLayoutBoxAsync', () => {
+    it('should return layout box when the resource has NOT been measured', () => {
+      sandbox.stub(element, 'isUpgraded').returns(true);
+      sandbox
+        .stub(element, 'getBoundingClientRect')
+        .returns(layoutRectLtwh(0, 0, 10, 10));
+      return expect(resource.getPageLayoutBoxAsync()).to.eventually.eql(
+        layoutRectLtwh(0, 0, 10, 10)
+      );
+    });
+
+    it('should return layout box when the resource has been measured', () => {
+      sandbox.stub(element, 'isUpgraded').returns(true);
+      sandbox
+        .stub(element, 'getBoundingClientRect')
+        .returns(layoutRectLtwh(0, 0, 10, 10));
+      resource.measure();
+      return expect(resource.getPageLayoutBoxAsync()).to.eventually.eql(
+        layoutRectLtwh(0, 0, 10, 10)
+      );
+    });
+  });
+
   describe('placeholder measure', () => {
     let rect;
 
