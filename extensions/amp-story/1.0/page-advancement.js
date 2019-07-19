@@ -21,6 +21,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
+import {BLING_LINK_SELECTOR} from './amp-story-bling-link';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
@@ -485,6 +486,7 @@ class ManualAdvancement extends AdvancementConfig {
   /**
    * For an element to trigger a tooltip it has to be descendant of
    * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
+   * Also it cannot be a bling link.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
@@ -493,13 +495,18 @@ class ManualAdvancement extends AdvancementConfig {
   canShowTooltip_(event, pageRect) {
     let valid = true;
     let tagName;
+    const target = dev().assertElement(event.target);
 
     if (this.isInScreenSideEdge_(event, pageRect)) {
       return false;
     }
 
+    if (target.matches(BLING_LINK_SELECTOR)) {
+      return false;
+    }
+
     return !!closest(
-      dev().assertElement(event.target),
+      target,
       el => {
         tagName = el.tagName.toLowerCase();
 
@@ -532,6 +539,19 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   *
+   * @param {*} target
+   * @return {boolean}
+   */
+  isCollapsedBlingLink(target) {
+    if (!target.matches(BLING_LINK_SELECTOR)) {
+      return false;
+    }
+
+    return !target.hasAttribute('expanded'); //TODO: use state service
+  }
+
+  /**
    * Checks if click should be handled by the embedded component logic rather
    * than by navigation.
    * @param {!Event} event
@@ -545,11 +565,11 @@ class ManualAdvancement extends AdvancementConfig {
       StateProperty.INTERACTIVE_COMPONENT_STATE
     ));
     const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
-    console.log('expanded mode', inExpandedMode);
     return (
       inExpandedMode ||
       (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&
-        this.canShowTooltip_(event, pageRect))
+        this.canShowTooltip_(event, pageRect)) ||
+      this.isCollapsedBlingLink(target)
     );
   }
 
