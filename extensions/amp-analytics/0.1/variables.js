@@ -222,11 +222,12 @@ export class VariableService {
       return this.macros_;
     }
     const elementMacros = {
-      'COOKIE': name => cookieReader(this.ampdoc_.win, element, name),
+      'COOKIE': name =>
+        cookieReader(this.ampdoc_.win, /** @type {!Element} */ (element), name),
       'CONSENT_STATE': getConsentStateStr(element),
     };
     const merged = Object.assign({}, this.macros_, elementMacros);
-    return /** @type {JsonObject} */ (merged);
+    return /** @type {!JsonObject} */ (merged);
   }
 
   /**
