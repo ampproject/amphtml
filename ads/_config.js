@@ -487,9 +487,9 @@ export const adConfig = {
   'idealmedia': {
     renderStartImplemented: true,
     prefetch: [
-        'https://jsc.idealmedia.io',
-        'https://servicer.idealmedia.io',
-        'https://s-img.idealmedia.io/',
+      'https://jsc.idealmedia.io',
+      'https://servicer.idealmedia.io',
+      'https://s-img.idealmedia.io/',
     ],
   },
 
@@ -551,9 +551,9 @@ export const adConfig = {
   'lentainform': {
     renderStartImplemented: true,
     preconnect: [
-        'https://jsc.lentainform.com',
-        'https://servicer.lentainform.com',
-        'https://s-img.lentainform.com',
+      'https://jsc.lentainform.com',
+      'https://servicer.lentainform.com',
+      'https://s-img.lentainform.com',
     ],
   },
 
