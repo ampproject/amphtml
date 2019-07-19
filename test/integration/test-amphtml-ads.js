@@ -52,7 +52,7 @@ describe('AMPHTML ad on AMP Page', () => {
       amp: true,
       extensions: ['amp-ad'],
       body: `
-      <div style="height: 100vh"></div>
+  <div style="height: 100vh"></div>
   <amp-ad
       width="300" height="250"
       id="i-amphtml-demo-id"
@@ -459,7 +459,6 @@ function testAmpComponentsBTF(win) {
   }, 2000);
   return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
 }
-
 
 /**
  * Returns a promise that fetches the content of the AMP ad at the amp4test url.
