@@ -185,7 +185,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       return;
     }
     const data = objOrParseJson(getData(event));
-    if (data === undefined) {
+    if (data == null) {
       return; // We only process valid JSON.
     }
     redispatch(this.element, data['data'], {
