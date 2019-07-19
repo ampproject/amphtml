@@ -30,7 +30,7 @@ describe
   .run('DOMPurify-based', () => {
     beforeEach(() => {
       html = document.createElement('html');
-      const documentEl = {documentElement: html};
+      const doc = {documentElement: html};
       /**
        * Helper that serializes output of purifyHtml() to string.
        * @param {string} html
@@ -39,7 +39,7 @@ describe
        * @return {string}
        */
       purify = (html, diffing = false) => {
-        const body = purifyHtml(html, documentEl, diffing);
+        const body = purifyHtml(html, doc, diffing);
         return body.innerHTML;
       };
     });
@@ -548,6 +548,7 @@ function runSanitizerTests() {
         expect(purify('<amp-anim controls></amp-anim>')).to.equal(
           '<amp-anim></amp-anim>'
         );
+        expect(purify('<amp-list>')).to.equal('');
       });
     });
   });
@@ -738,9 +739,15 @@ describe('validateAttributeChange', () => {
   });
 
   it('should perform AMP runtime validations', () => {
+    // !important style modifier.
     expect(vac('h1', 'style', 'color: red !important')).to.be.false;
+    // i-amphtml-* class names.
+    expect(vac('p', 'class', 'i-amphtml-illegal')).to.be.false;
+    // __amp_source_origin in URLs.
     expect(vac('amp-img', 'src', '?__amp_source_origin=evil')).to.be.false;
+    // BLACKLISTED_TAG_SPECIFIC_ATTRS.
     expect(vac('select', 'form', 'foo')).to.be.false;
+    // BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES.
     expect(vac('input', 'type', 'image')).to.be.false;
   });
 });
@@ -749,7 +756,8 @@ describe('getAllowedTags', () => {
   let allowedTags;
 
   beforeEach(() => {
-    allowedTags = getAllowedTags();
+    const doc = {documentElement: html};
+    allowedTags = getAllowedTags(doc);
   });
 
   it('should contain html tags', () => {
@@ -766,5 +774,10 @@ describe('getAllowedTags', () => {
     // Tags allowed in DOMPurify but disallowed in AMP.
     expect(allowedTags).to.not.have.property('audio');
     expect(allowedTags).to.not.have.property('img');
+  });
+
+  it('should not allow certain tags in amp4email', () => {
+    html.setAttribute('amp4email', '');
+    expect(allowedTags).to.not.have.property('amp-list');
   });
 });
