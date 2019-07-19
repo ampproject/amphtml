@@ -99,6 +99,22 @@ requirement: {
   value: 'String.fromCodePoint'
 }
 
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.trimStart is not allowed'
+  value: 'string.prototype.trimStart'
+  value: 'string.prototype.trimLeft'
+  whitelist: 'src/string.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.trimEnd is not allowed'
+  value: 'string.prototype.trimEnd'
+  value: 'string.prototype.trimRight'
+  whitelist: 'src/string.js'
+}
+
 # Object
 
 requirement: {
@@ -111,6 +127,12 @@ requirement: {
   type: BANNED_NAME
   error_message: 'Object.getOwnPropertyDescriptors is not allowed'
   value: 'Object.getOwnPropertyDescriptors'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.fromEntries is not allowed'
+  value: 'Object.fromEntries'
 }
 
 # Array
@@ -139,12 +161,32 @@ requirement: {
   value: 'Array.prototype.findIndex'
 }
 
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.flat is not allowed'
+  value: 'Array.prototype.flat'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.flatMap is not allowed'
+  value: 'Array.prototype.flatMap'
+}
+
 # Math
 
 requirement: {
   type: BANNED_NAME
   error_message: 'Math.trunc is not allowed'
   value: 'Math.trunc'
+}
+
+# Promise
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Promise.prototype.finally is not allowed'
+  value: 'Promise.prototype.finally'
 }
 
 # Number
