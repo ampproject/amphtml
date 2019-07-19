@@ -15,10 +15,11 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {dev} from '../../../src/log';
+import {dict, map} from '../../../src/utils/object';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
-import {map} from '../../../src/utils/object';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 
@@ -53,6 +54,9 @@ export class FormDirtiness {
     /** @private {boolean} */
     this.isSubmitting_ = false;
 
+    /** @private {boolean} */
+    this.wasDirty_ = false;
+
     this.installEventHandlers_();
   }
 
@@ -62,7 +66,7 @@ export class FormDirtiness {
    */
   onSubmitting() {
     this.isSubmitting_ = true;
-    this.updateDirtinessClass_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -71,7 +75,7 @@ export class FormDirtiness {
    */
   onSubmitError() {
     this.isSubmitting_ = false;
-    this.updateDirtinessClass_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -82,7 +86,7 @@ export class FormDirtiness {
     this.isSubmitting_ = false;
     this.submittedFormData_ = this.takeFormDataSnapshot_();
     this.clearDirtyFields_();
-    this.updateDirtinessClass_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -94,13 +98,27 @@ export class FormDirtiness {
   }
 
   /**
-   * Adds the `amp-form-dirty` class when there are dirty fields and the form
-   * is not being submitted, otherwise removes the class.
+   * Adds or removes the `amp-form-dirty` class and dispatches a
+   * `FORM_DIRTINESS_CHANGE` event that reflects the current dirtiness state,
+   * when the form dirtiness state changes. Does nothing otherwise.
    * @private
    */
-  updateDirtinessClass_() {
+  updateClassAndDispatchEventIfDirtyStateChanged_() {
     const isDirty = this.dirtyFieldCount_ > 0 && !this.isSubmitting_;
-    this.form_.classList.toggle(DIRTINESS_INDICATOR_CLASS, isDirty);
+
+    if (isDirty !== this.wasDirty_) {
+      this.form_.classList.toggle(DIRTINESS_INDICATOR_CLASS, isDirty);
+
+      const formDirtinessChangeEvent = createCustomEvent(
+        this.win_,
+        AmpEvents.FORM_DIRTINESS_CHANGE,
+        dict({'isDirty': isDirty}),
+        {bubbles: true}
+      );
+      this.form_.dispatchEvent(formDirtinessChangeEvent);
+    }
+
+    this.wasDirty_ = isDirty;
   }
 
   /**
@@ -127,7 +145,7 @@ export class FormDirtiness {
   onInput_(event) {
     const field = dev().assertElement(event.target);
     this.checkDirtinessAfterUserInteraction_(field);
-    this.updateDirtinessClass_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -137,7 +155,7 @@ export class FormDirtiness {
    */
   onReset_(unusedEvent) {
     this.clearDirtyFields_();
-    this.updateDirtinessClass_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**

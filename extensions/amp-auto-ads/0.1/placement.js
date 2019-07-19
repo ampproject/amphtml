@@ -105,7 +105,6 @@ INJECTORS[Position.LAST_CHILD] = (anchorElement, elementToInject) => {
 export class Placement {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
    * @param {!Position} position
    * @param {function(!Element, !Element)} injector
@@ -114,7 +113,6 @@ export class Placement {
    */
   constructor(
     ampdoc,
-    resources,
     anchorElement,
     position,
     injector,
@@ -125,7 +123,10 @@ export class Placement {
     this.ampdoc = ampdoc;
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = resources;
+    this.resources_ = Services.resourcesForDoc(anchorElement);
+
+    /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(anchorElement);
 
     /** @const @private {!Element} */
     this.anchorElement_ = anchorElement;
@@ -254,10 +255,9 @@ export class Placement {
    * @private
    */
   getPlacementSizing_(sizing, isResponsiveEnabled) {
-    const viewport = this.resources_.getViewport();
-    const viewportWidth = viewport.getWidth();
+    const viewportWidth = this.viewport_.getWidth();
     if (isResponsiveEnabled && viewportWidth <= MAXIMUM_RESPONSIVE_WIDTH) {
-      const viewportHeight = viewport.getHeight();
+      const viewportHeight = this.viewport_.getHeight();
       const responsiveHeight = getResponsiveHeightForContext_(
         viewportWidth,
         viewportHeight
@@ -383,7 +383,6 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
     placements.push(
       new Placement(
         ampdoc,
-        Services.resourcesForDoc(anchorElement),
         anchorElement,
         placementObj['pos'],
         injector,
