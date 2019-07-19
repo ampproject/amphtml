@@ -502,7 +502,7 @@ describes.realWin('Resource', {amp: true}, env => {
       );
     });
 
-    it.only('should return layout box when the resource has been measured', () => {
+    it('should return layout box when the resource has been measured', () => {
       sandbox.stub(element, 'isUpgraded').returns(true);
       sandbox
         .stub(element, 'getBoundingClientRect')
