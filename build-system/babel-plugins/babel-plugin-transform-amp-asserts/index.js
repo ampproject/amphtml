@@ -52,8 +52,9 @@ module.exports = function(babel) {
         const {callee} = node;
         const {parenthesized} = node.extra || {};
 
-        const isDirectCallExpression =
-          t.isIdentifier(callee, {name: 'devAssert'});
+        const isDirectCallExpression = t.isIdentifier(callee, {
+          name: 'devAssert',
+        });
         const isMemberAndCallExpression =
           t.isMemberExpression(callee) && t.isCallExpression(callee.object);
 
