@@ -23,6 +23,11 @@ import {
 import {dev, devAssert, rethrowAsync} from '../log';
 import {getMode} from '../mode';
 import {installStylesForDoc} from '../style-installer';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../experiments';
 import {map} from '../utils/object';
 import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
 import {startsWith} from '../string';
@@ -89,6 +94,15 @@ let ExtensionDef;
  * @private
  */
 let ExtensionHolderDef;
+
+/**
+ * @const {{experiment: string, control: string, branch: string}}
+ */
+const FIE_CSS_CLEANUP_EXP = {
+  branch: 'fie-css-cleanup',
+  control: '21064213',
+  experiment: '21064214',
+};
 
 /**
  * @param {string} extensionId
@@ -410,6 +424,178 @@ export class Extensions {
         }
       });
     });
+  }
+
+  /**
+   * Install extensions in the child window (friendly iframe). The pre-install
+   * callback, if specified, is executed after polyfills have been configured
+   * but before the first extension is installed.
+   * @param {!./ampdoc-impl.AmpDocFie} ampdoc
+   * @param {!Array<string>} extensionIds
+   * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+   * @return {!Promise}
+   * @restricted
+   */
+  installExtensionsInFie(ampdoc, extensionIds, opt_preinstallCallback) {
+    const childWin = ampdoc.win;
+    const topWin = this.win;
+    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
+    setParentWindow(childWin, parentWin);
+
+    // Install necessary polyfills.
+    installPolyfillsInChildWindow(parentWin, childWin);
+    // Install runtime styles.
+    this.maybeSelectFieCssExperiment(this.win);
+    installStylesForDoc(
+      ampdoc,
+      isExperimentOn(this.win, 'fie-css-cleanup') &&
+        getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.experiment) ===
+          FIE_CSS_CLEANUP_EXP.experiment
+        ? ampSharedCss
+        : ampDocCss + ampSharedCss,
+      /* callback */ null,
+      /* opt_isRuntimeCss */ true,
+      /* opt_ext */ 'amp-runtime'
+    );
+
+    // Run pre-install callback.
+    if (opt_preinstallCallback) {
+      opt_preinstallCallback(ampdoc.win, ampdoc);
+    }
+
+    // Install embeddable standard services.
+    installStandardServicesInEmbeddedDoc(ampdoc);
+
+    // Install built-ins and legacy elements.
+    copyBuiltinElementsToChildWindow(topWin, childWin);
+    stubLegacyElements(childWin);
+
+    return Promise.all(
+      extensionIds.map(extensionId => {
+        // This will extend automatic upgrade of custom elements from top
+        // window to the child window.
+        if (!LEGACY_ELEMENTS.includes(extensionId)) {
+          stubElementIfNotKnown(childWin, extensionId);
+        }
+        return this.installExtensionInDoc_(ampdoc, extensionId);
+      })
+    );
+  }
+
+  /**
+   * Install extensions in the child window (friendly iframe). The pre-install
+   * callback, if specified, is executed after polyfills have been configured
+   * but before the first extension is installed.
+   * @param {!Window} childWin
+   * @param {!Array<string>} extensionIds
+   * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+   * @return {!Promise}
+   * @restricted
+   */
+  installExtensionsInChildWindow(
+    childWin,
+    extensionIds,
+    opt_preinstallCallback
+  ) {
+    // TODO(#22733): remove this method when ampdoc-fie is launched.
+    const topWin = this.win;
+    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
+    setParentWindow(childWin, parentWin);
+
+    // Install necessary polyfills.
+    installPolyfillsInChildWindow(parentWin, childWin);
+
+    // Install runtime styles.
+    this.maybeSelectFieCssExperiment(this.win);
+    installStylesLegacy(
+      childWin.document,
+      isExperimentOn(this.win, 'fie-css-cleanup') &&
+        getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.experiment) ===
+          FIE_CSS_CLEANUP_EXP.experiment
+        ? ampSharedCss
+        : ampDocCss + ampSharedCss,
+      /* callback */ null,
+      /* opt_isRuntimeCss */ true,
+      /* opt_ext */ 'amp-runtime'
+    );
+
+    // Run pre-install callback.
+    if (opt_preinstallCallback) {
+      opt_preinstallCallback(childWin);
+    }
+
+    // Install embeddable standard services.
+    installStandardServicesInEmbed(childWin);
+
+    // Install built-ins and legacy elements.
+    copyBuiltinElementsToChildWindow(topWin, childWin);
+    stubLegacyElements(childWin);
+
+    const promises = [];
+    extensionIds.forEach(extensionId => {
+      // This will extend automatic upgrade of custom elements from top
+      // window to the child window.
+      if (!LEGACY_ELEMENTS.includes(extensionId)) {
+        stubElementIfNotKnown(childWin, extensionId);
+      }
+
+      // Install CSS.
+      const promise = this.preloadExtension(extensionId).then(extension => {
+        // Adopt embeddable extension services.
+        extension.services.forEach(service => {
+          installServiceInEmbedIfEmbeddable(childWin, service.serviceClass);
+        });
+
+        // Adopt the custom elements.
+        let elementPromises = null;
+        for (const elementName in extension.elements) {
+          const elementDef = extension.elements[elementName];
+          const elementPromise = new Promise(resolve => {
+            if (elementDef.css) {
+              installStylesLegacy(
+                childWin.document,
+                elementDef.css,
+                /* completeCallback */ resolve,
+                /* isRuntime */ false,
+                extensionId
+              );
+            } else {
+              resolve();
+            }
+          }).then(() => {
+            upgradeOrRegisterElement(
+              childWin,
+              elementName,
+              elementDef.implementationClass
+            );
+          });
+          if (elementPromises) {
+            elementPromises.push(elementPromise);
+          } else {
+            elementPromises = [elementPromise];
+          }
+        }
+        if (elementPromises) {
+          return Promise.all(elementPromises).then(() => extension);
+        }
+        return extension;
+      });
+      promises.push(promise);
+    });
+    return Promise.all(promises);
+  }
+
+  /**
+   * Select the experiment branch for fie-css-cleanup if necessary.
+   * @param {!Window} win
+   */
+  maybeSelectFieCssExperiment(win) {
+    const experimentInfoMap = /** @type {!Object<string, !ExperimentInfo>} */ ({});
+    experimentInfoMap['fie-css-cleanup'] = {
+      isTrafficEligible: () => true,
+      branches: [FIE_CSS_CLEANUP_EXP.control, FIE_CSS_CLEANUP_EXP.experiment],
+    };
+    randomlySelectUnsetExperiments(win, experimentInfoMap);
   }
 
   /**
