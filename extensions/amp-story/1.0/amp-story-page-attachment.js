@@ -20,7 +20,6 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {AnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {CSS} from '../../../build/amp-story-page-attachment-header-1.0.css';
 import {
   HistoryState,
@@ -29,8 +28,10 @@ import {
 } from './utils';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {closest, isAmpElement} from '../../../src/dom';
 import {dev} from '../../../src/log';
+import {getAnalyticsService} from './story-analytics';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
 import {listen} from '../../../src/event-helper';
@@ -540,7 +541,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     });
 
     this.historyService_.push(() => this.closeInternal_(), historyState);
-    this.analyticsService_.triggerEvent(AnalyticsEvent.PAGE_ATTACHMENT_ENTER);
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
+    );
   }
 
   /**
@@ -594,6 +597,8 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
 
-    this.analyticsService_.triggerEvent(AnalyticsEvent.PAGE_ATTACHMENT_EXIT);
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_EXIT
+    );
   }
 }
