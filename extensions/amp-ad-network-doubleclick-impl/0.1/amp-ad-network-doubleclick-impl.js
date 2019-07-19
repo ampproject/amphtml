@@ -24,6 +24,7 @@ import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   ADX_ADY_EXP,
   AmpAnalyticsConfigDef,
+  FIE_CSS_CLEANUP_EXP,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
@@ -393,6 +394,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       [[ADX_ADY_EXP.branch]]: {
         isTrafficEligible: () => true,
         branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
+      },
+      [[FIE_CSS_CLEANUP_EXP.branch]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [FIE_CSS_CLEANUP_EXP.control],
+          [FIE_CSS_CLEANUP_EXP.experiment],
+        ],
       },
     });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
