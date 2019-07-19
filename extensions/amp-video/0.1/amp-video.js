@@ -55,7 +55,6 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'controls',
   'crossorigin',
   'disableremoteplayback',
-  'poster',
   'controlsList',
 ];
 
@@ -64,7 +63,7 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
  *       video manager since amp-video implements the VideoInterface.
  * @private {!Array<string>}
  */
-const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['loop', 'preload'];
+const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['loop', 'poster', 'preload'];
 
 /** @private {!Array<string>} */
 const ATTRS_TO_PROPAGATE = ATTRS_TO_PROPAGATE_ON_BUILD.concat(
@@ -209,10 +208,7 @@ class AmpVideo extends AMP.BaseElement {
     this.applyFillContent(this.video_, true);
     propagateObjectFitStyles(this.element, this.video_);
 
-    this.createPosterForAndroidBug_();
     element.appendChild(this.video_);
-
-    this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
 
     // Gather metadata
     const artist = element.getAttribute('artist');
@@ -307,6 +303,9 @@ class AmpVideo extends AMP.BaseElement {
       dev().assertElement(this.video_),
       /* opt_removeMissingAttrs */ true
     );
+
+    this.createPosterForAndroidBug_();
+    this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
 
     this.propagateCachedSources_();
 
