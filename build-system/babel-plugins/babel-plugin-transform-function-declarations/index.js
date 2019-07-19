@@ -102,28 +102,37 @@ function createVariableDeclaration(t, path) {
 
 // Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
 // See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
-export default function({types: t}) {
-  const DEBUG = true;
+module.exports = function({types: t}) {
+  const DEBUG = false;
+  const REPORT = true;
 
   return {
     name: 'safe-arrows',
+    pre() {
+      this.bailoutCount = Object.assign({}, BAIL_OUT_CONDITIONS);
+      Object.keys(this.bailoutCount).forEach(
+        key => (this.bailoutCount[key] = [])
+      );
+      this.successCount = [];
+    },
     visitor: {
       FunctionDeclaration(path) {
+        const name = (path.get('id') && path.get('id').node.name) || '';
         for (const [id, method] of Object.entries(BAIL_OUT_CONDITIONS)) {
           if (method(t, path)) {
+            this.bailoutCount[id].push(name);
             if (DEBUG) {
               console /*OK*/
                 .log(
                   `Bail on ${
-                    path.get('id') && path.get('id').node.name
-                      ? `function ${path.node.id.name}:`
-                      : 'item:'
+                    name !== '' ? `function ${name}:` : 'item:'
                   } Reason ${id}.`
                 );
             }
             return;
           }
         }
+        this.successCount.push(name);
         if (DEBUG) {
           console /*OK*/
             .log(`Success for function ${path.get('id').node.name}.`);
@@ -131,5 +140,15 @@ export default function({types: t}) {
         path.replaceWith(createVariableDeclaration(t, path));
       },
     },
+    post() {
+      if (REPORT) {
+        console.log(`Success Count: ${this.successCount.length}`);
+        console.log('Bail Out Reason Counts');
+        Object.keys(this.bailoutCount).forEach(name =>
+          console.log(`${name}: ${this.bailoutCount[name].length}`)
+        );
+        console.log('\n');
+      }
+    },
   };
-}
+};
