@@ -114,22 +114,14 @@ exports.getFlags = function(config) {
     language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
+    process_common_js_modules: true,
     externs: config.externs,
     define: config.define,
-    // Turn off warning for "Unknown @define" since we use define to pass
-    // args such as FORTESTING to our runner.
-    jscomp_off: ['unknownDefines'],
-    // checkVars: Demote "variable foo is undeclared" errors.
-    // moduleLoad: Demote "module not found" errors to ignore missing files
-    //     in type declarations in the swg.js bundle.
-    jscomp_warning: ['checkVars', 'moduleLoad'],
-    jscomp_error: [
-      'checkTypes',
-      'accessControls',
-      'const',
-      'constantProperty',
-      'globalThis',
-    ],
+    // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
+    // for a full list of closure's default error / warning levels.
+    jscomp_off: ['accessControls', 'unknownDefines'],
+    jscomp_warning: ['checkTypes', 'checkVars', 'moduleLoad'],
+    jscomp_error: ['const', 'constantProperty', 'globalThis'],
     hide_warnings_for: config.hideWarningsFor,
   };
   if (argv.pretty_print) {

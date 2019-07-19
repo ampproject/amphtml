@@ -82,7 +82,10 @@ export class NativeWebAnimationRunner extends AnimationRunner {
       if (request.vars) {
         setStyles(request.target, assertDoesNotContainDisplay(request.vars));
       }
-      const player = request.target.animate(request.keyframes, request.timing);
+      const player = request.target.animate(
+        /** @type {!Array<Object>} */ (request.keyframes),
+        request.timing
+      );
       player.pause();
       return player;
     });
