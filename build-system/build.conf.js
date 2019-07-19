@@ -67,9 +67,8 @@ function getReplacePlugin() {
 
   // default each experiment flag constant to false
   Object.keys(experimentsConfig).forEach(experiment => {
-    const expirationStr =
-      experimentsConfig[experiment]['expirationTimestampMs'];
-    const expirationDate = new Date(parseInt(expirationStr, 10));
+    const expirationStr = experimentsConfig[experiment]['expirationDateUTC'];
+    const expirationDate = new Date(expirationStr);
     const expirationTimestampMs = expirationDate.getTime();
 
     // check experiment expiration times
@@ -77,7 +76,7 @@ function getReplacePlugin() {
       throw new Error(`Invalid expiration date for ${experiment}`);
     } else if (expirationTimestampMs < currentTimestampMs) {
       throw new Error(
-        `${experiment} has expired on ${expirationDate.toDateString()}. Please remove from experiments-config.json and cleanup relevant code.`
+        `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
       );
     }
 

@@ -3,7 +3,7 @@
     "name": "ANALYTICS_VENDOR_SPLIT",
     "command": "gulp dist --defineExperimentConstant=ANALYTICS_VENDOR_SPLIT",
     "issue": "",
-    "expirationTimestampMs": "1565870400000",
+    "expirationDateUTC": "2019-08-08",
     "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
   },
   "experimentB": {},
