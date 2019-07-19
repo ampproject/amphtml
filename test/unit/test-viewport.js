@@ -1744,17 +1744,10 @@ describes.realWin('marginBottomOfLastChild', {}, env => {
     secondChild.style.marginBottom = '22px';
     secondChild.style.height = '2px';
     element.appendChild(secondChild);
-
-    toggleExperiment(win, 'margin-bottom-in-content-height', true, true);
   });
 
   it('should return the marginBottom of the last child', () => {
     expect(marginBottomOfLastChild(win, element)).to.equal(22);
-  });
-
-  it('should return 0 if experiment is disabled', () => {
-    toggleExperiment(win, 'margin-bottom-in-content-height', false, true);
-    expect(marginBottomOfLastChild(win, element)).to.equal(0);
   });
 
   it('should return 0 if element has no children', () => {
