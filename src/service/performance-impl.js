@@ -302,7 +302,11 @@ export class Performance {
       } else if (entry.entryType === 'layoutJank') {
         this.aggregateJankScore_ += entry.fraction;
       } else if (entry.entryType === 'layout-shift') {
-        this.aggregateShiftScore_ += entry.value;
+        // Ignore layout shift that occurs within 500ms of user input, as it is
+        // likely in response to the user's action.
+        if (!entry.hadRecentInput) {
+          this.aggregateShiftScore_ += entry.value;
+        }
       }
     };
 
@@ -332,13 +336,14 @@ export class Performance {
     }
 
     if (this.supportsLayoutInstabilityAPI_) {
-      // Programmatically read once as currently PerformanceObserver does not
-      // report past entries as of Chrome 61.
-      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
-      this.win.performance
-        .getEntriesByType('layout-shift')
-        .forEach(processEntry);
-      entryTypesToObserve.push('layout-shift');
+      // Layout shift entries are not available from the Performance Timeline
+      // through `getEntriesByType`, so a separate PerformanceObserver is
+      // required for this metric.
+      const layoutInstabilityObserver = new this.win.PerformanceObserver(list => {
+        list.getEntries().forEach(processEntry);
+        this.flush();
+      });
+      layoutInstabilityObserver.observe({type: 'layout-shift', buffered: true});
     }
 
     if (entryTypesToObserve.length === 0) {

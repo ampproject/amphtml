@@ -1310,17 +1310,19 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       // Document should be initially visible.
       expect(fakeWin.document.visibilityState).to.equal('visible');
 
-      // Fake layout-shift that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType
-        .withArgs('layout-shift')
-        .returns([
-          {entryType: 'layout-shift', value: 0.25},
-          {entryType: 'layout-shift', value: 0.3},
-        ]);
-
       const perf = getPerformance();
       // visibilitychange/beforeunload listeners are now added.
       perf.coreServicesAvailable();
+
+      // Fake layout-shift that occured before the Performance service is started.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 0.25, hadRecentInput: false},
+            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
+          ];
+        },
+      });
 
       // The document has become hidden, e.g. via the user switching tabs.
       toggleVisibility(fakeWin, false);
@@ -1332,15 +1334,23 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
 
       // The user returns to the tab, and more layout shift occurs.
       toggleVisibility(fakeWin, true);
-      const list = {
+      performanceObserver.triggerCallback({
         getEntries() {
           return [
-            {entryType: 'layout-shift', value: 1},
-            {entryType: 'layout-shift', value: 0.0001},
+            {entryType: 'layout-shift', value: 1, hadRecentInput: false},
+            {entryType: 'layout-shift', value: 0.0001, hadRecentInput: false},
           ];
         },
-      };
-      performanceObserver.triggerCallback(list);
+      });
+
+      // User input occurs which triggers layout shift, which is ignored.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 0.3, hadRecentInput: true},
+          ];
+        },
+      });
 
       toggleVisibility(fakeWin, false);
       expect(perf.events_.length).to.equal(2);
@@ -1351,7 +1361,13 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
 
       // Any more layout shift shouldn't be reported.
       toggleVisibility(fakeWin, true);
-      performanceObserver.triggerCallback(list);
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 2, hadRecentInput: false},
+          ];
+        },
+      });
 
       toggleVisibility(fakeWin, false);
       expect(perf.events_.length).to.equal(2);
@@ -1365,17 +1381,19 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       // Document should be initially visible.
       expect(fakeWin.document.visibilityState).to.equal('visible');
 
-      // Fake layout-shift that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType
-        .withArgs('layout-shift')
-        .returns([
-          {entryType: 'layout-shift', value: 0.25},
-          {entryType: 'layout-shift', value: 0.3},
-        ]);
-
       const perf = getPerformance();
       // visibilitychange/beforeunload listeners are now added.
       perf.coreServicesAvailable();
+
+      // Fake layout-shift that occured before the Performance service is started.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 0.25, hadRecentInput: false},
+            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
+          ];
+        },
+      });
 
       // The document has become hidden, e.g. via the user switching tabs.
       // Note: Don't fire visibilitychange (not supported in this case).
@@ -1395,15 +1413,19 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
       sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
 
-      // Fake layout-shift that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType
-        .withArgs('layout-shift')
-        .returns([
-          {entryType: 'layout-shift', value: 0.25},
-          {entryType: 'layout-shift', value: 0.3},
-        ]);
       const perf = getPerformance();
       perf.coreServicesAvailable();
+
+      // Fake layout-shift that occured before the Performance service is started.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 0.25, hadRecentInput: false},
+            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
+          ];
+        },
+      });
+
       viewerVisibilityState = VisibilityState.INACTIVE;
       perf.onViewerVisibilityChange_();
 
