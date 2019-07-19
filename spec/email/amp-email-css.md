@@ -18,6 +18,24 @@ limitations under the License.
 
 This document outlines the CSS features currently supported inside AMP emails.
 
+## Applying CSS
+
+### Internal stylesheet
+
+When using an internal stylesheet, the CSS is specified inside a single
+`<style amp-custom>` tag located in the `<head>` tag of the email.
+
+### Inline styles
+
+In addition to an internal stylesheet, inline styles can be specified on any
+element using the [`style` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-style).
+
+### External stylesheet
+
+External stylesheets are **not** supported in AMP for Email.
+
+Using `<link rel="stylesheet" href="...">` is not allowed anywhere in the email.
+
 ## Supported CSS selectors
 
 ### Simple selectors
@@ -293,6 +311,16 @@ The following CSS properties have additional restrictions:
 | [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility) | The only allowed values are `hidden`, `visible` and `initial`. |
 | [`z-index`](https://developer.mozilla.org/en-US/docs/Web/CSS/z-index) | Only values between -100 and 100 are allowed. |
 
+## At-rules
+
+The only [at-rule](https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule)
+currently supported is `@media`. See [Media features](#media-features) for more
+information.
+
+### Custom fonts (`@font-face`)
+
+Custom fonts are **not** supported in AMP for Email.
+
 ## Media features
 
 List of [media features](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries#Media_features)
@@ -303,6 +331,7 @@ supported for conditionally applying rules via `@media` queries.
       *   `min-device-width`
 *   [`hover`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/hover)
 *   [`orientation`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/orientation)
+*   [`pointer`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/pointer)
 *   [`resolution`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/resolution)
       *   `max-resolution`
       *   `min-resolution`
