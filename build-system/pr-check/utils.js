@@ -195,7 +195,7 @@ function timedExecOrDie(cmd, fileName = 'utils.js') {
  * @param {string} outputDirs
  * @private
  */
-async function downloadOutput_(functionName, outputFileName, outputDirs) {
+function downloadOutput_(functionName, outputFileName, outputDirs) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   const buildOutputDownloadUrl = `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
 
@@ -229,7 +229,7 @@ async function downloadOutput_(functionName, outputFileName, outputDirs) {
  * @param {string} outputDirs
  * @private
  */
-async function uploadOutput_(functionName, outputFileName, outputDirs) {
+function uploadOutput_(functionName, outputFileName, outputDirs) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
 
   console.log(
@@ -296,7 +296,7 @@ function uploadBuildOutput(functionName) {
  * Zips and uploads the dist output to a remote storage location
  * @param {string} functionName
  */
-async function uploadDistOutput(functionName) {
+function uploadDistOutput(functionName) {
   uploadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
 }
 
