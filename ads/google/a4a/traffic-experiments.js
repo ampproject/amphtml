@@ -25,7 +25,6 @@
 import {EXPERIMENT_ATTRIBUTE, mergeExperimentIds} from './utils';
 import {
   ExperimentInfo, // eslint-disable-line no-unused-vars
-  isExperimentOn,
 } from '../../../src/experiments';
 import {Services} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
