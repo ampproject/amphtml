@@ -67,7 +67,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setCollapsePropertiesLevel(CompilerOptions.PropertyCollapseLevel.ALL);
     AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
-    options.setDevirtualizePrototypeMethods(true);
+    options.setDevirtualizeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);
     options.optimizeCalls = true;
