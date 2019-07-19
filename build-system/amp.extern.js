@@ -543,6 +543,7 @@ AccessService.prototype.getAuthdataField = function(field) {};
  * @typedef {{
  *   scope: string,
  *   createCookieIfNotPresent: (boolean|undefined),
+ *   cookieName: (string|undefined),
  * }}
  */
 var GetCidDef;

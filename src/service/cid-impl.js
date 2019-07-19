@@ -85,18 +85,6 @@ const API_KEYS = {
 let BaseCidInfoDef;
 
 /**
- * The "get CID" parameters.
- * - createCookieIfNotPresent: Whether CID is allowed to create a cookie when.
- *   Default value is `false`.
- * @typedef {{
- *   scope: string,
- *   createCookieIfNotPresent: (boolean|undefined),
- *   cookieName: (string|undefined),
- * }}
- */
-let GetCidDef;
-
-/**
  * @interface
  */
 export class CidDef {
