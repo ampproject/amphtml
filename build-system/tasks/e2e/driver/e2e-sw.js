@@ -30,10 +30,14 @@ self.addEventListener('activate', event => {
   );
 });
 
+// TODO(cvializ): This does not get fetches from iframes
+// that are defined by a srcdoc, which is needed by amp-analytics.
+// This could still be used for the amp-stories case.
+// Puppeteer DOES have access to the fetches though.
 self.addEventListener('fetch', event => {
   self.requests_ = self.requests_ || new ClientRequests();
-
   const {clientId, request} = event;
+  console.log('uwu', request.url);
   // Exit if we cannot access the client, e.g. if it's cross-origin
   if (!clientId) {
     return;
@@ -44,9 +48,12 @@ self.addEventListener('fetch', event => {
 
 self.addEventListener('message', event => {
   const {source, data} = event;
+
   const {id} = source;
-  console.log('SW Received Message: ' + data);
-  source.postMessage(self.requests_.get(id));
+  const {name} = data;
+  if (name === 'sendRequests') {
+    source.postMessage(self.requests_.get(id));
+  }
 });
 
 /**
@@ -103,7 +110,6 @@ async function logRequest(clientId, request) {
   if (!client) {
     return;
   }
-
   // TODO(cvializ): Pass the real request body
   const {url} = request;
   self.requests_.put(clientId, {url, body: {}});

@@ -23,6 +23,7 @@ const {
 const {By, Condition, Key: SeleniumKey, error} = require('selenium-webdriver');
 const {ControllerPromise} = require('./controller-promise');
 const {expect} = require('chai');
+const {parse: parseUrl} = require('url');
 const {parseQueryParams} = require('./parse-query-params');
 
 const {NoSuchElementError} = error;
@@ -552,7 +553,9 @@ class SeleniumWebDriverController {
   /**
    * Get the value of a request to a URL matching the given matcher.
    * Precondition: the request proxy ServiceWorker is installed in the page
-   * under test by maybeInstallRequestProxy_ (e.g. in `navigateTo`)
+   * under test by enableNetworkLogging
+   * NOTE: Currently the Service Worker implementation is unable to log requests
+   * made by srcdoc iframes, which is used by amp-ad for example.
    * @param {RegExp|string} matcher
    * @return {!ControllerPromise}
    */
@@ -565,13 +568,26 @@ class SeleniumWebDriverController {
       this.evaluate(getter, matcher),
       this.getWaitFn_(() => this.evaluate(getter, matcher))
     );
-    // p = p.then(result => {
-    //   if (result && result.url) {
-    //     console.log(result);
-    //     result.queryParams = parseQueryParams(result.url);
-    //   }
-    //   return result;
-    // });
+    p = p.then(result => {
+      if (!result) {
+        return;
+      }
+
+      const {url} = result;
+      if (!url) {
+        return result;
+      }
+
+      // We parse the query params here so we can use the Node
+      // implementation and avoid implementing or importing it
+      // in the Service Worker code.
+      result.queryParams = parseQueryParams(url);
+      result.path = parseUrl(url).path;
+
+      console.log(result);
+
+      return result;
+    });
     if (property) {
       p = p.then(result => result && result[property]);
     }

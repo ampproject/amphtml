@@ -29,6 +29,7 @@ const {
 } = require('./functional-test-controller');
 const {ControllerPromise} = require('./controller-promise');
 const {dirname, join} = require('path');
+const {parse: parseUrl} = require('url');
 const {parseQueryParams} = require('./parse-query-params');
 
 /**
@@ -620,7 +621,14 @@ class PuppeteerController {
     await page.setRequestInterception(true);
 
     page.on('request', req => {
-      this.requests_.push({url: req.url(), body: req.postData()});
+      const url = req.url();
+      const {path} = parseUrl(url);
+      const body = req.postData();
+      this.requests_.push({
+        url,
+        path,
+        body,
+      });
       req.continue();
     });
   }
@@ -634,7 +642,6 @@ class PuppeteerController {
     const matches = this.requests_.filter(request =>
       request.url.includes(matcher)
     );
-
     // Create a getter that will wait for future requests.
     const getter = async () => {
       const page = await this.getPage_();
@@ -642,15 +649,19 @@ class PuppeteerController {
         req.url().includes(matcher)
       );
       const url = request.url();
+      const {path} = parseUrl(url);
       const queryParams = parseQueryParams(url);
-      return {
+      const result = {
         url,
+        path,
         queryParams,
         // TODO(cvializ): pass the real request body
         // It's a challenge for Puppeteer because it stores the postData
         // as a string, and so we'd need to pass it to a body parser.
         body: {},
       };
+      console.log(result);
+      return result;
     };
     return new ControllerPromise(Promise.resolve(matches[0]), getter);
   }

@@ -23,6 +23,7 @@ const argv = minimist(process.argv.slice(2), {
 });
 const multer = require('multer');
 const path = require('path');
+const url = require('url');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 const upload = multer();
@@ -43,6 +44,7 @@ function log(...messages) {
 }
 
 app.use('/compose-doc', function(req, res) {
+  const {localPort} = req.connection;
   res.setHeader('X-XSS-Protection', '0');
 
   const {body, css, experiments, extensions, spec} = req.query;
@@ -66,7 +68,7 @@ app.use('/compose-doc', function(req, res) {
 
   // TODO: Do we need to inject amp-3p-iframe-src for non-ad tests?
   const head = `${experimentsBlock}
-    <meta name="amp-3p-iframe-src" content="http://localhost:9876/${frameHtml}">`;
+    <meta name="amp-3p-iframe-src" content="http://localhost:${localPort}/${frameHtml}">`;
 
   const doc = composeDocument({
     body,
@@ -96,10 +98,12 @@ ${req.query.body}
 });
 
 app.use('/compose-shadow', function(req, res) {
+  const {localPort} = req.connection;
   const {docUrl} = req.query;
   const viewerHtml = renderShadowViewer({
     src: docUrl.replace(/^\//, ''),
-    port: KARMA_SERVER_PORT,
+    // port: KARMA_SERVER_PORT,
+    port: localPort,
     baseHref: path.dirname(req.url),
   });
   res.send(replaceUrls(SERVE_MODE, viewerHtml));
@@ -191,17 +195,18 @@ app.use('/request-bank/:bid/teardown/', (req, res) => {
  */
 app.get('/a4a/:bid', (req, res) => {
   cors.enableCors(req, res);
+  const {localPort} = req.connection;
   const {bid} = req.params;
   const body = `
   <a href=https://ampbyexample.com target=_blank>
-    <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
+    <amp-img alt="AMP Ad" height=250 src=//localhost:${localPort}/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
   </a>
-  <amp-pixel src="//localhost:9876/amp4test/request-bank/${bid}/deposit/pixel/foo?cid=CLIENT_ID(a)"></amp-pixel>
+  <amp-pixel src="//localhost:${localPort}/amp4test/request-bank/${bid}/deposit/pixel/foo?cid=CLIENT_ID(a)"></amp-pixel>
   <amp-analytics>
     <script type="application/json">
     {
       "requests": {
-        "pageview": "//localhost:9876/amp4test/request-bank/${bid}/deposit/analytics/bar"
+        "pageview": "//localhost:${localPort}/amp4test/request-bank/${bid}/deposit/analytics/bar.json"
       },
       "triggers": {
         "pageview": {

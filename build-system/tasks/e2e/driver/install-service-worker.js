@@ -82,7 +82,7 @@ class RequestLoggingService {
     this.ready_ = true;
     const {controller} = serviceWorker;
     if (controller) {
-      controller.postMessage('wow');
+      controller.postMessage({name: 'sendRequests'});
     }
   }
 

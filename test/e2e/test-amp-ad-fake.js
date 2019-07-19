@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-// import {parseQueryString} from '../../src/url';
-
 describes.endtoend(
   'A4A',
   {
     testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-ad/fake.html',
     environments: ['single'],
+    engine: ['puppeteer'], // TODO(cvializ): worth implementing?
   },
   async env => {
     let controller;
@@ -35,22 +34,31 @@ describes.endtoend(
         // const imageReq = await controller.getNetworkRequest('image');
         // const pixelReq = await controller.getNetworkRequest('pixel');
         // const analyticsReq = await controller.getNetworkRequest('analytics');
-        await expect(controller.getNetworkRequest('image', 'url')).to.equal(
-          '/'
+        console.log(await controller.getNetworkRequest('doc'));
+        await expect(controller.getNetworkRequest('doc', 'url')).to.match(
+          /\//g
         );
-        await expect(controller.getNetworkRequest('pixel', 'url')).to.include(
-          '/foo?cid='
-        );
-        // await expect(analyticsReq.url).to.match(/^\/bar\?/);
-        console.log(await controller.getNetworkRequest('analytics'));
 
-        // await expect(controller.getNetworkRequest('analytics')).to.include({
-        //   title: 'AMP TEST', // ${title},
-        //   cid: '', // ${clientId(a)}
-        //   navTiming: '0', // ${navTiming(requestStart,requestStart)}
-        //   navType: '0', // ${navType}
-        //   navRedirectCount: '0', // ${navRedirectCount}
+        console.log(await controller.getNetworkRequest('/analytics/'));
+
+        // TODO(cvializ): So this one doesn't load when using the SW method,
+        // because it comes from the srcdoc iframe and Service Workers don't
+        // have access to srcdoc iframe requests. /shruggie
+        await expect(
+          controller.getNetworkRequest('/analytics/', 'queryParams')
+        ).to.include({
+          title: 'AMP TEST', // ${title},
+          cid: '', // ${clientId(a)}
+          navTiming: '0', // ${navTiming(requestStart,requestStart)}
+          navType: '0', // ${navType}
+          navRedirectCount: '0', // ${navRedirectCount}
+        });
+
+        // await expect(controller.getNetworkRequest('pixel')).to.include({
+        //   url: '/foo?cid=',
         // });
+        // await expect(analyticsReq.url).to.match(/^\/bar\?/);
+
         // const queries = parseQueryString(
         //   analyticsReq.url.substr('/bar'.length)
         // );
