@@ -1363,9 +1363,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       toggleVisibility(fakeWin, true);
       performanceObserver.triggerCallback({
         getEntries() {
-          return [
-            {entryType: 'layout-shift', value: 2, hadRecentInput: false},
-          ];
+          return [{entryType: 'layout-shift', value: 2, hadRecentInput: false}];
         },
       });
 

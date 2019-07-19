@@ -339,10 +339,12 @@ export class Performance {
       // Layout shift entries are not available from the Performance Timeline
       // through `getEntriesByType`, so a separate PerformanceObserver is
       // required for this metric.
-      const layoutInstabilityObserver = new this.win.PerformanceObserver(list => {
-        list.getEntries().forEach(processEntry);
-        this.flush();
-      });
+      const layoutInstabilityObserver = new this.win.PerformanceObserver(
+        list => {
+          list.getEntries().forEach(processEntry);
+          this.flush();
+        }
+      );
       layoutInstabilityObserver.observe({type: 'layout-shift', buffered: true});
     }
 
