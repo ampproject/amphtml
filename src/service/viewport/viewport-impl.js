@@ -208,13 +208,6 @@ export class Viewport {
       globalDocElement.classList.add('i-amphtml-webview');
     }
 
-    // Doc Level CSS Experiments
-    if (!isExperimentOn(this.ampdoc.win, 'inabox-remove-height-auto')) {
-      // This is a double negative, to allow going from 0 -> 100
-      // When deploying the experiment
-      globalDocElement.classList.add('i-amphtml-inabox-preserve-height-auto');
-    }
-
     // To avoid browser restore scroll position when traverse history
     if (isIframed(win) && 'scrollRestoration' in win.history) {
       win.history.scrollRestoration = 'manual';
@@ -1422,9 +1415,14 @@ function getViewportType(win, viewer) {
   ) {
     return viewportType;
   }
+  const isIosIframeScrollableOn = isExperimentOn(win, 'ios-scrollable-iframe');
   // Enable iOS Embedded mode so that it's easy to test against a more
   // realistic iOS environment w/o an iframe.
-  if (!isIframed(win) && (getMode(win).localDev || getMode(win).development)) {
+  if (
+    !isIframed(win) &&
+    (getMode(win).localDev || getMode(win).development) &&
+    !isIosIframeScrollableOn
+  ) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
 
@@ -1434,7 +1432,7 @@ function getViewportType(win, viewer) {
   }
 
   // Override to ios-embed for iframe-viewer mode.
-  if (isIframed(win) && viewer.isEmbedded()) {
+  if (isIframed(win) && viewer.isEmbedded() && !isIosIframeScrollableOn) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
   return viewportType;

@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="400" height="260" layout="responsive" 
+<amp-ad width="400" height="260" layout="responsive"
       type="revcontent"
       heights="(max-width: 320px) 933px,
       (max-width: 360px) 1087px,
@@ -51,6 +51,7 @@ Supported parameters:
 - `data-endpoint`
 - `data-ssl`
 - `data-testing`
+- `data-loadscript`
 
 ## Auto-sizing of Ads
 

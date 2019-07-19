@@ -15,7 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import RRule from '../../../third_party/rrule/rrule';
+import {rrulestr} from 'rrule/dist/esm/src/index.js';
 
 /** @enum {string} */
 const DateType = {
@@ -80,8 +80,9 @@ export class DatesList {
       }
     }
     const rruleDates = this.rrulestrs_
-      .map(rrule => rrule.after(date))
-      .filter(Boolean);
+      .map((/** {RRule} */ rrule) => rrule.after(date))
+      .filter(Boolean)
+      .map(normalizeRruleReturn);
     firstDatesAfter.concat(rruleDates);
 
     return firstDatesAfter.sort((a, b) => a.toDate() - b.toDate())[0];
@@ -109,9 +110,14 @@ export class DatesList {
       .startOf('day')
       .add(1, 'day')
       .toDate();
-    return this.rrulestrs_.some(rrule => {
-      const rruleDay = this.moment_(rrule.before(nextDate));
-      return this.ReactDates_['isSameDay'](rruleDay, date);
+    return this.rrulestrs_.some((/** {RRule} */ rrule) => {
+      const rruleUTCDate = rrule.before(nextDate);
+      if (!rruleUTCDate) {
+        return false;
+      }
+      const rruleLocalDate = normalizeRruleReturn(rruleUTCDate);
+      const rruleMoment = this.moment_(rruleLocalDate);
+      return this.ReactDates_['isSameDay'](rruleMoment, date);
     });
   }
 
@@ -136,13 +142,31 @@ export class DatesList {
 }
 
 /**
+ * RRULE returns dates as local time formatted at UTC, so the
+ * Date.prototype.getUTC* methods must be used to create a new date object.
+ * {@link https://github.com/jakubroztocil/rrule#important-use-utc-dates}
+ * @param {!Date} rruleDate
+ * @return {!Date}
+ */
+function normalizeRruleReturn(rruleDate) {
+  const year = rruleDate.getUTCFullYear();
+  const month = rruleDate.getUTCMonth();
+  const day = rruleDate.getUTCDate();
+  const hours = rruleDate.getUTCHours();
+  const minutes = rruleDate.getUTCMinutes();
+  const seconds = rruleDate.getUTCSeconds();
+  const ms = rruleDate.getUTCMilliseconds();
+  return new Date(year, month, day, hours, minutes, seconds, ms);
+}
+
+/**
  * Tries to parse a string into an RRULE object.
  * @param {string} str A string which represents a repeating date RRULE spec.
  * @return {?JsonObject}
  */
 function tryParseRrulestr(str) {
   try {
-    return RRule.fromString(str);
+    return rrulestr(str);
   } catch (e) {
     return null;
   }

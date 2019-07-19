@@ -38,7 +38,7 @@ import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {once} from '../../../src/utils/function';
@@ -543,7 +543,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.setupTemplates_();
     }
 
-    Promise.resolve(p).then(() => this.setState_(newState));
+    return Promise.resolve(p).then(() => this.setState_(newState));
   }
 
   /** @override */
@@ -674,10 +674,10 @@ export class AmpDatePicker extends AMP.BaseElement {
       return;
     }
 
-    if (!this.stateMachine_) {
-      return;
-    }
-
+    devAssert(
+      this.stateMachine_,
+      'transitonTo called before state machine is initialized'
+    );
     this.stateMachine_.setState(state);
   }
 
@@ -1876,10 +1876,10 @@ export class AmpDatePicker extends AMP.BaseElement {
   onMount() {
     if (this.mode_ == DatePickerMode.OVERLAY) {
       // REVIEW: this should be ok, since opening the overlay requires a
-      // user interaction, and this won't run until then
+      // user interaction, and this won't run until then.
       Services.bindForDocOrNull(this.element).then(bind => {
         if (bind) {
-          return bind.scanAndApply([this.element], [this.element]);
+          return bind.rescan([this.element], [this.element], {'apply': true});
         }
       });
     } else {

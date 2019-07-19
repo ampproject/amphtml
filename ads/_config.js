@@ -70,6 +70,8 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  '1wo': {},
+
   '24smi': {
     prefetch: 'https://jsn.24smi.net/smi.js',
     preconnect: 'https://data.24smi.net',
@@ -173,6 +175,7 @@ export const adConfig = {
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
     consentHandlingOverride: true,
+    renderStartImplemented: true,
   },
 
   'adsensor': {
@@ -180,7 +183,9 @@ export const adConfig = {
     clientIdScope: 'amp_ecid_adensor',
     renderStartImplemented: true,
   },
-
+  'adsloom': {
+    clientIdScope: 'AMP_ECID_ADSLOOM',
+  },
   'adsnative': {
     prefetch: 'https://static.adsnative.com/static/js/render.v1.js',
     preconnect: 'https://api.adsnative.com',
@@ -392,7 +397,9 @@ export const adConfig = {
     prefetch: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
     preconnect: 'https://bal.ad.dotandad.com',
   },
-
+  'dynad': {
+    preconnect: ['https://t.dynad.net', 'https://tm.jsuol.com.br'],
+  },
   'eadv': {
     renderStartImplemented: true,
     clientIdScope: 'AMP_ECID_EADV',
@@ -486,7 +493,7 @@ export const adConfig = {
 
   'idealmedia': {
     renderStartImplemented: true,
-    prefetch: [
+    preconnect: [
       'https://jsc.idealmedia.io',
       'https://servicer.idealmedia.io',
       'https://s-img.idealmedia.io/',
@@ -525,6 +532,12 @@ export const adConfig = {
     prefetch: 'https://cdn.innity.net/admanager.js',
     preconnect: 'https://as.innity.com',
     renderStartImplemented: true,
+  },
+
+  'invibes': {
+    prefetch: 'https://k.r66net.com/GetAmpLink',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
   },
 
   'ix': {
@@ -631,7 +644,12 @@ export const adConfig = {
   },
 
   'mgid': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.mgid.com',
+      'https://servicer.mgid.com',
+      'https://s-img.mgid.com',
+    ],
   },
 
   'microad': {
@@ -835,6 +853,8 @@ export const adConfig = {
     preconnect: 'https://ad.rfp.fout.jp',
     renderStartImplemented: true,
   },
+
+  'rnetplus': {},
 
   'rubicon': {},
 
