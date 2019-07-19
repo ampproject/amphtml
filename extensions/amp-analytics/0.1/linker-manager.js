@@ -218,7 +218,7 @@ export class LinkerManager {
    * @return {!Promise<string>} expanded template.
    */
   expandTemplateWithUrlParams_(template, expansionOptions) {
-    const bindings = this.variableService_.getMacros(this.element);
+    const bindings = this.variableService_.getMacros(this.element_);
 
     return this.variableService_
       .expandTemplate(template, expansionOptions)
