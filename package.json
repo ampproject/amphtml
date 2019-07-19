@@ -99,7 +99,7 @@
     "gulp-file": "0.4.0",
     "gulp-git": "2.9.0",
     "gulp-help": "chmontgomery/gulp-help#gulp4",
-    "gulp-if": "2.0.2",
+    "gulp-if": "3.0.0",
     "gulp-jest": "4.0.2",
     "gulp-jsonlint": "1.3.0",
     "gulp-jsonminify": "1.1.0",
