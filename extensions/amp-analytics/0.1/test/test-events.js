@@ -420,7 +420,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const event = new Event('story-page-visible');
       event.data = defaultVars;
 
-      tracker.sessionObservable_.fire(event);
+      root.getRoot().dispatchEvent(event);
 
       expect(analyticsEvent).to.be.calledOnce;
       expect(analyticsEvent).to.be.calledWith(
@@ -459,13 +459,14 @@ describes.realWin('Events', {amp: 1}, env => {
       const event = new Event('story-page-visible');
       event.data = defaultVars;
 
-      tracker.sessionObservable_.fire(event);
+      const rootEl = root.getRoot();
+      rootEl.dispatchEvent(event);
 
       defaultVars['detailsForPage']['repeated'] = true;
       event.data = defaultVars;
 
       // Trigger event second time, with 'repeated'.
-      tracker.sessionObservable_.fire(event);
+      rootEl.dispatchEvent(event);
 
       expect(analyticsEvent).to.be.calledOnce;
       expect(analyticsEvent).to.be.calledWith(
