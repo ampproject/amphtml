@@ -34,7 +34,6 @@ import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
-import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -339,7 +338,7 @@ export class Resources {
         const measurePromiseArray = [];
         this.resources_.forEach(r => {
           if (!r.hasBeenMeasured() && r.hostWin == hostWin && !r.hasOwner()) {
-            measurePromiseArray.push(this.ensuredMeasured_(r));
+            measurePromiseArray.push(r.getPageLayoutBoxAsync());
           }
         });
         return Promise.all(measurePromiseArray);
@@ -424,38 +423,6 @@ export class Resources {
    */
   getResourceForElementOptional(element) {
     return Resource.forElementOptional(element);
-  }
-
-  /**
-   * Returns a promise to the layoutBox for the element. If the element is
-   * resource-backed then makes use of the resource layoutBox, otherwise
-   * measures the element directly.
-   * @param {!Element} element
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
-   */
-  getElementLayoutBox(element) {
-    const resource = this.getResourceForElementOptional(element);
-    if (resource) {
-      return this.ensuredMeasured_(resource);
-    }
-    return this.vsync_.measurePromise(() => {
-      return this.viewport_.getLayoutRect(element);
-    });
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
-   * @private
-   */
-  ensuredMeasured_(resource) {
-    if (resource.hasBeenMeasured()) {
-      return tryResolve(() => resource.getPageLayoutBox());
-    }
-    return this.vsync_.measurePromise(() => {
-      resource.measure();
-      return resource.getPageLayoutBox();
-    });
   }
 
   /**

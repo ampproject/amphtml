@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from '../amp-events';
-import {Deferred} from '../utils/promise';
+import {Deferred, tryResolve} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
@@ -645,6 +645,22 @@ export class Resource {
     }
 
     return this.layoutBox_;
+  }
+
+  /**
+   * Returns the resource's layout box relative to the page. It will be
+   * measured if the resource hasn't ever be measured.
+   *
+   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   */
+  getPageLayoutBoxAsync() {
+    if (this.hasBeenMeasured()) {
+      return tryResolve(() => this.getPageLayoutBox());
+    }
+    return Services.vsyncFor(this.hostWin).measurePromise(() => {
+      this.measure();
+      return this.getPageLayoutBox();
+    });
   }
 
   /**

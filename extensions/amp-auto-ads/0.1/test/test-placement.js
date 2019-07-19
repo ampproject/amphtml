@@ -15,6 +15,7 @@
  */
 
 import '../../../amp-ad/0.1/amp-ad';
+import * as Utils from '../utils';
 import {AdTracker} from '../ad-tracker';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {Services} from '../../../../src/services';
@@ -661,7 +662,7 @@ describes.realWin(
         sandbox.stub(win, 'getComputedStyle').callsFake(() => {
           return {direction: 'ltr'};
         });
-        sandbox.stub(resource, 'getElementLayoutBox').callsFake(() => {
+        sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
           return Promise.resolve({left: 20});
         });
 
@@ -714,7 +715,7 @@ describes.realWin(
         sandbox.stub(win, 'getComputedStyle').callsFake(() => {
           return {direction: 'rtl'};
         });
-        sandbox.stub(resource, 'getElementLayoutBox').callsFake(() => {
+        sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
           return Promise.resolve({left: 20});
         });
 
