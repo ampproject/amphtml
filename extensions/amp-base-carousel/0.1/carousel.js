@@ -484,6 +484,7 @@ export class Carousel {
       return;
     }
 
+    this.ignoreNextScroll_ = false;
     this.requestedIndex_ = index;
     this.actionSource_ = actionSource;
     this.scrollSlideIntoView_(this.slides_[index], {smoothScroll});
@@ -716,6 +717,7 @@ export class Carousel {
     this.touching_ = true;
     this.actionSource_ = ActionSource.TOUCH;
     this.requestedIndex_ = null;
+    this.ignoreNextScroll_ = false;
 
     listenOnce(
       window,
@@ -738,6 +740,7 @@ export class Carousel {
   handleWheel_() {
     this.actionSource_ = ActionSource.WHEEL;
     this.requestedIndex_ = null;
+    this.ignoreNextScroll_ = false;
   }
 
   /**
@@ -822,9 +825,7 @@ export class Carousel {
       return false;
     }
 
-    const el = this.scrollContainer_;
-    const {width} = el./*OK*/ getBoundingClientRect();
-    return el./*OK*/ scrollLeft + width >= el./*OK*/ scrollWidth;
+    return this.forwards_ ? this.isScrollAtEnd() : this.isScrollAtStart();
   }
 
   /**
@@ -836,6 +837,22 @@ export class Carousel {
       return false;
     }
 
+    return this.forwards_ ? this.isScrollAtStart() : this.isScrollAtEnd();
+  }
+
+  /**
+   *
+   */
+  isScrollAtEnd() {
+    const el = this.scrollContainer_;
+    const {width} = el./*OK*/ getBoundingClientRect();
+    return el./*OK*/ scrollLeft + width >= el./*OK*/ scrollWidth;
+  }
+
+  /**
+   *
+   */
+  isScrollAtStart() {
     return this.scrollContainer_./*OK*/ scrollLeft <= 0;
   }
 

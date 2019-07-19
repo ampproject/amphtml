@@ -131,11 +131,13 @@ class AmpCarousel extends AMP.BaseElement {
     this.element.addEventListener('indexchange', event => {
       this.onIndexChanged_(event);
     });
-    this.prevButton_.addEventListener('click', () => this.prev());
-    this.nextButton_.addEventListener('click', () => this.next());
+    this.element.addEventListener('scrollpositionchange', () => {
+      this.onScrollPositionChanged_();
+    });
+    this.prevButton_.addEventListener('click', () => this.interactionPrev());
+    this.nextButton_.addEventListener('click', () => this.interactionNext());
 
     this.carousel_.updateSlides(this.slides_);
-    this.updateUi_();
     // Signal for runtime to check children for layout.
     return this.mutateElement(() => {});
   }
@@ -187,26 +189,12 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Goes to the next slide. This should be called from a user interaction.
-   */
-  interactionNext() {
-    this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
-  }
-
-  /**
-   * Goes to the previous slide. This should be called from a user interaction.
-   */
-  interactionPrev() {
-    this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
-  }
-
-  /**
    * Performs the next action (e.g. for a click from the next button). For a
    * carousel, this moves one carousel viewport forwards. For slides, this
    * moves to the next slide. The direction moved depends on the directionality
    * of the component.
    */
-  next() {
+  interactionNext() {
     if (this.type_ == CarouselType.CAROUSEL) {
       this.moveScrollOneViewport_(true);
       return;
@@ -221,7 +209,7 @@ class AmpCarousel extends AMP.BaseElement {
    * moves to the previous slide. The direction moved depends on the
    * directionality of the component.
    */
-  prev() {
+  interactionPrev() {
     if (this.type_ == CarouselType.CAROUSEL) {
       this.moveScrollOneViewport_(false);
       return;
@@ -242,7 +230,8 @@ class AmpCarousel extends AMP.BaseElement {
     const forwardsMultiplier = forwards ? 1 : -1;
     const directionMulitplier = direction == 'rtl' ? -1 : 1;
 
-    el.scrollLeft += el.offsetWidth * forwardsMultiplier * directionMulitplier;
+    el./*OK*/ scrollLeft +=
+      el./*OK*/ offsetWidth * forwardsMultiplier * directionMulitplier;
   }
 
   /**
@@ -281,15 +270,17 @@ class AmpCarousel extends AMP.BaseElement {
 
   /**
    * @param {!Array<!Element>} slides
-   * @private
+   * @privatef
    */
   configureCarousel_(slides) {
-    const dir = this.element.getAttribute('dir');
+    const dir =
+      this.element.getAttribute('dir') ||
+      computedStyle(this.win, this.element).direction;
     const loop = this.element.hasAttribute('loop');
     const autoplay = this.element.getAttribute('autoplay');
     const delay = this.element.getAttribute('delay');
     const type = this.element.getAttribute('type');
-    const autoAdvance = !!autoplay;
+    const autoAdvance = autoplay != null;
     const autoAdvanceLoops = autoplay
       ? Number(autoplay)
       : Number.POSITIVE_INFINITY;
@@ -299,8 +290,13 @@ class AmpCarousel extends AMP.BaseElement {
     this.carousel_.updateLoop(loop || autoAdvance);
     this.carousel_.updateAutoAdvanceLoops(autoAdvanceLoops);
     this.carousel_.updateAutoAdvanceInterval(autoAdvanceInterval);
+    this.mutateElement(() => {
+      this.prevButton_.setAttribute('dir', dir);
+      this.nextButton_.setAttribute('dir', dir);
+    });
     this.toggleAutoplay_(autoAdvance);
     this.updateType_(type, slides);
+    this.updateUi_();
   }
 
   /**
@@ -547,11 +543,19 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * Update the UI (buttons) for the new scroll position.
+   */
+  onScrollPositionChanged_() {
+    console.log(this.scrollContainer_.scrollLeft);
+    this.updateUi_();
+  }
+
+  /**
    * @private
    * @param {!Event} event
    */
   onIndexChanged_(event) {
-    this.updateUi_();
+    console.log(event.detail['index']);
 
     if (this.type_ == CarouselType.CAROUSEL) {
       return;

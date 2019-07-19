@@ -15,7 +15,8 @@
  */
 
 import '../amp-carousel';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {ActionTrust} from '../../../../src/action-constants';
+import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
  * @fileoverview Some simple tests for amp-carousel. Most of the functionality
@@ -23,10 +24,18 @@ import {listenOncePromise} from '../../../../src/event-helper';
  *    implementation via amp-base-carousel's tests.
  */
 
-async function afterIndexUpdate(el) {
-  await listenOncePromise(el, 'indexchange');
+/**
+ * @param {!Element} el
+ * @param {number=} index An intex to wait for.
+ */
+async function afterIndexUpdate(el, index) {
+  const event = await listenOncePromise(el, 'indexchange');
   await el.implementation_.mutateElement(() => {});
   await el.implementation_.mutateElement(() => {});
+
+  if (index != undefined && getDetail(event)['index'] != index) {
+    return afterIndexUpdate(el, index);
+  }
 }
 
 function getNextButton(el) {
@@ -59,16 +68,28 @@ describes.realWin(
     },
   },
   env => {
-    let win, doc;
+    let win;
+    let doc;
+    let container;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       env.iframe.width = '1000';
       env.iframe.height = '1000';
+      container = doc.createElement('div');
+      doc.body.appendChild(container);
     });
 
-    async function getCarousel(looping, slideCount = 5) {
+    afterEach(() => {
+      doc.body.removeChild(container);
+    });
+
+    async function getCarousel({
+      loop = false,
+      slideCount = 5,
+      dir = null,
+    } = {}) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
         'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
@@ -78,8 +99,11 @@ describes.realWin(
       carousel.setAttribute('height', '300');
       carousel.style.position = 'relative';
       carousel.setAttribute('controls', '');
-      if (looping) {
+      if (loop) {
         carousel.setAttribute('loop', '');
+      }
+      if (dir) {
+        carousel.setAttribute('dir', dir);
       }
 
       for (let i = 0; i < slideCount; i++) {
@@ -95,7 +119,7 @@ describes.realWin(
         carousel.appendChild(img);
       }
 
-      doc.body.appendChild(carousel);
+      container.appendChild(carousel);
       await carousel.build();
       carousel.updateLayoutBox({
         top: 0,
@@ -104,12 +128,13 @@ describes.realWin(
         height: 300,
       });
       await carousel.layoutCallback();
+      await afterIndexUpdate(carousel);
 
       return carousel;
     }
 
     it('should create container and wrappers and show initial slides', async () => {
-      const carousel = await getCarousel();
+      const carousel = await getCarousel({loop: false});
       const slideWrappers = getSlideWrappers(carousel);
 
       expect(
@@ -129,9 +154,9 @@ describes.realWin(
       expect(slideWrappers[1].getAttribute('aria-hidden')).to.equal('true');
     });
 
-    describe('looping', () => {
+    describe('loop', () => {
       it('should go to the correct slide clicking next', async () => {
-        const carousel = await getCarousel(true);
+        const carousel = await getCarousel({loop: true});
         const slideWrappers = getSlideWrappers(carousel);
 
         getNextButton(carousel).click();
@@ -142,7 +167,7 @@ describes.realWin(
       });
 
       it('should go to the correct slide clicking prev', async () => {
-        const carousel = await getCarousel(true);
+        const carousel = await getCarousel({loop: true});
         const slideWrappers = getSlideWrappers(carousel);
 
         getPrevButton(carousel).click();
@@ -153,32 +178,154 @@ describes.realWin(
       });
     });
 
-    describe('non-looping', () => {
+    describe('non-loop', () => {
       it('should disable the prev button when at the start', async () => {
-        const carousel = await getCarousel(false);
+        const carousel = await getCarousel({loop: false});
 
-        await carousel.implementation_.mutateElement(() => {});
         expect(getPrevButton(carousel).getAttribute('aria-disabled')).to.equal(
           'true'
         );
       });
 
       it('should disable the next button when at the end', async () => {
-        const carousel = await getCarousel(false);
+        const carousel = await getCarousel({loop: false});
 
-        carousel.implementation_.goToSlide(5);
+        carousel.implementation_.goToSlide(4);
         await afterIndexUpdate(carousel);
-        expect(getPrevButton(carousel).getAttribute('aria-disabled')).to.equal(
+
+        expect(getNextButton(carousel).getAttribute('aria-disabled')).to.equal(
           'true'
         );
       });
     });
 
+    describe('goToSlide action', () => {
+      it('should propagate high trust', async () => {
+        const carousel = await getCarousel({loop: false});
+        const impl = carousel.implementation_;
+        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+
+        impl.executeAction({
+          method: 'goToSlide',
+          args: {index: 1},
+          trust: ActionTrust.HIGH,
+          satisfiesTrust: () => true,
+        });
+        await afterIndexUpdate(carousel);
+
+        expect(triggerSpy).to.have.been.calledWith(
+          carousel,
+          'slideChange',
+          /* CustomEvent */ sinon.match.has('detail', {index: 1}),
+          ActionTrust.HIGH
+        );
+      });
+
+      it('should propagate low trust', async () => {
+        const carousel = await getCarousel({loop: false});
+        const impl = carousel.implementation_;
+        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+
+        impl.executeAction({
+          method: 'goToSlide',
+          args: {index: 1},
+          trust: ActionTrust.LOW,
+          satisfiesTrust: () => true,
+        });
+        await afterIndexUpdate(carousel);
+
+        expect(triggerSpy).to.have.been.calledWith(
+          carousel,
+          'slideChange',
+          /* CustomEvent */ sinon.match.has('detail', {index: 1}),
+          ActionTrust.LOW
+        );
+      });
+    });
+
+    describe('layout direction', () => {
+      it('should use the initial rtl context if not specified', async () => {
+        container.setAttribute('dir', 'rtl');
+
+        const carousel = await getCarousel({loop: false});
+        const slideWrappers = getSlideWrappers(carousel);
+
+        const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
+        const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
+        const {left: nextLeft} = getNextButton(
+          carousel
+        ).getBoundingClientRect();
+        const {left: prevLeft} = getPrevButton(
+          carousel
+        ).getBoundingClientRect();
+
+        expect(firstLeft).to.be.greaterThan(secondLeft);
+        expect(prevLeft).to.be.greaterThan(nextLeft);
+      });
+
+      it("should use the carousel's rtl direction", async () => {
+        container.setAttribute('dir', 'ltr');
+
+        const carousel = await getCarousel({loop: false, dir: 'rtl'});
+        const slideWrappers = getSlideWrappers(carousel);
+
+        const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
+        const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
+        const {left: nextLeft} = getNextButton(
+          carousel
+        ).getBoundingClientRect();
+        const {left: prevLeft} = getPrevButton(
+          carousel
+        ).getBoundingClientRect();
+
+        expect(firstLeft).to.be.greaterThan(secondLeft);
+        expect(prevLeft).to.be.greaterThan(nextLeft);
+      });
+
+      it('should use the initial ltr context if not specified', async () => {
+        container.setAttribute('dir', 'ltr');
+
+        const carousel = await getCarousel({loop: false});
+        const slideWrappers = getSlideWrappers(carousel);
+
+        const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
+        const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
+        const {left: nextLeft} = getNextButton(
+          carousel
+        ).getBoundingClientRect();
+        const {left: prevLeft} = getPrevButton(
+          carousel
+        ).getBoundingClientRect();
+
+        expect(secondLeft).to.be.greaterThan(firstLeft);
+        expect(nextLeft).to.be.greaterThan(prevLeft);
+      });
+
+      it("should use the carousel's ltr direction", async () => {
+        container.setAttribute('dir', 'rtl');
+
+        const carousel = await getCarousel({loop: false, dir: 'ltr'});
+        const slideWrappers = getSlideWrappers(carousel);
+
+        const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
+        const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
+        const {left: nextLeft} = getNextButton(
+          carousel
+        ).getBoundingClientRect();
+        const {left: prevLeft} = getPrevButton(
+          carousel
+        ).getBoundingClientRect();
+
+        expect(secondLeft).to.be.greaterThan(firstLeft);
+        expect(nextLeft).to.be.greaterThan(prevLeft);
+      });
+    });
+
     describe('button titles', () => {
-      describe('when not looping', () => {
+      describe('when not loop', () => {
         it('should have the correct values on the first index', async () => {
-          const carousel = await getCarousel(false, 3);
-          await afterIndexUpdate(carousel);
+          const carousel = await getCarousel({loop: false, slideCount: 3});
+
           expect(getPrevTitle(carousel)).to.equal(
             'Previous item in carousel (1 of 3)'
           );
@@ -188,9 +335,11 @@ describes.realWin(
         });
 
         it('should have the correct values on the last index', async () => {
-          const carousel = await getCarousel(false, 3);
+          const carousel = await getCarousel({loop: false, slideCount: 3});
+
           carousel.implementation_.goToSlide(2);
           await afterIndexUpdate(carousel);
+
           expect(getPrevTitle(carousel)).to.equal(
             'Previous item in carousel (2 of 3)'
           );
@@ -200,10 +349,10 @@ describes.realWin(
         });
       });
 
-      describe('when looping', () => {
+      describe('when loop', () => {
         it('should have the correct values on the first index', async () => {
-          const carousel = await getCarousel(true, 3);
-          await afterIndexUpdate(carousel);
+          const carousel = await getCarousel({loop: true, slideCount: 3});
+
           expect(getPrevTitle(carousel)).to.equal(
             'Previous item in carousel (3 of 3)'
           );
@@ -213,9 +362,11 @@ describes.realWin(
         });
 
         it('should have the correct values on the last index', async () => {
-          const carousel = await getCarousel(true, 3);
+          const carousel = await getCarousel({loop: true, slideCount: 3});
+
           carousel.implementation_.goToSlide(2);
           await afterIndexUpdate(carousel);
+
           expect(getPrevTitle(carousel)).to.equal(
             'Previous item in carousel (2 of 3)'
           );
