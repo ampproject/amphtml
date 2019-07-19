@@ -32,7 +32,7 @@ Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed-height, intrinsic, responsive</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -44,7 +44,7 @@ Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
 
 ## Examples
 
-With the responsive layout, the `width` and `height` from the example should yield correct layouts for 1:1 aspect ratio videos:
+With the responsive layout, the `width` and `height` from the example should yield correct layouts for 1:1 aspect ratio embeds:
 
 Visual Mode:
 ```html
