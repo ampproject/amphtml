@@ -425,7 +425,6 @@ export class LayoutLayers {
     if (this.onScroll_) {
       this.onScroll_(/* layer.getElements() */);
     }
-
   }
 
   /**
