@@ -43,7 +43,7 @@ import {
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
-import {removeChildren} from '../../../src/dom';
+import {removeChildren, scopedQuerySelector} from '../../../src/dom';
 import setDOM from 'set-dom/dist/set-dom.js';
 
 /** @const {string} */
@@ -171,8 +171,17 @@ export class AmpList extends AMP.BaseElement {
     // is missing attributes in the constructor.
     this.initialSrc_ = this.element.getAttribute('src');
 
-    this.container_ = this.createContainer_();
-    this.element.appendChild(this.container_);
+    if (this.element.hasAttribute('diffable')) {
+      // Set container to the initial content, if it exists. This allows
+      // us to DOM diff with the rendered result.
+      this.container_ = scopedQuerySelector(this.element, '> div[role=list]');
+      // Don't applyFillContent() in diffable mode. This allows [fetch-error]
+      // to displace the position of the initial content.
+    }
+    if (!this.container_) {
+      this.container_ = this.createContainer_();
+      this.element.appendChild(this.container_);
+    }
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
@@ -772,8 +781,7 @@ export class AmpList extends AMP.BaseElement {
     return this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
 
-      const diffing = isExperimentOn(this.win, 'amp-list-diffing');
-      if (diffing && container.hasChildNodes()) {
+      if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
         const newContainer = this.createContainer_();
         this.addElementsToContainer_(elements, newContainer);
 
@@ -1122,6 +1130,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   hideFallbackAndPlaceholder_() {
+    this.element.classList.remove('i-amphtml-list-fetch-error');
     this.toggleLoading(false);
     if (this.getFallback()) {
       this.toggleFallback_(false);
@@ -1135,6 +1144,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   showFallbackOrThrow_(error) {
+    this.element.classList.add('i-amphtml-list-fetch-error');
     this.toggleLoading(false);
     if (this.getFallback()) {
       this.toggleFallback_(true);

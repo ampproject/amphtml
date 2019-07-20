@@ -603,6 +603,10 @@ form [submit-error] {
   display: none;
 }
 
+amp-list [fetch-error] {
+  display: none;
+}
+
 /**
  * Hide the update reference point of amp-live-list by default. This is
  * reset by the `amp-live-list > .amp-active[update]` selector.

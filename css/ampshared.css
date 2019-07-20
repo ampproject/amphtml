@@ -488,6 +488,10 @@ form [submit-error] {
   display: none;
 }
 
+amp-list [fetch-error] {
+  display: none;
+}
+
 /**
  * Form validation error messages should be hidden at first.
  */
