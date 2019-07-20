@@ -169,5 +169,5 @@ export function trimStart(str) {
     return str.trimStart();
   }
 
-  return (str + '_').trim.slice(0, -1);
+  return (str + '_').trim().slice(0, -1);
 }
