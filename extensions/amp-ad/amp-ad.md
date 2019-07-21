@@ -382,6 +382,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [SlimCut Media](../../ads/slimcutmedia.md)
 - [Smart AdServer](../../ads/smartadserver.md)
 - [smartclip](../../ads/smartclip.md)
+- [SmileWanted](../../ads/smilewanted.md)
 - [sogou Ad](../../ads/sogouad.md)
 - [Sortable](../../ads/sortable.md)
 - [SOVRN](../../ads/sovrn.md)
