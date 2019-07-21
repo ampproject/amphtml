@@ -150,6 +150,12 @@ export class LayoutLayers {
       })
     );
 
+    /**
+     * Cleanup any detached layouts at most every second.
+     * @private @const {!function()}
+     */
+    this.throttledCleanup_ = throttle(win, () => this.cleanup_(), 1000);
+
     // Declare scrollingElement as the one true scrolling layer.
     const root = this.declareLayer_(
       scrollingElement,
@@ -162,12 +168,6 @@ export class LayoutLayers {
      * @private {!LayoutElement}
      */
     this.activeLayer_ = root;
-
-    /**
-     * Cleanup any detached layouts at most every second.
-     * @private @const {!function()}
-     */
-    this.throttledCleanup_ = throttle(win, () => this.cleanup_(), 1000);
   }
 
   /** @override */
