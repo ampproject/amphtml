@@ -3,6 +3,7 @@ name: Cherry-pick template
 about: Used to request a cherry-pick. See bit.ly/amp-cherry-pick
 title: "\U0001F338 Cherry-pick request for #<ISSUE_NUMBER> into #<RELEASE_ISSUE> (Pending)"
 labels: 'Type: Release'
+assignees: cramforce
 ---
 
 <!--
@@ -76,4 +77,4 @@ TIP: A few sentences summarizing the problem and impact.
 
 ---
 
-/cc @ampproject/wg-approvers @ampproject/cherry-pick-approvers
+/cc @cramforce
