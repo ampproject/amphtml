@@ -252,9 +252,7 @@ export class GoogleSubscriptionsPlatform {
      * for the page to be visible to avoid leaking that the
      * page was prerendered
      */
-    // TODO(#23102): restore safe prerendering mode. Instead of `false`,
-    // return `this.isGoogleViewer_`.
-    return false;
+    return this.isGoogleViewer_;
   }
 
   /** @override */
@@ -456,6 +454,7 @@ class AmpFetcher {
     return this.xhr_
       .fetchJson(url, {
         credentials: 'include',
+        prerenderSafe: true,
       })
       .then(response => response.json());
   }
