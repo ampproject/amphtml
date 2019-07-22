@@ -177,6 +177,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
       Math: {
         random: () => 0.1234,
       },
+      crypto: {
+        getRandomValues: array => {
+          array[0] = 1;
+          array[1] = 2;
+          array[2] = 3;
+          array[15] = 15;
+        },
+      },
       services: {
         'viewport': {obj: {}},
         'cid': {
@@ -214,7 +222,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       // Restrict the number of replacement params to globalVaraibleSource
       // Please consider adding the logic to amp-analytics instead.
       // Please contact @lannka or @zhouyx if the test fail.
-      expect(variables.length).to.equal(71);
+      expect(variables.length).to.equal(72);
     });
   });
 
@@ -592,6 +600,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace PAGE_VIEW_ID', () => {
     return expandUrlAsync('?pid=PAGE_VIEW_ID').then(res => {
       expect(res).to.match(/pid=\d+/);
+    });
+  });
+
+  it('should replace PAGE_VIEW_ID_64', () => {
+    return expandUrlAsync('?pid=PAGE_VIEW_ID_64').then(res => {
+      expect(res).to.match(/pid=[a-zA-Z0-9_-]+/);
     });
   });
 

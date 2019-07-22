@@ -22,6 +22,9 @@ import {
 } from '../url';
 import {isArray} from '../types';
 import {map} from '../utils/object';
+import {tryResolve} from '../utils/promise';
+import {getCryptoRandomBytesArray} from '../utils/bytes';
+import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */
@@ -32,6 +35,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *     - sourceUrl: the source url of an amp document.
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
+ *     - pageViewId64: Id for this page view. High entropy but should be unique. 
  *       for concurrent page views of a user().
  *     - linkRels: A map object of link tag's rel (key) and corresponding
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
@@ -45,6 +49,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
+ *   pageViewId64: string,
  *   linkRels: !Object<string, string|!Array<string>>,
  *   metaTags: !Object<string, string|!Array<string>>,
  *   replaceParams: ?Object<string, string|!Array<string>>
@@ -87,6 +92,7 @@ export class DocInfo {
         : sourceUrl;
     }
     const pageViewId = getPageViewId(ampdoc.win);
+    const pageViewId64 = getPageViewId64(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const metaTags = getMetaTags(ampdoc.win.document);
     const replaceParams = getReplaceParams(ampdoc);
@@ -98,6 +104,7 @@ export class DocInfo {
       },
       canonicalUrl,
       pageViewId,
+      pageViewId64,
       linkRels,
       metaTags,
       replaceParams,
@@ -114,6 +121,34 @@ export class DocInfo {
  */
 function getPageViewId(win) {
   return String(Math.floor(win.Math.random() * 10000));
+}
+
+/**
+ * Returns a relatively high entropy random string.
+ * This should be called once per window and then cached for subsequent
+ * access to the same value to be persistent per page.
+ * @param {!Window} win
+ * @return {Promise<String>}
+ */
+function getPageViewId64(win) {
+  const uint8array = getCryptoRandomBytesArray(win, 16); // 128 bit
+  if (uint8array) {
+    return tryResolve(() => base64UrlEncodeFromBytes(uint8array)
+        // Remove trailing padding
+        .replace(/\.+$/, '')
+    );
+  }
+
+  // Support for legacy browsers.
+  const entropy = String(
+    win.location.href +
+      Date.now() +
+      win.Math.random() +
+      win.screen.width +
+      win.screen.height
+  );
+
+  return Services.cryptoFor(win).sha384Base64(entropy);
 }
 
 /**
