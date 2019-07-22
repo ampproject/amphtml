@@ -757,10 +757,7 @@ describes.realWin(
 
       function selectorExpansionTest(selector) {
         it('expand selector value: ' + selector, () => {
-          const tracker = ins.root_.getTracker(
-            'click',
-            ClickEventTracker
-          );
+          const tracker = ins.root_.getTracker('click', ClickEventTracker);
           const addStub = sandbox.stub(tracker, 'add');
           const analytics = getAnalyticsTag({
             requests: {foo: 'https://example.com/bar'},
@@ -1506,10 +1503,7 @@ describes.realWin(
       });
 
       it('replace selector and selectionMethod when in scope', () => {
-        const tracker = ins.root_.getTracker(
-          'visible',
-          VisibilityTracker
-        );
+        const tracker = ins.root_.getTracker('visible', VisibilityTracker);
         const addStub = sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag(
           {
