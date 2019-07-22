@@ -460,7 +460,11 @@ const forbiddenTerms = {
   },
   'prerenderSafe': {
     message: requiresReviewPrivacy,
-    whitelist: ['build-system/amp.extern.js', 'src/utils/xhr-utils.js'],
+    whitelist: [
+      'build-system/amp.extern.js',
+      'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
+      'src/utils/xhr-utils.js',
+    ],
   },
   'eval\\(': {
     message: shouldNeverBeUsed,
