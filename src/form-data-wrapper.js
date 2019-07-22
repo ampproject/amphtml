@@ -15,10 +15,7 @@
  */
 
 import {Services} from './services';
-import {
-  getFormAsObject,
-  getSubmitButtonUsed,
-} from './form';
+import {getFormAsObject, getSubmitButtonUsed} from './form';
 import {iterateCursor} from './dom';
 import {map} from './utils/object';
 
@@ -106,9 +103,9 @@ export class PolyfillFormDataWrapper {
     let nextIndex = 0;
     return /** @type {!Iterator<!Array<string>>} */ ({
       next() {
-        return nextIndex < fieldEntries.length ?
-          {value: fieldEntries[nextIndex++], done: false} :
-          {value: undefined, done: true};
+        return nextIndex < fieldEntries.length
+          ? {value: fieldEntries[nextIndex++], done: false}
+          : {value: undefined, done: true};
       },
     });
   }
@@ -160,7 +157,7 @@ class NativeFormDataWrapper {
     }
 
     const button = getSubmitButtonUsed(opt_form);
-    if (button) {
+    if (button && button.name) {
       this.append(button.name, button.value);
     }
   }
@@ -232,7 +229,7 @@ class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
  * support `FormData.prototype.entries`.
  *
  * @interface
- * @note Subclassing `FormData` doesn't work in this case as the transpiler
+ * Subclassing `FormData` doesn't work in this case as the transpiler
  *     generates code that calls the super constructor directly using
  *     `Function.prototype.call`. WebKit (Safari) doesn't allow this and
  *     enforces that constructors be called with the `new` operator.

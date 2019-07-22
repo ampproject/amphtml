@@ -15,12 +15,12 @@
  */
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '../../../src/css';
 import {hasOwn, map} from '../../../src/utils/object';
+import {removeChildren, scopedQuerySelector} from '../../../src/dom';
 import {scale, setImportantStyles} from '../../../src/style';
-import {scopedQuerySelector} from '../../../src/dom';
-
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the
@@ -34,7 +34,6 @@ const TRANSITION_LINEAR = `transform ${POLL_INTERVAL_MS}ms linear`;
  * @const {string}
  */
 const TRANSITION_EASE = 'transform 200ms ease';
-
 
 /**
  * Progress bar for <amp-story>.
@@ -67,6 +66,12 @@ export class ProgressBar {
 
     /** @private {!Object<string, number>} */
     this.segmentIdMap_ = map();
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win_);
+
+    /** @private {string} */
+    this.activeSegmentId_ = '';
   }
 
   /**
@@ -77,38 +82,83 @@ export class ProgressBar {
   }
 
   /**
-   * @param {!Array<string>} segmentIds The id of each segment in the story.
+   * Builds the progress bar.
+   *
    * @return {!Element}
    */
-  build(segmentIds) {
+  build() {
     if (this.isBuilt_) {
       return this.getRoot();
     }
 
-    const segmentCount = segmentIds.length;
-    devAssert(segmentCount > 0);
-
-    this.isBuilt_ = true;
-    this.segmentCount_ = segmentCount;
-
-    segmentIds.forEach((id, i) => this.segmentIdMap_[id] = i);
-
     this.root_ = this.win_.document.createElement('ol');
     this.root_.classList.add('i-amphtml-story-progress-bar');
 
-    for (let i = 0; i < this.segmentCount_; i++) {
-      const segmentProgressBar = this.win_.document.createElement('li');
-      segmentProgressBar.classList.add('i-amphtml-story-page-progress-bar');
-      const segmentProgressValue = this.win_.document.createElement('div');
-      segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
-      segmentProgressBar.appendChild(segmentProgressValue);
-      this.root_.appendChild(segmentProgressBar);
-    }
+    this.storeService_.subscribe(
+      StateProperty.PAGE_IDS,
+      pageIds => {
+        if (this.isBuilt_) {
+          this.clear_();
+        }
 
+        pageIds.forEach(id => {
+          if (!(id in this.segmentIdMap_)) {
+            this.addSegment_(id);
+          }
+        });
+
+        if (this.isBuilt_) {
+          this.updateProgress(
+            this.activeSegmentId_,
+            this.activeSegmentProgress_,
+            true /** updateAllSegments */
+          );
+        }
+      },
+      true /** callToInitialize */
+    );
+
+    this.isBuilt_ = true;
     return this.getRoot();
   }
 
   /**
+   * Builds a new segment element and appends it to the progress bar.
+   *
+   * @private
+   */
+  buildSegmentEl_() {
+    const segmentProgressBar = this.win_.document.createElement('li');
+    segmentProgressBar.classList.add('i-amphtml-story-page-progress-bar');
+    const segmentProgressValue = this.win_.document.createElement('div');
+    segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
+    segmentProgressBar.appendChild(segmentProgressValue);
+    this.root_.appendChild(segmentProgressBar);
+  }
+
+  /**
+   * Clears the progress bar.
+   */
+  clear_() {
+    removeChildren(devAssert(this.root_));
+    this.segmentIdMap_ = map();
+    this.segmentCount_ = 0;
+  }
+
+  /**
+   * Adds a segment to the progress bar.
+   *
+   * @param {string} id The id of the segment.
+   * @private
+   */
+  addSegment_(id) {
+    this.segmentIdMap_[id] = this.segmentCount_++;
+    this.buildSegmentEl_();
+  }
+
+  /**
+   * Gets the root element of the progress bar.
+   *
    * @return {!Element}
    */
   getRoot() {
@@ -116,21 +166,27 @@ export class ProgressBar {
   }
 
   /**
+   * Validates that segment id exists.
+   *
    * @param {string} segmentId The index to assert validity
    * @private
    */
   assertVaildSegmentId_(segmentId) {
-    devAssert(hasOwn(this.segmentIdMap_, segmentId),
-        'Invalid segment-id passed to progress-bar');
+    devAssert(
+      hasOwn(this.segmentIdMap_, segmentId),
+      'Invalid segment-id passed to progress-bar'
+    );
   }
 
   /**
-   * The
-   * @param {string} segmentId the id of the segment whos progress to change
+   * Updates a segment with its corresponding progress.
+   *
+   * @param {string} segmentId the id of the segment whos progress to change.
    * @param {number} progress A number from 0.0 to 1.0, representing the
    *     progress of the current segment.
+   * @param {boolean} updateAllSegments Updates all of the segments.
    */
-  updateProgress(segmentId, progress) {
+  updateProgress(segmentId, progress, updateAllSegments = false) {
     this.assertVaildSegmentId_(segmentId);
     const segmentIndex = this.segmentIdMap_[segmentId];
 
@@ -138,21 +194,24 @@ export class ProgressBar {
 
     // If updating progress for a new segment, update all the other progress
     // bar segments.
-    if (this.activeSegmentIndex_ !== segmentIndex) {
+    if (this.activeSegmentIndex_ !== segmentIndex || updateAllSegments) {
       this.updateSegments_(
-          segmentIndex,
-          progress,
-          this.activeSegmentIndex_,
-          this.activeSegmentProgress_);
+        segmentIndex,
+        progress,
+        this.activeSegmentIndex_,
+        this.activeSegmentProgress_
+      );
     }
 
     this.activeSegmentProgress_ = progress;
     this.activeSegmentIndex_ = segmentIndex;
+    this.activeSegmentId_ = segmentId;
   }
 
   /**
    * Updates all the progress bar segments, and decides whether the update has
    * to be animated.
+   *
    * @param {number} activeSegmentIndex
    * @param {number} activeSegmentProgress
    * @param {number} prevSegmentIndex
@@ -163,7 +222,8 @@ export class ProgressBar {
     activeSegmentIndex,
     activeSegmentProgress,
     prevSegmentIndex,
-    prevSegmentProgress) {
+    prevSegmentProgress
+  ) {
     let shouldAnimatePreviousSegment = false;
 
     // Animating the transition from one full segment to another, which is the
@@ -194,14 +254,17 @@ export class ProgressBar {
       const progress = i < activeSegmentIndex ? 1 : 0;
 
       // Only animate the segment corresponding to the previous page, if needed.
-      const withTransition =
-          shouldAnimatePreviousSegment ? (i === prevSegmentIndex) : false;
+      const withTransition = shouldAnimatePreviousSegment
+        ? i === prevSegmentIndex
+        : false;
 
       this.updateProgressByIndex_(i, progress, withTransition);
     }
   }
 
   /**
+   * Updates styles to show progress to a corresponding segment.
+   *
    * @param {number} segmentIndex The index of the progress bar segment whose progress should be
    *     changed.
    * @param {number} progress A number from 0.0 to 1.0, representing the
@@ -213,17 +276,20 @@ export class ProgressBar {
     // Offset the index by 1, since nth-child indices start at 1 while
     // JavaScript indices start at 0.
     const nthChildIndex = segmentIndex + 1;
-    const progressEl = scopedQuerySelector(this.getRoot(),
-        `.i-amphtml-story-page-progress-bar:nth-child(${
-          escapeCssSelectorNth(nthChildIndex)
-        }) .i-amphtml-story-page-progress-value`);
+    const progressEl = scopedQuerySelector(
+      this.getRoot(),
+      `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
+        nthChildIndex
+      )}) .i-amphtml-story-page-progress-value`
+    );
     this.vsync_.mutate(() => {
       let transition = 'none';
       if (withTransition) {
         // Using an eased transition only if filling the bar to 0 or 1.
         transition =
-            (progress === 1 || progress === 0) ?
-              TRANSITION_EASE : TRANSITION_LINEAR;
+          progress === 1 || progress === 0
+            ? TRANSITION_EASE
+            : TRANSITION_LINEAR;
       }
       setImportantStyles(dev().assertElement(progressEl), {
         'transform': scale(`${progress},1`),

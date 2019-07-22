@@ -32,9 +32,7 @@ import {
   resetScheduledElementForTesting,
   upgradeOrRegisterElement,
 } from '../../../../src/service/custom-element-registry';
-import {
-  data as validCSSAmp,
-} from './testdata/valid_css_at_rules_amp.reserialized';
+import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
 // (e.g., XHR requests and interfaces to ad network-specific code), but
@@ -70,8 +68,10 @@ function expectRenderedInXDomainIframe(element, src) {
   // Note: Unlike expectRenderedInXDomainIframe, this doesn't return a Promise
   // because it doesn't (cannot) inspect the contents of the iframe.
   expect(element, 'ad element').to.be.ok;
-  expect(element.querySelector('iframe[srcdoc]'),
-      'does not have a friendly iframe child').to.not.be.ok;
+  expect(
+    element.querySelector('iframe[srcdoc]'),
+    'does not have a friendly iframe child'
+  ).to.not.be.ok;
   const child = element.querySelector('iframe[src]');
   expect(child, 'iframe child').to.be.ok;
   expect(child.getAttribute('src')).to.contain.string(src);
@@ -89,7 +89,9 @@ describe('integration test: a4a', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox;
     a4aRegistry = getA4ARegistry();
-    a4aRegistry['mock'] = () => {return true;};
+    a4aRegistry['mock'] = () => {
+      return true;
+    };
     return createIframePromise().then(f => {
       fixture = f;
       fetchMock = new FetchMock(fixture.win);
@@ -100,12 +102,16 @@ describe('integration test: a4a', () => {
         });
       }
       fetchMock.getOnce(
-          TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
-          {name: 'ad'});
+        TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+        () => adResponse,
+        {name: 'ad'}
+      );
       adResponse = {
-        headers: {'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc'},
         body: validCSSAmp.reserialized,
       };
+      if (!adResponse.headers) {
+        adResponse.headers = {};
+      }
       adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signatureHeader;
       installDocService(fixture.win, /* isSingleDoc */ true);
       installCryptoService(fixture.win);
@@ -119,7 +125,7 @@ describe('integration test: a4a', () => {
   });
 
   afterEach(() => {
-    fetchMock./*OK*/restore();
+    fetchMock./*OK*/ restore();
     sandbox.restore();
     resetScheduledElementForTesting(window, 'amp-a4a');
     delete a4aRegistry['mock'];
@@ -151,8 +157,10 @@ describe('integration test: a4a', () => {
     // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
-    const forceCollapseStub =
-        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
+    const forceCollapseStub = sandbox.spy(
+      MockA4AImpl.prototype,
+      'forceCollapse'
+    );
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
       expect(error.message).to.contain.string('AMP-A4A-');
@@ -164,49 +172,57 @@ describe('integration test: a4a', () => {
   it('should collapse slot when creative response has code 204', () => {
     adResponse.status = 204;
     adResponse.body = null;
-    const forceCollapseStub =
-        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
+    const forceCollapseStub = sandbox.spy(
+      MockA4AImpl.prototype,
+      'forceCollapse'
+    );
     return fixture.addElement(a4aElement).then(() => {
       expect(forceCollapseStub).to.be.calledOnce;
     });
   });
 
-  it('should collapse slot when creative response.arrayBuffer() is empty',
-      () => {
-        adResponse.body = '';
-        const forceCollapseStub =
-            sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
-        return fixture.addElement(a4aElement).then(unusedElement => {
-          expect(forceCollapseStub).to.be.calledOnce;
-        });
-      });
+  it('should collapse slot when creative response.arrayBuffer() is empty', () => {
+    adResponse.body = '';
+    const forceCollapseStub = sandbox.spy(
+      MockA4AImpl.prototype,
+      'forceCollapse'
+    );
+    return fixture.addElement(a4aElement).then(unusedElement => {
+      expect(forceCollapseStub).to.be.calledOnce;
+    });
+  });
 
   it('should continue to show old creative after refresh and no fill', () => {
     return fixture.addElement(a4aElement).then(() => {
-      return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.')
-          .then(() => {
-            const a4a = new MockA4AImpl(a4aElement);
-            const initiateAdRequestMock = sandbox.stub(
-                MockA4AImpl.prototype, 'initiateAdRequest').callsFake(
-                () => {
-                  a4a.adPromise_ = Promise.resolve();
-                  // This simulates calling forceCollapse, without tripping
-                  // up any unrelated asserts.
-                  a4a.isRefreshing = false;
-                });
-            const tearDownSlotMock =
-                sandbox.stub(MockA4AImpl.prototype, 'tearDownSlot');
-            tearDownSlotMock.returns(undefined);
-            const destroyFrameSpy =
-                sandbox.spy(MockA4AImpl.prototype, 'destroyFrame');
-            const callback = sandbox.spy();
-            return a4a.refresh(callback).then(() => {
-              expect(initiateAdRequestMock).to.be.called;
-              expect(tearDownSlotMock).to.be.called;
-              expect(destroyFrameSpy).to.not.be.called;
-              expect(callback).to.be.called;
+      return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.').then(
+        () => {
+          const a4a = new MockA4AImpl(a4aElement);
+          const initiateAdRequestMock = sandbox
+            .stub(MockA4AImpl.prototype, 'initiateAdRequest')
+            .callsFake(() => {
+              a4a.adPromise_ = Promise.resolve();
+              // This simulates calling forceCollapse, without tripping
+              // up any unrelated asserts.
+              a4a.isRefreshing = false;
             });
+          const tearDownSlotMock = sandbox.stub(
+            MockA4AImpl.prototype,
+            'tearDownSlot'
+          );
+          tearDownSlotMock.returns(undefined);
+          const destroyFrameSpy = sandbox.spy(
+            MockA4AImpl.prototype,
+            'destroyFrame'
+          );
+          const callback = sandbox.spy();
+          return a4a.refresh(callback).then(() => {
+            expect(initiateAdRequestMock).to.be.called;
+            expect(tearDownSlotMock).to.be.called;
+            expect(destroyFrameSpy).to.not.be.called;
+            expect(callback).to.be.called;
           });
+        }
+      );
     });
   });
 

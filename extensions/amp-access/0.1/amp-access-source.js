@@ -22,10 +22,7 @@ import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {
-  assertHttpsUrl,
-  parseQueryString,
-} from '../../../src/url';
+import {assertHttpsUrl, parseQueryString} from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
@@ -33,7 +30,6 @@ import {getValueForExpr} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-
 
 /** @const */
 const TAG = 'amp-access';
@@ -50,7 +46,6 @@ export const AccessType = {
   OTHER: 'other',
 };
 
-
 /**
  * AccessSource represents a single source of authentication information for a
  * page. These sources are constructed, unified and attached to the document by
@@ -65,9 +60,14 @@ export class AccessSource {
    * @param {function(!Promise)} onReauthorizeFn
    * @param {!Element} accessElement
    */
-  constructor(ampdoc, configJson, readerIdFn, scheduleViewFn,
-    onReauthorizeFn, accessElement) {
-
+  constructor(
+    ampdoc,
+    configJson,
+    readerIdFn,
+    scheduleViewFn,
+    onReauthorizeFn,
+    accessElement
+  ) {
     /** @const */
     this.ampdoc = ampdoc;
 
@@ -97,7 +97,7 @@ export class AccessSource {
 
     /** @const {?JsonObject} */
     this.authorizationFallbackResponse_ =
-        configJson['authorizationFallbackResponse'];
+      configJson['authorizationFallbackResponse'];
 
     /** @const {?string} */
     this.namespace_ = configJson['namespace'] || null;
@@ -168,7 +168,7 @@ export class AccessSource {
       buildUrl: this.buildUrl.bind(this),
       collectUrlVars: this.collectUrlVars.bind(this),
     });
-    const isJwt = (this.isJwtEnabled_ && configJson['jwt'] === true);
+    const isJwt = this.isJwtEnabled_ && configJson['jwt'] === true;
     switch (this.type_) {
       case AccessType.CLIENT:
         if (isJwt) {
@@ -197,7 +197,6 @@ export class AccessSource {
     return this.adapter_.getConfig();
   }
 
-
   /**
    * @return {!Promise} Returns a promise for the initial authorization.
    */
@@ -210,9 +209,9 @@ export class AccessSource {
    * @return {!AccessType}
    */
   buildConfigType_(configJson) {
-    let type = configJson['type'] ?
-      user().assertEnumValue(AccessType, configJson['type'], 'access type') :
-      null;
+    let type = configJson['type']
+      ? user().assertEnumValue(AccessType, configJson['type'], 'access type')
+      : null;
     if (!type) {
       if (configJson['vendor']) {
         type = AccessType.VENDOR;
@@ -228,8 +227,10 @@ export class AccessSource {
       user().info(TAG, 'Forcing access type: SERVER');
       type = AccessType.SERVER;
     }
-    if (type == AccessType.IFRAME &&
-        !isExperimentOn(this.ampdoc.win, 'amp-access-iframe')) {
+    if (
+      type == AccessType.IFRAME &&
+      !isExperimentOn(this.ampdoc.win, 'amp-access-iframe')
+    ) {
       user().error(TAG, 'Experiment "amp-access-iframe" is not enabled.');
       type = AccessType.CLIENT;
     }
@@ -253,8 +254,7 @@ export class AccessSource {
         loginMap[k] = loginConfig[k];
       }
     } else {
-      userAssert(false,
-          '"login" must be either a single URL or a map of URLs');
+      userAssert(false, '"login" must be either a single URL or a map of URLs');
     }
 
     // Check that all URLs are valid.
@@ -285,8 +285,13 @@ export class AccessSource {
    * Do some initial setup.
    */
   start() {
-    dev().fine(TAG, 'config:', this.type_, this.loginConfig_,
-        this.adapter_.getConfig());
+    dev().fine(
+      TAG,
+      'config:',
+      this.type_,
+      this.loginConfig_,
+      this.adapter_.getConfig()
+    );
 
     // Calculate login URLs right away.
     this.buildLoginUrls_();
@@ -350,29 +355,30 @@ export class AccessSource {
       return Promise.resolve();
     }
 
-    const responsePromise =
-      this.adapter_.authorize().catch(error => {
-        this.analyticsEvent_('access-authorization-failed');
-        if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
-          // Use fallback.
-          user().error(TAG, 'Authorization failed: ', error);
-          return this.authorizationFallbackResponse_;
-        } else {
-          // Rethrow the error, it will be processed in the bottom `catch`.
-          throw error;
-        }
-      });
-
-    const promise = responsePromise.then(response => {
-      dev().fine(TAG, 'Authorization response: ', response);
-      this.setAuthResponse_(response);
-      this.buildLoginUrls_();
-      return response;
-    }).catch(error => {
-      user().error(TAG, 'Authorization failed: ', error);
-      this.firstAuthorizationResolver_();
-      throw error;
+    const responsePromise = this.adapter_.authorize().catch(error => {
+      this.analyticsEvent_('access-authorization-failed');
+      if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
+        // Use fallback.
+        user().error(TAG, 'Authorization failed: ', error);
+        return this.authorizationFallbackResponse_;
+      } else {
+        // Rethrow the error, it will be processed in the bottom `catch`.
+        throw error;
+      }
     });
+
+    const promise = responsePromise
+      .then(response => {
+        dev().fine(TAG, 'Authorization response: ', response);
+        this.setAuthResponse_(response);
+        this.buildLoginUrls_();
+        return response;
+      })
+      .catch(error => {
+        user().error(TAG, 'Authorization failed: ', error);
+        this.firstAuthorizationResolver_();
+        throw error;
+      });
 
     return promise;
   }
@@ -390,13 +396,16 @@ export class AccessSource {
    * @return {!Promise}
    */
   reportViewToServer() {
-    return this.adapter_.pingback().then(() => {
-      dev().fine(TAG, 'Pingback complete');
-      this.analyticsEvent_('access-pingback-sent');
-    }).catch(error => {
-      this.analyticsEvent_('access-pingback-failed');
-      throw user().createError('Pingback failed: ', error);
-    });
+    return this.adapter_
+      .pingback()
+      .then(() => {
+        dev().fine(TAG, 'Pingback complete');
+        this.analyticsEvent_('access-pingback-sent');
+      })
+      .catch(error => {
+        this.analyticsEvent_('access-pingback-failed');
+        throw user().createError('Pingback failed: ', error);
+      });
   }
 
   /**
@@ -416,11 +425,17 @@ export class AccessSource {
    * @return {!Promise}
    */
   loginWithType(type) {
-    userAssert(this.loginConfig_[type],
-        'Login URL is not configured: %s', type);
+    userAssert(
+      this.loginConfig_[type],
+      'Login URL is not configured: %s',
+      type
+    );
     // Login URL should always be available at this time.
-    const loginUrl = userAssert(this.loginUrlMap_[type],
-        'Login URL is not ready: %s', type);
+    const loginUrl = userAssert(
+      this.loginUrlMap_[type],
+      'Login URL is not ready: %s',
+      type
+    );
     return this.login_(loginUrl, type);
   }
 
@@ -455,7 +470,7 @@ export class AccessSource {
     // 1 second, however, the new login request will be allowed to proceed,
     // given that we cannot always determine fully if the previous attempt is
     // "stuck".
-    if (this.loginPromise_ && (now - this.loginStartTime_ < 1000)) {
+    if (this.loginPromise_ && now - this.loginStartTime_ < 1000) {
       return this.loginPromise_;
     }
 
@@ -463,38 +478,41 @@ export class AccessSource {
 
     this.loginAnalyticsEvent_(eventLabel, 'started');
     const dialogPromise = this.openLoginDialog_(loginUrl);
-    const loginPromise = dialogPromise.then(result => {
-      dev().fine(TAG, 'Login dialog completed: ', eventLabel, result);
-      this.loginPromise_ = null;
-      const query = parseQueryString(result);
-      const s = query['success'];
-      const success = (s == 'true' || s == 'yes' || s == '1');
-      if (success) {
-        this.loginAnalyticsEvent_(eventLabel, 'success');
-      } else {
-        this.loginAnalyticsEvent_(eventLabel, 'rejected');
-      }
-      if (success || !s) {
-        // In case of a success, repeat the authorization and pingback flows.
-        // Also do this for an empty response to avoid false negatives.
-        // Pingback is repeated in this case since this could now be a new
-        // "view" with a different access profile.
-        this.adapter_.postAction();
-        const authorizationPromise = this.runAuthorization(
-            /* disableFallback */ true);
-        this.onReauthorize_(authorizationPromise);
-        return authorizationPromise.then(() => {
-          this.scheduleView_(/* timeToView */ 0);
-        });
-      }
-    }).catch(reason => {
-      dev().fine(TAG, 'Login dialog failed: ', eventLabel, reason);
-      this.loginAnalyticsEvent_(eventLabel, 'failed');
-      if (this.loginPromise_ == loginPromise) {
+    const loginPromise = dialogPromise
+      .then(result => {
+        dev().fine(TAG, 'Login dialog completed: ', eventLabel, result);
         this.loginPromise_ = null;
-      }
-      throw reason;
-    });
+        const query = parseQueryString(result);
+        const s = query['success'];
+        const success = s == 'true' || s == 'yes' || s == '1';
+        if (success) {
+          this.loginAnalyticsEvent_(eventLabel, 'success');
+        } else {
+          this.loginAnalyticsEvent_(eventLabel, 'rejected');
+        }
+        if (success || !s) {
+          // In case of a success, repeat the authorization and pingback flows.
+          // Also do this for an empty response to avoid false negatives.
+          // Pingback is repeated in this case since this could now be a new
+          // "view" with a different access profile.
+          this.adapter_.postAction();
+          const authorizationPromise = this.runAuthorization(
+            /* disableFallback */ true
+          );
+          this.onReauthorize_(authorizationPromise);
+          return authorizationPromise.then(() => {
+            this.scheduleView_(/* timeToView */ 0);
+          });
+        }
+      })
+      .catch(reason => {
+        dev().fine(TAG, 'Login dialog failed: ', eventLabel, reason);
+        this.loginAnalyticsEvent_(eventLabel, 'failed');
+        if (this.loginPromise_ == loginPromise) {
+          this.loginPromise_ = null;
+        }
+        throw reason;
+      });
     this.loginPromise_ = loginPromise;
     this.loginStartTime_ = now;
     return this.loginPromise_;
@@ -523,11 +541,13 @@ export class AccessSource {
     const promises = [];
     for (const k in this.loginConfig_) {
       promises.push(
-          this.buildUrl(this.loginConfig_[k], /* useAuthData */ true)
-              .then(url => {
-                this.loginUrlMap_[k] = url;
-                return {type: k, url};
-              }));
+        this.buildUrl(this.loginConfig_[k], /* useAuthData */ true).then(
+          url => {
+            this.loginUrlMap_[k] = url;
+            return {type: k, url};
+          }
+        )
+      );
     }
     return Promise.all(promises);
   }
@@ -542,12 +562,10 @@ export class AccessSource {
  */
 export let AccessTypeAdapterContextDef;
 
-
 /**
  * @interface
  */
 export class AccessTypeAdapterDef {
-
   /**
    * @return {!JsonObject}
    */

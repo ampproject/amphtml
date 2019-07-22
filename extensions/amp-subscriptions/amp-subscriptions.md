@@ -42,7 +42,7 @@ Implements subscription-style access protocol.
   <tr>
     <td class="col-fourty">
       <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">
+        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
           Supported Layouts
         </a>
       </strong>
@@ -64,7 +64,7 @@ and in many features builds on top of `amp-access`. However, it's a much more
 specialized version of access/paywall protocol. Some of the key differences are:
 
 1. The `amp-subscriptions` entitlements response is similar to the amp-access
-authorization, but it's striclty defined and standardized.
+authorization, but it's strictly defined and standardized.
 2. The `amp-subscriptions` extension allows multiple services to be configured
 for the page to participate in access/paywall decisions. Services are executed
 concurrently and prioritized based on which service returns the positive response.

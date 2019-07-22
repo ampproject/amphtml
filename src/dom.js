@@ -22,7 +22,6 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {onDocumentReady} from './document-ready';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -37,12 +36,10 @@ const HTML_ESCAPE_CHARS = {
 const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
 
 /** @const {string} */
-export const UPGRADE_TO_CUSTOMELEMENT_PROMISE =
-    '__AMP_UPG_PRM';
+export const UPGRADE_TO_CUSTOMELEMENT_PROMISE = '__AMP_UPG_PRM';
 
 /** @const {string} */
-export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER =
-    '__AMP_UPG_RES';
+export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER = '__AMP_UPG_RES';
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -92,44 +89,22 @@ export function waitForChildPromise(parent, checkFunc) {
 }
 
 /**
- * Waits for document's head to be available.
+ * Waits for document's body to be available and ready.
  * @param {!Document} doc
  * @param {function()} callback
  */
-export function waitForHead(doc, callback) {
+export function waitForBodyOpen(doc, callback) {
   waitForChild(doc.documentElement, () => !!doc.body, callback);
 }
-
-/**
- * Waits for the document's head to be available.
- * @param {!Document} doc
- * @return {!Promise}
- */
-export function waitForHeadPromise(doc) {
-  return new Promise(resolve => waitForHead(doc, resolve));
-}
-
-/**
- * Waits for document's body to be available and ready.
- * Will be deprecated soon; use {@link AmpDoc#whenBodyAvailable} or
- * @{link DocumentState#onBodyAvailable} instead.
- * @param {!Document} doc
- * @param {function()} callback
- */
-export function waitForBody(doc, callback) {
-  onDocumentReady(doc, () => waitForHead(doc, callback));
-}
-
 
 /**
  * Waits for document's body to be available.
  * @param {!Document} doc
  * @return {!Promise}
  */
-export function waitForBodyPromise(doc) {
-  return new Promise(resolve => waitForBody(doc, resolve));
+export function waitForBodyOpenPromise(doc) {
+  return new Promise(resolve => waitForBodyOpen(doc, resolve));
 }
-
 
 /**
  * Removes the element.
@@ -141,7 +116,6 @@ export function removeElement(element) {
   }
 }
 
-
 /**
  * Removes all child nodes of the specified element.
  * @param {!Element} parent
@@ -151,7 +125,6 @@ export function removeChildren(parent) {
     parent.removeChild(parent.firstChild);
   }
 }
-
 
 /**
  * Copies all children nodes of element "from" to element "to". Child nodes
@@ -241,8 +214,30 @@ export function rootNodeFor(node) {
     return node.getRootNode() || node;
   }
   let n;
-  for (n = node; !!n.parentNode; n = n.parentNode) {}
+  // Check isShadowRoot() is only needed for the polyfill case.
+  for (n = node; !!n.parentNode && !isShadowRoot(n); n = n.parentNode) {}
   return n;
+}
+
+/**
+ * Determines if value is actually a `ShadowRoot` node.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isShadowRoot(value) {
+  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
+  if (!value) {
+    return false;
+  }
+  // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
+  // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
+  if (value.tagName == 'I-AMPHTML-SHADOW-ROOT') {
+    return true;
+  }
+  return (
+    value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
+    Object.prototype.toString.call(value) === '[object ShadowRoot]'
+  );
 }
 
 /**
@@ -262,7 +257,6 @@ export function closest(element, callback, opt_stopAt) {
   return null;
 }
 
-
 /**
  * Finds the closest node that satisfies the callback from this node
  * up the DOM subtree.
@@ -278,7 +272,6 @@ export function closestNode(node, callback) {
   }
   return null;
 }
-
 
 /**
  * Finds the closest ancestor element with the specified selector from this
@@ -305,15 +298,17 @@ export function closestAncestorElementBySelector(element, selector) {
  */
 export function ancestorElements(child, predicate) {
   const ancestors = [];
-  for (let ancestor = child.parentElement; ancestor;
-    ancestor = ancestor.parentElement) {
+  for (
+    let ancestor = child.parentElement;
+    ancestor;
+    ancestor = ancestor.parentElement
+  ) {
     if (predicate(ancestor)) {
       ancestors.push(ancestor);
     }
   }
   return ancestors;
 }
-
 
 /**
  * Finds all ancestor elements that has the specified tag name.
@@ -336,15 +331,17 @@ export function ancestorElementsByTag(child, tagName) {
  * @return {?Element}
  */
 export function childElement(parent, callback) {
-  for (let child = parent.firstElementChild; child;
-    child = child.nextElementSibling) {
+  for (
+    let child = parent.firstElementChild;
+    child;
+    child = child.nextElementSibling
+  ) {
     if (callback(child)) {
       return child;
     }
   }
   return null;
 }
-
 
 /**
  * Finds all child elements that satisfy the callback.
@@ -354,15 +351,17 @@ export function childElement(parent, callback) {
  */
 export function childElements(parent, callback) {
   const children = [];
-  for (let child = parent.firstElementChild; child;
-    child = child.nextElementSibling) {
+  for (
+    let child = parent.firstElementChild;
+    child;
+    child = child.nextElementSibling
+  ) {
     if (callback(child)) {
       children.push(child);
     }
   }
   return children;
 }
-
 
 /**
  * Finds the last child element that satisfies the callback.
@@ -371,8 +370,11 @@ export function childElements(parent, callback) {
  * @return {?Element}
  */
 export function lastChildElement(parent, callback) {
-  for (let child = parent.lastElementChild; child;
-    child = child.previousElementSibling) {
+  for (
+    let child = parent.lastElementChild;
+    child;
+    child = child.previousElementSibling
+  ) {
     if (callback(child)) {
       return child;
     }
@@ -389,8 +391,7 @@ export function lastChildElement(parent, callback) {
  */
 export function childNodes(parent, callback) {
   const nodes = [];
-  for (let child = parent.firstChild; child;
-    child = child.nextSibling) {
+  for (let child = parent.firstChild; child; child = child.nextSibling) {
     if (callback(child)) {
       nodes.push(child);
     }
@@ -406,9 +407,8 @@ export function childNodes(parent, callback) {
  */
 export function childElementByAttr(parent, attr) {
   assertIsName(attr);
-  return scopedQuerySelector/*OK*/(parent, `> [${attr}]`);
+  return /*OK*/ scopedQuerySelector(parent, `> [${attr}]`);
 }
-
 
 /**
  * Finds the last child element that has the specified attribute.
@@ -423,7 +423,6 @@ export function lastChildElementByAttr(parent, attr) {
   });
 }
 
-
 /**
  * Finds all child elements that has the specified attribute.
  * @param {!Element} parent
@@ -432,9 +431,8 @@ export function lastChildElementByAttr(parent, attr) {
  */
 export function childElementsByAttr(parent, attr) {
   assertIsName(attr);
-  return scopedQuerySelectorAll/*OK*/(parent, `> [${attr}]`);
+  return /*OK*/ scopedQuerySelectorAll(parent, `> [${attr}]`);
 }
-
 
 /**
  * Finds the first child element that has the specified tag name.
@@ -444,9 +442,8 @@ export function childElementsByAttr(parent, attr) {
  */
 export function childElementByTag(parent, tagName) {
   assertIsName(tagName);
-  return scopedQuerySelector/*OK*/(parent, `> ${tagName}`);
+  return /*OK*/ scopedQuerySelector(parent, `> ${tagName}`);
 }
-
 
 /**
  * Finds all child elements with the specified tag name.
@@ -456,7 +453,7 @@ export function childElementByTag(parent, tagName) {
  */
 export function childElementsByTag(parent, tagName) {
   assertIsName(tagName);
-  return scopedQuerySelectorAll/*OK*/(parent, `> ${tagName}`);
+  return /*OK*/ scopedQuerySelectorAll(parent, `> ${tagName}`);
 }
 
 /**
@@ -466,11 +463,12 @@ export function childElementsByTag(parent, tagName) {
  * @return {boolean} True if the element matched the selector. False otherwise.
  */
 export function matches(el, selector) {
-  const matcher = el.matches ||
-      el.webkitMatchesSelector ||
-      el.mozMatchesSelector ||
-      el.msMatchesSelector ||
-      el.oMatchesSelector;
+  const matcher =
+    el.matches ||
+    el.webkitMatchesSelector ||
+    el.mozMatchesSelector ||
+    el.msMatchesSelector ||
+    el.oMatchesSelector;
   if (matcher) {
     return matcher.call(el, selector);
   }
@@ -485,7 +483,7 @@ export function matches(el, selector) {
  */
 export function elementByTag(element, tagName) {
   assertIsName(tagName);
-  return element./*OK*/querySelector(tagName);
+  return element./*OK*/ querySelector(tagName);
 }
 
 /**
@@ -502,7 +500,7 @@ function scopedQuerySelectionFallback(root, selector) {
   const unique = 'i-amphtml-scoped';
   root.classList.add(unique);
   const scopedSelector = prependSelectorsWith(selector, `.${unique}`);
-  const elements = root./*OK*/querySelectorAll(scopedSelector);
+  const elements = root./*OK*/ querySelectorAll(scopedSelector);
   root.classList.remove(unique);
   return elements;
 }
@@ -516,7 +514,7 @@ function scopedQuerySelectionFallback(root, selector) {
  */
 export function scopedQuerySelector(root, selector) {
   if (isScopeSelectorSupported(root)) {
-    return root./*OK*/querySelector(prependSelectorsWith(selector, ':scope'));
+    return root./*OK*/ querySelector(prependSelectorsWith(selector, ':scope'));
   }
 
   // Only IE.
@@ -533,14 +531,14 @@ export function scopedQuerySelector(root, selector) {
  */
 export function scopedQuerySelectorAll(root, selector) {
   if (isScopeSelectorSupported(root)) {
-    return root./*OK*/querySelectorAll(
-        prependSelectorsWith(selector, ':scope'));
+    return root./*OK*/ querySelectorAll(
+      prependSelectorsWith(selector, ':scope')
+    );
   }
 
   // Only IE.
   return scopedQuerySelectionFallback(root, selector);
 }
-
 
 /**
  * Returns element data-param- attributes as url parameters key-value pairs.
@@ -551,8 +549,11 @@ export function scopedQuerySelectorAll(root, selector) {
  * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!JsonObject}
  */
-export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
-  opt_paramPattern) {
+export function getDataParamsFromAttributes(
+  element,
+  opt_computeParamNameFunc,
+  opt_paramPattern
+) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const {dataset} = element;
   const params = dict();
@@ -582,8 +583,10 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
     if (currentElement.nextSibling) {
       return true;
     }
-  } while ((currentElement = currentElement.parentNode) &&
-            currentElement != opt_stopNode);
+  } while (
+    (currentElement = currentElement.parentNode) &&
+    currentElement != opt_stopNode
+  );
   return false;
 }
 
@@ -657,9 +660,11 @@ export function openWindowDialog(win, url, target, opt_features) {
  * @return {boolean}
  */
 export function isJsonScriptTag(element) {
-  return element.tagName == 'SCRIPT' &&
-            element.hasAttribute('type') &&
-            element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
+  return (
+    element.tagName == 'SCRIPT' &&
+    element.hasAttribute('type') &&
+    element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON'
+  );
 }
 
 /**
@@ -668,8 +673,10 @@ export function isJsonScriptTag(element) {
  * @return {boolean}
  */
 export function isJsonLdScriptTag(element) {
-  return element.tagName == 'SCRIPT' &&
-      element.getAttribute('type').toUpperCase() == 'APPLICATION/LD+JSON';
+  return (
+    element.tagName == 'SCRIPT' &&
+    element.getAttribute('type').toUpperCase() == 'APPLICATION/LD+JSON'
+  );
 }
 
 /**
@@ -678,9 +685,10 @@ export function isJsonLdScriptTag(element) {
  * @return {boolean}
  */
 export function isRTL(doc) {
-  const dir = doc.body.getAttribute('dir')
-                 || doc.documentElement.getAttribute('dir')
-                 || 'ltr';
+  const dir =
+    doc.body.getAttribute('dir') ||
+    doc.documentElement.getAttribute('dir') ||
+    'ltr';
   return dir == 'rtl';
 }
 
@@ -711,7 +719,7 @@ function escapeHtmlChar(c) {
  */
 export function tryFocus(element) {
   try {
-    element./*OK*/focus();
+    element./*OK*/ focus();
   } catch (e) {
     // IE <= 7 may throw exceptions when focusing on hidden items.
   }
@@ -735,9 +743,11 @@ export function isAmpElement(element) {
   const tag = element.tagName;
   // Use prefix to recognize AMP element. This is necessary because stub
   // may not be attached yet.
-  return startsWith(tag, 'AMP-') &&
-      // Some "amp-*" elements are not really AMP elements. :smh:
-      !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY');
+  return (
+    startsWith(tag, 'AMP-') &&
+    // Some "amp-*" elements are not really AMP elements. :smh:
+    !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY')
+  );
 }
 
 /**
@@ -758,7 +768,6 @@ export function whenUpgradedToCustomElement(element) {
     const deferred = new Deferred();
     element[UPGRADE_TO_CUSTOMELEMENT_PROMISE] = deferred.promise;
     element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = deferred.resolve;
-
   }
 
   return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
@@ -770,12 +779,13 @@ export function whenUpgradedToCustomElement(element) {
  * @param {!Element} element
  */
 export function fullscreenEnter(element) {
-  const requestFs = element.requestFullscreen
-    || element.requestFullScreen
-    || element.webkitRequestFullscreen
-    || element.webkitEnterFullscreen
-    || element.msRequestFullscreen
-    || element.mozRequestFullScreen;
+  const requestFs =
+    element.requestFullscreen ||
+    element.requestFullScreen ||
+    element.webkitRequestFullscreen ||
+    element.webkitEnterFullscreen ||
+    element.msRequestFullscreen ||
+    element.mozRequestFullScreen;
   if (requestFs) {
     requestFs.call(element);
   }
@@ -788,12 +798,12 @@ export function fullscreenEnter(element) {
  */
 export function fullscreenExit(element) {
   const elementBoundExit =
-      element.cancelFullScreen
-      || element.exitFullscreen
-      || element.webkitExitFullscreen
-      || element.webkitCancelFullScreen
-      || element.mozCancelFullScreen
-      || element.msExitFullscreen;
+    element.cancelFullScreen ||
+    element.exitFullscreen ||
+    element.webkitExitFullscreen ||
+    element.webkitCancelFullScreen ||
+    element.mozCancelFullScreen ||
+    element.msExitFullscreen;
   if (elementBoundExit) {
     elementBoundExit.call(element);
     return;
@@ -803,17 +813,16 @@ export function fullscreenExit(element) {
     return;
   }
   const docBoundExit =
-      ownerDocument.cancelFullScreen
-      || ownerDocument.exitFullscreencancelFullScreen
-      || ownerDocument.webkitExitFullscreencancelFullScreen
-      || ownerDocument.webkitCancelFullScreencancelFullScreen
-      || ownerDocument.mozCancelFullScreencancelFullScreen
-      || ownerDocument.msExitFullscreen;
+    ownerDocument.cancelFullScreen ||
+    ownerDocument.exitFullscreencancelFullScreen ||
+    ownerDocument.webkitExitFullscreencancelFullScreen ||
+    ownerDocument.webkitCancelFullScreencancelFullScreen ||
+    ownerDocument.mozCancelFullScreencancelFullScreen ||
+    ownerDocument.msExitFullscreen;
   if (docBoundExit) {
     docBoundExit.call(ownerDocument);
   }
 }
-
 
 /**
  * Replacement for `Document.fullscreenElement`.
@@ -831,10 +840,10 @@ export function isFullscreenElement(element) {
     return false;
   }
   const fullscreenElement =
-      ownerDocument.fullscreenElement
-      || ownerDocument.webkitFullscreenElement
-      || ownerDocument.mozFullScreenElement
-      || ownerDocument.webkitCurrentFullScreenElement;
+    ownerDocument.fullscreenElement ||
+    ownerDocument.webkitFullscreenElement ||
+    ownerDocument.mozFullScreenElement ||
+    ownerDocument.webkitCurrentFullScreenElement;
   return fullscreenElement == element;
 }
 
@@ -849,9 +858,6 @@ export function isFullscreenElement(element) {
 export function isEnabled(element) {
   return !(element.disabled || matches(element, ':disabled'));
 }
-
-const PRECEDING_OR_CONTAINS =
-    Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
 
 /**
  * A sorting comparator that sorts elements in DOM tree order.
@@ -869,16 +875,17 @@ export function domOrderComparator(element1, element2) {
   }
 
   const pos = element1.compareDocumentPosition(element2);
+  const precedingOrContains =
+    Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
 
-  // if fe2 is preceeding or contains fe1 then, fe1 is after fe2
-  if (pos & PRECEDING_OR_CONTAINS) {
+  // if fe2 is preceding or contains fe1 then, fe1 is after fe2
+  if (pos & precedingOrContains) {
     return 1;
   }
 
   // if fe2 is following or contained by fe1, then fe1 is before fe2
   return -1;
 }
-
 
 /**
  * Like `Element.prototype.toggleAttribute`. This either toggles an attribute

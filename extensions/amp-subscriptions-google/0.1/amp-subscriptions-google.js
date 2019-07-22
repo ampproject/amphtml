@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  Action,
+  ActionStatus,
+  SubscriptionAnalyticsEvents,
+} from '../../amp-subscriptions/0.1/analytics';
 import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
 import {
   ConfiguredRuntime,
@@ -27,18 +32,14 @@ import {
 } from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {
-  SubscriptionAnalyticsEvents,
-} from '../../amp-subscriptions/0.1/analytics';
-import {SubscriptionsScoreFactor}
-  from '../../amp-subscriptions/0.1/score-factors.js';
+import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
-
 
 /**
  */
@@ -57,17 +58,18 @@ export class GoogleSubscriptionsPlatformService {
    * @return {!GoogleSubscriptionsPlatform}
    */
   createPlatform(platformConfig, serviceAdapter) {
-    return new GoogleSubscriptionsPlatform(this.ampdoc_,
-        platformConfig, serviceAdapter);
+    return new GoogleSubscriptionsPlatform(
+      this.ampdoc_,
+      platformConfig,
+      serviceAdapter
+    );
   }
 }
-
 
 /**
  * @implements {../../amp-subscriptions/0.1/subscription-platform.SubscriptionPlatform}
  */
 export class GoogleSubscriptionsPlatform {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
@@ -88,11 +90,11 @@ export class GoogleSubscriptionsPlatform {
 
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
-        new DocImpl(ampdoc),
-        serviceAdapter.getPageConfig(),
-        {
-          fetcher: new AmpFetcher(ampdoc.win),
-        }
+      new DocImpl(ampdoc),
+      serviceAdapter.getPageConfig(),
+      {
+        fetcher: new AmpFetcher(ampdoc.win),
+      }
     );
     this.runtime_.setOnLoginRequest(request => {
       this.onLoginRequest_(request && request.linkRequested);
@@ -100,48 +102,54 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.setOnLinkComplete(() => {
       this.onLinkComplete_();
       this.subscriptionAnalytics_.actionEvent(
-          this.getServiceId(),
-          'link',
-          'success');
+        this.getServiceId(),
+        Action.LINK,
+        ActionStatus.SUCCESS
+      );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
-          SubscriptionAnalyticsEvents.LINK_COMPLETE,
-          this.getServiceId());
+        SubscriptionAnalyticsEvents.LINK_COMPLETE,
+        this.getServiceId()
+      );
     });
     this.runtime_.setOnFlowStarted(e => {
       if (
-        e.flow == 'subscribe' ||
-        e.flow == 'contribute' ||
-        e.flow == 'showContributionOptions' ||
-        e.flow == 'showOffers'
+        e.flow == Action.SUBSCRIBE ||
+        e.flow == Action.CONTRIBUTE ||
+        e.flow == Action.SHOW_CONTRIBUTION_OPTIONS ||
+        e.flow == Action.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
-            this.getServiceId(),
-            e.flow,
-            'started');
+          this.getServiceId(),
+          e.flow,
+          ActionStatus.STARTED
+        );
       }
     });
     this.runtime_.setOnFlowCanceled(e => {
       if (e.flow == 'linkAccount') {
         this.onLinkComplete_();
         this.subscriptionAnalytics_.actionEvent(
-            this.getServiceId(),
-            'link',
-            'rejected');
+          this.getServiceId(),
+          Action.LINK,
+          ActionStatus.REJECTED
+        );
         // TODO(dvoytenko): deprecate separate "link" events.
         this.subscriptionAnalytics_.serviceEvent(
-            SubscriptionAnalyticsEvents.LINK_CANCELED,
-            this.getServiceId());
+          SubscriptionAnalyticsEvents.LINK_CANCELED,
+          this.getServiceId()
+        );
       } else if (
-        e.flow == 'subscribe' ||
-        e.flow == 'contribute' ||
-        e.flow == 'showContributionOptions' ||
-        e.flow == 'showOffers'
+        e.flow == Action.SUBSCRIBE ||
+        e.flow == Action.CONTRIBUTE ||
+        e.flow == Action.SHOW_CONTRIBUTION_OPTIONS ||
+        e.flow == Action.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
-            this.getServiceId(),
-            e.flow,
-            'rejected');
+          this.getServiceId(),
+          e.flow,
+          ActionStatus.REJECTED
+        );
       }
     });
     this.runtime_.setOnNativeSubscribeRequest(() => {
@@ -149,12 +157,12 @@ export class GoogleSubscriptionsPlatform {
     });
     this.runtime_.setOnSubscribeResponse(promise => {
       promise.then(response => {
-        this.onSubscribeResponse_(response, 'subscribe');
+        this.onSubscribeResponse_(response, Action.SUBSCRIBE);
       });
     });
     this.runtime_.setOnContributionResponse(promise => {
       promise.then(response => {
-        this.onSubscribeResponse_(response, 'contribute');
+        this.onSubscribeResponse_(response, Action.CONTRIBUTE);
       });
     });
 
@@ -180,16 +188,17 @@ export class GoogleSubscriptionsPlatform {
     if (linkRequested && this.isGoogleViewer_) {
       this.runtime_.linkAccount();
       this.subscriptionAnalytics_.actionEvent(
-          this.getServiceId(),
-          'link',
-          'started');
+        this.getServiceId(),
+        Action.LINK,
+        ActionStatus.STARTED
+      );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
-          SubscriptionAnalyticsEvents.LINK_REQUESTED,
-          this.getServiceId());
+        SubscriptionAnalyticsEvents.LINK_REQUESTED,
+        this.getServiceId()
+      );
     } else {
-      this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal(
-          'login'));
+      this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal('login'));
     }
   }
 
@@ -201,8 +210,9 @@ export class GoogleSubscriptionsPlatform {
   /* TODO(jpettitt): should local suppoort 'contribute' action? */
   /** @private */
   onNativeSubscribeRequest_() {
-    this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal(
-        'subscribe'));
+    this.maybeComplete_(
+      this.serviceAdapter_.delegateActionToLocal(Action.SUBSCRIBE)
+    );
   }
 
   /**
@@ -227,9 +237,10 @@ export class GoogleSubscriptionsPlatform {
       this.serviceAdapter_.resetPlatforms();
     });
     this.subscriptionAnalytics_.actionEvent(
-        this.getServiceId(),
-        eventType,
-        'success');
+      this.getServiceId(),
+      eventType,
+      ActionStatus.SUCCESS
+    );
   }
 
   /** @override */
@@ -246,32 +257,34 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   getEntitlements() {
-    const encryptedDocumentKey =
-        this.serviceAdapter_.getEncryptedDocumentKey('google.com');
-    return this.runtime_.getEntitlements(
-        encryptedDocumentKey).then(swgEntitlements => {
-      // Get and store the isReadyToPay signal which is independent of
-      // any entitlments existing.
-      if (swgEntitlements.isReadyToPay) {
-        this.isReadyToPay_ = true;
-      }
+    const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
+      'google.com'
+    );
+    return this.runtime_
+      .getEntitlements(encryptedDocumentKey)
+      .then(swgEntitlements => {
+        // Get and store the isReadyToPay signal which is independent of
+        // any entitlments existing.
+        if (swgEntitlements.isReadyToPay) {
+          this.isReadyToPay_ = true;
+        }
 
-      // Get the specifc entitlement we're looking for
-      const swgEntitlement = swgEntitlements.getEntitlementForThis();
-      if (!swgEntitlement) {
-        return null;
-      }
-      swgEntitlements.ack();
-      return new Entitlement({
-        source: swgEntitlement.source,
-        raw: swgEntitlements.raw,
-        service: PLATFORM_ID,
-        granted: true, //swgEntitlements.getEntitlementForThis makes sure this is true.
-        grantReason: GrantReason.SUBSCRIBER, // there is no other case of subscription for SWG as of now.
-        dataObject: swgEntitlement.json(),
-        decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
+        // Get the specifc entitlement we're looking for
+        const swgEntitlement = swgEntitlements.getEntitlementForThis();
+        if (!swgEntitlement) {
+          return null;
+        }
+        swgEntitlements.ack();
+        return new Entitlement({
+          source: swgEntitlement.source,
+          raw: swgEntitlements.raw,
+          service: PLATFORM_ID,
+          granted: true, //swgEntitlements.getEntitlementForThis makes sure this is true.
+          grantReason: GrantReason.SUBSCRIBER, // there is no other case of subscription for SWG as of now.
+          dataObject: swgEntitlement.json(),
+          decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
+        });
       });
-    });
   }
 
   /** @override */
@@ -304,6 +317,11 @@ export class GoogleSubscriptionsPlatform {
     return false;
   }
 
+  /** @override */
+  pingbackReturnsAllEntitlements() {
+    return false;
+  }
+
   /**
    * Performs the pingback to the subscription platform
    */
@@ -331,7 +349,8 @@ export class GoogleSubscriptionsPlatform {
     const viewerUrl = viewer.getParam('viewerUrl');
     if (viewerUrl) {
       this.isGoogleViewer_ = GOOGLE_DOMAIN_RE.test(
-          parseUrlDeprecated(viewerUrl).hostname);
+        parseUrlDeprecated(viewerUrl).hostname
+      );
     } else {
       // This can only be resolved asynchronously in this case. However, the
       // action execution must be done synchronously. Thus we have to allow
@@ -339,7 +358,8 @@ export class GoogleSubscriptionsPlatform {
       viewer.getViewerOrigin().then(origin => {
         if (origin) {
           this.isGoogleViewer_ = GOOGLE_DOMAIN_RE.test(
-              parseUrlDeprecated(origin).hostname);
+            parseUrlDeprecated(origin).hostname
+          );
         }
       });
     }
@@ -363,19 +383,21 @@ export class GoogleSubscriptionsPlatform {
      * subscribe flows elsewhere since they are invoked after
      * offer selection.
      */
-    if (action == 'subscribe') {
+    if (action == Action.SUBSCRIBE) {
       this.runtime_.showOffers({
         list: 'amp',
-        isClosable: true});
+        isClosable: true,
+      });
       return Promise.resolve(true);
     }
-    if (action == 'contribute') {
+    if (action == Action.CONTRIBUTE) {
       this.runtime_.showContributionOptions({
         list: 'amp',
-        isClosable: true});
+        isClosable: true,
+      });
       return Promise.resolve(true);
     }
-    if (action == 'login') {
+    if (action == Action.LOGIN) {
       this.runtime_.linkAccount();
       return Promise.resolve(true);
     }
@@ -384,24 +406,41 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   decorateUI(element, action, options) {
-    /*
-     * Note: contribute doesn't have a standard button
-     * so we don't do anything here for it.
-     */
-    if (action === 'subscribe') {
-      element.textContent = '';
-      this.runtime_.attachButton(element, options, () => {});
+    const opts = options ? options : {};
+
+    switch (action) {
+      case Action.SUBSCRIBE:
+        element.textContent = '';
+        this.runtime_.attachButton(element, options, () => {});
+        break;
+      case 'subscribe-smartbutton':
+      case 'subscribe-smartbutton-light':
+      case 'subscribe-smartbutton-dark':
+        element.textContent = '';
+        opts.theme = action === 'subscribe-smartbutton-dark' ? 'dark' : 'light';
+        opts.lang = userAssert(
+          element.getAttribute('subscriptions-lang'),
+          'subscribe-smartbutton must have a language attribute'
+        );
+        const messageTextColor = element.getAttribute(
+          'subscriptions-message-text-color'
+        );
+        if (messageTextColor) {
+          opts.messageTextColor = messageTextColor;
+        }
+        this.runtime_.attachSmartButton(element, opts, () => {});
+        break;
+      default:
+      // do nothing
     }
   }
 }
-
 
 /**
  * Adopts fetcher protocol required for SwG to AMP fetching rules.
  * @implements {Fetcher}
  */
 class AmpFetcher {
-
   /**
    * @param {!Window} win
    */
@@ -412,32 +451,38 @@ class AmpFetcher {
 
   /** @override */
   fetchCredentialedJson(url) {
-    return this.xhr_.fetchJson(url, {
-      credentials: 'include',
-    }).then(response => response.json());
+    return this.xhr_
+      .fetchJson(url, {
+        credentials: 'include',
+        prerenderSafe: true,
+      })
+      .then(response => response.json());
   }
 }
 
-
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc('subscriptions-google',
-      /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
-      ampdoc => {
-        const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
-        const element = ampdoc.getHeadNode();
-        Services.subscriptionsServiceForDoc(element).then(service => {
-          service.registerPlatform(PLATFORM_ID,
-              (platformConfig, serviceAdapter) => {
-                return platformService.createPlatform(platformConfig,
-                    serviceAdapter);
-              }
-          );
-        });
-        return platformService;
+  AMP.registerServiceForDoc(
+    'subscriptions-google',
+    /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    ampdoc => {
+      const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
+      const element = ampdoc.getHeadNode();
+      Services.subscriptionsServiceForDoc(element).then(service => {
+        service.registerPlatform(
+          PLATFORM_ID,
+          (platformConfig, serviceAdapter) => {
+            return platformService.createPlatform(
+              platformConfig,
+              serviceAdapter
+            );
+          }
+        );
       });
+      return platformService;
+    }
+  );
 });
-
 
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.

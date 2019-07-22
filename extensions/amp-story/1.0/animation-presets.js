@@ -54,7 +54,7 @@ const FULL_BLEED_ANIMATION_NAMES = [
  */
 const ANIMATION_CSS_CLASS_NAMES = {
   [FULL_BLEED_CATEGORY]:
-      'i-amphtml-story-grid-template-with-full-bleed-animation',
+    'i-amphtml-story-grid-template-with-full-bleed-animation',
 };
 
 /**
@@ -66,10 +66,14 @@ export function setStyleForPreset(el, presetName) {
   // For full bleed animations.
   if (FULL_BLEED_ANIMATION_NAMES.indexOf(presetName) >= 0) {
     const parent = el.parentElement;
-    if (parent.classList.contains(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT])) {
-      parent.classList
-          .remove(GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]);
+    if (
+      parent.classList.contains(
+        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
+      )
+    ) {
+      parent.classList.remove(
+        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
+      );
     }
     parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
   }
@@ -178,8 +182,10 @@ export const getPresetDef = (name, options) => {
       return {
         duration: 1600,
         keyframes(dimensions) {
-          const maxBounceHeight =
-            Math.max(160, dimensions.targetY + dimensions.targetHeight);
+          const maxBounceHeight = Math.max(
+            160,
+            dimensions.targetY + dimensions.targetHeight
+          );
 
           return [
             {
@@ -262,8 +268,13 @@ export const getPresetDef = (name, options) => {
           const offsetX = dimensions.pageWidth - dimensions.targetWidth;
           const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
 
-          return scaleAndTranslate(offsetX, offsetY, translateX ?
-            offsetX + translateX : 0, offsetY, scalingFactor);
+          return scaleAndTranslate(
+            offsetX,
+            offsetY,
+            translateX ? offsetX + translateX : 0,
+            offsetY,
+            scalingFactor
+          );
         },
       };
     case 'pan-right':
@@ -280,8 +291,13 @@ export const getPresetDef = (name, options) => {
           const offsetX = dimensions.pageWidth - dimensions.targetWidth;
           const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
 
-          return scaleAndTranslate(0, offsetY, -translateX || offsetX, offsetY,
-              scalingFactor);
+          return scaleAndTranslate(
+            0,
+            offsetY,
+            -translateX || offsetX,
+            offsetY,
+            scalingFactor
+          );
         },
       };
     case 'pan-down':
@@ -298,8 +314,13 @@ export const getPresetDef = (name, options) => {
           const offsetX = -dimensions.targetWidth / 2;
           const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
-          return scaleAndTranslate(offsetX, 0, offsetX, -translateY || offsetY,
-              scalingFactor);
+          return scaleAndTranslate(
+            offsetX,
+            0,
+            offsetX,
+            -translateY || offsetY,
+            scalingFactor
+          );
         },
       };
     case 'pan-up':
@@ -316,16 +337,24 @@ export const getPresetDef = (name, options) => {
           const offsetX = -dimensions.targetWidth / 2;
           const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
-          return scaleAndTranslate(offsetX, offsetY, offsetX, translateY ?
-            offsetY + translateY : 0, scalingFactor);
+          return scaleAndTranslate(
+            offsetX,
+            offsetY,
+            offsetX,
+            translateY ? offsetY + translateY : 0,
+            scalingFactor
+          );
         },
       };
     case 'zoom-in':
       let {scaleStart, scaleEnd} = options;
 
       if (scaleStart) {
-        userAssert(scaleEnd > scaleStart, '"scale-end" value must be greater ' +
-        'than "scale-start" value when using "zoom-in" animation.');
+        userAssert(
+          scaleEnd > scaleStart,
+          '"scale-end" value must be greater ' +
+            'than "scale-start" value when using "zoom-in" animation.'
+        );
       }
 
       return {
@@ -341,8 +370,11 @@ export const getPresetDef = (name, options) => {
       scaleEnd = options.scaleEnd;
 
       if (scaleStart) {
-        userAssert(scaleStart > scaleEnd, '"scale-start" value must be ' +
-        'higher than "scale-end" value when using "zoom-out" animation.');
+        userAssert(
+          scaleStart > scaleEnd,
+          '"scale-start" value must be ' +
+            'higher than "scale-end" value when using "zoom-out" animation.'
+        );
       }
 
       return {

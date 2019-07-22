@@ -13,7 +13,491 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.49 */
+/** Version: 0.1.22.59 */
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number} */
+const AnalyticsEvent = {
+  UNKNOWN: 0,
+  IMPRESSION_PAYWALL: 1,
+  IMPRESSION_AD: 2,
+  IMPRESSION_OFFERS: 3,
+  IMPRESSION_SUBSCRIBE_BUTTON: 4,
+  IMPRESSION_SMARTBOX: 5,
+  ACTION_SUBSCRIBE: 1000,
+  ACTION_PAYMENT_COMPLETE: 1001,
+  ACTION_ACCOUNT_CREATED: 1002,
+  ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
+  ACTION_SUBSCRIPTIONS_LANDING_PAGE: 1004,
+  ACTION_PAYMENT_FLOW_STARTED: 1005,
+  ACTION_OFFER_SELECTED: 1006,
+  EVENT_PAYMENT_FAILED: 2000,
+  EVENT_CUSTOM: 3000,
+};
+/** @enum {number} */
+const EventOriginator = {
+  UNKNOWN_CLIENT: 0,
+  SWG_CLIENT: 1,
+  AMP_CLIENT: 2,
+  PROPENSITY_CLIENT: 3,
+  SWG_SERVER: 4,
+};
+
+/**
+ * @implements {Message}
+ */
+class AnalyticsContext {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.transactionId_ = (data[2] == null) ? null : data[2];
+
+    /** @private {?string} */
+    this.referringOrigin_ = (data[3] == null) ? null : data[3];
+
+    /** @private {?string} */
+    this.utmSource_ = (data[4] == null) ? null : data[4];
+
+    /** @private {?string} */
+    this.utmCampaign_ = (data[5] == null) ? null : data[5];
+
+    /** @private {?string} */
+    this.utmMedium_ = (data[6] == null) ? null : data[6];
+
+    /** @private {?string} */
+    this.sku_ = (data[7] == null) ? null : data[7];
+
+    /** @private {?boolean} */
+    this.readyToPay_ = (data[8] == null) ? null : data[8];
+
+    /** @private {!Array<string>} */
+    this.label_ = data[9] || [];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getEmbedderOrigin() {
+    return this.embedderOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setEmbedderOrigin(value) {
+    this.embedderOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getTransactionId() {
+    return this.transactionId_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setTransactionId(value) {
+    this.transactionId_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getReferringOrigin() {
+    return this.referringOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setReferringOrigin(value) {
+    this.referringOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmSource() {
+    return this.utmSource_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmSource(value) {
+    this.utmSource_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmCampaign() {
+    return this.utmCampaign_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmCampaign(value) {
+    this.utmCampaign_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmMedium() {
+    return this.utmMedium_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmMedium(value) {
+    this.utmMedium_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.sku_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSku(value) {
+    this.sku_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getReadyToPay() {
+    return this.readyToPay_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setReadyToPay(value) {
+    this.readyToPay_ = value;
+  }
+
+  /**
+   * @return {!Array<string>}
+   */
+  getLabelList() {
+    return this.label_;
+  }
+
+  /**
+   * @param {!Array<string>} value
+   */
+  setLabelList(value) {
+    this.label_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.embedderOrigin_,  // field 1 - embedder_origin
+      this.transactionId_,  // field 2 - transaction_id
+      this.referringOrigin_,  // field 3 - referring_origin
+      this.utmSource_,  // field 4 - utm_source
+      this.utmCampaign_,  // field 5 - utm_campaign
+      this.utmMedium_,  // field 6 - utm_medium
+      this.sku_,  // field 7 - sku
+      this.readyToPay_,  // field 8 - ready_to_pay
+      this.label_,  // field 9 - label
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsContext';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class AnalyticsEventMeta {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?EventOriginator} */
+    this.eventOriginator_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?boolean} */
+    this.isFromUserAction_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?EventOriginator}
+   */
+  getEventOriginator() {
+    return this.eventOriginator_;
+  }
+
+  /**
+   * @param {!EventOriginator} value
+   */
+  setEventOriginator(value) {
+    this.eventOriginator_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getIsFromUserAction() {
+    return this.isFromUserAction_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setIsFromUserAction(value) {
+    this.isFromUserAction_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.eventOriginator_,  // field 1 - event_originator
+      this.isFromUserAction_,  // field 2 - is_from_user_action
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsEventMeta';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class AnalyticsRequest {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?AnalyticsContext} */
+    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
+        AnalyticsContext(data[1]);
+
+    /** @private {?AnalyticsEvent} */
+    this.event_ = (data[2] == null) ? null : data[2];
+
+    /** @private {?AnalyticsEventMeta} */
+    this.meta_ = (data[3] == null || data[3] == undefined) ? null : new
+        AnalyticsEventMeta(data[3]);
+
+    /** @private {?EventParams} */
+    this.params_ = (data[4] == null || data[4] == undefined) ? null : new
+        EventParams(data[4]);
+  }
+
+  /**
+   * @return {?AnalyticsContext}
+   */
+  getContext() {
+    return this.context_;
+  }
+
+  /**
+   * @param {!AnalyticsContext} value
+   */
+  setContext(value) {
+    this.context_ = value;
+  }
+
+  /**
+   * @return {?AnalyticsEvent}
+   */
+  getEvent() {
+    return this.event_;
+  }
+
+  /**
+   * @param {!AnalyticsEvent} value
+   */
+  setEvent(value) {
+    this.event_ = value;
+  }
+
+  /**
+   * @return {?AnalyticsEventMeta}
+   */
+  getMeta() {
+    return this.meta_;
+  }
+
+  /**
+   * @param {!AnalyticsEventMeta} value
+   */
+  setMeta(value) {
+    this.meta_ = value;
+  }
+
+  /**
+   * @return {?EventParams}
+   */
+  getParams() {
+    return this.params_;
+  }
+
+  /**
+   * @param {!EventParams} value
+   */
+  setParams(value) {
+    this.params_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.context_ ? this.context_.toArray() : [], // field 1 - context
+      this.event_,  // field 2 - event
+      this.meta_ ? this.meta_.toArray() : [], // field 3 - meta
+      this.params_ ? this.params_.toArray() : [], // field 4 - params
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class EventParams {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.smartboxMessage_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSmartboxMessage() {
+    return this.smartboxMessage_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSmartboxMessage(value) {
+    this.smartboxMessage_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.smartboxMessage_,  // field 1 - smartbox_message
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EventParams';
+  }
+}
+
+const PROTO_MAP = {
+  'AnalyticsContext': AnalyticsContext,
+  'AnalyticsEventMeta': AnalyticsEventMeta,
+  'AnalyticsRequest': AnalyticsRequest,
+  'EventParams': EventParams,
+};
+
+/**
+ * Utility to deserialize a buffer
+ * @param {!Array} data
+ * @return {!Message}
+ */
+function deserialize(data) {
+  /** {?string} */
+  const key = data ? data[0] : null;
+  if (key) {
+    const ctor = PROTO_MAP[key];
+    if (ctor) {
+      return new ctor(data);
+    }
+  }
+  throw new Error('Deserialization failed for ' + data);
+}
+
+/**
+ * @param {function(new: T)} messageType
+ * @return {string}
+ * @template T
+ */
+function getLabel(messageType) {
+  const message = /** @type {!Message} */ (new messageType());
+  return message.label();
+}
+
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -1607,7 +2091,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.23';
+    this.version = '1.24';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -1835,11 +2319,12 @@ var activityPorts = {
   isAbortError,
 };
 var activityPorts_1 = activityPorts.ActivityPorts;
+var activityPorts_2 = activityPorts.ActivityIframePort;
 var activityPorts_11 = activityPorts.createAbortError;
 var activityPorts_12 = activityPorts.isAbortError;
 
 /**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1853,248 +2338,261 @@ var activityPorts_12 = activityPorts.isAbortError;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** @enum {number} */
-const AnalyticsEvent = {
-  UNKNOWN: 0,
-  IMPRESSION_PAYWALL: 1,
-  ACTION_SUBSCRIBE: 1000,
-  ACTION_PAYMENT_COMPLETE: 1001,
-  ACTION_ACCOUNT_CREATED: 1002,
-  ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
-  EVENT_PAYMENT_FAILED: 2000,
-};
-
-class AnalyticsContext {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
-
-    /** @private {?string} */
-    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
-
-    /** @private {?string} */
-    this.transactionId_ = (data[2] == null) ? null : data[2];
-
-    /** @private {?string} */
-    this.referringOrigin_ = (data[3] == null) ? null : data[3];
-
-    /** @private {?string} */
-    this.utmSource_ = (data[4] == null) ? null : data[4];
-
-    /** @private {?string} */
-    this.utmCampaign_ = (data[5] == null) ? null : data[5];
-
-    /** @private {?string} */
-    this.utmMedium_ = (data[6] == null) ? null : data[6];
-
-    /** @private {?string} */
-    this.sku_ = (data[7] == null) ? null : data[7];
-
-    /** @private {?boolean} */
-    this.readyToPay_ = (data[8] == null) ? null : data[8];
-
-    /** @private {!Array<string>} */
-    this.label_ = data[9] || [];
+/**
+ * @implements {ActivityPortDef}
+ */
+class ActivityPortDeprecated {
+  /**
+   * @param {!web-activities/activity-ports.ActivityPort} port
+   */
+  constructor(port) {
+    /** @private @const {!web-activities/activity-ports.ActivityPort} */
+    this.port_ = port;
   }
 
   /**
-   * @return {?string}
+   * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
    */
-  getEmbedderOrigin() {
-    return this.embedderOrigin_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setEmbedderOrigin(value) {
-    this.embedderOrigin_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getTransactionId() {
-    return this.transactionId_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setTransactionId(value) {
-    this.transactionId_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getReferringOrigin() {
-    return this.referringOrigin_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setReferringOrigin(value) {
-    this.referringOrigin_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmSource() {
-    return this.utmSource_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmSource(value) {
-    this.utmSource_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmCampaign() {
-    return this.utmCampaign_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmCampaign(value) {
-    this.utmCampaign_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmMedium() {
-    return this.utmMedium_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmMedium(value) {
-    this.utmMedium_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getSku() {
-    return this.sku_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setSku(value) {
-    this.sku_ = value;
-  }
-
-  /**
-   * @return {?boolean}
-   */
-  getReadyToPay() {
-    return this.readyToPay_;
-  }
-
-  /**
-   * @param {boolean} value
-   */
-  setReadyToPay(value) {
-    this.readyToPay_ = value;
-  }
-
-  /**
-   * @return {!Array<string>}
-   */
-  getLabelList() {
-    return this.label_;
-  }
-
-  /**
-   * @param {!Array<string>} value
-   */
-  setLabelList(value) {
-    this.label_ = value;
-  }
-
-  /**
-   * @return {!Array}
-   */
-  toArray() {
-    return [
-      'AnalyticsContext',  // message type
-      this.embedderOrigin_,  // field 1 - embedder_origin
-      this.transactionId_,  // field 2 - transaction_id
-      this.referringOrigin_,  // field 3 - referring_origin
-      this.utmSource_,  // field 4 - utm_source
-      this.utmCampaign_,  // field 5 - utm_campaign
-      this.utmMedium_,  // field 6 - utm_medium
-      this.sku_,  // field 7 - sku
-      this.readyToPay_,  // field 8 - ready_to_pay
-      this.label_,  // field 9 - label
-    ];
+  acceptResult() {
+    return this.port_.acceptResult();
   }
 }
 
+/**
+ * @implements {ActivityPortDef}
+ */
+class ActivityIframePort$1 {
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {?Object=} opt_args
+   */
+  constructor(iframe, url, opt_args) {
+    /** @private @const {!web-activities/activity-ports.ActivityIframePort} */
+    this.iframePort_ = new activityPorts_2(iframe, url, opt_args);
+    /** @private @const {!Object<string, function(!Object)>} */
+    this.callbackMap_ = {};
+    /** @private {?function(!Object)} */
+    this.callbackOriginal_ = null;
+  }
 
-class AnalyticsRequest {
+  /**
+   * Returns a promise that yields when the iframe is ready to be interacted
+   * with.
+   * @return {!Promise}
+   */
+  whenReady() {
+    return this.iframePort_.whenReady().then(() => {
+      this.iframePort_.onMessage(data => {
+        if (this.callbackOriginal_) {
+          this.callbackOriginal_(data);
+        }
+        const response = data && data['RESPONSE'];
+        if (!response) {
+          return;
+        }
+        const cb = this.callbackMap_[response[0]];
+        if (cb) {
+          cb(deserialize(response));
+        }
+      });
+    });
+  }
+
+  /**
+   * Waits until the activity port is connected to the host.
+   * @return {!Promise}
+   */
+  connect() {
+    return this.iframePort_.connect();
+  }
+
+  /**
+   * Disconnect the activity binding and cleanup listeners.
+   */
+  disconnect() {
+    this.iframePort_.disconnect();
+  }
+
+  /**
+   * Returns the mode of the activity: iframe, popup or redirect.
+   * @return {!web-activities/activity-ports.ActivityMode}
+   */
+  getMode() {
+    return this.iframePort_.getMode();
+  }
+
+  /**
+   * Accepts the result when ready. The client should verify the activity's
+   * mode, origin, verification and secure channel flags before deciding
+   * whether or not to trust the result.
+   *
+   * Returns the promise that yields when the activity has been completed and
+   * either a result, a cancelation or a failure has been returned.
+   *
+   * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
+   * @override
+   */
+  acceptResult() {
+    return this.iframePort_.acceptResult();
+  }
+
+  /**
+   * Register a callback to handle resize requests. Once successfully resized,
+   * ensure to call `resized()` method.
+   * @param {function(number)} callback
+   */
+  onResizeRequest(callback) {
+    return this.iframePort_.onResizeRequest(callback);
+  }
+
+  /**
+   * Sends a message to the host.
+   * @param {!Object} payload
+   */
+  messageDeprecated(payload) {
+    this.iframePort_.message(payload);
+  }
+
+  /**
+   * Registers a callback to receive messages from the host.
+   * @param {function(!Object)} callback
+   */
+  onMessageDeprecated(callback) {
+    this.callbackOriginal_ = callback;
+  }
+
+  /**
+   * @param {!../proto/api_messages.Message} request
+   */
+  execute(request) {
+    this.iframePort_.message({'REQUEST': request.toArray()});
+  }
+
+  /**
+   * @param {!function(new: T)} message
+   * @param {function(Object)} callback
+   * @template T
+   */
+  on(message, callback) {
+    const label = getLabel(message);
+    if (!label) {
+      throw new Error('Invalid data type');
+    } else if (this.callbackMap_[label]) {
+      throw new Error('Invalid type or duplicate callback for ', label);
+    }
+    this.callbackMap_[label] = callback;
+  }
+
+  /**
+   * Signals back to the activity implementation that the client has updated
+   * the activity's size.
+   */
+  resized() {
+    this.iframePort_.resized();
+  }
+}
+
+class ActivityPorts$1 {
  /**
-  * @param {!Array=} data
+  * @param {!Window} win
   */
-  constructor(data = []) {
+  constructor(win) {
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = new activityPorts_1(win);
+  }
 
-    /** @private {?AnalyticsContext} */
-    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
-        AnalyticsContext(data[1]);
+ /**
+  * Start an activity within the specified iframe.
+  * @param {!HTMLIFrameElement} iframe
+  * @param {string} url
+  * @param {?Object=} opt_args
+  * @return {!Promise<!ActivityIframePort>}
+  */
+  openIframe(iframe, url, opt_args) {
+    const activityPort = new ActivityIframePort$1(iframe, url, opt_args);
+    return activityPort.connect().then(() => activityPort);
+  }
 
-    /** @private {?AnalyticsEvent} */
-    this.event_ = (data[2] == null) ? null : data[2];
+ /**
+  * Start an activity in a separate window. The result will be delivered
+  * to the `onResult` callback.
+  *
+  * The activity can be opened in two modes: "popup" and "redirect". This
+  * depends on the `target` value, but also on the browser/environment.
+  *
+  * The allowed `target` values are `_blank`, `_top` and name targets. The
+  * `_self`, `_parent` and similar targets are not allowed.
+  *
+  * The `_top` target indicates that the activity should be opened as a
+  * "redirect", while other targets indicate that the activity should be
+  * opened as a popup. The activity client will try to honor the requested
+  * target. However, it's not always possible. Some environments do not
+  * allow popups and they either force redirect or fail the window open
+  * request. In this case, the activity will try to fallback to the "redirect"
+  * mode.
+  *
+  * @param {string} requestId
+  * @param {string} url
+  * @param {string} target
+  * @param {?Object=} opt_args
+  * @param {?web-activities/activity-ports.ActivityOpenOptions=} opt_options
+  * @return {{targetWin: ?Window}}
+  */
+  open(requestId, url, target, opt_args, opt_options) {
+    return this.activityPorts_.open(
+        requestId, url, target, opt_args, opt_options);
+  }
+
+ /**
+  * Registers the callback for the result of the activity opened with the
+  * specified `requestId` (see the `open()` method). The callback is a
+  * function that takes a single `ActivityPort` argument. The client
+  * can use this object to verify the port using it's origin, verified and
+  * secure channel flags. Then the client can call
+  * `ActivityPort.acceptResult()` method to accept the result.
+  *
+  * The activity result is handled via a separate callback because of a
+  * possible redirect. So use of direct callbacks and/or promises is not
+  * possible in that case.
+  *
+  * A typical implementation would look like:
+  * ```
+  * ports.onResult('request1', function(port) {
+  *   port.acceptResult().then(function(result) {
+  *     // Only verified origins are allowed.
+  *     if (result.origin == expectedOrigin &&
+  *         result.originVerified &&
+  *         result.secureChannel) {
+  *       handleResultForRequest1(result);
+  *     }
+  *   });
+  * })
+  *
+  * ports.open('request1', request1Url, '_blank');
+  * ```
+  *
+  * @param {string} requestId
+  * @param {function(!ActivityPortDef)} callback
+  */
+  onResult(requestId, callback) {
+    this.activityPorts_.onResult(requestId, port => {
+      callback(new ActivityPortDeprecated(port));
+    });
+  }
+
+ /**
+  * @param {function(!Error)} handler
+  */
+  onRedirectError(handler) {
+    this.activityPorts_.onRedirectError(handler);
   }
 
   /**
-   * @return {?AnalyticsContext}
+   * @return {!web-activities/activity-ports.ActivityPorts}
    */
-  getContext() {
-    return this.context_;
-  }
-
-  /**
-   * @param {!AnalyticsContext} value
-   */
-  setContext(value) {
-    this.context_ = value;
-  }
-
-  /**
-   * @return {?AnalyticsEvent}
-   */
-  getEvent() {
-    return this.event_;
-  }
-
-  /**
-   * @param {!AnalyticsEvent} value
-   */
-  setEvent(value) {
-    this.event_ = value;
-  }
-
-  /**
-   * @return {!Array}
-   */
-  toArray() {
-    return [
-      'AnalyticsRequest',  // message type
-      this.context_ ? this.context_.toArray() : [], // field 1 - context
-      this.event_,  // field 2 - event
-    ];
+  getOriginalWebActivityPorts() {
+    return this.activityPorts_;
   }
 }
 
@@ -2620,7 +3118,7 @@ function removeChildren(parent) {
 
 /**
  * Injects the provided styles in the HEAD section of the document.
- * @param {*} doc The document object.
+ * @param {!../model/doc.Doc} doc The document object.
  * @param {string} styleText The style string.
  * @return {!Element}
  */
@@ -2719,6 +3217,466 @@ function msg(map, langOrElement) {
  * limitations under the License.
  */
 
+/* @const */
+const toString_ = Object.prototype.toString;
+
+/**
+ * Returns the ECMA [[Class]] of a value
+ * @param {*} value
+ * @return {string}
+ */
+function toString$1(value) {
+  return toString_.call(value);
+}
+
+/**
+ * Determines if value is actually an Object.
+ * @param {*} value
+ * @return {boolean}
+ */
+function isObject(value) {
+  return toString$1(value) === '[object Object]';
+}
+
+/**
+ * Checks whether `s` is a valid value of `enumObj`.
+ *
+ * @param {!Object<T>} enumObj
+ * @param {T} s
+ * @return {boolean}
+ * @template T
+ */
+function isEnumValue(enumObj, s) {
+  for (const k in enumObj) {
+    if (enumObj[k] === s) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * True if the value is a function.
+ * @param {*} value
+ */
+function isFunction(value) {
+  return value !== null && typeof value === 'function';
+}
+
+/**
+ * True if the value is either true or false.
+ * @param {?*} value
+ */
+function isBoolean(value) {
+  return value === true || value === false;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Cached a-tag to avoid memory allocation during URL parsing.
+ * @type {HTMLAnchorElement}
+ */
+let a;
+
+
+/**
+ * We cached all parsed URLs. As of now there are no use cases
+ * of AMP docs that would ever parse an actual large number of URLs,
+ * but we often parse the same one over and over again.
+ * @type {Object<string, !LocationDef>}
+ */
+let cache;
+
+/**
+ * Returns a Location-like object for the given URL. If it is relative,
+ * the URL gets resolved.
+ * Consider the returned object immutable. This is enforced during
+ * testing by freezing the object.
+ * @param {string} url
+ * @param {boolean=} opt_nocache
+ * @return {!LocationDef}
+ */
+function parseUrl$1(url, opt_nocache) {
+  if (!a) {
+    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
+    cache = self.UrlCache || (self.UrlCache = Object.create(null));
+  }
+
+  const fromCache = cache[url];
+  if (fromCache) {
+    return fromCache;
+  }
+
+  const info = parseUrlWithA(a, url);
+
+  return cache[url] = info;
+}
+
+/**
+ * Returns a Location-like object for the given URL. If it is relative,
+ * the URL gets resolved.
+ * @param {!HTMLAnchorElement} a
+ * @param {string} url
+ * @return {!LocationDef}
+ */
+function parseUrlWithA(a, url) {
+  a.href = url;
+
+  // IE11 doesn't provide full URL components when parsing relative URLs.
+  // Assigning to itself again does the trick.
+  if (!a.protocol) {
+    a.href = a.href;
+  }
+
+  /** @type {!LocationDef} */
+  const info = {
+    href: a.href,
+    protocol: a.protocol,
+    host: a.host,
+    hostname: a.hostname,
+    port: a.port == '0' ? '' : a.port,
+    pathname: a.pathname,
+    search: a.search,
+    hash: a.hash,
+    origin: '', // Set below.
+  };
+
+  // Some IE11 specific polyfills.
+  // 1) IE11 strips out the leading '/' in the pathname.
+  if (info.pathname[0] !== '/') {
+    info.pathname = '/' + info.pathname;
+  }
+
+  // 2) For URLs with implicit ports, IE11 parses to default ports while
+  // other browsers leave the port field empty.
+  if ((info.protocol == 'http:' && info.port == 80) ||
+      (info.protocol == 'https:' && info.port == 443)) {
+    info.port = '';
+    info.host = info.hostname;
+  }
+
+  // For data URI a.origin is equal to the string 'null' which is not useful.
+  // We instead return the actual origin which is the full URL.
+  if (a.origin && a.origin != 'null') {
+    info.origin = a.origin;
+  } else if (info.protocol == 'data:' || !info.host) {
+    info.origin = info.href;
+  } else {
+    info.origin = info.protocol + '//' + info.host;
+  }
+  return info;
+}
+
+
+/**
+ * Parses and builds Object of URL query string.
+ * @param {string} query The URL query string.
+ * @return {!Object<string, string>}
+ */
+function parseQueryString$1(query) {
+  if (!query) {
+    return {};
+  }
+  return (/^[?#]/.test(query) ? query.slice(1) : query)
+      .split('&')
+      .reduce((params, param) => {
+        const item = param.split('=');
+        const key = decodeURIComponent(item[0] || '');
+        const value = decodeURIComponent(item[1] || '');
+        if (key) {
+          params[key] = value;
+        }
+        return params;
+      }, {});
+}
+
+
+/**
+ * Adds a parameter to a query string.
+ * @param {string} url
+ * @param {string} param
+ * @param {string} value
+ * @return {string}
+ */
+function addQueryParam(url, param, value) {
+  const queryIndex = url.indexOf('?');
+  const fragmentIndex = url.indexOf('#');
+  let fragment = '';
+  if (fragmentIndex != -1) {
+    fragment = url.substring(fragmentIndex);
+    url = url.substring(0, fragmentIndex);
+  }
+  if (queryIndex == -1) {
+    url += '?';
+  } else if (queryIndex < url.length - 1) {
+    url += '&';
+  }
+  url += encodeURIComponent(param) + '=' + encodeURIComponent(value);
+  return url + fragment;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Have to put these in the map to avoid compiler optimization. Due to
+ * optimization issues, this map only allows property-style keys. E.g. "hr1",
+ * as opposed to "1hr".
+ * @type {!Object<string, number>}
+ * @package Visible for testing only.
+ */
+const CACHE_KEYS = {
+  'nocache': 1,
+  'hr1': 3600000,  // 1hr = 1000 * 60 * 60
+  'hr12': 43200000,  // 12hr = 1000 * 60 * 60 * 12
+};
+
+
+/**
+ * @return {string}
+ */
+function feOrigin() {
+  return parseUrl$1('https://news.google.com').origin;
+}
+
+
+/**
+ * @param {string} url Relative URL, e.g. "/service1".
+ * @return {string} The complete URL.
+ */
+function serviceUrl(url) {
+  return 'https://news.google.com/swg/_/api/v1' + url;
+}
+
+/**
+ * @param {string} url  Relative URL, e.g. "/service1".
+ * @return {string} The complete URL.
+ */
+function adsUrl(url) {
+  return 'https://pubads.g.doubleclick.net' + url;
+}
+
+/**
+ * @param {string} url Relative URL, e.g. "/offersiframe".
+ * @param {string=} prefix
+ * @return {string} The complete URL.
+ */
+function feUrl(url, prefix = '') {
+  return feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
+}
+
+
+/**
+ * @param {string} url FE URL.
+ * @return {string} The complete URL including cache params.
+ */
+function feCached(url) {
+  return addQueryParam(url, '_', cacheParam('hr1'));
+}
+
+
+/**
+ * @param {!Object<string, ?>} args
+ * @return {!Object<string, ?>}
+ */
+function feArgs(args) {
+  return Object.assign(args, {
+    '_client': 'SwG 0.1.22.59',
+  });
+}
+
+
+/**
+ * @param {string} cacheKey
+ * @return {string}
+ * @package Visible for testing only.
+ */
+function cacheParam(cacheKey) {
+  let period = CACHE_KEYS[cacheKey];
+  if (period == null) {
+    period = 1;
+  }
+  if (period === 0) {
+    return '_';
+  }
+  const now = Date.now();
+  return String(period <= 1 ? now : Math.floor(now / period));
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string, string>} */
+const iframeAttributes = {
+  'frameborder': '0',
+  'scrolling': 'no',
+};
+
+/**
+ * @enum {string}
+ */
+const Theme = {
+  LIGHT: 'light',
+  DARK: 'dark',
+};
+
+
+/**
+ * The class for Smart button Api.
+ */
+class SmartSubscriptionButtonApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   * @param {!Element} button
+   * @param {!../api/subscriptions.SmartButtonOptions} options
+   * @param {function()=} callback
+   */
+  constructor(deps, button, options, callback) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!Document} */
+    this.doc_ = this.win_.document;
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ =
+    /** @type {!HTMLIFrameElement} */ (
+        createElement(this.doc_, 'iframe', iframeAttributes));
+
+    /** @private @const {!Element} */
+    this.button_ = button;
+
+    /** @private {!../api/subscriptions.SmartButtonOptions} */
+    this.options_ = options;
+
+    /** @private const {function()=} */
+    this.callback_ = callback;
+
+    /** @private @const {string} */
+    this.src_ = feUrl('/smartboxiframe');
+
+    const frontendArguments = {
+      'productId': this.deps_.pageConfig().getProductId(),
+      'publicationId': this.deps_.pageConfig().getPublicationId(),
+      'theme': this.options_ && this.options_.theme || 'light',
+      'lang': this.options_ && this.options_.lang || 'en',
+    };
+    const messageTextColor = this.options_ && this.options_.messageTextColor;
+    if (messageTextColor) {
+      frontendArguments['messageTextColor'] = messageTextColor;
+    }
+
+    /** @private @const {!Object} */
+    this.args_ = feArgs(frontendArguments);
+  }
+
+  /**
+   * Make a call to build button content and listens for the 'click' message.
+   * @return {!Element}
+   */
+  start() {
+    /**
+     * Add a callback to the button itself to fire the iframe's button click
+     * action when user tabs to the container button and hits enter.
+     */
+    this.button_.addEventListener('click', () => {
+      this.callback_();
+    });
+
+    setImportantStyles(this.iframe_, {
+      'opacity': 1,
+      'position': 'absolute',
+      'top': 0,
+      'bottom': 0,
+      'left': 0,
+      'height': '100%',
+      'right': 0,
+      'width': '100%',
+    });
+    this.button_.appendChild(this.iframe_);
+    const analyticsContext = this.deps_.analytics().getContext().toArray();
+    this.args_['analyticsContext'] = analyticsContext;
+    this.activityPorts_.openIframe(this.iframe_, this.src_, this.args_)
+        .then(port => {
+          port.onMessageDeprecated(result => {
+            if (result['clicked']) {
+              if (!this.callback_) {
+                throw new Error('No callback!');
+              }
+              this.callback_();
+              return;
+            }
+          });
+        });
+    return this.iframe_;
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 /**
  * The button title should match that of button's SVG.
  */
@@ -2759,10 +3717,10 @@ const TITLE_LANG_MAP = {
 class ButtonApi {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    */
   constructor(doc) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
   }
 
@@ -2789,7 +3747,7 @@ class ButtonApi {
   }
 
   /**
-   * @param {!Object|function()} optionsOrCallback
+   * @param {!../api/subscriptions.ButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {!Element}
    */
@@ -2800,29 +3758,76 @@ class ButtonApi {
 
   /**
    * @param {!Element} button
-   * @param {!Object|function()} optionsOrCallback
+   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {!Element}
    */
   attach(button, optionsOrCallback, opt_callback) {
-    const options =
-        typeof optionsOrCallback != 'function' ?
-        optionsOrCallback : null;
-    const callback = /** @type {function()} */ (
-        (typeof optionsOrCallback == 'function' ? optionsOrCallback : null) ||
-            opt_callback);
-    let theme = options && options['theme'];
-    if (theme !== 'light' && theme !== 'dark') {
-      theme = 'light';
-    }
+    const options = /** @type {!../api/subscriptions.ButtonOptions} */
+        (this.getOptions_(optionsOrCallback));
+    const callback = this.getCallback_(optionsOrCallback, opt_callback);
+
+    const theme = options['theme'];
     button.classList.add(`swg-button-${theme}`);
     button.setAttribute('role', 'button');
-    if (options && options['lang']) {
+    if (options['lang']) {
       button.setAttribute('lang', options['lang']);
     }
     button.setAttribute('title', msg(TITLE_LANG_MAP, button) || '');
     button.addEventListener('click', callback);
     return button;
+  }
+
+  /**
+   *
+   * @param {../api/subscriptions.ButtonOptions|../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
+   * @return {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions}
+   * @private
+   */
+  getOptions_(optionsOrCallback) {
+    const options = /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */
+        (optionsOrCallback && typeof optionsOrCallback != 'function' ?
+        optionsOrCallback : {'theme': Theme.LIGHT});
+
+    const theme = options['theme'];
+    if (theme !== Theme.LIGHT && theme !== Theme.DARK) {
+      options['theme'] = Theme.LIGHT;
+    }
+    return options;
+  }
+
+  /**
+   *
+   * @param {?../api/subscriptions.ButtonOptions|?../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
+   * @param {function()=} opt_callback
+   * @return {function()|function(Event):boolean}
+   * @private
+   */
+  getCallback_(optionsOrCallback, opt_callback) {
+    const callback = /** @type {function()|function(Event):boolean} */ (
+      (typeof optionsOrCallback == 'function' ? optionsOrCallback : null) ||
+          opt_callback);
+    return callback;
+  }
+
+  /**
+   * @param {!./deps.DepsDef} deps
+   * @param {!Element} button
+   * @param {../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
+   * @param {function()=} opt_callback
+   * @return {!Element}
+   */
+  attachSmartButton(deps, button, optionsOrCallback, opt_callback) {
+    const options = /** @type {!../api/subscriptions.SmartButtonOptions} */
+        (this.getOptions_(optionsOrCallback));
+    const callback = /** @type {function()} */
+        (this.getCallback_(optionsOrCallback, opt_callback));
+
+    // Add required CSS class, if missing.
+    button.classList.add('swg-smart-button');
+
+    return new SmartSubscriptionButtonApi(
+        deps, button, options, callback).start();
   }
 }
 
@@ -2873,14 +3878,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise<*>)} callback
+   * @param {function(!Promise<!../api/entitlements.Entitlements>)} callback
    */
   setOnEntitlementsResponse(callback) {
     this.setCallback_(CallbackId.ENTITLEMENTS, callback);
   }
 
   /**
-   * @param {!Promise<*>} promise
+   * @param {!Promise<!../api/entitlements.Entitlements>} promise
    */
   triggerEntitlementsResponse(promise) {
     return this.trigger_(
@@ -2896,14 +3901,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(*)} callback
+   * @param {function(!../api/subscriptions.LoginRequest)} callback
    */
   setOnLoginRequest(callback) {
     this.setCallback_(CallbackId.LOGIN_REQUEST, callback);
   }
 
   /**
-   * @param {*} request
+   * @param {!../api/subscriptions.LoginRequest} request
    * @return {boolean} Whether the callback has been found.
    */
   triggerLoginRequest(request) {
@@ -2973,21 +3978,21 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise<*>)} callback
+   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
    */
   setOnSubscribeResponse(callback) {
     this.setCallback_(CallbackId.SUBSCRIBE_RESPONSE, callback);
   }
 
   /**
-   * @param {function(!Promise<*>)} callback
+   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
    */
   setOnContributionResponse(callback) {
     this.setCallback_(CallbackId.CONTRIBUTION_RESPONSE, callback);
   }
 
   /**
-   * @param {!Promise<*>} responsePromise
+   * @param {!Promise<!../api/subscribe-response.SubscribeResponse>} responsePromise
    * @return {boolean} Whether the callback has been found.
    */
   triggerSubscribeResponse(responsePromise) {
@@ -2997,7 +4002,7 @@ class Callbacks {
   }
 
   /**
-   * @param {!Promise<*>} responsePromise
+   * @param {!Promise<!../api/subscribe-response.SubscribeResponse>} responsePromise
    * @return {boolean} Whether the callback has been found.
    */
   triggerContributionResponse(responsePromise) {
@@ -3148,7 +4153,7 @@ class View {
   getElement() {}
 
   /**
-   * @param {*} unusedDialog
+   * @param {!./dialog.Dialog} unusedDialog
    * @return {!Promise}
    * @abstract
    */
@@ -3253,7 +4258,7 @@ class ErrorUtils {
 
 
 /**
- * @param {!web-activities/activity-ports.ActivityPort} port
+ * @param {!../components/activities.ActivityPortDef} port
  * @param {string} requireOrigin
  * @param {boolean} requireOriginVerified
  * @param {boolean} requireSecureChannel
@@ -3291,7 +4296,7 @@ function acceptPortResultData(
  */
 
 /** @const {!Object<string, string>} */
-const iframeAttributes = {
+const iframeAttributes$1 = {
   'frameborder': '0',
   'scrolling': 'no',
 };
@@ -3304,7 +4309,7 @@ class ActivityIframeView extends View {
 
   /**
    * @param {!Window} win
-   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   * @param {!../components/activities.ActivityPorts} activityPorts
    * @param {string} src
    * @param {!Object<string, ?>=} args
    * @param {boolean=} shouldFadeBody
@@ -3328,9 +4333,9 @@ class ActivityIframeView extends View {
     /** @private @const {!HTMLIFrameElement} */
     this.iframe_ =
         /** @type {!HTMLIFrameElement} */ (
-            createElement(this.doc_, 'iframe', iframeAttributes));
+            createElement(this.doc_, 'iframe', iframeAttributes$1));
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = activityPorts;
 
     /** @private @const {string} */
@@ -3345,7 +4350,7 @@ class ActivityIframeView extends View {
     /** @private @const {boolean} */
     this.hasLoadingIndicator_ = hasLoadingIndicator;
 
-    /** @private {?web-activities/activity-ports.ActivityIframePort} */
+    /** @private {?../components/activities.ActivityIframePort} */
     this.port_ = null;
 
     /**
@@ -3391,8 +4396,8 @@ class ActivityIframeView extends View {
   }
 
   /**
-   * @param {!web-activities/activity-ports.ActivityIframePort} port
-   * @param {*} dialog
+   * @param {!../components/activities.ActivityIframePort} port
+   * @param {!../components/dialog.Dialog} dialog
    * @return {!Promise}
    */
   onOpenIframeResponse_(port, dialog) {
@@ -3407,7 +4412,7 @@ class ActivityIframeView extends View {
   }
 
   /**
-   * @return {!Promise<!web-activities/activity-ports.ActivityIframePort>}
+   * @return {!Promise<!../components/activities.ActivityIframePort>}
    * @private
    */
   getPortPromise_() {
@@ -3417,9 +4422,9 @@ class ActivityIframeView extends View {
   /**
    * @param {!Object} data
    */
-  message(data) {
+  messageDeprecated(data) {
     this.getPortPromise_().then(port => {
-      port.message(data);
+      port.messageDeprecated(data);
     });
   }
 
@@ -3427,9 +4432,9 @@ class ActivityIframeView extends View {
    * Handles the message received by the port.
    * @param {function(!Object<string, string|boolean>)} callback
    */
-  onMessage(callback) {
+  onMessageDeprecated(callback) {
     this.getPortPromise_().then(port => {
-      port.onMessage(callback);
+      port.onMessageDeprecated(callback);
     });
   }
 
@@ -3580,22 +4585,6 @@ function base64UrlDecodeToBytes(str) {
   const encoded = atob(str.replace(/[-_.]/g, ch => base64UrlDecodeSubs[ch]));
   return stringToBytes(encoded);
 }
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -4298,40 +5287,66 @@ const Event = {
    * IMPRESSION_PAYWALL event.
    * User hits a paywall.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * If the user has run out of metering, and that’s why was shown
    * a paywall, that would be a passive impression of the paywall.
-   * For example; {‘is_active’: false}
+   * For example:
+   * const propensityEvent = {
+   *  name: 'paywall',
+   *  active: false,
+   * }
    */
   IMPRESSION_PAYWALL: 'paywall',
   /**
    * IMPRESSION_AD event.
    * User has been shown a subscription ad.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * The JSON block can provide the name of the subscription ad
    * creative or campaign. Ad impressions are usually passive.
-   * For example; {'name': 'fall_ad', 'is_active': false}
+   * const propensityEvent = {
+   *   name: 'ad_shown',
+   *   active: false,
+   *   data: {'ad_name': 'fall_ad'}
+   * }
    */
   IMPRESSION_AD: 'ad_shown',
   /**
    * IMPRESSION_OFFERS event.
    * User has been shown a list of available offers for subscription.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * The JSON block can provide a list of products displayed,
    * and the source to indicate why the user was shown the offer.
    * Note: source is not the same as referrer.
    * In the cases below, the user took action before seeing the offers,
    * and therefore considered active impression.
-   * For example; {'offers': ['basic-monthly', 'premium-weekly'],
-   *               'source': 'ad-click',
-                  ‘is_active’: true}
-   * For example; {‘offers’: [‘basic-monthly’, ‘premium-weekly’],
-   *              ‘source’: ‘navigate-to-offers-page’,
-   *              ‘is_active’: true}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: true,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': 'ad-click'}
+   * }
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: true,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': ‘navigate-to-offers-page’}
+   * }
    * If the user was shown the offers as a result of paywall metering
    * expiration, it is considered a passive impression.
-   * For example; {‘offers’: [‘basic-monthly’],
-   *               ‘source’: ‘paywall-metering-expired’,
-   *               ‘is_active’: false}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: false,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': ‘paywall-metering-expired’}
+   * }
    */
   IMPRESSION_OFFERS: 'offers_shown',
   /**
@@ -4352,17 +5367,30 @@ const Event = {
    *   or ACTION_PAYMENT_FLOW_STARTED depending on if that button
    *   took the user to a checkout page on the publishers site or
    *   directly started the payment flow).
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block with this event can provide additional information
    * such as the source, indicating what caused the user to navigate
    * to this page.
-   * For example; {‘source’: ‘marketing_via_email’}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'subscriptions_landing_page',
+   *   active: true,
+   *   data: {'source': 'marketing_via_email'}
+   * }
    */
   ACTION_SUBSCRIPTIONS_LANDING_PAGE: 'subscriptions_landing_page',
   /**
    * ACTION_OFFER_SELECTED event.
    * User has selected an offer.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product selected.
-   * For example; {'product': 'basic-monthly'}
+   * For example: {
+   *   name: 'offer_selected',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    * When offer selection starts the payment flow directly,
    * use the next event ACTION_PAYMENT_FLOW_STARTED instead.
    */
@@ -4370,21 +5398,46 @@ const Event = {
   /**
    * ACTION_PAYMENT_FLOW_STARTED event.
    * User has started payment flow.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product selected.
-   * For example; {'product': 'basic-monthly'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'payment_flow_started',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    */
   ACTION_PAYMENT_FLOW_STARTED: 'payment_flow_start',
   /**
    * ACTION_PAYMENT_COMPLETED.
    * User has made the payment for a subscription.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product user paid for.
-   * For example; {'product': 'basic-monthly'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'payment_complete',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    */
   ACTION_PAYMENT_COMPLETED: 'payment_complete',
   /**
    * EVENT_CUSTOM: custom publisher event.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false depending on if the event
+   * was generated as a result of a user action.
    * The JSON block can provide the event name for the custom event.
-   * For example; {'name': 'email_signup'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'custom',
+   *   active: true,
+   *   data: {
+   *     'event_name': 'social_share',
+   *     'platform_used': 'whatsapp'
+   *   }
+   *  }
    */
   EVENT_CUSTOM: 'custom',
 };
@@ -4482,267 +5535,6 @@ function defaultConfig() {
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-
-/**
- * Cached a-tag to avoid memory allocation during URL parsing.
- * @type {HTMLAnchorElement}
- */
-let a;
-
-
-/**
- * We cached all parsed URLs. As of now there are no use cases
- * of AMP docs that would ever parse an actual large number of URLs,
- * but we often parse the same one over and over again.
- * @type {Object<string, !LocationDef>}
- */
-let cache;
-
-/**
- * Returns a Location-like object for the given URL. If it is relative,
- * the URL gets resolved.
- * Consider the returned object immutable. This is enforced during
- * testing by freezing the object.
- * @param {string} url
- * @param {boolean=} opt_nocache
- * @return {!LocationDef}
- */
-function parseUrl$1(url, opt_nocache) {
-  if (!a) {
-    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.UrlCache || (self.UrlCache = Object.create(null));
-  }
-
-  const fromCache = cache[url];
-  if (fromCache) {
-    return fromCache;
-  }
-
-  const info = parseUrlWithA(a, url);
-
-  return cache[url] = info;
-}
-
-/**
- * Returns a Location-like object for the given URL. If it is relative,
- * the URL gets resolved.
- * @param {!HTMLAnchorElement} a
- * @param {string} url
- * @return {!LocationDef}
- */
-function parseUrlWithA(a, url) {
-  a.href = url;
-
-  // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  if (!a.protocol) {
-    a.href = a.href;
-  }
-
-  /** @type {!LocationDef} */
-  const info = {
-    href: a.href,
-    protocol: a.protocol,
-    host: a.host,
-    hostname: a.hostname,
-    port: a.port == '0' ? '' : a.port,
-    pathname: a.pathname,
-    search: a.search,
-    hash: a.hash,
-    origin: '', // Set below.
-  };
-
-  // Some IE11 specific polyfills.
-  // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname[0] !== '/') {
-    info.pathname = '/' + info.pathname;
-  }
-
-  // 2) For URLs with implicit ports, IE11 parses to default ports while
-  // other browsers leave the port field empty.
-  if ((info.protocol == 'http:' && info.port == 80) ||
-      (info.protocol == 'https:' && info.port == 443)) {
-    info.port = '';
-    info.host = info.hostname;
-  }
-
-  // For data URI a.origin is equal to the string 'null' which is not useful.
-  // We instead return the actual origin which is the full URL.
-  if (a.origin && a.origin != 'null') {
-    info.origin = a.origin;
-  } else if (info.protocol == 'data:' || !info.host) {
-    info.origin = info.href;
-  } else {
-    info.origin = info.protocol + '//' + info.host;
-  }
-  return info;
-}
-
-
-/**
- * Parses and builds Object of URL query string.
- * @param {string} query The URL query string.
- * @return {!Object<string, string>}
- */
-function parseQueryString$1(query) {
-  if (!query) {
-    return {};
-  }
-  return (/^[?#]/.test(query) ? query.slice(1) : query)
-      .split('&')
-      .reduce((params, param) => {
-        const item = param.split('=');
-        const key = decodeURIComponent(item[0] || '');
-        const value = decodeURIComponent(item[1] || '');
-        if (key) {
-          params[key] = value;
-        }
-        return params;
-      }, {});
-}
-
-
-/**
- * Adds a parameter to a query string.
- * @param {string} url
- * @param {string} param
- * @param {string} value
- * @return {string}
- */
-function addQueryParam(url, param, value) {
-  const queryIndex = url.indexOf('?');
-  const fragmentIndex = url.indexOf('#');
-  let fragment = '';
-  if (fragmentIndex != -1) {
-    fragment = url.substring(fragmentIndex);
-    url = url.substring(0, fragmentIndex);
-  }
-  if (queryIndex == -1) {
-    url += '?';
-  } else if (queryIndex < url.length - 1) {
-    url += '&';
-  }
-  url += encodeURIComponent(param) + '=' + encodeURIComponent(value);
-  return url + fragment;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Have to put these in the map to avoid compiler optimization. Due to
- * optimization issues, this map only allows property-style keys. E.g. "hr1",
- * as opposed to "1hr".
- * @type {!Object<string, number>}
- * @package Visible for testing only.
- */
-const CACHE_KEYS = {
-  'nocache': 1,
-  'hr1': 3600000,  // 1hr = 1000 * 60 * 60
-  'hr12': 43200000,  // 12hr = 1000 * 60 * 60 * 12
-};
-
-
-/**
- * @return {string}
- */
-function feOrigin() {
-  return parseUrl$1('https://news.google.com').origin;
-}
-
-
-/**
- * @param {string} url Relative URL, e.g. "/service1".
- * @return {string} The complete URL.
- */
-function serviceUrl(url) {
-  return 'https://news.google.com/swg/_/api/v1' + url;
-}
-
-/**
- * @param {string} url  Relative URL, e.g. "/service1".
- * @return {string} The complete URL.
- */
-function adsUrl(url) {
-  return 'https://pubads.g.doubleclick.net' + url;
-}
-
-/**
- * @param {string} url Relative URL, e.g. "/offersiframe".
- * @param {string=} prefix
- * @return {string} The complete URL.
- */
-function feUrl(url, prefix = '') {
-  return feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
-}
-
-
-/**
- * @param {string} url FE URL.
- * @return {string} The complete URL including cache params.
- */
-function feCached(url) {
-  return addQueryParam(url, '_', cacheParam('hr1'));
-}
-
-
-/**
- * @param {!Object<string, ?>} args
- * @return {!Object<string, ?>}
- */
-function feArgs(args) {
-  return Object.assign(args, {
-    '_client': 'SwG 0.1.22.49',
-  });
-}
-
-
-/**
- * @param {string} cacheKey
- * @return {string}
- * @package Visible for testing only.
- */
-function cacheParam(cacheKey) {
-  let period = CACHE_KEYS[cacheKey];
-  if (period == null) {
-    period = 1;
-  }
-  if (period === 0) {
-    return '_';
-  }
-  const now = Date.now();
-  return String(period <= 1 ? now : Math.floor(now / period));
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
  * The Flow goes like this:
  * a. Start Payments
@@ -4771,27 +5563,27 @@ const ReplaceSkuProrationModeMapping = {
  */
 class PayStartFlow {
   /**
-   * @param {*} deps
-   * @param {*} skuOrSubscriptionRequest
-   * @param {*} productType
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.SubscriptionRequest|string} skuOrSubscriptionRequest
+   * @param {!../api/subscriptions.ProductType} productType
    */
   constructor(
         deps,
         skuOrSubscriptionRequest,
         productType = ProductType.SUBSCRIPTION) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!./pay-client.PayClient} */
     this.payClient_ = deps.payClient();
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = deps.pageConfig();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.SubscriptionRequest} */
     this.subscriptionRequest_ =
         typeof skuOrSubscriptionRequest == 'string' ?
             {'skuId': skuOrSubscriptionRequest} : skuOrSubscriptionRequest;
@@ -4799,7 +5591,7 @@ class PayStartFlow {
     /**@private @const {!ProductType} */
     this.productType_ = productType;
 
-    /** @private @const {*} */
+    /** @private @const {!../runtime/analytics-service.AnalyticsService} */
     this.analyticsService_ = deps.analytics();
   }
 
@@ -4852,7 +5644,7 @@ class PayStartFlow {
 class PayCompleteFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
     deps.payClient().onResponse(payPromise => {
@@ -4876,19 +5668,19 @@ class PayCompleteFlow {
   }
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?ActivityIframeView} */
@@ -4900,7 +5692,7 @@ class PayCompleteFlow {
     /** @private {?Promise} */
     this.readyPromise_ = null;
 
-    /** @private @const {*} */
+    /** @private @const {!../runtime/analytics-service.AnalyticsService} */
     this.analyticsService_ = deps.analytics();
   }
 
@@ -4939,7 +5731,7 @@ class PayCompleteFlow {
         feUrl('/payconfirmiframe'),
         feArgs(args),
         /* shouldFadeBody */ true);
-    this.activityIframeView_.onMessage(data => {
+    this.activityIframeView_.onMessageDeprecated(data => {
       if (data['entitlements']) {
         this.deps_.entitlementsManager().pushNextEntitlements(
             /** @type {string} */ (data['entitlements']));
@@ -4961,7 +5753,7 @@ class PayCompleteFlow {
     this.analyticsService_.logEvent(AnalyticsEvent.ACTION_ACCOUNT_CREATED);
     this.deps_.entitlementsManager().unblockNextNotification();
     this.readyPromise_.then(() => {
-      this.activityIframeView_.message({'complete': true});
+      this.activityIframeView_.messageDeprecated({'complete': true});
     });
     return this.activityIframeView_.acceptResult().catch(() => {
       // Ignore errors.
@@ -4975,13 +5767,18 @@ class PayCompleteFlow {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {!Promise<!Object>} payPromise
  * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
  */
 function validatePayResponse(deps, payPromise, completeHandler) {
   return payPromise.then(data => {
+    // If there was a redirect, we may have lost our stored transaction
+    // ID. Pay service is supposed to send back the transaction ID that
+    // was sent in the request and so, ideally it should be the same.
+    // In any case, we must remember and use this transaction ID going
+    // forward and assume whatever memory we had before redirect is lost.
     if (typeof data == 'object' && data['googleTransactionId']) {
       deps.analytics().setTransactionId(data['googleTransactionId']);
     }
@@ -4991,7 +5788,7 @@ function validatePayResponse(deps, payPromise, completeHandler) {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {*} data
  * @param {function():!Promise} completeHandler
  * @return {!SubscribeResponse}
@@ -5068,9 +5865,9 @@ function parseUserData(swgData) {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {!Object} swgData
- * @return {*}
+ * @return {?../api/entitlements.Entitlements}
  * @package Visible for testing.
  */
 function parseEntitlements(deps, swgData) {
@@ -5113,23 +5910,23 @@ function parseSkuFromPurchaseDataSafe(purchaseData) {
 class ContributionsFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
    */
   constructor(deps, options) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
     this.options_ = options;
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     const isClosable = (options && options.isClosable) || true;
@@ -5164,7 +5961,7 @@ class ContributionsFlow {
     });
 
     // If result is due to OfferSelection, redirect to payments.
-    this.activityIframeView_.onMessage(result => {
+    this.activityIframeView_.onMessageDeprecated(result => {
       if (result['alreadyMember']) {
         this.deps_.callbacks().triggerLoginRequest({
           linkRequested: !!result['linkRequested'],
@@ -5209,20 +6006,20 @@ class ContributionsFlow {
 class DeferredAccountFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {?../api/deferred-account-creation.DeferredAccountCreationRequest} options
    */
   constructor(deps, options) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?ActivityIframeView} */
@@ -5231,12 +6028,12 @@ class DeferredAccountFlow {
     /** @private {?Promise} */
     this.openPromise_ = null;
 
-    /** @type {*} */
+    /** @type {!../api/deferred-account-creation.DeferredAccountCreationRequest} */
     const defaultOptions = {
       entitlements: null,
       consent: true,
     };
-    /** @private @const {*} */
+    /** @private @const {!../api/deferred-account-creation.DeferredAccountCreationRequest} */
     this.options_ = Object.assign(defaultOptions, options || {});
   }
 
@@ -5587,11 +6384,11 @@ function transition(el, props, durationMillis, curve) {
 class Graypane {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    * @param {number} zIndex
    */
   constructor(doc, zIndex) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private @const {!Element} */
@@ -5929,12 +6726,12 @@ class Dialog {
 
   /**
    * Create a dialog for the provided doc.
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    * @param {!Object<string, string|number>=} importantStyles
    * @param {!Object<string, string|number>=} styles
    */
   constructor(doc, importantStyles = {}, styles = {}) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private @const {!FriendlyIframe} */
@@ -5957,7 +6754,7 @@ class Dialog {
     /** @private {?Element} */
     this.container_ = null;  // Depends on constructed document inside iframe.
 
-    /** @private {*} */
+    /** @private {?./view.View} */
     this.view_ = null;
 
     /** @private {?Promise} */
@@ -5966,7 +6763,7 @@ class Dialog {
     /** @private {boolean} */
     this.hidden_ = false;
 
-    /** @private {*} */
+    /** @private {?./view.View} */
     this.previousProgressView_ = null;
   }
 
@@ -6105,14 +6902,14 @@ class Dialog {
     }
   }
 
-  /** @return {*} */
+  /** @return {?./view.View} */
   getCurrentView() {
     return this.view_;
   }
 
   /**
    * Opens the given view and removes existing view from the DOM if any.
-   * @param {*} view
+   * @param {!./view.View} view
    * @return {!Promise}
    */
   openView(view) {
@@ -6163,7 +6960,7 @@ class Dialog {
 
   /**
    * Resizes the dialog container.
-   * @param {*} view
+   * @param {!./view.View} view
    * @param {number} height
    * @param {boolean=} animated
    * @return {?Promise}
@@ -6349,10 +7146,10 @@ const POPUP_Z_INDEX = 2147483647;
 class DialogManager {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    */
   constructor(doc) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private {?Dialog} */
@@ -6391,7 +7188,7 @@ class DialogManager {
   }
 
   /**
-   * @param {*} view
+   * @param {!./view.View} view
    * @param {boolean=} hidden
    * @return {!Promise}
    */
@@ -6408,7 +7205,7 @@ class DialogManager {
   }
 
   /**
-   * @param {*} view
+   * @param {?./view.View} view
    */
   completeView(view) {
     // Give a small amount of time for another view to take over the dialog.
@@ -6482,7 +7279,7 @@ const toastImportantStyles = {
 };
 
 /** @const {!Object<string, string>} */
-const iframeAttributes$1 = {
+const iframeAttributes$2 = {
   'frameborder': '0',
   'scrolling': 'no',
   'class': 'swg-toast',
@@ -6494,16 +7291,16 @@ const iframeAttributes$1 = {
 class Toast {
 
   /**
-   * @param {*} deps
+   * @param {!../runtime/deps.DepsDef} deps
    * @param {string} src
    * @param {!Object<string, ?>} args
    */
   constructor(deps, src, args) {
 
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {string} */
@@ -6521,7 +7318,7 @@ class Toast {
             createElement(
                 this.doc_.getWin().document,
                 'iframe',
-                iframeAttributes$1));
+                iframeAttributes$2));
 
     setImportantStyles(this.iframe_, toastImportantStyles);
 
@@ -6644,24 +7441,24 @@ class EntitlementsManager {
 
   /**
    * @param {!Window} win
-   * @param {*} pageConfig
-   * @param {*} fetcher
-   * @param {*} deps
+   * @param {!../model/page-config.PageConfig} pageConfig
+   * @param {!./fetcher.Fetcher} fetcher
+   * @param {!./deps.DepsDef} deps
    */
   constructor(win, pageConfig, fetcher, deps) {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = pageConfig;
 
     /** @private @const {string} */
     this.publicationId_ = this.pageConfig_.getPublicationId();
 
-    /** @private @const {*} */
+    /** @private @const {!./fetcher.Fetcher} */
     this.fetcher_ = fetcher;
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!JwtHelper} */
@@ -6676,13 +7473,13 @@ class EntitlementsManager {
     /** @private {boolean} */
     this.blockNextNotification_ = false;
 
-    /** @private @const {*} */
+    /** @private @const {!./storage.Storage} */
     this.storage_ = deps.storage();
 
-    /** @private @const {*} */
+    /** @private @const {!../runtime/analytics-service.AnalyticsService} */
     this.analyticsService_ = deps.analytics();
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.Config} */
     this.config_ = deps.config();
   }
 
@@ -7093,6 +7890,23 @@ const ExperimentFlags = {
    * Enables the Propensity feature
    */
   PROPENSITY: 'propensity',
+
+  /**
+   * Enables the Smartbox feature.
+   */
+  SMARTBOX: 'smartbox',
+
+  /**
+   * Enables logging events logged through the propensity API to the analytics
+   * server.
+   */
+  LOG_PROPENSITY_TO_SWG: 'log-propensity-to-swg',
+
+  /**
+   * Enables logging user events generated by the SwG and AMP clients to the
+   * publishers propensity server.
+   */
+  LOG_SWG_TO_PROPENSITY: 'log_swg_to_propensity',
 };
 
 /**
@@ -7500,7 +8314,7 @@ class XhrFetcher {
 
   /** @override */
   fetchCredentialedJson(url) {
-    const init = /** @type {*} */ ({
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       headers: {'Accept': 'text/plain, application/json'},
       credentials: 'include',
@@ -7531,10 +8345,10 @@ class XhrFetcher {
 class JsError {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    */
   constructor(doc) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private @const {!Promise} */
@@ -7641,19 +8455,19 @@ const LINK_REQUEST_ID = 'swg-link';
 class LinkbackFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = deps.pageConfig();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
   }
 
@@ -7684,12 +8498,12 @@ class LinkbackFlow {
 class LinkCompleteFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
     /**
      * Handler function.
-     * @param {!web-activities/activity-ports.ActivityPort} port
+     * @param {!../components/activities.ActivityPortDef} port
      */
     function handler(port) {
       deps.entitlementsManager().blockNextNotification();
@@ -7712,23 +8526,23 @@ class LinkCompleteFlow {
   }
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {?Object} response
    */
   constructor(deps, response) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {*} */
+    /** @private @const {!./entitlements-manager.EntitlementsManager} */
     this.entitlementsManager_ = deps.entitlementsManager();
 
-    /** @private @const {*} */
+    /** @private @const {!./callbacks.Callbacks} */
     this.callbacks_ = deps.callbacks();
 
     const index = response && response['index'] || '0';
@@ -7804,26 +8618,26 @@ class LinkCompleteFlow {
 class LinkSaveFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} callback
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.SaveSubscriptionRequestCallback} callback
    */
   constructor(deps, callback) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private {*} */
+    /** @private {!../api/subscriptions.SaveSubscriptionRequestCallback} */
     this.callback_ = callback;
 
-    /** @private {?Promise<*>} */
+    /** @private {?Promise<!../api/subscriptions.SaveSubscriptionRequest>} */
     this.requestPromise_ = null;
 
     /** @private {?Promise} */
@@ -7834,7 +8648,7 @@ class LinkSaveFlow {
   }
 
   /**
-   * @return {?Promise<*>}
+   * @return {?Promise<!../api/subscriptions.SaveSubscriptionRequest>}
    * @package Visible for testing.
    */
   getRequestPromise() {
@@ -7899,7 +8713,7 @@ class LinkSaveFlow {
         /* shouldFadeBody */ false,
         /* hasLoadingIndicator */ true
     );
-    this.activityIframeView_.onMessage(data => {
+    this.activityIframeView_.onMessageDeprecated(data => {
       if (data['getLinkingInfo']) {
         this.requestPromise_ = new Promise(resolve => {
           resolve(this.callback_());
@@ -7916,7 +8730,7 @@ class LinkSaveFlow {
           } else {
             throw new Error('Neither token or authCode is available');
           }
-          this.activityIframeView_.message(saveRequest);
+          this.activityIframeView_.messageDeprecated(saveRequest);
         }).catch(reason => {
           // The flow is complete.
           this.complete_();
@@ -7967,19 +8781,19 @@ class LinkSaveFlow {
 
 class LoginPromptApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -8046,19 +8860,19 @@ class LoginPromptApi {
 
 class LoginNotificationApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -11296,8 +12110,8 @@ function payDecryptUrl() {
 class PayClient {
   /**
    * @param {!Window} win
-   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
-   * @param {*} dialogManager
+   * @param {!../components/activities.ActivityPorts} activityPorts
+   * @param {!../components/dialog-manager.DialogManager} dialogManager
    */
   constructor(win, activityPorts, dialogManager) {
     /** @const @private {!PayClientBindingDef} */
@@ -11308,7 +12122,7 @@ class PayClient {
   }
 
   /**
-   * @param {*} pre
+   * @param {!../utils/preconnect.Preconnect} pre
    */
   preconnect(pre) {
     pre.prefetch(payUrl());
@@ -11351,15 +12165,15 @@ class PayClient {
 class PayClientBindingSwg {
   /**
    * @param {!Window} win
-   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
-   * @param {*} dialogManager
+   * @param {!../components/activities.ActivityPorts} activityPorts
+   * @param {!../components/dialog-manager.DialogManager} dialogManager
    */
   constructor(win, activityPorts, dialogManager) {
     /** @private @const {!Window} */
     this.win_ = win;
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = activityPorts;
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = dialogManager;
   }
 
@@ -11390,7 +12204,7 @@ class PayClientBindingSwg {
   }
 
   /**
-   * @param {!web-activities/activity-ports.ActivityPort} port
+   * @param {!../components/activities.ActivityPortDef} port
    * @return {!Promise<!Object>}
    * @private
    */
@@ -11405,7 +12219,7 @@ class PayClientBindingSwg {
         // Data is supplied as an encrypted blob.
         const xhr = new Xhr(this.win_);
         const url = payDecryptUrl();
-        const init = /** @type {*} */ ({
+        const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
           method: 'post',
           headers: {'Accept': 'text/plain, application/json'},
           credentials: 'include',
@@ -11437,12 +12251,12 @@ class PayClientBindingSwg {
 class PayClientBindingPayjs {
   /**
    * @param {!Window} win
-   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   * @param {!../components/activities.ActivityPorts} activityPorts
    */
   constructor(win, activityPorts) {
     /** @private @const {!Window} */
     this.win_ = win;
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = activityPorts;
 
     /** @private {?function(!Promise<!Object>)} */
@@ -11477,7 +12291,7 @@ class PayClientBindingPayjs {
         options,
         handler,
         /* useIframe */ false,
-        this.activityPorts_);
+        this.activityPorts_.getOriginalWebActivityPorts());
   }
 
   /** @override */
@@ -11744,20 +12558,20 @@ function setInternalParam(paymentRequest, param, value) {
 
 class WaitForSubscriptionLookupApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {?Promise} accountPromise
    */
   constructor(deps, accountPromise) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -11819,20 +12633,20 @@ class WaitForSubscriptionLookupApi {
 class OffersApi {
 
   /**
-   * @param {*} config
-   * @param {*} fetcher
+   * @param {!../model/page-config.PageConfig} config
+   * @param {!./fetcher.Fetcher} fetcher
    */
   constructor(config, fetcher) {
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.config_ = config;
 
-    /** @private @const {*} */
+    /** @private @const {!./fetcher.Fetcher} */
     this.fetcher_ = fetcher;
   }
 
   /**
    * @param {string=} opt_productId
-   * @return {!Promise<!Array<*>>}
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
    */
   getOffers(opt_productId) {
     const productId = opt_productId || this.config_.getProductId();
@@ -11844,7 +12658,7 @@ class OffersApi {
 
   /**
    * @param {string} productId
-   * @return {!Promise<!Array<*>>}
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
    * @private
    */
   fetch_(productId) {
@@ -11888,20 +12702,20 @@ const OFFERS_VIEW_CLOSABLE = true;
 class OffersFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
    */
   constructor(deps, options) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     let isClosable = options && options.isClosable;
@@ -11940,7 +12754,7 @@ class OffersFlow {
     });
 
     // If result is due to OfferSelection, redirect to payments.
-    this.activityIframeView_.onMessage(result => {
+    this.activityIframeView_.onMessageDeprecated(result => {
       if (result['alreadySubscribed']) {
         this.deps_.callbacks().triggerLoginRequest({
           linkRequested: !!result['linkRequested'],
@@ -11971,21 +12785,21 @@ class OffersFlow {
 class SubscribeOptionFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
    */
   constructor(deps, options) {
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
     this.options_ = options;
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!ActivityIframeView} */
@@ -12016,7 +12830,7 @@ class SubscribeOptionFlow {
           SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
     });
 
-    this.activityIframeView_.onMessage(data => {
+    this.activityIframeView_.onMessageDeprecated(data => {
       this.maybeOpenOffersFlow_(data);
     });
     this.activityIframeView_.acceptResult().then(result => {
@@ -12051,24 +12865,24 @@ class SubscribeOptionFlow {
 class AbbrvOfferFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest=} options
    */
   constructor(deps, options = {}) {
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
     this.options_ = options;
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!ActivityIframeView} */
@@ -12101,7 +12915,7 @@ class AbbrvOfferFlow {
     });
 
     // If the user is already subscribed, trigger login flow
-    this.activityIframeView_.onMessage(data => {
+    this.activityIframeView_.onMessageDeprecated(data => {
       if (data['alreadySubscribed']) {
         this.deps_.callbacks().triggerLoginRequest({
           linkRequested: !!data['linkRequested'],
@@ -12406,14 +13220,14 @@ const iframeStyles = {
 
 class AnalyticsService {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
 
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!HTMLIFrameElement} */
@@ -12445,6 +13259,18 @@ class AnalyticsService {
 
     /** @private {?Promise} */
     this.lastAction_ = null;
+
+    /** @private @const {!../api/client-event-manager-api.ClientEventManagerApi} */
+    this.eventManager_ = deps.eventManager();
+    this.eventManager_.registerEventListener(
+        this.handleClientEvent_.bind(this));
+
+    /** @private @const {!boolean} */
+    this.logPropensityExperiment_ = isExperimentOn(deps.win(),
+        ExperimentFlags.LOG_PROPENSITY_TO_SWG);
+
+    /** @private {!boolean} */
+    this.logPropensityConfig_ = false;
   }
 
   /**
@@ -12535,7 +13361,7 @@ class AnalyticsService {
   }
 
   /**
-   * @return {!Promise<!web-activities/activity-ports.ActivityIframePort>}
+   * @return {!Promise<!../components/activities.ActivityIframePort>}
    * @private
    */
   start_() {
@@ -12565,22 +13391,44 @@ class AnalyticsService {
   }
 
   /**
-   * @param {*} event
+   * @return {!AnalyticsContext}
+   */
+  getContext() {
+    return this.context_;
+  }
+
+  /**
+   * @param {!../api/client-event-manager-api.ClientEvent} event
    * @return {!AnalyticsRequest}
    */
   createLogRequest_(event) {
+    //ignore event.additionalParameters.  It may have data we shouldn't log
+    const meta = new AnalyticsEventMeta();
+    meta.setEventOriginator(event.eventOriginator);
+    meta.setIsFromUserAction(event.isFromUserAction);
+
     const request = new AnalyticsRequest();
-    request.setEvent(event);
+    request.setEvent(event.eventType);
     request.setContext(this.context_);
+    request.setMeta(meta);
     return request;
   }
 
   /**
-   * @param {*} event
+   * This function can be used to log a buy-flow event from SwG.
+   * It exists as a helper and to ensure backwards compatability,
+   * you have additional parameters available if you call eventManager.logEvent
+   * directly.
+   * @param {!../proto/api_messages.AnalyticsEvent} eventTypeIn
+   * @param {!boolean=} isFromUserActionIn
    */
-  logEvent(event) {
-    this.lastAction_ = this.start_().then(port => {
-      port.message({'buf': this.createLogRequest_(event).toArray()});
+  logEvent(eventTypeIn, isFromUserActionIn) {
+    this.eventManager_.logEvent({
+      eventType: eventTypeIn,
+      eventOriginator: EventOriginator.SWG_CLIENT,
+      isFromUserAction: /** @type {?boolean} */
+          (isBoolean(isFromUserActionIn) ? isFromUserActionIn : null),
+      additionalParameters: null,
     });
   }
 
@@ -12590,8 +13438,26 @@ class AnalyticsService {
    */
   onMessage(callback) {
     this.lastAction_ = this.start_().then(port => {
-      port.onMessage(callback);
+      port.onMessageDeprecated(callback);
     });
+  }
+
+  /**
+   *  Listens for new events from the events manager and handles logging
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   */
+  handleClientEvent_(event) {
+    if (!(this.logPropensityExperiment_ && this.logPropensityConfig_)
+        && event.eventOriginator === EventOriginator.PROPENSITY_CLIENT) {
+      return;
+    }
+    this.lastAction_ = this.start_().then(port => {
+      port.messageDeprecated({'buf': this.createLogRequest_(event).toArray()});
+    });
+  }
+
+  enableLoggingForPropensity() {
+    this.logPropensityConfig_ = true;
   }
 }
 
@@ -12611,6 +13477,77 @@ class AnalyticsService {
  * limitations under the License.
  */
 
+/** @const {!Object<string,AnalyticsEvent>} */
+const PropensityEventToAnalyticsEvent = {
+  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
+  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
+  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
+  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+      AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
+  [Event.ACTION_PAYMENT_FLOW_STARTED]:
+      AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
+  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
+  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
+};
+
+/** @const {!Object<number,?Event>} */
+const AnalyticsEventToPropensityEvent = {
+  [AnalyticsEvent.UNKNOWN]: null,
+  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
+  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
+  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
+  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
+  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
+  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
+  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
+  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+      Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
+      Event.ACTION_PAYMENT_FLOW_STARTED,
+  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
+  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
+  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
+};
+
+/**
+ * Converts a propensity event enum into an analytics event enum.
+ * @param {!Event|string} propensityEvent
+ * @returns {!AnalyticsEvent}
+ */
+function propensityEventToAnalyticsEvent(propensityEvent) {
+  return PropensityEventToAnalyticsEvent[propensityEvent];
+}
+/**
+ * Converts an analytics event enum into a propensity event enum.
+ * @param {!AnalyticsEvent} analyticsEvent
+ * @returns {?Event}
+ */
+function analyticsEventToPropensityEvent(analyticsEvent) {
+  return AnalyticsEventToPropensityEvent[analyticsEvent];
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
 /**
  * Implements interface to Propensity server
  */
@@ -12620,8 +13557,9 @@ class PropensityServer {
    * is available, publication ID is therefore used
    * in constructor for the server interface.
    * @param {string} publicationId
+   * @param {!../api/client-event-manager-api.ClientEventManagerApi} eventManager
    */
-  constructor(win, publicationId) {
+  constructor(win, publicationId, eventManager) {
     /** @private @const {!Window} */
     this.win_ = win;
     /** @private @const {string} */
@@ -12634,6 +13572,16 @@ class PropensityServer {
     this.xhr_ = new Xhr(win);
     /** @private @const {number} */
     this.version_ = 1;
+
+    eventManager.registerEventListener(this.handleClientEvent_.bind(this));
+
+    // TODO(mborof): b/133519525
+    /** @private @const {!boolean} */
+    this.logSwgEventsExperiment_ = isExperimentOn(win,
+        ExperimentFlags.LOG_SWG_TO_PROPENSITY);
+
+    /** @private {!boolean} */
+    this.logSwgEventsConfig_ = false;
   }
 
   /**
@@ -12679,7 +13627,7 @@ class PropensityServer {
    * @param {?string} entitlements
    */
   sendSubscriptionState(state, entitlements) {
-    const init = /** @type {*} */ ({
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       credentials: 'include',
     });
@@ -12700,9 +13648,10 @@ class PropensityServer {
   /**
    * @param {string} event
    * @param {?string} context
+   * @private
    */
-  sendEvent(event, context) {
-    const init = /** @type {*} */ ({
+  sendEvent_(event, context) {
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       credentials: 'include',
     });
@@ -12721,15 +13670,40 @@ class PropensityServer {
   }
 
   /**
+   *
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   */
+  handleClientEvent_(event) {
+    const propEvent = analyticsEventToPropensityEvent(event.eventType);
+    if (propEvent == null) {
+      return;
+    }
+    if (!(this.logSwgEventsExperiment_ && this.logSwgEventsConfig_)
+        && event.eventOriginator !== EventOriginator.PROPENSITY_CLIENT) {
+      return;
+    }
+    let additionalParameters = event.additionalParameters;
+
+    if (isBoolean(event.isFromUserAction)) {
+      if (!isObject(additionalParameters)) {
+        additionalParameters = {};
+      }
+      additionalParameters['is_active'] = event.isFromUserAction;
+    }
+    this.sendEvent_(propEvent,
+        JSON.stringify(/** @type {?JsonObject} */ (additionalParameters)));
+  }
+
+  /**
    * @param {JsonObject} response
-   * @return {*}
+   * @return {!../api/propensity-api.PropensityScore}
    */
   parsePropensityResponse_(response) {
     let defaultScore =
-        /** @type {*} */ ({});
+        /** @type {!../api/propensity-api.PropensityScore} */ ({});
     if (!response['header']) {
       defaultScore =
-        /** @type {*} */ ({
+        /** @type {!../api/propensity-api.PropensityScore} */ ({
           header: {ok: false},
           body: {result: 'No valid response'},
         });
@@ -12750,7 +13724,7 @@ class PropensityServer {
             value = result['error_message'];
           }
           defaultScore =
-            /** @type {*} */ ({
+            /** @type {!../api/propensity-api.PropensityScore} */ ({
               header: {ok: scoreStatus},
               body: {result: value},
             });
@@ -12759,14 +13733,14 @@ class PropensityServer {
       }
       if (!found) {
         const errorMessage = 'No score available for ' + this.publicationId_;
-        defaultScore = /** @type {*} */ ({
+        defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
           header: {ok: false},
           body: {result: errorMessage},
         });
       }
     } else {
       const errorMessage = response['error'];
-      defaultScore = /** @type {*} */ ({
+      defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
         header: {ok: false},
         body: {result: errorMessage},
       });
@@ -12776,11 +13750,11 @@ class PropensityServer {
   /**
    * @param {string} referrer
    * @param {string} type
-   * @return {*}
+   * @return {?Promise<../api/propensity-api.PropensityScore>}
    */
   getPropensity(referrer, type) {
     const clientId = this.getClientId_();
-    const init = /** @type {*} */ ({
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       credentials: 'include',
     });
@@ -12795,6 +13769,10 @@ class PropensityServer {
         .then(response => {
           return this.parsePropensityResponse_(response);
         });
+  }
+
+  enableLoggingSwgEvents() {
+    this.logSwgEventsConfig_ = true;
   }
 }
 
@@ -12821,14 +13799,18 @@ class Propensity {
 
   /**
    * @param {!Window} win
-   * @param {*} pageConfig
+   * @param {!../model/page-config.PageConfig} pageConfig
+   * @param {!../api/client-event-manager-api.ClientEventManagerApi} eventManager
    */
-  constructor(win, pageConfig) {
+  constructor(win, pageConfig, eventManager) {
     /** @private @const {!Window} */
     this.win_ = win;
     /** @private {PropensityServer} */
     this.propensityServer_ = new PropensityServer(win,
-        pageConfig.getPublicationId());
+        pageConfig.getPublicationId(), eventManager);
+
+    /** @private @const {!../api/client-event-manager-api.ClientEventManagerApi} */
+    this.eventManager_ = eventManager;
   }
 
   /** @override */
@@ -12842,7 +13824,13 @@ class Propensity {
       throw new Error('Entitlements must be provided for users with'
           + ' active or expired subscriptions');
     }
-    const entitlements = jsonEntitlements && JSON.stringify(jsonEntitlements);
+    if (jsonEntitlements && !isObject(jsonEntitlements)) {
+      throw new Error('Entitlements must be an Object');
+    }
+    let entitlements = null;
+    if (jsonEntitlements) {
+      entitlements = JSON.stringify(jsonEntitlements);
+    }
     this.propensityServer_.sendSubscriptionState(state, entitlements);
   }
 
@@ -12859,14 +13847,233 @@ class Propensity {
   }
 
   /** @override */
-  sendEvent(userEvent, jsonParams) {
-    if (!Object.values(Event).includes(userEvent)) {
-      throw new Error('Invalid user event provided');
+  sendEvent(userEvent) {
+    const analyticsEvent = propensityEventToAnalyticsEvent(userEvent.name);
+    let data = null;
+    if (!isEnumValue(Event, userEvent.name)
+        || !analyticsEvent) {
+      throw new Error('Invalid user event provided(' + userEvent.name + ')');
     }
-    // TODO(sohanirao): drop the params for some events?
-    // TODO(sohanirao) : verify parameters for some events
-    const paramString = jsonParams && JSON.stringify(jsonParams);
-    this.propensityServer_.sendEvent(userEvent, paramString);
+
+    if (userEvent.data) {
+      if (!isObject(userEvent.data)) {
+        throw new Error('Event data must be an Object(' + userEvent.data + ')');
+      } else {
+        data = {};
+        Object.assign(data, userEvent.data);
+      }
+    }
+
+    if (isBoolean(userEvent.active)) {
+      if (!data) {
+        data = {};
+      }
+      Object.assign(data, {'is_active': userEvent.active});
+    } else if (userEvent.active != null) {
+      throw new Error('Event active must be a boolean');
+    }
+
+    this.eventManager_.logEvent({
+      eventType: analyticsEvent,
+      eventOriginator: EventOriginator.PROPENSITY_CLIENT,
+      isFromUserAction: userEvent.active,
+      additionalParameters: data,
+    });
+  }
+
+  /**
+   * Enables logging events generated by the Subscribe with Google codebase
+   * to the Propensity to Subscribe server.
+   */
+  enableLoggingSwgEvents() {
+    this.propensityServer_.enableLoggingSwgEvents();
+  }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number}  */
+const FilterResult = {
+  /** The event is allowed to proceed to the listeners. */
+  PROCESS_EVENT: 0,
+  /** The event is canceled and the listeners are not informed about it. */
+  CANCEL_EVENT: 1,
+};
+
+/**
+ * Defines a client event in SwG
+ * Properties:
+ * - eventType: Required. The AnalyticsEvent type that occurred.
+ * - eventOriginator: Required.  The codebase that initiated the event.
+ * - isFromUserAction: Optional.  True if the user took an action to generate
+ *   the event.
+ * - additionalParameters: Optional.  A JSON object to store generic data.
+ *
+ *  @typedef {{
+ *    eventType: !AnalyticsEvent,
+ *    eventOriginator: !EventOriginator,
+ *    isFromUserAction: ?boolean,
+ *    additionalParameters: ?Object,
+ * }}
+ */
+let ClientEvent;
+
+/**
+ * @interface
+ */
+class ClientEventManagerApi {
+  /**
+   * Call this function to log an event. The registered listeners will be
+   * invoked unless the event is filtered.
+   * @param {!function(!ClientEvent)} listener
+   */
+  registerEventListener(listener) { }
+
+  /**
+   * Register a filterer for events if you need to potentially prevent the
+   * listeners from hearing about it.  A filterer should return
+   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
+   * event.
+   * @param {!function(!ClientEvent):FilterResult} filterer
+   */
+  registerEventFilterer(filterer) { }
+
+  /**
+   * Call this function to log an event.  It will immediately throw an error if
+   * the event is invalid.  It will then asynchronously call the filterers and
+   * stop the event if a filterer cancels it.  After that, it will call each
+   * listener asynchronously.
+   * @param {!ClientEvent} event
+   */
+  logEvent(event) { }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Helper function to describe an issue with an event object
+ * @param {!string} valueName
+ * @param {?*} value
+ * @returns {!string}
+ */
+function createEventErrorMessage(valueName, value) {
+  return 'Event has an invalid ' + valueName + '(' + value + ')';
+}
+
+/**
+ * Throws an error if the event is invalid.
+ * @param {!../api/client-event-manager-api.ClientEvent} event
+ */
+function validateEvent(event) {
+  if (!isObject(event)) {
+    throw new Error('Event must be a valid object');
+  }
+
+  if (!isEnumValue(AnalyticsEvent, event.eventType)) {
+    throw new Error(createEventErrorMessage('eventType', event.eventType));
+  }
+
+  if (!isEnumValue(EventOriginator, event.eventOriginator)) {
+    throw new Error(createEventErrorMessage('eventOriginator',
+        event.eventOriginator));
+  }
+
+  if (!isObject(event.additionalParameters)
+      && event.additionalParameters != null) {
+    throw new Error(createEventErrorMessage('additionalParameters',
+        event.additionalParameters));
+  }
+
+  if (event.isFromUserAction != null && !isBoolean(event.isFromUserAction)) {
+    throw new Error(createEventErrorMessage('isFromUserAction',
+        event.isFromUserAction));
+  }
+}
+
+/** @implements {../api/client-event-manager-api.ClientEventManagerApi} */
+class ClientEventManager {
+  /**
+   *
+   * @param {!Promise} configuredPromise
+   */
+  constructor(configuredPromise) {
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent)>} */
+    this.listeners_ = [];
+
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent):!FilterResult>} */
+    this.filterers_ = [];
+
+    /** @private {?Promise} */
+    this.lastAction_ = null;
+
+    /** @private @const {!Promise} */
+    this.isReadyPromise_ = configuredPromise;
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventListener(listener) {
+    if (!isFunction(listener)) {
+      throw new Error('Event manager listeners must be a function');
+    }
+    this.listeners_.push(listener);
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventFilterer(filterer) {
+    if (!isFunction(filterer)) {
+      throw new Error('Event manager filterers must be a function');
+    }
+    this.filterers_.push(filterer);
+  }
+
+  /**
+   * @overrides
+   */
+  logEvent(event) {
+    validateEvent(event);
+    this.lastAction_ = this.isReadyPromise_.then(() => {
+      for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
+        if (this.filterers_[filterer](event) === FilterResult.CANCEL_EVENT) {
+          return Promise.resolve();
+        }
+      }
+      for (let listener = 0; listener < this.listeners_.length; listener++) {
+        this.listeners_[listener](event);
+      }
+      return Promise.resolve();
+    });
   }
 }
 
@@ -12894,21 +14101,27 @@ class ConfiguredRuntime {
 
   /**
    * @param {!Window|!Document|!Doc} winOrDoc
-   * @param {*} pageConfig
+   * @param {!../model/page-config.PageConfig} pageConfig
    * @param {{
    *     fetcher: (!Fetcher|undefined),
+   *     eventManager: (!ClientEventManager|undefined)
    *   }=} opt_integr
-   * @param {*} opt_config
+   * @param {!../api/subscriptions.Config=} opt_config
    */
   constructor(winOrDoc, pageConfig, opt_integr, opt_config) {
+    /** @private @const {!ClientEventManager} */
+    this.eventManager_ = (opt_integr && opt_integr.eventManager)
+        || new ClientEventManager(Promise.resolve());
+
     /** @private @const {!Doc} */
     this.doc_ = resolveDoc(winOrDoc);
 
     /** @private @const {!Window} */
     this.win_ = this.doc_.getWin();
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.Config} */
     this.config_ = defaultConfig();
+
     if (isEdgeBrowser$1(this.win_)) {
       // TODO(dvoytenko, b/120607343): Find a way to remove this restriction
       // or move it to Web Activities.
@@ -12918,8 +14131,12 @@ class ConfiguredRuntime {
       this.configure_(opt_config);
     }
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = pageConfig;
+
+    /** @private @const {!Propensity} */
+    this.propensityModule_ = new Propensity(this.win_,
+      this.pageConfig_, this.eventManager_);
 
     /** @private @const {!Promise} */
     this.documentParsed_ = this.doc_.whenReady();
@@ -12937,8 +14154,8 @@ class ConfiguredRuntime {
     /** @private @const {!DialogManager} */
     this.dialogManager_ = new DialogManager(this.doc_);
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = new activityPorts_1(this.win_);
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = new ActivityPorts$1(this.win_);
 
     /** @private @const {!PayClient} */
     this.payClient_ = new PayClient(
@@ -12947,6 +14164,10 @@ class ConfiguredRuntime {
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
 
+    //NOTE: 'this' is passed in as a DepsDef.  Do not pass in 'this' before
+    //analytics service and entitlements manager are constructed unless
+    //you are certain they do not rely on them because they are part of that
+    //definition.
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this);
 
@@ -12959,10 +14180,6 @@ class ConfiguredRuntime {
 
     /** @private @const {!ButtonApi} */
     this.buttonApi_ = new ButtonApi(this.doc_);
-
-    /** @private @const {!Propensity} */
-    this.propensityModule_ = new Propensity(this.win_,
-      this.pageConfig_);
 
     const preconnect = new Preconnect(this.win_.document);
 
@@ -13048,7 +14265,7 @@ class ConfiguredRuntime {
   }
 
   /**
-   * @param {*} config
+   * @param {!../api/subscriptions.Config} config
    * @private
    */
   configure_(config) {
@@ -13270,11 +14487,22 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  getPropensityModule() {
-    if (!isExperimentOn(this.win_, ExperimentFlags.PROPENSITY)) {
+  attachSmartButton(button, optionsOrCallback, opt_callback) {
+    if (!isExperimentOn(this.win_, ExperimentFlags.SMARTBOX)) {
       throw new Error('Not yet launched!');
     }
+    this.buttonApi_.attachSmartButton(
+        this, button, optionsOrCallback, opt_callback);
+  }
+
+  /** @override */
+  getPropensityModule() {
     return Promise.resolve(this.propensityModule_);
+  }
+
+  /** @override */
+  eventManager() {
+    return this.eventManager_;
   }
 }
 
@@ -13294,11 +14522,15 @@ class ConfiguredRuntime {
  * limitations under the License.
  */
 
-
 export {
   ConfiguredRuntime,
   Entitlements,
   Entitlement,
   Fetcher,
   SubscribeResponse,
+  ClientEventManagerApi,
+  ClientEvent,
+  FilterResult,
+  AnalyticsEvent,
+  EventOriginator,
 };

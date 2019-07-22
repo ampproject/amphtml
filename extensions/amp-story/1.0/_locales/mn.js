@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Холбоос авах',
   },
@@ -117,8 +120,9 @@ const strings = {
     string: 'Энэ хэрэглээг харахын тулд цонхоо өргөнөөр нь дэлгэнэ үү',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Та энэ контентыг харахын тулд amp түүхийн туршилтыг идэвхжүүлэх ' +
-        'ёстой.',
+    string:
+      'Та энэ контентыг харахын тулд amp түүхийн туршилтыг идэвхжүүлэх ' +
+      'ёстой.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Хуудсыг босоо горимд хамгийн их харсан',

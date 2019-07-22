@@ -17,8 +17,6 @@
 import {ChunkPriority, chunk} from './chunk';
 import {Services} from './services';
 import {dev} from './log';
-import {isExperimentOn} from './experiments';
-
 
 /** @const @enum {string} */
 export const AutoLightboxEvents = {
@@ -27,21 +25,21 @@ export const AutoLightboxEvents = {
   NEWLY_SET: 'amp-auto-lightbox:newly-set',
 };
 
-
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installAutoLightboxExtension(ampdoc) {
-  const {win} = ampdoc;
-  if (!isExperimentOn(win, 'amp-auto-lightbox')) {
-    return;
-  }
-  chunk(ampdoc, () => {
-    Services.extensionsFor(win)
-        .installExtensionForDoc(ampdoc, 'amp-auto-lightbox');
-  }, ChunkPriority.LOW);
+  chunk(
+    ampdoc,
+    () => {
+      Services.extensionsFor(ampdoc.win).installExtensionForDoc(
+        ampdoc,
+        'amp-auto-lightbox'
+      );
+    },
+    ChunkPriority.LOW
+  );
 }
-
 
 /**
  * @param {!Element} element
@@ -55,16 +53,22 @@ export function isActionableByTap(element) {
     return true;
   }
   const action = Services.actionServiceForDoc(element);
-  const hasTapAction = action.hasResolvableAction(element, 'tap',
-      dev().assertElement(element.parentElement));
+  const hasTapAction = action.hasResolvableAction(
+    element,
+    'tap',
+    dev().assertElement(element.parentElement)
+  );
   if (hasTapAction) {
     return true;
   }
   const actionables = element.querySelectorAll('[on]');
   for (let i = 0; i < actionables.length; i++) {
     const actionable = actionables[i];
-    const hasTapAction = action.hasResolvableAction(actionable, 'tap',
-        dev().assertElement(actionable.parentElement));
+    const hasTapAction = action.hasResolvableAction(
+      actionable,
+      'tap',
+      dev().assertElement(actionable.parentElement)
+    );
     if (hasTapAction) {
       return true;
     }

@@ -15,41 +15,76 @@
  */
 
 const colors = require('ansi-colors');
+const conf = require('../build.conf');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const gulpWatch = require('gulp-watch');
 const log = require('fancy-log');
-const {
-  buildAlp,
-  buildExaminer,
-  buildExperiments,
-  buildWebWorker,
-  compile,
-  compileJs,
-  enableLocalTesting,
-  endBuildStep,
-  hostname,
-  mkdirSync,
-  printConfigHelp,
-  toPromise,
-} = require('./helpers');
 const {
   buildExtensions,
   extensionAliasFilePath,
   getExtensionsToBuild,
   parseExtensionFlags,
 } = require('./extension-helpers');
+const {
+  closureNailgunPort,
+  startNailgunServer,
+  stopNailgunServer,
+} = require('./nailgun');
+const {
+  createModuleCompatibleES5Bundle,
+} = require('./create-module-compatible-es5-bundle');
+const {
+  WEB_PUSH_PUBLISHER_FILES,
+  WEB_PUSH_PUBLISHER_VERSIONS,
+  buildAlp,
+  buildExaminer,
+  buildWebWorker,
+  compileJs,
+  compileAllMinifiedTargets,
+  endBuildStep,
+  hostname,
+  mkdirSync,
+  printConfigHelp,
+  printNobuildHelp,
+  toPromise,
+} = require('./helpers');
+const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {cleanupBuildDir} = require('../compile/compile');
-const {closureNailgunPort, startNailgunServer, stopNailgunServer} = require('./nailgun');
 const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {createModuleCompatibleES5Bundle} = require('./create-module-compatible-es5-bundle');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
+
+const babel = require('@babel/core');
+const deglob = require('globs-to-files');
+
+function transferSrcsToTempDir() {
+  if (!isTravisBuild()) {
+    log('Transforming and executing JS files to', cyan(SRC_TEMP_DIR));
+  }
+  const files = deglob.sync(BABEL_SRC_GLOBS);
+  files.forEach(file => {
+    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
+      fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
+      return;
+    }
+
+    const {code} = babel.transformFileSync(file, {
+      plugins: conf.plugins({
+        isEsmBuild: argv.esm,
+        isForTesting: argv.fortesting,
+      }),
+      retainLines: true,
+      compact: false,
+    });
+    const name = `${SRC_TEMP_DIR}${file.replace(process.cwd(), '')}`;
+    fs.outputFileSync(name, code);
+  });
+}
 
 /**
  * Dist Build
@@ -59,7 +94,11 @@ async function dist() {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
+  printNobuildHelp();
   cleanupBuildDir();
+
+  await prebuild();
+
   if (argv.fortesting) {
     let cmd = 'gulp dist --fortesting';
     if (argv.single_pass) {
@@ -69,74 +108,145 @@ async function dist() {
   }
   if (argv.single_pass) {
     if (!isTravisBuild()) {
-      log(green('Building all AMP extensions in'), cyan('single_pass'),
-          green('mode.'));
+      log(
+        green('Building all AMP extensions in'),
+        cyan('single_pass'),
+        green('mode.')
+      );
     }
   } else {
     parseExtensionFlags();
   }
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
-      .then(async() => {
-        await startNailgunServer(closureNailgunPort, /* detached */ false);
-      })
-      .then(() => {
+    .then(async () => {
+      await startNailgunServer(closureNailgunPort, /* detached */ false);
+    })
+    .then(() => {
+      // Single pass has its own tmp directory processing. Only do this for
+      // multipass.
+      // We need to execute this after `compileCss` so that we can copy that
+      // over to the tmp directory.
+      if (!argv.single_pass) {
+        transferSrcsToTempDir();
+      }
+      return Promise.all([
+        compileAllMinifiedTargets(),
+        // NOTE: When adding a line here,
+        // consider whether you need to include polyfills
+        // and whether you need to init logging (initLogConstructor).
+        buildAlp({minify: true, watch: false}),
+        buildExaminer({minify: true, watch: false}),
+        buildWebWorker({minify: true, watch: false}),
+        buildExtensions({minify: true, watch: false}),
+        buildExperiments({minify: true, watch: false}),
+        buildLoginDone('0.1', {minify: true, watch: false}),
+        buildWebPushPublisherFiles({minify: true, watch: false}).then(
+          postBuildWebPushPublisherFilesVersion
+        ),
+        copyCss(),
+      ]);
+    })
+    .then(() => {
+      if (isTravisBuild()) {
+        // New line after all the compilation progress dots on Travis.
+        console.log('\n');
+      }
+    })
+    .then(async () => {
+      await stopNailgunServer(closureNailgunPort);
+    })
+    .then(() => {
+      return copyAliasExtensions();
+    })
+    .then(() => {
+      if (argv.esm) {
         return Promise.all([
-          compile(false, true, true),
-          // NOTE: When adding a line here,
-          // consider whether you need to include polyfills
-          // and whether you need to init logging (initLogConstructor).
-          buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildExaminer({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildWebWorker({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
-          buildExperiments({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildLoginDone({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildWebPushPublisherFiles({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          copyCss(),
+          createModuleCompatibleES5Bundle('v0.js'),
+          createModuleCompatibleES5Bundle('amp4ads-v0.js'),
+          createModuleCompatibleES5Bundle('shadow-v0.js'),
         ]);
-      }).then(() => {
-        if (isTravisBuild()) {
-          // New line after all the compilation progress dots on Travis.
-          console.log('\n');
-        }
-      }).then(async() => {
-        await stopNailgunServer(closureNailgunPort);
-      }).then(() => {
-        return copyAliasExtensions();
-      }).then(() => {
-        if (argv.fortesting) {
-          return Promise.all([
-            enableLocalTesting('dist/v0.js'),
-            enableLocalTesting('dist/amp4ads-v0.js'),
-            enableLocalTesting('dist/shadow-v0.js'),
-          ]);
-          // TODO(#18934, erwinm): Re-enable when the ESM build is fixed.
-          // .then(() => {
-          //   if (!argv.single_pass) {
-          //     return enableLocalTesting('dist/v0-esm.js')
-          //   }
-          // });
-        }
-      }).then(() => {
-        if (argv.esm) {
-          return Promise.all([
-            createModuleCompatibleES5Bundle('v0.js'),
-            createModuleCompatibleES5Bundle('amp4ads-v0.js'),
-            createModuleCompatibleES5Bundle('shadow-v0.js'),
-          ]);
-        } else {
-          return Promise.resolve();
-        }
-      }).then(() => {
-        if (argv.fortesting) {
-          return enableLocalTesting('dist.3p/current-min/f.js');
-        }
-      }).then(() => exitCtrlcHandler(handlerProcess));
+      } else {
+        return Promise.resolve();
+      }
+    })
+    .then(() => {
+      return exitCtrlcHandler(handlerProcess);
+    });
+}
+
+/**
+ * Build AMP experiments.js.
+ *
+ * @param {!Object} options
+ */
+function buildExperiments(options) {
+  return compileJs(
+    './build/experiments/',
+    'experiments.max.js',
+    './dist.tools/experiments/',
+    {
+      watch: false,
+      minify: options.minify || argv.minify,
+      includePolyfills: true,
+      minifiedName: 'experiments.js',
+    }
+  );
+}
+
+/**
+ * Build amp-login-done-${version}.js file.
+ *
+ * @param {string} version
+ * @param {!Object} options
+ */
+function buildLoginDone(version, options) {
+  const buildDir = `build/all/amp-access-${version}/`;
+  const builtName = `amp-login-done-${version}.max.js`;
+  const minifiedName = `amp-login-done-${version}.js`;
+  const latestName = 'amp-login-done-latest.js';
+  return compileJs('./' + buildDir, builtName, './dist/v0/', {
+    watch: false,
+    includePolyfills: true,
+    minify: options.minify || argv.minify,
+    minifiedName,
+    latestName,
+    extraGlobs: [
+      buildDir + 'amp-login-done-0.1.max.js',
+      buildDir + 'amp-login-done-dialog.js',
+    ],
+  });
+}
+
+/**
+ * Build amp-web-push publisher files HTML page.
+ *
+ * @param {!Object} options
+ */
+function buildWebPushPublisherFiles(options) {
+  const distDir = 'dist/v0';
+  const promises = [];
+  WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
+    WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
+      const tempBuildDir = `build/all/amp-web-push-${version}/`;
+      const builtName = fileName + '.js';
+      const minifiedName = fileName + '.js';
+      const p = compileJs('./' + tempBuildDir, builtName, './' + distDir, {
+        watch: options.watch,
+        includePolyfills: true,
+        minify: options.minify || argv.minify,
+        minifiedName,
+        extraGlobs: [tempBuildDir + '*.js'],
+      });
+      promises.push(p);
+    });
+  });
+  return Promise.all(promises);
+}
+
+async function prebuild() {
+  await preBuildExperiments();
+  await preBuildLoginDone();
+  await preBuildWebPushPublisherFiles();
 }
 
 /**
@@ -150,11 +260,13 @@ function copyCss() {
     fs.copySync(`build/css/${outCss}`, `dist/${outCss}`);
   });
 
-  return toPromise(gulp.src('build/css/amp-*.css', {base: 'build/css/'})
-      .pipe(gulp.dest('dist/v0')))
-      .then(() => {
-        endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
-      });
+  return toPromise(
+    gulp
+      .src('build/css/amp-*.css', {base: 'build/css/'})
+      .pipe(gulp.dest('dist/v0'))
+  ).then(() => {
+    endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
+  });
 }
 
 /**
@@ -169,12 +281,16 @@ function copyAliasExtensions() {
   const extensionsToBuild = getExtensionsToBuild();
 
   for (const key in extensionAliasFilePath) {
-    if (extensionsToBuild.length > 0 &&
-        extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1) {
+    if (
+      extensionsToBuild.length > 0 &&
+      extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1
+    ) {
       continue;
     }
-    fs.copySync('dist/v0/' + extensionAliasFilePath[key]['file'],
-        'dist/v0/' + key);
+    fs.copySync(
+      'dist/v0/' + extensionAliasFilePath[key]['file'],
+      'dist/v0/' + key
+    );
   }
 
   return Promise.resolve();
@@ -183,134 +299,119 @@ function copyAliasExtensions() {
 /**
  * Build amp-web-push publisher files HTML page.
  *
- * @param {!Object} options
+ * @return {!Promise<!Array>}
  */
-function buildWebPushPublisherFiles(options) {
-  return buildWebPushPublisherFilesVersion('0.1', options);
-}
-
-/**
- * Build amp-web-push publisher files HTML page.
- *
- * @param {string} version
- * @param {!Object} options
- */
-function buildWebPushPublisherFilesVersion(version, options) {
-  options = options || {};
-  const {watch} = options;
-  const fileNames =
-      ['amp-web-push-helper-frame', 'amp-web-push-permission-dialog'];
-  const promises = [];
-
+async function preBuildWebPushPublisherFiles() {
   mkdirSync('dist');
   mkdirSync('dist/v0');
+  const promises = [];
 
-  for (let i = 0; i < fileNames.length; i++) {
-    const fileName = fileNames[i];
-    promises.push(buildWebPushPublisherFile(version, fileName, watch, options));
-  }
+  WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
+    WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
+      const basePath = `extensions/amp-web-push/${version}/`;
+      const tempBuildDir = `build/all/amp-web-push-${version}/`;
 
+      // Build Helper Frame JS
+      const js = fs.readFileSync(basePath + fileName + '.js', 'utf8');
+      const builtName = fileName + '.js';
+      const promise = toPromise(
+        gulp
+          .src(basePath + '/*.js', {base: basePath})
+          .pipe(file(builtName, js))
+          .pipe(gulp.dest(tempBuildDir))
+      );
+      promises.push(promise);
+    });
+  });
   return Promise.all(promises);
 }
 
 /**
- * Build WebPushPublisher file
- *
- * @param {*} version
- * @param {string} fileName
- * @param {string} watch
- * @param {Object} options
- * @return {Promise}
+ * post Build amp-web-push publisher files HTML page.
  */
-function buildWebPushPublisherFile(version, fileName, watch, options) {
-  const basePath = `extensions/amp-web-push/${version}/`;
-  const tempBuildDir = `build/all/amp-web-push-${version}/`;
+function postBuildWebPushPublisherFilesVersion() {
   const distDir = 'dist/v0';
+  WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
+    const basePath = `extensions/amp-web-push/${version}/`;
+    WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
+      const minifiedName = fileName + '.js';
+      if (!fs.existsSync(distDir + '/' + minifiedName)) {
+        throw new Error(`Cannot find ${distDir}/${minifiedName}`);
+      }
 
-  // Build Helper Frame JS
-  const js = fs.readFileSync(basePath + fileName + '.js', 'utf8');
-  const builtName = fileName + '.js';
-  const minifiedName = fileName + '.js';
-  return toPromise(gulp.src(basePath + '/*.js', {base: '.'})
+      // Build Helper Frame HTML
+      let fileContents = fs.readFileSync(basePath + fileName + '.html', 'utf8');
+      fileContents = fileContents.replace(
+        '<!-- [GULP-MAGIC-REPLACE ' + fileName + '.js] -->',
+        '<script>' +
+          fs.readFileSync(distDir + '/' + minifiedName, 'utf8') +
+          '</script>'
+      );
+
+      fs.writeFileSync('dist/v0/' + fileName + '.html', fileContents);
+    });
+  });
+}
+
+/**
+ * Precompilation steps required to build experiment js binaries.
+ */
+async function preBuildExperiments() {
+  const path = 'tools/experiments';
+  const htmlPath = path + '/experiments.html';
+  const jsPath = path + '/experiments.js';
+
+  // Build HTML.
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const minHtml = html.replace(
+    '/dist.tools/experiments/experiments.js',
+    `https://${hostname}/v0/experiments.js`
+  );
+
+  await toPromise(
+    gulp
+      .src(htmlPath)
+      .pipe(file('experiments.cdn.html', minHtml))
+      .pipe(gulp.dest('dist.tools/experiments/'))
+  );
+
+  // Build JS.
+  const js = fs.readFileSync(jsPath, 'utf8');
+  const builtName = 'experiments.max.js';
+  return toPromise(
+    gulp
+      .src(path + '/*.js')
       .pipe(file(builtName, js))
-      .pipe(gulp.dest(tempBuildDir)))
-      .then(function() {
-        return compileJs('./' + tempBuildDir, builtName, './' + distDir, {
-          watch,
-          includePolyfills: true,
-          minify: options.minify || argv.minify,
-          minifiedName,
-          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
-          extraGlobs: [
-            tempBuildDir + '*.js',
-          ],
-        });
-      })
-      .then(function() {
-        if (fs.existsSync(distDir + '/' + minifiedName)) {
-          // Build Helper Frame HTML
-          let fileContents =
-              fs.readFileSync(basePath + fileName + '.html', 'utf8');
-          fileContents = fileContents.replace(
-              '<!-- [GULP-MAGIC-REPLACE ' + fileName + '.js] -->',
-              '<script>' + fs.readFileSync(distDir + '/' +
-              minifiedName, 'utf8') + '</script>'
-          );
-
-          fs.writeFileSync('dist/v0/' + fileName + '.html',
-              fileContents);
-        }
-      });
+      .pipe(gulp.dest('build/experiments/'))
+  );
 }
 
 /**
  * Build "Login Done" page.
- *
- * @param {!Object} options
+ * @return {!Promise}
  */
-async function buildLoginDone(options) {
-  return buildLoginDoneVersion('0.1', options);
+function preBuildLoginDone() {
+  return preBuildLoginDoneVersion('0.1');
 }
 
 /**
  * Build "Login Done" page for the specified version.
  *
  * @param {string} version
- * @param {!Object} options
+ * @return {!Promise}
  */
-async function buildLoginDoneVersion(version, options) {
-  options = options || {};
+function preBuildLoginDoneVersion(version) {
   const path = `extensions/amp-access/${version}/`;
   const buildDir = `build/all/amp-access-${version}/`;
   const htmlPath = path + 'amp-login-done.html';
   const jsPath = path + 'amp-login-done.js';
-  let {watch} = options;
-  if (watch === undefined) {
-    watch = argv.watch || argv.w;
-  }
-
-  // Building extensions is a 2 step process because of the renaming
-  // and CSS inlining. This watcher watches the original file, copies
-  // it to the destination and adds the CSS.
-  if (watch) {
-    // Do not set watchers again when we get called by the watcher.
-    const copy = Object.create(options);
-    copy.watch = false;
-    gulpWatch(path + '/*', function() {
-      buildLoginDoneVersion(version, copy);
-    });
-  }
 
   // Build HTML.
   const html = fs.readFileSync(htmlPath, 'utf8');
   const minJs = `https://${hostname}/v0/amp-login-done-${version}.js`;
   const minHtml = html
-      .replace(
-          `../../../dist/v0/amp-login-done-${version}.max.js`,
-          minJs)
-      .replace(
-          `../../../dist/v0/amp-login-done-${version}.js`,
-          minJs);
+    .replace(`../../../dist/v0/amp-login-done-${version}.max.js`, minJs)
+    .replace(`../../../dist/v0/amp-login-done-${version}.js`, minJs);
   if (minHtml.indexOf(minJs) == -1) {
     throw new Error('Failed to correctly set JS in login-done.html');
   }
@@ -318,54 +419,41 @@ async function buildLoginDoneVersion(version, options) {
   mkdirSync('dist');
   mkdirSync('dist/v0');
 
-  fs.writeFileSync('dist/v0/amp-login-done-' + version + '.html',
-      minHtml);
+  fs.writeFileSync('dist/v0/amp-login-done-' + version + '.html', minHtml);
 
   // Build JS.
   const js = fs.readFileSync(jsPath, 'utf8');
   const builtName = 'amp-login-done-' + version + '.max.js';
-  const minifiedName = 'amp-login-done-' + version + '.js';
-  const latestName = 'amp-login-done-latest.js';
-  return toPromise(gulp.src(path + '/*.js', {base: path})
+  return toPromise(
+    gulp
+      .src(path + '/*.js', {base: path})
       .pipe(file(builtName, js))
-      .pipe(gulp.dest(buildDir)))
-      .then(function() {
-        return compileJs('./' + buildDir, builtName, './dist/v0/', {
-          watch: false,
-          includePolyfills: true,
-          minify: options.minify || argv.minify,
-          minifiedName,
-          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
-          latestName,
-          extraGlobs: [
-            buildDir + 'amp-login-done-0.1.max.js',
-            buildDir + 'amp-login-done-dialog.js',
-          ],
-        });
-      });
+      .pipe(gulp.dest(buildDir))
+  );
 }
 
 module.exports = {
-  buildExperiments,
-  buildLoginDone,
   dist,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-buildExperiments.description = 'Builds experiments.html/js';
-buildLoginDone.description = 'Builds login-done.html/js';
 dist.description = 'Build production binaries';
 dist.flags = {
-  pseudo_names: '  Compiles with readable names. ' +
-          'Great for profiling and debugging production code.',
+  pseudo_names:
+    '  Compiles with readable names. ' +
+    'Great for profiling and debugging production code.',
+  pretty_print:
+    '  Outputs compiled code with whitespace. ' +
+    'Great for debugging production code.',
   fortesting: '  Compiles production binaries for local testing',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  single_pass: 'Compile AMP\'s primary JS bundles in a single invocation',
+  single_pass: "Compile AMP's primary JS bundles in a single invocation",
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',
-  single_pass_dest: '  The directory closure compiler will write out to ' +
-          'with --single_pass mode. The default directory is `dist`',
+  single_pass_dest:
+    '  The directory closure compiler will write out to ' +
+    'with --single_pass mode. The default directory is `dist`',
   full_sourcemaps: '  Includes source code content in sourcemaps',
 };

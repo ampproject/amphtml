@@ -57,10 +57,10 @@ const strings = {
     string: 'מידע נוסף על תוצאות AMP',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'יש להקיש על \'הבא\'',
+    string: "יש להקיש על 'הבא'",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'יש להקיש על \'הקודם\'',
+    string: "יש להקיש על 'הקודם'",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'החלקה למעלה',
@@ -82,6 +82,9 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+‎',
+  },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'לקבלת קישור',
@@ -120,7 +123,7 @@ const strings = {
     string: 'יש להפעיל את הניסוי של סטורי ב-AMP כדי להציג תוכן זה.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'לחוויית הצפייה הטובה ביותר בדף, יש להשתמש במצב \'הדגשת דיוקן\'',
+    string: "לחוויית הצפייה הטובה ביותר בדף, יש להשתמש במצב 'הדגשת דיוקן'",
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'לצערנו, נראה שהדפדפן שלך לא תומך בחוויה הזו',

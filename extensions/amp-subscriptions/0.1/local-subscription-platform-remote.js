@@ -15,12 +15,12 @@
  */
 
 import {Entitlement} from './entitlement';
-import {LocalSubscriptionBasePlatform}
-  from './local-subscription-platform-base';
+import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
 import {Services} from '../../../src/services';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {isArray} from '../../../src/types';
 
 /**
  * Implments the remotel local subscriptions platform which uses
@@ -28,9 +28,7 @@ import {dict} from '../../../src/utils/object';
  *
  * @implements {./subscription-platform.SubscriptionPlatform}
  */
-export class LocalSubscriptionRemotePlatform
-  extends LocalSubscriptionBasePlatform {
-
+export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatform {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
@@ -41,11 +39,11 @@ export class LocalSubscriptionRemotePlatform
 
     /** @private @const {string} */
     this.authorizationUrl_ = assertHttpsUrl(
-        userAssert(
-            this.serviceConfig_['authorizationUrl'],
-            'Service config does not have authorization Url'
-        ),
-        'Authorization Url'
+      userAssert(
+        this.serviceConfig_['authorizationUrl'],
+        'Service config does not have authorization Url'
+      ),
+      'Authorization Url'
     );
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
@@ -59,21 +57,23 @@ export class LocalSubscriptionRemotePlatform
 
   /** @override */
   getEntitlements() {
-    return this.urlBuilder_.buildUrl(this.authorizationUrl_,
-        /* useAuthData */ false)
-        .then(fetchUrl => {
-          const encryptedDocumentKey =
-              this.serviceAdapter_.getEncryptedDocumentKey('local');
-          if (encryptedDocumentKey) {
-            //TODO(chenshay): if crypt, switch to 'post'
-            fetchUrl = addParamToUrl(fetchUrl, 'crypt', encryptedDocumentKey);
-          }
-          return this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
-              .then(res => res.json())
-              .then(resJson => {
-                return Entitlement.parseFromJson(resJson);
-              });
-        });
+    return this.urlBuilder_
+      .buildUrl(this.authorizationUrl_, /* useAuthData */ false)
+      .then(fetchUrl => {
+        const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
+          'local'
+        );
+        if (encryptedDocumentKey) {
+          //TODO(chenshay): if crypt, switch to 'post'
+          fetchUrl = addParamToUrl(fetchUrl, 'crypt', encryptedDocumentKey);
+        }
+        return this.xhr_
+          .fetchJson(fetchUrl, {credentials: 'include'})
+          .then(res => res.json())
+          .then(resJson => {
+            return Entitlement.parseFromJson(resJson);
+          });
+      });
   }
 
   /** @override */
@@ -81,16 +81,37 @@ export class LocalSubscriptionRemotePlatform
     return !!this.pingbackUrl_;
   }
 
+  /**
+   * Format data for pingback
+   * @param {./entitlement.Entitlement|Array<./entitlement.Entitlement>} entitlements
+   * @return {string}
+   * @private
+   */
+  stringifyPingbackData_(entitlements) {
+    if (isArray(entitlements)) {
+      const entitlementArray = [];
+      entitlements.forEach(ent => {
+        entitlementArray.push(ent.jsonForPingback());
+      });
+      return JSON.stringify(entitlementArray);
+    }
+    return JSON.stringify(entitlements.jsonForPingback());
+  }
+
   /** @override */
   pingback(selectedEntitlement) {
     if (!this.isPingbackEnabled) {
       return;
     }
-    const pingbackUrl = /** @type {string} */ (devAssert(this.pingbackUrl_,
-        'pingbackUrl is null'));
+    const pingbackUrl = /** @type {string} */ (devAssert(
+      this.pingbackUrl_,
+      'pingbackUrl is null'
+    ));
 
-    const promise = this.urlBuilder_.buildUrl(pingbackUrl,
-        /* useAuthData */ true);
+    const promise = this.urlBuilder_.buildUrl(
+      pingbackUrl,
+      /* useAuthData */ true
+    );
     return promise.then(url => {
       // Content should be 'text/plain' to avoid CORS preflight.
       return this.xhr_.sendSignal(url, {
@@ -99,7 +120,7 @@ export class LocalSubscriptionRemotePlatform
         headers: dict({
           'Content-Type': 'text/plain',
         }),
-        body: JSON.stringify(selectedEntitlement.jsonForPingback()),
+        body: this.stringifyPingbackData_(selectedEntitlement),
       });
     });
   }

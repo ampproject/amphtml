@@ -21,11 +21,10 @@ import {
   getExistingAds,
 } from './ad-tracker';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
+import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {Services} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
-import {getAttributesFromConfigObj} from './attributes';
 import {getPlacementsFromConfigObj} from './placement';
-import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const */
@@ -34,14 +33,9 @@ const TAG = 'amp-auto-ads';
 /** @const */
 const AD_TAG = 'amp-ad';
 
-
 export class AmpAutoAds extends AMP.BaseElement {
-
   /** @override */
   buildCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-auto-ads'),
-        'Experiment is off');
-
     const type = this.element.getAttribute('type');
     userAssert(type, 'Missing type attribute');
 
@@ -53,39 +47,51 @@ export class AmpAutoAds extends AMP.BaseElement {
     }
 
     const ampdoc = this.getAmpDoc();
-    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
-        ampdoc, AD_TAG);
+    Services.extensionsFor(this.win)./*OK*/ installExtensionForDoc(
+      ampdoc,
+      AD_TAG
+    );
 
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     const whenVisible = viewer.whenFirstVisible();
 
-    whenVisible.then(() => {
-      return this.getConfig_(adNetwork.getConfigUrl());
-    }).then(configObj => {
-      if (!configObj) {
-        return;
-      }
-      const noConfigReason = configObj['noConfigReason'];
-      if (noConfigReason) {
-        this.user().warn(TAG, noConfigReason);
-        return;
-      }
+    whenVisible
+      .then(() => {
+        return this.getConfig_(adNetwork.getConfigUrl());
+      })
+      .then(configObj => {
+        if (!configObj) {
+          return;
+        }
+        const noConfigReason = configObj['noConfigReason'];
+        if (noConfigReason) {
+          this.user().warn(TAG, noConfigReason);
+          return;
+        }
 
-      const placements = getPlacementsFromConfigObj(ampdoc, configObj);
-      const attributes = /** @type {!JsonObject} */ (
-        Object.assign(adNetwork.getAttributes(),
-            getAttributesFromConfigObj(configObj)));
-      const sizing = adNetwork.getSizing();
-      const adConstraints = getAdConstraintsFromConfigObj(ampdoc, configObj) ||
+        const placements = getPlacementsFromConfigObj(ampdoc, configObj);
+        const attributes = /** @type {!JsonObject} */ (Object.assign(
+          adNetwork.getAttributes(),
+          getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
+        ));
+        const sizing = adNetwork.getSizing();
+        const adConstraints =
+          getAdConstraintsFromConfigObj(ampdoc, configObj) ||
           adNetwork.getDefaultAdConstraints();
-      const adTracker = new AdTracker(getExistingAds(ampdoc), adConstraints);
-      new AdStrategy(placements,
+        const adTracker = new AdTracker(getExistingAds(ampdoc), adConstraints);
+        new AdStrategy(
+          placements,
           attributes,
           sizing,
           adTracker,
-          adNetwork.isResponsiveEnabled()).run();
-      new AnchorAdStrategy(ampdoc, attributes, configObj).run();
-    });
+          adNetwork.isResponsiveEnabled()
+        ).run();
+        const stickyAdAttributes = /** @type {!JsonObject} */ (Object.assign(
+          attributes,
+          getAttributesFromConfigObj(configObj, Attributes.STICKY_AD_ATTRIBUTES)
+        ));
+        new AnchorAdStrategy(ampdoc, stickyAdAttributes, configObj).run();
+      });
   }
 
   /** @override */
@@ -106,19 +112,16 @@ export class AmpAutoAds extends AMP.BaseElement {
       mode: 'cors',
       method: 'GET',
       credentials: 'omit',
-      requireAmpResponseSourceOrigin: false,
     };
     return Services.xhrFor(this.win)
-        .fetchJson(configUrl, xhrInit)
-        .then(res => res.json())
-        .catch(reason => {
-          this.user().error(
-              TAG, 'amp-auto-ads config xhr failed: ' + reason);
-          return null;
-        });
+      .fetchJson(configUrl, xhrInit)
+      .then(res => res.json())
+      .catch(reason => {
+        this.user().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
+        return null;
+      });
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAutoAds);

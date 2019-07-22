@@ -32,7 +32,7 @@ const escape = 'Escape key';
 const questionMark = 'Question mark';
 const selectFocusedDate = 'Select the date in focus.';
 const moveFocusByOneDay =
-    'Move backward (left) and forward (right) by one day.';
+  'Move backward (left) and forward (right) by one day.';
 const moveFocusByOneWeek = 'Move backward (up) and forward (down) by one week.';
 const moveFocusByOneMonth = 'Switch months.';
 const moveFocustoStartAndEndOfWeek = 'Go to the first or last day of a week.';

@@ -22,14 +22,27 @@ const {
   ElementHandle: PuppeteerHandle, // eslint-disable-line no-unused-vars
 } = require('puppeteer');
 const {
-  ControllerPromise,
+  DOMRectDef,
   ElementHandle,
   FunctionalTestController, // eslint-disable-line no-unused-vars
+  Key,
 } = require('./functional-test-controller');
+const {ControllerPromise} = require('./controller-promise');
 const {dirname, join} = require('path');
 
-const KeysMapping = {
-  'ENTER': 'Enter',
+/**
+ * For a list of all possible key strings, see
+ * {@link https://github.com/GoogleChrome/puppeteer/blob/master/lib/USKeyboardLayout.js}
+ * @enum {string}
+ */
+const KeyToPuppeteerMap = {
+  [Key.ArrowDown]: 'ArrowDown',
+  [Key.ArrowLeft]: 'ArrowLeft',
+  [Key.ArrowRight]: 'ArrowRight',
+  [Key.ArrowUp]: 'ArrowUp',
+  [Key.Enter]: 'Enter',
+  [Key.Escape]: 'Escape',
+  [Key.Tab]: 'Tab',
 };
 
 const DEFAULT_WAIT_TIMEOUT = 10000;
@@ -46,20 +59,36 @@ const DEFAULT_WAIT_TIMEOUT = 10000;
  * @template T
  */
 async function waitFor(page, valueFn, args, condition, opt_mutate) {
-  let value = await evaluate(page, valueFn, ...args);
+  const handle = await evaluate(page, valueFn, ...args);
+  let value = await unboxHandle(handle);
   if (opt_mutate) {
     value = await opt_mutate(value);
   }
 
   while (!condition(value)) {
     const handle = await page.waitForFunction(
-        valueFn, {timeout: DEFAULT_WAIT_TIMEOUT}, ...args);
-    value = await handle.jsonValue();
+      valueFn,
+      {timeout: DEFAULT_WAIT_TIMEOUT},
+      ...args
+    );
+    value = await unboxHandle(handle);
     if (opt_mutate) {
       value = await opt_mutate(value);
     }
   }
   return value;
+}
+
+/**
+ * Remove the jsonValue wrapper from a PuppeteerHandle and
+ * remove an outer object wrapper if present.
+ * @param {!PuppeteerHandle} handle
+ * @return {T}
+ * @template T
+ */
+async function unboxHandle(handle) {
+  const prop = await handle.jsonValue();
+  return 'value' in prop ? prop.value : prop;
 }
 
 /**
@@ -129,7 +158,7 @@ class PuppeteerController {
    * @template T
    */
   getWaitFn_(valueFn, ...args) {
-    return async(condition, opt_mutate) => {
+    return async (condition, opt_mutate) => {
       const frame = await this.getCurrentFrame_();
       return waitFor(frame, valueFn, args, condition, opt_mutate);
     };
@@ -148,6 +177,17 @@ class PuppeteerController {
   }
 
   /**
+   * Gets the result of a value function which is boxed in an object.
+   * @param {*} fn
+   * @param  {...any} args
+   */
+  async evaluateValue_(fn, ...args) {
+    const value = await this.evaluate(fn, ...args);
+    const json = await value.jsonValue();
+    return json.value;
+  }
+
+  /**
    * @param {string} selector
    * @return {!Promise<!ElementHandle<!PuppeteerHandle>>}
    * @override
@@ -155,9 +195,14 @@ class PuppeteerController {
   async findElement(selector) {
     const frame = await this.getCurrentFrame_();
     const root = await this.getRoot_();
-    const jsHandle = await frame.waitForFunction((root, selector) => {
-      return root./*OK*/querySelector(selector);
-    }, {timeout: DEFAULT_WAIT_TIMEOUT}, root, selector);
+    const jsHandle = await frame.waitForFunction(
+      (root, selector) => {
+        return root./*OK*/ querySelector(selector);
+      },
+      {timeout: DEFAULT_WAIT_TIMEOUT},
+      root,
+      selector
+    );
     const elementHandle = jsHandle.asElement();
     return new ElementHandle(elementHandle);
   }
@@ -170,10 +215,15 @@ class PuppeteerController {
   async findElements(selector) {
     const frame = await this.getCurrentFrame_();
     const root = await this.getRoot_();
-    const nodeListHandle = await frame.waitForFunction((root, selector) => {
-      const nodeList = root./*OK*/querySelectorAll(selector);
-      return nodeList.length > 0 ? nodeList : null;
-    }, {timeout: DEFAULT_WAIT_TIMEOUT}, root, selector);
+    const nodeListHandle = await frame.waitForFunction(
+      (root, selector) => {
+        const nodeList = root./*OK*/ querySelectorAll(selector);
+        return nodeList.length > 0 ? Array.from(nodeList) : null;
+      },
+      {timeout: DEFAULT_WAIT_TIMEOUT},
+      root,
+      selector
+    );
 
     const lengthHandle = await nodeListHandle.getProperty('length');
     const length = await lengthHandle.jsonValue();
@@ -197,10 +247,15 @@ class PuppeteerController {
     const frame = await this.getCurrentFrame_();
 
     const root = await this.getRoot_();
-    const jsHandle = await frame.waitForFunction((xpath, root) => {
-      const results = window.queryXpath(xpath, root);
-      return results && results[0];
-    }, {timeout: DEFAULT_WAIT_TIMEOUT}, xpath, root);
+    const jsHandle = await frame.waitForFunction(
+      (xpath, root) => {
+        const results = window.queryXpath(xpath, root);
+        return results && results[0];
+      },
+      {timeout: DEFAULT_WAIT_TIMEOUT},
+      xpath,
+      root
+    );
     return new ElementHandle(jsHandle.asElement());
   }
 
@@ -215,9 +270,14 @@ class PuppeteerController {
     const frame = await this.getCurrentFrame_();
     const root = await this.getRoot_();
 
-    const arrayHandle = await frame.waitForFunction((xpath, root) => {
-      return window.queryXpath(xpath, root);
-    }, {timeout: DEFAULT_WAIT_TIMEOUT}, xpath, root);
+    const arrayHandle = await frame.waitForFunction(
+      (xpath, root) => {
+        return window.queryXpath(xpath, root);
+      },
+      {timeout: DEFAULT_WAIT_TIMEOUT},
+      xpath,
+      root
+    );
 
     const lengthHandle = await arrayHandle.getProperty('length');
     const length = await lengthHandle.jsonValue();
@@ -271,18 +331,16 @@ class PuppeteerController {
 
   /**
    * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @param {string} keys
+   * @param {string|Key} keys
    * @return {!Promise}
    * @override
    */
   async type(handle, keys) {
-    const frame = await this.getCurrentFrame_();
-    const targetElement = handle ?
-      handle.getElement() :
-      await frame.$(':focus');
+    const targetElement = handle
+      ? handle.getElement()
+      : (await this.getActiveElement()).getElement();
 
-
-    const key = KeysMapping[keys.toUpperCase()];
+    const key = KeyToPuppeteerMap[keys];
     if (key) {
       await targetElement.press(key);
       return;
@@ -298,10 +356,11 @@ class PuppeteerController {
    */
   getElementText(handle) {
     const element = handle.getElement();
-    const getter = element => element.textContent;
+    const getter = element => ({value: element./*OK*/ innerText.trim()});
     return new ControllerPromise(
-        this.evaluate(getter, element),
-        this.getWaitFn_(getter, element));
+      this.evaluateValue_(getter, element),
+      this.getWaitFn_(getter, element)
+    );
   }
 
   /**
@@ -313,11 +372,13 @@ class PuppeteerController {
   getElementCssValue(handle, styleProperty) {
     const element = handle.getElement();
     const getter = (element, styleProperty) => {
-      return window/*OK*/['getComputedStyle'](element)[styleProperty];
+      const value = window /*OK*/['getComputedStyle'](element)[styleProperty];
+      return {value};
     };
     return new ControllerPromise(
-        this.evaluate(getter, element, styleProperty),
-        this.getWaitFn_(getter, element, styleProperty));
+      this.evaluateValue_(getter, element, styleProperty),
+      this.getWaitFn_(getter, element, styleProperty)
+    );
   }
 
   /**
@@ -328,10 +389,13 @@ class PuppeteerController {
    */
   getElementAttribute(handle, attribute) {
     const element = handle.getElement();
-    const getter = (element, attribute) => element.getAttribute(attribute);
+    const getter = (element, attribute) => ({
+      value: element.getAttribute(attribute),
+    });
     return new ControllerPromise(
-        this.evaluate(getter, element, attribute),
-        this.getWaitFn_(getter, element, attribute));
+      this.evaluateValue_(getter, element, attribute),
+      this.getWaitFn_(getter, element, attribute)
+    );
   }
 
   /**
@@ -343,16 +407,22 @@ class PuppeteerController {
   getElementProperty(handle, property) {
     const element = handle.getElement();
     const getter = (element, property) => {
-      return element[property];
+      let value = element[property];
+      if (typeof value !== 'string' && typeof value.length === 'number') {
+        value = Array.from(value);
+      }
+
+      return {value};
     };
     return new ControllerPromise(
-        this.evaluate(getter, element, property),
-        this.getWaitFn_(getter, element, property));
+      this.evaluateValue_(getter, element, property),
+      this.getWaitFn_(getter, element, property)
+    );
   }
 
   /**
    * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @return {!Promise<!{x: number, y: number, height: number. width: number}>}
+   * @return {!Promise<!DOMRectDef>}
    * @override
    */
   getElementRect(handle) {
@@ -361,17 +431,31 @@ class PuppeteerController {
       // Extracting the values seems to perform better than returning
       // the raw ClientRect from the element, in terms of flakiness.
       // The raw ClientRect also has hundredths of a pixel. We round to int.
-      const {x, y, width, height} = element./*OK*/getBoundingClientRect();
+      const {
+        x,
+        y,
+        width,
+        height,
+        top,
+        bottom,
+        left,
+        right,
+      } = element./*OK*/ getBoundingClientRect();
       return {
         x: Math.round(x),
         y: Math.round(y),
         width: Math.round(width),
         height: Math.round(height),
+        top: Math.round(top),
+        bottom: Math.round(bottom),
+        left: Math.round(left),
+        right: Math.round(right),
       };
     };
     return new ControllerPromise(
-        this.evaluate(getter, element),
-        this.getWaitFn_(getter, element));
+      this.evaluate(getter, element).then(handle => handle.jsonValue()),
+      this.getWaitFn_(getter, element)
+    );
   }
 
   /**
@@ -380,13 +464,9 @@ class PuppeteerController {
    * @override
    */
   async setWindowRect(rect) {
-    const {
-      width,
-      height,
-    } = rect;
+    const {width, height} = rect;
     await this.resizeWindow_(width, height);
   }
-
 
   /**
    * Resize the window and the viewport. The `page.setViewport` method only
@@ -426,7 +506,7 @@ class PuppeteerController {
     });
     const chromePaddingWidth = outerWidth > 0 ? outerWidth - clientWidth : 0;
     const chromePaddingHeight =
-        outerHeight > 0 ? outerHeight - clientHeight : 0;
+      outerHeight > 0 ? outerHeight - clientHeight : 0;
 
     await page.setViewport({
       width: width + chromePaddingWidth,
@@ -435,27 +515,30 @@ class PuppeteerController {
     });
 
     // Any tab.
-    const {targetInfos: [{targetId}]} = await browser._connection.send(
-        'Target.getTargets');
+    const {
+      targetInfos: [{targetId}],
+    } = await browser._connection.send('Target.getTargets');
 
     // Tab window.
     try {
       const {windowId} = await browser._connection.send(
-          'Browser.getWindowForTarget', {targetId});
+        'Browser.getWindowForTarget',
+        {targetId}
+      );
 
       // Resize.
-      await browser._connection.send(
-          'Browser.setWindowBounds', {
-            bounds: {
-              width: width + chromePaddingWidth,
-              height: height + chromePaddingHeight,
-            },
-            windowId,
-          });
+      await browser._connection.send('Browser.setWindowBounds', {
+        bounds: {
+          width: width + chromePaddingWidth,
+          height: height + chromePaddingHeight,
+        },
+        windowId,
+      });
     } catch (e) {
       // Catch if we're in headless.
-      if (!e.toString().includes(
-          'Protocol error (Browser.getWindowForTarget)')) {
+      if (
+        !e.toString().includes('Protocol error (Browser.getWindowForTarget)')
+      ) {
         throw e;
       }
     }
@@ -466,8 +549,9 @@ class PuppeteerController {
    */
   getTitle() {
     const title = this.getCurrentFrame_().then(frame => frame.title());
-    return new ControllerPromise(
-        title, () => this.getCurrentFrame_().then(frame => frame.title()));
+    return new ControllerPromise(title, () =>
+      this.getCurrentFrame_().then(frame => frame.title())
+    );
   }
 
   /**
@@ -496,11 +580,15 @@ class PuppeteerController {
    * @return {!Promise}
    * @override
    */
-  async scroll(handle, opt_scrollToOptions) {
+  async scrollTo(handle, opt_scrollToOptions) {
     const element = handle.getElement();
-    await this.evaluate((element, opt_scrollToOptions) => {
-      element./*OK*/scrollTo(opt_scrollToOptions);
-    }, element, opt_scrollToOptions);
+    await this.evaluate(
+      (element, opt_scrollToOptions) => {
+        element./*OK*/ scrollTo(opt_scrollToOptions);
+      },
+      element,
+      opt_scrollToOptions
+    );
   }
 
   /**
@@ -511,9 +599,13 @@ class PuppeteerController {
    */
   async scrollBy(handle, opt_scrollToOptions) {
     const element = handle.getElement();
-    await this.evaluate((element, opt_scrollToOptions) => {
-      element./*OK*/scrollBy(opt_scrollToOptions);
-    }, element, opt_scrollToOptions);
+    await this.evaluate(
+      (element, opt_scrollToOptions) => {
+        element./*OK*/ scrollBy(opt_scrollToOptions);
+      },
+      element,
+      opt_scrollToOptions
+    );
   }
 
   /**

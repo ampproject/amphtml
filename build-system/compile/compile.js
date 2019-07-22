@@ -16,44 +16,76 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const del = require('del');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
-const rimraf = require('rimraf');
 const sourcemaps = require('gulp-sourcemaps');
-const {gulpClosureCompile, handleCompilerError, handleTypeCheckError} = require('./closure-compile');
+const {
+  gulpClosureCompile,
+  handleCompilerError,
+  handleTypeCheckError,
+} = require('./closure-compile');
+const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
-const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
+const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
+
+// There's a race in the gulp plugin of closure compiler that gets exposed
+// during slower compilation operations.
+// See https://github.com/google/closure-compiler-npm/issues/9
+const MAX_PARALLEL_CLOSURE_INVOCATIONS =
+  argv.pseudo_names || argv.full_sourcemaps ? 1 : 4;
+
+/**
+ * Prefixes the the tmp directory if we need to shadow files that have been
+ * preprocess by babel in the `dist` task.
+ *
+ * @param {!Array<string>} paths
+ * @return {!Array<string>}
+ */
+function convertPathsToTmpRoot(paths) {
+  return paths.map(path => {
+    const hasNegation = path.charAt(0) === '!';
+    const newPath = hasNegation ? path.substr(1) : path;
+    return `${hasNegation ? '!' : ''}${SRC_TEMP_DIR}/${newPath}`;
+    return path;
+  });
+}
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
-exports.closureCompile = async function(entryModuleFilename, outputDir,
-  outputFilename, options) {
+exports.closureCompile = async function(
+  entryModuleFilename,
+  outputDir,
+  outputFilename,
+  options
+) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function(resolve, reject) {
     function start() {
       inProgress++;
-      compile(entryModuleFilename, outputDir, outputFilename, options)
-          .then(function() {
-            if (isTravisBuild()) {
-              // Print a progress dot after each task to avoid Travis timeouts.
-              process.stdout.write('.');
-            }
-            inProgress--;
-            next();
-            resolve();
-          }, reason => reject(reason));
+      compile(entryModuleFilename, outputDir, outputFilename, options).then(
+        function() {
+          if (isTravisBuild()) {
+            // Print a progress dot after each task to avoid Travis timeouts.
+            process.stdout.write('.');
+          }
+          inProgress--;
+          next();
+          resolve();
+        },
+        reason => reject(reason)
+      );
     }
     function next() {
       if (!queue.length) {
@@ -69,8 +101,8 @@ exports.closureCompile = async function(entryModuleFilename, outputDir,
 };
 
 function cleanupBuildDir() {
-  rimraf.sync('build/fake-module');
-  rimraf.sync('build/patched-module');
+  del.sync('build/fake-module');
+  del.sync('build/patched-module');
   fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
@@ -87,14 +119,11 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/mustache/',
     'third_party/vega/',
     'third_party/webcomponentsjs/',
-    'third_party/rrule/',
     'third_party/react-dates/',
     'third_party/amp-toolbox-cache-url/',
     'third_party/inputmask/',
     'node_modules/',
     'build/patched-module/',
-    // Can't seem to suppress `(0, win.eval)` suspicious code warning
-    '3p/environment.js',
     // Generated code.
     'extensions/amp-access/0.1/access-expr-impl.js',
   ];
@@ -103,13 +132,12 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'build-system/dompurify.extern.js',
     'build-system/event-timing.extern.js',
     'build-system/layout-jank.extern.js',
-    'third_party/closure-compiler/externs/web_animations.js',
+    'build-system/performance-observer.extern.js',
+    'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
   ];
-  const define = [
-    `VERSION=${internalRuntimeVersion}`,
-  ];
+  const define = [`VERSION=${internalRuntimeVersion}`];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
@@ -129,7 +157,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       define.push('ESM_BUILD=true');
     }
 
-    console/*OK*/.assert(typeof entryModuleFilenames == 'string');
+    console /*OK*/
+      .assert(typeof entryModuleFilenames == 'string');
     return singlePassCompile(entryModuleFilenames, compilationOptions);
   }
 
@@ -141,11 +170,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       entryModuleFilename = entryModuleFilenames;
       entryModuleFilenames = [entryModuleFilename];
     }
-    // If undefined/null or false then we're ok executing the deletions
-    // and mkdir.
-    if (!options.preventRemoveAndMakeDir) {
-      cleanupBuildDir();
-    }
     const unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];
@@ -156,93 +180,12 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     let sourceMapBase = 'http://localhost:8000/';
     if (isProdBuild) {
       // Point sourcemap to fetch files from correct GitHub tag.
-      sourceMapBase = 'https://raw.githubusercontent.com/ampproject/amphtml/' +
-            internalRuntimeVersion + '/';
+      sourceMapBase =
+        'https://raw.githubusercontent.com/ampproject/amphtml/' +
+        internalRuntimeVersion +
+        '/';
     }
-    const srcs = [
-      '3p/3p.js',
-      // Ads config files.
-      'ads/_*.js',
-      'ads/alp/**/*.js',
-      'ads/google/**/*.js',
-      'ads/inabox/**/*.js',
-      // Files under build/. Should be sparse.
-      'build/css.js',
-      'build/*.css.js',
-      'build/fake-module/**/*.js',
-      'build/patched-module/**/*.js',
-      'build/experiments/**/*.js',
-      // A4A has these cross extension deps.
-      'extensions/amp-ad-network*/**/*-config.js',
-      'extensions/amp-ad/**/*.js',
-      'extensions/amp-a4a/**/*.js',
-      // Currently needed for crypto.js and visibility.js.
-      // Should consider refactoring.
-      'extensions/amp-analytics/**/*.js',
-      // Needed for WebAnimationService
-      'extensions/amp-animation/**/*.js',
-      // For amp-bind in the web worker (ww.js).
-      'extensions/amp-bind/**/*.js',
-      // Needed to access to Variant interface from other extensions
-      'extensions/amp-experiment/**/*.js',
-      // Needed to access form impl from other extensions
-      'extensions/amp-form/**/*.js',
-      // Needed to access inputmask impl from other extensions
-      'extensions/amp-inputmask/**/*.js',
-      // Needed for AccessService
-      'extensions/amp-access/**/*.js',
-      // Needed for AmpStoryVariableService
-      'extensions/amp-story/**/*.js',
-      // Needed for SubscriptionsService
-      'extensions/amp-subscriptions/**/*.js',
-      // Needed to access UserNotificationManager from other extensions
-      'extensions/amp-user-notification/**/*.js',
-      // Needed for VideoService
-      'extensions/amp-video-service/**/*.js',
-      // Needed to access ConsentPolicyManager from other extensions
-      'extensions/amp-consent/**/*.js',
-      // Needed to access AmpGeo type for service locator
-      'extensions/amp-geo/**/*.js',
-      // Needed for AmpViewerAssistanceService
-      'extensions/amp-viewer-assistance/**/*.js',
-      // Needed for AmpViewerIntegrationVariableService
-      'extensions/amp-viewer-integration/**/*.js',
-      // Needed for amp-smartlinks dep on amp-skimlinks
-      'extensions/amp-skimlinks/0.1/**/*.js',
-      'src/*.js',
-      'src/**/*.js',
-      '!third_party/babel/custom-babel-helpers.js',
-      // Exclude since it's not part of the runtime/extension binaries.
-      '!extensions/amp-access/0.1/amp-login-done.js',
-      'builtins/**.js',
-      'third_party/caja/html-sanitizer.js',
-      'third_party/closure-library/sha384-generated.js',
-      'third_party/css-escape/css-escape.js',
-      'third_party/mustache/**/*.js',
-      'third_party/timeagojs/**/*.js',
-      'third_party/vega/**/*.js',
-      'third_party/d3/**/*.js',
-      'third_party/subscriptions-project/*.js',
-      'third_party/webcomponentsjs/ShadowCSS.js',
-      'third_party/rrule/rrule.js',
-      'third_party/react-dates/bundle.js',
-      'third_party/amp-toolbox-cache-url/**/*.js',
-      'third_party/inputmask/**/*.js',
-      'node_modules/dompurify/dist/purify.es.js',
-      'node_modules/promise-pjs/promise.js',
-      'node_modules/set-dom/src/**/*.js',
-      'node_modules/web-animations-js/web-animations.install.js',
-      'node_modules/web-activities/activity-ports.js',
-      'node_modules/@ampproject/animations/dist/animations.mjs',
-      'node_modules/@ampproject/worker-dom/dist/' +
-          'unminified.index.safe.mjs.patched.js',
-      'node_modules/document-register-element/build/' +
-          'document-register-element.patched.js',
-      // 'node_modules/core-js/modules/**.js',
-      // Not sure what these files are, but they seem to duplicate code
-      // one level below and confuse the compiler.
-      '!node_modules/core-js/modules/library/**.js',
-    ];
+    const srcs = [...CLOSURE_SRC_GLOBS];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
@@ -257,9 +200,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       srcs.push.apply(srcs, options.extraGlobs);
     }
     if (options.include3pDirectories) {
-      srcs.push(
-          '3p/**/*.js',
-          'ads/**/*.js');
+      srcs.push('3p/**/*.js', 'ads/**/*.js');
     }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
@@ -271,42 +212,47 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         return p !== 'custom-elements.js';
       });
       srcs.push(
-          '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js',
-          '!build/fake-polyfills/src/polyfills.js',
-          'src/polyfills/custom-elements.js',
-          'build/fake-polyfills/**/*.js');
+        '!build/fake-module/src/polyfills.js',
+        '!build/fake-module/src/polyfills/**/*.js',
+        '!build/fake-polyfills/src/polyfills.js',
+        'src/polyfills/custom-elements.js',
+        'build/fake-polyfills/**/*.js'
+      );
       polyfillsShadowList.forEach(polyfillFile => {
         srcs.push(`!src/polyfills/${polyfillFile}`);
-        fs.writeFileSync('build/fake-polyfills/src/polyfills/' + polyfillFile,
-            'export function install() {}');
+        fs.writeFileSync(
+          'build/fake-polyfills/src/polyfills/' + polyfillFile,
+          'export function install() {}'
+        );
       });
     } else if (options.includePolyfills) {
       srcs.push(
-          '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js',
-          '!build/fake-polyfills/**/*.js',
+        '!build/fake-module/src/polyfills.js',
+        '!build/fake-module/src/polyfills/**/*.js',
+        '!build/fake-polyfills/**/*.js'
       );
     } else {
-      srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js',);
+      srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js');
       unneededFiles.push('build/fake-module/src/polyfills.js');
     }
     // Negative globstars must come at the end.
     srcs.push(
-        // Don't include rollup configs
-        '!**/rollup.config.js',
-        // Don't include tests.
-        '!**_test.js',
-        '!**/test-*.js',
-        '!**/test-e2e/*.js',
-        // Don't include externs.
-        '!**/*.extern.js',
+      // Don't include rollup configs
+      '!**/rollup.config.js',
+      // Don't include tests.
+      '!**_test.js',
+      '!**/test-*.js',
+      '!**/test-e2e/*.js',
+      // Don't include externs.
+      '!**/*.extern.js'
     );
     unneededFiles.forEach(function(fake) {
       if (!fs.existsSync(fake)) {
-        fs.writeFileSync(fake,
-            '// Not needed in closure compiler\n' +
-            'export function deadCode() {}');
+        fs.writeFileSync(
+          fake,
+          '// Not needed in closure compiler\n' +
+            'export function deadCode() {}'
+        );
       }
     });
 
@@ -321,9 +267,12 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      // Transpile from ES6 to ES5.
+      /*
+       * Transpile from ES6 to ES5 if not running with `--esm`
+       * otherwise transpilation is done by Babel
+       */
       language_in: 'ECMASCRIPT6',
-      language_out: 'ECMASCRIPT5',
+      language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
       // respective top level polyfills.js files.
@@ -346,34 +295,64 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       source_map_include_content: !!argv.full_sourcemaps,
       source_map_location_mapping: '|' + sourceMapBase,
       warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
+      // These arrays are filled in below.
       jscomp_error: [],
-      // moduleLoad: Demote "module not found" errors to ignore missing files
-      //     in type declarations in the swg.js bundle.
-      jscomp_warning: ['moduleLoad'],
-      // Turn off warning for "Unknown @define" since we use define to pass
-      // args such as FORTESTING to our runner.
-      jscomp_off: ['unknownDefines'],
+      jscomp_warning: [],
+      jscomp_off: [],
       define,
       hide_warnings_for: hideWarningsFor,
     };
+    if (argv.pseudo_names) {
+      // Some optimizations get turned off when pseudo_names is on.
+      // This causes some errors caused by the babel transformations
+      // that we apply like unreachable code because we turn a conditional
+      // falsey. (ex. is IS_DEV transformation which causes some conditionals
+      // to be unreachable/suspicious code since the whole expression is
+      // falsey)
+      compilerOptions.jscomp_off.push('uselessCode', 'externsValidation');
+    }
+    if (argv.pretty_print) {
+      compilerOptions.formatting = 'PRETTY_PRINT';
+    }
 
-    // For now do type check separately
-    if (options.checkTypes || options.typeCheckOnly) {
+    // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
+    // for a full list of closure's default error / warning levels.
+    if (options.typeCheckOnly) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
       compilerOptions.jscomp_error.push(
-          'checkTypes',
-          'accessControls',
-          'const',
-          'constantProperty',
-          'globalThis');
+        'conformanceViolations',
+        'checkTypes',
+        'const',
+        'constantProperty',
+        'globalThis'
+      );
+      compilerOptions.jscomp_off.push(
+        'accessControls',
+        'moduleLoad',
+        'unknownDefines'
+      );
       compilerOptions.conformance_configs =
-          'build-system/conformance-config.textproto';
+        'build-system/conformance-config.textproto';
+      // TODO(cvializ, #23417): Remove these after fixing React.Component type errors.
+      compilerOptions.hide_warnings_for.push(
+        'extensions/amp-date-picker/0.1/date-picker-common.js',
+        'extensions/amp-date-picker/0.1/react-utils.js',
+        'extensions/amp-date-picker/0.1/single-date-picker.js',
+        'extensions/amp-date-picker/0.1/wrappers/maximum-nights.js'
+      );
+    } else {
+      compilerOptions.jscomp_warning.push('accessControls', 'moduleLoad');
+      compilerOptions.jscomp_off.push('unknownDefines');
     }
 
     if (compilerOptions.define.length == 0) {
       delete compilerOptions.define;
+    }
+
+    if (!argv.single_pass && !options.typeCheckOnly) {
+      compilerOptions.js_module_root.push(SRC_TEMP_DIR);
     }
 
     const compilerOptionsArray = [];
@@ -393,27 +372,31 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     });
 
     if (options.typeCheckOnly) {
-      return gulp.src(srcs, {base: '.'})
-          .pipe(gulpClosureCompile(compilerOptionsArray))
-          .on('error', err => {
-            handleTypeCheckError();
-            reject(err);
-          })
-          .pipe(nop())
-          .on('end', resolve);
+      return gulp
+        .src(srcs, {base: '.'})
+        .pipe(gulpClosureCompile(compilerOptionsArray))
+        .on('error', err => {
+          handleTypeCheckError();
+          reject(err);
+        })
+        .pipe(nop())
+        .on('end', resolve);
     } else {
-      return gulp.src(srcs, {base: '.'})
-          .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
-          .pipe(sourcemaps.init({loadMaps: true}))
-          .pipe(gulpClosureCompile(compilerOptionsArray))
-          .on('error', err => {
-            handleCompilerError(outputFilename);
-            reject(err);
-          })
-          .pipe(rename(outputFilename))
-          .pipe(sourcemaps.write('.'))
-          .pipe(gulp.dest(outputDir))
-          .on('end', resolve);
+      const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
+      const gulpBase = argv.single_pass ? '.' : SRC_TEMP_DIR;
+      return gulp
+        .src(gulpSrcs, {base: gulpBase})
+        .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(gulpClosureCompile(compilerOptionsArray))
+        .on('error', err => {
+          handleCompilerError(outputFilename);
+          reject(err);
+        })
+        .pipe(rename(outputFilename))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(outputDir))
+        .on('end', resolve);
     }
   });
 }

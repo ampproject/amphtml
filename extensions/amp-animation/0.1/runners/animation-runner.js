@@ -21,7 +21,6 @@ import {
 /**
  */
 export class AnimationRunner {
-
   /**
    * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests
    */
@@ -33,66 +32,54 @@ export class AnimationRunner {
   /**
    * @return {!WebAnimationPlayState}
    */
-  getPlayState() {
-  }
+  getPlayState() {}
 
   /**
    * @param {function(!WebAnimationPlayState)} unusedHandler
    * @return {!UnlistenDef}
    */
-  onPlayStateChanged(unusedHandler) {
-  }
+  onPlayStateChanged(unusedHandler) {}
 
   /**
-  * Initializes the players but does not change the state.
+   * Initializes the players but does not change the state.
    */
-  init() {
-  }
+  init() {}
 
   /**
    * Initializes the players if not already initialized,
    * and starts playing the animations.
    */
-  start() {
-  }
+  start() {}
 
   /**
    */
-  pause() {
-  }
+  pause() {}
 
   /**
    */
-  resume() {
-  }
+  resume() {}
 
   /**
    */
-  reverse() {
-  }
+  reverse() {}
 
   /**
    * @param {time} unusedTime
    */
-  seekTo(unusedTime) {
-  }
+  seekTo(unusedTime) {}
 
   /**
    * Seeks to a relative position within the animation timeline given a
    * percentage (0 to 1 number).
    * @param {number} unusedPercent between 0 and 1
    */
-  seekToPercent(unusedPercent) {
-  }
+  seekToPercent(unusedPercent) {}
 
   /**
    */
-  finish() {
-  }
+  finish() {}
 
   /**
    */
-  cancel() {
-  }
-
+  cancel() {}
 }

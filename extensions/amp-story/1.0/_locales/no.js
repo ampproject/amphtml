@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Hent linken',
   },
@@ -117,15 +120,17 @@ const strings = {
     string: 'Gjør vinduet ditt bredere for å se denne opplevelsen',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Du må aktivere eksperimentet med AMP-snuttsamlinger for å se ' +
-        'dette innholdet.',
+    string:
+      'Du må aktivere eksperimentet med AMP-snuttsamlinger for å se ' +
+      'dette innholdet.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Den beste visningen av siden er i stående retning',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Beklager, men det ser ut til at nettleseren din ikke støtter ' +
-        'denne opplevelsen',
+    string:
+      'Beklager, men det ser ut til at nettleseren din ikke støtter ' +
+      'denne opplevelsen',
   },
 };
 

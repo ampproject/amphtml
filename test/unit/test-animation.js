@@ -17,7 +17,6 @@
 import {Animation} from '../../src/animation';
 
 describe('Animation', () => {
-
   let sandbox;
   let vsync;
   let vsyncTasks;
@@ -61,8 +60,20 @@ describe('Animation', () => {
   it('animation', () => {
     let tr1 = -1;
     let tr2 = -1;
-    anim.add(0, time => {tr1 = time;}, 0.8);
-    anim.add(0.2, time => {tr2 = time;}, 0.8);
+    anim.add(
+      0,
+      time => {
+        tr1 = time;
+      },
+      0.8
+    );
+    anim.add(
+      0.2,
+      time => {
+        tr2 = time;
+      },
+      0.8
+    );
 
     const ap = anim.start(1000);
     let resolveCalled = false;
@@ -132,12 +143,20 @@ describe('Animation', () => {
     expect(tr2).to.equal(-1);
   });
 
-
   it('should animate out-of-bounds time', () => {
     let tr1 = -1;
     // Linear curve between -0.5 and 1.5
-    const curve = time => {return time * 2 - 0.5;};
-    anim.add(0, time => {tr1 = time;}, 1, curve);
+    const curve = time => {
+      return time * 2 - 0.5;
+    };
+    anim.add(
+      0,
+      time => {
+        tr1 = time;
+      },
+      1,
+      curve
+    );
 
     anim.start(1000);
 
@@ -163,8 +182,20 @@ describe('Animation', () => {
   it('halt freeze', () => {
     let tr1 = -1;
     let tr2 = -1;
-    anim.add(0, time => {tr1 = time;}, 0.8);
-    anim.add(0.2, time => {tr2 = time;}, 0.8);
+    anim.add(
+      0,
+      time => {
+        tr1 = time;
+      },
+      0.8
+    );
+    anim.add(
+      0.2,
+      time => {
+        tr2 = time;
+      },
+      0.8
+    );
 
     const ap = anim.start(1000);
     let rejectCalled = false;
@@ -189,8 +220,20 @@ describe('Animation', () => {
   it('halt reset', () => {
     let tr1 = -1;
     let tr2 = -1;
-    anim.add(0, time => {tr1 = time;}, 0.8);
-    anim.add(0.2, time => {tr2 = time;}, 0.8);
+    anim.add(
+      0,
+      time => {
+        tr1 = time;
+      },
+      0.8
+    );
+    anim.add(
+      0.2,
+      time => {
+        tr2 = time;
+      },
+      0.8
+    );
 
     const ap = anim.start(1000);
     let rejectCalled = false;
@@ -215,8 +258,20 @@ describe('Animation', () => {
   it('halt forward', () => {
     let tr1 = -1;
     let tr2 = -1;
-    anim.add(0, time => {tr1 = time;}, 0.8);
-    anim.add(0.2, time => {tr2 = time;}, 0.8);
+    anim.add(
+      0,
+      time => {
+        tr1 = time;
+      },
+      0.8
+    );
+    anim.add(
+      0.2,
+      time => {
+        tr2 = time;
+      },
+      0.8
+    );
 
     const ap = anim.start(1000);
     let rejectCalled = false;
@@ -241,22 +296,39 @@ describe('Animation', () => {
   it('should NOT start animation when cannot animate', () => {
     let tr1 = -1;
     let tr2 = -1;
-    anim.add(0, time => {tr1 = time;}, 0.8);
-    anim.add(0.2, time => {tr2 = time;}, 0.8);
+    anim.add(
+      0,
+      time => {
+        tr1 = time;
+      },
+      0.8
+    );
+    anim.add(
+      0.2,
+      time => {
+        tr2 = time;
+      },
+      0.8
+    );
     vsync.canAnimate = () => false;
 
     const ap = anim.start(1000);
     expect(vsyncTasks).to.have.length(0);
     expect(ap.running_).to.be.false;
-    return ap.then(() => {
-      return 'SUCCESS';
-    }, () => {
-      return 'ERROR';
-    }).then(response => {
-      expect(tr1).to.equal(-1);
-      expect(tr2).to.equal(-1);
-      expect(response).to.equal('ERROR');
-    });
+    return ap
+      .then(
+        () => {
+          return 'SUCCESS';
+        },
+        () => {
+          return 'ERROR';
+        }
+      )
+      .then(response => {
+        expect(tr1).to.equal(-1);
+        expect(tr2).to.equal(-1);
+        expect(response).to.equal('ERROR');
+      });
   });
 
   it('should halt-freeze animation when cannot animate', () => {

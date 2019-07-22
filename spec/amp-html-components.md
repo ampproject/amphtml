@@ -139,20 +139,13 @@ The collection of official AMP components is open-source and open to contributio
 * Have a fixed, known aspect ratio at initial page load, except if placed at the bottom of the page.
 * Not attempt to access or manipulate objects outside of the component's immediate ownership - e.g. elements that are not specified by or children of the component.
 * Not cause an AMP file to become invalid as per the AMP specification
-* The author of the component must sign the [Google Individual CLA](https://cla.developers.google.com/about/google-individual), or if contributing on behalf of a corporation, the [Corporate CLA](https://cla.developers.google.com/about/google-corporate?csw=1). Like most open-source projects, the CLA protects Google, the contributor, and users from issues of intellectual property rights.
+* The author of the component must sign the [Contributor License Agreement](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#contributor-license-agreement).
 
 In the near-term, implementation will focus on the core components, before prioritizing extensibility. The long-term goal of the runtime though is to support this extensibility.
 
 #### Contributing Components
 
-The creators of the AMP component project - Google and a core group of collaborators, and potentially representatives from other collaborators as the project grows in usage - will have ultimate discretion as to the inclusion of contributed components, though with the goal of including every high-quality contribution that meets the above guidelines, and resolving or providing feedback on proposed contributions in a timely manner.
-
-While in active development, the initial creators of the project - Google and a core group of collaborators - will work together around adding additional owners as well as approving contributions for inclusion.
-
-Contributions with the following characteristics will be prioritized:
-- Generalized components that solve problems in a non-service-specific way - e.g. a “Related Content” widget that makes a request to a generic JSON endpoint for lazy-loading in additional content.
-- Components that are modular, and useful for various types of contained content - e.g. a carousel that takes HTML as well as images.
-
+Components may be contributed using the [process for significant changes to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes).
 
 #### Service-specific Components
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {
   LayoutMarginsChangeDef,
   cloneLayoutMarginsChangeDef,
@@ -29,7 +30,7 @@ import {
 import {computedStyle} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getAttributesFromConfigObj} from './attributes';
+import {getElementLayoutBox} from './utils';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -80,10 +81,7 @@ const Position = {
  * extensions/amp-ad/.../validator-amp-ad.protoascii.
  * @const {!Array<string>}
  */
-const BLACKLISTED_ANCESTOR_TAGS = [
-  'AMP-SIDEBAR',
-  'AMP-APP-BANNER',
-];
+const BLACKLISTED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
 
 /**
  * @const {!Object<!Position, function(!Element, !Element)>}
@@ -94,7 +92,9 @@ INJECTORS[Position.BEFORE] = (anchorElement, elementToInject) => {
 };
 INJECTORS[Position.AFTER] = (anchorElement, elementToInject) => {
   anchorElement.parentNode.insertBefore(
-      elementToInject, anchorElement.nextSibling);
+    elementToInject,
+    anchorElement.nextSibling
+  );
 };
 INJECTORS[Position.FIRST_CHILD] = (anchorElement, elementToInject) => {
   anchorElement.insertBefore(elementToInject, anchorElement.firstChild);
@@ -106,20 +106,28 @@ INJECTORS[Position.LAST_CHILD] = (anchorElement, elementToInject) => {
 export class Placement {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
    * @param {!Position} position
    * @param {function(!Element, !Element)} injector
    * @param {!JsonObject<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
-  constructor(ampdoc, resources, anchorElement, position, injector, attributes,
-    opt_margins) {
+  constructor(
+    ampdoc,
+    anchorElement,
+    position,
+    injector,
+    attributes,
+    opt_margins
+  ) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = resources;
+    this.resources_ = Services.resourcesForDoc(anchorElement);
+
+    /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(anchorElement);
 
     /** @const @private {!Element} */
     this.anchorElement_ = anchorElement;
@@ -160,10 +168,9 @@ export class Placement {
    * @return {!Promise<number>}
    */
   getEstimatedPosition() {
-    return this.resources_.getElementLayoutBox(this.anchorElement_).then(
-        layoutBox => {
-          return this.getEstimatedPositionFromAchorLayout_(layoutBox);
-        });
+    return getElementLayoutBox(this.anchorElement_).then(layoutBox => {
+      return this.getEstimatedPositionFromAchorLayout_(layoutBox);
+    });
   }
 
   /**
@@ -205,27 +212,33 @@ export class Placement {
         this.adElement_ = this.createAdElement_(baseAttributes, sizing.width);
         this.injector_(this.anchorElement_, this.getAdElement());
 
-        return this.getPlacementSizing_(sizing, isResponsiveEnabled)
-            .then(placement => {
+        return this.getPlacementSizing_(sizing, isResponsiveEnabled).then(
+          placement => {
             // CustomElement polyfill does not call connectedCallback
             // synchronously. So we explicitly wait for CustomElement to be
             // ready.
-              return whenUpgradedToCustomElement(this.getAdElement())
-                  .then(() => this.getAdElement().whenBuilt())
-                  .then(() => {
-                    return this.resources_.attemptChangeSize(
-                        this.getAdElement(),
-                        placement.height,
-                        placement.width,
-                        placement.margins);
-                  }) .then(() => {
-                    this.state_ = PlacementState.PLACED;
-                    return this.state_;
-                  }, () => {
-                    this.state_ = PlacementState.RESIZE_FAILED;
-                    return this.state_;
-                  });
-            });
+            return whenUpgradedToCustomElement(this.getAdElement())
+              .then(() => this.getAdElement().whenBuilt())
+              .then(() => {
+                return this.resources_.attemptChangeSize(
+                  this.getAdElement(),
+                  placement.height,
+                  placement.width,
+                  placement.margins
+                );
+              })
+              .then(
+                () => {
+                  this.state_ = PlacementState.PLACED;
+                  return this.state_;
+                },
+                () => {
+                  this.state_ = PlacementState.RESIZE_FAILED;
+                  return this.state_;
+                }
+              );
+          }
+        );
       });
     });
   }
@@ -241,40 +254,42 @@ export class Placement {
    * @private
    */
   getPlacementSizing_(sizing, isResponsiveEnabled) {
-    const viewport = this.resources_.getViewport();
-    const viewportWidth = viewport.getWidth();
+    const viewportWidth = this.viewport_.getWidth();
     if (isResponsiveEnabled && viewportWidth <= MAXIMUM_RESPONSIVE_WIDTH) {
-      const viewportHeight = viewport.getHeight();
-      const responsiveHeight =
-        getResponsiveHeightForContext_(viewportWidth, viewportHeight);
+      const viewportHeight = this.viewport_.getHeight();
+      const responsiveHeight = getResponsiveHeightForContext_(
+        viewportWidth,
+        viewportHeight
+      );
       let margins = cloneLayoutMarginsChangeDef(this.margins_);
-      return Services.resourcesForDoc(this.anchorElement_)
-          .getElementLayoutBox(this.anchorElement_)
-          .then(layoutBox => {
-            const direction =
-                  computedStyle(this.ampdoc.win, this.anchorElement_)
-                      ['direction'];
-            if (layoutBox.left !== 0) {
-              margins = margins || {};
-              if (direction == 'rtl') {
-                margins.right = layoutBox.left;
-              } else {
-                margins.left = -layoutBox.left;
-              }
+      return getElementLayoutBox(this.anchorElement_)
+        .then(layoutBox => {
+          const direction = computedStyle(this.ampdoc.win, this.anchorElement_)[
+            'direction'
+          ];
+          if (layoutBox.left !== 0) {
+            margins = margins || {};
+            if (direction == 'rtl') {
+              margins.right = layoutBox.left;
+            } else {
+              margins.left = -layoutBox.left;
             }
-          })
-          .then(() => {
-            return Promise.resolve({
-              width: viewportWidth,
-              height: responsiveHeight,
-              margins,
-            });
+          }
+        })
+        .then(() => {
+          return Promise.resolve({
+            width: viewportWidth,
+            height: responsiveHeight,
+            margins,
           });
+        });
     } else {
-      return Promise.resolve(/** @type {!PlacementSizingDef} */ ({
-        height: (sizing.height || TARGET_AD_HEIGHT_PX),
-        margins: this.margins_,
-      }));
+      return Promise.resolve(
+        /** @type {!PlacementSizingDef} */ ({
+          height: sizing.height || TARGET_AD_HEIGHT_PX,
+          margins: this.margins_,
+        })
+      );
     }
   }
 
@@ -285,17 +300,23 @@ export class Placement {
    * @private
    */
   createAdElement_(baseAttributes, width) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(dict({
-      'layout': width ? 'fixed' : 'fixed-height',
-      'height': '0',
-      'width': width ? width : 'auto',
-      'class': 'i-amphtml-layout-awaiting-size',
-    }), baseAttributes, this.attributes_));
+    const attributes = /** @type {!JsonObject} */ (Object.assign(
+      dict({
+        'layout': width ? 'fixed' : 'fixed-height',
+        'height': '0',
+        'width': width ? width : 'auto',
+        'class': 'i-amphtml-layout-awaiting-size',
+      }),
+      baseAttributes,
+      this.attributes_
+    ));
     return createElementWithAttributes(
-        this.ampdoc.win.document, 'amp-ad', attributes);
+      this.ampdoc.win.document,
+      'amp-ad',
+      attributes
+    );
   }
 }
-
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -314,7 +335,6 @@ export function getPlacementsFromConfigObj(ampdoc, configObj) {
   });
   return placements;
 }
-
 
 /**
  * Validates that the placementObj represents a valid placement and if so
@@ -354,18 +374,22 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
     if (!isPositionValid(anchorElement, placementObj['pos'])) {
       return;
     }
-    const attributes = getAttributesFromConfigObj(placementObj);
-    placements.push(new Placement(
+    const attributes = getAttributesFromConfigObj(
+      placementObj,
+      Attributes.BASE_ATTRIBUTES
+    );
+    placements.push(
+      new Placement(
         ampdoc,
-        Services.resourcesForDoc(anchorElement),
         anchorElement,
         placementObj['pos'],
         injector,
         attributes,
-        margins));
+        margins
+      )
+    );
   });
 }
-
 
 /**
  * Looks up the element(s) addresses by the anchorObj.
@@ -380,8 +404,9 @@ function getAnchorElements(rootElement, anchorObj) {
     user().warn(TAG, 'No selector in anchor');
     return [];
   }
-  let elements = [].slice.call(scopedQuerySelectorAll(
-      rootElement.documentElement || rootElement, selector));
+  let elements = [].slice.call(
+    scopedQuerySelectorAll(rootElement.documentElement || rootElement, selector)
+  );
 
   const minChars = anchorObj['min_c'] || 0;
   if (minChars > 0) {
@@ -409,7 +434,6 @@ function getAnchorElements(rootElement, anchorObj) {
   return elements;
 }
 
-
 /**
  * @param {!Element} anchorElement
  * @param {!Position} position
@@ -417,8 +441,9 @@ function getAnchorElements(rootElement, anchorObj) {
  */
 function isPositionValid(anchorElement, position) {
   const elementToCheckOrNull =
-      position == Position.BEFORE || position == Position.AFTER ?
-        anchorElement.parentElement : anchorElement;
+    position == Position.BEFORE || position == Position.AFTER
+      ? anchorElement.parentElement
+      : anchorElement;
   if (!elementToCheckOrNull) {
     user().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
     return false;
@@ -432,7 +457,6 @@ function isPositionValid(anchorElement, position) {
     return false;
   });
 }
-
 
 /**
  * Calculates the appropriate height for a full-width responsive ad.

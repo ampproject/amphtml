@@ -19,24 +19,58 @@ import {loadScript, validateData, writeScript} from '../3p/3p';
 import {parseJson} from '../src/json';
 
 const mandatoryParams = [],
-    optionalParams = [
-      'ad_mode', 'placement', 'tracking_id', 'ad_type',
-      'marketplace', 'region', 'title',
-      'default_search_phrase', 'default_category', 'linkid',
-      'search_bar', 'search_bar_position', 'rows',
-      'design', 'asins', 'debug', 'aax_src_id',
-      'header_style', 'link_style', 'link_hover_style',
-      'text_style', 'random_permute', 'render_full_page',
-      'axf_exp_name', 'axf_treatment', 'disable_borders',
-      'attributes', 'carousel', 'feedback_enable',
-      'max_ads_in_a_row', 'list_price', 'prime',
-      'prime_position', 'widget_padding',
-      'strike_text_style', 'brand_text_link', 'brand_position',
-      'large_rating', 'rating_position', 'max_title_height',
-      'enable_swipe_on_mobile', 'overrides',
-      'ead', 'force_win_bid', 'fallback_mode', 'url',
-      'regionurl', 'divid', 'recomtype', 'adinstanceid',
-    ];
+  optionalParams = [
+    'ad_mode',
+    'placement',
+    'tracking_id',
+    'ad_type',
+    'marketplace',
+    'region',
+    'title',
+    'default_search_phrase',
+    'default_category',
+    'linkid',
+    'search_bar',
+    'search_bar_position',
+    'rows',
+    'design',
+    'asins',
+    'debug',
+    'aax_src_id',
+    'header_style',
+    'link_style',
+    'link_hover_style',
+    'text_style',
+    'random_permute',
+    'render_full_page',
+    'axf_exp_name',
+    'axf_treatment',
+    'disable_borders',
+    'attributes',
+    'carousel',
+    'feedback_enable',
+    'max_ads_in_a_row',
+    'list_price',
+    'prime',
+    'prime_position',
+    'widget_padding',
+    'strike_text_style',
+    'brand_text_link',
+    'brand_position',
+    'large_rating',
+    'rating_position',
+    'max_title_height',
+    'enable_swipe_on_mobile',
+    'overrides',
+    'ead',
+    'force_win_bid',
+    'fallback_mode',
+    'url',
+    'regionurl',
+    'divid',
+    'recomtype',
+    'adinstanceid',
+  ];
 const prefix = 'amzn_assoc_';
 
 /**
@@ -51,25 +85,22 @@ export function a9(global, data) {
 
   validateData(data, mandatoryParams, optionalParams);
 
-  const publisherUrl = global.context.canonicalUrl ||
-      global.context.sourceUrl;
+  const publisherUrl = global.context.canonicalUrl || global.context.sourceUrl;
 
   if (data.amzn_assoc_ad_mode) {
     if (data.amzn_assoc_ad_mode === 'auto') {
-      if (data.adinstanceid &&
-      (data.adinstanceid !== '')) {
+      if (data.adinstanceid && data.adinstanceid !== '') {
         loadRecTag(global, data, publisherUrl);
-      }
-      else {
+      } else {
         loadSearTag(global, data, publisherUrl);
       }
-    }
-    else if ((data.amzn_assoc_ad_mode === 'search')
-    || (data.amzn_assoc_ad_mode === 'manual')) {
+    } else if (
+      data.amzn_assoc_ad_mode === 'search' ||
+      data.amzn_assoc_ad_mode === 'manual'
+    ) {
       loadSearTag(global, data, publisherUrl);
     }
-  }
-  else {
+  } else {
     loadSearTag(global, data, publisherUrl);
   }
 }
@@ -79,7 +110,7 @@ export function a9(global, data) {
  */
 function getURL(data) {
   let url = 'https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US';
-  if (data.regionurl && (data.regionurl !== '')) {
+  if (data.regionurl && data.regionurl !== '') {
     url = data.regionurl;
   }
 
@@ -98,8 +129,7 @@ function loadRecTag(global, data, publisherUrl) {
 
   if (data['recomtype'] === 'sync') {
     writeScript(global, url);
-  }
-  else if (data['recomtype'] === 'async') {
+  } else if (data['recomtype'] === 'async') {
     const d = global.document.createElement('div');
     d.setAttribute('id', data['divid']);
     global.document.getElementById('c').appendChild(d);
@@ -114,9 +144,9 @@ function loadRecTag(global, data, publisherUrl) {
  */
 function loadSearTag(global, data, publisherUrl) {
   /**
-  * Sets macro type.
-  * @param {string} type
-  */
+   * Sets macro type.
+   * @param {string} type
+   */
   function setMacro(type) {
     if (!type) {
       return;
@@ -128,8 +158,8 @@ function loadSearTag(global, data, publisherUrl) {
   }
 
   /**
-  * Sets the params.
-  */
+   * Sets the params.
+   */
   function setParams() {
     const url = getURL(data);
     let i;
@@ -139,7 +169,7 @@ function loadSearTag(global, data, publisherUrl) {
     }
 
     if (data.amzn_assoc_fallback_mode) {
-      const str = (data.amzn_assoc_fallback_mode).split(',');
+      const str = data.amzn_assoc_fallback_mode.split(',');
       let types = str[0].split(':');
       let typev = str[1].split(':');
       types = parseJson(types[1]);
@@ -151,8 +181,7 @@ function loadSearTag(global, data, publisherUrl) {
     }
     if (data.amzn_assoc_url) {
       global['amzn_assoc_URL'] = data['amzn_assoc_url'];
-    }
-    else {
+    } else {
       global['amzn_assoc_URL'] = publisherUrl;
     }
 

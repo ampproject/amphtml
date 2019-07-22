@@ -21,13 +21,11 @@ import {dict} from '../../../src/utils/object';
 import {getData} from './../../../src/event-helper';
 
 import {ENDPOINTS} from './constants';
-import {LinkRewriterManager} from
-  '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
+import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 import {Linkmate} from './linkmate';
 import {getConfigOptions} from './linkmate-options';
 
 const TAG = 'amp-smartlinks';
-
 
 export class AmpSmartlinks extends AMP.BaseElement {
   /**
@@ -73,14 +71,15 @@ export class AmpSmartlinks extends AMP.BaseElement {
     this.linkmateOptions_ = getConfigOptions(this.element);
     this.linkRewriterService_ = new LinkRewriterManager(this.ampDoc_);
 
-    return this.ampDoc_.whenBodyAvailable()
-        .then(() => viewer.getReferrerUrl())
-        .then(referrer => {
-          this.referrer_ = referrer;
-          viewer.whenFirstVisible().then(() => {
-            this.runSmartlinks_();
-          });
+    return this.ampDoc_
+      .whenReady()
+      .then(() => viewer.getReferrerUrl())
+      .then(referrer => {
+        this.referrer_ = referrer;
+        viewer.whenFirstVisible().then(() => {
+          this.runSmartlinks_();
         });
+      });
   }
 
   /**
@@ -94,19 +93,21 @@ export class AmpSmartlinks extends AMP.BaseElement {
 
       this.postPageImpression_();
       this.linkmate_ = new Linkmate(
-          /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
-          (this.ampDoc_),
-          /** @type {!../../../src/service/xhr-impl.Xhr} */
-          (this.xhr_),
-          /** @type {!Object} */
-          (this.linkmateOptions_)
+        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
+        (this.ampDoc_),
+        /** @type {!../../../src/service/xhr-impl.Xhr} */
+        (this.xhr_),
+        /** @type {!Object} */
+        (this.linkmateOptions_)
       );
       this.smartLinkRewriter_ = this.initLinkRewriter_();
 
       // If the config specified linkmate to run and our API is expecting
       // linkmate to run
-      if (this.linkmateOptions_.linkmateEnabled &&
-          this.linkmateOptions_.linkmateExpected) {
+      if (
+        this.linkmateOptions_.linkmateEnabled &&
+        this.linkmateOptions_.linkmateExpected
+      ) {
         this.smartLinkRewriter_.getAnchorReplacementList();
       }
     });
@@ -122,23 +123,24 @@ export class AmpSmartlinks extends AMP.BaseElement {
    */
   getLinkmateOptions_() {
     const fetchUrl = ENDPOINTS.NRTV_CONFIG_ENDPOINT.replace(
-        '.nrtv_slug.', this.linkmateOptions_.nrtvSlug
+      '.nrtv_slug.',
+      this.linkmateOptions_.nrtvSlug
     );
 
     try {
-      return this.xhr_.fetchJson(fetchUrl, {
-        method: 'GET',
-        ampCors: false,
-      })
-          .then(res => res.json())
-          .then(res => {
-            return getData(res)[0]['amp_config'];
-          });
+      return this.xhr_
+        .fetchJson(fetchUrl, {
+          method: 'GET',
+          ampCors: false,
+        })
+        .then(res => res.json())
+        .then(res => {
+          return getData(res)[0]['amp_config'];
+        });
     } catch (err) {
       return null;
     }
   }
-
 
   /**
    * API call to indicate a page load event happened
@@ -153,12 +155,14 @@ export class AmpSmartlinks extends AMP.BaseElement {
 
     builder.track('page-impression', ENDPOINTS.PAGE_IMPRESSION_ENDPOINT);
 
-    builder.setTransportConfig(dict({
-      'beacon': true,
-      'image': false,
-      'xhrpost': true,
-      'useBody': true,
-    }));
+    builder.setTransportConfig(
+      dict({
+        'beacon': true,
+        'image': false,
+        'xhrpost': true,
+        'useBody': true,
+      })
+    );
 
     builder.setExtraUrlParams(payload);
     const reporter = builder.build();
@@ -175,11 +179,11 @@ export class AmpSmartlinks extends AMP.BaseElement {
     const options = {linkSelector: this.linkmateOptions_.linkSelector};
 
     return this.linkRewriterService_.registerLinkRewriter(
-        TAG,
-        anchorList => {
-          return this.linkmate_.runLinkmate(anchorList);
-        },
-        options
+      TAG,
+      anchorList => {
+        return this.linkmate_.runLinkmate(anchorList);
+      },
+      options
     );
   }
 
@@ -209,8 +213,10 @@ export class AmpSmartlinks extends AMP.BaseElement {
    */
   generateUUID_() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
-      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4)
-          .toString(16)
+      (
+        c ^
+        (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+      ).toString(16)
     );
   }
 }

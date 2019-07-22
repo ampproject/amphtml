@@ -30,7 +30,6 @@ import {WebPushConfig} from './amp-web-push-config';
 import {WebPushService} from './web-push-service';
 import {WebPushWidget} from './amp-web-push-widget';
 
-
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc(SERVICE_TAG, WebPushService);
   AMP.registerElement(CONFIG_TAG, WebPushConfig);

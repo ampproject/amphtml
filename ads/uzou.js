@@ -18,9 +18,9 @@ import {loadScript, validateData} from '../3p/3p';
 import {parseJson} from '../src/json';
 
 /**
-* @param {!Window} global
-* @param {!Object} data
-*/
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 export function uzou(global, data) {
   validateData(data, ['widgetParams'], []);
 
@@ -45,9 +45,9 @@ export function uzou(global, data) {
 
   const uzouInjector = {
     url: fixedEncodeURIComponent(
-        widgetParams['url'] ||
-      global.context.canonicalUrl ||
-      global.context.sourceUrl
+      widgetParams['url'] ||
+        global.context.canonicalUrl ||
+        global.context.sourceUrl
     ),
     referer: widgetParams['referer'] || global.context.referrer,
   };

@@ -139,6 +139,10 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
     <td>Replaced with <code>amp-img</code>.<br>
         Please note: <code>&lt;img&gt;</code> is a <a href="https://www.w3.org/TR/html5/syntax.html#void-elements">Void Element according to HTML5</a>, so it does not have an end tag. However, <code>&lt;amp-img&gt;</code> does have an end tag <code>&lt;/amp-img&gt;</code>.</td>
   </tr>
+    <tr>
+    <td width="30%">picture</td>
+    <td>Prohibited. Serve different image formats by using the [fallback](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders?format=websites) attribute or provide multiple [<code>srcset</code> on <code>&lt;amp-img&gt;</code>](https://amp.dev/documentation/components/amp-img#attributes).</td>
+  </tr>
   <tr>
     <td width="30%">video</td>
     <td>Replaced with <code>amp-video</code>.</td>
@@ -177,11 +181,11 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">form</td>
-    <td>Allowed. Require including <a href="https://www.ampproject.org/docs/reference/components/amp-form">amp-form</a> extension.</td>
+    <td>Allowed. Require including <a href="https://amp.dev/documentation/components/amp-form">amp-form</a> extension.</td>
   </tr>
   <tr>
     <td width="30%">input elements</td>
-    <td>Mostly allowed with <a href="https://www.ampproject.org/docs/reference/components/amp-form#inputs-and-fields">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
+    <td>Mostly allowed with <a href="https://amp.dev/documentation/components/amp-form#inputs-and-fields">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
   </tr>
   <tr>
     <td width="30%">button</td>

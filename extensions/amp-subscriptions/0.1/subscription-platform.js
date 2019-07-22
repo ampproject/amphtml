@@ -23,7 +23,6 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
  * @interface
  */
 export class SubscriptionPlatform {
-
   /**
    * Returns the service Id.
    * @return {string}
@@ -63,6 +62,12 @@ export class SubscriptionPlatform {
    * @return {boolean}
    */
   isPingbackEnabled() {}
+
+  /**
+   * True if pingback returns all entitlments
+   * @return {boolean}
+   */
+  pingbackReturnsAllEntitlements() {}
 
   /**
    * Performs the pingback to the subscription platform.

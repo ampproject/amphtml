@@ -46,11 +46,11 @@ export function wrap(WrappedComponent) {
     componentWillReceiveProps(nextProps) {
       const {props} = this;
       const shouldUpdate =
-          props['isOutsideRange'] != nextProps['isOutsideRange'] ||
-          props['startDate'] != nextProps['startDate'] ||
-          props['endDate'] != nextProps['endDate'] ||
-          props['focusedInput'] != nextProps['focusedInput'] ||
-          props['maximumNights'] != nextProps['maximumNights'];
+        props['isOutsideRange'] != nextProps['isOutsideRange'] ||
+        props['startDate'] != nextProps['startDate'] ||
+        props['endDate'] != nextProps['endDate'] ||
+        props['focusedInput'] != nextProps['focusedInput'] ||
+        props['maximumNights'] != nextProps['maximumNights'];
       if (shouldUpdate) {
         this.isOutsideRange_ = getIsOutsideRange(nextProps);
       }
@@ -63,6 +63,8 @@ export function wrap(WrappedComponent) {
       return React.createElement(WrappedComponent, props);
     }
   }
+  /** @private @const visible for testing */
+  MaximumNights.getIsOutsideRange = getIsOutsideRange;
 
   /**
    * Creates a function that will restrict the user from selecting a range
@@ -83,20 +85,26 @@ export function wrap(WrappedComponent) {
     }
 
     if (startDate && focusedInput == END_DATE) {
-      const firstIneligibleDay =
-          startDate.clone().add(maximumNights + 1, 'days');
+      const firstIneligibleDay = startDate
+        .clone()
+        .add(maximumNights + 1, 'days');
       return date => {
-        return isOutsideRange(date) ||
-            isInclusivelyAfterDay(date, firstIneligibleDay);
+        return (
+          isOutsideRange(date) ||
+          isInclusivelyAfterDay(date, firstIneligibleDay)
+        );
       };
     }
 
     if (endDate && focusedInput == START_DATE) {
-      const lastIneligibleDay =
-          endDate.clone().add(-1 * (maximumNights + 1), 'days');
+      const lastIneligibleDay = endDate
+        .clone()
+        .add(-1 * (maximumNights + 1), 'days');
       return date => {
-        return isOutsideRange(date) ||
-            isInclusivelyBeforeDay(date, lastIneligibleDay);
+        return (
+          isOutsideRange(date) ||
+          isInclusivelyBeforeDay(date, lastIneligibleDay)
+        );
       };
     }
 

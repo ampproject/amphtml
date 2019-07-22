@@ -4689,8 +4689,11 @@ function validateTagAgainstSpec(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag,
         resultForAttempt);
   }
-  validateDescendantTags(
-      encounteredTag, parsedTagSpec, context, resultForAttempt);
+  // Only validate that this is a valid descendant if it's not already invalid.
+  if (resultForAttempt.status === amp.validator.ValidationResult.Status.PASS) {
+    validateDescendantTags(
+        encounteredTag, parsedTagSpec, context, resultForAttempt);
+  }
   validateNoSiblingsAllowedTags(parsedTagSpec, context, resultForAttempt);
   validateLastChildTags(context, resultForAttempt);
   // If we haven't reached the body element yet, we may not have seen the
@@ -5766,7 +5769,24 @@ amp.validator.ValidationHandler =
         const attrsByKey = encounteredTag.attrsByKey();
         const styleAttr = attrsByKey['style'];
         if (styleAttr !== undefined) {
-          this.context_.addInlineStyleByteSize(byteLength(styleAttr));
+          const styleLen = byteLength(styleAttr);
+          this.context_.addInlineStyleByteSize(styleLen);
+          for (const cssLengthSpec of this.context_.getRules()
+                   .getCssLengthSpec()) {
+            if (cssLengthSpec.maxBytesPerInlineStyle !== undefined &&
+                styleLen > cssLengthSpec.maxBytesPerInlineStyle) {
+              this.context_.addError(
+                  amp.validator.ValidationError.Code.INLINE_STYLE_TOO_LONG,
+                  this.context_.getLineCol(),
+                  /* params */
+                  [
+                    encounteredTag.lowerName(), styleLen.toString(),
+                    cssLengthSpec.maxBytesPerInlineStyle.toString()
+                  ],
+                  cssLengthSpec.specUrl, this.validationResult_);
+              encounteredTag.dedupeAttrs();
+            }
+          }
         }
 
         /** @type {ValidateTagResult} */
@@ -5778,16 +5798,28 @@ amp.validator.ValidationHandler =
         amp.validator.ValidationResult.Status.UNKNOWN;
         const referencePointMatcher =
         this.context_.getTagStack().parentReferencePointMatcher();
+        // We must match the reference point before the TagSpec, as otherwise we
+        // will end up with "unexplained" attributes during tagspec matching
+        // which the reference point takes care of.
         if (referencePointMatcher !== null) {
           resultForReferencePoint =
           referencePointMatcher.validateTag(encounteredTag, this.context_);
-          this.validationResult_.mergeFrom(
-              resultForReferencePoint.validationResult);
         }
 
         const resultForTag = validateTag(
             encounteredTag, resultForReferencePoint.bestMatchTagSpec,
             this.context_);
+        // Only merge in the reference point errors into the final result if the
+        // tag otherwise passes one of the TagSpecs. Otherwise, we end up with
+        // unnecessarily verbose errors.
+        if (referencePointMatcher !== null &&
+            resultForTag.validationResult.status ===
+                amp.validator.ValidationResult.Status.PASS) {
+          this.validationResult_.mergeFrom(
+              resultForReferencePoint.validationResult);
+        }
+
+
         checkForReferencePointCollision(
             resultForReferencePoint.bestMatchTagSpec,
             resultForTag.bestMatchTagSpec,
@@ -5992,7 +6024,7 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
   }
   if (errorCategoryFilter === null && errors.length !== 0) {
     terminal.info(
-        'See also https://validator.ampproject.org/#url=' +
+        'See also https://validator.amp.dev/#url=' +
         encodeURIComponent(goog.uri.utils.removeFragment(url)));
   }
 };
@@ -6185,6 +6217,7 @@ amp.validator.categorizeError = function(error) {
       error.code ===
           amp.validator.ValidationError.Code
               .STYLESHEET_AND_INLINE_STYLE_TOO_LONG ||
+      error.code === amp.validator.ValidationError.Code.INLINE_STYLE_TOO_LONG ||
       (error.code ===
            amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST &&
        isAuthorStylesheet(error.params[0]))) {

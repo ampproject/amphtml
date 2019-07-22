@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'లింక్‌ను పొందండి',
   },
@@ -111,8 +114,7 @@ const strings = {
     string: 'ఈ కథనాన్ని చూడడానికి మీ విండో యొక్క ఎత్తును పెంచండి',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'ఈ కథనాన్ని చూడడానికి మీ విండో యొక్క ఎత్తు మరియు వెడల్పును ' +
-        'పెంచండి',
+    string: 'ఈ కథనాన్ని చూడడానికి మీ విండో యొక్క ఎత్తు మరియు వెడల్పును పెంచండి',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'ఈ కథనాన్ని చూడడానికి మీ విండో యొక్క వెడల్పును పెంచండి',

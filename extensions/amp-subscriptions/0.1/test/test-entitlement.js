@@ -16,7 +16,6 @@
 
 import {Entitlement, GrantReason} from '../entitlement';
 
-
 describes.realWin('EntitlementClass', {}, () => {
   const service = 'sample-service';
   const source = 'sample-source';
@@ -34,8 +33,14 @@ describes.realWin('EntitlementClass', {}, () => {
 
   it('should give json representation of the object', () => {
     const raw = 'raw';
-    const entitlement = new Entitlement({source, raw, service, granted,
-      grantReason, dataObject});
+    const entitlement = new Entitlement({
+      source,
+      raw,
+      service,
+      granted,
+      grantReason,
+      dataObject,
+    });
     expect(entitlement.json()).to.deep.equal({
       service,
       source,
@@ -48,8 +53,15 @@ describes.realWin('EntitlementClass', {}, () => {
   it('should not return the decrypted key in the json', () => {
     const raw = 'raw';
     const decryptedDocumentKey = 'decryptedDocumentKey';
-    const entitlement = new Entitlement({source, raw, service, granted,
-      grantReason, dataObject, decryptedDocumentKey});
+    const entitlement = new Entitlement({
+      source,
+      raw,
+      service,
+      granted,
+      grantReason,
+      dataObject,
+      decryptedDocumentKey,
+    });
     expect(entitlement.json().decryptedDocumentKey).to.be.undefined;
     expect(entitlement.decryptedDocumentKey).to.equal(decryptedDocumentKey);
   });
@@ -89,10 +101,17 @@ describes.realWin('EntitlementClass', {}, () => {
 
   it('should return raw, granStatus and source for pingback', () => {
     const raw = 'raw';
-    const entitlement = new Entitlement({source, raw, service, granted,
-      grantReason, dataObject});
+    const entitlement = new Entitlement({
+      source,
+      raw,
+      service,
+      granted,
+      grantReason,
+      dataObject,
+    });
     const pingbackData = entitlement.jsonForPingback();
     expect(pingbackData).to.deep.equal(
-        Object.assign({raw}, entitlement.json()));
+      Object.assign({raw}, entitlement.json())
+    );
   });
 });

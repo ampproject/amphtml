@@ -17,7 +17,8 @@
 export const CHARTBEAT_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://ping.chartbeat.net',
-    'basePrefix': '/ping?h=${domain}&' +
+    'basePrefix':
+      '/ping?h=${domain}&' +
       'p=${canonicalPath}&' +
       'u=${clientId(_cb)}&' +
       'd=${canonicalHost}&' +

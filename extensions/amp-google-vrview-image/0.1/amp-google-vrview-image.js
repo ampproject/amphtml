@@ -22,9 +22,7 @@ import {userAssert} from '../../../src/log';
 /** @const */
 const TAG = 'amp-google-vrview-image';
 
-
 class AmpGoogleVrviewImage extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -34,7 +32,6 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
 
     /** @private {string} */
     this.src_ = '';
-
   }
 
   /** @override */
@@ -44,11 +41,15 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-google-vrview-image'),
-        'TAG amp-google-vrview-image disabled');
+    userAssert(
+      isExperimentOn(this.win, 'amp-google-vrview-image'),
+      'TAG amp-google-vrview-image disabled'
+    );
 
-    this.imageSrc_ = assertHttpsUrl(this.element.getAttribute('src'),
-        this.element);
+    this.imageSrc_ = assertHttpsUrl(
+      this.element.getAttribute('src'),
+      this.element
+    );
     // TODO(dvoytenko): Consider recompiling and hosting viewer on the
     // cdn.ampproject.org as an iframe viewer or even possibly compiling
     // it as an AMP element.
@@ -97,7 +98,6 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     return this.loadPromise(iframe);
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpGoogleVrviewImage);

@@ -19,8 +19,8 @@ import {dict} from './utils/object.js';
 import {experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
+import {internalRuntimeVersion} from './internal-version';
 import {urls} from './config';
-import {version} from './internal-version';
 
 /**
  * Produces the attributes for the ad template.
@@ -31,7 +31,11 @@ import {version} from './internal-version';
  * @return {!JsonObject}
  */
 export function getContextMetadata(
-  parentWindow, element, sentinel, attributes) {
+  parentWindow,
+  element,
+  sentinel,
+  attributes
+) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
@@ -66,8 +70,10 @@ export function getContextMetadata(
   // Please also add new introduced variable
   // name to the extern list.
   attributes['_context'] = dict({
-    'ampcontextVersion': version(),
-    'ampcontextFilepath': `${urls.thirdParty}/${version()}/ampcontext-v0.js`,
+    'ampcontextVersion': internalRuntimeVersion(),
+    'ampcontextFilepath': `${
+      urls.thirdParty
+    }/${internalRuntimeVersion()}/ampcontext-v0.js`,
     'sourceUrl': docInfo.sourceUrl,
     'referrer': referrer,
     'canonicalUrl': docInfo.canonicalUrl,
@@ -80,12 +86,14 @@ export function getContextMetadata(
     'mode': getModeObject(),
     'canary': isCanary(parentWindow),
     'hidden': !viewer.isVisible(),
-    'initialLayoutRect': layoutRect ? {
-      'left': layoutRect.left,
-      'top': layoutRect.top,
-      'width': layoutRect.width,
-      'height': layoutRect.height,
-    } : null,
+    'initialLayoutRect': layoutRect
+      ? {
+          'left': layoutRect.left,
+          'top': layoutRect.top,
+          'width': layoutRect.width,
+          'height': layoutRect.height,
+        }
+      : null,
     'initialIntersection': element.getIntersectionChangeEntry(),
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),
