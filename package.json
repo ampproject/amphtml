@@ -49,7 +49,7 @@
     "autoprefixer": "9.6.1",
     "babel-eslint": "10.0.2",
     "babel-plugin-filter-imports": "3.0.0",
-    "babel-plugin-istanbul": "5.1.4",
+    "babel-plugin-istanbul": "5.2.0",
     "babel-plugin-minify-replace": "0.5.0",
     "babel-plugin-transform-es2015-modules-commonjs": "6.26.2",
     "babelify": "10.0.0",
