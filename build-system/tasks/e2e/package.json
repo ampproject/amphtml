@@ -3,7 +3,7 @@
   "name": "gulp-e2e",
   "version": "0.1.0",
   "description": "Gulp e2e",
-  "dependencies": {
+  "devDependencies": {
     "@babel/register": "7.4.4",
     "babel-regenerator-runtime": "6.5.0",
     "chromedriver": "74.0.0",

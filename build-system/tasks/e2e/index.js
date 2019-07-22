@@ -37,6 +37,7 @@ const TEST_RETRIES = 2;
 let webServerProcess_;
 
 function installPackages_() {
+  log('Running', cyan('yarn'), 'to install packages...');
   execOrDie('npx yarn --cwd build-system/tasks/e2e', {'stdio': 'ignore'});
 }
 
@@ -46,6 +47,7 @@ function buildRuntime_() {
 }
 
 function launchWebServer_() {
+  log('Launching webserver at', cyan(`http://${HOST}:${PORT}`) + '...');
   webServerProcess_ = execScriptAsync(
     `gulp serve --compiled --host ${HOST} --port ${PORT}`,
     {stdio: 'ignore'}
@@ -114,6 +116,7 @@ async function e2e() {
 
   // run tests
   if (!argv.watch) {
+    log('Running tests...');
     const mocha = createMocha_();
 
     // specify tests to run
