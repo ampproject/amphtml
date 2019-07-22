@@ -100,11 +100,6 @@ import {NAVEGG_CONFIG} from './vendors/navegg';
 import {VPONANALYTICS_CONFIG} from './vendors/vponanalytics';
 import {WEBENGAGE_CONFIG} from './vendors/webengage';
 
-// eslint-disable-next-line no-undef
-if (ANALYTICS_VENDOR_SPLIT) {
-  // test
-}
-
 /**
  * @const {!JsonObject}
  */
