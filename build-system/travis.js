@@ -138,11 +138,27 @@ function travisCommitSha() {
   return process.env.TRAVIS_COMMIT;
 }
 
+/**
+ * Returns the range of commits being tested by the ongoing Travis build.
+ * @return {string}
+ */
+function travisCommitRange() {
+  if (!isTravisBuild()) {
+    log(
+      red('ERROR:'),
+      'This is not a Travis build. Cannot get',
+      cyan('process.env.TRAVIS_COMMIT_RANGE') + '.'
+    );
+  }
+  return process.env.TRAVIS_COMMIT_RANGE;
+}
+
 module.exports = {
   isTravisBuild,
   isTravisPullRequestBuild,
   isTravisPushBuild,
   travisBuildNumber,
+  travisCommitRange,
   travisCommitSha,
   travisJobNumber,
   travisPullRequestBranch,

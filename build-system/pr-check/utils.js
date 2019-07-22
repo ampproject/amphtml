@@ -29,7 +29,7 @@ const {
 const {
   isTravisBuild,
   travisBuildNumber,
-  travisCommitSha,
+  travisCommitRange,
   travisPullRequestSha,
 } = require('../travis');
 const {execOrDie, exec} = require('../exec');
@@ -66,8 +66,8 @@ function printChangeSummary(fileName) {
         `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
     );
     console.log(
-      `${fileLogPrefix} ${colors.cyan('TRAVIS_COMMIT')} is currently at ` +
-        `commit ${colors.cyan(shortSha(travisCommitSha()))}`
+      `${fileLogPrefix} ${colors.cyan('TRAVIS_COMMIT_RANGE')} is ` +
+        `${colors.cyan(travisCommitRange())}`
     );
     commitSha = travisPullRequestSha();
   } else {
