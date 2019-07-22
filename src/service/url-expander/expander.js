@@ -16,6 +16,7 @@
 
 import {hasOwn} from '../../utils/object';
 import {rethrowAsync, user, userAssert} from '../../log';
+import {trimStart} from '../../string';
 import {tryResolve} from '../../utils/promise';
 
 /** @private @const {string} */
@@ -150,7 +151,7 @@ export class Expander {
           // Collect any chars that may be prefixing the macro, if we are in
           // a nested context trim the args.
           if (builder.trim().length) {
-            results.push(numOfPendingCalls ? builder.trimStart() : builder);
+            results.push(numOfPendingCalls ? trimStart(builder) : builder);
           }
 
           // If we know we are at the start of a macro, we figure out how to

@@ -158,3 +158,16 @@ export function trimEnd(str) {
 
   return ('_' + str).trim().slice(1);
 }
+
+/**
+ * Trims any leading whitespace from a string.
+ * @param {string} str  A string to trim.
+ * @return {string} The string, with leading whitespace removed.
+ */
+export function trimStart(str) {
+  if (str.trimStart) {
+    return str.trimStart();
+  }
+
+  return (str + '_').trim().slice(0, -1);
+}
