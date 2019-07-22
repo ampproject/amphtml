@@ -235,6 +235,11 @@ export class GlobalVariableSource extends VariableSource {
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
     this.set('PAGE_VIEW_ID', () => this.getDocInfo_().pageViewId);
+    
+    // Returns a random string that will be the constant for the duration of
+    // single page view. It should have sufficient entropy to be unique for
+    // all the page views a single user is making at a time.
+    this.setAsync('PAGE_VIEW_ID_64', () => this.getDocInfo_().pageViewId64);
 
     this.setBoth(
       'QUERY_PARAM',
@@ -1165,6 +1170,7 @@ export class UrlReplacements {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
       'PAGE_VIEW_ID': true,
+      'PAGE_VIEW_ID_64': true,
       'NAV_TIMING': true,
     };
     const additionalUrlParameters =
