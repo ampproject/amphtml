@@ -186,6 +186,7 @@ app.use('/request-bank/:bid/teardown/', (req, res) => {
  * Serves a fake ad for test-amp-ad-fake.js
  */
 app.get('/a4a/:bid', (req, res) => {
+  cors.enableCors(req, res);
   const {bid} = req.params;
   const body = `
   <a href=https://ampbyexample.com target=_blank>

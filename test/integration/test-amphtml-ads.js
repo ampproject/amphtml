@@ -20,53 +20,65 @@ import {parseQueryString} from '../../src/url';
 import {toggleExperiment} from '../../src/experiments';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
-/**
- * Returns a promise that fetches the content of the AMP ad at the amp4test url.
- * This somewhat simulates rendering an ad by getting its content from an ad
- * server.
- */
-function fetchAdContent() {
-  const url = '//localhost:9876/amp4test/a4a/' + RequestBank.getBrowserId();
-  return xhrServiceForTesting(window)
-    .fetchText(url, {
-      method: 'GET',
-      ampCors: false,
-      credentials: 'omit',
-    })
-    .then(res => res.text());
-}
+describe('AMPHTML ad on AMP Page', () => {
+  describes.integration(
+    'ATF',
+    {
+      amp: true,
+      extensions: ['amp-ad'],
+      body: `
+  <amp-ad
+      width="300" height="250"
+      id="i-amphtml-demo-id"
+      type="fake"
+      a4a-conversion="true"
+      checksig=""
+      disable3pfallback="true"
+      src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}">
+  </amp-ad>
+      `,
+    },
+    () => {
+      it('should layout amp-img, amp-pixel, amp-analytics', () => {
+        // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
+        return testAmpComponents();
+      });
+    }
+  );
 
-/**
- * Write the HTML page into the provided iframe then add it to the document.
- */
-function writeFriendlyFrame(doc, iframe, adContent) {
-  doc.body.appendChild(iframe);
-  iframe.contentDocument.write(adContent);
-  iframe.contentDocument.close();
-}
+  describes.integration(
+    'BTF',
+    {
+      amp: true,
+      extensions: ['amp-ad'],
+      body: `
+  <div style="height: 100vh"></div>
+  <amp-ad
+      width="300" height="250"
+      id="i-amphtml-demo-id"
+      type="fake"
+      a4a-conversion="true"
+      checksig=""
+      disable3pfallback="true"
+      src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}">
+  </amp-ad>
+      `,
+    },
+    env => {
+      beforeEach(() => {
+        // TODO: This happens after the test page is fully rendered, so there's
+        // a split second where the test iframe is not yet resized; that's
+        // enough to trigger viewability on Safari. Fix this to unskip
+        env.iframe.style.height = '100vh';
+      });
 
-/**
- * Write the HTML page into the provided iframe, turn it into a safe frame
- * then add it to the document.
- */
-function writeSafeFrame(doc, iframe, adContent) {
-  iframe.name = `1-0-31;${adContent.length};${adContent}{"uid": "test"}`;
-  iframe.src =
-    '//iframe.localhost:9876/test/fixtures/served/iframe-safeframe.html';
-  doc.body.appendChild(iframe);
-}
-
-/**
- * Unregister the specified iframe from the host script at the top-level window.
- * Use this command to reset between tests so the host script stops observing
- * iframes that has been removed when their tests ended.
- */
-function unregisterIframe(frame) {
-  const hostWin = window.top;
-  if (hostWin.AMP && hostWin.AMP.inaboxUnregisterIframe) {
-    hostWin['AMP'].inaboxUnregisterIframe(frame);
-  }
-}
+      it('should layout amp-img, amp-pixel, amp-analytics', () => {
+        // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
+        return testAmpComponentsBTF(env.win);
+      });
+    }
+  );
+});
 
 // TODO(zombifier):
 // - Unskip the cross domain tests on Firefox, which broke because localhost
@@ -77,62 +89,12 @@ function unregisterIframe(frame) {
 describe
   .configure()
   .skipWindows()
-  .run('inabox', function() {
-    function testAmpComponents() {
-      const imgPromise = RequestBank.withdraw('image').then(req => {
-        expect(req.url).to.equal('/');
-      });
-      const pixelPromise = RequestBank.withdraw('pixel').then(req => {
-        expect(req.url).to.equal('/foo?cid=');
-      });
-      const analyticsPromise = RequestBank.withdraw('analytics').then(req => {
-        expect(req.url).to.match(/^\/bar\?/);
-        const queries = parseQueryString(req.url.substr('/bar'.length));
-        expect(queries['cid']).to.equal('');
-        expect(queries['sourceUrl']).be.ok;
-        // Cookie is sent via http response header when requesting
-        // localhost:9876/amp4test/a4a/
-        // COOKIE macro is not allowed in inabox and resolves to empty
-        expect(queries['cookie']).to.equal('');
-      });
-      return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
-    }
-
-    function testAmpComponentsBTF(win) {
-      // The iframe starts BTF. "visible" trigger should be after scroll.
-      // We will record scrolling time for comparison.
-      let scrollTime = Infinity;
-      const imgPromise = RequestBank.withdraw('image').then(req => {
-        expect(Date.now()).to.be.below(scrollTime);
-        expect(req.url).to.equal('/');
-      });
-      const pixelPromise = RequestBank.withdraw('pixel').then(req => {
-        expect(Date.now()).to.be.below(scrollTime);
-        expect(req.url).to.equal('/foo?cid=');
-      });
-      const analyticsPromise = RequestBank.withdraw('analytics').then(req => {
-        expect(req.url).to.match(/^\/bar\?/);
-        const queries = parseQueryString(req.url.substr('/bar'.length));
-        expect(queries['cid']).to.equal('');
-        expect(Date.now()).to.be.above(scrollTime);
-        expect(parseInt(queries['timestamp'], 10)).to.be.above(scrollTime);
-      });
-      setTimeout(() => {
-        scrollTime = Date.now();
-        win.scrollTo(0, 1000);
-        // Scroll the top frame by 1 pixel manually because the host script lives
-        // there so it will only fire the position changed event if the top window
-        // itself is scrolled.
-        window.top.scrollTo(window.top.scrollX, window.top.scrollY - 1);
-      }, 2000);
-      return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
-    }
-
+  .run('AMPHTML ad on non-AMP page (inabox)', function() {
     const describeWebkit = describe.configure().skipFirefox();
 
     describeWebkit.run('AMPHTML ads', () => {
       describes.integration(
-        'rendered on non-AMP page ATF',
+        'ATF',
         {
           amp: false,
           body: `
@@ -157,7 +119,7 @@ describe
       );
 
       describes.integration(
-        'AMPHTML ads rendered on non-AMP page BTF',
+        'BTF',
         {
           amp: false,
           body: `
@@ -191,7 +153,7 @@ describe
     });
 
     describes.integration(
-      'rendered on non-AMP page ATF within friendly frame and safe frame',
+      'ATF within friendly frame and safe frame',
       {
         amp: false,
         body: `
@@ -241,8 +203,7 @@ describe
     );
 
     describes.integration(
-      'AMPHTML ads rendered on non-AMP page BTF within ' +
-        'friendly frame and safe frame',
+      'BTF within friendly frame and safe frame',
       {
         amp: false,
         body: `
@@ -448,3 +409,101 @@ describe
       }
     );
   });
+
+function testAmpComponents() {
+  const imgPromise = RequestBank.withdraw('image').then(req => {
+    expect(req.url).to.equal('/');
+  });
+  const pixelPromise = RequestBank.withdraw('pixel').then(req => {
+    expect(req.url).to.equal('/foo?cid=');
+  });
+  const analyticsPromise = RequestBank.withdraw('analytics').then(req => {
+    expect(req.url).to.match(/^\/bar\?/);
+    const queries = parseQueryString(req.url.substr('/bar'.length));
+    expect(queries['cid']).to.equal('');
+    expect(queries['sourceUrl']).be.ok;
+    // Cookie is sent via http response header when requesting
+    // localhost:9876/amp4test/a4a/
+    // COOKIE macro is not allowed in inabox and resolves to empty
+    expect(queries['cookie']).to.equal('');
+  });
+  return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
+}
+
+function testAmpComponentsBTF(win) {
+  // The iframe starts BTF. "visible" trigger should be after scroll.
+  // We will record scrolling time for comparison.
+  let scrollTime = Infinity;
+  const imgPromise = RequestBank.withdraw('image').then(req => {
+    expect(Date.now()).to.be.below(scrollTime);
+    expect(req.url).to.equal('/');
+  });
+  const pixelPromise = RequestBank.withdraw('pixel').then(req => {
+    expect(Date.now()).to.be.below(scrollTime);
+    expect(req.url).to.equal('/foo?cid=');
+  });
+  const analyticsPromise = RequestBank.withdraw('analytics').then(req => {
+    expect(req.url).to.match(/^\/bar\?/);
+    const queries = parseQueryString(req.url.substr('/bar'.length));
+    expect(queries['cid']).to.equal('');
+    expect(Date.now()).to.be.above(scrollTime);
+    expect(parseInt(queries['timestamp'], 10)).to.be.above(scrollTime);
+  });
+  setTimeout(() => {
+    scrollTime = Date.now();
+    win.scrollTo(0, 1000);
+    // Scroll the top frame by 1 pixel manually because the host script lives
+    // there so it will only fire the position changed event if the top window
+    // itself is scrolled.
+    window.top.scrollTo(window.top.scrollX, window.top.scrollY - 1);
+  }, 2000);
+  return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
+}
+
+/**
+ * Returns a promise that fetches the content of the AMP ad at the amp4test url.
+ * This somewhat simulates rendering an ad by getting its content from an ad
+ * server.
+ */
+function fetchAdContent() {
+  const url = '//localhost:9876/amp4test/a4a/' + RequestBank.getBrowserId();
+  return xhrServiceForTesting(window)
+    .fetchText(url, {
+      method: 'GET',
+      ampCors: false,
+      credentials: 'omit',
+    })
+    .then(res => res.text());
+}
+
+/**
+ * Write the HTML page into the provided iframe then add it to the document.
+ */
+function writeFriendlyFrame(doc, iframe, adContent) {
+  doc.body.appendChild(iframe);
+  iframe.contentDocument.write(adContent);
+  iframe.contentDocument.close();
+}
+
+/**
+ * Write the HTML page into the provided iframe, turn it into a safe frame
+ * then add it to the document.
+ */
+function writeSafeFrame(doc, iframe, adContent) {
+  iframe.name = `1-0-31;${adContent.length};${adContent}{"uid": "test"}`;
+  iframe.src =
+    '//iframe.localhost:9876/test/fixtures/served/iframe-safeframe.html';
+  doc.body.appendChild(iframe);
+}
+
+/**
+ * Unregister the specified iframe from the host script at the top-level window.
+ * Use this command to reset between tests so the host script stops observing
+ * iframes that has been removed when their tests ended.
+ */
+function unregisterIframe(frame) {
+  const hostWin = window.top;
+  if (hostWin.AMP && hostWin.AMP.inaboxUnregisterIframe) {
+    hostWin['AMP'].inaboxUnregisterIframe(frame);
+  }
+}
