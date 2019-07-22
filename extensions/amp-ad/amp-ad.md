@@ -342,6 +342,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [mox](../../ads/mox.md)
 - [myTarget](../../ads/mytarget.md)
 - [myWidget](../../ads/mywidget.md)
+- [NativeRoll](../../ads/nativeroll.md)
 - [Nativo](../../ads/nativo.md)
 - [Navegg](../../ads/navegg.md)
 - [Nend](../../ads/nend.md)
