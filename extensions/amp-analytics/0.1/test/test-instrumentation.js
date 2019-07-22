@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {AmpDocFie} from '../../../../src/service/ampdoc-impl';
+import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
 import {CustomEventTracker} from '../events';
-
 import {InstrumentationService} from '../instrumentation.js';
+import {Services} from '../../../../src/services';
 
 describes.realWin('InstrumentationService', {amp: 1}, env => {
   let win;
@@ -42,6 +44,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
   it('should create and dispose the ampdoc root', () => {
     expect(root).to.be.ok;
     expect(root.ampdoc).to.equal(ampdoc);
+    expect(root).to.be.instanceof(AmpdocAnalyticsRoot);
 
     const stub = sandbox.stub(root, 'dispose');
     service.dispose();
@@ -90,6 +93,7 @@ describes.realWin(
     });
 
     it('should create and reuse embed root', () => {
+      expect(root).to.be.instanceof(AmpdocAnalyticsRoot);
       expect(root.ampdoc).to.equal(ampdoc);
 
       const group1 = service.createAnalyticsGroup(analyticsElement);
@@ -103,6 +107,20 @@ describes.realWin(
       win.document.body.appendChild(analyticsElement2);
       const group2 = service.createAnalyticsGroup(analyticsElement2);
       expect(group2.root_).to.equal(embedRoot);
+    });
+
+    it('should create embed root for ampdoc-fie', () => {
+      const parentAmpdoc = ampdoc;
+      ampdoc = new AmpDocFie(win, 'https://example.org', parentAmpdoc);
+      sandbox.stub(Services, 'ampdoc').callsFake(context => {
+        if (context == win.document) {
+          return ampdoc;
+        }
+      });
+      service = new InstrumentationService(ampdoc);
+      root = service.root_;
+      expect(root).to.be.instanceof(EmbedAnalyticsRoot);
+      expect(root.ampdoc).to.equal(ampdoc);
     });
   }
 );
