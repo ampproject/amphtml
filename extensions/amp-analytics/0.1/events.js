@@ -1340,12 +1340,9 @@ export class VisibilityTracker extends EventTracker {
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
       unlistenPromise = this.root
-        .getAmpElement(
-          context.parentElement || context,
-          selector,
-          selectionMethod
-        )
+        .getElement(context.parentElement || context, selector, selectionMethod)
         .then(element => {
+          console.log(element);
           return visibilityManagerPromise.then(
             visibilityManager => {
               return visibilityManager.listenElement(
