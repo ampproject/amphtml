@@ -55,7 +55,7 @@ const AMP_EVENT_TO_SWG_EVENT = {
 
 const AMP_ACTION_TO_SWG_EVENT = {
   [Action.SHOW_OFFERS]: {
-    [ActionStatus.STARTED]: AnalyticsEvent.IMPRESSION_OFFERS,
+    [ActionStatus.STARTED]: null, //ex: AnalyticsEvent.IMPRESSION_OFFERS
   },
 };
 
