@@ -34,6 +34,9 @@ let PositionEntryDef;
 /** @const */
 const MIN_EVENT_INTERVAL_IN_MS = 100;
 
+/** @const */
+const AMP_INABOX_POSITION_OBSERVER = 'ampInaboxPositionObserver';
+
 export class PositionObserver {
   /**
    * @param {!Window} win
@@ -92,9 +95,9 @@ export class PositionObserver {
    */
   getPositionEntry_(element) {
     return {
-      viewportRect: /** @type {!LayoutRectDef} */ (this.viewportRect_),
+      'viewportRect': /** @type {!LayoutRectDef} */ (this.viewportRect_),
       // relative position to viewport
-      targetRect: this.getTargetRect(element),
+      'targetRect': this.getTargetRect(element),
     };
   }
 
@@ -178,4 +181,15 @@ function getScrollingElement(win) {
  */
 function isWebKit(ua) {
   return /WebKit/i.test(ua) && !/Edge/i.test(ua);
+}
+
+/**
+ * Use an existing position observer within the window, if any.
+ * @param {!Window} win
+ * @return {!PositionObserver}
+ */
+export function getPositionObserver(win) {
+  win[AMP_INABOX_POSITION_OBSERVER] =
+    win[AMP_INABOX_POSITION_OBSERVER] || new PositionObserver(win);
+  return win[AMP_INABOX_POSITION_OBSERVER];
 }
