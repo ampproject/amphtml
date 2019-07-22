@@ -14,11 +14,30 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {startsWith} from '../../../src/string';
-import {user, userAssert} from '../../../src/log';
+import { AmpA4A } from '../../amp-a4a/0.1/amp-a4a';
+import { startsWith, endsWith } from '../../../src/string';
+import { user, userAssert } from '../../../src/log';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
+
+const headComponents = {
+  metaOther: [],
+  scriptNonRenderDelayingExtensions: [],
+  scriptRenderDelayingExtensions: [],
+  linkIcons: [],
+  linkResourceHints: [],
+  linkStylesheetBeforeAmpCustom: [],
+  other: [],
+  styleAmpRuntime: null,
+  metaCharset: null,
+  scriptAmpEngine: null,
+  scriptAmpViewer: null,
+  scriptGmailAmpViewer: null,
+  styleAmpCustom: null,
+  linkStylesheetRuntimeCss: null,
+  styleAmpBoilerplate: null,
+  noscript: null,
+};
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
   /**
@@ -26,6 +45,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+
   }
 
   /** @override */
@@ -92,6 +112,8 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    */
   transformCreative_(source) {
     const doc = new DOMParser().parseFromString(source, 'text/html');
+    this.reorderHead_(doc.head);
+    const metadata = this.generateMetadata_(doc);
     const root = doc.documentElement;
 
     // <html ⚡> -> <html ⚡4ads>
@@ -106,55 +128,303 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       root.setAttribute('amp4ads', '');
     }
 
-    // Remove all AMP scripts.
+    const creative = root.outerHTML;
+    const creativeSplit = creative.split('</body>');
+    const docWithMetadata = creativeSplit[0] + `<script type='application/json' amp-ad-metadata>` + metadata + '</script></body>' + creativeSplit[1];
+    return docWithMetadata;
+  }
+
+  generateMetadata_(doc) {
+    const head = doc.head;
+    let metadata = {};
+    const jsonMetadata = [];
+    const styles = [];
     const extensions = [];
-    const scripts = doc.head.querySelectorAll('script[src]');
-    for (let i = 0; i < scripts.length; i++) {
-      const script = scripts[i];
-      if (script.hasAttribute('custom-element')) {
-        extensions.push(script.getAttribute('custom-element'));
-      } else if (script.hasAttribute('custom-template')) {
-        extensions.push(script.getAttribute('custom-template'));
+    let firstRuntimeElement, lastRuntimeElement;
+    let ctaType, ctaUrl;
+    if (head != null) {
+      for (let child of head.children) {
+        if (child.tagName == 'SCRIPT') {
+          if (child.hasAttribute('src')) {
+            if (firstRuntimeElement == null) {
+              firstRuntimeElement = child;
+            }
+            lastRuntimeElement = child;
+            if (child.hasAttribute('custom-element')) {
+              extensions.push({
+                'custom-element': child.getAttribute('custom-element'),
+                'src': child.getAttribute('src'),
+              });
+            }
+            if (child.hasAttribute('custom-template')) {
+              extensions.push({
+                'custom-template': child.getAttribute('custom-template'),
+                'src': child.getAttribute('src'),
+              });
+            }
+          }
+        }
+        if (
+          child.tagName == 'LINK' &&
+          child.getAttribute('rel') == 'stylesheet' &&
+          child.hasAttribute('href')
+        ) {
+          let styleJson = {href: child.getAttribute('href')};
+          if (child.hasAttribute('media')) {
+            styleJson.media = child.getAttribute('media');
+          }
+          styles.push(styleJson);
+        }
+        if (this.element.hasAttribute('amp-story')) {
+          if (
+            child.tagName == 'META' &&
+            child.hasAttribute('name') &&
+            child.hasAttribute('content')
+          ) {
+            if (child.getAttribute('name') == 'amp-cta-type') {
+              ctaType = child.getAttribute('content');
+            }
+            if (child.getAttribute('name') == 'amp-cta-url') {
+              ctaUrl = child.getAttribute('content');
+            }
+          }
+        }
       }
-      doc.head.removeChild(script);
+    }
+    const imgMetadata = [];
+    const imgs = doc.querySelectorAll('amp-img[src]');
+    for (let i = 0; i < imgs.length; i++) {
+      let img = imgs[i];
+      let width, height, area = -1;
+      if (img.hasAttribute('width')) {
+        width = img.getAttribute(width);
+      }
+      if (img.hasAttribute('height')) {
+        height = img.getAttribute('height');
+      }
+      if (height && width) {
+        area = height * width;
+      }
+      imgMetadata.push({
+        src: img.getAttribute('src'),
+        area: area,
+      });
     }
 
-    // Remove boilerplate styles.
-    const styles = doc.head.querySelectorAll('style[amp-boilerplate]');
-    for (let i = 0; i < styles.length; i++) {
-      const style = styles[i];
-      style.parentNode.removeChild(style);
+    const json = doc.querySelectorAll('script[type]');
+    for (let i = 0; i < json.length; i++) {
+      const script = json[i];
+      const type = script.getAttribute('type');
+      if (type == 'application/json' && script.hasAttribute('id') && !jsonMetadata.includes(script.getAttribute('id'))) {
+        jsonMetadata.push(script.getAttribute('id'));
+      }
+    }
+    const ampAnalytics = doc.querySelector('amp-analytics');
+    if (ampAnalytics && !jsonMetadata.includes('amp-analytics')) {
+      jsonMetadata.push('amp-analytics');
     }
 
-    let creative = root./*OK*/ outerHTML;
+    const creative = doc.documentElement.outerHTML;
+    let start = 0;
+    let end = 0;
+    if (firstRuntimeElement != null) {
+      firstRuntimeElement = firstRuntimeElement.outerHTML;
+      lastRuntimeElement = lastRuntimeElement.outerHTML;
+      start = creative.indexOf(firstRuntimeElement);
+      end =
+        creative.indexOf(lastRuntimeElement) + lastRuntimeElement.length;
+    }
+    metadata['ampRuntimeUtf16CharOffsets'] = [start, end];
 
-    // Metadata
-    creative += '<script type="application/json" amp-ad-metadata>';
-    creative += '{';
+    if (jsonMetadata.size > 0) {
+      metadata['jsonUtf16CharOffsets'] = {};
+      for (let name of jsonMetadata) {
+        let nameElementString;
+        if (name != 'amp-analytics') {
+          nameElementString = doc
+          .getElementById(name)
+          .outerHTML;
+        } else {
+          nameElementString = doc.querySelector('amp-analytics').child.outerHTML;
+        }
+        const jsonStart = creative.indexOf(nameElementString);
+        const jsonEnd = jsonStart + nameElementString.length;
+        metadata['jsonUtf16CharOffsets'][name] = [jsonStart, jsonEnd];
+      }
+    }
+    metadata['customElementExtensions'] = [];
+    metadata['extensions'] = [];
+    for (let extension of extensions) {
+      let custom;
+      if (extension['custom-element'] != null) {
+        custom = extension['custom-element'];
+      } else {
+        custom = extension['custom-template'];
+      }
+      if (!metadata['customElementExtensions'].includes(custom)) {
+        metadata['customElementExtensions'].push(custom);
+        metadata['extensions'].push({
+          'custom-element': custom,
+          'src': extension['src']
+        });
+      }
+    }
 
+    metadata['customStyleSheets'] = styles;
+    metadata['ampImages'] = [];
+    for (let img of imgMetadata) {
+      metadata['ampImages'].push(img.src);
+    }
     if (this.element.hasAttribute('amp-story')) {
-      const ctaTypeMeta = root.querySelector('[name=amp-cta-type]');
-      const ctaType = ctaTypeMeta && ctaTypeMeta.content;
-      creative += `"ctaType": "${ctaType}", `;
-
-      const ctaTypeUrl = root.querySelector('[name=amp-cta-url]');
-      const ctaUrl = ctaTypeUrl && ctaTypeUrl.content;
-      creative += `"ctaUrl": "${ctaUrl}", `;
+      metadata['ctaType'] = ctaType;
+      metadata['ctaUrl'] = ctaUrl;
     }
+    return JSON.stringify(metadata);
+  }
 
-    creative += '"ampRuntimeUtf16CharOffsets": [0, 0],';
-    creative += '"customElementExtensions": [';
-    for (let i = 0; i < extensions.length; i++) {
-      if (i > 0) {
-        creative += ',';
+  appendIfNotNull_(parent, element) {
+    if (element != null) {
+      parent.appendChild(element);
+    }
+  }
+
+  appendAll_(parent, element) {
+    for (let child of element) {
+      parent.appendChild(child);
+    }
+  }
+
+  reorderHead_(head) {
+    if (head != null) {
+      for (let child of head.children) {
+        switch (child.tagName) {
+          case 'META':
+            this.registerMeta(child);
+            break;
+          case 'SCRIPT':
+            this.registerScript(child);
+            break;
+          case 'STYLE':
+            this.registerStyle(child);
+            break;
+          case 'LINK':
+            this.registerLink(child);
+            break;
+          case 'NOSCRIPT':
+            headComponents.noscript = child;
+          default:
+            if (!headComponents.other.includes(child)) {
+              headComponents.other.push(child);
+            }
+            break;
+        }
       }
-      creative += `"${extensions[i]}"`;
     }
-    creative += ']';
-    creative += '}';
-    creative += '</script>';
+    head.innerHTML = '';
+    this.repopulate(head);
+    return head;
+  }
 
-    return creative;
+  repopulate(head) {
+    this.appendIfNotNull_(head, headComponents.metaCharset);
+    this.appendIfNotNull_(head, headComponents.linkStylesheetRuntimeCss);
+    this.appendIfNotNull_(head, headComponents.styleAmpRuntime);
+    this.appendAll_(head, headComponents.metaOther);
+    this.appendIfNotNull_(head, headComponents.scriptAmpEngine);
+    this.appendIfNotNull_(head, headComponents.scriptAmpViewer);
+    this.appendIfNotNull_(head, headComponents.scriptGmailAmpViewer);
+    this.appendAll_(head, headComponents.scriptRenderDelayingExtensions);
+    this.appendAll_(head, headComponents.scriptNonRenderDelayingExtensions);
+    this.appendAll_(head, headComponents.linkIcons);
+    this.appendAll_(head, headComponents.linkResourceHints);
+    this.appendAll_(head, headComponents.linkStylesheetBeforeAmpCustom);
+    this.appendIfNotNull_(head, headComponents.styleAmpCustom);
+    this.appendAll_(head, headComponents.other);
+    this.appendIfNotNull_(head, headComponents.styleAmpBoilerplate);
+    this.appendIfNotNull_(head, headComponents.noscript);
+    return head;
+  }
+
+  registerMeta(element) {
+    if (element.hasAttribute('charset')) {
+      headComponents.metaCharset = element;
+      return;
+    }
+    if (!headComponents.metaOther.includes(element)) {
+      headComponents.metaOther.push(element);
+      return;
+    }
+  }
+
+  registerScript(element) {
+    const src = element.getAttribute('src');
+    const isAsync = element.hasAttribute('async');
+    const isExtension = element.hasAttribute('custom-element') || element.hasAttribute('custom-template') || element.hasAttribute('host-service');
+    if (isExtension) {
+      const custom = element.getAttribute('custom-element');
+      if (custom == 'amp-story' || custom == 'amp-experiment' || custom == 'amp-dynamic-css-classes') {
+        headComponents.scriptRenderDelayingExtensions.push(element);
+        return;
+      }
+      headComponents.scriptNonRenderDelayingExtensions.push(element);
+      return;
+    }
+    if (isAsync && startsWith(src, 'https://cdn.ampproject.org/') && (endsWith(src, "/v0.js") || endsWith(src, "/v0.js.br") || endsWith(src, "/amp4ads-v0.js") || endsWith(src, "/amp4ads-v0.js.br"))) {
+      headComponents.scriptAmpEngine = element;
+      return;
+    }
+    if (isAsync && startsWith(src, "https://cdn.ampproject.org/v0/amp-viewer-integration-gmail-") && endsWith(src, '.js')) {
+      headComponents.scriptGmailAmpViewer = element;
+      return;
+    }
+    if (isAsync && (startsWith(src, 'https://cdn.ampproject.org/v0/amp-viewer-integration-') || startsWith(src, 'https://cdn.ampproject.org/viewer/google/v') && endsWith(src, '.js'))) {
+      headComponents.scriptAmpViewer = element;
+      return;
+    }
+    headComponents.other.push(element);
+  }
+
+  registerStyle(element) {
+    if (element.hasAttribute('amp-runtime')) {
+      headComponents.styleAmpRuntime = element;
+      return;
+    }
+    if (element.hasAttribute('amp-custom')) {
+      headComponents.styleAmpCustom = element;
+      return;
+    }
+    if (
+      element.hasAttribute('amp-boilerplate') ||
+      element.hasAttribute('amp4ads-boilerplate')
+    ) {
+      headComponents.styleAmpBoilerplate = element;
+      return;
+    }
+    headComponents.other.push(element);
+  }
+
+  registerLink(element) {
+    const rel = element.getAttribute('rel');
+    if (rel == 'stylesheet') {
+      if (startsWith(element.getAttribute('href'), 'https://cdn.ampproject.org/') && endsWith(element.getAttribute('href'), '/v0.css')) {
+        headComponents.linkStylesheetRuntimeCss = element;
+        return;
+      }
+      if (headComponents.styleAmpCustom == null) {
+        headComponents.linkStylesheetBeforeAmpCustom.push(element);
+        return;
+      }
+      return;
+    }
+    if (rel == 'icon' || rel == 'icon shortcut' || rel == 'shortcut icon') {
+      headComponents.linkIcons.push(element);
+      return;
+    }
+    if (rel == 'dns-prefetch preconnect') {
+      headComponents.linkResourceHints.push(element);
+      return;
+    }
+    headComponents.other.push(element);
   }
 }
 
