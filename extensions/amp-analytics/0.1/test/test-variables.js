@@ -362,6 +362,62 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         'a1b2c3&123'
       );
     });
+
+    describe('$MATCH', () => {
+      it('handles default index', () => {
+        return check('$MATCH(thisisatest, thisisatest)', 'thisisatest');
+      });
+
+      it('matches full match', () => {
+        return check('$MATCH(thisisatest, thisisatest, 0)', 'thisisatest');
+      });
+
+      it('matches partial match', () => {
+        return check('$MATCH(thisisatest, test, 0)', 'test');
+      });
+
+      it('matches 1st group match', () => {
+        return check('$MATCH(thisisatest, `thisisa(test)`, 1)', 'test');
+      });
+
+      it('matches 2nd group match', () => {
+        return check('$MATCH(thisisatest, `this(is)a(test)`, 2)', 'test');
+      });
+
+      it('does not match non-matching group', () => {
+        return check('$MATCH(thisisatest, `thisisa(?:test)`, 1)', '');
+      });
+
+      it('handles escaped regex chars', () => {
+        return check('$MATCH(1, \\d, 0)', '1');
+      });
+
+      it('handles no full match', () => {
+        return check('$MATCH(invalid, thisisatest, 0)', '');
+      });
+
+      it('handles no group match', () => {
+        return check('$MATCH(thisisatest, `thisisa(\\d+)?test`, 1)', '');
+      });
+
+      it('handles large index', () => {
+        return check('$MATCH(thisisatest, thisisatest, 100)', '');
+      });
+
+      it('handles negative index', () => {
+        expectAsyncConsoleError(
+          /Third argument in MATCH macro must be a number >= 0/
+        );
+        return check('$MATCH(thisisatest, thisisatest, -1)', 'thisisatest');
+      });
+
+      it('handles NaN index', () => {
+        expectAsyncConsoleError(
+          /Third argument in MATCH macro must be a number >= 0/
+        );
+        return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
+      });
+    });
   });
 
   describe('getNameArgs:', () => {

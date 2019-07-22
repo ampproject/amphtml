@@ -24,12 +24,12 @@ import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   ADX_ADY_EXP,
   AmpAnalyticsConfigDef,
+  FIE_CSS_CLEANUP_EXP,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
-  getContainerWidth,
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
@@ -74,6 +74,7 @@ import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {getFlexibleAdSlotRequestParams} from './flexible-ad-slot-utils';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -394,6 +395,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
       },
+      [[FIE_CSS_CLEANUP_EXP.branch]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [FIE_CSS_CLEANUP_EXP.control],
+          [FIE_CSS_CLEANUP_EXP.experiment],
+        ],
+      },
     });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(
@@ -523,21 +531,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const pageLayoutBox = this.isSinglePageStoryAd
       ? this.element.getPageLayoutBox()
       : null;
-    let psz = null;
     let msz = null;
+    let psz = null;
+    let fws = null;
     if (this.sendFlexibleAdSlotParams_) {
-      const parentWidth = getContainerWidth(
+      const {fwSignal, slotWidth, parentWidth} = getFlexibleAdSlotRequestParams(
         this.win,
         this.element.parentElement
       );
-      let slotWidth = getContainerWidth(
-        this.win,
-        this.element,
-        1 /* maxDepth */
-      );
-      slotWidth = slotWidth == -1 ? parentWidth : slotWidth;
+      // If slotWidth is -1, that means its width must be determined by its
+      // parent container, and so should have the same value as parentWidth.
+      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
       psz = `${parentWidth}x-1`;
-      msz = `${slotWidth}x-1`;
+      fws = fwSignal ? fwSignal : '0';
     }
     return Object.assign(
       {
@@ -559,6 +565,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // disallowed in AMP.
         'msz': msz,
         'psz': psz,
+        'fws': fws,
         'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||

@@ -397,7 +397,9 @@ export const adConfig = {
     prefetch: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
     preconnect: 'https://bal.ad.dotandad.com',
   },
-
+  'dynad': {
+    preconnect: ['https://t.dynad.net', 'https://tm.jsuol.com.br'],
+  },
   'eadv': {
     renderStartImplemented: true,
     clientIdScope: 'AMP_ECID_EADV',
@@ -490,7 +492,12 @@ export const adConfig = {
   'ibillboard': {},
 
   'idealmedia': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.idealmedia.io',
+      'https://servicer.idealmedia.io',
+      'https://s-img.idealmedia.io/',
+    ],
   },
 
   'imedia': {
@@ -632,7 +639,12 @@ export const adConfig = {
   },
 
   'mgid': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.mgid.com',
+      'https://servicer.mgid.com',
+      'https://s-img.mgid.com',
+    ],
   },
 
   'microad': {
@@ -676,6 +688,10 @@ export const adConfig = {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
     renderStartImplemented: true,
+  },
+
+  'nativeroll': {
+    prefetch: 'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
   },
 
   'nativo': {
@@ -836,6 +852,8 @@ export const adConfig = {
     preconnect: 'https://ad.rfp.fout.jp',
     renderStartImplemented: true,
   },
+
+  'rnetplus': {},
 
   'rubicon': {},
 

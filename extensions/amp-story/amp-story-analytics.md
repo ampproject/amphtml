@@ -50,6 +50,10 @@ Using `amp-analytics` you can re-assign the `story-page-visible` event to behave
 
 Consult your vendor's documentation for more specific details on how to set this up.
 
+### Last page visible trigger (`"on": "story-last-page-visible"`)
+
+The `story-last-page-visible` trigger is fired when the last page in the story is shown to the user. This can be used to measure completion rate.
+
 ### Bookend enter trigger (`"on": "story-bookend-enter"`)
 
 The `story-bookend-enter` trigger is fired when the bookend is shown to the user, after the last page of the current story.

@@ -1,12 +1,12 @@
 {
   "allow-doc-opt-in": [
-    "amp-img-auto-sizes",
     "amp-next-page",
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
     "inabox-css-cleanup"
   ],
   "allow-url-opt-in": [
+    "ios-scrollable-iframe",
     "pump-early-frame",
     "twitter-default-placeholder",
     "twitter-default-placeholder-fade",
@@ -15,15 +15,11 @@
 
   "canary": 1,
 
-  "a4aFastFetchAdSenseLaunched": 0,
-  "a4aFastFetchDoubleclickLaunched": 0,
   "a4aProfilingRate": 0.01,
   "amp-access-iframe": 1,
   "amp-ad-ff-adx-ady": 0.01,
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-consent-v2": 1,
-  "amp-force-prerender-visible-elements": 1,
-  "amp-img-auto-sizes": 1,
   "amp-list-load-more": 1,
   "amp-list-viewport-resize": 1,
   "amp-playbuzz": 1,
@@ -42,8 +38,8 @@
   "flexAdSlots": 0.01,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 1,
+  "ios-scrollable-iframe": 0,
   "layers": 1,
-  "margin-bottom-in-content-height": 1,
   "pump-early-frame": 1,
   "version-locking": 1
 }
