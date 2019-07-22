@@ -13,22 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const doctrine = require('@jridgewell/doctrine');
-
 const flatten = arr => [].concat(...arr);
-
-const buildFuncDecl = (t, id) => {
-  return t.functionDeclaration(t.identifier(id), [], t.blockStatement([]));
-};
-
-const buildExprStmt = (t, id, field) => {
-  return t.expressionStatement(
-    t.memberExpression(
-      t.memberExpression(t.identifier(id), t.identifier('prototype')),
-      t.identifier(field)
-    )
-  );
-};
 
 module.exports = function(babel) {
   const {types: t} = babel;
@@ -40,7 +25,7 @@ module.exports = function(babel) {
           return;
         }
 
-        const comments = node.leadingComments.filter(comment => {
+        const comments = node.leadingComments.find(comment => {
           return (
             comment.type === 'CommentBlock' && /@typedef/.test(comment.value)
           );
@@ -49,20 +34,10 @@ module.exports = function(babel) {
         if (!comments.length) {
           return;
         }
-        // We can assume theres only 1 typedef comment per VariableDeclaration.
-        const comment = doctrine.parse(comments[0].value, {unwrap: true});
-        const {fields} = comment.tags.filter(
-          tag => tag.title === 'typedef'
-        )[0].type;
 
-        // We can assume theres only 1 variable declarator
-        // if we can find a typedef leading comment.
-        const id = node.declarations[0].id.name;
-        const funcDecl = buildFuncDecl(t, id);
-        const memberExprs = fields.map(field => {
-          return buildExprStmt(t, id, field.key);
-        });
-        path.replaceWithMultiple([funcDecl, ...memberExprs]);
+        const comment = comments[0];
+
+        node.remove();
       },
     },
   };

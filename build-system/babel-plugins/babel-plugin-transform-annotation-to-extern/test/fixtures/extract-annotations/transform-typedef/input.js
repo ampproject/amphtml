@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {Observable} from '../../src/observable';
+
 /**
- *
  * @typedef {{
  *   viewportRect: !LayoutRectDef,
  *   targetRect: !LayoutRectDef,
@@ -22,17 +24,37 @@
  */
 let PositionEntryDef;
 
-/**
- *
- * @typedef {{
- *   viewportRect: !LayoutRectDef,
- *   targetRect: !LayoutRectDef,
- * }}
- */
-const PositionEntryDef2 = {};
+/** @const */
+const MIN_EVENT_INTERVAL_IN_MS = 100;
+
+export class PositionObserver {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @private {!Window} */
+    this.win_ = win;
+
+    /**
+     * @typedef {{
+     *   viewportRect: !LayoutRectDef,
+     *   targetRect: !LayoutRectDef,
+     * }}
+     */
+    const PositionEntryDef2 = {};
+  }
+}
 
 /**
- *
+ * Use an existing position observer within the window, if any.
+ * @param {!Window} win
+ * @return {!PositionObserver}
+ */
+export function getPositionObserver(win) {
+  win['string'] = {};
+}
+
+/**
  * @typedef {{
  *   viewportRect: !LayoutRectDef,
  *   targetRect: !LayoutRectDef,
