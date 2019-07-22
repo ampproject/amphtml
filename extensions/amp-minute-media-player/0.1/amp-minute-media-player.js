@@ -21,7 +21,7 @@ import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {
   createFrameFor,
-  isJsonOrObj,
+  isJsonOrObj, mutedOrUnmutedEvent,
   objOrParseJson,
   originMatches,
   redispatch,
@@ -82,6 +82,9 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private {?boolean}  */
+    this.muted_ = false;
   }
 
   /**
@@ -101,8 +104,6 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
-
-    installVideoManagerForDoc(this.element);
   }
 
   /** @override */
@@ -179,16 +180,26 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       return; // We only process valid JSON.
     }
 
-    const eventType = data['event'];
-
-    redispatch(this.element, eventType, {
+    redispatch(this.element, data['event'], {
+      'ready': VideoEvents.LOAD,
       'playing': VideoEvents.PLAYING,
       'pause': VideoEvents.PAUSE,
-      'muted': VideoEvents.MUTED,
       'ended': [VideoEvents.ENDED, VideoEvents.PAUSE],
       'ads-ad-started': VideoEvents.AD_START,
       'ads-ad-ended': VideoEvents.AD_END,
     });
+
+
+    if (data['event'] === 'mute') {
+      const muted = data['value'];
+      if (muted == null || this.muted_ == muted) {
+        return;
+      }
+      this.muted_ = muted;
+      this.element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      return;
+    }
+
   }
 
   /**
@@ -220,13 +231,16 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     const iframe = createFrameFor(this, this.iframeSource_());
     this.iframe_ = iframe;
 
-    Services.videoManagerForDoc(this.element).register(this);
     this.unlistenMessage_ = listen(
       this.win,
       'message',
       event => this.handleMinuteMediaPlayerMessage_(event)
     );
-    const loaded = this.loadPromise(this.iframe_)/*.then(() => Services.timerFor(this.win).promise(300))*/
+
+    installVideoManagerForDoc(this.element);
+    Services.videoManagerForDoc(this.element).register(this);
+
+    const loaded = this.loadPromise(this.iframe_)
       .then(() => {
       element.dispatchCustomEvent(VideoEvents.LOAD);
     });
