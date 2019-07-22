@@ -52,6 +52,7 @@ import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {
   childElement,
   closestAncestorElementBySelector,
+  createElementWithAttributes,
   isAmpElement,
   iterateCursor,
   matches,
@@ -264,6 +265,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
+
+    /** @private {?string} A textual description of the content of the page. */
+    this.description_ = null;
   }
 
   /**
@@ -311,6 +315,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       uiState => this.onUIStateUpdate_(uiState),
       true /* callToInitialize */
     );
+    this.setPageDescription_();
   }
 
   /**
@@ -1430,5 +1435,54 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setDescendantCssTextStyles_() {
     setTextBackgroundColor(this.element);
+  }
+
+  /**
+   * Sets the description of the page.
+   * @private
+   */
+  setPageDescription_() {
+    this.description_ = this.element.getAttribute('title');
+
+    if (this.isBotUserAgent_) {
+      this.renderPageDescription_();
+    } else {
+      // Strip the title attribute from the page on non-bot user agents, to
+      // prevent the browser tooltip.
+      if (!this.element.getAttribute('aria-label')) {
+        this.element.setAttribute('aria-label', this.description_);
+      }
+      this.element.removeAttribute('title');
+    }
+  }
+
+  /**
+   * Renders the page description in the page.
+   * @private
+   */
+  renderPageDescription_() {
+    if (!this.description_) {
+      return;
+    }
+
+    const descriptionElId = `i-amphtml-story-${this.element.id}-description`;
+    const descriptionEl = createElementWithAttributes(
+      this.win.document,
+      'h2',
+      dict({
+        'class': 'i-amphtml-story-page-description',
+        'id': descriptionElId,
+      })
+    );
+    descriptionEl./* OK */ textContent = this.description_;
+
+    this.element.parentElement.insertBefore(
+      descriptionEl,
+      this.element.nextElementSibling
+    );
+
+    if (!this.element.getAttribute('aria-labelledby')) {
+      this.element.setAttribute('aria-labelledby', descriptionElId);
+    }
   }
 }

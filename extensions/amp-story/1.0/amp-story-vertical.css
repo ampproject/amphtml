@@ -66,3 +66,13 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
   display: block !important;
   height: 178vw !important;
 }
+
+[i-amphtml-vertical] .i-amphtml-story-page-description {
+  background: white !important;
+  color: black !important;
+  display: block !important;
+  font-size: 0.8rem !important;
+  padding: 32px !important;
+  width: 100% !important;
+  z-index: 9999999 !important;
+}
