@@ -222,7 +222,8 @@ class RuntimeTestConfig {
         'report-config': {lcovonly: {file: `lcov-${testType}.info`}},
       };
 
-      const plugin = [
+      const newBabelifyConfig = Object.assign({}, this.babelifyConfig);
+      const instabulPlugin = [
         'istanbul',
         {
           exclude: [
@@ -236,12 +237,14 @@ class RuntimeTestConfig {
         },
       ];
 
-      this.browserify.transform = [
-        [
-          'babelify',
-          Object.assign({}, this.babelifyConfig, {plugins: [plugin]}),
-        ],
-      ];
+      // don't overwrite existing babel plugins
+      if ('plugins' in this.babelifyConfig) {
+        newBabelifyConfig['plugins'].push(instabulPlugin);
+      } else {
+        newBabelifyConfig['plugins'] = [instabulPlugin];
+      }
+
+      this.browserify.transform = [['babelify', newBabelifyConfig]];
     }
   }
 }
