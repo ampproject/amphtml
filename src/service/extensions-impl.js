@@ -15,19 +15,33 @@
  */
 
 import {Deferred} from '../utils/promise';
+import {
+  ExperimentInfo, // eslint-disable-line no-unused-vars
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../experiments';
 import {Services} from '../services';
 import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
 } from './extension-location';
 import {dev, devAssert, rethrowAsync} from '../log';
-import {getMode} from '../mode';
-import {installStylesForDoc} from '../style-installer';
 import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../experiments';
+  getAmpdoc,
+  installServiceInEmbedIfEmbeddable,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+  setParentWindow,
+} from '../service';
+import {getMode} from '../mode';
+import {installAmpdocServices} from './core-services';
+import {install as installCustomElements} from '../polyfills/custom-elements';
+import {install as installDOMTokenListToggle} from '../polyfills/domtokenlist-toggle';
+import {install as installDocContains} from '../polyfills/document-contains';
+import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
+import {installStylesForDoc, installStylesLegacy} from '../style-installer';
+import {installTimerInEmbedWindow} from './timer-impl';
 import {map} from '../utils/object';
 import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
 import {startsWith} from '../string';
