@@ -53,7 +53,7 @@ export let ElementDistanceFnDef;
  * Represents a task to be executed on a media element.
  * @typedef {function(!HTMLMediaElement, *): !Promise}
  */
-let ElementTaskDef;
+let ElementTask_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @const {string}

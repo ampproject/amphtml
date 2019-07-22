@@ -70,7 +70,7 @@ const DEFAULT_MESSAGES = {
  *   sandbox: (boolean|undefined),
  * }}
  */
-let LaterpayConfigDef;
+let LaterpayConfig_0_2_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @typedef {{
@@ -99,21 +99,21 @@ let ExpiryDef;
  *   expiry: ExpiryDef,
  * }}
  */
-let PurchaseOptionDef;
+let PurchaseOption_0_2_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @typedef {{
  *   identify_url: string,
- *   purchase_options: Array<PurchaseOptionDef>,
+ *   purchase_options: Array<PurchaseOption_0_2_Def>,
  * }}
  */
-let PurchaseConfigDef;
+let PurchaseConfig_0_2_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @typedef {{
- *   singlePurchases: Array<PurchaseOptionDef>,
- *   timepasses: Array<PurchaseOptionDef>,
- *   subscriptions: Array<PurchaseOptionDef>,
+ *   singlePurchases: Array<PurchaseOption_0_2_Def>,
+ *   timepasses: Array<PurchaseOption_0_2_Def>,
+ *   subscriptions: Array<PurchaseOption_0_2_Def>,
  * }}
  */
 let PurchaseOptionsDef;
@@ -136,10 +136,10 @@ export class LaterpayVendor {
     /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
-    /** @const @private {!JsonObject} For shape see LaterpayConfigDef */
+    /** @const @private {!JsonObject} For shape see LaterpayConfig_0_2_Def */
     this.laterpayConfig_ = this.accessSource_.getAdapterConfig();
 
-    /** @private {?JsonObject} For shape see PurchaseConfigDef */
+    /** @private {?JsonObject} For shape see PurchaseConfig_0_2_Def */
     this.purchaseConfig_ = null;
 
     /** @private {?Object} For shape see PurchaseOptionsDef */
@@ -294,7 +294,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {Array<PurchaseOptionDef>} purchaseOptionsList
+   * @param {Array<PurchaseOption_0_2_Def>} purchaseOptionsList
    * @return {!Object}
    * @private
    */
@@ -471,7 +471,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!JsonObject} option Shape: PurchaseOptionDef
+   * @param {!JsonObject} option Shape: PurchaseOption_0_2_Def
    * @return {!Element}
    * @private
    */
@@ -497,7 +497,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!JsonObject} option Shape: PurchaseOptionDef
+   * @param {!JsonObject} option Shape: PurchaseOption_0_2_Def
    * @return {!Element}
    * @private
    */
