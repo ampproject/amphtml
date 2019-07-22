@@ -323,11 +323,12 @@ export function getTopWindow(win) {
 /**
  * Returns the parent "friendly" iframe if the node belongs to a child window.
  * @param {!Node} node
- * @param {!Window} topWin
+ * @param {!Window=} opt_topWin
  * @return {?HTMLIFrameElement}
  */
-export function getParentWindowFrameElement(node, topWin) {
+export function getParentWindowFrameElement(node, opt_topWin) {
   const childWin = (node.ownerDocument || node).defaultView;
+  const topWin = opt_topWin || getTopWindow(childWin);
   if (childWin && childWin != topWin && getTopWindow(childWin) == topWin) {
     try {
       return /** @type {?HTMLIFrameElement} */ (childWin.frameElement);

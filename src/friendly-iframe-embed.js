@@ -218,9 +218,10 @@ export function installFriendlyIframeEmbed(
 
   return readyPromise.then(() => {
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
+    const signals = spec.host && spec.host.signals();
     const ampdoc =
       ampdocFieExperimentOn && ampdocService
-        ? ampdocService.installFieDoc(spec.url, childWin)
+        ? ampdocService.installFieDoc(spec.url, childWin, {signals})
         : null;
     const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise, ampdoc);
     iframe[EMBED_PROP] = embed;
@@ -379,7 +380,11 @@ export class FriendlyIframeEmbed {
     this.visibilityObservable_ = new Observable();
 
     /** @private @const */
-    this.signals_ = this.host ? this.host.signals() : new Signals();
+    this.signals_ = this.ampdoc
+      ? this.ampdoc.signals()
+      : this.host
+      ? this.host.signals()
+      : new Signals();
 
     /** @private @const {!Promise} */
     this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
@@ -394,6 +399,9 @@ export class FriendlyIframeEmbed {
   destroy() {
     Services.resourcesForDoc(this.iframe).removeForChildWindow(this.win);
     disposeServicesForEmbed(this.win);
+    if (this.ampdoc) {
+      this.ampdoc.dispose();
+    }
   }
 
   /**

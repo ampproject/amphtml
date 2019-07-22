@@ -17,10 +17,6 @@
 import {HostServices} from '../../../src/inabox/host-services';
 import {ScrollManager} from './scroll-manager';
 import {Services} from '../../../src/services';
-import {
-  VisibilityManagerForDoc,
-  VisibilityManagerForEmbed,
-} from './visibility-manager';
 import {VisibilityManagerForMApp} from './visibility-manager-for-mapp';
 import {
   closestAncestorElementBySelector,
@@ -31,6 +27,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
+import {provideVisibilityManager} from './visibility-manager';
 import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
@@ -40,8 +37,7 @@ const TAG = 'amp-analytics/analytics-root';
  * An analytics root. Analytics can be scoped to either ampdoc, embed or
  * an arbitrary AMP element.
  *
- * TODO(dvoytenko): consider moving this concept into core as `AmpRoot`
- * interface that will be implemented by `AmpDoc` and `FriendlyIframeEmbed`.
+ * TODO(#22733): merge analytics root properties into ampdoc.
  *
  * @implements {../../../src/service.Disposable}
  * @abstract
@@ -49,14 +45,10 @@ const TAG = 'amp-analytics/analytics-root';
 export class AnalyticsRoot {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {?AnalyticsRoot} parent
    */
-  constructor(ampdoc, parent) {
+  constructor(ampdoc) {
     /** @const */
     this.ampdoc = ampdoc;
-
-    /** @const */
-    this.parent = parent;
 
     /** @const */
     this.trackers_ = map();
@@ -70,7 +62,7 @@ export class AnalyticsRoot {
     /** @private {?Promise} */
     this.usingHostAPIPromise_ = null;
 
-    /** @restricted {!../../../src/inabox/host-services.VisibilityInterface} */
+    /** @private {?../../../src/inabox/host-services.VisibilityInterface} */
     this.hostVisibilityService_ = null;
   }
 
@@ -131,7 +123,7 @@ export class AnalyticsRoot {
   /**
    * The root node the analytics is scoped to.
    *
-   * @return {!Document|!ShadowRoot|!Element}
+   * @return {!Document|!ShadowRoot}
    * @abstract
    */
   getRoot() {}
@@ -386,17 +378,18 @@ export class AnalyticsRoot {
    */
   getVisibilityManager() {
     if (!this.visibilityManager_) {
-      this.visibilityManager_ = this.createVisibilityManager();
+      if (this.hostVisibilityService_) {
+        // If there is hostAPI (hostAPI never exist with the FIE case)
+        this.visibilityManager_ = new VisibilityManagerForMApp(
+          this.ampdoc,
+          this.hostVisibilityService_
+        );
+      } else {
+        this.visibilityManager_ = provideVisibilityManager(this.getRoot());
+      }
     }
     return this.visibilityManager_;
   }
-
-  /**
-   * @return {!./visibility-manager.VisibilityManager}
-   * @protected
-   * @abstract
-   */
-  createVisibilityManager() {}
 
   /**
    *  Returns the Scroll Managet corresponding to this analytics root.
@@ -422,7 +415,7 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    super(ampdoc, /* parent */ null);
+    super(ampdoc);
   }
 
   /** @override */
@@ -469,31 +462,19 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
     }
     return whenContentIniLoad(this.ampdoc, this.ampdoc.win, rect);
   }
-
-  /** @override */
-  createVisibilityManager() {
-    if (this.hostVisibilityService_) {
-      // If there is hostAPI (hostAPI never exist with the FIE case)
-      return new VisibilityManagerForMApp(
-        this.ampdoc,
-        this.hostVisibilityService_
-      );
-    }
-    return new VisibilityManagerForDoc(this.ampdoc);
-  }
 }
 
 /**
  * The implementation of the analytics root for FIE.
+ * TODO(#22733): merge into AnalyticsRoot once ampdoc-fie is launched.
  */
 export class EmbedAnalyticsRoot extends AnalyticsRoot {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!../../../src/friendly-iframe-embed.FriendlyIframeEmbed} embed
-   * @param {?AnalyticsRoot} parent
    */
-  constructor(ampdoc, embed, parent) {
-    super(ampdoc, parent);
+  constructor(ampdoc, embed) {
+    super(ampdoc);
     /** @const */
     this.embed = embed;
   }
@@ -526,14 +507,6 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
   /** @override */
   whenIniLoaded() {
     return this.embed.whenIniLoaded();
-  }
-
-  /** @override */
-  createVisibilityManager() {
-    return new VisibilityManagerForEmbed(
-      this.parent.getVisibilityManager(),
-      this.embed
-    );
   }
 }
 
