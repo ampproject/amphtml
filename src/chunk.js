@@ -20,6 +20,7 @@ import {getData} from './event-helper';
 import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
+import {isExperimentOn} from './experiments';
 
 /**
  * @const {string}
@@ -318,6 +319,11 @@ class Chunks {
     this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
     /** @private {number} */
     this.timeSinceLastExecution_ = Date.now();
+    /** @private {boolean} */
+    this.macroAfterLongTask_ = isExperimentOn(
+      this.win_,
+      'macro-after-long-task'
+    );
 
     this.win_.addEventListener('message', e => {
       if (getData(e) == 'amp-macro-task') {
@@ -410,7 +416,10 @@ class Chunks {
     // If we've spent over 5 millseconds executing the
     // last instruction yeild back to the main thread.
     // 5 milliseconds is a magic number.
-    if (Date.now() - this.timeSinceLastExecution_ > 5) {
+    if (
+      this.macroAfterLongTask_ &&
+      Date.now() - this.timeSinceLastExecution_ > 5
+    ) {
       this.requestMacroTask_();
       return;
     }
@@ -460,6 +469,7 @@ class Chunks {
    */
   requestMacroTask_() {
     // The message doesn't actually matter.
+    console.log('execute macro task');
     this.win_./*OK*/ postMessage('amp-macro-task', '*');
   }
 }

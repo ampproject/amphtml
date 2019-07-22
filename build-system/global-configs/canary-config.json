@@ -7,6 +7,7 @@
   ],
   "allow-url-opt-in": [
     "pump-early-frame",
+    "macro-after-long-task",
     "twitter-default-placeholder",
     "twitter-default-placeholder-fade",
     "twitter-default-placeholder-pulse"
@@ -43,5 +44,6 @@
   "layers": 1,
   "margin-bottom-in-content-height": 1,
   "pump-early-frame": 1,
-  "version-locking": 1
+  "version-locking": 1,
+  "macro-after-long-task": 1
 }
