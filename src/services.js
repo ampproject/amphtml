@@ -141,11 +141,11 @@ export class Services {
 
   /**
    * Returns the AmpDoc for the specified context node.
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
    * @return {!./service/ampdoc-impl.AmpDoc}
    */
-  static ampdoc(elementOrAmpDoc) {
-    return getAmpdoc(elementOrAmpDoc);
+  static ampdoc(nodeOrAmpDoc) {
+    return getAmpdoc(nodeOrAmpDoc);
   }
 
   /**
