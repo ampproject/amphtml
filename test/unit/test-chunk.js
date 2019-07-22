@@ -23,7 +23,7 @@ import {
   startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import { toggleExperiment } from '../../src/experiments';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('chunk', () => {
   beforeEach(() => {
