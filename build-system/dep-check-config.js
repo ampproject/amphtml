@@ -79,7 +79,7 @@ exports.rules = [
       'extensions/amp-autocomplete/**/*.js->third_party/fuzzysearch/index.js',
       'extensions/amp-crypto-polyfill/**/*.js->third_party/closure-library/sha384-generated.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
-      'extensions/amp-list/**->third_party/set-dom/index.js',
+      'extensions/amp-list/**->third_party/set-dom/set-dom.js',
       'extensions/amp-mustache/**/amp-mustache.js->third_party/mustache/mustache.js',
       'extensions/amp-recaptcha-input/**/*.js->third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/apis.js',
