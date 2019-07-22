@@ -201,13 +201,16 @@ export const callPixelEndpoint = event => {
       credentials: 'include',
     })
     .then(res => res.json())
-    .then(json => {
-      const {pixels = []} = json;
-      if (pixels.length > 0) {
-        dropPixelGroups(pixels, {
-          sid: eventData['sid'],
-          ampDoc,
-        });
-      }
-    });
+    .then(
+      json => {
+        const {pixels = []} = json;
+        if (pixels.length > 0) {
+          dropPixelGroups(pixels, {
+            sid: eventData['sid'],
+            ampDoc,
+          });
+        }
+      },
+      () => {}
+    );
 };
