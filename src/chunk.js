@@ -469,7 +469,6 @@ class Chunks {
    */
   requestMacroTask_() {
     // The message doesn't actually matter.
-    console.log('execute macro task');
     this.win_./*OK*/ postMessage('amp-macro-task', '*');
   }
 }
