@@ -41,10 +41,9 @@ import {
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 import {isArray, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
 import {removeChildren, scopedQuerySelector} from '../../../src/dom';
-import setDOM from 'set-dom/dist/set-dom.js';
+import setDOM from '../../../third_party/set-dom/index';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -57,6 +56,14 @@ const TAG = 'amp-list';
   payload: (?JsonObject|Array<JsonObject>),
 }} */
 export let RenderItems;
+
+/**
+ * Map of AMP element tag name to attributes that require replacement.
+ * @const {!Object<string, !Array<string>>}
+ */
+const MANUAL_DIFF_ELEMENTS = {
+  'AMP-IMG': ['src', 'srcset', 'layout', 'width', 'height'],
+};
 
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
@@ -174,7 +181,10 @@ export class AmpList extends AMP.BaseElement {
     if (this.element.hasAttribute('diffable')) {
       // Set container to the initial content, if it exists. This allows
       // us to DOM diff with the rendered result.
-      this.container_ = scopedQuerySelector(this.element, '> div[role=list]');
+      this.container_ = scopedQuerySelector(
+        this.element,
+        '> div[role=list]:not([placeholder]):not([fallback])'
+      );
       // Don't applyFillContent() in diffable mode. This allows [fetch-error]
       // to displace the position of the initial content.
     }
@@ -198,6 +208,10 @@ export class AmpList extends AMP.BaseElement {
           ' soon. Please see https://github.com/ampproject/amphtml/issues/18849'
       );
     }
+
+    // Override default attributes used for setDOM customization.
+    setDOM['KEY'] = 'i-amphtml-key';
+    setDOM['IGNORE'] = 'i-amphtml-ignore';
 
     Services.bindForDocOrNull(this.element).then(bind => {
       this.bind_ = bind;
@@ -782,15 +796,7 @@ export class AmpList extends AMP.BaseElement {
       this.hideFallbackAndPlaceholder_();
 
       if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
-        const newContainer = this.createContainer_();
-        this.addElementsToContainer_(elements, newContainer);
-
-        // Necessary to support both browserify and CC import semantics.
-        const diff = setDOM.default || setDOM;
-        // Use `i-amphtml-key` as a node key for identifying when to skip
-        // DOM diffing and replace. Needed for AMP elements, for example.
-        diff.KEY = 'i-amphtml-key';
-        diff(container, newContainer);
+        this.diff_(elements);
       } else {
         if (!opt_append) {
           removeChildren(container);
@@ -815,6 +821,50 @@ export class AmpList extends AMP.BaseElement {
 
       this.maybeResizeListToFitItems_();
     });
+  }
+
+  /**
+   * @param {!Array<!Element>} elements
+   * @private
+   */
+  diff_(elements) {
+    const newContainer = this.createContainer_();
+    this.addElementsToContainer_(elements, newContainer);
+
+    // In setDOM, nodes with unique keys will always be replaced. amp-mustache
+    // starts at 1 and increments, start at -1 and decrement to guarantee
+    // uniqueness.
+    let key = -1;
+    this.container_.querySelectorAll('.i-amphtml-element').forEach(e => {
+      // Nodes with "ignore" attribute will not be touched (old element stays).
+      // We manually diff these elements below.
+      if (MANUAL_DIFF_ELEMENTS[e.tagName]) {
+        e.setAttribute('i-amphtml-ignore', '');
+      } else if (!e.hasAttribute('id')) {
+        // [id] allows tracking the element across DOM reordering and is used
+        // as a fallback node key, so only set "key" attribute if there's no id.
+        e.setAttribute('i-amphtml-key', key--);
+      }
+    });
+
+    const ignored = setDOM(this.container_, newContainer);
+
+    // Manually diff elements that were ignored.
+    for (let i = 0; i < ignored.length; i += 2) {
+      const before = ignored[i];
+      const after = ignored[i + 1];
+
+      const attrs = MANUAL_DIFF_ELEMENTS['AMP-IMG'];
+      if (attrs) {
+        const mismatch = attrs.some(
+          attr => before.getAttribute(attr) !== after.getAttribute(attr)
+        );
+        // Use the new element if there's a mismatching attribute.
+        if (mismatch) {
+          before.parentElement.replaceChild(after, before);
+        }
+      }
+    }
   }
 
   /**

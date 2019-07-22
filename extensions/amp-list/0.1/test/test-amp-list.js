@@ -20,7 +20,6 @@ import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.repeated(
   'amp-list',
@@ -500,9 +499,9 @@ describes.repeated(
             );
           });
 
-          describe('DOM diffing', () => {
+          describe('DOM diffing with [diffable]', () => {
             beforeEach(() => {
-              toggleExperiment(win, 'amp-list-diffing', true, true);
+              list.setAttribute('diffable', '');
             });
 
             it('should keep unchanged elements', function*() {

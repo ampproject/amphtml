@@ -70,12 +70,11 @@ let KEY_COUNTER = 0;
  * Uses the standard DOMPurify config.
  * @param {string} dirty
  * @param {!Document} doc
- * @param {boolean=} diffing
  * @return {!Node}
  */
-export function purifyHtml(dirty, doc, diffing = false) {
+export function purifyHtml(dirty, doc) {
   const config = standardPurifyConfig();
-  addPurifyHooks(DomPurify, diffing, doc);
+  addPurifyHooks(DomPurify, doc);
   const body = DomPurify.sanitize(dirty, config);
   DomPurify.removeAllHooks();
   return body;
@@ -91,7 +90,7 @@ export function createPurifier(doc, opt_config) {
   const domPurify = purify(self);
   const config = Object.assign(opt_config || {}, standardPurifyConfig());
   domPurify.setConfig(config);
-  addPurifyHooks(domPurify, /* diffing */ false, doc);
+  addPurifyHooks(domPurify, doc);
   return domPurify;
 }
 
@@ -149,10 +148,9 @@ export function getAllowedTags() {
 /**
  * Adds AMP hooks to given DOMPurify object.
  * @param {!DomPurifyDef} purifier
- * @param {boolean} diffing
  * @param {!Document} doc
  */
-function addPurifyHooks(purifier, diffing, doc) {
+function addPurifyHooks(purifier, doc) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
   const allowedTagsChanges = [];
@@ -164,9 +162,13 @@ function addPurifyHooks(purifier, diffing, doc) {
   // Disables DOM diffing for a given node and allows it to be replaced.
   const disableDiffingFor = node => {
     const key = 'i-amphtml-key';
-    if (diffing && !node.hasAttribute(key)) {
-      // set-dom uses node attribute keys for opting out of diffing.
-      node.setAttribute(key, KEY_COUNTER++);
+    if (node.nodeName == 'AMP-IMG') {
+      node.setAttribute('i-amphtml-ignore', '');
+    } else {
+      if (!node.hasAttribute(key)) {
+        // set-dom uses node attribute keys for opting out of diffing.
+        node.setAttribute(key, KEY_COUNTER++);
+      }
     }
   };
 
