@@ -690,6 +690,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'nativeroll': {
+    prefetch: 'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
+  },
+
   'nativo': {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
