@@ -40,64 +40,66 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getMPlayer(attributes, opt_beforeLayoutCallback) {
-      const mplayerElement = doc.createElement('amp-minute-media-player');
+    function getMinuteMediaPlayer(attributes, opt_beforeLayoutCallback) {
+      const minuteMediaPlayerElement = doc.createElement(
+        'amp-minute-media-player'
+      );
       for (const key in attributes) {
-        mplayerElement.setAttribute(key, attributes[key]);
+        minuteMediaPlayerElement.setAttribute(key, attributes[key]);
       }
 
-      mplayerElement.setAttribute('width', WIDTH);
-      mplayerElement.setAttribute('height', HEIGHT);
-      mplayerElement.setAttribute('layout', RESPONSIVE);
+      minuteMediaPlayerElement.setAttribute('width', WIDTH);
+      minuteMediaPlayerElement.setAttribute('height', HEIGHT);
+      minuteMediaPlayerElement.setAttribute('layout', RESPONSIVE);
 
-      doc.body.appendChild(mplayerElement);
-      return mplayerElement
+      doc.body.appendChild(minuteMediaPlayerElement);
+      return minuteMediaPlayerElement
         .build()
         .then(() => {
-          mplayerElement.layoutCallback();
+          minuteMediaPlayerElement.layoutCallback();
         })
-        .then(() => mplayerElement);
+        .then(() => minuteMediaPlayerElement);
     }
 
     it('renders with curated content', () => {
-      return getMPlayer({
+      return getMinuteMediaPlayer({
         'data-content-type': CURATED,
         'data-content-id': DATA_CONTENT_ID,
-      }).then(mplayerElement => {
-        const iframe = mplayerElement.querySelector('iframe');
+      }).then(minuteMediaPlayerElement => {
+        const iframe = minuteMediaPlayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
-          `https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html?content_type=${CURATED}&content_id=${DATA_CONTENT_ID}`
+          `https://www.oo-syringe.com/dev/amp/mplayer.html?content_type=${CURATED}&content_id=${DATA_CONTENT_ID}`
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
     });
 
     it('renders with semantic (empty params)', () => {
-      return getMPlayer({
+      return getMinuteMediaPlayer({
         'data-content-type': SEMANTIC,
         /* no params to semantic */
-      }).then(mplayerElement => {
-        const iframe = mplayerElement.querySelector('iframe');
+      }).then(minuteMediaPlayerElement => {
+        const iframe = minuteMediaPlayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
-          `https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html?content_type=${SEMANTIC}`
+          `https://www.oo-syringe.com/dev/amp/mplayer.html?content_type=${SEMANTIC}`
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
     });
 
     it('renders with semantic (with params)', () => {
-      return getMPlayer({
+      return getMinuteMediaPlayer({
         'data-content-type': SEMANTIC,
         'data-minimum-date-factor': DATA_MINIMUM_DATE_FACTOR,
         'data-scanned-element-type': DATA_SCANNED_ELEMENT_TYPE,
-      }).then(mplayerElement => {
-        const iframe = mplayerElement.querySelector('iframe');
+      }).then(minuteMediaPlayerElement => {
+        const iframe = minuteMediaPlayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
           //******TO CHANGE******//
-          `https://syringe.s3-us-west-2.amazonaws.com/dev/amp/mplayer.html?content_type=${SEMANTIC}&minimum_date_factor=10&scanned_element_type=id`
+          `https://www.oo-syringe.com/dev/amp/mplayer.html?content_type=${SEMANTIC}&minimum_date_factor=10&scanned_element_type=id`
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });

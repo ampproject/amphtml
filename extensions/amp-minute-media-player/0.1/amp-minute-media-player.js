@@ -21,7 +21,8 @@ import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {
   createFrameFor,
-  isJsonOrObj, mutedOrUnmutedEvent,
+  isJsonOrObj,
+  mutedOrUnmutedEvent,
   objOrParseJson,
   originMatches,
   redispatch,
@@ -162,13 +163,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * @private
    */
   handleMinuteMediaPlayerMessage_(event) {
-    if (
-      !originMatches(
-        event,
-        this.iframe_,
-        'https://www.oo-syringe.com'
-      )
-    ) {
+    if (!originMatches(event, this.iframe_, 'https://www.oo-syringe.com')) {
       return;
     }
     const eventData = getData(event);
@@ -189,7 +184,6 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       'ads-ad-ended': VideoEvents.AD_END,
     });
 
-
     if (data['event'] === 'mute') {
       const muted = data['value'];
       if (muted == null || this.muted_ == muted) {
@@ -199,7 +193,6 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       this.element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
       return;
     }
-
   }
 
   /**
@@ -231,17 +224,14 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     const iframe = createFrameFor(this, this.iframeSource_());
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      event => this.handleMinuteMediaPlayerMessage_(event)
+    this.unlistenMessage_ = listen(this.win, 'message', event =>
+      this.handleMinuteMediaPlayerMessage_(event)
     );
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
 
-    const loaded = this.loadPromise(this.iframe_)
-      .then(() => {
+    const loaded = this.loadPromise(this.iframe_).then(() => {
       element.dispatchCustomEvent(VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
