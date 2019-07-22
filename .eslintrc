@@ -45,6 +45,7 @@
     "amphtml-internal/no-array-destructuring": 2,
     "amphtml-internal/no-deep-destructuring": 2,
     "amphtml-internal/no-duplicate-import": 2,
+    "amphtml-internal/no-duplicate-name-typedef": 2,
     "amphtml-internal/no-es2015-number-props": 2,
     "amphtml-internal/no-export-side-effect": 2,
     "amphtml-internal/no-for-of-statement": 2,
