@@ -23,6 +23,7 @@ import {
   startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import { toggleExperiment } from '../../src/experiments';
 
 describe('chunk', () => {
   beforeEach(() => {
@@ -336,7 +337,7 @@ describe('chunk', () => {
   );
 });
 
-describe.skip('taskQueues', () => {
+describe('taskQueues', () => {
   describes.fakeWin(
     'long chunk tasks force a macro task between work',
     {
@@ -362,6 +363,7 @@ describe.skip('taskQueues', () => {
         subscriptions = {};
         sandbox = sinon.sandbox;
         clock = sandbox.useFakeTimers();
+        toggleExperiment(env.win, 'macro-after-long-task', true);
 
         if (!env.win.addEventListener || !env.win.postMessage) {
           env.win.addEventListener = function(type, handler) {
