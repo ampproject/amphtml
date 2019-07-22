@@ -63,7 +63,7 @@ function getReplacePlugin() {
     replacements.push(createReplacement(defineFlag, true));
   }
 
-  const currentTimestampMs = new Date().getTime();
+  const currentTimestampMs = Date.now();
 
   // default each experiment flag constant to false
   Object.keys(experimentsConfig).forEach(experiment => {
