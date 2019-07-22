@@ -690,6 +690,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'nativeroll': {
+    prefetch: 'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
+  },
+
   'nativo': {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
@@ -848,6 +852,8 @@ export const adConfig = {
     preconnect: 'https://ad.rfp.fout.jp',
     renderStartImplemented: true,
   },
+
+  'rnetplus': {},
 
   'rubicon': {},
 

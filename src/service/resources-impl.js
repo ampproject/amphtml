@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../common-signals';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
@@ -35,7 +34,6 @@ import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
-import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -320,14 +318,6 @@ export class Resources {
   }
 
   /**
-   * Signals that the document has been started rendering.
-   * @restricted
-   */
-  renderStarted() {
-    this.ampdoc.signals().signal(CommonSignals.RENDER_START);
-  }
-
-  /**
    * Returns a subset of resources which are (1) belong to the specified host
    * window, and (2) meet the filterFn given.
    * @param {!Window} hostWin
@@ -348,7 +338,7 @@ export class Resources {
         const measurePromiseArray = [];
         this.resources_.forEach(r => {
           if (!r.hasBeenMeasured() && r.hostWin == hostWin && !r.hasOwner()) {
-            measurePromiseArray.push(this.ensuredMeasured_(r));
+            measurePromiseArray.push(r.getPageLayoutBoxAsync());
           }
         });
         return Promise.all(measurePromiseArray);
@@ -436,46 +426,6 @@ export class Resources {
   }
 
   /**
-   * Returns a promise to the layoutBox for the element. If the element is
-   * resource-backed then makes use of the resource layoutBox, otherwise
-   * measures the element directly.
-   * @param {!Element} element
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
-   */
-  getElementLayoutBox(element) {
-    const resource = this.getResourceForElementOptional(element);
-    if (resource) {
-      return this.ensuredMeasured_(resource);
-    }
-    return this.vsync_.measurePromise(() => {
-      return this.getViewport().getLayoutRect(element);
-    });
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
-   * @private
-   */
-  ensuredMeasured_(resource) {
-    if (resource.hasBeenMeasured()) {
-      return tryResolve(() => resource.getPageLayoutBox());
-    }
-    return this.vsync_.measurePromise(() => {
-      resource.measure();
-      return resource.getPageLayoutBox();
-    });
-  }
-
-  /**
-   * Returns the viewport instance
-   * @return {!./viewport/viewport-impl.Viewport}
-   */
-  getViewport() {
-    return this.viewport_;
-  }
-
-  /**
    * Returns the direction the user last scrolled.
    *  - -1 for scrolling up
    *  - 1 for scrolling down
@@ -522,7 +472,7 @@ export class Resources {
    * a finite number. Returns false if the number has been reached.
    * @return {boolean}
    */
-  grantBuildPermission() {
+  isUnderBuildQuota_() {
     // For pre-render we want to limit the amount of CPU used, so we limit
     // the number of elements build. For pre-render to "seem complete"
     // we only need to build elements in the first viewport. We can't know
@@ -531,7 +481,7 @@ export class Resources {
     // Most documents have 10 or less AMP tags. By building 20 we should not
     // change the behavior for the vast majority of docs, and almost always
     // catch everything in the first viewport.
-    return this.buildAttemptsCount_++ < 20 || this.viewer_.hasBeenVisible();
+    return this.buildAttemptsCount_ < 20 || this.viewer_.hasBeenVisible();
   }
 
   /**
@@ -553,7 +503,7 @@ export class Resources {
 
     // During prerender mode, don't build elements that aren't allowed to be
     // prerendered. This avoids wasting our prerender build quota.
-    // See grantBuildPermission() for more details.
+    // See isUnderBuildQuota_() for more details.
     const shouldBuildResource =
       this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
       resource.prerenderAllowed();
@@ -621,8 +571,15 @@ export class Resources {
    * @private
    */
   buildResourceUnsafe_(resource, schedulePass, force = false) {
-    const promise = resource.build(force);
-    if (!promise || !schedulePass) {
+    if (!this.isUnderBuildQuota_() && !force) {
+      return null;
+    }
+    const promise = resource.build();
+    if (!promise) {
+      return null;
+    }
+    this.buildAttemptsCount_++;
+    if (!schedulePass) {
       return promise;
     }
     return promise.then(
@@ -1109,7 +1066,7 @@ export class Resources {
             resource.completeCollapse();
             resolve();
           } else {
-            reject(new Error('collapse attempt denied'));
+            reject(dev().createExpectedError('collapse attempt denied'));
           }
         }
       );

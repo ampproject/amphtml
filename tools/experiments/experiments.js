@@ -186,6 +186,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
+    id: 'ios-scrollable-iframe',
+    name: 'iOS 13 enables iframe scrolling per spec',
+    spec: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23379',
+  },
+  {
     id: 'chunked-amp',
     name: "Split AMP's loading phase into chunks",
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
@@ -360,26 +366,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
-    id: 'amp-force-prerender-visible-elements',
-    name:
-      'Force builds the AMP elements that are visible and in the viewport ' +
-      'during prerendering, beyond the 20 elements limit.',
-    spec: 'https://github.com/ampproject/amphtml/issues/21791',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21792',
-  },
-  {
     id: 'amp-user-location',
     name:
       'Expose the browser geolocation API for latitude and longitude ' +
       'access after user interaction and approval',
     spec: 'https://github.com/ampproject/amphtml/issues/8929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
-  },
-  {
-    id: 'margin-bottom-in-content-height',
-    name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
-    spec: 'https://github.com/ampproject/amphtml/issues/22718',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
   },
   {
     id: 'untrusted-xhr-interception',

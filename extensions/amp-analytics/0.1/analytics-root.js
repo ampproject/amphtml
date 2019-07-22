@@ -209,7 +209,7 @@ export class AnalyticsRoot {
    * has not been requested before, it will be created.
    *
    * @param {string} name
-   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.ScrollEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)} klass
+   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.ScrollEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)|function(new:./events.AmpStoryEventTracker, !AnalyticsRoot)} klass
    * @return {!./events.EventTracker}
    */
   getTracker(name, klass) {
@@ -354,7 +354,7 @@ export class AnalyticsRoot {
         if (
           isSelectAny ||
           (isSelectRoot && target == rootElement) ||
-          matchesNoInline(target, selector)
+          tryMatches_(target, selector)
         ) {
           listener(target, event);
           // Don't fire the event multiple times even if the more than one
@@ -541,8 +541,9 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
  * @param  {!Element} el
  * @param  {string} selector
  * @return {boolean}
+ * @noinline
  */
-function matchesNoInline(el, selector) {
+function tryMatches_(el, selector) {
   try {
     return matches(el, selector);
   } catch (e) {
