@@ -89,7 +89,8 @@ export class InstrumentationService {
    * @return {!./analytics-root.AnalyticsRoot}
    */
   findRoot_(context) {
-    // TODO(#22733): cleanup when ampdoc-fie is launched.
+    // TODO(#22733): cleanup when ampdoc-fie is launched. Just use
+    // `ampdoc.getParent()`.
     const ampdoc = Services.ampdoc(context);
     const frame = getParentWindowFrameElement(context);
     const embed = frame && getFriendlyIframeEmbedOptional(frame);

@@ -62,7 +62,7 @@ export class AnalyticsRoot {
     /** @private {?Promise} */
     this.usingHostAPIPromise_ = null;
 
-    /** @private {!../../../src/inabox/host-services.VisibilityInterface} */
+    /** @private {?../../../src/inabox/host-services.VisibilityInterface} */
     this.hostVisibilityService_ = null;
   }
 
@@ -466,6 +466,7 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
 
 /**
  * The implementation of the analytics root for FIE.
+ * TODO(#22733): merge into AnalyticsRoot once ampdoc-fie is launched.
  */
 export class EmbedAnalyticsRoot extends AnalyticsRoot {
   /**
