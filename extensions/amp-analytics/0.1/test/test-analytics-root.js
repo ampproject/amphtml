@@ -467,7 +467,7 @@ describes.realWin(
       ampdoc = env.ampdoc;
       embed.host = ampdoc.win.document.createElement('amp-embed-host');
       parentRoot = new AmpdocAnalyticsRoot(ampdoc);
-      root = new EmbedAnalyticsRoot(ampdoc, embed, parentRoot);
+      root = new EmbedAnalyticsRoot(ampdoc, embed);
       body = win.document.body;
 
       target = win.document.createElement('target');
@@ -489,7 +489,6 @@ describes.realWin(
     it('should initialize correctly', () => {
       expect(root.ampdoc).to.equal(ampdoc);
       expect(root.getType()).to.equal('embed');
-      expect(root.parent).to.equal(parentRoot);
       expect(root.getHostElement()).to.be.equal(embed.iframe);
       expect(root.getRoot()).to.equal(win.document);
       expect(root.getRootElement()).to.equal(win.document.documentElement);

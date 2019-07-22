@@ -17,6 +17,7 @@
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
 import {AnalyticsEvent, CustomEventTracker} from './events';
 import {AnalyticsGroup} from './analytics-group';
+import {Services} from '../../../src/services';
 import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
 import {
   getParentWindowFrameElement,
@@ -41,12 +42,12 @@ export class InstrumentationService {
     this.ampdoc = ampdoc;
 
     /** @const */
-    this.ampdocRoot_ = new AmpdocAnalyticsRoot(this.ampdoc);
+    this.root_ = this.findRoot_(ampdoc.getRootNode());
   }
 
   /** @override */
   dispose() {
-    this.ampdocRoot_.dispose();
+    this.root_.dispose();
   }
 
   /**
@@ -74,7 +75,6 @@ export class InstrumentationService {
    * @param {!JsonObject=} opt_vars A map of vars and their values.
    */
   triggerEventForTarget(target, eventType, opt_vars) {
-    // TODO(dvoytenko): rename to `triggerEvent`.
     const event = new AnalyticsEvent(target, eventType, opt_vars);
     const root = this.findRoot_(target);
     const tracker = /** @type {!CustomEventTracker} */ (root.getTracker(
@@ -89,24 +89,21 @@ export class InstrumentationService {
    * @return {!./analytics-root.AnalyticsRoot}
    */
   findRoot_(context) {
-    // FIE
-    const frame = getParentWindowFrameElement(context, this.ampdoc.win);
-    if (frame) {
-      const embed = getFriendlyIframeEmbedOptional(frame);
-      if (embed) {
-        const embedNotNull = embed;
-        return this.getOrCreateRoot_(embed, () => {
-          return new EmbedAnalyticsRoot(
-            this.ampdoc,
-            embedNotNull,
-            this.ampdocRoot_
-          );
-        });
-      }
+    // TODO(#22733): cleanup when ampdoc-fie is launched. Just use
+    // `ampdoc.getParent()`.
+    const ampdoc = Services.ampdoc(context);
+    const frame = getParentWindowFrameElement(context);
+    const embed = frame && getFriendlyIframeEmbedOptional(frame);
+    if (ampdoc == this.ampdoc && !embed && this.root_) {
+      // Main root already exists.
+      return this.root_;
     }
-
-    // Ampdoc root
-    return this.ampdocRoot_;
+    return this.getOrCreateRoot_(embed || ampdoc, () => {
+      if (embed) {
+        return new EmbedAnalyticsRoot(ampdoc, embed);
+      }
+      return new AmpdocAnalyticsRoot(ampdoc);
+    });
   }
 
   /**

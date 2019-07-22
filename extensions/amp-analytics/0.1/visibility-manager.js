@@ -23,8 +23,10 @@ import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
+import {getParentWindowFrameElement} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {
   layoutPositionRelativeToScrolledViewport,
@@ -33,6 +35,7 @@ import {
 
 const TAG = 'amp-analytics/visibility-manager';
 
+const PROP = '__AMP_VIS';
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
 /** @type {number} */
@@ -49,6 +52,35 @@ function getElementId(element) {
     element[VISIBILITY_ID_PROP] = id;
   }
   return id;
+}
+
+/**
+ * @param {!Node} rootNode
+ * @return {!VisibilityManager}
+ */
+export function provideVisibilityManager(rootNode) {
+  if (!rootNode[PROP]) {
+    rootNode[PROP] = createVisibilityManager(rootNode);
+  }
+  return rootNode[PROP];
+}
+
+/**
+ * @param {!Node} rootNode
+ * @return {!VisibilityManager}
+ */
+function createVisibilityManager(rootNode) {
+  // TODO(#22733): cleanup when ampdoc-fie is launched.
+  const ampdoc = Services.ampdoc(rootNode);
+  const frame = getParentWindowFrameElement(rootNode);
+  const embed = frame && getFriendlyIframeEmbedOptional(frame);
+  if (embed && frame && frame.ownerDocument) {
+    return new VisibilityManagerForEmbed(
+      provideVisibilityManager(frame.ownerDocument),
+      embed
+    );
+  }
+  return new VisibilityManagerForDoc(ampdoc);
 }
 
 /**
