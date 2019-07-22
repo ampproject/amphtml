@@ -185,8 +185,6 @@ export class AmpList extends AMP.BaseElement {
         this.element,
         '> div[role=list]:not([placeholder]):not([fallback])'
       );
-      // Don't applyFillContent() in diffable mode. This allows [fetch-error]
-      // to displace the position of the initial content.
     }
     if (!this.container_) {
       this.container_ = this.createContainer_();
