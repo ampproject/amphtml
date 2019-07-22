@@ -19,6 +19,7 @@ import {getModeObject} from './mode-object';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
 import {once} from './utils/function';
+import {urls} from './config';
 
 const noop = () => {};
 
@@ -91,13 +92,28 @@ export function overrideLogLevel(level) {
 }
 
 /**
- * @param {string} path
+ * URL that displays a log message on amp.dev.
+ * Query params should be appended postfacto.
+ * This prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.)
+ * It doesn't matter if this gets the prod table for a different channel, since message
+ * tables are guaranteed not to divert as long as `internalRuntimeVersion` is the same.
  * @return {string}
  */
-const externalMessagesUrl = (path = '') =>
-  `https://log.amp.dev/${path}?v=${encodeURIComponent(
+const externalMessagesUrl = () =>
+  `https://log.amp.dev/?v=01${encodeURIComponent(internalRuntimeVersion())}&`;
+
+/**
+ * URL to simple log messages table JSON file, which contains an Object<string, string>
+ * which maps message id to full message template.
+ * This prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.)
+ * It doesn't matter if this gets the prod table for a different channel, since message
+ * tables are guaranteed not to divert as long as `internalRuntimeVersion` is the same.
+ * @return {string}
+ */
+const externalMessagesSimpleTableUrl = () =>
+  `${urls.cdn}/rtv/01${encodeURIComponent(
     internalRuntimeVersion()
-  )}&`;
+  )}/log-messages.simple.json`;
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -142,9 +158,8 @@ export class Log {
     this.messages_ = null;
 
     this.fetchExternalMessagesOnce_ = once(() => {
-      // TODO(alanorozco): These should come from the CDN, not amp.dev.
       win
-        .fetch(externalMessagesUrl('.json'))
+        .fetch(externalMessagesSimpleTableUrl())
         .then(response => response.json(), noop)
         .then(opt_messages => {
           if (opt_messages) {
