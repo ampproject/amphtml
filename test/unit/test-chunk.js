@@ -336,7 +336,7 @@ describe('chunk', () => {
   );
 });
 
-describe('taskQueues', () => {
+describe.skip('taskQueues', () => {
   describes.fakeWin(
     'long chunk tasks force a macro task between work',
     {
