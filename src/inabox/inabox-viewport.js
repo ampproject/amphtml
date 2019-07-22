@@ -200,6 +200,9 @@ export class ViewportBindingInabox {
     ).then(() => {
       this.topWindowPositionObserver_ = getPositionObserver(this.win.top);
       this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
+        // If the window is the top window (not sitting in an iframe) then
+        // frameElement doesn't exist. In that case we observe the scrolling
+        // element.
         /** @type {!HTMLIFrameElement|!HTMLElement} */
         (this.win.frameElement || this.getScrollingElement()),
         data => {
