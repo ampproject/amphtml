@@ -17,7 +17,7 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const request = require('request');
+const request = require('request-promise');
 const {gitCommitHash} = require('../git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../app-utils');
 const {travisBuildNumber} = require('../travis');
@@ -55,14 +55,14 @@ async function replaceUrls(dir) {
   await Promise.all(promises);
 }
 
-function signalDistUploadComplete() {
+async function signalDistUploadComplete() {
   const sha = gitCommitHash();
   const travisBuild = travisBuildNumber();
   const url =
     'https://amp-pr-deploy-bot.appspot.com/probot/v0/pr-deploy/' +
     `travisbuilds/${travisBuild}/headshas/${sha}/0`;
 
-  request.post(url);
+  await request.post(url);
 }
 
 module.exports = {
