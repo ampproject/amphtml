@@ -378,6 +378,24 @@ describes.realWin(
           options[3],
         ]);
 
+        impl.executeAction({
+          method: 'selectDown',
+          satisfiesTrust: () => true,
+        });
+        expect(impl.inputs_.length).to.equal(1);
+        expect(impl.getSelectedElementsForTesting()).to.include.members([
+          options[0],
+        ]);
+
+        impl.executeAction({
+          method: 'selectUp',
+          satisfiesTrust: () => true,
+        });
+        expect(impl.inputs_.length).to.equal(1);
+        expect(impl.getSelectedElementsForTesting()).to.include.members([
+          options[3],
+        ]);
+
         ampSelector = getSelector({
           attributes: {
             name: 'muti_select',
