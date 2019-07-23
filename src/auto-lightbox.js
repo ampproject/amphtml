@@ -28,7 +28,7 @@ export const AutoLightboxEvents = {
 };
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @return {boolean}
  */
 function isProxyOriginOrLocalDev(ampdoc) {
