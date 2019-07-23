@@ -918,6 +918,7 @@ describes.realWin(
           ampSelector.children[0].setAttribute('selected', '');
           ampSelector.build();
           const impl = ampSelector.implementation_;
+          const triggerSpy = sandbox.spy(impl.action_, 'trigger');
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
@@ -928,6 +929,14 @@ describes.realWin(
           });
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+
+          expect(triggerSpy).to.be.calledOnce;
+          expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
+
+          const event = triggerSpy.firstCall.args[2];
+          expect(event).to.have.property('detail');
+          expect(event.detail).to.have.property('targetOption', '1');
+          expect(event.detail).to.have.deep.property('selectedOptions', ['1']);
 
           impl.executeAction({method: 'selectUp', satisfiesTrust: () => true});
 
