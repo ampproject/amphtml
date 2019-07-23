@@ -18,7 +18,6 @@ import * as Service from '../../src/service';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {installAmpdocServices} from '../../src/service/core-services';
 import {installAmpdocServicesForInabox} from '../../src/inabox/amp-inabox';
-import {remove} from '../../src/utils/array';
 
 describe('amp-inabox', () => {
   describes.realWin('installAmpdocServicesForInabox', {amp: false}, env => {
