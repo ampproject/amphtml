@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../src/observable';
-
 /**
  * @typedef {{
  *   viewportRect: !LayoutRectDef,
@@ -27,7 +25,7 @@ let PositionEntryDef;
 /** @const */
 const MIN_EVENT_INTERVAL_IN_MS = 100;
 
-export class PositionObserver {
+class PositionObserver {
   /**
    * @param {!Window} win
    */
@@ -43,15 +41,6 @@ export class PositionObserver {
      */
     const PositionEntryDef2 = {};
   }
-}
-
-/**
- * Use an existing position observer within the window, if any.
- * @param {!Window} win
- * @return {!PositionObserver}
- */
-export function getPositionObserver(win) {
-  win['string'] = {};
 }
 
 /**

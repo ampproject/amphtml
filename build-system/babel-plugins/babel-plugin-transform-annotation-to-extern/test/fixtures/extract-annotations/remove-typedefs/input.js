@@ -15,37 +15,38 @@
  */
 
 /**
- *
  * @typedef {{
  *   viewportRect: !LayoutRectDef,
  *   targetRect: !LayoutRectDef,
  * }}
  */
-function PositionEntryDef() {}
+let PositionEntryDef;
 
-PositionEntryDef.prototype.viewportRect;
-PositionEntryDef.prototype.targetRect;
+/** @const */
+const MIN_EVENT_INTERVAL_IN_MS = 100;
+
+class PositionObserver {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @private {!Window} */
+    this.win_ = win;
+
+    /**
+     * @typedef {{
+     *   viewportRect: !LayoutRectDef,
+     *   targetRect: !LayoutRectDef,
+     * }}
+     */
+    const PositionEntryDef2 = {};
+  }
+}
+
 /**
- *
  * @typedef {{
  *   viewportRect: !LayoutRectDef,
  *   targetRect: !LayoutRectDef,
  * }}
  */
-
-function PositionEntryDef2() {}
-
-PositionEntryDef2.prototype.viewportRect;
-PositionEntryDef2.prototype.targetRect;
-/**
- *
- * @typedef {{
- *   viewportRect: !LayoutRectDef,
- *   targetRect: !LayoutRectDef,
- * }}
- */
-
-function PositionEntryDef3() {}
-
-PositionEntryDef3.prototype.viewportRect;
-PositionEntryDef3.prototype.targetRect;
+var PositionEntryDef3;

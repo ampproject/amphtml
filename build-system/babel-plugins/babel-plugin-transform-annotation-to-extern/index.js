@@ -13,31 +13,89 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const flatten = arr => [].concat(...arr);
+
+// Global typedef map typedefName: typedef comment
+const TYPEDEFS = new Map();
+
+const buildTypedefs = (t, path) => {
+  const typedefs = [];
+  for (const [typedefName, typedefComment] of TYPEDEFS) {
+    const ast = buildVarDeclAndComment(t, path, typedefName, typedefComment);
+    typedefs.push(ast);
+  }
+  return typedefs;
+};
+
+const buildVarDeclAndComment = (t, path, name, comment) => {
+  const decl = t.variableDeclaration('let', [
+    t.variableDeclarator(t.identifier(name)),
+  ]);
+  // Add the typedef annotation.
+  t.addComment(decl, 'leading', comment);
+  return decl;
+};
 
 module.exports = function(babel) {
   const {types: t} = babel;
+  // `shouldWriteToFile` should only be true in the production pipeline.
+  let shouldWriteToFile;
+  // `shouldEmitTypedefs` is used for testing purposes only.
+  let shouldEmitTypedefs;
   return {
+    pre() {
+      TYPEDEFS.clear();
+      const {writeToFile = false, emitTypedefs = false} = this.opts;
+      shouldWriteToFile = writeToFile;
+      shouldEmitTypedefs = emitTypedefs;
+    },
     visitor: {
+      Program: {
+        exit(path) {
+          if (shouldWriteToFile) {
+            // Stub
+            console.log('write to temp directory');
+          }
+          if (shouldEmitTypedefs) {
+            // Preserve the leading LICENSE comment.
+            path.addComment('leading', path.parent.comments[0].value);
+
+            const typedefs = buildTypedefs(t, path);
+            path.replaceWith(t.program(typedefs));
+            path.skip();
+          }
+        },
+      },
       VariableDeclaration(path) {
         const {node} = path;
+
         if (!node.leadingComments) {
           return;
         }
 
-        const comments = node.leadingComments.find(comment => {
+        const typedefComment = node.leadingComments.find(comment => {
           return (
             comment.type === 'CommentBlock' && /@typedef/.test(comment.value)
           );
         });
 
-        if (!comments.length) {
+        if (!typedefComment) {
           return;
         }
 
-        const comment = comments[0];
+        // We can assume theres only 1 variable declaration  when a typedef
+        // annotation is found. This is because Closure Compiler does not allow
+        // declaration of multiple variables with a shared type information.
+        const typedefName = node.declarations[0].id.name;
 
-        node.remove();
+        const typedefLocation = TYPEDEFS.get(typedefName);
+        if (!typedefLocation) {
+          TYPEDEFS.set(typedefName, typedefComment.value);
+        }
+
+        // We can't easily remove comment nodes so we just empty the string out.
+        typedefComment.value = '';
+        // Remove the actual VariableDeclaration.
+        path.remove();
       },
     },
   };
