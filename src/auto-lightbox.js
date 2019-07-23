@@ -45,7 +45,7 @@ function isProxyOriginOrLocalDev(ampdoc) {
     return false;
   }
 
-  const {documentElement} = ampdoc.getRoot();
+  const {documentElement} = ampdoc.getRootNode();
   if (!documentElement) {
     return false;
   }
