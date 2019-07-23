@@ -19,7 +19,7 @@ import {
   LEGACY_ELEMENTS,
   installStandardServicesInEmbed,
   installStandardServicesInEmbeddedDoc,
-  stubLegacyElements
+  stubLegacyElements,
 } from './service/extensions-impl';
 import {Observable} from './observable';
 import {Services} from './services';
