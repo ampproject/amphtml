@@ -15,12 +15,36 @@
  */
 
 import {CommonSignals} from './common-signals';
+import {
+  LEGACY_ELEMENTS,
+  installStandardServicesInEmbed,
+  installStandardServicesInEmbeddedDoc,
+  stubLegacyElements
+} from './service/extensions-impl';
 import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {closestAncestorElementBySelector, escapeHtml} from './dom';
+import {
+  copyElementToChildWindow,
+  stubElementIfNotKnown,
+  upgradeOrRegisterElement,
+} from './service/custom-element-registry';
 import {dev, rethrowAsync, userAssert} from './log';
-import {disposeServicesForEmbed, getTopWindow} from './service';
+import {
+  disposeServicesForEmbed,
+  getTopWindow,
+  installServiceInEmbedIfEmbeddable,
+  setParentWindow,
+} from './service';
+import {getMode} from './mode';
+import {install as installCustomElements} from './polyfills/custom-elements';
+import {install as installDOMTokenListToggle} from './polyfills/domtokenlist-toggle';
+import {install as installDocContains} from './polyfills/document-contains';
+import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
+import {installStylesForDoc, installStylesLegacy} from './style-installer';
 import {isDocumentReady} from './document-ready';
 import {isExperimentOn} from './experiments';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
@@ -228,13 +252,15 @@ export function installFriendlyIframeEmbed(
 
     // Add extensions.
     if (ampdoc && ampdocFieExperimentOn) {
-      extensions.installExtensionsInFie(
+      installExtensionsInFie(
+        extensions.win,
         ampdoc,
         spec.extensionIds || [],
         opt_preinstallCallback
       );
     } else {
-      extensions.installExtensionsInChildWindow(
+      installExtensionsInChildWindow(
+        extensions.win,
         childWin,
         spec.extensionIds || [],
         opt_preinstallCallback
@@ -684,4 +710,195 @@ export function isInFie(element) {
     element.classList.contains('i-amphtml-fie') ||
     !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
   );
+}
+
+/**
+ * Install extensions in the child window (friendly iframe). The pre-install
+ * callback, if specified, is executed after polyfills have been configured
+ * but before the first extension is installed.
+ * @param {!Window} topWin
+ * @param {!./ampdoc-impl.AmpDocFie} ampdoc
+ * @param {!Array<string>} extensionIds
+ * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+ * @return {!Promise}
+ * @restricted
+ */
+function installExtensionsInFie(
+  topWin,
+  ampdoc,
+  extensionIds,
+  opt_preinstallCallback
+) {
+  const childWin = ampdoc.win;
+  const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
+  setParentWindow(childWin, parentWin);
+
+  // Install necessary polyfills.
+  installPolyfillsInChildWindow(parentWin, childWin);
+
+  // Install runtime styles.
+  installStylesForDoc(
+    ampdoc,
+    isExperimentOn(this.win, 'fie-css-cleanup')
+      ? ampSharedCss
+      : ampDocCss + ampSharedCss,
+    /* callback */ null,
+    /* opt_isRuntimeCss */ true,
+    /* opt_ext */ 'amp-runtime'
+  );
+
+  // Run pre-install callback.
+  if (opt_preinstallCallback) {
+    opt_preinstallCallback(ampdoc.win, ampdoc);
+  }
+
+  // Install embeddable standard services.
+  installStandardServicesInEmbeddedDoc(ampdoc);
+
+  // Install built-ins and legacy elements.
+  copyBuiltinElementsToChildWindow(topWin, childWin);
+  stubLegacyElements(childWin);
+
+  return Promise.all(
+    extensionIds.map(extensionId => {
+      // This will extend automatic upgrade of custom elements from top
+      // window to the child window.
+      if (!LEGACY_ELEMENTS.includes(extensionId)) {
+        stubElementIfNotKnown(childWin, extensionId);
+      }
+      return this.installExtensionInDoc_(ampdoc, extensionId);
+    })
+  );
+}
+
+/**
+ * Install extensions in the child window (friendly iframe). The pre-install
+ * callback, if specified, is executed after polyfills have been configured
+ * but before the first extension is installed.
+ * @param {!Window} topWin
+ * @param {!Window} childWin
+ * @param {!Array<string>} extensionIds
+ * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+ * @return {!Promise}
+ * @restricted
+ */
+function installExtensionsInChildWindow(
+  topWin,
+  childWin,
+  extensionIds,
+  opt_preinstallCallback
+) {
+  const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
+  setParentWindow(childWin, parentWin);
+
+  // Install necessary polyfills.
+  installPolyfillsInChildWindow(parentWin, childWin);
+
+  // Install runtime styles.
+  installStylesLegacy(
+    childWin.document,
+    isExperimentOn(topWin, 'fie-css-cleanup')
+      ? ampSharedCss
+      : ampDocCss + ampSharedCss,
+    /* callback */ null,
+    /* opt_isRuntimeCss */ true,
+    /* opt_ext */ 'amp-runtime'
+  );
+
+  // Run pre-install callback.
+  if (opt_preinstallCallback) {
+    opt_preinstallCallback(childWin);
+  }
+
+  // Install embeddable standard services.
+  installStandardServicesInEmbed(childWin);
+
+  // Install built-ins and legacy elements.
+  copyBuiltinElementsToChildWindow(topWin, childWin);
+  stubLegacyElements(childWin);
+
+  const promises = [];
+  extensionIds.forEach(extensionId => {
+    // This will extend automatic upgrade of custom elements from top
+    // window to the child window.
+    if (!LEGACY_ELEMENTS.includes(extensionId)) {
+      stubElementIfNotKnown(childWin, extensionId);
+    }
+
+    // Install CSS.
+    const promise = this.preloadExtension(extensionId).then(extension => {
+      // Adopt embeddable extension services.
+      extension.services.forEach(service => {
+        installServiceInEmbedIfEmbeddable(childWin, service.serviceClass);
+      });
+
+      // Adopt the custom elements.
+      let elementPromises = null;
+      for (const elementName in extension.elements) {
+        const elementDef = extension.elements[elementName];
+        const elementPromise = new Promise(resolve => {
+          if (elementDef.css) {
+            installStylesLegacy(
+              childWin.document,
+              elementDef.css,
+              /* completeCallback */ resolve,
+              /* isRuntime */ false,
+              extensionId
+            );
+          } else {
+            resolve();
+          }
+        }).then(() => {
+          upgradeOrRegisterElement(
+            childWin,
+            elementName,
+            elementDef.implementationClass
+          );
+        });
+        if (elementPromises) {
+          elementPromises.push(elementPromise);
+        } else {
+          elementPromises = [elementPromise];
+        }
+      }
+      if (elementPromises) {
+        return Promise.all(elementPromises).then(() => extension);
+      }
+      return extension;
+    });
+    promises.push(promise);
+  });
+  return Promise.all(promises);
+}
+
+/**
+ * Install polyfills in the child window (friendly iframe).
+ * @param {!Window} parentWin
+ * @param {!Window} childWin
+ * @suppress {suspiciousCode}
+ */
+function installPolyfillsInChildWindow(parentWin, childWin) {
+  installDocContains(childWin);
+  installDOMTokenListToggle(childWin);
+  // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
+  // is DCE'd from production builds. Note: When the hack is removed, remove the
+  // @suppress {suspiciousCode} annotation at the top of this function.
+  if (
+    (false && isExperimentOn(parentWin, 'custom-elements-v1')) ||
+    getMode().test
+  ) {
+    installCustomElements(childWin);
+  } else {
+    installRegisterElement(childWin, 'auto');
+  }
+}
+
+/**
+ * Copy builtins to a child window.
+ * @param {!Window} parentWin
+ * @param {!Window} childWin
+ */
+function copyBuiltinElementsToChildWindow(parentWin, childWin) {
+  copyElementToChildWindow(parentWin, childWin, 'amp-img');
+  copyElementToChildWindow(parentWin, childWin, 'amp-pixel');
 }
