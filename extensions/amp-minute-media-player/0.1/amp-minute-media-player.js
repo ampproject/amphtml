@@ -54,11 +54,8 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.contentType_ = null;
 
-    /*
     /** @private {?string} */
-    /*
     this.playerId_ = null;
-    */
 
     /** @private {?string} */
     this.contentId_ = '';
@@ -201,7 +198,6 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * @private
    */
   iframeSource_() {
-    const {element} = this;
     const baseUrl =
       'https://www.oo-syringe.com/dev/amp/mplayer.html' +
       `?content_type=${encodeURIComponent(this.contentType_)}`;
@@ -212,7 +208,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       'tags': this.tags_ || undefined,
       'minimum_date_factor': this.minimumDateFactor_ || undefined,
       'scanned_element_type': this.scannedElementType_ || undefined,
-      'player_id': element.getAttribute('data-player-id') || undefined,
+      'player_id': this.playerId_ || undefined,
     });
 
     return addParamsToUrl(baseUrl, moreQueryParams);
@@ -263,7 +259,10 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
   sendCommand_(message) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          message,
+          'https://www.oo-syringe.com'
+        );
       }
     });
   }
@@ -355,7 +354,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    */
   /** @override */
   unmute() {
-    this.sendCommand_('unMute');
+    this.sendCommand_('unmute');
   }
 
   /**
