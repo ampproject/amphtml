@@ -13,21 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('./global-configs/experiments-config.json');
 
+const localPlugin = name =>
+  require.resolve(`./babel-plugins/babel-plugin-${name}`);
+
 const defaultPlugins = [
-  require.resolve('./babel-plugins/babel-plugin-transform-html-template'),
-  require.resolve(
-    './babel-plugins/babel-plugin-transform-parenthesize-expression'
-  ),
-  require.resolve(
-    './babel-plugins/babel-plugin-is_minified-constant-transformer'
-  ),
-  require.resolve('./babel-plugins/babel-plugin-transform-amp-extension-call'),
-  require.resolve('./babel-plugins/babel-plugin-transform-version-call'),
+  // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
+  [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
+  localPlugin('transform-parenthesize-expression'),
+  localPlugin('is_minified-constant-transformer'),
+  localPlugin('transform-amp-extension-call'),
+  localPlugin('transform-html-template'),
+  localPlugin('transform-version-call'),
 ];
+
+const esmRemovedImports = {
+  './polyfills/document-contains': ['installDocContains'],
+  './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
+  './polyfills/fetch': ['installFetch'],
+  './polyfills/math-sign': ['installMathSign'],
+  './polyfills/object-assign': ['installObjectAssign'],
+  './polyfills/object-values': ['installObjectValues'],
+  './polyfills/promise': ['installPromise'],
+};
 
 /**
  * @return {Array<string|Object>} the minify-replace plugin options that can be
@@ -93,63 +103,40 @@ function getReplacePlugin() {
     }
   });
 
-  const replacePlugin = [
-    require.resolve('babel-plugin-minify-replace'),
-    {replacements},
-  ];
-
-  return replacePlugin;
+  return ['minify-replace', {replacements}];
 }
 
-module.exports = {
-  plugins({isEsmBuild, isForTesting, isSinglePass}) {
-    let pluginsToApply = defaultPlugins.slice(0);
-    // TODO(erwinm): This is temporary until we remove the assert/log removals
-    // from the java transformation to the babel transformation.
-    // There is currently a weird interaction where when we do the transform
-    // in babel and leave a bare "string", Closure Compiler does not remove
-    // the dead string expression statements. We cannot just outright remove
-    // the argument of the assert/log calls since we would need to inspect
-    // if the arguments have any method calls (which might have side effects).
-    if (isSinglePass) {
-      pluginsToApply.push(
-        require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts')
-      );
-    }
-    if (isEsmBuild) {
-      pluginsToApply = pluginsToApply.concat([
-        [
-          require.resolve('babel-plugin-filter-imports'),
-          {
-            'imports': {
-              './polyfills/fetch': ['installFetch'],
-              './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
-              './polyfills/document-contains': ['installDocContains'],
-              './polyfills/math-sign': ['installMathSign'],
-              './polyfills/object-assign': ['installObjectAssign'],
-              './polyfills/object-values': ['installObjectValues'],
-              './polyfills/promise': ['installPromise'],
-            },
-          },
-        ],
-      ]);
-    }
-    if (!isForTesting) {
-      pluginsToApply = pluginsToApply.concat([
-        require.resolve(
-          './babel-plugins/babel-plugin-is_dev-constant-transformer'
-        ),
-        require.resolve('./babel-plugins/babel-plugin-amp-mode-transformer'),
-      ]);
-    }
-    pluginsToApply.push(getReplacePlugin());
-    return pluginsToApply;
-  },
+const eliminateIntermediateBundles = () => [
+  localPlugin('transform-prune-namespace'),
+];
 
-  eliminateIntermediateBundles() {
-    return [
-      require.resolve('./babel-plugins/babel-plugin-transform-prune-namespace'),
-    ];
-  },
-  getReplacePlugin,
-};
+/**
+ * Resolves babel plugin set to apply before compiling on singlepass.
+ * @param {!Object<string, boolean>} buildFlags
+ * @return {!Array<string|!Array<string|!Object>>}
+ */
+function plugins({isEsmBuild, isForTesting, isSinglePass}) {
+  const applied = [...defaultPlugins];
+  // TODO(erwinm): This is temporary until we remove the assert/log removals
+  // from the java transformation to the babel transformation.
+  // There is currently a weird interaction where when we do the transform
+  // in babel and leave a bare "string", Closure Compiler does not remove
+  // the dead string expression statements. We cannot just outright remove
+  // the argument of the assert/log calls since we would need to inspect
+  // if the arguments have any method calls (which might have side effects).
+  if (isSinglePass) {
+    applied.push(localPlugin('transform-amp-asserts'));
+  }
+  if (isEsmBuild) {
+    applied.push(['filter-imports', {imports: esmRemovedImports}]);
+  }
+  if (!isForTesting) {
+    applied.push(
+      localPlugin('amp-mode-transformer'),
+      localPlugin('is_dev-constant-transformer')
+    );
+  }
+  return applied;
+}
+
+module.exports = {plugins, eliminateIntermediateBundles, getReplacePlugin};
