@@ -67,7 +67,7 @@ export class InfoDialog {
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
 
     /** @private {?Element} */
