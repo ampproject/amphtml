@@ -193,9 +193,10 @@ export class FakeWindow {
 
     // Storage.
     /** @const {!FakeStorage|undefined} */
-    this.localStorage = spec.localStorageOff
-      ? undefined
-      : new FakeStorage(this);
+    this.localStorage = spec.localStorageOff ? undefined : new FakeStorage();
+
+    /** @const {!FakeStorage} */
+    this.sessionStorage = new FakeStorage();
 
     // Timers and animation frames.
     /** @const */
@@ -584,11 +585,7 @@ export class FakeHistory {
  * @extends {Storage}
  */
 export class FakeStorage {
-  /** @param {!Window} win */
-  constructor(win) {
-    /** @const */
-    this.win = win;
-
+  constructor() {
     /** @const {!Object<string, string>} */
     this.values = {};
 
