@@ -31,7 +31,6 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
-
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 
