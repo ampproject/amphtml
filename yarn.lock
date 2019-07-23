@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.2.0.tgz#82b6b68b6fe0eacbcc95d3f0a82ddf19a0e2b316"
   integrity sha512-CiMdKK9eMa6eqhqZc9bq86nPdgbALY+E8rKgUPR7wf2wGUNTm/jtFZQ7fn4sj/oggn0wvadBokabErtl1m1KSw==
 
-"@ampproject/worker-dom@0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.14.0.tgz#642d8b12bd7198a54a9d1ad93a27d4cf541c7236"
-  integrity sha512-IZ8dC9KMiJH7rvw8+k9iVwD/aqqnFNVU3cqZE5Fc2YvUKLrWPsrtJRoQ1EO099D8yLaZDzZkfOKlUl54vBcvmQ==
+"@ampproject/worker-dom@0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.15.0.tgz#58c646ec23cfffcd7e74d20f5a7abcb26815d335"
+  integrity sha512-PqPZjdcUATkLXl6EXSYP6YvRKMAUbUBnRufVcnqIRkAanqwpVWRJ+3VWxsTPFm8WT73Hv/bbbFLpaE2N9V7YBQ==
 
 "@ava/babel-plugin-throws-helper@^3.0.0":
   version "3.0.0"

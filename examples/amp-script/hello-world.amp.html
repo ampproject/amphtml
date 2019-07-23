@@ -56,5 +56,39 @@
   <script type="text/plain" target="amp-script" id="sandbox-allow-forms">
     document.body.appendChild(document.createElement('input'));
   </script>
+
+  <h1>Example: localStorage</h1>
+  <amp-script width=300 height=40 script="local-storage" sandbox="allow-forms">
+    <input id=input type=text>
+    <input id=output type=text disabled>
+    <div>
+      <button id=get>get</button>
+      <button id=set>set</button>
+      <button id=remove>remove</button>
+      <button id=clear>clear</button>
+    </div>
+  </amp-script>
+  <script type="text/plain" target="amp-script" id="local-storage">
+    const input = document.querySelector('#input');
+    const output = document.querySelector('#output');
+    const get = document.querySelector('#get');
+    const set = document.querySelector('#set');
+    const remove = document.querySelector('#remove');
+    const clear = document.querySelector('#clear');
+
+    get.addEventListener('click', () => {
+      output.value = input.value ? localStorage.getItem(input.value) : JSON.stringify(localStorage);
+    });
+    set.addEventListener('click', () => {
+      const tuple = input.value.split('=');
+      localStorage.setItem(tuple[0], tuple[1]);
+    });
+    remove.addEventListener('click', () => {
+      localStorage.removeItem(input.value);
+    });
+    clear.addEventListener('click', () => {
+      localStorage.clear();
+    });
+  </script>
 </body>
 </html>
