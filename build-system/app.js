@@ -63,8 +63,14 @@ app.use((req, res, next) => {
   next();
 });
 
+function isRtvMode(serveMode) {
+  return /^\d{15}$/.test(serveMode);
+}
+
 function isValidServeMode(serveMode) {
-  return ['default', 'compiled', 'cdn'].includes(serveMode);
+  return (
+    ['default', 'compiled', 'cdn'].includes(serveMode) || isRtvMode(serveMode)
+  );
 }
 
 function setServeMode(serveMode) {
