@@ -31,7 +31,6 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 
@@ -339,30 +338,6 @@ function usesLightboxExplicitly(ampdoc) {
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {boolean}
- */
-function isProxyOriginOrLocalDev(ampdoc) {
-  // Allow `localDev` in lieu of proxy origin for manual testing, except in
-  // tests where we need to actually perform the check.
-  const {win} = ampdoc;
-  if (getMode(win).localDev && !getMode(win).test) {
-    return true;
-  }
-
-  // An attached node is required for proxy origin check. If no elements are
-  // present, short-circuit.
-  const {firstElementChild} = ampdoc.getBody();
-  if (!firstElementChild) {
-    return false;
-  }
-
-  // TODO(alanorozco): Additionally check for transformed, webpackaged flag.
-  // See git.io/fhQ0a (#20359) for details.
-  return Services.urlForDoc(firstElementChild).isProxyOrigin(win.location);
-}
-
-/**
  * Determines whether auto-lightbox is enabled for a document.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {boolean}
@@ -372,13 +347,10 @@ export function isEnabledForDoc(ampdoc) {
   if (usesLightboxExplicitly(ampdoc)) {
     return false;
   }
-  if (
-    !DocMetaAnnotations.hasValidOgType(ampdoc) &&
-    !DocMetaAnnotations.hasValidLdJsonType(ampdoc)
-  ) {
-    return false;
-  }
-  return isProxyOriginOrLocalDev(ampdoc);
+  return (
+    DocMetaAnnotations.hasValidOgType(ampdoc) ||
+    DocMetaAnnotations.hasValidLdJsonType(ampdoc)
+  );
 }
 
 /** @private {number} */
