@@ -26,6 +26,8 @@ import {installGlobalSubmitListenerForDoc} from '../document-submit';
 import {installHiddenObserverForDoc} from './hidden-observer-impl';
 import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
+import {installInaboxCidService} from '../inabox/inabox-cid';
+import {installInaboxViewportService} from '../inabox/inabox-viewport';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
 import {installPixel} from '../../builtins/amp-pixel';
@@ -74,29 +76,28 @@ export function installRuntimeServices(global) {
  * Install ampdoc-level services.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
- * @param {boolean=} opt_inabox
  * @restricted
  */
-export function installAmpdocServices(ampdoc, opt_initParams, opt_inabox) {
+export function installAmpdocServices(ampdoc, opt_initParams) {
   const isEmbedded = !!ampdoc.getParent();
 
-  // Order is important!
+  // When making changes to this method:
+  // 1. Order is important!
+  // 2. Consider to apply same changes to installAmpdocServicesForInabox
   installUrlForDoc(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'documentInfo')
     : installDocumentInfoServiceForDoc(ampdoc);
-  if (!opt_inabox) {
-    // those services are installed in amp-inabox.js
-    isEmbedded
-      ? adoptServiceForEmbedDoc(ampdoc, 'cid')
-      : installCidService(ampdoc);
-    isEmbedded
-      ? adoptServiceForEmbedDoc(ampdoc, 'viewer')
-      : installViewerServiceForDoc(ampdoc, opt_initParams);
-    isEmbedded
-      ? adoptServiceForEmbedDoc(ampdoc, 'viewport')
-      : installViewportServiceForDoc(ampdoc);
-  }
+  // those services are installed in amp-inabox.js
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'cid')
+    : installCidService(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'viewer')
+    : installViewerServiceForDoc(ampdoc, opt_initParams);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'viewport')
+    : installViewportServiceForDoc(ampdoc);
   installHiddenObserverForDoc(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'history')
@@ -109,12 +110,32 @@ export function installAmpdocServices(ampdoc, opt_initParams, opt_inabox) {
     : installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
-  if (!opt_inabox) {
-    // For security, Storage is not supported in inabox.
-    isEmbedded
-      ? adoptServiceForEmbedDoc(ampdoc, 'storage')
-      : installStorageServiceForDoc(ampdoc);
-  }
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'storage')
+    : installStorageServiceForDoc(ampdoc);
+  installGlobalNavigationHandlerForDoc(ampdoc);
+  installGlobalSubmitListenerForDoc(ampdoc);
+}
+
+/**
+ * Install ampdoc-level services.
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @restricted
+ */
+export function installAmpdocServicesForInabox(ampdoc) {
+  // Order is important!
+  installUrlForDoc(ampdoc);
+  installDocumentInfoServiceForDoc(ampdoc);
+  installInaboxCidService(ampdoc);
+  installViewerServiceForDoc(ampdoc);
+  installInaboxViewportService(ampdoc);
+  installHiddenObserverForDoc(ampdoc);
+  installHistoryServiceForDoc(ampdoc);
+  installResourcesServiceForDoc(ampdoc);
+  installUrlReplacementsServiceForDoc(ampdoc);
+  installActionServiceForDoc(ampdoc);
+  installStandardActionsForDoc(ampdoc);
+  // For security, Storage is not installed in inabox.
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
