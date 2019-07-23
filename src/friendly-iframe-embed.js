@@ -342,6 +342,8 @@ export function mergeHtmlForTesting(spec) {
  * The friendly iframe is managed by the top-level AMP Runtime. When it's
  * destroyed, the `destroy` method must be called to free up the shared
  * resources.
+ *
+ * @visibleForTesting
  */
 export class FriendlyIframeEmbed {
   /**
