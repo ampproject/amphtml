@@ -64,7 +64,9 @@ module.exports = function(babel) {
             path.addComment('leading', path.parent.comments[0].value);
 
             const typedefs = buildTypedefs(t);
-            path.replaceWith(t.program(typedefs));
+            typedefs.forEach(typedef => {
+              path.pushContainer('body', typedef);
+            });
             path.skip();
           }
         },
@@ -93,12 +95,13 @@ module.exports = function(babel) {
 
         if (!TYPEDEFS.has(typedefName)) {
           TYPEDEFS.set(typedefName, typedefComment.value);
+          // We can't easily remove comment nodes so we just empty the string
+          // out.
+          typedefComment.value = '';
+          // Remove the actual VariableDeclaration.
+          path.remove();
         }
 
-        // We can't easily remove comment nodes so we just empty the string out.
-        typedefComment.value = '';
-        // Remove the actual VariableDeclaration.
-        path.remove();
       },
     },
   };
