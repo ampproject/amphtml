@@ -21,7 +21,7 @@
   font-size: 0 !important;
 }
 
-.i-amphtml-story-bling-link[expanded], .i-amphtml-story-bling-link[expanded] .i-amphtml-story-bling-link-circle {
+amp-story-page[active] .i-amphtml-story-bling-link[expanded], amp-story-page[active] .i-amphtml-story-bling-link[expanded] .i-amphtml-story-bling-link-circle {
   width: 150px !important;
   transition: width 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
@@ -32,7 +32,9 @@
   background: rgba(255, 255, 255, 1) !important;
   margin: 5px !important;
   width: 40px !important;
-  height: 40px !important;  
+  height: 40px !important;
+  transition: 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  transition-property: width, border-radius !important;
 }
 
 .i-amphtml-story-bling-link[expanded] .i-amphtml-story-bling-link-circle {  
@@ -41,6 +43,7 @@
 }
 
 .i-amphtml-story-bling-link-text {
+  visibility: hidden !important;
   text-align: center !important;
   text-overflow: ellipsis !important;
   overflow: hidden;
@@ -56,6 +59,7 @@
 }
 
 .i-amphtml-story-bling-link-launch {
+  visibility: hidden !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
   background-size: 18px 18px !important;
@@ -83,6 +87,18 @@ amp-story-page[active] .i-amphtml-story-bling-link-pulse {
   100% {
     transform: scale(1.3);    
   }
+}
+
+.i-amphtml-story-bling-link[expanded] .i-amphtml-story-bling-link-pulse {
+  animation: none !important;
+}
+
+.i-amphtml-story-bling-link[expanded] .i-amphtml-story-bling-link-text {
+  visibility: visible !important;
+}
+
+.i-amphtml-story-bling-link[expanded] .i-amphtml-story-bling-link-launch {
+  visibility: visible !important;
 }
 
 .i-amphtml-story-bling-link:hover .i-amphtml-story-bling-link-circle {

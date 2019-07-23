@@ -23,7 +23,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {AmpStoryBlingLink, BLING_LINK_SELECTOR} from './amp-story-bling-link';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -527,18 +526,6 @@ export class AmpStoryEmbeddedComponent {
           this.focusedStateOverlay_.classList.toggle('i-amphtml-hidden', true);
         }
       );
-      return;
-    }
-
-    //if component is a bling link, expand it instead of building a tooltip
-    if (component.element.matches(BLING_LINK_SELECTOR)) {
-      addAttributesToElement(
-        dev().assertElement(component.element),
-        dict({
-          'href': this.getElementHref_(component.element),
-        })
-      );
-      AmpStoryBlingLink.expand(component.element);
       return;
     }
 

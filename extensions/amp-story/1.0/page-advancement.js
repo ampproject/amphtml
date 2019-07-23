@@ -568,9 +568,26 @@ class ManualAdvancement extends AdvancementConfig {
     return (
       inExpandedMode ||
       (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&
-        this.canShowTooltip_(event, pageRect)) ||
-      this.isCollapsedBlingLink(target)
+        this.canShowTooltip_(event, pageRect))
     );
+  }
+
+  /**
+   * Check if click should be handled by the bling link logic
+   * @param {!Event} event
+   * @private
+   */
+  isHandledByBlingLink_(event) {
+    const expanded = this.storeService_.get(StateProperty.BLING_LINK_STATE);
+    const clickedOnLink = event.target.matches(BLING_LINK_SELECTOR);
+
+    if (expanded) {
+      // do not handle if clicking on expanded bling link
+      return !clickedOnLink;
+    }
+
+    // handle if clicking on collapsed bling link
+    return clickedOnLink;
   }
 
   /**
@@ -594,6 +611,13 @@ class ManualAdvancement extends AdvancementConfig {
         clientX: event.clientX,
         clientY: event.clientY,
       });
+      return;
+    }
+
+    if (this.isHandledByBlingLink_(event)) {
+      event.preventDefault();
+      const expanded = this.storeService_.get(StateProperty.BLING_LINK_STATE);
+      this.storeService_.dispatch(Action.TOGGLE_BLING_LINK, !expanded);
       return;
     }
 

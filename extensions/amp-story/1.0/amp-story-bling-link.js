@@ -15,10 +15,15 @@
  */
 
 /**
- * @fileoverview Bling link component that turns into a tooltip when clicked.
+ * @fileoverview Bling link component that expands when clicked.
  */
 
+import {StateProperty, getStoreService} from './amp-story-store-service';
+import {addAttributesToElement} from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
+import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
+import {user} from '../../../src/log';
 
 /**
  * Links that are bling links.
@@ -26,72 +31,112 @@ import {htmlFor} from '../../../src/static-template';
  */
 export const BLING_LINK_SELECTOR = 'a.i-amphtml-story-bling-link';
 
+/**
+ * Custom property signifying a built link
+ * @const {string}
+ */
 export const BLING_LINK_BUILT = '__AMP_BLING_LINK_BUILT';
 
 export class AmpStoryBlingLink {
   /**
-   * Builds bling link
+   * @param {!Window} win
    * @param {!Element} element
    */
-  static build(element) {
-    if (element[BLING_LINK_BUILT]) {
-      return;
-    }
+  constructor(win, element) {
+    /** @private {!Window} */
+    this.win_ = win;
 
-    this.addPulseElement_(element);
-    this.addIconElement_(element);
+    /** @private {!Element} */
+    this.element_ = element;
 
-    element[BLING_LINK_BUILT] = true;
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win_);
   }
 
   /**
-   * Expands bling link
-   * @param {!Element} element
+   * Builds bling link
    */
-  static expand(element) {
-    element.toggleAttribute('expanded', true);
+  build() {
+    //TODO(esth): does this logic still work bc you're instantiating class in amp-story-page.js
+    if (this.element_[BLING_LINK_BUILT]) {
+      return;
+    }
 
-    const pulseEl = element.getElementsByClassName(
-      'i-amphtml-story-bling-link-pulse'
-    )[0];
-    pulseEl.toggleAttribute('hidden', true);
+    this.addIconElement_();
+    this.addText_();
+    this.addPulseElement_();
+    this.validateHref_();
+    this.initializeListeners_();
+    this.element_[BLING_LINK_BUILT] = true;
+  }
 
-    const circleEl = element.getElementsByClassName(
-      'i-amphtml-story-bling-link-circle'
-    )[0];
-
-    const textEl = htmlFor(circleEl)`
-      <span class="i-amphtml-story-bling-link-text">
-      </span>`;
-    textEl.innerText = element.innerText;
-    circleEl.appendChild(textEl);
-
-    const launchEl = htmlFor(circleEl)`
-      <i class="i-amphtml-story-bling-link-launch"></i>`;
-    circleEl.appendChild(launchEl);
+  /**
+   * @private
+   */
+  initializeListeners_() {
+    this.storeService_.subscribe(
+      StateProperty.BLING_LINK_STATE,
+      toggleExpand => {
+        this.element_.toggleAttribute('expanded', toggleExpand);
+      }
+    );
   }
 
   /**
    * Adds icon as a child element of <amp-story-bling-link>
-   * @param {!Element} element
    * @private
    */
-  static addIconElement_(element) {
-    const iconEl = htmlFor(element)`
+  addIconElement_() {
+    const iconEl = htmlFor(this.element_)`
       <div class="i-amphtml-story-bling-link-circle">
         <i class="i-amphtml-story-bling-link-icon i-amphtml-story-bling-link-shopping-cart"></i>
+        <span class="i-amphtml-story-bling-link-text"></span>
+        <i class="i-amphtml-story-bling-link-launch"></i>
       </div>`;
-    element.appendChild(iconEl);
+    this.element_.appendChild(iconEl);
+  }
+
+  /**
+   * Adds text from <a> tag to expanded link
+   * @private
+   */
+  addText_() {
+    const textEl = this.element_.querySelector(
+      '.i-amphtml-story-bling-link-text'
+    );
+    textEl.innerText = this.element_.innerText;
   }
 
   /**
    * Adds pulse as a child element of <amp-story-bling-link>
-   * @param {!Element} element
    * @private
    */
-  static addPulseElement_(element) {
-    const pulseEl = htmlFor(element)`
+  addPulseElement_() {
+    const pulseEl = htmlFor(this.element_)`
       <div class="i-amphtml-story-bling-link-pulse"></div>`;
-    element.appendChild(pulseEl);
+    this.element_.appendChild(pulseEl);
+  }
+
+  /**
+   * @private
+   */
+  validateHref_() {
+    const href = this.getElementHref_(this.element_);
+    addAttributesToElement(this.element_, dict({'href': href}));
+  }
+
+  /**
+   * Gets href from an element containing a url.
+   * @param {!Element} target
+   * @private
+   */
+  getElementHref_(target) {
+    const elUrl = target.getAttribute('href');
+    if (!isProtocolValid(elUrl)) {
+      user().error('amp-story-bling-link', 'The bling link url is invalid');
+      return;
+    }
+
+    return parseUrlDeprecated(elUrl).href;
   }
 }

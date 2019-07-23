@@ -592,7 +592,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   addStylesToBlingLinks_() {
     scopedQuerySelectorAll(this.element, BLING_LINK_SELECTOR).forEach(el => {
-      AmpStoryBlingLink.build(el);
+      const link = new AmpStoryBlingLink(this.win, el);
+      link.build();
     });
   }
 
