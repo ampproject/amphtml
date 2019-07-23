@@ -18,6 +18,7 @@ import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
 import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
+import {isExperimentOn} from './experiments';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
@@ -316,6 +317,13 @@ class Chunks {
 
     /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
     this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
+    /** @private {number} */
+    this.timeSinceLastExecution_ = Date.now();
+    /** @private {boolean} */
+    this.macroAfterLongTask_ = isExperimentOn(
+      this.win_,
+      'macro-after-long-task'
+    );
 
     this.win_.addEventListener('message', e => {
       if (getData(e) == 'amp-macro-task') {
@@ -390,6 +398,7 @@ class Chunks {
       return false;
     }
     const before = Date.now();
+    this.timeSinceLastExecution_ = before;
     t.runTask_(idleDeadline);
     resolved.then(() => {
       this.schedule_();
@@ -404,6 +413,16 @@ class Chunks {
    * @private
    */
   executeAsap_(idleDeadline) {
+    // If we've spent over 5 millseconds executing the
+    // last instruction yeild back to the main thread.
+    // 5 milliseconds is a magic number.
+    if (
+      this.macroAfterLongTask_ &&
+      Date.now() - this.timeSinceLastExecution_ > 5
+    ) {
+      this.requestMacroTask_();
+      return;
+    }
     resolved.then(() => {
       this.boundExecute_(idleDeadline);
     });
@@ -439,6 +458,16 @@ class Chunks {
       );
       return;
     }
+    this.requestMacroTask_();
+  }
+
+  /**
+   * Requests executing of a macro task. Yields to the event queue
+   * before executing the task.
+   * Places task on browser message queue which then respectively
+   * triggers dequeuing and execution of a chunk.
+   */
+  requestMacroTask_() {
     // The message doesn't actually matter.
     this.win_./*OK*/ postMessage('amp-macro-task', '*');
   }

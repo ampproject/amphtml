@@ -387,6 +387,13 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20237',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
   },
+  {
+    id: 'macro-after-long-task',
+    name:
+      'If applicable, convert remaining micro tasks to the next macro ' +
+      ' tasks if a previous micro task execution took too long',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
+  },
 ];
 
 if (getMode().localDev) {
