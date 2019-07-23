@@ -538,7 +538,7 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * @return {!./service/resources-impl.Resources}
+   * @return {!./service/resources-impl.ResourcesDef}
    * @private
    */
   getResources_() {

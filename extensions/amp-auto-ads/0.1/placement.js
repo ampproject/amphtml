@@ -123,7 +123,7 @@ export class Placement {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(anchorElement);
 
     /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
