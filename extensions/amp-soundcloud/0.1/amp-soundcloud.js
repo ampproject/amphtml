@@ -27,8 +27,8 @@
  * </amp-soundcloud>
  */
 
-import {Layout} from '../../../src/layout';
 import {dict} from '../../../src/utils/object';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
 
 class AmpSoundcloud extends AMP.BaseElement {
@@ -50,7 +50,7 @@ class AmpSoundcloud extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return isLayoutSizeDefined(layout);
   }
 
   /**@override*/
