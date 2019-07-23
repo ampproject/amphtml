@@ -22,6 +22,7 @@ import {
   tryDecodeUriComponent,
 } from './url';
 import {urls} from './config';
+import {userAssert} from './log';
 
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 
@@ -206,30 +207,24 @@ function trySetCookie(win, name, value, expirationTime, domain) {
  */
 function checkOriginForSettingCookie(win, options, name) {
   if (options && options.allowOnProxyOrigin) {
-    if (options.highestAvailableDomain) {
-      throw new Error(
-        'Could not support higestAvailable Domain on proxy origin, ' +
-          'specify domain explicitly'
-      );
-    }
+    userAssert(
+      !options.highestAvailableDomain,
+      'Could not support higestAvailable Domain on proxy origin, ' +
+        'specify domain explicitly'
+    );
     return;
   }
-
-  if (isProxyOrigin(win.location.href)) {
-    throw new Error(
-      'Should never attempt to set cookie on proxy origin: ' + name
-    );
-  }
-
+  userAssert(
+    !isProxyOrigin(win.location.href),
+    `Should never attempt to set cookie on proxy origin: ${name}`
+  );
   const current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
   const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
-  if (current == proxy || endsWith(current, '.' + proxy)) {
-    throw new Error(
-      'Should never attempt to set cookie on proxy origin.' +
-        ' (in depth check): ' +
-        name
-    );
-  }
+  userAssert(
+    !(current == proxy || endsWith(current, '.' + proxy)),
+    'Should never attempt to set cookie on proxy origin. (in depth check): ' +
+      name
+  );
 }
 
 /**

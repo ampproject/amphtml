@@ -44,6 +44,7 @@ const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
+const {formatExtractedMessages} = require('./log-messages');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
@@ -315,9 +316,7 @@ exports.getGraph = function(entryModules, config) {
     // directly and which we don't want to apply during deps finding.
     .transform(babelify, {
       compact: false,
-      plugins: [
-        require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
-      ],
+      plugins: ['transform-es2015-modules-commonjs'],
     });
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
@@ -555,6 +554,7 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
     .then(thirdPartyConcat)
+    .then(formatExtractedMessages)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       throw err;
@@ -671,7 +671,7 @@ function postPrepend(extension, prependContents) {
 function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
-    return gulp
+    gulp
       .src(srcs, {base: transformDir})
       .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
       .pipe(sourcemaps.init({loadMaps: true}))
