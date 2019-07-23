@@ -25,23 +25,9 @@ describes.realWin(
     },
   },
   env => {
-    const title = `<title>Hello, world.</title>`;
-    const styleBoilerplate = `<style amp4ads-boilerplate>body{visibility:hidden}</style>`;
-    const ampExperiment = `<script async custom-element=amp-experiment src=https://cdn.ampproject.org/v0/amp-experiment-0.1.js></script>`;
-    const ampAudio = `<script async custom-element=amp-audio src=https://cdn.ampproject.org/v0/amp-audio-0.1.js></script>`;
-    const noscript = `<noscript><style amp-boilerplate> body{-webkit-animation:none;-moz-animation:none;-ms-animation:none; animation:none}</style></noscript>`;
-    const ampRuntimeStyle = `<style amp-runtime i-amphtml-version=42></style>`;
     const ampRuntimeScript = `<script async src=https://cdn.ampproject.org/amp4ads-v0.js></script>`;
-    const ampMraid = `<script async host-service=amp-mraid src=https://cdn.ampproject.org/v0/amp-mraid-0.1.js></script>`;
-    const ampMustache = `<script async custom-template=amp-mustache src=https://cdn.ampproject.org/v0/amp-mustache-0.1.js></script>`;
-    const fontLink = `<link href=https://fonts.googleapis.com/css?foobar rel=stylesheet type=text/css>`;
-    const crossorigin = `<link crossorigin href=https://fonts.gstatic.com/ rel="dns-prefetch preconnect">`;
     const metaCharset = `<meta charset=utf-8></meta>`;
     const metaViewport = `<meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"></meta>`;
-    const ampCustomStyle = `<style amp-custom></style>`;
-    const linkIcon = `<link href=https://example.com/favicon.ico rel=icon>`;
-    const ampViewerIntegration = `<script async src=https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js></script>`;
-    const ampGmail = `<script async src=https://cdn.ampproject.org/v0/amp-viewer-integration-gmail-0.1.js></script>`;
     let doc;
     let win;
     let fakeImplElem;
@@ -67,6 +53,97 @@ describes.realWin(
       fakeImplElem.setAttribute('id', 'i-amphtml-demo-test');
       const fakeImpl = new AmpAdNetworkFakeImpl(fakeImplElem);
       expect(fakeImpl.isValidElement()).to.be.true;
+    });
+
+    it('generates extensions metadata', () => {
+      const docString = `<html ⚡><head>
+      <script custom-element="amp-font"
+          src="https://cdn.ampproject.org/v0/amp-font-0.1.js"></script>
+      <script custom-element="amp-list"
+          src="https://cdn.ampproject.org/v0/amp-list-latest.js"></script>
+      <script custom-element="amp-list"
+          src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+      </head><body></body></html>`;
+      fakeImplElem.setAttribute('id', 'i-amphtml-demo-test-3');
+      const reordered = new AmpAdNetworkFakeImpl(
+        fakeImplElem
+      ).transformCreative_(docString);
+      expect(reordered).to.include(
+        `"extensions":[{"custom-element":"amp-font","src":"https://cdn.ampproject.org/v0/amp-font-0.1.js"},{"custom-element":"amp-list","src":"https://cdn.ampproject.org/v0/amp-list-latest.js"}]`
+      );
+    });
+
+    it('generates runtime offsets', () => {
+      const docString =
+        '<!doctype html><html amp4ads><head>' +
+        metaCharset +
+        metaViewport +
+        ampRuntimeScript +
+        `</head><body>hello world
+      </script></body></html>`;
+      fakeImplElem.setAttribute('id', 'i-amphtml-demo-test-4');
+      const reordered = new AmpAdNetworkFakeImpl(
+        fakeImplElem
+      ).transformCreative_(docString);
+      expect(reordered).to.include(`"ampRuntimeUtf16CharOffsets":[128,201]`);
+    });
+
+    it('generates json offsets', () => {
+      const docString =
+        '<!doctype html><html amp4ads><head>' +
+        metaCharset +
+        metaViewport +
+        ampRuntimeScript +
+        '<style amp-custom></style></head><body><amp-analytics><script type=application/json>Iñtërnâtiônàlizætiøn☃💩</script></amp-analytics></body></html>';
+      fakeImplElem.setAttribute('id', 'i-amphtml-demo-test-5');
+      const reordered = new AmpAdNetworkFakeImpl(
+        fakeImplElem
+      ).transformCreative_(docString);
+      expect(reordered).to.include(
+        `"jsonUtf16CharOffsets":{"amp-analytics":[258,322]`
+      );
+    });
+
+    it('handles already existing amp-ad-metadata json', () => {
+      const docString =
+        '<!doctype html><html amp4ads><head>' +
+        metaCharset +
+        metaViewport +
+        ampRuntimeScript +
+        '<style amp-custom></style></head><body><script type=application/json amp-ad-metadata>{"diagnosis": "pre-existing condition"}</script></body></html>';
+      fakeImplElem.setAttribute('id', 'i-amphtml-demo-test-5');
+      const reordered = new AmpAdNetworkFakeImpl(
+        fakeImplElem
+      ).transformCreative_(docString);
+      expect(reordered).to.include(`"diagnosis":"pre-existing condition"`);
+    });
+
+    it('generates image metadata', () => {
+      const docString =
+        '<!doctype html><html amp4ads><head>' +
+        metaCharset +
+        metaViewport +
+        ampRuntimeScript +
+        `<style amp-custom></style></head><body>
+             <amp-img notSrc="https://goo.com"></amp-img>
+            <amp-img-other src="https://goo.com"></amp-img>
+            <Amp-imG src="https://some.image.com?a=b" height=999 width=0></amp-img>
+            <div>
+              <amp-img src="https://foo.image.com?a=b&c=d" height=1 width=1></amp-img>
+            </div>
+            <amp-img src="https://test.image.com" height=1 width=5></amp-img>
+            <amp-img src="https://foo.image.com?a=b&c=d" height=1 width=2></amp-img>
+            <aMp-imG src="https://test.image.com?d=e" height=1 width=3></amp-img>
+            <amp-img src="https://test.image.com?f=g" height=4 width=1></amp-img>
+            <amp-img src="https://test.image.com?h=i" height=0 width=1999></amp-img>
+             </body></html>`;
+      fakeImplElem.setAttribute('id', 'i-amphtml-demo-test-5');
+      const reordered = new AmpAdNetworkFakeImpl(
+        fakeImplElem
+      ).transformCreative_(docString);
+      expect(reordered).to.include(
+        `"images":["https://some.image.com?a=b","https://foo.image.com?a=b&c=d","https://test.image.com","https://foo.image.com?a=b&c=d","https://test.image.com?d=e","https://test.image.com?f=g","https://test.image.com?h=i"]`
+      );
     });
 
     it('adds the correct metadata for a story ad', () => {
@@ -95,55 +172,5 @@ describes.realWin(
       expect(parsed.ctaType).to.equal('INSTALL');
       expect(parsed.ctaUrl).to.equal('https://www.amp.dev');
     });
-
-
-    it('reorders head', () => {
-      const input = `
-      <html>
-      <head>` + title + styleBoilerplate + ampExperiment + ampAudio + noscript + ampRuntimeStyle + ampRuntimeScript + ampMraid + ampMustache + fontLink + crossorigin + metaCharset
-      + metaViewport + ampCustomStyle + linkIcon + ampViewerIntegration + ampGmail + 
-      `</head><body></body></html>`;
-      const expected = `
-      <html>
-      <head>` + metaCharset + ampRuntimeStyle + metaViewport + ampRuntimeScript + ampViewerIntegration + ampGmail + ampExperiment + ampAudio + ampMraid + ampMustache
-      + linkIcon + crossorigin + fontLink + ampCustomStyle + title + styleBoilerplate + noscript + 
-      `</head><body></body></html>`;
-      const inputHeadDoc = new DOMParser().parseFromString(input, 'text/html');
-      const expectedHeadDoc = new DOMParser().parseFromString(expected, 'text/html')
-      fakeImplElem.setAttribute('id', 'i-amphtml-demo-test-1');
-      const transformed = new AmpAdNetworkFakeImpl(fakeImplElem).reorderHead_(inputHeadDoc.head);
-      expect(transformed).to.equal(expectedHeadDoc.head.outerHTML);
-    });
-
-    it('reorders head a4a', () => {
-      const inputa4a = `
-      <html amp4ads>
-      <head>` + title + styleBoilerplate + ampAudio + ampRuntimeScript + fontLink + crossorigin + metaCharset
-      + metaViewport + ampCustomStyle + 
-      `</head><body></body></html>`;
-      const expecteda4a = `
-      <html>
-      <head>` + metaCharset + metaViewport + ampRuntimeScript + ampAudio + crossorigin + fontLink + ampCustomStyle + title + styleBoilerplate +
-      `</head><body></body></html>`;
-      const inputHeadDoc = new DOMParser().parseFromString(inputa4a, 'text/html');
-      const expectedHeadDoc = new DOMParser().parseFromString(expecteda4a, 'text/html')
-      fakeImplElem.setAttribute('id', 'i-amphtml-demo-test-2');
-      const transformed = new AmpAdNetworkFakeImpl(fakeImplElem).reorderHead_(inputHeadDoc.head);
-      expect(transformed).to.equal(expectedHeadDoc.head);
-    });
-
-    it('generates metadata', () => {
-      const docString = `<html ⚡><head>
-      <script custom-element="amp-font"
-          src="https://cdn.ampproject.org/v0/amp-font-0.1.js"></script>
-      <script custom-element="amp-list"
-          src="https://cdn.ampproject.org/v0/amp-list-latest.js"></script>
-      <script custom-element="amp-list"
-          src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-      </head><body></body></html>`;
-      fakeImplElem.setAttribute('id', 'i-amphtml-demo-test-3');
-      const reordered = new AmpAdNetworkFakeImpl(fakeImplElem).transformCreative_(docString);
-      expect(reordered).to.include(`"extensions":[{"custom-element":"amp-font","src":"https://cdn.ampproject.org/v0/amp-font-0.1.js"},{"custom-element":"amp-list","src":"https://cdn.ampproject.org/v0/amp-list-latest.js"}]`);  
-    })
   }
 );
