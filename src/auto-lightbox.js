@@ -41,14 +41,18 @@ function isProxyOriginOrLocalDev(ampdoc) {
 
   // An attached node is required for proxy origin check. If no elements are
   // present, short-circuit.
-  const {firstElementChild} = ampdoc.getBody();
-  if (!firstElementChild) {
+  if (!ampdoc.isSingleDoc()) {
+    return false;
+  }
+
+  const {documentElement} = ampdoc.getRoot();
+  if (!documentElement) {
     return false;
   }
 
   // TODO(alanorozco): Additionally check for transformed, webpackaged flag.
   // See git.io/fhQ0a (#20359) for details.
-  return Services.urlForDoc(firstElementChild).isProxyOrigin(win.location);
+  return Services.urlForDoc(documentElement).isProxyOrigin(win.location);
 }
 
 /**
