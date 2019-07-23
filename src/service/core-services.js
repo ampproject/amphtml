@@ -26,8 +26,6 @@ import {installGlobalSubmitListenerForDoc} from '../document-submit';
 import {installHiddenObserverForDoc} from './hidden-observer-impl';
 import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
-import {installInaboxCidService} from '../inabox/inabox-cid';
-import {installInaboxViewportService} from '../inabox/inabox-viewport';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
 import {installPixel} from '../../builtins/amp-pixel';
@@ -83,7 +81,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
 
   // When making changes to this method:
   // 1. Order is important!
-  // 2. Consider to apply same changes to installAmpdocServicesForInabox
+  // 2. Consider to install same services to amp-inabox.js
   installUrlForDoc(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'documentInfo')
@@ -113,29 +111,6 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'storage')
     : installStorageServiceForDoc(ampdoc);
-  installGlobalNavigationHandlerForDoc(ampdoc);
-  installGlobalSubmitListenerForDoc(ampdoc);
-}
-
-/**
- * Install ampdoc-level services.
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @restricted
- */
-export function installAmpdocServicesForInabox(ampdoc) {
-  // Order is important!
-  installUrlForDoc(ampdoc);
-  installDocumentInfoServiceForDoc(ampdoc);
-  installInaboxCidService(ampdoc);
-  installViewerServiceForDoc(ampdoc);
-  installInaboxViewportService(ampdoc);
-  installHiddenObserverForDoc(ampdoc);
-  installHistoryServiceForDoc(ampdoc);
-  installResourcesServiceForDoc(ampdoc);
-  installUrlReplacementsServiceForDoc(ampdoc);
-  installActionServiceForDoc(ampdoc);
-  installStandardActionsForDoc(ampdoc);
-  // For security, Storage is not installed in inabox.
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
