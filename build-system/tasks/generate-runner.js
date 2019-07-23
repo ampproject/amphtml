@@ -121,7 +121,6 @@ async function generateRunner(subDir) {
       );
     }
   }
-  return Promise.resolve();
 }
 
 module.exports = {
