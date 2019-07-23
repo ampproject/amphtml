@@ -539,19 +539,6 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   *
-   * @param {*} target
-   * @return {boolean}
-   */
-  isCollapsedBlingLink(target) {
-    if (!target.matches(BLING_LINK_SELECTOR)) {
-      return false;
-    }
-
-    return !target.hasAttribute('expanded'); //TODO: use state service
-  }
-
-  /**
    * Checks if click should be handled by the embedded component logic rather
    * than by navigation.
    * @param {!Event} event
@@ -565,6 +552,7 @@ class ManualAdvancement extends AdvancementConfig {
       StateProperty.INTERACTIVE_COMPONENT_STATE
     ));
     const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
+
     return (
       inExpandedMode ||
       (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&
