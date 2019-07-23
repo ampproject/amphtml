@@ -20,6 +20,7 @@
  * for both the babel and closure sources to be as close as possible.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const tempy = require('tempy');
 
 const SRC_TEMP_DIR = tempy.directory();
@@ -126,8 +127,16 @@ const CLOSURE_SRC_GLOBS = [
   '!node_modules/core-js/modules/library/**.js',
 ].concat(COMMON_GLOBS);
 
+let destination =
+  typeof argv.destination === 'string' ? argv.destination : './dist/';
+if (!destination.endsWith('/')) {
+  destination = `${destination}/`;
+}
+const OUTPUT_DIR = destination;
+
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
   SRC_TEMP_DIR,
+  OUTPUT_DIR,
 };

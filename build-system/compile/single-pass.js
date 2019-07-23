@@ -46,6 +46,7 @@ const {
 } = require('./closure-compile');
 const {formatExtractedMessages} = require('./log-messages');
 const {isTravisBuild} = require('../travis');
+const {OUTPUT_DIR} = require('../sources');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
@@ -53,12 +54,6 @@ const wrappers = require('../compile-wrappers');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const argv = minimist(process.argv.slice(2));
-let destination =
-  typeof argv.destination === 'string' ? argv.destination : './dist/';
-
-if (!destination.endsWith('/')) {
-  destination = `${destination}/`;
-}
 
 const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
 
@@ -544,7 +539,7 @@ exports.singlePassCompile = async function(entryModule, options) {
   return exports
     .getFlags({
       modules: [entryModule].concat(extensions),
-      writeTo: destination,
+      writeTo: OUTPUT_DIR,
       define: options.define,
       externs: options.externs,
       hideWarningsFor: options.hideWarningsFor,
@@ -573,9 +568,9 @@ function wrapMainBinaries() {
   const prefix = pair[0];
   const suffix = pair[1];
   // Cache the v0 file so we can prepend it to alternative binaries.
-  const mainFile = readMagicString(`${destination}/v0.js`);
+  const mainFile = readMagicString(`${OUTPUT_DIR}v0.js`);
   jsFilesToWrap.forEach(x => {
-    const path = `${destination}/${x}.js`;
+    const path = `${OUTPUT_DIR}${x}.js`;
     const s = readMagicString(path);
     if (x === 'v0') {
       s.prepend(prefix);
@@ -609,8 +604,8 @@ function wrapMainBinaries() {
 function intermediateBundleConcat() {
   extensionBundles.forEach(extension => {
     const prependContents = [
-      `${destination}/v0/_base_i.js`,
-      `${destination}/v0/${extension.type}.js`,
+      `${OUTPUT_DIR}v0/_base_i.js`,
+      `${OUTPUT_DIR}v0/${extension.type}.js`,
     ].map(readMagicString);
 
     // If there are third_party libraries to prepend too, ensure we inject a
@@ -641,7 +636,7 @@ function thirdPartyConcat() {
 
 function postPrepend(extension, prependContents) {
   function createFullPath(version) {
-    return `${destination}/v0/${extension.name}-${version}.js`;
+    return `${OUTPUT_DIR}v0/${extension.name}-${version}.js`;
   }
 
   let targets = [];
@@ -693,7 +688,7 @@ function compile(flagsArray) {
 function eliminateIntermediateBundles() {
   extensionBundles.forEach(extension => {
     function createFullPath(version) {
-      return `${destination}/v0/${extension.name}-${version}.js`;
+      return `${OUTPUT_DIR}v0/${extension.name}-${version}.js`;
     }
 
     let targets = [];
@@ -764,7 +759,7 @@ function readMagicString(file) {
 }
 
 function loadSourceMap(file) {
-  if (file.startsWith(destination)) {
+  if (file.startsWith(OUTPUT_DIR)) {
     return readFile(`${file}.map`);
   }
   return null;

@@ -39,6 +39,7 @@ const {
 } = require('../../git');
 const {execOrDie, execScriptAsync} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
+const {OUTPUT_DIR} = require('../../sources');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
 
 // optional dependencies for local development (outside of visual diff tests)
@@ -827,7 +828,7 @@ async function performVisualTests() {
 async function ensureOrBuildAmpRuntimeInTestMode_() {
   if (argv.nobuild) {
     const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":true\b/.test(
-      fs.readFileSync('dist/v0.js', 'utf8')
+      fs.readFileSync(`${OUTPUT_DIR}/v0.js`, 'utf8')
     );
     if (!isInTestMode) {
       log(

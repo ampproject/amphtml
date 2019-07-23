@@ -22,6 +22,7 @@ const del = require('del');
 const file = require('gulp-file');
 const gulp = require('gulp');
 const {endBuildStep, toPromise, compileJs} = require('./helpers');
+const {OUTPUT_DIR} = require('../sources');
 
 /**
  * Generate all the vendor config JSONs from their respective JS files
@@ -32,7 +33,7 @@ function generateVendorJsons() {
 
   const srcDir = 'extensions/amp-analytics/0.1';
   const srcFile = 'vendors.js';
-  const tempPath = 'dist/temp-analytics/';
+  const tempPath = `${OUTPUT_DIR}temp-analytics/`;
   const destPath = 'extensions/amp-analytics/0.1/vendors/';
   const compileOptions = {
     browserifyOptions: {
@@ -50,7 +51,9 @@ function generateVendorJsons() {
 
   return compileJs(srcDir, srcFile, tempPath, compileOptions).then(() => {
     const promises = [];
-    const {ANALYTICS_CONFIG} = require('../../dist/temp-analytics/vendors.js');
+    const {
+      ANALYTICS_CONFIG,
+    } = require(`../../${OUTPUT_DIR}/temp-analytics/vendors.js`);
 
     // iterate over each vendor config and write to JSON file
     Object.keys(ANALYTICS_CONFIG).forEach(vendorName => {

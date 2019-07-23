@@ -49,7 +49,7 @@ const {
   printNobuildHelp,
   toPromise,
 } = require('./helpers');
-const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
+const {BABEL_SRC_GLOBS, SRC_TEMP_DIR, OUTPUT_DIR} = require('../sources');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
@@ -204,7 +204,7 @@ function buildLoginDone(version, options) {
   const builtName = `amp-login-done-${version}.max.js`;
   const minifiedName = `amp-login-done-${version}.js`;
   const latestName = 'amp-login-done-latest.js';
-  return compileJs('./' + buildDir, builtName, './dist/v0/', {
+  return compileJs('./' + buildDir, builtName, `./${OUTPUT_DIR}v0/`, {
     watch: false,
     includePolyfills: true,
     minify: options.minify || argv.minify,
@@ -223,7 +223,7 @@ function buildLoginDone(version, options) {
  * @param {!Object} options
  */
 function buildWebPushPublisherFiles(options) {
-  const distDir = 'dist/v0';
+  const distDir = `${OUTPUT_DIR}v0`;
   const promises = [];
   WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
     WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
@@ -257,13 +257,13 @@ function copyCss() {
   const startTime = Date.now();
 
   cssEntryPoints.forEach(({outCss}) => {
-    fs.copySync(`build/css/${outCss}`, `dist/${outCss}`);
+    fs.copySync(`build/css/${outCss}`, `${OUTPUT_DIR}${outCss}`);
   });
 
   return toPromise(
     gulp
       .src('build/css/amp-*.css', {base: 'build/css/'})
-      .pipe(gulp.dest('dist/v0'))
+      .pipe(gulp.dest(`${OUTPUT_DIR}v0`))
   ).then(() => {
     endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
   });
@@ -288,8 +288,8 @@ function copyAliasExtensions() {
       continue;
     }
     fs.copySync(
-      'dist/v0/' + extensionAliasFilePath[key]['file'],
-      'dist/v0/' + key
+      `${OUTPUT_DIR}v0/${extensionAliasFilePath[key]['file']}`,
+      `${OUTPUT_DIR}v0/${key}`
     );
   }
 
@@ -302,8 +302,8 @@ function copyAliasExtensions() {
  * @return {!Promise<!Array>}
  */
 async function preBuildWebPushPublisherFiles() {
-  mkdirSync('dist');
-  mkdirSync('dist/v0');
+  mkdirSync(OUTPUT_DIR);
+  mkdirSync(`${OUTPUT_DIR}v0`);
   const promises = [];
 
   WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
@@ -330,7 +330,7 @@ async function preBuildWebPushPublisherFiles() {
  * post Build amp-web-push publisher files HTML page.
  */
 function postBuildWebPushPublisherFilesVersion() {
-  const distDir = 'dist/v0';
+  const distDir = `${OUTPUT_DIR}v0`;
   WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
     const basePath = `extensions/amp-web-push/${version}/`;
     WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
@@ -348,7 +348,7 @@ function postBuildWebPushPublisherFilesVersion() {
           '</script>'
       );
 
-      fs.writeFileSync('dist/v0/' + fileName + '.html', fileContents);
+      fs.writeFileSync(`${OUTPUT_DIR}v0/${fileName}.html`, fileContents);
     });
   });
 }
@@ -409,6 +409,8 @@ function preBuildLoginDoneVersion(version) {
   // Build HTML.
   const html = fs.readFileSync(htmlPath, 'utf8');
   const minJs = `https://${hostname}/v0/amp-login-done-${version}.js`;
+  // `dist` string here is hard coded so we need to leave it alone instead
+  // of replacing it with OUTPUT_DIR.
   const minHtml = html
     .replace(`../../../dist/v0/amp-login-done-${version}.max.js`, minJs)
     .replace(`../../../dist/v0/amp-login-done-${version}.js`, minJs);
@@ -416,10 +418,10 @@ function preBuildLoginDoneVersion(version) {
     throw new Error('Failed to correctly set JS in login-done.html');
   }
 
-  mkdirSync('dist');
-  mkdirSync('dist/v0');
+  mkdirSync(OUTPUT_DIR);
+  mkdirSync(`${OUTPUT_DIR}v0`);
 
-  fs.writeFileSync('dist/v0/amp-login-done-' + version + '.html', minHtml);
+  fs.writeFileSync(`${OUTPUT_DIR}v0/amp-login-done-${version}.html`, minHtml);
 
   // Build JS.
   const js = fs.readFileSync(jsPath, 'utf8');

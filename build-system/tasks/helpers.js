@@ -36,6 +36,7 @@ const {altMainBundles} = require('../../bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
 const {isTravisBuild} = require('../travis');
+const {OUTPUT_DIR} = require('../sources');
 const {thirdPartyFrames} = require('../config');
 const {transpileTs} = require('../typescript');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
@@ -175,7 +176,7 @@ function compile(watch, shouldMinify) {
     compileJs(
       './extensions/amp-viewer-integration/0.1/examples/',
       'amp-viewer-host.js',
-      './dist/v0/examples',
+      `./${OUTPUT_DIR}v0/examples`,
       {
         toName: 'amp-viewer-host.max.js',
         minifiedName: 'amp-viewer-host.js',
@@ -190,7 +191,7 @@ function compile(watch, shouldMinify) {
 
   if (!argv.single_pass && (!watch || argv.with_shadow)) {
     promises.push(
-      compileJs('./src/', 'amp-shadow.js', './dist', {
+      compileJs('./src/', 'amp-shadow.js', `./${OUTPUT_DIR}`, {
         minifiedName: 'shadow-v0.js',
         includePolyfills: true,
         watch,
@@ -201,7 +202,7 @@ function compile(watch, shouldMinify) {
 
   if (!watch || argv.with_video_iframe_integration) {
     promises.push(
-      compileJs('./src/', 'video-iframe-integration.js', './dist', {
+      compileJs('./src/', 'video-iframe-integration.js', `./${OUTPUT_DIR}`, {
         minifiedName: 'video-iframe-integration-v0.js',
         includePolyfills: false,
         watch,
@@ -214,7 +215,7 @@ function compile(watch, shouldMinify) {
     if (!argv.single_pass) {
       promises.push(
         // Entry point for inabox runtime.
-        compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+        compileJs('./src/inabox/', 'amp-inabox.js', `./${OUTPUT_DIR}`, {
           toName: 'amp-inabox.js',
           minifiedName: 'amp4ads-v0.js',
           includePolyfills: true,
@@ -226,7 +227,7 @@ function compile(watch, shouldMinify) {
     }
     promises.push(
       // inabox-host
-      compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
+      compileJs('./ads/inabox/', 'inabox-host.js', `./${OUTPUT_DIR}`, {
         toName: 'amp-inabox-host.js',
         minifiedName: 'amp4ads-host-v0.js',
         includePolyfills: false,
@@ -251,7 +252,7 @@ function compile(watch, shouldMinify) {
   }
 
   return Promise.all(promises).then(() => {
-    return compileJs('./src/', 'amp.js', './dist', {
+    return compileJs('./src/', 'amp.js', `./${OUTPUT_DIR}`, {
       toName: 'amp.js',
       minifiedName: 'v0.js',
       includePolyfills: true,
@@ -342,7 +343,7 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       if (argv.fortesting && options.singlePassCompilation) {
         const promises = [];
         altMainBundles.forEach(bundle => {
-          promises.push(enableLocalTesting(`dist/${bundle.name}.js`));
+          promises.push(enableLocalTesting(`${OUTPUT_DIR}${bundle.name}.js`));
         });
         return Promise.all(promises);
       }
@@ -688,7 +689,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
  */
 function buildAlp(options) {
   options = options || {};
-  return compileJs('./ads/alp/', 'install-alp.js', './dist/', {
+  return compileJs('./ads/alp/', 'install-alp.js', `./${OUTPUT_DIR}`, {
     toName: 'alp.max.js',
     watch: options.watch,
     minify: options.minify || argv.minify,
@@ -703,7 +704,7 @@ function buildAlp(options) {
  * @param {!Object} options
  */
 function buildExaminer(options) {
-  return compileJs('./src/examiner/', 'examiner.js', './dist/', {
+  return compileJs('./src/examiner/', 'examiner.js', `./${OUTPUT_DIR}`, {
     toName: 'examiner.max.js',
     watch: options.watch,
     minify: options.minify || argv.minify,
@@ -718,7 +719,7 @@ function buildExaminer(options) {
  * @param {!Object} options
  */
 function buildWebWorker(options) {
-  return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
+  return compileJs('./src/web-worker/', 'web-worker.js', `./${OUTPUT_DIR}`, {
     toName: 'ww.max.js',
     minifiedName: 'ww.js',
     includePolyfills: true,

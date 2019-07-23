@@ -28,7 +28,7 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
-const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
+const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR, OUTPUT_DIR} = require('../sources');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
@@ -153,7 +153,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
 
     // Add babel plugin to remove unwanted polyfills in esm build
     if (options.esmPassCompilation) {
-      compilationOptions['dest'] = './dist/esm/';
+      compilationOptions['dest'] = `./${OUTPUT_DIR}esm/`;
       define.push('ESM_BUILD=true');
     }
 

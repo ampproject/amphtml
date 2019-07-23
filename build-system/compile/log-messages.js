@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 const fs = require('fs-extra');
+const {OUTPUT_DIR} = require('../sources');
 
-const pathPrefix = 'dist/log-messages';
+const pathPrefix = `${OUTPUT_DIR}log-messages`;
 
 /**
  * Source of truth for extracted messages during build, but should not be
