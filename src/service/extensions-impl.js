@@ -239,7 +239,7 @@ export class Extensions {
     return (extLoaders[extensionId] = this.preloadExtension(
       extensionId,
       opt_extensionVersion
-    ).then(() => this.installExtensionInDoc_(ampdoc, extensionId)));
+    ).then(() => this.installExtensionInDoc(ampdoc, extensionId)));
   }
 
   /**
@@ -393,7 +393,7 @@ export class Extensions {
   installExtensionsInDoc(ampdoc, extensionIds) {
     const promises = [];
     extensionIds.forEach(extensionId => {
-      promises.push(this.installExtensionInDoc_(ampdoc, extensionId));
+      promises.push(this.installExtensionInDoc(ampdoc, extensionId));
     });
     return Promise.all(promises);
   }
@@ -403,9 +403,8 @@ export class Extensions {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {string} extensionId
    * @return {!Promise}
-   * @private
    */
-  installExtensionInDoc_(ampdoc, extensionId) {
+  installExtensionInDoc(ampdoc, extensionId) {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
     return this.waitFor_(holder).then(() => {
       ampdoc.declareExtension(extensionId);

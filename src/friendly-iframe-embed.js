@@ -253,14 +253,14 @@ export function installFriendlyIframeEmbed(
     // Add extensions.
     if (ampdoc && ampdocFieExperimentOn) {
       installExtensionsInFie(
-        extensions.win,
+        extensions,
         ampdoc,
         spec.extensionIds || [],
         opt_preinstallCallback
       );
     } else {
       installExtensionsInChildWindow(
-        extensions.win,
+        extensions,
         childWin,
         spec.extensionIds || [],
         opt_preinstallCallback
@@ -716,19 +716,20 @@ export function isInFie(element) {
  * Install extensions in the child window (friendly iframe). The pre-install
  * callback, if specified, is executed after polyfills have been configured
  * but before the first extension is installed.
- * @param {!Window} topWin
- * @param {!./ampdoc-impl.AmpDocFie} ampdoc
+ * @param {!./service/extensions-impl.Extensions} extensions
+ * @param {!./service/ampdoc-impl.AmpDocFie} ampdoc
  * @param {!Array<string>} extensionIds
- * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+ * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
  * @return {!Promise}
  * @private
  */
 function installExtensionsInFie(
-  topWin,
+  extensions,
   ampdoc,
   extensionIds,
   opt_preinstallCallback
 ) {
+  const topWin = extensions.win;
   const childWin = ampdoc.win;
   const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
   setParentWindow(childWin, parentWin);
@@ -739,7 +740,7 @@ function installExtensionsInFie(
   // Install runtime styles.
   installStylesForDoc(
     ampdoc,
-    isExperimentOn(this.win, 'fie-css-cleanup')
+    isExperimentOn(topWin, 'fie-css-cleanup')
       ? ampSharedCss
       : ampDocCss + ampSharedCss,
     /* callback */ null,
@@ -766,7 +767,7 @@ function installExtensionsInFie(
       if (!LEGACY_ELEMENTS.includes(extensionId)) {
         stubElementIfNotKnown(childWin, extensionId);
       }
-      return this.installExtensionInDoc_(ampdoc, extensionId);
+      return extensions.installExtensionInDoc(ampdoc, extensionId);
     })
   );
 }
@@ -775,19 +776,20 @@ function installExtensionsInFie(
  * Install extensions in the child window (friendly iframe). The pre-install
  * callback, if specified, is executed after polyfills have been configured
  * but before the first extension is installed.
- * @param {!Window} topWin
+ * @param {!./service/extensions-impl.Extensions} extensions
  * @param {!Window} childWin
  * @param {!Array<string>} extensionIds
- * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+ * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
  * @return {!Promise}
  * @private
  */
 function installExtensionsInChildWindow(
-  topWin,
+  extensions,
   childWin,
   extensionIds,
   opt_preinstallCallback
 ) {
+  const topWin = extensions.win;
   const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
   setParentWindow(childWin, parentWin);
 
@@ -826,7 +828,7 @@ function installExtensionsInChildWindow(
     }
 
     // Install CSS.
-    const promise = this.preloadExtension(extensionId).then(extension => {
+    const promise = extensions.preloadExtension(extensionId).then(extension => {
       // Adopt embeddable extension services.
       extension.services.forEach(service => {
         installServiceInEmbedIfEmbeddable(childWin, service.serviceClass);
