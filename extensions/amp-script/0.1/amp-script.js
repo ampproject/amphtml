@@ -52,8 +52,24 @@ const MAX_TOTAL_SCRIPT_SIZE = 150000;
  */
 const MAX_FREE_MUTATION_HEIGHT = 300;
 
-const PHASE_HYDRATING = 1;
-const PHASE_MUTATING = 2;
+/**
+ * See src/transfer/Phase.ts in worker-dom.
+ * @enum {number}
+ */
+const Phase = {
+  INITIALIZING: 0,
+  HYDRATING: 1,
+  MUTATING: 2,
+};
+
+/**
+ * See src/transfer/TransferrableStorage.ts in worker-dom.
+ * @enum {number}
+ */
+const StorageLocation = {
+  LOCAL: 0,
+  SESSION: 1,
+};
 
 export class AmpScript extends AMP.BaseElement {
   /**
@@ -228,14 +244,14 @@ export class AmpScript extends AMP.BaseElement {
    * @private
    */
   mutationPump_(flush, phase) {
-    if (phase == PHASE_HYDRATING) {
+    if (phase == Phase.HYDRATING) {
       this.vsync_.mutate(() =>
         this.element.classList.add('i-amphtml-hydrated')
       );
     }
     const allowMutation =
       // Hydration is always allowed.
-      phase != PHASE_MUTATING ||
+      phase != Phase.MUTATING ||
       // Mutation depends on the gesture state and long tasks.
       this.userActivation_.isActive() ||
       // If the element is size-contained and small enough.
@@ -418,14 +434,14 @@ export class SanitizerImpl {
   }
 
   /**
-   * @param {string} scope
+   * @param {!StorageLocation} location
    * @return {?Object}
    */
-  getStorage(scope) {
+  getStorage(location) {
     // Note that filtering out amp-* keys will affect the predictability of
     // Storage.key(). We could preserve indices by adding empty entries but
     // that might be even more confusing.
-    const storage = this.storageFor_(scope);
+    const storage = this.storageFor_(location);
     const output = {};
     for (let i = 0; i < storage.length; i++) {
       const key = storage.key(i);
@@ -437,12 +453,12 @@ export class SanitizerImpl {
   }
 
   /**
-   * @param {string} scope
+   * @param {!StorageLocation} location
    * @param {?string} key
    * @param {?string} value
    */
-  changeStorage(scope, key, value) {
-    const storage = this.storageFor_(scope);
+  changeStorage(location, key, value) {
+    const storage = this.storageFor_(location);
     if (key === null) {
       if (value === null) {
         user().error(TAG, 'Storage.clear() is not supported in amp-script.');
@@ -461,13 +477,13 @@ export class SanitizerImpl {
   }
 
   /**
-   * @param {string} scope
+   * @param {!StorageLocation} location
    * @return {?Storage}
    */
-  storageFor_(scope) {
-    if (scope == 'local') {
+  storageFor_(location) {
+    if (location === StorageLocation.LOCAL) {
       return this.win_.localStorage;
-    } else if (scope == 'session') {
+    } else if (location === StorageLocation.SESSION) {
       return this.win_.sessionStorage;
     }
     return null;
