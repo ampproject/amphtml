@@ -570,7 +570,6 @@ export function stubLegacyElements(win) {
   });
 }
 
-
 /**
  * Adopt predefined core services for the child window (friendly iframe).
  * @param {!Window} childWin

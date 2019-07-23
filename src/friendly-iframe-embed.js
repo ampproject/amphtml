@@ -721,7 +721,7 @@ export function isInFie(element) {
  * @param {!Array<string>} extensionIds
  * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
  * @return {!Promise}
- * @restricted
+ * @private
  */
 function installExtensionsInFie(
   topWin,
@@ -780,7 +780,7 @@ function installExtensionsInFie(
  * @param {!Array<string>} extensionIds
  * @param {function(!Window, ?./ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
  * @return {!Promise}
- * @restricted
+ * @private
  */
 function installExtensionsInChildWindow(
   topWin,
