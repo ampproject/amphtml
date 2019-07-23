@@ -223,6 +223,25 @@ class AmpAddThis extends AMP.BaseElement {
       // Only the component that registers the page view listens for x-frame
       // events.
       this.setupListeners_({ampDoc, loc, pubId: this.pubId_});
+
+      // Create close button for listing tool
+      if (this.element.getAttribute('data-widget-type') === 'messages'){
+        const closeButton = createElementWithAttributes(
+          this.win.document,
+          'div',
+          dict({
+            'id': 'closeButton',
+          })
+        );
+        setStyle(closeButton, 'float', 'right');
+        setStyle(closeButton, 'cursor', 'pointer');
+        setStyle(closeButton, 'position', 'relative');
+        setStyle(closeButton, 'z-index', '1');
+        closeButton.onclick = function(){
+          this.parentNode.parentNode.removeChild(this.parentNode);
+        }
+        this.element.appendChild(closeButton);
+      }
     }
   }
 
