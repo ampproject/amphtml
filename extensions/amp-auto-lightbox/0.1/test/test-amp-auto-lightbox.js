@@ -92,14 +92,6 @@ describes.realWin(
         }
       });
 
-    function mockIsProxyOrigin(isProxyOrigin) {
-      env.sandbox.stub(Services, 'urlForDoc').returns({
-        isProxyOrigin() {
-          return isProxyOrigin;
-        },
-      });
-    }
-
     function spyInstallExtensionsForDoc() {
       const installExtensionForDoc = env.sandbox.spy();
 
@@ -440,7 +432,6 @@ describes.realWin(
       it('does not load extension if no candidates found', async () => {
         const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-        mockIsProxyOrigin(true);
         mockCandidates([]);
 
         await waitForAllScannedToBeResolved();
@@ -452,7 +443,6 @@ describes.realWin(
       it('loads extension if >= 1 candidates meet criteria', async () => {
         const installExtensionForDoc = spyInstallExtensionsForDoc();
 
-        mockIsProxyOrigin(true);
         mockCandidates([
           mockLoadedSignal(
             html`
@@ -483,7 +473,6 @@ describes.realWin(
         ]);
 
         mockAllCriteriaMet(false);
-        mockIsProxyOrigin(true);
 
         await waitForAllScannedToBeResolved();
 
@@ -518,7 +507,6 @@ describes.realWin(
         allCriteriaMet.withArgs(matchEquals(c)).returns(true);
 
         mockCandidates([a, b, c]);
-        mockIsProxyOrigin(true);
 
         await waitForAllScannedToBeResolved();
 
@@ -540,7 +528,6 @@ describes.realWin(
         );
 
         mockAllCriteriaMet(true);
-        mockIsProxyOrigin(true);
 
         await waitForAllScannedToBeResolved();
 
@@ -592,7 +579,6 @@ describes.realWin(
       };
 
       it('rejects documents without any type annotation', () => {
-        mockIsProxyOrigin(true);
         expectIsEnabled(false);
       });
 
@@ -674,7 +660,6 @@ describes.realWin(
 
       describe('by LD+JSON @type', () => {
         it('rejects doc with invalid LD+JSON @type', () => {
-          mockIsProxyOrigin(true);
           mockLdJsonSchemaTypes('hamberder');
           expectIsEnabled(false);
         });
@@ -682,9 +667,8 @@ describes.realWin(
         ldJsonSchemaTypes.forEach(type => {
           const typeSubObj = `{..."@type": "${type}"}`;
 
-          it(`accepts docs with ${typeSubObj} schema and proxy origin`, () => {
+          it(`accepts docs with ${typeSubObj} schema`, () => {
             mockLdJsonSchemaTypes(type);
-            mockIsProxyOrigin(true);
             expectIsEnabled(true);
           });
 
@@ -703,13 +687,6 @@ describes.realWin(
             doc.body.appendChild(lightboxable);
 
             mockLdJsonSchemaTypes(type);
-            mockIsProxyOrigin(true);
-            expectIsEnabled(false);
-          });
-
-          it(`rejects docs with ${typeSubObj} schema, non-proxy origin`, () => {
-            mockLdJsonSchemaTypes(type);
-            mockIsProxyOrigin(false);
             expectIsEnabled(false);
           });
         });
@@ -717,7 +694,6 @@ describes.realWin(
 
       describe('by og:type', () => {
         it('rejects doc with invalid <meta property="og:type">', () => {
-          mockIsProxyOrigin(true);
           mockOgType('cinnamonroll');
           expectIsEnabled(false);
         });
@@ -725,9 +701,8 @@ describes.realWin(
         ogTypes.forEach(type => {
           const ogTypeMeta = `<meta property="og:type" content="${type}">`;
 
-          it(`accepts docs with ${ogTypeMeta} and proxy origin`, () => {
+          it(`accepts docs with ${ogTypeMeta}`, () => {
             mockOgType(type);
-            mockIsProxyOrigin(true);
             expectIsEnabled(true);
           });
 
@@ -746,13 +721,6 @@ describes.realWin(
             doc.body.appendChild(lightboxable);
 
             mockOgType(type);
-            mockIsProxyOrigin(true);
-            expectIsEnabled(false);
-          });
-
-          it(`rejects docs with ${ogTypeMeta} for non-proxy origin`, () => {
-            mockOgType(type);
-            mockIsProxyOrigin(false);
             expectIsEnabled(false);
           });
         });
