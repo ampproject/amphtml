@@ -35,7 +35,7 @@ import {
   createNewLoaderElement,
   isNewLoaderExperimentEnabled,
 } from '../src/loader.js';
-import {dev, devAssert, rethrowAsync, user} from './log';
+import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
@@ -446,15 +446,14 @@ function createBaseCustomElementClass(win) {
         this.layout_ != Layout.NODISPLAY &&
         !this.implementation_.isLayoutSupported(this.layout_)
       ) {
-        let error = 'Layout not supported: ' + this.layout_;
-        if (!this.getAttribute('layout')) {
-          error +=
-            '. The element did not specify a layout attribute. ' +
-            'Check https://www.ampproject.org/docs/guides/' +
-            'responsive/control_layout and the respective element ' +
-            'documentation for details.';
-        }
-        throw user().createError(error);
+        userAssert(
+          this.getAttribute('layout'),
+          'The element did not specify a layout attribute. ' +
+            'Check https://amp.dev/documentation/guides-and-tutorials/' +
+            'develop/style_and_layout/control_layout and the respective ' +
+            'element documentation for details.'
+        );
+        userAssert(false, `Layout not supported: ${this.layout_}`);
       }
     }
 
@@ -1632,7 +1631,7 @@ function createBaseCustomElementClass(win) {
       // 5. The element is a `placeholder` or a `fallback`;
       // 6. The element's layout is not a size-defining layout.
       // 7. The document is A4A.
-      if (this.isInA4A_()) {
+      if (this.isInA4A()) {
         return false;
       }
       if (this.loadingDisabled_ === undefined) {
@@ -1655,9 +1654,8 @@ function createBaseCustomElementClass(win) {
 
     /**
      * @return {boolean}
-     * @private
      */
-    isInA4A_() {
+    isInA4A() {
       return (
         // in FIE
         (this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView) ||

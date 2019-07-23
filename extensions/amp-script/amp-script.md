@@ -3,12 +3,12 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Allows rendering of custom UI components running on third-party JavaScript.
+  text: Allows running custom JavaScript to render UI.
 experimental: true
 ---
 # amp-script
 
-# <a name="amp-script"></a> `amp-script`
+Allows running custom JavaScript to render UI.
 
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -28,8 +28,6 @@ limitations under the License.
 
 [TOC]
 
-Allows rendering of custom UI components running on third-party JavaScript.
-
 <table>
   <tr>
     <td><strong>Availability</strong></td>
@@ -46,11 +44,28 @@ Allows rendering of custom UI components running on third-party JavaScript.
       </div>
     </td>
   </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td>
+      <ul>
+        <li><a href="https://github.com/ampproject/amphtml/tree/master/examples/amp-script">Unannotated code samples</a></li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Tutorials</strong></td>
+    <td>
+      <ul>
+        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript">Getting started with amp-script</a></li>
+        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript-tutorial?format=websites">Custom password requirements with amp-script</a></li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
 ## Overview
 
-The `amp-script` component allows you to render widgets and other UI using custom third-party JavaScript, e.g. a React component.
+The `amp-script` component allows you run custom JavaScript to render UI elements, such as a React component.
 
 {% call callout('Important', type='caution') %}
 `amp-script` is in active development and under [experimental availability](https://amp.dev/documentation/guides-and-tutorials/learn/experimental). It's subject to breaking API changes and should not yet be used in production.
@@ -58,49 +73,72 @@ The `amp-script` component allows you to render widgets and other UI using custo
 
 ### A simple example
 
-```html
-<!-- Using a local script ("script" attribute). -->
-<amp-script layout="container" script="hello-world">
-  <button id="hello">Insert Hello World!</button>
-</amp-script>
+An `amp-script` element can load a JavaScript file from a URL:
 
-<!-- Local scripts are referenced by id. -->
-<script type="text/plain" target="amp-script" id="hello-world">
-  const button = document.getElementById('hello');
-  button.addEventListener('click', () => {
-    const h1 = document.createElement('h1');
-    h1.textContent = 'Hello World!';
-    // `document.body` is effectively the <amp-script> element.
-    document.body.appendChild(h1);
-  });
-</script>
+```html
+<!-- Use an remote script via the "src" attribute. -->
+<amp-script layout="container" src="https://example.com/hello-world.js">
+  <button>Hello amp-script!</button>
+</amp-script>
 ```
 
+...or reference a local `script` element by `id`:
+
 ```html
-<!-- Using an remote script ("src" attribute). -->
-<amp-script layout="container" src="https://example.com/hello-world.js">
-  <button id="hello">Insert Hello World!</button>
+<!-- Reference a local script by id via the "script" attribute. -->
+<amp-script layout="container" script="hello-world">
+  <button>Hello amp-script!</button>
 </amp-script>
+
+<script id="hello-world" type="text/plain" target="amp-script">
+  const btn = document.querySelector('button');
+  btn.addEventListener('click', () => {
+    document.body.textContent += 'Hello World!';
+  });
+</script>
 ```
 
 {% call callout('Tip', type='success') %}
 Enable the experiment via `AMP.toggleExperiment('amp-script')` in dev console.
 {% endcall %}
 
-For additional code samples, see [`examples/amp-script/`](https://github.com/ampproject/amphtml/tree/master/examples/amp-script).
-
 ### How does it work?
 
-`amp-script` is an AMP component wrapper for [`worker-dom`](https://github.com/ampproject/worker-dom/).
+`amp-script` runs your custom JavaScript in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) that contains a virtual DOM. When your JavaScript code modifies this virtual DOM, `amp-script` forwards these changes to the main thread and applies them to the `amp-script` element subtree.
 
-`worker-dom` runs third-party JavaScript in a web worker containing a virtual DOM. The virtual DOM listens for mutations and forwards them to the main page which reflects the changes on the real DOM.
+For example, adding an element to `document.body`:
 
-For design details, see the ["Intent to Implement" issue](https://github.com/ampproject/amphtml/issues/13471).
-For more information on `worker-dom`, see the [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/) repository.
+```js
+// my-script.js
+const p = document.createElement('p');
+p.textContent = 'I am added to the body!';
+document.body.appendChild(p);
+```
 
-### Mutations and user gestures
+Will be reflected on the page as a new child of the `amp-script` element:
 
-`amp-script` generally requires a user gesture to perform mutations. This avoids content jumps that are not triggered by user gesture, but there are some exceptions:
+```html
+<amp-script src="http://example.com/my-script.js" width=300 height=100>
+  <p>I am added to the body!</p>
+</amp-script>
+```
+
+Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/). For design details, see the ["Intent to Implement" issue](https://github.com/ampproject/amphtml/issues/13471).
+
+### Restrictions
+
+#### Size of JavaScript code
+
+`amp-script` has the following restrictions on JavaScript file size:
+
+- Maximum of 10,000 bytes per `amp-script` element that uses a local script via `script[type=text/plain][target=amp-script]`.
+- Maximum total of 150,000 bytes for all `amp-script` elements on the page.
+
+#### User gestures
+
+`amp-script` generally requires a user gesture to apply changes triggered by your JavaScript code to the page (we call these "mutations"). This requirement helps avoid poor user experience from unexpected content jumping.
+
+The rules for mutations are as follows:
 
 1. Mutations are always accepted for five seconds after a user gesture.
 2. The five second interval is extended if the author script performs a `fetch()` as a result of the user gesture.
@@ -126,7 +164,7 @@ Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Si
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
-## Interested in using `<amp-script>`?
+## Interested in using amp-script?
 
 We recommend developing against a local build of `amp-script`. This enables dev-only debugging hooks e.g. human-readable `postMessage` events.
 
@@ -134,17 +172,16 @@ See our [Quick Start](https://github.com/ampproject/amphtml/blob/master/contribu
 
 ## FAQ
 
-#### I'm getting a "size exceeded" error.
-
-`amp-script` has restrictions on the size of the JS.
-
-- Maximum of 10,000 bytes per `amp-script` element that uses a local script via `script[type=text/plain][target=amp-script]`.
-- Maximum total of 150,000 bytes for all `amp-script` elements on the page.
-
 #### Which JavaScript APIs can I use?
 
-Currently, most DOM elements and their properties are supported. DOM query APIs like `querySelector` have partial support. Browser APIs like `History` are not implemented yet. We'll publish an API support matrix soon.
+Currently, most DOM elements and their properties are supported. DOM query APIs like `querySelector` have partial support. Browser APIs like `History` are not implemented yet.
+
+See the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md) for details.
 
 #### Can you support ____ API?
 
 Our feature timelines are informed by your real-world use cases! Please [file an issue](https://github.com/ampproject/amphtml/issues/new) and mention `@choumx` and `@kristoferbaxter`.
+
+#### I'm getting a "size exceeded" error.
+
+See [Size of JavaScript code](#size-of-javascript-code) above.

@@ -1083,8 +1083,7 @@ export class AmpList extends AMP.BaseElement {
       .getClientRectAsync(dev().assertElement(endoOfListMarker))
       .then(positionRect => {
         const viewportHeight = this.viewport_.getHeight();
-        const viewportTop = this.viewport_.getScrollTop();
-        if (viewportTop + 3 * viewportHeight > positionRect.bottom) {
+        if (3 * viewportHeight > positionRect.bottom) {
           return this.loadMoreCallback_();
         }
       });

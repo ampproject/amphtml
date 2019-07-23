@@ -18,6 +18,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
+const conf = require('../build.conf');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
@@ -46,7 +47,7 @@ const argv = require('minimist')(process.argv.slice(2));
  * Tasks that should print the `--nobuild` help text.
  * @private @const {!Set<string>}
  */
-const NOBUILD_HELP_TASKS = new Set(['test', 'visual-diff']);
+const NOBUILD_HELP_TASKS = new Set(['e2e', 'integration', 'visual-diff']);
 
 const MODULE_SEPARATOR = ';';
 const EXTENSION_BUNDLE_MAP = {
@@ -69,16 +70,26 @@ const UNMINIFIED_TARGETS = [
 
 const MINIFIED_TARGETS = [
   'v0.js',
-  'v0-esm.js',
   'shadow-v0.js',
   'amp4ads-v0.js',
   'alp.js',
   'f.js',
 ];
 
+const WEB_PUSH_PUBLISHER_FILES = [
+  'amp-web-push-helper-frame',
+  'amp-web-push-permission-dialog',
+];
+
+const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
+
 const BABELIFY_GLOBAL_TRANSFORM = {
   global: true, // Transform node_modules
   ignore: devDependencies(), // Ignore devDependencies
+};
+
+const BABELIFY_REPLACE_PLUGIN = {
+  plugins: [conf.getReplacePlugin()],
 };
 
 const hostname = argv.hostname || 'cdn.ampproject.org';
@@ -239,34 +250,19 @@ function compile(watch, shouldMinify) {
     });
   }
 
-  return Promise.all(promises)
-    .then(() => {
-      return compileJs('./src/', 'amp.js', './dist', {
-        toName: 'amp.js',
-        minifiedName: 'v0.js',
-        includePolyfills: true,
-        watch,
-        minify: shouldMinify,
-        wrapper: wrappers.mainBinary,
-        singlePassCompilation: argv.single_pass,
-        esmPassCompilation: argv.esm,
-      });
-    })
-    .then(() => {
-      if (!argv.single_pass) {
-        return compileJs('./src/', 'amp.js', './dist', {
-          toName: 'amp-esm.js',
-          minifiedName: 'v0-esm.js',
-          includePolyfills: true,
-          includeOnlyESMLevelPolyfills: true,
-          watch,
-          minify: shouldMinify,
-          wrapper: wrappers.mainBinary,
-        });
-      } else {
-        return Promise.resolve();
-      }
+  return Promise.all(promises).then(() => {
+    return compileJs('./src/', 'amp.js', './dist', {
+      toName: 'amp.js',
+      minifiedName: 'v0.js',
+      includePolyfills: true,
+      watch,
+      minify: shouldMinify,
+      wrapper: wrappers.mainBinary,
+      singlePassCompilation: argv.single_pass,
+      esmPassCompilation: argv.esm,
+      includeOnlyESMLevelPolyfills: argv.esm,
     });
+  });
 }
 
 /**
@@ -430,9 +426,15 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     options.browserifyOptions
   );
 
+  const babelifyOptions = Object.assign(
+    {},
+    BABELIFY_GLOBAL_TRANSFORM,
+    BABELIFY_REPLACE_PLUGIN
+  );
+
   let bundler = browserify(browserifyOptions).transform(
     babelify,
-    BABELIFY_GLOBAL_TRANSFORM
+    babelifyOptions
   );
 
   if (options.watch) {
@@ -701,7 +703,6 @@ function buildAlp(options) {
  * @param {!Object} options
  */
 function buildExaminer(options) {
-  options = options || {};
   return compileJs('./src/examiner/', 'examiner.js', './dist/', {
     toName: 'examiner.max.js',
     watch: options.watch,
@@ -717,13 +718,12 @@ function buildExaminer(options) {
  * @param {!Object} options
  */
 function buildWebWorker(options) {
-  const opts = Object.assign({}, options);
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
     toName: 'ww.max.js',
     minifiedName: 'ww.js',
     includePolyfills: true,
-    watch: opts.watch,
-    minify: opts.minify || argv.minify,
+    watch: options.watch,
+    minify: options.minify || argv.minify,
   });
 }
 
@@ -756,6 +756,9 @@ function toPromise(readable) {
 
 module.exports = {
   BABELIFY_GLOBAL_TRANSFORM,
+  BABELIFY_REPLACE_PLUGIN,
+  WEB_PUSH_PUBLISHER_FILES,
+  WEB_PUSH_PUBLISHER_VERSIONS,
   buildAlp,
   buildExaminer,
   buildWebWorker,

@@ -112,7 +112,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
         hasCapability: unusedParam => true,
         isTrustedViewer: () => Promise.resolve(true),
         sendMessageAwaitResponse: sandbox.stub().returns(Promise.resolve({})),
-        whenFirstVisible: () => Promise.resolve(),
+        whenFirstVisible: sandbox.stub().returns(Promise.resolve()),
       };
       viewerForDoc = sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       win = {
@@ -192,11 +192,26 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
           },
         },
       });
-      expect(viewer.sendMessageAwaitResponse).to.have.been.calledOnce;
-      expect(viewer.sendMessageAwaitResponse).to.have.been.calledWith(
+      expect(viewer.sendMessageAwaitResponse).to.have.been.calledOnceWith(
         'xhr',
         msgPayload
       );
+    });
+
+    it('should wait for visibility', async () => {
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      expect(viewer.whenFirstVisible).to.have.been.calledOnce;
+    });
+
+    it('should not wait for visibility if prerenderSafe', async () => {
+      init = {
+        prerenderSafe: true,
+      };
+
+      await getViewerInterceptResponse(win, ampDocSingle, input, init);
+
+      expect(viewer.whenFirstVisible).to.not.have.been.called;
     });
   });
 

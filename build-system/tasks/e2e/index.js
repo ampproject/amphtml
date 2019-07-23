@@ -37,15 +37,17 @@ const TEST_RETRIES = 2;
 let webServerProcess_;
 
 function installPackages_() {
+  log('Running', cyan('yarn'), 'to install packages...');
   execOrDie('npx yarn --cwd build-system/tasks/e2e', {'stdio': 'ignore'});
 }
 
 function buildRuntime_() {
   execOrDie('gulp clean');
-  execOrDie('gulp dist --fortesting');
+  execOrDie(`gulp dist --fortesting --config ${argv.config}`);
 }
 
 function launchWebServer_() {
+  log('Launching webserver at', cyan(`http://${HOST}:${PORT}`) + '...');
   webServerProcess_ = execScriptAsync(
     `gulp serve --compiled --host ${HOST} --port ${PORT}`,
     {stdio: 'ignore'}
@@ -114,6 +116,7 @@ async function e2e() {
 
   // run tests
   if (!argv.watch) {
+    log('Running tests...');
     const mocha = createMocha_();
 
     // specify tests to run
@@ -167,6 +170,8 @@ e2e.flags = {
   'browsers':
     '  Run only the specified browser tests. Options are ' +
     '`chrome`, `firefox`.',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
