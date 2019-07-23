@@ -1413,14 +1413,16 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
-        this.storeService_.dispatch(Action.CHANGE_PAGE, {
-          id: targetPageId,
-          index: pageIndex,
-        });
-
+        let storePageIndex;
         if (targetPage.isAd()) {
           this.storeService_.dispatch(Action.TOGGLE_AD, true);
           setAttributeInMutate(this, Attributes.AD_SHOWING);
+
+          // Keep current page index when an ad is shown. Otherwise it messes
+          // up with the progress variable in the VariableService.
+          storePageIndex = this.storeService_.get(
+            StateProperty.CURRENT_PAGE_INDEX
+          );
         } else {
           this.storeService_.dispatch(Action.TOGGLE_AD, false);
           removeAttributeInMutate(this, Attributes.AD_SHOWING);
@@ -1436,7 +1438,13 @@ export class AmpStory extends AMP.BaseElement {
               this.advancement_.getProgress()
             );
           }
+          storePageIndex = pageIndex;
         }
+
+        this.storeService_.dispatch(Action.CHANGE_PAGE, {
+          id: targetPageId,
+          index: storePageIndex,
+        });
 
         // If first navigation.
         if (!oldPage) {
