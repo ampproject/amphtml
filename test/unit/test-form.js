@@ -433,13 +433,8 @@ describes.realWin('isFieldDefault', {}, env => {
     let textField;
 
     beforeEach(() => {
-      // Element is inserted as HTML so that the `defaultValue` property is
-      // generated correctly, since it returns "the default value as
-      // **originally specified in the HTML** that created this object."
-      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
-      const html = '<input type="text" value="default">';
-      doc.body.insertAdjacentHTML('afterbegin', html);
-      textField = doc.querySelector('input');
+      textField = doc.createElement('input');
+      textField.setAttribute('value', 'default');
     });
 
     it("returns true if text field's value matches its default value", () => {
@@ -457,13 +452,8 @@ describes.realWin('isFieldDefault', {}, env => {
     let textarea;
 
     beforeEach(() => {
-      // Element is inserted as HTML so that the `defaultValue` property is
-      // generated correctly, since it returns "the default value as
-      // **originally specified in the HTML** that created this object."
-      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
-      const html = '<textarea>default</textarea>';
-      doc.body.insertAdjacentHTML('afterbegin', html);
-      textarea = doc.querySelector('textarea');
+      textarea = doc.createElement('textarea');
+      textarea.textContent = 'default';
     });
 
     it("returns true if textarea's value matches its default value", () => {
@@ -481,17 +471,20 @@ describes.realWin('isFieldDefault', {}, env => {
     let optionA, optionB;
 
     beforeEach(() => {
-      // Element is inserted as HTML so that the `defaultChecked` property is
-      // generated correctly, since it returns "the default state as
-      // **originally specified in the HTML** that created this object."
-      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
-      const html = `
-          <input type="radio" id="radio-a" name="radio" value="A" checked>
-          <input type="radio" id="radio-b" name="radio" value="B">
-        `;
-      doc.body.insertAdjacentHTML('afterbegin', html);
-      optionA = doc.querySelector('#radio-a');
-      optionB = doc.querySelector('#radio-b');
+      optionA = doc.createElement('input');
+      optionA.setAttribute('type', 'radio');
+      optionA.setAttribute('name', 'radio');
+      optionA.setAttribute('checked', 'checked');
+
+      optionB = doc.createElement('input');
+      optionB.setAttribute('type', 'radio');
+      optionB.setAttribute('name', 'radio');
+
+      // Radio buttons need to be inserted into the DOM for the "radio group"
+      // (the constraint that only one may be selected at a time) to be
+      // recognized.
+      doc.body.appendChild(optionA);
+      doc.body.appendChild(optionB);
     });
 
     it('returns true if the radio button is in its default state', () => {
@@ -511,13 +504,9 @@ describes.realWin('isFieldDefault', {}, env => {
     let checkbox;
 
     beforeEach(() => {
-      // Element is inserted as HTML so that the `defaultChecked` property is
-      // generated correctly, since it returns "the default state as
-      // **originally specified in the HTML** that created this object."
-      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
-      const html = '<input type="checkbox" checked>';
-      doc.body.insertAdjacentHTML('afterbegin', html);
-      checkbox = doc.querySelector('input');
+      checkbox = doc.createElement('input');
+      checkbox.setAttribute('type', 'checkbox');
+      checkbox.setAttribute('checked', 'checked');
     });
 
     it('returns true if checkbox is in its default state', () => {
@@ -535,18 +524,14 @@ describes.realWin('isFieldDefault', {}, env => {
     let dropdown;
 
     beforeEach(() => {
-      // Element is inserted as HTML so that the `defaultSelected` property is
-      // generated correctly, since it returns "the default state as
-      // **originally specified in the HTML** that created this object."
-      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
-      const html = `
-          <select>
-            <option value="A" selected>A</option>
-            <option value="B">B</option>
-          </select>
-        `;
-      doc.body.insertAdjacentHTML('afterbegin', html);
-      dropdown = doc.querySelector('select');
+      dropdown = doc.createElement('select');
+
+      const optionA = doc.createElement('option');
+      optionA.setAttribute('selected', 'selected');
+      const optionB = doc.createElement('option');
+
+      dropdown.appendChild(optionA);
+      dropdown.appendChild(optionB);
     });
 
     it("returns true if the dropdown's selections match its default selections", () => {
@@ -564,18 +549,15 @@ describes.realWin('isFieldDefault', {}, env => {
     let dropdown;
 
     beforeEach(() => {
-      // Element is inserted as HTML so that the `defaultSelected` property is
-      // generated correctly, since it returns "the default state as
-      // **originally specified in the HTML** that created this object."
-      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
-      const html = `
-          <select>
-            <option value="A" selected>A</option>
-            <option value="B">B</option>
-          </select>
-        `;
-      doc.body.insertAdjacentHTML('afterbegin', html);
-      dropdown = doc.querySelector('select');
+      dropdown = doc.createElement('select');
+      dropdown.setAttribute('multiple', 'multiple');
+
+      const optionA = doc.createElement('option');
+      optionA.setAttribute('selected', 'selected');
+      const optionB = doc.createElement('option');
+
+      dropdown.appendChild(optionA);
+      dropdown.appendChild(optionB);
     });
 
     it("returns true if the dropdown's selections match its default selections", () => {
