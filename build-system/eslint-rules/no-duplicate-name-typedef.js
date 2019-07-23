@@ -33,7 +33,7 @@ module.exports = function(context) {
         return;
       }
 
-      // We can assume theres only 1 variable declaration  when a typedef
+      // We can assume theres only 1 variable declaration when a typedef
       // annotation is found. This is because Closure Compiler does not allow
       // declaration of multiple variables with a shared type information.
       const typedefName = node.declarations[0].id.name;

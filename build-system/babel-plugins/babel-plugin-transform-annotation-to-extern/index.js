@@ -17,16 +17,16 @@
 // Global typedef map typedefName: typedef comment
 const TYPEDEFS = new Map();
 
-const buildTypedefs = (t, path) => {
+const buildTypedefs = t => {
   const typedefs = [];
   for (const [typedefName, typedefComment] of TYPEDEFS) {
-    const ast = buildVarDeclAndComment(t, path, typedefName, typedefComment);
+    const ast = buildVarDeclAndComment(t, typedefName, typedefComment);
     typedefs.push(ast);
   }
   return typedefs;
 };
 
-const buildVarDeclAndComment = (t, path, name, comment) => {
+const buildVarDeclAndComment = (t, name, comment) => {
   const decl = t.variableDeclaration('let', [
     t.variableDeclarator(t.identifier(name)),
   ]);
@@ -51,7 +51,6 @@ module.exports = function(babel) {
     visitor: {
       Program: {
         exit(path) {
-
           // Write out the transient file that we will feed into CC.
           if (shouldWriteToFile) {
             // Stub. This needs to be an append operation.
@@ -64,7 +63,7 @@ module.exports = function(babel) {
             // Preserve the leading LICENSE comment.
             path.addComment('leading', path.parent.comments[0].value);
 
-            const typedefs = buildTypedefs(t, path);
+            const typedefs = buildTypedefs(t);
             path.replaceWith(t.program(typedefs));
             path.skip();
           }
@@ -87,13 +86,12 @@ module.exports = function(babel) {
           return;
         }
 
-        // We can assume theres only 1 variable declaration  when a typedef
+        // We can assume theres only 1 variable declaration when a typedef
         // annotation is found. This is because Closure Compiler does not allow
         // declaration of multiple variables with a shared type information.
         const typedefName = node.declarations[0].id.name;
 
-        const typedefLocation = TYPEDEFS.get(typedefName);
-        if (!typedefLocation) {
+        if (!TYPEDEFS.has(typedefName)) {
           TYPEDEFS.set(typedefName, typedefComment.value);
         }
 
