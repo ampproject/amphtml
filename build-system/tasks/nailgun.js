@@ -20,8 +20,8 @@ const log = require('fancy-log');
 const sleep = require('sleep-promise');
 const {exec, execScriptAsync, getStdout} = require('../exec');
 const {green, red, cyan, yellow} = colors;
-const {generateRunner} = require('./generate-runner');
 const {isTravisBuild} = require('../travis');
+const {maybeGenerateRunner} = require('./generate-runner');
 
 // Used to start and stop the Closure nailgun server
 let nailgunRunnerReplacer;
@@ -79,7 +79,7 @@ async function startNailgunServer(port, detached) {
     return;
   }
 
-  await generateRunner(port);
+  await maybeGenerateRunner(port);
 
   // Start up the nailgun server after cleaning up old instances (if any)
   const customRunner = require.resolve(`../runner/dist/${port}/runner.jar`);

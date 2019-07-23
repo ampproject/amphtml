@@ -188,6 +188,15 @@ function gitMasterBaseline() {
   return gitMergeBaseLocalMaster();
 }
 
+/**
+ * Returns the diffs for given path based on the given commit
+ * @param {string} path
+ * @param {string} commit
+ */
+function gitDiffPath(path, commit) {
+  return getStdout(`git diff ${commit} ${path}`).trim();
+}
+
 module.exports = {
   gitBranchCreationPoint,
   gitBranchName,
@@ -199,6 +208,7 @@ module.exports = {
   gitDiffCommitLog,
   gitDiffFileMaster,
   gitDiffNameOnlyMaster,
+  gitDiffPath,
   gitDiffStatMaster,
   gitTravisMasterBaseline,
   shortSha,
