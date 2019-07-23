@@ -15,6 +15,7 @@
  */
 
 import {dict} from './utils/object';
+import {isAmp4Email} from './format';
 import {isUrlAttribute} from './url-rewrite';
 import {startsWith} from './string';
 
@@ -270,24 +271,4 @@ export function isValidAttr(
   }
 
   return true;
-}
-
-/**
- * Checks that the document is of an AMP format type.
- * @param {!Array<string>} formats
- * @param {!Document} doc
- * @return {boolean}
- */
-function isAmpFormatType(formats, doc) {
-  const html = doc.documentElement;
-  const isFormatType = formats.some(format => html.hasAttribute(format));
-  return isFormatType;
-}
-
-/**
- * @param {!Document} doc
- * @return {boolean}
- */
-export function isAmp4Email(doc) {
-  return isAmpFormatType(['⚡4email', 'amp4email'], doc);
 }

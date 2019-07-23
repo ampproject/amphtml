@@ -1196,10 +1196,10 @@ export class UrlReplacements {
       if (whitelist) {
         user().warn(
           'URL',
-          'Ignoring link replacement',
-          href,
-          " because the link does not go to the document's" +
-            ' source, canonical, or whitelisted origin.'
+          'Ignoring link replacement %s' +
+            " because the link does not go to the document's" +
+            ' source, canonical, or whitelisted origin.',
+          href
         );
       }
       return (element.href = href);
