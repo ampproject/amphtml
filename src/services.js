@@ -385,10 +385,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/resources-impl.Resources}
+   * @return {!./service/resources-impl.ResourcesDef}
    */
   static resourcesForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/resources-impl.Resources} */ (getServiceForDoc(
+    return /** @type {!./service/resources-impl.ResourcesDef} */ (getServiceForDoc(
       elementOrAmpDoc,
       'resources'
     ));
@@ -396,10 +396,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/resources-impl.Resources>}
+   * @return {!Promise<!./service/resources-impl.ResourcesDef>}
    */
   static resourcesPromiseForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/resources-impl.Resources>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/resources-impl.ResourcesDef>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'resources'
     ));

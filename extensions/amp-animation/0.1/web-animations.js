@@ -151,7 +151,7 @@ export class Builder {
    * @param {!Document|!ShadowRoot} rootNode
    * @param {string} baseUrl
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   * @param {!../../../src/service/resources-impl.Resources} resources
+   * @param {!../../../src/service/resources-impl.ResourcesDef} resources
    */
   constructor(win, rootNode, baseUrl, vsync, resources) {
     /** @const @private */

@@ -70,6 +70,313 @@ let MarginChangeDef;
  */
 let ChangeSizeRequestDef;
 
+/* eslint-disable no-unused-vars */
+/**
+ * @interface
+ */
+class OwnersDef {
+  /**
+   * Assigns an owner for the specified element. This means that the resources
+   * within this element will be managed by the owner and not Resources manager.
+   * @param {!Element} element
+   * @param {!AmpElement} owner
+   * @package
+   */
+  setOwner(element, owner) {}
+
+  /**
+   * Schedules layout for the specified sub-elements that are children of the
+   * parent element. The parent element may choose to send this signal either
+   * because it's an owner (see {@link setOwner}) or because it wants the
+   * layouts to be done sooner. In either case, both parent's and children's
+   * priority is observed when scheduling this work.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  scheduleLayout(parentElement, subElements) {}
+
+  /**
+   * Invokes `unload` on the elements' resource which in turn will invoke
+   * the `documentBecameInactive` callback on the custom element.
+   * Resources that call `schedulePause` must also call `scheduleResume`.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  schedulePause(parentElement, subElements) {}
+
+  /**
+   * Invokes `resume` on the elements' resource which in turn will invoke
+   * `resumeCallback` only on paused custom elements.
+   * Resources that call `schedulePause` must also call `scheduleResume`.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  scheduleResume(parentElement, subElements) {}
+
+  /**
+   * Schedules unlayout for specified sub-elements that are children of the
+   * parent element. The parent element can choose to send this signal when
+   * it want to unload resources for its children.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  scheduleUnlayout(parentElement, subElements) {}
+
+  /**
+   * Schedules preload for the specified sub-elements that are children of the
+   * parent element. The parent element may choose to send this signal either
+   * because it's an owner (see {@link setOwner}) or because it wants the
+   * preloads to be done sooner. In either case, both parent's and children's
+   * priority is observed when scheduling this work.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  schedulePreload(parentElement, subElements) {}
+
+  /**
+   * A parent resource, especially in when it's an owner (see {@link setOwner}),
+   * may request the Resources manager to update children's inViewport state.
+   * A child's inViewport state is a logical AND between inLocalViewport
+   * specified here and parent's own inViewport state.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   * @param {boolean} inLocalViewport
+   */
+  updateInViewport(parentElement, subElements, inLocalViewport) {}
+}
+
+/**
+ * @interface
+ */
+class MutatorsAndOwnersDef extends OwnersDef {
+  /**
+   * Requests the runtime to change the element's size. When the size is
+   * successfully updated then the opt_callback is called.
+   * @param {!Element} element
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
+   * @param {function()=} opt_callback A callback function.
+   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
+   */
+  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {}
+
+  /**
+   * Return a promise that requests the runtime to update the size of
+   * this element to the specified value.
+   * The runtime will schedule this request and attempt to process it
+   * as soon as possible. However, unlike in {@link changeSize}, the runtime
+   * may refuse to make a change in which case it will reject promise, call the
+   * `overflowCallback` method on the target resource with the height value.
+   * Overflow callback is expected to provide the reader with the user action
+   * to update the height manually.
+   * Note that the runtime does not call the `overflowCallback` method if the
+   * requested height is 0 or negative.
+   * If the height is successfully updated then the promise is resolved.
+   * @param {!Element} element
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
+   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
+   * @return {!Promise}
+   */
+  attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {}
+
+  /**
+   * Expands the element.
+   * @param {!Element} element
+   */
+  expandElement(element) {}
+
+  /**
+   * Return a promise that requests runtime to collapse this element.
+   * The runtime will schedule this request and first attempt to resize
+   * the element to height and width 0. If success runtime will set element
+   * display to none, and notify element owner of this collapse.
+   * @param {!Element} element
+   * @return {!Promise}
+   */
+  attemptCollapse(element) {}
+
+  /**
+   * Collapses the element: ensures that it's `display:none`, notifies its
+   * owner and updates the layout box.
+   * @param {!Element} element
+   */
+  collapseElement(element) {}
+
+  /**
+   * Runs the specified measure, which is called in the "measure" vsync phase.
+   * This is simply a proxy to the privileged vsync service.
+   *
+   * @param {function()} measurer
+   * @return {!Promise}
+   */
+  measureElement(measurer) {}
+
+  /**
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {!Element} element
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  mutateElement(element, mutator) {}
+
+  /**
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElement(element, measurer, mutator) {}
+}
+
+/**
+ * @interface
+ */
+export class ResourcesDef extends MutatorsAndOwnersDef {
+  /**
+   * Returns a list of resources.
+   * @return {!Array<!Resource>}
+   * @export
+   */
+  get() {}
+
+  /**
+   * @return {!./ampdoc-impl.AmpDoc}
+   */
+  getAmpdoc() {}
+
+  /**
+   * Returns a subset of resources which are (1) belong to the specified host
+   * window, and (2) meet the filterFn given.
+   * @param {!Window} hostWin
+   * @param {function(!Resource):boolean} filterFn
+   * @return {!Promise<!Array<!Resource>>}
+   */
+  getMeasuredResources(hostWin, filterFn) {}
+
+  /**
+   * Returns a subset of resources which are (1) belong to the specified host
+   * window, and (2) positioned in the specified rect.
+   * @param {!Window} hostWin
+   * @param {!../layout-rect.LayoutRectDef} rect
+   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
+   * @return {!Promise<!Array<!Resource>>}
+   */
+  getResourcesInRect(hostWin, rect, opt_isInPrerender) {}
+
+  /**
+   * Returns the {@link Resource} instance corresponding to the specified AMP
+   * Element. If no Resource is found, the exception is thrown.
+   * @param {!AmpElement} element
+   * @return {!Resource}
+   */
+  getResourceForElement(element) {}
+
+  /**
+   * Returns the {@link Resource} instance corresponding to the specified AMP
+   * Element. Returns null if no resource is found.
+   * @param {!AmpElement} element
+   * @return {?Resource}
+   */
+  getResourceForElementOptional(element) {}
+
+  /**
+   * Returns the direction the user last scrolled.
+   *  - -1 for scrolling up
+   *  - 1 for scrolling down
+   *  - Defaults to 1
+   * TODO(lannka): this method should not belong to resources.
+   * @return {number}
+   */
+  getScrollDirection() {}
+
+  /**
+   * Signals that an element has been added to the DOM. Resources manager
+   * will start tracking it from this point on.
+   * @param {!AmpElement} element
+   */
+  add(element) {}
+
+  /**
+   * Signals that an element has been upgraded to the DOM. Resources manager
+   * will perform build and enable layout/viewport signals for this element.
+   * @param {!AmpElement} element
+   */
+  upgraded(element) {}
+
+  /**
+   * Signals that an element has been removed to the DOM. Resources manager
+   * will stop tracking it from this point on.
+   * @param {!AmpElement} element
+   */
+  remove(element) {}
+
+  /**
+   * Removes all resources belonging to the specified child window.
+   * TODO(lannka): this method should not belong to resources.
+   * @param {!Window} childWin
+   */
+  removeForChildWindow(childWin) {}
+
+  /**
+   * Schedules the work pass at the latest with the specified delay.
+   * @param {number=} opt_delay
+   * @param {boolean=} opt_relayoutAll
+   * @return {boolean}
+   */
+  schedulePass(opt_delay, opt_relayoutAll) {}
+
+  /**
+   * Registers a callback to be called when the next pass happens.
+   * @param {function()} callback
+   */
+  onNextPass(callback) {}
+
+  /**
+   * Called when main AMP binary is fully initialized.
+   * May never be called in Shadow Mode.
+   */
+  ampInitComplete() {}
+
+  /**
+   * Requires the layout of the specified element or top-level sub-elements
+   * within.
+   * @param {!Element} element
+   * @param {number=} opt_parentPriority
+   * @return {!Promise}
+   */
+  requireLayout(element, opt_parentPriority) {}
+
+  /**
+   * Updates the priority of the resource. If there are tasks currently
+   * scheduled, their priority is updated as well.
+   * @param {!Element} element
+   * @param {number} newLayoutPriority
+   */
+  updateLayoutPriority(element, newLayoutPriority) {}
+}
+/* eslint-enable no-unused-vars */
+
+/**
+ * @implements {ResourcesDef}
+ */
 export class Resources {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
@@ -308,22 +615,17 @@ export class Resources {
     });
   }
 
-  /**
-   * Returns a list of resources.
-   * @return {!Array<!Resource>}
-   * @export
-   */
+  /** @override */
   get() {
     return this.resources_.slice(0);
   }
 
-  /**
-   * Returns a subset of resources which are (1) belong to the specified host
-   * window, and (2) meet the filterFn given.
-   * @param {!Window} hostWin
-   * @param {function(!Resource):boolean} filterFn
-   * @return {!Promise<!Array<!Resource>>}
-   */
+  /** @override */
+  getAmpdoc() {
+    return this.ampdoc;
+  }
+
+  /** @override */
   getMeasuredResources(hostWin, filterFn) {
     // First, wait for the `ready-scan` signal. Waiting for each element
     // individually is too expensive and `ready-scan` will cover most of
@@ -355,14 +657,7 @@ export class Resources {
       );
   }
 
-  /**
-   * Returns a subset of resources which are (1) belong to the specified host
-   * window, and (2) positioned in the specified rect.
-   * @param {!Window} hostWin
-   * @param {!../layout-rect.LayoutRectDef} rect
-   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
-   * @return {!Promise<!Array<!Resource>>}
-   */
+  /** @override */
   getResourcesInRect(hostWin, rect, opt_isInPrerender) {
     return this.getMeasuredResources(hostWin, r => {
       // TODO(jridgewell): Remove isFixed check here once the position
@@ -405,42 +700,22 @@ export class Resources {
     });
   }
 
-  /**
-   * Returns the {@link Resource} instance corresponding to the specified AMP
-   * Element. If no Resource is found, the exception is thrown.
-   * @param {!AmpElement} element
-   * @return {!Resource}
-   */
+  /** @override */
   getResourceForElement(element) {
     return Resource.forElement(element);
   }
 
-  /**
-   * Returns the {@link Resource} instance corresponding to the specified AMP
-   * Element. Returns null if no resource is found.
-   * @param {!AmpElement} element
-   * @return {?Resource}
-   */
+  /** @override */
   getResourceForElementOptional(element) {
     return Resource.forElementOptional(element);
   }
 
-  /**
-   * Returns the direction the user last scrolled.
-   *  - -1 for scrolling up
-   *  - 1 for scrolling down
-   *  - Defaults to 1
-   * @return {number}
-   */
+  /** @override */
   getScrollDirection() {
     return Math.sign(this.lastVelocity_) || 1;
   }
 
-  /**
-   * Signals that an element has been added to the DOM. Resources manager
-   * will start tracking it from this point on.
-   * @param {!AmpElement} element
-   */
+  /** @override */
   add(element) {
     // Ensure the viewport is ready to accept the first element.
     this.addCount_++;
@@ -595,11 +870,7 @@ export class Resources {
     );
   }
 
-  /**
-   * Signals that an element has been removed to the DOM. Resources manager
-   * will stop tracking it from this point on.
-   * @param {!AmpElement} element
-   */
+  /** @override */
   remove(element) {
     const resource = Resource.forElementOptional(element);
     if (!resource) {
@@ -628,45 +899,25 @@ export class Resources {
     dev().fine(TAG_, 'element removed:', resource.debugid);
   }
 
-  /**
-   * Removes all resources belonging to the specified child window.
-   * @param {!Window} childWin
-   */
+  /** @override */
   removeForChildWindow(childWin) {
     const toRemove = this.resources_.filter(r => r.hostWin == childWin);
     toRemove.forEach(r => this.removeResource_(r, /* disconnect */ true));
   }
 
-  /**
-   * Signals that an element has been upgraded to the DOM. Resources manager
-   * will perform build and enable layout/viewport signals for this element.
-   * @param {!AmpElement} element
-   */
+  /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
     this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
-  /**
-   * Assigns an owner for the specified element. This means that the resources
-   * within this element will be managed by the owner and not Resources manager.
-   * @param {!Element} element
-   * @param {!AmpElement} owner
-   * @package
-   */
+  /** @override */
   setOwner(element, owner) {
     Resource.setOwner(element, owner);
   }
 
-  /**
-   * Requires the layout of the specified element or top-level sub-elements
-   * within.
-   * @param {!Element} element
-   * @param {number=} opt_parentPriority
-   * @return {!Promise}
-   * @restricted
-   */
+  /** @override */
   requireLayout(element, opt_parentPriority) {
     const promises = [];
     this.discoverResourcesForElement_(element, resource => {
@@ -696,15 +947,7 @@ export class Resources {
     return Promise.all(promises);
   }
 
-  /**
-   * Schedules layout for the specified sub-elements that are children of the
-   * parent element. The parent element may choose to send this signal either
-   * because it's an owner (see {@link setOwner}) or because it wants the
-   * layouts to be done sooner. In either case, both parent's and children's
-   * priority is observed when scheduling this work.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
+  /** @override */
   scheduleLayout(parentElement, subElements) {
     this.scheduleLayoutOrPreloadForSubresources_(
       Resource.forElement(parentElement),
@@ -713,13 +956,7 @@ export class Resources {
     );
   }
 
-  /**
-   * Invokes `unload` on the elements' resource which in turn will invoke
-   * the `documentBecameInactive` callback on the custom element.
-   * Resources that call `schedulePause` must also call `scheduleResume`.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
+  /** @override */
   schedulePause(parentElement, subElements) {
     const parentResource = Resource.forElement(parentElement);
     subElements = elements_(subElements);
@@ -729,13 +966,7 @@ export class Resources {
     });
   }
 
-  /**
-   * Invokes `resume` on the elements' resource which in turn will invoke
-   * `resumeCallback` only on paused custom elements.
-   * Resources that call `schedulePause` must also call `scheduleResume`.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
+  /** @override */
   scheduleResume(parentElement, subElements) {
     const parentResource = Resource.forElement(parentElement);
     subElements = elements_(subElements);
@@ -745,13 +976,7 @@ export class Resources {
     });
   }
 
-  /**
-   * Schedules unlayout for specified sub-elements that are children of the
-   * parent element. The parent element can choose to send this signal when
-   * it want to unload resources for its children.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
+  /** @override */
   scheduleUnlayout(parentElement, subElements) {
     const parentResource = Resource.forElement(parentElement);
     subElements = elements_(subElements);
@@ -761,15 +986,7 @@ export class Resources {
     });
   }
 
-  /**
-   * Schedules preload for the specified sub-elements that are children of the
-   * parent element. The parent element may choose to send this signal either
-   * because it's an owner (see {@link setOwner}) or because it wants the
-   * preloads to be done sooner. In either case, both parent's and children's
-   * priority is observed when scheduling this work.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
+  /** @override */
   schedulePreload(parentElement, subElements) {
     this.scheduleLayoutOrPreloadForSubresources_(
       Resource.forElement(parentElement),
@@ -778,13 +995,7 @@ export class Resources {
     );
   }
 
-  /**
-   * Updates the priority of the resource. If there are tasks currently
-   * scheduled, their priority is updated as well.
-   * @param {!Element} element
-   * @param {number} newLayoutPriority
-   * @restricted
-   */
+  /** @override */
   updateLayoutPriority(element, newLayoutPriority) {
     const resource = Resource.forElement(element);
 
@@ -800,15 +1011,7 @@ export class Resources {
     this.schedulePass();
   }
 
-  /**
-   * A parent resource, especially in when it's an owner (see {@link setOwner}),
-   * may request the Resources manager to update children's inViewport state.
-   * A child's inViewport state is a logical AND between inLocalViewport
-   * specified here and parent's own inViewport state.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   * @param {boolean} inLocalViewport
-   */
+  /** @override */
   updateInViewport(parentElement, subElements, inLocalViewport) {
     this.updateInViewportForSubresources_(
       Resource.forElement(parentElement),
@@ -817,15 +1020,7 @@ export class Resources {
     );
   }
 
-  /**
-   * Requests the runtime to change the element's size. When the size is
-   * successfully updated then the opt_callback is called.
-   * @param {!Element} element
-   * @param {number|undefined} newHeight
-   * @param {number|undefined} newWidth
-   * @param {function()=} opt_callback A callback function.
-   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
-   */
+  /** @override */
   changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
     this.scheduleChangeSize_(
       Resource.forElement(element),
@@ -837,24 +1032,7 @@ export class Resources {
     );
   }
 
-  /**
-   * Return a promise that requests the runtime to update the size of
-   * this element to the specified value.
-   * The runtime will schedule this request and attempt to process it
-   * as soon as possible. However, unlike in {@link changeSize}, the runtime
-   * may refuse to make a change in which case it will reject promise, call the
-   * `overflowCallback` method on the target resource with the height value.
-   * Overflow callback is expected to provide the reader with the user action
-   * to update the height manually.
-   * Note that the runtime does not call the `overflowCallback` method if the
-   * requested height is 0 or negative.
-   * If the height is successfully updated then the promise is resolved.
-   * @param {!Element} element
-   * @param {number|undefined} newHeight
-   * @param {number|undefined} newWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
-   * @return {!Promise}
-   */
+  /** @override */
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(
@@ -874,50 +1052,17 @@ export class Resources {
     });
   }
 
-  /**
-   * Runs the specified measure, which is called in the "measure" vsync phase.
-   * This is simply a proxy to the privileged vsync service.
-   *
-   * @param {function()} measurer
-   * @return {!Promise}
-   */
+  /** @override */
   measureElement(measurer) {
     return this.vsync_.measurePromise(measurer);
   }
 
-  /**
-   * Runs the specified mutation on the element and ensures that remeasures and
-   * layouts performed for the affected elements.
-   *
-   * This method should be called whenever a significant mutations are done
-   * on the DOM that could affect layout of elements inside this subtree or
-   * its siblings. The top-most affected element should be specified as the
-   * first argument to this method and all the mutation work should be done
-   * in the mutator callback which is called in the "mutation" vsync phase.
-   *
-   * @param {!Element} element
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
+  /** @override */
   mutateElement(element, mutator) {
     return this.measureMutateElement(element, null, mutator);
   }
 
-  /**
-   * Runs the specified mutation on the element and ensures that remeasures and
-   * layouts performed for the affected elements.
-   *
-   * This method should be called whenever a significant mutations are done
-   * on the DOM that could affect layout of elements inside this subtree or
-   * its siblings. The top-most affected element should be specified as the
-   * first argument to this method and all the mutation work should be done
-   * in the mutator callback which is called in the "mutation" vsync phase.
-   *
-   * @param {!Element} element
-   * @param {?function()} measurer
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
+  /** @override */
   measureMutateElement(element, measurer, mutator) {
     if (this.useLayers_) {
       return this.measureMutateElementLayers_(element, measurer, mutator);
@@ -1044,14 +1189,7 @@ export class Resources {
     this.schedulePass(FOUR_FRAME_DELAY_, relayoutAll);
   }
 
-  /**
-   * Return a promise that requests runtime to collapse this element.
-   * The runtime will schedule this request and first attempt to resize
-   * the element to height and width 0. If success runtime will set element
-   * display to none, and notify element owner of this collapse.
-   * @param {!Element} element
-   * @return {!Promise}
-   */
+  /** @override */
   attemptCollapse(element) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(
@@ -1073,11 +1211,7 @@ export class Resources {
     });
   }
 
-  /**
-   * Collapses the element: ensures that it's `display:none`, notifies its
-   * owner and updates the layout box.
-   * @param {!Element} element
-   */
+  /** @override */
   collapseElement(element) {
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
@@ -1095,10 +1229,7 @@ export class Resources {
     this.schedulePass(FOUR_FRAME_DELAY_);
   }
 
-  /**
-   * Expands the element.
-   * @param {!Element} element
-   */
+  /** @override */
   expandElement(element) {
     const resource = Resource.forElement(element);
     resource.completeExpand();
@@ -1111,12 +1242,7 @@ export class Resources {
     this.schedulePass(FOUR_FRAME_DELAY_);
   }
 
-  /**
-   * Schedules the work pass at the latest with the specified delay.
-   * @param {number=} opt_delay
-   * @param {boolean=} opt_relayoutAll
-   * @return {boolean}
-   */
+  /** @override */
   schedulePass(opt_delay, opt_relayoutAll) {
     if (opt_relayoutAll) {
       this.relayoutAll_ = true;
@@ -1126,8 +1252,9 @@ export class Resources {
 
   /**
    * Schedules the work pass at the latest with the specified delay.
+   * @private
    */
-  schedulePassVsync() {
+  schedulePassVsync_() {
     if (this.vsyncScheduled_) {
       return;
     }
@@ -1135,19 +1262,13 @@ export class Resources {
     this.vsync_.mutate(() => this.doPass());
   }
 
-  /**
-   * Called when main AMP binary is fully initialized.
-   * May never be called in Shadow Mode.
-   */
+  /** @override */
   ampInitComplete() {
     this.ampInitialized_ = true;
     this.schedulePass();
   }
 
-  /**
-   * Registers a callback to be called when the next pass happens.
-   * @param {function()} callback
-   */
+  /** @override */
   onNextPass(callback) {
     this.passCallbacks_.push(callback);
   }
@@ -2205,7 +2326,7 @@ export class Resources {
         }
       );
     }
-    this.schedulePassVsync();
+    this.schedulePassVsync_();
   }
 
   /**

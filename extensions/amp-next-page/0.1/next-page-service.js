@@ -75,7 +75,7 @@ export class NextPageService {
     /** @private {?Element} */
     this.separator_ = null;
 
-    /** @private {?../../../src/service/resources-impl.Resources} */
+    /** @private {?../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = null;
 
     /** @private {?MultidocManager} */

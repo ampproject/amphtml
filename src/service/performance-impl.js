@@ -88,7 +88,7 @@ export class Performance {
     /** @private {?./viewer-impl.Viewer} */
     this.viewer_ = null;
 
-    /** @private {?./resources-impl.Resources} */
+    /** @private {?./resources-impl.ResourcesDef} */
     this.resources_ = null;
 
     /** @private {boolean} */
