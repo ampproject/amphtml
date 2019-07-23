@@ -14,5 +14,26 @@
  * limitations under the License.
  */
 
-/*copyright*/
-let hello;
+/**
+ * @typedef {{
+ *   viewportRect: !LayoutRectDef,
+ *   targetRect: !LayoutRectDef,
+ * }}
+ */
+let PositionEntryDef;
+
+/**
+     * @typedef {{
+     *   viewportRect: !LayoutRectDef,
+     *   targetRect: !LayoutRectDef,
+     * }}
+     */
+let PositionEntryDef2;
+
+/**
+ * @typedef {{
+ *   viewportRect: !LayoutRectDef,
+ *   targetRect: !LayoutRectDef,
+ * }}
+ */
+let PositionEntryDef3;

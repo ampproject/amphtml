@@ -51,10 +51,15 @@ module.exports = function(babel) {
     visitor: {
       Program: {
         exit(path) {
+
+          // Write out the transient file that we will feed into CC.
           if (shouldWriteToFile) {
-            // Stub
+            // Stub. This needs to be an append operation.
             console.log('write to temp directory');
           }
+
+          // This is done for testing purposes only to output what the
+          // extern would look like.
           if (shouldEmitTypedefs) {
             // Preserve the leading LICENSE comment.
             path.addComment('leading', path.parent.comments[0].value);
