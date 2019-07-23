@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {Action, SubscriptionAnalytics} from '../analytics';
+import {
+  Action,
+  ActionStatus,
+  SubscriptionAnalytics,
+  SubscriptionAnalyticsEvents,
+} from '../analytics';
 import {Actions} from '../actions';
 import {UrlBuilder} from '../url-builder';
 import {WebLoginDialog} from '../../../amp-access/0.1/login-dialog';
@@ -81,11 +86,25 @@ describes.realWin('Actions', {amp: true}, env => {
   it('should open the action popup window synchronously', () => {
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.STARTED,
+        }
+      )
       .once();
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-success', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.SUCCESS,
+        }
+      )
       .once();
     return actions
       .build()
@@ -131,11 +150,25 @@ describes.realWin('Actions', {amp: true}, env => {
   it('should accept success=no', () => {
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.STARTED,
+        }
+      )
       .once();
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-rejected', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.REJECTED,
+        }
+      )
       .once();
     return actions
       .build()
@@ -179,11 +212,25 @@ describes.realWin('Actions', {amp: true}, env => {
   it('should handle failures', () => {
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.STARTED,
+        }
+      )
       .once();
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-failed', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.FAILED,
+        }
+      )
       .once();
     return actions
       .build()
