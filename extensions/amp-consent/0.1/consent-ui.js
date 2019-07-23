@@ -100,7 +100,7 @@ export class ConsentUI {
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @private {?../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ =  Services.viewerForDoc(this.ampdoc_);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
     /** @private {!Element} */
     this.parent_ = baseInstance.element;
