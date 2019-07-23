@@ -36,11 +36,9 @@
   },
   "devDependencies": {
     "@babel/core": "7.5.5",
-    "@babel/generator": "7.5.5",
     "@babel/helper-plugin-test-runner": "7.1.0",
     "@babel/plugin-proposal-class-properties": "7.5.5",
     "@babel/preset-env": "7.5.5",
-    "@jridgewell/doctrine": "3.0.2",
     "@jridgewell/resorcery": "0.0.3",
     "@octokit/rest": "16.28.7",
     "acorn-globals": "4.3.2",
