@@ -53,11 +53,11 @@ const wrappers = require('../compile-wrappers');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const argv = minimist(process.argv.slice(2));
-let singlePassDest =
-  typeof argv.single_pass_dest === 'string' ? argv.single_pass_dest : './dist/';
+let destination =
+  typeof argv.destination === 'string' ? argv.destination : './dist/';
 
-if (!singlePassDest.endsWith('/')) {
-  singlePassDest = `${singlePassDest}/`;
+if (!destination.endsWith('/')) {
+  destination = `${destination}/`;
 }
 
 const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
@@ -544,7 +544,7 @@ exports.singlePassCompile = async function(entryModule, options) {
   return exports
     .getFlags({
       modules: [entryModule].concat(extensions),
-      writeTo: singlePassDest,
+      writeTo: destination,
       define: options.define,
       externs: options.externs,
       hideWarningsFor: options.hideWarningsFor,
@@ -573,9 +573,9 @@ function wrapMainBinaries() {
   const prefix = pair[0];
   const suffix = pair[1];
   // Cache the v0 file so we can prepend it to alternative binaries.
-  const mainFile = readMagicString('dist/v0.js');
+  const mainFile = readMagicString(`${destination}/v0.js`);
   jsFilesToWrap.forEach(x => {
-    const path = `dist/${x}.js`;
+    const path = `${destination}/${x}.js`;
     const s = readMagicString(path);
     if (x === 'v0') {
       s.prepend(prefix);
@@ -609,8 +609,8 @@ function wrapMainBinaries() {
 function intermediateBundleConcat() {
   extensionBundles.forEach(extension => {
     const prependContents = [
-      'dist/v0/_base_i.js',
-      `dist/v0/${extension.type}.js`,
+      `${destination}/v0/_base_i.js`,
+      `${destination}/v0/${extension.type}.js`,
     ].map(readMagicString);
 
     // If there are third_party libraries to prepend too, ensure we inject a
@@ -641,7 +641,7 @@ function thirdPartyConcat() {
 
 function postPrepend(extension, prependContents) {
   function createFullPath(version) {
-    return `dist/v0/${extension.name}-${version}.js`;
+    return `${destination}/v0/${extension.name}-${version}.js`;
   }
 
   let targets = [];
@@ -693,7 +693,7 @@ function compile(flagsArray) {
 function eliminateIntermediateBundles() {
   extensionBundles.forEach(extension => {
     function createFullPath(version) {
-      return `dist/v0/${extension.name}-${version}.js`;
+      return `${destination}/v0/${extension.name}-${version}.js`;
     }
 
     let targets = [];
@@ -764,7 +764,7 @@ function readMagicString(file) {
 }
 
 function loadSourceMap(file) {
-  if (file.startsWith('dist')) {
+  if (file.startsWith(destination)) {
     return readFile(`${file}.map`);
   }
   return null;
