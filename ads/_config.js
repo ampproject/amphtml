@@ -457,6 +457,11 @@ export const adConfig = {
     ],
   },
 
+  'forkmedia': {
+    prefetch: 'https://delivery.forkcdn.com/rappio/inread/v1.1/amp/inread.js',
+    renderStartImplemented: true,
+  },
+
   'freewheel': {
     prefetch: 'https://cdn.stickyadstv.com/prime-time/fw-amp.min.js',
     renderStartImplemented: true,
