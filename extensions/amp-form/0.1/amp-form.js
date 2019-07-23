@@ -143,7 +143,7 @@ export class AmpForm {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(this.form_);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
