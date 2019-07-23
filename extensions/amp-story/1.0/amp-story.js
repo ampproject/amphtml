@@ -1413,7 +1413,7 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
-        let storePageIndex;
+        let storePageIndex = pageIndex;
         if (targetPage.isAd()) {
           this.storeService_.dispatch(Action.TOGGLE_AD, true);
           setAttributeInMutate(this, Attributes.AD_SHOWING);
@@ -1438,7 +1438,6 @@ export class AmpStory extends AMP.BaseElement {
               this.advancement_.getProgress()
             );
           }
-          storePageIndex = pageIndex;
         }
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
