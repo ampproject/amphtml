@@ -160,6 +160,8 @@ function getChromeArgs(config) {
   // figure out why headless causes more flakes
   if (config.headless) {
     args.push('--headless');
+    // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
+    args.push('--remote-debugging-port=9222');
   }
   return args;
 }
