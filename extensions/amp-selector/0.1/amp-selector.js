@@ -472,6 +472,9 @@ export class AmpSelector extends AMP.BaseElement {
     if (previousEl) {
       this.clearSelection_(previousEl);
     }
+
+    this.setInputs_();
+    this.fireSelectEvent_(el);
   }
 
   /**
