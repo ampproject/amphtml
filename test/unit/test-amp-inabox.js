@@ -35,14 +35,15 @@ describe('amp-inabox', () => {
         .callsFake((ampdoc, id) => {
           installedServices.push(id);
         });
+      sandbox
+        .stub(Service, 'rejectServicePromiseForDoc')
+        .callsFake((ampdoc, id) => {
+          installedServices.push(id);
+        });
       sandbox.stub(Service, 'getServiceForDoc').returns({});
       installAmpdocServices(ampdoc);
 
       const installedServicesByRegularAmp = installedServices.slice(0);
-      remove(installedServicesByRegularAmp, id => {
-        // add regular-AMP-only services here
-        return ['storage'].indexOf(id) >= 0;
-      });
 
       installedServices = [];
       installAmpdocServicesForInabox(ampdoc);

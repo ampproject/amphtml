@@ -105,9 +105,6 @@ startupChunk(self.document, function initial() {
     fullCss,
     () => {
       startupChunk(self.document, function services() {
-        // For security, storage is not supported in inabox.
-        // Fail early with console errors for any attempt of access.
-        unsupportedService(ampdoc, 'storage');
         // Core services.
         installRuntimeServices(self);
         fontStylesheetTimeout(self);
@@ -193,6 +190,7 @@ export function installAmpdocServicesForInabox(ampdoc) {
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
   // For security, Storage is not installed in inabox.
+  unsupportedService(ampdoc, 'storage');
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
