@@ -479,6 +479,7 @@ export class SanitizerImpl {
   /**
    * @param {!StorageLocation} location
    * @return {?Storage}
+   * @private
    */
   storageFor_(location) {
     if (location === StorageLocation.LOCAL) {
