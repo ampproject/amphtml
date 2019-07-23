@@ -175,7 +175,7 @@ function unsupportedService(ampdoc, name) {
 
 /**
  * Install ampdoc-level services.
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
  * @visibleForTesting
  */
 export function installAmpdocServicesForInabox(ampdoc) {
