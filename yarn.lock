@@ -1375,10 +1375,10 @@
     once "^1.4.0"
     universal-user-agent "^3.0.0"
 
-"@octokit/rest@16.28.5":
-  version "16.28.5"
-  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.28.5.tgz#56a5a37fc45a6520199189ac3e5eb09420c0ef6f"
-  integrity sha512-W8hHSm6103c+lNdTuQBMKdZNDCOFFXJdatj92g2d6Hqk134EMDHRc02QWI/Fs1WGnWZ8Leb0QFbXPKO2njeevQ==
+"@octokit/rest@16.28.6":
+  version "16.28.6"
+  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.28.6.tgz#9e73104077c9c06cf3b1628603b4b0c55a117809"
+  integrity sha512-ERfzS6g6ZNPJkEUclxLenr+UEncbymCe//IBrWWdp59nslYDeJboq07Ue9brX05Uv0+SY3kwA33cdiVBVPAOMQ==
   dependencies:
     "@octokit/request" "^5.0.0"
     "@octokit/request-error" "^1.0.2"
