@@ -25,6 +25,7 @@
 const colors = require('ansi-colors');
 const {
   printChangeSummary,
+  processAndUploadDistOutput,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
@@ -39,7 +40,7 @@ const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
     stopTimer(FILENAME, FILENAME, startTime);
@@ -66,7 +67,7 @@ function main() {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting');
       timedExecOrDie('gulp bundle-size --on_pr_build');
-      uploadDistOutput(FILENAME);
+      await processAndUploadDistOutput(FILENAME);
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
       console.log(
