@@ -51,7 +51,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
- *   pageViewId64: Promise<string>,
+ *   pageViewId64: !Promise<string>,
  *   linkRels: !Object<string, string|!Array<string>>,
  *   metaTags: !Object<string, string|!Array<string>>,
  *   replaceParams: ?Object<string, string|!Array<string>>
@@ -93,6 +93,7 @@ export class DocInfo {
         ? parseUrlDeprecated(canonicalTag.href).href
         : sourceUrl;
     }
+
     const pageViewId = getPageViewId(ampdoc.win);
     const pageViewId64 = getPageViewId64(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
@@ -126,32 +127,48 @@ function getPageViewId(win) {
 }
 
 /**
- * Returns a relatively high entropy random string.
- * This should be called once per window and then cached for subsequent
- * access to the same value to be persistent per page.
+ * Returns an array with a total of 128 of random values based on the
+ * `win.crypto.getRandomValues` API. If that is not available concatenates
+ * a string of other values that might be hard to guess including
+ * `Math.random` and the current time.
  * @param {!Window} win
- * @return {Promise<string>}
+ * @return {!Uint8Array|string} Entropy.
  */
-function getPageViewId64(win) {
+function getHighEntropy(win) {
+  // Use win.crypto.getRandomValues to get 128 bits of random value
   const uint8array = getCryptoRandomBytesArray(win, 16); // 128 bit
   if (uint8array) {
-    return tryResolve(() =>
-      base64UrlEncodeFromBytes(uint8array)
-        // Remove trailing padding
-        .replace(/\.+$/, '')
-    );
+    return uint8array;
   }
 
   // Support for legacy browsers.
-  const entropy = String(
+  return String(
     win.location.href +
       Date.now() +
       win.Math.random() +
       win.screen.width +
       win.screen.height
   );
+}
 
-  return Services.cryptoFor(win).sha384Base64(entropy);
+/**
+ * Returns a relatively high entropy random string.
+ * This should be called once per window and then cached for subsequent
+ * access to the same value to be persistent per page.
+ * @param {!Window} win
+ * @return {!Promise<string>} pageViewId64
+ */
+function getPageViewId64(win) {
+  const entropy = getHighEntropy(win);
+  if (typeof entropy == 'string') {
+    return Services.cryptoFor(win).sha384Base64(entropy);
+  }
+  const cast = /** @type {!Uint8Array} */ (entropy);
+  return tryResolve(() =>
+    base64UrlEncodeFromBytes(cast)
+      // Remove trailing padding
+      .replace(/\.+$/, '')
+  );
 }
 
 /**
