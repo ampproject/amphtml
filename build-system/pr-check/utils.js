@@ -54,6 +54,40 @@ const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
 const OUTPUT_STORAGE_SERVICE_ACCOUNT =
   'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
 
+const GIT_BRANCH_URL =
+  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch';
+
+/**
+ * Checks if the PR branch was forked from `master`
+ * @param {string} fileName
+ * @return {boolean}
+ */
+function verifyBranchCreationPoint(fileName) {
+  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
+  const branchCreationPoint = gitBranchCreationPoint();
+  if (!branchCreationPoint) {
+    console.error(
+      fileLogPrefix,
+      colors.red('ERROR:'),
+      'Could not find a common ancestor for',
+      colors.cyan(gitBranchName()),
+      'and',
+      colors.cyan('master') + '. Was this PR branch properly forked?'
+    );
+    console.error(
+      fileLogPrefix,
+      colors.yellow('NOTE:'),
+      'To fix this, rebase your branch on',
+      colors.cyan('master') +
+        ', or recreate it by following the instructions at',
+      colors.cyan(GIT_BRANCH_URL) + '.'
+    );
+
+    return false;
+  }
+  return true;
+}
+
 /**
  * Prints a summary of files changed by, and commits included in the PR.
  * @param {string} fileName
@@ -338,4 +372,5 @@ module.exports = {
   timedExecOrDie,
   uploadBuildOutput,
   uploadDistOutput,
+  verifyBranchCreationPoint,
 };

@@ -21,6 +21,7 @@ const {
   startTimer,
   stopTimer,
   timedExec,
+  verifyBranchCreationPoint,
 } = require('../pr-check/utils');
 const {determineBuildTargets} = require('../pr-check/build-targets');
 const {runYarnChecks} = require('../pr-check/yarn-checks');
@@ -49,6 +50,12 @@ async function prCheck(cb) {
 
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
+  }
+
+  if (!verifyBranchCreationPoint(FILENAME)) {
     stopTimer(FILENAME, FILENAME, startTime);
     process.exitCode = 1;
     return;
