@@ -18,6 +18,7 @@ import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
+import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {Services} from '../../../src/services';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
@@ -96,6 +97,9 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
+
+    /** @private {?ChildLayout} */
+    this.childLayoutManager_ = null;
   }
 
   /** @override */
@@ -137,6 +141,18 @@ class AmpCarousel extends AMP.BaseElement {
     this.prevButton_.addEventListener('click', () => this.interactionPrev());
     this.nextButton_.addEventListener('click', () => this.interactionNext());
 
+    this.childLayoutManager_ = new ChildLayoutManager({
+      ampElement: this,
+      intersectionElement: this.scrollContainer_,
+      viewportIntersectionCallback: (child, isIntersecting) => {
+        if (isIntersecting) {
+          this.scheduleResume(child);
+        } else {
+          this.schedulePause(child);
+        }
+      },
+    });
+    this.childLayoutManager_.updateChildren(this.slides_);
     this.carousel_.updateSlides(this.slides_);
     // Signal for runtime to check children for layout.
     return this.mutateElement(() => {});
@@ -159,8 +175,14 @@ class AmpCarousel extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    this.childLayoutManager_.wasLaidOut();
     this.carousel_.updateUi();
     return Promise.resolve();
+  }
+
+  /** @override */
+  unlayoutcallback() {
+    this.childLayoutManager_.wasUnlaidOut();
   }
 
   /** @override */
@@ -270,7 +292,7 @@ class AmpCarousel extends AMP.BaseElement {
 
   /**
    * @param {!Array<!Element>} slides
-   * @privatef
+   * @private
    */
   configureCarousel_(slides) {
     const dir =
@@ -546,7 +568,6 @@ class AmpCarousel extends AMP.BaseElement {
    * Update the UI (buttons) for the new scroll position.
    */
   onScrollPositionChanged_() {
-    console.log(this.scrollContainer_.scrollLeft);
     this.updateUi_();
   }
 
@@ -555,8 +576,6 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {!Event} event
    */
   onIndexChanged_(event) {
-    console.log(event.detail['index']);
-
     if (this.type_ == CarouselType.CAROUSEL) {
       return;
     }
