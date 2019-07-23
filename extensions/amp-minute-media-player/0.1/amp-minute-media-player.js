@@ -183,7 +183,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
 
     if (data['event'] === 'mute') {
       const muted = data['value'];
-      if (muted == null || this.muted_ == muted) {
+      if (this.muted_ == muted) {
         return;
       }
       this.muted_ = muted;
