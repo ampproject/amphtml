@@ -20,12 +20,14 @@ import {
   parseQueryString,
   parseUrlDeprecated,
 } from '../url';
+
+import {Services} from '../services';
+import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {getCryptoRandomBytesArray} from '../utils/bytes';
 import {isArray} from '../types';
 import {map} from '../utils/object';
-import {tryResolve} from '../utils/promise';
-import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {registerServiceBuilderForDoc} from '../service';
+import {tryResolve} from '../utils/promise';
 
 /** @private @const {!Array<string>} */
 const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
@@ -35,7 +37,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *     - sourceUrl: the source url of an amp document.
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
- *     - pageViewId64: Id for this page view. High entropy but should be unique. 
+ *     - pageViewId64: Id for this page view. High entropy but should be unique
  *       for concurrent page views of a user().
  *     - linkRels: A map object of link tag's rel (key) and corresponding
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
@@ -49,7 +51,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
- *   pageViewId64: string,
+ *   pageViewId64: Promise<string>,
  *   linkRels: !Object<string, string|!Array<string>>,
  *   metaTags: !Object<string, string|!Array<string>>,
  *   replaceParams: ?Object<string, string|!Array<string>>
@@ -128,12 +130,13 @@ function getPageViewId(win) {
  * This should be called once per window and then cached for subsequent
  * access to the same value to be persistent per page.
  * @param {!Window} win
- * @return {Promise<String>}
+ * @return {Promise<string>}
  */
 function getPageViewId64(win) {
   const uint8array = getCryptoRandomBytesArray(win, 16); // 128 bit
   if (uint8array) {
-    return tryResolve(() => base64UrlEncodeFromBytes(uint8array)
+    return tryResolve(() =>
+      base64UrlEncodeFromBytes(uint8array)
         // Remove trailing padding
         .replace(/\.+$/, '')
     );
