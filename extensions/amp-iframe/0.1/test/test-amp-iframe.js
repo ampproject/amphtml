@@ -203,6 +203,7 @@ describes.realWin(
           allow: 'microphone; camera',
           referrerpolicy: 'no-referrer',
           frameborder: 3,
+          tabindex: -1,
           longdesc: 'foo',
           marginwidth: 5,
         });
@@ -214,6 +215,7 @@ describes.realWin(
         expect(iframe.getAttribute('allow')).to.equal('microphone; camera');
         expect(iframe.getAttribute('referrerpolicy')).to.equal('no-referrer');
         expect(iframe.getAttribute('frameborder')).to.equal('3');
+        expect(iframe.getAttribute('tabindex')).to.equal('-1');
         // unsupproted attributes
         expect(iframe.getAttribute('longdesc')).to.be.null;
         expect(iframe.getAttribute('marginwidth')).to.be.null;

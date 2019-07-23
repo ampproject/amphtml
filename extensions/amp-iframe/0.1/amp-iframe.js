@@ -50,6 +50,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'frameborder',
   'referrerpolicy',
   'scrolling',
+  'tabindex',
 ];
 
 /** @type {number}  */
