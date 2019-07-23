@@ -162,6 +162,8 @@ function getChromeArgs(config) {
     args.push('--headless');
     // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
     args.push('--remote-debugging-port=9222');
+    // https://stackoverflow.com/q/50642308
+    args.push('--disable-dev-shm-usage');
   }
   return args;
 }
