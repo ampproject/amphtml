@@ -361,7 +361,6 @@ export class ResourcesDef extends MutatorsAndOwnersDef {
    * @param {!Element} element
    * @param {number=} opt_parentPriority
    * @return {!Promise}
-   * @restricted
    */
   requireLayout(element, opt_parentPriority) {}
 
@@ -370,7 +369,6 @@ export class ResourcesDef extends MutatorsAndOwnersDef {
    * scheduled, their priority is updated as well.
    * @param {!Element} element
    * @param {number} newLayoutPriority
-   * @restricted
    */
   updateLayoutPriority(element, newLayoutPriority) {}
 }
