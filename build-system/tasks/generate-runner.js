@@ -36,6 +36,7 @@ const generatedAtCommitFile = 'GENERATED_AT_COMMIT';
 function shouldGenerateRunner(subDir) {
   const runnerJarDir = `${runnerDistDir}/${subDir}`;
   const runnerJar = `${runnerJarDir}/runner.jar`;
+  const generatedAtCommitPath = `${runnerJarDir}/${generatedAtCommitFile}`;
 
   // Always generate on Travis
   if (isTravisBuild()) {
@@ -47,10 +48,15 @@ function shouldGenerateRunner(subDir) {
     return true;
   }
 
+  // We don't know when the binary was last generated
+  if (!fs.existsSync(generatedAtCommitPath)) {
+    return true;
+  }
+
   // The binary was generated at a different commit
   const currentCommit = gitCommitHash();
   const generatedAtCommit = fs
-    .readFileSync(`${runnerJarDir}/${generatedAtCommitFile}`, 'utf8')
+    .readFileSync(generatedAtCommitPath, 'utf8')
     .toString();
   if (currentCommit != generatedAtCommit) {
     return true;
