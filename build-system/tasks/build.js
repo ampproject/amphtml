@@ -27,6 +27,7 @@ const {
 const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 const {serve} = require('./serve');
@@ -61,16 +62,23 @@ async function performBuild(watch) {
   printNobuildHelp();
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
   parseExtensionFlags();
-  return compileCss(watch).then(() => {
-    return Promise.all([
-      polyfillsForTests(),
-      buildAlp({watch}),
-      buildExaminer({watch}),
-      buildWebWorker({watch}),
-      buildExtensions({watch}),
-      compileAllUnminifiedTargets(watch),
-    ]);
-  });
+  return compileCss(watch)
+    .then(() => {
+      return Promise.all([
+        polyfillsForTests(),
+        buildAlp({watch}),
+        buildExaminer({watch}),
+        buildWebWorker({watch}),
+        buildExtensions({watch}),
+        compileAllUnminifiedTargets(watch),
+      ]);
+    })
+    .then(() => {
+      if (isTravisBuild()) {
+        // New line after all the compilation progress dots on Travis.
+        console.log('\n');
+      }
+    });
 }
 
 /**

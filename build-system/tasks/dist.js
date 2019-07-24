@@ -63,9 +63,12 @@ const babel = require('@babel/core');
 const deglob = require('globs-to-files');
 
 function transferSrcsToTempDir() {
-  if (!isTravisBuild()) {
-    log('Transforming and executing JS files to', cyan(SRC_TEMP_DIR));
-  }
+  log(
+    'Performing multi-pass',
+    colors.cyan('babel'),
+    'transforms in',
+    colors.cyan(SRC_TEMP_DIR)
+  );
   const files = deglob.sync(BABEL_SRC_GLOBS);
   files.forEach(file => {
     if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
@@ -83,7 +86,9 @@ function transferSrcsToTempDir() {
     });
     const name = `${SRC_TEMP_DIR}${file.replace(process.cwd(), '')}`;
     fs.outputFileSync(name, code);
+    process.stdout.write('.');
   });
+  console.log('\n');
 }
 
 /**
