@@ -28,6 +28,7 @@ const {
   processAndUploadDistOutput,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExecWithError,
   timedExecOrDie: timedExecOrDieBase,
   uploadDistOutput,
@@ -43,16 +44,11 @@ const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
-function stopJob(startTime) {
-  stopTimer(FILENAME, FILENAME, startTime);
-  process.exitCode = 1;
-  return;
-}
-
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
-    stopJob(startTime);
+    stopTimedJob(FILENAME, startTime);
+    return;
   }
 
   if (!isTravisPullRequestBuild()) {
@@ -62,7 +58,8 @@ async function main() {
     uploadDistOutput(FILENAME);
   } else {
     if (!verifyBranchCreationPoint(FILENAME)) {
-      stopJob(startTime);
+      stopTimedJob(FILENAME, startTime);
+      return;
     }
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -79,7 +76,8 @@ async function main() {
       const process = timedExecWithError('gulp dist --fortesting', FILENAME);
       if (process.error) {
         await signalDistUpload('errored');
-        stopJob(startTime);
+        stopTimedJob(FILENAME, startTime);
+        return;
       }
 
       timedExecOrDie('gulp bundle-size --on_pr_build');

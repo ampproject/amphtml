@@ -26,6 +26,7 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
   uploadBuildOutput,
   verifyBranchCreationPoint,
@@ -42,8 +43,7 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
+    stopTimedJob(FILENAME, startTime);
     return;
   }
 
@@ -53,8 +53,7 @@ function main() {
     uploadBuildOutput(FILENAME);
   } else {
     if (!verifyBranchCreationPoint(FILENAME)) {
-      stopTimer(FILENAME, FILENAME, startTime);
-      process.exitCode = 1;
+      stopTimedJob(FILENAME, startTime);
       return;
     }
     printChangeSummary(FILENAME);

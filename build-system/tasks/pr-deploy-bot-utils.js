@@ -24,12 +24,6 @@ const {gitCommitHash} = require('../git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../app-utils');
 const {travisBuildNumber} = require('../travis');
 
-const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
-const results = new Map()
-  .set('success', 0)
-  .set('errored', 1)
-  .set('skipped', 2);
-
 async function walk(dest) {
   const filelist = [];
   const files = await fs.readdir(dest);
@@ -66,8 +60,8 @@ async function replaceUrls(dir) {
 async function signalDistUpload(result) {
   const sha = gitCommitHash();
   const travisBuild = travisBuildNumber();
-  const exitCode = results.get(result);
-  const url = `${baseUrl}travisbuilds/${travisBuild}/headshas/${sha}/${exitCode}`;
+  const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
+  const url = `${baseUrl}travisbuilds/${travisBuild}/headshas/${sha}/${result}`;
 
   await request.post(url);
   log(

@@ -31,7 +31,7 @@ const {
   travisBuildNumber,
   travisPullRequestSha,
 } = require('../travis');
-const {execOrDie, exec} = require('../exec');
+const {execOrDie, execWithError, exec} = require('../exec');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const BUILD_OUTPUT_FILE = isTravisBuild()
@@ -195,10 +195,20 @@ function stopTimer(functionName, fileName, startTime) {
 }
 
 /**
+ * Stops the Node process and timer
+ * @param {string} fileName
+ * @param {startTime} startTime
+ */
+function stopTimedJob(fileName, startTime) {
+  stopTimer(fileName, fileName, startTime);
+  process.exitCode = 1;
+}
+
+/**
  * Executes the provided command and times it. Errors, if any, are printed.
  * @param {string} cmd
  * @param {string} fileName
- * @return {<Object>} Process info.
+ * @return {!Object} Node process
  */
 function timedExec(cmd, fileName = 'utils.js') {
   const startTime = startTimer(cmd, fileName);
@@ -211,15 +221,12 @@ function timedExec(cmd, fileName = 'utils.js') {
  * Executes the provided command and times it. Errors, if any, are returned.
  * @param {string} cmd
  * @param {string} fileName
- * @return {<Object>} Process info.
+ * @return {!Object} Node process
  */
 function timedExecWithError(cmd, fileName = 'utils.js') {
   const startTime = startTimer(cmd, fileName);
-  const p = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
+  const p = execWithError(cmd);
   stopTimer(cmd, fileName, startTime);
-  if (p.stderr.length > 0) {
-    p.error = new Error(p.stderr.toString());
-  }
   return p;
 }
 
@@ -381,6 +388,7 @@ module.exports = {
   stopTimer,
   startSauceConnect,
   stopSauceConnect,
+  stopTimedJob,
   timedExec,
   timedExecOrDie,
   timedExecWithError,
