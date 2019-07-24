@@ -19,10 +19,7 @@
  */
 
 import '../polyfills';
-import {
-  Navigation,
-  installGlobalNavigationHandlerForDoc,
-} from '../service/navigation';
+import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {adopt} from '../runtime';
 import {cssText as ampDocCss} from '../../build/ampdoc.css';
@@ -31,35 +28,22 @@ import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
-import {installActionServiceForDoc} from '../service/action-impl';
+import {installAmpdocServicesForInabox} from './inabox-services';
 import {
   installBuiltinElements,
   installRuntimeServices,
 } from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../service/document-info-impl';
 import {installErrorReporting} from '../error';
-import {installGlobalSubmitListenerForDoc} from '../document-submit';
-import {installHiddenObserverForDoc} from '../service/hidden-observer-impl';
-import {installHistoryServiceForDoc} from '../service/history-impl';
-import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
-import {installInaboxCidService} from './inabox-cid';
-import {installInaboxViewportService} from './inabox-viewport';
 import {installPerformanceService} from '../service/performance-impl';
-import {installResourcesServiceForDoc} from '../service/resources-impl';
-import {installStandardActionsForDoc} from '../service/standard-actions-impl';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from '../style-installer';
-import {installUrlForDoc} from '../service/url-impl';
-import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
-import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {internalRuntimeVersion} from '../internal-version';
 import {isExperimentOn} from '../experiments';
 import {maybeValidate} from '../validator-integration';
-import {rejectServicePromiseForDoc} from '../service';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
@@ -157,40 +141,3 @@ self.document.documentElement.setAttribute(
   'amp-version',
   internalRuntimeVersion()
 );
-
-/**
- * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
- * @param {string} name
- */
-function unsupportedService(ampdoc, name) {
-  rejectServicePromiseForDoc(
-    ampdoc,
-    name,
-    new Error('Un-supported service: ' + name)
-  );
-}
-
-/**
- * Install ampdoc-level services.
- * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
- * @visibleForTesting
- */
-export function installAmpdocServicesForInabox(ampdoc) {
-  // Order is important!
-  installIframeMessagingClient(ampdoc.win); // this is an inabox-only service
-  installUrlForDoc(ampdoc);
-  installDocumentInfoServiceForDoc(ampdoc);
-  installInaboxCidService(ampdoc);
-  installViewerServiceForDoc(ampdoc);
-  installInaboxViewportService(ampdoc);
-  installHiddenObserverForDoc(ampdoc);
-  installHistoryServiceForDoc(ampdoc);
-  installResourcesServiceForDoc(ampdoc);
-  installUrlReplacementsServiceForDoc(ampdoc);
-  installActionServiceForDoc(ampdoc);
-  installStandardActionsForDoc(ampdoc);
-  // For security, Storage is not installed in inabox.
-  unsupportedService(ampdoc, 'storage');
-  installGlobalNavigationHandlerForDoc(ampdoc);
-  installGlobalSubmitListenerForDoc(ampdoc);
-}
