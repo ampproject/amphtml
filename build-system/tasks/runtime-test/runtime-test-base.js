@@ -156,7 +156,7 @@ function getFiles(testType) {
  */
 function updateReporters(config) {
   if (
-    (argv.testnames || argv.local_changes || argv.files) &&
+    (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
     !isTravisBuild()
   ) {
     config.reporters = ['mocha'];
