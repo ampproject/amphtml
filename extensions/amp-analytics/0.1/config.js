@@ -389,7 +389,7 @@ export class AnalyticsConfig {
     const expansionPromises = [];
 
     const urlReplacements = Services.urlReplacementsForDoc(element);
-    const bindings = variableServiceForDoc(element).getMacros();
+    const bindings = variableServiceForDoc(element).getMacros(element);
 
     Object.keys(obj).forEach(key => {
       keys.push(key);

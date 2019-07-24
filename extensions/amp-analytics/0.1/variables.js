@@ -214,13 +214,10 @@ export class VariableService {
   }
 
   /**
-   * @param {Element=} element
+   * @param {!Element} element
    * @return {!JsonObject} contains all registered macros
    */
   getMacros(element) {
-    if (!element) {
-      return this.macros_;
-    }
     const elementMacros = {
       'COOKIE': name =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),

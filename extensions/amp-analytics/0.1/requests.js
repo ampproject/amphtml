@@ -405,7 +405,7 @@ export function expandPostMessage(
   const variableService = variableServiceForDoc(ampdoc);
   const urlReplacementService = Services.urlReplacementsForDoc(element);
 
-  const bindings = variableService.getMacros();
+  const bindings = variableService.getMacros(element);
   expansionOption.freezeVar('extraUrlParams');
 
   const basePromise = variableService

@@ -205,7 +205,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     function check(input, output, opt_bindings) {
-      const macros = Object.assign(variables.getMacros(), opt_bindings);
+      const macros = Object.assign(variables.getMacros(doc), opt_bindings);
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
       return expect(expanded).to.eventually.equal(output);
     }
