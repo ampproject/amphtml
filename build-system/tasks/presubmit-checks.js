@@ -123,10 +123,13 @@ const forbiddenTerms = {
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
       'build-system/pr-check/yarn-checks.js',
+      'build-system/tasks/build.js',
       'build-system/tasks/check-exact-versions.js',
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
+      'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
+      'build-system/compile/single-pass.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -175,7 +178,7 @@ const forbiddenTerms = {
   'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/action-impl.js',
       'src/service/core-services.js',
       'src/service/standard-actions-impl.js',
@@ -256,7 +259,7 @@ const forbiddenTerms = {
   'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/url-replacements-impl.js',
     ],
@@ -265,7 +268,7 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
-      'src/inabox/amp-inabox.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/viewer-impl.js',
     ],
@@ -299,7 +302,7 @@ const forbiddenTerms = {
   'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
