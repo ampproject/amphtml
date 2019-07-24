@@ -253,8 +253,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
         if (name != 'amp-analytics') {
           nameElementString = doc.getElementById(name)./*REVIEW*/ outerHTML;
         } else {
-          nameElementString = doc.querySelector('amp-analytics').childNodes[0]
-            ./*REVIEW*/ outerHTML;
+          nameElementString = ampAnalytics./*REVIEW*/ innerHTML;
         }
         const jsonStart = creative.indexOf(nameElementString);
         const jsonEnd = jsonStart + nameElementString.length;
