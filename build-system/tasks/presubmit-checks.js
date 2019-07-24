@@ -126,6 +126,7 @@ const forbiddenTerms = {
       'build-system/tasks/check-exact-versions.js',
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
+      'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
@@ -460,7 +461,11 @@ const forbiddenTerms = {
   },
   'prerenderSafe': {
     message: requiresReviewPrivacy,
-    whitelist: ['build-system/amp.extern.js', 'src/utils/xhr-utils.js'],
+    whitelist: [
+      'build-system/amp.extern.js',
+      'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
+      'src/utils/xhr-utils.js',
+    ],
   },
   'eval\\(': {
     message: shouldNeverBeUsed,
@@ -482,13 +487,14 @@ const forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-access/0.1/amp-access-iframe.js',
+      'extensions/amp-script/0.1/amp-script.js',
+      'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
+      'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
       'src/experiments.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/fake-dom.js',
-      'extensions/amp-access/0.1/amp-access-iframe.js',
-      'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
-      'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
     ],
   },
   'sessionStorage': {
@@ -496,6 +502,8 @@ const forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/amp-access-iframe.js',
       'extensions/amp-accordion/0.1/amp-accordion.js',
+      'extensions/amp-script/0.1/amp-script.js',
+      'testing/fake-dom.js',
     ],
   },
   'indexedDB': {
@@ -885,7 +893,10 @@ const forbiddenTermsSrcInclusive = {
   },
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (whitelist), use Date.now().',
-    whitelist: ['extensions/amp-timeago/0.1/amp-timeago.js'],
+    whitelist: [
+      'extensions/amp-timeago/0.1/amp-timeago.js',
+      'build-system/build.conf.js',
+    ],
   },
   '\\.expandStringSync\\(': {
     message: requiresReviewPrivacy,

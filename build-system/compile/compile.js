@@ -28,6 +28,7 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
+const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
@@ -134,7 +135,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'build-system/event-timing.extern.js',
     'build-system/layout-jank.extern.js',
     'build-system/performance-observer.extern.js',
-    'third_party/closure-compiler/externs/web_animations.js',
+    'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
   ];
@@ -325,14 +326,24 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       compilerOptions.jscomp_error.push(
         'conformanceViolations',
         'checkTypes',
-        'accessControls',
         'const',
         'constantProperty',
         'globalThis'
       );
-      compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
+      compilerOptions.jscomp_off.push(
+        'accessControls',
+        'moduleLoad',
+        'unknownDefines'
+      );
       compilerOptions.conformance_configs =
         'build-system/conformance-config.textproto';
+      // TODO(cvializ, #23417): Remove these after fixing React.Component type errors.
+      compilerOptions.hide_warnings_for.push(
+        'extensions/amp-date-picker/0.1/date-picker-common.js',
+        'extensions/amp-date-picker/0.1/react-utils.js',
+        'extensions/amp-date-picker/0.1/single-date-picker.js',
+        'extensions/amp-date-picker/0.1/wrappers/maximum-nights.js'
+      );
     } else {
       compilerOptions.jscomp_warning.push('accessControls', 'moduleLoad');
       compilerOptions.jscomp_off.push('unknownDefines');
@@ -365,7 +376,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (options.typeCheckOnly) {
       return gulp
         .src(srcs, {base: '.'})
-        .pipe(gulpClosureCompile(compilerOptionsArray))
+        .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
         .on('error', err => {
           handleTypeCheckError();
           reject(err);
@@ -379,7 +390,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .src(gulpSrcs, {base: gulpBase})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(gulpClosureCompile(compilerOptionsArray))
+        .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
         .on('error', err => {
           handleCompilerError(outputFilename);
           reject(err);

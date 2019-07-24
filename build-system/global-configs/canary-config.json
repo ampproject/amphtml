@@ -8,6 +8,7 @@
   "allow-url-opt-in": [
     "ios-scrollable-iframe",
     "pump-early-frame",
+    "macro-after-long-task",
     "twitter-default-placeholder",
     "twitter-default-placeholder-fade",
     "twitter-default-placeholder-pulse"
@@ -15,8 +16,6 @@
 
   "canary": 1,
 
-  "a4aFastFetchAdSenseLaunched": 0,
-  "a4aFastFetchDoubleclickLaunched": 0,
   "a4aProfilingRate": 0.01,
   "amp-access-iframe": 1,
   "amp-ad-ff-adx-ady": 0.01,
@@ -43,5 +42,6 @@
   "ios-scrollable-iframe": 0,
   "layers": 1,
   "pump-early-frame": 1,
-  "version-locking": 1
+  "version-locking": 1,
+  "macro-after-long-task": 1
 }
