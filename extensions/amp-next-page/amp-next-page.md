@@ -87,7 +87,7 @@ single instance. This limit may be changed or removed in the future.
 
 [tip type="important]
 **Important**
-[`<amp-analytics>`](../amp-analytics/amp-analytics.md) is unsupported on pages users land on through `<amp-next-page>`. 
+[`<amp-analytics>`](../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`. 
 Measuring pageviews is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md).
 [/tip]
 
