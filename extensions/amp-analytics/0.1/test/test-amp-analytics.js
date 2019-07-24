@@ -433,7 +433,7 @@ describes.realWin(
 
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/e.com\/start=[0-9]+&duration=0/
+            /https:\/\/e.com\/start=[0-9]+&duration=[0-9]/
           );
           requestVerifier.verifyRequest('https://e.com/totalVisibleTime=0');
         });
