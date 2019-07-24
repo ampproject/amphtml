@@ -290,6 +290,7 @@ const AMP_EMBED_ALLOWED = {
   mgid: true,
   miximedia: true,
   mywidget: true,
+  lentainform: true,
   opinary: true,
   outbrain: true,
   plista: true,
