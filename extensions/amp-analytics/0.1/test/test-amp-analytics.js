@@ -414,8 +414,7 @@ describes.realWin(
         });
       });
 
-      // TODO(lannka, #12476): Make this test work with sinon 4.0.
-      it.skip('fills internally provided trigger vars', function() {
+      it('fills internally provided trigger vars', function() {
         const analytics = getAnalyticsTag({
           'requests': {
             'timer':
@@ -433,7 +432,7 @@ describes.realWin(
         });
 
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest(
+          requestVerifier.verifyRequestMatch(
             /https:\/\/e.com\/start=[0-9]+&duration=0/
           );
           requestVerifier.verifyRequest('https://e.com/totalVisibleTime=0');
