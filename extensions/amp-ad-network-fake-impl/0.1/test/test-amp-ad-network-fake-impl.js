@@ -86,6 +86,9 @@ describes.realWin(
         fakeImplElem
       ).transformCreative_(docString);
       expect(reordered).to.include(`"ampRuntimeUtf16CharOffsets":[128,201]`);
+      expect(reordered.substr(128, 73)).to.equal(
+        `<script async="" src="https://cdn.ampproject.org/amp4ads-v0.js"></script>`
+      );
     });
 
     it('generates json offsets', () => {
@@ -101,6 +104,9 @@ describes.realWin(
       ).transformCreative_(docString);
       expect(reordered).to.include(
         `"jsonUtf16CharOffsets":{"amp-analytics":[258,322]`
+      );
+      expect(reordered.substr(258, 64)).to.equal(
+        `<script type="application/json">Iñtërnâtiônàlizætiøn☃💩</script>`
       );
     });
 
