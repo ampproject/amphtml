@@ -111,6 +111,7 @@ module.exports = {
   exec,
   execOrDie,
   execScriptAsync,
+  getOutput,
   getStderr,
   getStdout,
 };
