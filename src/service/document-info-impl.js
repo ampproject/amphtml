@@ -93,9 +93,7 @@ export class DocInfo {
         ? parseUrlDeprecated(canonicalTag.href).href
         : sourceUrl;
     }
-
     const pageViewId = getPageViewId(ampdoc.win);
-    const pageViewId64 = getPageViewId64(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const metaTags = getMetaTags(ampdoc.win.document);
     const replaceParams = getReplaceParams(ampdoc);
@@ -105,9 +103,12 @@ export class DocInfo {
       get sourceUrl() {
         return getSourceUrl(ampdoc.getUrl());
       },
+      /** @return {!Promise<string>} */
+      get pageViewId64() {
+        return getPageViewId64(ampdoc.win);
+      },
       canonicalUrl,
       pageViewId,
-      pageViewId64,
       linkRels,
       metaTags,
       replaceParams,
@@ -162,13 +163,16 @@ function getPageViewId64(win) {
   const entropy = getHighEntropy(win);
   if (typeof entropy == 'string') {
     return Services.cryptoFor(win).sha384Base64(entropy);
+  } else {
+    // If our entropy is a pure random number, we can just directly turn it
+    // into base 64
+    const cast = /** @type {!Uint8Array} */ (entropy);
+    return tryResolve(() =>
+      base64UrlEncodeFromBytes(cast)
+        // Remove trailing padding
+        .replace(/\.+$/, '')
+    );
   }
-  const cast = /** @type {!Uint8Array} */ (entropy);
-  return tryResolve(() =>
-    base64UrlEncodeFromBytes(cast)
-      // Remove trailing padding
-      .replace(/\.+$/, '')
-  );
 }
 
 /**
