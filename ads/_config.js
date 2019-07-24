@@ -587,6 +587,7 @@ export const adConfig = {
 
   'logly': {
     preconnect: ['https://l.logly.co.jp', 'https://cdn.logly.co.jp'],
+    renderStartImplemented: true,
   },
 
   'loka': {
