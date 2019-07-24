@@ -16,6 +16,8 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
+import {parseJson} from '../../../src/json';
+import {dict} from '../../../src/utils/object';
 import {startsWith} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
 
@@ -128,7 +130,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    */
   generateMetadata_(doc) {
     const {head} = doc;
-    const metadata = {};
+    const metadata = dict({});
     const jsonMetadata = [];
     const styles = [];
     const extensions = [];
@@ -192,7 +194,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
         height,
         area = -1;
       if (img.hasAttribute('width')) {
-        width = img.getAttribute(width);
+        width = img.getAttribute('width');
       }
       if (img.hasAttribute('height')) {
         height = img.getAttribute('height');
@@ -221,7 +223,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
         type == 'application/json' &&
         script.hasAttribute('amp-ad-metadata')
       ) {
-        const parsed = JSON.parse(script.textContent);
+        const parsed = parseJson(script.textContent);
         for (const attribute in parsed) {
           metadata[attribute] = parsed[attribute];
         }
@@ -270,7 +272,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
         } else {
           custom = extension['custom-template'];
         }
-        if (!metadata['customElementExtensions'].includes(custom)) {
+        if (metadata['customElementExtensions'].indexOf(custom) == -1) {
           metadata['customElementExtensions'].push(custom);
           metadata['extensions'].push({
             'custom-element': custom,
