@@ -16,8 +16,10 @@
 'use strict';
 
 const fs = require('fs-extra');
+const log = require('fancy-log');
 const path = require('path');
 const request = require('request-promise');
+const {cyan, green} = require('ansi-colors');
 const {gitCommitHash} = require('../git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../app-utils');
 const {travisBuildNumber} = require('../travis');
@@ -68,6 +70,12 @@ async function signalDistUpload(result) {
   const url = `${baseUrl}travisbuilds/${travisBuild}/headshas/${sha}/${exitCode}`;
 
   await request.post(url);
+  log(
+    green('INFO:'),
+    'reported ',
+    cyan(`dist: ${result}`),
+    'to the pr-deploy GitHub App'
+  );
 }
 
 module.exports = {
