@@ -895,12 +895,15 @@ app.get(
     const mode = pc.env.SERVE_MODE;
     const inabox = req.query['inabox'];
     const stream = Number(req.query['stream']);
+    const index = Number(req.query['index']);
+
     fs.readFileAsync(pc.cwd() + filePath, 'utf8')
       .then(file => {
         if (req.query['amp_js_v']) {
           file = addViewerIntegrationScript(req.query['amp_js_v'], file);
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
+        file = file.replace(/__PAGE_INDEX__/g, isNaN(index) ? 0 : index + 1);
 
         if (inabox && req.headers.origin && req.query.__amp_source_origin) {
           // Allow CORS requests for A4A.
