@@ -19,8 +19,9 @@ var ignoredNodes = [];
  * @description
  * Updates existing dom to match a new dom.
  *
- * @param {Node} oldNode - The html entity to update.
- * @param {String|Node} newNode - The updated html(entity).
+ * @param {!Node} oldNode - The html entity to update.
+ * @param {string|!Node} newNode - The updated html(entity).
+ * @return {!Array<!Node>}
  */
 function setDOM (oldNode, newNode) {
   ignoredNodes = [];

@@ -17,6 +17,12 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-list-0.1.css';
+import {
+  DIFFABLE_AMP_ELEMENTS,
+  DIFF_IGNORE,
+  DIFF_KEY,
+  markElementForDiffing,
+} from '../../../src/sanitation';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {LoadMoreService} from './service/load-more-service';
@@ -48,22 +54,16 @@ import setDOM from '../../../third_party/set-dom/set-dom';
 /** @const {string} */
 const TAG = 'amp-list';
 
-/** @typedef {{
-  data:(?JsonObject|string|undefined|!Array),
-  resolver:!Function,
-  rejecter:!Function,
-  append:boolean,
-  payload: (?JsonObject|Array<JsonObject>),
-}} */
-export let RenderItems;
-
 /**
- * Map of AMP element tag name to attributes that require replacement.
- * @const {!Object<string, !Array<string>>}
+ * @typedef {{
+ *   data:(?JsonObject|string|undefined|!Array),
+ *   resolver:!Function,
+ *   rejecter:!Function,
+ *   append:boolean,
+ *   payload: (?JsonObject|Array<JsonObject>)
+ * }}
  */
-const MANUAL_DIFF_ELEMENTS = {
-  'AMP-IMG': ['src', 'srcset', 'layout', 'width', 'height'],
-};
+export let RenderItems;
 
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
@@ -208,8 +208,8 @@ export class AmpList extends AMP.BaseElement {
     }
 
     // Override default attributes used for setDOM customization.
-    setDOM['KEY'] = 'i-amphtml-key';
-    setDOM['IGNORE'] = 'i-amphtml-ignore';
+    setDOM['KEY'] = DIFF_KEY;
+    setDOM['IGNORE'] = DIFF_IGNORE;
 
     Services.bindForDocOrNull(this.element).then(bind => {
       this.bind_ = bind;
@@ -822,6 +822,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Updates `this.container_` by DOM diffing its children against `elements`.
    * @param {!Array<!Element>} elements
    * @private
    */
@@ -829,20 +830,12 @@ export class AmpList extends AMP.BaseElement {
     const newContainer = this.createContainer_();
     this.addElementsToContainer_(elements, newContainer);
 
-    // In setDOM, nodes with unique keys will always be replaced. amp-mustache
-    // starts at 1 and increments, start at -1 and decrement to guarantee
-    // uniqueness.
+    // TODO(choumx): Only do this for initial content diffing.
+    // amp-mustache starts at 1 and increments, so start at -1 and decrement to
+    // guarantee uniqueness.
     let key = -1;
-    this.container_.querySelectorAll('.i-amphtml-element').forEach(e => {
-      // Nodes with "ignore" attribute will not be touched (old element stays).
-      // We manually diff these elements below.
-      if (MANUAL_DIFF_ELEMENTS[e.tagName]) {
-        e.setAttribute('i-amphtml-ignore', '');
-      } else if (!e.hasAttribute('id')) {
-        // [id] allows tracking the element across DOM reordering and is used
-        // as a fallback node key, so only set "key" attribute if there's no id.
-        e.setAttribute('i-amphtml-key', key--);
-      }
+    this.container_.querySelectorAll('.i-amphtml-element').forEach(element => {
+      markElementForDiffing(element, () => String(key--));
     });
 
     const ignored = setDOM(this.container_, newContainer);
@@ -851,14 +844,14 @@ export class AmpList extends AMP.BaseElement {
     for (let i = 0; i < ignored.length; i += 2) {
       const before = ignored[i];
       const after = ignored[i + 1];
-
-      const attrs = MANUAL_DIFF_ELEMENTS['AMP-IMG'];
+      devAssert(before.nodeName == after.nodeName, 'Mismatched nodeName.');
+      const attrs = DIFFABLE_AMP_ELEMENTS[before.nodeName];
       if (attrs) {
-        const mismatch = attrs.some(
+        const shouldReplace = attrs.some(
           attr => before.getAttribute(attr) !== after.getAttribute(attr)
         );
-        // Use the new element if there's a mismatching attribute.
-        if (mismatch) {
+        // Use the new element if there's a mismatched attribute value.
+        if (shouldReplace) {
           before.parentElement.replaceChild(after, before);
         }
       }

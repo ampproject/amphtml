@@ -22,6 +22,7 @@ import {
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
   isValidAttr,
+  markElementForDiffing,
 } from './sanitation';
 import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
@@ -63,7 +64,7 @@ const PURIFY_PROFILES = /** @type {!DomPurifyConfig} */ ({
  * Monotonically increasing counter used for keying nodes.
  * @private {number}
  */
-let KEY_COUNTER = 0;
+let KEY_COUNTER = 1;
 
 /**
  * Returns a <body> element containing the sanitized `dirty` markup.
@@ -159,19 +160,6 @@ function addPurifyHooks(purifier, doc) {
   let allowedAttributes;
   const allowedAttributesChanges = [];
 
-  // Disables DOM diffing for a given node and allows it to be replaced.
-  const disableDiffingFor = node => {
-    const key = 'i-amphtml-key';
-    if (node.nodeName == 'AMP-IMG') {
-      node.setAttribute('i-amphtml-ignore', '');
-    } else {
-      if (!node.hasAttribute(key)) {
-        // set-dom uses node attribute keys for opting out of diffing.
-        node.setAttribute(key, KEY_COUNTER++);
-      }
-    }
-  };
-
   /**
    * @param {!Node} node
    * @param {{tagName: string, allowedTags: !Object<string, boolean>}} data
@@ -183,8 +171,6 @@ function addPurifyHooks(purifier, doc) {
     // Allow all AMP elements.
     if (startsWith(tagName, 'amp-')) {
       allowedTags[tagName] = true;
-      // AMP elements don't support arbitrary mutation, so don't DOM diff them.
-      disableDiffingFor(node);
     }
     // Set `target` attribute for <a> tags if necessary.
     if (tagName === 'a') {
@@ -283,10 +269,6 @@ function addPurifyHooks(purifier, doc) {
       // Set a custom attribute to mark this element as containing a binding.
       // This is an optimization that obviates the need for DOM scan later.
       node.setAttribute('i-amphtml-binding', '');
-      // Don't DOM diff nodes with bindings because amp-bind scans newly
-      // rendered elements and discards _all_ old elements _before_ diffing, so
-      // preserving some old elements would cause loss of functionality.
-      disableDiffingFor(node);
     }
 
     if (
@@ -315,10 +297,12 @@ function addPurifyHooks(purifier, doc) {
   };
 
   /**
-   * @param {!Node} unusedNode
+   * @param {!Node} node
    * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
    */
-  const afterSanitizeAttributes = function(unusedNode) {
+  const afterSanitizeAttributes = function(node) {
+    markElementForDiffing(node, () => String(KEY_COUNTER++));
+
     // DOMPurify doesn't have a tag-specific attribute whitelist API and
     // `allowedAttributes` has a per-invocation scope, so we need to undo
     // changes after sanitizing attributes.
