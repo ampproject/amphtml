@@ -33,11 +33,13 @@ const realWinConfig = {
 describes.realWin('TemplateRenderer', realWinConfig, env => {
   const templateUrl = '/adzerk/1';
 
+  let doc;
   let containerElement;
   let impl;
 
   beforeEach(() => {
-    containerElement = document.createElement('div');
+    doc = env.win.document;
+    containerElement = doc.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
     containerElement.setAttribute('src', templateUrl);
@@ -60,7 +62,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     containerElement.getIntersectionChangeEntry = () => ({});
     containerElement.isInViewport = () => true;
     containerElement.getAmpDoc = () => env.ampdoc;
-    document.body.appendChild(containerElement);
+    doc.body.appendChild(containerElement);
 
     impl = new AmpAdTemplate(containerElement);
     impl.attemptChangeSize = (width, height) => {
@@ -72,7 +74,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
 
   afterEach(() => {
     sandbox.restore();
-    document.body.removeChild(containerElement);
+    doc.body.removeChild(containerElement);
   });
 
   describe('Iframe Rendering', () => {
