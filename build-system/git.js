@@ -192,6 +192,7 @@ function gitMasterBaseline() {
  * Returns the diffs for given path based on the given commit
  * @param {string} path
  * @param {string} commit
+ * @return {string}
  */
 function gitDiffPath(path, commit) {
   return getStdout(`git diff ${commit} ${path}`).trim();
