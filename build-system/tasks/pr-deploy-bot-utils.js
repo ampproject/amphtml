@@ -22,6 +22,12 @@ const {gitCommitHash} = require('../git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../app-utils');
 const {travisBuildNumber} = require('../travis');
 
+const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/probot/v0/pr-deploy/';
+const results = new Map()
+  .set('success', 0)
+  .set('errored', 1)
+  .set('skipped', 2);
+
 async function walk(dest) {
   const filelist = [];
   const files = await fs.readdir(dest);
@@ -55,17 +61,16 @@ async function replaceUrls(dir) {
   await Promise.all(promises);
 }
 
-async function signalDistUploadComplete() {
+async function signalDistUpload(result) {
   const sha = gitCommitHash();
   const travisBuild = travisBuildNumber();
-  const url =
-    'https://amp-pr-deploy-bot.appspot.com/probot/v0/pr-deploy/' +
-    `travisbuilds/${travisBuild}/headshas/${sha}/0`;
+  const exitCode = results.get(result);
+  const url = `${baseUrl}travisbuilds/${travisBuild}/headshas/${sha}/${exitCode}`;
 
   await request.post(url);
 }
 
 module.exports = {
   replaceUrls,
-  signalDistUploadComplete,
+  signalDistUpload,
 };
