@@ -16,7 +16,7 @@
 
 const log = require('fancy-log');
 const {
-  closureNailgunPort,
+  checkTypesNailgunPort,
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
@@ -66,7 +66,7 @@ async function checkTypes() {
     .sort();
   return compileCss()
     .then(async () => {
-      await startNailgunServer(closureNailgunPort, /* detached */ false);
+      await startNailgunServer(checkTypesNailgunPort, /* detached */ false);
     })
     .then(() => {
       if (!isTravisBuild()) {
@@ -127,7 +127,7 @@ async function checkTypes() {
       }
     })
     .then(async () => {
-      await stopNailgunServer(closureNailgunPort);
+      await stopNailgunServer(checkTypesNailgunPort);
     })
     .then(() => exitCtrlcHandler(handlerProcess));
 }
