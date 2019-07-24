@@ -110,7 +110,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       root.setAttribute('amp4ads', '');
     }
 
-    const creative = root.outerHTML;
+    const creative = root./*OK*/ outerHTML;
     const creativeSplit = creative.split('</body>');
     const docWithMetadata =
       creativeSplit[0] +
@@ -232,12 +232,12 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       jsonMetadata.push('amp-analytics');
     }
 
-    const creative = doc.documentElement.outerHTML;
+    const creative = doc.documentElement./*REVIEW*/ outerHTML;
     let start = 0;
     let end = 0;
     if (firstRuntimeElement != null) {
-      firstRuntimeElement = firstRuntimeElement.outerHTML;
-      lastRuntimeElement = lastRuntimeElement.outerHTML;
+      firstRuntimeElement = firstRuntimeElement./*REVIEW*/ outerHTML;
+      lastRuntimeElement = lastRuntimeElement./*REVIEW*/ outerHTML;
       start = creative.indexOf(firstRuntimeElement);
       end = creative.indexOf(lastRuntimeElement) + lastRuntimeElement.length;
     }
@@ -249,10 +249,10 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
         const name = jsonMetadata[i];
         let nameElementString;
         if (name != 'amp-analytics') {
-          nameElementString = doc.getElementById(name).outerHTML;
+          nameElementString = doc.getElementById(name)./*REVIEW*/ outerHTML;
         } else {
           nameElementString = doc.querySelector('amp-analytics').childNodes[0]
-            .outerHTML;
+            ./*REVIEW*/ outerHTML;
         }
         const jsonStart = creative.indexOf(nameElementString);
         const jsonEnd = jsonStart + nameElementString.length;

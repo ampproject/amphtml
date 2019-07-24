@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {endsWith, startsWith} from '../../../src/string';
+import {urls} from '../../../src/config';
 
 export class ExternalReorderHeadTransformer {
   /** constructor */
@@ -101,16 +102,19 @@ export class ExternalReorderHeadTransformer {
             break;
           case 'NOSCRIPT':
             this.headComponents.noscript = child;
+            break;
           default:
             if (!this.headComponents.other.includes(child)) {
               this.headComponents.other.push(child);
             }
-            break;
         }
       }
+      for (let i = 0; i < head.children.length; i++) {
+        head.removeChild(head.children.item(i));
+      }
+      this.repopulate(head);
     }
-    head.innerHTML = '';
-    this.repopulate(head);
+
     return head;
   }
 
@@ -157,7 +161,7 @@ export class ExternalReorderHeadTransformer {
     }
     if (
       isAsync &&
-      startsWith(src, 'https://cdn.ampproject.org/') &&
+      startsWith(src, urls.cdn) &&
       (endsWith(src, '/v0.js') ||
         endsWith(src, '/v0.js.br') ||
         endsWith(src, '/amp4ads-v0.js') ||
@@ -168,10 +172,7 @@ export class ExternalReorderHeadTransformer {
     }
     if (
       isAsync &&
-      startsWith(
-        src,
-        'https://cdn.ampproject.org/v0/amp-viewer-integration-gmail-'
-      ) &&
+      startsWith(src, urls.cdn + '/v0/amp-viewer-integration-gmail-') &&
       endsWith(src, '.js')
     ) {
       this.headComponents.scriptGmailAmpViewer = element;
@@ -179,11 +180,8 @@ export class ExternalReorderHeadTransformer {
     }
     if (
       isAsync &&
-      (startsWith(
-        src,
-        'https://cdn.ampproject.org/v0/amp-viewer-integration-'
-      ) ||
-        (startsWith(src, 'https://cdn.ampproject.org/viewer/google/v') &&
+      (startsWith(src, urls.cdn + '/v0/amp-viewer-integration-') ||
+        (startsWith(src, urls.cdn + '/viewer/google/v') &&
           endsWith(src, '.js')))
     ) {
       this.headComponents.scriptAmpViewer = element;
@@ -225,10 +223,7 @@ export class ExternalReorderHeadTransformer {
     const rel = element.getAttribute('rel');
     if (rel == 'stylesheet') {
       if (
-        startsWith(
-          element.getAttribute('href'),
-          'https://cdn.ampproject.org/'
-        ) &&
+        startsWith(element.getAttribute('href'), urls.cdn) &&
         endsWith(element.getAttribute('href'), '/v0.css')
       ) {
         this.headComponents.linkStylesheetRuntimeCss = element;
