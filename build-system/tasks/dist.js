@@ -27,13 +27,13 @@ const {
   parseExtensionFlags,
 } = require('./extension-helpers');
 const {
-  closureNailgunPort,
+  createModuleCompatibleES5Bundle,
+} = require('./create-module-compatible-es5-bundle');
+const {
+  distNailgunPort,
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
-const {
-  createModuleCompatibleES5Bundle,
-} = require('./create-module-compatible-es5-bundle');
 const {
   WEB_PUSH_PUBLISHER_FILES,
   WEB_PUSH_PUBLISHER_VERSIONS,
@@ -63,9 +63,12 @@ const babel = require('@babel/core');
 const deglob = require('globs-to-files');
 
 function transferSrcsToTempDir() {
-  if (!isTravisBuild()) {
-    log('Transforming and executing JS files to', cyan(SRC_TEMP_DIR));
-  }
+  log(
+    'Performing multi-pass',
+    colors.cyan('babel'),
+    'transforms in',
+    colors.cyan(SRC_TEMP_DIR)
+  );
   const files = deglob.sync(BABEL_SRC_GLOBS);
   files.forEach(file => {
     if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
@@ -83,7 +86,9 @@ function transferSrcsToTempDir() {
     });
     const name = `${SRC_TEMP_DIR}${file.replace(process.cwd(), '')}`;
     fs.outputFileSync(name, code);
+    process.stdout.write('.');
   });
+  console.log('\n');
 }
 
 /**
@@ -119,7 +124,7 @@ async function dist() {
   }
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
     .then(async () => {
-      await startNailgunServer(closureNailgunPort, /* detached */ false);
+      await startNailgunServer(distNailgunPort, /* detached */ false);
     })
     .then(() => {
       // Single pass has its own tmp directory processing. Only do this for
@@ -153,7 +158,7 @@ async function dist() {
       }
     })
     .then(async () => {
-      await stopNailgunServer(closureNailgunPort);
+      await stopNailgunServer(distNailgunPort);
     })
     .then(() => {
       return copyAliasExtensions();

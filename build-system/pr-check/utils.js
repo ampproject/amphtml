@@ -31,8 +31,11 @@ const {
   travisBuildNumber,
   travisPullRequestSha,
 } = require('../travis');
+const {
+  replaceUrls,
+  signalDistUploadComplete,
+} = require('../tasks/pr-deploy-bot-utils');
 const {execOrDie, exec} = require('../exec');
-const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
 const BUILD_OUTPUT_FILE = isTravisBuild()
   ? `amp_build_${travisBuildNumber()}.zip`
@@ -50,6 +53,9 @@ const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
 const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
 const OUTPUT_STORAGE_SERVICE_ACCOUNT =
   'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
+
+const GIT_BRANCH_URL =
+  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -77,13 +83,36 @@ function printChangeSummary(fileName) {
   console.log(filesChanged);
 
   const branchCreationPoint = gitBranchCreationPoint();
-  console.log(
-    `${fileLogPrefix} Commit log since branch`,
-    `${colors.cyan(gitBranchName())} was forked from`,
-    `${colors.cyan('master')} at`,
-    `${colors.cyan(shortSha(branchCreationPoint))}:`
-  );
-  console.log(gitDiffCommitLog() + '\n');
+  if (branchCreationPoint) {
+    console.log(
+      `${fileLogPrefix} Commit log since branch`,
+      `${colors.cyan(gitBranchName())} was forked from`,
+      `${colors.cyan('master')} at`,
+      `${colors.cyan(shortSha(branchCreationPoint))}:`
+    );
+    console.log(gitDiffCommitLog() + '\n');
+  } else {
+    console.error(
+      fileLogPrefix,
+      colors.yellow('WARNING:'),
+      'Could not find a common ancestor for',
+      colors.cyan(gitBranchName()),
+      'and',
+      colors.cyan('master') + '. (This can happen with older PR branches.)'
+    );
+    console.error(
+      fileLogPrefix,
+      colors.yellow('NOTE 1:'),
+      'If this causes unexpected test failures, try rebasing the PR branch on',
+      colors.cyan('master') + '.'
+    );
+    console.error(
+      fileLogPrefix,
+      colors.yellow('NOTE 2:'),
+      "If rebasing doesn't work, you may have to recreate the branch. See",
+      colors.cyan(GIT_BRANCH_URL) + '.\n'
+    );
+  }
 }
 
 /**
@@ -192,7 +221,7 @@ function timedExecOrDie(cmd, fileName = 'utils.js') {
  * @param {string} outputDirs
  * @private
  */
-async function downloadOutput_(functionName, outputFileName, outputDirs) {
+function downloadOutput_(functionName, outputFileName, outputDirs) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   const buildOutputDownloadUrl = `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
 
@@ -226,7 +255,7 @@ async function downloadOutput_(functionName, outputFileName, outputDirs) {
  * @param {string} outputDirs
  * @private
  */
-async function uploadOutput_(functionName, outputFileName, outputDirs) {
+function uploadOutput_(functionName, outputFileName, outputDirs) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
 
   console.log(
@@ -293,10 +322,20 @@ function uploadBuildOutput(functionName) {
  * Zips and uploads the dist output to a remote storage location
  * @param {string} functionName
  */
-async function uploadDistOutput(functionName) {
+function uploadDistOutput(functionName) {
+  uploadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
+}
+
+/**
+ * Replaces URLS in HTML files, zips and uploads dist output,
+ * and signals to the AMP PR Deploy bot that the upload is complete.
+ * @param {string} functionName
+ */
+async function processAndUploadDistOutput(functionName) {
   await replaceUrls('test/manual');
   await replaceUrls('examples');
-  uploadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
+  uploadDistOutput(functionName);
+  await signalDistUploadComplete();
 }
 
 /**
@@ -316,6 +355,7 @@ module.exports = {
   downloadBuildOutput,
   downloadDistOutput,
   printChangeSummary,
+  processAndUploadDistOutput,
   startTimer,
   stopTimer,
   startSauceConnect,

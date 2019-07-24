@@ -99,6 +99,9 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
  * Compile all runtime targets in minified mode and drop them in dist/.
  */
 function compileAllMinifiedTargets() {
+  if (isTravisBuild()) {
+    log('Minifying multi-pass runtime targets with', cyan('closure-compiler'));
+  }
   return compile(/* watch */ false, /* shouldMinify */ true);
 }
 
@@ -107,6 +110,9 @@ function compileAllMinifiedTargets() {
  * @param {boolean} watch
  */
 function compileAllUnminifiedTargets(watch) {
+  if (isTravisBuild()) {
+    log('Compiling runtime with', cyan('browserify'));
+  }
   return compile(/* watch */ watch);
 }
 
@@ -484,6 +490,11 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       .then(() => {
         if (UNMINIFIED_TARGETS.includes(destFilename)) {
           return enableLocalTesting(`${destDir}/${destFilename}`);
+        }
+      })
+      .then(() => {
+        if (isTravisBuild()) {
+          process.stdout.write('.');
         }
       });
   }
