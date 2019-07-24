@@ -140,8 +140,7 @@ export function getAllowedTags(doc) {
   // Sanitize dummy markup so that the hook is invoked.
   DomPurify.sanitize('<p></p>');
   // Remove any blacklisted tags.
-  const tags = blacklistedTags(doc);
-  Object.keys(tags).forEach(tag => {
+  Object.keys(blacklistedTags(doc)).forEach(tag => {
     delete allowedTags[tag];
   });
   // Pops the last hook added.

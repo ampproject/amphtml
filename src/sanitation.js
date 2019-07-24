@@ -279,11 +279,13 @@ export function isValidAttr(
     return false;
   }
 
+  const isEmail = isAmp4Email(doc);
+
   // Remove blacklisted attributes from specific tags e.g. input[formaction].
   const attrBlacklist = Object.assign(
     map(),
     BLACKLISTED_TAG_SPECIFIC_ATTRS,
-    isAmp4Email(doc) ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS : {}
+    isEmail ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS : {}
   )[tagName];
   if (attrBlacklist && attrBlacklist.indexOf(attrName) != -1) {
     return false;
@@ -294,7 +296,7 @@ export function isValidAttr(
   const attrValueBlacklist = Object.assign(
     map(),
     BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES,
-    isAmp4Email(doc) ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES : {}
+    isEmail ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES : {}
   )[tagName];
   if (attrValueBlacklist) {
     const blacklistedValuesRegex = attrValueBlacklist[attrName];
