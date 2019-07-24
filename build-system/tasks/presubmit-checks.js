@@ -178,7 +178,7 @@ const forbiddenTerms = {
   'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/action-impl.js',
       'src/service/core-services.js',
       'src/service/standard-actions-impl.js',
@@ -259,7 +259,7 @@ const forbiddenTerms = {
   'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/url-replacements-impl.js',
     ],
@@ -268,7 +268,7 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
-      'src/inabox/amp-inabox.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/viewer-impl.js',
     ],
@@ -302,7 +302,7 @@ const forbiddenTerms = {
   'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
