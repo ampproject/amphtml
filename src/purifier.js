@@ -24,9 +24,9 @@ import {
   isValidAttr,
   markElementForDiffing,
 } from './sanitation';
+import {dev, user} from './log';
 import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
-import {user} from './log';
 import purify from 'dompurify/dist/purify.es';
 
 /**
@@ -174,17 +174,19 @@ function addPurifyHooks(purifier, doc) {
     }
     // Set `target` attribute for <a> tags if necessary.
     if (tagName === 'a') {
-      if (node.hasAttribute('href') && !node.hasAttribute('target')) {
-        node.setAttribute('target', '_top');
+      const element = dev().assertElement(node);
+      if (element.hasAttribute('href') && !element.hasAttribute('target')) {
+        element.setAttribute('target', '_top');
       }
     }
     // Allow certain tags if they have an attribute with a whitelisted value.
     const whitelist = WHITELISTED_TAGS_BY_ATTRS[tagName];
     if (whitelist) {
       const {attribute, values} = whitelist;
+      const element = dev().assertElement(node);
       if (
-        node.hasAttribute(attribute) &&
-        values.includes(node.getAttribute(attribute))
+        element.hasAttribute(attribute) &&
+        values.includes(element.getAttribute(attribute))
       ) {
         allowedTags[tagName] = true;
         allowedTagsChanges.push(tagName);
@@ -206,17 +208,17 @@ function addPurifyHooks(purifier, doc) {
   };
 
   /**
-   * @param {!Node} node
+   * @param {!Element} element
    * @param {{attrName: string, attrValue: string, allowedAttributes: !Object<string, boolean>}} data
    */
-  const uponSanitizeAttribute = function(node, data) {
-    // Beware of DOM Clobbering when using properties or functions on `node`.
+  const uponSanitizeAttribute = function(element, data) {
+    // Beware of DOM Clobbering when using properties or functions on `element`.
     // DOMPurify checks a few of these for its internal usage (e.g. `nodeName`),
     // but not others that may be used in custom hooks.
     // See https://github.com/cure53/DOMPurify/wiki/Security-Goals-&-Threat-Model#security-goals
     // and https://github.com/cure53/DOMPurify/blob/master/src/purify.js#L527.
 
-    const tagName = node.nodeName.toLowerCase();
+    const tagName = element.nodeName.toLowerCase();
     const {attrName} = data;
     let {attrValue} = data;
     allowedAttributes = data.allowedAttributes;
@@ -263,12 +265,12 @@ function addPurifyHooks(purifier, doc) {
     // after sanitization, which fails because `[]` are not valid attr chars.
     if (bindingType === BindingType.CLASSIC) {
       const property = attrName.substring(1, attrName.length - 1);
-      node.setAttribute(`${BIND_PREFIX}${property}`, attrValue);
+      element.setAttribute(`${BIND_PREFIX}${property}`, attrValue);
     }
     if (bindingType !== BindingType.NONE) {
       // Set a custom attribute to mark this element as containing a binding.
       // This is an optimization that obviates the need for DOM scan later.
-      node.setAttribute('i-amphtml-binding', '');
+      element.setAttribute('i-amphtml-binding', '');
     }
 
     if (
@@ -297,11 +299,11 @@ function addPurifyHooks(purifier, doc) {
   };
 
   /**
-   * @param {!Node} node
+   * @param {!Element} element
    * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
    */
-  const afterSanitizeAttributes = function(node) {
-    markElementForDiffing(node, () => String(KEY_COUNTER++));
+  const afterSanitizeAttributes = function(element) {
+    markElementForDiffing(element, () => String(KEY_COUNTER++));
 
     // DOMPurify doesn't have a tag-specific attribute whitelist API and
     // `allowedAttributes` has a per-invocation scope, so we need to undo
