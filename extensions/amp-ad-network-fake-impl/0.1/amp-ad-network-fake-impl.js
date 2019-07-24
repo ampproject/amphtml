@@ -16,8 +16,8 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
-import {parseJson} from '../../../src/json';
 import {dict} from '../../../src/utils/object';
+import {parseJson} from '../../../src/json';
 import {startsWith} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
 
