@@ -22,7 +22,7 @@ const {gitCommitHash} = require('../git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../app-utils');
 const {travisBuildNumber} = require('../travis');
 
-const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/probot/v0/pr-deploy/';
+const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
 const results = new Map()
   .set('success', 0)
   .set('errored', 1)
