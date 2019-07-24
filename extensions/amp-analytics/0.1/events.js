@@ -1503,7 +1503,7 @@ export class VisibilityTracker extends EventTracker {
     // to give developers control over the behavior, and the unload listener
     // interferes with it. To allow publishers to use the default BFCache
     // behavior, we should not add an unload listener.
-    if (!'onpagehide' in window) {
+    if (!this.supportsPageHide_()) {
       win.addEventListener(
         'unload',
         (unloadListener = () => {
@@ -1528,6 +1528,18 @@ export class VisibilityTracker extends EventTracker {
       })
     );
     return deferred.promise;
+  }
+
+  /**
+   * Detect support for the pagehide event.
+   * IE<=10 and Opera Mini do not support the pagehide event and
+   * possibly others, so we feature-detect support with this method.
+   * This is in a stubbable method for testing.
+   * @return {boolean}
+   * @private visible for testing
+   */
+  supportsPageHide_() {
+    return 'onpagehide' in this.root.ampdoc.win;
   }
 
   /**
