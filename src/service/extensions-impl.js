@@ -19,7 +19,6 @@ import {
   ExperimentInfo, // eslint-disable-line no-unused-vars
   getExperimentBranch,
   isExperimentOn,
-  randomlySelectUnsetExperiments,
 } from '../experiments';
 import {Services} from '../services';
 import {
@@ -458,8 +457,8 @@ export class Extensions {
 
     // Install necessary polyfills.
     installPolyfillsInChildWindow(parentWin, childWin);
+
     // Install runtime styles.
-    this.maybeSelectFieCssExperiment(this.win);
     installStylesForDoc(
       ampdoc,
       isExperimentOn(this.win, 'fie-css-cleanup') &&
@@ -520,7 +519,6 @@ export class Extensions {
     installPolyfillsInChildWindow(parentWin, childWin);
 
     // Install runtime styles.
-    this.maybeSelectFieCssExperiment(this.win);
     installStylesLegacy(
       childWin.document,
       isExperimentOn(this.win, 'fie-css-cleanup') &&
@@ -597,19 +595,6 @@ export class Extensions {
       promises.push(promise);
     });
     return Promise.all(promises);
-  }
-
-  /**
-   * Select the experiment branch for fie-css-cleanup if necessary.
-   * @param {!Window} win
-   */
-  maybeSelectFieCssExperiment(win) {
-    const experimentInfoMap = /** @type {!Object<string, !ExperimentInfo>} */ ({});
-    experimentInfoMap['fie-css-cleanup'] = {
-      isTrafficEligible: () => true,
-      branches: [FIE_CSS_CLEANUP_EXP.control, FIE_CSS_CLEANUP_EXP.experiment],
-    };
-    randomlySelectUnsetExperiments(win, experimentInfoMap);
   }
 
   /**
