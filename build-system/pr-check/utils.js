@@ -58,37 +58,6 @@ const GIT_BRANCH_URL =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch';
 
 /**
- * Checks if the PR branch was forked from `master`
- * @param {string} fileName
- * @return {boolean}
- */
-function verifyBranchCreationPoint(fileName) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  const branchCreationPoint = gitBranchCreationPoint();
-  if (!branchCreationPoint) {
-    console.error(
-      fileLogPrefix,
-      colors.red('ERROR:'),
-      'Could not find a common ancestor for',
-      colors.cyan(gitBranchName()),
-      'and',
-      colors.cyan('master') + '. Was this PR branch properly forked?'
-    );
-    console.error(
-      fileLogPrefix,
-      colors.yellow('NOTE:'),
-      'To fix this, rebase your branch on',
-      colors.cyan('master') +
-        ', or recreate it by following the instructions at',
-      colors.cyan(GIT_BRANCH_URL) + '.'
-    );
-
-    return false;
-  }
-  return true;
-}
-
-/**
  * Prints a summary of files changed by, and commits included in the PR.
  * @param {string} fileName
  */
@@ -114,13 +83,36 @@ function printChangeSummary(fileName) {
   console.log(filesChanged);
 
   const branchCreationPoint = gitBranchCreationPoint();
-  console.log(
-    `${fileLogPrefix} Commit log since branch`,
-    `${colors.cyan(gitBranchName())} was forked from`,
-    `${colors.cyan('master')} at`,
-    `${colors.cyan(shortSha(branchCreationPoint))}:`
-  );
-  console.log(gitDiffCommitLog() + '\n');
+  if (branchCreationPoint) {
+    console.log(
+      `${fileLogPrefix} Commit log since branch`,
+      `${colors.cyan(gitBranchName())} was forked from`,
+      `${colors.cyan('master')} at`,
+      `${colors.cyan(shortSha(branchCreationPoint))}:`
+    );
+    console.log(gitDiffCommitLog() + '\n');
+  } else {
+    console.error(
+      fileLogPrefix,
+      colors.yellow('WARNING:'),
+      'Could not find a common ancestor for',
+      colors.cyan(gitBranchName()),
+      'and',
+      colors.cyan('master') + '. (This can happen with older PR branches.)'
+    );
+    console.error(
+      fileLogPrefix,
+      colors.yellow('NOTE 1:'),
+      'If this causes unexpected test failures, try rebasing the PR branch on',
+      colors.cyan('master') + '.'
+    );
+    console.error(
+      fileLogPrefix,
+      colors.yellow('NOTE 2:'),
+      "If rebasing doesn't work, you may have to recreate the branch. See",
+      colors.cyan(GIT_BRANCH_URL) + '.\n'
+    );
+  }
 }
 
 /**
@@ -372,5 +364,4 @@ module.exports = {
   timedExecOrDie,
   uploadBuildOutput,
   uploadDistOutput,
-  verifyBranchCreationPoint,
 };

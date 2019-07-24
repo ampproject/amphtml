@@ -30,7 +30,6 @@ const {
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
   uploadDistOutput,
-  verifyBranchCreationPoint,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
@@ -55,11 +54,6 @@ async function main() {
     timedExecOrDie('gulp bundle-size --on_push_build');
     uploadDistOutput(FILENAME);
   } else {
-    if (!verifyBranchCreationPoint(FILENAME)) {
-      stopTimer(FILENAME, FILENAME, startTime);
-      process.exitCode = 1;
-      return;
-    }
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
     if (
