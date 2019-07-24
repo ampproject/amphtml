@@ -457,6 +457,11 @@ export const adConfig = {
     ],
   },
 
+  'forkmedia': {
+    prefetch: 'https://delivery.forkcdn.com/rappio/inread/v1.1/amp/inread.js',
+    renderStartImplemented: true,
+  },
+
   'freewheel': {
     prefetch: 'https://cdn.stickyadstv.com/prime-time/fw-amp.min.js',
     renderStartImplemented: true,
@@ -562,7 +567,12 @@ export const adConfig = {
   'kuadio': {},
 
   'lentainform': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.lentainform.com',
+      'https://servicer.lentainform.com',
+      'https://s-img.lentainform.com',
+    ],
   },
 
   'ligatus': {
@@ -688,6 +698,10 @@ export const adConfig = {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
     renderStartImplemented: true,
+  },
+
+  'nativeroll': {
+    prefetch: 'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
   },
 
   'nativo': {

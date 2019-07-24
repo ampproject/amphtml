@@ -30,6 +30,7 @@ import {
 import {computedStyle} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getElementLayoutBox} from './utils';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -122,7 +123,7 @@ export class Placement {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(anchorElement);
 
     /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
@@ -167,11 +168,9 @@ export class Placement {
    * @return {!Promise<number>}
    */
   getEstimatedPosition() {
-    return this.resources_
-      .getElementLayoutBox(this.anchorElement_)
-      .then(layoutBox => {
-        return this.getEstimatedPositionFromAchorLayout_(layoutBox);
-      });
+    return getElementLayoutBox(this.anchorElement_).then(layoutBox => {
+      return this.getEstimatedPositionFromAchorLayout_(layoutBox);
+    });
   }
 
   /**
@@ -263,8 +262,7 @@ export class Placement {
         viewportHeight
       );
       let margins = cloneLayoutMarginsChangeDef(this.margins_);
-      return Services.resourcesForDoc(this.anchorElement_)
-        .getElementLayoutBox(this.anchorElement_)
+      return getElementLayoutBox(this.anchorElement_)
         .then(layoutBox => {
           const direction = computedStyle(this.ampdoc.win, this.anchorElement_)[
             'direction'

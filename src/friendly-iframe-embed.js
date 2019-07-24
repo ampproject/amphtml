@@ -218,9 +218,10 @@ export function installFriendlyIframeEmbed(
 
   return readyPromise.then(() => {
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
+    const signals = spec.host && spec.host.signals();
     const ampdoc =
       ampdocFieExperimentOn && ampdocService
-        ? ampdocService.installFieDoc(spec.url, childWin)
+        ? ampdocService.installFieDoc(spec.url, childWin, {signals})
         : null;
     const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise, ampdoc);
     iframe[EMBED_PROP] = embed;
@@ -341,6 +342,8 @@ export function mergeHtmlForTesting(spec) {
  * The friendly iframe is managed by the top-level AMP Runtime. When it's
  * destroyed, the `destroy` method must be called to free up the shared
  * resources.
+ *
+ * @visibleForTesting
  */
 export class FriendlyIframeEmbed {
   /**
@@ -379,7 +382,11 @@ export class FriendlyIframeEmbed {
     this.visibilityObservable_ = new Observable();
 
     /** @private @const */
-    this.signals_ = this.host ? this.host.signals() : new Signals();
+    this.signals_ = this.ampdoc
+      ? this.ampdoc.signals()
+      : this.host
+      ? this.host.signals()
+      : new Signals();
 
     /** @private @const {!Promise} */
     this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
@@ -394,6 +401,9 @@ export class FriendlyIframeEmbed {
   destroy() {
     Services.resourcesForDoc(this.iframe).removeForChildWindow(this.win);
     disposeServicesForEmbed(this.win);
+    if (this.ampdoc) {
+      this.ampdoc.dispose();
+    }
   }
 
   /**
@@ -528,7 +538,7 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * @return {!./service/resources-impl.Resources}
+   * @return {!./service/resources-impl.ResourcesDef}
    * @private
    */
   getResources_() {

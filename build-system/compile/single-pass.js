@@ -44,6 +44,7 @@ const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
+const {formatExtractedMessages} = require('./log-messages');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
@@ -114,22 +115,14 @@ exports.getFlags = function(config) {
     language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
+    process_common_js_modules: true,
     externs: config.externs,
     define: config.define,
-    // Turn off warning for "Unknown @define" since we use define to pass
-    // args such as FORTESTING to our runner.
-    jscomp_off: ['unknownDefines'],
-    // checkVars: Demote "variable foo is undeclared" errors.
-    // moduleLoad: Demote "module not found" errors to ignore missing files
-    //     in type declarations in the swg.js bundle.
-    jscomp_warning: ['checkVars', 'moduleLoad'],
-    jscomp_error: [
-      'checkTypes',
-      'accessControls',
-      'const',
-      'constantProperty',
-      'globalThis',
-    ],
+    // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
+    // for a full list of closure's default error / warning levels.
+    jscomp_off: ['accessControls', 'unknownDefines'],
+    jscomp_warning: ['checkTypes', 'checkVars', 'moduleLoad'],
+    jscomp_error: ['const', 'constantProperty', 'globalThis'],
     hide_warnings_for: config.hideWarningsFor,
   };
   if (argv.pretty_print) {
@@ -323,9 +316,7 @@ exports.getGraph = function(entryModules, config) {
     // directly and which we don't want to apply during deps finding.
     .transform(babelify, {
       compact: false,
-      plugins: [
-        require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
-      ],
+      plugins: ['transform-es2015-modules-commonjs'],
     });
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
@@ -563,6 +554,7 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
     .then(thirdPartyConcat)
+    .then(formatExtractedMessages)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       throw err;
@@ -679,7 +671,7 @@ function postPrepend(extension, prependContents) {
 function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
-    return gulp
+    gulp
       .src(srcs, {base: transformDir})
       .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
       .pipe(sourcemaps.init({loadMaps: true}))

@@ -138,6 +138,7 @@ import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
+import {forkmedia} from '../ads/forkmedia';
 import {freewheel} from '../ads/freewheel';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
@@ -180,6 +181,7 @@ import {monetizer101} from '../ads/monetizer101';
 import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
+import {nativeroll} from '../ads/nativeroll';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
 import {nend} from '../ads/nend';
@@ -280,6 +282,7 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  forkmedia: true,
   idealmedia: true,
   jubna: true,
   kuadio: true,
@@ -287,6 +290,7 @@ const AMP_EMBED_ALLOWED = {
   mgid: true,
   miximedia: true,
   mywidget: true,
+  lentainform: true,
   opinary: true,
   outbrain: true,
   plista: true,
@@ -394,6 +398,7 @@ register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
 register('fluct', fluct);
+register('forkmedia', forkmedia);
 register('freewheel', freewheel);
 register('fusion', fusion);
 register('genieessp', genieessp);
@@ -440,6 +445,7 @@ register('monetizer101', monetizer101);
 register('mox', mox);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
+register('nativeroll', nativeroll);
 register('nativo', nativo);
 register('navegg', navegg);
 register('nend', nend);

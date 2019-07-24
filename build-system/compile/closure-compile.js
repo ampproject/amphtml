@@ -17,7 +17,6 @@
 
 const closureCompiler = require('google-closure-compiler');
 const colors = require('ansi-colors');
-const {closureNailgunPort} = require('../tasks/nailgun');
 const {highlight} = require('cli-highlight');
 
 let compilerErrors = '';
@@ -37,21 +36,21 @@ function formatClosureCompilerError(message) {
   return message;
 }
 
-exports.handleCompilerError = function(outputFilename) {
+function handleCompilerError(outputFilename) {
   handleError(
     colors.red('Compilation failed for ') +
       colors.cyan(outputFilename) +
       colors.red(':')
   );
-};
+}
 
-exports.handleTypeCheckError = function() {
+function handleTypeCheckError() {
   handleError(colors.red('Type checking failed:'));
-};
+}
 
-exports.handleSinglePassCompilerError = function() {
+function handleSinglePassCompilerError() {
   handleError(colors.red('Single pass compilation failed:'));
-};
+}
 
 /**
  * Prints an error message when compilation fails
@@ -65,9 +64,10 @@ function handleError(message) {
 
 /**
  * @param {Array<string>} compilerOptions
+ * @param {?string} nailgunPort
  * @return {stream.Writable}
  */
-exports.gulpClosureCompile = function(compilerOptions) {
+function gulpClosureCompile(compilerOptions, nailgunPort) {
   const initOptions = {
     extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
   };
@@ -78,10 +78,8 @@ exports.gulpClosureCompile = function(compilerOptions) {
 
   if (compilerOptions.includes('SINGLE_FILE_COMPILATION=true')) {
     // For single-pass compilation, use the default compiler.jar
-    // TODO(rsimha): Use the native compiler instead of compiler.jar once a fix
-    // is checked in for https://github.com/google/closure-compiler/issues/3041
     closureCompiler.compiler.JAR_PATH = require.resolve(
-      '../../third_party/closure-compiler/compiler.jar'
+      '../../node_modules/google-closure-compiler-java/compiler.jar'
     );
   } else {
     // On Mac OS and Linux, speed up compilation using nailgun.
@@ -89,7 +87,7 @@ exports.gulpClosureCompile = function(compilerOptions) {
     if (process.platform == 'darwin' || process.platform == 'linux') {
       compilerOptions = [
         '--nailgun-port',
-        closureNailgunPort,
+        nailgunPort,
         'org.ampproject.AmpCommandLineRunner',
         '--',
       ].concat(compilerOptions);
@@ -98,10 +96,17 @@ exports.gulpClosureCompile = function(compilerOptions) {
     } else {
       // For other platforms, use AMP's custom runner.jar
       closureCompiler.compiler.JAR_PATH = require.resolve(
-        '../runner/dist/runner.jar'
+        `../runner/dist/${nailgunPort}/runner.jar`
       );
     }
   }
 
   return closureCompiler.gulp(initOptions)(compilerOptions, pluginOptions);
+}
+
+module.exports = {
+  gulpClosureCompile,
+  handleCompilerError,
+  handleSinglePassCompilerError,
+  handleTypeCheckError,
 };
