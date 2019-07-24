@@ -28,6 +28,7 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
+const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
@@ -374,7 +375,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (options.typeCheckOnly) {
       return gulp
         .src(srcs, {base: '.'})
-        .pipe(gulpClosureCompile(compilerOptionsArray))
+        .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
         .on('error', err => {
           handleTypeCheckError();
           reject(err);
@@ -388,7 +389,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .src(gulpSrcs, {base: gulpBase})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(gulpClosureCompile(compilerOptionsArray))
+        .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
         .on('error', err => {
           handleCompilerError(outputFilename);
           reject(err);

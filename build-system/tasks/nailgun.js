@@ -21,6 +21,7 @@ const sleep = require('sleep-promise');
 const {exec, execScriptAsync, getStdout} = require('../exec');
 const {green, red, cyan, yellow} = colors;
 const {isTravisBuild} = require('../travis');
+const {maybeGenerateRunner} = require('./generate-runner');
 
 // Used to start and stop the Closure nailgun server
 let nailgunRunnerReplacer;
@@ -30,9 +31,9 @@ const nailgunRunner = require.resolve(
 const nailgunServer = require.resolve(
   '../../third_party/nailgun/nailgun-server.jar'
 );
-const customRunner = require.resolve('../runner/dist/runner.jar');
 const DEFAULT_NAILGUN_PORT = '2113';
-const CLOSURE_NAILGUN_PORT = '2114';
+const CHECK_TYPES_NAILGUN_PORT = '2114';
+const DIST_NAILGUN_PORT = '2115';
 const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
 
 /**
@@ -78,7 +79,10 @@ async function startNailgunServer(port, detached) {
     return;
   }
 
+  await maybeGenerateRunner(port);
+
   // Start up the nailgun server after cleaning up old instances (if any)
+  const customRunner = require.resolve(`../runner/dist/${port}/runner.jar`);
   const startNailgunServerCmd =
     'java -XX:+TieredCompilation -server -cp ' +
     `${nailgunServer}:${customRunner} ` +
@@ -161,7 +165,8 @@ async function nailgunStop() {
 }
 
 module.exports = {
-  closureNailgunPort: CLOSURE_NAILGUN_PORT,
+  checkTypesNailgunPort: CHECK_TYPES_NAILGUN_PORT,
+  distNailgunPort: DIST_NAILGUN_PORT,
   nailgunStart,
   nailgunStop,
   startNailgunServer,
