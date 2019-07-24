@@ -27,7 +27,6 @@ const defaultPlugins = [
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
-  getReplacePlugin(),
 ];
 
 const esmRemovedImports = {
