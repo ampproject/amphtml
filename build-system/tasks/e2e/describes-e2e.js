@@ -154,16 +154,17 @@ async function createDriver(browserName, args) {
  * @return {!Array<string>}
  */
 function getChromeArgs(config) {
-  const args = ['--no-sandbox', '--disable-gpu'];
+  const args = [
+    '--no-sandbox',
+    '--disable-gpu',
+    '--remote-debugging-port=9222', // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
+    '--disable-dev-shm-usage', // https://stackoverflow.com/q/50642308
+  ];
 
   // TODO(cvializ,estherkim,sparhami):
   // figure out why headless causes more flakes
   if (config.headless) {
     args.push('--headless');
-    // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
-    args.push('--remote-debugging-port=9222');
-    // https://stackoverflow.com/q/50642308
-    args.push('--disable-dev-shm-usage');
   }
   return args;
 }
