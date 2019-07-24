@@ -126,6 +126,7 @@ const forbiddenTerms = {
       'build-system/tasks/check-exact-versions.js',
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
+      'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
