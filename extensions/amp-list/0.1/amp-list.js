@@ -115,6 +115,12 @@ export class AmpList extends AMP.BaseElement {
      */
     this.initialSrc_ = null;
 
+    /**
+     * Does the amp-list have initial content that's not a placeholder?
+     * @private {boolean}
+     */
+    this.hasInitialContent_ = false;
+
     /** @private {?../../../extensions/amp-bind/0.1/bind-impl.Bind} */
     this.bind_ = null;
 
@@ -181,10 +187,14 @@ export class AmpList extends AMP.BaseElement {
     if (this.element.hasAttribute('diffable')) {
       // Set container to the initial content, if it exists. This allows
       // us to DOM diff with the rendered result.
-      this.container_ = scopedQuerySelector(
+      const initialContent = scopedQuerySelector(
         this.element,
         '> div[role=list]:not([placeholder]):not([fallback])'
       );
+      if (initialContent) {
+        this.container_ = initialContent;
+        this.hasInitialContent_ = true;
+      }
     }
     if (!this.container_) {
       this.container_ = this.createContainer_();
@@ -830,13 +840,20 @@ export class AmpList extends AMP.BaseElement {
     const newContainer = this.createContainer_();
     this.addElementsToContainer_(elements, newContainer);
 
-    // TODO(choumx): Only do this for initial content diffing.
-    // amp-mustache starts at 1 and increments, so start at -1 and decrement to
-    // guarantee uniqueness.
-    let key = -1;
-    this.container_.querySelectorAll('.i-amphtml-element').forEach(element => {
-      markElementForDiffing(element, () => String(key--));
-    });
+    // Typically, diff-marking elements happens during template sanitization.
+    // This obviously doesn't apply to initial content, so we mark them manually
+    // here to enable diffing in the first render.
+    if (this.hasInitialContent_) {
+      // amp-mustache starts at 1 and increments, so start at -1 and decrement
+      // to guarantee uniqueness.
+      let key = -1;
+      // We only need to mark AMP elements for diffing because bindings in
+      // initial content are inert.
+      const elements = this.container_.querySelectorAll('.i-amphtml-element');
+      elements.forEach(element => {
+        markElementForDiffing(element, () => String(key--));
+      });
+    }
 
     const ignored = setDOM(this.container_, newContainer);
 
