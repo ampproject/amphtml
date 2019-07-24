@@ -113,7 +113,6 @@ let ExtensionHolderDef;
  */
 const FIE_CSS_CLEANUP_EXP = {
   branch: 'fie-css-cleanup',
-  control: '21064213',
   experiment: '21064214',
 };
 
