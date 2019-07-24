@@ -140,7 +140,7 @@ describe
             env.iframe.style.height = '100vh';
           });
 
-          it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
+          it('should layout amp-img, amp-pixel, amp-analytics', () => {
             // See amp4test.js for creative content
             return testAmpComponentsBTF(env.win);
           });
