@@ -72,7 +72,7 @@ function verifyBranchCreationPoint(fileName) {
       'Could not find a common ancestor for',
       colors.cyan(gitBranchName()),
       'and',
-      colors.cyan('master') + '. Was this PR branch properly forked?'
+      colors.cyan('master') + '. Perhaps this PR branch is really old?'
     );
     console.error(
       fileLogPrefix,
