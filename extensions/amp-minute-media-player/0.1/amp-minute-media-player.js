@@ -52,7 +52,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     this.iframe_ = null;
 
     /** @private {string} */
-    this.contentType_ = null;
+    this.contentType_ = '';
 
     /** @private {?string} */
     this.playerId_ = null;
