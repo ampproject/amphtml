@@ -28,7 +28,6 @@ const {
   stopTimer,
   stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
-  verifyBranchCreationPoint,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
@@ -50,10 +49,6 @@ function main() {
     timedExecOrDie('gulp validator');
     timedExecOrDie('gulp validator-webui');
   } else {
-    if (!verifyBranchCreationPoint(FILENAME)) {
-      stopTimedJob(FILENAME, startTime);
-      return;
-    }
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
     if (
