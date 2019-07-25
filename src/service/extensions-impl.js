@@ -461,7 +461,7 @@ export class Extensions {
     installStylesForDoc(
       ampdoc,
       isExperimentOn(this.win, 'fie-css-cleanup') &&
-        getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.experiment) ===
+        getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.branch) ===
           FIE_CSS_CLEANUP_EXP.experiment
         ? ampSharedCss
         : ampDocCss + ampSharedCss,
@@ -521,7 +521,7 @@ export class Extensions {
     installStylesLegacy(
       childWin.document,
       isExperimentOn(this.win, 'fie-css-cleanup') &&
-        getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.experiment) ===
+        getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.branch) ===
           FIE_CSS_CLEANUP_EXP.experiment
         ? ampSharedCss
         : ampDocCss + ampSharedCss,
