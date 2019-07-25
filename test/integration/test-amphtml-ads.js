@@ -231,7 +231,7 @@ describe
           env.win.document.body.removeChild(iframe);
         });
 
-        it.skip(
+        it(
           'should layout amp-img, amp-pixel, ' +
             'amp-analytics within friendly frame',
           () => {
@@ -240,7 +240,7 @@ describe
           }
         );
 
-        it.skip(
+        it(
           'should layout amp-img, amp-pixel, ' +
             'amp-analytics within safe frame',
           () => {
