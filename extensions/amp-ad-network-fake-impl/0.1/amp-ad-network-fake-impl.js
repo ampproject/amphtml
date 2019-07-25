@@ -29,7 +29,9 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
-    this.reorderHeadTransformer = new ExternalReorderHeadTransformer();
+
+    /** @private {./external-reorder-head-transformer.ExternalReorderHeadTransformer} */
+    this.reorderHeadTransformer_ = new ExternalReorderHeadTransformer();
   }
 
   /** @override */
@@ -96,7 +98,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    */
   transformCreative_(source) {
     const doc = new DOMParser().parseFromString(source, 'text/html');
-    this.reorderHeadTransformer.reorderHead(doc.head);
+    this.reorderHeadTransformer_.reorderHead(doc.head);
     const metadata = this.generateMetadata_(doc);
     const root = doc.documentElement;
 

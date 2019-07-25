@@ -89,16 +89,16 @@ export class ExternalReorderHeadTransformer {
         const child = head.children.item(i);
         switch (child.tagName) {
           case 'META':
-            this.registerMeta(child);
+            this.registerMeta_(child);
             break;
           case 'SCRIPT':
-            this.registerScript(child);
+            this.registerScript_(child);
             break;
           case 'STYLE':
-            this.registerStyle(child);
+            this.registerStyle_(child);
             break;
           case 'LINK':
-            this.registerLink(child);
+            this.registerLink_(child);
             break;
           case 'NOSCRIPT':
             this.headComponents.noscript = child;
@@ -112,7 +112,7 @@ export class ExternalReorderHeadTransformer {
       for (let i = 0; i < head.children.length; i++) {
         head.removeChild(head.children.item(i));
       }
-      this.repopulate(head);
+      this.repopulate_(head);
     }
 
     return head;
@@ -123,7 +123,7 @@ export class ExternalReorderHeadTransformer {
    * @param {Element} element
    *
    */
-  registerMeta(element) {
+  registerMeta_(element) {
     if (element.hasAttribute('charset')) {
       this.headComponents.metaCharset = element;
       return;
@@ -139,7 +139,7 @@ export class ExternalReorderHeadTransformer {
    * @param {Element} element
    *
    */
-  registerScript(element) {
+  registerScript_(element) {
     const src = element.getAttribute('src');
     const isAsync = element.hasAttribute('async');
     const isExtension =
@@ -195,7 +195,7 @@ export class ExternalReorderHeadTransformer {
    * @param {Element} element
    *
    */
-  registerStyle(element) {
+  registerStyle_(element) {
     if (element.hasAttribute('amp-runtime')) {
       this.headComponents.styleAmpRuntime = element;
       return;
@@ -219,7 +219,7 @@ export class ExternalReorderHeadTransformer {
    * @param {Element} element
    *
    */
-  registerLink(element) {
+  registerLink_(element) {
     const rel = element.getAttribute('rel');
     if (rel == 'stylesheet') {
       if (
@@ -250,7 +250,7 @@ export class ExternalReorderHeadTransformer {
    * Add components back to head in specified order
    * @param {Element} head
    */
-  repopulate(head) {
+  repopulate_(head) {
     this.appendIfNotNull_(head, this.headComponents.metaCharset);
     this.appendIfNotNull_(head, this.headComponents.linkStylesheetRuntimeCss);
     this.appendIfNotNull_(head, this.headComponents.styleAmpRuntime);
