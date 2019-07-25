@@ -730,13 +730,25 @@
     },
     {
       "url": "examples/visual-tests/amp-ad/amp-ad.html",
-      "name": "AMP ad",
+      "name": "amp-ad: creative",
       "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js",
       "no_base_test": true
     },
     {
-      "url": "examples/visual-tests/amp-ad/amp-inabox.html",
-      "name": "AMP Inabox ad",
+      "url": "examples/visual-tests/amp-ad/amp-fie-text.html",
+      "name": "amp-ad: friendly iframe text ad",
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js",
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-fie-image.html",
+      "name": "amp-ad: friendly iframe image ad",
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js",
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-inabox-creative.html",
+      "name": "amp-ad: inabox creative",
       "loading_complete_selectors": [
         ".view", ".activeview"
       ],
@@ -744,27 +756,15 @@
       "no_base_test": true
     },
     {
-      "url": "examples/visual-tests/amp-ad/amp-fie-doubleclick-text.html",
-      "name": "amp-ad: friendly iframe real text ad",
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-fie-doubleclick.js",
+      "url": "examples/visual-tests/amp-ad/amp-inabox-text.html",
+      "name": "amp-ad: inabox text ad",
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js",
       "no_base_test": true
     },
     {
-      "url": "examples/visual-tests/amp-ad/amp-fie-doubleclick-image.html",
-      "name": "amp-ad: friendly iframe real image ad",
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-fie-doubleclick.js",
-      "no_base_test": true
-    },
-    {
-      "url": "examples/visual-tests/amp-ad/amp-inabox-doubleclick-text.html",
-      "name": "amp-ad: inabox real text ad",
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox-doubleclick.js",
-      "no_base_test": true
-    },
-    {
-      "url": "examples/visual-tests/amp-ad/amp-inabox-doubleclick-image.html",
-      "name": "amp-ad: inabox real image ad",
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox-doubleclick.js",
+      "url": "examples/visual-tests/amp-ad/amp-inabox-image.html",
+      "name": "amp-ad: inabox image ad",
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js",
       "no_base_test": true
     }
   ]
