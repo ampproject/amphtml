@@ -16,8 +16,6 @@
 
 import {Deferred} from '../utils/promise';
 import {
-  ExperimentInfo, // eslint-disable-line no-unused-vars
-  getExperimentBranch,
   isExperimentOn,
 } from '../experiments';
 import {Services} from '../services';
