@@ -46,7 +46,7 @@ import {
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {FIE_CSS_CLEANUP_EXP} from '../../../src/service/extensions-impl';
+import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
 import {Navigation} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {
