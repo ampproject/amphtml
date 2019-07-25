@@ -32,19 +32,15 @@ FAIL
 |    <!-- Invalid: Missing script, test is to see if the error message is OK. -->
 |    <amp-carousel layout=fill></amp-carousel>
 >>   ^~~~~~~~~
-amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:32:2 The specified layout 'FILL' is not supported by tag 'AMP-CAROUSEL [lightbox] [type=carousel]'. (see https://amp.dev/documentation/components/amp-carousel) [AMP_LAYOUT_PROBLEM]
+amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:32:2 The specified layout 'FILL' is not supported by tag 'AMP-CAROUSEL [type=carousel]'. (see https://amp.dev/documentation/components/amp-carousel) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:32:2 The tag 'AMP-CAROUSEL [lightbox] [type=carousel]' requires including the 'amp-carousel' extension JavaScript. (see https://amp.dev/documentation/components/amp-carousel) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
->>   ^~~~~~~~~
-amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:32:2 The tag 'AMP-CAROUSEL [lightbox] [type=carousel]' requires including the 'amp-lightbox-gallery' extension JavaScript. (see https://amp.dev/documentation/components/amp-carousel) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:32:2 The tag 'AMP-CAROUSEL [type=carousel]' requires including the 'amp-carousel' extension JavaScript. (see https://amp.dev/documentation/components/amp-carousel) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-carousel width="600" height="522" layout="responsive" type="slides" controls></amp-carousel>
 >>   ^~~~~~~~~
-amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:33:2 The specified layout 'RESPONSIVE' is not supported by tag 'AMP-CAROUSEL [lightbox] [type=carousel]'. (see https://amp.dev/documentation/components/amp-carousel) [AMP_LAYOUT_PROBLEM]
+amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:33:2 The specified layout 'RESPONSIVE' is not supported by tag 'AMP-CAROUSEL [type=carousel]'. (see https://amp.dev/documentation/components/amp-carousel) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:33:2 The attribute 'type' in tag 'AMP-CAROUSEL [lightbox] [type=carousel]' is set to the invalid value 'slides'. (see https://amp.dev/documentation/components/amp-carousel) [DISALLOWED_HTML]
+amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:33:2 The attribute 'type' in tag 'AMP-CAROUSEL [type=carousel]' is set to the invalid value 'slides'. (see https://amp.dev/documentation/components/amp-carousel) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:33:2 The tag 'AMP-CAROUSEL [lightbox] [type=carousel]' requires including the 'amp-carousel' extension JavaScript. (see https://amp.dev/documentation/components/amp-carousel) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
->>   ^~~~~~~~~
-amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:33:2 The tag 'AMP-CAROUSEL [lightbox] [type=carousel]' requires including the 'amp-lightbox-gallery' extension JavaScript. (see https://amp.dev/documentation/components/amp-carousel) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-carousel/0.1/test/validator-amp-carousel-error-msg.html:33:2 The tag 'AMP-CAROUSEL [type=carousel]' requires including the 'amp-carousel' extension JavaScript. (see https://amp.dev/documentation/components/amp-carousel) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </body>
 |  </html>

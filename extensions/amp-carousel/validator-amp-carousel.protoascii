@@ -57,6 +57,23 @@ attr_lists: {
   # <amp-bind>
   attrs: { name: "[slide]" }
 }
+# There are 4 variants here, due to two independent axis of differences:
+#  1) type=slides vs. type=carousel
+#     - type=slides is the implied default if type is unspecified. This is
+#       encoded in the rules by making type=carousel mandatory, and
+#       type=slides optional.
+#     - slides vs. carousel implies different sets up supported layouts.
+#  2) presence of `lightbox` attribute.
+#     - lightbox is only allowed in AMP html format.
+#     - lightbox implies additional reference_point requirements of the
+#       amp-lightbox children.
+# The attribute implied rules (different layouts or different children) is not
+# a feature of the validator rules engine. Thus the only supportable ruleset is
+# to implement 1 tagspec for each combination. This produces the desired rules
+# but has undesirable results for some of the error messages, as seen in some
+# of the test cases. The main issue is that since there are two tagspecs with
+# each combination, we cannot use the usual dispatch_key trick for either
+# attribute.
 tags: {  # <amp-carousel type=slides>
   html_format: AMP
   html_format: AMP4ADS
@@ -94,7 +111,6 @@ tags: {  # <amp-carousel type=carousel>
     name: "type"
     value: "carousel"
     mandatory: true
-    dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
