@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from '../services';
 import {devAssert} from '../log';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
@@ -29,6 +30,8 @@ export let AsyncResolverDef;
 /** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
 let ReplacementDef;
 
+const LOAD_EVENT_END = 'loadEventEnd';
+
 /**
  * Returns navigation timing information based on the start and end events.
  * The data for the timing events is retrieved from performance.timing API.
@@ -41,7 +44,16 @@ let ReplacementDef;
  * @return {!Promise<ResolverReturnDef>}
  */
 export function getTimingDataAsync(win, startEvent, endEvent) {
-  return loadPromise(win).then(() => {
+  let readyPromise = loadPromise(win);
+  if (startEvent === LOAD_EVENT_END || endEvent === LOAD_EVENT_END) {
+    // performance.timing.loadEventEnd returns 0 before the load event handler
+    // has terminated, that's when the load event is completed.
+    // To wait for the event handler to terminate, wait 1ms and defer to the
+    // event loop.
+    const timer = Services.timerFor(win);
+    readyPromise = readyPromise.then(() => timer.promise(1));
+  }
+  return readyPromise.then(() => {
     return getTimingDataSync(win, startEvent, endEvent);
   });
 }
