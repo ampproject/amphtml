@@ -1031,6 +1031,15 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Creates a loader logo.
+     * @return {?Element}
+     * @final @this {!Element}
+     */
+    createLoaderLogo() {
+      return this.implementation_.createLoaderLogoCallback();
+    }
+
+    /**
      * Whether the element should ever render when it is not in viewport.
      * @return {boolean|number}
      * @final @this {!Element}
@@ -1639,10 +1648,11 @@ function createBaseCustomElementClass(win) {
       }
 
       if (
+        this.layoutCount_ > 0 ||
+        this.layoutWidth_ <= 0 || // Layout is not ready or invisible
         this.loadingDisabled_ ||
         !isLoadingAllowed(this) ||
         isTooSmallForLoader(this) ||
-        this.layoutCount_ > 0 ||
         isInternalOrServiceNode(this) ||
         !isLayoutSizeDefined(this.layout_)
       ) {
@@ -1676,7 +1686,6 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.loadingContainer_) {
         const doc = this.ownerDocument;
-        const win = toWin(doc.defaultView);
         devAssert(doc);
 
         const container = htmlFor(/** @type {!Document} */ (doc))`
@@ -1684,7 +1693,7 @@ function createBaseCustomElementClass(win) {
               amp-hidden"></div>`;
 
         let loadingElement;
-        if (isNewLoaderExperimentEnabled(win)) {
+        if (isNewLoaderExperimentEnabled(this)) {
           loadingElement = createNewLoaderElement(
             this,
             this.layoutWidth_,
@@ -1902,8 +1911,8 @@ function isInternalOrServiceNode(node) {
  * @return {boolean}
  */
 function isTooSmallForLoader(element) {
-  if (isNewLoaderExperimentEnabled(toWin(element.ownerDocument.defaultView))) {
-    // New loaders experiments has its own sizing heuristics
+  // New loaders experiments has its own sizing heuristics
+  if (isNewLoaderExperimentEnabled(element)) {
     return false;
   }
 

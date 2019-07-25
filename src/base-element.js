@@ -431,6 +431,15 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to provide a svg logo that will be
+   * displayed as the loader.
+   * @return {?Element}
+   */
+  createLoaderLogoCallback() {
+    return null;
+  }
+
+  /**
    * Subclasses can override this method to opt-out of rendering the element
    * when it is not currently visible.
    * Returning a boolean allows or prevents rendering outside the viewport at

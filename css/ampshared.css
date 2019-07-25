@@ -565,11 +565,43 @@ amp-accordion > section[expanded] > :last-child {
 .i-amphtml-new-loader-logo {
   transform-origin: 60px 60px;
   opacity: 0;
+  animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in 0.6s forwards;
+}
+/* Default logo fades away, custom ones don't*/
+.i-amphtml-new-loader-logo-default {
   animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in 0.6s forwards,
-    i-amphtml-new-loader-fade-out 0.8s ease-out 1.8s forwards;
+  i-amphtml-new-loader-fade-out 0.8s ease-out 1.8s forwards;
+}
+/* Background shim */
+.i-amphtml-new-loader-shim {
+  transform-origin: 60px 60px;
+  opacity: 0;
+  fill: rgba(0, 0, 0, .6);
+  r: 36;
+  animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in 0.6s forwards;
 }
 
- /* Spinner and its segments*/
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-shim {
+  r: 24;
+}
+
+/*
+  shim forces spinner and logo fills to be white.
+  using i-amphtml-new-loader-white-on-shim and
+  i-amphtml-new-loader-transparent-on-shim each logo can customize which
+  parts become white and which parts become transparent when on a shim.
+*/
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-white-on-shim {
+  fill: #ffffff !important;
+}
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-transparent-on-shim {
+  fill: transparent !important;
+}
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-spinner-segment {
+  stroke: #ffffff !important
+}
+
+ /* Spinner and its segments */
 .i-amphtml-new-loader-spinner {
   transform-origin: 60px 60px;
   opacity: 0;
@@ -590,7 +622,10 @@ amp-accordion > section[expanded] > :last-child {
    * Small loader does not have a logo but its spinner appears at the same
    * time as the logo for the default spinner does.
    */
-  animation-delay: 0.8s;
+  animation-delay: 0.6s;
+}
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner-segment {
+  animation-delay: 1.4s, 2s;
 }
 
 .i-amphtml-new-loader-spinner-segment {
