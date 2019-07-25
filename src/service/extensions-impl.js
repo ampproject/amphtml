@@ -21,16 +21,10 @@ import {
   parseExtensionUrl,
 } from './extension-location';
 import {dev, devAssert, rethrowAsync} from '../log';
-import {
-  getAmpdoc,
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-} from '../service';
 import {getMode} from '../mode';
-import {installAmpdocServices} from './core-services';
 import {installStylesForDoc} from '../style-installer';
-import {installTimerInEmbedWindow} from './timer-impl';
 import {map} from '../utils/object';
+import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
 import {startsWith} from '../string';
 import {
   stubElementIfNotKnown,
@@ -567,42 +561,6 @@ export function stubLegacyElements(win) {
   LEGACY_ELEMENTS.forEach(name => {
     stubElementIfNotKnown(win, name);
   });
-}
-
-/**
- * Adopt predefined core services for the child window (friendly iframe).
- * @param {!Window} childWin
- * @visibleForTesting
- */
-export function installStandardServicesInEmbed(childWin) {
-  // TODO(#22733): remove when ampdoc-fie is launched.
-  const frameElement = dev().assertElement(
-    childWin.frameElement,
-    'frameElement not found for embed'
-  );
-  const standardServices = [
-    // The order of service adoptations is important.
-    Services.urlForDoc(frameElement),
-    Services.actionServiceForDoc(frameElement),
-    Services.standardActionsForDoc(frameElement),
-    Services.navigationForDoc(frameElement),
-  ];
-  const ampdoc = getAmpdoc(frameElement);
-  standardServices.forEach(service => {
-    // Static functions must be invoked on the class, not the instance.
-    service.constructor.installInEmbedWindow(childWin, ampdoc);
-  });
-  installTimerInEmbedWindow(childWin);
-}
-
-/**
- * Adopt predefined core services for the embedded ampdoc (friendly iframe).
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @visibleForTesting
- */
-export function installStandardServicesInEmbeddedDoc(ampdoc) {
-  installAmpdocServices(ampdoc);
-  installTimerInEmbedWindow(ampdoc.win);
 }
 
 /**

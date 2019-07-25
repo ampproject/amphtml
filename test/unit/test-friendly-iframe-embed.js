@@ -20,6 +20,7 @@ import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
   installFriendlyIframeEmbed,
+  installStandardServicesInEmbed,
   mergeHtmlForTesting,
   setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
@@ -35,7 +36,6 @@ import {
 } from '../../src/service';
 import {
   installExtensionsService,
-  installStandardServicesInEmbed,
 } from '../../src/service/extensions-impl';
 import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';

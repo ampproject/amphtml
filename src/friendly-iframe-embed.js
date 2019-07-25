@@ -15,12 +15,7 @@
  */
 
 import {CommonSignals} from './common-signals';
-import {
-  LEGACY_ELEMENTS,
-  installStandardServicesInEmbed,
-  installStandardServicesInEmbeddedDoc,
-  stubLegacyElements,
-} from './service/extensions-impl';
+import {LEGACY_ELEMENTS, stubLegacyElements} from './service/extensions-impl';
 import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
@@ -34,17 +29,19 @@ import {
 } from './service/custom-element-registry';
 import {dev, rethrowAsync, userAssert} from './log';
 import {
-  disposeServicesForEmbed,
+  disposeServicesForEmbed, getAmpdoc,
   getTopWindow,
   installServiceInEmbedIfEmbeddable,
   setParentWindow,
 } from './service';
 import {getMode} from './mode';
+import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenListToggle} from './polyfills/domtokenlist-toggle';
 import {install as installDocContains} from './polyfills/document-contains';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from './style-installer';
+import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
 import {isExperimentOn} from './experiments';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
@@ -905,4 +902,39 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
 function copyBuiltinElementsToChildWindow(parentWin, childWin) {
   copyElementToChildWindow(parentWin, childWin, 'amp-img');
   copyElementToChildWindow(parentWin, childWin, 'amp-pixel');
+}
+
+/**
+ * Adopt predefined core services for the embedded ampdoc (friendly iframe).
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ */
+function installStandardServicesInEmbeddedDoc(ampdoc) {
+  installAmpdocServices(ampdoc);
+  installTimerInEmbedWindow(ampdoc.win);
+}
+
+/**
+ * Adopt predefined core services for the child window (friendly iframe).
+ * @param {!Window} childWin
+ * @visibleForTesting
+ */
+export function installStandardServicesInEmbed(childWin) {
+  // TODO(#22733): remove when ampdoc-fie is launched.
+  const frameElement = dev().assertElement(
+    childWin.frameElement,
+    'frameElement not found for embed'
+  );
+  const standardServices = [
+    // The order of service adoptations is important.
+    Services.urlForDoc(frameElement),
+    Services.actionServiceForDoc(frameElement),
+    Services.standardActionsForDoc(frameElement),
+    Services.navigationForDoc(frameElement),
+  ];
+  const ampdoc = getAmpdoc(frameElement);
+  standardServices.forEach(service => {
+    // Static functions must be invoked on the class, not the instance.
+    service.constructor.installInEmbedWindow(childWin, ampdoc);
+  });
+  installTimerInEmbedWindow(childWin);
 }
