@@ -29,7 +29,8 @@ import {
 } from './service/custom-element-registry';
 import {dev, rethrowAsync, userAssert} from './log';
 import {
-  disposeServicesForEmbed, getAmpdoc,
+  disposeServicesForEmbed,
+  getAmpdoc,
   getTopWindow,
   installServiceInEmbedIfEmbeddable,
   setParentWindow,

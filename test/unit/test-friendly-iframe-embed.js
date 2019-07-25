@@ -34,9 +34,7 @@ import {
   registerServiceBuilder,
   setParentWindow,
 } from '../../src/service';
-import {
-  installExtensionsService,
-} from '../../src/service/extensions-impl';
+import {installExtensionsService} from '../../src/service/extensions-impl';
 import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
