@@ -72,6 +72,20 @@ function execOrDie(cmd, options) {
 }
 
 /**
+ * Executes the provided command, piping the parent process' stderr, updating
+ * the error to process if stderr is not empty, and returns process object.
+ * @param {string} cmd
+ * @return {!Object}
+ */
+function execWithError(cmd) {
+  const p = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
+  if (p.stderr.length > 0) {
+    p.error = new Error(p.stderr.toString());
+  }
+  return p;
+}
+
+/**
  * Executes the provided command, returning the process object.
  * @param {string} cmd
  * @param {?Object} options
@@ -111,6 +125,7 @@ module.exports = {
   exec,
   execOrDie,
   execScriptAsync,
+  execWithError,
   getOutput,
   getStderr,
   getStdout,
