@@ -199,10 +199,11 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    */
   iframeSource_() {
     const baseUrl =
-      'https://www.oo-syringe.com/dev/amp/mplayer.html' +
-      `?content_type=${encodeURIComponent(this.contentType_)}`;
+      'https://www.oo-syringe.com/dev/amp/mplayer.html';
+      //`?content_type=${encodeURIComponent(this.contentType_)}`;
 
     const moreQueryParams = dict({
+      'content_type': this.contentType_ || undefined,
       'content_id': this.contentId_ || undefined,
       'scanned_element': this.scannedElement_ || undefined,
       'tags': this.tags_ || undefined,
