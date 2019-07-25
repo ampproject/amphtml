@@ -35,7 +35,7 @@ import {
   installServiceInEmbedIfEmbeddable,
   setParentWindow,
 } from './service';
-import {getExperimentBranch} from './experiments';
+import {getExperimentBranch, isExperimentOn} from './experiments';
 import {getMode} from './mode';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
@@ -45,7 +45,7 @@ import {installCustomElements as installRegisterElement} from 'document-register
 import {installStylesForDoc, installStylesLegacy} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
-import {isExperimentOn} from './experiments';
+
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -715,7 +715,7 @@ export class FriendlyIframeEmbed {
     installStylesForDoc(
       ampdoc,
       getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.branch) ===
-          FIE_CSS_CLEANUP_EXP.experiment
+        FIE_CSS_CLEANUP_EXP.experiment
         ? ampSharedCss
         : ampDocCss + ampSharedCss,
       /* callback */ null,
@@ -775,7 +775,7 @@ export class FriendlyIframeEmbed {
     installStylesLegacy(
       childWin.document,
       getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.branch) ===
-          FIE_CSS_CLEANUP_EXP.experiment
+        FIE_CSS_CLEANUP_EXP.experiment
         ? ampSharedCss
         : ampDocCss + ampSharedCss,
       /* callback */ null,
