@@ -29,7 +29,7 @@ export function withDatePickerCommon(WrappedComponent) {
   const isInclusivelyAfterDay = reactDates['isInclusivelyAfterDay'];
   const isInclusivelyBeforeDay = reactDates['isInclusivelyBeforeDay'];
   const React = requireExternal('react');
-  const moment = requireExternal('moment');
+  const Moment = requireExternal('moment');
 
   /**
    * If `max` is null, the default minimum date is the current date.
@@ -40,7 +40,7 @@ export function withDatePickerCommon(WrappedComponent) {
    * @return {?moment}
    */
   function getDefaultMinDate(max) {
-    const today = moment();
+    const today = Moment();
     if (max) {
       return !isInclusivelyAfterDay(today, max) ? today : null;
     } else {
@@ -68,8 +68,8 @@ export function withDatePickerCommon(WrappedComponent) {
    * @return {boolean}
    */
   function isOutsideRange(min, max, date) {
-    const maxInclusive = max ? moment(max) : null;
-    const minInclusive = min ? moment(min) : getDefaultMinDate(maxInclusive);
+    const maxInclusive = max ? Moment(max) : null;
+    const minInclusive = min ? Moment(min) : getDefaultMinDate(maxInclusive);
     if (!maxInclusive && !minInclusive) {
       return false;
     } else if (!minInclusive) {
@@ -211,7 +211,7 @@ export function withDatePickerCommon(WrappedComponent) {
 
       const initialDate =
         initialVisibleMonth || date || startDate || endDate || undefined;
-      props['initialVisibleMonth'] = () => moment(initialDate);
+      props['initialVisibleMonth'] = () => Moment(initialDate);
 
       return React.createElement(
         WrappedComponent,

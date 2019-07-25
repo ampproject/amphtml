@@ -54,6 +54,7 @@ describe('Logging', () => {
       console: {
         log: logSpy,
       },
+      location: {hash: ''},
       setTimeout: timeoutSpy,
       reportError: error => error,
     };
@@ -770,6 +771,46 @@ describe('Logging', () => {
       expect(user()).to.equal(user(element));
       expect(user(element1)).to.equal(user(element2));
       expect(user()).to.not.equal(user(element1));
+    });
+  });
+
+  describe('expandLogMessage', () => {
+    const prefixRe = 'https:\\/\\/log\\.amp\\.dev\\/\\?v=[^&]+&';
+    let log;
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('returns url without args', () => {
+      const id = 'foo';
+      const queryRe = `id=${id}`;
+      const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
+      const result = log.expandLogMessage_([id]);
+      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
+        .true;
+    });
+
+    it('returns url with one arg', () => {
+      const id = 'foo';
+      const arg1 = 'bar';
+      const queryRe = `id=${id}&s\\[\\]=${arg1}`;
+      const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
+      const result = log.expandLogMessage_([id, arg1]);
+      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
+        .true;
+    });
+
+    it('returns url with many args', () => {
+      const id = 'foo';
+      const arg1 = 'bar';
+      const arg2 = 'baz';
+      const arg3 = 'taquitos';
+      const queryRe = `id=${id}&s\\[\\]=${arg1}&s\\[\\]=${arg2}&s\\[\\]=${arg3}`;
+      const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
+      const result = log.expandLogMessage_([id, arg1, arg2, arg3]);
+      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
+        .true;
     });
   });
 });

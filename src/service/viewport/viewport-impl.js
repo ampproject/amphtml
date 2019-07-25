@@ -28,7 +28,6 @@ import {closestAncestorElementBySelector, isIframed} from '../../dom';
 import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
-import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
 import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,
@@ -1448,4 +1447,18 @@ export function installViewportServiceForDoc(ampdoc) {
     createViewport,
     /* opt_instantiate */ true
   );
+}
+
+/**
+ * A duplicated copy of the same method in friendly-iframe-embed.js
+ * to work around a circular imports, which breaks single-pass.
+ * TODO(lannka): fix this.
+ *
+ * @param {!HTMLIFrameElement} iframe
+ * @return {?../../friendly-iframe-embed.FriendlyIframeEmbed}
+ */
+function getFriendlyIframeEmbedOptional(iframe) {
+  return /** @type {?../../friendly-iframe-embed.FriendlyIframeEmbed} */ (iframe[
+    '__AMP_EMBED__'
+  ]);
 }

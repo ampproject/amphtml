@@ -374,12 +374,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
   },
   {
-    id: 'margin-bottom-in-content-height',
-    name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
-    spec: 'https://github.com/ampproject/amphtml/issues/22718',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
-  },
-  {
     id: 'untrusted-xhr-interception',
     name:
       'Enable "xhrInterceptor" capability for untrusted viewers. ' +
@@ -392,6 +386,13 @@ const EXPERIMENTS = [
     name: 'New default loaders',
     spec: 'https://github.com/ampproject/amphtml/issues/20237',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
+  },
+  {
+    id: 'macro-after-long-task',
+    name:
+      'If applicable, convert remaining micro tasks to the next macro ' +
+      ' tasks if a previous micro task execution took too long',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
   },
 ];
 

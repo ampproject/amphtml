@@ -21,6 +21,7 @@ import {
   PlayingStates,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
+import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
@@ -83,6 +84,13 @@ const TRACKER_TYPE = Object.freeze({
       return new CustomEventTracker(root);
     },
   },
+  'amp-story': {
+    name: 'amp-story',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) {
+      return new AmpStoryEventTracker(root);
+    },
+  },
   'render-start': {
     name: 'render-start',
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
@@ -139,6 +147,14 @@ function isVideoTriggerType(triggerType) {
  * @param {string} triggerType
  * @return {boolean}
  */
+function isAmpStoryTriggerType(triggerType) {
+  return startsWith(triggerType, 'story');
+}
+
+/**
+ * @param {string} triggerType
+ * @return {boolean}
+ */
 function isReservedTriggerType(triggerType) {
   return (
     !!TRACKER_TYPE[triggerType] || isEnumValue(AnalyticsEventType, triggerType)
@@ -152,6 +168,9 @@ function isReservedTriggerType(triggerType) {
 export function getTrackerKeyName(eventType) {
   if (isVideoTriggerType(eventType)) {
     return 'video';
+  }
+  if (isAmpStoryTriggerType(eventType)) {
+    return 'amp-story';
   }
   if (!isReservedTriggerType(eventType)) {
     return 'custom';
@@ -377,6 +396,64 @@ export class CustomEventTracker extends EventTracker {
         this.buffer_[eventType].push(event);
       }
     }
+  }
+}
+
+export class AmpStoryEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+
+    /** @private {?Observable<!Event>} */
+    this.sessionObservable_ = new Observable();
+
+    /** @private {?function(!Event)} */
+    this.boundOnSession_ = this.sessionObservable_.fire.bind(
+      this.sessionObservable_
+    );
+
+    Object.keys(StoryAnalyticsEvent).forEach(key => {
+      this.root
+        .getRoot()
+        .addEventListener(StoryAnalyticsEvent[key], this.boundOnSession_);
+    });
+  }
+
+  /** @override */
+  dispose() {
+    const root = this.root.getRoot();
+    Object.keys(StoryAnalyticsEvent).forEach(key => {
+      root.removeEventListener(StoryAnalyticsEvent[key], this.boundOnSession_);
+    });
+    this.boundOnSession_ = null;
+    this.sessionObservable_ = null;
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const storySpec = config['storySpec'] || {};
+    const rootTarget = this.root.getRootElement();
+
+    const repeat = storySpec['repeat'];
+    const on = config['on'];
+
+    return this.sessionObservable_.add(event => {
+      const {type} = event;
+
+      if (type !== on) {
+        return;
+      }
+      const details = /** @type {?JsonObject|undefined} */ (getData(event));
+      const detailsForPage = details['detailsForPage'];
+
+      if (repeat === false && detailsForPage['repeated']) {
+        return;
+      }
+
+      listener(new AnalyticsEvent(rootTarget, type, details));
+    });
   }
 }
 
@@ -1419,27 +1496,22 @@ export class VisibilityTracker extends EventTracker {
     const {win} = this.root.ampdoc;
     let unloadListener, pageHideListener;
 
-    // Listeners are provided below for both 'unload' and 'pagehide'. Fore
-    // more info, see https://developer.mozilla.org/en-US/docs/Web/Events/unload
-    // and https://developer.mozilla.org/en-US/docs/Web/Events/pagehide, but in
-    // short the difference between them is:
-    // * unload is fired when document is being unloaded. Does not fire on
-    //   Safari.
-    // * pagehide is fired when traversing away from a session history item.
-    // Usually, if one is fired, the other is too, with pagehide being fired
-    // first. An exception is that in Safari (desktop and mobile), pagehide is
-    // fired when navigating to another page, but unload is not.
-    // On mobile Chrome, and mobile Firefox, neither of these will fire if the
-    // user presses the home button, uses the OS task switcher to switch to
-    // a different app, answers an incoming call, etc.
-
-    win.addEventListener(
-      'unload',
-      (unloadListener = () => {
-        win.removeEventListener('unload', unloadListener);
-        deferred.resolve();
-      })
-    );
+    // Do not add an unload listener unless pagehide is not available.
+    // If an unload listener is present, the back/forward cache will not work.
+    // The BFCache saves pages to be instantly loaded when navigating back
+    // or forward and pauses their JavaScript. The pagehide event was added
+    // to give developers control over the behavior, and the unload listener
+    // interferes with it. To allow publishers to use the default BFCache
+    // behavior, we should not add an unload listener.
+    if (!this.supportsPageHide_()) {
+      win.addEventListener(
+        'unload',
+        (unloadListener = () => {
+          win.removeEventListener('unload', unloadListener);
+          deferred.resolve();
+        })
+      );
+    }
 
     // Note: pagehide is currently not supported on Opera Mini, nor IE<=10.
     // Documentation conflicts as to whether Safari on iOS will also fire it
@@ -1456,6 +1528,18 @@ export class VisibilityTracker extends EventTracker {
       })
     );
     return deferred.promise;
+  }
+
+  /**
+   * Detect support for the pagehide event.
+   * IE<=10 and Opera Mini do not support the pagehide event and
+   * possibly others, so we feature-detect support with this method.
+   * This is in a stubbable method for testing.
+   * @return {boolean}
+   * @private visible for testing
+   */
+  supportsPageHide_() {
+    return 'onpagehide' in this.root.ampdoc.win;
   }
 
   /**

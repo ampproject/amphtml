@@ -88,6 +88,10 @@ const BABELIFY_GLOBAL_TRANSFORM = {
   ignore: devDependencies(), // Ignore devDependencies
 };
 
+const BABELIFY_REPLACE_PLUGIN = {
+  plugins: [conf.getReplacePlugin()],
+};
+
 const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
@@ -95,6 +99,9 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
  * Compile all runtime targets in minified mode and drop them in dist/.
  */
 function compileAllMinifiedTargets() {
+  if (isTravisBuild()) {
+    log('Minifying multi-pass runtime targets with', cyan('closure-compiler'));
+  }
   return compile(/* watch */ false, /* shouldMinify */ true);
 }
 
@@ -103,6 +110,9 @@ function compileAllMinifiedTargets() {
  * @param {boolean} watch
  */
 function compileAllUnminifiedTargets(watch) {
+  if (isTravisBuild()) {
+    log('Compiling runtime with', cyan('browserify'));
+  }
   return compile(/* watch */ watch);
 }
 
@@ -422,13 +432,11 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     options.browserifyOptions
   );
 
-  const babelifyOptions = Object.assign({}, BABELIFY_GLOBAL_TRANSFORM);
-  const replacePlugin = conf.getReplacePlugin();
-  if ('plugins' in babelifyOptions) {
-    babelifyOptions['plugins'].push(replacePlugin);
-  } else {
-    babelifyOptions['plugins'] = [replacePlugin];
-  }
+  const babelifyOptions = Object.assign(
+    {},
+    BABELIFY_GLOBAL_TRANSFORM,
+    BABELIFY_REPLACE_PLUGIN
+  );
 
   let bundler = browserify(browserifyOptions).transform(
     babelify,
@@ -482,6 +490,11 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       .then(() => {
         if (UNMINIFIED_TARGETS.includes(destFilename)) {
           return enableLocalTesting(`${destDir}/${destFilename}`);
+        }
+      })
+      .then(() => {
+        if (isTravisBuild()) {
+          process.stdout.write('.');
         }
       });
   }
@@ -754,6 +767,7 @@ function toPromise(readable) {
 
 module.exports = {
   BABELIFY_GLOBAL_TRANSFORM,
+  BABELIFY_REPLACE_PLUGIN,
   WEB_PUSH_PUBLISHER_FILES,
   WEB_PUSH_PUBLISHER_VERSIONS,
   buildAlp,
