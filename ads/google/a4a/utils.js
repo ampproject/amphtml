@@ -108,13 +108,6 @@ export const ADX_ADY_EXP = {
   experiment: '21062593',
 };
 
-/** @const {!{branch: string, control: string, experiment: string}} */
-export const FIE_CSS_CLEANUP_EXP = {
-  branch: 'fie-css-cleanup',
-  control: '21064213',
-  experiment: '21064214',
-};
-
 /**
  * Returns the value of some navigation timing parameter.
  * Feature detection is used for safety on browsers that do not support the

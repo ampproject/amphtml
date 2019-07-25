@@ -35,6 +35,7 @@ import {
   installServiceInEmbedIfEmbeddable,
   setParentWindow,
 } from './service';
+import {getExperimentBranch, isExperimentOn} from './experiments';
 import {getMode} from './mode';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
@@ -44,7 +45,7 @@ import {installCustomElements as installRegisterElement} from 'document-register
 import {installStylesForDoc, installStylesLegacy} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
-import {isExperimentOn} from './experiments';
+
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -66,6 +67,15 @@ const EXCLUDE_INI_LOAD = [
   'AMP-PIXEL',
   'AMP-AD-EXIT',
 ];
+
+/**
+ * @const {{experiment: string, control: string, branch: string}}
+ */
+export const FIE_CSS_CLEANUP_EXP = {
+  branch: 'fie-css-cleanup',
+  control: '21064213',
+  experiment: '21064214',
+};
 
 /**
  * Parameters used to create the new "friendly iframe" embed.
@@ -704,7 +714,8 @@ export class FriendlyIframeEmbed {
     // Install runtime styles.
     installStylesForDoc(
       ampdoc,
-      isExperimentOn(topWin, 'fie-css-cleanup')
+      getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.branch) ===
+        FIE_CSS_CLEANUP_EXP.experiment
         ? ampSharedCss
         : ampDocCss + ampSharedCss,
       /* callback */ null,
@@ -763,7 +774,8 @@ export class FriendlyIframeEmbed {
     // Install runtime styles.
     installStylesLegacy(
       childWin.document,
-      isExperimentOn(topWin, 'fie-css-cleanup')
+      getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.branch) ===
+        FIE_CSS_CLEANUP_EXP.experiment
         ? ampSharedCss
         : ampDocCss + ampSharedCss,
       /* callback */ null,
