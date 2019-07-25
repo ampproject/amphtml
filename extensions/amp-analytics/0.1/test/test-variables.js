@@ -423,6 +423,12 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         );
         return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
       });
+
+      it('"COOKIE" resolves cookie value', async () => {
+        doc.cookie = 'test=123';
+        await check('COOKIE(test)', '123');
+        doc.cookie = '';
+      });
     });
   });
 
