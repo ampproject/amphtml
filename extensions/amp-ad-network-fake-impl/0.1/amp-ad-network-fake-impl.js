@@ -126,7 +126,13 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   }
 
   /**
-   * Generates metadata for AMP4ADS doc
+   * Creates a JSON metadata in which custom stylesheets, extensions
+   * and runtime offsets are recorded. This is used by AMP4ADS at runtime
+   * for embedding an ad into an enclosing document.
+   * Please note: once runtime offsets are computed the document must not
+   * change.
+   *
+   * https://cs.corp.google.com/piper///depot/google3/search/amphtml/transformers/amp_ad_metadata_transformer.cc
    * @param {Document} doc
    * @return {string}
    */

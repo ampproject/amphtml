@@ -61,21 +61,35 @@ it('reorders head', () => {
     `
         <html>
         <head>` +
+    // (0) <meta charset> tag
     metaCharset +
+    // (1) <style amp-runtime>
     ampRuntimeStyle +
+    // (2) remaining <meta> tags (those other than <meta charset>)
     metaViewport +
+    // (3) AMP runtime .js <script> tag
     ampRuntimeScript +
+    // (4) AMP viewer runtime .js <script> tag
     ampViewerIntegration +
+    // (5) Gmail AMP viewer runtime .js <script> tag
     ampGmail +
+    // (6) <script> tags for render delaying extensions
     ampExperiment +
+    // (7) <script> tags for remaining extensions
     ampAudio +
     ampMraid +
     ampMustache +
+    // (8) <link> tag for favicon
     linkIcon +
+    // (9) <link> tag for resource hints
     crossorigin +
+    // (10) <link rel=stylesheet> tags before <style amp-custom>
     fontLink +
+    // (11) <style amp-custom>
     ampCustomStyle +
+    // (12) any other tags allowed in <head>
     title +
+    // (13) amp boilerplate (first style amp-boilerplate, then noscript)
     styleBoilerplate +
     noscript +
     `</head><body></body></html>`;
@@ -109,14 +123,33 @@ it('reorders head a4a', () => {
     `
         <html>
         <head>` +
+    // (0) <meta charset> tag
     metaCharset +
+    // (1) <style amp-runtime>
+    // N/A for a4a
+    // (2) remaining <meta> tags (those other than <meta charset>)
     metaViewport +
+    // (3) AMP runtime .js <script> tag
     ampRuntimeScript +
+    // (4) AMP viewer runtime .js <script> tag
+    // N/A (no viewer in a4a)
+    // (5) Gmail AMP viewer runtime .js <script> tag
+    // N/A
+    // (6) <script> tags for render delaying extensions
+    // N/A (render delaying extensions not allowed in a4a)
+    // (7) <script> tags for remaining extensions
     ampAudio +
+    // (8) <link> tag for favicon
+    // N/A
+    // (9) <link> tag for resource hints
     crossorigin +
+    // (10) <link rel=stylesheet> tags before <style amp-custom>
     fontLink +
+    // (11) <style amp-custom>
     ampCustomStyle +
+    // (12) any other tags allowed in <head>
     title +
+    // (13) amp boilerplate (first style amp-boilerplate, then noscript)
     styleBoilerplate +
     `</head><body></body></html>`;
   const inputHeadDoc = new DOMParser().parseFromString(inputa4a, 'text/html');
