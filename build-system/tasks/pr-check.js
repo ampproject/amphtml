@@ -20,6 +20,7 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExec,
 } = require('../pr-check/utils');
 const {determineBuildTargets} = require('../pr-check/build-targets');
@@ -49,8 +50,7 @@ async function prCheck(cb) {
 
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
+    stopTimedJob(FILENAME, startTime);
     return;
   }
 
