@@ -22,6 +22,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
+import {isCanary} from '../../../src/experiments';
 import {urls} from '../../../src/config';
 import {variableServiceForDoc} from './variables';
 
@@ -84,8 +85,9 @@ export class AnalyticsConfig {
     const rtv = getMode().rtvVersion;
     const baseUrl = getMode().localDev ? `/dist` : `${urls.cdn}/rtv/${rtv}`;
     const max = getMode().minified ? '' : '.max';
-
-    return `${baseUrl}/v0/analytics-vendors/${vendor}${max}.json`;
+    // bg has a special canary config
+    const canary = vendor === 'bg' && isCanary(self) ? '.canary' : '';
+    return `${baseUrl}/v0/analytics-vendors/${vendor}${canary}${max}.json`;
   }
 
   /**
