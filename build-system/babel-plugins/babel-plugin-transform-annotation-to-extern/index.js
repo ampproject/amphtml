@@ -60,9 +60,6 @@ module.exports = function(babel) {
           // This is done for testing purposes only to output what the
           // extern would look like.
           if (shouldEmitTypedefs) {
-            // Preserve the leading LICENSE comment.
-            path.addComment('leading', path.parent.comments[0].value);
-
             const typedefs = buildTypedefs(t);
             typedefs.forEach(typedef => {
               path.pushContainer('body', typedef);
@@ -71,7 +68,7 @@ module.exports = function(babel) {
           }
         },
       },
-      VariableDeclaration(path) {
+      VariableDeclaration(path, state) {
         const {node} = path;
 
         if (!node.leadingComments) {
@@ -93,15 +90,17 @@ module.exports = function(babel) {
         // declaration of multiple variables with a shared type information.
         const typedefName = node.declarations[0].id.name;
 
-        if (!TYPEDEFS.has(typedefName)) {
-          TYPEDEFS.set(typedefName, typedefComment.value);
-          // We can't easily remove comment nodes so we just empty the string
-          // out.
-          typedefComment.value = '';
-          // Remove the actual VariableDeclaration.
-          path.remove();
+        if (TYPEDEFS.has(typedefName)) {
+          throw new Error(`Found duplicate typedef name "${typedefName}" in ` +
+            `file ${state.file.opts.filename}`);
         }
 
+        TYPEDEFS.set(typedefName, typedefComment.value);
+        // We can't easily remove comment nodes so we just empty the string
+        // out.
+        typedefComment.value = '';
+        // Remove the actual VariableDeclaration.
+        path.remove();
       },
     },
   };
