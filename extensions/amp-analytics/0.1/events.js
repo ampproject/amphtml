@@ -44,16 +44,16 @@ const TAG = 'amp-analytics/events';
  * @enum {string}
  */
 export const AnalyticsEventType = {
-  VISIBLE: 'visible',
+  AMP_STORY: 'amp-story',
   CLICK: 'click',
   CUSTOM: 'custom',
-  TIMER: 'timer',
-  SCROLL: 'scroll',
   HIDDEN: 'hidden',
-  RENDER_START: 'render-start',
-  AMP_STORY: 'amp-story',
   INI_LOAD: 'ini-load',
+  RENDER_START: 'render-start',
+  SCROLL: 'scroll',
+  TIMER: 'timer',
   VIDEO: 'video',
+  VISIBLE: 'visible',
 };
 
 const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
