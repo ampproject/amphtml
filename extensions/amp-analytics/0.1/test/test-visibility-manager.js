@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AnalyticsEventType} from '../events';
 import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
@@ -25,7 +26,6 @@ import {
 } from '../visibility-manager';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
-import {AnalyticsEventType} from '../events';
 
 class IntersectionObserverStub {
   constructor(callback, options) {

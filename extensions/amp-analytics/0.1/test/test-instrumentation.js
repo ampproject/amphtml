@@ -52,7 +52,10 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
   });
 
   it('should trigger a custom event on the ampdoc root', () => {
-    const tracker = root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker);
+    const tracker = root.getTracker(
+      AnalyticsEventType.CUSTOM,
+      CustomEventTracker
+    );
     const triggerStub = sandbox.stub(tracker, 'trigger');
     service.triggerEventForTarget(target, 'test-event', {foo: 'bar'});
     expect(triggerStub).to.be.calledOnce;

@@ -15,7 +15,6 @@
  */
 
 import {AmpdocAnalyticsRoot} from '../analytics-root.js';
-import {AnalyticsGroup} from '../analytics-group.js';
 import {
   AnalyticsEventType,
   ClickEventTracker,
@@ -26,6 +25,7 @@ import {
   TimerEventTracker,
   VisibilityTracker,
 } from '../events';
+import {AnalyticsGroup} from '../analytics-group.js';
 
 describes.realWin('AnalyticsGroup', {amp: 1}, env => {
   let win;
@@ -78,7 +78,10 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
   });
 
   it('should add "scroll" trigger', () => {
-    const tracker = root.getTracker(AnalyticsEventType.SCROLL, ScrollEventTracker);
+    const tracker = root.getTracker(
+      AnalyticsEventType.SCROLL,
+      ScrollEventTracker
+    );
     const unlisten = function() {};
     const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const config = {on: 'scroll', selector: '*'};
@@ -86,7 +89,12 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     expect(group.listeners_).to.be.empty;
     group.addTrigger(config, handler);
     expect(stub).to.be.calledOnce;
-    expect(stub).to.be.calledWith(analyticsElement, AnalyticsEventType.SCROLL, config, handler);
+    expect(stub).to.be.calledWith(
+      analyticsElement,
+      AnalyticsEventType.SCROLL,
+      config,
+      handler
+    );
     expect(group.listeners_).to.have.length(1);
     expect(group.listeners_[0]).to.equal(unlisten);
   });

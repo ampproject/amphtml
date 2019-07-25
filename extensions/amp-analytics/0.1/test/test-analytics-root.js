@@ -72,13 +72,20 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   });
 
   it('should add tracker, reuse and dispose', () => {
-    const tracker = root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker);
+    const tracker = root.getTracker(
+      AnalyticsEventType.CUSTOM,
+      CustomEventTracker
+    );
     expect(tracker).to.be.instanceOf(CustomEventTracker);
     expect(tracker.root).to.equal(root);
 
     // Reused.
-    expect(root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)).to.equal(tracker);
-    expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.equal(tracker);
+    expect(
+      root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)
+    ).to.equal(tracker);
+    expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.equal(
+      tracker
+    );
 
     // Dispose.
     const stub = sandbox.stub(tracker, 'dispose');
@@ -497,13 +504,20 @@ describes.realWin(
     });
 
     it('should add tracker, reuse and dispose', () => {
-      const tracker = root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker);
+      const tracker = root.getTracker(
+        AnalyticsEventType.CUSTOM,
+        CustomEventTracker
+      );
       expect(tracker).to.be.instanceOf(CustomEventTracker);
       expect(tracker.root).to.equal(root);
 
       // Reused.
-      expect(root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)).to.equal(tracker);
-      expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.equal(tracker);
+      expect(
+        root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)
+      ).to.equal(tracker);
+      expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.equal(
+        tracker
+      );
 
       // Dispose.
       const stub = sandbox.stub(tracker, 'dispose');
@@ -516,19 +530,22 @@ describes.realWin(
       const whitelist = {
         'custom': CustomEventTracker,
       };
-      const customTracker = root.getTrackerForWhitelist(AnalyticsEventType.CUSTOM, whitelist);
+      const customTracker = root.getTrackerForWhitelist(
+        AnalyticsEventType.CUSTOM,
+        whitelist
+      );
       expect(customTracker).to.be.instanceOf(CustomEventTracker);
       expect(customTracker.root).to.equal(root);
 
       const noneTracker = root.getTrackerForWhitelist('none', whitelist);
       expect(noneTracker).to.be.null;
 
-      expect(root.getTrackerForWhitelist(AnalyticsEventType.CUSTOM, whitelist)).to.equal(
-        customTracker
-      );
-      expect(root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)).to.equal(
-        customTracker
-      );
+      expect(
+        root.getTrackerForWhitelist(AnalyticsEventType.CUSTOM, whitelist)
+      ).to.equal(customTracker);
+      expect(
+        root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)
+      ).to.equal(customTracker);
     });
 
     it('should init with embed signals', () => {

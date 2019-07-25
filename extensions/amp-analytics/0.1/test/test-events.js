@@ -213,7 +213,12 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(tracker.root).to.equal(root);
       expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
 
-      tracker.add(undefined, AnalyticsEventType.SCROLL, defaultScrollConfig, sandbox.stub());
+      tracker.add(
+        undefined,
+        AnalyticsEventType.SCROLL,
+        defaultScrollConfig,
+        sandbox.stub()
+      );
       expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(1);
 
       tracker.dispose();
@@ -223,7 +228,12 @@ describes.realWin('Events', {amp: 1}, env => {
     it('fires on scroll', () => {
       const fn1 = sandbox.stub();
       const fn2 = sandbox.stub();
-      tracker.add(undefined, AnalyticsEventType.SCROLL, defaultScrollConfig, fn1);
+      tracker.add(
+        undefined,
+        AnalyticsEventType.SCROLL,
+        defaultScrollConfig,
+        fn1
+      );
       tracker.add(
         undefined,
         AnalyticsEventType.SCROLL,
@@ -271,7 +281,12 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('does not fire duplicates on scroll', () => {
       const fn1 = sandbox.stub();
-      tracker.add(undefined, AnalyticsEventType.SCROLL, defaultScrollConfig, fn1);
+      tracker.add(
+        undefined,
+        AnalyticsEventType.SCROLL,
+        defaultScrollConfig,
+        fn1
+      );
 
       // Scroll Down
       fakeViewport.getScrollTop.returns(10);
@@ -285,7 +300,12 @@ describes.realWin('Events', {amp: 1}, env => {
       const fn1 = sandbox.stub();
 
       allowConsoleError(() => {
-        tracker.add(undefined, AnalyticsEventType.SCROLL, {'on': AnalyticsEventType.SCROLL}, fn1);
+        tracker.add(
+          undefined,
+          AnalyticsEventType.SCROLL,
+          {'on': AnalyticsEventType.SCROLL},
+          fn1
+        );
         expect(fn1).to.have.not.been.called;
 
         tracker.add(
@@ -932,10 +952,20 @@ describes.realWin('Events', {amp: 1}, env => {
           tracker.add(analyticsElement, AnalyticsEventType.TIMER, {}, handler);
         }).to.throw(/Bad timer specification/);
         expect(() => {
-          tracker.add(analyticsElement, AnalyticsEventType.TIMER, {timerSpec: 1}, handler);
+          tracker.add(
+            analyticsElement,
+            AnalyticsEventType.TIMER,
+            {timerSpec: 1},
+            handler
+          );
         }).to.throw(/Bad timer specification/);
         expect(() => {
-          tracker.add(analyticsElement, AnalyticsEventType.TIMER, {timerSpec: {}}, handler);
+          tracker.add(
+            analyticsElement,
+            AnalyticsEventType.TIMER,
+            {timerSpec: {}},
+            handler
+          );
         }).to.throw(/Timer interval specification required/);
         expect(() => {
           tracker.add(
@@ -1087,7 +1117,10 @@ describes.realWin('Events', {amp: 1}, env => {
       target.click(); // Stop timer.
 
       const fn2 = sandbox.stub();
-      const customTracker = root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker);
+      const customTracker = root.getTracker(
+        AnalyticsEventType.CUSTOM,
+        CustomEventTracker
+      );
       const getElementSpy = sandbox.spy(root, 'getElement');
       tracker.add(
         analyticsElement,
