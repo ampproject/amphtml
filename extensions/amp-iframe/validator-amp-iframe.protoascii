@@ -62,7 +62,7 @@ tags: {  # <amp-iframe>
   }
   attrs: {
     name: "tabindex"
-    value_regex: "-?\d+"
+    value_regex: "-?\\d+"
   }
   attrs: {
     name: "src"
