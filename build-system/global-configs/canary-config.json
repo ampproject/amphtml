@@ -35,6 +35,7 @@
   "expAdsenseA4A": 0.01,
   "expAdsenseCanonical": 0.05,
   "expAdsenseUnconditionedCanonical": 0.05,
+  "fie-css-cleanup": 1,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.01,
   "hidden-mutation-observer": 1,
