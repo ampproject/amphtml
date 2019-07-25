@@ -907,7 +907,7 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
 
 /**
  * Adopt predefined core services for the embedded ampdoc (friendly iframe).
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 function installStandardServicesInEmbeddedDoc(ampdoc) {
   installAmpdocServices(ampdoc);
