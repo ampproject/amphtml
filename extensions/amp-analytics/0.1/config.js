@@ -100,16 +100,13 @@ export class AnalyticsConfig {
       return Promise.resolve();
     }
 
-    const fetchConfig = {
-      requireAmpResponseSourceOrigin: false,
-    };
     const vendorUrl = this.getVendorUrl_(type);
 
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching vendor config', vendorUrl);
 
     return Services.xhrFor(toWin(this.win_))
-      .fetchJson(vendorUrl, fetchConfig)
+      .fetchJson(vendorUrl)
       .then(res => res.json())
       .then(
         jsonValue => {
