@@ -74,8 +74,8 @@ function execOrDie(cmd, options) {
 /**
  * Executes the provided command, piping the parent process' stderr, updating
  * the error to process if stderr is not empty, and returns process object.
- *
  * @param {string} cmd
+ * @return {!Object}
  */
 function execWithError(cmd) {
   const p = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
