@@ -80,6 +80,7 @@ amp-minute-media-player/0.1/test/validator-amp-minute-media-player.html:72:2 The
 |      dock
 |      data-content-type="semantic"
 |      data-minimum-date-factor="10"
+|      data-scoped-keywords="football"
 |      layout="responsive" width="160" height="96">
 |    </amp-minute-media-player>
 |

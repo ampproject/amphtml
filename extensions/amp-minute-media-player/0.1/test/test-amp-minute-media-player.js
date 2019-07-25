@@ -24,6 +24,7 @@ const SEMANTIC = 'semantic';
 const DATA_CONTENT_ID = 'fSkmeWKF';
 const DATA_MINIMUM_DATE_FACTOR = '10';
 const DATA_SCANNED_ELEMENT_TYPE = 'id';
+const DATA_SCOPED_KEYWORDS = 'football';
 
 describes.realWin(
   'amp-minute-media-player',
@@ -69,7 +70,7 @@ describes.realWin(
         const iframe = minuteMediaPlayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
-          `https://www.oo-syringe.com/dev/amp/mplayer.html?content_type=${CURATED}&content_id=${DATA_CONTENT_ID}`
+          `https://www.oo-syringe.com/prod/AMP/minute-media-player.html?content_type=${CURATED}&content_id=${DATA_CONTENT_ID}`
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
@@ -83,7 +84,7 @@ describes.realWin(
         const iframe = minuteMediaPlayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
-          `https://www.oo-syringe.com/dev/amp/mplayer.html?content_type=${SEMANTIC}`
+          `https://www.oo-syringe.com/prod/AMP/minute-media-player.html?content_type=${SEMANTIC}`
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
@@ -94,12 +95,13 @@ describes.realWin(
         'data-content-type': SEMANTIC,
         'data-minimum-date-factor': DATA_MINIMUM_DATE_FACTOR,
         'data-scanned-element-type': DATA_SCANNED_ELEMENT_TYPE,
+        'data-scoped-keywords': DATA_SCOPED_KEYWORDS,
       }).then(minuteMediaPlayerElement => {
         const iframe = minuteMediaPlayerElement.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
           //******TO CHANGE******//
-          `https://www.oo-syringe.com/dev/amp/mplayer.html?content_type=${SEMANTIC}&minimum_date_factor=10&scanned_element_type=id`
+          `https://www.oo-syringe.com/prod/AMP/minute-media-player.html?content_type=${SEMANTIC}&scanned_element_type=${DATA_SCANNED_ELEMENT_TYPE}&minimum_date_factor=${DATA_MINIMUM_DATE_FACTOR}&scoped_keywords=${DATA_SCOPED_KEYWORDS}`
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });

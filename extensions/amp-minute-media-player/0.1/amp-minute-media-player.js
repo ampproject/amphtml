@@ -61,6 +61,9 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     this.contentId_ = '';
 
     /** @private {?string} */
+    this.scannedElementType_ = '';
+
+    /** @private {?string} */
     this.scannedElement_ = '';
 
     /** @private {?string} */
@@ -70,7 +73,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     this.minimumDateFactor_ = '';
 
     /** @private {?string} */
-    this.scannedElementType_ = '';
+    this.scopedKeywords_ = '';
 
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
@@ -153,6 +156,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       element.getAttribute('data-minimum-date-factor') || '';
     this.scannedElementType_ =
       element.getAttribute('data-scanned-element-type') || '';
+    this.scopedKeywords_ = element.getAttribute('data-scoped-keywords') || '';
   }
 
   /**
@@ -198,15 +202,17 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * @private
    */
   iframeSource_() {
-    const baseUrl = 'https://www.oo-syringe.com/dev/amp/mplayer.html';
+    const baseUrl =
+      'https://www.oo-syringe.com/prod/AMP/minute-media-player.html';
 
     const moreQueryParams = dict({
       'content_type': this.contentType_ || undefined,
       'content_id': this.contentId_ || undefined,
+      'scanned_element_type': this.scannedElementType_ || undefined,
       'scanned_element': this.scannedElement_ || undefined,
       'tags': this.tags_ || undefined,
       'minimum_date_factor': this.minimumDateFactor_ || undefined,
-      'scanned_element_type': this.scannedElementType_ || undefined,
+      'scoped_keywords': this.scopedKeywords_ || undefined,
       'player_id': this.playerId_ || undefined,
     });
 

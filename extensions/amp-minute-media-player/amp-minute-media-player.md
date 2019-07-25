@@ -102,6 +102,11 @@ Example with FIXED layout - fixed width and height.
     <p>This data is reflected only if you choose playing 'semantic' content (in the data-content-type).</p></td>
   </tr>
   <tr>
+      <td width="40%"><strong>data-scoped-keywords</strong></td>
+      <td><p>This data is responsible to return only videos with the specified tags in the matching results.</p>
+      <p>This data is reflected only if you choose playing 'semantic' content (in the data-content-type).</p></td>
+    </tr>
+  <tr>
     <td width="40%"><strong>autoplay</strong></td>
     <td><p>If this attribute is present, and the browser supports autoplay:</p>
     <ul>

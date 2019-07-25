@@ -50,6 +50,7 @@ tags: {  # <amp-minute-media-player>
   }
   attrs: { name: "data-tags" }
   attrs: { name: "data-minimum-date-factor" }
+  attrs: { name: "data-scoped-keywords" }
 
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-minute-media-player"
