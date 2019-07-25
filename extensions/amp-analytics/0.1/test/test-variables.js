@@ -192,6 +192,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     let win;
     let urlReplacementService;
     let sandbox;
+    let analyticsElement;
 
     beforeEach(() => {
       sandbox = env.sandbox;
@@ -202,10 +203,15 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       variables = variableServiceForDoc(doc);
       const {documentElement} = win.document;
       urlReplacementService = Services.urlReplacementsForDoc(documentElement);
+      analyticsElement = doc.createElement('amp-analytics');
+      doc.body.appendChild(analyticsElement);
     });
 
     function check(input, output, opt_bindings) {
-      const macros = Object.assign(variables.getMacros(doc), opt_bindings);
+      const macros = Object.assign(
+        variables.getMacros(analyticsElement),
+        opt_bindings
+      );
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
       return expect(expanded).to.eventually.equal(output);
     }
