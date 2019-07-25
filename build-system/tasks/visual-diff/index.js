@@ -438,9 +438,10 @@ async function generateSnapshots(percy, webpages) {
   // no interactions, and each test that has in interactive tests file should
   // load those tests here.
   for (const webpage of webpages) {
-    webpage.tests_ = {
-      '': async () => {},
-    };
+    webpage.tests_ = {};
+    if (!webpage.no_base_test) {
+      webpage.tests_[''] = async () => {};
+    }
     if (webpage.interactive_tests) {
       try {
         Object.assign(
