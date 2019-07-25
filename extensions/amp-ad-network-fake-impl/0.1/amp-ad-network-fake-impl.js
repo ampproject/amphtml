@@ -30,7 +30,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   constructor(element) {
     super(element);
 
-    /** @private {./external-reorder-head-transformer.ExternalReorderHeadTransformer} */
+    /** @private {!./external-reorder-head-transformer.ExternalReorderHeadTransformer} */
     this.reorderHeadTransformer_ = new ExternalReorderHeadTransformer();
   }
 

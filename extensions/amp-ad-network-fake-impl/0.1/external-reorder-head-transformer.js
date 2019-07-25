@@ -19,7 +19,8 @@ import {urls} from '../../../src/config';
 export class ExternalReorderHeadTransformer {
   /** constructor */
   constructor() {
-    this.headComponents = {
+    /** @private {!Object} */
+    this.headComponents_ = {
       metaOther: [],
       scriptNonRenderDelayingExtensions: [],
       scriptRenderDelayingExtensions: [],
@@ -101,11 +102,11 @@ export class ExternalReorderHeadTransformer {
             this.registerLink_(child);
             break;
           case 'NOSCRIPT':
-            this.headComponents.noscript = child;
+            this.headComponents_.noscript = child;
             break;
           default:
-            if (!this.headComponents.other.includes(child)) {
-              this.headComponents.other.push(child);
+            if (!this.headComponents_.other.includes(child)) {
+              this.headComponents_.other.push(child);
             }
         }
       }
@@ -125,11 +126,11 @@ export class ExternalReorderHeadTransformer {
    */
   registerMeta_(element) {
     if (element.hasAttribute('charset')) {
-      this.headComponents.metaCharset = element;
+      this.headComponents_.metaCharset = element;
       return;
     }
-    if (!this.headComponents.metaOther.includes(element)) {
-      this.headComponents.metaOther.push(element);
+    if (!this.headComponents_.metaOther.includes(element)) {
+      this.headComponents_.metaOther.push(element);
       return;
     }
   }
@@ -153,10 +154,10 @@ export class ExternalReorderHeadTransformer {
         custom == 'amp-experiment' ||
         custom == 'amp-dynamic-css-classes'
       ) {
-        this.headComponents.scriptRenderDelayingExtensions.push(element);
+        this.headComponents_.scriptRenderDelayingExtensions.push(element);
         return;
       }
-      this.headComponents.scriptNonRenderDelayingExtensions.push(element);
+      this.headComponents_.scriptNonRenderDelayingExtensions.push(element);
       return;
     }
     if (
@@ -167,7 +168,7 @@ export class ExternalReorderHeadTransformer {
         endsWith(src, '/amp4ads-v0.js') ||
         endsWith(src, '/amp4ads-v0.js.br'))
     ) {
-      this.headComponents.scriptAmpEngine = element;
+      this.headComponents_.scriptAmpEngine = element;
       return;
     }
     if (
@@ -175,7 +176,7 @@ export class ExternalReorderHeadTransformer {
       startsWith(src, urls.cdn + '/v0/amp-viewer-integration-gmail-') &&
       endsWith(src, '.js')
     ) {
-      this.headComponents.scriptGmailAmpViewer = element;
+      this.headComponents_.scriptGmailAmpViewer = element;
       return;
     }
     if (
@@ -184,10 +185,10 @@ export class ExternalReorderHeadTransformer {
         (startsWith(src, urls.cdn + '/viewer/google/v') &&
           endsWith(src, '.js')))
     ) {
-      this.headComponents.scriptAmpViewer = element;
+      this.headComponents_.scriptAmpViewer = element;
       return;
     }
-    this.headComponents.other.push(element);
+    this.headComponents_.other.push(element);
   }
 
   /**
@@ -197,21 +198,21 @@ export class ExternalReorderHeadTransformer {
    */
   registerStyle_(element) {
     if (element.hasAttribute('amp-runtime')) {
-      this.headComponents.styleAmpRuntime = element;
+      this.headComponents_.styleAmpRuntime = element;
       return;
     }
     if (element.hasAttribute('amp-custom')) {
-      this.headComponents.styleAmpCustom = element;
+      this.headComponents_.styleAmpCustom = element;
       return;
     }
     if (
       element.hasAttribute('amp-boilerplate') ||
       element.hasAttribute('amp4ads-boilerplate')
     ) {
-      this.headComponents.styleAmpBoilerplate = element;
+      this.headComponents_.styleAmpBoilerplate = element;
       return;
     }
-    this.headComponents.other.push(element);
+    this.headComponents_.other.push(element);
   }
 
   /**
@@ -226,24 +227,24 @@ export class ExternalReorderHeadTransformer {
         startsWith(element.getAttribute('href'), urls.cdn) &&
         endsWith(element.getAttribute('href'), '/v0.css')
       ) {
-        this.headComponents.linkStylesheetRuntimeCss = element;
+        this.headComponents_.linkStylesheetRuntimeCss = element;
         return;
       }
-      if (this.headComponents.styleAmpCustom == null) {
-        this.headComponents.linkStylesheetBeforeAmpCustom.push(element);
+      if (this.headComponents_.styleAmpCustom == null) {
+        this.headComponents_.linkStylesheetBeforeAmpCustom.push(element);
         return;
       }
       return;
     }
     if (rel == 'icon' || rel == 'icon shortcut' || rel == 'shortcut icon') {
-      this.headComponents.linkIcons.push(element);
+      this.headComponents_.linkIcons.push(element);
       return;
     }
     if (rel == 'dns-prefetch preconnect') {
-      this.headComponents.linkResourceHints.push(element);
+      this.headComponents_.linkResourceHints.push(element);
       return;
     }
-    this.headComponents.other.push(element);
+    this.headComponents_.other.push(element);
   }
 
   /**
@@ -251,25 +252,25 @@ export class ExternalReorderHeadTransformer {
    * @param {Element} head
    */
   repopulate_(head) {
-    this.appendIfNotNull_(head, this.headComponents.metaCharset);
-    this.appendIfNotNull_(head, this.headComponents.linkStylesheetRuntimeCss);
-    this.appendIfNotNull_(head, this.headComponents.styleAmpRuntime);
-    this.appendAll_(head, this.headComponents.metaOther);
-    this.appendIfNotNull_(head, this.headComponents.scriptAmpEngine);
-    this.appendIfNotNull_(head, this.headComponents.scriptAmpViewer);
-    this.appendIfNotNull_(head, this.headComponents.scriptGmailAmpViewer);
-    this.appendAll_(head, this.headComponents.scriptRenderDelayingExtensions);
+    this.appendIfNotNull_(head, this.headComponents_.metaCharset);
+    this.appendIfNotNull_(head, this.headComponents_.linkStylesheetRuntimeCss);
+    this.appendIfNotNull_(head, this.headComponents_.styleAmpRuntime);
+    this.appendAll_(head, this.headComponents_.metaOther);
+    this.appendIfNotNull_(head, this.headComponents_.scriptAmpEngine);
+    this.appendIfNotNull_(head, this.headComponents_.scriptAmpViewer);
+    this.appendIfNotNull_(head, this.headComponents_.scriptGmailAmpViewer);
+    this.appendAll_(head, this.headComponents_.scriptRenderDelayingExtensions);
     this.appendAll_(
       head,
-      this.headComponents.scriptNonRenderDelayingExtensions
+      this.headComponents_.scriptNonRenderDelayingExtensions
     );
-    this.appendAll_(head, this.headComponents.linkIcons);
-    this.appendAll_(head, this.headComponents.linkResourceHints);
-    this.appendAll_(head, this.headComponents.linkStylesheetBeforeAmpCustom);
-    this.appendIfNotNull_(head, this.headComponents.styleAmpCustom);
-    this.appendAll_(head, this.headComponents.other);
-    this.appendIfNotNull_(head, this.headComponents.styleAmpBoilerplate);
-    this.appendIfNotNull_(head, this.headComponents.noscript);
+    this.appendAll_(head, this.headComponents_.linkIcons);
+    this.appendAll_(head, this.headComponents_.linkResourceHints);
+    this.appendAll_(head, this.headComponents_.linkStylesheetBeforeAmpCustom);
+    this.appendIfNotNull_(head, this.headComponents_.styleAmpCustom);
+    this.appendAll_(head, this.headComponents_.other);
+    this.appendIfNotNull_(head, this.headComponents_.styleAmpBoilerplate);
+    this.appendIfNotNull_(head, this.headComponents_.noscript);
     return head;
   }
 }
