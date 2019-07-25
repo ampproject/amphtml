@@ -252,14 +252,14 @@ export function installFriendlyIframeEmbed(
 
     // Add extensions.
     if (ampdoc && ampdocFieExperimentOn) {
-      installExtensionsInFie(
+      embed.installExtensionsInFie(
         extensions,
         ampdoc,
         spec.extensionIds || [],
         opt_preinstallCallback
       );
     } else {
-      installExtensionsInChildWindow(
+      embed.installExtensionsInChildWindow(
         extensions,
         childWin,
         spec.extensionIds || [],
@@ -677,6 +677,169 @@ export class FriendlyIframeEmbed {
       },
     });
   }
+
+  /**
+   * Install extensions in the child window (friendly iframe). The pre-install
+   * callback, if specified, is executed after polyfills have been configured
+   * but before the first extension is installed.
+   * @param {!./service/extensions-impl.Extensions} extensions
+   * @param {!./service/ampdoc-impl.AmpDocFie} ampdoc
+   * @param {!Array<string>} extensionIds
+   * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+   * @return {!Promise}
+   * @visibleForTesting
+   */
+  installExtensionsInFie(
+    extensions,
+    ampdoc,
+    extensionIds,
+    opt_preinstallCallback
+  ) {
+    const topWin = extensions.win;
+    const childWin = ampdoc.win;
+    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
+    setParentWindow(childWin, parentWin);
+
+    // Install necessary polyfills.
+    installPolyfillsInChildWindow(parentWin, childWin);
+
+    // Install runtime styles.
+    installStylesForDoc(
+      ampdoc,
+      isExperimentOn(topWin, 'fie-css-cleanup')
+        ? ampSharedCss
+        : ampDocCss + ampSharedCss,
+      /* callback */ null,
+      /* opt_isRuntimeCss */ true,
+      /* opt_ext */ 'amp-runtime'
+    );
+
+    // Run pre-install callback.
+    if (opt_preinstallCallback) {
+      opt_preinstallCallback(ampdoc.win, ampdoc);
+    }
+
+    // Install embeddable standard services.
+    installStandardServicesInEmbeddedDoc(ampdoc);
+
+    // Install built-ins and legacy elements.
+    copyBuiltinElementsToChildWindow(topWin, childWin);
+    stubLegacyElements(childWin);
+
+    return Promise.all(
+      extensionIds.map(extensionId => {
+        // This will extend automatic upgrade of custom elements from top
+        // window to the child window.
+        if (!LEGACY_ELEMENTS.includes(extensionId)) {
+          stubElementIfNotKnown(childWin, extensionId);
+        }
+        return extensions.installExtensionInDoc(ampdoc, extensionId);
+      })
+    );
+  }
+
+  /**
+   * Install extensions in the child window (friendly iframe). The pre-install
+   * callback, if specified, is executed after polyfills have been configured
+   * but before the first extension is installed.
+   * @param {!./service/extensions-impl.Extensions} extensions
+   * @param {!Window} childWin
+   * @param {!Array<string>} extensionIds
+   * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+   * @return {!Promise}
+   * @visibleForTesting
+   */
+  installExtensionsInChildWindow(
+    extensions,
+    childWin,
+    extensionIds,
+    opt_preinstallCallback
+  ) {
+    const topWin = extensions.win;
+    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
+    setParentWindow(childWin, parentWin);
+
+    // Install necessary polyfills.
+    installPolyfillsInChildWindow(parentWin, childWin);
+
+    // Install runtime styles.
+    installStylesLegacy(
+      childWin.document,
+      isExperimentOn(topWin, 'fie-css-cleanup')
+        ? ampSharedCss
+        : ampDocCss + ampSharedCss,
+      /* callback */ null,
+      /* opt_isRuntimeCss */ true,
+      /* opt_ext */ 'amp-runtime'
+    );
+
+    // Run pre-install callback.
+    if (opt_preinstallCallback) {
+      opt_preinstallCallback(childWin);
+    }
+
+    // Install embeddable standard services.
+    installStandardServicesInEmbed(childWin);
+
+    // Install built-ins and legacy elements.
+    copyBuiltinElementsToChildWindow(topWin, childWin);
+    stubLegacyElements(childWin);
+
+    const promises = [];
+    extensionIds.forEach(extensionId => {
+      // This will extend automatic upgrade of custom elements from top
+      // window to the child window.
+      if (!LEGACY_ELEMENTS.includes(extensionId)) {
+        stubElementIfNotKnown(childWin, extensionId);
+      }
+
+      // Install CSS.
+      const promise = extensions
+        .preloadExtension(extensionId)
+        .then(extension => {
+          // Adopt embeddable extension services.
+          extension.services.forEach(service => {
+            installServiceInEmbedIfEmbeddable(childWin, service.serviceClass);
+          });
+
+          // Adopt the custom elements.
+          let elementPromises = null;
+          for (const elementName in extension.elements) {
+            const elementDef = extension.elements[elementName];
+            const elementPromise = new Promise(resolve => {
+              if (elementDef.css) {
+                installStylesLegacy(
+                  childWin.document,
+                  elementDef.css,
+                  /* completeCallback */ resolve,
+                  /* isRuntime */ false,
+                  extensionId
+                );
+              } else {
+                resolve();
+              }
+            }).then(() => {
+              upgradeOrRegisterElement(
+                childWin,
+                elementName,
+                elementDef.implementationClass
+              );
+            });
+            if (elementPromises) {
+              elementPromises.push(elementPromise);
+            } else {
+              elementPromises = [elementPromise];
+            }
+          }
+          if (elementPromises) {
+            return Promise.all(elementPromises).then(() => extension);
+          }
+          return extension;
+        });
+      promises.push(promise);
+    });
+    return Promise.all(promises);
+  }
 }
 
 /**
@@ -710,167 +873,6 @@ export function isInFie(element) {
     element.classList.contains('i-amphtml-fie') ||
     !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
   );
-}
-
-/**
- * Install extensions in the child window (friendly iframe). The pre-install
- * callback, if specified, is executed after polyfills have been configured
- * but before the first extension is installed.
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {!./service/ampdoc-impl.AmpDocFie} ampdoc
- * @param {!Array<string>} extensionIds
- * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
- * @return {!Promise}
- * @private
- */
-function installExtensionsInFie(
-  extensions,
-  ampdoc,
-  extensionIds,
-  opt_preinstallCallback
-) {
-  const topWin = extensions.win;
-  const childWin = ampdoc.win;
-  const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
-  setParentWindow(childWin, parentWin);
-
-  // Install necessary polyfills.
-  installPolyfillsInChildWindow(parentWin, childWin);
-
-  // Install runtime styles.
-  installStylesForDoc(
-    ampdoc,
-    isExperimentOn(topWin, 'fie-css-cleanup')
-      ? ampSharedCss
-      : ampDocCss + ampSharedCss,
-    /* callback */ null,
-    /* opt_isRuntimeCss */ true,
-    /* opt_ext */ 'amp-runtime'
-  );
-
-  // Run pre-install callback.
-  if (opt_preinstallCallback) {
-    opt_preinstallCallback(ampdoc.win, ampdoc);
-  }
-
-  // Install embeddable standard services.
-  installStandardServicesInEmbeddedDoc(ampdoc);
-
-  // Install built-ins and legacy elements.
-  copyBuiltinElementsToChildWindow(topWin, childWin);
-  stubLegacyElements(childWin);
-
-  return Promise.all(
-    extensionIds.map(extensionId => {
-      // This will extend automatic upgrade of custom elements from top
-      // window to the child window.
-      if (!LEGACY_ELEMENTS.includes(extensionId)) {
-        stubElementIfNotKnown(childWin, extensionId);
-      }
-      return extensions.installExtensionInDoc(ampdoc, extensionId);
-    })
-  );
-}
-
-/**
- * Install extensions in the child window (friendly iframe). The pre-install
- * callback, if specified, is executed after polyfills have been configured
- * but before the first extension is installed.
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {!Window} childWin
- * @param {!Array<string>} extensionIds
- * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
- * @return {!Promise}
- * @private
- */
-function installExtensionsInChildWindow(
-  extensions,
-  childWin,
-  extensionIds,
-  opt_preinstallCallback
-) {
-  const topWin = extensions.win;
-  const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
-  setParentWindow(childWin, parentWin);
-
-  // Install necessary polyfills.
-  installPolyfillsInChildWindow(parentWin, childWin);
-
-  // Install runtime styles.
-  installStylesLegacy(
-    childWin.document,
-    isExperimentOn(topWin, 'fie-css-cleanup')
-      ? ampSharedCss
-      : ampDocCss + ampSharedCss,
-    /* callback */ null,
-    /* opt_isRuntimeCss */ true,
-    /* opt_ext */ 'amp-runtime'
-  );
-
-  // Run pre-install callback.
-  if (opt_preinstallCallback) {
-    opt_preinstallCallback(childWin);
-  }
-
-  // Install embeddable standard services.
-  installStandardServicesInEmbed(childWin);
-
-  // Install built-ins and legacy elements.
-  copyBuiltinElementsToChildWindow(topWin, childWin);
-  stubLegacyElements(childWin);
-
-  const promises = [];
-  extensionIds.forEach(extensionId => {
-    // This will extend automatic upgrade of custom elements from top
-    // window to the child window.
-    if (!LEGACY_ELEMENTS.includes(extensionId)) {
-      stubElementIfNotKnown(childWin, extensionId);
-    }
-
-    // Install CSS.
-    const promise = extensions.preloadExtension(extensionId).then(extension => {
-      // Adopt embeddable extension services.
-      extension.services.forEach(service => {
-        installServiceInEmbedIfEmbeddable(childWin, service.serviceClass);
-      });
-
-      // Adopt the custom elements.
-      let elementPromises = null;
-      for (const elementName in extension.elements) {
-        const elementDef = extension.elements[elementName];
-        const elementPromise = new Promise(resolve => {
-          if (elementDef.css) {
-            installStylesLegacy(
-              childWin.document,
-              elementDef.css,
-              /* completeCallback */ resolve,
-              /* isRuntime */ false,
-              extensionId
-            );
-          } else {
-            resolve();
-          }
-        }).then(() => {
-          upgradeOrRegisterElement(
-            childWin,
-            elementName,
-            elementDef.implementationClass
-          );
-        });
-        if (elementPromises) {
-          elementPromises.push(elementPromise);
-        } else {
-          elementPromises = [elementPromise];
-        }
-      }
-      if (elementPromises) {
-        return Promise.all(elementPromises).then(() => extension);
-      }
-      return extension;
-    });
-    promises.push(promise);
-  });
-  return Promise.all(promises);
 }
 
 /**
