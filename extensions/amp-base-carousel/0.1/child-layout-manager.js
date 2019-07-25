@@ -148,7 +148,7 @@ export class ChildLayoutManager {
       // away elements? Do we want schedule preload farther away elements?
       this.ampElement_.scheduleLayout(target);
     } else {
-      this.ampElement_.scheduleUnlayout(target);
+      this.ampElement_./*OK */ scheduleUnlayout(target);
     }
   }
 

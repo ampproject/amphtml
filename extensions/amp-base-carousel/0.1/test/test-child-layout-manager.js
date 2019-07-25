@@ -44,12 +44,12 @@ describes.realWin('child layout manager', {}, env => {
     doc.body.appendChild(container);
 
     ampElementMock = {
-      setAsOwner: sinon.spy(),
-      scheduleLayout: sinon.spy(),
-      scheduleUnlayout: sinon.spy(),
-      schedulePause: sinon.spy(),
-      scheduleResume: sinon.spy(),
-      updateInViewport: sinon.spy(),
+      setAsOwner: env.sandbox.spy(),
+      scheduleLayout: env.sandbox.spy(),
+      scheduleUnlayout: env.sandbox.spy(),
+      schedulePause: env.sandbox.spy(),
+      scheduleResume: env.sandbox.spy(),
+      updateInViewport: env.sandbox.spy(),
       win,
     };
   });
@@ -189,7 +189,7 @@ describes.realWin('child layout manager', {}, env => {
   });
 
   it('should call the viewportIntersectionCallback', async () => {
-    const viewportIntersectionCallback = sinon.spy();
+    const viewportIntersectionCallback = env.sandbox.spy();
     const el = createHorizontalScroller(5);
     const clm = new ChildLayoutManager({
       ampElement: ampElementMock,
