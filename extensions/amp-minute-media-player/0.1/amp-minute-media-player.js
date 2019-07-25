@@ -198,9 +198,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * @private
    */
   iframeSource_() {
-    const baseUrl =
-      'https://www.oo-syringe.com/dev/amp/mplayer.html';
-      //`?content_type=${encodeURIComponent(this.contentType_)}`;
+    const baseUrl = 'https://www.oo-syringe.com/dev/amp/mplayer.html';
 
     const moreQueryParams = dict({
       'content_type': this.contentType_ || undefined,

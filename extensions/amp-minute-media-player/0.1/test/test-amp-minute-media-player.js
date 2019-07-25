@@ -61,7 +61,7 @@ describes.realWin(
         .then(() => minuteMediaPlayerElement);
     }
 
-    it('renders with curated content', async() => {
+    it('renders with curated content', async () => {
       return getMinuteMediaPlayer({
         'data-content-type': CURATED,
         'data-content-id': DATA_CONTENT_ID,
@@ -75,7 +75,7 @@ describes.realWin(
       });
     });
 
-    it('renders with semantic (empty params)', async() => {
+    it('renders with semantic (empty params)', async () => {
       return getMinuteMediaPlayer({
         'data-content-type': SEMANTIC,
         /* no params to semantic */
@@ -89,7 +89,7 @@ describes.realWin(
       });
     });
 
-    it('renders with semantic (with params)', async() => {
+    it('renders with semantic (with params)', async () => {
       return getMinuteMediaPlayer({
         'data-content-type': SEMANTIC,
         'data-minimum-date-factor': DATA_MINIMUM_DATE_FACTOR,
