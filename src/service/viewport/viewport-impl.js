@@ -17,7 +17,7 @@
 import {Animation} from '../../animation';
 import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
-import {Services} from '../../services';
+import {Services, getFriendlyIframeEmbedOptional} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedShadowRoot_} from './viewport-binding-ios-embed-sd';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
@@ -1447,18 +1447,4 @@ export function installViewportServiceForDoc(ampdoc) {
     createViewport,
     /* opt_instantiate */ true
   );
-}
-
-/**
- * A duplicated copy of the same method in friendly-iframe-embed.js
- * to work around a circular imports, which breaks single-pass.
- * TODO(lannka): fix this.
- *
- * @param {!HTMLIFrameElement} iframe
- * @return {?../../friendly-iframe-embed.FriendlyIframeEmbed}
- */
-function getFriendlyIframeEmbedOptional(iframe) {
-  return /** @type {?../../friendly-iframe-embed.FriendlyIframeEmbed} */ (iframe[
-    '__AMP_EMBED__'
-  ]);
 }

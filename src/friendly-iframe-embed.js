@@ -15,13 +15,12 @@
  */
 
 import {CommonSignals} from './common-signals';
+import {EMBED_PROP, Services} from './services';
 import {LEGACY_ELEMENTS, stubLegacyElements} from './service/extensions-impl';
 import {Observable} from './observable';
-import {Services} from './services';
 import {Signals} from './utils/signals';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {closestAncestorElementBySelector, escapeHtml} from './dom';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
@@ -35,6 +34,7 @@ import {
   installServiceInEmbedIfEmbeddable,
   setParentWindow,
 } from './service';
+import {escapeHtml} from './dom';
 import {getMode} from './mode';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
@@ -55,9 +55,6 @@ import {
   setStyles,
 } from './style';
 import {toWin} from './types';
-
-/** @const {string} */
-const EMBED_PROP = '__AMP_EMBED__';
 
 /** @const {!Array<string>} */
 const EXCLUDE_INI_LOAD = [
@@ -121,18 +118,6 @@ function isSrcdocSupported() {
  */
 export function setFriendlyIframeEmbedVisible(embed, visible) {
   embed.setVisible_(visible);
-}
-
-/**
- * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
- * Caution: This will only return the FIE after the iframe has 'loaded'. If you
- * are checking before this signal you may be in a race condition that returns
- * null.
- * @param {!HTMLIFrameElement} iframe
- * @return {?FriendlyIframeEmbed}
- */
-export function getFriendlyIframeEmbedOptional(iframe) {
-  return /** @type {?FriendlyIframeEmbed} */ (iframe[EMBED_PROP]);
 }
 
 /**
@@ -860,17 +845,6 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
       });
       return Promise.all(promises);
     });
-}
-
-/**
- * @param {!Element} element
- * @return {boolean}
- */
-export function isInFie(element) {
-  return (
-    element.classList.contains('i-amphtml-fie') ||
-    !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
-  );
 }
 
 /**

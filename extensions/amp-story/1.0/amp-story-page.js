@@ -47,7 +47,7 @@ import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';
-import {Services} from '../../../src/services';
+import {Services, getFriendlyIframeEmbedOptional} from '../../../src/services';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {
   childElement,
@@ -64,7 +64,6 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getData, listen} from '../../../src/event-helper';
-import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';

@@ -241,6 +241,17 @@ export function isShadowRoot(value) {
 }
 
 /**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isInFie(element) {
+  return (
+    element.classList.contains('i-amphtml-fie') ||
+    !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
+  );
+}
+
+/**
  * Finds the closest element that satisfies the callback from this element
  * up the DOM subtree.
  * @param {!Element} element
