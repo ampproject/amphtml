@@ -126,6 +126,13 @@
    *   //   };
    *   "interactive_tests": "examples/visual-tests/foo/foo-test.js",
    *
+   *   // [optional, EXPERIMENTAL] If interactive_tests have been specified, both
+   *   // interactive tests and the base page without any interactive tests will
+   *   // be executed by default. However, if the result of the base execution
+   *   // is of no interest, setting no_base_test to true will cause the base test
+   *   // not to be executed.
+   *   "no_base_test": true,
+   *
    *   // [optional] Add this key and set to true to skip this test. You should
    *   // also add an explanation and a link to an example of a previous
    *   // snapshot on Percy that demonstrate the flakiness of this test.
@@ -724,7 +731,8 @@
     {
       "url": "examples/visual-tests/amp-ad/amp-ad.html",
       "name": "AMP ad",
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js"
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js",
+      "no_base_test": true
     },
     {
       "url": "examples/visual-tests/amp-ad/amp-inabox.html",
@@ -732,7 +740,8 @@
       "loading_complete_selectors": [
         ".view", ".activeview"
       ],
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js"
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js",
+      "no_base_test": true
     }
   ]
 }
