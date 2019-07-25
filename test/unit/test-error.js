@@ -198,6 +198,7 @@ describe('reportErrorToServerOrViewer', () => {
         expect(data['a']).to.not.be.undefined;
         expect(data['s']).to.not.be.undefined;
         expect(data['el']).to.not.be.undefined;
+        expect(data['ex']).to.not.be.undefined;
         expect(data['v']).to.not.be.undefined;
         expect(data['jse']).to.not.be.undefined;
       });
