@@ -85,20 +85,18 @@ export const naturalDimensions_ = {
 };
 
 /**
- * Elements that the progess can be shown for. This set has to be externalized
+ * Elements that the progress can be shown for. This set has to be externalized
  * since the element's implementation may not be downloaded yet.
+ * This list does not include video players which are found via regex later.
  * @enum {boolean}
  * @private  Visible for testing only!
  */
 export const LOADING_ELEMENTS_ = {
   'AMP-AD': true,
   'AMP-ANIM': true,
-  'AMP-BRIGHTCOVE': true,
-  'AMP-DAILYMOTION': true,
   'AMP-EMBED': true,
   'AMP-FACEBOOK': true,
   'AMP-FACEBOOK-COMMENTS': true,
-  'AMP-FACEBOOK-LIKE': true,
   'AMP-FACEBOOK-PAGE': true,
   'AMP-GOOGLE-DOCUMENT-EMBED': true,
   'AMP-IFRAME': true,
@@ -107,17 +105,15 @@ export const LOADING_ELEMENTS_ = {
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
   'AMP-PLAYBUZZ': true,
-  'AMP-YOUTUBE': true,
-  'AMP-VIMEO': true,
+  'AMP-TWITTER': true,
 };
-
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
+ * reasons, so they are listed individually.
  * @private @const {!RegExp}
  */
-const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
+const videoPlayerTagNameRe = /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
 
 /**
  * @param {string} s
@@ -298,7 +294,7 @@ export function getNaturalDimensions(element) {
  */
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
-  return LOADING_ELEMENTS_[tagName] || isVideoPlayerComponent(tagName);
+  return LOADING_ELEMENTS_[tagName] || isIframeVideoPlayerComponent(tagName);
 }
 
 /**
@@ -308,7 +304,10 @@ export function isLoadingAllowed(element) {
  * @param {string} tagName
  * @return {boolean}
  */
-function isVideoPlayerComponent(tagName) {
+export function isIframeVideoPlayerComponent(tagName) {
+  if (tagName == 'AMP-VIDEO') {
+    return false;
+  }
   return videoPlayerTagNameRe.test(tagName);
 }
 
