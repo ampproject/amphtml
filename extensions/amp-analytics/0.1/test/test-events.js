@@ -1890,7 +1890,7 @@ describes.realWin('Events', {amp: 1}, env => {
         });
       });
 
-      it('with documentExit trigger on unload', function*() {
+      it('with documentExit trigger on unload if pagehide is unsupported', function*() {
         const config = {visibilitySpec: {reportWhen: 'documentExit'}};
         const tracker = root.getTracker('visible', VisibilityTracker);
         const deferred = new Deferred();
@@ -1899,6 +1899,7 @@ describes.realWin('Events', {amp: 1}, env => {
           deferred.resolve(event);
           handlerSpy();
         };
+        sandbox.stub(tracker, 'supportsPageHide_').returns(false);
 
         tracker.add(tracker.root, 'visible', config, handler);
 
@@ -1930,6 +1931,35 @@ describes.realWin('Events', {amp: 1}, env => {
         win.dispatchEvent(new Event('pagehide'));
 
         return deferred.promise.then(event => {
+          expect(event.type).to.equal('visible');
+        });
+      });
+
+      it('with no trigger on unload if pagehide is supported', function*() {
+        const config = {visibilitySpec: {reportWhen: 'documentExit'}};
+        const tracker = root.getTracker('visible', VisibilityTracker);
+        const deferred = new Deferred();
+        const handlerSpy = sandbox.spy();
+        const handler = event => {
+          deferred.resolve(event);
+          handlerSpy();
+        };
+        sandbox.stub(tracker, 'supportsPageHide_').returns(true);
+
+        tracker.add(tracker.root, 'visible', config, handler);
+
+        yield macroTask();
+        expect(handlerSpy).to.not.be.called;
+        win.dispatchEvent(new Event('unload'));
+        // Should not be triggered
+
+        // Ensure pagehide event is dispatched after visibiltyModel is ready
+        yield macroTask();
+        expect(handlerSpy).to.not.be.called;
+        win.dispatchEvent(new Event('pagehide'));
+
+        return deferred.promise.then(event => {
+          expect(handlerSpy).to.be.calledOnce;
           expect(event.type).to.equal('visible');
         });
       });
