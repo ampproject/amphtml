@@ -105,7 +105,7 @@ export class ExternalReorderHeadTransformer {
             this.headComponents_.noscript = child;
             break;
           default:
-            if (!this.headComponents_.other.includes(child)) {
+            if (this.headComponents_.other.indexOf(child) == -1) {
               this.headComponents_.other.push(child);
             }
         }
@@ -129,7 +129,7 @@ export class ExternalReorderHeadTransformer {
       this.headComponents_.metaCharset = element;
       return;
     }
-    if (!this.headComponents_.metaOther.includes(element)) {
+    if (this.headComponents_.metaOther.indexOf(element) == -1) {
       this.headComponents_.metaOther.push(element);
       return;
     }
@@ -188,7 +188,9 @@ export class ExternalReorderHeadTransformer {
       this.headComponents_.scriptAmpViewer = element;
       return;
     }
-    this.headComponents_.other.push(element);
+    if (this.headComponents_.other.indexOf(element) == -1) {
+      this.headComponents_.other.push(element);
+    }
   }
 
   /**
@@ -212,7 +214,9 @@ export class ExternalReorderHeadTransformer {
       this.headComponents_.styleAmpBoilerplate = element;
       return;
     }
-    this.headComponents_.other.push(element);
+    if (this.headComponents_.other.indexOf(element) == -1) {
+      this.headComponents_.other.push(element);
+    }
   }
 
   /**
@@ -244,7 +248,9 @@ export class ExternalReorderHeadTransformer {
       this.headComponents_.linkResourceHints.push(element);
       return;
     }
-    this.headComponents_.other.push(element);
+    if (this.headComponents_.other.indexOf(element) == -1) {
+      this.headComponents_.other.push(element);
+    }
   }
 
   /**
