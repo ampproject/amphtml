@@ -379,7 +379,7 @@ export class AnalyticsConfig {
   /**
    * Expands all key value pairs asynchronously and returns a promise that will
    * resolve with the expanded object.
-   * @param {!Element|!ShadowRoot} element
+   * @param {!Element} element
    * @param {!Object} obj
    * @return {!Promise<!Object>}
    */
