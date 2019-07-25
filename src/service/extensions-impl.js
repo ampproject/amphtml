@@ -16,7 +16,7 @@
 
 import {Deferred} from '../utils/promise';
 import {
-  isExperimentOn,
+  getExperimentBranch,
 } from '../experiments';
 import {Services} from '../services';
 import {
@@ -109,8 +109,9 @@ let ExtensionHolderDef;
 /**
  * @const {{experiment: string, control: string, branch: string}}
  */
-const FIE_CSS_CLEANUP_EXP = {
+export const FIE_CSS_CLEANUP_EXP = {
   branch: 'fie-css-cleanup',
+  control: '21064213',
   experiment: '21064214',
 };
 
@@ -458,7 +459,6 @@ export class Extensions {
     // Install runtime styles.
     installStylesForDoc(
       ampdoc,
-      isExperimentOn(this.win, 'fie-css-cleanup') &&
         getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.branch) ===
           FIE_CSS_CLEANUP_EXP.experiment
         ? ampSharedCss
@@ -518,7 +518,6 @@ export class Extensions {
     // Install runtime styles.
     installStylesLegacy(
       childWin.document,
-      isExperimentOn(this.win, 'fie-css-cleanup') &&
         getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.branch) ===
           FIE_CSS_CLEANUP_EXP.experiment
         ? ampSharedCss
