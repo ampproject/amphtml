@@ -51,12 +51,9 @@ describe('Layout', () => {
       // in whitelist.
       'AMP-AD',
       'AMP-ANIM',
-      'AMP-BRIGHTCOVE',
-      'AMP-DAILYMOTION',
       'AMP-EMBED',
       'AMP-FACEBOOK',
       'AMP-FACEBOOK-COMMENTS',
-      'AMP-FACEBOOK-LIKE',
       'AMP-FACEBOOK-PAGE',
       'AMP-GOOGLE-DOCUMENT-EMBED',
       'AMP-IFRAME',
@@ -65,8 +62,7 @@ describe('Layout', () => {
       'AMP-LIST',
       'AMP-PINTEREST',
       'AMP-PLAYBUZZ',
-      'AMP-YOUTUBE',
-      'AMP-VIMEO',
+      'AMP-TWITTER',
 
       // matched by video player naming convention (fake)
       'AMP-FOO-PLAYER',
@@ -75,8 +71,11 @@ describe('Layout', () => {
       // matched by video player naming convention (actual)
       'AMP-JWPLAYER',
       'AMP-OOYALA-PLAYER',
-      'AMP-VIDEO',
       'AMP-VIDEO-IFRAME',
+      'AMP-YOUTUBE',
+      'AMP-VIMEO',
+      'AMP-BRIGHTCOVE',
+      'AMP-DAILYMOTION',
     ];
     elementsValidTagNames.forEach(function(tag) {
       el.tagName = tag;
@@ -88,7 +87,7 @@ describe('Layout', () => {
     const elementsInvalidTagNames = [
       'AMP-POSITION-OBSERVER',
       'AMP-BODYMOVIN-ANIMATION',
-      'AMP-TWITTER',
+      'AMP-VIDEO',
       'AMP-REDDIT',
       'AMP-GITHUB',
     ];

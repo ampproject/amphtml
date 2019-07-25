@@ -16,11 +16,11 @@
 
 import {
   BIND_PREFIX,
-  BLACKLISTED_TAGS,
   TRIPLE_MUSTACHE_WHITELISTED_TAGS,
   WHITELISTED_ATTRS,
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
+  blacklistedTags,
   isValidAttr,
 } from './sanitation';
 import {dict} from './utils/object';
@@ -98,7 +98,7 @@ export function sanitizeHtml(html, doc, diffing) {
   // No Caja support for <script> or <svg>.
   const cajaBlacklistedTags = Object.assign(
     {'script': true, 'svg': true},
-    BLACKLISTED_TAGS
+    blacklistedTags(doc)
   );
 
   const parser = htmlSanitizer.makeSaxParser({
