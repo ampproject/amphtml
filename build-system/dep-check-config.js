@@ -246,6 +246,12 @@ exports.rules = [
       // Ads needs iframe transports
       'extensions/amp-ad-exit/0.1/config.js->extensions/amp-analytics/0.1/iframe-transport-vendors.js',
 
+      // Facebook components
+      'extensions/amp-facebook/0.1/amp-facebook.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
+
       // Amp geo in group enum
       'extensions/amp-consent/0.1/amp-consent.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
@@ -255,7 +261,6 @@ exports.rules = [
       'extensions/amp-story/1.0/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
-      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/navigation-state.js',
       // TODO(ccordry): remove this after createShadowRootWithStyle is moved to src
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/utils.js',
 

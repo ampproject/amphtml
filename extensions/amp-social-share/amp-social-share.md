@@ -37,12 +37,12 @@ Displays a social share button.
     </td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>container, fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-social-share/">amp-social-share example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-social-share/">amp-social-share example</a>.</td>
   </tr>
 </table>
 

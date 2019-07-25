@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.57 */
+/** Version: 0.1.22.61 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -464,11 +464,59 @@ class EventParams {
   }
 }
 
+/**
+ * @implements {Message}
+ */
+class SmartBoxMessage {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.isClicked_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getIsClicked() {
+    return this.isClicked_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setIsClicked(value) {
+    this.isClicked_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.isClicked_,  // field 1 - is_clicked
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'SmartBoxMessage';
+  }
+}
+
 const PROTO_MAP = {
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
   'EventParams': EventParams,
+  'SmartBoxMessage': SmartBoxMessage,
 };
 
 /**
@@ -2091,7 +2139,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.23';
+    this.version = '1.24';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -2382,7 +2430,16 @@ class ActivityIframePort$1 {
    * @return {!Promise}
    */
   whenReady() {
-    return this.iframePort_.whenReady().then(() => {
+    return this.iframePort_.whenReady();
+  }
+
+  /**
+   * Waits until the activity port is connected to the host.
+   * @return {!Promise}
+   */
+  connect() {
+    return this.iframePort_.connect().then(() => {
+      // Attach a callback to receive messages after connection complete
       this.iframePort_.onMessage(data => {
         if (this.callbackOriginal_) {
           this.callbackOriginal_(data);
@@ -2397,14 +2454,6 @@ class ActivityIframePort$1 {
         }
       });
     });
-  }
-
-  /**
-   * Waits until the activity port is connected to the host.
-   * @return {!Promise}
-   */
-  connect() {
-    return this.iframePort_.connect();
   }
 
   /**
@@ -3510,7 +3559,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.57',
+    '_client': 'SwG 0.1.22.61',
   });
 }
 
@@ -3570,7 +3619,7 @@ class SmartSubscriptionButtonApi {
   /**
    * @param {!./deps.DepsDef} deps
    * @param {!Element} button
-   * @param {!../api/subscriptions.ButtonOptions} options
+   * @param {!../api/subscriptions.SmartButtonOptions} options
    * @param {function()=} callback
    */
   constructor(deps, button, options, callback) {
@@ -3594,7 +3643,7 @@ class SmartSubscriptionButtonApi {
     /** @private @const {!Element} */
     this.button_ = button;
 
-    /** @private {!../api/subscriptions.ButtonOptions} */
+    /** @private {!../api/subscriptions.SmartButtonOptions} */
     this.options_ = options;
 
     /** @private const {function()=} */
@@ -3603,13 +3652,19 @@ class SmartSubscriptionButtonApi {
     /** @private @const {string} */
     this.src_ = feUrl('/smartboxiframe');
 
-    /** @private @const {!Object} */
-    this.args_ = feArgs({
+    const frontendArguments = {
       'productId': this.deps_.pageConfig().getProductId(),
       'publicationId': this.deps_.pageConfig().getPublicationId(),
       'theme': this.options_ && this.options_.theme || 'light',
       'lang': this.options_ && this.options_.lang || 'en',
-    });
+    };
+    const messageTextColor = this.options_ && this.options_.messageTextColor;
+    if (messageTextColor) {
+      frontendArguments['messageTextColor'] = messageTextColor;
+    }
+
+    /** @private @const {!Object} */
+    this.args_ = feArgs(frontendArguments);
   }
 
   /**
@@ -3636,6 +3691,8 @@ class SmartSubscriptionButtonApi {
       'width': '100%',
     });
     this.button_.appendChild(this.iframe_);
+    const analyticsContext = this.deps_.analytics().getContext().toArray();
+    this.args_['analyticsContext'] = analyticsContext;
     this.activityPorts_.openIframe(this.iframe_, this.src_, this.args_)
         .then(port => {
           port.onMessageDeprecated(result => {
@@ -3755,7 +3812,8 @@ class ButtonApi {
    * @return {!Element}
    */
   attach(button, optionsOrCallback, opt_callback) {
-    const options = this.getOptions_(optionsOrCallback);
+    const options = /** @type {!../api/subscriptions.ButtonOptions} */
+        (this.getOptions_(optionsOrCallback));
     const callback = this.getCallback_(optionsOrCallback, opt_callback);
 
     const theme = options['theme'];
@@ -3771,12 +3829,12 @@ class ButtonApi {
 
   /**
    *
-   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
-   * @return {!../api/subscriptions.ButtonOptions}
+   * @param {../api/subscriptions.ButtonOptions|../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
+   * @return {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions}
    * @private
    */
   getOptions_(optionsOrCallback) {
-    const options = /** @type {!../api/subscriptions.ButtonOptions} */
+    const options = /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */
         (optionsOrCallback && typeof optionsOrCallback != 'function' ?
         optionsOrCallback : {'theme': Theme.LIGHT});
 
@@ -3789,7 +3847,7 @@ class ButtonApi {
 
   /**
    *
-   * @param {?../api/subscriptions.ButtonOptions|function()} optionsOrCallback
+   * @param {?../api/subscriptions.ButtonOptions|?../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {function()|function(Event):boolean}
    * @private
@@ -3804,12 +3862,13 @@ class ButtonApi {
   /**
    * @param {!./deps.DepsDef} deps
    * @param {!Element} button
-   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
+   * @param {../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {!Element}
    */
   attachSmartButton(deps, button, optionsOrCallback, opt_callback) {
-    const options = this.getOptions_(optionsOrCallback);
+    const options = /** @type {!../api/subscriptions.SmartButtonOptions} */
+        (this.getOptions_(optionsOrCallback));
     const callback = /** @type {function()} */
         (this.getCallback_(optionsOrCallback, opt_callback));
 
@@ -13381,6 +13440,13 @@ class AnalyticsService {
   }
 
   /**
+   * @return {!AnalyticsContext}
+   */
+  getContext() {
+    return this.context_;
+  }
+
+  /**
    * @param {!../api/client-event-manager-api.ClientEvent} event
    * @return {!AnalyticsRequest}
    */
@@ -13549,8 +13615,6 @@ class PropensityServer {
     this.publicationId_ = publicationId;
     /** @private {?string} */
     this.clientId_ = null;
-    /** @private {boolean} */
-    this.userConsent_ = false;
     /** @private @const {!Xhr} */
     this.xhr_ = new Xhr(win);
     /** @private @const {number} */
@@ -13581,12 +13645,6 @@ class PropensityServer {
    * @private
    */
   getClientId_() {
-    // No cookie is sent when user consent is not available.
-    if (!this.userConsent_) {
-      return 'noConsent';
-    }
-    // When user consent is available, get the first party cookie
-    // for Google Ads.
     if (!this.clientId_) {
       // Match '__gads' (name of the cookie) dropped by Ads Tag.
       const gadsmatch = this.getDocumentCookie_().match(
@@ -13599,25 +13657,18 @@ class PropensityServer {
   }
 
   /**
-   * @param {boolean} userConsent
-   */
-  setUserConsent(userConsent) {
-    this.userConsent_ = userConsent;
-  }
-
-  /**
    * @param {string} state
-   * @param {?string} entitlements
+   * @param {?string} productsOrSkus
    */
-  sendSubscriptionState(state, entitlements) {
+  sendSubscriptionState(state, productsOrSkus) {
     const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       credentials: 'include',
     });
     const clientId = this.getClientId_();
     let userState = this.publicationId_ + ':' + state;
-    if (entitlements) {
-      userState = userState + ':' + encodeURIComponent(entitlements);
+    if (productsOrSkus) {
+      userState = userState + ':' + encodeURIComponent(productsOrSkus);
     }
     let url = adsUrl('/subopt/data?states=')
         + encodeURIComponent(userState) + '&u_tz=240'
@@ -13688,46 +13739,48 @@ class PropensityServer {
       defaultScore =
         /** @type {!../api/propensity-api.PropensityScore} */ ({
           header: {ok: false},
-          body: {result: 'No valid response'},
+          body: {error: 'No valid response'},
         });
+      return defaultScore;
     }
     const status = response['header'];
+    let scoreDetails = undefined;
     if (status['ok']) {
       const scores = response['scores'];
-      let found = false;
+      scoreDetails = [];
       for (let i = 0; i < scores.length; i++) {
         const result = scores[i];
-        if (result['product'] == this.publicationId_) {
-          found = true;
-          const scoreStatus = !!result['score'];
-          let value = undefined;
-          if (scoreStatus) {
-            value = result['score'];
-          } else {
-            value = result['error_message'];
-          }
-          defaultScore =
-            /** @type {!../api/propensity-api.PropensityScore} */ ({
-              header: {ok: scoreStatus},
-              body: {result: value},
-            });
-          break;
+        const scoreStatus = !!result['score'];
+        let scoreDetail;
+        if (scoreStatus) {
+          const value = /** @type {!../api/propensity-api.Score} */({
+            value: result['score'],
+            bucketed: result['score_type'] == 2,
+          });
+          scoreDetail = /** @type {!../api/propensity-api.Body} */ ({
+            product: result['product'],
+            score: value,
+          });
+        } else {
+          scoreDetail = /** @type {!../api/propensity-api.Body} */ ({
+            product: result['product'],
+            error: result['error_message'],
+          });
         }
+        scoreDetails.push(scoreDetail);
       }
-      if (!found) {
-        const errorMessage = 'No score available for ' + this.publicationId_;
+      if (scoreDetails) {
         defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
-          header: {ok: false},
-          body: {result: errorMessage},
+          header: {ok: true},
+          body: {scores: scoreDetails},
         });
       }
-    } else {
-      const errorMessage = response['error'];
-      defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
-        header: {ok: false},
-        body: {result: errorMessage},
-      });
+      return defaultScore;
     }
+    defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
+      header: {ok: false},
+      body: {error: response['error']},
+    });
     return defaultScore;
   }
   /**
@@ -13797,24 +13850,24 @@ class Propensity {
   }
 
   /** @override */
-  sendSubscriptionState(state, jsonEntitlements) {
+  sendSubscriptionState(state, jsonProducts) {
     if (!Object.values(SubscriptionState).includes(state)) {
       throw new Error('Invalid subscription state provided');
     }
     if ((SubscriptionState.SUBSCRIBER == state ||
          SubscriptionState.PAST_SUBSCRIBER == state)
-        && !jsonEntitlements) {
+        && !jsonProducts) {
       throw new Error('Entitlements must be provided for users with'
           + ' active or expired subscriptions');
     }
-    if (jsonEntitlements && !isObject(jsonEntitlements)) {
+    if (jsonProducts && !isObject(jsonProducts)) {
       throw new Error('Entitlements must be an Object');
     }
-    let entitlements = null;
-    if (jsonEntitlements) {
-      entitlements = JSON.stringify(jsonEntitlements);
+    let productsOrSkus = null;
+    if (jsonProducts) {
+      productsOrSkus = JSON.stringify(jsonProducts);
     }
-    this.propensityServer_.sendSubscriptionState(state, entitlements);
+    this.propensityServer_.sendSubscriptionState(state, productsOrSkus);
   }
 
   /** @override */
@@ -14087,14 +14140,16 @@ class ConfiguredRuntime {
    * @param {!../model/page-config.PageConfig} pageConfig
    * @param {{
    *     fetcher: (!Fetcher|undefined),
-   *     eventManager: (!ClientEventManager|undefined)
+   *     configPromise: (!Promise|undefined),
    *   }=} opt_integr
    * @param {!../api/subscriptions.Config=} opt_config
    */
   constructor(winOrDoc, pageConfig, opt_integr, opt_config) {
+    opt_integr = opt_integr || {};
+    opt_integr.configPromise = opt_integr.configPromise || Promise.resolve();
+
     /** @private @const {!ClientEventManager} */
-    this.eventManager_ = (opt_integr && opt_integr.eventManager)
-        || new ClientEventManager(Promise.resolve());
+    this.eventManager_ = new ClientEventManager(opt_integr.configPromise);
 
     /** @private @const {!Doc} */
     this.doc_ = resolveDoc(winOrDoc);
@@ -14128,8 +14183,7 @@ class ConfiguredRuntime {
     this.jserror_ = new JsError(this.doc_);
 
     /** @private @const {!Fetcher} */
-    this.fetcher_ = opt_integr && opt_integr.fetcher ||
-        new XhrFetcher(this.win_);
+    this.fetcher_ = opt_integr.fetcher || new XhrFetcher(this.win_);
 
     /** @private @const {!Storage} */
     this.storage_ = new Storage(this.win_);

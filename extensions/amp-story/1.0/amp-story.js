@@ -37,14 +37,9 @@ import {
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
-import {
-  AdvancementMode,
-  AnalyticsEvent,
-  getAnalyticsService,
-} from './story-analytics';
+import {AdvancementMode, getAnalyticsService} from './story-analytics';
 import {AmpEvents} from '../../../src/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
@@ -71,10 +66,10 @@ import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
 import {LocalizationService} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
-import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
+import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {
   SwipeXYRecognizer,
   SwipeYRecognizer,
@@ -245,12 +240,6 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(Action.TOGGLE_RTL, true);
     }
 
-    // TODO(#19768): Avoid passing a private function here.
-    /** @private {!NavigationState} */
-    this.navigationState_ = new NavigationState(this.win, () =>
-      this.hasBookend_()
-    );
-
     /** @private {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
@@ -315,9 +304,6 @@ export class AmpStory extends AMP.BaseElement {
     this.landscapeOrientationMedia_ = this.win.matchMedia(
       '(orientation: landscape)'
     );
-
-    /** @private {?AmpStoryBackground} */
-    this.background_ = null;
 
     /** @private {?HTMLMediaElement} */
     this.backgroundAudioEl_ = null;
@@ -434,11 +420,6 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(Action.TOGGLE_CAN_SHOW_BOOKEND, false);
     }
 
-    this.navigationState_.observe(stateChangeEvent => {
-      this.variableService_.onNavigationStateChange(stateChangeEvent);
-      this.analyticsService_.onNavigationStateChange(stateChangeEvent);
-    });
-
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
     this.element.removeAttribute('title');
@@ -503,7 +484,7 @@ export class AmpStory extends AMP.BaseElement {
       this.initializeMediaQueries_(mediaQueryEls);
     }
 
-    const styleEl = document.querySelector('style[amp-custom]');
+    const styleEl = this.win.document.querySelector('style[amp-custom]');
 
     if (styleEl) {
       this.rewriteStyles_(styleEl);
@@ -549,10 +530,10 @@ export class AmpStory extends AMP.BaseElement {
     // ../../../extensions/amp-animation/0.1/web-animations.js
     this.mutateElement(() => {
       styleEl.textContent = styleEl.textContent
-        .replace(/([\d.]+)vh/gim, 'calc($1 * var(--story-page-vh))')
-        .replace(/([\d.]+)vw/gim, 'calc($1 * var(--story-page-vw))')
-        .replace(/([\d.]+)vmin/gim, 'calc($1 * var(--story-page-vmin))')
-        .replace(/([\d.]+)vmax/gim, 'calc($1 * var(--story-page-vmax))');
+        .replace(/(-?[\d.]+)vh/gim, 'calc($1 * var(--story-page-vh))')
+        .replace(/(-?[\d.]+)vw/gim, 'calc($1 * var(--story-page-vw))')
+        .replace(/(-?[\d.]+)vmin/gim, 'calc($1 * var(--story-page-vmin))')
+        .replace(/(-?[\d.]+)vmax/gim, 'calc($1 * var(--story-page-vmax))');
     });
   }
 
@@ -658,7 +639,9 @@ export class AmpStory extends AMP.BaseElement {
         // We do not want to trigger an analytics event for the initialization of
         // the muted state.
         this.analyticsService_.triggerEvent(
-          isMuted ? AnalyticsEvent.STORY_MUTED : AnalyticsEvent.STORY_UNMUTED
+          isMuted
+            ? StoryAnalyticsEvent.STORY_MUTED
+            : StoryAnalyticsEvent.STORY_UNMUTED
         );
       },
       false /** callToInitialize */
@@ -1449,16 +1432,6 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
-        const oldPageId = oldPage ? oldPage.element.id : null;
-        // TODO(alanorozco): check if autoplay
-        this.navigationState_.updateActivePage(
-          pageIndex,
-          this.getPageCount(),
-          targetPage.element.id,
-          oldPageId,
-          targetPage.getNextPageId() === null /* isFinalPage */
-        );
-
         // If first navigation.
         if (!oldPage) {
           this.registerAndPreloadBackgroundAudio_();
@@ -1468,8 +1441,6 @@ export class AmpStory extends AMP.BaseElement {
           oldPage && oldPage.muteAllMedia();
           this.activePage_.unmuteAllMedia();
         }
-
-        this.updateBackground_(targetPage.element, /* initial */ !oldPage);
       },
       // Third and last step contains all the actions that can be delayed after
       // the navigation happened, like preloading the following pages, or
@@ -1804,16 +1775,6 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
-        if (
-          !this.background_ &&
-          isExperimentOn(this.win, 'amp-story-desktop-background')
-        ) {
-          this.background_ = new AmpStoryBackground(this.win, this.element);
-          this.background_.attach();
-        }
-        if (this.activePage_) {
-          this.updateBackground_(this.activePage_.element, /* initial */ true);
-        }
         break;
       case UIType.DESKTOP_FULLBLEED:
         this.buildPaginationButtons_();
@@ -1843,6 +1804,16 @@ export class AmpStory extends AMP.BaseElement {
             this.element.appendChild(pageAttachments[i]);
           }
         });
+
+        this.signals()
+          .whenSignal(CommonSignals.LOAD_END)
+          .then(() => {
+            this.vsync_.mutate(() => {
+              this.pages_.forEach(page =>
+                page.element.setAttribute('active', '')
+              );
+            });
+          });
         break;
     }
   }
@@ -2061,64 +2032,6 @@ export class AmpStory extends AMP.BaseElement {
         });
       }
     }
-  }
-
-  /**
-   * Get the URL of the given page's background resource.
-   * @param {!Element} pageElement
-   * @return {?string} The URL of the background resource
-   */
-  getBackgroundUrl_(pageElement) {
-    let fillElement = pageElement.querySelector(
-      '[template="fill"]:not(.i-amphtml-hidden-by-media-query)'
-    );
-
-    if (!fillElement) {
-      return null;
-    }
-
-    fillElement = dev().assertElement(fillElement);
-
-    const fillPosterElement = fillElement.querySelector(
-      '[poster]:not(.i-amphtml-hidden-by-media-query)'
-    );
-
-    const srcElement = fillElement.querySelector(
-      '[src]:not(.i-amphtml-hidden-by-media-query)'
-    );
-
-    const fillPoster = fillPosterElement
-      ? fillPosterElement.getAttribute('poster')
-      : '';
-    const src = srcElement ? srcElement.getAttribute('src') : '';
-
-    return fillPoster || src;
-  }
-
-  /**
-   * Update the background to the specified page's background.
-   * @param {!Element} pageElement
-   * @param {boolean=} initial
-   */
-  updateBackground_(pageElement, initial = false) {
-    if (!this.background_) {
-      return;
-    }
-
-    this.getVsync().run(
-      {
-        measure: state => {
-          state.url = this.getBackgroundUrl_(pageElement);
-          state.color = computedStyle(this.win, pageElement).getPropertyValue(
-            'background-color'
-          );
-        },
-        mutate: state => {
-          this.background_.setBackground(state.color, state.url, initial);
-        },
-      },
-      {}
-    );
   }
 
   /**
@@ -2659,11 +2572,6 @@ export class AmpStory extends AMP.BaseElement {
         ctaAnchorEl.setAttribute('data-vars-story-page-index', pageIndex);
       });
     });
-  }
-
-  /** @return {!NavigationState} */
-  getNavigationState() {
-    return this.navigationState_;
   }
 
   /**

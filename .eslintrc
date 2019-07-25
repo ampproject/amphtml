@@ -33,23 +33,6 @@
         "file": "fileoverview",
         "returns": "return"
       },
-      "additionalTagNames": {
-        "customTags": [
-          "closurePrimitive",
-          "deprecated",
-          "dict",
-          "export",
-          "final",
-	        "nocollapse",
-          "package",
-          "record",
-          "restricted",
-          "struct",
-          "suppress",
-          "template",
-          "visibleForTesting"
-        ]
-      },
       "allowOverrideWithoutParam" : true
     }
   },
@@ -62,6 +45,7 @@
     "amphtml-internal/no-array-destructuring": 2,
     "amphtml-internal/no-deep-destructuring": 2,
     "amphtml-internal/no-duplicate-import": 2,
+    "amphtml-internal/no-duplicate-name-typedef": 2,
     "amphtml-internal/no-es2015-number-props": 2,
     "amphtml-internal/no-export-side-effect": 2,
     "amphtml-internal/no-for-of-statement": 2,
@@ -70,6 +54,7 @@
     "amphtml-internal/no-import": 2,
     "amphtml-internal/no-import-rename": 2,
     "amphtml-internal/no-is-amp-alt": 2,
+    "amphtml-internal/no-log-array": 2,
     "amphtml-internal/no-mixed-operators": 2,
     "amphtml-internal/no-module-exports": 2,
     "amphtml-internal/no-mixed-interpolation": 2,
@@ -90,7 +75,24 @@
     "curly": 2,
     "google-camelcase/google-camelcase": 2,
     "jsdoc/check-param-names": 2,
-    "jsdoc/check-tag-names": 2,
+    "jsdoc/check-tag-names": [2, {
+      "definedTags": [
+        "closurePrimitive",
+        "deprecated",
+        "dict",
+        "export",
+        "final",
+        "nocollapse",
+        "noinline",
+        "package",
+        "record",
+        "restricted",
+        "struct",
+        "suppress",
+        "template",
+        "visibleForTesting"
+      ]
+    }],
     "jsdoc/check-types": [2, { "noDefaults": true }],
     "jsdoc/require-param": 2,
     "jsdoc/require-param-name": 2,

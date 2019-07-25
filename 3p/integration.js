@@ -126,6 +126,7 @@ import {dable} from '../ads/dable';
 import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {dotandads} from '../ads/dotandads';
+import {dynad} from '../ads/dynad';
 import {eadv} from '../ads/eadv';
 import {eas} from '../ads/eas';
 import {engageya} from '../ads/engageya';
@@ -137,6 +138,7 @@ import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
+import {forkmedia} from '../ads/forkmedia';
 import {freewheel} from '../ads/freewheel';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
@@ -153,6 +155,7 @@ import {imonomy} from '../ads/imonomy';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
+import {invibes} from '../ads/invibes';
 import {ix} from '../ads/ix';
 import {jubna} from '../ads/jubna';
 import {kargo} from '../ads/kargo';
@@ -178,6 +181,7 @@ import {monetizer101} from '../ads/monetizer101';
 import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
+import {nativeroll} from '../ads/nativeroll';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
 import {nend} from '../ads/nend';
@@ -211,6 +215,7 @@ import {relap} from '../ads/relap';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
+import {rnetplus} from '../ads/rnetplus';
 import {rubicon} from '../ads/rubicon';
 import {runative} from '../ads/runative';
 import {sas} from '../ads/sas';
@@ -277,11 +282,15 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  forkmedia: true,
+  idealmedia: true,
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
+  mgid: true,
   miximedia: true,
   mywidget: true,
+  lentainform: true,
   opinary: true,
   outbrain: true,
   plista: true,
@@ -375,6 +384,7 @@ register('dable', dable);
 register('directadvert', directadvert);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
+register('dynad', dynad);
 register('eadv', eadv);
 register('eas', eas);
 register('embedly', embedly);
@@ -388,6 +398,7 @@ register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
 register('fluct', fluct);
+register('forkmedia', forkmedia);
 register('freewheel', freewheel);
 register('fusion', fusion);
 register('genieessp', genieessp);
@@ -406,6 +417,7 @@ register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('innity', innity);
+register('invibes', invibes);
 register('ix', ix);
 register('jubna', jubna);
 register('kargo', kargo);
@@ -433,6 +445,7 @@ register('monetizer101', monetizer101);
 register('mox', mox);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
+register('nativeroll', nativeroll);
 register('nativo', nativo);
 register('navegg', navegg);
 register('nend', nend);
@@ -468,6 +481,7 @@ register('relap', relap);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rfp', rfp);
+register('rnetplus', rnetplus);
 register('rubicon', rubicon);
 register('runative', runative);
 register('sas', sas);
