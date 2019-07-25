@@ -15,7 +15,7 @@
  */
 
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
-import {AnalyticsEvent, CustomEventTracker, AnalyticsEventType} from './events';
+import {AnalyticsEvent, AnalyticsEventType, CustomEventTracker} from './events';
 import {AnalyticsGroup} from './analytics-group';
 import {Services} from '../../../src/services';
 import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
