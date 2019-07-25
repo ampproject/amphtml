@@ -701,9 +701,9 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/array-includes.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
-      'src/service/extensions-impl.js->src/polyfills/custom-elements.js',
-      'src/service/extensions-impl.js->src/polyfills/document-contains.js',
-      'src/service/extensions-impl.js->src/polyfills/domtokenlist-toggle.js',
+      'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
+      'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
+      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist-toggle.js',
     ],
   },
   {
