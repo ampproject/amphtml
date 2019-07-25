@@ -46,9 +46,14 @@ const TAG = 'amp-analytics/events';
 export const AnalyticsEventType = {
   VISIBLE: 'visible',
   CLICK: 'click',
+  CUSTOM: 'custom',
   TIMER: 'timer',
   SCROLL: 'scroll',
   HIDDEN: 'hidden',
+  RENDER_START: 'render-start',
+  AMP_STORY: 'amp-story',
+  INI_LOAD: 'ini-load',
+  VIDEO: 'video',
 };
 
 const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
@@ -62,72 +67,72 @@ const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
  *   }>}
  */
 const TRACKER_TYPE = Object.freeze({
-  'click': {
-    name: 'click',
+  [AnalyticsEventType.CLICK]: {
+    name: AnalyticsEventType.CLICK,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function(root) {
       return new ClickEventTracker(root);
     },
   },
-  'scroll': {
-    name: 'scroll',
+  [AnalyticsEventType.SCROLL]: {
+    name: AnalyticsEventType.SCROLL,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
       return new ScrollEventTracker(root);
     },
   },
-  'custom': {
-    name: 'custom',
+  [AnalyticsEventType.CUSTOM]: {
+    name: AnalyticsEventType.CUSTOM,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
       return new CustomEventTracker(root);
     },
   },
-  'amp-story': {
-    name: 'amp-story',
+  [AnalyticsEventType.AMP_STORY]: {
+    name: AnalyticsEventType.AMP_STORY,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
       return new AmpStoryEventTracker(root);
     },
   },
-  'render-start': {
-    name: 'render-start',
+  [AnalyticsEventType.RENDER_START]: {
+    name: AnalyticsEventType.RENDER_START,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
     klass: function(root) {
       return new SignalTracker(root);
     },
   },
-  'ini-load': {
-    name: 'ini-load',
+  [AnalyticsEventType.INI_LOAD]: {
+    name: AnalyticsEventType.INI_LOAD,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
     klass: function(root) {
       return new IniLoadTracker(root);
     },
   },
-  'timer': {
-    name: 'timer',
+  [AnalyticsEventType.TIMER]: {
+    name: AnalyticsEventType.TIMER,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
     klass: function(root) {
       return new TimerEventTracker(root);
     },
   },
-  'visible': {
-    name: 'visible',
+  [AnalyticsEventType.VISIBLE]: {
+    name: AnalyticsEventType.VISIBLE,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
       return new VisibilityTracker(root);
     },
   },
-  'hidden': {
-    name: 'visible', // Reuse tracker with visibility
+  [AnalyticsEventType.HIDDEN]: {
+    name: AnalyticsEventType.VISIBLE, // Reuse tracker with visibility
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
       return new VisibilityTracker(root);
     },
   },
-  'video': {
-    name: 'video',
+  [AnalyticsEventType.VIDEO]: {
+    name: AnalyticsEventType.VIDEO,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
       return new VideoEventTracker(root);
@@ -1354,7 +1359,7 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
-    if (eventType == 'hidden') {
+    if (eventType === AnalyticsEventType.HIDDEN) {
       if (reportWhenSpec) {
         user().error(
           TAG,

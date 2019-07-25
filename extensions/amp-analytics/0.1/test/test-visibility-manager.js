@@ -25,6 +25,7 @@ import {
 } from '../visibility-manager';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+import {AnalyticsEventType} from '../events';
 
 class IntersectionObserverStub {
   constructor(callback, options) {
@@ -405,7 +406,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       width: 100,
       height: 100,
     });
-    viewport.scrollObservable_.fire({type: 'scroll'});
+    viewport.scrollObservable_.fire({type: AnalyticsEventType.SCROLL});
     expect(model.getVisibility_()).to.equal(0.5);
 
     return eventPromise.then(() => {
