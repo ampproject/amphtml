@@ -79,8 +79,7 @@ class LoaderBuilder {
   }
 
   /**
-   * Builds the loader's DOM and returns the element.
-   * @return {!Element} new loader root element
+   * Builds the loader's DOM.
    */
   build() {
     this.buildContainers_();
@@ -416,11 +415,11 @@ class LoaderBuilder {
 
 export class LoaderService {
   /**
-   * @param {*} element
-   * @param {*} loaderRoot
-   * @param {*} initDelay
-   * @param {*} elementWidth
-   * @param {*} elementHeight
+   * @param {!AmpElement} element
+   * @param {!Element} loaderRoot
+   * @param {number} initDelay
+   * @param {number} elementWidth
+   * @param {number} elementHeight
    */
   initializeLoader(
     element,

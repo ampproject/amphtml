@@ -48,13 +48,13 @@ export function createLegacyLoaderElement(doc, elementName) {
 }
 
 /* NEW LOADER */
-/** @type {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>} */
+/** @type {?Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>} */
 let loaderServicePromise = null;
 
 /**
  * Gets a Promise for the LoaderService, initiating a request to download the
  * code.
- * @param {!AmpDoc} ampDoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
  * @param {!Element} element
  * @return {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>}
  */
@@ -73,7 +73,7 @@ function getLoaderServicePromise(ampDoc, element) {
  *
  * Please see https://github.com/ampproject/amphtml/issues/20237 for details,
  * screenshots and various states of the new loader design.
- * @param {!AmpDoc} ampDoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
  * @param {!AmpElement} element
  * @param {number} elementWidth
  * @param {number} elementHeight
