@@ -82,10 +82,13 @@ usually be placed directly after the unique content of a given page: for
 example, at the end of a news article or recipe, but before the footer or
 other content repeated across articles.
 
-{% call callout('Note', type='note') %} For performance reasons the
-component will render a maximum of three documents (total) on screen at one
-time. This limit may be changed or removed in the future.
-{% endcall %}
+The component will render a total maximum of three documents on screen in a
+component will render a maximum of three documents (total) on screen at one	single instance. This limit may be changed or removed in the future. 
+
+[tip type="important]
+**Important**	[`<amp-analytics>`](../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`. 
+Measuring pageviews is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md).
+[/tip]
 
 ### Recommendation box
 
