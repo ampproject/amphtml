@@ -9,9 +9,6 @@ var ELEMENT_TYPE = 1
 var DOCUMENT_TYPE = 9
 var DOCUMENT_FRAGMENT_TYPE = 11
 
-// Expose api.
-module.exports = {setDOM, setAttributes};
-
 // Flattened array of node pairs that were ignored (via setDOM.IGNORE) in last diff.
 var ignoredNodes = [];
 
@@ -23,7 +20,7 @@ var ignoredNodes = [];
  * @param {string|!Node} newNode - The updated html(entity).
  * @return {!Array<!Node>}
  */
-function setDOM (oldNode, newNode) {
+export function setDOM (oldNode, newNode) {
   ignoredNodes = [];
 
   // Ensure a realish dom node is provided.
@@ -102,7 +99,7 @@ function setNode (oldNode, newNode) {
  * @param {NamedNodeMap} oldAttributes - The previous attributes.
  * @param {NamedNodeMap} newAttributes - The updated attributes.
  */
-function setAttributes (oldAttributes, newAttributes) {
+export function setAttributes (oldAttributes, newAttributes) {
   var i, a, b, ns, name
 
   // Remove old attributes.

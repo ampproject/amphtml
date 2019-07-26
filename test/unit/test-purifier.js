@@ -35,7 +35,6 @@ describe
       /**
        * Helper that serializes output of purifyHtml() to string.
        * @param {string} html
-       * @param {Document=} doc
        * @return {string}
        */
       purify = html => {
