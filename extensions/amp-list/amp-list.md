@@ -223,7 +223,7 @@ Your endpoint must implement the requirements specified in the [CORS Requests in
 
 If fetching the data at the `src` URL fails, the `<amp-list>` triggers a low-trust `fetch-error` event.
 
-The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supports URL and non-URL expression values; see [amp-bind documentation](https://amp.dev/documentation/components/amp-bind/#element-specific-attributes) for details.
+The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supports URL and non-URL expression values; see `amp-list` in [`amp-bind` element specific attributes documentation](https://amp.dev/documentation/components/amp-bind/#element-specific-attributes) for details.
 
 ##### credentials (optional)
 
