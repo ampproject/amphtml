@@ -56,7 +56,8 @@ module.exports = function(babel) {
           // Write out the transient file that we will feed into CC.
           if (shouldWriteToFile) {
             // Stub
-            console.log('Stub');
+            console /*OK*/
+              .log('Stub');
           }
 
           // This is done for testing purposes only to output what the
