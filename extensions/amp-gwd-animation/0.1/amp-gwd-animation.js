@@ -26,7 +26,7 @@ import {
   getExistingServiceForDocInEmbedScope,
   getParentWindowFrameElement,
 } from '../../../src/service';
-import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {userAssert} from '../../../src/log';
 
 /**

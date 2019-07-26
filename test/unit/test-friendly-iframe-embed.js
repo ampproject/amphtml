@@ -18,7 +18,6 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {
   FriendlyIframeEmbed,
-  getFriendlyIframeEmbedOptional,
   installFriendlyIframeEmbed,
   installStandardServicesInEmbed,
   mergeHtmlForTesting,
@@ -28,6 +27,7 @@ import {
 } from '../../src/friendly-iframe-embed';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
+import {getFriendlyIframeEmbedOptional} from '../../src/iframe-helper';
 import {
   getService,
   installServiceInEmbedScope,

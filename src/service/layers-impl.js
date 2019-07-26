@@ -15,14 +15,11 @@
  */
 
 import {Services} from '../services';
-import {
-  closestAncestorElementBySelector,
-  isConnectedNode,
-  rootNodeFor,
-} from '../dom';
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
+import {isConnectedNode, rootNodeFor} from '../dom';
+import {isInFie} from '../iframe-helper';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -1375,20 +1372,5 @@ export function installLayersServiceForDoc(
       );
     },
     /* opt_instantiate */ true
-  );
-}
-
-/**
- * A duplicated copy of the same method in friendly-iframe-embed.js
- * to work around a circular imports, which breaks single-pass.
- * TODO(lannka): fix this.
- *
- * @param {!Element} element
- * @return {boolean}
- */
-function isInFie(element) {
-  return (
-    element.classList.contains('i-amphtml-fie') ||
-    !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
   );
 }

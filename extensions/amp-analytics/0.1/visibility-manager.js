@@ -23,7 +23,7 @@ import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
-import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
 import {getParentWindowFrameElement} from '../../../src/service';
