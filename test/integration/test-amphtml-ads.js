@@ -231,23 +231,27 @@ describe
           env.win.document.body.removeChild(iframe);
         });
 
-        it.skip(
-          'should layout amp-img, amp-pixel, ' +
-            'amp-analytics within friendly frame',
-          () => {
-            writeFriendlyFrame(env.win.document, iframe, adContent);
-            return testAmpComponentsBTF(env.win);
-          }
-        );
+        it.configure()
+          .skipSafari()
+          .run(
+            'should layout amp-img, amp-pixel, ' +
+              'amp-analytics within friendly frame',
+            () => {
+              writeFriendlyFrame(env.win.document, iframe, adContent);
+              return testAmpComponentsBTF(env.win);
+            }
+          );
 
-        it.skip(
-          'should layout amp-img, amp-pixel, ' +
-            'amp-analytics within safe frame',
-          () => {
-            writeSafeFrame(env.win.document, iframe, adContent);
-            return testAmpComponentsBTF(env.win);
-          }
-        );
+        it.configure()
+          .skipSafari()
+          .run(
+            'should layout amp-img, amp-pixel, ' +
+              'amp-analytics within safe frame',
+            () => {
+              writeSafeFrame(env.win.document, iframe, adContent);
+              return testAmpComponentsBTF(env.win);
+            }
+          );
       }
     );
   });
