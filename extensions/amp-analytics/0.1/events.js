@@ -172,13 +172,13 @@ function isReservedTriggerType(triggerType) {
  */
 export function getTrackerKeyName(eventType) {
   if (isVideoTriggerType(eventType)) {
-    return 'video';
+    return AnalyticsEventType.VIDEO;
   }
   if (isAmpStoryTriggerType(eventType)) {
-    return 'amp-story';
+    return AnalyticsEventType.AMP_STORY;
   }
   if (!isReservedTriggerType(eventType)) {
-    return 'custom';
+    return AnalyticsEventType.CUSTOM;
   }
   return hasOwn(TRACKER_TYPE, eventType)
     ? TRACKER_TYPE[eventType].name
