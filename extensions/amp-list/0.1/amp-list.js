@@ -37,10 +37,6 @@ import {
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  setAttributes as diffAttributes,
-  setDOM,
-} from '../../../third_party/set-dom/set-dom';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
@@ -53,6 +49,7 @@ import {
 import {isArray, toArray} from '../../../src/types';
 import {px, setStyles, toggle} from '../../../src/style';
 import {removeChildren, scopedQuerySelector} from '../../../src/dom';
+import {setDOM} from '../../../third_party/set-dom/set-dom';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -860,7 +857,7 @@ export class AmpList extends AMP.BaseElement {
 
     const ignored = setDOM(this.container_, newContainer);
 
-    // Manually diff elements that were ignored.
+    // Manually process ignored elements (AMP elements).
     for (let i = 0; i < ignored.length; i += 2) {
       const before = ignored[i];
       const after = ignored[i + 1];
@@ -873,13 +870,10 @@ export class AmpList extends AMP.BaseElement {
         // Use the new element if there's a mismatched attribute value.
         if (shouldReplace) {
           before.parentElement.replaceChild(after, before);
-        } else {
-          // Otherwise, apply any attribute changes to existing element.
-          // For simplicity, this is currently an imperfect manual diff:
-          //   1. Children are not diffed.
-          //   2. Attribute changes are not propagated (e.g. to amp-img > img).
-          diffAttributes(before.attributes, after.attributes);
         }
+        // Note that the above can be overeager to replace the existing element.
+        // E.g. changes to [class] are harmless if internal AMP CSS is ignored.
+        // Manual diffing in an "else" here is left for future work.
       }
     }
   }

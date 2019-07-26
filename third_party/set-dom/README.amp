@@ -8,5 +8,4 @@ A lightweight library to update DOM and persist state.
 Local Modifications:
 - Remove unneeded HTML parser (src/parse-html.js).
 - Store and return ignored nodes from setDOM() so we can do manual diffing.
-- Export setAttributes() for attribute diffing.
 - Use ES6 export.

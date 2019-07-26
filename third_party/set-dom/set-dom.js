@@ -99,7 +99,7 @@ function setNode (oldNode, newNode) {
  * @param {NamedNodeMap} oldAttributes - The previous attributes.
  * @param {NamedNodeMap} newAttributes - The updated attributes.
  */
-export function setAttributes (oldAttributes, newAttributes) {
+function setAttributes (oldAttributes, newAttributes) {
   var i, a, b, ns, name
 
   // Remove old attributes.

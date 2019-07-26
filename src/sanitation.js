@@ -30,12 +30,11 @@ export const DIFF_IGNORE = 'i-amphtml-ignore';
 
 /**
  * Map of AMP element tag name to attributes that, if changed, require
- * replacement of the original element. E.g. changing amp-img[src] requires
- * creating a new amp-img, but [class] does not.
+ * replacement of the original element.
  * @const {!Object<string, !Array<string>>}
  */
 export const DIFFABLE_AMP_ELEMENTS = {
-  'AMP-IMG': ['src', 'srcset', 'layout', 'width', 'height'],
+  'AMP-IMG': ['src', 'srcset', 'layout', 'width', 'height', 'class', 'style'],
 };
 
 /**

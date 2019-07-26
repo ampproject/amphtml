@@ -574,7 +574,7 @@ describes.repeated(
 
               expect(list.container_.contains(img)).to.be.true;
               expect(list.container_.contains(newImg)).to.be.false;
-              expect(img.getAttribute('class')).to.equal('foo');
+              expect(img.hasAttribute('class')).to.be.false;
             });
 
             it('should replace amp-img if [src] changes', async () => {
