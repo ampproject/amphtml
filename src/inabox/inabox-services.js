@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../polyfills';
 import {installActionServiceForDoc} from '../service/action-impl';
 import {installDocumentInfoServiceForDoc} from '../service/document-info-impl';
 import {installGlobalNavigationHandlerForDoc} from '../service/navigation';

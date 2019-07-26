@@ -16,8 +16,10 @@
 'use strict';
 
 const fs = require('fs-extra');
+const log = require('fancy-log');
 const path = require('path');
 const request = require('request-promise');
+const {cyan, green} = require('ansi-colors');
 const {gitCommitHash} = require('../git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../app-utils');
 const {travisBuildNumber} = require('../travis');
@@ -55,17 +57,22 @@ async function replaceUrls(dir) {
   await Promise.all(promises);
 }
 
-async function signalDistUploadComplete() {
+async function signalDistUpload(result) {
   const sha = gitCommitHash();
   const travisBuild = travisBuildNumber();
-  const url =
-    'https://amp-pr-deploy-bot.appspot.com/probot/v0/pr-deploy/' +
-    `travisbuilds/${travisBuild}/headshas/${sha}/0`;
+  const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
+  const url = `${baseUrl}travisbuilds/${travisBuild}/headshas/${sha}/${result}`;
 
   await request.post(url);
+  log(
+    green('INFO:'),
+    'reported ',
+    cyan(`dist: ${result}`),
+    'to the pr-deploy GitHub App'
+  );
 }
 
 module.exports = {
   replaceUrls,
-  signalDistUploadComplete,
+  signalDistUpload,
 };
