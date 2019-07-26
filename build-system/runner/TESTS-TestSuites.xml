@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+  <testsuite errors="1" failures="0" hostname="erwinm-macbookpro2.roam.corp.google.com" id="0" name="AmpPassJSONObjectCastFinderTest" package="org.ampproject" skipped="0" tests="1" time="1.15" timestamp="2019-05-10T00:13:03">
+      <properties>
+          <property name="java.vendor" value="Oracle Corporation" />
+
+          <property name="compiler.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/../../third_party/closure-compiler" />
+
+          <property name="sun.java.launcher" value="SUN_STANDARD" />
+
+          <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers" />
+
+          <property name="os.name" value="Mac OS X" />
+
+          <property name="java.vm.specification.vendor" value="Oracle Corporation" />
+
+          <property name="ant.home" value="/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840" />
+
+          <property name="java.runtime.version" value="9+181" />
+
+          <property name="user.name" value="erwinm" />
+
+          <property name="build.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/build" />
+
+          <property name="user.language" value="en" />
+
+          <property name="test.method" value="" />
+
+          <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk-9.jdk/Contents/Home/lib" />
+
+          <property name="ant.project.default-target" value="jar" />
+
+          <property name="ant.project.name" value="runner" />
+
+          <property name="java.vm.compressedOopsMode" value="Zero based" />
+
+          <property name="java.version" value="9" />
+
+          <property name="user.timezone" value="" />
+
+          <property name="sun.arch.data.model" value="64" />
+
+          <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16" />
+
+          <property name="sun.cpu.isalist" value="" />
+
+          <property name="sun.jnu.encoding" value="UTF-8" />
+
+          <property name="file.encoding.pkg" value="sun.io" />
+
+          <property name="file.separator" value="/" />
+
+          <property name="java.specification.name" value="Java Platform API Specification" />
+
+          <property name="java.class.version" value="53.0" />
+
+          <property name="classes.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/build/classes" />
+
+          <property name="testClasses.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/build/test" />
+
+          <property name="user.country" value="US" />
+
+          <property name="java.home" value="/Library/Java/JavaVirtualMachines/jdk-9.jdk/Contents/Home" />
+
+          <property name="dist.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/dist" />
+
+          <property name="java.vm.info" value="mixed mode" />
+
+          <property name="ant.file" value="/Users/erwinm/dev/amphtml/build-system/runner/build.xml" />
+
+          <property name="os.version" value="10.13.6" />
+
+          <property name="path.separator" value=":" />
+
+          <property name="java.vm.version" value="9+181" />
+
+          <property name="ant.library.dir" value="/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib" />
+
+          <property name="java.awt.printerjob" value="sun.lwawt.macosx.CPrinterJob" />
+
+          <property name="sun.io.unicode.encoding" value="UnicodeBig" />
+
+          <property name="test.fork" value="true" />
+
+          <property name="awt.toolkit" value="sun.lwawt.macosx.LWCToolkit" />
+
+          <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16" />
+
+          <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16" />
+
+          <property name="user.home" value="/Users/erwinm" />
+
+          <property name="java.specification.vendor" value="Oracle Corporation" />
+
+          <property name="ant.file.runner" value="/Users/erwinm/dev/amphtml/build-system/runner/build.xml" />
+
+          <property name="test.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/test" />
+
+          <property name="java.library.path" value="/Users/erwinm/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:." />
+
+          <property name="java.vendor.url" value="http://java.oracle.com/" />
+
+          <property name="java.vm.vendor" value="Oracle Corporation" />
+
+          <property name="gopherProxySet" value="false" />
+
+          <property name="java.runtime.name" value="Java(TM) SE Runtime Environment" />
+
+          <property name="sun.java.command" value="org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner testsfile=/Users/erwinm/dev/amphtml/build-system/runner/junittestcases6992590537469509062.properties skipNonTests=false filtertrace=true haltOnError=false haltOnFailure=false formatter=org.apache.tools.ant.taskdefs.optional.junit.SummaryJUnitResultFormatter showoutput=true outputtoformatters=true logfailedtests=true threadid=0 logtestlistenerevents=false formatter=org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,/Users/erwinm/dev/amphtml/build-system/runner/build/testoutput/IGNORETHIS.xml crashfile=/Users/erwinm/dev/amphtml/build-system/runner/junitvmwatcher4571633880411205500.properties propsfile=/Users/erwinm/dev/amphtml/build-system/runner/junit17937800091606687779.properties" />
+
+          <property name="java.class.path" value="/Users/erwinm/dev/amphtml/build-system/runner/build/classes:/Users/erwinm/dev/amphtml/third_party/closure-compiler/compiler-and-tests.jar:/Users/erwinm/dev/amphtml/build-system/runner/build/test:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant-launcher.jar:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant.jar:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant-junit.jar:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant-junit4.jar" />
+
+          <property name="ant.version" value="Apache Ant(TM) version 1.10.1 compiled on February 2 2017" />
+
+          <property name="jdk.debug" value="release" />
+
+          <property name="test.class" value="*Test" />
+
+          <property name="java.vm.specification.name" value="Java Virtual Machine Specification" />
+
+          <property name="java.vm.specification.version" value="9" />
+
+          <property name="sun.cpu.endian" value="little" />
+
+          <property name="sun.os.patch.level" value="unknown" />
+
+          <property name="java.io.tmpdir" value="/var/folders/_k/v8m5pk_52_jdv3dk86pw414m008j68/T/" />
+
+          <property name="java.vendor.url.bug" value="http://bugreport.java.com/bugreport/" />
+
+          <property name="os.arch" value="x86_64" />
+
+          <property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment" />
+
+          <property name="runner-jarfile" value="/Users/erwinm/dev/amphtml/build-system/runner/build/runner.jar" />
+
+          <property name="user.dir" value="/Users/erwinm/dev/amphtml/build-system/runner" />
+
+          <property name="line.separator" value="&#xa;" />
+
+          <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM" />
+
+          <property name="basedir" value="/Users/erwinm/dev/amphtml/build-system/runner" />
+
+          <property name="ant.java.version" value="9" />
+
+          <property name="ant.core.lib" value="/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant.jar" />
+
+          <property name="dir.buildfile" value="." />
+
+          <property name="ant.file.type.runner" value="file" />
+
+          <property name="file.encoding" value="UTF-8" />
+
+          <property name="java.specification.version" value="9" />
+
+          <property name="src.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/src" />
+
+          <property name="ant.project.invoked-targets" value="test" />
+
+      </properties>
+
+      <testcase classname="org.ampproject.AmpPassJSONObjectCastFinderTest" name="initializationError" time="0.006">
+          <error message="No runnable methods" type="java.lang.Exception">java.lang.Exception: No runnable methods
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:488)
+</error>
+
+      </testcase>
+
+      <system-out><![CDATA[]]></system-out>
+
+      <system-err><![CDATA[]]></system-err>
+
+  </testsuite>
+  <testsuite errors="0" failures="0" hostname="erwinm-macbookpro2.roam.corp.google.com" id="1" name="AmpPassTest" package="org.ampproject" skipped="0" tests="16" time="0.672" timestamp="2019-05-10T00:13:04">
+      <properties>
+          <property name="java.vendor" value="Oracle Corporation" />
+
+          <property name="compiler.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/../../third_party/closure-compiler" />
+
+          <property name="sun.java.launcher" value="SUN_STANDARD" />
+
+          <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers" />
+
+          <property name="os.name" value="Mac OS X" />
+
+          <property name="java.vm.specification.vendor" value="Oracle Corporation" />
+
+          <property name="ant.home" value="/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840" />
+
+          <property name="java.runtime.version" value="9+181" />
+
+          <property name="user.name" value="erwinm" />
+
+          <property name="build.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/build" />
+
+          <property name="user.language" value="en" />
+
+          <property name="test.method" value="" />
+
+          <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk-9.jdk/Contents/Home/lib" />
+
+          <property name="ant.project.default-target" value="jar" />
+
+          <property name="ant.project.name" value="runner" />
+
+          <property name="java.vm.compressedOopsMode" value="Zero based" />
+
+          <property name="java.version" value="9" />
+
+          <property name="user.timezone" value="" />
+
+          <property name="sun.arch.data.model" value="64" />
+
+          <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16" />
+
+          <property name="sun.cpu.isalist" value="" />
+
+          <property name="sun.jnu.encoding" value="UTF-8" />
+
+          <property name="file.encoding.pkg" value="sun.io" />
+
+          <property name="file.separator" value="/" />
+
+          <property name="java.specification.name" value="Java Platform API Specification" />
+
+          <property name="java.class.version" value="53.0" />
+
+          <property name="classes.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/build/classes" />
+
+          <property name="testClasses.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/build/test" />
+
+          <property name="user.country" value="US" />
+
+          <property name="java.home" value="/Library/Java/JavaVirtualMachines/jdk-9.jdk/Contents/Home" />
+
+          <property name="dist.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/dist" />
+
+          <property name="java.vm.info" value="mixed mode" />
+
+          <property name="ant.file" value="/Users/erwinm/dev/amphtml/build-system/runner/build.xml" />
+
+          <property name="os.version" value="10.13.6" />
+
+          <property name="path.separator" value=":" />
+
+          <property name="java.vm.version" value="9+181" />
+
+          <property name="ant.library.dir" value="/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib" />
+
+          <property name="java.awt.printerjob" value="sun.lwawt.macosx.CPrinterJob" />
+
+          <property name="sun.io.unicode.encoding" value="UnicodeBig" />
+
+          <property name="test.fork" value="true" />
+
+          <property name="awt.toolkit" value="sun.lwawt.macosx.LWCToolkit" />
+
+          <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16" />
+
+          <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16" />
+
+          <property name="user.home" value="/Users/erwinm" />
+
+          <property name="java.specification.vendor" value="Oracle Corporation" />
+
+          <property name="ant.file.runner" value="/Users/erwinm/dev/amphtml/build-system/runner/build.xml" />
+
+          <property name="test.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/test" />
+
+          <property name="java.library.path" value="/Users/erwinm/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:." />
+
+          <property name="java.vendor.url" value="http://java.oracle.com/" />
+
+          <property name="java.vm.vendor" value="Oracle Corporation" />
+
+          <property name="gopherProxySet" value="false" />
+
+          <property name="java.runtime.name" value="Java(TM) SE Runtime Environment" />
+
+          <property name="sun.java.command" value="org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner testsfile=/Users/erwinm/dev/amphtml/build-system/runner/junittestcases6992590537469509062.properties skipNonTests=false filtertrace=true haltOnError=false haltOnFailure=false formatter=org.apache.tools.ant.taskdefs.optional.junit.SummaryJUnitResultFormatter showoutput=true outputtoformatters=true logfailedtests=true threadid=0 logtestlistenerevents=false formatter=org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,/Users/erwinm/dev/amphtml/build-system/runner/build/testoutput/IGNORETHIS.xml crashfile=/Users/erwinm/dev/amphtml/build-system/runner/junitvmwatcher4571633880411205500.properties propsfile=/Users/erwinm/dev/amphtml/build-system/runner/junit17937800091606687779.properties" />
+
+          <property name="java.class.path" value="/Users/erwinm/dev/amphtml/build-system/runner/build/classes:/Users/erwinm/dev/amphtml/third_party/closure-compiler/compiler-and-tests.jar:/Users/erwinm/dev/amphtml/build-system/runner/build/test:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant-launcher.jar:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant.jar:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant-junit.jar:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant-junit4.jar" />
+
+          <property name="ant.version" value="Apache Ant(TM) version 1.10.1 compiled on February 2 2017" />
+
+          <property name="jdk.debug" value="release" />
+
+          <property name="test.class" value="*Test" />
+
+          <property name="java.vm.specification.name" value="Java Virtual Machine Specification" />
+
+          <property name="java.vm.specification.version" value="9" />
+
+          <property name="sun.cpu.endian" value="little" />
+
+          <property name="sun.os.patch.level" value="unknown" />
+
+          <property name="java.io.tmpdir" value="/var/folders/_k/v8m5pk_52_jdv3dk86pw414m008j68/T/" />
+
+          <property name="java.vendor.url.bug" value="http://bugreport.java.com/bugreport/" />
+
+          <property name="os.arch" value="x86_64" />
+
+          <property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment" />
+
+          <property name="runner-jarfile" value="/Users/erwinm/dev/amphtml/build-system/runner/build/runner.jar" />
+
+          <property name="user.dir" value="/Users/erwinm/dev/amphtml/build-system/runner" />
+
+          <property name="line.separator" value="&#xa;" />
+
+          <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM" />
+
+          <property name="basedir" value="/Users/erwinm/dev/amphtml/build-system/runner" />
+
+          <property name="ant.java.version" value="9" />
+
+          <property name="ant.core.lib" value="/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant.jar" />
+
+          <property name="dir.buildfile" value="." />
+
+          <property name="ant.file.type.runner" value="file" />
+
+          <property name="file.encoding" value="UTF-8" />
+
+          <property name="java.specification.version" value="9" />
+
+          <property name="src.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/src" />
+
+          <property name="ant.project.invoked-targets" value="test" />
+
+      </properties>
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testShouldPreserveNoneCalls" time="0.476" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testOptimizeGetModeFunction" time="0.009" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testGetModeLocalDevPropertyReplacement" time="0.01" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testGetModeMinifiedPropertyReplacement" time="0.007" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testGetModePreserve" time="0.013" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testDevFineRemoval" time="0.01" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testAmpVersionReplacement" time="0.008" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testRemoveAmpAddExtensionCallWithExplicitContext" time="0.007" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testDevAssertExpressionRemoval" time="0.011" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testDevErrorPreserve" time="0.009" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testRemoveAmpAddExtensionCallWithNoContext" time="0.006" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testDevAssertPreserveFirstArg" time="0.012" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testGetModeWinTestPropertyReplacement" time="0.007" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testGetModeTestPropertyReplacement" time="0.006" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testDevAssertRemoval" time="0.018" />
+
+      <testcase classname="org.ampproject.AmpPassTest" name="testGetModeWinMinifiedPropertyReplacement" time="0.007" />
+
+      <system-out><![CDATA[]]></system-out>
+
+      <system-err><![CDATA[]]></system-err>
+
+  </testsuite>
+  <testsuite errors="0" failures="0" hostname="erwinm-macbookpro2.roam.corp.google.com" id="2" name="AmpPassTestEnvTest" package="org.ampproject" skipped="0" tests="4" time="0.024" timestamp="2019-05-10T00:13:05">
+      <properties>
+          <property name="java.vendor" value="Oracle Corporation" />
+
+          <property name="compiler.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/../../third_party/closure-compiler" />
+
+          <property name="sun.java.launcher" value="SUN_STANDARD" />
+
+          <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers" />
+
+          <property name="os.name" value="Mac OS X" />
+
+          <property name="java.vm.specification.vendor" value="Oracle Corporation" />
+
+          <property name="ant.home" value="/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840" />
+
+          <property name="java.runtime.version" value="9+181" />
+
+          <property name="user.name" value="erwinm" />
+
+          <property name="build.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/build" />
+
+          <property name="user.language" value="en" />
+
+          <property name="test.method" value="" />
+
+          <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk-9.jdk/Contents/Home/lib" />
+
+          <property name="ant.project.default-target" value="jar" />
+
+          <property name="ant.project.name" value="runner" />
+
+          <property name="java.vm.compressedOopsMode" value="Zero based" />
+
+          <property name="java.version" value="9" />
+
+          <property name="user.timezone" value="" />
+
+          <property name="sun.arch.data.model" value="64" />
+
+          <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16" />
+
+          <property name="sun.cpu.isalist" value="" />
+
+          <property name="sun.jnu.encoding" value="UTF-8" />
+
+          <property name="file.encoding.pkg" value="sun.io" />
+
+          <property name="file.separator" value="/" />
+
+          <property name="java.specification.name" value="Java Platform API Specification" />
+
+          <property name="java.class.version" value="53.0" />
+
+          <property name="classes.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/build/classes" />
+
+          <property name="testClasses.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/build/test" />
+
+          <property name="user.country" value="US" />
+
+          <property name="java.home" value="/Library/Java/JavaVirtualMachines/jdk-9.jdk/Contents/Home" />
+
+          <property name="dist.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/dist" />
+
+          <property name="java.vm.info" value="mixed mode" />
+
+          <property name="ant.file" value="/Users/erwinm/dev/amphtml/build-system/runner/build.xml" />
+
+          <property name="os.version" value="10.13.6" />
+
+          <property name="path.separator" value=":" />
+
+          <property name="java.vm.version" value="9+181" />
+
+          <property name="ant.library.dir" value="/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib" />
+
+          <property name="java.awt.printerjob" value="sun.lwawt.macosx.CPrinterJob" />
+
+          <property name="sun.io.unicode.encoding" value="UnicodeBig" />
+
+          <property name="test.fork" value="true" />
+
+          <property name="awt.toolkit" value="sun.lwawt.macosx.LWCToolkit" />
+
+          <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16" />
+
+          <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16" />
+
+          <property name="user.home" value="/Users/erwinm" />
+
+          <property name="java.specification.vendor" value="Oracle Corporation" />
+
+          <property name="ant.file.runner" value="/Users/erwinm/dev/amphtml/build-system/runner/build.xml" />
+
+          <property name="test.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/test" />
+
+          <property name="java.library.path" value="/Users/erwinm/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:." />
+
+          <property name="java.vendor.url" value="http://java.oracle.com/" />
+
+          <property name="java.vm.vendor" value="Oracle Corporation" />
+
+          <property name="gopherProxySet" value="false" />
+
+          <property name="java.runtime.name" value="Java(TM) SE Runtime Environment" />
+
+          <property name="sun.java.command" value="org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner testsfile=/Users/erwinm/dev/amphtml/build-system/runner/junittestcases6992590537469509062.properties skipNonTests=false filtertrace=true haltOnError=false haltOnFailure=false formatter=org.apache.tools.ant.taskdefs.optional.junit.SummaryJUnitResultFormatter showoutput=true outputtoformatters=true logfailedtests=true threadid=0 logtestlistenerevents=false formatter=org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,/Users/erwinm/dev/amphtml/build-system/runner/build/testoutput/IGNORETHIS.xml crashfile=/Users/erwinm/dev/amphtml/build-system/runner/junitvmwatcher4571633880411205500.properties propsfile=/Users/erwinm/dev/amphtml/build-system/runner/junit17937800091606687779.properties" />
+
+          <property name="java.class.path" value="/Users/erwinm/dev/amphtml/build-system/runner/build/classes:/Users/erwinm/dev/amphtml/third_party/closure-compiler/compiler-and-tests.jar:/Users/erwinm/dev/amphtml/build-system/runner/build/test:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant-launcher.jar:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant.jar:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant-junit.jar:/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant-junit4.jar" />
+
+          <property name="ant.version" value="Apache Ant(TM) version 1.10.1 compiled on February 2 2017" />
+
+          <property name="jdk.debug" value="release" />
+
+          <property name="test.class" value="*Test" />
+
+          <property name="java.vm.specification.name" value="Java Virtual Machine Specification" />
+
+          <property name="java.vm.specification.version" value="9" />
+
+          <property name="sun.cpu.endian" value="little" />
+
+          <property name="sun.os.patch.level" value="unknown" />
+
+          <property name="java.io.tmpdir" value="/var/folders/_k/v8m5pk_52_jdv3dk86pw414m008j68/T/" />
+
+          <property name="java.vendor.url.bug" value="http://bugreport.java.com/bugreport/" />
+
+          <property name="os.arch" value="x86_64" />
+
+          <property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment" />
+
+          <property name="runner-jarfile" value="/Users/erwinm/dev/amphtml/build-system/runner/build/runner.jar" />
+
+          <property name="user.dir" value="/Users/erwinm/dev/amphtml/build-system/runner" />
+
+          <property name="line.separator" value="&#xa;" />
+
+          <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM" />
+
+          <property name="basedir" value="/Users/erwinm/dev/amphtml/build-system/runner" />
+
+          <property name="ant.java.version" value="9" />
+
+          <property name="ant.core.lib" value="/Users/erwinm/.p2/pool/plugins/org.apache.ant_1.10.1.v20170504-0840/lib/ant.jar" />
+
+          <property name="dir.buildfile" value="." />
+
+          <property name="ant.file.type.runner" value="file" />
+
+          <property name="file.encoding" value="UTF-8" />
+
+          <property name="java.specification.version" value="9" />
+
+          <property name="src.dir" value="/Users/erwinm/dev/amphtml/build-system/runner/src" />
+
+          <property name="ant.project.invoked-targets" value="test" />
+
+      </properties>
+
+      <testcase classname="org.ampproject.AmpPassTestEnvTest" name="testGetModeLocalDevPropertyReplacementInTestingEnv" time="0.007" />
+
+      <testcase classname="org.ampproject.AmpPassTestEnvTest" name="testOptimizeGetModeFunction" time="0.004" />
+
+      <testcase classname="org.ampproject.AmpPassTestEnvTest" name="testGetModeTestPropertyReplacementInTestingEnv" time="0.005" />
+
+      <testcase classname="org.ampproject.AmpPassTestEnvTest" name="testGetModeMinifiedPropertyReplacementInTestingEnv" time="0.005" />
+
+      <system-out><![CDATA[]]></system-out>
+
+      <system-err><![CDATA[]]></system-err>
+
+  </testsuite>
+</testsuites>
