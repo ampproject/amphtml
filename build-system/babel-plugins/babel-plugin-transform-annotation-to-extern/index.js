@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-const fs = require('fs-extra');
-const generate = require('@babel/generator').default;
-
 // Global typedef map typedefName: typedef comment
 const TYPEDEFS = new Map();
 
@@ -46,7 +43,7 @@ module.exports = function(babel) {
   let shouldEmitTypedefs;
   return {
     pre() {
-      const {writeToFile = false, emitTypedefs = false, writeToDir = ''} = this.opts;
+      const {writeToFile = false, emitTypedefs = false} = this.opts;
       shouldWriteToFile = writeToFile;
       shouldEmitTypedefs = emitTypedefs;
     },
@@ -57,14 +54,10 @@ module.exports = function(babel) {
         },
         exit(path) {
           // Write out the transient file that we will feed into CC.
-          //if (shouldWriteToFile) {
-            const typedefs = buildTypedefs(t);
-            const code = generate({
-              type: 'Program',
-              body: [typedefs],
-            });
-            fs.appendFileSync('build-system/transient.extern.js', code);
-          //}
+          if (shouldWriteToFile) {
+            // Stub
+            console.log('Stub');
+          }
 
           // This is done for testing purposes only to output what the
           // extern would look like.

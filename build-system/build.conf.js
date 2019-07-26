@@ -127,7 +127,6 @@ function plugins({isEsmBuild, isForTesting, isSinglePass}) {
   // if the arguments have any method calls (which might have side effects).
   if (isSinglePass) {
     applied.push(localPlugin('transform-amp-asserts'));
-    applied.push(localPlugin('transform-annotation-to-extern'));
   }
   if (isEsmBuild) {
     applied.push(['filter-imports', {imports: esmRemovedImports}]);
