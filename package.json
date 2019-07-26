@@ -15,7 +15,8 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "scripts": {
-    "preinstall": "node build-system/check-package-manager.js"
+    "preinstall": "node build-system/check-package-manager.js",
+    "start": "node build-system/launch-app.js"
   },
   "dependencies": {
     "@ampproject/animations": "0.2.0",

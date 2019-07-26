@@ -32,7 +32,6 @@ const {
   travisPullRequestSha,
 } = require('../travis');
 const {execOrDie, execWithError, exec} = require('../exec');
-const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const BUILD_OUTPUT_FILE = isTravisBuild()
   ? `amp_build_${travisBuildNumber()}.zip`
@@ -43,7 +42,10 @@ const DIST_OUTPUT_FILE = isTravisBuild()
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const DIST_OUTPUT_DIRS =
-  'build/ dist/ dist.3p/ dist.tools/ EXTENSIONS_CSS_MAP examples/ test/manual/';
+  'build/ dist/ dist.3p/ dist.tools/ EXTENSIONS_CSS_MAP examples/ test/manual/' +
+  'build-system/app-index/ build-system/routes/ build-system/amp4test.js build-system/amp-cors.js' +
+  'build-system/app.js build-system/app-utils.js build-system/app-video-bench.js' +
+  'build-system/launch-app.js build-system/recaptcha-router.js build-system/shadow-viewer.js package.json';
 
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
@@ -347,15 +349,23 @@ function uploadDistOutput(functionName) {
 }
 
 /**
- * Replaces URLS in HTML files, zips and uploads dist output,
- * and signals to the AMP PR Deploy bot that the upload is complete.
- * @param {string} functionName
+ * Send HTTP post request to the AMP PR Deploy bot with the result of
+ * the dist job
+ * @param {string} result
  */
-async function processAndUploadDistOutput(functionName) {
-  await replaceUrls('test/manual');
-  await replaceUrls('examples');
-  uploadDistOutput(functionName);
-  await signalDistUpload('success');
+async function signalDistUpload(result) {
+  const sha = gitCommitHash();
+  const travisBuild = travisBuildNumber();
+  const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
+  const url = `${baseUrl}travisbuilds/${travisBuild}/headshas/${sha}/${result}`;
+
+  await requestPromise.post(url);
+  console.log(
+    colors.green('INFO:'),
+    'reported ',
+    colors.cyan(`dist: ${result}`),
+    'to the pr-deploy GitHub App'
+  );
 }
 
 /**
@@ -375,7 +385,7 @@ module.exports = {
   downloadBuildOutput,
   downloadDistOutput,
   printChangeSummary,
-  processAndUploadDistOutput,
+  signalDistUpload,
   startTimer,
   stopTimer,
   startSauceConnect,

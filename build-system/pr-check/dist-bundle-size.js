@@ -25,7 +25,6 @@
 const colors = require('ansi-colors');
 const {
   printChangeSummary,
-  processAndUploadDistOutput,
   startTimer,
   stopTimer,
   stopTimedJob,
@@ -76,7 +75,8 @@ async function main() {
       }
 
       timedExecOrDie('gulp bundle-size --on_pr_build');
-      await processAndUploadDistOutput(FILENAME);
+      uploadDistOutput(FILENAME);
+      await signalDistUpload('success');
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
       await signalDistUpload('skipped');
