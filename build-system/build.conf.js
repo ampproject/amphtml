@@ -15,6 +15,7 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('./global-configs/experiments-config.json');
+const {TRANSIENT_EXTERN} = require('./sources');
 
 const localPlugin = name =>
   require.resolve(`./babel-plugins/babel-plugin-${name}`);
@@ -127,7 +128,9 @@ function plugins({isEsmBuild, isForTesting, isSinglePass}) {
   // if the arguments have any method calls (which might have side effects).
   if (isSinglePass) {
     applied.push(localPlugin('transform-amp-asserts'));
-    applied.push(localPlugin('transform-annotation-to-extern'));
+    applied.push([localPlugin('transform-annotation-to-extern'), {
+      externDestination: TRANSIENT_EXTERN,
+    }]);
   }
   if (isEsmBuild) {
     applied.push(['filter-imports', {imports: esmRemovedImports}]);

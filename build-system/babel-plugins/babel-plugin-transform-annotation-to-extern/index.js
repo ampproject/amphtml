@@ -40,8 +40,8 @@ const buildVarDeclAndComment = (t, name, comment) => {
 
 module.exports = function(babel) {
   const {types: t} = babel;
-  // `shouldWriteToFile` should only be true in the production pipeline.
-  let shouldWriteToFile;
+  // `externDest` should only be truthy in the production pipeline execution.
+  let externDest;
   // `shouldEmitTypedefs` is used for testing purposes only.
   let shouldEmitTypedefs;
   return {

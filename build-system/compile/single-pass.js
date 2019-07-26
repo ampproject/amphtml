@@ -50,6 +50,7 @@ const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('../compile-wrappers');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
+const {SRC_TEMP_DIR} = require('../sources');
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest =
@@ -62,7 +63,6 @@ if (!singlePassDest.endsWith('/')) {
 const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
 
 // Used to store transforms and compile v0.js
-const transformDir = tempy.directory();
 const srcs = [];
 
 const mainBundle = 'src/amp.js';
@@ -292,7 +292,7 @@ exports.getGraph = function(entryModules, config) {
       },
     },
     packages: {},
-    tmp: transformDir,
+    tmp: SRC_TEMP_DIR,
   };
 
   TYPES_VALUES.forEach(type => {
@@ -685,7 +685,7 @@ function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
     gulp
-      .src(srcs, {base: transformDir})
+      .src(srcs, {base: SRC_TEMP_DIR})
       .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(gulpClosureCompile(flagsArray))
