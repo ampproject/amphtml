@@ -19,7 +19,7 @@ import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
 import {isConnectedNode, rootNodeFor} from '../dom';
-import {isInFie} from '../friendly-iframe-embed';
+import {isInFie} from '../iframe-helper';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';

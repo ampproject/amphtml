@@ -99,6 +99,9 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
  * Compile all runtime targets in minified mode and drop them in dist/.
  */
 function compileAllMinifiedTargets() {
+  if (isTravisBuild()) {
+    log('Minifying multi-pass runtime targets with', cyan('closure-compiler'));
+  }
   return compile(/* watch */ false, /* shouldMinify */ true);
 }
 
@@ -107,6 +110,9 @@ function compileAllMinifiedTargets() {
  * @param {boolean} watch
  */
 function compileAllUnminifiedTargets(watch) {
+  if (isTravisBuild()) {
+    log('Compiling runtime with', cyan('browserify'));
+  }
   return compile(/* watch */ watch);
 }
 
@@ -485,6 +491,11 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         if (UNMINIFIED_TARGETS.includes(destFilename)) {
           return enableLocalTesting(`${destDir}/${destFilename}`);
         }
+      })
+      .then(() => {
+        if (isTravisBuild()) {
+          process.stdout.write('.');
+        }
       });
   }
 
@@ -578,7 +589,7 @@ function printConfigHelp(command) {
 function printNobuildHelp() {
   if (!isTravisBuild()) {
     for (const task of NOBUILD_HELP_TASKS) {
-      // eslint-disable-line amphtml-internal/no-for-of-statement
+      // eslint-disable-line local/no-for-of-statement
       if (argv._.includes(task)) {
         log(
           green('To skip building during future'),

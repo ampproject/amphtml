@@ -235,6 +235,12 @@ exports.rules = [
       // Ads needs iframe transports
       'extensions/amp-ad-exit/0.1/config.js->extensions/amp-analytics/0.1/iframe-transport-vendors.js',
 
+      // Facebook components
+      'extensions/amp-facebook/0.1/amp-facebook.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
+
       // Amp geo in group enum
       'extensions/amp-consent/0.1/amp-consent.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
@@ -684,9 +690,9 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/array-includes.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
-      'src/service/extensions-impl.js->src/polyfills/custom-elements.js',
-      'src/service/extensions-impl.js->src/polyfills/document-contains.js',
-      'src/service/extensions-impl.js->src/polyfills/domtokenlist-toggle.js',
+      'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
+      'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
+      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist-toggle.js',
     ],
   },
   {
