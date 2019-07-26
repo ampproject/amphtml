@@ -41,7 +41,7 @@ import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {isInFie} from '../../../src/friendly-iframe-embed';
+import {isInFie} from '../../../src/iframe-helper';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './parsers/css-expr';
 
