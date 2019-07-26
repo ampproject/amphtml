@@ -434,7 +434,7 @@ export class Resources {
     // operations themselves are not free and might delay
     this.eventuallyCallPreconnects_ = debounce(
       this.win,
-      this.eventuallyCallPreconnects_.bind(this),
+      this.callPreconnects_.bind(this),
       1
     );
 
@@ -868,7 +868,7 @@ export class Resources {
    * buffer.
    * @private
    */
-  eventuallyCallPreconnects_() {
+  callPreconnects_() {
     for (let i = 0; i < this.pendingPreconnectResources_.length; i++) {
       const resource = this.pendingPreconnectResources_[i];
       resource.preconnect();
