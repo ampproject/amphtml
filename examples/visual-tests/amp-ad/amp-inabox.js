@@ -17,9 +17,14 @@
 
 const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
+/**
+ * Percy preserves the DOM object as snapshot so the content of iframe is not
+ * included. This interactive test is created to backfill the iframe to the
+ * parent DOM object so that it can be included in the Percy snapshot.
+ */
 module.exports = {
-  'fill iframe content in srcdoc': async (page, name) => {
-    await page.$eval("#iframe", el => {
+  'page view': async (page, name) => {
+    await page.$eval("iframe", el => {
         el.srcdoc = el.contentDocument.documentElement.innerHTML;
     });
   },
