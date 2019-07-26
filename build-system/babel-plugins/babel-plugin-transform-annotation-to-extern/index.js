@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+const fs = require('fs-extra');
+const generate = require('@babel/generator').default;
+
 // Global typedef map typedefName: typedef comment
 const TYPEDEFS = new Map();
 
