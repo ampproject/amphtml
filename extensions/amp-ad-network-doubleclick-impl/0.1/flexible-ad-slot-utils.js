@@ -65,7 +65,9 @@ function getElementWidthVisitor(setWidth) {
         setWidth(0);
         return true;
       default:
-        // If no layout is provided, we must use getComputedStyle.
+        // If no layout is provided, we must use getComputedStyle. Padding is
+        // not included in the overall computed width, so we must manually
+        // include it.
         const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
         const paddingRight = parseInt(style.paddingRight, 10) || 0;
         const totalPadding = paddingLeft + paddingRight;
