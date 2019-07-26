@@ -876,13 +876,7 @@ export class Resources {
     }
   }
 
-  /**
-   * Assigns an owner for the specified element. This means that the resources
-   * within this element will be managed by the owner and not Resources manager.
-   * @param {!Element} element
-   * @param {!AmpElement} owner
-   * @package
-   */
+  /** @override */
   setOwner(element, owner) {
     Resource.setOwner(element, owner);
   }
