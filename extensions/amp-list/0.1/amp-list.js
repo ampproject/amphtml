@@ -875,10 +875,9 @@ export class AmpList extends AMP.BaseElement {
           before.parentElement.replaceChild(after, before);
         } else {
           // Otherwise, apply any attribute changes to existing element.
-          // Note that we ignore changes to children (e.g. to avoid removing
-          // amp-img > img) -- this works for amp-img but won't generalize.
-          // To support diffing other AMP components, we should delegate
-          // diffing to each component instead of doing it here.
+          // For simplicity, this is currently an imperfect manual diff:
+          //   1. Children are not diffed.
+          //   2. Attribute changes are not propagated (e.g. to amp-img > img).
           diffAttributes(before.attributes, after.attributes);
         }
       }
