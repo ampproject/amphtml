@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -17,46 +18,145 @@
 import {dict} from '../../../src/utils/object';
 import {parseJson} from '../../../src/json';
 
-/**
- * Creates a JSON metadata in which custom stylesheets, extensions
- * and runtime offsets are recorded. This is used by AMP4ADS at runtime
- * for embedding an ad into an enclosing document.
- * Please note: once runtime offsets are computed the document must not
- * change.
- *
- * https://cs.corp.google.com/piper///depot/google3/search/amphtml/transformers/amp_ad_metadata_transformer.cc
- * @param {Document} doc
- * @return {string}
- */
-export function generateMetadata(doc) {
-  const {head} = doc;
-  const metadata = dict({});
-  const jsonMetadata = [];
-  const styles = [];
-  const extensions = [];
-  let firstRuntimeElement, lastRuntimeElement;
-  let ctaType, ctaUrl;
-  if (head != null) {
+export class AmpAdMetadataTransformer {
+  /** constructor */
+  constructor() {
+    /** @public {JsonObject} */
+    this.metadata = dict({});
+    /** @private {!Array<Object>} */
+    this.styles_ = [];
+    /** @private {!Array<Object>} */
+    this.extensions_ = [];
+    /** @private {Element} */
+    this.firstRuntimeElement_ = null;
+    /** @private {Element} */
+    this.lastRuntimeElement_ = null;
+    /** @private {string} */
+    this.ctaType_ = '';
+    /** @private {string} */
+    this.ctaUrl_ = '';
+    /** @private {!Array<string>} */
+    this.jsonMetadata_ = [];
+    /** @private {!Array<Object>} */
+    this.imgMetadata_ = [];
+    /** @private {Element} */
+    this.ampAnalytics_ = null;
+  }
+  /**
+   * Creates a JSON metadata in which custom stylesheets, extensions
+   * and runtime offsets are recorded. This is used by AMP4ADS at runtime
+   * for embedding an ad into an enclosing document.
+   * Please note: once runtime offsets are computed the document must not
+   * change.
+   *
+   * https://cs.corp.google.com/piper///depot/google3/search/amphtml/transformers/amp_ad_metadata_transformer.cc
+   * @param {Document} doc
+   * @return {string}
+   */
+  generateMetadata(doc) {
+    const {head} = doc;
+    this.generateHeadMetadata_(head);
+    this.generateImageMetadata_(doc);
+    this.generateJsonMetadata_(doc);
+
+    // Creating json object from all of the components
+    const creative = doc.documentElement./*REVIEW*/ outerHTML;
+    let start = 0;
+    let end = 0;
+    if (this.firstRuntimeElement_ != null) {
+      const firstRuntimeElementString = this.firstRuntimeElement_
+        ./*REVIEW*/ outerHTML;
+      const lastRuntimeElementString = this.lastRuntimeElement_
+        ./*REVIEW*/ outerHTML;
+      start = creative.indexOf(firstRuntimeElementString);
+      end =
+        creative.indexOf(lastRuntimeElementString) +
+        lastRuntimeElementString.length;
+    }
+    this.metadata['ampRuntimeUtf16CharOffsets'] = [start, end];
+
+    if (this.jsonMetadata_.length > 0) {
+      this.metadata['jsonUtf16CharOffsets'] = {};
+      for (let i = 0; i < this.jsonMetadata_.length; i++) {
+        const name = this.jsonMetadata_[i];
+        let nameElementString;
+        if (name != 'amp-analytics') {
+          nameElementString = doc.getElementById(name)./*REVIEW*/ outerHTML;
+        } else {
+          nameElementString = this.ampAnalytics_./*REVIEW*/ innerHTML;
+        }
+        const jsonStart = creative.indexOf(nameElementString);
+        const jsonEnd = jsonStart + nameElementString.length;
+        this.metadata['jsonUtf16CharOffsets'][name] = [jsonStart, jsonEnd];
+      }
+    }
+    if (this.extensions_.length > 0) {
+      this.metadata['customElementExtensions'] = [];
+      this.metadata['extensions'] = [];
+      for (let i = 0; i < this.extensions_.length; i++) {
+        const extension = this.extensions_[i];
+        let custom;
+        if (extension['custom-element'] != null) {
+          custom = extension['custom-element'];
+        } else {
+          custom = extension['custom-template'];
+        }
+        if (this.metadata['customElementExtensions'].indexOf(custom) == -1) {
+          this.metadata['customElementExtensions'].push(custom);
+          this.metadata['extensions'].push({
+            'custom-element': custom,
+            'src': extension['src'],
+          });
+        }
+      }
+    }
+
+    if (this.styles_.length > 0) {
+      this.metadata['customStyleSheets'] = this.styles_;
+    }
+    if (this.imgMetadata_.length > 0) {
+      this.metadata['images'] = [];
+      for (let i = 0; i < this.imgMetadata_.length; i++) {
+        const img = this.imgMetadata_[i];
+        this.metadata['images'].push(img.src);
+      }
+    }
+    if (this.ctaType_) {
+      this.metadata['ctaType'] = this.ctaType_;
+    }
+    if (this.ctaUrl_) {
+      this.metadata['ctaUrl'] = this.ctaUrl_;
+    }
+    return JSON.stringify(this.metadata);
+  }
+
+  /**
+   * Generates metadata from document head, including
+   * runtime offsets, custom extensions, styles, and CTA
+   * @param {Element} head
+   */
+  generateHeadMetadata_(head) {
+    if (head == null) {
+      return;
+    }
     for (let i = 0; i < head.children.length; i++) {
       const child = head.children.item(i);
-      if (child.tagName == 'SCRIPT') {
-        if (child.hasAttribute('src')) {
-          if (firstRuntimeElement == null) {
-            firstRuntimeElement = child;
-          }
-          lastRuntimeElement = child;
-          if (child.hasAttribute('custom-element')) {
-            extensions.push({
-              'custom-element': child.getAttribute('custom-element'),
-              'src': child.getAttribute('src'),
-            });
-          }
-          if (child.hasAttribute('custom-template')) {
-            extensions.push({
-              'custom-template': child.getAttribute('custom-template'),
-              'src': child.getAttribute('src'),
-            });
-          }
+      if (child.tagName == 'SCRIPT' && child.hasAttribute('src')) {
+        if (this.firstRuntimeElement_ == null) {
+          this.firstRuntimeElement_ = child;
+        }
+        this.lastRuntimeElement_ = child;
+        if (child.hasAttribute('custom-element')) {
+          this.extensions_.push({
+            'custom-element': child.getAttribute('custom-element'),
+            'src': child.getAttribute('src'),
+          });
+        }
+        if (child.hasAttribute('custom-template')) {
+          this.extensions_.push({
+            'custom-template': child.getAttribute('custom-template'),
+            'src': child.getAttribute('src'),
+          });
         }
       }
       if (
@@ -64,133 +164,100 @@ export function generateMetadata(doc) {
         child.getAttribute('rel') == 'stylesheet' &&
         child.hasAttribute('href')
       ) {
-        const styleJson = {href: child.getAttribute('href')};
-        if (child.hasAttribute('media')) {
-          styleJson.media = child.getAttribute('media');
-        }
-        styles.push(styleJson);
+        this.generateStyleMetadata_(child);
       }
       if (
         child.tagName == 'META' &&
         child.hasAttribute('name') &&
         child.hasAttribute('content')
       ) {
-        if (child.getAttribute('name') == 'amp-cta-type') {
-          ctaType = child.getAttribute('content');
+        this.generateCtaMetadata_(child);
+      }
+    }
+  }
+
+  /**
+   * Generates custom style metadata
+   * @param {Element} element
+   */
+  generateStyleMetadata_(element) {
+    const styleJson = {href: element.getAttribute('href')};
+    if (element.hasAttribute('media')) {
+      styleJson.media = element.getAttribute('media');
+    }
+    this.styles_.push(styleJson);
+  }
+
+  /**
+   * Generates CTA metadata for story ads
+   * @param {Element} element
+   */
+  generateCtaMetadata_(element) {
+    if (element.getAttribute('name') == 'amp-cta-type') {
+      this.ctaType_ = element.getAttribute('content');
+    }
+    if (element.getAttribute('name') == 'amp-cta-url') {
+      this.ctaUrl_ = element.getAttribute('content');
+    }
+  }
+
+  /**
+   * Generates image metadata
+   * @param {Document} doc
+   */
+  generateImageMetadata_(doc) {
+    const imgs = doc.querySelectorAll('amp-img[src]');
+    for (let i = 0; i < imgs.length; i++) {
+      const img = imgs[i];
+      let width,
+        height,
+        area = -1;
+      if (img.hasAttribute('width')) {
+        width = img.getAttribute('width');
+      }
+      if (img.hasAttribute('height')) {
+        height = img.getAttribute('height');
+      }
+      if (height && width) {
+        area = height * width;
+      }
+      this.imgMetadata_.push({
+        src: img.getAttribute('src'),
+        area,
+      });
+    }
+  }
+
+  /**
+   * Generates json offsets and parses
+   * existing <amp-ad-metadata> script, if it exists
+   * @param {Document} doc
+   */
+  generateJsonMetadata_(doc) {
+    const json = doc.querySelectorAll('script[type]');
+    for (let i = 0; i < json.length; i++) {
+      const script = json[i];
+      const type = script.getAttribute('type');
+      if (
+        type == 'application/json' &&
+        script.hasAttribute('id') &&
+        !this.jsonMetadata_.includes(script.getAttribute('id'))
+      ) {
+        this.jsonMetadata_.push(script.getAttribute('id'));
+      }
+      if (
+        type == 'application/json' &&
+        script.hasAttribute('amp-ad-metadata')
+      ) {
+        const parsed = parseJson(script.textContent);
+        for (const attribute in parsed) {
+          this.metadata[attribute] = parsed[attribute];
         }
-        if (child.getAttribute('name') == 'amp-cta-url') {
-          ctaUrl = child.getAttribute('content');
-        }
       }
     }
-  }
-  const imgMetadata = [];
-  const imgs = doc.querySelectorAll('amp-img[src]');
-  for (let i = 0; i < imgs.length; i++) {
-    const img = imgs[i];
-    let width,
-      height,
-      area = -1;
-    if (img.hasAttribute('width')) {
-      width = img.getAttribute('width');
-    }
-    if (img.hasAttribute('height')) {
-      height = img.getAttribute('height');
-    }
-    if (height && width) {
-      area = height * width;
-    }
-    imgMetadata.push({
-      src: img.getAttribute('src'),
-      area,
-    });
-  }
-
-  const json = doc.querySelectorAll('script[type]');
-  for (let i = 0; i < json.length; i++) {
-    const script = json[i];
-    const type = script.getAttribute('type');
-    if (
-      type == 'application/json' &&
-      script.hasAttribute('id') &&
-      !jsonMetadata.includes(script.getAttribute('id'))
-    ) {
-      jsonMetadata.push(script.getAttribute('id'));
-    }
-    if (type == 'application/json' && script.hasAttribute('amp-ad-metadata')) {
-      const parsed = parseJson(script.textContent);
-      for (const attribute in parsed) {
-        metadata[attribute] = parsed[attribute];
-      }
+    this.ampAnalytics_ = doc.querySelector('amp-analytics');
+    if (this.ampAnalytics_ && !this.jsonMetadata_.includes('amp-analytics')) {
+      this.jsonMetadata_.push('amp-analytics');
     }
   }
-  const ampAnalytics = doc.querySelector('amp-analytics');
-  if (ampAnalytics && !jsonMetadata.includes('amp-analytics')) {
-    jsonMetadata.push('amp-analytics');
-  }
-
-  const creative = doc.documentElement./*REVIEW*/ outerHTML;
-  let start = 0;
-  let end = 0;
-  if (firstRuntimeElement != null) {
-    firstRuntimeElement = firstRuntimeElement./*REVIEW*/ outerHTML;
-    lastRuntimeElement = lastRuntimeElement./*REVIEW*/ outerHTML;
-    start = creative.indexOf(firstRuntimeElement);
-    end = creative.indexOf(lastRuntimeElement) + lastRuntimeElement.length;
-  }
-  metadata['ampRuntimeUtf16CharOffsets'] = [start, end];
-
-  if (jsonMetadata.length > 0) {
-    metadata['jsonUtf16CharOffsets'] = {};
-    for (let i = 0; i < jsonMetadata.length; i++) {
-      const name = jsonMetadata[i];
-      let nameElementString;
-      if (name != 'amp-analytics') {
-        nameElementString = doc.getElementById(name)./*REVIEW*/ outerHTML;
-      } else {
-        nameElementString = ampAnalytics./*REVIEW*/ innerHTML;
-      }
-      const jsonStart = creative.indexOf(nameElementString);
-      const jsonEnd = jsonStart + nameElementString.length;
-      metadata['jsonUtf16CharOffsets'][name] = [jsonStart, jsonEnd];
-    }
-  }
-  if (extensions.length > 0) {
-    metadata['customElementExtensions'] = [];
-    metadata['extensions'] = [];
-    for (let i = 0; i < extensions.length; i++) {
-      const extension = extensions[i];
-      let custom;
-      if (extension['custom-element'] != null) {
-        custom = extension['custom-element'];
-      } else {
-        custom = extension['custom-template'];
-      }
-      if (metadata['customElementExtensions'].indexOf(custom) == -1) {
-        metadata['customElementExtensions'].push(custom);
-        metadata['extensions'].push({
-          'custom-element': custom,
-          'src': extension['src'],
-        });
-      }
-    }
-  }
-
-  if (styles.length > 0) {
-    metadata['customStyleSheets'] = styles;
-  }
-  if (imgMetadata.length > 0) {
-    metadata['images'] = [];
-    for (let i = 0; i < imgMetadata.length; i++) {
-      const img = imgMetadata[i];
-      metadata['images'].push(img.src);
-    }
-  }
-  if (ctaType) {
-    metadata['ctaType'] = ctaType;
-  }
-  if (ctaUrl) {
-    metadata['ctaUrl'] = ctaUrl;
-  }
-  return JSON.stringify(metadata);
 }

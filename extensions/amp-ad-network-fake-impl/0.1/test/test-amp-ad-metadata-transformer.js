@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {generateMetadata} from '../amp-ad-metadata-transformer';
+import {AmpAdMetadataTransformer} from '../amp-ad-metadata-transformer';
 
 const ampRuntimeScript = `<script async src=https://cdn.ampproject.org/amp4ads-v0.js></script>`;
 const metaCharset = `<meta charset=utf-8></meta>`;
@@ -30,7 +30,7 @@ it('generates extensions metadata', () => {
         src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
     </head><body></body></html>`;
   const doc = new DOMParser().parseFromString(docString, 'text/html');
-  const metadata = generateMetadata(doc);
+  const metadata = new AmpAdMetadataTransformer().generateMetadata(doc);
   expect(metadata).to.include(
     `"extensions":[{"custom-element":"amp-font","src":"https://cdn.ampproject.org/v0/amp-font-0.1.js"},{"custom-element":"amp-list","src":"https://cdn.ampproject.org/v0/amp-list-latest.js"}]`
   );
@@ -44,7 +44,7 @@ it('generates runtime offsets', () => {
     ampRuntimeScript +
     `</head><body>hello world</body></html>`;
   const doc = new DOMParser().parseFromString(docString, 'text/html');
-  const metadata = generateMetadata(doc);
+  const metadata = new AmpAdMetadataTransformer().generateMetadata(doc);
   expect(metadata).to.equal(`{"ampRuntimeUtf16CharOffsets":[128,201]}`);
 });
 
@@ -56,7 +56,7 @@ it('generates json offsets', () => {
     ampRuntimeScript +
     '<style amp-custom></style></head><body><amp-analytics><script type=application/json>Iñtërnâtiônàlizætiøn☃💩</script></amp-analytics></body></html>';
   const doc = new DOMParser().parseFromString(docString, 'text/html');
-  const metadata = generateMetadata(doc);
+  const metadata = new AmpAdMetadataTransformer().generateMetadata(doc);
   expect(metadata).to.include(
     `"jsonUtf16CharOffsets":{"amp-analytics":[258,322]`
   );
@@ -70,7 +70,7 @@ it('handles already existing amp-ad-metadata json', () => {
     ampRuntimeScript +
     '<style amp-custom></style></head><body><script type=application/json amp-ad-metadata>{"diagnosis": "pre-existing condition"}</script></body></html>';
   const doc = new DOMParser().parseFromString(docString, 'text/html');
-  const metadata = generateMetadata(doc);
+  const metadata = new AmpAdMetadataTransformer().generateMetadata(doc);
   expect(metadata).to.include(`"diagnosis":"pre-existing condition"`);
 });
 
@@ -94,7 +94,7 @@ it('generates image metadata', () => {
           <amp-img src="https://test.image.com?h=i" height=0 width=1999></amp-img>
            </body></html>`;
   const doc = new DOMParser().parseFromString(docString, 'text/html');
-  const metadata = generateMetadata(doc);
+  const metadata = new AmpAdMetadataTransformer().generateMetadata(doc);
   expect(metadata).to.include(
     `"images":["https://some.image.com?a=b","https://foo.image.com?a=b&c=d","https://test.image.com","https://foo.image.com?a=b&c=d","https://test.image.com?d=e","https://test.image.com?f=g","https://test.image.com?h=i"]`
   );
@@ -115,7 +115,7 @@ it('adds the correct metadata for a story ad', () => {
   </html>
   `;
   const doc = new DOMParser().parseFromString(storyAd, 'text/html');
-  const metadata = generateMetadata(doc);
+  const metadata = new AmpAdMetadataTransformer().generateMetadata(doc);
   const parsed = JSON.parse(metadata);
   expect(parsed.ctaType).to.equal('INSTALL');
   expect(parsed.ctaUrl).to.equal('https://www.amp.dev');

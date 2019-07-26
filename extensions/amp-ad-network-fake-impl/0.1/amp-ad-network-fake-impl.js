@@ -15,8 +15,8 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
-import {generateMetadata} from './amp-ad-metadata-transformer';
 import {startsWith} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
 
@@ -31,6 +31,8 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
     /** @private {!./external-reorder-head-transformer.ExternalReorderHeadTransformer} */
     this.reorderHeadTransformer_ = new ExternalReorderHeadTransformer();
+    /** @private {!./amp-ad-metadata-transformer.AmpAdMetadataTransformer} */
+    this.metadataTransformer_ = new AmpAdMetadataTransformer();
   }
 
   /** @override */
@@ -112,7 +114,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     }
 
     this.reorderHeadTransformer_.reorderHead(doc.head);
-    const metadata = generateMetadata(doc);
+    const metadata = this.metadataTransformer_.generateMetadata(doc);
 
     const creative = root./*OK*/ outerHTML;
     const creativeSplit = creative.split('</body>');
