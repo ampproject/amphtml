@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /* eslint-disable indent */
-/* eslint-disable amphtml-internal/html-template */
+/* eslint-disable local/html-template */
 const {html, joinFragments} = require('./html');
 
 const serveModes = [
