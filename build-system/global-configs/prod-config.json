@@ -35,7 +35,7 @@
   "expAdsenseCanonical": 0.05,
   "expAdsenseUnconditionedCanonical": 0.05,
   "fixed-elements-in-lightbox": 1,
-  "flexAdSlots": 0.01,
+  "flexAdSlots": 0.05,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
   "ios-scrollable-iframe": 0,
