@@ -730,16 +730,40 @@
     },
     {
       "url": "examples/visual-tests/amp-ad/amp-ad.html",
-      "name": "AMP ad",
+      "name": "amp-ad: creative",
       "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js",
       "no_base_test": true
     },
     {
-      "url": "examples/visual-tests/amp-ad/amp-inabox.html",
-      "name": "AMP Inabox ad",
+      "url": "examples/visual-tests/amp-ad/amp-fie-text.html",
+      "name": "amp-ad: friendly iframe text ad",
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js",
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-fie-image.html",
+      "name": "amp-ad: friendly iframe image ad",
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js",
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-inabox-creative.html",
+      "name": "amp-ad: inabox creative",
       "loading_complete_selectors": [
         ".view", ".activeview"
       ],
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js",
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-inabox-text.html",
+      "name": "amp-ad: inabox text ad",
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js",
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-inabox-image.html",
+      "name": "amp-ad: inabox image ad",
       "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js",
       "no_base_test": true
     }
