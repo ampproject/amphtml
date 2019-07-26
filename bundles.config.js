@@ -691,7 +691,10 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     options: {
       hasCss: true,
-      cssBinaries: ['amp-story-auto-ads-attribution'],
+      cssBinaries: [
+        'amp-story-auto-ads-ad-badge',
+        'amp-story-auto-ads-attribution',
+      ],
     },
     type: TYPES.MISC,
   },
