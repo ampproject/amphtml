@@ -39,7 +39,8 @@ import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
-import {isIframed, isInFie} from '../../../src/dom';
+import {isIframed} from '../../../src/dom';
+import {isInFie} from '../../../src/iframe-helper';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';

@@ -15,7 +15,7 @@
  */
 
 import {CommonSignals} from './common-signals';
-import {EMBED_PROP} from './iframe-helper';
+import {FIE_EMBED_PROP} from './iframe-helper';
 import {LEGACY_ELEMENTS, stubLegacyElements} from './service/extensions-impl';
 import {Observable} from './observable';
 import {Services} from './services';
@@ -232,7 +232,7 @@ export function installFriendlyIframeEmbed(
         ? ampdocService.installFieDoc(spec.url, childWin, {signals})
         : null;
     const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise, ampdoc);
-    iframe[EMBED_PROP] = embed;
+    iframe[FIE_EMBED_PROP] = embed;
 
     // Add extensions.
     if (ampdoc && ampdocFieExperimentOn) {

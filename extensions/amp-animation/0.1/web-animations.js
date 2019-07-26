@@ -35,9 +35,9 @@ import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runn
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {
   closestAncestorElementBySelector,
-  isInFie,
   matches,
 } from '../../../src/dom';
+import {isInFie} from '../../../src/iframe-helper';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';

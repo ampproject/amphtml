@@ -38,7 +38,8 @@ import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
-import {isInFie, removeElement, tryFocus} from '../../../src/dom';
+import {removeElement, tryFocus} from '../../../src/dom';
+import {isInFie} from '../../../src/iframe-helper';
 import {toArray} from '../../../src/types';
 
 /** @const {string} */
