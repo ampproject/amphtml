@@ -65,6 +65,9 @@ module.exports = function({types: t}) {
   return {
     name: 'transform-html-templates',
     visitor: {
+      Program() {
+        INSERTED_TEMPLATES.clear();
+      },
       TaggedTemplateExpression(path) {
         const {tag} = path.node;
 
