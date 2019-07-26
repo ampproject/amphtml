@@ -65,13 +65,16 @@ function getElementWidthVisitor(setWidth) {
         setWidth(0);
         return true;
       default:
-        // If no layout is provided, we must use getComputedStyle. Padding is
-        // not included in the overall computed width, so we must manually
-        // include it.
+        // If no layout is provided, we must use getComputedStyle. Padding and
+        // border is not included in the overall computed width, so we must
+        // manually include them.
         const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
         const paddingRight = parseInt(style.paddingRight, 10) || 0;
         const totalPadding = paddingLeft + paddingRight;
-        setWidth((parseInt(style.width, 10) || 0) + totalPadding);
+        const borderLeft = parseInt(style.borderLeftWidth, 10) || 0;
+        const borderRight = parseInt(style.borderRightWidth, 10) || 0;
+        const totalBorder = borderLeft + borderRight;
+        setWidth((parseInt(style.width, 10) || 0) + totalPadding + totalBorder);
         return true;
     }
   };

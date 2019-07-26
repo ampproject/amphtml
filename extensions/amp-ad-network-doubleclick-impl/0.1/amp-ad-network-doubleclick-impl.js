@@ -1251,7 +1251,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     ) {
       this.attemptChangeSize(newHeight, newWidth).catch(() => {});
       if (newWidth > width) {
-        this.adjustSlotPostExpansion(newWidth);
+        this.adjustSlotPostExpansion_(newWidth);
       }
     }
   }
@@ -1259,8 +1259,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Ensures that slot is properly centered after being expanded.
    * @param {number} newWidth The new width of the slot.
+   * @private
    */
-  adjustSlotPostExpansion(newWidth) {
+  adjustSlotPostExpansion_(newWidth) {
     if (this.flexibleAdSlotData_ == null) {
       dev().warn(
         TAG,
