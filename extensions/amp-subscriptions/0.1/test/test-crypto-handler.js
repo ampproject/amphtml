@@ -24,8 +24,8 @@ describes.realWin(
   env => {
     let win;
     let ampdoc;
-    let cryptDiv1;
-    let cryptDiv2;
+    let cryptoSection1;
+    let cryptoSection2;
     let cryptoHandler;
     const serviceConfig = {
       services: [
@@ -76,18 +76,20 @@ describes.realWin(
       crypt1.setAttribute('encrypted', '');
       crypt1.setAttribute('type', 'application/octet-stream');
       crypt1.textContent = encryptedContent;
-      cryptDiv1 = win.document.createElement('div');
-      cryptDiv1.appendChild(crypt1);
-      win.document.body.appendChild(cryptDiv1);
+      cryptoSection1 = win.document.createElement('section');
+      cryptoSection1.setAttribute('subscriptions-section', 'content');
+      cryptoSection1.appendChild(crypt1);
+      win.document.body.appendChild(cryptoSection1);
 
       // Create encrypted content in the document body.
       const crypt2 = win.document.createElement('script');
       crypt2.setAttribute('encrypted', '');
       crypt2.setAttribute('type', 'application/octet-stream');
       crypt2.textContent = encryptedContent;
-      cryptDiv2 = win.document.createElement('div');
-      cryptDiv2.appendChild(crypt2);
-      win.document.body.appendChild(cryptDiv2);
+      cryptoSection2 = win.document.createElement('section');
+      cryptoSection2.setAttribute('subscriptions-section', 'content');
+      cryptoSection2.appendChild(crypt2);
+      win.document.body.appendChild(cryptoSection2);
 
       cryptoHandler = new CryptoHandler(ampdoc);
     });
@@ -123,8 +125,8 @@ describes.realWin(
       // eslint-disable-next-line max-len
       it('should replace the encrypted content with decrypted content in multiple sections', () => {
         return cryptoHandler.tryToDecryptDocument(decryptedDocKey).then(() => {
-          expect(cryptDiv1.textContent).to.equal(decryptedContent);
-          expect(cryptDiv2.textContent).to.equal(decryptedContent);
+          expect(cryptoSection1.textContent).to.equal(decryptedContent);
+          expect(cryptoSection2.textContent).to.equal(decryptedContent);
         });
       });
     });

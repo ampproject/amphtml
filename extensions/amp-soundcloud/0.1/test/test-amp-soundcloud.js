@@ -27,7 +27,7 @@ describes.realWin(
     const trackEmbedUrl =
       'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F243169232';
     const playlistEmbedUrl =
-      'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F173211206';
+      'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F1595551';
 
     let win, doc;
 
@@ -36,31 +36,31 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getIns(mediaid, playlist, opt_attrs) {
-      const ins = doc.createElement('amp-soundcloud');
-      if (playlist) {
-        ins.setAttribute('data-playlistid', mediaid);
+    function getSCPlayer(mediaid, isPlaylist, opt_attrs) {
+      const scplayer = doc.createElement('amp-soundcloud');
+      if (isPlaylist) {
+        scplayer.setAttribute('data-playlistid', mediaid);
       } else {
-        ins.setAttribute('data-trackid', mediaid);
+        scplayer.setAttribute('data-trackid', mediaid);
       }
-      ins.setAttribute('height', '237');
+      scplayer.setAttribute('height', '237');
 
       if (opt_attrs) {
         for (const attr in opt_attrs) {
-          ins.setAttribute(attr, opt_attrs[attr]);
+          scplayer.setAttribute(attr, opt_attrs[attr]);
         }
       }
 
-      doc.body.appendChild(ins);
-      return ins
+      doc.body.appendChild(scplayer);
+      return scplayer
         .build()
-        .then(() => ins.layoutCallback())
-        .then(() => ins);
+        .then(() => scplayer.layoutCallback())
+        .then(() => scplayer);
     }
 
     it('renders track', () => {
-      return getIns('243169232').then(ins => {
-        const iframe = ins.firstChild;
+      return getSCPlayer('243169232').then(scplayer => {
+        const iframe = scplayer.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(trackEmbedUrl);
@@ -68,8 +68,8 @@ describes.realWin(
     });
 
     it('renders playlist', () => {
-      return getIns('173211206', true).then(ins => {
-        const iframe = ins.firstChild;
+      return getSCPlayer('1595551', true).then(scplayer => {
+        const iframe = scplayer.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(playlistEmbedUrl);
@@ -77,42 +77,54 @@ describes.realWin(
     });
 
     it('renders secret token', () => {
-      return getIns('243169232', false, {
+      return getSCPlayer('243169232', false, {
         'data-visual': true,
         'data-secret-token': 'c-af',
-      }).then(ins => {
-        const iframe = ins.firstChild;
+      }).then(scplayer => {
+        const iframe = scplayer.firstChild;
         expect(iframe.src).to.include(encodeURIComponent('?secret_token=c-af'));
       });
     });
 
     it('renders fixed-height', () => {
-      return getIns('243169232', false, {layout: 'fixed-height'}).then(ins => {
-        expect(ins.className).to.match(/i-amphtml-layout-fixed-height/);
-      });
+      return getSCPlayer('243169232', false, {layout: 'fixed-height'}).then(
+        scplayer => {
+          expect(scplayer.className).to.match(/i-amphtml-layout-fixed-height/);
+        }
+      );
+    });
+
+    it('renders responsively', () => {
+      return getSCPlayer('243169232', false, {layout: 'responsive'}).then(
+        scplayer => {
+          const iframe = scplayer.firstChild;
+          expect(iframe).to.not.be.null;
+          expect(iframe.className).to.match(/i-amphtml-fill-content/);
+        }
+      );
     });
 
     it('ignores color in visual mode', () => {
-      return getIns('243169232', false, {
+      return getSCPlayer('243169232', false, {
         'data-visual': true,
         'data-color': '00FF00',
-      }).then(ins => {
-        const iframe = ins.firstChild;
+      }).then(scplayer => {
+        const iframe = scplayer.firstChild;
         expect(iframe.src).to.include('visual=true');
         expect(iframe.src).not.to.include('color=00FF00');
       });
     });
 
     it('renders without optional params', () => {
-      return getIns('243169232').then(ins => {
-        const iframe = ins.firstChild;
+      return getSCPlayer('243169232').then(scplayer => {
+        const iframe = scplayer.firstChild;
         expect(iframe.src).not.to.include('&visual=true');
         expect(iframe.src).not.to.include('&color=FF0000');
       });
     });
 
     it('renders data-trackid', () => {
-      expect(getIns('')).to.be.rejectedWith(
+      expect(getSCPlayer('')).to.be.rejectedWith(
         /The data-trackid attribute is required for/
       );
     });

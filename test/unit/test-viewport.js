@@ -100,7 +100,7 @@ describes.fakeWin('Viewport', {}, env => {
     installPlatformService(windowApi);
     installDocService(windowApi, /* isSingleDoc */ true);
     installGlobalDocumentStateService(windowApi);
-    ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
     installViewerServiceForDoc(ampdoc);
 
     binding = new ViewportBindingDef();
@@ -202,37 +202,6 @@ describes.fakeWin('Viewport', {}, env => {
       ampdoc.win.parent = {};
       new Viewport(ampdoc, binding, viewer);
       expect(root).to.have.class('i-amphtml-iframed');
-    });
-
-    describe('experiments', () => {
-      afterEach(() => {
-        toggleExperiment(windowApi, 'inabox-remove-height-auto', false);
-      });
-
-      it(
-        'should set ' +
-          '.i-amphtml-inabox-preserve-height-auto ' +
-          'without an experiment',
-        () => {
-          ampdoc.win.parent = {};
-          new Viewport(ampdoc, binding, viewer);
-          expect(root).to.have.class('i-amphtml-inabox-preserve-height-auto');
-        }
-      );
-
-      it(
-        'should NOT set ' +
-          '.i-amphtml-inabox-preserve-height-auto ' +
-          'with the experiment',
-        () => {
-          toggleExperiment(windowApi, 'inabox-remove-height-auto', true);
-          ampdoc.win.parent = {};
-          new Viewport(ampdoc, binding, viewer);
-          expect(root).to.not.have.class(
-            'i-amphtml-inabox-preserve-height-auto'
-          );
-        }
-      );
     });
 
     describe('ios-webview', () => {
@@ -1471,7 +1440,7 @@ describe('Viewport META', () => {
       installPlatformService(windowApi);
       installDocService(windowApi, /* isSingleDoc */ true);
       installGlobalDocumentStateService(windowApi);
-      ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
+      ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
       viewport = new Viewport(ampdoc, binding, viewer);
@@ -1572,7 +1541,7 @@ describe('createViewport', () => {
         win.parent = win;
         installDocService(win, /* isSingleDoc */ true);
         installGlobalDocumentStateService(win);
-        const ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
+        const ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
@@ -1583,7 +1552,7 @@ describe('createViewport', () => {
         win.parent = {};
         installDocService(win, /* isSingleDoc */ true);
         installGlobalDocumentStateService(win);
-        const ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
+        const ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
@@ -1609,7 +1578,7 @@ describe('createViewport', () => {
         installVsyncService(win);
         installDocService(win, /* isSingleDoc */ true);
         installGlobalDocumentStateService(win);
-        ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
+        ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         viewer = Services.viewerForDoc(ampDoc);
         win.getComputedStyle = () => ({});
@@ -1730,6 +1699,24 @@ describe('createViewport', () => {
           ViewportBindingIosEmbedWrapper_
         );
       });
+
+      it('should bind to "natural" when iframed, but iOS supports scrollable iframes', () => {
+        toggleExperiment(win, 'ios-scrollable-iframe', true);
+        win.parent = {};
+        sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+        installViewportServiceForDoc(ampDoc);
+        const viewport = Services.viewportForDoc(ampDoc);
+        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+      });
+
+      it('should bind to "natural" when in dev mode, but iOS supports scrollable iframes', () => {
+        toggleExperiment(win, 'ios-scrollable-iframe', true);
+        getMode(win).development = true;
+        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
+        installViewportServiceForDoc(ampDoc);
+        const viewport = Services.viewportForDoc(ampDoc);
+        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+      });
     }
   );
 });
@@ -1757,17 +1744,10 @@ describes.realWin('marginBottomOfLastChild', {}, env => {
     secondChild.style.marginBottom = '22px';
     secondChild.style.height = '2px';
     element.appendChild(secondChild);
-
-    toggleExperiment(win, 'margin-bottom-in-content-height', true, true);
   });
 
   it('should return the marginBottom of the last child', () => {
     expect(marginBottomOfLastChild(win, element)).to.equal(22);
-  });
-
-  it('should return 0 if experiment is disabled', () => {
-    toggleExperiment(win, 'margin-bottom-in-content-height', false, true);
-    expect(marginBottomOfLastChild(win, element)).to.equal(0);
   });
 
   it('should return 0 if element has no children', () => {

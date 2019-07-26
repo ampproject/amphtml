@@ -15,14 +15,18 @@
  */
 
 import {Services} from '../services';
+import {
+  closestAncestorElementBySelector,
+  isConnectedNode,
+  rootNodeFor,
+} from '../dom';
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
-import {isInFie} from '../friendly-iframe-embed';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
-import {rootNodeFor} from '../dom';
+import {throttle} from '../utils/rate-limit.js';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
 
@@ -149,6 +153,12 @@ export class LayoutLayers {
       })
     );
 
+    /**
+     * Cleanup any detached layouts at most every second.
+     * @private @const {!function()}
+     */
+    this.throttledCleanup_ = throttle(win, () => this.cleanup_(), 1000);
+
     // Declare scrollingElement as the one true scrolling layer.
     const root = this.declareLayer_(
       scrollingElement,
@@ -181,6 +191,7 @@ export class LayoutLayers {
    * @return {!LayoutElement}
    */
   add(element) {
+    this.throttledCleanup_();
     let layout = LayoutElement.forOptional(element);
     // Elements may already have a layout (common for calls to get size or
     // position from Resources).
@@ -202,12 +213,10 @@ export class LayoutLayers {
    * This also "dirties" the layout, so if's being reparented it will lazily
    * update appropriately.
    *
-   * TODO(jridgewell): This won't catch detach events from native DOM
-   * elements...
-   *
    * @param {!Element} element
    */
   remove(element) {
+    this.throttledCleanup_();
     const layout = LayoutElement.forOptional(element);
     if (!layout) {
       return;
@@ -219,7 +228,7 @@ export class LayoutLayers {
       layouts.splice(index, 1);
     }
 
-    const parent = layout.getParentLayer();
+    const parent = layout.parentLayer_;
     if (parent) {
       parent.remove(layout);
     } else {
@@ -248,6 +257,7 @@ export class LayoutLayers {
    * @return {!PositionDef}
    */
   getScrolledPosition(element, opt_ancestor) {
+    this.throttledCleanup_();
     const layout = this.add(element);
     const pos = layout.getScrolledPosition(opt_ancestor);
     return positionLt(Math.round(pos.left), Math.round(pos.top));
@@ -264,6 +274,7 @@ export class LayoutLayers {
    * @return {!PositionDef}
    */
   getOffsetPosition(element, opt_ancestor) {
+    this.throttledCleanup_();
     const layout = this.add(element);
     const pos = layout.getOffsetPosition(opt_ancestor);
     return positionLt(Math.round(pos.left), Math.round(pos.top));
@@ -276,6 +287,7 @@ export class LayoutLayers {
    * @return {!SizeDef}
    */
   getSize(element) {
+    this.throttledCleanup_();
     const layout = this.add(element);
     const size = layout.getSize();
     return sizeWh(Math.round(size.width), Math.round(size.height));
@@ -294,6 +306,7 @@ export class LayoutLayers {
    * @param {boolean=} opt_force
    */
   remeasure(element, opt_force) {
+    this.throttledCleanup_();
     const layout = this.add(element);
     const from = layout.getParentLayer() || layout;
     if (opt_force) {
@@ -309,6 +322,7 @@ export class LayoutLayers {
    * @param {!Element} element
    */
   declareLayer(element) {
+    this.throttledCleanup_();
     this.declareLayer_(element, false, false);
   }
 
@@ -318,11 +332,15 @@ export class LayoutLayers {
    * @param {!Element} node
    */
   dirty(node) {
+    this.throttledCleanup_();
     // Find a parent layer, or fall back to the root scrolling layer in cases
     // where the node is the scrolling layer (which doesn't have a parent).
-    const layer =
-      LayoutElement.getParentLayer(node) ||
-      LayoutElement.for(this.scrollingElement_);
+    let layer;
+    if (node === this.scrollingElement_) {
+      layer = LayoutElement.for(this.scrollingElement_);
+    } else {
+      layer = LayoutElement.getParentLayer(node) || this.add(node);
+    }
     layer.dirtyMeasurements();
   }
 
@@ -347,6 +365,7 @@ export class LayoutLayers {
    * @private
    */
   onResize_() {
+    this.throttledCleanup_();
     const layouts = this.layouts_;
     for (let i = 0; i < layouts.length; i++) {
       const layout = layouts[i];
@@ -417,6 +436,7 @@ export class LayoutLayers {
    * @param {function()} handler
    */
   onScroll(handler) {
+    this.throttledCleanup_();
     this.onScroll_ = handler;
   }
 
@@ -426,6 +446,7 @@ export class LayoutLayers {
    * @return {!LayoutElement}
    */
   getActiveLayer() {
+    this.throttledCleanup_();
     return this.activeLayer_;
   }
 
@@ -443,8 +464,22 @@ export class LayoutLayers {
    * @template T
    */
   iterateAncestry(element, iterator, state) {
+    this.throttledCleanup_();
     const layout = this.add(element);
     return layout.iterateAncestry(iterator, state);
+  }
+
+  /**
+   * Checks every layout to see if any have been detached from the DOM tree.
+   * @private
+   */
+  cleanup_() {
+    const removed = remove(this.layouts_, layout => {
+      return !layout.isConnected();
+    });
+    for (let i = 0; i < removed.length; i++) {
+      removed[i].undeclareLayer();
+    }
   }
 }
 
@@ -833,11 +868,13 @@ export class LayoutElement {
     }
 
     this.isLayer_ = false;
-    // Handle if this was a fixed position layer (and therefore had null parent
-    // layer).
-    const parent =
-      this.getParentLayer() || LayoutElement.getParentLayer(element, true);
-    this.transfer_(/** @type {!LayoutElement} */ (devAssert(parent)));
+    const children = this.children_;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      child.forgetParentLayer();
+      child.dirtyMeasurements();
+    }
+    children.length = 0;
   }
 
   /**
@@ -1120,7 +1157,14 @@ export class LayoutElement {
    * the element.
    */
   dirtyMeasurements() {
+    if (this.needsRemeasure_) {
+      return;
+    }
     this.needsRemeasure_ = true;
+    const children = this.children_;
+    for (let i = 0; i < children.length; i++) {
+      children[i].dirtyMeasurements();
+    }
   }
 
   /**
@@ -1129,30 +1173,6 @@ export class LayoutElement {
    */
   dirtyScrollMeasurements() {
     this.needsScrollRemeasure_ = true;
-  }
-
-  /**
-   * Remasures the element's size and offset position. This traverse as high as
-   * possible in the layer tree to remeasure as many elements as possible in
-   * one go. This is necessary both from a performance standpoint, and to
-   * ensure that any calculation uses the correct value, since layer in the
-   * ancestry may have been dirtied.
-   *
-   * No matter what, though, the current element will be remeasured.
-   */
-  remeasure() {
-    let layer = this;
-
-    // Find the topmost dirty layer, and remeasure from there.
-    for (let p = this.getParentLayer(); p; p = p.getParentLayer()) {
-      if (p.needsRemeasure_) {
-        layer = p;
-      }
-    }
-
-    if (layer.needsRemeasure_) {
-      layer.remeasure_();
-    }
   }
 
   /**
@@ -1201,15 +1221,17 @@ export class LayoutElement {
   }
 
   /**
-   * Remeasures the element, and all children, since this element was marked
-   * dirty.
-   *
-   * @private
+   * Remasures the element's size and offset position, and any ancestor
+   * elements as needed.
    */
-  remeasure_() {
+  remeasure() {
     this.updateScrollPosition_();
+
+    if (!this.needsRemeasure_) {
+      return;
+    }
     this.needsRemeasure_ = false;
-    const {element_: element} = this;
+    const element = this.element_;
 
     // We need a relative box to measure our offset. Importantly, this box must
     // be negatively offset by its scroll position, to account for the fact
@@ -1239,17 +1261,6 @@ export class LayoutElement {
     if ((getMode().localDev || getMode().test) && Object.freeze) {
       Object.freeze(this.size_);
       Object.freeze(this.position_);
-    }
-
-    // Now, recursively measure all child nodes, to since they've probably been
-    // invalidated by the parent changing.
-    // TODO(jridgewell): When do children need to be remeasured? Could we skip
-    // for only size changes? Or only position changes?
-    const children = this.children_;
-    if (children.length > 0) {
-      for (let i = 0; i < children.length; i++) {
-        children[i].remeasure_();
-      }
     }
   }
 
@@ -1288,6 +1299,14 @@ export class LayoutElement {
       position.left - this.getScrollLeft(),
       position.top - this.getScrollTop()
     );
+  }
+
+  /**
+   * Whether the layout's element is currently connected to the DOM tree.
+   * @return {boolean}
+   */
+  isConnected() {
+    return isConnectedNode(this.element_);
   }
 }
 
@@ -1356,5 +1375,20 @@ export function installLayersServiceForDoc(
       );
     },
     /* opt_instantiate */ true
+  );
+}
+
+/**
+ * A duplicated copy of the same method in friendly-iframe-embed.js
+ * to work around a circular imports, which breaks single-pass.
+ * TODO(lannka): fix this.
+ *
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function isInFie(element) {
+  return (
+    element.classList.contains('i-amphtml-fie') ||
+    !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
   );
 }

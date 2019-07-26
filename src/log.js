@@ -16,7 +16,12 @@
 
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
-import {isEnumValue} from './types';
+import {internalRuntimeVersion} from './internal-version';
+import {isArray, isEnumValue} from './types';
+import {once} from './utils/function';
+import {urls} from './config';
+
+const noop = () => {};
 
 /**
  * Triple zero width space.
@@ -87,6 +92,30 @@ export function overrideLogLevel(level) {
 }
 
 /**
+ * URL that displays a log message on amp.dev.
+ * Query params should be appended postfacto.
+ * This prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.)
+ * It doesn't matter if this gets the prod table for a different channel, since message
+ * tables are guaranteed not to divert as long as `internalRuntimeVersion` is the same.
+ * @return {string}
+ */
+const externalMessagesUrl = () =>
+  `https://log.amp.dev/?v=01${encodeURIComponent(internalRuntimeVersion())}&`;
+
+/**
+ * URL to simple log messages table JSON file, which contains an Object<string, string>
+ * which maps message id to full message template.
+ * This prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.)
+ * It doesn't matter if this gets the prod table for a different channel, since message
+ * tables are guaranteed not to divert as long as `internalRuntimeVersion` is the same.
+ * @return {string}
+ */
+const externalMessagesSimpleTableUrl = () =>
+  `${urls.cdn}/rtv/01${encodeURIComponent(
+    internalRuntimeVersion()
+  )}/log-messages.simple.json`;
+
+/**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
  * errors because errors could be rethrown by some native code as a new error,
  * and only a message would survive. Also, some browser don’t support a 5th
@@ -108,7 +137,7 @@ export class Log {
    * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
    * @param {string=} opt_suffix
    */
-  constructor(win, levelFunc, opt_suffix) {
+  constructor(win, levelFunc, opt_suffix = '') {
     /**
      * In tests we use the main test window instead of the iframe where
      * the tests runs because only the former is relayed to the console.
@@ -123,7 +152,21 @@ export class Log {
     this.level_ = this.defaultLevel_();
 
     /** @private @const {string} */
-    this.suffix_ = opt_suffix || '';
+    this.suffix_ = opt_suffix;
+
+    /** @private {?JsonObject} */
+    this.messages_ = null;
+
+    this.fetchExternalMessagesOnce_ = once(() => {
+      win
+        .fetch(externalMessagesSimpleTableUrl())
+        .then(response => response.json(), noop)
+        .then(opt_messages => {
+          if (opt_messages) {
+            this.messages_ = /** @type {!JsonObject} */ (opt_messages);
+          }
+        });
+    });
   }
 
   /**
@@ -178,10 +221,11 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
+      const args = this.maybeExpandArguments_(messages);
       if (getMode().localDev) {
-        messages.unshift('[' + tag + ']');
+        args.unshift('[' + tag + ']');
       }
-      fn.apply(this.win.console, messages);
+      fn.apply(this.win.console, args);
     }
   }
 
@@ -316,7 +360,7 @@ export class Log {
    *
    * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
    *     not evaluate to true.
-   * @param {string=} opt_message The assertion message
+   * @param {!Array|string=} opt_message The assertion message
    * @param {...*} var_args Arguments substituted into %s in the message.
    * @return {R} The value of shouldBeTrueish.
    * @throws {!Error} When `value` is `null` or `undefined`.
@@ -333,6 +377,12 @@ export class Log {
    */
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
+    if (isArray(opt_message)) {
+      return this.assert(
+        shouldBeTrueish,
+        this.expandLogMessage_(/** @type {!Array} */ (opt_message))
+      );
+    }
     if (!shouldBeTrueish) {
       const message = opt_message || 'Assertion failed';
       const splitMessage = message.split('%s');
@@ -369,7 +419,7 @@ export class Log {
    * Otherwise see `assert` for usage
    *
    * @param {*} shouldBeElement
-   * @param {string=} opt_message The assertion message
+   * @param {!Array|string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
    * @template T
    * @closurePrimitive {asserts.matchesReturn}
@@ -391,7 +441,7 @@ export class Log {
    * For more details see `assert`.
    *
    * @param {*} shouldBeString
-   * @param {string=} opt_message The assertion message
+   * @param {!Array|string=} opt_message The assertion message
    * @return {string} The string value. Can be an empty string.
    * @closurePrimitive {asserts.matchesReturn}
    */
@@ -411,7 +461,7 @@ export class Log {
    * For more details see `assert`.
    *
    * @param {*} shouldBeNumber
-   * @param {string=} opt_message The assertion message
+   * @param {!Array|string=} opt_message The assertion message
    * @return {number} The number value. The allowed values include `0`
    *   and `NaN`.
    * @closurePrimitive {asserts.matchesReturn}
@@ -430,7 +480,7 @@ export class Log {
    * The array can be empty.
    *
    * @param {*} shouldBeArray
-   * @param {string=} opt_message The assertion message
+   * @param {!Array|string=} opt_message The assertion message
    * @return {!Array} The array value
    * @closurePrimitive {asserts.matchesReturn}
    */
@@ -449,7 +499,7 @@ export class Log {
    * For more details see `assert`.
    *
    * @param {*} shouldBeBoolean
-   * @param {string=} opt_message The assertion message
+   * @param {!Array|string=} opt_message The assertion message
    * @return {boolean} The boolean value.
    * @closurePrimitive {asserts.matchesReturn}
    */
@@ -495,6 +545,53 @@ export class Log {
     } else if (isUserErrorMessage(error.message)) {
       error.message = error.message.replace(USER_ERROR_SENTINEL, '');
     }
+  }
+
+  /**
+   * @param {!Array} args
+   * @return {!Array}
+   * @private
+   */
+  maybeExpandArguments_(args) {
+    if (isArray(args[0])) {
+      return [this.expandLogMessage_(/** @type {!Array} */ (args[0]))];
+    }
+    return args;
+  }
+
+  /**
+   * Either redirects a pair of (errorId, ...args) to a URL where the full
+   * message is displayed, or displays it from a fetched table.
+   *
+   * This method is used by the output of the `transform-log-methods` babel
+   * plugin. It should not be used directly. Use the (*error|assert*|info|warn)
+   * methods instead.
+   *
+   * @param {!Array} parts
+   * @return {string}
+   * @private
+   */
+  expandLogMessage_(parts) {
+    // First value should exist.
+    const id = parts[0];
+    // Best effort fetch of message template table.
+    // Since this is async, the first few logs might be indirected to a URL even
+    // if in development mode. Message table is ~small so this should be a short
+    // gap.
+    if (getMode(this.win).development && !this.messages_) {
+      this.fetchExternalMessagesOnce_();
+    }
+    const args = parts.slice(1);
+    if (this.messages_ && id in this.messages_) {
+      const template = this.messages_[id];
+      const {message} = createErrorVargs.apply(null, [template].concat(args));
+      return message;
+    }
+    const url = args.reduce(
+      (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
+      `${externalMessagesUrl()}id=${encodeURIComponent(id)}`
+    );
+    return `More info at ${url}`;
   }
 }
 
@@ -737,7 +834,7 @@ export function isFromEmbed(win, opt_element) {
  *
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
- * @param {string=} opt_message The assertion message
+ * @param {!Array|string=} opt_message The assertion message
  * @param {*=} opt_1 Optional argument (Var arg as individual params for better
  * @param {*=} opt_2 Optional argument inlining)
  * @param {*=} opt_3 Optional argument
@@ -808,7 +905,7 @@ export function devAssert(
  *
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
- * @param {string=} opt_message The assertion message
+ * @param {!Array|string=} opt_message The assertion message
  * @param {*=} opt_1 Optional argument (Var arg as individual params for better
  * @param {*=} opt_2 Optional argument inlining)
  * @param {*=} opt_3 Optional argument

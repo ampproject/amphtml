@@ -25,7 +25,6 @@
 import {EXPERIMENT_ATTRIBUTE, mergeExperimentIds} from './utils';
 import {
   ExperimentInfo, // eslint-disable-line no-unused-vars
-  isExperimentOn,
 } from '../../../src/experiments';
 import {Services} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
@@ -131,27 +130,6 @@ export function isInExperiment(element, id) {
  */
 export function isInManualExperiment(element) {
   return isInExperiment(element, MANUAL_EXPERIMENT_ID);
-}
-
-/**
- * Predicate to check whether A4A has launched yet or not.
- * If it has not yet launched, then the experimental branch serves A4A, and
- * control/filler do not. If it has not, then the filler and control branch do
- * serve A4A, and the experimental branch does not.
- *
- * @param {!Window} win  Host window for the ad.
- * @param {!Element} element  Element to check for pre-launch membership.
- * @return {boolean}
- */
-export function hasLaunched(win, element) {
-  switch (element.getAttribute('type')) {
-    case 'adsense':
-      return isExperimentOn(win, 'a4aFastFetchAdSenseLaunched');
-    case 'doubleclick':
-      return isExperimentOn(win, 'a4aFastFetchDoubleclickLaunched');
-    default:
-      return false;
-  }
 }
 
 /**

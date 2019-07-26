@@ -32,6 +32,7 @@ import {
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {AmpEvents} from '../../../src/amp-events';
+import {AmpStoryBlingLink, BLING_LINK_SELECTOR} from './amp-story-bling-link';
 import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
@@ -51,6 +52,7 @@ import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {
   childElement,
   closestAncestorElementBySelector,
+  createElementWithAttributes,
   isAmpElement,
   iterateCursor,
   matches,
@@ -119,9 +121,6 @@ const TAG = 'amp-story-page';
 /** @private @const {string} */
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
-/** @private @const {string} */
-const HAS_ATTACHMENT_ATTR_NAME = 'i-amphtml-has-attachment';
-
 /** @private @const {number} */
 const REWIND_TIMEOUT_MS = 350;
 
@@ -176,7 +175,7 @@ export const NavigationDirection = {
  * animation.
  * @param {!Window} win
  * @param {!Element} page
- * @param {!../../../src/service/resources-impl.Resources} resources
+ * @param {!../../../src/service/resources-impl.ResourcesDef} resources
  * @return {function(!Element, ?UnlistenDef)}
  */
 function debounceEmbedResize(win, page, resources) {
@@ -227,7 +226,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Element} */
     this.openAttachmentEl_ = null;
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
 
     const deferred = new Deferred();
@@ -266,6 +265,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
+
+    /** @private {?string} A textual description of the content of the page. */
+    this.description_ = null;
   }
 
   /**
@@ -308,7 +310,12 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.emitProgress_(progress)
     );
     this.setDescendantCssTextStyles_();
-    this.setHasAttachmentAttribute_();
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      uiState => this.onUIStateUpdate_(uiState),
+      true /* callToInitialize */
+    );
+    this.setPageDescription_();
   }
 
   /**
@@ -461,6 +468,23 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.findAndPrepareEmbeddedComponents_(true /* forceResize */);
   }
 
+  /**
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    // On vertical rendering, render all the animations with their final state.
+    if (uiState === UIType.VERTICAL && this.animationManager_) {
+      this.signals()
+        .whenSignal(CommonSignals.LOAD_END)
+        .then(() => this.maybeApplyFirstAnimationFrame())
+        .then(() => {
+          this.animationManager_.finishAll();
+        });
+    }
+  }
+
   /** @return {!Promise} */
   beforeVisible() {
     return this.maybeApplyFirstAnimationFrame();
@@ -514,6 +538,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   findAndPrepareEmbeddedComponents_(forceResize = false) {
     this.addClickShieldToEmbeddedComponents_();
     this.resizeInteractiveEmbeddedComponents_(forceResize);
+    this.addStylesToBlingLinks_();
   }
 
   /**
@@ -564,6 +589,15 @@ export class AmpStoryPage extends AMP.BaseElement {
         // Run in case target never changes size.
         debouncePrepareForAnimation(el, null /* unlisten */);
       }
+    });
+  }
+
+  /**
+   * Adds icon and pulse animation to bling links
+   */
+  addStylesToBlingLinks_() {
+    scopedQuerySelectorAll(this.element, BLING_LINK_SELECTOR).forEach(el => {
+      AmpStoryBlingLink.build(el);
     });
   }
 
@@ -944,15 +978,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (distance > 0 && distance <= 2) {
       this.findAndPrepareEmbeddedComponents_();
       this.preloadAllMedia_();
-    }
-  }
-
-  /**
-   * @private
-   */
-  setHasAttachmentAttribute_() {
-    if (this.element.querySelector('amp-story-page-attachment')) {
-      this.element.setAttribute(HAS_ATTACHMENT_ATTR_NAME, '');
     }
   }
 
@@ -1410,5 +1435,54 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setDescendantCssTextStyles_() {
     setTextBackgroundColor(this.element);
+  }
+
+  /**
+   * Sets the description of the page.
+   * @private
+   */
+  setPageDescription_() {
+    this.description_ = this.element.getAttribute('title');
+
+    if (this.isBotUserAgent_) {
+      this.renderPageDescription_();
+    } else {
+      // Strip the title attribute from the page on non-bot user agents, to
+      // prevent the browser tooltip.
+      if (!this.element.getAttribute('aria-label')) {
+        this.element.setAttribute('aria-label', this.description_);
+      }
+      this.element.removeAttribute('title');
+    }
+  }
+
+  /**
+   * Renders the page description in the page.
+   * @private
+   */
+  renderPageDescription_() {
+    if (!this.description_) {
+      return;
+    }
+
+    const descriptionElId = `i-amphtml-story-${this.element.id}-description`;
+    const descriptionEl = createElementWithAttributes(
+      this.win.document,
+      'h2',
+      dict({
+        'class': 'i-amphtml-story-page-description',
+        'id': descriptionElId,
+      })
+    );
+    descriptionEl./* OK */ textContent = this.description_;
+
+    this.element.parentElement.insertBefore(
+      descriptionEl,
+      this.element.nextElementSibling
+    );
+
+    if (!this.element.getAttribute('aria-labelledby')) {
+      this.element.setAttribute('aria-labelledby', descriptionElId);
+    }
   }
 }

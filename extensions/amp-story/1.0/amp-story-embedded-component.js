@@ -283,7 +283,7 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
@@ -722,9 +722,9 @@ export class AmpStoryEmbeddedComponent {
       `Failed to look up embed style element with ID ${embedId}`
     );
 
-    embedStyleEl[AMP_EMBED_DATA].transform = `scale(${
-      embedStyleEl[AMP_EMBED_DATA].scaleFactor
-    })`;
+    embedStyleEl[
+      AMP_EMBED_DATA
+    ].transform = `scale(${embedStyleEl[AMP_EMBED_DATA].scaleFactor})`;
     updateEmbedStyleEl(embedStyleEl, embedStyleEl[AMP_EMBED_DATA]);
   }
 
@@ -789,7 +789,7 @@ export class AmpStoryEmbeddedComponent {
    * that content around stays put.
    * @param {!Element} pageEl
    * @param {!Element} element
-   * @param {!../../../src/service/resources-impl.Resources} resources
+   * @param {!../../../src/service/resources-impl.ResourcesDef} resources
    */
   static prepareForAnimation(pageEl, element, resources) {
     let elId = null;

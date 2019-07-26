@@ -18,10 +18,16 @@
 
 const gulp = require('gulp-help')(require('gulp'));
 const {
+  checkExactVersions,
+} = require('./build-system/tasks/check-exact-versions');
+const {
   compileAccessExpr,
   compileBindExpr,
   compileCssExpr,
 } = require('./build-system/tasks/compile-expr');
+const {
+  generateVendorJsons,
+} = require('./build-system/tasks/generate-vendor-jsons');
 const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
@@ -75,6 +81,7 @@ gulp.task('bundle-size', bundleSize);
 gulp.task('caches-json', cachesJson);
 gulp.task('changelog', changelog);
 gulp.task('changelog:update', changelogUpdate);
+gulp.task('check-exact-versions', checkExactVersions);
 gulp.task('check-links', checkLinks);
 gulp.task('check-types', checkTypes);
 gulp.task('clean', clean);
@@ -91,6 +98,7 @@ gulp.task('dev-dashboard-tests', devDashboardTests);
 gulp.task('dist', dist);
 gulp.task('e2e', e2e);
 gulp.task('firebase', firebase);
+gulp.task('generate-vendor-jsons', generateVendorJsons);
 gulp.task('get-zindex', getZindex);
 gulp.task('integration', integration);
 gulp.task('json-syntax', jsonSyntax);
@@ -104,9 +112,9 @@ gulp.task('presubmit', presubmit);
 gulp.task('process-3p-github-pr', process3pGithubPr);
 gulp.task('process-github-issues', processGithubIssues);
 gulp.task('release:tag', releaseTag);
-gulp.task('test', test);
 gulp.task('serve', serve);
 gulp.task('size', size);
+gulp.task('test', test);
 gulp.task('todos:find-closed', todosFindClosed);
 gulp.task('unit', unit);
 gulp.task('update-packages', updatePackages);

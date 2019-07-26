@@ -213,11 +213,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then(() => Services.timerFor(this.win).promise(1))
       .then(() => this.consentPromise_)
       .then(() => Services.ampdocServiceFor(this.win))
-      .then(ampDocService => {
-        return ampDocService.getAmpDoc(this.element, {
-          closestAmpDoc: true,
-        });
-      })
+      .then(ampDocService => ampDocService.getAmpDoc(this.element))
       .then(ampdoc =>
         Promise.all([
           instrumentationServicePromiseForDoc(ampdoc),
@@ -346,17 +342,17 @@ export class AmpAnalytics extends AMP.BaseElement {
               }
               trigger['selector'] = this.element.parentElement.tagName;
               trigger['selectionMethod'] = 'closest';
-              this.addTriggerNoInline_(trigger);
+              this.addTrigger_(trigger);
             } else if (trigger['selector']) {
               // Expand the selector using variable expansion.
               return this.variableService_
                 .expandTemplate(trigger['selector'], expansionOptions)
                 .then(selector => {
                   trigger['selector'] = selector;
-                  this.addTriggerNoInline_(trigger);
+                  this.addTrigger_(trigger);
                 });
             } else {
-              this.addTriggerNoInline_(trigger);
+              this.addTrigger_(trigger);
             }
           })
         );
@@ -378,13 +374,12 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Calls `AnalyticsGroup.addTrigger` and reports any errors. "NoInline" is
-   * to avoid inlining this method so that `try/catch` does it veto
-   * optimizations.
+   * Calls `AnalyticsGroup.addTrigger` and reports any errors.
    * @param {!JsonObject} config
    * @private
+   * @noinline
    */
-  addTriggerNoInline_(config) {
+  addTrigger_(config) {
     if (!this.analyticsGroup_) {
       // No need to handle trigger for component that has already been detached
       // from DOM
