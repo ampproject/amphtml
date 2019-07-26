@@ -24,6 +24,4 @@ app.use('/dist.tools', express.static('dist.tools'));
 app.use('/examples', express.static('examples'));
 app.use('/test', express.static('test'));
 
-app.listen(9000, () => {
-  console.log('app is listening');
-});
+app.listen(process.env.SERVE_PORT);

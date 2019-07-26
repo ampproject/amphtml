@@ -25,6 +25,7 @@
 const colors = require('ansi-colors');
 const {
   printChangeSummary,
+  signalDistUpload,
   startTimer,
   stopTimer,
   stopTimedJob,
@@ -35,7 +36,6 @@ const {
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 const {runYarnChecks} = require('./yarn-checks');
-const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const FILENAME = 'dist-bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
