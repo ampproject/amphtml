@@ -50,6 +50,7 @@ import {isArray, toArray} from '../../../src/types';
 import {px, setStyles, toggle} from '../../../src/style';
 import {removeChildren, scopedQuerySelector} from '../../../src/dom';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
+import {startsWith} from '../../../src/string';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -870,10 +871,31 @@ export class AmpList extends AMP.BaseElement {
         // Use the new element if there's a mismatched attribute value.
         if (shouldReplace) {
           before.parentElement.replaceChild(after, before);
+        } else {
+          // TODO(#23470): Support more attributes to manually diff by calling
+          // mutatedAttributesCallback() and changeSize().
+
+          // Add new classes.
+          for (let i = 0; i < after.classList.length; i++) {
+            before.classList.add(after.classList[i]);
+          }
+          // Remove missing, non-internal classes.
+          for (let i = 0; i < before.classList.length; i++) {
+            const c = before.classList[i];
+            if (!startsWith('i-amphtml-', c) && !after.classList.contains(c)) {
+              before.classList.remove(c);
+            }
+          }
+          // Concatenate instead of overwrite [style] since width/height are set
+          // by AMP's layout engine.
+          if (after.hasAttribute('style')) {
+            const afterStyle = after.getAttribute('style');
+            before.setAttribute(
+              'style',
+              `${before.getAttribute('style') || ''};${afterStyle}`
+            );
+          }
         }
-        // Note that the above can be overeager to replace the existing element.
-        // E.g. changes to [class] are harmless if internal AMP CSS is ignored.
-        // Manual diffing in an "else" here is left for future work.
       }
     }
   }

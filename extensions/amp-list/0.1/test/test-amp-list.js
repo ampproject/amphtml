@@ -567,14 +567,26 @@ describes.repeated(
 
             it('should keep amp-img if [src] is the same', async () => {
               const img = createAmpImg('foo.jpg');
+              img.setAttribute('class', 'i-amphtml-layout');
+              img.setAttribute('style', 'width:10px');
               const newImg = createAmpImg('foo.jpg');
               newImg.setAttribute('class', 'foo');
+              newImg.setAttribute('style', 'color:red');
+              newImg.setAttribute('should-not', 'be-copied');
 
               await renderTwice(img, newImg);
 
               expect(list.container_.contains(img)).to.be.true;
               expect(list.container_.contains(newImg)).to.be.false;
-              expect(img.hasAttribute('class')).to.be.false;
+              // Only [class] and [style] should be manually diffed.
+              expect(img.getAttribute('class')).to.equal(
+                'i-amphtml-layout foo'
+              );
+              expect(img.getAttribute('style')).to.equal(
+                'width:10px;color:red'
+              );
+              // Other attributes will be lost.
+              expect(img.hasAttribute('should-not')).to.be.false;
             });
 
             it('should replace amp-img if [src] changes', async () => {

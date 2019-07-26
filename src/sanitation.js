@@ -34,7 +34,7 @@ export const DIFF_IGNORE = 'i-amphtml-ignore';
  * @const {!Object<string, !Array<string>>}
  */
 export const DIFFABLE_AMP_ELEMENTS = {
-  'AMP-IMG': ['src', 'srcset', 'layout', 'width', 'height', 'class', 'style'],
+  'AMP-IMG': ['src', 'srcset', 'layout', 'width', 'height'],
 };
 
 /**
