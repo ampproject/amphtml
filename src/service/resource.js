@@ -1091,4 +1091,11 @@ export class Resource {
     delete this.element[RESOURCE_PROP_];
     this.element.disconnect(/* opt_pretendDisconnected */ true);
   }
+
+  /**
+   * Calls element's preconnectCallback.
+   */
+  preconnect() {
+    this.element.preconnect();
+  }
 }

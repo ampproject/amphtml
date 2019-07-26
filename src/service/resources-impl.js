@@ -25,6 +25,7 @@ import {VisibilityState} from '../visibility-state';
 import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
+import {debounce} from '../utils/rate-limit';
 import {dev, devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
 import {getSourceUrl} from '../url';
@@ -424,6 +425,18 @@ export class Resources {
 
     /** @private {?Array<!Resource>} */
     this.pendingBuildResources_ = [];
+
+    /** @private {?Array<!Resource>} */
+    this.pendingPreconnectResources_ = [];
+
+    // If we do early preconnects we delay them a bit. This is kind of
+    // an unfortunate trade off, but it seems faster, because the DOM
+    // operations themselves are not free and might delay
+    this.eventuallyCallPreconnects_ = debounce(
+      this.win,
+      this.eventuallyCallPreconnects_.bind(this),
+      1
+    );
 
     /** @private {boolean} */
     this.isCurrentlyBuildingPendingResources_ = false;
@@ -840,7 +853,36 @@ export class Resources {
     dev().fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
-  /** @override */
+  /**
+   * Schedule resources for preconnecting.
+   * @param {!Element} element
+   */
+  requestPreconnect(element) {
+    const resource = Resource.forElement(element);
+    this.pendingPreconnectResources_.push(resource);
+    this.eventuallyCallPreconnects_();
+  }
+
+  /**
+   * Calls resource manager's preconnect and removes resource from the pending
+   * buffer.
+   * @private
+   */
+  eventuallyCallPreconnects_() {
+    for (let i = 0; i < this.pendingPreconnectResources_.length; i++) {
+      const resource = this.pendingPreconnectResources_[i];
+      resource.preconnect();
+      this.pendingPreconnectResources_.splice(i, 1);
+    }
+  }
+
+  /**
+   * Assigns an owner for the specified element. This means that the resources
+   * within this element will be managed by the owner and not Resources manager.
+   * @param {!Element} element
+   * @param {!AmpElement} owner
+   * @package
+   */
   setOwner(element, owner) {
     Resource.setOwner(element, owner);
   }
