@@ -22,7 +22,7 @@ module.exports = function(context) {
   const call = `${listenCall}, ${addEventListenerCall}`;
 
   const displayMessage = [
-    'Do not add an "unload" listener, which breaks the back/forward cache.',
+    'Do not add "unload" listeners because they break the back/forward cache.',
     'Use the "pagehide" event instead, and if needed check `!event.persisted`.',
   ].join('\n\t');
 
