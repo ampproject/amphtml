@@ -87,7 +87,7 @@ component will render a maximum of three documents (total) on screen at one	sing
 
 [tip type="important]
 **Important**	[`<amp-analytics>`](../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`. 
-Measuring pageviews is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md).	Measuring pageviews is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md).
+Measuring pageviews is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md).
 [/tip]
 
 ### Recommendation box
