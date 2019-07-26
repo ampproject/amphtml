@@ -38,7 +38,7 @@ const {
   recaptchaRouter,
 } = require('./recaptcha-router');
 const {renderShadowViewer} = require('./shadow-viewer');
-const {replaceUrls} = require('./app-utils');
+const {replaceUrls, isRtvMode} = require('./app-utils');
 
 const upload = multer();
 
@@ -62,10 +62,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-function isRtvMode(serveMode) {
-  return /^\d{15}$/.test(serveMode);
-}
 
 function isValidServeMode(serveMode) {
   return (
