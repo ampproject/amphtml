@@ -10,7 +10,7 @@ var DOCUMENT_TYPE = 9
 var DOCUMENT_FRAGMENT_TYPE = 11
 
 // Expose api.
-module.exports = setDOM
+module.exports = {setDOM, setAttributes};
 
 // Flattened array of node pairs that were ignored (via setDOM.IGNORE) in last diff.
 var ignoredNodes = [];

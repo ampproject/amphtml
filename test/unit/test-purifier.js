@@ -35,11 +35,10 @@ describe
        * Helper that serializes output of purifyHtml() to string.
        * @param {string} html
        * @param {Document=} doc
-       * @param {boolean=} diffing
        * @return {string}
        */
-      purify = (html, diffing = false) => {
-        const body = purifyHtml(html, documentEl, diffing);
+      purify = html => {
+        const body = purifyHtml(html, documentEl);
         return body.innerHTML;
       };
     });
@@ -90,24 +89,24 @@ describe
 
     describe('for <amp-bind>', () => {
       it('should rewrite [text] and [class] attributes', () => {
-        expect(purify('<p [text]="foo"></p>')).to.be.equal(
-          '<p data-amp-bind-text="foo" i-amphtml-binding=""></p>'
+        expect(purify('<p [text]="foo"></p>')).to.match(
+          /<p data-amp-bind-text="foo" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/p>/
         );
-        expect(purify('<p [class]="bar"></p>')).to.be.equal(
-          '<p data-amp-bind-class="bar" i-amphtml-binding=""></p>'
+        expect(purify('<p [class]="bar"></p>')).to.match(
+          /<p data-amp-bind-class="bar" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/p>/
         );
       });
 
       it('should add "i-amphtml-binding" for data-amp-bind-*', () => {
-        expect(purify('<p data-amp-bind-text="foo"></p>')).to.be.equal(
-          '<p i-amphtml-binding="" data-amp-bind-text="foo"></p>'
+        expect(purify('<p data-amp-bind-text="foo"></p>')).to.match(
+          /<p i-amphtml-binding="" data-amp-bind-text="foo" i-amphtml-key="(\d+)"><\/p>/
         );
       });
 
       it('should NOT rewrite values of binding attributes', () => {
         // Should not change "foo.bar".
-        expect(purify('<a [href]="foo.bar">link</a>')).to.equal(
-          '<a data-amp-bind-href="foo.bar" i-amphtml-binding="">link</a>'
+        expect(purify('<a [href]="foo.bar">link</a>')).to.match(
+          /<a data-amp-bind-href="foo.bar" i-amphtml-binding="" i-amphtml-key="(\d+)">link<\/a>/
         );
       });
     });
@@ -214,7 +213,7 @@ function runSanitizerTests() {
         )
       ).to.be.equal(
         '<h1>a<i>b</i>c' +
-          '<amp-img src="http://example.com/1.png"></amp-img></h1>'
+          '<amp-img src="http://example.com/1.png" i-amphtml-ignore=""></amp-img></h1>'
       );
     });
 
@@ -286,23 +285,31 @@ function runSanitizerTests() {
     });
 
     it('should output "layout" attribute', () => {
-      const img = '<amp-img layout="responsive"></amp-img>';
-      expect(purify(img)).to.equal(img);
+      expect(purify('<amp-img layout="responsive"></amp-img>')).to.equal(
+        '<amp-img layout="responsive" i-amphtml-ignore=""></amp-img>'
+      );
     });
 
     it('should output "media" attribute', () => {
-      const img = '<amp-img media="(min-width: 650px)"></amp-img>';
-      expect(purify(img)).to.equal(img);
+      expect(purify('<amp-img media="(min-width: 650px)"></amp-img>')).to.equal(
+        '<amp-img media="(min-width: 650px)" i-amphtml-ignore=""></amp-img>'
+      );
     });
 
     it('should output "sizes" attribute', () => {
-      const img = '<amp-img sizes="(min-width: 650px) 50vw, 100vw"></amp-img>';
-      expect(purify(img)).to.equal(img);
+      expect(
+        purify('<amp-img sizes="(min-width: 650px) 50vw, 100vw"></amp-img>')
+      ).to.equal(
+        '<amp-img sizes="(min-width: 650px) 50vw, 100vw" i-amphtml-ignore=""></amp-img>'
+      );
     });
 
     it('should output "heights" attribute', () => {
-      const img = '<amp-img heights="(min-width:500px) 200px, 80%"></amp-img>';
-      expect(purify(img)).to.equal(img);
+      expect(
+        purify('<amp-img heights="(min-width:500px) 200px, 80%"></amp-img>')
+      ).to.equal(
+        '<amp-img heights="(min-width:500px) 200px, 80%" i-amphtml-ignore=""></amp-img>'
+      );
     });
 
     it('should default target to _top with href', () => {
@@ -480,32 +487,40 @@ function runSanitizerTests() {
     it('should avoid disallowing default-supported attributes', () => {
       // We whitelist all attributes of AMP elements, but make sure we don't
       // remove default-supported attributes from the whitelist afterwards.
-      const html =
-        '<amp-img style="color: red"></amp-img><p style="color: blue"></p>';
-      expect(purify(html)).to.equal(html);
+      expect(
+        purify(
+          '<amp-img style="color: red"></amp-img><p style="color: blue"></p>'
+        )
+      ).to.equal(
+        '<amp-img style="color: red" i-amphtml-ignore=""></amp-img><p style="color: blue"></p>'
+      );
     });
 
     it('should allow <amp-lightbox> attributes', () => {
-      expect(purify('<amp-lightbox scrollable></amp-lightbox>')).to.equal(
-        '<amp-lightbox scrollable=""></amp-lightbox>'
+      expect(purify('<amp-lightbox scrollable></amp-lightbox>')).to.match(
+        /<amp-lightbox scrollable="" i-amphtml-key="(\d+)"><\/amp-lightbox>/
       );
     });
 
-    it('should output "i-amphtml-key" attribute if diffing is enabled', () => {
-      // Elements with bindings should have i-amphtml-key="<number>".
-      expect(purify('<p [x]="y"></p>', true)).to.match(
+    it('should output diff marker attributes for some elements', () => {
+      // Elements with bindings should have [i-amphtml-key=<number>].
+      expect(purify('<p [x]="y"></p>')).to.match(
         /<p data-amp-bind-x="y" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/p>/
       );
-      // AMP elements should have i-amphtml-key="<number>".
-      expect(purify('<amp-img></amp-img>', true)).to.match(
-        /<amp-img i-amphtml-key="(\d+)"><\/amp-img>/
+      // AMP elements should have [i-amphtml-key=<number>].
+      expect(purify('<amp-pixel></amp-pixel>')).to.match(
+        /<amp-pixel i-amphtml-key="(\d+)"><\/amp-pixel>/
       );
-      // AMP elements with bindings should have i-amphtml-key="<number>".
-      expect(purify('<amp-img [x]="y"></amp-img>', true)).to.match(
-        /<amp-img i-amphtml-key="(\d+)" data-amp-bind-x="y" i-amphtml-binding=""><\/amp-img>/
+      // AMP elements with bindings should have [i-amphtml-key=<number>].
+      expect(purify('<amp-pixel [x]="y"></amp-pixel>')).to.match(
+        /<amp-pixel data-amp-bind-x="y" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/amp-pixel>/
       );
-      // Other elements should NOT have i-amphtml-key-set.
-      expect(purify('<p></p>', true)).to.equal('<p></p>');
+      // amp-img should have [i-amphtml-ignore].
+      expect(purify('<amp-img></amp-img>')).to.equal(
+        '<amp-img i-amphtml-ignore=""></amp-img>'
+      );
+      // Other elements should NOT have [i-amphtml-key].
+      expect(purify('<p></p>')).to.equal('<p></p>');
     });
 
     it('should resolve URLs', () => {
@@ -545,8 +560,8 @@ function runSanitizerTests() {
         expect(purify('<form name="form-name"></form>')).to.equal(
           '<form></form>'
         );
-        expect(purify('<amp-anim controls></amp-anim>')).to.equal(
-          '<amp-anim></amp-anim>'
+        expect(purify('<amp-anim controls></amp-anim>')).to.match(
+          /<amp-anim i-amphtml-key="(\d+)"><\/amp-anim>/
         );
       });
     });

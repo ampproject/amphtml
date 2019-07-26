@@ -568,13 +568,13 @@ describes.repeated(
             it('should keep amp-img if [src] is the same', async () => {
               const img = createAmpImg('foo.jpg');
               const newImg = createAmpImg('foo.jpg');
-
-              // TODO: Copy other attributes?
+              newImg.setAttribute('class', 'foo');
 
               await renderTwice(img, newImg);
 
               expect(list.container_.contains(img)).to.be.true;
               expect(list.container_.contains(newImg)).to.be.false;
+              expect(img.getAttribute('class')).to.equal('foo');
             });
 
             it('should replace amp-img if [src] changes', async () => {

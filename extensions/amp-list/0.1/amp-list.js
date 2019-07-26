@@ -37,6 +37,10 @@ import {
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {
+  setAttributes as diffAttributes,
+  setDOM,
+} from '../../../third_party/set-dom/set-dom';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
@@ -49,7 +53,6 @@ import {
 import {isArray, toArray} from '../../../src/types';
 import {px, setStyles, toggle} from '../../../src/style';
 import {removeChildren, scopedQuerySelector} from '../../../src/dom';
-import setDOM from '../../../third_party/set-dom/set-dom';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -870,6 +873,13 @@ export class AmpList extends AMP.BaseElement {
         // Use the new element if there's a mismatched attribute value.
         if (shouldReplace) {
           before.parentElement.replaceChild(after, before);
+        } else {
+          // Otherwise, apply any attribute changes to existing element.
+          // Note that we ignore changes to children (e.g. to avoid removing
+          // amp-img > img) -- this works for amp-img but won't generalize.
+          // To support diffing other AMP components, we should delegate
+          // diffing to each component instead of doing it here.
+          diffAttributes(before.attributes, after.attributes);
         }
       }
     }
