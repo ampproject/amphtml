@@ -1249,13 +1249,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       isFluidRequestAndFixedResponse ||
       (returnedSizeDifferent && heightNotIncreased)
     ) {
-      this.attemptChangeSize(newHeight, newWidth)
-        .then(() => {
-          if (newWidth > width) {
-            this.adjustSlotPostExpansion(newWidth);
-          }
-        })
-        .catch(() => {});
+      this.attemptChangeSize(newHeight, newWidth).catch(() => {});
+      if (newWidth > width) {
+        this.adjustSlotPostExpansion(newWidth);
+      }
     }
   }
 
