@@ -91,8 +91,10 @@ module.exports = function(babel) {
         const typedefName = node.declarations[0].id.name;
 
         if (TYPEDEFS.has(typedefName)) {
-          throw new Error(`Found duplicate typedef name "${typedefName}" in ` +
-            `file ${state.file.opts.filename}`);
+          throw new Error(
+            `Found duplicate typedef name "${typedefName}" in ` +
+              `file ${state.file.opts.filename}`
+          );
         }
 
         TYPEDEFS.set(typedefName, typedefComment.value);
