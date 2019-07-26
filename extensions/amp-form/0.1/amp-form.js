@@ -144,7 +144,7 @@ export class AmpForm {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(this.form_);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
@@ -580,41 +580,49 @@ export class AmpForm {
     this.setState_(FormState.SUBMITTING);
 
     //Promised to run before all async calls ; require extended timeout
-    var increasedTimeoutPresubmitPromised = [Promise.resolve()];
-    iterateCursor(asyncInputs, input =>{
-      if(input.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)) increasedTimeoutPresubmitPromised.push(input);
+    var increasedPresubmitPromises = [];
+    iterateCursor(asyncInputs, asyncInput =>{
+      if(asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)) increasedPresubmitPromises.push(this.getValueForAsyncInput_(asyncInput))
     })
 
     // Promises to run before submitting the form
-    var timeout = SUBMIT_TIMEOUT_TYPE.REGULAR;
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
     iterateCursor(asyncInputs, asyncInput => {
-      if(asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)) presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+      if(!asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)) presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
     });
 
-    function runPresubmitPromisesWithTimeout(promises, timeout, sucsess_callback){
-      console.log('running presubit ')
-      this.waitOnPromisesOrTimeout_(
-        promises,
-        timeout
-      ).then(
-        () => {return sucsess_callback()},
-        error => {
-          const detail = dict();
-          if (error && error.message) {
-            detail['error'] = error.message;
-          }
-          return this.handleSubmitFailure_(error, detail);
-        }
-      );
-    }
+    var t = this
 
-    return runPresubmitPromisesWithTimeout(increasedTimeoutPresubmitPromised, SUBMIT_TIMEOUT_TYPE.INCREASED, function(){
-      runPresubmitPromisesWithTimeout(presubmitPromises, SUBMIT_TIMEOUT_TYPE.REGULAR, function(){
-        return this.handlePresubmitSuccess_(trust)
+    
+    return t.doPresubmit(increasedPresubmitPromises,SUBMIT_TIMEOUT_TYPE.INCREASED, function(){
+      return t.doPresubmit(presubmitPromises,SUBMIT_TIMEOUT_TYPE.REGULAR,function(){
+        return t.handlePresubmitSuccess_(trust)
       })
     })
+    
+  }
+
+  /**
+   * Run the presubmit promises before the form submit
+   * @param (Promise[]) promises
+   * @param (Number) timeout
+   * @param (Funciton) callback
+   */
+  doPresubmit(promises, timeout, callback){
+      return this.waitOnPromisesOrTimeout_(
+      promises,
+      timeout
+    ).then(
+      callback,
+      error => {
+        const detail = dict();
+        if (error && error.message) {
+          detail['error'] = error.message;
+        }
+        return this.handleSubmitFailure_(error, detail);
+      }
+    );
   }
 
   /**
