@@ -295,9 +295,7 @@ class LoaderBuilder {
     // Keeping the video logo here short term.
     // This is because there is no single CSS for all players, there is
     // video-interface but not all players implement it. Also the SVG is not
-    // that big.
-    // We need to move most of loaders code out of v0 anyway, see
-    // https://github.com/ampproject/amphtml/issues/23108.
+    // that big. We may still want to move this out eventually.
     if (isIframeVideoPlayerComponent(this.element_.tagName)) {
       const svg = svgFor(this.element_);
       const color = DEFAULT_LOGO_SPINNER_COLOR;
