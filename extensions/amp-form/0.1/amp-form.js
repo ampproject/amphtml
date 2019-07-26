@@ -580,7 +580,7 @@ export class AmpForm {
     this.setState_(FormState.SUBMITTING);
 
     //Promised to run before all async calls ; require extended timeout
-    var increasedTimeoutPresubmitPromised = [];
+    var increasedTimeoutPresubmitPromised = [Promise.resolve()];
     iterateCursor(asyncInputs, input =>{
       if(input.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)) increasedTimeoutPresubmitPromised.push(input);
     })
@@ -612,7 +612,7 @@ export class AmpForm {
 
     return runPresubmitPromisesWithTimeout(increasedTimeoutPresubmitPromised, SUBMIT_TIMEOUT_TYPE.INCREASED, function(){
       runPresubmitPromisesWithTimeout(presubmitPromises, SUBMIT_TIMEOUT_TYPE.REGULAR, function(){
-        this.handlePresubmitSuccess_(trust)
+        return this.handlePresubmitSuccess_(trust)
       })
     })
   }
