@@ -20,7 +20,7 @@ import {AmpFormTextarea} from './amp-form-textarea';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
-  SUBMIT_TIMEOUT_TYPE
+  SUBMIT_TIMEOUT_TYPE,
 } from '../../../src/async-input';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
@@ -94,12 +94,6 @@ const UserValidityState = {
 
 /** @private @const {string} */
 const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
-
-/**
- * Time to wait for services / async input before throwing an error.
- * @private @const {number}
- */
-const SUBMIT_TIMEOUT = 10000;
 
 export class AmpForm {
   /**
@@ -580,40 +574,53 @@ export class AmpForm {
     this.setState_(FormState.SUBMITTING);
 
     //Promised to run before all async calls ; require extended timeout
-    var increasedPresubmitPromises = [];
-    iterateCursor(asyncInputs, asyncInput =>{
-      if(asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)) increasedPresubmitPromises.push(this.getValueForAsyncInput_(asyncInput))
-    })
+    const increasedPresubmitPromises = [];
+    iterateCursor(asyncInputs, asyncInput => {
+      if (
+        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+      ) {
+        increasedPresubmitPromises.push(
+          this.getValueForAsyncInput_(asyncInput)
+        );
+      }
+    });
 
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
     iterateCursor(asyncInputs, asyncInput => {
-      if(!asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)) presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+      if (
+        !asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+      ) {
+        presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+      }
     });
 
-    var t = this
+    const t = this;
 
-    
-    return t.doPresubmit(increasedPresubmitPromises,SUBMIT_TIMEOUT_TYPE.INCREASED, function(){
-      return t.doPresubmit(presubmitPromises,SUBMIT_TIMEOUT_TYPE.REGULAR,function(){
-        return t.handlePresubmitSuccess_(trust)
-      })
-    })
-    
+    return t.doPresubmit(
+      increasedPresubmitPromises,
+      SUBMIT_TIMEOUT_TYPE.INCREASED,
+      function() {
+        return t.doPresubmit(
+          presubmitPromises,
+          SUBMIT_TIMEOUT_TYPE.REGULAR,
+          function() {
+            return t.handlePresubmitSuccess_(trust);
+          }
+        );
+      }
+    );
   }
 
   /**
    * Run the presubmit promises before the form submit
-   * @param (Promise[]) promises
-   * @param (Number) timeout
-   * @param (Funciton) callback
+   * @param {Promise[]} promises
+   * @param {number} timeout
+   * @param {function} callback
    */
-  doPresubmit(promises, timeout, callback){
-      return this.waitOnPromisesOrTimeout_(
-      promises,
-      timeout
-    ).then(
+  doPresubmit(promises, timeout, callback) {
+    return this.waitOnPromisesOrTimeout_(promises, timeout).then(
       callback,
       error => {
         const detail = dict();
