@@ -192,7 +192,6 @@ function overwriteAlwaysUseSuper(utils) {
         try {
           // Tell chai to use value as the subject of the expect chain.
           flag(this, 'object', value);
-
           // Run the code that checks the condition.
           _super.apply(this, arguments);
 

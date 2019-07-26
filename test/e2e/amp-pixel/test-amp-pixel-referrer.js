@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-pixel',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-pixel/pixel.html?a=123',
+    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-pixel/referrer.html',
     environments: ['single'],
   },
   async env => {
@@ -28,69 +27,24 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    describe('amp-pixel macro integration test', () => {
-      it('should expand the TITLE macro', async () => {
-        await expect(controller.getNetworkRequest('hello-world')).to.include({
-          path: '/hello-world?title=AMP%20TEST&qp=123',
+    describe('amp-pixel referrer e2e test', () => {
+      it('should keep referrer if no referrerpolicy specified', async () => {
+        await expect(
+          controller.getNetworkRequest('keep-referrer', 'headers')
+        ).to.deep.include({
+          referrer:
+            'http://localhost:8000/test/fixtures/e2e/amp-pixel/referrer.html',
         });
-        // expect(req.headers.host).to.be.ok;
       });
 
-      // await expect(controller.getNetworkRequest('pixel')).to.include({
-      //   url: '/foo?cid=',
-      // });
-      // await expect(analyticsReq.url).to.match(/^\/bar\?/);
-
-      // const queries = parseQueryString(
-      //   analyticsReq.url.substr('/bar'.length)
-      // );
-      // await expect(queries).to.include({
-      //   title: 'AMP TEST', // ${title},
-      //   cid: '', // ${clientId(a)}
-      //   navTiming: '0', // ${navTiming(requestStart,requestStart)}
-      //   navType: '0', // ${navType}
-      //   navRedirectCount: '0', // ${navRedirectCount}
-      // });
-      // await expect(queries['ampdocUrl']).to.contain(
-      //   'http://localhost:9876/amp4test/compose-doc?'
-      // );
-      // await expect(queries['canonicalUrl']).to.equal(
-      //   'http://nonblocking.io/'
-      // );
-      // await expect(queries['img']).to.contain('/deposit/image'); // ${htmlAttr(amp-img,src)}
+      it('should remove referrer if referrerpolicy=no-referrer', async () => {
+        await expect(
+          controller.getNetworkRequest('no-referrer', 'headers')
+        ).to.deep.include({referrer: ''});
+      });
     });
   }
 );
-
-// describe('amp-bind in A4A', env => {
-//   it('p[text]', async () => {
-//     // Wait for the amp-ad to construct its child iframe.
-//     const ad = env.win.document.getElementById('i-amphtml-demo-id');
-//     yield poll('amp-ad > iframe', () => ad.querySelector('iframe'));
-
-//     // Wait for the iframe contents to load.
-//     const fie = ad.querySelector('iframe').contentWindow;
-//     yield poll('iframe > button', () =>
-//       fie.document.querySelector('button')
-//     );
-
-//     const text = fie.document.querySelector('p');
-//     expect(text.textContent).to.equal('123');
-
-//     const button = fie.document.querySelector('button');
-//     return poll(
-//       '[text]',
-//       () => {
-//         // We click this too many times but there's no good way to tell whether
-//         // amp-bind is initialized yet.
-//         button.click();
-//         return text.textContent === '456';
-//       },
-//       /* onError */ undefined,
-//       5000
-//     );
-//   });
-// });
 
 // import {AmpPixel} from '../../builtins/amp-pixel';
 // import {BrowserController, RequestBank} from '../../testing/test-helper';

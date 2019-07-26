@@ -57,23 +57,38 @@ const DEFAULT_WAIT_TIMEOUT = 10000;
  * @param {!IArrayLike<*>} args
  * @param {function(T):boolean} condition
  * @param {function(T):T} opt_mutate
+ * @param {boolean=} opt_passThrough If true, do not use the waitForFunction method
  * @return {!Promise<?T>}
  * @template T
  */
-async function waitFor(page, valueFn, args, condition, opt_mutate) {
-  const handle = await evaluate(page, valueFn, ...args);
-  let value = await unboxHandle(handle);
+async function waitFor(
+  page,
+  valueFn,
+  args,
+  condition,
+  opt_mutate,
+  opt_passThrough
+) {
+  let value = opt_passThrough
+    ? await valueFn.apply(null, args)
+    : await unboxHandle(await evaluate(page, valueFn, ...args));
+
   if (opt_mutate) {
     value = await opt_mutate(value);
   }
 
   while (!condition(value)) {
-    const handle = await page.waitForFunction(
-      valueFn,
-      {timeout: DEFAULT_WAIT_TIMEOUT},
-      ...args
-    );
-    value = await unboxHandle(handle);
+    if (opt_passThrough) {
+      const handle = await page.waitForFunction(
+        valueFn,
+        {timeout: DEFAULT_WAIT_TIMEOUT},
+        ...args
+      );
+      value = await unboxHandle(handle);
+    } else {
+      value = await valueFn.apply(null, args);
+    }
+
     if (opt_mutate) {
       value = await opt_mutate(value);
     }
@@ -157,6 +172,7 @@ class PuppeteerController {
   /**
    * Return a wait function. When called, the function will cause the test
    * runner to wait until the given value matches the expected value.
+   * The passed-in method evaluates in the context of the test document.
    * @param {function(): !Promise<?T>} valueFn
    * @param {...*} args
    * @return {function(T,T): !Promise<?T>}
@@ -166,6 +182,29 @@ class PuppeteerController {
     return async (condition, opt_mutate) => {
       const frame = await this.getCurrentFrame_();
       return waitFor(frame, valueFn, args, condition, opt_mutate);
+    };
+  }
+
+  /**
+   * Return a wait function. When called, the function will cause the test
+   * runner to wait until the given value matches the expected value.
+   * This method does not evaluate in the context of the test document.
+   * @param {function(): !Promise<?T>} valueFn
+   * @param {...*} args
+   * @return {function(T,T): !Promise<?T>}
+   * @template T
+   */
+  getWaitFnNoeval_(valueFn, ...args) {
+    return async (condition, opt_mutate) => {
+      const frame = await this.getCurrentFrame_();
+      return waitFor(
+        frame,
+        valueFn,
+        args,
+        condition,
+        opt_mutate,
+        /*opt_passthrough*/ true
+      );
     };
   }
 
@@ -621,14 +660,7 @@ class PuppeteerController {
     await page.setRequestInterception(true);
 
     page.on('request', req => {
-      const url = req.url();
-      const {path} = parseUrl(url);
-      const body = req.postData();
-      this.requests_.push({
-        url,
-        path,
-        body,
-      });
+      this.requests_.push(this.annotateRequest_(req));
       req.continue();
     });
   }
@@ -645,25 +677,49 @@ class PuppeteerController {
     // Create a getter that will wait for future requests.
     const getter = async () => {
       const page = await this.getPage_();
-      const request = await page.waitForRequest(req =>
-        req.url().includes(matcher)
+      const response = await page.waitForResponse(res =>
+        res
+          .request()
+          .url()
+          .includes(matcher)
       );
-      const url = request.url();
-      const {path} = parseUrl(url);
-      const queryParams = parseQueryParams(url);
-      const result = {
-        url,
-        path,
-        queryParams,
-        // TODO(cvializ): pass the real request body
-        // It's a challenge for Puppeteer because it stores the postData
-        // as a string, and so we'd need to pass it to a body parser.
-        body: {},
-      };
+      const request = response.request();
+      const result = this.annotateRequest_(request);
       console.log(result);
       return result;
     };
-    return new ControllerPromise(Promise.resolve(matches[0]), getter);
+    return new ControllerPromise(
+      Promise.resolve(matches[0]),
+      this.getWaitFnNoeval_(getter)
+    );
+  }
+
+  /**
+   *
+   * @param {?Request} request
+   */
+  annotateRequest_(request) {
+    if (!request) {
+      return null;
+    }
+
+    const url = request.url();
+    const headers = request.headers();
+
+    const {path} = parseUrl(url);
+    const queryParams = parseQueryParams(url);
+    const body = request.postData();
+    const result = {
+      url,
+      path,
+      headers,
+      queryParams,
+      // TODO(cvializ): pass the request body as an object, not string.
+      // It's a challenge for Puppeteer because it stores the postData
+      // as a string, and so we'd need to pass it to a body parser.
+      body,
+    };
+    return result;
   }
 
   /**

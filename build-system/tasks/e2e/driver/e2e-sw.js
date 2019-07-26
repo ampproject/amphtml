@@ -37,7 +37,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   self.requests_ = self.requests_ || new ClientRequests();
   const {clientId, request} = event;
-  console.log('uwu', request.url);
+  console.log('uwu', request);
   // Exit if we cannot access the client, e.g. if it's cross-origin
   if (!clientId) {
     return;
@@ -93,6 +93,7 @@ class ClientRequests {
 /**
  * @typedef {{
  *   url: string,
+ *   headers: Object,
  *   body: string
  * }}
  */
@@ -110,9 +111,24 @@ async function logRequest(clientId, request) {
   if (!client) {
     return;
   }
-  // TODO(cvializ): Pass the real request body
-  const {url} = request;
-  self.requests_.put(clientId, {url, body: {}});
+
+  const {headers, url, referrer} = request;
+  const headersMap = {};
+  // This does not support all headers. e.g. Referrer
+  for (const header of headers) {
+    const key = header[0];
+    const value = header[1];
+    headersMap[key] = value;
+  }
+  headersMap['host'] = new URL(url).host;
+  headersMap['referrer'] = referrer;
+
+  self.requests_.put(clientId, {
+    url,
+    headers: headersMap,
+    // TODO(cvializ): Pass the request body
+    body: {},
+  });
 
   client.postMessage(self.requests_.get(clientId));
 }

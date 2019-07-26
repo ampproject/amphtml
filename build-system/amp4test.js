@@ -23,14 +23,12 @@ const argv = minimist(process.argv.slice(2), {
 });
 const multer = require('multer');
 const path = require('path');
-const url = require('url');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 const upload = multer();
 
 /* eslint-disable max-len */
 
-const KARMA_SERVER_PORT = 9876;
 const {SERVE_MODE} = process.env;
 
 /**
