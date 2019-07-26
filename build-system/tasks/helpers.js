@@ -589,7 +589,7 @@ function printConfigHelp(command) {
 function printNobuildHelp() {
   if (!isTravisBuild()) {
     for (const task of NOBUILD_HELP_TASKS) {
-      // eslint-disable-line amphtml-internal/no-for-of-statement
+      // eslint-disable-line local/no-for-of-statement
       if (argv._.includes(task)) {
         log(
           green('To skip building during future'),
