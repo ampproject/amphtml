@@ -599,7 +599,7 @@ export class AmpForm {
         promises,
         timeout
       ).then(
-        () => sucsess_callback(),
+        () => {return sucsess_callback()},
         error => {
           const detail = dict();
           if (error && error.message) {
@@ -612,7 +612,7 @@ export class AmpForm {
 
     return runPresubmitPromisesWithTimeout(increasedTimeoutPresubmitPromised, SUBMIT_TIMEOUT_TYPE.INCREASED, function(){
       runPresubmitPromisesWithTimeout(presubmitPromises, SUBMIT_TIMEOUT_TYPE.REGULAR, function(){
-        return this.handlePresubmitSuccess_(trust)
+        this.handlePresubmitSuccess_(trust)
       })
     })
   }
