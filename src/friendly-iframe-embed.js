@@ -15,9 +15,10 @@
  */
 
 import {CommonSignals} from './common-signals';
-import {EMBED_PROP, Services} from './services';
+import {EMBED_PROP} from './iframe-helper';
 import {LEGACY_ELEMENTS, stubLegacyElements} from './service/extensions-impl';
 import {Observable} from './observable';
+import {Services} from './services';
 import {Signals} from './utils/signals';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';

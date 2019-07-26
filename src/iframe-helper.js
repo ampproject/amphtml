@@ -586,3 +586,20 @@ export function canInspectWindow(win) {
     return false;
   }
 }
+
+/** @const {string} */
+export const EMBED_PROP = '__AMP_EMBED__';
+
+/**
+ * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
+ * Caution: This will only return the FIE after the iframe has 'loaded'. If you
+ * are checking before this signal you may be in a race condition that returns
+ * null.
+ * @param {!HTMLIFrameElement} iframe
+ * @return {?./friendly-iframe-embed.FriendlyIframeEmbed}
+ */
+export function getFriendlyIframeEmbedOptional(iframe) {
+  return /** @type {?./friendly-iframe-embed.FriendlyIframeEmbed} */ (iframe[
+    EMBED_PROP
+  ]);
+}

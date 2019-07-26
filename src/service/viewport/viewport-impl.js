@@ -17,7 +17,7 @@
 import {Animation} from '../../animation';
 import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
-import {Services, getFriendlyIframeEmbedOptional} from '../../services';
+import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedShadowRoot_} from './viewport-binding-ios-embed-sd';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
@@ -28,6 +28,7 @@ import {closestAncestorElementBySelector, isIframed} from '../../dom';
 import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
+import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
 import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,

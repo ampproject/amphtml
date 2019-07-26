@@ -17,7 +17,8 @@
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
 import {AnalyticsEvent, CustomEventTracker} from './events';
 import {AnalyticsGroup} from './analytics-group';
-import {Services, getFriendlyIframeEmbedOptional} from '../../../src/services';
+import {Services} from '../../../src/services';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
   getParentWindowFrameElement,
   getServiceForDoc,

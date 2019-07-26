@@ -25,8 +25,9 @@ import {
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
 } from '../../src/friendly-iframe-embed';
-import {Services, getFriendlyIframeEmbedOptional} from '../../src/services';
+import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
+import {getFriendlyIframeEmbedOptional} from '../../src/iframe-helper';
 import {
   getService,
   installServiceInEmbedScope,
