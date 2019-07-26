@@ -275,7 +275,7 @@ def CompileWithClosure(js_files, definitions, entry_points, output_file):
   """
 
   cmd = [
-      'java', '-jar', 'node_modules/google-closure-compiler/compiler.jar',
+      'java', '-jar', 'node_modules/google-closure-compiler-java/compiler.jar',
       '--language_out=ES5_STRICT', '--dependency_mode=STRICT',
       '--js_output_file=%s' % output_file
   ]
