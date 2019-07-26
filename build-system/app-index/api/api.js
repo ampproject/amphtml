@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable amphtml-internal/no-deep-destructuring */
+/* eslint-disable local/no-deep-destructuring */
 
 'use strict';
 

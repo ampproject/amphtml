@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,8 @@
  * limitations under the License.
  */
 
-/* eslint-disable local/html-template */
+/* global require, module */
 
-const {html} = require('./html');
+const {rules} = require('./build-system/eslint-rules/index');
 
-const Option = ({value, name}) =>
-  html`
-    <option value=${value}>${name}</option>
-  `;
-
-const KeyValueOptions = options =>
-  Object.keys(options)
-    .map(name =>
-      Option({
-        name,
-        value: options[name],
-      })
-    )
-    .join('');
-
-module.exports = {Option, KeyValueOptions};
+module.exports = {rules};

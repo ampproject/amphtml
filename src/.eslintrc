@@ -1,5 +1,5 @@
 {
   "rules": {
-    "amphtml-internal/no-global": 2
+    "local/no-global": 2
   }
 }

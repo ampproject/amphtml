@@ -5106,9 +5106,6 @@ eslint-config-prettier@6.0.0:
   dependencies:
     get-stdin "^6.0.0"
 
-"eslint-plugin-amphtml-internal@file:build-system/eslint-rules":
-  version "0.1.0"
-
 eslint-plugin-chai-expect@2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/eslint-plugin-chai-expect/-/eslint-plugin-chai-expect-2.0.1.tgz#0f9267745feafa723b8ec1bb151c073df5558f60"
@@ -5141,6 +5138,11 @@ eslint-plugin-jsdoc@15.7.2:
     lodash "^4.17.15"
     object.entries-ponyfill "^1.0.1"
     regextras "^0.6.1"
+
+eslint-plugin-local@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-local/-/eslint-plugin-local-1.0.0.tgz#f0c07011c95fec42bfb4d909debb6ea035f3b2a4"
+  integrity sha1-8MBwEclf7EK/tNkJ3rtuoDXzsqQ=
 
 eslint-plugin-notice@0.8.8:
   version "0.8.8"

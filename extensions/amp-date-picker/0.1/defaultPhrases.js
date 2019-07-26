@@ -73,7 +73,7 @@ const dateIsUnavailable = obj => {
 /**
  * @type {!JsonObject}
  */
-// eslint-disable-next-line amphtml-internal/no-export-side-effect
+// eslint-disable-next-line local/no-export-side-effect
 export const DayPickerPhrases = dict({
   'calendarLabel': calendarLabel,
   'jumpToPrevMonth': jumpToPrevMonth,
