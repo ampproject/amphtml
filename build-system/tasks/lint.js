@@ -71,12 +71,11 @@ function logOnSameLine(message) {
 
 /**
  * Runs the linter on the given stream using the given options.
- * @param {string} filePath
  * @param {!ReadableStream} stream
  * @param {!Object} options
  * @return {boolean}
  */
-function runLinter(filePath, stream, options) {
+function runLinter(stream, options) {
   if (!isTravisBuild()) {
     log(colors.green('Starting linter...'));
   }
@@ -85,17 +84,17 @@ function runLinter(filePath, stream, options) {
     .pipe(eslint(options))
     .pipe(
       eslint.formatEach('stylish', function(msg) {
-        logOnSameLine(msg.trim() + '\n');
+        logOnSameLine(msg.replace(`${rootDir}/`, '').trim() + '\n');
       })
     )
-    .pipe(eslintIfFixed(filePath))
+    .pipe(eslintIfFixed(rootDir))
     .pipe(
       eslint.result(function(result) {
+        const relativePath = path.relative(rootDir, result.filePath);
         if (!isTravisBuild()) {
-          logOnSameLine(colors.green('Linted: ') + result.filePath);
+          logOnSameLine(colors.green('Linted: ') + relativePath);
         }
         if (options.fix && result.fixed) {
-          const relativePath = path.relative(rootDir, result.filePath);
           const status =
             result.errorCount == 0
               ? colors.green('Fixed: ')
@@ -239,9 +238,8 @@ function lint() {
     }
     setFilesToLint(jsFiles);
   }
-  const basePath = '.';
-  const stream = initializeStream(config.lintGlobs, {base: basePath});
-  return runLinter(basePath, stream, options);
+  const stream = initializeStream(config.lintGlobs, {base: rootDir});
+  return runLinter(stream, options);
 }
 
 module.exports = {
