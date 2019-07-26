@@ -805,7 +805,7 @@ export class AmpList extends AMP.BaseElement {
       this.hideFallbackAndPlaceholder_();
 
       if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
-        this.diff_(elements);
+        this.diff_(container, elements);
       } else {
         if (!opt_append) {
           removeChildren(container);
@@ -834,10 +834,11 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Updates `this.container_` by DOM diffing its children against `elements`.
+   * @param {!Element} container
    * @param {!Array<!Element>} elements
    * @private
    */
-  diff_(elements) {
+  diff_(container, elements) {
     const newContainer = this.createContainer_();
     this.addElementsToContainer_(elements, newContainer);
 
@@ -850,18 +851,18 @@ export class AmpList extends AMP.BaseElement {
       let key = -1;
       // We only need to mark AMP elements for diffing because bindings in
       // initial content are inert.
-      const elements = this.container_.querySelectorAll('.i-amphtml-element');
+      const elements = container.querySelectorAll('.i-amphtml-element');
       elements.forEach(element => {
         markElementForDiffing(element, () => String(key--));
       });
     }
 
-    const ignored = setDOM(this.container_, newContainer);
+    const ignored = setDOM(container, newContainer);
 
     // Manually process ignored elements (AMP elements).
     for (let i = 0; i < ignored.length; i += 2) {
-      const before = ignored[i];
-      const after = ignored[i + 1];
+      const before = dev().assertElement(ignored[i]);
+      const after = dev().assertElement(ignored[i + 1]);
       devAssert(before.nodeName == after.nodeName, 'Mismatched nodeName.');
       const attrs = DIFFABLE_AMP_ELEMENTS[before.nodeName];
       if (attrs) {

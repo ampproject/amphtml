@@ -71,7 +71,9 @@ describe
 
       it('should output valid markup', () => {
         expect(purify('<h1>abc</h1>')).to.be.equal('<h1>abc</h1>');
-        expect(purify('<h1>a<i>b</i>c</h1>')).to.be.equal('<h1>a<i>b</i>c</h1>');
+        expect(purify('<h1>a<i>b</i>c</h1>')).to.be.equal(
+          '<h1>a<i>b</i>c</h1>'
+        );
         expect(purify('<h1>a<i>b</i><br>c</h1>')).to.be.equal(
           '<h1>a<i>b</i><br>c</h1>'
         );
@@ -160,7 +162,9 @@ describe
       });
 
       it('should output "media" attribute', () => {
-        expect(purify('<amp-img media="(min-width: 650px)"></amp-img>')).to.equal(
+        expect(
+          purify('<amp-img media="(min-width: 650px)"></amp-img>')
+        ).to.equal(
           '<amp-img media="(min-width: 650px)" i-amphtml-ignore=""></amp-img>'
         );
       });
