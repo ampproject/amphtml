@@ -567,7 +567,6 @@ describes.repeated(
 
             it('should keep amp-img if [src] is the same', async () => {
               const img = createAmpImg('foo.jpg');
-              img.setAttribute('class', 'i-amphtml-layout');
               img.setAttribute('style', 'width:10px');
               const newImg = createAmpImg('foo.jpg');
               newImg.setAttribute('class', 'foo');
@@ -579,9 +578,7 @@ describes.repeated(
               expect(list.container_.contains(img)).to.be.true;
               expect(list.container_.contains(newImg)).to.be.false;
               // Only [class] and [style] should be manually diffed.
-              expect(img.getAttribute('class')).to.equal(
-                'i-amphtml-layout foo'
-              );
+              expect(img.classList.contains('foo')).to.be.true;
               expect(img.getAttribute('style')).to.equal(
                 'width:10px;color:red'
               );
@@ -600,13 +597,14 @@ describes.repeated(
             });
 
             it('should diff against initial content', async () => {
-              const div = doc.createElement('div');
-              const newDiv = doc.createElement('div');
-              newDiv.setAttribute('class', 'foo');
+              const img = createAmpImg('foo.jpg');
+              img.setAttribute('class', 'i-amphtml-element');
+              const newImg = createAmpImg('foo.jpg'); // Same src.
+              newImg.setAttribute('class', 'bar');
 
               const initialContainer = doc.createElement('div');
               initialContainer.setAttribute('role', 'list');
-              initialContainer.appendChild(div);
+              initialContainer.appendChild(img);
 
               // Initial content must be set before buildCallback(), so use
               // a new test AmpList instance.
@@ -616,13 +614,16 @@ describes.repeated(
               list = createAmpList(element);
 
               const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
-                newDiv,
+                newImg,
               ]);
               await list.layoutCallback().then(() => rendered);
 
-              expect(list.container_.contains(div)).to.be.true;
-              expect(list.container_.contains(newDiv)).to.be.false;
-              expect(div.getAttribute('class')).to.equal('foo');
+              expect(list.container_.contains(img)).to.be.true;
+              expect(list.container_.contains(newImg)).to.be.false;
+              // Internal class names should be preserved.
+              expect(img.getAttribute('class')).to.equal(
+                'i-amphtml-element bar'
+              );
             });
           });
 

@@ -883,7 +883,7 @@ export class AmpList extends AMP.BaseElement {
           // Remove missing, non-internal classes.
           for (let i = 0; i < before.classList.length; i++) {
             const c = before.classList[i];
-            if (!startsWith('i-amphtml-', c) && !after.classList.contains(c)) {
+            if (!startsWith(c, 'i-amphtml-') && !after.classList.contains(c)) {
               before.classList.remove(c);
             }
           }
