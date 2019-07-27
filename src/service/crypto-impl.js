@@ -217,6 +217,7 @@ export class Crypto {
 
 /**
  * @param {!Window} win
+ * @return {*} TODO: Specify return type
  */
 export function installCryptoService(win) {
   return registerServiceBuilder(win, 'crypto', Crypto);

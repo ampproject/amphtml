@@ -328,6 +328,7 @@ export class AmpVideoIntegration {
   /**
    * @param {function()} callback
    * @private
+   * @return {*} TODO: Specify return type
    */
   safePlayOrPause_(callback) {
     return () => {
@@ -373,6 +374,7 @@ export class AmpVideoIntegration {
    * @param {!JsonObject} data
    * @param {function()=} opt_callback
    * @private
+   * @return {*} TODO: Specify return type
    */
   postToParent_(data, opt_callback) {
     const id = this.callCounter_++;
@@ -402,6 +404,7 @@ export class AmpVideoIntegration {
    * detail that others should not rely on.
    * @param {function(!JsonObject)} callback
    * @private
+   * @return {*} TODO: Specify return type
    */
   getIntersectionForTesting_(callback) {
     return this.postToParent_(dict({'method': 'getIntersection'}), callback);

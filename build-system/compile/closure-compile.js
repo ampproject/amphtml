@@ -26,6 +26,7 @@ let compilerErrors = '';
  * dropping the closure compiler plugin's logging prefix and then syntax
  * highlighting the error text.
  * @param {string} message
+ * @return {*} TODO: Specify return type
  */
 function formatClosureCompilerError(message) {
   const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;

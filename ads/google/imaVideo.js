@@ -1020,6 +1020,7 @@ export function updateUi(currentTime, duration) {
  * hour if the content is less than one hour.
  * @param {number} time
  * @visibleForTesting
+ * @return {*} TODO: Specify return type
  */
 export function formatTime(time) {
   if (isNaN(time)) {
@@ -1045,6 +1046,7 @@ export function formatTime(time) {
  * Zero-pads the provided int and returns a string of length 2.
  * @param {string|number} input
  * @visibleForTesting
+ * @return {*} TODO: Specify return type
  */
 export function zeroPad(input) {
   input = String(input);
@@ -1510,6 +1512,7 @@ function postMessage(data) {
  * Returns the properties we need to access for testing.
  *
  * @visibleForTesting
+ * @return {*} TODO: Specify return type
  */
 export function getPropertiesForTesting() {
   return {

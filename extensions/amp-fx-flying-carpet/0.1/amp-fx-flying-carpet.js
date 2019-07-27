@@ -200,6 +200,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    * visually, only their surrounding Elements or non-whitespace Texts do.
    * @param {!Array<!Node>} nodes
    * @private
+   * @return {*} TODO: Specify return type
    */
   visibileChildren_(nodes) {
     return nodes.filter(node => {

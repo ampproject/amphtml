@@ -666,6 +666,7 @@ function getNewCidForCookie(win) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {*} TODO: Specify return type
  */
 export function installCidService(ampdoc) {
   return registerServiceBuilderForDoc(ampdoc, 'cid', Cid);

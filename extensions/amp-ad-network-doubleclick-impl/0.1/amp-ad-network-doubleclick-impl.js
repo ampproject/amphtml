@@ -687,6 +687,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * category exclusions.
    * @param {?Array<!rtcResponseDef>} rtcResponseArray
    * @private
+   * @return {?Object|undefined}
    */
   mergeRtcResponses_(rtcResponseArray) {
     if (!rtcResponseArray) {

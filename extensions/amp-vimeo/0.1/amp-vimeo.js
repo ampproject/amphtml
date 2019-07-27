@@ -89,6 +89,7 @@ class AmpVimeo extends AMP.BaseElement {
     /**
      * @param {!Event} e
      * @private
+     * @return {*} TODO: Specify return type
      */
     this.boundOnMessage_ = e => this.onMessage_(e);
 

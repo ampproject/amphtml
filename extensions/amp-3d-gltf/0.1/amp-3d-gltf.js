@@ -153,10 +153,13 @@ export class Amp3dGltf extends AMP.BaseElement {
     return this.willBeLoaded_.promise;
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {?Function}
+   */
   listenGltfViewerMessages_() {
     if (!this.iframe_) {
-      return;
+      return null;
     }
 
     const listenIframe = (evName, cb) =>

@@ -727,6 +727,7 @@ function polyfill(win) {
    * You can't use the real HTMLElement constructor, because you can't subclass
    * it without using native classes. So, mock its approximation using
    * createElement.
+   * @return {*} TODO: Specify return type
    */
   function HTMLElementPolyfill() {
     const {constructor} = this;
@@ -782,6 +783,7 @@ function polyfill(win) {
 function wrapHTMLElement(win) {
   const {HTMLElement, Reflect, Object} = win;
   /**
+   * @return {*} TODO: Specify return type
    */
   function HTMLElementWrapper() {
     const ctor = /** @type {function(...?):?|undefined} */ (this.constructor);

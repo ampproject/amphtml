@@ -198,6 +198,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @param {number} x
    * @param {number} y
    * @param {number} scale
+   * @return {*} TODO: Specify return type
    */
   transform(x, y, scale) {
     this.updatePanZoomBounds_(scale);
@@ -434,6 +435,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * relative to the amp-pan-zoom component.
    * @param {number} clientX
    * @private
+   * @return {number}
    */
   getOffsetX_(clientX) {
     const {left} = this.elementBox_;
@@ -445,6 +447,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * relative to the amp-pan-zoom component.
    * @param {number} clientY
    * @private
+   * @return {number}
    */
   getOffsetY_(clientY) {
     const {top} = this.elementBox_;
@@ -828,6 +831,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   /**
    * @param {number} clientX
    * @param {number} clientY
+   * @return {*} TODO: Specify return type
    */
   onDoubletapZoom_(clientX, clientY) {
     const newScale =

@@ -904,6 +904,7 @@ export class VideoDocking {
    * @param {!DockTargetDef} target
    * @param {number=} opt_step
    * @private
+   * @return {*} TODO: Specify return type
    */
   dockInTransferLayerStep_(video, target, opt_step) {
     // Do this in a multi-step process due to a browser quirk in transferring
@@ -1082,6 +1083,7 @@ export class VideoDocking {
    * @param {number} transitionDurationMs
    * @param {RelativeX=} opt_relativeX
    * @private
+   * @return {!Promise}
    */
   placeAt_(video, x, y, scale, step, transitionDurationMs, opt_relativeX) {
     if (this.alreadyPlacedAt_(x, y, scale)) {

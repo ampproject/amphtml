@@ -342,6 +342,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
   /**
    * @param {!Element} element
    * @private
+   * @return {*} TODO: Specify return type
    */
   rendered_(element) {
     return this.mutateElement(() => {

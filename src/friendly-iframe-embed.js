@@ -288,6 +288,7 @@ function isIframeReady(iframe) {
 /**
  * Merges base and fonts into html document.
  * @param {!FriendlyIframeSpec} spec
+ * @return {string}
  */
 function mergeHtml(spec) {
   const originalHtml = spec.html;
@@ -347,6 +348,7 @@ function mergeHtml(spec) {
  * Exposes `mergeHtml` for testing purposes.
  * @param {!FriendlyIframeSpec} spec
  * @visibleForTesting
+ * @return {*} TODO: Specify return type
  */
 export function mergeHtmlForTesting(spec) {
   return mergeHtml(spec);

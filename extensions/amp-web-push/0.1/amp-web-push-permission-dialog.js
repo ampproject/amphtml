@@ -227,7 +227,10 @@ export class AmpWebPushPermissionDialog {
     }
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO: Specify return type
+   */
   onPermissionDefaultOrGranted_() {
     // Prompt for permissions
     return this.requestNotificationPermission().then(permission => {

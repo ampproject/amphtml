@@ -480,6 +480,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Builds the tooltip overlay and appends it to the provided story.
    * @private
+   * @return {Node}
    */
   buildFocusedState_() {
     this.shadowRoot_ = this.win_.document.createElement('div');
@@ -678,12 +679,13 @@ export class AmpStoryEmbeddedComponent {
    * Gets href from an element containing a url.
    * @param {!Element} target
    * @private
+   * @return {string}
    */
   getElementHref_(target) {
     const elUrl = target.getAttribute('href');
     if (!isProtocolValid(elUrl)) {
       user().error(TAG, 'The tooltip url is invalid');
-      return;
+      return '';
     }
 
     return parseUrlDeprecated(elUrl).href;

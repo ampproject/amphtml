@@ -42,6 +42,7 @@ export function delayAfterDeferringToEventLoop(win, duration) {
  * @param {string} s
  * @param {number} targetLength
  * @param {string} padString
+ * @return {*} TODO: Specify return type
  */
 function padStart(s, targetLength, padString) {
   if (s.length >= targetLength) {

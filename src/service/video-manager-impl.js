@@ -100,7 +100,10 @@ export class VideoManager {
     /** @private @const */
     this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
-    /** @private @const */
+    /**
+     * @private @const
+     * @return {*} TODO: Specify return type
+     */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     /** @private @const {function():!AutoFullscreenManager} */
@@ -405,6 +408,7 @@ class VideoEntry {
       analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE)
     );
 
+    // eslint-disable-next-line jsdoc/require-returns
     /** @private @const {function(): !Promise<boolean>} */
     this.supportsAutoplay_ = () => {
       const {win} = this.ampdoc_;
@@ -991,6 +995,7 @@ export class AutoFullscreenManager {
     /** @private @const {!Array<!../video-interface.VideoOrBaseElementDef>} */
     this.entries_ = [];
 
+    // eslint-disable-next-line jsdoc/require-returns
     /** @private @const {function()} */
     this.boundSelectBestCentered_ = () => this.selectBestCenteredInPortrait_();
 
@@ -1147,6 +1152,7 @@ export class AutoFullscreenManager {
    * @param {!../video-interface.VideoOrBaseElementDef} video
    * @param {?string=} optPos
    * @private
+   * @return {*} TODO: Specify return type
    */
   scrollIntoIfNotVisible_(video, optPos = null) {
     const {element} = video;
@@ -1169,18 +1175,27 @@ export class AutoFullscreenManager {
     });
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO: Specify return type
+   */
   getViewport_() {
     return Services.viewportForDoc(this.ampdoc_);
   }
 
-  /** @private @return {!Promise} */
+  /**
+   * @private
+   * @return {!Promise}
+   */
   onceOrientationChanges_() {
     const magicNumber = 330;
     return Services.timerFor(this.ampdoc_.win).promise(magicNumber);
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO: Specify return type
+   */
   selectBestCenteredInPortrait_() {
     if (this.isInLandscape()) {
       return this.currentlyCentered_;

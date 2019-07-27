@@ -254,6 +254,7 @@ export class MediaPool {
    * @param {!HTMLMediaElement} mediaA The first element to compare.
    * @param {!HTMLMediaElement} mediaB The second element to compare.
    * @private
+   * @return {number}
    */
   compareMediaDistances_(mediaA, mediaB) {
     const distanceA = this.distanceFn_(mediaA);

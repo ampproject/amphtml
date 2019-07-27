@@ -204,7 +204,10 @@ export class ShareWidget {
     this.requestService_ = Services.storyRequestServiceV01(this.win);
   }
 
-  /** @param {!Window} win */
+  /**
+   * @param {!Window} win
+   * @return {!ShareWidget}
+   */
   static create(win) {
     return new ShareWidget(win);
   }
@@ -449,7 +452,10 @@ export class ScrollableShareWidget extends ShareWidget {
     this.containerWidth_ = null;
   }
 
-  /** @param {!Window} win */
+  /**
+   * @param {!Window} win
+   * @return {!ScrollableShareWidget}
+   */
   static create(win) {
     return new ScrollableShareWidget(win);
   }

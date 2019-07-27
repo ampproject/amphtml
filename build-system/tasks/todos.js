@@ -118,6 +118,7 @@ function githubRequest(path, opt_method, opt_data) {
 
 /**
  * todos:find-closed task.
+ * @return {*} TODO: Specify return type
  */
 function todosFindClosed() {
   let foundCount = 0;

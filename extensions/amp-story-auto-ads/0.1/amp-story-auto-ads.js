@@ -538,6 +538,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * create an `amp-story-page` containing an `amp-ad`
    * @private
+   * @return {!Element}
    */
   createAdPage_() {
     const ampStoryAdPage = this.createPageElement_();
@@ -668,6 +669,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * Validate ad-server response has requirements to build outlink
    * @param {!Element} adPageElement
    * @param {!Object} a4aVars
+   * @return {*} TODO: Specify return type
    */
   maybeCreateCtaLayer_(adPageElement, a4aVars) {
     // if making a CTA layer we need a button name & outlink url
@@ -900,6 +902,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * Place ad based on user config
    * @param {string} pageBeforeAdId
    * @private
+   * @return {*} TODO: Specify return type
    */
   tryToPlaceAdAfterPage_(pageBeforeAdId) {
     const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];

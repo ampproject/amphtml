@@ -48,6 +48,7 @@ export function getScopeElements(ampDoc, configOpts) {
  * corresponding value of the anchor element attribute
  * @param {!Node} htmlElement
  * @param {!Object} configOpts
+ * @return {*} TODO: Specify return type
  */
 function hasAttributeValues(htmlElement, configOpts) {
   const anchorAttr = configOpts.attribute;

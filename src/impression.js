@@ -169,6 +169,7 @@ function handleReplaceUrl(win) {
 /**
  * @param {string} referrer
  * @visibleForTesting
+ * @return {*} TODO: Specify return type
  */
 export function isTrustedReferrer(referrer) {
   const url = parseUrlDeprecated(referrer);

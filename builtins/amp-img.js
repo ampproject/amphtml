@@ -211,6 +211,7 @@ export class AmpImg extends BaseElement {
   /**
    * @param {number} newWidth
    * @private
+   * @return {*} TODO: Specify return type
    */
   shouldSetSizes_(newWidth) {
     if (!this.img_.hasAttribute('sizes')) {

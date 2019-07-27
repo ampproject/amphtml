@@ -73,6 +73,7 @@ export class SsrTemplateHelper {
    *     element is not attempted.
    * @param {!Object=} opt_attributes Additional JSON to send to viewer.
    * return {!Promise<{data:{?JsonObject|string|undefined}}>}
+   * @return {*} TODO: Specify return type
    */
   fetchAndRenderTemplate(
     element,

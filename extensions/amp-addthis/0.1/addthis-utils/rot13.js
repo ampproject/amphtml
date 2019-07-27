@@ -24,6 +24,7 @@ const CHAR_Z_UPPER = 90;
  *
  * @param {string} input
  * @private
+ * @return {*} TODO: Specify return type
  */
 const rot13 = input => {
   return input.replace(RE_ALPHA, match => {

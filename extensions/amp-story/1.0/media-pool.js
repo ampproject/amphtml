@@ -307,6 +307,7 @@ export class MediaPool {
    * @param {!PoolBoundElementDef} mediaA The first element to compare.
    * @param {!PoolBoundElementDef} mediaB The second element to compare.
    * @private
+   * @return {number}
    */
   compareMediaDistances_(mediaA, mediaB) {
     const distanceA = this.distanceFn_(mediaA);

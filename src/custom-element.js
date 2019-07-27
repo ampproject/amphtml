@@ -1867,7 +1867,10 @@ function createBaseCustomElementClass(win) {
   return win.BaseCustomElementClass;
 }
 
-/** @param {!Element} element */
+/**
+ * @param {!Element} element
+ * @return {*} TODO: Specify return type
+ */
 function isInputPlaceholder(element) {
   return 'placeholder' in element;
 }

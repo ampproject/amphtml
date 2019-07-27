@@ -81,6 +81,7 @@ function getMatchingValue(mediaQueryListsAndValues) {
  * * "(min-width: 600px) true"
  *
  * @param {string} str The media query/value string.
+ * @return {*} TODO: Specify return type
  */
 export function getResponsiveAttributeValue(str) {
   return getMatchingValue(getMediaQueryListsAndValues(str));

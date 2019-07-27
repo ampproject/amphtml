@@ -220,6 +220,7 @@ export class LinkRewriter {
    * that were not in the page at the time of the last page scan.
    * @param {!Array<!HTMLElement>} anchorList
    * @private
+   * @return {!Array<HTMLElement>}
    */
   getUnknownAnchors_(anchorList) {
     const unknownAnchors = [];

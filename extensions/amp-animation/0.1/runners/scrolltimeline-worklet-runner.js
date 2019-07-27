@@ -133,6 +133,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
 /**
  * @param {!Window} win
  * @private
+ * @return {*} TODO: Specify return type
  */
 function getOrAddWorkletModule(win) {
   if (workletModulePromise) {

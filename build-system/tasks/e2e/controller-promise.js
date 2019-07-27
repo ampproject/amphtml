@@ -83,6 +83,7 @@ class ControllerPromise {
  * @param {function(TYPE,function(TYPE): ?TYPE): !Promise=} wait
  * @param {function(TYPE): TYPE} mutate
  * @template TYPE
+ * @return {*} TODO: Specify return type
  */
 function wrapWait(wait, mutate) {
   return (condition, opt_mutate) => {

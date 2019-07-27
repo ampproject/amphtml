@@ -966,7 +966,10 @@ class TimerEventHandler {
     this.listenForStart_();
   }
 
-  /** @private @return {number} */
+  /**
+   * @private
+   * @return {number}
+   */
   calculateDuration_() {
     if (this.startTime_) {
       return Date.now() - (this.lastRequestTime_ || this.startTime_);

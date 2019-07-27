@@ -22,6 +22,7 @@
  *   expect(actual).to.equal(expected);
  * Good:
  *   await expect(actual).to.equal(expected);
+ * @return {*} TODO: Specify return type
  */
 module.exports = function(context) {
   return {

@@ -173,6 +173,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * Handles click events and maybe closes the paywall.
    * @param {!Event} event
    * @private
+   * @return {*} TODO: Specify return type
    */
   onClick_(event) {
     const el = dev().assertElement(event.target);
@@ -323,6 +324,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @param {string=} namespace
    * @param {string=} type
    * @private
+   * @return {*} TODO: Specify return type
    */
   getActionObject_(namespace = undefined, type = undefined) {
     const method = ['login', namespace, type].filter(s => !!s).join('-');

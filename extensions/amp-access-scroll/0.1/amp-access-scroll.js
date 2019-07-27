@@ -20,7 +20,10 @@ import {Services} from '../../../src/services';
 AMP.extension('amp-access-scroll', '0.1', function(AMP) {
   AMP.registerServiceForDoc(
     'scroll',
-    /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    /**
+     * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+     * @return {*} TODO: Specify return type
+     */
     function(ampdoc) {
       const element = ampdoc.getHeadNode();
       return Services.accessServiceForDoc(element).then(accessService => {

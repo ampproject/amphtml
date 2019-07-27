@@ -89,6 +89,7 @@ export function nativo(global, data) {
     }
     /**
      * @param {*} positions
+     * @return {*} TODO: Specify return type
      */
     function getLastPositionCoordinates(positions) {
       return positions[positions.length - 1];

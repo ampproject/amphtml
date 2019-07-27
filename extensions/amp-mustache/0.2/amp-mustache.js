@@ -131,6 +131,7 @@ export class AmpMustache extends AMP.BaseTemplate {
    *
    * @param {string} html
    * @private
+   * @return {*} TODO: Specify return type
    */
   purifyAndSetHtml_(html) {
     const diffing = isExperimentOn(self, 'amp-list-diffing');

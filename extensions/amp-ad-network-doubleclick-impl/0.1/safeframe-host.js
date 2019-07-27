@@ -600,6 +600,7 @@ export class SafeframeHostApi {
    * @param {number} width In pixels.
    * @param {string} messageType
    * @param {boolean=} optIsCollapse Whether this is a collapse attempt.
+   * @return {*} TODO: Specify return type
    */
   handleSizeChange(height, width, messageType, optIsCollapse) {
     return this.viewport_

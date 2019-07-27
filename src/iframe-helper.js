@@ -553,6 +553,7 @@ export function isAdLike(element) {
 /**
  * @param {!Element} iframe
  * @private
+ * @return {!Element}
  */
 export function disableScrollingOnIframe(iframe) {
   addAttributesToElement(iframe, dict({'scrolling': 'no'}));

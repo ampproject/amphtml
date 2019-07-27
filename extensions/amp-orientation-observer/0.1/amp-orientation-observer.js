@@ -93,6 +93,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
    * @param {string} rangeName
    * @param {Array} originalRange
    * @private
+   * @return {?Array<number>}
    */
   parseAttributes_(rangeName, originalRange) {
     const providedRange = this.element.getAttribute(rangeName);

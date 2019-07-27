@@ -39,6 +39,7 @@ let syncScriptLoads = 0;
 
 /**
  * Returns the registration map
+ * @return {*} TODO: Specify return type
  */
 export function getRegistrations() {
   if (!registrations) {

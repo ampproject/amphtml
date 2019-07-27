@@ -142,6 +142,7 @@ export class WebviewViewerForTesting {
   /**
    * Fake docs for testing
    * @param {*} e
+   * @return {*} TODO: Specify return type
    */
   isChannelOpen_(e) {
     return (
@@ -195,6 +196,7 @@ export class WebviewViewerForTesting {
    * Fake docs for testing
    * @param {*} eventData
    * @visibleForTesting
+   * @return {*} TODO: Specify return type
    */
   processRequest_(eventData) {
     const data = eventData;

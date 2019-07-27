@@ -32,6 +32,7 @@ import {rethrowAsync} from './../../../src/log';
  * @param {Function} func
  * @param {number} wait
  * @param {boolean=} immediate
+ * @return {Function}
  */
 export function debounce(func, wait, immediate) {
   let timeout;

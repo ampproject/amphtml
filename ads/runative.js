@@ -54,6 +54,7 @@ export function runative(global, data) {
 
 /**
  * @param {!Object} data
+ * @return {*} TODO: Specify return type
  */
 function getInitData(data) {
   const initKeys = requiredParams.concat(optionsParams);
@@ -74,6 +75,7 @@ function getInitData(data) {
 
 /**
  * @param {!Window} global
+ * @return {?Node}
  */
 function getAdContainer(global) {
   const container = global.document.createElement('div');
@@ -86,10 +88,11 @@ function getAdContainer(global) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @return {?Node}
  */
 function getInitAdScript(global, data) {
   const scriptElement = global.document.createElement('script');
-  const initData = getInitData(data);
+  const initData = /** @type {JsonObject} */ (getInitData(data));
   const initScript = global.document.createTextNode(
     `NativeAd(${JSON.stringify(initData)});`
   );

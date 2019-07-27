@@ -404,6 +404,7 @@ function buildExtension(
  * @param {string} name
  * @param {string} version
  * @param {!Object} options
+ * @return {*} TODO: Specify return type
  */
 function buildExtensionCss(path, name, version, options) {
   /**

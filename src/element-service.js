@@ -232,6 +232,7 @@ export function isExtensionScriptInNode(ampdoc, extensionId) {
  * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @param {string} extensionId
  * @private
+ * @return {*} TODO: Specify return type
  */
 function extensionScriptInNode(head, extensionId) {
   return extensionScriptsInNode(head).includes(extensionId);

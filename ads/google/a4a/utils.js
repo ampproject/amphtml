@@ -621,24 +621,28 @@ export function getCsiAmpAnalyticsConfig() {
  * @param {!AMP.BaseElement} a4a The A4A element.
  * @param {?string} qqid The query ID or null if the query ID has not been set
  *     yet.
+ * @return {!JsonObject}
  */
 export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
   const viewer = Services.viewerForDoc(ampdoc);
   const navStart = getNavigationTiming(win, 'navigationStart');
-  const vars = {
-    'correlator': getCorrelator(win, ampdoc),
-    'slotId': a4a.element.getAttribute('data-amp-slot-index'),
-    'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
-  };
+  const vars = Object.assign(
+    {},
+    {
+      'correlator': getCorrelator(win, ampdoc),
+      'slotId': a4a.element.getAttribute('data-amp-slot-index'),
+      'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
+    }
+  );
   if (qqid) {
     vars['qqid'] = qqid;
   }
   if (analyticsTrigger == 'ad-render-start') {
     vars['scheduleTime'] = a4a.element.layoutScheduleTime - navStart;
   }
-  return vars;
+  return /** @type {!JsonObject} */ (vars);
 }
 
 /**

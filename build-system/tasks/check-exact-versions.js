@@ -31,6 +31,7 @@ const checkerExecutable = 'npx npm-exact-versions';
 
 /**
  * Makes sure all package.json files in the repo use exact versions.
+ * @return {*} TODO: Specify return type
  */
 async function checkExactVersions() {
   let success = true;

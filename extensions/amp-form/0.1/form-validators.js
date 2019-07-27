@@ -313,6 +313,7 @@ export class AbstractCustomValidator extends FormValidator {
    * Wraps the validity type for inputs to support pattern on <textarea>
    * @param {!Element} input
    * @param {string=} inputInvalidType
+   * @return {*} TODO: Specify return type
    */
   getInvalidType_(input, inputInvalidType = undefined) {
     const {tagName, validationMessage} = input;

@@ -141,6 +141,7 @@ export class AnalyticsConfig {
    * Handles logic if configRewriter is enabled.
    * @param {!JsonObject} config
    * @param {string} configRewriterUrl
+   * @return {!Promise<undefined>}
    */
   handleConfigRewriter_(config, configRewriterUrl) {
     assertHttpsUrl(configRewriterUrl, this.element_);
@@ -411,6 +412,7 @@ export class AnalyticsConfig {
  * @param {Object|Array} from Object or array to merge from
  * @param {Object|Array} to Object or Array to merge into
  * @param {boolean=} opt_predefinedConfig
+ * @return {*} TODO: Specify return type
  */
 export function mergeObjects(from, to, opt_predefinedConfig) {
   if (to === null || to === undefined) {
@@ -466,6 +468,7 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
  * Expand config's request to object
  * @param {!JsonObject} config
  * @visibleForTesting
+ * @return {?Object}
  */
 export function expandConfigRequest(config) {
   if (!config['requests']) {
@@ -483,6 +486,7 @@ export function expandConfigRequest(config) {
 /**
  * Expand single request to an object
  * @param {!JsonObject} request
+ * @return {*} TODO: Specify return type
  */
 function expandRequestStr(request) {
   if (isObject(request)) {

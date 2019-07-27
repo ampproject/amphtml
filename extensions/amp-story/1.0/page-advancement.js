@@ -616,6 +616,7 @@ class ManualAdvancement extends AdvancementConfig {
    * settings.
    * @param {!Object} page
    * @private
+   * @return {number}
    */
   getTapDirection_(page) {
     const {left, right} = this.sections_;

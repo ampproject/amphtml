@@ -538,7 +538,10 @@ class AmpFetcher {
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc(
     'subscriptions-google',
-    /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    /**
+     * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+     * @return {*} TODO: Specify return type
+     */
     ampdoc => {
       const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
       const element = ampdoc.getHeadNode();
@@ -561,6 +564,7 @@ AMP.extension(TAG, '0.1', function(AMP) {
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package @visibleForTesting
+ * @return {*} TODO: Specify return type
  */
 export function getFetcherClassForTesting() {
   return Fetcher;
@@ -569,6 +573,7 @@ export function getFetcherClassForTesting() {
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package @visibleForTesting
+ * @return {*} TODO: Specify return type
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
@@ -577,6 +582,7 @@ export function getPageConfigClassForTesting() {
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package @visibleForTesting
+ * @return {*} TODO: Specify return type
  */
 export function getSubscribeResponseClassForTesting() {
   return SubscribeResponse;
