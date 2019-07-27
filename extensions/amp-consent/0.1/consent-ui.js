@@ -99,6 +99,9 @@ export class ConsentUI {
     /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
+    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(this.ampdoc_);
+
     /** @private {!Element} */
     this.parent_ = baseInstance.element;
 
@@ -341,6 +344,12 @@ export class ConsentUI {
 
     this.resetAnimationStyles_();
 
+    this.viewer_.sendMessage(
+      'requestFullOverlay',
+      dict(),
+      /* cancelUnsent */ true
+    );
+
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeFullscreen);
 
@@ -519,6 +528,13 @@ export class ConsentUI {
 
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
     classList.remove(consentUiClasses.iframeFullscreen);
+    if (this.isFullscreen_) {
+      this.viewer_.sendMessage(
+        'cancelFullOverlay',
+        dict(),
+        /* cancelUnsent */ true
+      );
+    }
     this.isFullscreen_ = false;
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;

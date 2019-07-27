@@ -522,6 +522,29 @@ describes.realWin(
           expect(consentUI.scrollEnabled_).to.be.true;
         });
       });
+
+      it(
+        'should hide the viewer on enterFullscreen, ' +
+          'and show the viewer on hide',
+        () => {
+          return getReadyIframeCmpConsentUi().then(consentUI => {
+            const sendMessageStub = sandbox.stub(
+              consentUI.viewer_,
+              'sendMessage'
+            );
+
+            consentUI.enterFullscreen_();
+
+            expect(sendMessageStub).to.be.calledOnce;
+
+            sandbox
+              .stub(consentUI, 'baseInstance_')
+              .callsFake(callback => callback());
+            consentUI.hide();
+            expect(sendMessageStub).to.be.calledTwice;
+          });
+        }
+      );
     });
   }
 );
