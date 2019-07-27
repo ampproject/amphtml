@@ -103,6 +103,9 @@ amp-consent.i-amphtml-consent-ui-iframe-active {
   padding: 0px !important;
   margin: 0px !important;
 
+  /**Scrolling support/UX for iOS**/
+  overflow: auto !important;
+
   transform: translate3d(0px, 100vh, 0px) !important;
 }
 
