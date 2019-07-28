@@ -188,7 +188,12 @@ export class RequestBank {
         ampCors: false,
         credentials: 'omit',
       })
-      .then(res => res.json());
+      .then(res => res.json())
+      .catch(err => {
+        return err.response.text().then(msg => {
+          throw new Error(err.message + ': ' + msg);
+        });
+      });
   }
 
   static tearDown() {
