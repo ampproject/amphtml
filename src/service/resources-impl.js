@@ -2716,24 +2716,14 @@ export let SizeDef;
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installResourcesServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'resources', getResources);
+  registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
 }
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installOwnersServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'owners', getResources);
-}
-
-let resources;
-/**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Resources}
- */
-function getResources(ampdoc) {
-  if (!resources) {
-    resources = new Resources(ampdoc);
-  }
-  return resources;
+  registerServiceBuilderForDoc(ampdoc, 'owners', ampdoc => {
+    return Services.resourcesForDoc(ampdoc);
+  });
 }
