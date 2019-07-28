@@ -26,6 +26,7 @@ import {
   SignalTracker,
   TimerEventTracker,
   VisibilityTracker,
+  trackerTypeForTesting,
 } from '../events';
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {Deferred} from '../../../../src/utils/promise';
@@ -57,6 +58,14 @@ describes.realWin('Events', {amp: 1}, env => {
     child = win.document.createElement('div');
     child.classList.add('child');
     target.appendChild(child);
+  });
+
+  describe('AnalyticsEventType', () => {
+    it('should match TRACKER_TYPES', () => {
+      const analyticsEventTypes = Object.values(AnalyticsEventType);
+      const trackerTypes = Object.keys(trackerTypeForTesting);
+      expect(analyticsEventTypes).to.deep.equal(trackerTypes);
+    });
   });
 
   describe('ClickEventTracker', () => {

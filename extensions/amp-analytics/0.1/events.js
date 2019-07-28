@@ -67,19 +67,19 @@ const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
  *   }>}
  */
 const TRACKER_TYPE = Object.freeze({
+  [AnalyticsEventType.AMP_STORY]: {
+    name: AnalyticsEventType.AMP_STORY,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) {
+      return new AmpStoryEventTracker(root);
+    },
+  },
   [AnalyticsEventType.CLICK]: {
     name: AnalyticsEventType.CLICK,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function(root) {
       return new ClickEventTracker(root);
-    },
-  },
-  [AnalyticsEventType.SCROLL]: {
-    name: AnalyticsEventType.SCROLL,
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
-      return new ScrollEventTracker(root);
     },
   },
   [AnalyticsEventType.CUSTOM]: {
@@ -89,18 +89,11 @@ const TRACKER_TYPE = Object.freeze({
       return new CustomEventTracker(root);
     },
   },
-  [AnalyticsEventType.AMP_STORY]: {
-    name: AnalyticsEventType.AMP_STORY,
+  [AnalyticsEventType.HIDDEN]: {
+    name: AnalyticsEventType.VISIBLE, // Reuse tracker with visibility
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
-      return new AmpStoryEventTracker(root);
-    },
-  },
-  [AnalyticsEventType.RENDER_START]: {
-    name: AnalyticsEventType.RENDER_START,
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
-    klass: function(root) {
-      return new SignalTracker(root);
+      return new VisibilityTracker(root);
     },
   },
   [AnalyticsEventType.INI_LOAD]: {
@@ -110,25 +103,25 @@ const TRACKER_TYPE = Object.freeze({
       return new IniLoadTracker(root);
     },
   },
+  [AnalyticsEventType.RENDER_START]: {
+    name: AnalyticsEventType.RENDER_START,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
+    klass: function(root) {
+      return new SignalTracker(root);
+    },
+  },
+  [AnalyticsEventType.SCROLL]: {
+    name: AnalyticsEventType.SCROLL,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) {
+      return new ScrollEventTracker(root);
+    },
+  },
   [AnalyticsEventType.TIMER]: {
     name: AnalyticsEventType.TIMER,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
     klass: function(root) {
       return new TimerEventTracker(root);
-    },
-  },
-  [AnalyticsEventType.VISIBLE]: {
-    name: AnalyticsEventType.VISIBLE,
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
-      return new VisibilityTracker(root);
-    },
-  },
-  [AnalyticsEventType.HIDDEN]: {
-    name: AnalyticsEventType.VISIBLE, // Reuse tracker with visibility
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
-      return new VisibilityTracker(root);
     },
   },
   [AnalyticsEventType.VIDEO]: {
@@ -138,7 +131,17 @@ const TRACKER_TYPE = Object.freeze({
       return new VideoEventTracker(root);
     },
   },
+  [AnalyticsEventType.VISIBLE]: {
+    name: AnalyticsEventType.VISIBLE,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) {
+      return new VisibilityTracker(root);
+    },
+  },
 });
+
+/** @visibleForTesting */
+export const trackerTypeForTesting = TRACKER_TYPE;
 
 /**
  * @param {string} triggerType
@@ -161,9 +164,7 @@ function isAmpStoryTriggerType(triggerType) {
  * @return {boolean}
  */
 function isReservedTriggerType(triggerType) {
-  return (
-    !!TRACKER_TYPE[triggerType] || isEnumValue(AnalyticsEventType, triggerType)
-  );
+  return isEnumValue(AnalyticsEventType, triggerType);
 }
 
 /**
