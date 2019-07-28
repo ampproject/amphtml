@@ -81,13 +81,11 @@ describe('AMPHTML ad on AMP Page', () => {
 });
 
 // TODO(zombifier):
-// - Unskip the cross domain tests on Firefox, which broke because localhost
-// subdomains no longer work on version 65.
 // - Unskip on Windows once these tests work there.
 // - The BTF test fails on Safari (#21311).
 // Should be ported to being E2E tests once we found a way to check network requests
 // In E2E tests.
-describe('AMPHTML ad on non-AMP page (inabox)', function() {
+describe('AMPHTML ad on non-AMP page (inabox)', () => {
   describes.integration(
     'ATF',
     {
@@ -136,7 +134,6 @@ describe('AMPHTML ad on non-AMP page (inabox)', function() {
       });
 
       it.configure()
-        .skipEdge()
         .run('should layout amp-img, amp-pixel, amp-analytics', () => {
           // See amp4test.js for creative content
           return testAmpComponentsBTF(env.win);
@@ -177,7 +174,6 @@ describe('AMPHTML ad on non-AMP page (inabox)', function() {
       });
 
       it.configure()
-        .skipEdge()
         .run(
           'should layout amp-img, amp-pixel, ' +
             'amp-analytics within friendly frame',
@@ -187,7 +183,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', function() {
           }
         );
 
-      it.configure().run(
+      it(
         'should layout amp-img, amp-pixel, ' +
           'amp-analytics within safe frame',
         () => {
@@ -229,7 +225,6 @@ describe('AMPHTML ad on non-AMP page (inabox)', function() {
 
       it.configure()
         .skipSafari()
-        .skipEdge()
         .run(
           'should layout amp-img, amp-pixel, ' +
             'amp-analytics within friendly frame',
@@ -253,7 +248,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', function() {
   );
 });
 
-describe('inabox with a complex image ad', function() {
+describe('A more real AMPHTML image ad', () => {
   const {testServerPort} = window.ampTestRuntimeConfig;
 
   // The image ad as seen in examples/inabox.gpt.html,
@@ -390,7 +385,7 @@ describe('inabox with a complex image ad', function() {
         return testVisibilityPings(2000, 3000);
       });
 
-      it('should properly render ad in a safe frame with viewability pings', () => {
+      it.skip('should properly render ad in a safe frame with viewability pings', () => {
         writeSafeFrame(doc, iframe, adBody);
         return testVisibilityPings(2000, 3000);
       });
@@ -495,8 +490,12 @@ function writeSafeFrame(doc, iframe, adContent) {
  * iframes that has been removed when their tests ended.
  */
 function unregisterIframe(frame) {
-  const hostWin = window.top;
-  if (hostWin.AMP && hostWin.AMP.inaboxUnregisterIframe) {
-    hostWin['AMP'].inaboxUnregisterIframe(frame);
+  try {
+    const hostWin = window.top;
+    if (hostWin.AMP && hostWin.AMP.inaboxUnregisterIframe) {
+      hostWin['AMP'].inaboxUnregisterIframe(frame);
+    }
+  } catch (e) {
+    // ignore errors like: 'Can't execute code from a freed script' in Edge
   }
 }
