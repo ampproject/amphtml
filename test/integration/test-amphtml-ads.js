@@ -133,11 +133,10 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         env.iframe.style.height = '100vh';
       });
 
-      it.configure()
-        .run('should layout amp-img, amp-pixel, amp-analytics', () => {
-          // See amp4test.js for creative content
-          return testAmpComponentsBTF(env.win);
-        });
+      it('should layout amp-img, amp-pixel, amp-analytics', () => {
+        // See amp4test.js for creative content
+        return testAmpComponentsBTF(env.win);
+      });
 
       afterEach(() => {
         unregisterIframe(env.win.document.getElementById('inabox'));
@@ -173,15 +172,14 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         env.win.document.body.removeChild(iframe);
       });
 
-      it.configure()
-        .run(
-          'should layout amp-img, amp-pixel, ' +
-            'amp-analytics within friendly frame',
-          () => {
-            writeFriendlyFrame(env.win.document, iframe, adContent);
-            return testAmpComponents();
-          }
-        );
+      it(
+        'should layout amp-img, amp-pixel, ' +
+          'amp-analytics within friendly frame',
+        () => {
+          writeFriendlyFrame(env.win.document, iframe, adContent);
+          return testAmpComponents();
+        }
+      );
 
       it(
         'should layout amp-img, amp-pixel, ' +
