@@ -303,7 +303,7 @@ describe('A more real AMPHTML image ad', () => {
         return testVisibilityPings(0, 1000);
       });
 
-      it.skip('should properly render ad in a safe frame with viewability pings', () => {
+      it('should properly render ad in a safe frame with viewability pings', () => {
         writeSafeFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });
