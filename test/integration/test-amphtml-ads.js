@@ -87,7 +87,7 @@ describe('AMPHTML ad on AMP Page', () => {
 // - The BTF test fails on Safari (#21311).
 // Should be ported to being E2E tests once we found a way to check network requests
 // In E2E tests.
-describe.configure().run('AMPHTML ad on non-AMP page (inabox)', function() {
+describe('AMPHTML ad on non-AMP page (inabox)', function() {
   describes.integration(
     'ATF',
     {
