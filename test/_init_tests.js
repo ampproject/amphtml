@@ -56,17 +56,6 @@ global.describes = describes;
 // during the normal 2000 allowance.
 const BEFORE_AFTER_TIMEOUT = 5000;
 
-// Override AMP.extension to buffer extension installers.
-/**
- * @param {string} name
- * @param {string} version
- * @param {function(!Object)} installer
- * @const
- */
-global.AMP.extension = function(name, version, installer) {
-  describes.bufferExtension(`${name}:${version}`, installer);
-};
-
 // Make amp section in karma config readable by tests.
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
