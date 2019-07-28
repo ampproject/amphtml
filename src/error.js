@@ -392,17 +392,14 @@ export function maybeReportErrorToViewer(win, data) {
   if (!docOptedIn) {
     return Promise.resolve(false);
   }
-
   const viewer = Services.viewerForDoc(ampdocSingle);
   if (!viewer.hasCapability('errorReporter')) {
     return Promise.resolve(false);
   }
-
   return viewer.isTrustedViewer().then(viewerTrusted => {
     if (!viewerTrusted) {
       return false;
     }
-
     viewer.sendMessage('error', errorReportingDataForViewer(data));
     return true;
   });
@@ -421,6 +418,7 @@ export function errorReportingDataForViewer(errorReportData) {
     'a': errorReportData['a'], // isUserError
     's': errorReportData['s'], // error stack
     'el': errorReportData['el'], // tagName
+    'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
     'jse': errorReportData['jse'], // detectedJsEngine
   });

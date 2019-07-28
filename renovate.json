@@ -15,6 +15,7 @@
   "includePaths": [
     "package.json",
     "build-system/tasks/e2e/package.json",
-    "build-system/tasks/visual-diff/package.json"
+    "build-system/tasks/visual-diff/package.json",
+    "validator/package.json"
   ]
 }
