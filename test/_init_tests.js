@@ -20,7 +20,6 @@ import * as describes from '../testing/describes';
 import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
-import {adopt} from '../src/runtime';
 import {
   installAmpdocServices,
   installRuntimeServices,
