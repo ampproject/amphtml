@@ -57,10 +57,6 @@ global.describes = describes;
 // during the normal 2000 allowance.
 const BEFORE_AFTER_TIMEOUT = 5000;
 
-// Needs to be called before the custom elements are first made.
-beforeTest();
-adopt(window);
-
 // Override AMP.extension to buffer extension installers.
 /**
  * @param {string} name
