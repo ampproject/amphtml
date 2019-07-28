@@ -80,11 +80,6 @@ describe('AMPHTML ad on AMP Page', () => {
   );
 });
 
-// TODO(zombifier):
-// - Unskip on Windows once these tests work there.
-// - The BTF test fails on Safari (#21311).
-// Should be ported to being E2E tests once we found a way to check network requests
-// In E2E tests.
 describe('AMPHTML ad on non-AMP page (inabox)', () => {
   describes.integration(
     'ATF',
@@ -192,6 +187,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
     }
   );
 
+  // TODO(zombifier): The BTF test fails on Safari (#21311).
   describes.integration(
     'BTF within friendly frame or safe frame',
     {
@@ -355,6 +351,7 @@ describe('A more real AMPHTML image ad', () => {
     }
   );
 
+  // TODO(zombifier): unskip the tests.
   describes.integration(
     'BTF within friendly frame or safe frame',
     {
@@ -378,7 +375,7 @@ describe('A more real AMPHTML image ad', () => {
         }, 2000);
       });
 
-      it('should properly render ad in a friendly iframe with viewability pings', () => {
+      it.skip('should properly render ad in a friendly iframe with viewability pings', () => {
         writeFriendlyFrame(doc, iframe, adBody);
         return testVisibilityPings(2000, 3000);
       });
