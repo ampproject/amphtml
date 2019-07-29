@@ -435,7 +435,7 @@ export class Resources {
     this.eventuallyCallPreconnects_ = debounce(
       this.win,
       this.callPreconnects_.bind(this),
-      1
+      5
     );
 
     /** @private {boolean} */
