@@ -727,7 +727,7 @@ function polyfill(win) {
    * You can't use the real HTMLElement constructor, because you can't subclass
    * it without using native classes. So, mock its approximation using
    * createElement.
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   function HTMLElementPolyfill() {
     const {constructor} = this;

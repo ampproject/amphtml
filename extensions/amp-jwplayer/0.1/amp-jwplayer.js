@@ -160,7 +160,7 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
   /**
    *
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   getContextualVal() {
     if (this.contentSearch_ === '__CONTEXTUAL__') {

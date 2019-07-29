@@ -370,7 +370,7 @@ export class RealTimeConfigManager {
      * async call. Thus, however long the URL replacement took is treated as a
      * time penalty.
      * @param {string} url
-     * @return {*} TODO: Specify return type
+     * @return {*} TODO(#23582): Specify return type
      */
     const send = url => {
       if (Object.keys(this.seenUrls_).length == MAX_RTC_CALLOUTS) {

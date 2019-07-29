@@ -161,7 +161,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * Scrolls to the slide at the given slide index.
    * @param {number} index
    * @private
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   goToSlide_(index) {
     const noOfSlides = this.cells_.length;

@@ -173,7 +173,7 @@ export class MediaTask {
   /**
    * @param {!HTMLMediaElement} unusedMediaEl The media element on which this
    *     task should be executed.
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    * @protected
    */
   executeInternal(unusedMediaEl) {

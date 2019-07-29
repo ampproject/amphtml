@@ -222,7 +222,7 @@ export class AmpVizVega extends AMP.BaseElement {
     return parsePromise.then(
       /**
        * @param {!VegaChartFactory} chartFactory
-       * @return {*} TODO: Specify return type
+       * @return {*} TODO(#23582): Specify return type
        */
       chartFactory => {
         return Services.vsyncFor(this.win).mutatePromise(() => {

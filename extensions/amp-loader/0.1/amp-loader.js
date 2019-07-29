@@ -233,7 +233,7 @@ class LoaderBuilder {
   /**
    * Adds the default or branded logo.
    * @private
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   getLogo_() {
     const customLogo = this.getCustomLogo_();

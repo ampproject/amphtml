@@ -19,7 +19,7 @@ const del = require('del');
 
 /**
  * Clean up the build artifacts
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 async function clean() {
   return del([

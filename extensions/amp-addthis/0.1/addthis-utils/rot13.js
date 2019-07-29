@@ -23,7 +23,7 @@ const CHAR_Z_UPPER = 90;
  * For "good enough" obfuscation.
  *
  * @param {string} input
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  * @private
  */
 const rot13 = input => {

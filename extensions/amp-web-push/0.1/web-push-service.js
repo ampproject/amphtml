@@ -613,7 +613,7 @@ export class WebPushService {
 
   /**
    * @private
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   updateWidgetVisibilitiesServiceWorkerActivated_() {
     return Services.timerFor(this.ampdoc.win).timeoutPromise(
@@ -762,7 +762,7 @@ export class WebPushService {
    * notification permissions when subscribing.
    *
    * @param {Array<?>} result
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   handlePermissionDialogInteraction(result) {
     /*
@@ -793,7 +793,7 @@ export class WebPushService {
 
   /**
    * @private
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   onPermissionGrantedSubscribe_() {
     return this.subscribeForPushRemotely().then(() => {

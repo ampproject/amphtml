@@ -647,7 +647,7 @@ export class BaseElement {
    *   for the element to be resolved, upgraded and built.
    * @final
    * @package
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   executeAction(invocation, unusedDeferred) {
     let {method} = invocation;

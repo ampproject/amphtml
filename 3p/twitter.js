@@ -126,7 +126,7 @@ export function twitter(global, data) {
   /**
    * @param {string} input
    * @param {string} prefix
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   function stripPrefixCamelCase(input, prefix) {
     const stripped = input.replace(new RegExp('^' + prefix), '');
@@ -137,7 +137,7 @@ export function twitter(global, data) {
 /**
  * @param {string} tweetid
  * @visibleForTesting
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 export function cleanupTweetId_(tweetid) {
   // 1)

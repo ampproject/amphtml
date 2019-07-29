@@ -53,7 +53,7 @@ function exec(cmd, options) {
  *
  * @param {string} script
  * @param {?Object} options
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 function execScriptAsync(script, options) {
   return childProcess.spawn(shellCmd, [shellFlag, script], options);

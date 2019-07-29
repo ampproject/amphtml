@@ -130,7 +130,7 @@ export class AmpMustache extends AMP.BaseTemplate {
   /**
    *
    * @param {string} html
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   purifyAndSetHtml_(html) {

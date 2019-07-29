@@ -29,7 +29,7 @@ import {addExperimentIdToElement} from './traffic-experiments';
  * @param {!Array<string>} branches
  * @param {string} expName
  * @param {boolean=} optAddExpIdToElement
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 export function selectAndSetExperiments(
   win,

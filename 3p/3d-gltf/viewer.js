@@ -122,7 +122,7 @@ export default class GltfViewer {
 
   /**
    * @private
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   setupSize_() {
     let oldW = null;

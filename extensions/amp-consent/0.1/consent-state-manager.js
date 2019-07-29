@@ -181,7 +181,7 @@ export class ConsentStateManager {
 
   /**
    * Returns a promise that's resolved when consent instance is ready.
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   whenConsentReady() {
     if (this.instance_) {
@@ -247,7 +247,7 @@ export class ConsentInstance {
   /**
    * Set dirtyBit to current consent info. Refresh stored consent value with
    * dirtyBit
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   setDirtyBit() {
     // Note: this.hasDirtyBitNext_ is only set to true when 'forcePromptNext'

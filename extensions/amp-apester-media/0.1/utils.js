@@ -76,7 +76,7 @@ export function getPlatform() {
 /**
  * Extracts tags from a given element .
  * @param {!Node} element
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 export function extractElementTags(element) {
   const tagsAttribute = element && element.getAttribute('data-apester-tags');
@@ -118,7 +118,7 @@ export function extratctTitle(root) {
 /**
  * Extracts article meta keywords
  * @param {*} root
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 export function extractArticleTags(root) {
   const metaKeywords = root.querySelector('meta[name="keywords"]') || {

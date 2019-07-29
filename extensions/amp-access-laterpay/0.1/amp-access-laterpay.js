@@ -22,7 +22,7 @@ AMP.extension('amp-access-laterpay', '0.1', function(AMP) {
     'laterpay',
     /**
      * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-     * @return {*} TODO: Specify return type
+     * @return {*} TODO(#23582): Specify return type
      */
     function(ampdoc) {
       const element = ampdoc.getHeadNode();

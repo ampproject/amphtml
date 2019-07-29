@@ -903,7 +903,7 @@ export class VideoDocking {
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number=} opt_step
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   dockInTransferLayerStep_(video, target, opt_step) {

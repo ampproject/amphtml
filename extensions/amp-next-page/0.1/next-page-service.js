@@ -118,7 +118,7 @@ export class NextPageService {
   /**
    * Returns true if the service has already been initialized.
    *
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   isActive() {
     return this.config_ !== null;

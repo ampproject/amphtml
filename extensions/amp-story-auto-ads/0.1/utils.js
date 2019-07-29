@@ -44,7 +44,7 @@ export function getUniqueId(win) {
 /**
  * Finds all meta tags starting with `amp4ads-vars-`.
  * @param {Document} doc
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 export function getA4AMetaTags(doc) {
   const selector = 'meta[name^=amp4ads-vars-]';

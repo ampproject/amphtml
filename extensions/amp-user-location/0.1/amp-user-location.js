@@ -93,7 +93,7 @@ export class AmpUserLocation extends AMP.BaseElement {
    * On user interaction, request the location
    * and fire the resulting AMP Events
    * @private
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   userLocationInteraction_() {
     return Promise.all([
@@ -132,7 +132,7 @@ export class AmpUserLocation extends AMP.BaseElement {
 
   /**
    * Retrieve and normalize the element's config
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   getConfig_() {
     return this.configLoader_

@@ -71,7 +71,7 @@ export class AmpPixel extends BaseElement {
 
   /**
    * Triggers the signal.
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   trigger_() {

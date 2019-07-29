@@ -1313,7 +1313,7 @@ app.use('/shadow/', (req, res) => {
 /**
  * @param {string} ampJsVersion
  * @param {string} file
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 function addViewerIntegrationScript(ampJsVersion, file) {
   ampJsVersion = parseFloat(ampJsVersion);

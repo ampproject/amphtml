@@ -82,7 +82,7 @@ class ControllerPromise {
  * the inner opt_mutate function.
  * @param {function(TYPE,function(TYPE): ?TYPE): !Promise=} wait
  * @param {function(TYPE): TYPE} mutate
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  * @template TYPE
  */
 function wrapWait(wait, mutate) {

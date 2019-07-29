@@ -74,7 +74,7 @@ export function capirs(global, data) {
 /**
  * @param {!Window} global
  * @param {!Object} banner
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 function getWidth(global, banner) {
   let width;

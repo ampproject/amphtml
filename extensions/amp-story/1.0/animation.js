@@ -496,7 +496,7 @@ export class AnimationManager {
   /**
    * Determines if there is an entrance animation running.
    *
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   hasAnimationStarted() {
     return this.getRunners_().some(runner => runner.hasStarted());
@@ -504,7 +504,7 @@ export class AnimationManager {
 
   /**
    * @private
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   getRunners_() {
     return devAssert(this.runners_, 'Executed before applyFirstFrame');

@@ -392,7 +392,7 @@ class ImageElement extends PageElement {
 class VideoInterfaceElement extends PageElement {
   /**
    * @private
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   isLaidOut_() {
     return this.element.hasAttribute('i-amphtml-layout');

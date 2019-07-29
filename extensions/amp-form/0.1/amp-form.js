@@ -1185,7 +1185,7 @@ export class AmpForm {
    * Returns a promise that resolves when tempalte render finishes. The promise
    * will be null if the template render has not started.
    * @visibleForTesting
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   renderTemplatePromiseForTesting() {
     return this.renderTemplatePromise_;
@@ -1195,7 +1195,7 @@ export class AmpForm {
    * Returns a promise that resolves when xhr submit finishes. The promise
    * will be null if xhr submit has not started.
    * @visibleForTesting
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   xhrSubmitPromiseForTesting() {
     return this.xhrSubmitPromise_;

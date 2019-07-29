@@ -18,7 +18,7 @@
 /**
  * Enforces naming rules for private properties.
  *
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 module.exports = function(context) {
   /**

@@ -30,7 +30,7 @@ export function factory(Inputmask) {
         'postValidation': buffer => /[\s\d]+/.test(buffer.join('')),
         /**
          * @param {!JsonObject} opts
-         * @return {*} TODO: Specify return type
+         * @return {*} TODO(#23582): Specify return type
          */
         'mask': function(opts) {
           opts['definitions'] = dict({

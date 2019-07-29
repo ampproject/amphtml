@@ -94,7 +94,7 @@ export class IframeMessagingClient {
    * @param {string} responseType The type of the response message.
    * @param {function(Object)} callback The callback function to call
    *   when a message with type responseType is received.
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   requestOnce(requestType, responseType, callback) {
     const unlisten = this.registerCallback(responseType, event => {

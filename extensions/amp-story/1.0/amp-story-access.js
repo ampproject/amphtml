@@ -172,7 +172,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
   /**
    * Handles click events and maybe closes the paywall.
    * @param {!Event} event
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   onClick_(event) {
@@ -323,7 +323,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * Whitelists an action for the given namespace / type pair.
    * @param {string=} namespace
    * @param {string=} type
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   getActionObject_(namespace = undefined, type = undefined) {

@@ -115,7 +115,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /**
    * @protected
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   isDismissed() {
     return Services.storageForDoc(this.getAmpDoc())
@@ -144,7 +144,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /**
    * @protected
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   hide_() {
     return this.getVsync().runPromise(

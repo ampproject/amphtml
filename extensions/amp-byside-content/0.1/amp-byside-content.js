@@ -231,7 +231,7 @@ export class AmpBysideContent extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   composeSrcUrl_() {
     const src = this.baseUrl_ + 'placeholder.php';

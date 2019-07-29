@@ -49,7 +49,7 @@ export class LocalSubscriptionPlatformRenderer {
   /**
    *
    * @param {!JsonObject} renderState
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   render(renderState) {
     return Promise.all([
@@ -177,7 +177,7 @@ export class LocalSubscriptionPlatformRenderer {
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package
  * @visibleForTesting
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 export function getEntitlementClassForTesting() {
   return Entitlement;

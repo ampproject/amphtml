@@ -89,7 +89,7 @@ class AmpPinterest extends AMP.BaseElement {
 
   /**
    * Renders the component
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   render() {
     switch (this.type_) {

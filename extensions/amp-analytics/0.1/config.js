@@ -412,7 +412,7 @@ export class AnalyticsConfig {
  * @param {Object|Array} from Object or array to merge from
  * @param {Object|Array} to Object or Array to merge into
  * @param {boolean=} opt_predefinedConfig
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 export function mergeObjects(from, to, opt_predefinedConfig) {
   if (to === null || to === undefined) {
@@ -486,7 +486,7 @@ export function expandConfigRequest(config) {
 /**
  * Expand single request to an object
  * @param {!JsonObject} request
- * @return {*} TODO: Specify return type
+ * @return {*} TODO(#23582): Specify return type
  */
 function expandRequestStr(request) {
   if (isObject(request)) {

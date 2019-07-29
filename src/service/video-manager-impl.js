@@ -1152,7 +1152,7 @@ export class AutoFullscreenManager {
    * Scrolls to a video if it's not in view.
    * @param {!../video-interface.VideoOrBaseElementDef} video
    * @param {?string=} optPos
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   scrollIntoIfNotVisible_(video, optPos = null) {
@@ -1178,7 +1178,7 @@ export class AutoFullscreenManager {
 
   /**
    * @private
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   getViewport_() {
     return Services.viewportForDoc(this.ampdoc_);
@@ -1195,7 +1195,7 @@ export class AutoFullscreenManager {
 
   /**
    * @private
-   * @return {*} TODO: Specify return type
+   * @return {*} TODO(#23582): Specify return type
    */
   selectBestCenteredInPortrait_() {
     if (this.isInLandscape()) {
