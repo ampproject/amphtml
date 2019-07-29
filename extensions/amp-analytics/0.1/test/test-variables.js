@@ -369,6 +369,36 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       );
     });
 
+    it('"COOKIE" resolves cookie value', async () => {
+      doc.cookie = 'test=123';
+      await check('COOKIE(test)', '123');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string in FIE', async () => {
+      doc.cookie = 'test=123';
+      const fakeFie = doc.createElement('div');
+      fakeFie.classList.add('i-amphtml-fie');
+      doc.body.appendChild(fakeFie);
+      fakeFie.appendChild(analyticsElement);
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string when inabox', async () => {
+      doc.cookie = 'test=123';
+      env.win.AMP_MODE.runtime = 'inabox';
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string on cache', async () => {
+      win.location = 'https://www-example-com.cdn.ampproject.org';
+      doc.cookie = 'test=123';
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
+    });
+
     describe('$MATCH', () => {
       it('handles default index', () => {
         return check('$MATCH(thisisatest, thisisatest)', 'thisisatest');
@@ -423,14 +453,38 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         );
         return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
       });
-
-      it('"COOKIE" resolves cookie value', async () => {
-        doc.cookie = 'test=123';
-        await check('COOKIE(test)', '123');
-        doc.cookie = '';
-      });
     });
   });
+
+  // describes.realWin(
+  //   'FIE testing',
+  //   {
+  //     amp: {ampdoc: 'fie'},
+  //   },
+  //   env => {
+  //     let win;
+  //     let doc;
+  //     let variables;
+
+  //     beforeEach(() => {
+  //       win = env.win;
+  //       doc = win.doc;
+  //       installLinkerReaderService(win);
+  //       variables = new VariableService(env.ampdoc);
+  //     });
+
+  //     it('does not resolve cookie when inabox', async () => {
+  //       win.AMP_MODE.runtime = 'inabox';
+  //       win.location =
+  //         'https://beta-washingtonpost-com.cdn.ampproject.org/v/s/' +
+  //         'beta.washingtonpost.com/politics/2019/07/29/' +
+  //         'bidens-electability-numbers-are-up-therefore-so-are-his-poll-numbers/';
+  //       doc.cookie = 'test=123';
+  //       await check('COOKIE(test)', '123');
+  //       doc.cookie = '';
+  //     });
+  //   }
+  // );
 
   describe('getNameArgs:', () => {
     function check(input, name, argList) {
