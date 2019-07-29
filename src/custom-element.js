@@ -1695,6 +1695,7 @@ function createBaseCustomElementClass(win) {
         let loadingElement;
         if (isNewLoaderExperimentEnabled(this)) {
           loadingElement = createNewLoaderElement(
+            this.ampdoc_,
             this,
             this.layoutWidth_,
             this.layoutHeight_
