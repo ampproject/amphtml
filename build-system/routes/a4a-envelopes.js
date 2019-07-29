@@ -28,7 +28,7 @@ app.use('/inabox/', (req, res) => {
   const urlPrefix = getUrlPrefix(req);
   if (
     !adUrl.startsWith('/proxy') && // Ignore /proxy
-    urlPrefix.indexOf('//localhost') !== -1
+    urlPrefix.includes('//localhost')
   ) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
@@ -50,11 +50,11 @@ app.use('/inabox/', (req, res) => {
 // http://localhost:8000/a4a[-3p]/examples/animations.amp.html
 // http://localhost:8000/a4a[-3p]/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/a4a(|-3p)/', (req, res) => {
-  const force3p = req.baseUrl.indexOf('/a4a-3p') === 0;
+  const force3p = req.baseUrl.startsWith('/a4a-3p');
   let adUrl = req.url;
   const templatePath = '/build-system/server-a4a-template.html';
   const urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/proxy') && urlPrefix.indexOf('//localhost') !== -1) {
+  if (!adUrl.startsWith('/proxy') && urlPrefix.includes('//localhost')) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
