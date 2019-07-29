@@ -54,6 +54,28 @@ describe('getMode', () => {
     const mode = getMode(getWin(url));
     expect(mode.lite).to.be.false;
   });
+
+  it('should support different html formats for development', () => {
+    let url = 'https://www.amp-site.org#development=1';
+    expect(getMode(getWin(url)).development).to.be.true;
+
+    url = 'https://www.amp-site.org#development=amp';
+    expect(getMode(getWin(url)).development).to.be.true;
+
+    url = 'https://www.amp-site.org#development=amp4email';
+    expect(getMode(getWin(url)).development).to.be.true;
+
+    url = 'https://www.amp-site.org#development=amp4ads';
+    expect(getMode(getWin(url)).development).to.be.true;
+
+    url = 'https://www.amp-site.org#development=actions';
+    expect(getMode(getWin(url)).development).to.be.true;
+  });
+
+  it('should not support invalid format for development', () => {
+    const url = 'https://www.amp-site.org#development=amp4invalid';
+    expect(getMode(getWin(url)).development).to.be.false;
+  });
 });
 
 describe('getRtvVersion', () => {
