@@ -338,6 +338,17 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/owners-impl.Owners}
+   */
+  static ownersForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/owners-impl.Owners} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'owners'
+    ));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/performance-impl.Performance}
    */

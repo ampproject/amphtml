@@ -16,6 +16,7 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
+import {Services} from '../../../src/services';
 import {
   computedStyle,
   removeAlphaFromColor,
@@ -242,7 +243,10 @@ class AmpStickyAd extends AMP.BaseElement {
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
       this.visible_ = false;
-      this./*OK*/ scheduleUnlayout(dev().assertElement(this.ad_));
+      Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+        this.element,
+        dev().assertElement(this.ad_)
+      );
       this.viewport_.removeFromFixedLayer(this.element);
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
