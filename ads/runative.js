@@ -15,6 +15,7 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
+import {parseJson} from '../src/json';
 
 const requiredParams = ['spot'];
 const optionsParams = [
@@ -54,7 +55,7 @@ export function runative(global, data) {
 
 /**
  * @param {!Object} data
- * @return {*} TODO: Specify return type
+ * @return {JsonObject}
  */
 function getInitData(data) {
   const initKeys = requiredParams.concat(optionsParams);
@@ -70,7 +71,7 @@ function getInitData(data) {
 
   initParams['element_id'] = adContainerId;
 
-  return initParams;
+  return parseJson(initParams);
 }
 
 /**
@@ -92,7 +93,7 @@ function getAdContainer(global) {
  */
 function getInitAdScript(global, data) {
   const scriptElement = global.document.createElement('script');
-  const initData = /** @type {JsonObject} */ (getInitData(data));
+  const initData = getInitData(data);
   const initScript = global.document.createTextNode(
     `NativeAd(${JSON.stringify(initData)});`
   );
