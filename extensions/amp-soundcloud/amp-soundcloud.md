@@ -31,12 +31,12 @@ Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
     <td><code>&lt;script async custom-element="amp-soundcloud" src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fixed-height</td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-soundcloud/">Annotated code example for amp-soundcloud</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-soundcloud/">Annotated code example for amp-soundcloud</a></td>
   </tr>
 </table>
 
@@ -44,18 +44,20 @@ Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
 
 ## Examples
 
+With the responsive layout, the `width` and `height` from the example should yield correct layouts for 1:1 aspect ratio embeds:
+
 Visual Mode:
 ```html
-<amp-soundcloud height=657
-    layout="fixed-height"
+<amp-soundcloud width="480" height="480"
+    layout="responsive"
     data-trackid="243169232"
     data-visual="true"></amp-soundcloud>
 ```
 
 Classic Mode:
 ```html
-<amp-soundcloud height=657
-    layout="fixed-height"
+<amp-soundcloud width="480" height="480"
+    layout="responsive"
     data-trackid="243169232"
     data-color="ff5500"></amp-soundcloud>
 ```

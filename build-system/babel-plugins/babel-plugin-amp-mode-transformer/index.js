@@ -30,7 +30,7 @@ module.exports = function({types: t}) {
           return;
         }
         specifiers.forEach(specifier => {
-          if (specifier.imported.name === 'getMode') {
+          if (specifier.imported && specifier.imported.name === 'getMode') {
             const filepath = resolve(
               dirname(state.file.opts.filename),
               source.value

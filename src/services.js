@@ -141,11 +141,11 @@ export class Services {
 
   /**
    * Returns the AmpDoc for the specified context node.
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
    * @return {!./service/ampdoc-impl.AmpDoc}
    */
-  static ampdoc(elementOrAmpDoc) {
-    return getAmpdoc(elementOrAmpDoc);
+  static ampdoc(nodeOrAmpDoc) {
+    return getAmpdoc(nodeOrAmpDoc);
   }
 
   /**
@@ -206,10 +206,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/cid-impl.Cid>}
+   * @return {!Promise<!./service/cid-impl.CidDef>}
    */
   static cidForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/cid-impl.Cid>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/cid-impl.CidDef>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'cid'
     ));
@@ -385,10 +385,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/resources-impl.Resources}
+   * @return {!./service/resources-impl.ResourcesDef}
    */
   static resourcesForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/resources-impl.Resources} */ (getServiceForDoc(
+    return /** @type {!./service/resources-impl.ResourcesDef} */ (getServiceForDoc(
       elementOrAmpDoc,
       'resources'
     ));
@@ -396,10 +396,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/resources-impl.Resources>}
+   * @return {!Promise<!./service/resources-impl.ResourcesDef>}
    */
   static resourcesPromiseForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/resources-impl.Resources>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/resources-impl.ResourcesDef>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'resources'
     ));

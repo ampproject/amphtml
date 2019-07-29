@@ -81,7 +81,7 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @param {!Element} iframe the iframe element who's context will trigger the
  *     event
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
- * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
+ * @return {?Object<string, !Array<function(!JsonObject, !Window, string, !MessageEvent)>>}
  */
 function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
   const sentinel = getSentinel_(iframe, opt_is3P);
@@ -113,7 +113,7 @@ function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
  * @param {string} sentinel the sentinel of the message
  * @param {string} origin the source window's origin
  * @param {?Window} triggerWin the window that triggered the event
- * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
+ * @return {?Object<string, !Array<function(!JsonObject, !Window, string, !MessageEvent)>>}
  */
 function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
   const listenSentinel = getListenForSentinel(parentWin, sentinel);
@@ -224,7 +224,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
     listeners = listeners.slice();
     for (let i = 0; i < listeners.length; i++) {
       const listener = listeners[i];
-      listener(data, event.source, event.origin);
+      listener(data, event.source, event.origin, event);
     }
   };
 
@@ -237,7 +237,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
  *
  * @param {?Element} iframe
  * @param {string} typeOfMessage
- * @param {?function(!JsonObject, !Window, string)} callback Called when a
+ * @param {?function(!JsonObject, !Window, string, !MessageEvent)} callback Called when a
  *     message of this type arrives for this iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @param {boolean=} opt_includingNestedWindows set to true if messages from
@@ -276,7 +276,7 @@ export function listenFor(
     listenForEvents[typeOfMessage] || (listenForEvents[typeOfMessage] = []);
 
   let unlisten;
-  let listener = function(data, source, origin) {
+  let listener = function(data, source, origin, event) {
     const sentinel = data['sentinel'];
 
     // Exclude messages that don't satisfy amp sentinel rules.
@@ -304,7 +304,7 @@ export function listenFor(
       unlisten();
       return;
     }
-    callback(data, source, origin);
+    callback(data, source, origin, event);
   };
 
   events.push(listener);
@@ -330,7 +330,7 @@ export function listenFor(
  * @param {!Element} iframe
  * @param {string|!Array<string>} typeOfMessages
  * @param {boolean=} opt_is3P
- * @return {!Promise<!{data: !JsonObject, source: !Window, origin: string}>}
+ * @return {!Promise<!{data: !JsonObject, source: !Window, origin: string, event: !MessageEvent}>}
  */
 export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
   const unlistenList = [];
@@ -343,11 +343,11 @@ export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
       const unlisten = listenFor(
         iframe,
         message,
-        (data, source, origin) => {
+        (data, source, origin, event) => {
           for (let i = 0; i < unlistenList.length; i++) {
             unlistenList[i]();
           }
-          resolve({data, source, origin});
+          resolve({data, source, origin, event});
         },
         opt_is3P
       );
@@ -585,4 +585,32 @@ export function canInspectWindow(win) {
     // eslint-disable-line no-unused-vars
     return false;
   }
+}
+
+/** @const {string} */
+export const FIE_EMBED_PROP = '__AMP_EMBED__';
+
+/**
+ * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
+ * Caution: This will only return the FIE after the iframe has 'loaded'. If you
+ * are checking before this signal you may be in a race condition that returns
+ * null.
+ * @param {!HTMLIFrameElement} iframe
+ * @return {?./friendly-iframe-embed.FriendlyIframeEmbed}
+ */
+export function getFriendlyIframeEmbedOptional(iframe) {
+  return /** @type {?./friendly-iframe-embed.FriendlyIframeEmbed} */ (iframe[
+    FIE_EMBED_PROP
+  ]);
+}
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isInFie(element) {
+  return (
+    element.classList.contains('i-amphtml-fie') ||
+    !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
+  );
 }

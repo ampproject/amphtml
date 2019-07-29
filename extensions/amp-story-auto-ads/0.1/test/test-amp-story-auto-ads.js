@@ -13,13 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as analytics from '../../../../src/analytics';
-import {AmpStoryAutoAds} from '../amp-story-auto-ads';
+import {
+  Action,
+  UIType,
+  getStoreService,
+} from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpStory} from '../../../amp-story/1.0/amp-story';
+import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
+import {CommonSignals} from '../../../../src/common-signals';
+import {
+  MockStoryImpl,
+  addCtaValues,
+  addStoryAutoAdsConfig,
+  addStoryPages,
+  fireBuildSignals,
+  insertAdContent,
+} from './story-mock';
 import {Services} from '../../../../src/services';
 import {macroTask} from '../../../../testing/yield';
 
 const NOOP = () => {};
 
+// TODO(ccordry): Continue to refactor the rest of this file to use new test helpers.
 describes.realWin(
   'amp-story-auto-ads',
   {
@@ -29,41 +46,40 @@ describes.realWin(
   },
   env => {
     let win;
+    let doc;
     let adElement;
     let storyElement;
     let autoAds;
+    let story;
 
     beforeEach(() => {
       win = env.win;
+      doc = win.document;
       const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       adElement = win.document.createElement('amp-story-auto-ads');
       storyElement = win.document.createElement('amp-story');
       win.document.body.appendChild(storyElement);
       storyElement.appendChild(adElement);
+      story = new AmpStory(storyElement);
       autoAds = new AmpStoryAutoAds(adElement);
-      autoAds.config_ = {
-        'ad-attributes': {
-          type: 'doubleclick',
-          'data-slot': '/30497360/samfrank_native_v2_a4a',
-        },
-      };
     });
 
     describe('glass pane', () => {
-      let page;
-      let pane;
-
-      beforeEach(() => {
-        page = autoAds.createAdPage_();
-        pane = page.querySelector('.i-amphtml-glass-pane');
+      beforeEach(async () => {
+        new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(doc, adElement);
+        await autoAds.buildCallback();
+        autoAds.layoutCallback();
       });
 
       it('should create glassPane', () => {
+        const pane = doc.querySelector('.i-amphtml-glass-pane');
         expect(pane).to.exist;
       });
 
       it('glass pane should have full viewport grid parent', () => {
+        const pane = doc.querySelector('.i-amphtml-glass-pane');
         const parent = pane.parentElement;
         expect(parent.tagName).to.equal('AMP-STORY-GRID-LAYER');
         expect(parent.getAttribute('template')).to.equal('fill');
@@ -99,6 +115,104 @@ describes.realWin(
           /* pageId */ 'non-ad-page'
         );
         expect(removeVisibleStub.calledOnce).to.be.true;
+      });
+    });
+
+    describe('ad badge', () => {
+      let storeService;
+
+      beforeEach(async () => {
+        // Force sync mutateElement.
+        sandbox.stub(autoAds, 'mutateElement').callsArg(0);
+        addStoryAutoAdsConfig(win.document, adElement);
+        storeService = getStoreService(win);
+        await story.buildCallback();
+        // Fire these events so that story ads thinks the parent story is ready.
+        story.signals().signal(CommonSignals.BUILT);
+        story.signals().signal(CommonSignals.INI_LOAD);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+      });
+
+      it('should propigate the ad-showing attribute', () => {
+        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(
+          Attributes.AD_SHOWING
+        );
+        storeService.dispatch(Action.TOGGLE_AD, true);
+        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
+          Attributes.AD_SHOWING
+        );
+      });
+
+      it('should propigate the desktop-panels attribute', () => {
+        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(
+          Attributes.DESKTOP_PANELS
+        );
+        storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
+        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
+          Attributes.DESKTOP_PANELS
+        );
+      });
+
+      it('should propigate the dir=rtl attribute', () => {
+        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(Attributes.DIR);
+        storeService.dispatch(Action.TOGGLE_RTL, true);
+        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
+          Attributes.DIR,
+          'rtl'
+        );
+      });
+    });
+
+    describe('ad choices', () => {
+      beforeEach(async () => {
+        addStoryAutoAdsConfig(doc, adElement);
+        const storyImpl = new MockStoryImpl(storyElement);
+        storyElement.getImpl = () => Promise.resolve(storyImpl);
+        await addStoryPages(doc, storyImpl);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        fireBuildSignals(doc);
+        return Promise.resolve();
+      });
+
+      it('does not render the ad choices icon if no meta tags present', async () => {
+        addCtaValues(autoAds, 'SHOP', 'https://example.com');
+        await insertAdContent(autoAds, ''); // No ad content.
+        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
+        expect(adChoices).not.to.exist;
+      });
+
+      it('does not render if only one tag present', async () => {
+        const url = 'https://amp.dev';
+        const iframeContent = `
+          <meta name="amp4ads-vars-attribution-url" content="${url}">
+        `;
+        addCtaValues(autoAds, 'SHOP', 'https://example.com');
+        await insertAdContent(autoAds, iframeContent);
+        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
+        expect(adChoices).not.to.exist;
+      });
+
+      it('renders the ad choices icon if meta tags present', async () => {
+        const windowOpenStub = sandbox.stub(win, 'open');
+        const icon =
+          'https://tpc.googlesyndication.com/pagead/images/adchoices/icon.png';
+        const url = 'https://amp.dev';
+        const iframeContent = `
+          <meta name="amp4ads-vars-attribution-icon" content="${icon}">
+          <meta name="amp4ads-vars-attribution-url" content="${url}">
+        `;
+        addCtaValues(autoAds, 'SHOP', 'https://example.com');
+        await insertAdContent(autoAds, iframeContent);
+        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
+        expect(adChoices).to.exist;
+        expect(adChoices.getAttribute('src')).to.equal(icon);
+        adChoices.click();
+        expect(windowOpenStub).to.be.calledWith(url);
       });
     });
 
@@ -264,24 +378,41 @@ describes.realWin(
       });
     });
 
-    describe('creation of attributes', () => {
-      it('should not allow blacklisted attributes', () => {
-        Object.assign(autoAds.config_['ad-attributes'], {
+    describe('creation of amp-ad with attributes', () => {
+      let config;
+
+      beforeEach(() => {
+        config = {
+          'ad-attributes': {
+            type: 'doubleclick',
+            'data-slot': 'abcd',
+          },
+        };
+      });
+
+      it('should not allow blacklisted attributes', async () => {
+        Object.assign(config['ad-attributes'], {
           height: 100,
           width: 100,
           layout: 'responsive',
         });
 
-        const adElement = autoAds.createAdElement_();
-        expect(adElement.hasAttribute('type')).to.be.true;
-        expect(adElement.hasAttribute('data-slot')).to.be.true;
-        expect(adElement.hasAttribute('width')).to.be.false;
-        expect(adElement.hasAttribute('height')).to.be.false;
-        expect(adElement.getAttribute('layout')).to.equal('fill');
+        addStoryAutoAdsConfig(doc, adElement, config);
+        const storyImpl = new MockStoryImpl(storyElement);
+        storyElement.getImpl = () => Promise.resolve(storyImpl);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+
+        const ampAd = doc.querySelector('amp-ad');
+        expect(ampAd).to.have.attribute('type');
+        expect(ampAd).to.have.attribute('data-slot');
+        expect(ampAd).not.to.have.attribute('width');
+        expect(ampAd).not.to.have.attribute('height');
+        expect(ampAd.getAttribute('layout')).to.equal('fill');
       });
 
-      it('should stringify attributes given as objects', () => {
-        Object.assign(autoAds.config_['ad-attributes'], {
+      it('should stringify attributes given as objects', async () => {
+        Object.assign(config['ad-attributes'], {
           'rtc-config': {
             vendors: {
               vendor1: {'SLOT_ID': 1},
@@ -290,8 +421,14 @@ describes.realWin(
           },
         });
 
-        const adElement = autoAds.createAdElement_();
-        expect(adElement.getAttribute('rtc-config')).to.equal(
+        addStoryAutoAdsConfig(doc, adElement, config);
+        const storyImpl = new MockStoryImpl(storyElement);
+        storyElement.getImpl = () => Promise.resolve(storyImpl);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+
+        const ampAd = doc.querySelector('amp-ad');
+        expect(ampAd.getAttribute('rtc-config')).to.equal(
           '{"vendors":{"vendor1":{"SLOT_ID":1},' +
             '"vendor2":{"PAGE_ID":"abc"}}}'
         );

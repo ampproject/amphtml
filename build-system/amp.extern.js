@@ -34,6 +34,7 @@
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
  *   ampCors: (boolean|undefined),
+ *   prerenderSafe: (boolean|undefined),
  *   bypassInterceptorForDev: (boolean|undefined)
  * }}
  */
@@ -299,6 +300,19 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function() {};
+let RRule;
+/**
+ * @param {Date} unusedDt
+ * @param {boolean} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.before = function(unusedDt, unusedInc) {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.after = function(unusedDt, unusedInc) {};
 
 /**
  * @dict
@@ -689,6 +703,12 @@ let BindEvaluateBindingsResultDef;
  */
 let BindEvaluateExpressionResultDef;
 
+/**
+ * Options for Bind.rescan().
+ * @typedef {{update: (boolean|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
+ */
+let BindRescanOptionsDef;
+
 /////////////////////////////
 ////// Web Anmomation externs
 /////////////////////////////
@@ -817,3 +837,8 @@ var WebAnimationSelectorDef;
  * }}
  */
 var WebAnimationSubtargetDef;
+
+var ampInaboxPositionObserver;
+ampInaboxPositionObserver.observe;
+ampInaboxPositionObserver.getTargetRect;
+ampInaboxPositionObserver.getViewportRect;

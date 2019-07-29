@@ -16,12 +16,12 @@
 
 const fs = require('fs');
 const {
-  ControllerPromise,
   DOMRectDef,
   ElementHandle,
   Key,
 } = require('./functional-test-controller');
 const {By, Condition, Key: SeleniumKey, error} = require('selenium-webdriver');
+const {ControllerPromise} = require('./controller-promise');
 const {expect} = require('chai');
 
 const {NoSuchElementError} = error;
@@ -513,25 +513,6 @@ class SeleniumWebDriverController {
    */
   async click(handle) {
     return await handle.getElement().click();
-  }
-
-  /**
-   * @param {!ElementHandle<!WebElement>} handle
-   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
-   * @return {!Promise}
-   * @override
-   */
-  async scroll(handle, opt_scrollToOptions) {
-    const webElement = handle.getElement();
-    const scrollTo = (element, opt_scrollToOptions) => {
-      element./*OK*/ scrollTo(opt_scrollToOptions);
-    };
-
-    return await this.driver.executeScript(
-      scrollTo,
-      webElement,
-      opt_scrollToOptions
-    );
   }
 
   /**

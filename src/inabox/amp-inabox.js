@@ -24,28 +24,25 @@ import {Services} from '../services';
 import {adopt} from '../runtime';
 import {cssText as ampDocCss} from '../../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
+import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
+import {installAmpdocServicesForInabox} from './inabox-services';
 import {
-  installAmpdocServices,
   installBuiltinElements,
   installRuntimeServices,
 } from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
-import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
-import {installInaboxViewportService} from './inabox-viewport';
 import {installPerformanceService} from '../service/performance-impl';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from '../style-installer';
-import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {internalRuntimeVersion} from '../internal-version';
 import {isExperimentOn} from '../experiments';
-import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
@@ -95,15 +92,10 @@ startupChunk(self.document, function initial() {
         // Core services.
         installRuntimeServices(self);
         fontStylesheetTimeout(self);
-        installIframeMessagingClient(self);
-        // Install inabox specific Viewport service before
-        // runtime tries to install the normal one.
-        installViewerServiceForDoc(ampdoc);
-        installInaboxViewportService(ampdoc);
-        installAmpdocServices(ampdoc, undefined, true);
+        installAmpdocServicesForInabox(ampdoc);
         // We need the core services (viewer/resources) to start instrumenting
         perf.coreServicesAvailable();
-        maybeTrackImpression(self);
+        doNotTrackImpression();
         registerIniLoadListener(ampdoc);
       });
       startupChunk(self.document, function builtins() {

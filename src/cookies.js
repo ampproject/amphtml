@@ -22,6 +22,7 @@ import {
   tryDecodeUriComponent,
 } from './url';
 import {urls} from './config';
+import {userAssert} from './log';
 
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 
@@ -37,7 +38,7 @@ const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
  * @return {?string}
  */
 export function getCookie(win, name) {
-  const cookieString = tryGetDocumentCookieNoInline(win);
+  const cookieString = tryGetDocumentCookie_(win);
   if (!cookieString) {
     return null;
   }
@@ -58,12 +59,11 @@ export function getCookie(win, name) {
 
 /**
  * This method should not be inlined to prevent TryCatch deoptimization.
- * NoInline keyword at the end of function name also prevents Closure compiler
- * from inlining the function.
  * @param {!Window} win
  * @return {string}
+ * @noinline
  */
-function tryGetDocumentCookieNoInline(win) {
+function tryGetDocumentCookie_(win) {
   try {
     return win.document.cookie;
   } catch (e) {
@@ -207,30 +207,24 @@ function trySetCookie(win, name, value, expirationTime, domain) {
  */
 function checkOriginForSettingCookie(win, options, name) {
   if (options && options.allowOnProxyOrigin) {
-    if (options.highestAvailableDomain) {
-      throw new Error(
-        'Could not support higestAvailable Domain on proxy origin, ' +
-          'specify domain explicitly'
-      );
-    }
+    userAssert(
+      !options.highestAvailableDomain,
+      'Could not support higestAvailable Domain on proxy origin, ' +
+        'specify domain explicitly'
+    );
     return;
   }
-
-  if (isProxyOrigin(win.location.href)) {
-    throw new Error(
-      'Should never attempt to set cookie on proxy origin: ' + name
-    );
-  }
-
+  userAssert(
+    !isProxyOrigin(win.location.href),
+    `Should never attempt to set cookie on proxy origin: ${name}`
+  );
   const current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
   const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
-  if (current == proxy || endsWith(current, '.' + proxy)) {
-    throw new Error(
-      'Should never attempt to set cookie on proxy origin.' +
-        ' (in depth check): ' +
-        name
-    );
-  }
+  userAssert(
+    !(current == proxy || endsWith(current, '.' + proxy)),
+    'Should never attempt to set cookie on proxy origin. (in depth check): ' +
+      name
+  );
 }
 
 /**

@@ -333,9 +333,18 @@ function onError(message, filename, line, col, error) {
     hasNonAmpJs
   );
   if (data) {
-    reportingBackoff(() =>
-      reportErrorToServerOrViewer(this, /** @type {!JsonObject} */ (data))
-    );
+    reportingBackoff(() => {
+      try {
+        return reportErrorToServerOrViewer(
+          this,
+          /** @type {!JsonObject} */ (data)
+        ).catch(() => {
+          // catch async errors to avoid recursive errors.
+        });
+      } catch (e) {
+        // catch async errors to avoid recursive errors.
+      }
+    });
   }
 }
 
@@ -377,23 +386,20 @@ export function maybeReportErrorToViewer(win, data) {
   if (!ampdocService.isSingleDoc()) {
     return Promise.resolve(false);
   }
-  const ampdocSingle = ampdocService.getAmpDoc();
+  const ampdocSingle = ampdocService.getSingleDoc();
   const htmlElement = ampdocSingle.getRootNode().documentElement;
   const docOptedIn = htmlElement.hasAttribute('report-errors-to-viewer');
   if (!docOptedIn) {
     return Promise.resolve(false);
   }
-
   const viewer = Services.viewerForDoc(ampdocSingle);
   if (!viewer.hasCapability('errorReporter')) {
     return Promise.resolve(false);
   }
-
   return viewer.isTrustedViewer().then(viewerTrusted => {
     if (!viewerTrusted) {
       return false;
     }
-
     viewer.sendMessage('error', errorReportingDataForViewer(data));
     return true;
   });
@@ -412,6 +418,7 @@ export function errorReportingDataForViewer(errorReportData) {
     'a': errorReportData['a'], // isUserError
     's': errorReportData['s'], // error stack
     'el': errorReportData['el'], // tagName
+    'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
     'jse': errorReportData['jse'], // detectedJsEngine
   });
@@ -708,7 +715,7 @@ export function reportErrorToAnalytics(error, win) {
  */
 function getRootElement_(win) {
   const root = Services.ampdocServiceFor(win)
-    .getAmpDoc()
+    .getSingleDoc()
     .getRootNode();
   return dev().assertElement(root.documentElement || root.body || root);
 }

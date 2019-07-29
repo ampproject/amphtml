@@ -33,7 +33,7 @@ Capture analytics data from an AMP document.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-analytics/">amp-analytics example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-analytics/">amp-analytics example</a>.</td>
   </tr>
 </table>
 
@@ -272,6 +272,7 @@ The `requests` configuration object specifies the URLs used to transmit data to 
 The properties for defining a request with an object are:
  - `baseUrl`: Defines the url of the request (required).
  - `reportWindow`: An optional property to specify the time (in seconds) to stop reporting requests. The trigger with `important: true` overrides the maximum report window constraint.
+ - [`origin`](#request-origin): An optional property to specify the origin for requests
 
 In this example, all requests are valid.
 
@@ -290,6 +291,42 @@ In this example, all requests are valid.
 ```
 
 Some analytics providers have an already-provided configuration, which you use via the `type` attribute. If you are using an analytics provider, you may not need to include requests information. See your vendor documentation to find out if requests need to be configured, and how.
+
+##### Request Origin
+The top-level `requestOrigin` property accepts an absolute URL and defines the origin for requests. If `requestOrigin` is declared, the origin will be extracted from the value and it will be prepended to `baseUrl`. `requestOrigin` accepts and supports variables substitution. Variables will **not** be encoded in `requestOrigin`.
+
+```javascript
+"requestOrigin": "${example}/ignore_query",
+"requests": {
+  "base": "/analytics?a=${account}",
+  "pageview": {
+    "baseUrl": "${base}&type=pageview"
+  },
+  "event": {
+    "baseUrl": "${base}&type=event",
+  }
+},
+"vars": {
+  "example": "https://example.com"
+}
+```
+
+In this example, outgoing requests will be `https://example.com/analytics?a=${account}&type=pageview` for `pageview` requests and `https://example.com/analytics?a=${account}&type=event` for `event` requests. Notice that the `requestOrigin` value is not encoded and that only the origin is added to `baseUrl`.
+
+Request objects can also have an `origin` property that will override this top-level `requestOrigin` property.
+
+```javascript
+"requestOrigin": "https://example.com",
+"requests": {
+  "pageview": {
+    "origin": 'https://newexample.com',
+    "baseUrl": "/analytics?type=pageview"
+  },
+}
+```
+
+In this example, the outgoing request will be `https://newexample.com/analytics?type=pageview` for the `pageview` request.
+
 
 ##### Batching configs
 To reduce the number of request pings, you can specify batching behaviors in the request configuration. Any [`extraUrlParams`](#extra-url-params) from `triggers` that use the same request are appended to the `baseUrl` of the request.
@@ -535,6 +572,7 @@ NOTE: There is a [known issue](https://github.com/ampproject/amphtml/issues/1089
 <strong><a id="visibility-spec"></a>Visibility Spec</strong>
 
 The `visibilitySpec` is a set of conditions and properties that can be applied to `visible` or `hidden` triggers to change when they fire. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
+
   - `waitFor`: This property indicates that the visibility trigger should wait for a certain signal before tracking visibility. The supported values are `none`, `ini-load` and `render-start`. If `waitFor` is undefined, it is defaulted to [`ini-load`](#initial-load-trigger) when selector is specified, or to `none` otherwise.
   - `reportWhen`: This property indicates that the visibility trigger should wait for a certain signal before sending the trigger. The only supported value is `documentExit`. `reportWhen` and `repeat` may not both be used in the same visibilitySpec. Note that when `reportWhen` is specified, the report will be sent at the time of the signal even if visibility requirements are not met at that time or have not been met previously. Any relevant variables (`totalVisibleTime`, etc.) will be populated according to the visibility requirements in this `visibilitySpec`.
   - `continuousTimeMin` and `continuousTimeMax`: These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
@@ -737,7 +775,7 @@ The above configuration translates to:
 AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
 
 
-#### Video analytics triggers
+##### Video analytics triggers
 
 Video analytics provides several triggers (`"on": "video-*"`) that publishers can use to track different events occurring during a video's lifecycle. More details are available in [AMP Video Analytics](./amp-video-analytics.md).
 

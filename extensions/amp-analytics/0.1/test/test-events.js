@@ -15,8 +15,8 @@
  */
 
 import * as lolex from 'lolex';
-import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
+  AmpStoryEventTracker,
   AnalyticsEvent,
   ClickEventTracker,
   CustomEventTracker,
@@ -26,6 +26,7 @@ import {
   TimerEventTracker,
   VisibilityTracker,
 } from '../events';
+import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {Deferred} from '../../../../src/utils/promise';
 import {Signals} from '../../../../src/utils/signals';
 import {macroTask} from '../../../../testing/yield';
@@ -382,6 +383,99 @@ describes.realWin('Events', {amp: 1}, env => {
         fn2
       );
       expect(fn2).to.be.calledOnce;
+    });
+  });
+
+  describe('AmpStoryEventTracker', () => {
+    let tracker;
+
+    beforeEach(() => {
+      tracker = root.getTracker('story', AmpStoryEventTracker);
+    });
+
+    it('should initialize', () => {
+      expect(tracker.root).to.equal(root);
+    });
+
+    it('should listen on story events', () => {
+      const analyticsEvent = sandbox.stub();
+
+      const defaultStoryConfig = {
+        'on': 'story-page-visible',
+      };
+
+      const defaultVars = {
+        'storyPageIndex': '0',
+        'storyPageId': 'p4',
+        'storyPageCount': '4',
+      };
+
+      tracker.add(
+        analyticsElement,
+        'story-page-visible',
+        defaultStoryConfig,
+        analyticsEvent
+      );
+
+      const event = new Event('story-page-visible');
+      event.data = defaultVars;
+
+      root.getRoot().dispatchEvent(event);
+
+      expect(analyticsEvent).to.be.calledOnce;
+      expect(analyticsEvent).to.be.calledWith(
+        new AnalyticsEvent(
+          root.getRootElement(),
+          'story-page-visible',
+          defaultVars
+        )
+      );
+    });
+
+    it('should only fire event once when repeat is false', () => {
+      const analyticsEvent = sandbox.stub();
+
+      const defaultStoryConfig = {
+        'on': 'story-page-visible',
+        'storySpec': {
+          'repeat': false,
+        },
+      };
+
+      const defaultVars = {
+        'storyPageIndex': '0',
+        'storyPageId': 'p4',
+        'storyPageCount': '4',
+        'detailsForPage': {'repeated': false},
+      };
+
+      tracker.add(
+        analyticsElement,
+        'story-page-visible',
+        defaultStoryConfig,
+        analyticsEvent
+      );
+
+      const event = new Event('story-page-visible');
+      event.data = defaultVars;
+
+      const rootEl = root.getRoot();
+      rootEl.dispatchEvent(event);
+
+      defaultVars['detailsForPage']['repeated'] = true;
+      event.data = defaultVars;
+
+      // Trigger event second time, with 'repeated'.
+      rootEl.dispatchEvent(event);
+
+      expect(analyticsEvent).to.be.calledOnce;
+      expect(analyticsEvent).to.be.calledWith(
+        new AnalyticsEvent(
+          root.getRootElement(),
+          'story-page-visible',
+          defaultVars
+        )
+      );
     });
   });
 
@@ -1796,7 +1890,7 @@ describes.realWin('Events', {amp: 1}, env => {
         });
       });
 
-      it('with documentExit trigger on unload', function*() {
+      it('with documentExit trigger on unload if pagehide is unsupported', function*() {
         const config = {visibilitySpec: {reportWhen: 'documentExit'}};
         const tracker = root.getTracker('visible', VisibilityTracker);
         const deferred = new Deferred();
@@ -1805,6 +1899,7 @@ describes.realWin('Events', {amp: 1}, env => {
           deferred.resolve(event);
           handlerSpy();
         };
+        sandbox.stub(tracker, 'supportsPageHide_').returns(false);
 
         tracker.add(tracker.root, 'visible', config, handler);
 
@@ -1836,6 +1931,35 @@ describes.realWin('Events', {amp: 1}, env => {
         win.dispatchEvent(new Event('pagehide'));
 
         return deferred.promise.then(event => {
+          expect(event.type).to.equal('visible');
+        });
+      });
+
+      it('with no trigger on unload if pagehide is supported', function*() {
+        const config = {visibilitySpec: {reportWhen: 'documentExit'}};
+        const tracker = root.getTracker('visible', VisibilityTracker);
+        const deferred = new Deferred();
+        const handlerSpy = sandbox.spy();
+        const handler = event => {
+          deferred.resolve(event);
+          handlerSpy();
+        };
+        sandbox.stub(tracker, 'supportsPageHide_').returns(true);
+
+        tracker.add(tracker.root, 'visible', config, handler);
+
+        yield macroTask();
+        expect(handlerSpy).to.not.be.called;
+        win.dispatchEvent(new Event('unload'));
+        // Should not be triggered
+
+        // Ensure pagehide event is dispatched after visibiltyModel is ready
+        yield macroTask();
+        expect(handlerSpy).to.not.be.called;
+        win.dispatchEvent(new Event('pagehide'));
+
+        return deferred.promise.then(event => {
+          expect(handlerSpy).to.be.calledOnce;
           expect(event.type).to.equal('visible');
         });
       });
