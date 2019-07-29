@@ -182,22 +182,26 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
+    return this.fetch_(url).then(res => res.json());
+  }
+
+  static tearDown() {
+    const url = `${REQUEST_URL}/teardown/`;
+    return this.fetch_(url);
+  }
+
+  static fetch_(url) {
     return xhrServiceForTesting(window)
       .fetchJson(url, {
         method: 'GET',
         ampCors: false,
         credentials: 'omit',
       })
-      .then(res => res.json());
-  }
-
-  static tearDown() {
-    const url = `${REQUEST_URL}/teardown/`;
-    return xhrServiceForTesting(window).fetchJson(url, {
-      method: 'GET',
-      ampCors: false,
-      credentials: 'omit',
-    });
+      .catch(err => {
+        return err.response.text().then(msg => {
+          throw new Error(err.message + ': ' + msg);
+        });
+      });
   }
 }
 
