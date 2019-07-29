@@ -38,6 +38,7 @@ const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
 
 /**
  * Replaces the default compiler binary with nailgun on linux and macos
+ * @return {*} TODO(#23582): Specify return type
  */
 function maybeReplaceDefaultCompiler() {
   if (process.platform == 'darwin') {

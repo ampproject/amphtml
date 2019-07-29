@@ -29,6 +29,7 @@ import {addExperimentIdToElement} from './traffic-experiments';
  * @param {!Array<string>} branches
  * @param {string} expName
  * @param {boolean=} optAddExpIdToElement
+ * @return {*} TODO(#23582): Specify return type
  */
 export function selectAndSetExperiments(
   win,
@@ -59,6 +60,7 @@ export class ExperimentUtils {
    * @param {!Element} element
    * @param {!Array<string>} selectionBranches
    * @param {string} experimentName
+   * @return {?string}
    */
   maybeSelectExperiment(win, element, selectionBranches, experimentName) {
     const experimentInfoMap = /** @type {!Object<string, !ExperimentInfo>} */ ({});

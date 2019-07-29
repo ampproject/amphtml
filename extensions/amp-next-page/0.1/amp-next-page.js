@@ -242,6 +242,7 @@ export class AmpNextPage extends AMP.BaseElement {
   /**
    * Appends the element too page
    * @param {!Element} element
+   * @return {!Promise}
    */
   appendPage_(element) {
     return this.mutateElement(() => this.element.appendChild(element));
@@ -250,6 +251,7 @@ export class AmpNextPage extends AMP.BaseElement {
   /**
    * Fetches the element config from the URL specified in [src].
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   fetchConfig_() {
     const ampdoc = this.getAmpDoc();
@@ -296,6 +298,7 @@ function extractAdSenseImageUrl(el) {
  * Returns the text content of an element, with leading/trailing whitespace
  * trimmed.
  * @param {Element} el
+ * @return {*} TODO(#23582): Specify return type
  */
 function extractAdSenseTextContent(el) {
   const content = (el && el.textContent) || '';

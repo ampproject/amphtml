@@ -198,6 +198,7 @@ export class InfoDialog {
 
   /**
    * Sets the heading on the dialog.
+   * @return {*} TODO(#23582): Specify return type
    */
   setHeading_() {
     const label = this.localizationService_.getLocalizedString(
@@ -215,6 +216,7 @@ export class InfoDialog {
   /**
    * @param {string} pageUrl The URL to the canonical version of the current
    *     document.
+   * @return {*} TODO(#23582): Specify return type
    */
   setPageLink_(pageUrl) {
     const linkEl = dev().assertElement(
@@ -233,6 +235,7 @@ export class InfoDialog {
   /**
    * @param {?string} moreInfoUrl The URL to the "more info" page, if there is
    * one.
+   * @return {*} TODO(#23582): Specify return type
    */
   setMoreInfoLinkUrl_(moreInfoUrl) {
     if (!moreInfoUrl) {

@@ -103,6 +103,7 @@ export class PositionObserver {
 
   /**
    * A  method to get viewport rect
+   * @return {LayoutRectDef}
    */
   getViewportRect() {
     const {scrollingElement_: scrollingElement, win_: win} = this;

@@ -214,6 +214,7 @@ export class VariableSource {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *   that can be substituted.
+   * @return {!RegExp}
    */
   getExpr(opt_bindings, opt_whiteList) {
     if (!this.initialized_) {

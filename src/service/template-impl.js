@@ -407,6 +407,7 @@ export function installTemplatesService(win) {
  * @param {!Window} win
  * @param {string} type
  * @param {!TemplateClassDef} templateClass
+ * @return {undefined}
  */
 export function registerExtendedTemplate(win, type, templateClass) {
   const templatesService = getService(win, 'templates');

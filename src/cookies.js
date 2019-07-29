@@ -100,7 +100,7 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
   if (opt_options && opt_options.domain) {
     domain = opt_options.domain;
   } else if (opt_options && opt_options.highestAvailableDomain) {
-    domain = getHighestAvailableDomain(win);
+    domain = /** @type {string} */ (getHighestAvailableDomain(win));
   }
   trySetCookie(win, name, value, expirationTime, domain);
 }
@@ -108,6 +108,7 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
 /**
  * Attemp to find the HighestAvailableDomain on
  * @param {!Window} win
+ * @return {?string}
  */
 export function getHighestAvailableDomain(win) {
   // <meta name='amp-cookie-scope'>. Need to respect the meta first.

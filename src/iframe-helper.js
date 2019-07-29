@@ -552,6 +552,7 @@ export function isAdLike(element) {
 
 /**
  * @param {!Element} iframe
+ * @return {!Element}
  * @private
  */
 export function disableScrollingOnIframe(iframe) {

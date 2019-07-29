@@ -73,6 +73,7 @@ function createDeferred_() {
  * Shallow compare a and b.
  * @param {*} a
  * @param {*} b
+ * @return {*} TODO(#23582): Specify return type
  */
 function shallowDiffers(a, b) {
   for (const i in a) {

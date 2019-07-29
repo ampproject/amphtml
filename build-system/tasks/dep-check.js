@@ -276,6 +276,7 @@ function flattenGraph(entryPoints) {
  * Run Module dependency graph against the rules.
  *
  * @param {!Array<!ModuleDef>} modules
+ * @return {*} TODO(#23582): Specify return type
  */
 function runRules(modules) {
   let errorsFound = false;
@@ -337,6 +338,7 @@ function toArrayOrDefault(value, defaultValue) {
  * Flatten array of arrays.
  *
  * @param {!Array<!Array>} arr
+ * @return {*} TODO(#23582): Specify return type
  */
 function flatten(arr) {
   return [].concat.apply([], arr);

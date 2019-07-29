@@ -98,6 +98,7 @@ export class PinWidget {
 
   /**
    * @param {!JsonObject} pin
+   * @return {*} TODO(#23582): Specify return type
    */
   renderPin(pin) {
     // start setting our class name

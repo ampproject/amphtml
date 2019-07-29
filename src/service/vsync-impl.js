@@ -452,6 +452,7 @@ export class Vsync {
  * For optimization reasons to stop try/catch from blocking optimization.
  * @param {function(!VsyncStateDef):undefined|undefined} callback
  * @param {!VsyncStateDef} state
+ * @return {boolean}
  * @noinline
  */
 function callTask_(callback, state) {

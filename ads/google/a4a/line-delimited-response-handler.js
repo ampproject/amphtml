@@ -72,6 +72,7 @@ export function lineDelimitedStreamer(win, response, lineCallback) {
  * html unescaped.
  * @param {function(string, !Object<string, *>, boolean)} callback
  * @private
+ * @return {function(string, boolean)}
  */
 export function metaJsonCreativeGrouper(callback) {
   let first;

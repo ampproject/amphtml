@@ -105,6 +105,7 @@ const NUM_BATCHES = 14;
 
 /**
  * Calculate the reviewer this week, based on rotation calendar
+ * @return {*} TODO(#23582): Specify return type
  */
 function calculateReviewer() {
   const now = Date.now();
@@ -116,6 +117,7 @@ function calculateReviewer() {
 
 /**
  * Main function for auto triaging
+ * @return {*} TODO(#23582): Specify return type
  */
 function process3pGithubPr() {
   if (!GITHUB_ACCESS_TOKEN) {
@@ -186,6 +188,7 @@ function getIssues(opt_page) {
 /**
  * API call to get all changed files of a pull request.
  * @param {!Object} pr
+ * @return {*} TODO(#23582): Specify return type
  */
 function getPullRequestFiles(pr) {
   const options = extend({}, defaultOption);
@@ -205,6 +208,7 @@ function getPullRequestFiles(pr) {
 /**
  * Determine the type of a give pull request
  * @param {?Array<!Object>} files
+ * @return {*} TODO(#23582): Specify return type
  */
 function analyzeChangedFiles(files) {
   if (!files) {
@@ -237,6 +241,7 @@ function analyzeChangedFiles(files) {
 /**
  * Determine if we need to reply to an issue
  * @param {!Object} issue
+ * @return {*} TODO(#23582): Specify return type
  */
 function isQualifiedPR(issue) {
   // All issues are opened has no assignee
@@ -262,6 +267,7 @@ function isQualifiedPR(issue) {
  * Auto reply
  * @param {!Object} pr
  * @param {ANALYZE_OUTCOME} outcome
+ * @return {*} TODO(#23582): Specify return type
  */
 function replyToPR(pr, outcome) {
   let promise = Promise.resolve();
@@ -284,6 +290,7 @@ function replyToPR(pr, outcome) {
  * API call to comment on a give issue.
  * @param {!Object} issue
  * @param {string} comment
+ * @return {*} TODO(#23582): Specify return type
  */
 function applyComment(issue, comment) {
   const {number} = issue;
@@ -310,6 +317,7 @@ function applyComment(issue, comment) {
  * API call to assign an issue with a list of assignees
  * @param {!Object} issue
  * @param {!Array<string>} assignees
+ * @return {*} TODO(#23582): Specify return type
  */
 function assignIssue(issue, assignees) {
   const {number} = issue;

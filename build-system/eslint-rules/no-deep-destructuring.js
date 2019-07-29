@@ -22,6 +22,7 @@
  *   const { x: { y } } = obj.prop;
  * Good:
  *   const { y } = obj.prop.x;
+ * @return {*} TODO(#23582): Specify return type
  */
 module.exports = function(context) {
   return {

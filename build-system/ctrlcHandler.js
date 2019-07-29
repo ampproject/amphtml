@@ -29,6 +29,7 @@ const killSuffix = process.platform == 'win32' ? '>NUL' : '';
  * the ongoing `gulp watch | build | dist` task.
  *
  * @param {string} command
+ * @return {*} TODO(#23582): Specify return type
  */
 exports.createCtrlcHandler = function(command) {
   if (!isTravisBuild()) {

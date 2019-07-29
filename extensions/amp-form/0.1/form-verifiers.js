@@ -44,6 +44,7 @@ let UpdatedErrorsDef;
  * a config block is present.
  * @param {!HTMLFormElement} form
  * @param {function():Promise<!Response>} xhr
+ * @return {!FormVerifier}
  */
 export function getFormVerifier(form, xhr) {
   if (form.hasAttribute('verify-xhr')) {

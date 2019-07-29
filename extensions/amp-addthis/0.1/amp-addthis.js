@@ -88,6 +88,7 @@ let shouldRegisterView = true;
 
 /**
  * Redirection to prevent eslint issues.
+ * @return {*} TODO(#23582): Specify return type
  */
 export function getConfigManager() {
   return configManager;

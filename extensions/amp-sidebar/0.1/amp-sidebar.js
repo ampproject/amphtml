@@ -528,7 +528,8 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * @private @return {!../../../src/service/history-impl.History}
+   * @private
+   * @return {!../../../src/service/history-impl.History}
    */
   getHistory_() {
     return Services.historyForDoc(this.getAmpDoc());

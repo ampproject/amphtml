@@ -1341,6 +1341,7 @@ function frameParent(doc) {
  * destroyed (eg, a node inside an iframe that was disconnected from the DOM).
  *
  * @param {!Node} node
+ * @return {boolean}
  */
 function isDestroyed(node) {
   const {ownerDocument} = node;

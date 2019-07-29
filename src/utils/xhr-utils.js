@@ -245,6 +245,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
  * @param {string} input
  * @param {!FetchInitDef} init The options of the XHR which may get
  * intercepted.
+ * @return {string}
  */
 export function setupInput(win, input, init) {
   devAssert(typeof input == 'string', 'Only URL supported: %s', input);
@@ -362,6 +363,7 @@ function normalizeMethod_(method) {
 /**
  * If 415 or in the 5xx range.
  * @param {number} status
+ * @return {boolean}
  */
 function isRetriable(status) {
   return status == 415 || (status >= 500 && status < 600);

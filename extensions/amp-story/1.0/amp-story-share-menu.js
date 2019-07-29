@@ -221,6 +221,7 @@ export class ShareMenu {
   /**
    * Handles click events and maybe closes the menu for the fallback UI.
    * @param  {!Event} event
+   * @return {*} TODO(#23582): Specify return type
    */
   onShareMenuClick_(event) {
     const el = dev().assertElement(event.target);
