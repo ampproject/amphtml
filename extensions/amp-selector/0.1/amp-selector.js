@@ -465,12 +465,16 @@ export class AmpSelector extends AMP.BaseElement {
     const selectUpWhenNoneSelected = previousIndex === -1 && delta < 0;
     const index = selectUpWhenNoneSelected ? delta : previousIndex + delta;
     const normalizedIndex = mod(index, this.elements_.length);
+    const el = this.elements_[normalizedIndex];
 
-    this.setSelection_(this.elements_[normalizedIndex]);
+    this.setSelection_(el);
     const previousEl = this.elements_[previousIndex];
     if (previousEl) {
       this.clearSelection_(previousEl);
     }
+
+    this.setInputs_();
+    this.fireSelectEvent_(el);
   }
 
   /**
