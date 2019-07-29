@@ -32,6 +32,7 @@ import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attributi
 import {
   createElementWithAttributes,
   isJsonScriptTag,
+  iterateCursor,
   openWindowDialog,
 } from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -975,7 +976,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const iframeDoc = getFrameDoc(iframe);
     const tags = getA4AMetaTags(iframeDoc);
     const vars = {};
-    tags.forEach(tag => {
+    iterateCursor(tags, tag => {
       const name = tag.name.split('amp4ads-vars-')[1];
       const {content} = tag;
       vars[name] = content;
