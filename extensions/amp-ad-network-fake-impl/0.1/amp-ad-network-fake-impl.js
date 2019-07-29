@@ -116,6 +116,10 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     this.reorderHeadTransformer_.reorderHead(doc.head);
     const metadata = this.metadataTransformer_.generateMetadata(doc);
 
+    //Removes <amp-ad-metadata> tag if it exists
+    const oldMetadata = doc.querySelector('script[amp-ad-metadata]');
+    oldMetadata.parentNode.removeChild(oldMetadata);
+
     const creative = root./*OK*/ outerHTML;
     const creativeSplit = creative.split('</body>');
     const docWithMetadata =
