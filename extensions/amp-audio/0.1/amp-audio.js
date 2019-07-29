@@ -68,6 +68,7 @@ export class AmpAudio extends AMP.BaseElement {
 
   /**
    * Builds the internal <audio> element
+   * @return {*} TODO(#23582): Specify return type
    */
   buildAudioElement() {
     const audio = this.element.ownerDocument.createElement('audio');

@@ -68,6 +68,7 @@ export class AmpAccessIframeApi {
   }
 
   /**
+   * @return {*} TODO(#23582): Specify return type
    */
   connect() {
     this.messenger_.connect(this.handleCommand_.bind(this));
@@ -124,7 +125,10 @@ export class AmpAccessIframeApi {
   }
 }
 
-/** @package Visible for testing. */
+/**
+ * @package Visible for testing.
+ * @return {*} TODO(#23582): Specify return type
+ */
 export function getAccessControllerForTesting() {
   return AccessController;
 }

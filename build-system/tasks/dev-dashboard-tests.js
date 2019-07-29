@@ -22,6 +22,7 @@ const {isTravisBuild} = require('../travis');
 
 /**
  * Run all the dev dashboard tests
+ * @return {*} TODO(#23582): Specify return type
  */
 async function devDashboardTests() {
   const mocha = new Mocha({reporter: isTravisBuild() ? 'dot' : 'spec'});

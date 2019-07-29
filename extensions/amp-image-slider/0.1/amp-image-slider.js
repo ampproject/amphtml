@@ -560,6 +560,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Get current slider's percentage to the left
    * Should be wrapped inside measureElement
    * @private
+   * @return {number}
    */
   getCurrentSliderPercentage_() {
     const {left: barLeft} = this.bar_./*OK*/ getBoundingClientRect();
@@ -693,6 +694,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Limit percentage between 0 and 1
    * @param {number} percentage
    * @private
+   * @return {number}
    */
   limitPercentage_(percentage) {
     return clamp(percentage, 0, 1);

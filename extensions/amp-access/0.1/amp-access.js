@@ -771,7 +771,10 @@ AMP.extension(TAG, '0.1', function(AMP) {
   });
 });
 
-/** @package Visible for testing only. */
+/**
+ * @package Visible for testing only.
+ * @return {*} TODO(#23582): Specify return type
+ */
 export function getAccessVarsClassForTesting() {
   return AccessVars;
 }

@@ -20,6 +20,7 @@
  * @param {string=} hostName
  * @param {boolean=} inabox
  * @param {boolean=} storyV1
+ * @return {*} TODO(#23582): Specify return type
  */
 const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
   hostName = hostName || '';

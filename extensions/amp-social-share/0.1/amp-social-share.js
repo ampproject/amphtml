@@ -179,7 +179,10 @@ class AmpSocialShare extends AMP.BaseElement {
     }
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   systemShareSupported_() {
     // Chrome exports navigator.share in WebView but does not implement it.
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923

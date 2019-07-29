@@ -45,6 +45,7 @@ function addCanonicalLinkTag(global) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @return {?Node}
  */
 function createContainer(global, data) {
   // add canonical link tag

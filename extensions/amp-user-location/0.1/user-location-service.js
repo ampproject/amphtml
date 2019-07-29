@@ -264,6 +264,7 @@ export class UserLocationService {
    * @param {string} expr
    * @param {string} type
    * @param {boolean=} poll
+   * @return {*} TODO(#23582): Specify return type
    */
   getReplacementLocation(expr, type, poll = false) {
     return this.getLocation(poll).then(position => {

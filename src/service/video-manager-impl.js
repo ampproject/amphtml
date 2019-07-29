@@ -100,7 +100,11 @@ export class VideoManager {
     /** @private @const */
     this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
-    /** @private @const */
+    /**
+     * @private
+     * @const
+     * @return {undefined}
+     */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     /** @private @const {function():!AutoFullscreenManager} */
@@ -405,6 +409,7 @@ class VideoEntry {
       analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE)
     );
 
+    // eslint-disable-next-line jsdoc/require-returns
     /** @private @const {function(): !Promise<boolean>} */
     this.supportsAutoplay_ = () => {
       const {win} = this.ampdoc_;
@@ -991,6 +996,7 @@ export class AutoFullscreenManager {
     /** @private @const {!Array<!../video-interface.VideoOrBaseElementDef>} */
     this.entries_ = [];
 
+    // eslint-disable-next-line jsdoc/require-returns
     /** @private @const {function()} */
     this.boundSelectBestCentered_ = () => this.selectBestCenteredInPortrait_();
 
@@ -1146,6 +1152,7 @@ export class AutoFullscreenManager {
    * Scrolls to a video if it's not in view.
    * @param {!../video-interface.VideoOrBaseElementDef} video
    * @param {?string=} optPos
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   scrollIntoIfNotVisible_(video, optPos = null) {
@@ -1169,18 +1176,27 @@ export class AutoFullscreenManager {
     });
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   getViewport_() {
     return Services.viewportForDoc(this.ampdoc_);
   }
 
-  /** @private @return {!Promise} */
+  /**
+   * @private
+   * @return {!Promise}
+   */
   onceOrientationChanges_() {
     const magicNumber = 330;
     return Services.timerFor(this.ampdoc_.win).promise(magicNumber);
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   selectBestCenteredInPortrait_() {
     if (this.isInLandscape()) {
       return this.currentlyCentered_;

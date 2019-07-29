@@ -103,6 +103,7 @@ function writeGeneratedAtCommitFile(runnerJarDir) {
  * given subdirectory of build-system/runner/dist/ (to enable concurrent usage)
  * @param {string} subDir
  *
+ * @return {*} TODO(#23582): Specify return type
  */
 async function generateRunner(subDir) {
   const generateCmd = `${antExecutable} -buildfile ${buildFile} -Ddist.dir dist/${subDir} jar`;

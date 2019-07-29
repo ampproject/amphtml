@@ -157,6 +157,7 @@ export class ViewerForTesting {
   /**
    * This is used in test-amp-viewer-integration to test the handshake and make
    * sure the test waits for everything to get executed.
+   * @return {*} TODO(#23582): Specify return type
    */
   waitForDocumentLoaded() {
     return this.documentLoadedPromise_;
@@ -164,6 +165,7 @@ export class ViewerForTesting {
 
   /**
    * This is only used for a unit test.
+   * @return {*} TODO(#23582): Specify return type
    */
   hasCapability() {
     return false;

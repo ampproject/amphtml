@@ -198,6 +198,7 @@ export function truncateText({container, overflowNodes} = {}) {
  * @param {function(!Node): boolean} filter A filter function for which nodes
  *    (and their subtrees) to include.
  * @param {!Array<!Node>} nodes An optional Array of initial nodes to include.
+ * @return {*} TODO(#23582): Specify return type
  */
 function getAllNodes(root, filter, nodes = []) {
   if (!filter(root)) {
@@ -264,6 +265,7 @@ function underflowAtPosition(container, node, text, offset) {
  * @param {!Text} node A Text Node to ellipsize.
  * @param {!Element} container The container that should have no overflow.
  * @param {!ClientRect} containerRect The ClientRect for `container`.
+ * @return {*} TODO(#23582): Specify return type
  */
 function maybeEllipsizeNode(node, container, containerRect) {
   // The Node can have no rects if an ancestor has `display: none`. We need to

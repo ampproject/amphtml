@@ -161,6 +161,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * Scrolls to the slide at the given slide index.
    * @param {number} index
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   goToSlide_(index) {
     const noOfSlides = this.cells_.length;
@@ -203,6 +204,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   /**
    * Calculates the target scroll position for the given slide index.
    * @param {number} index
+   * @return {number}
    */
   getPosForSlideIndex_(index) {
     const containerWidth = this.element./*OK*/ offsetWidth;

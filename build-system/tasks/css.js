@@ -111,6 +111,7 @@ function compileCss(watch, opt_compileAll) {
    * @param {string} outJs
    * @param {string} outCss
    * @param {boolean} append
+   * @return {*} TODO(#23582): Specify return type
    */
   function writeCssEntryPoint(path, outJs, outCss, append) {
     return jsifyCssAsync(`css/${path}`).then(css =>

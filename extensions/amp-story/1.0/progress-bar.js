@@ -76,6 +76,7 @@ export class ProgressBar {
 
   /**
    * @param {!Window} win
+   * @return {!ProgressBar}
    */
   static create(win) {
     return new ProgressBar(win);

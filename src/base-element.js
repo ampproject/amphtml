@@ -248,7 +248,8 @@ export class BaseElement {
 
   /**
    * DO NOT CALL. Retained for backward compat during rollout.
-   * @public @return {!Window}
+   * @public
+   * @return {!Window}
    */
   getWin() {
     return this.win;
@@ -263,7 +264,10 @@ export class BaseElement {
     return this.element.getAmpDoc();
   }
 
-  /** @public @return {!./service/vsync-impl.Vsync} */
+  /**
+   * @public
+   * @return {!./service/vsync-impl.Vsync}
+   */
   getVsync() {
     return Services.vsyncFor(this.win);
   }
@@ -643,6 +647,7 @@ export class BaseElement {
    *   for the element to be resolved, upgraded and built.
    * @final
    * @package
+   * @return {*} TODO(#23582): Specify return type
    */
   executeAction(invocation, unusedDeferred) {
     let {method} = invocation;
@@ -1081,6 +1086,7 @@ export class BaseElement {
   /**
    * Declares a child element (or ourselves) as a Layer
    * @param {!Element=} opt_element
+   * @return {undefined}
    */
   declareLayer(opt_element) {
     devAssert(

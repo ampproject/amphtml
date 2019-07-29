@@ -133,6 +133,7 @@ class LoaderBuilder {
   /**
    * Sets the size of the loader based element's size and a few special cases.
    * @private
+   * @return {undefined}
    */
   setSize_() {
     const sizeClassDefault = 'i-amphtml-new-loader-size-default';
@@ -210,6 +211,7 @@ class LoaderBuilder {
 
   /**
    * @param {string} color
+   * @return {!Node}
    */
   getSpinner_(color) {
     const svg = svgFor(this.element_);
@@ -231,6 +233,7 @@ class LoaderBuilder {
   /**
    * Adds the default or branded logo.
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   getLogo_() {
     const customLogo = this.getCustomLogo_();

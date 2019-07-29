@@ -115,7 +115,11 @@ export class NextPageService {
     this.history_ = null;
   }
 
-  /** Returns true if the service has already been initialized. */
+  /**
+   * Returns true if the service has already been initialized.
+   *
+   * @return {*} TODO(#23582): Specify return type
+   */
   isActive() {
     return this.config_ !== null;
   }

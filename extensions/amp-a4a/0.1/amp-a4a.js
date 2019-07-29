@@ -1629,6 +1629,7 @@ export class AmpA4A extends AMP.BaseElement {
    * call render-start, rather than triggering it itself. Example use case
    * is that amp-sticky-ad should trigger render-start itself so that the
    * sticky container isn't shown before an ad is ready.
+   * @return {boolean}
    */
   letCreativeTriggerRenderStart() {
     return false;
@@ -1924,6 +1925,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @param {string=} headerValue Method as given in header.
+   * @return {?XORIGIN_MODE}
    */
   getNonAmpCreativeRenderingMethod(headerValue) {
     if (headerValue) {
@@ -1933,7 +1935,7 @@ export class AmpA4A extends AMP.BaseElement {
           `cross-origin render mode header ${headerValue}`
         );
       } else {
-        return headerValue;
+        return /** @type {XORIGIN_MODE} */ (headerValue);
       }
     }
     return Services.platformFor(this.win).isIos()
