@@ -28,9 +28,12 @@ import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
+import {
+  installOwnersServiceForDoc,
+  installResourcesServiceForDoc,
+} from './resources-impl';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installPlatformService} from './platform-impl';
-import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
 import {installTemplatesService} from './template-impl';
@@ -103,6 +106,9 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'resources')
     : installResourcesServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'owners')
+    : installOwnersServiceForDoc(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
     : installUrlReplacementsServiceForDoc(ampdoc);
