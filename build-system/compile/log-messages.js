@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 const fs = require('fs-extra');
+const log = require('fancy-log');
+const {cyan} = require('colors');
 
 const pathPrefix = 'dist/log-messages';
 
@@ -38,15 +40,17 @@ const extractedItems = () => fs.readJson(extractedPath).then(Object.values);
  * Format extracted messages table in multiple outputs, keyed by id.
  * @return {!Promise}
  */
-const formatExtractedMessages = () =>
-  extractedItems().then(items =>
-    Promise.all(
-      Object.entries(formats).map(([path, format]) => {
-        const formatted = {};
-        items.forEach(item => (formatted[item.id] = format(item)));
-        return fs.outputJson(path, formatted);
-      })
-    )
+async function formatExtractedMessages() {
+  const items = await extractedItems();
+  log('Formatting log messages from', cyan(extractedPath));
+  return Promise.all(
+    Object.entries(formats).map(async ([path, format]) => {
+      const formatted = {};
+      items.forEach(item => (formatted[item.id] = format(item)));
+      await fs.outputJson(path, formatted);
+      log('Formatted', cyan(path));
+    })
   );
+}
 
 module.exports = {extractedPath, formatExtractedMessages};
