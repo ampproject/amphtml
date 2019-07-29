@@ -97,6 +97,7 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 /**
  * Compile all runtime targets in minified mode and drop them in dist/.
+ * @return {*} TODO(#23582): Specify return type
  */
 function compileAllMinifiedTargets() {
   if (isTravisBuild()) {
@@ -108,6 +109,7 @@ function compileAllMinifiedTargets() {
 /**
  * Compile all runtime targets in unminified mode and drop them in dist/.
  * @param {boolean} watch
+ * @return {*} TODO(#23582): Specify return type
  */
 function compileAllUnminifiedTargets(watch) {
   if (isTravisBuild()) {
@@ -609,6 +611,7 @@ function printNobuildHelp() {
  * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
  * Called at the end of "gulp build" and "gulp dist --fortesting".
  * @param {string} targetFile File to which the config is to be written.
+ * @return {*} TODO(#23582): Specify return type
  */
 async function enableLocalTesting(targetFile) {
   const config = argv.config === 'canary' ? 'canary' : 'prod';
@@ -695,6 +698,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
  * Build ALP JS.
  *
  * @param {!Object} options
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildAlp(options) {
   options = options || {};
@@ -711,6 +715,7 @@ function buildAlp(options) {
  * Build Examiner JS.
  *
  * @param {!Object} options
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildExaminer(options) {
   return compileJs('./src/examiner/', 'examiner.js', './dist/', {
@@ -726,6 +731,7 @@ function buildExaminer(options) {
  * Build web worker JS.
  *
  * @param {!Object} options
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildWebWorker(options) {
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {

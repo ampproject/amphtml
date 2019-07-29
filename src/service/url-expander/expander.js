@@ -292,6 +292,7 @@ export class Expander {
    *    the FOO binding opt_args will be [[Result of BAR, Result of BAR], [123]].
    *    This structure is so that the outer array will have the correct number of
    *    arguments, but we still can resolve each macro separately.
+   * @return {string|!Promise<string>}
    */
   evaluateBinding_(bindingInfo, opt_args) {
     const {encode, name} = bindingInfo;
@@ -443,6 +444,7 @@ export class Expander {
    * This will cast all arguments to string before calling the macro.
    *  [[Result of BAR, Result of BAR], 123]. => ['resultresult', '123']
    * @param {Array<!Array>|undefined} argsArray
+   * @return {Array<string>|undefined}
    */
   processArgsSync_(argsArray) {
     if (!argsArray) {

@@ -54,6 +54,7 @@ function isValidInactiveElementSpec(spec) {
 
 /**
  * @param {string} selector A CSS selector matching elements to ignore.
+ * @return {!../config.ClickLocationConfig}
  */
 export function makeInactiveElementSpec(selector) {
   return {type: FilterType.INACTIVE_ELEMENT, selector};
