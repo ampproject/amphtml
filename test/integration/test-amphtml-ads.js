@@ -376,12 +376,12 @@ describe('A more real AMPHTML image ad', () => {
         }, 2000);
       });
 
-      it.skip('should properly render ad in a friendly iframe with viewability pings', () => {
+      it('should properly render ad in a friendly iframe with viewability pings', () => {
         writeFriendlyFrame(doc, iframe, adBody);
         return testVisibilityPings(2000, 3000);
       });
 
-      it.skip('should properly render ad in a safe frame with viewability pings', () => {
+      it('should properly render ad in a safe frame with viewability pings', () => {
         writeSafeFrame(doc, iframe, adBody);
         return testVisibilityPings(2000, 3000);
       });
