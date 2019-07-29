@@ -27,6 +27,9 @@ const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
 /** @const @private {string} */
 const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
 
+/** @const @private {string} */
+const ARIA_DESC_ID_PREFIX = 'i-amphtml-aria-desc-';
+
 /**
  * Validation user message for non-standard pattern mismatch errors.
  * Note this isn't localized but custom validation can be used instead.
@@ -93,6 +96,18 @@ export class FormValidator {
      * @private {boolean|null}
      */
     this.formValidity_ = null;
+
+    /** @private {string} */
+    this.uniqueFormId_ = this.form.id
+      ? this.form.id
+      : String(Date.now() + Math.floor(Math.random() * 100));
+
+    /**
+     * Counter used to create a unique id for every validation message
+     * to be used with `aria-describedby`.
+     * @protected {number}
+     */
+    this.ariaDescCounter_ = 0;
   }
 
   /**
@@ -113,6 +128,15 @@ export class FormValidator {
   /** @return {!NodeList} */
   inputs() {
     return this.form.querySelectorAll('input,select,textarea');
+  }
+
+  /**
+   * @return {string} A unique ID.
+   */
+  createUniqueAriaDescId_() {
+    return (
+      ARIA_DESC_ID_PREFIX + this.uniqueFormId_ + '-' + this.ariaDescCounter_++
+    );
   }
 
   /**
@@ -345,9 +369,17 @@ export class AbstractCustomValidator extends FormValidator {
     }
     input[VISIBLE_VALIDATION_CACHE] = validation;
 
-    this.resources.mutateElement(input, () =>
-      input.setAttribute('aria-invalid', 'true')
-    );
+    let validationId = validation.getAttribute('id');
+    if (!validationId) {
+      validationId = this.createUniqueAriaDescId_();
+      validation.setAttribute('id', validationId);
+    }
+
+    this.resources.mutateElement(input, () => {
+      input.setAttribute('aria-invalid', 'true');
+      dev().assertString(validationId);
+      input.setAttribute('aria-describedby', validationId);
+    });
     this.resources.mutateElement(validation, () =>
       validation.classList.add('visible')
     );
@@ -363,9 +395,10 @@ export class AbstractCustomValidator extends FormValidator {
     }
     delete input[VISIBLE_VALIDATION_CACHE];
 
-    this.resources.mutateElement(input, () =>
-      input.removeAttribute('aria-invalid')
-    );
+    this.resources.mutateElement(input, () => {
+      input.removeAttribute('aria-invalid');
+      input.removeAttribute('aria-describedby');
+    });
     this.resources.mutateElement(visibleValidation, () =>
       visibleValidation.classList.remove('visible')
     );
