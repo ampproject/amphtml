@@ -41,6 +41,7 @@ export class AmpAdMetadataTransformer {
     /** @private {Element} */
     this.ampAnalytics_ = null;
   }
+
   /**
    * Creates a JSON metadata in which custom stylesheets, extensions
    * and runtime offsets are recorded. This is used by AMP4ADS at runtime
