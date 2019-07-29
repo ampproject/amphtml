@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {iterateCursor} from '../../../src/dom';
+
 /**
  *
  * @param {?../../../src/service/ampdoc-impl.AmpDoc} ampDoc
@@ -31,7 +33,7 @@ export function getScopeElements(ampDoc, configOpts) {
     selection = doc.querySelectorAll(cssSelector);
   }
 
-  selection.forEach(element => {
+  iterateCursor(selection, element => {
     if (hasAttributeValues(element, configOpts)) {
       filteredSelection.push(element);
     }
