@@ -1,0 +1,60 @@
+<!doctype html>
+<html amp4ads>
+<head>
+  <meta charset="utf-8">
+  <title>Carousel ad</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      font-family: 'Questrial', Arial;
+    }
+  </style>
+
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <meta name="amp4ads-id" content="vendor=doubleclick,type=impression-id,value=12345">
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+</head>
+<body>
+<amp-carousel
+    id="scrollable-carousel"
+    width="400"
+    height="225"
+    layout="fixed"
+    type="carousel">
+  <amp-img src="https://picsum.photos/1600/900?image=110"
+      width="400"
+      height="225"
+      aria-label="Aria labels are cool."></amp-img>
+  <amp-img src="https://picsum.photos/1600/900?image=112"
+      width="400"
+      height="225"></amp-img>
+  <amp-img src="https://picsum.photos/1600/900?image=113"
+      width="400"
+      height="225"></amp-img>
+  <amp-video
+      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+      width="358"
+      height="204"
+      layout="responsive"
+      controls>
+  </amp-video>
+  <amp-img src="https://picsum.photos/1600/900?image=110"
+      width="400"
+      height="225"
+      alt="a beautiful cat"></amp-img>
+  <amp-img src="https://picsum.photos/1600/900?image=112"
+      width="400"
+      height="225"></amp-img>
+  <amp-img src="https://picsum.photos/1600/900?image=113"
+      width="400"
+      height="225"></amp-img>
+</amp-carousel>
+<button on="tap:scrollable-carousel.goToSlide(index=0)">Go to slide 0</button>
+<button on="tap:scrollable-carousel.goToSlide(index=3)">Go to slide 3</button>
+<button on="tap:scrollable-carousel.goToSlide(index=5)">Go to slide 5</button>
+</body>
+</html>

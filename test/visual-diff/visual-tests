@@ -32,7 +32,7 @@
   */
   "asset_globs": [
     "examples/visual-tests/**",
-    "examples/inabox-tag-integration.js"
+    "examples/amphtml-ads/ads-tag-integration.js"
   ],
 
   /**

@@ -91,7 +91,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
           scrolling="no" id="inabox"
           width="300" height="250">
       </iframe>
-      <script src="/examples/inabox-tag-integration.js"></script>
+      <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
     env => {
@@ -117,7 +117,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
           scrolling="no" id='inabox'
           width="300" height="250">
       </iframe>
-      <script src="/examples/inabox-tag-integration.js"></script>
+      <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
     env => {
@@ -144,7 +144,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
     {
       amp: false,
       body: `
-      <script src="/examples/inabox-tag-integration.js"></script>
+      <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
     env => {
@@ -194,7 +194,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       amp: false,
       body: `
       <div style="height: 100vh"></div>
-      <script src="/examples/inabox-tag-integration.js"></script>
+      <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
     env => {
@@ -284,7 +284,7 @@ describe('A more real AMPHTML image ad', () => {
     {
       amp: false,
       body: `
-        <script src="/examples/inabox-tag-integration.js"></script>
+        <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
         `,
     },
     env => {
@@ -359,7 +359,7 @@ describe('A more real AMPHTML image ad', () => {
       amp: false,
       body: `
         <div style="height: 100vh"></div>
-        <script src="/examples/inabox-tag-integration.js"></script>
+        <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
         `,
     },
     env => {
