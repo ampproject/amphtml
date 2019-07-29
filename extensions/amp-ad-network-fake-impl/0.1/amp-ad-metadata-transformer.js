@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -92,8 +91,8 @@ export class AmpAdMetadataTransformer {
         this.metadata['jsonUtf16CharOffsets'] = {};
       }
       this.metadata['jsonUtf16CharOffsets']['amp-analytics'] = [];
-      // eslint-disable-next-line local/no-for-of-statement
-      for (const element of ampAnalytics) {
+      for (let i = 0; i < ampAnalytics.length; i++) {
+        const element = ampAnalytics[i];
         const nameElementString = element./*REVIEW*/ innerHTML;
         const jsonStart = creative.indexOf(nameElementString);
         const jsonEnd = jsonStart + nameElementString.length;
