@@ -101,7 +101,8 @@ export class VideoManager {
     this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
     /**
-     * @private @const
+     * @private
+     * @const
      * @return {*} TODO: Specify return type
      */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
@@ -1151,8 +1152,8 @@ export class AutoFullscreenManager {
    * Scrolls to a video if it's not in view.
    * @param {!../video-interface.VideoOrBaseElementDef} video
    * @param {?string=} optPos
-   * @private
    * @return {*} TODO: Specify return type
+   * @private
    */
   scrollIntoIfNotVisible_(video, optPos = null) {
     const {element} = video;

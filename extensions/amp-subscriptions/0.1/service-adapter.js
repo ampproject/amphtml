@@ -119,7 +119,8 @@ export class ServiceAdapter {
 }
 
 /**
- * @package @VisibleForTesting
+ * @package
+ * @visibleForTesting
  * @return {*} TODO: Specify return type
  */
 export function getPageConfigForTesting() {

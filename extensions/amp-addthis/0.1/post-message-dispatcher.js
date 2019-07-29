@@ -56,8 +56,8 @@ export class PostMessageDispatcher {
   /**
    * Utility method to parse out the data from the supplied `postMessage` event.
    * @param {!Event} event
-   * @private
    * @return {?JsonObject|undefined}
+   * @private
    */
   getMessageData_(event) {
     const data = getData(event);

@@ -56,8 +56,8 @@ export class ReadDepthTracker {
 
   /**
    * Reviews positions of each paragraph relative to vieport, finds top.
-   * @private
    * @return {*} TODO: Specify return type
+   * @private
    */
   findTopParagraph_() {
     return Promise.all(

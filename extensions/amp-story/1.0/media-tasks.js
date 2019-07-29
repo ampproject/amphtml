@@ -177,8 +177,8 @@ export class MediaTask {
   /**
    * @param {!HTMLMediaElement} unusedMediaEl The element on which this task
    *     should be executed.
-   * @protected
    * @return {*} TODO: Specify return type
+   * @protected
    */
   executeInternal(unusedMediaEl) {
     return Promise.resolve();

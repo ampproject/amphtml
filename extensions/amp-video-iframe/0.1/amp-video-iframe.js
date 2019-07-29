@@ -108,8 +108,8 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     /**
      * @param {!Event} e
-     * @private
      * @return {*} TODO: Specify return type
+     * @private
      */
     this.boundOnMessage_ = e => this.onMessage_(e);
   }

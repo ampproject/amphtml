@@ -199,8 +199,8 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    * nodes that only contain whitespace since they do not contribute anything
    * visually, only their surrounding Elements or non-whitespace Texts do.
    * @param {!Array<!Node>} nodes
-   * @private
    * @return {*} TODO: Specify return type
+   * @private
    */
   visibileChildren_(nodes) {
     return nodes.filter(node => {

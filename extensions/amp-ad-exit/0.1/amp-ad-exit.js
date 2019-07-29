@@ -312,11 +312,13 @@ export class AmpAdExit extends AMP.BaseElement {
         this.defaultFilters_.splice(
           0,
           1,
-          /** @type {!./filters/filter.Filter} */ (createFilter(
-            'minDelay',
-            makeClickDelaySpec(1000, config['options']['startTimingEvent']),
-            this
-          ))
+          devAssert(
+            createFilter(
+              'minDelay',
+              makeClickDelaySpec(1000, config['options']['startTimingEvent']),
+              this
+            )
+          )
         );
       }
       for (const name in config['filters']) {

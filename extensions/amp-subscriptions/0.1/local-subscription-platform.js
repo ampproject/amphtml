@@ -47,7 +47,8 @@ export function localSubscriptionPlatformFactory(
 
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @VisibleForTesting
+ * @package
+ * @visibleForTesting
  * @return {*} TODO: Specify return type
  */
 export function getPageConfigClassForTesting() {

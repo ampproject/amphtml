@@ -563,7 +563,8 @@ AMP.extension(TAG, '0.1', function(AMP) {
 
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
+ * @package
+ * @visibleForTesting
  * @return {*} TODO: Specify return type
  */
 export function getFetcherClassForTesting() {
@@ -572,7 +573,8 @@ export function getFetcherClassForTesting() {
 
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
+ * @package
+ * @visibleForTesting
  * @return {*} TODO: Specify return type
  */
 export function getPageConfigClassForTesting() {
@@ -581,7 +583,8 @@ export function getPageConfigClassForTesting() {
 
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
+ * @package
+ * @visibleForTesting
  * @return {*} TODO: Specify return type
  */
 export function getSubscribeResponseClassForTesting() {

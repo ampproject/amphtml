@@ -327,8 +327,8 @@ export class AmpVideoIntegration {
 
   /**
    * @param {function()} callback
-   * @private
    * @return {*} TODO: Specify return type
+   * @private
    */
   safePlayOrPause_(callback) {
     return () => {
@@ -373,8 +373,8 @@ export class AmpVideoIntegration {
   /**
    * @param {!JsonObject} data
    * @param {function()=} opt_callback
-   * @private
    * @return {*} TODO: Specify return type
+   * @private
    */
   postToParent_(data, opt_callback) {
     const id = this.callCounter_++;
@@ -403,8 +403,8 @@ export class AmpVideoIntegration {
    * Returns message id for testing. Private as message id is an implementation
    * detail that others should not rely on.
    * @param {function(!JsonObject)} callback
-   * @private
    * @return {*} TODO: Specify return type
+   * @private
    */
   getIntersectionForTesting_(callback) {
     return this.postToParent_(dict({'method': 'getIntersection'}), callback);

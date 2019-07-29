@@ -59,8 +59,8 @@ export function fetchDocument(win, input, opt_init) {
  *
  * @param {string} input
  * @param {!FetchInitDef} init
- * @private
  * @return {*} TODO: Specify return type
+ * @private
  */
 function xhrRequest(input, init) {
   return new Promise((resolve, reject) => {

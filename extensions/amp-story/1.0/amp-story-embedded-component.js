@@ -678,8 +678,8 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Gets href from an element containing a url.
    * @param {!Element} target
-   * @private
    * @return {string}
+   * @private
    */
   getElementHref_(target) {
     const elUrl = target.getAttribute('href');

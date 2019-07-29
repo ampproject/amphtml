@@ -38,8 +38,8 @@ const MIN_EVENT_INTERVAL = 100;
 /**
  * @param {!Window} win
  * @param {!Element} bodyElement
- * @visibleForTesting
  * @return {!Promise}
+ * @visibleForTesting
  */
 export function prepareBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).runPromise(
@@ -71,8 +71,8 @@ export function prepareBodyForOverlay(win, bodyElement) {
 /**
  * @param {!Window} win
  * @param {!Element} bodyElement
- * @visibleForTesting
  * @return {!Promise}
+ * @visibleForTesting
  */
 export function resetBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).mutatePromise(() => {

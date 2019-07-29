@@ -279,8 +279,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * Return a cleaned clone of the given element for building
    * carousel slides with.
    * @param {!Element} element
-   * @private
    * @return {*} TODO: Specify return type
+   * @private
    */
   cloneLightboxableElement_(element) {
     const deepClone = !element.classList.contains('i-amphtml-element');

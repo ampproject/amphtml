@@ -23,8 +23,8 @@ const CHAR_Z_UPPER = 90;
  * For "good enough" obfuscation.
  *
  * @param {string} input
- * @private
  * @return {*} TODO: Specify return type
+ * @private
  */
 const rot13 = input => {
   return input.replace(RE_ALPHA, match => {

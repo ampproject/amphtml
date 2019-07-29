@@ -452,8 +452,8 @@ export class Vsync {
  * For optimization reasons to stop try/catch from blocking optimization.
  * @param {function(!VsyncStateDef):undefined|undefined} callback
  * @param {!VsyncStateDef} state
- * @noinline
  * @return {*} TODO: Specify return type
+ * @noinline
  */
 function callTask_(callback, state) {
   devAssert(callback);

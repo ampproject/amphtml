@@ -498,8 +498,8 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * Retrieve iframe position entry in next animation frame.
-   * @private
    * @return {*} TODO: Specify return type
+   * @private
    */
   getIframePositionPromise_() {
     return this.viewport_
