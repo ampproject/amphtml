@@ -87,7 +87,10 @@ export class AmpAdMetadataTransformer {
     }
 
     const ampAnalytics = doc.querySelectorAll('amp-analytics');
-    if (ampAnalytics) {
+    if (ampAnalytics.length > 0) {
+      if (!this.metadata['jsonUtf16CharOffsets']) {
+        this.metadata['jsonUtf16CharOffsets'] = {};
+      }
       this.metadata['jsonUtf16CharOffsets']['amp-analytics'] = [];
       // eslint-disable-next-line local/no-for-of-statement
       for (const element of ampAnalytics) {
@@ -98,6 +101,7 @@ export class AmpAdMetadataTransformer {
         this.metadata['jsonUtf16CharOffsets']['amp-analytics'].push(jsonEnd);
       }
     }
+
     if (this.extensions_.length > 0) {
       this.metadata['customElementExtensions'] = [];
       this.metadata['extensions'] = [];
