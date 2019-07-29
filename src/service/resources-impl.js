@@ -429,13 +429,11 @@ export class Resources {
     /** @private {?Array<!Resource>} */
     this.pendingPreconnectResources_ = [];
 
-    // If we do early preconnects we delay them a bit. This is kind of
-    // an unfortunate trade off, but it seems faster, because the DOM
-    // operations themselves are not free and might delay
+    /** @private */
     this.eventuallyCallPreconnects_ = debounce(
       this.win,
       this.callPreconnects_.bind(this),
-      5
+      1
     );
 
     /** @private {boolean} */

@@ -582,6 +582,9 @@ function createBaseCustomElementClass(win) {
       if (onLayout) {
         this.implementation_.preconnectCallback(onLayout);
       } else {
+        // If we do early preconnects we delay them a bit. This is kind of
+        // an unfortunate trade off, but it seems faster, because the DOM
+        // operations themselves are not free and might delay
         this.getResources().requestPreconnect(this);
       }
     }
@@ -598,7 +601,7 @@ function createBaseCustomElementClass(win) {
         dev().error(TAG, 'preconnect without defaultView');
         return;
       }
-      this.implementation_.preconnectCallback(false);
+      this.implementation_.preconnectCallback(/* opt_onLayout */ false);
     }
 
     /**
