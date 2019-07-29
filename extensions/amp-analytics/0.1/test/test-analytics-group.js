@@ -15,8 +15,8 @@
  */
 
 import {AmpdocAnalyticsRoot} from '../analytics-root.js';
-import {AnalyticsGroup} from '../analytics-group.js';
 import {
+  AnalyticsEventType,
   ClickEventTracker,
   CustomEventTracker,
   IniLoadTracker,
@@ -25,6 +25,7 @@ import {
   TimerEventTracker,
   VisibilityTracker,
 } from '../events';
+import {AnalyticsGroup} from '../analytics-group.js';
 
 describes.realWin('AnalyticsGroup', {amp: 1}, env => {
   let win;
@@ -77,7 +78,10 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
   });
 
   it('should add "scroll" trigger', () => {
-    const tracker = root.getTracker('scroll', ScrollEventTracker);
+    const tracker = root.getTracker(
+      AnalyticsEventType.SCROLL,
+      ScrollEventTracker
+    );
     const unlisten = function() {};
     const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const config = {on: 'scroll', selector: '*'};
@@ -85,13 +89,21 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     expect(group.listeners_).to.be.empty;
     group.addTrigger(config, handler);
     expect(stub).to.be.calledOnce;
-    expect(stub).to.be.calledWith(analyticsElement, 'scroll', config, handler);
+    expect(stub).to.be.calledWith(
+      analyticsElement,
+      AnalyticsEventType.SCROLL,
+      config,
+      handler
+    );
     expect(group.listeners_).to.have.length(1);
     expect(group.listeners_[0]).to.equal(unlisten);
   });
 
   it('should add "custom" trigger', () => {
-    const tracker = root.getTracker('custom', CustomEventTracker);
+    const tracker = root.getTracker(
+      AnalyticsEventType.CUSTOM,
+      CustomEventTracker
+    );
     const unlisten = function() {};
     const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const config = {on: 'custom-event-1', selector: '*'};
@@ -155,7 +167,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
       .callsFake(() => unlisten);
     const config = {on: 'timer'};
     group.addTrigger(config, handler);
-    const tracker = root.getTrackerOptional('timer');
+    const tracker = root.getTrackerOptional(AnalyticsEventType.TIMER);
     expect(tracker).to.be.instanceOf(TimerEventTracker);
     expect(stub).to.be.calledOnce;
     expect(stub).to.be.calledWith(analyticsElement, 'timer', config, handler);
