@@ -79,15 +79,23 @@ export class AmpAdMetadataTransformer {
       this.metadata['jsonUtf16CharOffsets'] = {};
       for (let i = 0; i < this.jsonMetadata_.length; i++) {
         const name = this.jsonMetadata_[i];
-        let nameElementString;
-        if (name != 'amp-analytics') {
-          nameElementString = doc.getElementById(name)./*REVIEW*/ outerHTML;
-        } else {
-          nameElementString = this.ampAnalytics_./*REVIEW*/ innerHTML;
-        }
+        const nameElementString = this.ampAnalytics_./*REVIEW*/ innerHTML;
         const jsonStart = creative.indexOf(nameElementString);
         const jsonEnd = jsonStart + nameElementString.length;
         this.metadata['jsonUtf16CharOffsets'][name] = [jsonStart, jsonEnd];
+      }
+    }
+
+    const ampAnalytics = doc.querySelectorAll('amp-analytics');
+    if (ampAnalytics) {
+      this.metadata['jsonUtf16CharOffsets']['amp-analytics'] = [];
+      // eslint-disable-next-line local/no-for-of-statement
+      for (const element of ampAnalytics) {
+        const nameElementString = element./*REVIEW*/ innerHTML;
+        const jsonStart = creative.indexOf(nameElementString);
+        const jsonEnd = jsonStart + nameElementString.length;
+        this.metadata['jsonUtf16CharOffsets']['amp-analytics'].push(jsonStart);
+        this.metadata['jsonUtf16CharOffsets']['amp-analytics'].push(jsonEnd);
       }
     }
     if (this.extensions_.length > 0) {
@@ -254,10 +262,6 @@ export class AmpAdMetadataTransformer {
           this.metadata[attribute] = parsed[attribute];
         }
       }
-    }
-    this.ampAnalytics_ = doc.querySelector('amp-analytics');
-    if (this.ampAnalytics_ && !this.jsonMetadata_.includes('amp-analytics')) {
-      this.jsonMetadata_.push('amp-analytics');
     }
   }
 }

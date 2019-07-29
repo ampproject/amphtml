@@ -110,8 +110,8 @@ export class ExternalReorderHeadTransformer {
             }
         }
       }
-      for (let i = 0; i < head.children.length; i++) {
-        head.removeChild(head.children.item(i));
+      for (let i = 0; i < head.childNodes.length; i++) {
+        head.removeChild(head.childNodes.item(i));
       }
       this.repopulate_(head);
     }
