@@ -339,13 +339,12 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       }
     })
     .then(() => {
-      if (argv.fortesting && options.singlePassCompilation) {
-        const promises = [];
-        altMainBundles.forEach(bundle => {
-          promises.push(enableLocalTesting(`dist/${bundle.name}.js`));
-        });
-        return Promise.all(promises);
+      if (!argv.fortesting || !options.singlePassCompilation) {
+        return;
       }
+      return Promise.all(
+        altMainBundles.map(({name}) => enableLocalTesting(`dist/${name}.js`))
+      );
     });
 }
 
