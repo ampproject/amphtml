@@ -17,13 +17,13 @@
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {calculateScriptBaseUrl} from '../../../src/service/extension-location';
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
-import {urls} from '../../../src/config';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';
@@ -65,12 +65,8 @@ export class AnalyticsConfig {
   loadConfig() {
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
-    // eslint-disable-next-line no-undef
-    const fetchVendorConfigPromise = ANALYTICS_VENDOR_SPLIT
-      ? this.fetchVendorConfig_()
-      : Promise.resolve();
 
-    return Promise.all([this.fetchRemoteConfig_(), fetchVendorConfigPromise])
+    return Promise.all([this.fetchRemoteConfig_(), this.fetchVendorConfig_()])
       .then(this.processConfigs_.bind(this))
       .then(() => this.config_);
   }
@@ -82,12 +78,12 @@ export class AnalyticsConfig {
    * @return {string} the URL to request the vendor config file from
    */
   getVendorUrl_(vendor) {
-    const rtv = getMode().rtvVersion;
-    const baseUrl = getMode().localDev ? `/dist` : `${urls.cdn}/rtv/${rtv}`;
-    const max = getMode().minified ? '' : '.max';
+    const isLocalDev = getMode().localDev;
+    const baseUrl = calculateScriptBaseUrl(this.win_.location, isLocalDev);
+    const rtv = isLocalDev ? '' : `/rtv/${getMode().rtvVersion}`;
     // bg has a special canary config
     const canary = vendor === 'bg' && isCanary(self) ? '.canary' : '';
-    return `${baseUrl}/v0/analytics-vendors/${vendor}${canary}${max}.json`;
+    return `${baseUrl}${rtv}/v0/analytics-vendors/${vendor}${canary}.json`;
   }
 
   /**
@@ -97,6 +93,12 @@ export class AnalyticsConfig {
    * @return {!Promise<undefined>}
    */
   fetchVendorConfig_() {
+    // eslint-disable-next-line no-undef
+    if (!ANALYTICS_VENDOR_SPLIT) {
+      this.predefinedConfig_ = ANALYTICS_CONFIG;
+      return Promise.resolve();
+    }
+
     const type = this.element_.getAttribute('type');
     if (!type) {
       return Promise.resolve();
