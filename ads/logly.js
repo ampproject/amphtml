@@ -31,7 +31,5 @@ export function logly(global, data) {
     'https://l.logly.co.jp/lift_widget.js' +
     `?adspot_id=${encodeURIComponent(data['adspotid'])}`;
 
-  loadScript(global, url, () => {
-    window.context.renderStart();
-  });
+  loadScript(global, url);
 }
