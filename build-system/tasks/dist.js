@@ -53,6 +53,7 @@ const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {formatExtractedMessages} = require('../compile/log-messages');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
@@ -122,61 +123,52 @@ async function dist() {
   } else {
     parseExtensionFlags();
   }
-  return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
-    .then(async () => {
-      await startNailgunServer(distNailgunPort, /* detached */ false);
-    })
-    .then(() => {
-      // Single pass has its own tmp directory processing. Only do this for
-      // multipass.
-      // We need to execute this after `compileCss` so that we can copy that
-      // over to the tmp directory.
-      if (!argv.single_pass) {
-        transferSrcsToTempDir();
-      }
-      return Promise.all([
-        compileAllMinifiedTargets(),
-        // NOTE: When adding a line here,
-        // consider whether you need to include polyfills
-        // and whether you need to init logging (initLogConstructor).
-        buildAlp({minify: true, watch: false}),
-        buildExaminer({minify: true, watch: false}),
-        buildWebWorker({minify: true, watch: false}),
-        buildExtensions({minify: true, watch: false}),
-        buildExperiments({minify: true, watch: false}),
-        buildLoginDone('0.1', {minify: true, watch: false}),
-        buildWebPushPublisherFiles({minify: true, watch: false}).then(
-          postBuildWebPushPublisherFilesVersion
-        ),
-        copyCss(),
-      ]);
-    })
-    .then(() => {
-      if (isTravisBuild()) {
-        // New line after all the compilation progress dots on Travis.
-        console.log('\n');
-      }
-    })
-    .then(async () => {
-      await stopNailgunServer(distNailgunPort);
-    })
-    .then(() => {
-      return copyAliasExtensions();
-    })
-    .then(() => {
-      if (argv.esm) {
-        return Promise.all([
-          createModuleCompatibleES5Bundle('v0.js'),
-          createModuleCompatibleES5Bundle('amp4ads-v0.js'),
-          createModuleCompatibleES5Bundle('shadow-v0.js'),
-        ]);
-      } else {
-        return Promise.resolve();
-      }
-    })
-    .then(() => {
-      return exitCtrlcHandler(handlerProcess);
-    });
+  await compileCss(/* watch */ undefined, /* opt_compileAll */ true);
+  await startNailgunServer(distNailgunPort, /* detached */ false);
+
+  // Single pass has its own tmp directory processing. Only do this for
+  // multipass.
+  // We need to execute this after `compileCss` so that we can copy that
+  // over to the tmp directory.
+  if (!argv.single_pass) {
+    transferSrcsToTempDir();
+  }
+
+  await Promise.all([
+    compileAllMinifiedTargets(),
+    // NOTE: When adding a line here,
+    // consider whether you need to include polyfills
+    // and whether you need to init logging (initLogConstructor).
+    buildAlp({minify: true, watch: false}),
+    buildExaminer({minify: true, watch: false}),
+    buildWebWorker({minify: true, watch: false}),
+    buildExtensions({minify: true, watch: false}),
+    buildExperiments({minify: true, watch: false}),
+    buildLoginDone('0.1', {minify: true, watch: false}),
+    buildWebPushPublisherFiles({minify: true, watch: false}).then(
+      postBuildWebPushPublisherFilesVersion
+    ),
+    copyCss(),
+  ]);
+
+  if (isTravisBuild()) {
+    // New line after all the compilation progress dots on Travis.
+    console.log('\n');
+  }
+
+  await stopNailgunServer(distNailgunPort);
+  await copyAliasExtensions();
+  await formatExtractedMessages();
+
+  if (argv.esm) {
+    await Promise.all([
+      createModuleCompatibleES5Bundle('v0.js'),
+      createModuleCompatibleES5Bundle('amp4ads-v0.js'),
+      createModuleCompatibleES5Bundle('shadow-v0.js'),
+    ]);
+  }
+
+  return exitCtrlcHandler(handlerProcess);
 }
 
 /**
