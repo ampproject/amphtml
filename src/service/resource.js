@@ -679,6 +679,7 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed() {
+    return true;
     const isFluid = this.element.getLayout() == Layout.FLUID;
     // TODO(jridgewell): #getSize
     const box = this.getLayoutBox();

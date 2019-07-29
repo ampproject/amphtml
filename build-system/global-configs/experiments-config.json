@@ -6,6 +6,12 @@
     "expirationDateUTC": "2019-08-08",
     "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
   },
-  "experimentB": {},
+  "experimentB": {
+    "name": "INABOX_LITE_RESOURCES",
+    "command": "gulp dist --defineExperimentConstant=INABOX_LITE_RESOURCES",
+    "issue": "",
+    "expirationDateUTC": "2019-08-29",
+    "defineExperimentConstant": "INABOX_LITE"
+  },
   "experimentC": {}
 }
