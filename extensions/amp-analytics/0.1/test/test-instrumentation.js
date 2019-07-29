@@ -16,7 +16,7 @@
 
 import {AmpDocFie} from '../../../../src/service/ampdoc-impl';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
-import {CustomEventTracker} from '../events';
+import {AnalyticsEventType, CustomEventTracker} from '../events';
 import {InstrumentationService} from '../instrumentation.js';
 import {Services} from '../../../../src/services';
 
@@ -52,7 +52,10 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
   });
 
   it('should trigger a custom event on the ampdoc root', () => {
-    const tracker = root.getTracker('custom', CustomEventTracker);
+    const tracker = root.getTracker(
+      AnalyticsEventType.CUSTOM,
+      CustomEventTracker
+    );
     const triggerStub = sandbox.stub(tracker, 'trigger');
     service.triggerEventForTarget(target, 'test-event', {foo: 'bar'});
     expect(triggerStub).to.be.calledOnce;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AnalyticsEventType} from './events';
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {
   ExpansionOptions,
@@ -274,7 +275,7 @@ export class RequestHandler {
       // TODO: iframePing will not work with batch. Add a config validation.
       if (trigger['iframePing']) {
         userAssert(
-          trigger['on'] == 'visible',
+          trigger['on'] == AnalyticsEventType.VISIBLE,
           'iframePing is only available on page view requests.'
         );
         this.transport_.sendRequestUsingIframe(requestUrl, batchSegments[0]);
