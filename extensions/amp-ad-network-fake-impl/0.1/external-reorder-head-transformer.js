@@ -261,6 +261,7 @@ export class ExternalReorderHeadTransformer {
   /**
    * Add components back to head in specified order
    * @param {Element} head
+   * @return {Element}
    */
   repopulate_(head) {
     this.appendIfNotNull_(head, this.headComponents_.metaCharset);
