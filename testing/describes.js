@@ -615,7 +615,7 @@ class RealWinFixture {
         resolve();
       };
       iframe.onerror = reject;
-      document.body.appendChild(iframe);
+      document.body.insertBefore(iframe, document.body.firstChild);
     });
   }
 

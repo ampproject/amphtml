@@ -316,10 +316,11 @@ describe('A more real AMPHTML image ad', () => {
   );
 
   // Testing that analytics components use IntersectionObserver properly.
-  describes.realWin(
+  describes.integration(
     'No Host Script within friendly frame or safe frame',
     {
       amp: false,
+      body: '',
     },
     env => {
       let iframe;
