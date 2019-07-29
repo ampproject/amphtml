@@ -50,7 +50,7 @@ const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('../compile-wrappers');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
-const {SRC_TEMP_DIR} = require('../sources');
+const {SRC_TEMP_DIR, TRANSIENT_EXTERN} = require('../sources');
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest =
@@ -115,7 +115,7 @@ exports.getFlags = function(config) {
     module_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
     process_common_js_modules: true,
-    externs: config.externs,
+    externs: [TRANSIENT_EXTERN].concat(config.externs),
     define: config.define,
     // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
     // for a full list of closure's default error / warning levels.

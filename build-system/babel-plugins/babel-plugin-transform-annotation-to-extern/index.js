@@ -47,7 +47,7 @@ module.exports = function(babel) {
   return {
     pre() {
       const {writeToFile = false, emitTypedefs = false} = this.opts;
-      shouldWriteToFile = writeToFile;
+      externDest = writeToFile;
       shouldEmitTypedefs = emitTypedefs;
     },
     visitor: {
@@ -57,10 +57,18 @@ module.exports = function(babel) {
         },
         exit(path) {
           // Write out the transient file that we will feed into CC.
-          if (shouldWriteToFile) {
-            // Stub
-            console /*OK*/
-              .log('Stub');
+          if (externDest) {
+            const typedefs = buildTypedefs(t);
+            const ast = {
+              type: 'Program',
+              body: typedefs,
+            };
+            const {code} = generate(ast);
+            try {
+              fs.appendFileSync(externDest, code);
+            } catch (e) {
+              throw new Error(`failed to append to file in ${externDest}. ${e.message}`);
+            }
           }
 
           // This is done for testing purposes only to output what the

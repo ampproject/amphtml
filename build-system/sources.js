@@ -126,7 +126,7 @@ const CLOSURE_SRC_GLOBS = [
   '!node_modules/core-js/modules/library/**.js',
 ].concat(COMMON_GLOBS);
 
-const TRANSIENT_EXTERN = `${SRC_TEMP_DIR}transient.extern.js`;
+const TRANSIENT_EXTERN = `${SRC_TEMP_DIR}/transient.extern.js`;
 
 module.exports = {
   BABEL_SRC_GLOBS,
