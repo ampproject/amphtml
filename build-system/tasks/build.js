@@ -49,7 +49,8 @@ async function watch() {
 async function build() {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('build');
-  return performBuild().then(() => exitCtrlcHandler(handlerProcess));
+  await performBuild();
+  return exitCtrlcHandler(handlerProcess);
 }
 
 /**

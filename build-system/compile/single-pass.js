@@ -44,7 +44,6 @@ const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
-const {formatExtractedMessages} = require('./log-messages');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
@@ -563,7 +562,6 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
     .then(thirdPartyConcat)
-    .then(formatExtractedMessages)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       throw err;
