@@ -75,6 +75,7 @@ app.use('/compose-doc', function(req, res) {
     head,
     spec,
   });
+  res.cookie('test-cookie', 'test');
   res.send(doc);
 });
 
@@ -143,11 +144,15 @@ app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
   log('SERVER-LOG [WITHDRAW]: ' + key);
   const result = bank[req.params.bid][key];
   if (typeof result === 'function') {
-    return res.status(500).send('another client is withdrawing this ID');
+    return res
+      .status(500)
+      .send(`another client is withdrawing this ID [${key}]`);
   }
   const callback = function(result) {
     if (result === undefined) {
-      res.status(404).end();
+      // This happens when tearDown is called but no request
+      // of given ID has been received yet.
+      res.status(404).send(`Request of given ID not found: [${key}]`);
     } else {
       res.json({
         headers: result.headers,
@@ -185,6 +190,7 @@ app.use('/request-bank/:bid/teardown/', (req, res) => {
  * Serves a fake ad for test-amp-ad-fake.js
  */
 app.get('/a4a/:bid', (req, res) => {
+  cors.enableCors(req, res);
   const {bid} = req.params;
   const body = `
   <a href=https://ampbyexample.com target=_blank>
@@ -210,7 +216,9 @@ app.get('/a4a/:bid', (req, res) => {
             "img": "\${htmlAttr(amp-img,src)}",
             "navTiming": "\${navTiming(requestStart,requestStart)}",
             "navType": "\${navType}",
-            "navRedirectCount": "\${navRedirectCount}"
+            "navRedirectCount": "\${navRedirectCount}",
+            "sourceUrl": "\${sourceUrl}",
+            "cookie": "\${cookie(test-cookie)}"
           }
         }
       }
@@ -224,6 +232,7 @@ app.get('/a4a/:bid', (req, res) => {
     css: 'body { background-color: #f4f4f4; }',
     extensions: ['amp-analytics'],
   });
+  res.cookie('test-cookie', 'test');
   res.send(doc);
 });
 

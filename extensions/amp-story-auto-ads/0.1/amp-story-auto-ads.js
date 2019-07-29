@@ -23,16 +23,21 @@ import {
 } from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {
-  StateChangeEventDef,
-  StateChangeType,
-} from '../../amp-story/1.0/navigation-state';
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+  StateProperty,
+  UIType,
+} from '../../amp-story/1.0/amp-story-store-service';
+import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
+import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
-import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  isJsonScriptTag,
+  openWindowDialog,
+} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
-import {getUniqueId} from './utils';
+import {getA4AMetaTags, getFrameDoc, getUniqueId} from './utils';
 import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
@@ -81,19 +86,28 @@ const TIMEOUT_LIMIT = 10000; // 10 seconds
 /** @const */
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
-/** @const */
-const LOADING_ATTR = 'i-amphtml-loading';
+/** @enum {string} */
+export const Attributes = {
+  AD_SHOWING: 'ad-showing',
+  DESKTOP_PANELS: 'desktop-panels',
+  DIR: 'dir',
+  IFRAME_BODY_VISIBLE: 'amp-story-visible',
+  LOADING: 'i-amphtml-loading',
+  NEXT_PAGE_NO_AD: 'next-page-no-ad',
+};
 
-/** @const {string} */
-const NEXT_PAGE_NO_AD = 'next-page-no-ad';
-
-/** @const {string} */
-const IFRAME_BODY_VISIBLE_ATTR = 'amp-story-visible';
-
-/** @const */
-const DATA_ATTR = {
+/** @enum {string} */
+const DataAttrs = {
   CTA_TYPE: 'data-vars-ctatype',
   CTA_URL: 'data-vars-ctaurl',
+};
+
+/** @enum {string} */
+const A4AVarNames = {
+  ATTRIBUTION_ICON: 'attribution-icon',
+  ATTRIBUTION_URL: 'attribution-url',
+  CTA_TYPE: 'cta-type',
+  CTA_URL: 'cta-url',
 };
 
 /** @const */
@@ -188,11 +202,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private */
+    this.doc_ = this.win.document;
+
     /** @private {?../../amp-story/1.0/amp-story.AmpStory} */
     this.ampStory_ = null;
-
-    /** @private {?../../amp-story/1.0/navigation-state.NavigationState} */
-    this.navigationState_ = null;
 
     /** @private {number} */
     this.uniquePagesCount_ = 0;
@@ -214,6 +228,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.lastCreatedAdElement_ = null;
+
+    /** @private */
+    this.lastCreatedAdImpl_ = null;
 
     /** @private {?Element}} */
     this.visibleAdBody_ = null;
@@ -238,6 +255,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.pendingAdView_ = false;
+
+    /** @private {?Element} */
+    this.adBadgeContainer_ = null;
 
     /**
      * Version of the story store service depends on which version of amp-story
@@ -320,17 +340,26 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    this.navigationState_ = this.ampStory_.getNavigationState();
-    this.navigationState_.observe(this.handleStateChange_.bind(this));
-
     return this.ampStory_
       .signals()
       .whenSignal(CommonSignals.INI_LOAD)
       .then(() => {
         this.createAdOverlay_();
+        this.initializeListeners_();
         this.readConfig_();
         this.schedulePage_();
       });
+  }
+
+  /**
+   * Force this extension to behave as if ad is about to be shown.
+   * Used for testing but should be extended to force an ad to show in a real story.
+   * @param {string} pageBeforeAdId
+   * @visibleForTesting
+   */
+  forceRender(pageBeforeAdId) {
+    this.isCurrentAdLoaded_ = true;
+    this.tryToPlaceAdAfterPage_(pageBeforeAdId);
   }
 
   /**
@@ -341,6 +370,96 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   isAutomaticAdInsertionAllowed_() {
     return !!this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
+  }
+
+  /**
+   * Subscribes to all relevant state changes from the containing story.
+   * @private
+   */
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
+      this.onAdStateUpdate_(isAd);
+    });
+
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      rtlState => {
+        this.onRtlStateUpdate_(rtlState);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      uiState => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
+      const pageIndex = this.storeService_.get(
+        StateProperty.CURRENT_PAGE_INDEX
+      );
+
+      this.handleActivePageChange_(
+        dev().assertNumber(pageIndex),
+        dev().assertString(pageId)
+      );
+    });
+  }
+
+  /**
+   * Reacts to the ad state updates and passes the information along as
+   * attributes to the shadowed ad badge.
+   * @param {boolean} isAd
+   */
+  onAdStateUpdate_(isAd) {
+    this.mutateElement(() => {
+      isAd
+        ? this.adBadgeContainer_.setAttribute(Attributes.AD_SHOWING, '')
+        : this.adBadgeContainer_.removeAttribute(Attributes.AD_SHOWING);
+    });
+  }
+
+  /**
+   * Reacts to the rtl state updates and passes the information along as
+   * attributes to the shadowed ad badge.
+   * @param {boolean} rtlState
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.mutateElement(() => {
+      rtlState
+        ? this.adBadgeContainer_.setAttribute(Attributes.DIR, 'rtl')
+        : this.adBadgeContainer_.removeAttribute(Attributes.DIR);
+    });
+  }
+
+  /**
+   * Reacts to UI state updates and passes the information along as
+   * attributes to the shadowed ad badge.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    this.mutateElement(() => {
+      const {DESKTOP_PANELS} = Attributes;
+      const root = this.adBadgeContainer_;
+
+      root.removeAttribute(DESKTOP_PANELS);
+
+      if (uiState === UIType.DESKTOP_PANELS) {
+        root.setAttribute(DESKTOP_PANELS, '');
+      }
+    });
+  }
+
+  /**
+   * @visibleForTesting
+   * @return {Element}
+   */
+  getAdBadgeRoot() {
+    return this.adBadgeContainer_;
   }
 
   /**
@@ -364,15 +483,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdOverlay_() {
-    const container = this.win.document.createElement('aside');
-    container.className = 'i-amphtml-ad-overlay-container';
+    const root = this.doc_.createElement('div');
 
-    const span = this.win.document.createElement('p');
-    span.className = 'i-amphtml-story-ad-attribution';
-    span.textContent = 'Ad';
+    this.adBadgeContainer_ = this.doc_.createElement('aside');
+    this.adBadgeContainer_.className = 'i-amphtml-ad-overlay-container';
 
-    createShadowRootWithStyle(container, span, attributionCSS);
-    this.ampStory_.element.appendChild(container);
+    const badge = this.doc_.createElement('p');
+    badge.className = 'i-amphtml-story-ad-badge';
+    badge.textContent = 'Ad';
+
+    this.adBadgeContainer_.appendChild(badge);
+    createShadowRootWithStyle(root, this.adBadgeContainer_, adBadgeCSS);
+    this.ampStory_.element.appendChild(root);
   }
 
   /**
@@ -421,10 +543,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const ampStoryAdPage = this.createPageElement_();
     const ampAd = this.createAdElement_();
 
-    const glassPane = this.win.document.createElement('div');
+    const glassPane = this.doc_.createElement('div');
     glassPane.classList.add(GLASS_PANE_CLASS);
 
-    const gridLayer = this.win.document.createElement('amp-story-grid-layer');
+    const gridLayer = this.doc_.createElement('amp-story-grid-layer');
     gridLayer.setAttribute('template', 'fill');
 
     const paneGridLayer = gridLayer.cloneNode(false);
@@ -440,8 +562,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // set up listener for ad-loaded event
     ampAd
       .getImpl()
-      .then(impl => {
-        const signals = impl.signals();
+      .then(adImpl => {
+        this.lastCreatedAdImpl_ = adImpl;
+        const signals = adImpl.signals();
+        // TODO(ccordry): Investigate using a better signal waiting for video loads.
         return signals.whenSignal(CommonSignals.INI_LOAD);
       })
       .then(() => {
@@ -453,7 +577,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         // remove loading attribute once loaded so that desktop CSS will position
         // offscren with all other pages
         const currentPageEl = this.adPageEls_[this.adPageEls_.length - 1];
-        currentPageEl.removeAttribute(LOADING_ATTR);
+        currentPageEl.removeAttribute(Attributes.LOADING);
 
         this.analyticsEventWithCurrentAd_(Events.AD_LOADED, {
           [Vars.AD_LOADED]: Date.now(),
@@ -489,11 +613,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       'i-amphtml-loading': '',
     });
 
-    return createElementWithAttributes(
-      this.win.document,
-      'amp-story-page',
-      attributes
-    );
+    return createElementWithAttributes(this.doc_, 'amp-story-page', attributes);
   }
 
   /**
@@ -541,17 +661,22 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       requiredAttrs
     ));
 
-    return createElementWithAttributes(this.win.document, 'amp-ad', attributes);
+    return createElementWithAttributes(this.doc_, 'amp-ad', attributes);
   }
 
   /**
    * Validate ad-server response has requirements to build outlink
    * @param {!Element} adPageElement
+   * @param {!Object} a4aVars
    */
-  maybeCreateCtaLayer_(adPageElement) {
+  maybeCreateCtaLayer_(adPageElement, a4aVars) {
     // if making a CTA layer we need a button name & outlink url
-    const ctaUrl = this.lastCreatedAdElement_.getAttribute(DATA_ATTR.CTA_URL);
-    const ctaType = this.lastCreatedAdElement_.getAttribute(DATA_ATTR.CTA_TYPE);
+    const ctaUrl =
+      a4aVars[A4AVarNames.CTA_URL] ||
+      this.lastCreatedAdElement_.getAttribute(DataAttrs.CTA_URL);
+    const ctaType =
+      a4aVars[A4AVarNames.CTA_TYPE] ||
+      this.lastCreatedAdElement_.getAttribute(DataAttrs.CTA_TYPE);
 
     if (!ctaUrl || !ctaType) {
       user().error(
@@ -584,7 +709,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @return {boolean}
    */
   createCtaLayer_(adPageElement, ctaText, ctaUrl) {
-    const a = this.win.document.createElement('a');
+    // TODO(ccordry): Move button to shadow root.
+    const a = this.doc_.createElement('a');
     a.className = 'i-amphtml-story-ad-link';
     a.setAttribute('target', '_blank');
     setStyles(a, {
@@ -611,26 +737,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.analyticsEvent_(Events.AD_CLICKED, vars);
     });
 
-    const ctaLayer = this.win.document.createElement('amp-story-cta-layer');
+    const ctaLayer = this.doc_.createElement('amp-story-cta-layer');
     ctaLayer.appendChild(a);
     adPageElement.appendChild(ctaLayer);
     return true;
-  }
-
-  /**
-   * @param {!StateChangeEventDef} stateChangeEvent
-   * @private
-   */
-  handleStateChange_(stateChangeEvent) {
-    switch (stateChangeEvent.type) {
-      case StateChangeType.ACTIVE_PAGE:
-        const {pageIndex, pageId} = stateChangeEvent.value;
-        this.handleActivePageChange_(
-          dev().assertNumber(pageIndex),
-          dev().assertString(pageId)
-        );
-        break;
-    }
   }
 
   /**
@@ -713,12 +823,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {Element} adElement
    */
   setVisibleAttribute_(adElement) {
-    const friendlyIframeEmbed = adElement.querySelector('iframe');
-    const frameDoc =
-      friendlyIframeEmbed.contentDocument || friendlyIframeEmbed.win.document;
+    const friendlyIframeEmbed = /** @type {HTMLIFrameElement} */ (adElement.querySelector(
+      'iframe'
+    ));
+    // TODO(calebcordry): Properly handle visible trigger for custom ads.
+    if (!friendlyIframeEmbed) {
+      return;
+    }
+
+    const frameDoc = getFrameDoc(friendlyIframeEmbed);
     const {body} = frameDoc;
     this.mutateElement(() => {
-      body.setAttribute(IFRAME_BODY_VISIBLE_ATTR, '');
+      body.setAttribute(Attributes.IFRAME_BODY_VISIBLE, '');
       this.visibleAdBody_ = body;
     });
   }
@@ -729,7 +845,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   removeVisibleAttribute_() {
     this.mutateElement(() => {
       if (this.visibleAdBody_) {
-        this.visibleAdBody_.removeAttribute(IFRAME_BODY_VISIBLE_ATTR);
+        this.visibleAdBody_.removeAttribute(Attributes.IFRAME_BODY_VISIBLE);
         this.visibleAdBody_ = null;
       }
     });
@@ -824,13 +940,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.PENDING;
     }
 
+    const a4aVars = this.extractA4AVars_();
+
     const ctaCreated = this.maybeCreateCtaLayer_(
-      dev().assertElement(nextAdPageEl)
+      dev().assertElement(nextAdPageEl),
+      a4aVars
     );
     if (!ctaCreated) {
       // failed on ad-server response format
       return AD_STATE.FAILED;
     }
+
+    this.maybeCreateAttribution_(nextAdPageEl, a4aVars);
 
     this.ampStory_.insertPage(pageBeforeAdId, nextAdPageEl.id);
 
@@ -841,6 +962,81 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.analyticsData_[adIndex][Vars.POSITION] = pageNumber + 1;
 
     return AD_STATE.INSERTED;
+  }
+
+  /**
+   * Find all `amp4ads-vars-` prefixed meta tags and return all kv pairs
+   * in a single object.
+   * @private
+   * @return {!Object}
+   */
+  extractA4AVars_() {
+    const {iframe} = this.lastCreatedAdImpl_;
+    const iframeDoc = getFrameDoc(iframe);
+    const tags = getA4AMetaTags(iframeDoc);
+    const vars = {};
+    tags.forEach(tag => {
+      const name = tag.name.split('amp4ads-vars-')[1];
+      const {content} = tag;
+      vars[name] = content;
+    });
+    return vars;
+  }
+
+  /**
+   * @param {Element} adPageElement
+   * @param {!Object} a4aVars
+   */
+  maybeCreateAttribution_(adPageElement, a4aVars) {
+    const href = a4aVars[A4AVarNames.ATTRIBUTION_URL];
+    const src = a4aVars[A4AVarNames.ATTRIBUTION_ICON];
+
+    // Ad attribution is optional, but need both to render.
+    if (!href && !src) {
+      return;
+    }
+
+    if (!href || !src) {
+      user().warn(TAG, 'Both icon and URL must be supplied for Ad Choices.');
+      return;
+    }
+
+    assertHttpsUrl(href, this.element);
+    assertHttpsUrl(src, this.element);
+
+    const root = createElementWithAttributes(
+      this.doc_,
+      'div',
+      dict({
+        'role': 'button',
+      })
+    );
+
+    const adChoicesIcon = createElementWithAttributes(
+      this.doc_,
+      'img',
+      dict({
+        'class': 'i-amphtml-story-ad-attribution',
+        'src': src,
+      })
+    );
+
+    adChoicesIcon.addEventListener(
+      'click',
+      this.handleAttributionClick_.bind(this, href)
+    );
+
+    createShadowRootWithStyle(root, adChoicesIcon, attributionCSS);
+    adPageElement.appendChild(root);
+  }
+
+  /**
+   * @private
+   * @param {string} href
+   * @param {!Event} unusedEvent
+   */
+  handleAttributionClick_(href, unusedEvent) {
+    openWindowDialog(this.win, href, '_blank');
   }
 
   /**
@@ -867,7 +1063,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   nextPageNoAd_(page) {
-    return page.element.hasAttribute(NEXT_PAGE_NO_AD);
+    return page.element.hasAttribute(Attributes.NEXT_PAGE_NO_AD);
   }
 
   /**

@@ -27,6 +27,7 @@ const {
 const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 const {serve} = require('./serve');
@@ -61,16 +62,23 @@ async function performBuild(watch) {
   printNobuildHelp();
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
   parseExtensionFlags();
-  return compileCss(watch).then(() => {
-    return Promise.all([
-      polyfillsForTests(),
-      buildAlp({watch}),
-      buildExaminer({watch}),
-      buildWebWorker({watch}),
-      buildExtensions({watch}),
-      compileAllUnminifiedTargets(watch),
-    ]);
-  });
+  return compileCss(watch)
+    .then(() => {
+      return Promise.all([
+        polyfillsForTests(),
+        buildAlp({watch}),
+        buildExaminer({watch}),
+        buildWebWorker({watch}),
+        buildExtensions({watch}),
+        compileAllUnminifiedTargets(watch),
+      ]);
+    })
+    .then(() => {
+      if (isTravisBuild()) {
+        // New line after all the compilation progress dots on Travis.
+        console.log('\n');
+      }
+    });
 }
 
 /**
@@ -105,7 +113,6 @@ build.flags = {
 watch.description = 'Watches for changes in files, re-builds when detected';
 watch.flags = {
   with_inabox: '  Also watch and build the amp-inabox.js binary.',
-  with_inabox_lite: '  Also watch and build the amp-inabox-lite.js binary.',
   with_shadow: '  Also watch and build the amp-shadow.js binary.',
   with_video_iframe_integration:
     '  Also watch and build the video-iframe-integration.js binary.',
@@ -118,7 +125,6 @@ watch.flags = {
 defaultTask.description = 'Runs "watch" and then "serve"';
 defaultTask.flags = {
   with_inabox: '  Also watch and build the amp-inabox.js binary.',
-  with_inabox_lite: '  Also watch and build the amp-inabox-lite.js binary.',
   with_shadow: '  Also watch and build the amp-shadow.js binary.',
   with_video_iframe_integration:
     '  Also watch and build the video-iframe-integration.js binary.',

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {adoptServiceForEmbedDoc} from '../service';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
@@ -76,19 +77,40 @@ export function installRuntimeServices(global) {
  * @restricted
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
-  // Order is important!
+  const isEmbedded = !!ampdoc.getParent();
+
+  // When making changes to this method:
+  // 1. Order is important!
+  // 2. Consider to install same services to amp-inabox.js
   installUrlForDoc(ampdoc);
-  installCidService(ampdoc);
-  installDocumentInfoServiceForDoc(ampdoc);
-  installViewerServiceForDoc(ampdoc, opt_initParams);
-  installViewportServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'documentInfo')
+    : installDocumentInfoServiceForDoc(ampdoc);
+  // those services are installed in amp-inabox.js
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'cid')
+    : installCidService(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'viewer')
+    : installViewerServiceForDoc(ampdoc, opt_initParams);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'viewport')
+    : installViewportServiceForDoc(ampdoc);
   installHiddenObserverForDoc(ampdoc);
-  installHistoryServiceForDoc(ampdoc);
-  installResourcesServiceForDoc(ampdoc);
-  installUrlReplacementsServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'history')
+    : installHistoryServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'resources')
+    : installResourcesServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
+    : installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
-  installStorageServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'storage')
+    : installStorageServiceForDoc(ampdoc);
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }

@@ -52,7 +52,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     installVsyncService(win);
     installDocService(win, /* isSingleDoc */ true);
     installGlobalDocumentStateService(win);
-    ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
     binding = new ViewportBindingNatural_(ampdoc, viewer);
     binding.connect();
   });

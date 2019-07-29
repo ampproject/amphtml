@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable amphtml-internal/html-template */
+/* eslint-disable local/html-template */
 
 const {html} = require('./html');
 

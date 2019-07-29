@@ -845,7 +845,7 @@ app.use('/a4a(|-3p)/', (req, res) => {
 // Examples:
 // http://localhost:8000/inabox/examples/animations.amp.html
 // http://localhost:8000/inabox/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/inabox/:version/', (req, res) => {
+app.use('/inabox/', (req, res) => {
   let adUrl = req.url;
   const templatePath = '/build-system/server-inabox-template.html';
   const urlPrefix = getUrlPrefix(req);
@@ -857,7 +857,7 @@ app.use('/inabox/:version/', (req, res) => {
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
   }
-  adUrl = addQueryParam(adUrl, 'inabox', req.params['version']);
+  adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
     const result = template
       .replace(/AD_URL/g, adUrl)
@@ -1320,7 +1320,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  // eslint-disable-next-line amphtml-internal/no-es2015-number-props
+  // eslint-disable-next-line local/no-es2015-number-props
   if (Number.isInteger(ampJsVersion)) {
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js

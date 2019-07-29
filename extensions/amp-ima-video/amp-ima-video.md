@@ -35,12 +35,12 @@ the
     <td><code>&lt;script async custom-element="amp-ima-video" src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fixed, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-ima-video/">amp-ima-video example</a>.</td></td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-ima-video/">amp-ima-video example</a>.</td></td>
   </tr>
 </table>
 
@@ -111,7 +111,7 @@ default, the first frame is displayed.</td>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes
-<a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a>
+<a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a>
 extended to AMP components.</td>
   </tr>
 </table>

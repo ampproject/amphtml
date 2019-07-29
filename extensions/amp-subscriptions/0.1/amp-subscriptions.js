@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  ActionStatus,
+  SubscriptionAnalytics,
+  SubscriptionAnalyticsEvents,
+} from './analytics';
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
@@ -27,7 +32,6 @@ import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {Services} from '../../../src/services';
-import {SubscriptionAnalytics, SubscriptionAnalyticsEvents} from './analytics';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
@@ -103,10 +107,21 @@ export class SubscriptionService {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(ampdoc.win);
 
-    /** @private @const {boolean} */
+    /**
+     * @private @const {boolean}
+     * View substitutes for other services and handles auth. Usually an app
+     * with a webview.
+     */
     this.doesViewerProvideAuth_ = this.viewer_.hasCapability('auth');
 
-    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
+    /**
+     * @private @const {boolean}
+     * Viewer also does paywall/metering so on page "local" paywall is not shown.
+     */
+    this.doesViewerProvidePaywall_ =
+      this.doesViewerProvideAuth_ && this.viewer_.hasCapability('paywall');
+
+    /** @private @const {!Promise<!../../../src/service/cid-impl.CidDef>} */
     this.cid_ = Services.cidForDoc(ampdoc);
 
     /** @private {!Object<string, ?Promise<string>>} */
@@ -224,7 +239,14 @@ export class SubscriptionService {
    */
   processGrantState_(grantState) {
     this.renderer_.toggleLoading(false);
-    this.renderer_.setGrantState(grantState);
+    /*
+     * If the viewer is providing a paywall we don't want the publisher
+     * paywall to render in the case of no grant so we leave the page
+     * in the original "unknown" state.
+     */
+    if (grantState || !this.doesViewerProvidePaywall_) {
+      this.renderer_.setGrantState(grantState);
+    }
     this.viewTrackerPromise_ = this.viewerTracker_.scheduleView(2000);
     if (grantState === false) {
       // TODO(@prateekbh): Show UI that no eligible entitlement found
@@ -592,6 +614,10 @@ export class SubscriptionService {
           dict({
             'action': action,
             'serviceId': serviceId,
+          }),
+          dict({
+            'action': action,
+            'status': ActionStatus.STARTED,
           })
         );
         resolve(platform.executeAction(action));

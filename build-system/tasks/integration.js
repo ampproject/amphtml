@@ -18,15 +18,13 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {
   maybePrintArgvMessages,
-  refreshKarmaWdCache,
   shouldNotRun,
 } = require('./runtime-test/helpers');
 const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {clean} = require('./clean');
-const {dist} = require('./dist');
+const {execOrDie} = require('../exec');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -38,10 +36,8 @@ class Runner extends RuntimeTestRunner {
     if (argv.nobuild) {
       return;
     }
-    argv.fortesting = true;
-    argv.compiled = true;
-    await clean();
-    await dist();
+    execOrDie('gulp clean');
+    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
   }
 }
 
@@ -51,7 +47,6 @@ async function integration() {
   }
 
   maybePrintArgvMessages();
-  refreshKarmaWdCache();
 
   const config = new RuntimeTestConfig('integration');
   const runner = new Runner(config);
@@ -71,6 +66,8 @@ integration.flags = {
   'chrome_flags': '  Uses the given flags to launch Chrome',
   'compiled':
     '  Changes integration tests to use production JS binaries for execution',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'coverage': '  Run tests in code coverage mode',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
