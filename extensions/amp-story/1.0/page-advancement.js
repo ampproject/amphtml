@@ -615,6 +615,7 @@ class ManualAdvancement extends AdvancementConfig {
    * individual section has been previously defined depending on the language
    * settings.
    * @param {!Object} page
+   * @return {number}
    * @private
    */
   getTapDirection_(page) {

@@ -83,6 +83,7 @@ export class LinkerManager {
    * and register the callback with the navigation service. Since macro
    * resolution is asynchronous the callback may be looking for these values
    * before they are ready.
+   * @return {*} TODO(#23582): Specify return type
    */
   init() {
     if (!isObject(this.config_)) {
@@ -320,6 +321,7 @@ export class LinkerManager {
    * @param {string} url
    * @param {string} name Name given in linker config.
    * @param {?Array} domains
+   * @return {*} TODO(#23582): Specify return type
    */
   isDomainMatch_(url, name, domains) {
     const {hostname} = this.urlService_.parse(url);
@@ -434,6 +436,7 @@ export class LinkerManager {
    * @param {!Element} form
    * @param {function(string)} actionXhrMutator
    * @param {string} linkerName
+   * @return {*} TODO(#23582): Specify return type
    */
   addDataToForm_(form, actionXhrMutator, linkerName) {
     const ids = this.resolvedIds_[linkerName];
@@ -511,6 +514,7 @@ function getBaseDomain(domain) {
 /**
  * Escape any regex flags other than `*`
  * @param {string} str
+ * @return {*} TODO(#23582): Specify return type
  */
 function regexEscape(str) {
   return str.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');
