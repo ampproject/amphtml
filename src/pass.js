@@ -49,7 +49,7 @@ export class Pass {
 
     /**
      * @private
-     * @const {!Function}
+     * @const {function()}
      */
     this.boundPass_ = () => {
       this.pass_();

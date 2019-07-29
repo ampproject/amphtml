@@ -155,7 +155,7 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {Function|undefined}
+   * @return {function()|undefined}
    */
   listenGltfViewerMessages_() {
     if (!this.iframe_) {

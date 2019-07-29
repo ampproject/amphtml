@@ -628,21 +628,18 @@ export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const ampdoc = a4a.getAmpDoc();
   const viewer = Services.viewerForDoc(ampdoc);
   const navStart = getNavigationTiming(win, 'navigationStart');
-  const vars = Object.assign(
-    {},
-    {
-      'correlator': getCorrelator(win, ampdoc),
-      'slotId': a4a.element.getAttribute('data-amp-slot-index'),
-      'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
-    }
-  );
+  const vars = /** @type {!JsonObject} */ ({
+    'correlator': getCorrelator(win, ampdoc),
+    'slotId': a4a.element.getAttribute('data-amp-slot-index'),
+    'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
+  });
   if (qqid) {
     vars['qqid'] = qqid;
   }
   if (analyticsTrigger == 'ad-render-start') {
     vars['scheduleTime'] = a4a.element.layoutScheduleTime - navStart;
   }
-  return /** @type {!JsonObject} */ (vars);
+  return vars;
 }
 
 /**

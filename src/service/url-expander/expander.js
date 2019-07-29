@@ -292,7 +292,7 @@ export class Expander {
    *    the FOO binding opt_args will be [[Result of BAR, Result of BAR], [123]].
    *    This structure is so that the outer array will have the correct number of
    *    arguments, but we still can resolve each macro separately.
-   * @return {*} TODO: Specify return type
+   * @return {string|!Promise<string>}
    */
   evaluateBinding_(bindingInfo, opt_args) {
     const {encode, name} = bindingInfo;

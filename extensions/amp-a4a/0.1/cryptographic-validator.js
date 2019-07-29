@@ -29,7 +29,7 @@ const TAG = 'amp-ad-cryptographic-validator';
 export class CryptographicValidator extends Validator {
   /**
    * @param {!Window} win
-   * @return {*} TODO: Specify return type
+   * @return {!SignatureVerifier}
    */
   getSignatureVerifier_(win) {
     // TODO(levitzky) extract this into a service registered to ampdoc.

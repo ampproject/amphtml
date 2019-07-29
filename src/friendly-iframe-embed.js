@@ -347,7 +347,7 @@ function mergeHtml(spec) {
 /**
  * Exposes `mergeHtml` for testing purposes.
  * @param {!FriendlyIframeSpec} spec
- * @return {*} TODO: Specify return type
+ * @return {string}
  * @visibleForTesting
  */
 export function mergeHtmlForTesting(spec) {

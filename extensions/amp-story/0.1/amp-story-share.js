@@ -276,7 +276,7 @@ export class ShareWidget {
         const failureString = localizationService.getLocalizedString(
           LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
         );
-        Toast.show(this.win, failureString);
+        Toast.show(this.win, dev().assertString(failureString));
       });
       return;
     }

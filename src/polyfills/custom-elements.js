@@ -783,7 +783,7 @@ function polyfill(win) {
 function wrapHTMLElement(win) {
   const {HTMLElement, Reflect, Object} = win;
   /**
-   * @return {*} TODO: Specify return type
+   * @return {!Element}
    */
   function HTMLElementWrapper() {
     const ctor = /** @type {function(...?):?|undefined} */ (this.constructor);

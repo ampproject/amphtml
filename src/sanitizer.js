@@ -276,7 +276,7 @@ export function sanitizeTagsForTripleMustache(html) {
  * Tag policy for handling what is valid html in templates.
  * @param {string} tagName
  * @param {!Array<string>} attribs
- * @return {*} TODO: Specify return type
+ * @return {?{tagName: string, attribs: !Array<string>}}
  */
 function tripleMustacheTagPolicy(tagName, attribs) {
   if (tagName == 'template') {

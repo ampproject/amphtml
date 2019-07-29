@@ -1086,7 +1086,7 @@ export class BaseElement {
   /**
    * Declares a child element (or ourselves) as a Layer
    * @param {!Element=} opt_element
-   * @return {*} TODO: Specify return type
+   * @return {undefined}
    */
   declareLayer(opt_element) {
     devAssert(

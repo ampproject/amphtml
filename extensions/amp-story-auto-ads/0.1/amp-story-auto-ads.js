@@ -700,7 +700,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return false;
     }
 
-    return this.createCtaLayer_(adPageElement, ctaText, ctaUrl);
+    return this.createCtaLayer_(
+      adPageElement,
+      dev().assertString(ctaText),
+      ctaUrl
+    );
   }
 
   /**

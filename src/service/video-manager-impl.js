@@ -103,7 +103,7 @@ export class VideoManager {
     /**
      * @private
      * @const
-     * @return {*} TODO: Specify return type
+     * @return {undefined}
      */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 

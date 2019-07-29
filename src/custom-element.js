@@ -1869,7 +1869,7 @@ function createBaseCustomElementClass(win) {
 
 /**
  * @param {!Element} element
- * @return {*} TODO: Specify return type
+ * @return {boolean}
  */
 function isInputPlaceholder(element) {
   return 'placeholder' in element;

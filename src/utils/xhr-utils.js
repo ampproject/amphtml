@@ -363,7 +363,7 @@ function normalizeMethod_(method) {
 /**
  * If 415 or in the 5xx range.
  * @param {number} status
- * @return {*} TODO: Specify return type
+ * @return {boolean}
  */
 function isRetriable(status) {
   return status == 415 || (status >= 500 && status < 600);

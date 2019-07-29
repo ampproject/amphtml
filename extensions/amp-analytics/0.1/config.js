@@ -467,7 +467,7 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
 /**
  * Expand config's request to object
  * @param {!JsonObject} config
- * @return {?Object}
+ * @return {?JsonObject}
  * @visibleForTesting
  */
 export function expandConfigRequest(config) {

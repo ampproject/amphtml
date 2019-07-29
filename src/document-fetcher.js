@@ -59,7 +59,7 @@ export function fetchDocument(win, input, opt_init) {
  *
  * @param {string} input
  * @param {!FetchInitDef} init
- * @return {*} TODO: Specify return type
+ * @return {!Promise<!{response: !Response, xhr: !XMLHttpRequest}>}
  * @private
  */
 function xhrRequest(input, init) {
