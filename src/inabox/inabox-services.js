@@ -22,6 +22,8 @@ import {installHiddenObserverForDoc} from '../service/hidden-observer-impl';
 import {installHistoryServiceForDoc} from '../service/history-impl';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
 import {installInaboxCidService} from './inabox-cid';
+import {installInaboxOwnersServiceForDoc} from './inabox-owners';
+import {installInaboxResourcesServiceForDoc} from './inabox-resources';
 import {installInaboxViewportService} from './inabox-viewport';
 import {
   installOwnersServiceForDoc,
@@ -32,6 +34,8 @@ import {installUrlForDoc} from '../service/url-impl';
 import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {rejectServicePromiseForDoc} from '../service';
+
+const INABOX_LITE_RESOURCES = true;
 
 /**
  * Install ampdoc-level services.
@@ -47,8 +51,13 @@ export function installAmpdocServicesForInabox(ampdoc) {
   installInaboxViewportService(ampdoc);
   installHiddenObserverForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
-  installResourcesServiceForDoc(ampdoc);
-  installOwnersServiceForDoc(ampdoc);
+  if (INABOX_LITE_RESOURCES) {
+    installInaboxResourcesServiceForDoc(ampdoc);
+    installInaboxOwnersServiceForDoc(ampdoc);
+  } else {
+    installResourcesServiceForDoc(ampdoc);
+    installOwnersServiceForDoc(ampdoc);
+  }
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
