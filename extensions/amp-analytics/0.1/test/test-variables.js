@@ -456,36 +456,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
   });
 
-  // describes.realWin(
-  //   'FIE testing',
-  //   {
-  //     amp: {ampdoc: 'fie'},
-  //   },
-  //   env => {
-  //     let win;
-  //     let doc;
-  //     let variables;
-
-  //     beforeEach(() => {
-  //       win = env.win;
-  //       doc = win.doc;
-  //       installLinkerReaderService(win);
-  //       variables = new VariableService(env.ampdoc);
-  //     });
-
-  //     it('does not resolve cookie when inabox', async () => {
-  //       win.AMP_MODE.runtime = 'inabox';
-  //       win.location =
-  //         'https://beta-washingtonpost-com.cdn.ampproject.org/v/s/' +
-  //         'beta.washingtonpost.com/politics/2019/07/29/' +
-  //         'bidens-electability-numbers-are-up-therefore-so-are-his-poll-numbers/';
-  //       doc.cookie = 'test=123';
-  //       await check('COOKIE(test)', '123');
-  //       doc.cookie = '';
-  //     });
-  //   }
-  // );
-
   describe('getNameArgs:', () => {
     function check(input, name, argList) {
       it('can parse ' + name, () => {
