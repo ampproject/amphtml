@@ -574,16 +574,7 @@ export class AmpForm {
     this.setState_(FormState.SUBMITTING);
 
     //Promised to run before all async calls ; require extended timeout
-    const increasedPresubmitPromises = [];
-    iterateCursor(asyncInputs, asyncInput => {
-      if (
-        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
-      ) {
-        increasedPresubmitPromises.push(
-          this.getValueForAsyncInput_(asyncInput)
-        );
-      }
-    });
+    const requiredActionPromises = [];
 
     // Promises to run before submitting the form
     const presubmitPromises = [];
@@ -593,20 +584,20 @@ export class AmpForm {
         !asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
       ) {
         presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+      }else{
+        requiredActionPromises.push(this.getValueForAsyncInput_(asyncInput));
       }
     });
 
-    const t = this;
-
-    return t.doPresubmit(
-      increasedPresubmitPromises,
+    return this.doPresubmit(
+      requiredActionPromises,
       SUBMIT_TIMEOUT_TYPE.INCREASED,
-      function() {
-        return t.doPresubmit(
+      () => {
+        return this.doPresubmit(
           presubmitPromises,
           SUBMIT_TIMEOUT_TYPE.REGULAR,
-          function() {
-            return t.handlePresubmitSuccess_(trust);
+          () => {
+            return this.handlePresubmitSuccess_(trust);
           }
         );
       }
