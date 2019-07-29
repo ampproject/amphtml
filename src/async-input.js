@@ -58,12 +58,6 @@ export const AsyncInputAttributes = {
   NAME: 'name',
 };
 
-export const SUBMIT_TIMEOUT_TYPE = Object.freeze({
-  REGULAR: 10000,
-  /* 5 minutes */
-  INCREASED: 300000,
-});
-
 /**
  * Classes
  *

@@ -20,7 +20,6 @@ import {AmpFormTextarea} from './amp-form-textarea';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
-  SUBMIT_TIMEOUT_TYPE,
 } from '../../../src/async-input';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
@@ -94,6 +93,13 @@ const UserValidityState = {
 
 /** @private @const {string} */
 const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
+
+/**
+ * Time to wait for services / async input before throwing an error.
+ * @private @const {number}
+ */
+
+const SUBMIT_TIMEOUT = 10000;
 
 export class AmpForm {
   /**
@@ -574,8 +580,7 @@ export class AmpForm {
     this.setState_(FormState.SUBMITTING);
 
     //Promised to run before all async calls ; require extended timeout
-    const requiredActionPromises = [];
-
+    const requiredActionPromises = [Promise.resolve()];
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
@@ -584,35 +589,26 @@ export class AmpForm {
         !asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
       ) {
         presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
-      }else{
+      } else {
         requiredActionPromises.push(this.getValueForAsyncInput_(asyncInput));
       }
     });
 
-    return this.doPresubmit(
-      requiredActionPromises,
-      SUBMIT_TIMEOUT_TYPE.INCREASED,
+    return Promise.race(Promise.all(requiredActionPromises)).then(
       () => {
-        return this.doPresubmit(
-          presubmitPromises,
-          SUBMIT_TIMEOUT_TYPE.REGULAR,
+        this.waitOnPromisesOrTimeout_(presubmitPromises, SUBMIT_TIMEOUT).then(
           () => {
             return this.handlePresubmitSuccess_(trust);
+          },
+          error => {
+            const detail = dict();
+            if (error && error.message) {
+              detail['error'] = error.message;
+            }
+            return this.handleSubmitFailure_(error, detail);
           }
         );
-      }
-    );
-  }
-
-  /**
-   * Run the presubmit promises before the form submit
-   * @param {Promise[]} promises
-   * @param {number} timeout
-   * @param {function} callback
-   */
-  doPresubmit(promises, timeout, callback) {
-    return this.waitOnPromisesOrTimeout_(promises, timeout).then(
-      callback,
+      },
       error => {
         const detail = dict();
         if (error && error.message) {
