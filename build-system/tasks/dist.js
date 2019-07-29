@@ -153,6 +153,7 @@ async function dist() {
 
   await stopNailgunServer(distNailgunPort);
   await copyAliasExtensions();
+  await formatExtractedMessages();
 
   if (argv.esm) {
     await Promise.all([
@@ -161,8 +162,6 @@ async function dist() {
       createModuleCompatibleES5Bundle('shadow-v0.js'),
     ]);
   }
-
-  await formatExtractedMessages();
 
   return exitCtrlcHandler(handlerProcess);
 }
