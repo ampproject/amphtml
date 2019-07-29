@@ -115,7 +115,7 @@ up all arriving AMP messages into a global array.
 1. Once host script is fully loaded, ads tag can then hand over the job to
 it to process the queued messages and listen for future messages.
 
-A sample implementation of the above process can be found [here](../../examples/inabox-tag-integration.js).
+A sample implementation of the above process can be found [here](../../examples/amphtml-ads/ads-tag-integration.js).
 
 ## Mobile SDK integration
 (Working in progress, stay tuned)
