@@ -59,14 +59,14 @@ export class AmpAdMetadataTransformer {
     this.generateJsonMetadata_(doc);
 
     // Creating json object from all of the components
-    const creative = doc.documentElement./*REVIEW*/ outerHTML;
+    const creative = doc.documentElement./*OK*/ outerHTML;
     let start = 0;
     let end = 0;
     if (this.firstRuntimeElement_ != null) {
       const firstRuntimeElementString = this.firstRuntimeElement_
-        ./*REVIEW*/ outerHTML;
+        ./*OK*/ outerHTML;
       const lastRuntimeElementString = this.lastRuntimeElement_
-        ./*REVIEW*/ outerHTML;
+        ./*OK*/ outerHTML;
       start = creative.indexOf(firstRuntimeElementString);
       end =
         creative.indexOf(lastRuntimeElementString) +
@@ -78,7 +78,7 @@ export class AmpAdMetadataTransformer {
       this.metadata['jsonUtf16CharOffsets'] = {};
       for (let i = 0; i < this.jsonMetadata_.length; i++) {
         const name = this.jsonMetadata_[i];
-        const nameElementString = this.ampAnalytics_./*REVIEW*/ innerHTML;
+        const nameElementString = this.ampAnalytics_./*OK*/ innerHTML;
         const jsonStart = creative.indexOf(nameElementString);
         const jsonEnd = jsonStart + nameElementString.length;
         this.metadata['jsonUtf16CharOffsets'][name] = [jsonStart, jsonEnd];
@@ -93,7 +93,7 @@ export class AmpAdMetadataTransformer {
       this.metadata['jsonUtf16CharOffsets']['amp-analytics'] = [];
       for (let i = 0; i < ampAnalytics.length; i++) {
         const element = ampAnalytics[i];
-        const nameElementString = element./*REVIEW*/ innerHTML;
+        const nameElementString = element./*OK*/ innerHTML;
         const jsonStart = creative.indexOf(nameElementString);
         const jsonEnd = jsonStart + nameElementString.length;
         this.metadata['jsonUtf16CharOffsets']['amp-analytics'].push(jsonStart);
@@ -249,21 +249,20 @@ export class AmpAdMetadataTransformer {
     for (let i = 0; i < json.length; i++) {
       const script = json[i];
       const type = script.getAttribute('type');
-      if (
-        type == 'application/json' &&
-        script.hasAttribute('id') &&
-        !this.jsonMetadata_.includes(script.getAttribute('id'))
-      ) {
-        this.jsonMetadata_.push(script.getAttribute('id'));
+      if (type != 'application/json') {
+        return;
       }
-      if (
-        type == 'application/json' &&
-        script.hasAttribute('amp-ad-metadata')
-      ) {
+      if (script.hasAttribute('amp-ad-metadata')) {
         const parsed = parseJson(script.textContent);
         for (const attribute in parsed) {
           this.metadata[attribute] = parsed[attribute];
         }
+      }
+      if (
+        script.hasAttribute('id') &&
+        !this.jsonMetadata_.includes(script.getAttribute('id'))
+      ) {
+        this.jsonMetadata_.push(script.getAttribute('id'));
       }
     }
   }
