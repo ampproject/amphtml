@@ -35,6 +35,8 @@ import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-i
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {rejectServicePromiseForDoc} from '../service';
 
+const INABOX_LITE_RESOURCES = true;
+
 /**
  * Install ampdoc-level services.
  * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
