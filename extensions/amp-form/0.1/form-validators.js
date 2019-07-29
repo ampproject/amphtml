@@ -96,18 +96,6 @@ export class FormValidator {
      * @private {boolean|null}
      */
     this.formValidity_ = null;
-
-    /** @private {string} */
-    this.uniqueFormId_ = this.form.id
-      ? this.form.id
-      : String(Date.now() + Math.floor(Math.random() * 100));
-
-    /**
-     * Counter used to create a unique id for every validation message
-     * to be used with `aria-describedby`.
-     * @protected {number}
-     */
-    this.ariaDescCounter_ = 0;
   }
 
   /**
@@ -128,16 +116,6 @@ export class FormValidator {
   /** @return {!NodeList} */
   inputs() {
     return this.form.querySelectorAll('input,select,textarea');
-  }
-
-  /**
-   * @return {string} A unique ID.
-   * @protected
-   */
-  createUniqueAriaDescId_() {
-    return (
-      ARIA_DESC_ID_PREFIX + this.uniqueFormId_ + '-' + this.ariaDescCounter_++
-    );
   }
 
   /**
@@ -292,6 +270,18 @@ export class AbstractCustomValidator extends FormValidator {
    */
   constructor(form) {
     super(form);
+
+    /** @private {string} */
+    this.uniqueFormId_ = this.form.id
+      ? this.form.id
+      : String(Date.now() + Math.floor(Math.random() * 100));
+
+    /**
+     * Counter used to create a unique id for every validation message
+     * to be used with `aria-describedby`.
+     * @private {number}
+     */
+    this.ariaDescCounter_ = 0;
   }
 
   /**
@@ -302,6 +292,15 @@ export class AbstractCustomValidator extends FormValidator {
     if (invalidType) {
       this.showValidationFor(input, invalidType);
     }
+  }
+
+  /**
+   * @return {string} A unique ID.
+   * @private
+   */
+  createUniqueAriaDescId_() {
+    return `${ARIA_DESC_ID_PREFIX}${this.uniqueFormId_}-${this
+      .ariaDescCounter_++}`;
   }
 
   /**
@@ -376,11 +375,9 @@ export class AbstractCustomValidator extends FormValidator {
       validation.setAttribute('id', validationId);
     }
 
-    this.resources.mutateElement(input, () => {
-      input.setAttribute('aria-invalid', 'true');
-      dev().assertString(validationId);
-      input.setAttribute('aria-describedby', validationId);
-    });
+    input.setAttribute('aria-invalid', 'true');
+    input.setAttribute('aria-describedby', validationId);
+
     this.resources.mutateElement(validation, () =>
       validation.classList.add('visible')
     );
@@ -396,10 +393,9 @@ export class AbstractCustomValidator extends FormValidator {
     }
     delete input[VISIBLE_VALIDATION_CACHE];
 
-    this.resources.mutateElement(input, () => {
-      input.removeAttribute('aria-invalid');
-      input.removeAttribute('aria-describedby');
-    });
+    input.removeAttribute('aria-invalid');
+    input.removeAttribute('aria-describedby');
+
     this.resources.mutateElement(visibleValidation, () =>
       visibleValidation.classList.remove('visible')
     );
