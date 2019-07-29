@@ -21,6 +21,7 @@
  * @param {!Element} element An Element to create a ShadowRoot for.
  * @param {string} styleText The style text for the ShadowRoot.
  * @param {!Element} content The content of the shadowRoot.
+ * @return {*} TODO(#23582): Specify return type
  */
 export function createShadowRoot(element, styleText, content) {
   // TODO(sparhami) Where is the right place to put this? Runtime? What about

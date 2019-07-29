@@ -73,6 +73,7 @@ const PATHS = [
 /**
  * We can replace full-text of standard licenses with a pre-approved shorten
  * version.
+ * @return {*} TODO(#23582): Specify return type
  */
 exports.shortenLicense = function() {
   const streams = LICENSES.map(tuple => {
@@ -86,6 +87,7 @@ exports.shortenLicense = function() {
 /**
  * Returns true if a source file has a license that needs to be shortened.
  * @param {Vinyl} file
+ * @return {*} TODO(#23582): Specify return type
  */
 exports.shouldShortenLicense = function(file) {
   return PATHS.some(path => file.path.endsWith(path));

@@ -686,6 +686,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Merges all of the rtcResponses into the JSON targeting and
    * category exclusions.
    * @param {?Array<!rtcResponseDef>} rtcResponseArray
+   * @return {?Object|undefined}
    * @private
    */
   mergeRtcResponses_(rtcResponseArray) {
