@@ -132,6 +132,7 @@ export class FormValidator {
 
   /**
    * @return {string} A unique ID.
+   * @protected
    */
   createUniqueAriaDescId_() {
     return (

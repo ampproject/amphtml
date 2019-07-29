@@ -328,7 +328,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[3].className).to.not.contain('visible');
     });
 
-    it('should set aria-describedby to the first validation message', () => {
+    it('should set aria-describedby to the first validation message (generated ID)', () => {
       validator.report();
       expect(validations[0].getAttribute('id')).to.be.a('string');
       expect(form.elements[0].getAttribute('aria-describedby')).to.equal(
@@ -336,7 +336,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       );
     });
 
-    it('should set aria-describedby to the second validation message with preset id', () => {
+    it('should set aria-describedby to the second validation message (existing ID)', () => {
       form.elements[0].value = 'John Miller';
       form.elements[1].value = 'invalidemail';
       form.elements[1].validationMessage = 'Email format is wrong';
