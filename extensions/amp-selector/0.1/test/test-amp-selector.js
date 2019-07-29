@@ -378,6 +378,24 @@ describes.realWin(
           options[3],
         ]);
 
+        impl.executeAction({
+          method: 'selectDown',
+          satisfiesTrust: () => true,
+        });
+        expect(impl.inputs_.length).to.equal(1);
+        expect(impl.getSelectedElementsForTesting()).to.include.members([
+          options[0],
+        ]);
+
+        impl.executeAction({
+          method: 'selectUp',
+          satisfiesTrust: () => true,
+        });
+        expect(impl.inputs_.length).to.equal(1);
+        expect(impl.getSelectedElementsForTesting()).to.include.members([
+          options[3],
+        ]);
+
         ampSelector = getSelector({
           attributes: {
             name: 'muti_select',
@@ -887,7 +905,7 @@ describes.realWin(
 
       it(
         'should trigger `select` action when user uses ' +
-          '`selectUp`/`selectDown` action with default delta value of 1',
+          '`selectDown` action with default delta value of 1',
         () => {
           const ampSelector = getSelector({
             attributes: {
@@ -900,6 +918,7 @@ describes.realWin(
           ampSelector.children[0].setAttribute('selected', '');
           ampSelector.build();
           const impl = ampSelector.implementation_;
+          const triggerSpy = sandbox.spy(impl.action_, 'trigger');
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
@@ -911,10 +930,48 @@ describes.realWin(
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
 
+          expect(triggerSpy).to.be.calledOnce;
+          expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
+
+          const event = triggerSpy.firstCall.args[2];
+          expect(event).to.have.property('detail');
+          expect(event.detail).to.have.property('targetOption', '1');
+          expect(event.detail).to.have.deep.property('selectedOptions', ['1']);
+        }
+      );
+
+      it(
+        'should trigger `select` action when user uses ' +
+          '`selectUp` action with default delta value of 1',
+        () => {
+          const ampSelector = getSelector({
+            attributes: {
+              id: 'ampSelector',
+            },
+            config: {
+              count: 6,
+            },
+          });
+          ampSelector.children[0].setAttribute('selected', '');
+          ampSelector.build();
+          const impl = ampSelector.implementation_;
+          const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+
+          expect(ampSelector.hasAttribute('multiple')).to.be.false;
+          expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
           impl.executeAction({method: 'selectUp', satisfiesTrust: () => true});
 
-          expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
-          expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+          expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+          expect(ampSelector.children[5].hasAttribute('selected')).to.be.true;
+
+          expect(triggerSpy).to.be.calledOnce;
+          expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
+
+          const event = triggerSpy.firstCall.args[2];
+          expect(event).to.have.property('detail');
+          expect(event.detail).to.have.property('targetOption', '5');
+          expect(event.detail).to.have.deep.property('selectedOptions', ['5']);
         }
       );
 
