@@ -825,7 +825,9 @@ export class Carousel {
       return false;
     }
 
-    return this.forwards_ ? this.isScrollAtEnd() : this.isScrollAtStart();
+    return this.forwards_
+      ? this.isScrollAtRightEdge()
+      : this.isScrollAtLeftEdge();
   }
 
   /**
@@ -837,22 +839,28 @@ export class Carousel {
       return false;
     }
 
-    return this.forwards_ ? this.isScrollAtStart() : this.isScrollAtEnd();
+    return this.forwards_
+      ? this.isScrollAtLeftEdge()
+      : this.isScrollAtRightEdge();
   }
 
   /**
-   *
+   * @return {boolean} True if the scrolling is at the right edge of the
+   *    carousel. Note that this ignores RTL, and only checks for the right
+   *    edge.
    */
-  isScrollAtEnd() {
+  isScrollAtRightEdge() {
     const el = this.scrollContainer_;
     const {width} = el./*OK*/ getBoundingClientRect();
     return el./*OK*/ scrollLeft + width >= el./*OK*/ scrollWidth;
   }
 
   /**
-   *
+   * @return {boolean} True if the scrolling is at the left edge of the
+   *    carousel. Note that this ignores RTL, and only checks for the left
+   *    edge.
    */
-  isScrollAtStart() {
+  isScrollAtLeftEdge() {
     return this.scrollContainer_./*OK*/ scrollLeft <= 0;
   }
 
