@@ -28,6 +28,7 @@ export class ExternalReorderHeadTransformer {
       linkResourceHints: [],
       linkStylesheetBeforeAmpCustom: [],
       other: [],
+      otherScripts: [],
       styleAmpRuntime: null,
       metaCharset: null,
       scriptAmpEngine: null,
@@ -188,6 +189,10 @@ export class ExternalReorderHeadTransformer {
       this.headComponents_.scriptAmpViewer = element;
       return;
     }
+    if (isAsync) {
+      this.headComponents_.otherScripts.push(element);
+      return;
+    }
     if (this.headComponents_.other.indexOf(element) == -1) {
       this.headComponents_.other.push(element);
     }
@@ -270,6 +275,7 @@ export class ExternalReorderHeadTransformer {
       head,
       this.headComponents_.scriptNonRenderDelayingExtensions
     );
+    this.appendAll_(head, this.headComponents_.otherScripts);
     this.appendAll_(head, this.headComponents_.linkIcons);
     this.appendAll_(head, this.headComponents_.linkResourceHints);
     this.appendAll_(head, this.headComponents_.linkStylesheetBeforeAmpCustom);
