@@ -528,7 +528,11 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     }).then(() => {
       this.scheduleLayout(this.ampComponents_);
       this.scheduleResume(this.ampComponents_);
-      this.updateInViewport(this.ampComponents_, true);
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
+        this.ampComponents_,
+        true
+      );
     });
 
     const currentHistoryState = /** @type {!Object} */ (getState(
@@ -592,7 +596,11 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       );
     }).then(() => {
       this.schedulePause(this.ampComponents_);
-      this.updateInViewport(this.ampComponents_, false);
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
+        this.ampComponents_,
+        false
+      );
     });
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
