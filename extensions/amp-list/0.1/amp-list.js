@@ -18,7 +18,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-list-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Layout, getLayoutClass, isLayoutSizeDefined} from '../../../src/layout';
 import {LoadMoreService} from './service/load-more-service';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
@@ -880,44 +880,28 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Undoes previous size-defined layout, must be called in mutation context.
    * @param {string} previousLayout
+   * @see src/layout.js
    */
   undoPreviousLayout_(previousLayout) {
-    switch (previousLayout) {
-      case Layout.RESPONSIVE:
-        this.element.classList.remove('i-amphtml-layout-responsive');
-        setStyles(this.element, {
-          height: '',
-          width: '',
-        });
-        break;
-      case Layout.FLEX_ITEM:
-        setStyles(this.element, {
-          height: '',
-          width: '',
-        });
-        break;
-      case Layout.FIXED:
-        this.element.classList.remove('i-amphtml-layout-fixed');
-        setStyles(this.element, {
-          height: '',
-        });
-        break;
-      case Layout.FIXED_HEIGHT:
-        this.element.classList.remove('i-amphtml-layout-fixed-height');
-        setStyles(this.element, {
-          height: '',
-          width: '',
-        });
-        break;
-      case Layout.INTRINSIC:
-        this.element.classList.remove('i-amphtml-layout-intrinsic');
-        break;
-      default:
-      // fall through, always remove sizer and size-defined class
+    const layoutClass = getLayoutClass(previousLayout);
+    this.element.classList.remove(layoutClass, 'i-amphtml-layout-size-defined');
+
+    // TODO(amphtml): Remove [width] and [height] attributes too?
+    if (
+      [
+        Layout.FIXED,
+        Layout.FLEX_ITEM,
+        Layout.FLUID,
+        Layout.RESPONSIVE,
+      ].includes(previousLayout)
+    ) {
+      setStyles(this.element, {width: '', height: ''});
+    } else if (previousLayout == Layout.FIXED_HEIGHT) {
+      setStyles(this.element, {height: ''});
     }
+
     // The changeSize() call removes the sizer element.
     this.element./*OK*/ changeSize();
-    this.element.classList.remove('i-amphtml-layout-size-defined');
   }
 
   /**
@@ -927,12 +911,11 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   changeToLayoutContainer_() {
-    const previousLayout = this.element.getAttribute('layout');
+    const previousLayout = this.element.getAttribute('i-amphtml-layout');
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
       return Promise.resolve();
     }
-
     return this.mutateElement(() => {
       this.undoPreviousLayout_(previousLayout);
       this.container_.classList.remove(
@@ -941,13 +924,14 @@ export class AmpList extends AMP.BaseElement {
       );
       // The overflow element is generally hidden with visibility hidden,
       // but after changing to layout container, this causes an undesirable
-      // empty white space so we hide it with display none instead.
+      // empty white space so we hide it with "display: none" instead.
       const overflowElement = this.getOverflowElement();
       if (overflowElement) {
         toggle(overflowElement, false);
       }
-      this.element.classList.add('i-amphtml-layout-container');
       this.element.setAttribute('layout', 'container');
+      this.element.setAttribute('i-amphtml-layout', 'container');
+      this.element.classList.add('i-amphtml-layout-container');
     });
   }
 
