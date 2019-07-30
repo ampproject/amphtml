@@ -98,7 +98,6 @@ export class AnalyticsConfig {
   fetchVendorConfig_() {
     // eslint-disable-next-line no-undef
     if (!ANALYTICS_VENDOR_SPLIT) {
-      this.predefinedConfig_ = ANALYTICS_CONFIG;
       return Promise.resolve();
     }
 
