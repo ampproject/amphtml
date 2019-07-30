@@ -1,7 +1,7 @@
 {
   "experimentA": {
     "name": "ANALYTICS_VENDOR_SPLIT",
-    "command": "gulp dist --defineExperimentConstant=ANALYTICS_VENDOR_SPLIT",
+    "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=ANALYTICS_VENDOR_SPLIT",
     "issue": "",
     "expirationDateUTC": "2019-08-08",
     "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
