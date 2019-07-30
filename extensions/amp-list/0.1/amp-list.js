@@ -1122,6 +1122,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   hideFallbackAndPlaceholder_() {
+    this.element.classList.remove('i-amphtml-list-fetch-error');
     this.toggleLoading(false);
     if (this.getFallback()) {
       this.toggleFallback_(false);
@@ -1135,6 +1136,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   showFallbackOrThrow_(error) {
+    this.element.classList.add('i-amphtml-list-fetch-error');
     this.toggleLoading(false);
     if (this.getFallback()) {
       this.toggleFallback_(true);
