@@ -3,26 +3,24 @@
 setDOM.KEY = 'data-key'
 setDOM.IGNORE = 'data-ignore'
 setDOM.CHECKSUM = 'data-checksum'
+var parseHTML = require('./parse-html')
 var KEY_PREFIX = '_set-dom-'
 var NODE_MOUNTED = KEY_PREFIX + 'mounted'
 var ELEMENT_TYPE = 1
 var DOCUMENT_TYPE = 9
 var DOCUMENT_FRAGMENT_TYPE = 11
 
-// Flattened array of node pairs that were ignored (via setDOM.IGNORE) in last diff.
-var ignoredNodes = null;
+// Expose api.
+module.exports = setDOM
 
 /**
  * @description
  * Updates existing dom to match a new dom.
  *
- * @param {!Node} oldNode - The html entity to update.
- * @param {string|!Node} newNode - The updated html(entity).
- * @return {!Array<!Node>}
+ * @param {Node} oldNode - The html entity to update.
+ * @param {String|Node} newNode - The updated html(entity).
  */
-export function setDOM (oldNode, newNode) {
-  ignoredNodes = [];
-
+function setDOM (oldNode, newNode) {
   // Ensure a realish dom node is provided.
   assert(oldNode && oldNode.nodeType, 'You must provide a valid node to update.')
 
@@ -35,7 +33,11 @@ export function setDOM (oldNode, newNode) {
     setChildNodes(oldNode, newNode)
   } else {
     // Otherwise we diff the entire old node.
-    setNode(oldNode, newNode)
+    setNode(oldNode, typeof newNode === 'string'
+      // If a string was provided we will parse it as dom.
+      ? parseHTML(newNode, oldNode.nodeName)
+      : newNode
+    )
   }
 
   // Trigger mount events on initial set.
@@ -43,10 +45,6 @@ export function setDOM (oldNode, newNode) {
     oldNode[NODE_MOUNTED] = true
     mount(oldNode)
   }
-
-  var returnValue = ignoredNodes;
-  ignoredNodes = null;
-  return returnValue;
 }
 
 /**
@@ -228,13 +226,9 @@ function getKey (node) {
  * @param {Node} b - Another node to compare.
  */
 function isEqualNode (a, b) {
-  const ignored = (isIgnored(a) && isIgnored(b));
-  if (ignored) {
-    ignoredNodes.push(a, b);
-  }
   return (
     // Check if both nodes are ignored.
-    ignored ||
+    (isIgnored(a) && isIgnored(b)) ||
     // Check if both nodes have the same checksum.
     (getCheckSum(a) === getCheckSum(b)) ||
     // Fall back to native isEqualNode check.
