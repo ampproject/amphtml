@@ -4,7 +4,7 @@
 [![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg?logo=GitHub&style=flat-square "GitHub Release")](https://github.com/ampproject/amphtml/releases)
 [![Contributors](https://img.shields.io/github/contributors-anon/ampproject/amphtml.svg?logo=GitHub&style=flat-square "Contributors")](https://github.com/ampproject/amphtml/graphs/contributors)
 [![Commits](https://img.shields.io/github/commit-activity/m/ampproject/amphtml.svg?logo=GitHub&style=flat-square "Commits")](https://github.com/ampproject/amphtml/pulse/monthly)
-[![Badges](https://img.shields.io/badge/badges-15-brightgreen?logo=GitHub&style=flat-square)](#)
+[![Badges](https://img.shields.io/badge/badges-16-brightgreen?logo=GitHub&style=flat-square)](#)
 
 <details>
 <summary>
