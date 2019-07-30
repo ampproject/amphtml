@@ -787,13 +787,10 @@ describe('validateAttributeChange', () => {
 });
 
 describe('getAllowedTags', () => {
-  let html;
   let allowedTags;
 
   beforeEach(() => {
-    html = document.createElement('html');
-    const doc = {documentElement: html};
-    allowedTags = getAllowedTags(doc);
+    allowedTags = getAllowedTags();
   });
 
   it('should contain html tags', () => {
