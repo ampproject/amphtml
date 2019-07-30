@@ -98,7 +98,6 @@ const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
  * Time to wait for services / async input before throwing an error.
  * @private @const {number}
  */
-
 const SUBMIT_TIMEOUT = 10000;
 
 export class AmpForm {
@@ -144,7 +143,7 @@ export class AmpForm {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(this.form_);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
@@ -579,7 +578,7 @@ export class AmpForm {
     // Set ourselves to the SUBMITTING State
     this.setState_(FormState.SUBMITTING);
 
-    //Promised to run before all async calls ; require extended timeout
+    //required promises to run before presubmit calls
     const requiredActionPromises = [Promise.resolve()];
     // Promises to run before submitting the form
     const presubmitPromises = [];
@@ -594,12 +593,13 @@ export class AmpForm {
       }
     });
 
-    return Promise.race(Promise.all(requiredActionPromises)).then(
+    return Promise.all(requiredActionPromises).then(
       () => {
-        this.waitOnPromisesOrTimeout_(presubmitPromises, SUBMIT_TIMEOUT).then(
-          () => {
-            return this.handlePresubmitSuccess_(trust);
-          },
+        return this.waitOnPromisesOrTimeout_(
+          presubmitPromises,
+          SUBMIT_TIMEOUT
+        ).then(
+          () => this.handlePresubmitSuccess_(trust),
           error => {
             const detail = dict();
             if (error && error.message) {
