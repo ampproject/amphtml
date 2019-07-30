@@ -80,9 +80,9 @@ jobs:
         - build-system/sauce_connect/stop_sauce_connect.sh
         - ps -ef
     - stage: test
-      name: "End to End Tests"
+      name: "End to End, Experiment Tests"
       script:
-        - unbuffer node build-system/pr-check/e2e-tests.js
+        - unbuffer node build-system/pr-check/e2e-experiment-tests.js
       after_script:
         - ps -ef
 cache:

@@ -23,6 +23,7 @@
  */
 
 const colors = require('ansi-colors');
+const experimentsConfig = require('../global-configs/experiments-config.json');
 const {
   printChangeSummary,
   processAndUploadDistOutput,
@@ -32,6 +33,7 @@ const {
   timedExecWithError,
   timedExecOrDie: timedExecOrDieBase,
   uploadDistOutput,
+  uploadDistExperimentOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
@@ -42,6 +44,16 @@ const FILENAME = 'dist-bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
+
+function buildAndUploadExperiments_() {
+  Object.keys(experimentsConfig).forEach(experiment => {
+    const config = experimentsConfig[experiment];
+    timedExecOrDie('gulp clean');
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie(config.command);
+    uploadDistExperimentOutput(FILENAME, config.name);
+  });
+}
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -55,8 +67,11 @@ async function main() {
     timedExecOrDie('gulp dist --fortesting');
     timedExecOrDie('gulp bundle-size --on_push_build');
     uploadDistOutput(FILENAME);
+    //buildAndUploadExperiments_();
   } else {
     printChangeSummary(FILENAME);
+    //TODO(estherkim): move this to push build before merging
+    buildAndUploadExperiments_();
     const buildTargets = determineBuildTargets(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||

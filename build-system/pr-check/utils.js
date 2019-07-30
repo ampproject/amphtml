@@ -331,6 +331,16 @@ function downloadDistOutput(functionName) {
 }
 
 /**
+ * Downloads and unzips dist experiment output from storage
+ * @param {string} functionName
+ * @param {string} experiment
+ */
+function downloadDistExperimentOutput(functionName, experiment) {
+  const outputFile = DIST_OUTPUT_FILE.replace('.zip', `_${experiment}.zip`);
+  downloadOutput_(functionName, outputFile, DIST_OUTPUT_DIRS);
+}
+
+/**
  * Zips and uploads the build output to a remote storage location
  * @param {string} functionName
  */
@@ -344,6 +354,16 @@ function uploadBuildOutput(functionName) {
  */
 function uploadDistOutput(functionName) {
   uploadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
+}
+
+/**
+ * Zips and uploads the dist experiment output to a remote storage location
+ * @param {string} functionName
+ * @param {string} experiment
+ */
+function uploadDistExperimentOutput(functionName, experiment) {
+  const outputFile = DIST_OUTPUT_FILE.replace('.zip', `_${experiment}.zip`);
+  uploadOutput_(functionName, outputFile, DIST_OUTPUT_DIRS);
 }
 
 /**
@@ -373,6 +393,7 @@ function decryptTravisKey_() {
 
 module.exports = {
   downloadBuildOutput,
+  downloadDistExperimentOutput,
   downloadDistOutput,
   printChangeSummary,
   processAndUploadDistOutput,
@@ -385,5 +406,6 @@ module.exports = {
   timedExecOrDie,
   timedExecWithError,
   uploadBuildOutput,
+  uploadDistExperimentOutput,
   uploadDistOutput,
 };

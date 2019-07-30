@@ -23,19 +23,31 @@
 
 const colors = require('ansi-colors');
 const {
+  downloadDistExperimentOutput,
   downloadDistOutput,
   printChangeSummary,
   startTimer,
+  startSauceConnect,
   stopTimer,
+  stopSauceConnect,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
-const FILENAME = 'e2e-tests.js';
+const FILENAME = 'e2e-experiment-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
+
+async function runExperimentTests_() {
+  timedExecOrDie('gulp clean');
+  downloadDistExperimentOutput(FILENAME);
+  timedExecOrDie('gulp update-packages');
+  await startSauceConnect(FILENAME);
+  timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
+  stopSauceConnect(FILENAME);
+}
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -44,8 +56,12 @@ async function main() {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp e2e --nobuild --headless');
+    //await runExperimentTests_();
   } else {
     printChangeSummary(FILENAME);
+    //TODO(estherkim): move this to push build before merging
+    await runExperimentTests_();
+
     const buildTargets = determineBuildTargets(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||
