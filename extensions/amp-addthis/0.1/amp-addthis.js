@@ -225,7 +225,7 @@ class AmpAddThis extends AMP.BaseElement {
       this.setupListeners_({ampDoc, loc, pubId: this.pubId_});
 
       // Create close button for listing tool
-      if (this.element.getAttribute('data-widget-type') === 'messages'){
+      if (this.element.getAttribute('data-widget-type') === 'messages') {
         const closeButton = createElementWithAttributes(
           this.win.document,
           'div',
@@ -237,9 +237,9 @@ class AmpAddThis extends AMP.BaseElement {
         setStyle(closeButton, 'cursor', 'pointer');
         setStyle(closeButton, 'position', 'relative');
         setStyle(closeButton, 'z-index', '1');
-        closeButton.onclick = function(){
+        closeButton.onclick = function() {
           this.parentNode.parentNode.removeChild(this.parentNode);
-        }
+        };
         this.element.appendChild(closeButton);
       }
     }
