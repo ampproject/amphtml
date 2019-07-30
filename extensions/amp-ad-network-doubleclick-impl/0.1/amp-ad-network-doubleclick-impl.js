@@ -1262,20 +1262,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   adjustSlotPostExpansion_(newWidth) {
-    if (this.flexibleAdSlotData_ == null) {
-      dev().warn(
-        TAG,
+    if (
+      !devAssert(
+        this.flexibleAdSlotData_,
         'Attempted to expand slot without flexible ad slot data.'
-      );
+      )
+    ) {
       return;
     }
     const isRtl = isRTL(this.win.document);
     const dirStr = isRtl ? 'Right' : 'Left';
     // Guaranteed to be set after exiting if/else.
     let /** ?number */ newMargin = null;
-    if (newWidth <= this.flexibleAdSlotData_.parentWidth) {
+    const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
+    if (newWidth <= parentWidth) {
       // Must center creative within its parent container
-      const {parentStyle} = this.flexibleAdSlotData_;
       const parentPadding = parseInt(parentStyle[`padding${dirStr}`], 10) || 0;
       const parentBorder =
         parseInt(parentStyle[`border${dirStr}Width`], 10) || 0;
@@ -1296,12 +1297,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (isRtl) {
       setStyles(this.element, {
         'z-index': '30',
-        'margin-right': `${newMargin}px`,
+        'margin-right': `${Math.round(newMargin)}px`,
       });
     } else {
       setStyles(this.element, {
         'z-index': '30',
-        'margin-left': `${newMargin}px`,
+        'margin-left': `${Math.round(newMargin)}px`,
       });
     }
   }
