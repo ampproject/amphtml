@@ -273,8 +273,8 @@ function flattenGraph(entryPoints) {
 /**
  * Run Module dependency graph against the rules.
  *
- * @param {!Array<!ModuleDef>} modules
- * @return {*} TODO(#23582): Specify return type
+ * @param {!ModuleDef} modules
+ * @return {boolean}
  */
 function runRules(modules) {
   let errorsFound = false;
