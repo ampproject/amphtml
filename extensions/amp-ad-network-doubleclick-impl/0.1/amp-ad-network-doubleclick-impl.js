@@ -1196,6 +1196,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.reattemptToExpandFluidCreative_ = false;
           })
           .catch(() => {
+            user().warn(
+              TAG,
+              'Attempt to change size failed on fluid ' +
+                'creative. Will re-attempt when slot is out of the viewport.'
+            );
             this.reattemptToExpandFluidCreative_ = true;
             this.setCssPosition_('absolute');
           });
