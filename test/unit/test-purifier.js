@@ -422,8 +422,41 @@ describe
           expect(purify('<amp-anim controls></amp-anim>')).to.equal(
             '<amp-anim></amp-anim>'
           );
-          expect(purify('<amp-list>')).to.equal('');
         });
+      });
+
+      it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
+        html.setAttribute('amp4email', '');
+        allowConsoleError(() => {
+          expect(purify('<amp-analytics>')).to.equal('');
+          expect(purify('<amp-iframe>')).to.equal('');
+          expect(purify('<amp-list>')).to.equal('');
+          expect(purify('<amp-pixel>')).to.equal('');
+          expect(purify('<amp-twitter>')).to.equal('');
+          expect(purify('<amp-video>')).to.equal('');
+          expect(purify('<amp-youtube>')).to.equal('');
+        });
+
+        expect(purify('<amp-accordion>')).to.equal(
+          '<amp-accordion></amp-accordion>'
+        );
+        expect(purify('<amp-anim>')).to.equal('<amp-anim></amp-anim>');
+        expect(purify('<amp-bind-macro>')).to.equal(
+          '<amp-bind-macro></amp-bind-macro>'
+        );
+        expect(purify('<amp-carousel>')).to.equal(
+          '<amp-carousel></amp-carousel>'
+        );
+        expect(purify('<amp-fit-text>')).to.equal(
+          '<amp-fit-text></amp-fit-text>'
+        );
+        expect(purify('<amp-img>')).to.equal('<amp-img></amp-img>');
+        expect(purify('<amp-layout>')).to.equal('<amp-layout></amp-layout>');
+        expect(purify('<amp-selector>')).to.equal(
+          '<amp-selector></amp-selector>'
+        );
+        expect(purify('<amp-sidebar>')).to.equal('<amp-sidebar></amp-sidebar>');
+        expect(purify('<amp-timeago>')).to.equal('<amp-timeago></amp-timeago>');
       });
     });
 
@@ -754,13 +787,10 @@ describe('validateAttributeChange', () => {
 });
 
 describe('getAllowedTags', () => {
-  let html;
   let allowedTags;
 
   beforeEach(() => {
-    html = document.createElement('html');
-    const doc = {documentElement: html};
-    allowedTags = getAllowedTags(doc);
+    allowedTags = getAllowedTags();
   });
 
   it('should contain html tags', () => {
@@ -773,14 +803,9 @@ describe('getAllowedTags', () => {
     expect(allowedTags).to.have.property('feblend', true);
   });
 
-  it('should not contain blacklisted tags', () => {
+  it('should have blacklisted tags set to false', () => {
     // Tags allowed in DOMPurify but disallowed in AMP.
-    expect(allowedTags).to.not.have.property('audio');
-    expect(allowedTags).to.not.have.property('img');
-  });
-
-  it('should not allow certain tags in amp4email', () => {
-    html.setAttribute('amp4email', '');
-    expect(allowedTags).to.not.have.property('amp-list');
+    expect(allowedTags).to.have.property('audio', false);
+    expect(allowedTags).to.have.property('img', false);
   });
 });
