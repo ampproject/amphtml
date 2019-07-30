@@ -892,6 +892,7 @@ export class AmpList extends AMP.BaseElement {
         Layout.FIXED,
         Layout.FLEX_ITEM,
         Layout.FLUID,
+        Layout.INTRINSIC,
         Layout.RESPONSIVE,
       ].includes(previousLayout)
     ) {
