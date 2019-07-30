@@ -3,7 +3,8 @@
     "amp-next-page",
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
-    "inabox-css-cleanup"
+    "inabox-css-cleanup",
+    "inabox-no-chunking"
   ],
   "allow-url-opt-in": [
     "ios-scrollable-iframe",
