@@ -36,6 +36,7 @@ import {findIndex, remove} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
+import {isAmp4Email} from '../../../src/format';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
@@ -531,7 +532,7 @@ export class Bind {
    */
   initialize_(root) {
     // Disallow URL property bindings in AMP4EMAIL.
-    const allowUrlProperties = !this.isAmp4Email_();
+    const allowUrlProperties = !isAmp4Email(this.localWin_.document);
     this.validator_ = new BindValidator(allowUrlProperties);
 
     // The web worker's evaluator also has an instance of BindValidator
@@ -569,17 +570,6 @@ export class Bind {
         this.viewer_.sendMessage('bindReady', undefined);
         this.dispatchEventForTesting_(BindEvents.INITIALIZE);
       });
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isAmp4Email_() {
-    const html = this.localWin_.document.documentElement;
-    const amp4email =
-      html.hasAttribute('amp4email') || html.hasAttribute('⚡4email');
-    return amp4email;
   }
 
   /**

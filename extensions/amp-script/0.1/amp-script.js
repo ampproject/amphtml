@@ -326,7 +326,7 @@ export class SanitizerImpl {
     this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
 
     /** @private @const {!Object<string, boolean>} */
-    this.allowedTags_ = getAllowedTags(win.document);
+    this.allowedTags_ = getAllowedTags();
 
     // TODO(choumx): Support opt-in for variable substitutions.
     // For now, only allow built-in AMP components except amp-pixel.

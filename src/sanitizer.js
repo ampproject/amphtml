@@ -16,15 +16,17 @@
 
 import {
   BIND_PREFIX,
+  BLACKLISTED_TAGS,
+  EMAIL_WHITELISTED_AMP_TAGS,
   TRIPLE_MUSTACHE_WHITELISTED_TAGS,
   WHITELISTED_ATTRS,
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
-  blacklistedTags,
   isValidAttr,
 } from './sanitation';
 import {dict} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {isAmp4Email} from './format';
 import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
 import {user} from './log';
@@ -98,7 +100,7 @@ export function sanitizeHtml(html, doc, diffing) {
   // No Caja support for <script> or <svg>.
   const cajaBlacklistedTags = Object.assign(
     {'script': true, 'svg': true},
-    blacklistedTags(doc)
+    BLACKLISTED_TAGS
   );
 
   const parser = htmlSanitizer.makeSaxParser({
@@ -130,7 +132,12 @@ export function sanitizeHtml(html, doc, diffing) {
 
       if (cajaBlacklistedTags[tagName]) {
         ignore++;
-      } else if (!isAmpElement) {
+      } else if (isAmpElement) {
+        // Enforce AMP4EMAIL tag whitelist at runtime.
+        if (isAmp4Email(doc) && !EMAIL_WHITELISTED_AMP_TAGS[tagName]) {
+          ignore++;
+        }
+      } else {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
