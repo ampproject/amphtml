@@ -41,7 +41,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    async function getMinuteMediaPlayer(attributes) {
+    function getMinuteMediaPlayer(attributes) {
       const minuteMediaPlayerElement = doc.createElement(
         'amp-minute-media-player'
       );
@@ -60,7 +60,7 @@ describes.realWin(
           minuteMediaPlayerElement.layoutCallback();
         })
         .then(() => minuteMediaPlayerElement);
-    };
+    }
 
     it('renders with curated content', async () => {
       const minuteMediaPlayerElement = await getMinuteMediaPlayer({
