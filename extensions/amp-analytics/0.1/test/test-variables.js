@@ -192,6 +192,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     let win;
     let urlReplacementService;
     let sandbox;
+    let analyticsElement;
 
     beforeEach(() => {
       sandbox = env.sandbox;
@@ -202,10 +203,15 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       variables = variableServiceForDoc(doc);
       const {documentElement} = win.document;
       urlReplacementService = Services.urlReplacementsForDoc(documentElement);
+      analyticsElement = doc.createElement('amp-analytics');
+      doc.body.appendChild(analyticsElement);
     });
 
     function check(input, output, opt_bindings) {
-      const macros = Object.assign(variables.getMacros(), opt_bindings);
+      const macros = Object.assign(
+        variables.getMacros(analyticsElement),
+        opt_bindings
+      );
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
       return expect(expanded).to.eventually.equal(output);
     }
@@ -361,6 +367,36 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         'LINKER_PARAM(gl, cid)&LINKER_PARAM(gl, gclid)',
         'a1b2c3&123'
       );
+    });
+
+    it('"COOKIE" resolves cookie value', async () => {
+      doc.cookie = 'test=123';
+      await check('COOKIE(test)', '123');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string in FIE', async () => {
+      doc.cookie = 'test=123';
+      const fakeFie = doc.createElement('div');
+      fakeFie.classList.add('i-amphtml-fie');
+      doc.body.appendChild(fakeFie);
+      fakeFie.appendChild(analyticsElement);
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string when inabox', async () => {
+      doc.cookie = 'test=123';
+      env.win.AMP_MODE.runtime = 'inabox';
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string on cache', async () => {
+      win.location = 'https://www-example-com.cdn.ampproject.org';
+      doc.cookie = 'test=123';
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
     });
 
     describe('$MATCH', () => {
