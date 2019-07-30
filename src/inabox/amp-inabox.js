@@ -24,6 +24,7 @@ import {Services} from '../services';
 import {adopt} from '../runtime';
 import {cssText as ampDocCss} from '../../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
+import {deactivateChunking, startupChunk} from '../chunk';
 import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
@@ -44,7 +45,6 @@ import {
 import {internalRuntimeVersion} from '../internal-version';
 import {isExperimentOn} from '../experiments';
 import {maybeValidate} from '../validator-integration';
-import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
@@ -60,6 +60,10 @@ let ampdocService;
 try {
   // Should happen first.
   installErrorReporting(self); // Also calls makeBodyVisibleRecovery on errors.
+
+  if (isExperimentOn(self, 'inabox-no-chunking')) {
+    deactivateChunking();
+  }
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
