@@ -446,21 +446,6 @@ app.use('/share-tracking/get-outgoing-fragment', (req, res) => {
   });
 });
 
-app.use('/dist/v0/analytics-vendors/*', (req, res) => {
-  console.log('asdf');
-  console.log(req.params);
-});
-
-app.use(/\/rtv\/\d+\/v0\/analytics-vendors\//, (req, res) => {
-  console.log('asdf2');
-  console.log(req.params);
-});
-
-app.use('/rtv/**/v0/analytics-vendors/*', (req, res) => {
-  console.log('asdf2');
-  console.log(req.params);
-});
-
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.
 function proxyToAmpProxy(req, res, mode) {
@@ -1414,5 +1399,22 @@ function decryptDocumentKey(encryptedDocumentKey) {
   }
   return parsedJson.key;
 }
+
+// serve local vendor config JSON files
+app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
+  const {vendor} = req.params;
+  const max = pc.env.SERVE_MODE === 'default' ? '.max' : '';
+  const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
+
+  fs.readFileAsync(localVendorConfigPath)
+    .then(file => {
+      res.setHeader('Content-Type', 'application/json');
+      res.end(file);
+    })
+    .error(() => {
+      res.status(404);
+      res.end('Not found: ' + localVendorConfigPath);
+    });
+});
 
 module.exports = app;

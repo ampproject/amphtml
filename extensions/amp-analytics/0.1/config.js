@@ -78,12 +78,15 @@ export class AnalyticsConfig {
    * @return {string} the URL to request the vendor config file from
    */
   getVendorUrl_(vendor) {
-    const isLocalDev = getMode().localDev;
-    const baseUrl = calculateScriptBaseUrl(this.win_.location, isLocalDev);
-    const rtv = isLocalDev ? '' : `/rtv/${getMode().rtvVersion}`;
+    const baseUrl = calculateScriptBaseUrl(
+      this.win_.location,
+      getMode().localDev
+    );
     // bg has a special canary config
     const canary = vendor === 'bg' && isCanary(self) ? '.canary' : '';
-    return `${baseUrl}${rtv}/v0/analytics-vendors/${vendor}${canary}.json`;
+    return `${baseUrl}/rtv/${
+      getMode().rtvVersion
+    }/v0/analytics-vendors/${vendor}${canary}.json`;
   }
 
   /**
