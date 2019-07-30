@@ -43,6 +43,7 @@ export class CircularBuffer {
 
   /**
    * @param {number} index The index of an element to get.
+   * @return {!TextPosDef}
    */
   get(index) {
     if (this.buff_.length >= this.max_) {

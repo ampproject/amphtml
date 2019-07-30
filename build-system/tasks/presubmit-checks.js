@@ -389,6 +389,7 @@ const forbiddenTerms = {
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-viewer-integration/0.1/highlight-handler.js',
+      'extensions/amp-consent/0.1/consent-ui.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
@@ -1028,6 +1029,7 @@ function isInBuildSystemFixtureFolder(filePath) {
 /**
  * Strip Comments
  * @param {string} contents
+ * @return {*} TODO(#23582): Specify return type
  */
 function stripComments(contents) {
   // Multi-line comments
@@ -1205,6 +1207,7 @@ function isMissingTerms(file) {
 /**
  * Check a file for all the required terms and
  * any forbidden terms and log any errors found.
+ * @return {*} TODO(#23582): Specify return type
  */
 function presubmit() {
   let forbiddenFound = false;

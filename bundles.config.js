@@ -523,6 +523,13 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-loader',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-mathml',
     version: '0.1',
     latestVersion: '0.1',
@@ -691,7 +698,10 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     options: {
       hasCss: true,
-      cssBinaries: ['amp-story-auto-ads-attribution'],
+      cssBinaries: [
+        'amp-story-auto-ads-ad-badge',
+        'amp-story-auto-ads-attribution',
+      ],
     },
     type: TYPES.MISC,
   },

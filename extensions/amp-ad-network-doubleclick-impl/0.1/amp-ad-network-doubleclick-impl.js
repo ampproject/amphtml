@@ -24,7 +24,6 @@ import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   ADX_ADY_EXP,
   AmpAnalyticsConfigDef,
-  FIE_CSS_CLEANUP_EXP,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
@@ -51,6 +50,7 @@ import {
 } from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
+import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
@@ -686,6 +686,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Merges all of the rtcResponses into the JSON targeting and
    * category exclusions.
    * @param {?Array<!rtcResponseDef>} rtcResponseArray
+   * @return {?Object|undefined}
    * @private
    */
   mergeRtcResponses_(rtcResponseArray) {

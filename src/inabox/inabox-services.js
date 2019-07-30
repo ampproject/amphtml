@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../polyfills';
 import {installActionServiceForDoc} from '../service/action-impl';
 import {installDocumentInfoServiceForDoc} from '../service/document-info-impl';
 import {installGlobalNavigationHandlerForDoc} from '../service/navigation';
@@ -24,7 +23,10 @@ import {installHistoryServiceForDoc} from '../service/history-impl';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
 import {installInaboxCidService} from './inabox-cid';
 import {installInaboxViewportService} from './inabox-viewport';
-import {installResourcesServiceForDoc} from '../service/resources-impl';
+import {
+  installOwnersServiceForDoc,
+  installResourcesServiceForDoc,
+} from '../service/resources-impl';
 import {installStandardActionsForDoc} from '../service/standard-actions-impl';
 import {installUrlForDoc} from '../service/url-impl';
 import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
@@ -46,6 +48,7 @@ export function installAmpdocServicesForInabox(ampdoc) {
   installHiddenObserverForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
+  installOwnersServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
