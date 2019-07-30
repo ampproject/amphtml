@@ -190,7 +190,7 @@ export class AmpList extends AMP.BaseElement {
       // us to DOM diff with the rendered result.
       const initialContent = scopedQuerySelector(
         this.element,
-        '> div[role=list]:not([placeholder]):not([fallback])'
+        '> div[role=list]:not([placeholder]):not([fallback]):not([fetch-error])'
       );
       if (initialContent) {
         this.container_ = initialContent;
@@ -846,57 +846,77 @@ export class AmpList extends AMP.BaseElement {
     // This obviously doesn't apply to initial content, so we mark them manually
     // here to enable diffing in the first render.
     if (this.hasInitialContent_) {
-      // amp-mustache starts at 1 and increments, so start at -1 and decrement
-      // to guarantee uniqueness.
-      let key = -1;
-      // We only need to mark AMP elements for diffing because bindings in
-      // initial content are inert.
-      const elements = container.querySelectorAll('.i-amphtml-element');
-      elements.forEach(element => {
-        markElementForDiffing(element, () => String(key--));
-      });
+      this.markContainerForDiffing_(container);
     }
 
+    // setDOM does in-place DOM diffing for all non-AMP elements.
     const ignored = setDOM(container, newContainer);
 
-    // Manually process ignored elements (AMP elements).
+    // Manually process ignored (AMP) elements.
     for (let i = 0; i < ignored.length; i += 2) {
       const before = dev().assertElement(ignored[i]);
       const after = dev().assertElement(ignored[i + 1]);
-      devAssert(before.nodeName == after.nodeName, 'Mismatched nodeName.');
-      const attrs = DIFFABLE_AMP_ELEMENTS[before.nodeName];
-      if (attrs) {
-        const shouldReplace = attrs.some(
-          attr => before.getAttribute(attr) !== after.getAttribute(attr)
-        );
-        // Use the new element if there's a mismatched attribute value.
-        if (shouldReplace) {
-          before.parentElement.replaceChild(after, before);
-        } else {
-          // TODO(#23470): Support more attributes to manually diff by calling
-          // mutatedAttributesCallback() and changeSize().
+      this.manuallyDiffElement_(before, after);
+    }
+  }
 
-          // Add new classes.
-          for (let i = 0; i < after.classList.length; i++) {
-            before.classList.add(after.classList[i]);
-          }
-          // Remove missing, non-internal classes.
-          for (let i = 0; i < before.classList.length; i++) {
-            const c = before.classList[i];
-            if (!startsWith(c, 'i-amphtml-') && !after.classList.contains(c)) {
-              before.classList.remove(c);
-            }
-          }
-          // Concatenate instead of overwrite [style] since width/height are set
-          // by AMP's layout engine.
-          if (after.hasAttribute('style')) {
-            const afterStyle = after.getAttribute('style');
-            before.setAttribute(
-              'style',
-              `${before.getAttribute('style') || ''};${afterStyle}`
-            );
-          }
+  /**
+   * @param {!Element} container
+   * @private
+   */
+  markContainerForDiffing_(container) {
+    // amp-mustache starts at 1 and increments, so start at -1 and decrement
+    // to guarantee uniqueness.
+    let key = -1;
+    // (1) AMP elements and (2) elements with bindings need diff marking.
+    // But, we only need to do (1) here because bindings in initial content
+    // are inert by design (as are bindings in placeholder content).
+    const elements = container.querySelectorAll('.i-amphtml-element');
+    elements.forEach(element => {
+      markElementForDiffing(element, () => String(key--));
+    });
+  }
+
+  /**
+   * @param {!Element} before
+   * @param {!Element} after
+   * @private
+   */
+  manuallyDiffElement_(before, after) {
+    devAssert(before.nodeName == after.nodeName, 'Mismatched nodeName.');
+    const replacementAttrs = DIFFABLE_AMP_ELEMENTS[before.nodeName];
+    if (!replacementAttrs) {
+      return;
+    }
+    const shouldReplace = replacementAttrs.some(
+      attr => before.getAttribute(attr) !== after.getAttribute(attr)
+    );
+    // Use the new element if there's a mismatched attribute value.
+    if (shouldReplace) {
+      before.parentElement.replaceChild(after, before);
+    } else {
+      // TODO(#23470): Support more attributes to manually diff by calling
+      // mutatedAttributesCallback() and changeSize().
+
+      // Add new classes.
+      for (let i = 0; i < after.classList.length; i++) {
+        before.classList.add(after.classList[i]);
+      }
+      // Remove missing, non-internal classes.
+      for (let i = 0; i < before.classList.length; i++) {
+        const c = before.classList[i];
+        if (!startsWith(c, 'i-amphtml-') && !after.classList.contains(c)) {
+          before.classList.remove(c);
         }
+      }
+      // Concatenate instead of overwrite [style] since width/height are set
+      // by AMP's layout engine.
+      if (after.hasAttribute('style')) {
+        const afterStyle = after.getAttribute('style');
+        before.setAttribute(
+          'style',
+          `${before.getAttribute('style') || ''};${afterStyle}`
+        );
       }
     }
   }
