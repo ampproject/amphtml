@@ -53,12 +53,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  * @return {!Array<string>}
  */
 function convertPathsToTmpRoot(paths) {
-  return paths.map(path => {
-    const hasNegation = path.charAt(0) === '!';
-    const newPath = hasNegation ? path.substr(1) : path;
-    return `${hasNegation ? '!' : ''}${SRC_TEMP_DIR}/${newPath}`;
-    return path;
-  });
+  return paths.map(path => path.replace(/^(\!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
 }
 
 // Compiles AMP with the closure compiler. This is intended only for

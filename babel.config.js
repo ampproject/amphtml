@@ -41,7 +41,7 @@ const moduleTarget = {
   'esmodules': true,
 };
 
-// eslint-disable-next-line amphtml-internal/no-module-exports
+// eslint-disable-next-line local/no-module-exports
 module.exports = function(api) {
   api.cache(true);
   // `dist` builds do not use any of the default settings below until its

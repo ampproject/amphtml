@@ -226,6 +226,29 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
   });
 
+  it('should resolve element dependent vars and macros', () => {
+    win.document.cookie = 'foo=123';
+    const config = {
+      linkers: {
+        enabled: true,
+        proxyOnly: false,
+        testLinker1: {
+          ids: {
+            yum: '${myCookie}',
+          },
+        },
+      },
+      vars: {
+        'myCookie': 'COOKIE(foo)',
+      },
+    };
+
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(expandedIds => {
+      expect(expandedIds[0]).to.eql({yum: '123'});
+    });
+  });
+
   it('should not add params where linker value is empty', () => {
     const config = {
       linkers: {

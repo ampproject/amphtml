@@ -16,6 +16,7 @@
 
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
+import {Owners} from './owners-impl';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
@@ -74,7 +75,7 @@ let ChangeSizeRequestDef;
 /**
  * @interface
  */
-class OwnersDef {
+class OwnersDef extends Owners {
   /**
    * Assigns an owner for the specified element. This means that the resources
    * within this element will be managed by the owner and not Resources manager.
@@ -112,15 +113,6 @@ class OwnersDef {
    * @param {!Element|!Array<!Element>} subElements
    */
   scheduleResume(parentElement, subElements) {}
-
-  /**
-   * Schedules unlayout for specified sub-elements that are children of the
-   * parent element. The parent element can choose to send this signal when
-   * it want to unload resources for its children.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  scheduleUnlayout(parentElement, subElements) {}
 
   /**
    * Schedules preload for the specified sub-elements that are children of the
@@ -376,6 +368,7 @@ export class ResourcesDef extends MutatorsAndOwnersDef {
 
 /**
  * @implements {ResourcesDef}
+ * @implements {./owners-impl.Owners}
  */
 export class Resources {
   /**
@@ -2724,4 +2717,13 @@ export let SizeDef;
  */
 export function installResourcesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installOwnersServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'owners', ampdoc => {
+    return Services.resourcesForDoc(ampdoc);
+  });
 }

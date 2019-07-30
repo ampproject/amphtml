@@ -253,6 +253,7 @@ export class MediaPool {
    * current position in the document.
    * @param {!HTMLMediaElement} mediaA The first element to compare.
    * @param {!HTMLMediaElement} mediaB The second element to compare.
+   * @return {number}
    * @private
    */
   compareMediaDistances_(mediaA, mediaB) {

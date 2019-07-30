@@ -15,13 +15,13 @@
  */
 
 import {CommonSignals} from './common-signals';
+import {FIE_EMBED_PROP} from './iframe-helper';
 import {LEGACY_ELEMENTS, stubLegacyElements} from './service/extensions-impl';
 import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {closestAncestorElementBySelector, escapeHtml} from './dom';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
@@ -35,6 +35,8 @@ import {
   installServiceInEmbedIfEmbeddable,
   setParentWindow,
 } from './service';
+import {escapeHtml} from './dom';
+import {getExperimentBranch, isExperimentOn} from './experiments';
 import {getMode} from './mode';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
@@ -44,7 +46,6 @@ import {installCustomElements as installRegisterElement} from 'document-register
 import {installStylesForDoc, installStylesLegacy} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
-import {isExperimentOn} from './experiments';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -56,9 +57,6 @@ import {
 } from './style';
 import {toWin} from './types';
 
-/** @const {string} */
-const EMBED_PROP = '__AMP_EMBED__';
-
 /** @const {!Array<string>} */
 const EXCLUDE_INI_LOAD = [
   'AMP-AD',
@@ -66,6 +64,15 @@ const EXCLUDE_INI_LOAD = [
   'AMP-PIXEL',
   'AMP-AD-EXIT',
 ];
+
+/**
+ * @const {{experiment: string, control: string, branch: string}}
+ */
+export const FIE_CSS_CLEANUP_EXP = {
+  branch: 'fie-css-cleanup',
+  control: '21064213',
+  experiment: '21064214',
+};
 
 /**
  * Parameters used to create the new "friendly iframe" embed.
@@ -121,18 +128,6 @@ function isSrcdocSupported() {
  */
 export function setFriendlyIframeEmbedVisible(embed, visible) {
   embed.setVisible_(visible);
-}
-
-/**
- * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
- * Caution: This will only return the FIE after the iframe has 'loaded'. If you
- * are checking before this signal you may be in a race condition that returns
- * null.
- * @param {!HTMLIFrameElement} iframe
- * @return {?FriendlyIframeEmbed}
- */
-export function getFriendlyIframeEmbedOptional(iframe) {
-  return /** @type {?FriendlyIframeEmbed} */ (iframe[EMBED_PROP]);
 }
 
 /**
@@ -246,7 +241,7 @@ export function installFriendlyIframeEmbed(
         ? ampdocService.installFieDoc(spec.url, childWin, {signals})
         : null;
     const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise, ampdoc);
-    iframe[EMBED_PROP] = embed;
+    iframe[FIE_EMBED_PROP] = embed;
 
     // Add extensions.
     if (ampdoc && ampdocFieExperimentOn) {
@@ -293,6 +288,7 @@ function isIframeReady(iframe) {
 /**
  * Merges base and fonts into html document.
  * @param {!FriendlyIframeSpec} spec
+ * @return {string}
  */
 function mergeHtml(spec) {
   const originalHtml = spec.html;
@@ -351,6 +347,7 @@ function mergeHtml(spec) {
 /**
  * Exposes `mergeHtml` for testing purposes.
  * @param {!FriendlyIframeSpec} spec
+ * @return {string}
  * @visibleForTesting
  */
 export function mergeHtmlForTesting(spec) {
@@ -704,7 +701,8 @@ export class FriendlyIframeEmbed {
     // Install runtime styles.
     installStylesForDoc(
       ampdoc,
-      isExperimentOn(topWin, 'fie-css-cleanup')
+      getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.branch) ===
+        FIE_CSS_CLEANUP_EXP.experiment
         ? ampSharedCss
         : ampDocCss + ampSharedCss,
       /* callback */ null,
@@ -763,7 +761,8 @@ export class FriendlyIframeEmbed {
     // Install runtime styles.
     installStylesLegacy(
       childWin.document,
-      isExperimentOn(topWin, 'fie-css-cleanup')
+      getExperimentBranch(this.win, FIE_CSS_CLEANUP_EXP.branch) ===
+        FIE_CSS_CLEANUP_EXP.experiment
         ? ampSharedCss
         : ampDocCss + ampSharedCss,
       /* callback */ null,
@@ -860,17 +859,6 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
       });
       return Promise.all(promises);
     });
-}
-
-/**
- * @param {!Element} element
- * @return {boolean}
- */
-export function isInFie(element) {
-  return (
-    element.classList.contains('i-amphtml-fie') ||
-    !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
-  );
 }
 
 /**

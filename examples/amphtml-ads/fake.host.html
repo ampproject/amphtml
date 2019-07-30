@@ -18,7 +18,7 @@
   <h3>Inabox above the fold</h3>
   <iframe
       name="inabox-atf"
-      src="//ads.localhost:8000/examples/inabox.amp.html"
+      src="//ads.localhost:8000/examples/amphtml-ads/image-ad.a4a.html"
       scrolling="no"
       width="300" height="200">
   </iframe>
@@ -34,7 +34,7 @@
   <div style="height: 100vh"></div>
   <iframe
       name="inabox-btf"
-      srcdoc="<iframe src='//ads.localhost:8000/examples/inabox.amp.html' width='300' height='200' scrolling='no' frameborder=0></iframe>"
+      srcdoc="<iframe src='//ads.localhost:8000/examples/amphtml-ads/image-ad.a4a.html' width='300' height='200' scrolling='no' frameborder=0></iframe>"
       scrolling="no"
       marginwidth="0"
       marginheight="0"
@@ -45,20 +45,7 @@
     You should have seen another 2 failed network requests: <code>visible</code>, <code>rootVisible</code> when the 2nd iframe enters viewport.
     Then followed by <code>img2Visible</code> when the 2nd image in this iframe enters viewport.
   </div>
-  <div style="height: 20vh"></div>
-  <hr>
-  <h3>Everything inabox</h3>
-  <div>
-    <strong>Check Point 3: AMP elements rendering for inabox</strong><br/>
-    This is a long AMP document. You should see everything renders correctly. All check console errors.
-  </div>
-  <iframe
-      name="inabox-article"
-      src="//ads.localhost:8000/examples/inabox-more.amp.html"
-      scrolling="no"
-      width="300" height="1000">
-  </iframe>
 
-  <script src="./inabox-tag-integration.js"></script>
+  <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
 </body>
 </html>

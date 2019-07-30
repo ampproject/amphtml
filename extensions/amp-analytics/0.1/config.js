@@ -197,6 +197,7 @@ export class AnalyticsConfig {
    * Handles logic if configRewriter is enabled.
    * @param {!JsonObject} config
    * @param {string} configRewriterUrl
+   * @return {!Promise<undefined>}
    */
   handleConfigRewriter_(config, configRewriterUrl) {
     assertHttpsUrl(configRewriterUrl, this.element_);
@@ -435,7 +436,7 @@ export class AnalyticsConfig {
   /**
    * Expands all key value pairs asynchronously and returns a promise that will
    * resolve with the expanded object.
-   * @param {!Element|!ShadowRoot} element
+   * @param {!Element} element
    * @param {!Object} obj
    * @return {!Promise<!Object>}
    */
@@ -445,7 +446,7 @@ export class AnalyticsConfig {
     const expansionPromises = [];
 
     const urlReplacements = Services.urlReplacementsForDoc(element);
-    const bindings = variableServiceForDoc(element).getMacros();
+    const bindings = variableServiceForDoc(element).getMacros(element);
 
     Object.keys(obj).forEach(key => {
       keys.push(key);
@@ -467,6 +468,7 @@ export class AnalyticsConfig {
  * @param {Object|Array} from Object or array to merge from
  * @param {Object|Array} to Object or Array to merge into
  * @param {boolean=} opt_predefinedConfig
+ * @return {*} TODO(#23582): Specify return type
  */
 export function mergeObjects(from, to, opt_predefinedConfig) {
   if (to === null || to === undefined) {
@@ -521,6 +523,7 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
 /**
  * Expand config's request to object
  * @param {!JsonObject} config
+ * @return {?JsonObject}
  * @visibleForTesting
  */
 export function expandConfigRequest(config) {
@@ -539,6 +542,7 @@ export function expandConfigRequest(config) {
 /**
  * Expand single request to an object
  * @param {!JsonObject} request
+ * @return {*} TODO(#23582): Specify return type
  */
 function expandRequestStr(request) {
   if (isObject(request)) {
