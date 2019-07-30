@@ -380,7 +380,7 @@ export class AnalyticsConfig {
   /**
    * Expands all key value pairs asynchronously and returns a promise that will
    * resolve with the expanded object.
-   * @param {!Element|!ShadowRoot} element
+   * @param {!Element} element
    * @param {!Object} obj
    * @return {!Promise<!Object>}
    */
@@ -390,7 +390,7 @@ export class AnalyticsConfig {
     const expansionPromises = [];
 
     const urlReplacements = Services.urlReplacementsForDoc(element);
-    const bindings = variableServiceForDoc(element).getMacros();
+    const bindings = variableServiceForDoc(element).getMacros(element);
 
     Object.keys(obj).forEach(key => {
       keys.push(key);
