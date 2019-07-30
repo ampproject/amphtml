@@ -49,8 +49,8 @@ import {
 import {isArray, toArray} from '../../../src/types';
 import {px, setStyles, toggle} from '../../../src/style';
 import {removeChildren, scopedQuerySelector} from '../../../src/dom';
-import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {startsWith} from '../../../src/string';
+import setDOM from 'set-dom/dist/set-dom.js';
 
 /** @const {string} */
 const TAG = 'amp-list';
