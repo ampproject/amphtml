@@ -446,6 +446,21 @@ app.use('/share-tracking/get-outgoing-fragment', (req, res) => {
   });
 });
 
+app.use('/dist/v0/analytics-vendors/*', (req, res) => {
+  console.log('asdf');
+  console.log(req.params);
+});
+
+app.use(/\/rtv\/\d+\/v0\/analytics-vendors\//, (req, res) => {
+  console.log('asdf2');
+  console.log(req.params);
+});
+
+app.use('/rtv/**/v0/analytics-vendors/*', (req, res) => {
+  console.log('asdf2');
+  console.log(req.params);
+});
+
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.
 function proxyToAmpProxy(req, res, mode) {
