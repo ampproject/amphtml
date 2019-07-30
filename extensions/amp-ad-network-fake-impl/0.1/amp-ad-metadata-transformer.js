@@ -61,67 +61,10 @@ export class AmpAdMetadataTransformer {
 
     // Creating json object from all of the components
     const creative = doc.documentElement./*OK*/ outerHTML;
-    let start = 0;
-    let end = 0;
-    if (this.firstRuntimeElement_ != null) {
-      const firstRuntimeElementString = this.firstRuntimeElement_
-        ./*OK*/ outerHTML;
-      const lastRuntimeElementString = this.lastRuntimeElement_
-        ./*OK*/ outerHTML;
-      start = creative.indexOf(firstRuntimeElementString);
-      end =
-        creative.indexOf(lastRuntimeElementString) +
-        lastRuntimeElementString.length;
-    }
-    this.metadata['ampRuntimeUtf16CharOffsets'] = [start, end];
-
-    if (this.jsonMetadata_.length > 0) {
-      this.metadata['jsonUtf16CharOffsets'] = {};
-      for (let i = 0; i < this.jsonMetadata_.length; i++) {
-        const name = this.jsonMetadata_[i];
-        const nameElementString = this.ampAnalytics_./*OK*/ innerHTML;
-        const jsonStart = creative.indexOf(nameElementString);
-        const jsonEnd = jsonStart + nameElementString.length;
-        this.metadata['jsonUtf16CharOffsets'][name] = [jsonStart, jsonEnd];
-      }
-    }
-
-    const ampAnalytics = doc.querySelectorAll('amp-analytics');
-    if (ampAnalytics.length > 0) {
-      if (!this.metadata['jsonUtf16CharOffsets']) {
-        this.metadata['jsonUtf16CharOffsets'] = {};
-      }
-      this.metadata['jsonUtf16CharOffsets']['amp-analytics'] = [];
-      for (let i = 0; i < ampAnalytics.length; i++) {
-        const element = ampAnalytics[i];
-        const nameElementString = element./*OK*/ innerHTML;
-        const jsonStart = creative.indexOf(nameElementString);
-        const jsonEnd = jsonStart + nameElementString.length;
-        this.metadata['jsonUtf16CharOffsets']['amp-analytics'].push(jsonStart);
-        this.metadata['jsonUtf16CharOffsets']['amp-analytics'].push(jsonEnd);
-      }
-    }
-
-    if (this.extensions_.length > 0) {
-      this.metadata['customElementExtensions'] = [];
-      this.metadata['extensions'] = [];
-      for (let i = 0; i < this.extensions_.length; i++) {
-        const extension = this.extensions_[i];
-        let custom;
-        if (extension['custom-element'] != null) {
-          custom = extension['custom-element'];
-        } else {
-          custom = extension['custom-template'];
-        }
-        if (this.metadata['customElementExtensions'].indexOf(custom) == -1) {
-          this.metadata['customElementExtensions'].push(custom);
-          this.metadata['extensions'].push({
-            'custom-element': custom,
-            'src': extension['src'],
-          });
-        }
-      }
-    }
+    this.generateRuntimeOffsets_(creative);
+    this.generateJsonOffsets_(creative);
+    this.generateAmpAnalyticsOffsets_(doc, creative);
+    this.addExtensionsMetadata_();
 
     if (this.styles_.length > 0) {
       this.metadata['customStyleSheets'] = this.styles_;
@@ -241,7 +184,7 @@ export class AmpAdMetadataTransformer {
   }
 
   /**
-   * Generates json offsets and parses
+   * Finds all <script type=application/json> tags and parses
    * existing <amp-ad-metadata> script, if it exists
    * @param {Document} doc
    */
@@ -264,6 +207,93 @@ export class AmpAdMetadataTransformer {
         !this.jsonMetadata_.includes(script.getAttribute('id'))
       ) {
         this.jsonMetadata_.push(script.getAttribute('id'));
+      }
+    }
+  }
+
+  /**
+   * Generates start and end of all runtime scripts,
+   * so they can be extracted by amp-a4a.js
+   * @param {string} creative
+   */
+  generateRuntimeOffsets_(creative) {
+    let start = 0;
+    let end = 0;
+    if (this.firstRuntimeElement_ != null) {
+      const firstRuntimeElementString = this.firstRuntimeElement_
+        ./*OK*/ outerHTML;
+      const lastRuntimeElementString = this.lastRuntimeElement_
+        ./*OK*/ outerHTML;
+      start = creative.indexOf(firstRuntimeElementString);
+      end =
+        creative.indexOf(lastRuntimeElementString) +
+        lastRuntimeElementString.length;
+    }
+    this.metadata['ampRuntimeUtf16CharOffsets'] = [start, end];
+  }
+
+  /**
+   * Generates start and end of all json scripts,
+   * not including <amp-analytics> json
+   * @param {string} creative
+   */
+  generateJsonOffsets_(creative) {
+    if (this.jsonMetadata_.length > 0) {
+      this.metadata['jsonUtf16CharOffsets'] = {};
+      for (let i = 0; i < this.jsonMetadata_.length; i++) {
+        const name = this.jsonMetadata_[i];
+        const nameElementString = this.ampAnalytics_./*OK*/ innerHTML;
+        const jsonStart = creative.indexOf(nameElementString);
+        const jsonEnd = jsonStart + nameElementString.length;
+        this.metadata['jsonUtf16CharOffsets'][name] = [jsonStart, jsonEnd];
+      }
+    }
+  }
+  /**
+   * Generates start and end of all json scripts
+   * within <amp-analytics> tags
+   * @param {Document} doc
+   * @param {string} creative
+   */
+  generateAmpAnalyticsOffsets_(doc, creative) {
+    const ampAnalytics = doc.querySelectorAll('amp-analytics');
+    if (ampAnalytics.length > 0) {
+      if (!this.metadata['jsonUtf16CharOffsets']) {
+        this.metadata['jsonUtf16CharOffsets'] = {};
+      }
+      this.metadata['jsonUtf16CharOffsets']['amp-analytics'] = [];
+      for (let i = 0; i < ampAnalytics.length; i++) {
+        const element = ampAnalytics[i];
+        const nameElementString = element./*OK*/ innerHTML;
+        const jsonStart = creative.indexOf(nameElementString);
+        const jsonEnd = jsonStart + nameElementString.length;
+        this.metadata['jsonUtf16CharOffsets']['amp-analytics'].push(jsonStart);
+        this.metadata['jsonUtf16CharOffsets']['amp-analytics'].push(jsonEnd);
+      }
+    }
+  }
+  /**
+   * Adds "customElementExtensions" and "extensions" objects to metadata
+   */
+  addExtensionsMetadata_() {
+    if (this.extensions_.length > 0) {
+      this.metadata['customElementExtensions'] = [];
+      this.metadata['extensions'] = [];
+      for (let i = 0; i < this.extensions_.length; i++) {
+        const extension = this.extensions_[i];
+        let custom;
+        if (extension['custom-element'] != null) {
+          custom = extension['custom-element'];
+        } else {
+          custom = extension['custom-template'];
+        }
+        if (this.metadata['customElementExtensions'].indexOf(custom) == -1) {
+          this.metadata['customElementExtensions'].push(custom);
+          this.metadata['extensions'].push({
+            'custom-element': custom,
+            'src': extension['src'],
+          });
+        }
       }
     }
   }
