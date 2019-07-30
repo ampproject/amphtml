@@ -28,6 +28,7 @@ import {
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
+import {childElementByAttr, removeChildren} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -43,7 +44,6 @@ import {
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
-import {removeChildren} from '../../../src/dom';
 import setDOM from 'set-dom/dist/set-dom.js';
 
 /** @const {string} */
@@ -1137,6 +1137,11 @@ export class AmpList extends AMP.BaseElement {
    */
   showFallbackOrThrow_(error) {
     this.element.classList.add('i-amphtml-list-fetch-error');
+    // Displaying [fetch-error] may offset initial content, so resize to fit.
+    if (childElementByAttr(this.element, 'fetch-error')) {
+      // Note that we're measuring against the element instead of the container.
+      this.attemptToFit_(this.element);
+    }
     this.toggleLoading(false);
     if (this.getFallback()) {
       this.toggleFallback_(true);
