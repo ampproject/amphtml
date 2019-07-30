@@ -16,14 +16,9 @@
 
 import {AnalyticsEventType} from './events';
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
-import {
-  ExpansionOptions,
-  getConsentStateStr,
-  variableServiceForDoc,
-} from './variables';
+import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {cookieReader} from './cookie-reader';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
@@ -132,16 +127,12 @@ export class RequestHandler {
 
     this.queueSize_++;
     this.lastTrigger_ = trigger;
-    const bindings = this.variableService_.getMacros();
+    const bindings = this.variableService_.getMacros(this.element_);
     bindings['RESOURCE_TIMING'] = getResourceTiming(
       this.ampdoc_,
       trigger['resourceTimingSpec'],
       this.startTime_
     );
-    // TODO: (@zhouyx) Move to variable service once that becomes
-    // a doc level services
-    bindings['CONSENT_STATE'] = getConsentStateStr(this.element_);
-    bindings['COOKIE'] = name => cookieReader(this.win, this.element_, name);
 
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
@@ -415,7 +406,7 @@ export function expandPostMessage(
   const variableService = variableServiceForDoc(ampdoc);
   const urlReplacementService = Services.urlReplacementsForDoc(element);
 
-  const bindings = variableService.getMacros();
+  const bindings = variableService.getMacros(element);
   expansionOption.freezeVar('extraUrlParams');
 
   const basePromise = variableService

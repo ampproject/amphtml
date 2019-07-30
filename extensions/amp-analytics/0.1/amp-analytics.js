@@ -737,7 +737,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then(key =>
         Services.urlReplacementsForDoc(this.element).expandUrlAsync(
           key,
-          this.variableService_.getMacros()
+          this.variableService_.getMacros(this.element)
         )
       );
   }
