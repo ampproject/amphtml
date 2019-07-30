@@ -489,13 +489,6 @@ form [submit-error] {
 }
 
 /**
- * amp-list error messaging container should be hidden at first.
- */
-amp-list [fetch-error] {
-  display: none;
-}
-
-/**
  * Form validation error messages should be hidden at first.
  */
 [visible-when-invalid]:not(.visible) {
