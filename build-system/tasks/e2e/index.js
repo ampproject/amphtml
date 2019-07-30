@@ -39,7 +39,6 @@ let webServerProcess_;
 function installPackages_() {
   log('Running', cyan('yarn'), 'to install packages...');
   execOrDie('npx yarn --cwd build-system/tasks/e2e', {'stdio': 'ignore'});
-  execOrDie('npx npm install chromedriver --chromedriver_version=76.0.3809.68');
 }
 
 function buildRuntime_() {

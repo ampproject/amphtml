@@ -40,45 +40,45 @@ addons:
     # but should not resolve in tests.
     - fonts.googleapis.com
 stages:
-  - build
-  - test
+  # - build
+   - test
 jobs:
   include:
-    - stage: build
-      name: "Build"
-      script:
-        - unbuffer node build-system/pr-check/build.js
-    - stage: build
-      name: "Checks"
-      script:
-        - unbuffer node build-system/pr-check/checks.js
-    - stage: build
-      name: "Validator Tests"
-      script:
-        - unbuffer node build-system/pr-check/validator-tests.js
-    - stage: build
-      name: "Dist, Bundle Size"
-      script:
-        - unbuffer node build-system/pr-check/dist-bundle-size.js
-    - stage: test
-      name: "Single Pass Tests"
-      script:
-        - unbuffer node build-system/pr-check/single-pass-tests.js
-    - stage: test
-      name: "Visual Diff Tests"
-      script:
-        - unbuffer node build-system/pr-check/visual-diff-tests.js
-    - stage: test
-      name: "Local Tests"
-      script:
-        - unbuffer node build-system/pr-check/local-tests.js
-    - stage: test
-      name: "Remote (Sauce Labs) Tests"
-      script:
-        - unbuffer node build-system/pr-check/remote-tests.js
-      after_script:
-        - build-system/sauce_connect/stop_sauce_connect.sh
-        - ps -ef
+    # - stage: build
+    #   name: "Build"
+    #   script:
+    #     - unbuffer node build-system/pr-check/build.js
+    # - stage: build
+    #   name: "Checks"
+    #   script:
+    #     - unbuffer node build-system/pr-check/checks.js
+    # - stage: build
+    #   name: "Validator Tests"
+    #   script:
+    #     - unbuffer node build-system/pr-check/validator-tests.js
+    # - stage: build
+    #   name: "Dist, Bundle Size"
+    #   script:
+    #     - unbuffer node build-system/pr-check/dist-bundle-size.js
+    # - stage: test
+    #   name: "Single Pass Tests"
+    #   script:
+    #     - unbuffer node build-system/pr-check/single-pass-tests.js
+    # - stage: test
+    #   name: "Visual Diff Tests"
+    #   script:
+    #     - unbuffer node build-system/pr-check/visual-diff-tests.js
+    # - stage: test
+    #   name: "Local Tests"
+    #   script:
+    #     - unbuffer node build-system/pr-check/local-tests.js
+    # - stage: test
+    #   name: "Remote (Sauce Labs) Tests"
+    #   script:
+    #     - unbuffer node build-system/pr-check/remote-tests.js
+    #   after_script:
+    #     - build-system/sauce_connect/stop_sauce_connect.sh
+    #     - ps -ef
     - stage: test
       name: "End to End Tests"
       script:
@@ -95,3 +95,5 @@ cache:
     - validator/nodejs/node_modules
     - validator/webui/node_modules
   yarn: true
+env:
+  - CHROMEDRIVER_VERSION=76.0.3809.68
