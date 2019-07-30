@@ -80,6 +80,7 @@
       color: #fff;
       display: inline-block;
       background-color: #2979ff;
+      text-decoration: none;
     }
     .button-secondary {
       background: transparent;
@@ -103,6 +104,7 @@
     This is only used for transitions that are activated when the selected item slides into view. If the transition is not desired, `amp-bind` is no longer a requisite for this example.
     -->
     <amp-carousel
+        id="scrollable-carousel"
         height="132"
         layout="fixed-height"
         type="slides"
@@ -144,9 +146,9 @@
           layout="fixed"
           class="logo-img"></amp-img>
     </div>
-    <a href="https://amp.dev/documentation/examples/" target="_blank" class="button button-secondary">
-      Locate Store
-    </a>
+    <button class="button button-secondary" on="tap:scrollable-carousel.goToSlide(index=2)">
+      The last slide
+    </button>
     <a href="https://amp.dev/documentation/examples/" target="_blank" class="button">
       Explore
     </a>
