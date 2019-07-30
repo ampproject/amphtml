@@ -217,27 +217,23 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         env.win.document.body.removeChild(iframe);
       });
 
-      it.configure()
-        .skipSafari()
-        .run(
-          'should layout amp-img, amp-pixel, ' +
-            'amp-analytics within friendly frame',
-          () => {
-            writeFriendlyFrame(env.win.document, iframe, adContent);
-            return testAmpComponentsBTF(env.win);
-          }
-        );
+      it(
+        'should layout amp-img, amp-pixel, ' +
+          'amp-analytics within friendly frame',
+        () => {
+          writeFriendlyFrame(env.win.document, iframe, adContent);
+          return testAmpComponentsBTF(env.win);
+        }
+      );
 
-      it.configure()
-        .skipSafari()
-        .run(
-          'should layout amp-img, amp-pixel, ' +
-            'amp-analytics within safe frame',
-          () => {
-            writeSafeFrame(env.win.document, iframe, adContent);
-            return testAmpComponentsBTF(env.win);
-          }
-        );
+      it(
+        'should layout amp-img, amp-pixel, ' +
+          'amp-analytics within safe frame',
+        () => {
+          writeSafeFrame(env.win.document, iframe, adContent);
+          return testAmpComponentsBTF(env.win);
+        }
+      );
     }
   );
 });
@@ -376,12 +372,12 @@ describe('A more real AMPHTML image ad', () => {
         }, 2000);
       });
 
-      it.skip('should properly render ad in a friendly iframe with viewability pings', () => {
+      it('should properly render ad in a friendly iframe with viewability pings', () => {
         writeFriendlyFrame(doc, iframe, adBody);
         return testVisibilityPings(2000, 3000);
       });
 
-      it.skip('should properly render ad in a safe frame with viewability pings', () => {
+      it('should properly render ad in a safe frame with viewability pings', () => {
         writeSafeFrame(doc, iframe, adBody);
         return testVisibilityPings(2000, 3000);
       });
