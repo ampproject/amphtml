@@ -46,8 +46,8 @@ module.exports = function(babel) {
   let shouldEmitTypedefs;
   return {
     pre() {
-      const {writeToFile = false, emitTypedefs = false} = this.opts;
-      externDest = writeToFile;
+      const {externDestination = '', emitTypedefs = false} = this.opts;
+      externDest = externDestination;
       shouldEmitTypedefs = emitTypedefs;
     },
     visitor: {
