@@ -1301,20 +1301,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should attempt resize for fluid request + fixed response case', () => {
       impl.isFluidRequest_ = true;
-      impl.handleResize_(350, 300);
-      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
-      expect(impl.element.getAttribute('style')).to.match(/height: 300/);
-    });
-
-    it('should attempt resize for larger width response', () => {
-      impl.handleResize_(350, 50);
-      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
-      expect(impl.element.getAttribute('style')).to.match(/height: 50/);
-    });
-
-    it('should not attempt resize for larger height response', () => {
-      impl.handleResize_(350, 300);
-      expect(impl.element.getAttribute('style')).to.match(/width: 200/);
+      impl.handleResize_(150, 50);
+      expect(impl.element.getAttribute('style')).to.match(/width: 150/);
       expect(impl.element.getAttribute('style')).to.match(/height: 50/);
     });
   });
