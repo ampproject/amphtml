@@ -67,7 +67,7 @@ module.exports = function(babel) {
             typedefs.forEach(typedef => {
               path.pushContainer('body', typedef);
             });
-            path.skip();
+            path.stop();
           }
         },
       },
