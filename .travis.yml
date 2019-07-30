@@ -81,7 +81,7 @@ jobs:
         - ps -ef
     - stage: test
       name: "End to End Tests"
-      before_script
+      before_script:
         - build-system/pr-check/install-chromedriver.sh
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
