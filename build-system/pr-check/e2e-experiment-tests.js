@@ -22,6 +22,7 @@
  */
 
 const colors = require('ansi-colors');
+const experimentsConfig = require('../global-configs/experiments-config.json');
 const {
   downloadDistExperimentOutput,
   downloadDistOutput,
@@ -41,12 +42,15 @@ const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
 async function runExperimentTests_() {
-  timedExecOrDie('gulp clean');
-  downloadDistExperimentOutput(FILENAME);
-  timedExecOrDie('gulp update-packages');
-  await startSauceConnect(FILENAME);
-  timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
-  stopSauceConnect(FILENAME);
+  Object.keys(experimentsConfig).forEach(async experiment => {
+    const config = experimentsConfig[experiment];
+    timedExecOrDie('gulp clean');
+    downloadDistExperimentOutput(FILENAME, config.name);
+    timedExecOrDie('gulp update-packages');
+    await startSauceConnect(FILENAME);
+    timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
+    stopSauceConnect(FILENAME);
+  });
 }
 
 async function main() {
@@ -61,7 +65,6 @@ async function main() {
     printChangeSummary(FILENAME);
     //TODO(estherkim): move this to push build before merging
     await runExperimentTests_();
-
     const buildTargets = determineBuildTargets(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||
