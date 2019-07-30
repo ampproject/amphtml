@@ -51,6 +51,10 @@ import {
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
+import {
+  FlexibleAdSlotDataTypeDef,
+  getFlexibleAdSlotData,
+} from './flexible-ad-slot-utils';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
@@ -66,7 +70,11 @@ import {
   serializeTargeting,
   sraBlockCallbackHandler,
 } from './sra-utils';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  isRTL,
+  removeElement,
+} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
@@ -74,7 +82,6 @@ import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {getFlexibleAdSlotRequestParams} from './flexible-ad-slot-utils';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -287,6 +294,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.sendFlexibleAdSlotParams_ = false;
+
+    /**
+     * Set after the ad request is built.
+     * @private {?FlexibleAdSlotDataTypeDef}
+     */
+    this.flexibleAdSlotData_ = null;
   }
 
   /**
@@ -535,10 +548,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     let psz = null;
     let fws = null;
     if (this.sendFlexibleAdSlotParams_) {
-      const {fwSignal, slotWidth, parentWidth} = getFlexibleAdSlotRequestParams(
+      this.flexibleAdSlotData_ = getFlexibleAdSlotData(
         this.win,
         this.element.parentElement
       );
+      const {fwSignal, slotWidth, parentWidth} = this.flexibleAdSlotData_;
       // If slotWidth is -1, that means its width must be determined by its
       // parent container, and so should have the same value as parentWidth.
       msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
@@ -1237,6 +1251,60 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       (returnedSizeDifferent && heightNotIncreased)
     ) {
       this.attemptChangeSize(newHeight, newWidth).catch(() => {});
+      if (newWidth > width) {
+        this.adjustSlotPostExpansion_(newWidth);
+      }
+    }
+  }
+
+  /**
+   * Ensures that slot is properly centered after being expanded.
+   * @param {number} newWidth The new width of the slot.
+   * @private
+   */
+  adjustSlotPostExpansion_(newWidth) {
+    if (
+      !devAssert(
+        this.flexibleAdSlotData_,
+        'Attempted to expand slot without flexible ad slot data.'
+      )
+    ) {
+      return;
+    }
+    const isRtl = isRTL(this.win.document);
+    const dirStr = isRtl ? 'Right' : 'Left';
+    // Guaranteed to be set after exiting if/else.
+    let /** ?number */ newMargin = null;
+    const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
+    if (newWidth <= parentWidth) {
+      // Must center creative within its parent container
+      const parentPadding = parseInt(parentStyle[`padding${dirStr}`], 10) || 0;
+      const parentBorder =
+        parseInt(parentStyle[`border${dirStr}Width`], 10) || 0;
+      const whitespace = (this.flexibleAdSlotData_.parentWidth - newWidth) / 2;
+      newMargin = whitespace - parentPadding - parentBorder;
+    } else {
+      // Must center creative within the viewport
+      const viewportWidth = this.getViewport().getRect().width;
+      const pageLayoutBox = this.element.getPageLayoutBox();
+      const whitespace = (viewportWidth - newWidth) / 2;
+      if (isRtl) {
+        newMargin = pageLayoutBox.right + whitespace - viewportWidth;
+      } else {
+        newMargin = -(pageLayoutBox.left - whitespace);
+      }
+    }
+    // setStyles cannot have computed style names, so we must do this by cases.
+    if (isRtl) {
+      setStyles(this.element, {
+        'z-index': '30',
+        'margin-right': `${Math.round(newMargin)}px`,
+      });
+    } else {
+      setStyles(this.element, {
+        'z-index': '30',
+        'margin-left': `${Math.round(newMargin)}px`,
+      });
     }
   }
 
