@@ -48,10 +48,12 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 function buildAndUploadExperiments_() {
   Object.keys(experimentsConfig).forEach(experiment => {
     const config = experimentsConfig[experiment];
-    timedExecOrDie('gulp clean');
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie(config.command);
-    uploadDistExperimentOutput(FILENAME, config.name);
+    if (config.command) {
+      timedExecOrDie('gulp clean');
+      timedExecOrDie('gulp update-packages');
+      timedExecOrDie(config.command);
+      uploadDistExperimentOutput(FILENAME, experiment);
+    }
   });
 }
 
