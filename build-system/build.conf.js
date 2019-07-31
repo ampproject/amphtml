@@ -38,6 +38,7 @@ const esmRemovedImports = {
   './polyfills/object-assign': ['installObjectAssign'],
   './polyfills/object-values': ['installObjectValues'],
   './polyfills/promise': ['installPromise'],
+  './polyfills/array-includes': ['installArrayIncludes'],
 };
 
 /**
