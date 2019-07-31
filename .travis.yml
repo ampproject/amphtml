@@ -29,7 +29,8 @@ addons:
       - google-cloud-sdk
       - openssl
       - protobuf-compiler
-  chrome: stable
+    sources:
+      - google-chrome
   hosts:
     - ads.localhost
     - iframe.localhost
