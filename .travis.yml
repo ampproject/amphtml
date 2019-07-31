@@ -90,7 +90,7 @@ jobs:
         - ps -ef
   allow_failures:
     - script:
-      - unbuffer node build-system/pr-check/e2e-tests.js
+      - unbuffer node build-system/pr-check/e2e-experiment-tests.js
 cache:
   directories:
     - node_modules
