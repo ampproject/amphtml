@@ -25,13 +25,14 @@ describes.realWin(
     },
   },
   env => {
-    let win, doc;
+    let win, doc, ownerImpl;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       env.iframe.width = '300';
       env.iframe.height = '200';
+      ownerImpl = Services.ownersForDoc(doc);
     });
 
     function getAmpScrollableCarousel() {
@@ -129,7 +130,6 @@ describes.realWin(
       () => {
         return getAmpScrollableCarousel().then(carousel => {
           const impl = carousel.implementation_;
-          const ownerImpl = Services.ownersForDoc(impl.element);
           const updateInViewportSpy = sandbox.spy(
             ownerImpl,
             'updateInViewport'
@@ -210,7 +210,6 @@ describes.realWin(
           // click on the next button the first time
           impl.goCallback(1, /*animate*/ false);
 
-          const ownerImpl = Services.ownersForDoc(impl.element);
           const updateInViewportSpy = sandbox.spy(
             ownerImpl,
             'updateInViewport'
@@ -291,7 +290,6 @@ describes.realWin(
           impl.goCallback(1, /*animate*/ false);
           impl.goCallback(1, /*animate*/ false);
 
-          const ownerImpl = Services.ownersForDoc(impl.element);
           const updateInViewportSpy = sandbox.spy(
             ownerImpl,
             'updateInViewport'
@@ -375,7 +373,6 @@ describes.realWin(
           impl.goCallback(1, /*animate*/ false);
           impl.goCallback(-1, /*animate*/ false);
 
-          const ownerImpl = Services.ownersForDoc(impl.element);
           const updateInViewportSpy = sandbox.spy(
             ownerImpl,
             'updateInViewport'
