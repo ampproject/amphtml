@@ -35,6 +35,7 @@ class InaboxCid {
 
 /**
  * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {*} TODO(#23582): Specify return type
  */
 export function installInaboxCidService(ampdoc) {
   return registerServiceBuilderForDoc(ampdoc, 'cid', InaboxCid);

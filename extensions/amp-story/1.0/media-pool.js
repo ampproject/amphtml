@@ -306,6 +306,7 @@ export class MediaPool {
    * current position in the document.
    * @param {!PoolBoundElementDef} mediaA The first element to compare.
    * @param {!PoolBoundElementDef} mediaB The second element to compare.
+   * @return {number}
    * @private
    */
   compareMediaDistances_(mediaA, mediaB) {

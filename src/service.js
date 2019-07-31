@@ -254,6 +254,7 @@ export function getServiceForDoc(elementOrAmpDoc, id) {
  * If service `id` is not registered, returns null.
  * @param {!Element|!ShadowRoot} element
  * @param {string} id
+ * @return {?Object}
  */
 function getServiceForDocOrNullInternal(element, id) {
   const ampdoc = getAmpdoc(element);
