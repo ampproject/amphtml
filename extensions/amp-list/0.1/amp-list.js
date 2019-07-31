@@ -18,7 +18,12 @@ import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-list-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
-import {Layout, getLayoutClass, isLayoutSizeDefined} from '../../../src/layout';
+import {
+  Layout,
+  getLayoutClass,
+  isLayoutSizeDefined,
+  parseLayout,
+} from '../../../src/layout';
 import {LoadMoreService} from './service/load-more-service';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
@@ -879,11 +884,12 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Undoes previous size-defined layout, must be called in mutation context.
-   * @param {string} previousLayout
+   * @param {string} layoutString
    * @see src/layout.js
    */
-  undoPreviousLayout_(previousLayout) {
-    const layoutClass = getLayoutClass(previousLayout);
+  undoLayout_(layoutString) {
+    const layout = parseLayout(layoutString);
+    const layoutClass = getLayoutClass(devAssert(layout));
     this.element.classList.remove(layoutClass, 'i-amphtml-layout-size-defined');
 
     // TODO(amphtml): Remove [width] and [height] attributes too?
@@ -894,10 +900,10 @@ export class AmpList extends AMP.BaseElement {
         Layout.FLUID,
         Layout.INTRINSIC,
         Layout.RESPONSIVE,
-      ].includes(previousLayout)
+      ].includes(layout)
     ) {
       setStyles(this.element, {width: '', height: ''});
-    } else if (previousLayout == Layout.FIXED_HEIGHT) {
+    } else if (layout == Layout.FIXED_HEIGHT) {
       setStyles(this.element, {height: ''});
     }
 
@@ -918,7 +924,7 @@ export class AmpList extends AMP.BaseElement {
       return Promise.resolve();
     }
     return this.mutateElement(() => {
-      this.undoPreviousLayout_(previousLayout);
+      this.undoLayout_(previousLayout);
       this.container_.classList.remove(
         'i-amphtml-fill-content',
         'i-amphtml-replaced-content'
