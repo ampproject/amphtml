@@ -49,6 +49,33 @@ const MINIMAL_EXTENSION_SET = [
 ];
 
 /**
+ * Extensions to build when `--extensions=inabox`.
+ * See AMPHTML ads spec for supported extensions:
+ * https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/
+ *
+ * @private @const {!Array<string>}
+ */
+const INABOX_EXTENSION_SET = [
+  'amp-accordion',
+  'amp-ad-exit',
+  'amp-analytics',
+  'amp-anim',
+  'amp-animation',
+  'amp-audio',
+  'amp-bind',
+  'amp-carousel',
+  'amp-fit-text',
+  'amp-font',
+  'amp-form',
+  'amp-layout',
+  'amp-lightbox',
+  'amp-mustache',
+  'amp-position-observer',
+  'amp-social-share',
+  'amp-video',
+];
+
+/**
  * @typedef {{
  *   name: ?string,
  *   version: ?string,
@@ -168,6 +195,8 @@ function getExtensionsToBuild() {
   if (!!argv.extensions) {
     if (argv.extensions === 'minimal_set') {
       argv.extensions = MINIMAL_EXTENSION_SET.join(',');
+    } else if (argv.extensions === 'inabox') {
+      argv.extensions = INABOX_EXTENSION_SET.join(',');
     }
     extensionsToBuild = argv.extensions.split(',');
   }
@@ -202,6 +231,11 @@ function parseExtensionFlags() {
       green('to build just the extensions needed to load ') +
       cyan('article.amp.html') +
       green('.');
+    const inaboxSetMessage =
+      green('⤷ Use ') +
+      cyan('--extensions=inabox ') +
+      green('to build just the extensions that are supported in AMPHTML ads') +
+      green('.');
     const extensionsFromMessage =
       green('⤷ Use ') +
       cyan('--extensions_from=examples/foo.amp.html ') +
@@ -212,6 +246,7 @@ function parseExtensionFlags() {
         log(noExtensionsMessage);
         log(extensionsMessage);
         log(minimalSetMessage);
+        log(inaboxSetMessage);
         log(extensionsFromMessage);
         process.exit(1);
       }
@@ -231,6 +266,7 @@ function parseExtensionFlags() {
     log(noExtensionsMessage);
     log(extensionsMessage);
     log(minimalSetMessage);
+    log(inaboxSetMessage);
     log(extensionsFromMessage);
   }
 }
