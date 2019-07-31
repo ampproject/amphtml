@@ -40,8 +40,8 @@ addons:
     # but should not resolve in tests.
     - fonts.googleapis.com
 stages:
-   - build
-   - test
+  - build
+  - test
 jobs:
   include:
     - stage: build
@@ -98,5 +98,3 @@ cache:
     - validator/nodejs/node_modules
     - validator/webui/node_modules
   yarn: true
-env:
-  - CHROMEDRIVER_VERSION=76.0.3809.68
