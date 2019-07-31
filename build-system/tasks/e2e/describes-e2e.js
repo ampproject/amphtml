@@ -154,7 +154,7 @@ async function createDriver(browserName, args) {
  * @return {!Array<string>}
  */
 function getChromeArgs(config) {
-  const args = ['--no-sandbox', '--disable-gpu'];
+  const args = ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'];
 
   // TODO(cvializ,estherkim,sparhami):
   // figure out why headless causes more flakes
