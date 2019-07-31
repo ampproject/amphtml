@@ -594,6 +594,7 @@ export class AmpForm {
       }
     });
 
+
     return Promise.all(requiredActionPromises).then(
       () => {
         return this.waitOnPromisesOrTimeout_(
@@ -601,23 +602,23 @@ export class AmpForm {
           SUBMIT_TIMEOUT
         ).then(
           () => this.handlePresubmitSuccess_(trust),
-          error => {
-            const detail = dict();
-            if (error && error.message) {
-              detail['error'] = error.message;
-            }
-            return this.handleSubmitFailure_(error, detail);
-          }
+          error => this.handlePresubmitError(error)
         );
       },
-      error => {
-        const detail = dict();
-        if (error && error.message) {
-          detail['error'] = error.message;
-        }
-        return this.handleSubmitFailure_(error, detail);
-      }
+      error => this.handlePresubmitError(error)
     );
+  }
+
+  /**
+   * Handle form error for presubmit async calls
+   * @param {Error} error
+   */
+  handlePresubmitError(error){
+    const detail = dict();
+    if (error && error.message) {
+      detail['error'] = error.message;
+    }
+    return this.handleSubmitFailure_(error, detail);
   }
 
   /**
