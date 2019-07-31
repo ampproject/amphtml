@@ -115,7 +115,8 @@ export class AmpAdXOriginIframeHandler {
     );
 
     // Enable creative position observer if inabox experiment enabled OR
-    // adsense running on non-CDN cache where AMP creatives are xdomained.
+    // adsense running on non-CDN cache where AMP creatives are xdomained and
+    // may require this information.
     if (
       isExperimentOn(this.win_, 'inabox-position-api') ||
       (/^adsense$/i.test(this.element_.getAttribute('type')) &&
