@@ -578,18 +578,19 @@ export class AmpForm {
     // Set ourselves to the SUBMITTING State
     this.setState_(FormState.SUBMITTING);
 
-    //required promises to run before presubmit calls
-    const requiredActionPromises = [Promise.resolve()];
+    // Promises to run before submit without timeout.
+    const requiredActionPromises = [];
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
     iterateCursor(asyncInputs, asyncInput => {
+      const asyncCall = this.getValueForAsyncInput_(asyncInput);
       if (
-        !asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
       ) {
-        presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+        requiredActionPromises.push(asyncCall);
       } else {
-        requiredActionPromises.push(this.getValueForAsyncInput_(asyncInput));
+        presubmitPromises.push(asyncCall);
       }
     });
 
