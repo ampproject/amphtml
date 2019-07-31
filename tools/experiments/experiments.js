@@ -366,6 +366,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
+    id: 'inabox-no-chunking',
+    name: 'Experiment to disable startup chunking in inabox runtime',
+    spec: 'https://github.com/ampproject/amphtml/issues/23573',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23573',
+  },
+  {
     id: 'amp-user-location',
     name:
       'Expose the browser geolocation API for latitude and longitude ' +
@@ -458,6 +464,7 @@ function build() {
 /**
  * Builds one row in the channel or experiments table.
  * @param {!ExperimentDef} experiment
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildExperimentRow(experiment) {
   const tr = document.createElement('tr');
@@ -640,6 +647,7 @@ function showConfirmation_(message, callback) {
  * Loads the AMP_CONFIG objects from whatever the v0.js is that the
  * user has (depends on whether they opted into canary or RC), so that
  * experiment state can reflect the default activated experiments.
+ * @return {*} TODO(#23582): Specify return type
  */
 function getAmpConfig() {
   const deferred = new Deferred();

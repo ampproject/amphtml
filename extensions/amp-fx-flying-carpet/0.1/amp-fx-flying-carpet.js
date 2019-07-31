@@ -17,6 +17,7 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
@@ -108,7 +109,11 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(inViewport) {
-    this.updateInViewport(this.children_, inViewport);
+    Services.ownersForDoc(this.element).updateInViewport(
+      this.element,
+      this.children_,
+      inViewport
+    );
   }
 
   /**
@@ -199,6 +204,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    * nodes that only contain whitespace since they do not contribute anything
    * visually, only their surrounding Elements or non-whitespace Texts do.
    * @param {!Array<!Node>} nodes
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   visibileChildren_(nodes) {

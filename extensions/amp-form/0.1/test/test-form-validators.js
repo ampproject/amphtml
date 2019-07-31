@@ -101,6 +101,7 @@ describes.realWin('form-validators', {amp: true}, env => {
     const invalidEmail = doc.createElement('div');
     invalidEmail.setAttribute('visible-when-invalid', 'typeMismatch');
     invalidEmail.setAttribute('validation-for', 'email1');
+    invalidEmail.setAttribute('id', 'invalidformat-for-email1');
     invalidEmail.textContent = emailTypeValidationMsg;
 
     const invalidText = doc.createElement('div');
@@ -325,6 +326,25 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
       expect(validations[3].className).to.not.contain('visible');
+    });
+
+    it('should set aria-describedby to the first validation message (generated ID)', () => {
+      validator.report();
+      expect(validations[0].getAttribute('id')).to.be.a('string');
+      expect(form.elements[0].getAttribute('aria-describedby')).to.equal(
+        validations[0].getAttribute('id')
+      );
+    });
+
+    it('should set aria-describedby to the second validation message (existing ID)', () => {
+      form.elements[0].value = 'John Miller';
+      form.elements[1].value = 'invalidemail';
+      form.elements[1].validationMessage = 'Email format is wrong';
+      validator.report();
+      validator.onInput({target: form.elements[1]});
+      expect(form.elements[1].getAttribute('aria-describedby')).to.equal(
+        'invalidformat-for-email1'
+      );
     });
 
     it('should not report on interaction for non-active inputs', () => {

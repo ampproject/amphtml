@@ -147,6 +147,7 @@ class LoaderBuilder {
   /**
    * Sets the size of the loader based element's size and a few special cases.
    * @private
+   * @return {undefined}
    */
   setSize_() {
     const sizeClassDefault = 'i-amphtml-new-loader-size-default';
