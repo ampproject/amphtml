@@ -82,7 +82,7 @@ jobs:
         - build-system/sauce_connect/stop_sauce_connect.sh
         - ps -ef
     - stage: test
-      name: "[TEMPORARILY NON BLOCKING] End to End, Experiment Tests"      
+      name: "[TEMPORARILY NON BLOCKING] End to End, Experiment Tests"
       script:
         - unbuffer node build-system/pr-check/e2e-experiment-tests.js
       after_script:
