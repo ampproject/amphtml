@@ -195,12 +195,10 @@ function getExtensionsToBuild() {
   if (!!argv.extensions) {
     if (argv.extensions === 'minimal_set') {
       argv.extensions = MINIMAL_EXTENSION_SET.join(',');
+    } else if (argv.extensions === 'inabox') {
+      argv.extensions = INABOX_EXTENSION_SET.join(',');
     }
     extensionsToBuild = argv.extensions.split(',');
-  }
-
-  if (argv.extensions === 'inabox') {
-    extensionsToBuild = INABOX_EXTENSION_SET;
   }
 
   if (!!argv.extensions_from) {
