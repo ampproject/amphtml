@@ -37,6 +37,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {upgrade} from '@ampproject/worker-dom/dist/amp/main.mjs';
+import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -109,19 +110,29 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    return this.isExperimentOn_().then(on => {
-      if (!on) {
-        // Return rejected Promise to buildCallback() to disable component.
-        throw user().createError(TAG, `Experiment "${TAG}" is not enabled.`);
-      }
-    });
+    return this.isExperimentOn_()
+      .then(on => {
+        if (!on) {
+          // Return rejected Promise to buildCallback() to disable component.
+          throw user().createError('Experiment "%s" is not enabled.', TAG);
+        }
+        return getElementServiceForDoc(this.element, TAG, TAG);
+      })
+      .then(service => {
+        this.service_ = service;
+      });
   }
 
   /** @override */
   layoutCallback() {
     this.userActivation_ = new UserActivationTracker(this.element);
 
-    const authorScriptPromise = this.getAuthorScript_();
+    // The displayed name of the combined script in dev tools.
+    const sourceURL = this.element.hasAttribute('src')
+      ? `amp-script[src="${this.element.getAttribute('src')}"].js`
+      : `amp-script[script=#${this.element.getAttribute('script')}].js`;
+
+    const authorScriptPromise = this.getAuthorScript_(sourceURL);
     if (!authorScriptPromise) {
       const error = user().createError(
         '[%s] "src" or "script" attribute is required.',
@@ -133,11 +144,9 @@ export class AmpScript extends AMP.BaseElement {
     const workerAndAuthorScripts = Promise.all([
       this.getWorkerScript_(),
       authorScriptPromise,
-      getElementServiceForDoc(this.element, TAG, TAG),
     ]).then(results => {
       const workerScript = results[0];
       const authorScript = results[1];
-      this.service_ = results[2];
 
       if (this.service_.sizeLimitExceeded(authorScript.length)) {
         user().error(
@@ -151,11 +160,6 @@ export class AmpScript extends AMP.BaseElement {
       }
       return [workerScript, authorScript];
     });
-
-    // The displayed name of the combined script in dev tools.
-    const sourceURL = this.element.hasAttribute('src')
-      ? `amp-script[src="${this.element.getAttribute('src')}"].js`
-      : `amp-script[script=#${this.element.getAttribute('script')}].js`;
 
     const sandbox = this.element.getAttribute('sandbox') || '';
     const sandboxTokens = sandbox.split(' ').map(s => s.trim());
@@ -212,19 +216,31 @@ export class AmpScript extends AMP.BaseElement {
   /**
    * Query local or fetch remote author script. Returns promise that resolves
    * with the script contents. Returns null if script reference is missing.
+   * @param {string} scriptId
    * @return {?Promise<string>}
    * @private
    */
-  getAuthorScript_() {
+  getAuthorScript_(scriptId) {
     const authorUrl = this.element.getAttribute('src');
     if (authorUrl) {
-      return Services.xhrFor(this.win)
-        .fetchText(authorUrl, {ampCors: false})
-        .then(r => r.text());
+      const urlService = Services.urlForDoc(this.element);
+
+      const docOrigin = urlService.getSourceOrigin(this.getAmpDoc().getUrl());
+      const scriptOrigin = urlService.parse(authorUrl).origin;
+      const sameOrigin = docOrigin === scriptOrigin;
+
+      return this.fetchAuthorScript_(authorUrl, sameOrigin, scriptId);
     } else {
       const id = this.element.getAttribute('script');
       if (id) {
         const local = this.getAmpDoc().getElementById(id);
+        userAssert(
+          local,
+          '[%s] %s could not find element with #%s.',
+          TAG,
+          scriptId,
+          id
+        );
         const target = local.getAttribute('target');
         userAssert(
           target === 'amp-script',
@@ -232,10 +248,50 @@ export class AmpScript extends AMP.BaseElement {
           TAG,
           id
         );
-        return Promise.resolve(local.textContent);
+        const script = local.textContent;
+        return this.service_.checkSha384(script, scriptId).then(() => script);
       }
     }
+    // No [src] or [script].
     return null;
+  }
+
+  /**
+   * @param {string} authorUrl
+   * @param {boolean} sameOrigin
+   * @param {string} scriptId
+   * @return {!Promise<string>}
+   */
+  fetchAuthorScript_(authorUrl, sameOrigin, scriptId) {
+    return Services.xhrFor(this.win)
+      .fetchText(authorUrl, {ampCors: false})
+      .then(r => {
+        const text = r.text();
+        if (sameOrigin) {
+          // For same-origin scripts, disallow redirect and non-JS content type.
+          if (r.redirected) {
+            throw user().createError(
+              '[%s] %s src URL must not have redirects.',
+              TAG,
+              scriptId
+            );
+          }
+          const contentType = r.headers.get('Content-Type');
+          if (!startsWith(contentType, 'application/javascript')) {
+            throw user().createError(
+              '[%s] %s has Content-Type: "%s". ' +
+                'Only "application/javascript" is allowed.',
+              TAG,
+              scriptId,
+              contentType
+            );
+          }
+          return text;
+        } else {
+          // For cross-origin, verify hash of script itself.
+          return this.service_.checkSha384(text, scriptId).then(() => text);
+        }
+      });
   }
 
   /**
@@ -277,11 +333,47 @@ export class AmpScript extends AMP.BaseElement {
  */
 class AmpScriptService {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(unusedAmpdoc) {
+  constructor(ampdoc) {
     /** @private {number} */
     this.cumulativeSize_ = 0;
+
+    /** @private {!Array<string>} */
+    this.sources_ = [];
+
+    // Query the meta tag once per document.
+    const allowedHashes = ampdoc
+      .getHeadNode()
+      .querySelector('meta[name="amp-script-src"]');
+    if (allowedHashes && allowedHashes.hasAttribute('content')) {
+      const content = allowedHashes.getAttribute('content');
+      this.sources_ = content
+        .split(' ')
+        .map(s => s.trim())
+        .filter(s => s.length);
+    }
+
+    this.crypto_ = Services.cryptoFor(ampdoc.win);
+  }
+
+  /**
+   * @param {string} string
+   * @param {string} id
+   * @return {!Promise}
+   */
+  checkSha384(string, id) {
+    const bytes = utf8Encode(string);
+    return this.crypto_.sha384Base64(bytes).then(hash => {
+      if (!hash || !this.sources_.includes('sha384-' + hash)) {
+        throw user().createError(
+          '[%s] %id must have "sha384-%s" in meta[name="amp-script-src"].',
+          TAG,
+          id,
+          hash
+        );
+      }
+    });
   }
 
   /**
