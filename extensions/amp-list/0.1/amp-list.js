@@ -44,7 +44,7 @@ import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
 import {removeChildren} from '../../../src/dom';
-import setDOM from 'set-dom/dist/set-dom.js';
+import {setDOM} from '../../../third_party/set-dom/set-dom';
 
 /** @const {string} */
 const TAG = 'amp-list';
