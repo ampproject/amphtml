@@ -338,7 +338,8 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   updateViewportState(inViewport) {
     if (this.slideIndex_ !== null) {
-      this.updateInViewport(
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
         this.slides_[
           user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')
         ],
@@ -684,7 +685,8 @@ export class AmpSlideScroll extends BaseSlides {
       showIndexArr.push(nextIndex);
     }
     if (this.slideIndex_ !== null) {
-      this.updateInViewport(
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
         this.slides_[
           user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')
         ],
@@ -702,7 +704,11 @@ export class AmpSlideScroll extends BaseSlides {
       );
       return false;
     }
-    this.updateInViewport(newSlideInView, true);
+    Services.ownersForDoc(this.element).updateInViewport(
+      this.element,
+      newSlideInView,
+      true
+    );
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);

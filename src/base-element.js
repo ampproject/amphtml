@@ -884,20 +884,6 @@ export class BaseElement {
   }
 
   /**
-   * Update inViewport state of the specified children element or elements.
-   * Resource manager will perform the actual changes to the inViewport state
-   * based on the state of these elements and their parent subtree.
-   * @param {!Element|!Array<!Element>} elements
-   * @param {boolean} inLocalViewport
-   * @public
-   */
-  updateInViewport(elements, inLocalViewport) {
-    this.element
-      .getResources()
-      .updateInViewport(this.element, elements, inLocalViewport);
-  }
-
-  /**
    * Requests the runtime to update the height of this element to the specified
    * value. The runtime will schedule this request and attempt to process it
    * as soon as possible.

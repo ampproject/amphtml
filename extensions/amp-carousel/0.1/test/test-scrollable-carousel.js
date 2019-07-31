@@ -15,6 +15,7 @@
  */
 
 import '../amp-carousel';
+import {Services} from '../../../../src/services';
 
 describes.realWin(
   'test-scrollable-carousel',
@@ -24,13 +25,15 @@ describes.realWin(
     },
   },
   env => {
-    let win, doc;
+    let win, doc, ownerImpl, updateInViewportSpy;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       env.iframe.width = '300';
       env.iframe.height = '200';
+      ownerImpl = Services.ownersForDoc(doc);
+      updateInViewportSpy = sandbox.spy(ownerImpl, 'updateInViewport');
     });
 
     function getAmpScrollableCarousel() {
@@ -128,7 +131,6 @@ describes.realWin(
       () => {
         return getAmpScrollableCarousel().then(carousel => {
           const impl = carousel.implementation_;
-          const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
           const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
           const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
           const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
@@ -142,24 +144,29 @@ describes.realWin(
           // load new slides in viewport
           expect(updateInViewportSpy).to.have.callCount(5);
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[2],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[3],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[4],
             true
           );
 
           // unload and pause old slides in viewport
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[0],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[1],
             false
           );
@@ -200,7 +207,6 @@ describes.realWin(
           // click on the next button the first time
           impl.goCallback(1, /*animate*/ false);
 
-          const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
           const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
           const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
           const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
@@ -215,24 +221,29 @@ describes.realWin(
           // load new slides in viewport
           expect(updateInViewportSpy).to.have.callCount(5);
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[4],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[5],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[6],
             true
           );
 
           // unload and pause old slides in viewport
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[2],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[3],
             false
           );
@@ -272,7 +283,6 @@ describes.realWin(
           impl.goCallback(1, /*animate*/ false);
           impl.goCallback(1, /*animate*/ false);
 
-          const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
           const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
           const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
           const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
@@ -286,24 +296,29 @@ describes.realWin(
           // load new slides in viewport
           expect(updateInViewportSpy).to.have.callCount(5);
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[2],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[3],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[4],
             true
           );
 
           // unload and pause old slides in viewport
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[5],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[6],
             false
           );
@@ -347,7 +362,6 @@ describes.realWin(
           impl.goCallback(1, /*animate*/ false);
           impl.goCallback(-1, /*animate*/ false);
 
-          const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
           const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
           const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
           const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
@@ -361,24 +375,29 @@ describes.realWin(
           // load new slides in viewport
           expect(updateInViewportSpy).to.have.callCount(5);
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[0],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[1],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[2],
             true
           );
 
           // unload and pause old slides in viewport
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[3],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[4],
             false
           );
