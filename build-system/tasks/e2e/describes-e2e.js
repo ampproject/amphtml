@@ -147,7 +147,13 @@ async function createDriver(browserName, args) {
   const builder = new Builder().withCapabilities(capabilities);
   switch (browserName) {
     case 'firefox':
-      builder.setFirefoxOptions(new firefox.Options().addArguments(args));
+      const options = new firefox.Options();
+      // for some reason firefox.Options().addArguments() doesn't like arrays
+      args.forEach(arg => {
+        console.log(arg);
+        options.addArguments(arg);
+      });
+      builder.setFirefoxOptions(options);
     case 'chrome':
       builder.setChromeOptions(new chrome.Options().addArguments(args));
   }
@@ -182,7 +188,7 @@ function getFirefoxArgs(config) {
   const args = [];
 
   if (config.headless) {
-    args.push('-headless');
+    args.push('--headless');
   }
   return args;
 }
