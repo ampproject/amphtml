@@ -223,6 +223,7 @@ async function launchBrowser() {
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {JsonObject} viewport optional viewport size object with numeric
  *     fields `width` and `height`.
+ * @return {*} TODO(#23582): Specify return type
  */
 async function newPage(browser, viewport = null) {
   log('verbose', 'Creating new tab');
@@ -762,6 +763,7 @@ async function createEmptyBuild() {
 
 /**
  * Runs the AMP visual diff tests.
+ * @return {*} TODO(#23582): Specify return type
  */
 async function visualDiff() {
   ensureOrBuildAmpRuntimeInTestMode_();

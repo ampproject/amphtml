@@ -15,7 +15,11 @@
  */
 'use strict';
 
-/** Enforces naming rules for private properties. */
+/**
+ * Enforces naming rules for private properties.
+ *
+ * @return {*} TODO(#23582): Specify return type
+ */
 module.exports = function(context) {
   /**
    * @param {!Array<!Node>|undefined} commentLines

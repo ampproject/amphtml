@@ -313,8 +313,9 @@ export class AbstractAmpContext {
   }
 
   /**
-   *  Calculate the hostWindow
-   *  @private
+   * Calculate the hostWindow
+   * @private
+   * @return {!Window}
    */
   getHostWindow_() {
     const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);

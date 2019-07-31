@@ -1695,6 +1695,7 @@ function createBaseCustomElementClass(win) {
         let loadingElement;
         if (isNewLoaderExperimentEnabled(this)) {
           loadingElement = createNewLoaderElement(
+            this.ampdoc_,
             this,
             this.layoutWidth_,
             this.layoutHeight_
@@ -1866,7 +1867,10 @@ function createBaseCustomElementClass(win) {
   return win.BaseCustomElementClass;
 }
 
-/** @param {!Element} element */
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
 function isInputPlaceholder(element) {
   return 'placeholder' in element;
 }

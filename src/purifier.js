@@ -16,13 +16,15 @@
 
 import {
   BIND_PREFIX,
+  BLACKLISTED_TAGS,
+  EMAIL_WHITELISTED_AMP_TAGS,
   TRIPLE_MUSTACHE_WHITELISTED_TAGS,
   WHITELISTED_ATTRS,
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
-  blacklistedTags,
   isValidAttr,
 } from './sanitation';
+import {isAmp4Email} from './format';
 import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
 import {user} from './log';
@@ -74,7 +76,7 @@ let KEY_COUNTER = 0;
  * @return {!Node}
  */
 export function purifyHtml(dirty, doc, diffing = false) {
-  const config = standardPurifyConfig(doc);
+  const config = standardPurifyConfig();
   addPurifyHooks(DomPurify, diffing, doc);
   const body = DomPurify.sanitize(dirty, config);
   DomPurify.removeAllHooks();
@@ -89,7 +91,7 @@ export function purifyHtml(dirty, doc, diffing = false) {
  */
 export function createPurifier(doc, opt_config) {
   const domPurify = purify(self);
-  const config = Object.assign(opt_config || {}, standardPurifyConfig(doc));
+  const config = Object.assign(opt_config || {}, standardPurifyConfig());
   domPurify.setConfig(config);
   addPurifyHooks(domPurify, /* diffing */ false, doc);
   return domPurify;
@@ -104,16 +106,15 @@ export function createPurifier(doc, opt_config) {
  * closure compiler from optimizing these fields here in this file and in the
  * 3rd party library file. See #19624 for further information.
  *
- * @param {!Document} doc
  * @return {!DomPurifyConfig}
  */
-function standardPurifyConfig(doc) {
+function standardPurifyConfig() {
   const config = Object.assign(
     {},
     PURIFY_PROFILES,
     /** @type {!DomPurifyConfig} */ ({
       ADD_ATTR: WHITELISTED_ATTRS,
-      FORBID_TAGS: Object.keys(blacklistedTags(doc)),
+      FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
       // Avoid reparenting of some elements to document head e.g. <script>.
       FORCE_BODY: true,
       // Avoid need for serializing to/from string by returning Node directly.
@@ -128,10 +129,9 @@ function standardPurifyConfig(doc) {
 
 /**
  * Gets a copy of the map of allowed tag names (standard DOMPurify config).
- * @param {!Document} doc
  * @return {!Object<string, boolean>}
  */
-export function getAllowedTags(doc) {
+export function getAllowedTags() {
   const allowedTags = {};
   // Use this hook to extract purifier's allowed tags.
   DomPurify.addHook('uponSanitizeElement', function(node, data) {
@@ -139,9 +139,8 @@ export function getAllowedTags(doc) {
   });
   // Sanitize dummy markup so that the hook is invoked.
   DomPurify.sanitize('<p></p>');
-  // Remove any blacklisted tags.
-  Object.keys(blacklistedTags(doc)).forEach(tag => {
-    delete allowedTags[tag];
+  Object.keys(BLACKLISTED_TAGS).forEach(tag => {
+    allowedTags[tag] = false;
   });
   // Pops the last hook added.
   DomPurify.removeHook('uponSanitizeElement');
@@ -155,6 +154,8 @@ export function getAllowedTags(doc) {
  * @param {!Document} doc
  */
 function addPurifyHooks(purifier, diffing, doc) {
+  const isEmail = isAmp4Email(doc);
+
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
   const allowedTagsChanges = [];
@@ -182,7 +183,8 @@ function addPurifyHooks(purifier, diffing, doc) {
 
     // Allow all AMP elements.
     if (startsWith(tagName, 'amp-')) {
-      allowedTags[tagName] = true;
+      // Enforce AMP4EMAIL tag whitelist at runtime.
+      allowedTags[tagName] = !isEmail || EMAIL_WHITELISTED_AMP_TAGS[tagName];
       // AMP elements don't support arbitrary mutation, so don't DOM diff them.
       disableDiffingFor(node);
     }

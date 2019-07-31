@@ -258,7 +258,9 @@ export class ViewerSubscriptionPlatform {
 
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
+ * @package
+ * @visibleForTesting
+ * @return {*} TODO(#23582): Specify return type
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
