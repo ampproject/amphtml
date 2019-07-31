@@ -42,17 +42,17 @@ const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
 async function runExperimentTests_() {
-  Object.keys(experimentsConfig).forEach(async experiment => {
+  await startSauceConnect(FILENAME);
+  Object.keys(experimentsConfig).forEach(experiment => {
     const config = experimentsConfig[experiment];
     if (config.command) {
       timedExecOrDie('gulp clean');
       downloadDistExperimentOutput(FILENAME, experiment);
       timedExecOrDie('gulp update-packages');
-      await startSauceConnect(FILENAME);
       timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
-      stopSauceConnect(FILENAME);
     }
   });
+  stopSauceConnect(FILENAME);
 }
 
 async function main() {
