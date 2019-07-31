@@ -62,11 +62,9 @@ async function main() {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp e2e --nobuild --headless');
-    //await runExperimentTests_();
+    await runExperimentTests_();
   } else {
     printChangeSummary(FILENAME);
-    //TODO(estherkim): move this to push build before merging
-    await runExperimentTests_();
     const buildTargets = determineBuildTargets(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||

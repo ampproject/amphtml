@@ -69,11 +69,9 @@ async function main() {
     timedExecOrDie('gulp dist --fortesting');
     timedExecOrDie('gulp bundle-size --on_push_build');
     uploadDistOutput(FILENAME);
-    //buildAndUploadExperiments_();
+    buildAndUploadExperiments_();
   } else {
     printChangeSummary(FILENAME);
-    //TODO(estherkim): move this to push build before merging
-    buildAndUploadExperiments_();
     const buildTargets = determineBuildTargets(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||
