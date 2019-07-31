@@ -25,7 +25,7 @@ describes.realWin(
     },
   },
   env => {
-    let win, doc, ownerImpl;
+    let win, doc, ownerImpl, updateInViewportSpy;
 
     beforeEach(() => {
       win = env.win;
@@ -33,6 +33,7 @@ describes.realWin(
       env.iframe.width = '300';
       env.iframe.height = '200';
       ownerImpl = Services.ownersForDoc(doc);
+      updateInViewportSpy = sandbox.spy(ownerImpl, 'updateInViewport');
     });
 
     function getAmpScrollableCarousel() {
@@ -130,10 +131,6 @@ describes.realWin(
       () => {
         return getAmpScrollableCarousel().then(carousel => {
           const impl = carousel.implementation_;
-          const updateInViewportSpy = sandbox.spy(
-            ownerImpl,
-            'updateInViewport'
-          );
           const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
           const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
           const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
@@ -210,10 +207,6 @@ describes.realWin(
           // click on the next button the first time
           impl.goCallback(1, /*animate*/ false);
 
-          const updateInViewportSpy = sandbox.spy(
-            ownerImpl,
-            'updateInViewport'
-          );
           const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
           const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
           const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
@@ -290,10 +283,6 @@ describes.realWin(
           impl.goCallback(1, /*animate*/ false);
           impl.goCallback(1, /*animate*/ false);
 
-          const updateInViewportSpy = sandbox.spy(
-            ownerImpl,
-            'updateInViewport'
-          );
           const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
           const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
           const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
@@ -373,10 +362,6 @@ describes.realWin(
           impl.goCallback(1, /*animate*/ false);
           impl.goCallback(-1, /*animate*/ false);
 
-          const updateInViewportSpy = sandbox.spy(
-            ownerImpl,
-            'updateInViewport'
-          );
           const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
           const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
           const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
