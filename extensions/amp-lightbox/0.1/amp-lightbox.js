@@ -349,7 +349,11 @@ class AmpLightbox extends AMP.BaseElement {
 
     const container = dev().assertElement(this.container_);
     if (!this.isScrollable_) {
-      this.updateInViewport(container, true);
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
+        container,
+        true
+      );
     } else {
       this.scrollHandler_();
       this.updateChildrenInViewport_(this.pos_, this.pos_);
@@ -582,13 +586,21 @@ class AmpLightbox extends AMP.BaseElement {
     const seen = [];
     this.forEachVisibleChild_(newPos, cell => {
       seen.push(cell);
-      this.updateInViewport(cell, true);
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
+        cell,
+        true
+      );
       this.scheduleLayout(cell);
     });
     if (oldPos != newPos) {
       this.forEachVisibleChild_(oldPos, cell => {
         if (!seen.includes(cell)) {
-          this.updateInViewport(cell, false);
+          Services.ownersForDoc(this.element).updateInViewport(
+            this.element,
+            cell,
+            false
+          );
         }
       });
     }

@@ -15,6 +15,7 @@
  */
 
 import '../amp-carousel';
+import {Services} from '../../../../src/services';
 
 describes.realWin(
   'SlideScroll',
@@ -143,7 +144,8 @@ describes.realWin(
     it.skip('should show the correct slide', () => {
       return getAmpSlideScroll().then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
-        const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
+        const ownerImpl = Services.ownersForDoc(impl.element);
+        const updateInViewportSpy = sandbox.spy(ownerImpl, 'updateInViewport');
         const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
         const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
         const hideRestOfTheSlidesSpy = sandbox.spy(
@@ -179,10 +181,12 @@ describes.realWin(
 
         expect(impl.showSlide_(1)).to.be.true;
         expect(updateInViewportSpy).to.have.been.calledWith(
+          impl.element,
           impl.slides_[0],
           false
         );
         expect(updateInViewportSpy).to.have.been.calledWith(
+          impl.element,
           impl.slides_[1],
           true
         );
@@ -220,10 +224,12 @@ describes.realWin(
 
         expect(impl.showSlide_(0)).to.be.true;
         expect(updateInViewportSpy).to.have.been.calledWith(
+          impl.element,
           impl.slides_[1],
           false
         );
         expect(updateInViewportSpy).to.have.been.calledWith(
+          impl.element,
           impl.slides_[0],
           true
         );
@@ -257,10 +263,12 @@ describes.realWin(
 
         expect(impl.showSlide_(4)).to.be.true;
         expect(updateInViewportSpy).to.have.been.calledWith(
+          impl.element,
           impl.slides_[0],
           false
         );
         expect(updateInViewportSpy).to.have.been.calledWith(
+          impl.element,
           impl.slides_[4],
           true
         );
@@ -645,7 +653,11 @@ describes.realWin(
       it.skip('should show the correct slides when looping', () => {
         return getAmpSlideScroll(true).then(ampSlideScroll => {
           const impl = ampSlideScroll.implementation_;
-          const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
+          const ownerImpl = Services.ownersForDoc(impl.element);
+          const updateInViewportSpy = sandbox.spy(
+            ownerImpl,
+            'updateInViewport'
+          );
           const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
           const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
           const hideRestOfTheSlidesSpy = sandbox.spy(
@@ -661,10 +673,12 @@ describes.realWin(
           impl.showSlide_(1);
 
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.slides_[0],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.slides_[1],
             true
           );
@@ -727,10 +741,12 @@ describes.realWin(
           impl.showSlide_(4);
 
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.slides_[0],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.slides_[4],
             true
           );
@@ -762,7 +778,11 @@ describes.realWin(
       it('show correct slides when looping with `autoplay` for 2 slides', () => {
         return getAmpSlideScroll(true, 2).then(ampSlideScroll => {
           const impl = ampSlideScroll.implementation_;
-          const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
+          const ownerImpl = Services.ownersForDoc(impl.element);
+          const updateInViewportSpy = sandbox.spy(
+            ownerImpl,
+            'updateInViewport'
+          );
           const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
           const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
           const hideRestOfTheSlidesSpy = sandbox.spy(
@@ -777,10 +797,12 @@ describes.realWin(
           impl.showSlide_(1);
 
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.slides_[0],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.slides_[1],
             true
           );
@@ -806,10 +828,12 @@ describes.realWin(
           impl.showSlide_(0);
 
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.slides_[1],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.slides_[0],
             true
           );
