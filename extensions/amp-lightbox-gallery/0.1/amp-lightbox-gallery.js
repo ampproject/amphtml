@@ -761,7 +761,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       .then(() => {
         this.isActive_ = true;
 
-        this.updateInViewport(dev().assertElement(this.container_), true);
+        Services.ownersForDoc(this.element).updateInViewport(
+          this.element,
+          dev().assertElement(this.container_),
+          true
+        );
         this.scheduleLayout(dev().assertElement(this.container_));
 
         this.doc_.documentElement.addEventListener(
