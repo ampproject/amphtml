@@ -35,6 +35,9 @@ app.use('/inabox/', (req, res) => {
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
   }
   adUrl = addQueryParam(adUrl, 'inabox', 1);
+  if (req.query.log) {
+    adUrl += '#log=' + req.query.log;
+  }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     const result = template
       .replace(/AD_URL/g, adUrl)
