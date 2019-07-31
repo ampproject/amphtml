@@ -38,55 +38,51 @@ export function streamrail(global, data) {
   macros.width = data.width;
   macros.height = data.height;
 
-  const ctx = window.context;
-  global.srAsyncInit = function() {
-    const playerId = `player-${data['streamrail_api_key']}`;
+  const conatinerId = `${data['streamrail_api_key']}-${
+    data['streamrail_player_id']
+  }`;
+  createContainer(conatinerId);
 
-    createContainer(playerId);
-    // eslint-disable-next-line no-undef
-    const p = SR(playerId, {
-      'playerId': data['streamrail_player_id'],
-      'apiKey': data['streamrail_api_key'],
-      'version': '1.0',
-      'macros': macros,
-    });
+  global._streamrailConfig = {
+    playerId: data['streamrail_player_id'],
+    apiKey: data['streamrail_api_key'],
+    version: '1.0',
+    macros,
+  };
+  const ctx = global.context;
 
-    p.then(function(player) {
-      if (
-        player &&
-        !player.hasAds &&
-        player.options &&
-        player.options.content &&
-        !player.options.content.length
-      ) {
-        ctx.noContentAvailable();
-        return;
-      }
-      player.on('playerReady', function() {
-        ctx.reportRenderedEntityIdentifier(playerId);
-        ctx.renderStart({
-          width: player.width,
-          height: player.height,
-        });
-      });
-    }).catch(function() {
-      ctx.noContentAvailable();
+  global._streamrailOnLoad = function(error, player) {
+    if (error) {
+      global.context.noContentAvailable();
+      return;
+    }
+    ctx.reportRenderedEntityIdentifier(conatinerId);
+    ctx.renderStart({
+      width: player.width,
+      height: player.height,
     });
   };
 
-  const type = data['streamrail_player_type'];
-  if (type === 'bladex') {
-    loadScript(global, 'https://sdk.streamrail.com/blade/sr.bladex.js');
-  } else if (type === 'blade') {
-    loadScript(global, 'https://sdk.streamrail.com/blade/sr.blade.js');
-  }
+  loadScript(
+    global,
+    `https://ssp.streamrail.net/js/${data['streamrail_api_key']}/${
+      data['streamrail_player_id']
+    }/player.js?t=${
+      data['streamrail_player_type']
+    }&callback=_streamrailOnLoad&config=_streamrailConfig&c=${conatinerId}`,
+    undefined,
+    () => {
+      global.context.noContentAvailable();
+    }
+  );
 }
 
 /**
- * @param {string} playerId
+ * @param {string} elemId
  */
-function createContainer(playerId) {
+function createContainer(elemId) {
   const d = global.document.createElement('div');
-  d.id = playerId;
+  d.id = elemId;
+  d.classList.add('streamrail');
   global.document.getElementById('c').appendChild(d);
 }
