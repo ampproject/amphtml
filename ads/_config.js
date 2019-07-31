@@ -397,7 +397,9 @@ export const adConfig = {
     prefetch: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
     preconnect: 'https://bal.ad.dotandad.com',
   },
-
+  'dynad': {
+    preconnect: ['https://t.dynad.net', 'https://tm.jsuol.com.br'],
+  },
   'eadv': {
     renderStartImplemented: true,
     clientIdScope: 'AMP_ECID_EADV',
@@ -455,6 +457,11 @@ export const adConfig = {
     ],
   },
 
+  'forkmedia': {
+    prefetch: 'https://delivery.forkcdn.com/rappio/inread/v1.1/amp/inread.js',
+    renderStartImplemented: true,
+  },
+
   'freewheel': {
     prefetch: 'https://cdn.stickyadstv.com/prime-time/fw-amp.min.js',
     renderStartImplemented: true,
@@ -490,7 +497,12 @@ export const adConfig = {
   'ibillboard': {},
 
   'idealmedia': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.idealmedia.io',
+      'https://servicer.idealmedia.io',
+      'https://s-img.idealmedia.io/',
+    ],
   },
 
   'imedia': {
@@ -527,6 +539,12 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'invibes': {
+    prefetch: 'https://k.r66net.com/GetAmpLink',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'ix': {
     prefetch: ['https://js-sec.indexww.com/apl/amp.js'],
     preconnect: 'https://as-sec.casalemedia.com',
@@ -549,7 +567,12 @@ export const adConfig = {
   'kuadio': {},
 
   'lentainform': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.lentainform.com',
+      'https://servicer.lentainform.com',
+      'https://s-img.lentainform.com',
+    ],
   },
 
   'ligatus': {
@@ -559,6 +582,11 @@ export const adConfig = {
 
   'lockerdome': {
     prefetch: 'https://cdn2.lockerdomecdn.com/_js/amp.js',
+    renderStartImplemented: true,
+  },
+
+  'logly': {
+    preconnect: ['https://l.logly.co.jp', 'https://cdn.logly.co.jp'],
     renderStartImplemented: true,
   },
 
@@ -626,7 +654,12 @@ export const adConfig = {
   },
 
   'mgid': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.mgid.com',
+      'https://servicer.mgid.com',
+      'https://s-img.mgid.com',
+    ],
   },
 
   'microad': {
@@ -670,6 +703,10 @@ export const adConfig = {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
     renderStartImplemented: true,
+  },
+
+  'nativeroll': {
+    prefetch: 'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
   },
 
   'nativo': {
@@ -830,6 +867,8 @@ export const adConfig = {
     preconnect: 'https://ad.rfp.fout.jp',
     renderStartImplemented: true,
   },
+
+  'rnetplus': {},
 
   'rubicon': {},
 

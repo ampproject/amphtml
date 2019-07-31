@@ -798,6 +798,15 @@ describes.realWin(
         impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then(url => {
           expect(url).to.not.match(/(\?|&)npa=(&|$)/);
         }));
+      it('should have spsa and size 1x1 when single page story ad', () => {
+        impl.isSinglePageStoryAd = true;
+        return impl.getAdUrl().then(url => {
+          expect(url).to.match(/format=1x1/);
+          expect(url).to.match(/h=1/);
+          expect(url).to.match(/w=1/);
+          expect(url).to.match(/spsa=\d+?x\d+?/);
+        });
+      });
     });
 
     describe('#unlayoutCallback', () => {

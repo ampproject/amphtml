@@ -155,6 +155,7 @@ export class FontLoader {
    * Font download is detected by comparing the elements height and width with
    * measurements between default fonts and custom font.
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   loadWithPolyfill_() {
     return new Promise((resolve, reject) => {

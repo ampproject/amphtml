@@ -35,6 +35,12 @@ const TEST_TIMEOUT = 20000;
 const SETUP_TIMEOUT = 30000;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const defaultBrowsers = new Set(['chrome', 'firefox']);
+/**
+ * TODO(cvializ): Firefox now experimentally supports puppeteer.
+ * When it's more mature we might want to support it.
+ * {@link https://github.com/GoogleChrome/puppeteer/blob/master/experimental/puppeteer-firefox/README.md}
+ */
+const PUPPETEER_BROWSERS = new Set(['chrome']);
 
 /**
  * @typedef {{
@@ -103,6 +109,7 @@ function getConfig() {
 /**
  * Configure and launch a Puppeteer instance
  * @param {!PuppeteerConfigDef=} opt_config
+ * @return {*} TODO(#23582): Specify return type
  */
 async function createPuppeteer(opt_config = {}) {
   const browser = await puppeteer.launch({
@@ -256,6 +263,7 @@ class ItConfig {
  * that also sets up the provided fixtures and returns the corresponding
  * environment objects of each fixture to the test method.
  * @param {function(!Object):!Array<?Fixture>} factory
+ * @return {*} TODO(#23582): Specify return type
  */
 function describeEnv(factory) {
   /**
@@ -263,6 +271,7 @@ function describeEnv(factory) {
    * @param {!Object} spec
    * @param {function(!Object)} fn
    * @param {function(string, function())} describeFunc
+   * @return {*} TODO(#23582): Specify return type
    */
   const templateFunc = function(suiteName, spec, fn, describeFunc) {
     const fixture = factory(spec);
@@ -279,11 +288,7 @@ function describeEnv(factory) {
     }
 
     function createBrowserDescribe() {
-      const {browsers} = getConfig();
-
-      const allowedBrowsers = browsers
-        ? new Set(browsers.split(',').map(x => x.trim()))
-        : defaultBrowsers;
+      const allowedBrowsers = getAllowedBrowsers();
 
       spec.browsers
         .filter(x => allowedBrowsers.has(x))
@@ -292,6 +297,27 @@ function describeEnv(factory) {
             createVariantDescribe(browserName);
           });
         });
+    }
+
+    function getAllowedBrowsers() {
+      const {engine, browsers} = getConfig();
+
+      const allowedBrowsers = browsers
+        ? new Set(browsers.split(',').map(x => x.trim()))
+        : defaultBrowsers;
+
+      if (engine === 'puppeteer') {
+        const result = intersect(allowedBrowsers, PUPPETEER_BROWSERS);
+        if (result.size === 0) {
+          const browsersList = Array.from(allowedBrowsers).join(',');
+          throw new Error(
+            `browsers ${browsersList} not supported by Puppeteer`
+          );
+        }
+        return result;
+      }
+
+      return allowedBrowsers;
     }
 
     function createVariantDescribe(browserName) {
@@ -351,6 +377,7 @@ function describeEnv(factory) {
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
+   * @return {*} TODO(#23582): Specify return type
    */
   const mainFunc = function(name, spec, fn) {
     return templateFunc(name, spec, fn, describe);
@@ -360,6 +387,7 @@ function describeEnv(factory) {
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
+   * @return {*} TODO(#23582): Specify return type
    */
   mainFunc.only = function(name, spec, fn) {
     return templateFunc(name, spec, fn, describe./*OK*/ only);
@@ -418,6 +446,7 @@ class EndToEndFixture {
  * Get the controller object for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
+ * @return {*} TODO(#23582): Specify return type
  */
 async function getController(
   {engine = 'selenium', headless = false},
@@ -451,6 +480,17 @@ async function toggleExperiments(ampDriver, testUrl, experiments) {
   for (const experiment of experiments) {
     await ampDriver.toggleExperiment(experiment, true);
   }
+}
+
+/**
+ * Intersection of two sets
+ * @param {Set<T>} a
+ * @param {Set<T>} b
+ * @return {Set<T>}
+ * @template T
+ */
+function intersect(a, b) {
+  return new Set(Array.from(a).filter(aItem => b.has(aItem)));
 }
 
 module.exports = {

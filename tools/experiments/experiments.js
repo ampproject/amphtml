@@ -23,6 +23,7 @@ import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
+import {parseUrlDeprecated} from '../../src/url';
 //TODO(@cramforce): For type. Replace with forward declaration.
 import {reportError} from '../../src/error';
 
@@ -59,7 +60,7 @@ const AMP_CANARY_COOKIE = {
 };
 
 /** @const {!Array<!ExperimentDef>} */
-const EXPERIMENTS = [
+const CHANNELS = [
   // Canary (Dev Channel)
   {
     id: CANARY_EXPERIMENT_ID,
@@ -76,6 +77,10 @@ const EXPERIMENTS = [
       'https://github.com/ampproject/amphtml/blob/master/' +
       'contributing/release-schedule.md#amp-release-candidate-rc-channel',
   },
+];
+
+/** @const {!Array<!ExperimentDef>} */
+const EXPERIMENTS = [
   {
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
@@ -181,6 +186,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
+    id: 'ios-scrollable-iframe',
+    name: 'iOS 13 enables iframe scrolling per spec',
+    spec: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23379',
+  },
+  {
     id: 'chunked-amp',
     name: "Split AMP's loading phase into chunks",
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
@@ -251,14 +262,6 @@ const EXPERIMENTS = [
     name: 'Scale pages in amp-story by rewriting responsive units',
     spec: 'https://github.com/ampproject/amphtml/issues/15955',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
-  },
-  {
-    id: 'amp-story-desktop-background',
-    name:
-      "Removes blurred background images from the amp-story component's " +
-      'three-panel desktop UI.',
-    spec: 'https://github.com/ampproject/amphtml/issues/21287',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21288',
   },
   {
     id: 'amp-next-page',
@@ -339,24 +342,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
-    id: 'amp-auto-lightbox',
-    name: 'Automatically detects images to place in a lightbox.',
-    spec: 'https://github.com/ampproject/amphtml/issues/20395',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
-  },
-  {
-    id: 'amp-auto-lightbox-carousel',
-    name: 'Automatically detects carousels to group in a lightbox.',
-    spec: 'https://github.com/ampproject/amphtml/issues/20395',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
-  },
-  {
-    id: 'amp-img-auto-sizes',
-    name: 'Automatically generates sizes for amp-img if not given',
-    spec: 'https://github.com/ampproject/amphtml/issues/19513',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
-  },
-  {
     id: 'inabox-viewport-friendly',
     name:
       'Inabox viewport measures the host window directly if ' +
@@ -381,12 +366,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
-    id: 'amp-force-prerender-visible-elements',
-    name:
-      'Force builds the AMP elements that are visible and in the viewport ' +
-      'during prerendering, beyond the 20 elements limit.',
-    spec: 'https://github.com/ampproject/amphtml/issues/21791',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21792',
+    id: 'inabox-no-chunking',
+    name: 'Experiment to disable startup chunking in inabox runtime',
+    spec: 'https://github.com/ampproject/amphtml/issues/23573',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23573',
   },
   {
     id: 'amp-user-location',
@@ -395,12 +378,6 @@ const EXPERIMENTS = [
       'access after user interaction and approval',
     spec: 'https://github.com/ampproject/amphtml/issues/8929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
-  },
-  {
-    id: 'margin-bottom-in-content-height',
-    name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
-    spec: 'https://github.com/ampproject/amphtml/issues/22718',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
   },
   {
     id: 'untrusted-xhr-interception',
@@ -415,6 +392,13 @@ const EXPERIMENTS = [
     name: 'New default loaders',
     spec: 'https://github.com/ampproject/amphtml/issues/20237',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
+  },
+  {
+    id: 'macro-after-long-task',
+    name:
+      'If applicable, convert remaining micro tasks to the next macro ' +
+      ' tasks if a previous micro task execution took too long',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
   },
 ];
 
@@ -431,15 +415,56 @@ if (getMode().localDev) {
  * Builds the expriments tbale.
  */
 function build() {
-  const table = document.getElementById('experiments-table');
-  EXPERIMENTS.forEach(function(experiment) {
-    table.appendChild(buildExperimentRow(experiment));
+  const {host} = window.location;
+
+  const subdomain = document.getElementById('subdomain');
+  subdomain.textContent = host;
+
+  // #redirect contains UI that generates a subdomain experiments page link
+  // given a "google.com/amp/..." viewer URL.
+  const redirect = document.getElementById('redirect');
+  const input = redirect.querySelector('input');
+  const button = redirect.querySelector('button');
+  const anchor = redirect.querySelector('a');
+  button.addEventListener('click', function() {
+    let urlString = input.value.trim();
+    // Avoid protocol-less urlString from being parsed as a relative URL.
+    const hasProtocol = /^https?:\/\//.test(urlString);
+    if (!hasProtocol) {
+      urlString = 'https://' + urlString;
+    }
+    const url = parseUrlDeprecated(urlString);
+    if (url) {
+      const subdomain = url.hostname.replace(/\./g, '-');
+      const href = `https://${subdomain}.cdn.ampproject.org/experiments.html`;
+      anchor.href = href;
+      anchor.textContent = href;
+    }
   });
+
+  const channelsTable = document.getElementById('channels-table');
+  CHANNELS.forEach(function(experiment) {
+    channelsTable.appendChild(buildExperimentRow(experiment));
+  });
+
+  const experimentsTable = document.getElementById('experiments-table');
+  EXPERIMENTS.forEach(function(experiment) {
+    experimentsTable.appendChild(buildExperimentRow(experiment));
+  });
+
+  if (host === 'cdn.ampproject.org') {
+    const experimentsDesc = document.getElementById('experiments-desc');
+    experimentsDesc.setAttribute('hidden', '');
+    experimentsTable.setAttribute('hidden', '');
+  } else {
+    redirect.setAttribute('hidden', '');
+  }
 }
 
 /**
- * Builds one row of the experiments table.
+ * Builds one row in the channel or experiments table.
  * @param {!ExperimentDef} experiment
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildExperimentRow(experiment) {
   const tr = document.createElement('tr');
@@ -506,7 +531,7 @@ function buildLinkMaybe(text, link) {
  * Updates states of all experiments in the table.
  */
 function update() {
-  EXPERIMENTS.forEach(function(experiment) {
+  CHANNELS.concat(EXPERIMENTS).forEach(function(experiment) {
     updateExperimentRow(experiment);
   });
 }
@@ -622,6 +647,7 @@ function showConfirmation_(message, callback) {
  * Loads the AMP_CONFIG objects from whatever the v0.js is that the
  * user has (depends on whether they opted into canary or RC), so that
  * experiment state can reflect the default activated experiments.
+ * @return {*} TODO(#23582): Specify return type
  */
 function getAmpConfig() {
   const deferred = new Deferred();

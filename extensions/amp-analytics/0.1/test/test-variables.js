@@ -192,6 +192,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     let win;
     let urlReplacementService;
     let sandbox;
+    let analyticsElement;
 
     beforeEach(() => {
       sandbox = env.sandbox;
@@ -202,10 +203,15 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       variables = variableServiceForDoc(doc);
       const {documentElement} = win.document;
       urlReplacementService = Services.urlReplacementsForDoc(documentElement);
+      analyticsElement = doc.createElement('amp-analytics');
+      doc.body.appendChild(analyticsElement);
     });
 
     function check(input, output, opt_bindings) {
-      const macros = Object.assign(variables.getMacros(), opt_bindings);
+      const macros = Object.assign(
+        variables.getMacros(analyticsElement),
+        opt_bindings
+      );
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
       return expect(expanded).to.eventually.equal(output);
     }
@@ -361,6 +367,92 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         'LINKER_PARAM(gl, cid)&LINKER_PARAM(gl, gclid)',
         'a1b2c3&123'
       );
+    });
+
+    it('"COOKIE" resolves cookie value', async () => {
+      doc.cookie = 'test=123';
+      await check('COOKIE(test)', '123');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string in FIE', async () => {
+      doc.cookie = 'test=123';
+      const fakeFie = doc.createElement('div');
+      fakeFie.classList.add('i-amphtml-fie');
+      doc.body.appendChild(fakeFie);
+      fakeFie.appendChild(analyticsElement);
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string when inabox', async () => {
+      doc.cookie = 'test=123';
+      env.win.AMP_MODE.runtime = 'inabox';
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
+    });
+
+    it('COOKIE resolves to empty string on cache', async () => {
+      win.location = 'https://www-example-com.cdn.ampproject.org';
+      doc.cookie = 'test=123';
+      await check('COOKIE(test)', '');
+      doc.cookie = '';
+    });
+
+    describe('$MATCH', () => {
+      it('handles default index', () => {
+        return check('$MATCH(thisisatest, thisisatest)', 'thisisatest');
+      });
+
+      it('matches full match', () => {
+        return check('$MATCH(thisisatest, thisisatest, 0)', 'thisisatest');
+      });
+
+      it('matches partial match', () => {
+        return check('$MATCH(thisisatest, test, 0)', 'test');
+      });
+
+      it('matches 1st group match', () => {
+        return check('$MATCH(thisisatest, `thisisa(test)`, 1)', 'test');
+      });
+
+      it('matches 2nd group match', () => {
+        return check('$MATCH(thisisatest, `this(is)a(test)`, 2)', 'test');
+      });
+
+      it('does not match non-matching group', () => {
+        return check('$MATCH(thisisatest, `thisisa(?:test)`, 1)', '');
+      });
+
+      it('handles escaped regex chars', () => {
+        return check('$MATCH(1, \\d, 0)', '1');
+      });
+
+      it('handles no full match', () => {
+        return check('$MATCH(invalid, thisisatest, 0)', '');
+      });
+
+      it('handles no group match', () => {
+        return check('$MATCH(thisisatest, `thisisa(\\d+)?test`, 1)', '');
+      });
+
+      it('handles large index', () => {
+        return check('$MATCH(thisisatest, thisisatest, 100)', '');
+      });
+
+      it('handles negative index', () => {
+        expectAsyncConsoleError(
+          /Third argument in MATCH macro must be a number >= 0/
+        );
+        return check('$MATCH(thisisatest, thisisatest, -1)', 'thisisatest');
+      });
+
+      it('handles NaN index', () => {
+        expectAsyncConsoleError(
+          /Third argument in MATCH macro must be a number >= 0/
+        );
+        return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
+      });
     });
   });
 

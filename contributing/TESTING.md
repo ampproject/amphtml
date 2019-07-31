@@ -34,7 +34,6 @@ This document provides details for testing and building your AMP code.
   * [Running Visual Diff Tests Locally](#running-visual-diff-tests-locally)
 - [Testing on devices](#testing-on-devices)
   * [Testing with ngrok](#testing-with-ngrok)
-  * [Testing with Heroku](#testing-with-heroku)
   * [Testing with Firebase](#testing-with-firebase)
 - [End-to-end Tests](#end-to-end-tests)
 
@@ -81,7 +80,8 @@ Command                                                                 | Descri
 `gulp pr-check --files=<test-files-path-glob>`                          | Runs all the Travis CI checks locally, and restricts tests to the files provided.
 `gulp unit`                                                             | Runs the unit tests in Chrome (doesn't require the AMP library to be built).
 `gulp unit --local_changes`                                             | Runs the unit tests directly affected by the files changed in the local branch in Chrome.
-`gulp integration`                                                      | Runs the integration tests in Chrome (requires the AMP library to be built).
+`gulp integration`                                                      | Runs the integration tests in Chrome after building the runtime with the `prod` version of `AMP_CONFIG`.
+`gulp integration --config=<config>`                                    | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)
 `gulp [unit\|integration] --verbose`                                    | Runs tests in Chrome with logging enabled.
 `gulp [unit\|integration] --nobuild`                                    | Runs tests without re-build.
 `gulp [unit\|integration] --coverage`                                   | Runs code coverage tests. After running, the report will be available at test/coverage/index.html
@@ -104,7 +104,8 @@ Command                                                                 | Descri
 `gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.
 `gulp ava`                                                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava).
 `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed.
-`gulp visual-diff`                                                      | Runs all visual diff tests on a headless instance of local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`.
+`gulp visual-diff`                                                      | Runs all visual diff tests on a headless instance of local Chrome after building the runtime with the `prod` version of `AMP_CONFIG`. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`.
+`gulp visual-diff --config=<config>`                                    | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)
 `gulp visual-diff --nobuild`                                            | Same as above, but without re-build.
 `gulp visual-diff --chrome_debug --webserver_debug`                     | Same as above, with additional logging. Debug flags can be used independently.
 `gulp visual-diff --grep=<regular-expression-pattern>`                  | Same as above, but executes only those tests whose name matches the regular expression pattern.
@@ -112,7 +113,8 @@ Command                                                                 | Descri
 `gulp firebase --file path/to/file`                                     | Same as above, but copies over the file specified as `firebase/index.html`.
 `gulp firebase --min`                                                   | Same as `gulp firebase`, but uses minified files of the form `/dist/v0/amp-component-name.js` instead of unminified files of the form `/dist/v0/amp-component-name.max.js`.
 `gulp firebase --nobuild`                                               | Same as `gulp firebase`, but skips the `gulp build` step.
-`gulp e2e`                                                              | Runs all end-to-end tests on Chrome.
+`gulp e2e`                                                              | Runs all end-to-end tests on Chrome after building the runtime with the `prod` version of `AMP_CONFIG`..
+`gulp e2e --config=<config>`                                            | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)
 `gulp e2e --files=<test-files-path-glob>`                               | Runs end-to-end tests from the specified files on the latest Chrome browser.
 `gulp e2e --nobuild`                                                    | Runs all end-to-end tests without building the runtime.
 `gulp e2e --testnames`                                                  | Lists the name of each test being run, and prints a summary at the end.
@@ -289,17 +291,6 @@ ngrok http 8000
 
 Once started, the ngrok will print URLs for both `http` and `https`. E.g. `http://73774d8c.ngrok.io/` and `https://73774d8c.ngrok.io/`. These URLs can be used to debug on iOS and elsewhere.
 
-
-### Testing with Heroku
-
-For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) , please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
-
-In the meantime you can also use our automatic build on Heroku [link](http://amphtml-nightly.herokuapp.com/), which is normally built with latest head on master branch (please allow delay). The first time load is normally slow due to Heroku's free account throttling policy.
-
-To correctly get ads and third party working when testing on hosted services
-you will need set the `AMP_TESTING_HOST` environment variable. (On heroku this
-is done through
-`heroku config:set AMP_TESTING_HOST=my-heroku-subdomain.herokuapp.com`)
 
 ### Testing with Firebase
 For deploying and testing local AMP builds on [Firebase](https://firebase.google.com/), install firebase and initialize firebase within this directory* (a `firebase` folder can be generated with the command, `gulp firebase`).

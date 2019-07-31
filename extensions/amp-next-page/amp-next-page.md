@@ -43,14 +43,14 @@ Dynamically loads more documents recommended for the user.
   <tr>
     <td>
       <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a>
+        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a>
       </strong>
     </td>
     <td>N/A</td>
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-next-page/">amp-next-page example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-next-page/">amp-next-page example</a>.</td>
   </tr>
 </table>
 
@@ -82,10 +82,13 @@ usually be placed directly after the unique content of a given page: for
 example, at the end of a news article or recipe, but before the footer or
 other content repeated across articles.
 
-{% call callout('Note', type='note') %} For performance reasons the
-component will render a maximum of three documents (total) on screen at one
-time. This limit may be changed or removed in the future.
-{% endcall %}
+The component will render a total maximum of three documents on screen in a
+component will render a maximum of three documents (total) on screen at one	single instance. This limit may be changed or removed in the future. 
+
+[tip type="important]
+**Important**	[`<amp-analytics>`](../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`. 
+Measuring pageviews is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md).
+[/tip]
 
 ### Recommendation box
 

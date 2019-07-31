@@ -66,6 +66,7 @@ export function uzou(global, data) {
 /**
  * encode URI based on RFC 3986
  * @param {string} str url string
+ * @return {*} TODO(#23582): Specify return type
  */
 function fixedEncodeURIComponent(str) {
   return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {

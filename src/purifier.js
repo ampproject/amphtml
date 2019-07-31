@@ -17,13 +17,14 @@
 import {
   BIND_PREFIX,
   BLACKLISTED_TAGS,
+  EMAIL_WHITELISTED_AMP_TAGS,
   TRIPLE_MUSTACHE_WHITELISTED_TAGS,
   WHITELISTED_ATTRS,
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
-  isAmp4Email,
   isValidAttr,
 } from './sanitation';
+import {isAmp4Email} from './format';
 import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
 import {user} from './log';
@@ -138,9 +139,8 @@ export function getAllowedTags() {
   });
   // Sanitize dummy markup so that the hook is invoked.
   DomPurify.sanitize('<p></p>');
-  // Remove any blacklisted tags.
-  Object.keys(BLACKLISTED_TAGS).forEach(blacklistedTag => {
-    delete allowedTags[blacklistedTag];
+  Object.keys(BLACKLISTED_TAGS).forEach(tag => {
+    allowedTags[tag] = false;
   });
   // Pops the last hook added.
   DomPurify.removeHook('uponSanitizeElement');
@@ -154,6 +154,8 @@ export function getAllowedTags() {
  * @param {!Document} doc
  */
 function addPurifyHooks(purifier, diffing, doc) {
+  const isEmail = isAmp4Email(doc);
+
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
   const allowedTagsChanges = [];
@@ -181,7 +183,8 @@ function addPurifyHooks(purifier, diffing, doc) {
 
     // Allow all AMP elements.
     if (startsWith(tagName, 'amp-')) {
-      allowedTags[tagName] = true;
+      // Enforce AMP4EMAIL tag whitelist at runtime.
+      allowedTags[tagName] = !isEmail || EMAIL_WHITELISTED_AMP_TAGS[tagName];
       // AMP elements don't support arbitrary mutation, so don't DOM diff them.
       disableDiffingFor(node);
     }
@@ -314,10 +317,10 @@ function addPurifyHooks(purifier, diffing, doc) {
   };
 
   /**
-   * @param {!Node} node
+   * @param {!Node} unusedNode
    * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
    */
-  const afterSanitizeAttributes = function(node) {
+  const afterSanitizeAttributes = function(unusedNode) {
     // DOMPurify doesn't have a tag-specific attribute whitelist API and
     // `allowedAttributes` has a per-invocation scope, so we need to undo
     // changes after sanitizing attributes.
@@ -325,20 +328,6 @@ function addPurifyHooks(purifier, diffing, doc) {
       delete allowedAttributes[attr];
     });
     allowedAttributesChanges.length = 0;
-
-    // TODO(alabiaga): Revert this change once DOM Purifier patch to make
-    // this work is live. https://github.com/cure53/DOMPurify/pull/329
-    // Remove input type file if applicable. The purifier will actually
-    // not remove this attribute because of a Safari bug where removing it
-    // will result in not being able to add it programmatically afterwards.
-    // For AMP HTML's usage, this is fine.
-    const nodeName = node.nodeName.toLowerCase();
-    if (nodeName == 'input') {
-      const inputType = node.getAttribute('type');
-      if (inputType && inputType.toLowerCase() == 'file' && isAmp4Email(doc)) {
-        node.removeAttribute('type');
-      }
-    }
   };
 
   purifier.addHook('uponSanitizeElement', uponSanitizeElement);
@@ -401,6 +390,11 @@ export function validateAttributeChange(purifier, node, attr, value) {
       return false;
     }
   }
+  // By now, the attribute is safe to remove.  DOMPurify.isValidAttribute()
+  // expects non-null values.
+  if (value == null) {
+    return true;
+  }
   // Don't allow binding attributes for now.
   if (bindingTypeForAttr(attr) !== BindingType.NONE) {
     return false;
@@ -414,12 +408,10 @@ export function validateAttributeChange(purifier, node, attr, value) {
     // TODO(choumx): This opts out of DOMPurify's attribute _value_ sanitization
     // for the above, which assumes that the attributes don't have security
     // implications beyond URLs etc. that are covered by isValidAttr().
-    // This is OK for now, but we should instead somehow modify ALLOWED_ATTR
-    // to preserve value sanitization.
-    const whitelisted = WHITELISTED_ATTRS.includes(attr);
+    // This is OK but we ought to contribute new hooks and remove this.
     const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tag];
     const whitelistedForTag = attrsByTags && attrsByTags.includes(attr);
-    if (!whitelisted && !whitelistedForTag && !startsWith(tag, 'amp-')) {
+    if (!whitelistedForTag && !startsWith(tag, 'amp-')) {
       return false;
     }
   }

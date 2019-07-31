@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {adoptServiceForEmbedDoc} from '../service';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
@@ -27,9 +28,12 @@ import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
+import {
+  installOwnersServiceForDoc,
+  installResourcesServiceForDoc,
+} from './resources-impl';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installPlatformService} from './platform-impl';
-import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
 import {installTemplatesService} from './template-impl';
@@ -73,29 +77,46 @@ export function installRuntimeServices(global) {
  * Install ampdoc-level services.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
- * @param {boolean=} opt_inabox
  * @restricted
  */
-export function installAmpdocServices(ampdoc, opt_initParams, opt_inabox) {
-  // Order is important!
+export function installAmpdocServices(ampdoc, opt_initParams) {
+  const isEmbedded = !!ampdoc.getParent();
+
+  // When making changes to this method:
+  // 1. Order is important!
+  // 2. Consider to install same services to amp-inabox.js
   installUrlForDoc(ampdoc);
-  installDocumentInfoServiceForDoc(ampdoc);
-  if (!opt_inabox) {
-    // those services are installed in amp-inabox.js
-    installCidService(ampdoc);
-    installViewerServiceForDoc(ampdoc, opt_initParams);
-    installViewportServiceForDoc(ampdoc);
-  }
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'documentInfo')
+    : installDocumentInfoServiceForDoc(ampdoc);
+  // those services are installed in amp-inabox.js
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'cid')
+    : installCidService(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'viewer')
+    : installViewerServiceForDoc(ampdoc, opt_initParams);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'viewport')
+    : installViewportServiceForDoc(ampdoc);
   installHiddenObserverForDoc(ampdoc);
-  installHistoryServiceForDoc(ampdoc);
-  installResourcesServiceForDoc(ampdoc);
-  installUrlReplacementsServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'history')
+    : installHistoryServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'resources')
+    : installResourcesServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'owners')
+    : installOwnersServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
+    : installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
-  if (!opt_inabox) {
-    // For security, Storage is not supported in inabox.
-    installStorageServiceForDoc(ampdoc);
-  }
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'storage')
+    : installStorageServiceForDoc(ampdoc);
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }

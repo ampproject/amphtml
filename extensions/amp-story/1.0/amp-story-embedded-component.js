@@ -283,7 +283,7 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
@@ -480,6 +480,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Builds the tooltip overlay and appends it to the provided story.
    * @private
+   * @return {Node}
    */
   buildFocusedState_() {
     this.shadowRoot_ = this.win_.document.createElement('div');
@@ -677,13 +678,14 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Gets href from an element containing a url.
    * @param {!Element} target
+   * @return {string}
    * @private
    */
   getElementHref_(target) {
     const elUrl = target.getAttribute('href');
     if (!isProtocolValid(elUrl)) {
       user().error(TAG, 'The tooltip url is invalid');
-      return;
+      return '';
     }
 
     return parseUrlDeprecated(elUrl).href;
@@ -789,7 +791,7 @@ export class AmpStoryEmbeddedComponent {
    * that content around stays put.
    * @param {!Element} pageEl
    * @param {!Element} element
-   * @param {!../../../src/service/resources-impl.Resources} resources
+   * @param {!../../../src/service/resources-impl.ResourcesDef} resources
    */
   static prepareForAnimation(pageEl, element, resources) {
     let elId = null;

@@ -15,7 +15,11 @@
  */
 'use strict';
 
-/** Enforces naming rules for private properties. */
+/**
+ * Enforces naming rules for private properties.
+ *
+ * @return {*} TODO(#23582): Specify return type
+ */
 module.exports = function(context) {
   /**
    * @param {!Array<!Node>|undefined} commentLines
@@ -39,14 +43,6 @@ module.exports = function(context) {
   }
 
   /**
-   * @param {string}
-   * @return {boolean}
-   */
-  function hasExplicitNoInline(fnName) {
-    return /NoInline$/.test(fnName);
-  }
-
-  /**
    * @param {!Node}
    * @return {boolean}
    */
@@ -59,7 +55,6 @@ module.exports = function(context) {
     MethodDefinition: function(node) {
       if (
         hasPrivateAnnotation(node.leadingComments) &&
-        !hasExplicitNoInline(node.key.name) &&
         !hasTrailingUnderscore(node.key.name)
       ) {
         context.report({
@@ -73,7 +68,6 @@ module.exports = function(context) {
         node.parent.type == 'ExpressionStatement' &&
         hasPrivateAnnotation(node.parent.leadingComments) &&
         isThisMemberExpression(node.left) &&
-        !hasExplicitNoInline(node.left.property.name) &&
         !hasTrailingUnderscore(node.left.property.name)
       ) {
         context.report({

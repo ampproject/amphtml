@@ -36,6 +36,7 @@ import {findIndex, remove} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
+import {isAmp4Email} from '../../../src/format';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
@@ -116,6 +117,8 @@ export class Bind {
    * @param {!Window=} opt_win
    */
   constructor(ampdoc, opt_win) {
+    // TODO(#22733): remove opt_win subroooting once ampdoc-fie is launched.
+
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -174,7 +177,7 @@ export class Bind {
      */
     this.maxNumberOfBindings_ = 1000;
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /**
@@ -529,7 +532,7 @@ export class Bind {
    */
   initialize_(root) {
     // Disallow URL property bindings in AMP4EMAIL.
-    const allowUrlProperties = !this.isAmp4Email_();
+    const allowUrlProperties = !isAmp4Email(this.localWin_.document);
     this.validator_ = new BindValidator(allowUrlProperties);
 
     // The web worker's evaluator also has an instance of BindValidator
@@ -567,17 +570,6 @@ export class Bind {
         this.viewer_.sendMessage('bindReady', undefined);
         this.dispatchEventForTesting_(BindEvents.INITIALIZE);
       });
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isAmp4Email_() {
-    const html = this.localWin_.document.documentElement;
-    const amp4email =
-      html.hasAttribute('amp4email') || html.hasAttribute('⚡4email');
-    return amp4email;
   }
 
   /**
@@ -857,7 +849,7 @@ export class Bind {
       // rescan() with {fast: true} for better performance. Note that only
       // children are opted-out (e.g. amp-list children, not amp-list itself).
       const next = FAST_RESCAN_TAGS.includes(node.nodeName)
-        ? walker.nextSibling()
+        ? this.skipSubtree_(walker)
         : walker.nextNode();
       return !next || limitExceeded;
     };
@@ -888,6 +880,23 @@ export class Bind {
       };
       chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
     });
+  }
+
+  /**
+   * Skips the subtree at the walker's current node and returns the next node
+   * in document order, if any. Otherwise, returns null.
+   * @param {!TreeWalker} walker
+   * @return {?Node}
+   * @private
+   */
+  skipSubtree_(walker) {
+    for (let n = walker.currentNode; n; n = walker.parentNode()) {
+      const sibling = walker.nextSibling();
+      if (sibling) {
+        return sibling;
+      }
+    }
+    return null;
   }
 
   /**

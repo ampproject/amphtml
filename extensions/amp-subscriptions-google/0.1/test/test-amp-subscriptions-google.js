@@ -146,7 +146,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should proxy fetch via AMP fetcher', () => {
     const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake((url, init) => {
       expect(url).to.match(/publication\/example.org/);
-      expect(init).to.deep.equal({credentials: 'include'});
+      expect(init).to.deep.equal({
+        credentials: 'include',
+        prerenderSafe: true,
+      });
       return Promise.resolve({
         json: () => {
           return Promise.resolve({entitlements: entitlementResponse});
@@ -447,9 +450,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should allow prerender if in a google viewer', () => {
     viewer.params_['viewerUrl'] = 'https://www.google.com/other';
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
-    // TODO(#23102): restore safe prerendering mode. This will be `true` once
-    // it's restored.
-    expect(platform.isPrerenderSafe()).to.be.false;
+    expect(platform.isPrerenderSafe()).to.be.true;
   });
 
   it('should attach button given to decorateUI', () => {
@@ -489,6 +490,21 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     platform.decorateUI(elem, 'subscribe-smartbutton-dark');
     expect(elem.textContent).to.be.equal('');
     expect(attachStub).to.be.calledWith(elem, {theme: 'dark', lang: 'en'});
+  });
+
+  it('should use message text color', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('subscriptions-lang', 'en');
+    elem.setAttribute('subscriptions-message-text-color', '#09f');
+    platform.decorateUI(elem, 'subscribe-smartbutton');
+    expect(elem.textContent).to.be.equal('');
+    expect(attachStub).to.be.calledWith(elem, {
+      lang: 'en',
+      messageTextColor: '#09f',
+      theme: 'light',
+    });
   });
 
   it('should throw if smartButton language is missing', () => {
