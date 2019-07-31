@@ -1334,7 +1334,22 @@ function decryptDocumentKey(encryptedDocumentKey) {
 // serve local vendor config JSON files
 app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
   const {vendor} = req.params;
-  const max = pc.env.SERVE_MODE === 'default' ? '.max' : '';
+  const serveMode = pc.env.SERVE_MODE;
+
+  if (serveMode === 'cdn') {
+    const vendorUrl = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
+    request(vendorUrl, (error, response) => {
+      if (error) {
+        res.status(404);
+        res.end();
+      } else {
+        res.send(response);
+      }
+    });
+    return;
+  }
+
+  const max = serveMode === 'default' ? '.max' : '';
   const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
 
   fs.readFileAsync(localVendorConfigPath)
