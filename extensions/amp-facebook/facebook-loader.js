@@ -25,17 +25,16 @@ import {svgFor} from '../../src/static-template';
 export function createLoaderLogo(element) {
   const svg = svgFor(element);
   return svg`
-      <g fill="#4267B2" class="i-amphtml-new-loader-white-on-shim">
+      <g fill="#1877F2" class="i-amphtml-new-loader-white-on-shim">
         <path
-          fill="#4267B2" class="i-amphtml-new-loader-white-on-shim"
-          d="M68.9,50H51.1c-0.6,0-1.1,0.5-1.1,1.1v17.8c0,0.6,0.5,1.1,1.1,1.1c0,0,0,0,0,0h9.6v-7.7h-2.6v-3h2.6V57
-                  c0-2.6,1.6-4,3.9-4c0.8,0,1.6,0,2.3,0.1v2.7h-1.6c-1.3,0-1.5,0.6-1.5,1.5v1.9h3l-0.4,3h-2.6V70h5.1c0.6,0,1.1-0.5,1.1-1.1l0,0V51.1
-                  C70,50.5,69.5,50,68.9,50C68.9,50,68.9,50,68.9,50z"
+          fill="#1877F2" class="i-amphtml-new-loader-white-on-shim"
+          d="M70,60c0-5.5-4.5-10-10-10s-10,4.5-10,10c0,5,3.7,9.1,8.4,9.9v-7h-2.5V60h2.5v-2.2c0-2.5,1.5-3.9,3.8-3.9
+                  	c1.1,0,2.2,0.2,2.2,0.2v2.5h-1.3c-1.2,0-1.6,0.8-1.6,1.6V60h2.8l-0.4,2.9h-2.3v7C66.3,69.1,70,65,70,60z"
         ></path>
         <path
           fill="#ffffff" class="i-amphtml-new-loader-transparent-on-shim"
-          d="M63.8,70v-7.7h2.6l0.4-3h-3v-1.9c0-0.9,0.2-1.5,1.5-1.5h1.6v-2.7c-0.8-0.1-1.6-0.1-2.3-0.1
-                  c-2.3,0-3.9,1.4-3.9,4v2.2h-2.6v3h2.6V70H63.8z"
+          d="M63.9,62.9l0.4-2.9h-2.8v-1.9c0-0.8,0.4-1.6,1.6-1.6h1.3v-2.5c0,0-1.1-0.2-2.2-0.2c-2.3,0-3.8,1.4-3.8,3.9V60
+                  	h-2.5v2.9h2.5v7c0.5,0.1,1,0.1,1.6,0.1s1.1,0,1.6-0.1v-7H63.9z"
         ></path>
       </g>
     `;

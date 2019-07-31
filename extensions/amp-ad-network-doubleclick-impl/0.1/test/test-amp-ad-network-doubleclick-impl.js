@@ -305,6 +305,95 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
       expect(impl.sandboxHTMLCreativeFrame()).to.be.true;
     });
+
+    [
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 250,
+        margin: '-25px',
+      },
+      {
+        direction: 'rtl',
+        parentWidth: 300,
+        newWidth: 250,
+        margin: '-25px',
+      },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 300,
+        margin: '-50px',
+      },
+      {
+        direction: 'rtl',
+        parentWidth: 300,
+        newWidth: 300,
+        margin: '-50px',
+      },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 380,
+        margin: '-15px',
+      },
+      {
+        direction: 'rtl',
+        parentWidth: 300,
+        newWidth: 380,
+        margin: '-365px',
+      },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 400,
+        margin: '-25px',
+      },
+      {
+        direction: 'rtl',
+        parentWidth: 300,
+        newWidth: 400,
+        margin: '-375px',
+      },
+    ].forEach((testCase, testNum) => {
+      it(`should adjust slot CSS after expanding width #${testNum}`, () => {
+        sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
+          impl.element.style.width = `${width}px`;
+          return {
+            catch: () => {},
+          };
+        });
+        sandbox.stub(impl, 'getViewport').callsFake(() => ({
+          getRect: () => ({width: 400}),
+        }));
+        sandbox.stub(impl.element, 'getPageLayoutBox').callsFake(() => ({
+          left: 25,
+          right: 25,
+        }));
+        const dirStr = testCase.direction == 'ltr' ? 'Left' : 'Right';
+        impl.flexibleAdSlotData_ = {
+          parentWidth: testCase.parentWidth,
+          parentStyle: {
+            [`padding${dirStr}`]: '50px',
+          },
+        };
+        impl.win.document.body.dir = testCase.direction;
+        impl.extractSize({
+          get(name) {
+            switch (name) {
+              case 'X-CreativeSize':
+                return `${testCase.newWidth}x50`;
+            }
+          },
+          has(name) {
+            return !!this.get(name);
+          },
+        });
+        expect(impl.element.style[`margin${dirStr}`]).to.equal(testCase.margin);
+        // We use a fixed '30' value for z-index.
+        expect(impl.element.style.zIndex).to.equal('30');
+      });
+    });
   });
 
   describe('#onCreativeRender', () => {
@@ -1212,20 +1301,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should attempt resize for fluid request + fixed response case', () => {
       impl.isFluidRequest_ = true;
-      impl.handleResize_(350, 300);
-      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
-      expect(impl.element.getAttribute('style')).to.match(/height: 300/);
-    });
-
-    it('should attempt resize for larger width response', () => {
-      impl.handleResize_(350, 50);
-      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
-      expect(impl.element.getAttribute('style')).to.match(/height: 50/);
-    });
-
-    it('should not attempt resize for larger height response', () => {
-      impl.handleResize_(350, 300);
-      expect(impl.element.getAttribute('style')).to.match(/width: 200/);
+      impl.handleResize_(150, 50);
+      expect(impl.element.getAttribute('style')).to.match(/width: 150/);
       expect(impl.element.getAttribute('style')).to.match(/height: 50/);
     });
   });
