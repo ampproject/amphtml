@@ -24,9 +24,9 @@ export const BIND_PREFIX = 'data-amp-bind-';
 
 /**
  * @const {!Object<string, boolean>}
- * See https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
+ * @see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
  */
-const BLACKLISTED_TAGS = Object.freeze({
+export const BLACKLISTED_TAGS = {
   'applet': true,
   'audio': true,
   'base': true,
@@ -40,29 +40,28 @@ const BLACKLISTED_TAGS = Object.freeze({
   'object': true,
   'style': true,
   'video': true,
-});
+};
 
 /**
- * Rules in addition to BLACKLISTED_TAGS for AMP4EMAIL.
+ * AMP elements allowed in AMP4EMAIL, modulo:
+ * - amp-list, which cannot be nested.
+ * - amp-lightbox and amp-image-lightbox, which are deprecated.
  * @const {!Object<string, boolean>}
+ * @see https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-components.md
  */
-const EMAIL_BLACKLISTED_TAGS = Object.freeze({
-  // See disallowed_ancestor in validator-amp-list.protoascii.
-  'amp-list': true,
-});
-
-/**
- *
- * @param {!Document} doc
- * @return {!Object<string, boolean>}
- */
-export function blacklistedTags(doc) {
-  return Object.assign(
-    map(),
-    BLACKLISTED_TAGS,
-    isAmp4Email(doc) ? EMAIL_BLACKLISTED_TAGS : {}
-  );
-}
+export const EMAIL_WHITELISTED_AMP_TAGS = {
+  'amp-accordion': true,
+  'amp-anim': true,
+  'amp-bind-macro': true,
+  'amp-carousel': true,
+  'amp-fit-text': true,
+  'amp-img': true,
+  'amp-layout': true,
+  'amp-selector': true,
+  'amp-sidebar': true,
+  'amp-state': true,
+  'amp-timeago': true,
+};
 
 /**
  * Whitelist of tags allowed in triple mustache e.g. {{{name}}}.
