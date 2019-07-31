@@ -86,6 +86,7 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/e2e-experiment-tests.js
       after_script:
+        - build-system/sauce_connect/stop_sauce_connect.sh
         - ps -ef
   allow_failures:
     - script:
