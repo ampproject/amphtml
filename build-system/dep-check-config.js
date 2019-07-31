@@ -74,37 +74,26 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'third_party/**/*.js',
     whitelist: [
-      'extensions/amp-crypto-polyfill/**/*.js->' +
-        'third_party/closure-library/sha384-generated.js',
-      'extensions/amp-mustache/**/amp-mustache.js->' +
-        'third_party/mustache/mustache.js',
-      'extensions/amp-ad-network-adzerk-impl/0.1/' +
-        'amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
-      'extensions/amp-timeago/0.1/amp-timeago.js->' +
-        'third_party/timeagojs/timeago.js',
       '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',
-      'src/sanitizer.js->third_party/caja/html-sanitizer.js',
-      'extensions/amp-viz-vega/**->third_party/vega/vega.js',
-      'extensions/amp-viz-vega/**->third_party/d3/d3.js',
-      'src/css.js->third_party/css-escape/css-escape.js',
-      'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
-      'third_party/timeagojs/timeago.js->' +
-        'third_party/timeagojs/timeago-locales.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
+      'extensions/amp-autocomplete/**/*.js->third_party/fuzzysearch/index.js',
+      'extensions/amp-crypto-polyfill/**/*.js->third_party/closure-library/sha384-generated.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
-      'extensions/amp-subscriptions/**/*.js->' +
-        'third_party/subscriptions-project/apis.js',
-      'extensions/amp-subscriptions/**/*.js->' +
-        'third_party/subscriptions-project/config.js',
-      'extensions/amp-subscriptions-google/**/*.js->' +
-        'third_party/subscriptions-project/apis.js',
-      'extensions/amp-subscriptions-google/**/*.js->' +
-        'third_party/subscriptions-project/config.js',
-      'extensions/amp-subscriptions-google/**/*.js->' +
-        'third_party/subscriptions-project/swg.js',
-      'extensions/amp-recaptcha-input/**/*.js->' +
-        'third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
-      'extensions/amp-autocomplete/**/*.js->' +
-        'third_party/fuzzysearch/index.js',
+      'extensions/amp-list/**->third_party/set-dom/set-dom.js',
+      'extensions/amp-mustache/**/amp-mustache.js->third_party/mustache/mustache.js',
+      'extensions/amp-recaptcha-input/**/*.js->third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
+      'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/apis.js',
+      'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/config.js',
+      'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
+      'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/apis.js',
+      'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
+      'extensions/amp-timeago/0.1/amp-timeago.js->third_party/timeagojs/timeago.js',
+      'extensions/amp-viz-vega/**->third_party/d3/d3.js',
+      'extensions/amp-viz-vega/**->third_party/vega/vega.js',
+      'src/css.js->third_party/css-escape/css-escape.js',
+      'src/sanitizer.js->third_party/caja/html-sanitizer.js',
+      'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
+      'third_party/timeagojs/timeago.js->third_party/timeagojs/timeago-locales.js',
     ],
   },
   // Rules for 3p
