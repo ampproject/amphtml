@@ -136,6 +136,11 @@ export const RTC_VENDORS = {
       'https://krk.kargo.com/api/v1/event/amprtc-error?error_type=ERROR_TYPE&url=HREF',
     disableKeyAppend: true,
   },
+  yieldlab: {
+    url: 'https://ad.yieldlab.net/yp/ADSLOT_ID?content=amp&t=amp%3D1',
+    macros: ['ADSLOT_ID'],
+    disableKeyAppend: true,
+  },
 };
 
 // DO NOT MODIFY: Setup for tests

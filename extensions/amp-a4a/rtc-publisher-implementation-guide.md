@@ -33,6 +33,7 @@ To use RTC, you must meet the following requirements:
 *   Salesforce
 *   Yieldbot
 *   Kargo
+*   Yieldlab
 
 ### Overview
 
