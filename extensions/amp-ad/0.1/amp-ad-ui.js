@@ -61,6 +61,7 @@ export class AmpAdUIHandler {
   /**
    * Create a default placeholder if not provided.
    * Should be called in baseElement createPlaceholderCallback.
+   * @return {*} TODO(#23582): Specify return type
    */
   createPlaceholder() {
     return this.addDefaultUiComponent_('placeholder');

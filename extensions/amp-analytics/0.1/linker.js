@@ -201,6 +201,7 @@ function getMinSinceEpoch() {
  * Function that encodesURIComponent but also tilde, since we are using it as
  * our delimiter.
  * @param {string} value
+ * @return {*} TODO(#23582): Specify return type
  */
 function encode(value) {
   return base64UrlEncodeFromString(String(value));

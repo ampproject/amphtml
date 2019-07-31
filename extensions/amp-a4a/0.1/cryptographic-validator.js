@@ -27,7 +27,10 @@ export const SIGNATURE_VERIFIER_PROPERTY_NAME =
 const TAG = 'amp-ad-cryptographic-validator';
 
 export class CryptographicValidator extends Validator {
-  /** @param {!Window} win */
+  /**
+   * @param {!Window} win
+   * @return {!SignatureVerifier}
+   */
   getSignatureVerifier_(win) {
     // TODO(levitzky) extract this into a service registered to ampdoc.
     return (

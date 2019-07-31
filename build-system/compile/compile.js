@@ -53,12 +53,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  * @return {!Array<string>}
  */
 function convertPathsToTmpRoot(paths) {
-  return paths.map(path => {
-    const hasNegation = path.charAt(0) === '!';
-    const newPath = hasNegation ? path.substr(1) : path;
-    return `${hasNegation ? '!' : ''}${SRC_TEMP_DIR}/${newPath}`;
-    return path;
-  });
+  return paths.map(path => path.replace(/^(\!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
 }
 
 // Compiles AMP with the closure compiler. This is intended only for
@@ -113,16 +108,17 @@ exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const hideWarningsFor = [
+    'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
-    'third_party/subscriptions-project/',
     'third_party/d3/',
+    'third_party/inputmask/',
     'third_party/mustache/',
+    'third_party/react-dates/',
+    'third_party/set-dom/',
+    'third_party/subscriptions-project/',
     'third_party/vega/',
     'third_party/webcomponentsjs/',
-    'third_party/react-dates/',
-    'third_party/amp-toolbox-cache-url/',
-    'third_party/inputmask/',
     'node_modules/',
     'build/patched-module/',
     // Generated code.
