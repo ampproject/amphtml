@@ -15,6 +15,7 @@
  */
 
 import {BrowserController, RequestBank} from '../../testing/test-helper';
+
 import {parseQueryString} from '../../src/url';
 
 describe('amp-analytics', function() {
@@ -47,6 +48,7 @@ describe('amp-analytics', function() {
             "a": 1,
             "b": "\${title}",
             "cid": "\${clientId(_cid)}",
+            "pid": "\${pageViewId64},
             "default": "\$DEFAULT( , test)",
             "cookie": "\${cookie(test-cookie)}"
           }
@@ -67,6 +69,7 @@ describe('amp-analytics', function() {
           expect(q['a']).to.equal('2');
           expect(q['b']).to.equal('AMP TEST');
           expect(q['cid']).to.equal('amp-12345');
+          expect(q['pid']).to.match(/pid=([a-zA-Z0-9_-]+){10,}/);
           expect(q['default']).to.equal('test');
           // cookie set via http response header when requesting
           // localhost:9876/amp4test/compose-doc

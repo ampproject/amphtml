@@ -15,18 +15,11 @@
  */
 
 import * as trackPromise from '../../src/impression';
-import {Observable} from '../../src/observable';
-import {Services} from '../../src/services';
-import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
-import {createIframePromise} from '../../testing/iframe';
+
 import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
-import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {installCryptoService} from '../../src/service/crypto-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
@@ -35,6 +28,15 @@ import {
   mockWindowInterface,
   stubServiceForDoc,
 } from '../../testing/test-helper';
+
+import {Observable} from '../../src/observable';
+import {Services} from '../../src/services';
+import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
+import {createIframePromise} from '../../testing/iframe';
+import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
+import {installCryptoService} from '../../src/service/crypto-impl';
+import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
 import {parseUrlDeprecated} from '../../src/url';
 import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
@@ -605,7 +607,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace PAGE_VIEW_ID_64', () => {
     return expandUrlAsync('?pid=PAGE_VIEW_ID_64').then(res => {
-      expect(res).to.match(/pid=[a-zA-Z0-9_-]+/);
+      expect(res).to.match(/pid=([a-zA-Z0-9_-]+){10,}/);
     });
   });
 
