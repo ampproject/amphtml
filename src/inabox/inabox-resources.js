@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import {Resource} from '../service/resource';
+import {Pass} from '../pass';
+import {Resource, ResourceState} from '../service/resource';
+import {Services} from '../services';
 import {dev} from '../log';
 import {registerServiceBuilderForDoc} from '../service';
 
-const TAG_ = 'inabox-resources';
+const TAG = 'inabox-resources';
+const FOUR_FRAME_DELAY = 70;
 
 /**
  * @implements {../service/resources-impl.ResourcesDef}
@@ -40,8 +43,11 @@ class InaboxResources {
     /** @private {number} */
     this.resourceIdCounter_ = 0;
 
-    /** @private {boolean} */
-    this.ampInitialized_ = false;
+    /** @private @const {!./vsync-impl.Vsync} */
+    this.vsync_ = Services./*OK*/ vsyncFor(this.win);
+
+    /** @const @private {!Pass} */
+    this.pass_ = new Pass(this.win, this.doPass_.bind(this));
   }
 
   /** @override */
@@ -87,7 +93,7 @@ class InaboxResources {
   add(element) {
     const resource = new Resource(++this.resourceIdCounter_, element, this);
     this.resources_.push(resource);
-    dev().fine(TAG_, 'resource added:', resource.debugid);
+    dev().fine(TAG, 'resource added:', resource.debugid);
   }
 
   /**
@@ -97,7 +103,7 @@ class InaboxResources {
    */
   upgraded(element) {
     const resource = this.getResourceForElement(element);
-    this.buildResource_(resource);
+    this.buildAndTryLayoutResource_(resource);
   }
 
   /** @override */
@@ -110,7 +116,7 @@ class InaboxResources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
-    dev().fine(TAG_, 'element removed:', resource.debugid);
+    dev().fine(TAG, 'element removed:', resource.debugid);
   }
 
   /** @override */
@@ -122,26 +128,25 @@ class InaboxResources {
    * @param {boolean=} opt_relayoutAll
    * @return {boolean}
    */
-  schedulePass(opt_delay, opt_relayoutAll) {}
+  schedulePass(opt_delay, opt_relayoutAll) {
+    dev().error(TAG, `schedulePass opt_delay=${opt_delay},opt_relayoutAll=${opt_relayoutAll}`);
+    this.pass_.schedule(opt_delay);
+  }
 
   /**
    * Registers a callback to be called when the next pass happens.
    * @param {function()} callback
    */
-  onNextPass(callback) {}
+  onNextPass(callback) {
+    dev().error(TAG, 'onNextPass');
+  }
 
   /**
    * Called when main AMP binary is fully initialized.
    * May never be called in Shadow Mode.
    */
   ampInitComplete() {
-    domContentLoaded(this.ampdoc_.win).then(() => {
-      dev().fine(TAG_, 'start pass');
-      this.ampInitialized_ = true;
-      this.get().forEach(resource => {
-        this.buildResource_(resource);
-      });
-    });
+    dev().fine(TAG, 'ampInitComplete');
   }
 
   /**
@@ -152,7 +157,9 @@ class InaboxResources {
    * @return {!Promise}
    * @restricted
    */
-  requireLayout(element, opt_parentPriority) {}
+  requireLayout(element, opt_parentPriority) {
+    dev().error(TAG, 'requireLayout');
+  }
 
   /**
    * Updates the priority of the resource. If there are tasks currently
@@ -161,7 +168,9 @@ class InaboxResources {
    * @param {number} newLayoutPriority
    * @restricted
    */
-  updateLayoutPriority(element, newLayoutPriority) {}
+  updateLayoutPriority(element, newLayoutPriority) {
+    dev().error(TAG, 'updateLayoutPriority');
+  }
 
   /**
    * Requests the runtime to change the element's size. When the size is
@@ -172,7 +181,9 @@ class InaboxResources {
    * @param {function()=} opt_callback A callback function.
    * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {}
+  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
+    dev().error(TAG, 'changeSize');
+  }
 
   /**
    * Return a promise that requests the runtime to update the size of
@@ -192,13 +203,17 @@ class InaboxResources {
    * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    * @return {!Promise}
    */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {}
+  attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
+    dev().error(TAG, 'attemptChangeSize');
+  }
 
   /**
    * Expands the element.
    * @param {!Element} element
    */
-  expandElement(element) {}
+  expandElement(element) {
+    dev().error(TAG, 'expandElement');
+  }
 
   /**
    * Return a promise that requests runtime to collapse this element.
@@ -208,14 +223,19 @@ class InaboxResources {
    * @param {!Element} element
    * @return {!Promise}
    */
-  attemptCollapse(element) {}
+  attemptCollapse(element) {
+    this.collapseElement(element);
+  }
 
   /**
    * Collapses the element: ensures that it's `display:none`, notifies its
    * owner and updates the layout box.
    * @param {!Element} element
    */
-  collapseElement(element) {}
+  collapseElement(element) {
+    const resource = this.getResourceForElement(element);
+    resource.completeCollapse();
+  }
 
   /**
    * Runs the specified measure, which is called in the "measure" vsync phase.
@@ -224,7 +244,10 @@ class InaboxResources {
    * @param {function()} measurer
    * @return {!Promise}
    */
-  measureElement(measurer) {}
+  measureElement(measurer) {
+    dev().error(TAG, 'measureElement');
+    return this.vsync_.measurePromise(measurer);
+  }
 
   /**
    * Runs the specified mutation on the element and ensures that remeasures and
@@ -240,7 +263,9 @@ class InaboxResources {
    * @param {function()} mutator
    * @return {!Promise}
    */
-  mutateElement(element, mutator) {}
+  mutateElement(element, mutator) {
+    return this.measureMutateElement(element, null, mutator);
+  }
 
   /**
    * Runs the specified mutation on the element and ensures that remeasures and
@@ -257,7 +282,26 @@ class InaboxResources {
    * @param {function()} mutator
    * @return {!Promise}
    */
-  measureMutateElement(element, measurer, mutator) {}
+  measureMutateElement(element, measurer, mutator) {
+    const resource = this.getResourceForElementOptional(element);
+    dev().fine(
+      TAG,
+      'measureMutateElement',
+      resource ? resource.debugid : element
+    );
+
+    return this.vsync_.runPromise({
+      measure: () => {
+        if (measurer) {
+          measurer();
+        }
+      },
+      mutate: () => {
+        mutator();
+        this.schedulePass(FOUR_FRAME_DELAY);
+      },
+    });
+  }
 
   /**
    * Assigns an owner for the specified element. This means that the resources
@@ -266,7 +310,10 @@ class InaboxResources {
    * @param {!AmpElement} owner
    * @package
    */
-  setOwner(element, owner) {}
+  setOwner(element, owner) {
+    // Resource.setOwner(element, owner);
+    dev().error(TAG, 'setOwner');
+  }
 
   /**
    * Schedules layout for the specified sub-elements that are children of the
@@ -277,7 +324,12 @@ class InaboxResources {
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
-  scheduleLayout(parentElement, subElements) {}
+  scheduleLayout(parentElement, subElements) {
+    dev().error(TAG, 'scheduleLayout');
+    // elements_(subElements).forEach(element => {
+    //   this.tryLayoutResource_(this.getResourceForElement(element));
+    // });
+  }
 
   /**
    * Invokes `unload` on the elements' resource which in turn will invoke
@@ -286,7 +338,9 @@ class InaboxResources {
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
-  schedulePause(parentElement, subElements) {}
+  schedulePause(parentElement, subElements) {
+    dev().error(TAG, 'schedulePause');
+  }
 
   /**
    * Invokes `resume` on the elements' resource which in turn will invoke
@@ -295,7 +349,9 @@ class InaboxResources {
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
-  scheduleResume(parentElement, subElements) {}
+  scheduleResume(parentElement, subElements) {
+    dev().error(TAG, 'scheduleResume');
+  }
 
   /**
    * Schedules unlayout for specified sub-elements that are children of the
@@ -304,7 +360,9 @@ class InaboxResources {
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
-  scheduleUnlayout(parentElement, subElements) {}
+  scheduleUnlayout(parentElement, subElements) {
+    dev().error(TAG, 'scheduleUnlayout');
+  }
 
   /**
    * Schedules preload for the specified sub-elements that are children of the
@@ -315,7 +373,9 @@ class InaboxResources {
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
-  schedulePreload(parentElement, subElements) {}
+  schedulePreload(parentElement, subElements) {
+    dev().error(TAG, 'schedulePreload');
+  }
 
   /**
    * A parent resource, especially in when it's an owner (see {@link setOwner}),
@@ -326,36 +386,46 @@ class InaboxResources {
    * @param {!Element|!Array<!Element>} subElements
    * @param {boolean} inLocalViewport
    */
-  updateInViewport(parentElement, subElements, inLocalViewport) {}
+  updateInViewport(parentElement, subElements, inLocalViewport) {
+    dev().error(TAG, 'updateInViewport');
+  }
 
-  buildResource_(resource) {
-    if (resource.isBuilt()) {
+  /**
+   * @private
+   */
+  doPass_() {
+    dev().error(TAG, 'layoutRemainingResources_');
+    this.resources_.forEach(this.tryLayoutResource_.bind(this));
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @private
+   */
+  buildAndTryLayoutResource_(resource) {
+    this.ampdoc_
+      .whenReady()
+      .then(resource.build.bind(resource))
+      .then(this.tryLayoutResource_.bind(this, resource));
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @private
+   */
+  tryLayoutResource_(resource) {
+    if (!resource.isLayoutPending()) {
       return;
     }
-    const buildPromise = resource.build();
-    if (buildPromise) {
-      buildPromise
-        .then(() => {
-          resource.startLayout();
-        })
-        .catch(error => {
-          this.remove(resource);
-          dev().error(TAG_, error);
-        });
-    } else {
-      dev().fine(TAG_, 'resource not ready for build: ' + resource.debugid);
+    dev().fine(TAG, resource.debugid + ' isDisplayed=' + resource.isDisplayed());
+    resource.measure();
+    if (
+      resource.getState() === ResourceState.READY_FOR_LAYOUT &&
+      resource.isDisplayed()
+    ) {
+      resource.startLayout();
     }
   }
-}
-
-/**
- * @param {!Window} win
- * @return {Promise}
- */
-function domContentLoaded(win) {
-  return new Promise(resolve => {
-    win.addEventListener('DOMContentLoaded', resolve);
-  });
 }
 
 /**

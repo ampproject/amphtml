@@ -329,6 +329,7 @@ export class Resource {
       return null;
     }
     this.isBuilding_ = true;
+    dev().fine(TAG, 'building ' + this.debugid);
     return this.element.build().then(
       () => {
         this.isBuilding_ = false;
@@ -438,6 +439,7 @@ export class Resource {
    * transitioned to the "ready for layout" state.
    */
   measure() {
+    dev().fine(TAG, 'measure: ' + this.debugid);
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
@@ -493,6 +495,7 @@ export class Resource {
   measureViaResources_() {
     const viewport = Services.viewportForDoc(this.element);
     const box = viewport.getLayoutRect(this.element);
+    dev().fine(TAG, this.debugid + ' layoutBox=', box);
     this.layoutBox_ = box;
 
     // Calculate whether the element is currently is or in `position:fixed`.
@@ -679,7 +682,6 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed() {
-    return true;
     const isFluid = this.element.getLayout() == Layout.FLUID;
     // TODO(jridgewell): #getSize
     const box = this.getLayoutBox();
@@ -903,6 +905,8 @@ export class Resource {
    * @package
    */
   startLayout() {
+    dev().fine(TAG, 'layout ' + this.debugid);
+
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }

@@ -83,11 +83,18 @@ startupChunk(self.document, function initial() {
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
-  const fullCss =
+  let fullCss =
     (isExperimentOn(self, 'inabox-css-cleanup')
       ? ampSharedCss
       : ampDocCss + ampSharedCss) +
     'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
+
+  fullCss += `
+  .i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
+[layout]:not([layout=container]):not(.i-amphtml-element) > *
+{
+  display: initial;
+}`;
   installStylesForDoc(
     ampdoc,
     fullCss,
