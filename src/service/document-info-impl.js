@@ -21,13 +21,10 @@ import {
   parseUrlDeprecated,
 } from '../url';
 
-import {Services} from '../services';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {getCryptoRandomBytesArray} from '../utils/bytes';
+import {getRandomString64} from './cid-impl';
 import {isArray} from '../types';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
-import {tryResolve} from '../utils/promise';
 
 /** @private @const {!Array<string>} */
 const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
@@ -94,6 +91,7 @@ export class DocInfo {
         : sourceUrl;
     }
     const pageViewId = getPageViewId(ampdoc.win);
+    const pageViewId64 = getRandomString64(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const metaTags = getMetaTags(ampdoc.win.document);
     const replaceParams = getReplaceParams(ampdoc);
@@ -103,12 +101,9 @@ export class DocInfo {
       get sourceUrl() {
         return getSourceUrl(ampdoc.getUrl());
       },
-      /** @return {!Promise<string>} */
-      get pageViewId64() {
-        return getPageViewId64(ampdoc.win);
-      },
       canonicalUrl,
       pageViewId,
+      pageViewId64,
       linkRels,
       metaTags,
       replaceParams,
@@ -125,54 +120,6 @@ export class DocInfo {
  */
 function getPageViewId(win) {
   return String(Math.floor(win.Math.random() * 10000));
-}
-
-/**
- * Returns an array with a total of 128 of random values based on the
- * `win.crypto.getRandomValues` API. If that is not available concatenates
- * a string of other values that might be hard to guess including
- * `Math.random` and the current time.
- * @param {!Window} win
- * @return {!Uint8Array|string} Entropy.
- */
-function getHighEntropy(win) {
-  // Use win.crypto.getRandomValues to get 128 bits of random value
-  const uint8array = getCryptoRandomBytesArray(win, 16); // 128 bit
-  if (uint8array) {
-    return uint8array;
-  }
-
-  // Support for legacy browsers.
-  return String(
-    win.location.href +
-      Date.now() +
-      win.Math.random() +
-      win.screen.width +
-      win.screen.height
-  );
-}
-
-/**
- * Returns a relatively high entropy random string.
- * This should be called once per window and then cached for subsequent
- * access to the same value to be persistent per page.
- * @param {!Window} win
- * @return {!Promise<string>} pageViewId64
- */
-function getPageViewId64(win) {
-  const entropy = getHighEntropy(win);
-  if (typeof entropy == 'string') {
-    return Services.cryptoFor(win).sha384Base64(entropy);
-  } else {
-    // If our entropy is a pure random number, we can just directly turn it
-    // into base 64
-    const cast = /** @type {!Uint8Array} */ (entropy);
-    return tryResolve(() =>
-      base64UrlEncodeFromBytes(cast)
-        // Remove trailing padding
-        .replace(/\.+$/, '')
-    );
-  }
 }
 
 /**
