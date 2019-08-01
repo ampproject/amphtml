@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Observable} from '../observable';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from '../service/resource';
 import {Services} from '../services';
@@ -28,10 +29,10 @@ const FOUR_FRAME_DELAY = 70;
  */
 class InaboxResources {
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!../service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @const {!Window} */
@@ -43,11 +44,14 @@ class InaboxResources {
     /** @private {number} */
     this.resourceIdCounter_ = 0;
 
-    /** @private @const {!./vsync-impl.Vsync} */
+    /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = Services./*OK*/ vsyncFor(this.win);
 
     /** @const @private {!Pass} */
     this.pass_ = new Pass(this.win, this.doPass_.bind(this));
+
+    /** @private @const {!Observable} */
+    this.passObservable_ = new Observable();
   }
 
   /** @override */
@@ -61,12 +65,12 @@ class InaboxResources {
   }
 
   /** @override */
-  getMeasuredResources(hostWin, filterFn) {
+  getMeasuredResources(unusedHostWin, unusedFilterFn) {
     return Promise.resolve(this.get());
   }
 
   /** @override */
-  getResourcesInRect(hostWin, rect, opt_isInPrerender) {
+  getResourcesInRect(unusedHostWin, unusedRect, opt_isInPrerender) {
     return Promise.resolve(this.get());
   }
 
@@ -85,25 +89,18 @@ class InaboxResources {
     return 1;
   }
 
-  /**
-   * Signals that an element has been added to the DOM. Resources manager
-   * will start tracking it from this point on.
-   * @param {!AmpElement} element
-   */
+  /** @override */
   add(element) {
     const resource = new Resource(++this.resourceIdCounter_, element, this);
     this.resources_.push(resource);
     dev().fine(TAG, 'resource added:', resource.debugid);
   }
 
-  /**
-   * Signals that an element has been upgraded to the DOM. Resources manager
-   * will perform build and enable layout/viewport signals for this element.
-   * @param {!AmpElement} element
-   */
+  /** @override */
   upgraded(element) {
     const resource = this.getResourceForElement(element);
-    this.buildAndTryLayoutResource_(resource);
+    this.buildThenSchedulePass_(resource);
+    dev().fine(TAG, 'resource upgraded:', resource.debugid);
   }
 
   /** @override */
@@ -113,183 +110,89 @@ class InaboxResources {
       return;
     }
     const index = this.resources_.indexOf(resource);
-    if (index != -1) {
+    if (index !== -1) {
       this.resources_.splice(index, 1);
     }
     dev().fine(TAG, 'element removed:', resource.debugid);
   }
 
   /** @override */
-  removeForChildWindow(childWin) {}
+  removeForChildWindow(unusedChildWin) {
+    // no child window in inabox
+  }
 
-  /**
-   * Schedules the work pass at the latest with the specified delay.
-   * @param {number=} opt_delay
-   * @param {boolean=} opt_relayoutAll
-   * @return {boolean}
-   */
+  /** @override */
   schedulePass(opt_delay, opt_relayoutAll) {
-    dev().error(TAG, `schedulePass opt_delay=${opt_delay},opt_relayoutAll=${opt_relayoutAll}`);
-    this.pass_.schedule(opt_delay);
+    return this.pass_.schedule(opt_delay);
   }
 
-  /**
-   * Registers a callback to be called when the next pass happens.
-   * @param {function()} callback
-   */
+  /** @override */
   onNextPass(callback) {
-    dev().error(TAG, 'onNextPass');
+    this.passObservable_.add(callback);
   }
 
-  /**
-   * Called when main AMP binary is fully initialized.
-   * May never be called in Shadow Mode.
-   */
-  ampInitComplete() {
-    dev().fine(TAG, 'ampInitComplete');
+  /** @override */
+  ampInitComplete() {}
+
+  /** @override */
+  requireLayout(unusedElement, opt_parentPriority) {
+    // TODO: this is needed in amp-animation
+    dev().error(TAG, 'requireLayout not supported yet!');
+    return Promise.resolve();
   }
 
-  /**
-   * Requires the layout of the specified element or top-level sub-elements
-   * within.
-   * @param {!Element} element
-   * @param {number=} opt_parentPriority
-   * @return {!Promise}
-   * @restricted
-   */
-  requireLayout(element, opt_parentPriority) {
-    dev().error(TAG, 'requireLayout');
+  /** @override */
+  updateLayoutPriority(unusedElement, unusedNewLayoutPriority) {
+    // concept of element priority does not exist in inabox
   }
 
-  /**
-   * Updates the priority of the resource. If there are tasks currently
-   * scheduled, their priority is updated as well.
-   * @param {!Element} element
-   * @param {number} newLayoutPriority
-   * @restricted
-   */
-  updateLayoutPriority(element, newLayoutPriority) {
-    dev().error(TAG, 'updateLayoutPriority');
-  }
-
-  /**
-   * Requests the runtime to change the element's size. When the size is
-   * successfully updated then the opt_callback is called.
-   * @param {!Element} element
-   * @param {number|undefined} newHeight
-   * @param {number|undefined} newWidth
-   * @param {function()=} opt_callback A callback function.
-   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
-   */
+  /** @override */
   changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
-    dev().error(TAG, 'changeSize');
+    const resource = Resource.forElement(element);
+    resource.changeSize(newHeight, newWidth, opt_newMargins);
+    this.schedulePass(FOUR_FRAME_DELAY);
+    if (opt_callback) {
+      opt_callback();
+    }
   }
 
-  /**
-   * Return a promise that requests the runtime to update the size of
-   * this element to the specified value.
-   * The runtime will schedule this request and attempt to process it
-   * as soon as possible. However, unlike in {@link changeSize}, the runtime
-   * may refuse to make a change in which case it will reject promise, call the
-   * `overflowCallback` method on the target resource with the height value.
-   * Overflow callback is expected to provide the reader with the user action
-   * to update the height manually.
-   * Note that the runtime does not call the `overflowCallback` method if the
-   * requested height is 0 or negative.
-   * If the height is successfully updated then the promise is resolved.
-   * @param {!Element} element
-   * @param {number|undefined} newHeight
-   * @param {number|undefined} newWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
-   * @return {!Promise}
-   */
+  /** @override */
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
-    dev().error(TAG, 'attemptChangeSize');
+    this.changeSize(element, newHeight, newWidth, undefined, opt_newMargins);
+    return Promise.resolve();
   }
 
-  /**
-   * Expands the element.
-   * @param {!Element} element
-   */
+  /** @override */
   expandElement(element) {
-    dev().error(TAG, 'expandElement');
+    const resource = Resource.forElement(element);
+    resource.completeExpand();
+    this.schedulePass(FOUR_FRAME_DELAY);
   }
 
-  /**
-   * Return a promise that requests runtime to collapse this element.
-   * The runtime will schedule this request and first attempt to resize
-   * the element to height and width 0. If success runtime will set element
-   * display to none, and notify element owner of this collapse.
-   * @param {!Element} element
-   * @return {!Promise}
-   */
+  /** @override */
   attemptCollapse(element) {
     this.collapseElement(element);
+    return Promise.resolve();
   }
 
-  /**
-   * Collapses the element: ensures that it's `display:none`, notifies its
-   * owner and updates the layout box.
-   * @param {!Element} element
-   */
+  /** @override */
   collapseElement(element) {
     const resource = this.getResourceForElement(element);
     resource.completeCollapse();
   }
 
-  /**
-   * Runs the specified measure, which is called in the "measure" vsync phase.
-   * This is simply a proxy to the privileged vsync service.
-   *
-   * @param {function()} measurer
-   * @return {!Promise}
-   */
+  /** @override */
   measureElement(measurer) {
-    dev().error(TAG, 'measureElement');
     return this.vsync_.measurePromise(measurer);
   }
 
-  /**
-   * Runs the specified mutation on the element and ensures that remeasures and
-   * layouts performed for the affected elements.
-   *
-   * This method should be called whenever a significant mutations are done
-   * on the DOM that could affect layout of elements inside this subtree or
-   * its siblings. The top-most affected element should be specified as the
-   * first argument to this method and all the mutation work should be done
-   * in the mutator callback which is called in the "mutation" vsync phase.
-   *
-   * @param {!Element} element
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
+  /** @override */
   mutateElement(element, mutator) {
     return this.measureMutateElement(element, null, mutator);
   }
 
-  /**
-   * Runs the specified mutation on the element and ensures that remeasures and
-   * layouts performed for the affected elements.
-   *
-   * This method should be called whenever a significant mutations are done
-   * on the DOM that could affect layout of elements inside this subtree or
-   * its siblings. The top-most affected element should be specified as the
-   * first argument to this method and all the mutation work should be done
-   * in the mutator callback which is called in the "mutation" vsync phase.
-   *
-   * @param {!Element} element
-   * @param {?function()} measurer
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
+  /** @override */
   measureMutateElement(element, measurer, mutator) {
-    const resource = this.getResourceForElementOptional(element);
-    dev().fine(
-      TAG,
-      'measureMutateElement',
-      resource ? resource.debugid : element
-    );
-
     return this.vsync_.runPromise({
       measure: () => {
         if (measurer) {
@@ -303,133 +206,67 @@ class InaboxResources {
     });
   }
 
-  /**
-   * Assigns an owner for the specified element. This means that the resources
-   * within this element will be managed by the owner and not Resources manager.
-   * @param {!Element} element
-   * @param {!AmpElement} owner
-   * @package
-   */
-  setOwner(element, owner) {
-    // Resource.setOwner(element, owner);
-    dev().error(TAG, 'setOwner');
-  }
+  /* eslint-disable no-unused-vars */
+  /** @override */
+  setOwner(element, owner) {}
+
+  /** @override */
+  scheduleLayout(parentElement, subElements) {}
+
+  /** @override */
+  schedulePause(parentElement, subElements) {}
+
+  /** @override */
+  scheduleResume(parentElement, subElements) {}
+
+  /** @override */
+  scheduleUnlayout(parentElement, subElements) {}
+
+  /** @override */
+  schedulePreload(parentElement, subElements) {}
+
+  /** @override */
+  updateInViewport(parentElement, subElements, inLocalViewport) {}
+  /* eslint-enable no-unused-vars */
 
   /**
-   * Schedules layout for the specified sub-elements that are children of the
-   * parent element. The parent element may choose to send this signal either
-   * because it's an owner (see {@link setOwner}) or because it wants the
-   * layouts to be done sooner. In either case, both parent's and children's
-   * priority is observed when scheduling this work.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
+   * @param {!Resource} resource
+   * @private
    */
-  scheduleLayout(parentElement, subElements) {
-    dev().error(TAG, 'scheduleLayout');
-    // elements_(subElements).forEach(element => {
-    //   this.tryLayoutResource_(this.getResourceForElement(element));
-    // });
-  }
-
-  /**
-   * Invokes `unload` on the elements' resource which in turn will invoke
-   * the `documentBecameInactive` callback on the custom element.
-   * Resources that call `schedulePause` must also call `scheduleResume`.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  schedulePause(parentElement, subElements) {
-    dev().error(TAG, 'schedulePause');
-  }
-
-  /**
-   * Invokes `resume` on the elements' resource which in turn will invoke
-   * `resumeCallback` only on paused custom elements.
-   * Resources that call `schedulePause` must also call `scheduleResume`.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  scheduleResume(parentElement, subElements) {
-    dev().error(TAG, 'scheduleResume');
-  }
-
-  /**
-   * Schedules unlayout for specified sub-elements that are children of the
-   * parent element. The parent element can choose to send this signal when
-   * it want to unload resources for its children.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  scheduleUnlayout(parentElement, subElements) {
-    dev().error(TAG, 'scheduleUnlayout');
-  }
-
-  /**
-   * Schedules preload for the specified sub-elements that are children of the
-   * parent element. The parent element may choose to send this signal either
-   * because it's an owner (see {@link setOwner}) or because it wants the
-   * preloads to be done sooner. In either case, both parent's and children's
-   * priority is observed when scheduling this work.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  schedulePreload(parentElement, subElements) {
-    dev().error(TAG, 'schedulePreload');
-  }
-
-  /**
-   * A parent resource, especially in when it's an owner (see {@link setOwner}),
-   * may request the Resources manager to update children's inViewport state.
-   * A child's inViewport state is a logical AND between inLocalViewport
-   * specified here and parent's own inViewport state.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   * @param {boolean} inLocalViewport
-   */
-  updateInViewport(parentElement, subElements, inLocalViewport) {
-    dev().error(TAG, 'updateInViewport');
+  buildThenSchedulePass_(resource) {
+    this.ampdoc_
+      .whenReady()
+      .then(resource.build.bind(resource))
+      .then(this.schedulePass.bind(this, FOUR_FRAME_DELAY));
   }
 
   /**
    * @private
    */
   doPass_() {
-    dev().error(TAG, 'layoutRemainingResources_');
-    this.resources_.forEach(this.tryLayoutResource_.bind(this));
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @private
-   */
-  buildAndTryLayoutResource_(resource) {
-    this.ampdoc_
-      .whenReady()
-      .then(resource.build.bind(resource))
-      .then(this.tryLayoutResource_.bind(this, resource));
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @private
-   */
-  tryLayoutResource_(resource) {
-    if (!resource.isLayoutPending()) {
-      return;
-    }
-    dev().fine(TAG, resource.debugid + ' isDisplayed=' + resource.isDisplayed());
-    resource.measure();
-    if (
-      resource.getState() === ResourceState.READY_FOR_LAYOUT &&
-      resource.isDisplayed()
-    ) {
-      resource.startLayout();
-    }
+    dev().fine(TAG, 'doPass');
+    // measure in a batch
+    this.resources_.forEach(resource => {
+      if (!resource.isLayoutPending()) {
+        return;
+      }
+      resource.measure();
+    });
+    // mutation in a batch
+    this.resources_.forEach(resource => {
+      if (
+        resource.getState() === ResourceState.READY_FOR_LAYOUT &&
+        resource.isDisplayed()
+      ) {
+        resource.startLayout();
+      }
+    });
+    this.passObservable_.fire();
   }
 }
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installInaboxResourcesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'resources', InaboxResources);
