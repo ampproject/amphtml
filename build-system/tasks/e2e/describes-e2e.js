@@ -150,7 +150,6 @@ async function createDriver(browserName, args) {
       const options = new firefox.Options();
       // for some reason firefox.Options().addArguments() doesn't like arrays
       args.forEach(arg => {
-        console.log(arg);
         options.addArguments(arg);
       });
       builder.setFirefoxOptions(options);
