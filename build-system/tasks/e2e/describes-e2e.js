@@ -18,6 +18,8 @@
 require('chromedriver'); // eslint-disable-line no-unused-vars
 require('geckodriver'); // eslint-disable-line no-unused-vars
 
+const chrome = require('selenium-webdriver/chrome');
+const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
 const {
   SeleniumWebDriverController,
@@ -143,6 +145,17 @@ async function createDriver(browserName, args) {
   const capabilities = Capabilities[browserName]();
   capabilities.set(capabilitiesKeys[browserName], {'args': args});
   const builder = new Builder().withCapabilities(capabilities);
+  switch (browserName) {
+    case 'firefox':
+      const options = new firefox.Options();
+      // for some reason firefox.Options().addArguments() doesn't like arrays
+      args.forEach(arg => {
+        options.addArguments(arg);
+      });
+      builder.setFirefoxOptions(options);
+    case 'chrome':
+      builder.setChromeOptions(new chrome.Options().addArguments(args));
+  }
   const driver = await builder.build();
   return driver;
 }
@@ -174,7 +187,7 @@ function getFirefoxArgs(config) {
   const args = [];
 
   if (config.headless) {
-    args.push('-headless');
+    args.push('--headless');
   }
   return args;
 }
