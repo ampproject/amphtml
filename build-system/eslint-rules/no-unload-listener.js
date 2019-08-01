@@ -38,7 +38,7 @@ module.exports = function(context) {
     [call]: function(node) {
       const {callee} = node;
       const {name} = callee;
-      const argIndex = name && name.indexOf('listen') === 0 ? 1 : 0;
+      const argIndex = name && name.lastIndexOf('listen', 0) == 0 ? 1 : 0;
       const arg = node.arguments[argIndex];
       if (!arg) {
         return;
