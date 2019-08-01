@@ -151,8 +151,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     ) {
       // see comment in layoutCallback
       // When layers not enabled
-      this.setAsOwner(dev().assertElement(this.leftAmpImage_));
-      this.setAsOwner(dev().assertElement(this.rightAmpImage_));
+      const owners = Services.ownersForDoc(this.element);
+      owners.setOwner(dev().assertElement(this.leftAmpImage_), this.element);
+      owners.setOwner(dev().assertElement(this.rightAmpImage_), this.element);
     }
 
     this.container_ = this.doc_.createElement('div');
@@ -720,7 +721,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // Extensions such as amp-carousel still uses .setAsOwner()
+    // Extensions such as amp-carousel still uses .setOwner()
     // This would break the rendering of the images as carousel
     // will call .scheduleLayout on the slider but not the contents
     // while Resources would found amp-imgs' parent has owner and

@@ -204,7 +204,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       const el = dev().assertElement(walker.currentNode);
       if (isAmpElement(el)) {
         this.ampComponents_.push(el);
-        this.setAsOwner(el);
+        Services.ownersForDoc(this.element).setOwner(el, this.element);
       }
     }
     return Promise.resolve();
