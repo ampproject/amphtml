@@ -16,20 +16,29 @@
 'use strict';
 
 module.exports = function(context) {
-  const listenCall = 'CallExpression[callee.name=listen]';
+  const listenMethodNames = [
+    'listen',
+    'listenPromise',
+    'listenOnce',
+    'listenOncePromise',
+  ];
+  const listenCall = listenMethodNames
+    .map(m => `CallExpression[callee.name=${m}]`)
+    .join(',');
   const addEventListenerCall =
     'CallExpression[callee.property.name=addEventListener]';
-  const call = `${listenCall}, ${addEventListenerCall}`;
+  const call = `${listenCall},${addEventListenerCall}`;
 
   const displayMessage = [
-    'Do not add "unload" listeners because they break the back/forward cache.',
+    'Do not add "unload" or "beforeunload" listeners because they break the back/forward cache.',
     'Use the "pagehide" event instead, and if needed check `!event.persisted`.',
   ].join('\n\t');
 
   return {
     [call]: function(node) {
       const {callee} = node;
-      const argIndex = callee.name === 'listen' ? 1 : 0;
+      const {name} = callee;
+      const argIndex = name && name.indexOf('listen') === 0 ? 1 : 0;
       const arg = node.arguments[argIndex];
       if (!arg) {
         return;
@@ -41,11 +50,12 @@ module.exports = function(context) {
         return;
       }
 
-      if (arg.type !== 'Literal' || typeof arg.value !== 'string') {
+      const {value, type} = arg;
+      if (type !== 'Literal' || typeof value !== 'string') {
         return;
       }
 
-      if (arg.value === 'unload') {
+      if (value === 'unload' || value === 'beforeunload') {
         context.report({
           node: arg,
           message: displayMessage,
