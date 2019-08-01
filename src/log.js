@@ -378,9 +378,11 @@ export class Log {
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
     if (isArray(opt_message)) {
-      return this.assert(
-        shouldBeTrueish,
-        this.expandLogMessage_(/** @type {!Array} */ (opt_message))
+      return this.assert.apply(
+        this,
+        [shouldBeTrueish].concat(
+          this.expandLogMessage_(/** @type {!Array} */ (opt_message))
+        )
       );
     }
     if (!shouldBeTrueish) {
@@ -426,10 +428,11 @@ export class Log {
    */
   assertElement(shouldBeElement, opt_message) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
-    this.assert(
+    this.assertType_(
+      shouldBeElement,
       shouldBeTrueish,
-      (opt_message || 'Element expected') + ': %s',
-      shouldBeElement
+      'Element expected',
+      opt_message
     );
     return /** @type {!Element} */ (shouldBeElement);
   }
@@ -446,10 +449,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertString(shouldBeString, opt_message) {
-    this.assert(
+    this.assertType_(
+      shouldBeString,
       typeof shouldBeString == 'string',
-      (opt_message || 'String expected') + ': %s',
-      shouldBeString
+      'String expected',
+      opt_message
     );
     return /** @type {string} */ (shouldBeString);
   }
@@ -467,10 +471,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertNumber(shouldBeNumber, opt_message) {
-    this.assert(
+    this.assertType_(
+      shouldBeNumber,
       typeof shouldBeNumber == 'number',
-      (opt_message || 'Number expected') + ': %s',
-      shouldBeNumber
+      'Number expected',
+      opt_message
     );
     return /** @type {number} */ (shouldBeNumber);
   }
@@ -485,10 +490,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertArray(shouldBeArray, opt_message) {
-    this.assert(
-      Array.isArray(shouldBeArray),
-      (opt_message || 'Array expected') + ': %s',
-      shouldBeArray
+    this.assertType_(
+      shouldBeArray,
+      isArray(shouldBeArray),
+      'Array expected',
+      opt_message
     );
     return /** @type {!Array} */ (shouldBeArray);
   }
@@ -504,10 +510,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertBoolean(shouldBeBoolean, opt_message) {
-    this.assert(
+    this.assertType_(
+      shouldBeBoolean,
       !!shouldBeBoolean === shouldBeBoolean,
-      (opt_message || 'Boolean expected') + ': %s',
-      shouldBeBoolean
+      'Boolean expected',
+      opt_message
     );
     return /** @type {boolean} */ (shouldBeBoolean);
   }
@@ -568,30 +575,49 @@ export class Log {
    * methods instead.
    *
    * @param {!Array} parts
-   * @return {string}
+   * @return {!Array|string}
    * @private
    */
   expandLogMessage_(parts) {
     // First value should exist.
     const id = parts[0];
+    const args = parts.slice(1);
     // Best effort fetch of message template table.
     // Since this is async, the first few logs might be indirected to a URL even
     // if in development mode. Message table is ~small so this should be a short
     // gap.
-    if (getMode(this.win).development && !this.messages_) {
+    if (getMode(this.win).development) {
       this.fetchExternalMessagesOnce_();
     }
-    const args = parts.slice(1);
     if (this.messages_ && id in this.messages_) {
-      const template = this.messages_[id];
-      const {message} = createErrorVargs.apply(null, [template].concat(args));
-      return message;
+      return [this.messages_[id]].concat(args);
     }
     const url = args.reduce(
       (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
       `${externalMessagesUrl()}id=${encodeURIComponent(id)}`
     );
     return `More info at ${url}`;
+  }
+
+  /**
+   * Asserts types, backbone of `assertNumber`, `assertString`, etc.
+   *
+   * It understands array-based "id"-contracted messages.
+   *
+   * Otherwise creates a sprintf syntax string containing the optional message or the
+   * default. An interpolation token is added at the end to include the `subject`.
+   * @param {*} subject
+   * @param {boolean} assertion
+   * @param {string} defaultMessage
+   * @param {!Array|string=} opt_message
+   * @return {!Array}
+   * @private
+   */
+  assertType_(subject, assertion, defaultMessage, opt_message) {
+    const args = isArray(opt_message)
+      ? [assertion, opt_message.concat(subject)]
+      : [assertion, `${opt_message || defaultMessage}: %s`, subject];
+    this.assert.apply(this, args);
   }
 }
 

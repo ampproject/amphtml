@@ -813,4 +813,90 @@ describe('Logging', () => {
         .true;
     });
   });
+
+  describe('Type assertions with message array ids', () => {
+    let log;
+
+    // Promise.resolve would be nicer, but it won't resolve sync'ly.
+    const syncResolve = v => ({then: cb => cb(v)});
+
+    function mockExternalMessages(messageTemplates) {
+      win.fetch = () =>
+        syncResolve({json: () => syncResolve(messageTemplates)});
+
+      log.fetchExternalMessagesOnce_();
+    }
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('displays URL for assertString without messages', () => {
+      mockExternalMessages(null);
+      const notString = false;
+      expect(() => log.assertString(notString, ['a'])).to.throw(
+        /\?v=.+&id=a&s\[\]=false$/
+      );
+    });
+
+    it('expands message from table for assertString', () => {
+      mockExternalMessages({
+        'a': 'Foo: %s',
+        'foo': 'irrelevant',
+      });
+      const notString = false;
+      expect(() => log.assertString(notString, ['a'])).to.throw(/Foo: false/);
+    });
+
+    it('displays URL for assertNumber without messages', () => {
+      mockExternalMessages(null);
+      const notNumber = false;
+      expect(() => log.assertNumber(notNumber, ['x'])).to.throw(
+        /\?v=.+&id=x&s\[\]=false$/
+      );
+    });
+
+    it('expands message from table for assertNumber', () => {
+      mockExternalMessages({
+        'b': '%s Mundo',
+        'baz': 'tacos',
+      });
+      const notNumber = 'Hola';
+      expect(() => log.assertNumber(notNumber, ['b'])).to.throw(/Hola Mundo/);
+    });
+
+    it('displays URL for assertArray without messages', () => {
+      mockExternalMessages(null);
+      const notArray = 'xxx';
+      expect(() => log.assertArray(notArray, ['zzz'])).to.throw(
+        /\?v=.+&id=zzz&s\[\]=xxx$/
+      );
+    });
+
+    it('expands message from table for assertArray', () => {
+      mockExternalMessages({
+        'x': 'sas%s',
+        'baz': 'tacos',
+      });
+      const notArray = 'quatch';
+      expect(() => log.assertArray(notArray, ['x'])).to.throw(/sasquatch/);
+    });
+
+    it('displays URL for assertBoolean without messages', () => {
+      mockExternalMessages(null);
+      const notBoolean = 'bar';
+      expect(() => log.assertBoolean(notBoolean, ['lol'])).to.throw(
+        /\?v=.+&id=lol&s\[\]=bar$/
+      );
+    });
+
+    it('expands message from table for assertBoolean', () => {
+      mockExternalMessages({
+        'foo': '%s',
+        'baz': 'tacos',
+      });
+      const notBoolean = 'bar';
+      expect(() => log.assertBoolean(notBoolean, ['x'])).to.throw(/bar/);
+    });
+  });
 });
