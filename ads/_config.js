@@ -166,18 +166,6 @@ export const adConfig = {
 
   'adreactor': {},
 
-  'adsense': {
-    prefetch: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
-    preconnect: 'https://googleads.g.doubleclick.net',
-    clientIdScope: 'AMP_ECID_GOOGLE',
-    clientIdCookieName: '_ga',
-    remoteHTMLDisabled: true,
-    masterFrameAccessibleType: 'google_network',
-    fullWidthHeightRatio: 1.2,
-    consentHandlingOverride: true,
-    renderStartImplemented: true,
-  },
-
   'adsensor': {
     prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
     clientIdScope: 'amp_ecid_adensor',

@@ -68,10 +68,10 @@ function getAdTypes() {
     weborama: ['weborama-display'],
   };
 
-  // Start with Google ad types
-  const adTypes = ['adsense'];
+  const adTypes = [];
 
-  // Add all other ad types
+  // Add ad types (google networks not included as they full support native
+  // implementations).
   const files = fs.readdirSync('./ads/');
   for (let i = 0; i < files.length; i++) {
     if (
