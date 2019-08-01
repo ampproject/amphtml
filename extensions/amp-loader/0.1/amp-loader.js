@@ -245,6 +245,7 @@ class LoaderBuilder {
         content,
       };
     }
+
     return this.element_.createLoaderLogo() || {};
   }
 
@@ -269,7 +270,9 @@ class LoaderBuilder {
    */
   isAd_() {
     // Not Implemented
-    return false;
+    return (
+      this.element_.tagName == 'AMP-AD' || this.element_.tagName == 'AMP-EMBED'
+    );
   }
 
   /**
