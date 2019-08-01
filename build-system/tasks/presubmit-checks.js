@@ -475,7 +475,12 @@ const forbiddenTerms = {
     whitelist: ['extension/amp-bind/0.1/test/test-bind-expr.js'],
   },
   'storageForDoc': {
-    message: requiresReviewPrivacy,
+    message:
+      requiresReviewPrivacy +
+      ' Please refer to spec/amp-localstorage.md for more information on' +
+      ' the storage service usage.' +
+      ' Once approved, please also update the spec/amp-localstorage.md to' +
+      ' include your usage.',
     whitelist: [
       // Storage service is not allowed in amp4ads. No usage should there be
       // in extensions listed in the amp4ads spec:
