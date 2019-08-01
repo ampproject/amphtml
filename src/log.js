@@ -613,10 +613,11 @@ export class Log {
    * @private
    */
   assertType_(subject, assertion, defaultMessage, opt_message) {
-    const args = isArray(opt_message)
-      ? [assertion, opt_message.concat(subject)]
-      : [assertion, `${opt_message || defaultMessage}: %s`, subject];
-    this.assert.apply(this, args);
+    if (isArray(opt_message)) {
+      this.assert(assertion, opt_message.concat(subject));
+    } else {
+      this.assert(assertion, `${opt_message || defaultMessage}: %s`, subject);
+    }
   }
 }
 
