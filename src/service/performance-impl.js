@@ -208,6 +208,7 @@ export class Performance {
       // See https://bugs.webkit.org/show_bug.cgi?id=151234
       const platform = Services.platformFor(this.win);
       if (platform.isSafari()) {
+        // TODO(#23634): Remove, explain or adjust the usage of the unload listener
         this.win.addEventListener(
           BEFORE_UNLOAD_EVENT,
           this.boundTickLayoutJankScore_
