@@ -39,9 +39,13 @@ function buildAndUploadExperiments_() {
   Object.keys(experimentsConfig).forEach(experiment => {
     const config = experimentsConfig[experiment];
     if (config.command) {
+      const command = config.command.replace(
+        'gulp dist',
+        'gulp dist --fortesting'
+      );
       timedExecOrDie('gulp clean');
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie(config.command);
+      timedExecOrDie(command);
       uploadDistExperimentOutput(FILENAME, experiment);
     }
   });
