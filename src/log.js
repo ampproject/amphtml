@@ -95,7 +95,7 @@ export function overrideLogLevel(level) {
  * Prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.) for
  * extracted message URLs.
  * (Specific channel is irrelevant: message tables are invariant on internal version.)
- * @return {StringLiteralTypeAnnotation}
+ * @return {string}
  */
 const externalMessagesUrlRtv = () =>
   `01${encodeURIComponent(internalRuntimeVersion())}`;
