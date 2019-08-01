@@ -97,7 +97,7 @@ export function overrideLogLevel(level) {
  * (Specific channel is irrelevant: message tables are invariant on internal version.)
  * @return {string}
  */
-const messageUrlRtv = () => `01${encodeURIComponent(internalRuntimeVersion())}`;
+const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
 
 /**
  * Gets a URL to display a message on amp.dev.
