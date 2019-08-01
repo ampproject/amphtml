@@ -279,6 +279,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * Return a cleaned clone of the given element for building
    * carousel slides with.
    * @param {!Element} element
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   cloneLightboxableElement_(element) {
@@ -760,7 +761,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       .then(() => {
         this.isActive_ = true;
 
-        this.updateInViewport(dev().assertElement(this.container_), true);
+        Services.ownersForDoc(this.element).updateInViewport(
+          this.element,
+          dev().assertElement(this.container_),
+          true
+        );
         this.scheduleLayout(dev().assertElement(this.container_));
 
         this.doc_.documentElement.addEventListener(

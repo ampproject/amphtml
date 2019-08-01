@@ -16,6 +16,7 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
+import {Services} from '../../../src/services';
 import {
   computedStyle,
   removeAlphaFromColor,
@@ -96,7 +97,11 @@ class AmpStickyAd extends AMP.BaseElement {
       toggle(this.element, true);
       const borderBottom = this.element./*OK*/ offsetHeight;
       this.viewport_.updatePaddingBottom(borderBottom);
-      this.updateInViewport(dev().assertElement(this.ad_), true);
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
+        dev().assertElement(this.ad_),
+        true
+      );
       this.scheduleLayout(dev().assertElement(this.ad_));
     }
     return Promise.resolve();
@@ -192,7 +197,11 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   layoutAd_() {
     const ad = dev().assertElement(this.ad_);
-    this.updateInViewport(ad, true);
+    Services.ownersForDoc(this.element).updateInViewport(
+      this.element,
+      ad,
+      true
+    );
     this.scheduleLayout(ad);
     // Wait for the earliest: `render-start` or `load-end` signals.
     // `render-start` is expected to arrive first, but it's not emitted by
@@ -242,7 +251,10 @@ class AmpStickyAd extends AMP.BaseElement {
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
       this.visible_ = false;
-      this./*OK*/ scheduleUnlayout(dev().assertElement(this.ad_));
+      Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+        this.element,
+        dev().assertElement(this.ad_)
+      );
       this.viewport_.removeFromFixedLayer(this.element);
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);

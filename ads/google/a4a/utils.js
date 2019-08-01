@@ -108,13 +108,6 @@ export const ADX_ADY_EXP = {
   experiment: '21062593',
 };
 
-/** @const {!{branch: string, control: string, experiment: string}} */
-export const FIE_CSS_CLEANUP_EXP = {
-  branch: 'fie-css-cleanup',
-  control: '21064213',
-  experiment: '21064214',
-};
-
 /**
  * Returns the value of some navigation timing parameter.
  * Feature detection is used for safety on browsers that do not support the
@@ -628,17 +621,18 @@ export function getCsiAmpAnalyticsConfig() {
  * @param {!AMP.BaseElement} a4a The A4A element.
  * @param {?string} qqid The query ID or null if the query ID has not been set
  *     yet.
+ * @return {!JsonObject}
  */
 export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
   const viewer = Services.viewerForDoc(ampdoc);
   const navStart = getNavigationTiming(win, 'navigationStart');
-  const vars = {
+  const vars = /** @type {!JsonObject} */ ({
     'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
     'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
-  };
+  });
   if (qqid) {
     vars['qqid'] = qqid;
   }

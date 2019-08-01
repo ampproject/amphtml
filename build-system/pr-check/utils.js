@@ -31,11 +31,8 @@ const {
   travisBuildNumber,
   travisPullRequestSha,
 } = require('../travis');
-const {
-  replaceUrls,
-  signalDistUploadComplete,
-} = require('../tasks/pr-deploy-bot-utils');
-const {execOrDie, exec} = require('../exec');
+const {execOrDie, execWithError, exec} = require('../exec');
+const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const BUILD_OUTPUT_FILE = isTravisBuild()
   ? `amp_build_${travisBuildNumber()}.zip`
@@ -56,37 +53,6 @@ const OUTPUT_STORAGE_SERVICE_ACCOUNT =
 
 const GIT_BRANCH_URL =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch';
-
-/**
- * Checks if the PR branch was forked from `master`
- * @param {string} fileName
- * @return {boolean}
- */
-function verifyBranchCreationPoint(fileName) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  const branchCreationPoint = gitBranchCreationPoint();
-  if (!branchCreationPoint) {
-    console.error(
-      fileLogPrefix,
-      colors.red('ERROR:'),
-      'Could not find a common ancestor for',
-      colors.cyan(gitBranchName()),
-      'and',
-      colors.cyan('master') + '. Was this PR branch properly forked?'
-    );
-    console.error(
-      fileLogPrefix,
-      colors.yellow('NOTE:'),
-      'To fix this, rebase your branch on',
-      colors.cyan('master') +
-        ', or recreate it by following the instructions at',
-      colors.cyan(GIT_BRANCH_URL) + '.'
-    );
-
-    return false;
-  }
-  return true;
-}
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -114,13 +80,36 @@ function printChangeSummary(fileName) {
   console.log(filesChanged);
 
   const branchCreationPoint = gitBranchCreationPoint();
-  console.log(
-    `${fileLogPrefix} Commit log since branch`,
-    `${colors.cyan(gitBranchName())} was forked from`,
-    `${colors.cyan('master')} at`,
-    `${colors.cyan(shortSha(branchCreationPoint))}:`
-  );
-  console.log(gitDiffCommitLog() + '\n');
+  if (branchCreationPoint) {
+    console.log(
+      `${fileLogPrefix} Commit log since branch`,
+      `${colors.cyan(gitBranchName())} was forked from`,
+      `${colors.cyan('master')} at`,
+      `${colors.cyan(shortSha(branchCreationPoint))}:`
+    );
+    console.log(gitDiffCommitLog() + '\n');
+  } else {
+    console.error(
+      fileLogPrefix,
+      colors.yellow('WARNING:'),
+      'Could not find a common ancestor for',
+      colors.cyan(gitBranchName()),
+      'and',
+      colors.cyan('master') + '. (This can happen with older PR branches.)'
+    );
+    console.error(
+      fileLogPrefix,
+      colors.yellow('NOTE 1:'),
+      'If this causes unexpected test failures, try rebasing the PR branch on',
+      colors.cyan('master') + '.'
+    );
+    console.error(
+      fileLogPrefix,
+      colors.yellow('NOTE 2:'),
+      "If rebasing doesn't work, you may have to recreate the branch. See",
+      colors.cyan(GIT_BRANCH_URL) + '.\n'
+    );
+  }
 }
 
 /**
@@ -198,14 +187,37 @@ function stopTimer(functionName, fileName, startTime) {
 }
 
 /**
+ * Stops the Node process and timer
+ * @param {string} fileName
+ * @param {startTime} startTime
+ */
+function stopTimedJob(fileName, startTime) {
+  stopTimer(fileName, fileName, startTime);
+  process.exitCode = 1;
+}
+
+/**
  * Executes the provided command and times it. Errors, if any, are printed.
  * @param {string} cmd
  * @param {string} fileName
- * @return {<Object>} Process info.
+ * @return {!Object} Node process
  */
 function timedExec(cmd, fileName = 'utils.js') {
   const startTime = startTimer(cmd, fileName);
   const p = exec(cmd);
+  stopTimer(cmd, fileName, startTime);
+  return p;
+}
+
+/**
+ * Executes the provided command and times it. Errors, if any, are returned.
+ * @param {string} cmd
+ * @param {string} fileName
+ * @return {!Object} Node process
+ */
+function timedExecWithError(cmd, fileName = 'utils.js') {
+  const startTime = startTimer(cmd, fileName);
+  const p = execWithError(cmd);
   stopTimer(cmd, fileName, startTime);
   return p;
 }
@@ -343,7 +355,7 @@ async function processAndUploadDistOutput(functionName) {
   await replaceUrls('test/manual');
   await replaceUrls('examples');
   uploadDistOutput(functionName);
-  await signalDistUploadComplete();
+  await signalDistUpload('success');
 }
 
 /**
@@ -368,9 +380,10 @@ module.exports = {
   stopTimer,
   startSauceConnect,
   stopSauceConnect,
+  stopTimedJob,
   timedExec,
   timedExecOrDie,
+  timedExecWithError,
   uploadBuildOutput,
   uploadDistOutput,
-  verifyBranchCreationPoint,
 };

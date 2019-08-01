@@ -38,6 +38,7 @@ const MIN_EVENT_INTERVAL = 100;
 /**
  * @param {!Window} win
  * @param {!Element} bodyElement
+ * @return {!Promise}
  * @visibleForTesting
  */
 export function prepareBodyForOverlay(win, bodyElement) {
@@ -70,6 +71,7 @@ export function prepareBodyForOverlay(win, bodyElement) {
 /**
  * @param {!Window} win
  * @param {!Element} bodyElement
+ * @return {!Promise}
  * @visibleForTesting
  */
 export function resetBodyForOverlay(win, bodyElement) {

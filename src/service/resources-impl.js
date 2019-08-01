@@ -16,6 +16,7 @@
 
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
+import {Owners} from './owners-impl';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
@@ -74,7 +75,7 @@ let ChangeSizeRequestDef;
 /**
  * @interface
  */
-class OwnersDef {
+class OwnersDef extends Owners {
   /**
    * Assigns an owner for the specified element. This means that the resources
    * within this element will be managed by the owner and not Resources manager.
@@ -114,15 +115,6 @@ class OwnersDef {
   scheduleResume(parentElement, subElements) {}
 
   /**
-   * Schedules unlayout for specified sub-elements that are children of the
-   * parent element. The parent element can choose to send this signal when
-   * it want to unload resources for its children.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  scheduleUnlayout(parentElement, subElements) {}
-
-  /**
    * Schedules preload for the specified sub-elements that are children of the
    * parent element. The parent element may choose to send this signal either
    * because it's an owner (see {@link setOwner}) or because it wants the
@@ -132,17 +124,6 @@ class OwnersDef {
    * @param {!Element|!Array<!Element>} subElements
    */
   schedulePreload(parentElement, subElements) {}
-
-  /**
-   * A parent resource, especially in when it's an owner (see {@link setOwner}),
-   * may request the Resources manager to update children's inViewport state.
-   * A child's inViewport state is a logical AND between inLocalViewport
-   * specified here and parent's own inViewport state.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   * @param {boolean} inLocalViewport
-   */
-  updateInViewport(parentElement, subElements, inLocalViewport) {}
 }
 
 /**
@@ -376,6 +357,7 @@ export class ResourcesDef extends MutatorsAndOwnersDef {
 
 /**
  * @implements {ResourcesDef}
+ * @implements {./owners-impl.Owners}
  */
 export class Resources {
   /**
@@ -2724,4 +2706,13 @@ export let SizeDef;
  */
 export function installResourcesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installOwnersServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'owners', ampdoc => {
+    return Services.resourcesForDoc(ampdoc);
+  });
 }

@@ -27,6 +27,7 @@ const defaultPlugins = [
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
+  getReplacePlugin(),
 ];
 
 const esmRemovedImports = {
@@ -37,6 +38,7 @@ const esmRemovedImports = {
   './polyfills/object-assign': ['installObjectAssign'],
   './polyfills/object-values': ['installObjectValues'],
   './polyfills/promise': ['installPromise'],
+  './polyfills/array-includes': ['installArrayIncludes'],
 };
 
 /**

@@ -149,6 +149,7 @@ export class WebviewViewerForTesting {
 
   /**
    * @param {!Event} e
+   * @return {*} TODO(#23582): Specify return type
    */
   isChannelOpen_(e) {
     const data = JSON.parse(e.data);
@@ -232,6 +233,7 @@ export class WebviewViewerForTesting {
    * @param {*} type
    * @param {*} data
    * @param {*} awaitResponse
+   * @return {*} TODO(#23582): Specify return type
    */
   sendRequest_(type, data, awaitResponse) {
     this.log('Viewer.prototype.sendRequest_');
@@ -257,6 +259,7 @@ export class WebviewViewerForTesting {
   /**
    * This is used in test-amp-viewer-integration to test the handshake and make
    * sure the test waits for everything to get executed.
+   * @return {*} TODO(#23582): Specify return type
    */
   waitForDocumentLoaded() {
     return this.documentLoadedPromise_;
@@ -265,6 +268,7 @@ export class WebviewViewerForTesting {
   /**
    * Fake docs for testing
    * @param {*} eventData
+   * @return {*} TODO(#23582): Specify return type
    */
   processRequest_(eventData) {
     const data = JSON.parse(eventData);

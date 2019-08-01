@@ -43,6 +43,7 @@ const LIGHTBOX_ELEMENT_CLASS = 'i-amphtml-lightbox-element';
 
 /**
  * @param {!Element} el
+ * @return {boolean}
  */
 function isLightbox(el) {
   return el.tagName.indexOf('LIGHTBOX') !== -1;

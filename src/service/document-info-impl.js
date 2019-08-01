@@ -58,6 +58,7 @@ export let DocumentInfoDef;
 
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {*} TODO(#23582): Specify return type
  */
 export function installDocumentInfoServiceForDoc(nodeOrDoc) {
   return registerServiceBuilderForDoc(nodeOrDoc, 'documentInfo', DocInfo);
