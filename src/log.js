@@ -92,28 +92,32 @@ export function overrideLogLevel(level) {
 }
 
 /**
- * URL that displays a log message on amp.dev.
- * Query params should be appended postfacto.
- * This prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.)
- * It doesn't matter if this gets the prod table for a different channel, since message
- * tables are guaranteed not to divert as long as `internalRuntimeVersion` is the same.
+ * Prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.) for
+ * extracted message URLs.
+ * (Specific channel is irrelevant: message tables are invariant on internal version.)
  * @return {string}
  */
-const externalMessagesUrl = () =>
-  `https://log.amp.dev/?v=01${encodeURIComponent(internalRuntimeVersion())}&`;
+const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
+
+/**
+ * Gets a URL to display a message on amp.dev.
+ * @param {string} id
+ * @param {!Array} interpolatedParts
+ * @return {string}
+ */
+const externalMessageUrl = (id, interpolatedParts) =>
+  interpolatedParts.reduce(
+    (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
+    `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`
+  );
 
 /**
  * URL to simple log messages table JSON file, which contains an Object<string, string>
  * which maps message id to full message template.
- * This prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.)
- * It doesn't matter if this gets the prod table for a different channel, since message
- * tables are guaranteed not to divert as long as `internalRuntimeVersion` is the same.
  * @return {string}
  */
 const externalMessagesSimpleTableUrl = () =>
-  `${urls.cdn}/rtv/01${encodeURIComponent(
-    internalRuntimeVersion()
-  )}/log-messages.simple.json`;
+  `${urls.cdn}/rtv/${messageUrlRtv()}/log-messages.simple.json`;
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -221,7 +225,7 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      const args = this.maybeExpandArguments_(messages);
+      const args = this.maybeExpandMessageArgs_(messages);
       if (getMode().localDev) {
         args.unshift('[' + tag + ']');
       }
@@ -378,9 +382,11 @@ export class Log {
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
     if (isArray(opt_message)) {
-      return this.assert(
-        shouldBeTrueish,
-        this.expandLogMessage_(/** @type {!Array} */ (opt_message))
+      return this.assert.apply(
+        this,
+        [shouldBeTrueish].concat(
+          this.expandMessageArgs_(/** @type {!Array} */ (opt_message))
+        )
       );
     }
     if (!shouldBeTrueish) {
@@ -426,10 +432,11 @@ export class Log {
    */
   assertElement(shouldBeElement, opt_message) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
-    this.assert(
+    this.assertType_(
+      shouldBeElement,
       shouldBeTrueish,
-      (opt_message || 'Element expected') + ': %s',
-      shouldBeElement
+      'Element expected',
+      opt_message
     );
     return /** @type {!Element} */ (shouldBeElement);
   }
@@ -446,10 +453,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertString(shouldBeString, opt_message) {
-    this.assert(
+    this.assertType_(
+      shouldBeString,
       typeof shouldBeString == 'string',
-      (opt_message || 'String expected') + ': %s',
-      shouldBeString
+      'String expected',
+      opt_message
     );
     return /** @type {string} */ (shouldBeString);
   }
@@ -467,10 +475,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertNumber(shouldBeNumber, opt_message) {
-    this.assert(
+    this.assertType_(
+      shouldBeNumber,
       typeof shouldBeNumber == 'number',
-      (opt_message || 'Number expected') + ': %s',
-      shouldBeNumber
+      'Number expected',
+      opt_message
     );
     return /** @type {number} */ (shouldBeNumber);
   }
@@ -485,10 +494,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertArray(shouldBeArray, opt_message) {
-    this.assert(
-      Array.isArray(shouldBeArray),
-      (opt_message || 'Array expected') + ': %s',
-      shouldBeArray
+    this.assertType_(
+      shouldBeArray,
+      isArray(shouldBeArray),
+      'Array expected',
+      opt_message
     );
     return /** @type {!Array} */ (shouldBeArray);
   }
@@ -504,10 +514,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertBoolean(shouldBeBoolean, opt_message) {
-    this.assert(
+    this.assertType_(
+      shouldBeBoolean,
       !!shouldBeBoolean === shouldBeBoolean,
-      (opt_message || 'Boolean expected') + ': %s',
-      shouldBeBoolean
+      'Boolean expected',
+      opt_message
     );
     return /** @type {boolean} */ (shouldBeBoolean);
   }
@@ -552,9 +563,9 @@ export class Log {
    * @return {!Array}
    * @private
    */
-  maybeExpandArguments_(args) {
+  maybeExpandMessageArgs_(args) {
     if (isArray(args[0])) {
-      return [this.expandLogMessage_(/** @type {!Array} */ (args[0]))];
+      return this.expandMessageArgs_(/** @type {!Array} */ (args[0]));
     }
     return args;
   }
@@ -568,30 +579,44 @@ export class Log {
    * methods instead.
    *
    * @param {!Array} parts
-   * @return {string}
+   * @return {!Array}
    * @private
    */
-  expandLogMessage_(parts) {
+  expandMessageArgs_(parts) {
     // First value should exist.
-    const id = parts[0];
+    const id = parts.shift();
     // Best effort fetch of message template table.
     // Since this is async, the first few logs might be indirected to a URL even
     // if in development mode. Message table is ~small so this should be a short
     // gap.
-    if (getMode(this.win).development && !this.messages_) {
+    if (getMode(this.win).development) {
       this.fetchExternalMessagesOnce_();
     }
-    const args = parts.slice(1);
     if (this.messages_ && id in this.messages_) {
-      const template = this.messages_[id];
-      const {message} = createErrorVargs.apply(null, [template].concat(args));
-      return message;
+      return [this.messages_[id]].concat(parts);
     }
-    const url = args.reduce(
-      (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
-      `${externalMessagesUrl()}id=${encodeURIComponent(id)}`
-    );
-    return `More info at ${url}`;
+    return [`More info at ${externalMessageUrl(id, parts)}`];
+  }
+
+  /**
+   * Asserts types, backbone of `assertNumber`, `assertString`, etc.
+   *
+   * It understands array-based "id"-contracted messages.
+   *
+   * Otherwise creates a sprintf syntax string containing the optional message or the
+   * default. An interpolation token is added at the end to include the `subject`.
+   * @param {*} subject
+   * @param {*} assertion
+   * @param {string} defaultMessage
+   * @param {!Array|string=} opt_message
+   * @private
+   */
+  assertType_(subject, assertion, defaultMessage, opt_message) {
+    if (isArray(opt_message)) {
+      this.assert(assertion, opt_message.concat(subject));
+    } else {
+      this.assert(assertion, `${opt_message || defaultMessage}: %s`, subject);
+    }
   }
 }
 
