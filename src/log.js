@@ -92,28 +92,29 @@ export function overrideLogLevel(level) {
 }
 
 /**
+ * Prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.) for
+ * extracted message URLs.
+ * (Specific channel is irrelevant: message tables are invariant on internal version.)
+ * @return {StringLiteralTypeAnnotation}
+ */
+const externalMessagesUrlRtv = () =>
+  `01${encodeURIComponent(internalRuntimeVersion())}`;
+
+/**
  * URL that displays a log message on amp.dev.
  * Query params should be appended postfacto.
- * This prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.)
- * It doesn't matter if this gets the prod table for a different channel, since message
- * tables are guaranteed not to divert as long as `internalRuntimeVersion` is the same.
  * @return {string}
  */
 const externalMessagesUrl = () =>
-  `https://log.amp.dev/?v=01${encodeURIComponent(internalRuntimeVersion())}&`;
+  `https://log.amp.dev/?v=${externalMessagesUrlRtv()}&`;
 
 /**
  * URL to simple log messages table JSON file, which contains an Object<string, string>
  * which maps message id to full message template.
- * This prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.)
- * It doesn't matter if this gets the prod table for a different channel, since message
- * tables are guaranteed not to divert as long as `internalRuntimeVersion` is the same.
  * @return {string}
  */
 const externalMessagesSimpleTableUrl = () =>
-  `${urls.cdn}/rtv/01${encodeURIComponent(
-    internalRuntimeVersion()
-  )}/log-messages.simple.json`;
+  `${urls.cdn}/rtv/${externalMessagesUrlRtv()}/log-messages.simple.json`;
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
