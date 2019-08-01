@@ -17,27 +17,22 @@
 
 /**
  * @fileoverview
- * This script runs end to end tests.
- * This is run during the CI stage = test; job = e2e tests.
+ * This script runs remote experiments tests.
+ * This is run during the CI stage = test; job = experiments tests.
  */
 
-const colors = require('ansi-colors');
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const {
   downloadDistExperimentOutput,
-  downloadDistOutput,
-  printChangeSummary,
   startTimer,
   startSauceConnect,
   stopTimer,
   stopSauceConnect,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
-const FILENAME = 'e2e-experiment-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
+const FILENAME = 'experiment-tests.js';
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
@@ -50,6 +45,7 @@ async function runExperimentTests_() {
       downloadDistExperimentOutput(FILENAME, experiment);
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
+      timedExecOrDie('gulp e2e --nobuild --headless');
     }
   });
   stopSauceConnect(FILENAME);
@@ -59,29 +55,10 @@ async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
   if (!isTravisPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp e2e --nobuild --headless');
     await runExperimentTests_();
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('E2E_TEST')
-    ) {
-      downloadDistOutput(FILENAME);
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp e2e --nobuild --headless');
-    } else {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('End to End Tests'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or end-to-end tests'
-      );
-    }
+    //TODO(estherkim): remove this before merging
+    await runExperimentTests_();
   }
   stopTimer(FILENAME, FILENAME, startTime);
 }

@@ -62,6 +62,11 @@ jobs:
       name: "Dist, Bundle Size"
       script:
         - unbuffer node build-system/pr-check/dist-bundle-size.js
+    - stage: build
+      name: "Dist For Experiments"
+      script:
+        - unbuffer node build-system/pr-check/dist-experiment.js
+      if: type = pull_request #change to type = push before merging
     - stage: test
       name: "Single Pass Tests"
       script:
@@ -82,15 +87,20 @@ jobs:
         - build-system/sauce_connect/stop_sauce_connect.sh
         - ps -ef
     - stage: test
-      name: "[TEMPORARILY NON BLOCKING] End to End, Experiment Tests"
+      name: "[TEMPORARILY NON BLOCKING] End to End Tests"
       script:
-        - unbuffer node build-system/pr-check/e2e-experiment-tests.js
+        - unbuffer node build-system/pr-check/e2e-tests.js
+        - ps -ef
+    - stage: test
+      name: "Dist Experiment Tests"
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
-        - ps -ef
+      if: type = pull_request #change to type = push before merging
   allow_failures:
     - script:
-      - unbuffer node build-system/pr-check/e2e-experiment-tests.js
+      - unbuffer node build-system/pr-check/e2e-tests.js
 cache:
   directories:
     - node_modules
