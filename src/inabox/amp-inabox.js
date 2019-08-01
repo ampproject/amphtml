@@ -88,7 +88,6 @@ startupChunk(self.document, function initial() {
       ? ampSharedCss
       : ampDocCss + ampSharedCss) +
     'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
-
   installStylesForDoc(
     ampdoc,
     fullCss,
