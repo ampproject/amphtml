@@ -500,11 +500,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   isXhrAllowed() {
-    return (
-      isCdnProxy(this.win) ||
-      getMode(this.win).localDev ||
-      getMode(this.win).test
-    );
+    return isCdnProxy(this.win);
   }
 
   /** @override */
