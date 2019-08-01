@@ -774,7 +774,7 @@ describe('Logging', () => {
     });
   });
 
-  describe('expandLogMessage', () => {
+  describe('expandMessageArgs with URL', () => {
     const prefixRe = 'https:\\/\\/log\\.amp\\.dev\\/\\?v=[^&]+&';
     let log;
 
@@ -786,8 +786,10 @@ describe('Logging', () => {
       const id = 'foo';
       const queryRe = `id=${id}`;
       const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
-      const result = log.expandLogMessage_([id]);
-      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
+      const messageArgs = log.expandMessageArgs_([id]);
+      expect(messageArgs).to.have.lengthOf(1);
+      const message = messageArgs[0];
+      expect(expectedRe.test(message), `${expectedRe}.test('${message}')`).to.be
         .true;
     });
 
@@ -796,8 +798,10 @@ describe('Logging', () => {
       const arg1 = 'bar';
       const queryRe = `id=${id}&s\\[\\]=${arg1}`;
       const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
-      const result = log.expandLogMessage_([id, arg1]);
-      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
+      const messageArgs = log.expandMessageArgs_([id, arg1]);
+      expect(messageArgs).to.have.lengthOf(1);
+      const message = messageArgs[0];
+      expect(expectedRe.test(message), `${expectedRe}.test('${message}')`).to.be
         .true;
     });
 
@@ -808,13 +812,15 @@ describe('Logging', () => {
       const arg3 = 'taquitos';
       const queryRe = `id=${id}&s\\[\\]=${arg1}&s\\[\\]=${arg2}&s\\[\\]=${arg3}`;
       const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
-      const result = log.expandLogMessage_([id, arg1, arg2, arg3]);
-      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
+      const messageArgs = log.expandMessageArgs_([id, arg1, arg2, arg3]);
+      expect(messageArgs).to.have.lengthOf(1);
+      const message = messageArgs[0];
+      expect(expectedRe.test(message), `${expectedRe}.test('${message}')`).to.be
         .true;
     });
   });
 
-  describe('Type assertions with message array ids', () => {
+  describe('Extracted messages by ids', () => {
     let log;
 
     // Promise.resolve would be nicer, but it won't resolve sync'ly.

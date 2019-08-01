@@ -97,16 +97,19 @@ export function overrideLogLevel(level) {
  * (Specific channel is irrelevant: message tables are invariant on internal version.)
  * @return {string}
  */
-const externalMessagesUrlRtv = () =>
-  `01${encodeURIComponent(internalRuntimeVersion())}`;
+const messageUrlRtv = () => `01${encodeURIComponent(internalRuntimeVersion())}`;
 
 /**
- * URL that displays a log message on amp.dev.
- * Query params should be appended postfacto.
+ * Gets a URL to display a message on amp.dev.
+ * @param {string} id
+ * @param {!Array} interpolatedParts
  * @return {string}
  */
-const externalMessagesUrl = () =>
-  `https://log.amp.dev/?v=${externalMessagesUrlRtv()}&`;
+const externalMessageUrl = (id, interpolatedParts) =>
+  interpolatedParts.reduce(
+    (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
+    `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`
+  );
 
 /**
  * URL to simple log messages table JSON file, which contains an Object<string, string>
@@ -114,7 +117,7 @@ const externalMessagesUrl = () =>
  * @return {string}
  */
 const externalMessagesSimpleTableUrl = () =>
-  `${urls.cdn}/rtv/${externalMessagesUrlRtv()}/log-messages.simple.json`;
+  `${urls.cdn}/rtv/${messageUrlRtv()}/log-messages.simple.json`;
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -222,7 +225,7 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      const args = this.maybeExpandArguments_(messages);
+      const args = this.maybeExpandMessageArgs_(messages);
       if (getMode().localDev) {
         args.unshift('[' + tag + ']');
       }
@@ -382,7 +385,7 @@ export class Log {
       return this.assert.apply(
         this,
         [shouldBeTrueish].concat(
-          this.expandLogMessage_(/** @type {!Array} */ (opt_message))
+          this.expandMessageArgs_(/** @type {!Array} */ (opt_message))
         )
       );
     }
@@ -560,9 +563,9 @@ export class Log {
    * @return {!Array}
    * @private
    */
-  maybeExpandArguments_(args) {
+  maybeExpandMessageArgs_(args) {
     if (isArray(args[0])) {
-      return [this.expandLogMessage_(/** @type {!Array} */ (args[0]))];
+      return this.expandMessageArgs_(/** @type {!Array} */ (args[0]));
     }
     return args;
   }
@@ -576,13 +579,12 @@ export class Log {
    * methods instead.
    *
    * @param {!Array} parts
-   * @return {!Array|string}
+   * @return {!Array}
    * @private
    */
-  expandLogMessage_(parts) {
+  expandMessageArgs_(parts) {
     // First value should exist.
-    const id = parts[0];
-    const args = parts.slice(1);
+    const id = parts.shift();
     // Best effort fetch of message template table.
     // Since this is async, the first few logs might be indirected to a URL even
     // if in development mode. Message table is ~small so this should be a short
@@ -591,13 +593,9 @@ export class Log {
       this.fetchExternalMessagesOnce_();
     }
     if (this.messages_ && id in this.messages_) {
-      return [this.messages_[id]].concat(args);
+      return [this.messages_[id]].concat(parts);
     }
-    const url = args.reduce(
-      (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
-      `${externalMessagesUrl()}id=${encodeURIComponent(id)}`
-    );
-    return `More info at ${url}`;
+    return [`More info at ${externalMessageUrl(id, parts)}`];
   }
 
   /**
