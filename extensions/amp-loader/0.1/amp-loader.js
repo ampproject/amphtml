@@ -245,7 +245,7 @@ class LoaderBuilder {
         content,
       };
     }
-    return this.element_.createLoaderLogo() || {};
+    return this.element_.createLoaderLogo();
   }
 
   /**

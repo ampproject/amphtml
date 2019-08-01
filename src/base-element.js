@@ -437,13 +437,13 @@ export class BaseElement {
   /**
    * Subclasses can override this method to provide a svg logo that will be
    * displayed as the loader.
-   * @return {?{
+   * @return {!{
    *  content: (!Element|undefined),
    *  color: (string|undefined),
    * }}
    */
   createLoaderLogoCallback() {
-    return null;
+    return {};
   }
 
   /**

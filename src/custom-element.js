@@ -1032,7 +1032,7 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Creates a loader logo.
-     * @return {?{
+     * @return {!{
      *  content: (!Element|undefined),
      *  color: (string|undefined),
      * }}
