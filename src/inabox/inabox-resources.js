@@ -149,8 +149,8 @@ class InaboxResources {
   /** @override */
   changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
     const resource = Resource.forElement(element);
-    resource.changeSize(newHeight, newWidth, opt_newMargins);
-    this.schedulePass(FOUR_FRAME_DELAY);
+    resource./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
+    this./*OK*/ schedulePass(FOUR_FRAME_DELAY);
     if (opt_callback) {
       opt_callback();
     }
@@ -158,7 +158,13 @@ class InaboxResources {
 
   /** @override */
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
-    this.changeSize(element, newHeight, newWidth, undefined, opt_newMargins);
+    this./*OK*/ changeSize(
+      element,
+      newHeight,
+      newWidth,
+      undefined,
+      opt_newMargins
+    );
     return Promise.resolve();
   }
 
@@ -166,7 +172,7 @@ class InaboxResources {
   expandElement(element) {
     const resource = Resource.forElement(element);
     resource.completeExpand();
-    this.schedulePass(FOUR_FRAME_DELAY);
+    this./*OK*/ schedulePass(FOUR_FRAME_DELAY);
   }
 
   /** @override */
@@ -201,11 +207,12 @@ class InaboxResources {
       },
       mutate: () => {
         mutator();
-        this.schedulePass(FOUR_FRAME_DELAY);
+        this./*OK*/ schedulePass(FOUR_FRAME_DELAY);
       },
     });
   }
 
+  // TODO(lannka): replace owners impl.
   /* eslint-disable no-unused-vars */
   /** @override */
   setOwner(element, owner) {}
