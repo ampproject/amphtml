@@ -726,8 +726,15 @@ export class AmpImageSlider extends AMP.BaseElement {
     // while Resources would found amp-imgs' parent has owner and
     // refuse to run the normal scheduling in discoverWork_.
     // SIMPLER SOL: simply always call scheduleLayout no matter what
-    this.scheduleLayout(dev().assertElement(this.leftAmpImage_));
-    this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(
+      this.element,
+      dev().assertElement(this.leftAmpImage_)
+    );
+    owners.scheduleLayout(
+      this.element,
+      dev().assertElement(this.rightAmpImage_)
+    );
 
     this.registerEvents_();
 
