@@ -1751,7 +1751,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
       return {
         scheduleLayout: () => {},
       };
-    };1
+    };
     element.appendChild(createWithAttr('fallback'));
     element.toggleFallback(true);
     expect(element).to.not.have.class('amp-notsupported');
