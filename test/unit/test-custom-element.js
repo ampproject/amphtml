@@ -1747,9 +1747,11 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
         return element.resource;
       },
     };
-    element.owners_ = {
-      scheduleLayout: () => {},
-    };
+    element.getOwners = () => {
+      return {
+        scheduleLayout: () => {},
+      };
+    };1
     element.appendChild(createWithAttr('fallback'));
     element.toggleFallback(true);
     expect(element).to.not.have.class('amp-notsupported');

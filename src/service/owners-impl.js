@@ -22,6 +22,17 @@
  */
 export class Owners {
   /**
+   * Schedules preload for the specified sub-elements that are children of the
+   * parent element. The parent element may choose to send this signal either
+   * because it's an owner (see {@link setOwner}) or because it wants the
+   * preloads to be done sooner. In either case, both parent's and children's
+   * priority is observed when scheduling this work.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  schedulePreload(parentElement, subElements) {}
+
+  /**
    * Schedules layout for the specified sub-elements that are children of the
    * parent element. The parent element may choose to send this signal either
    * because it's an owner (see {@link setOwner}) or because it wants the
@@ -58,17 +69,6 @@ export class Owners {
    * @param {!Element|!Array<!Element>} subElements
    */
   scheduleUnlayout(parentElement, subElements) {}
-
-  /**
-   * Schedules preload for the specified sub-elements that are children of the
-   * parent element. The parent element may choose to send this signal either
-   * because it's an owner (see {@link setOwner}) or because it wants the
-   * preloads to be done sooner. In either case, both parent's and children's
-   * priority is observed when scheduling this work.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  schedulePreload(parentElement, subElements) {}
 
   /**
    * A parent resource, especially in when it's an owner (see {@link setOwner}),
