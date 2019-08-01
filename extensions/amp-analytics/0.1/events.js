@@ -1514,7 +1514,7 @@ export class VisibilityTracker extends EventTracker {
     // behavior, we should not add an unload listener.
     if (!this.supportsPageHide_()) {
       win.addEventListener(
-        'unload',
+        /*OK*/ 'unload',
         (unloadListener = () => {
           win.removeEventListener('unload', unloadListener);
           deferred.resolve();

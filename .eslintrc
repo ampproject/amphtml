@@ -92,6 +92,7 @@
     "local/no-style-display": 2,
     "local/no-style-property-setting": 2,
     "local/no-swallow-return-from-allow-console-error": 2,
+    "local/no-unload-listener": 2,
     "local/prefer-deferred-promise": 0,
     "local/prefer-destructuring": 2,
     "local/private-prop-names": 2,
