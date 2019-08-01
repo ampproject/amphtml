@@ -206,8 +206,6 @@ describes.repeated(
 
               return Promise.resolve({
                 ampForm,
-                asyncInputRequiredAction,
-                asyncInputValueRequiredAction,
                 getValueStubRequiredAction,
               });
             }
@@ -2926,12 +2924,7 @@ describes.repeated(
             return getAmpFormWithAsyncInput(
               true /*includeRequiredAction*/
             ).then(response => {
-              const {
-                ampForm,
-                asyncInputRequiredAction,
-                asyncInputValueRequiredAction,
-                getValueStubRequiredAction,
-              } = response;
+              const {ampForm, getValueStubRequiredAction} = response;
 
               const handlePresubmitSuccessStub = sandbox.stub(
                 ampForm,
