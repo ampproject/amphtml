@@ -1719,14 +1719,14 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
         return element.resource;
       },
     };
-    element.owners_ = {
-      scheduleLayout: sandbox.spy(),
-    };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = sandbox.mock();
     const fallback = element.appendChild(createWithAttr('fallback'));
     element.toggleFallback(true);
     expect(element).to.have.class('amp-notsupported');
-    expect(element.owners_.scheduleLayout).to.be.calledOnce;
-    expect(element.owners_.scheduleLayout).to.have.been.calledWith(
+    expect(owners.scheduleLayout).to.be.calledOnce;
+    expect(owners.scheduleLayout).to.have.been.calledWith(
       element.element,
       fallback
     );
@@ -1747,11 +1747,10 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
         return element.resource;
       },
     };
-    element.getOwners = () => {
-      return {
-        scheduleLayout: () => {},
-      };
-    };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = sandbox.mock();
+
     element.appendChild(createWithAttr('fallback'));
     element.toggleFallback(true);
     expect(element).to.not.have.class('amp-notsupported');

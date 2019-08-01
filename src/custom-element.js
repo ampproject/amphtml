@@ -197,12 +197,6 @@ function createBaseCustomElementClass(win) {
       this.resources_ = null;
 
       /**
-       * Owners can only be looked up when an element is attached.
-       * @private {?./service/owners-impl.Owners}
-       */
-      this.owners_ = null;
-
-      /**
        * Layers can only be looked up when an element is attached.
        * @private {?./service/layers-impl.LayoutLayers}
        */
@@ -359,18 +353,6 @@ function createBaseCustomElementClass(win) {
       );
       return /** @typedef {!./service/resources-impl.ResourcesDef} */ this
         .resources_;
-    }
-
-    /**
-     * Returns owners manager. Only available after attachment. It throws
-     * exception before the element is attached.
-     * @return {!./service/owners-impl.Owners}
-     * @final @this {!Element}
-     * @package
-     */
-    getOwners() {
-      devAssert(this.owners_, 'no owners yet, since element is not attached');
-      return /** @typedef {!./service/owners-impl.Owners} */ this.owners_;
     }
 
     /**
@@ -847,9 +829,6 @@ function createBaseCustomElementClass(win) {
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = Services.resourcesForDoc(this.ampdoc_);
-      }
-      if (!this.owners_) {
-        this.owners_ = Services.ownersForDoc(this.ampdoc_);
       }
       if (isExperimentOn(this.ampdoc_.win, 'layers')) {
         if (!this.layers_) {
@@ -1629,7 +1608,10 @@ function createBaseCustomElementClass(win) {
       if (show == true) {
         const fallbackElement = this.getFallback();
         if (fallbackElement) {
-          this.getOwners().scheduleLayout(this.element, fallbackElement);
+          Services.ownersForDoc(this.getAmpDoc()).scheduleLayout(
+            this.element,
+            fallbackElement
+          );
         }
       }
     }
