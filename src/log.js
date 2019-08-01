@@ -607,10 +607,9 @@ export class Log {
    * Otherwise creates a sprintf syntax string containing the optional message or the
    * default. An interpolation token is added at the end to include the `subject`.
    * @param {*} subject
-   * @param {boolean} assertion
+   * @param {*} assertion
    * @param {string} defaultMessage
    * @param {!Array|string=} opt_message
-   * @return {!Array}
    * @private
    */
   assertType_(subject, assertion, defaultMessage, opt_message) {
