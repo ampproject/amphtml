@@ -16,6 +16,7 @@
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
+import {Owners} from '../../src/service/owners-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {Resources} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
@@ -863,6 +864,7 @@ describes.realWin('Resource', {amp: true}, env => {
   describe('Resource set/get ownership', () => {
     let child;
     let parentResource;
+    let owners;
     let resources;
     let grandChild;
     beforeEach(() => {
@@ -898,7 +900,9 @@ describes.realWin('Resource', {amp: true}, env => {
       child.getElementsByClassName = () => {
         return [grandChild];
       };
-      resources = new Resources(new AmpDocSingle(window));
+      const ampdoc = new AmpDocSingle(window);
+      resources = new Resources(ampdoc);
+      owners = new Owners(ampdoc);
       parentResource = new Resource(1, parent, resources);
     });
 
