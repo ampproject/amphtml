@@ -527,6 +527,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'insticator': {
+    prefetch: 'https://testthisshit.online/amp-embed-lib/insticator.js',
+    preconnect: [
+      'https://drhn9v8cwg89y.cloudfront.net',
+      'https://d3lcz8vpax4lo2.cloudfront.net',
+    ]
+   },
+
   'invibes': {
     prefetch: 'https://k.r66net.com/GetAmpLink',
     renderStartImplemented: true,
