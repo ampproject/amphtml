@@ -113,6 +113,8 @@
 
 /* The spinner itself */
 .i-amphtml-new-loader-spinner {
+  stroke: currentColor;
+  stroke-width: 1.5px;
   margin: 12px;
   opacity: 0;
   animation: i-amphtml-new-loader-fade-in 0.8s ease-in forwards;
@@ -128,6 +130,11 @@
   animation-delay:
       calc(2.8s - var(--loader-delay-offset)),
       calc(3.4s - var(--loader-delay-offset));
+}
+
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner {
+  stroke-width: calc(1.5px * 22 / 12);
+  transform: scale(calc(12/ 22));
 }
 
 /* Animations only run when active */
