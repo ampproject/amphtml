@@ -51,21 +51,21 @@ function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
 }
 
 /**
- * @param {number} x
- * @param {number} y
- * @param {number} radius
- * @param {number} startAngle
- * @param {number} endAngle
- * @return {string}
+ * @param {number} x The x coordinate of the center of a circle.
+ * @param {number} y The y coordinate of the center of a circle.
+ * @param {number} radius The radius of a circle.
+ * @param {number} startAngle The starting angle for the arc.
+ * @param {number} endAngle The ending angle for the arc.
+ * @return {string} The path for the arc.
  */
-function getArcPath(x, y, radius, startAngle, endAngle) {
+function getCircleArcPath(x, y, radius, startAngle, endAngle) {
   const start = polarToCartesian(x, y, radius, endAngle);
   const end = polarToCartesian(x, y, radius, startAngle);
   const deltaX = end.x - start.x;
   const deltaY = end.y - start.y;
 
   const largeArcFlag =
-    endAngle > startAngle != Math.abs(endAngle - startAngle) <= 180 ? '1' : '0';
+    endAngle > startAngle != Math.abs(endAngle - startAngle) <= 180 ? 1 : 0;
 
   return getArcPathCommands(
     start.x,
@@ -81,7 +81,7 @@ function getArcPath(x, y, radius, startAngle, endAngle) {
  * @param {number} x The start x position.
  * @param {number} y The start y position.
  * @param {number} r The x/y radius of the arc.
- * @param {number} l The large arc flag..
+ * @param {number} l The large arc flag.
  * @param {number} dx The x delta for the end position.
  * @param {number} dy The y delta for the end position.
  * @return {string} The commands for the desired arc as a string.
@@ -108,7 +108,7 @@ function getSpinnerPath() {
   // The current start angle for the arc.
   let startAngle = -45;
 
-  // The current end angle for the arc/
+  // The current end angle for the arc.
   let endAngle = -45;
 
   /**
@@ -122,8 +122,13 @@ function getSpinnerPath() {
     for (let i = 0; i < steps; i++) {
       if (i >= startStep) {
         pathD +=
-          getArcPath(center + xOffset, center, radius, startAngle, endAngle) +
-          '\n';
+          getCircleArcPath(
+            center + xOffset,
+            center,
+            radius,
+            startAngle,
+            endAngle
+          ) + '\n';
       }
 
       startAngle += startAngleDelta / steps;
