@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+
 /* Placeholder */
 .i-amphtml-default-placeholder {
   background-color: #f8f8f8;
@@ -60,6 +62,10 @@
 }
 
 /* Background shim */
+.i-amphtml-new-loader-has-shim {
+  color: #fff !important;
+}
+
 .i-amphtml-new-loader-shim {
   width: 72px;
   height: 72px;
@@ -71,6 +77,10 @@
   animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in forwards;
   animation-delay: 0.6s;
   animation-delay: calc(0.6s - var(--loader-delay-offset));
+}
+
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-shim {
+  display: initial;
 }
 
 .i-amphtml-new-loader-size-small .i-amphtml-new-loader-shim {

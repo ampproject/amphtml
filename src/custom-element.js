@@ -1032,7 +1032,7 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Creates a loader logo.
-     * @return {!{
+     * @return {{
      *  content: (!Element|undefined),
      *  color: (string|undefined),
      * }}
@@ -1611,7 +1611,10 @@ function createBaseCustomElementClass(win) {
       if (show == true) {
         const fallbackElement = this.getFallback();
         if (fallbackElement) {
-          this.getResources().scheduleLayout(this, fallbackElement);
+          Services.ownersForDoc(this.getAmpDoc()).scheduleLayout(
+            this.element,
+            fallbackElement
+          );
         }
       }
     }
