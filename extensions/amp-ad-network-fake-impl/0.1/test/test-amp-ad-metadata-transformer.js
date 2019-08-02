@@ -120,3 +120,20 @@ it('adds the correct metadata for a story ad', () => {
   expect(parsed.ctaType).to.equal('INSTALL');
   expect(parsed.ctaUrl).to.equal('https://www.amp.dev');
 });
+
+it('warns user when invalid script is in document', () => {
+  const input = `<html ⚡4ads>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  </head>
+  <body><script type="bad"></script></body>
+  </html>
+  `;
+  const doc = new DOMParser().parseFromString(input, 'text/html');
+  const metadata = new AmpAdMetadataTransformer().generateMetadata(doc);
+  //metadata should not include bad script
+  expect(metadata).to.equal('{"ampRuntimeUtf16CharOffsets":[191,264]}');
+});

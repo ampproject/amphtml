@@ -16,6 +16,7 @@
 
 import {dict} from '../../../src/utils/object';
 import {parseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 export class AmpAdMetadataTransformer {
   /** constructor */
@@ -136,11 +137,11 @@ export class AmpAdMetadataTransformer {
    * @param {Element} element
    */
   generateStyleMetadata_(element) {
-    const styleJson = {href: element.getAttribute('href')};
+    const styleObject = {href: element.getAttribute('href')};
     if (element.hasAttribute('media')) {
-      styleJson.media = element.getAttribute('media');
+      styleObject.media = element.getAttribute('media');
     }
-    this.styles_.push(styleJson);
+    this.styles_.push(styleObject);
   }
 
   /**
@@ -164,9 +165,9 @@ export class AmpAdMetadataTransformer {
     const imgs = doc.querySelectorAll('amp-img[src]');
     for (let i = 0; i < imgs.length; i++) {
       const img = imgs[i];
-      let width,
-        height,
-        area = -1;
+      let width;
+      let height;
+      let area = -1;
       if (img.hasAttribute('width')) {
         width = img.getAttribute('width');
       }
@@ -194,7 +195,8 @@ export class AmpAdMetadataTransformer {
       const script = json[i];
       const type = script.getAttribute('type');
       if (type != 'application/json') {
-        return;
+        user().warn('SCRIPT', 'Type is invalid, must be `application/json`');
+        continue;
       }
       if (script.hasAttribute('amp-ad-metadata')) {
         const parsed = parseJson(script.textContent);
