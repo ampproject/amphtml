@@ -131,8 +131,9 @@ There are 3 serving modes:
 - DEFAULT mode serves unminified AMP. You want to use this during normal dev.
 - COMPILED mode serves minified AMP. This is closer to the prod setup. This is only available after running `gulp dist --fortesting`. Serve MIN mode by adding `--compiled` to `gulp` command.
 - CDN mode serves prod. These remote files would not reflect your local changes. Serve CDN mode by adding `--cdn` to `gulp` command.
+- <RTV_NUMBER> mode serves the bundle from the given RTV number, where <RTV_NUMBER> is a 15 digit number. Ex. `001907161745080`
 
-To switch serving mode during runtime, go to http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the following values: `default`, `compiled,` or `cdn`.
+To switch serving mode during runtime, go to http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the following values: `default`, `compiled`, `cdn` or `<RTV_NUMBER>`.
 
 ### Examples
 

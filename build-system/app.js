@@ -90,7 +90,7 @@ if (!global.AMP_TESTING) {
 }
 
 // Changes the current serve mode via query param
-// e.g. /serve_mode_change?mode=(default|compiled|cdn)
+// e.g. /serve_mode_change?mode=(default|compiled|cdn|<RTV_NUMBER>)
 // (See ./app-index/settings.js)
 app.get('/serve_mode_change', (req, res) => {
   const {mode} = req.query;
