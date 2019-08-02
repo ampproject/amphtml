@@ -190,7 +190,7 @@ export class AmpSlideScroll extends BaseSlides {
       this.dataSlideIdArr_.push(
         slide.getAttribute('data-slide-id') || index.toString()
       );
-      this.setAsOwner(slide);
+      Services.ownersForDoc(this.element).setOwner(slide, this.element);
       slide.classList.add('amp-carousel-slide');
 
       const slideWrapper = this.win.document.createElement('div');
