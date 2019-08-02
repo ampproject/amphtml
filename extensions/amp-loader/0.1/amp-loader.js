@@ -235,9 +235,9 @@ class LoaderBuilder {
   getVideoPlayerLogo_() {
     // Keeping the video logo here short term.
     // This is because there is no single CSS for all players, there is
-    // video-interface but not all players implement it.
-    // TODO(sparhami) Move this out of amp-loader into something common for
-    // video players.
+    // video-interface but not all players implement it. Also the SVG is not
+    // that big.
+    // TODO(sparhami) Figure out how to move this out of amp-loader.
     const html = htmlFor(this.element_);
     return html`
       <svg viewBox="0 0 72 72">
