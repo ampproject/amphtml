@@ -189,7 +189,7 @@ export class ExternalReorderHeadTransformer {
       this.headComponents_.scriptAmpViewer = element;
       return;
     }
-    if (isAsync) {
+    if (isAsync && endsWith(src, '/dist/amp-inabox.js')) {
       this.headComponents_.otherScripts.push(element);
       return;
     }
