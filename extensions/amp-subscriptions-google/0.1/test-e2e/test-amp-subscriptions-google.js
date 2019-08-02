@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-describes.endtoend('amp-subscriptions-google', {
-  testUrl: 'http://localhost:8000/test/manual/amp-subscriptions-google/swg.amp.html',
-  environments: ['single'],
-}, env => {
-  let controller;
+describes.endtoend(
+  'amp-subscriptions-google',
+  {
+    testUrl:
+      'http://localhost:8000/test/manual/amp-subscriptions-google/swg.amp.html',
+    environments: ['single'],
+  },
+  env => {
+    let controller;
 
-  beforeEach(() => {
-    controller = env.controller;
-  });
+    beforeEach(() => {
+      controller = env.controller;
+    });
 
-  it('Subscription offers should render correctly', async() => {
-    const btn = await controller.findElement('#swg_button');
-    await controller.click(btn);
+    it('Subscription offers should render correctly', async () => {
+      const btn = await controller.findElement('#swg_button');
+      await controller.click(btn);
 
-    // Check the SwG subscription offer dialog iframe.
-    const iframe = await controller.findElement('.swg-dialog');
-    await expect(iframe).to.exist;
-  });
-});
+      // Check the SwG subscription offer dialog iframe.
+      const iframe = await controller.findElement('.swg-dialog');
+      await expect(iframe).to.exist;
+    });
+  }
+);
