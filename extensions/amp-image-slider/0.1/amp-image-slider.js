@@ -560,6 +560,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Get current slider's percentage to the left
    * Should be wrapped inside measureElement
    * @private
+   * @return {number}
    */
   getCurrentSliderPercentage_() {
     const {left: barLeft} = this.bar_./*OK*/ getBoundingClientRect();
@@ -693,6 +694,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Limit percentage between 0 and 1
    * @param {number} percentage
    * @private
+   * @return {number}
    */
   limitPercentage_(percentage) {
     return clamp(percentage, 0, 1);
@@ -724,8 +726,15 @@ export class AmpImageSlider extends AMP.BaseElement {
     // while Resources would found amp-imgs' parent has owner and
     // refuse to run the normal scheduling in discoverWork_.
     // SIMPLER SOL: simply always call scheduleLayout no matter what
-    this.scheduleLayout(dev().assertElement(this.leftAmpImage_));
-    this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(
+      this.element,
+      dev().assertElement(this.leftAmpImage_)
+    );
+    owners.scheduleLayout(
+      this.element,
+      dev().assertElement(this.rightAmpImage_)
+    );
 
     this.registerEvents_();
 

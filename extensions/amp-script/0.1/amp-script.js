@@ -35,6 +35,7 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
+import {startsWith} from '../../../src/string';
 import {upgrade} from '@ampproject/worker-dom/dist/amp/main.mjs';
 
 /** @const {string} */
@@ -51,8 +52,24 @@ const MAX_TOTAL_SCRIPT_SIZE = 150000;
  */
 const MAX_FREE_MUTATION_HEIGHT = 300;
 
-const PHASE_HYDRATING = 1;
-const PHASE_MUTATING = 2;
+/**
+ * See src/transfer/Phase.ts in worker-dom.
+ * @enum {number}
+ */
+const Phase = {
+  INITIALIZING: 0,
+  HYDRATING: 1,
+  MUTATING: 2,
+};
+
+/**
+ * See src/transfer/TransferrableStorage.ts in worker-dom.
+ * @enum {number}
+ */
+const StorageLocation = {
+  LOCAL: 0,
+  SESSION: 1,
+};
 
 export class AmpScript extends AMP.BaseElement {
   /**
@@ -227,14 +244,14 @@ export class AmpScript extends AMP.BaseElement {
    * @private
    */
   mutationPump_(flush, phase) {
-    if (phase == PHASE_HYDRATING) {
+    if (phase == Phase.HYDRATING) {
       this.vsync_.mutate(() =>
         this.element.classList.add('i-amphtml-hydrated')
       );
     }
     const allowMutation =
       // Hydration is always allowed.
-      phase != PHASE_MUTATING ||
+      phase != Phase.MUTATING ||
       // Mutation depends on the gesture state and long tasks.
       this.userActivation_.isActive() ||
       // If the element is size-contained and small enough.
@@ -278,6 +295,21 @@ class AmpScriptService {
 }
 
 /**
+ * sandbox="allow-forms" enables tags in HTMLFormElement.elements.
+ * @const {!Array<string>}
+ */
+const FORM_ELEMENTS = [
+  'form',
+  'button',
+  'fieldset',
+  'input',
+  'object',
+  'output',
+  'select',
+  'textarea',
+];
+
+/**
  * A DOMPurify wrapper that implements the worker-dom.Sanitizer interface.
  * @visibleForTesting
  */
@@ -287,10 +319,13 @@ export class SanitizerImpl {
    * @param {!Array<string>} sandboxTokens
    */
   constructor(win, sandboxTokens) {
-    /** @private {!DomPurifyDef} */
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!DomPurifyDef} */
     this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
 
-    /** @private {!Object<string, boolean>} */
+    /** @private @const {!Object<string, boolean>} */
     this.allowedTags_ = getAllowedTags();
 
     // TODO(choumx): Support opt-in for variable substitutions.
@@ -299,20 +334,10 @@ export class SanitizerImpl {
     this.allowedTags_['amp-layout'] = true;
     this.allowedTags_['amp-pixel'] = false;
 
-    // "allow-forms" enables tags in HTMLFormElement.elements.
-    const allowForms = sandboxTokens.includes('allow-forms');
-    const formElements = [
-      'form',
-      'button',
-      'fieldset',
-      'input',
-      'object',
-      'output',
-      'select',
-      'textarea',
-    ];
-    formElements.forEach(fe => {
-      this.allowedTags_[fe] = allowForms;
+    /** @private @const {boolean} */
+    this.allowForms_ = sandboxTokens.includes('allow-forms');
+    FORM_ELEMENTS.forEach(fe => {
+      this.allowedTags_[fe] = this.allowForms_;
     });
   }
 
@@ -329,7 +354,9 @@ export class SanitizerImpl {
     const tag = node.nodeName.toLowerCase();
     const clean = this.allowedTags_[tag];
     if (!clean) {
-      user().warn(TAG, 'Sanitized node:', node);
+      if (!this.warnIfFormsAreDisallowed_(tag)) {
+        user().warn(TAG, 'Sanitized node:', node);
+      }
     }
     return clean;
   }
@@ -340,7 +367,7 @@ export class SanitizerImpl {
    * @param {string|null} value
    * @return {boolean}
    */
-  mutateAttribute(node, attribute, value) {
+  changeAttribute(node, attribute, value) {
     // TODO(choumx): Call mutatedAttributesCallback() on AMP elements e.g.
     // so an amp-img can update its child img when [src] is changed.
 
@@ -366,7 +393,25 @@ export class SanitizerImpl {
         return true;
       }
     }
-    user().warn(TAG, 'Sanitized [%s]="%s":', attribute, value, node);
+    if (!this.warnIfFormsAreDisallowed_(tag)) {
+      user().warn(TAG, 'Sanitized [%s]="%s":', attribute, value, node);
+    }
+    return false;
+  }
+
+  /**
+   * @param {string} tag
+   * @return {boolean}
+   */
+  warnIfFormsAreDisallowed_(tag) {
+    if (!this.allowForms_ && FORM_ELEMENTS.includes(tag)) {
+      user().warn(
+        TAG,
+        'Form elements (%s) are not allowed without sandbox="allow-forms".',
+        tag
+      );
+      return true;
+    }
     return false;
   }
 
@@ -376,7 +421,7 @@ export class SanitizerImpl {
    * @param {string} value
    * @return {boolean}
    */
-  mutateProperty(node, property, value) {
+  changeProperty(node, property, value) {
     const prop = property.toLowerCase();
 
     // worker-dom's supported properties and corresponding attribute name
@@ -386,6 +431,63 @@ export class SanitizerImpl {
       return true;
     }
     return false;
+  }
+
+  /**
+   * @param {!StorageLocation} location
+   * @return {?Object}
+   */
+  getStorage(location) {
+    // Note that filtering out amp-* keys will affect the predictability of
+    // Storage.key(). We could preserve indices by adding empty entries but
+    // that might be even more confusing.
+    const storage = this.storageFor_(location);
+    const output = {};
+    for (let i = 0; i < storage.length; i++) {
+      const key = storage.key(i);
+      if (key && !startsWith(key, 'amp-')) {
+        output[key] = storage.getItem(key);
+      }
+    }
+    return output;
+  }
+
+  /**
+   * @param {!StorageLocation} location
+   * @param {?string} key
+   * @param {?string} value
+   */
+  changeStorage(location, key, value) {
+    const storage = this.storageFor_(location);
+    if (key === null) {
+      if (value === null) {
+        user().error(TAG, 'Storage.clear() is not supported in amp-script.');
+      }
+    } else {
+      if (startsWith(key, 'amp-')) {
+        user().error(TAG, 'Invalid "amp-" prefix for storage key: %s', key);
+      } else {
+        if (value === null) {
+          storage.removeItem(key);
+        } else {
+          storage.setItem(key, value);
+        }
+      }
+    }
+  }
+
+  /**
+   * @param {!StorageLocation} location
+   * @return {?Storage}
+   * @private
+   */
+  storageFor_(location) {
+    if (location === StorageLocation.LOCAL) {
+      return this.win_.localStorage;
+    } else if (location === StorageLocation.SESSION) {
+      return this.win_.sessionStorage;
+    }
+    return null;
   }
 }
 

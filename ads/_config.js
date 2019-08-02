@@ -166,18 +166,6 @@ export const adConfig = {
 
   'adreactor': {},
 
-  'adsense': {
-    prefetch: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
-    preconnect: 'https://googleads.g.doubleclick.net',
-    clientIdScope: 'AMP_ECID_GOOGLE',
-    clientIdCookieName: '_ga',
-    remoteHTMLDisabled: true,
-    masterFrameAccessibleType: 'google_network',
-    fullWidthHeightRatio: 1.2,
-    consentHandlingOverride: true,
-    renderStartImplemented: true,
-  },
-
   'adsensor': {
     prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
     clientIdScope: 'amp_ecid_adensor',
@@ -457,6 +445,11 @@ export const adConfig = {
     ],
   },
 
+  'forkmedia': {
+    prefetch: 'https://delivery.forkcdn.com/rappio/inread/v1.1/amp/inread.js',
+    renderStartImplemented: true,
+  },
+
   'freewheel': {
     prefetch: 'https://cdn.stickyadstv.com/prime-time/fw-amp.min.js',
     renderStartImplemented: true,
@@ -492,7 +485,12 @@ export const adConfig = {
   'ibillboard': {},
 
   'idealmedia': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.idealmedia.io',
+      'https://servicer.idealmedia.io',
+      'https://s-img.idealmedia.io/',
+    ],
   },
 
   'imedia': {
@@ -557,7 +555,12 @@ export const adConfig = {
   'kuadio': {},
 
   'lentainform': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.lentainform.com',
+      'https://servicer.lentainform.com',
+      'https://s-img.lentainform.com',
+    ],
   },
 
   'ligatus': {
@@ -567,6 +570,11 @@ export const adConfig = {
 
   'lockerdome': {
     prefetch: 'https://cdn2.lockerdomecdn.com/_js/amp.js',
+    renderStartImplemented: true,
+  },
+
+  'logly': {
+    preconnect: ['https://l.logly.co.jp', 'https://cdn.logly.co.jp'],
     renderStartImplemented: true,
   },
 
@@ -634,7 +642,12 @@ export const adConfig = {
   },
 
   'mgid': {
-    renderStartImplemented: false,
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.mgid.com',
+      'https://servicer.mgid.com',
+      'https://s-img.mgid.com',
+    ],
   },
 
   'microad': {
@@ -843,6 +856,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'rnetplus': {},
+
   'rubicon': {},
 
   'runative': {
@@ -920,6 +935,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'streamrail': {
+    prefetch: 'https://sdk.streamrail.com/blade/sr.blade.js',
+    renderStartImplemented: true,
+  },
+
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',
@@ -993,10 +1013,7 @@ export const adConfig = {
 
   'valuecommerce': {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
-    preconnect: [
-      'https://ad.jp.ap.valuecommerce.com',
-      'https://ad.omks.valuecommerce.com',
-    ],
+    preconnect: ['https://ad.jp.ap.valuecommerce.com'],
     renderStartImplemented: true,
   },
 

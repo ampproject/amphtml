@@ -156,7 +156,7 @@ function getFiles(testType) {
  */
 function updateReporters(config) {
   if (
-    (argv.testnames || argv.local_changes || argv.files) &&
+    (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
     !isTravisBuild()
   ) {
     config.reporters = ['mocha'];
@@ -222,7 +222,7 @@ class RuntimeTestConfig {
         'report-config': {lcovonly: {file: `lcov-${testType}.info`}},
       };
 
-      const plugin = [
+      const instanbulPlugin = [
         'istanbul',
         {
           exclude: [
@@ -235,12 +235,11 @@ class RuntimeTestConfig {
           ],
         },
       ];
+      // don't overwrite existing plugins
+      const plugins = [instanbulPlugin].concat(this.babelifyConfig.plugins);
 
       this.browserify.transform = [
-        [
-          'babelify',
-          Object.assign({}, this.babelifyConfig, {plugins: [plugin]}),
-        ],
+        ['babelify', Object.assign({}, this.babelifyConfig, {plugins})],
       ];
     }
   }
@@ -260,7 +259,11 @@ class RuntimeTestRunner {
   async setup() {
     // TODO(alanorozco): Come up with a more elegant check?
     global.AMP_TESTING = true;
-    process.env.SERVE_MODE = argv.compiled ? 'compiled' : 'default';
+
+    // Run tests against compiled code when explicitly specified via --compiled,
+    // or when the minified runtime is automatically built.
+    process.env.SERVE_MODE =
+      argv.compiled || !argv.nobuild ? 'compiled' : 'default';
 
     await this.maybeBuild();
 

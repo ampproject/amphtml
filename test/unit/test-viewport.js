@@ -1699,6 +1699,24 @@ describe('createViewport', () => {
           ViewportBindingIosEmbedWrapper_
         );
       });
+
+      it('should bind to "natural" when iframed, but iOS supports scrollable iframes', () => {
+        toggleExperiment(win, 'ios-scrollable-iframe', true);
+        win.parent = {};
+        sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+        installViewportServiceForDoc(ampDoc);
+        const viewport = Services.viewportForDoc(ampDoc);
+        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+      });
+
+      it('should bind to "natural" when in dev mode, but iOS supports scrollable iframes', () => {
+        toggleExperiment(win, 'ios-scrollable-iframe', true);
+        getMode(win).development = true;
+        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
+        installViewportServiceForDoc(ampDoc);
+        const viewport = Services.viewportForDoc(ampDoc);
+        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+      });
     }
   );
 });
@@ -1726,17 +1744,10 @@ describes.realWin('marginBottomOfLastChild', {}, env => {
     secondChild.style.marginBottom = '22px';
     secondChild.style.height = '2px';
     element.appendChild(secondChild);
-
-    toggleExperiment(win, 'margin-bottom-in-content-height', true, true);
   });
 
   it('should return the marginBottom of the last child', () => {
     expect(marginBottomOfLastChild(win, element)).to.equal(22);
-  });
-
-  it('should return 0 if experiment is disabled', () => {
-    toggleExperiment(win, 'margin-bottom-in-content-height', false, true);
-    expect(marginBottomOfLastChild(win, element)).to.equal(0);
   });
 
   it('should return 0 if element has no children', () => {

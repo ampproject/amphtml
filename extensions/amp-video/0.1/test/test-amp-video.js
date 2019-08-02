@@ -265,7 +265,6 @@ describes.realWin(
         function(element) {
           // Should set appropriate attributes in buildCallback
           const video = element.querySelector('video');
-          expect(video.getAttribute('poster')).to.equal('img.png');
           expect(video.getAttribute('controls')).to.exist;
           expect(video.getAttribute('playsinline')).to.exist;
           expect(video.getAttribute('webkit-playsinline')).to.exist;
@@ -282,7 +281,7 @@ describes.realWin(
       });
     });
 
-    it('should not set src or preload in build', () => {
+    it('should not set poster, src, or preload in build', () => {
       return getVideo(
         {
           src: 'video.mp4',
@@ -295,6 +294,7 @@ describes.realWin(
         function(element) {
           const video = element.querySelector('video');
           expect(video.getAttribute('preload')).to.equal('none');
+          expect(video.hasAttribute('poster')).to.be.false;
           expect(video.hasAttribute('src')).to.be.false;
         }
       ).then(v => {
@@ -302,6 +302,7 @@ describes.realWin(
         const video = v.querySelector('video');
         expect(video.tagName).to.equal('VIDEO');
         expect(video.getAttribute('preload')).to.equal('auto');
+        expect(video.getAttribute('poster')).to.equal('img.png');
       });
     });
 
@@ -317,7 +318,7 @@ describes.realWin(
         function(element) {
           const video = element.querySelector('video');
           expect(video.getAttribute('preload')).to.equal('none');
-          expect(video.getAttribute('poster')).to.equal('img.png');
+          expect(video.hasAttribute('poster')).to.be.false;
           expect(video.hasAttribute('src')).to.be.false;
         }
       ).then(v => {
@@ -386,7 +387,7 @@ describes.realWin(
         function(element) {
           const video = element.querySelector('video');
           expect(video.getAttribute('preload')).to.equal('none');
-          expect(video.getAttribute('poster')).to.equal('img.png');
+          expect(video.hasAttribute('poster')).to.be.false;
           expect(video.hasAttribute('src')).to.be.false;
         }
       ).then(v => {

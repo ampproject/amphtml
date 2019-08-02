@@ -83,7 +83,6 @@ import {adpicker} from '../ads/adpicker';
 import {adplugg} from '../ads/adplugg';
 import {adpon} from '../ads/adpon';
 import {adreactor} from '../ads/adreactor';
-import {adsense} from '../ads/google/adsense';
 import {adsensor} from '../ads/adsensor';
 import {adsloom} from '../ads/adsloom';
 import {adsnative} from '../ads/adsnative';
@@ -138,6 +137,7 @@ import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
+import {forkmedia} from '../ads/forkmedia';
 import {freewheel} from '../ads/freewheel';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
@@ -164,6 +164,7 @@ import {kuadio} from '../ads/kuadio';
 import {lentainform} from '../ads/lentainform';
 import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
+import {logly} from '../ads/logly';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
@@ -214,6 +215,7 @@ import {relap} from '../ads/relap';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
+import {rnetplus} from '../ads/rnetplus';
 import {rubicon} from '../ads/rubicon';
 import {runative} from '../ads/runative';
 import {sas} from '../ads/sas';
@@ -229,6 +231,7 @@ import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {speakol} from '../ads/speakol';
 import {spotx} from '../ads/spotx';
+import {streamrail} from '../ads/streamrail';
 import {strossle} from '../ads/strossle';
 import {sunmedia} from '../ads/sunmedia';
 import {svknative} from '../ads/svknative';
@@ -280,11 +283,15 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  forkmedia: true,
+  idealmedia: true,
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
+  mgid: true,
   miximedia: true,
   mywidget: true,
+  lentainform: true,
   opinary: true,
   outbrain: true,
   plista: true,
@@ -333,7 +340,6 @@ register('adpicker', adpicker);
 register('adplugg', adplugg);
 register('adpon', adpon);
 register('adreactor', adreactor);
-register('adsense', adsense);
 register('adsensor', adsensor);
 register('adsloom', adsloom);
 register('adsnative', adsnative);
@@ -392,6 +398,7 @@ register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
 register('fluct', fluct);
+register('forkmedia', forkmedia);
 register('freewheel', freewheel);
 register('fusion', fusion);
 register('genieessp', genieessp);
@@ -420,6 +427,7 @@ register('kuadio', kuadio);
 register('lentainform', lentainform);
 register('ligatus', ligatus);
 register('lockerdome', lockerdome);
+register('logly', logly);
 register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
@@ -474,6 +482,7 @@ register('relap', relap);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rfp', rfp);
+register('rnetplus', rnetplus);
 register('rubicon', rubicon);
 register('runative', runative);
 register('sas', sas);
@@ -488,6 +497,7 @@ register('sogouad', sogouad);
 register('sortable', sortable);
 register('sovrn', sovrn);
 register('spotx', spotx);
+register('streamrail', streamrail);
 register('strossle', strossle);
 register('sunmedia', sunmedia);
 register('svknative', svknative);

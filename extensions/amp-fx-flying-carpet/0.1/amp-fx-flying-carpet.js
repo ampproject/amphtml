@@ -17,6 +17,7 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
@@ -101,14 +102,21 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       setStyle(this.container_, 'width', width, 'px');
     });
     if (this.firstLayoutCompleted_) {
-      this.scheduleLayout(this.children_);
+      Services.ownersForDoc(this.element).scheduleLayout(
+        this.element,
+        this.children_
+      );
       listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
     }
   }
 
   /** @override */
   viewportCallback(inViewport) {
-    this.updateInViewport(this.children_, inViewport);
+    Services.ownersForDoc(this.element).updateInViewport(
+      this.element,
+      this.children_,
+      inViewport
+    );
   }
 
   /**
@@ -154,7 +162,10 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       this./*OK*/ collapse();
       throw e;
     }
-    this.scheduleLayout(this.children_);
+    Services.ownersForDoc(this.element).scheduleLayout(
+      this.element,
+      this.children_
+    );
     listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
     this.firstLayoutCompleted_ = true;
     return Promise.resolve();
@@ -170,7 +181,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
   layoutBuiltChild_(event) {
     const child = dev().assertElement(event.target);
     if (child.getOwner() === this.element) {
-      this.scheduleLayout(child);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, child);
     }
   }
 
@@ -199,6 +210,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    * nodes that only contain whitespace since they do not contribute anything
    * visually, only their surrounding Elements or non-whitespace Texts do.
    * @param {!Array<!Node>} nodes
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   visibileChildren_(nodes) {

@@ -62,17 +62,20 @@ For more details on templates, see [AMP HTML Templates](../../spec/amp-html-temp
 
 In the following example, we retrieve JSON data that contains URLs and titles, and render the content in a nested [amp-mustache template](https://amp.dev/documentation/components/amp-mustache).
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="259"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/amplist.basic.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true" imports="amp-list" template="amp-mustache"]
+```html
+<amp-list width="auto"
+  height="100"
+  layout="fixed-height"
+  src="{{server_for_email}}/static/inline-examples/data/amp-list-urls.json">
+  <template type="amp-mustache">{% raw %}
+    <div class="url-entry">
+      <a href="{{url}}">{{title}}</a>
+    </div>
+  {% endraw %}</template>
+</amp-list>
+```
+[/example]
 
 Here is the JSON file that we used:
 
@@ -130,17 +133,27 @@ Optionally, the `<amp-list>` element can contain an element with an `overflow` a
 
 In the following example, we display a list of images and titles. Because the `<amp-list>` content requires more space than available, the AMP Runtime displays the overflow element.
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="213"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/amplist.overflow.embed.html?active-tab=preview&preview-height=213">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true" imports="amp-list" template="amp-mustache"]
+```html
+<amp-list width="auto"
+  height="140"
+  layout="fixed-height"
+  src="{{server_for_email}}/static/inline-examples/data/amp-list-data.json">
+  <template type="amp-mustache">{% raw %}
+    <div class="image-entry">
+      <amp-img src="{{imageUrl}}"
+        width="100"
+        height="75"></amp-img>
+      <span class="image-title">{{title}}</span>
+    </div>
+  {% endraw %}</template>
+  <div overflow
+    class="list-overflow">
+    See more
+  </div>
+</amp-list>
+```
+[/example]
 
 Here's the CSS for the `overflow`:
 
@@ -208,9 +221,9 @@ within this `<amp-list>`. This must be a CORS HTTP service. The URL's protocol m
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
 
-The `src` attribute may be omitted if the `[src]` attribute exists.
-
 If fetching the data at the `src` URL fails, the `<amp-list>` triggers a low-trust `fetch-error` event.
+
+The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supports URL and non-URL expression values; see `amp-list` in [`amp-bind` element specific attributes documentation](https://amp.dev/documentation/components/amp-bind/#element-specific-attributes) for details.
 
 ##### credentials (optional)
 

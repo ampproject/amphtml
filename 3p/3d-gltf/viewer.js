@@ -120,7 +120,10 @@ export default class GltfViewer {
     return value * max + (1 - value) * min;
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   setupSize_() {
     let oldW = null;
     let oldH = null;

@@ -123,7 +123,8 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       getAmpdocServiceHolder(ampdoc),
       ampdoc,
       id,
-      () => service
+      () => service,
+      /* override */ true
     );
   } else {
     registerServiceInternal(embedWin, embedWin, id, () => service);
@@ -253,6 +254,7 @@ export function getServiceForDoc(elementOrAmpDoc, id) {
  * If service `id` is not registered, returns null.
  * @param {!Element|!ShadowRoot} element
  * @param {string} id
+ * @return {?Object}
  */
 function getServiceForDocOrNullInternal(element, id) {
   const ampdoc = getAmpdoc(element);
@@ -322,11 +324,12 @@ export function getTopWindow(win) {
 /**
  * Returns the parent "friendly" iframe if the node belongs to a child window.
  * @param {!Node} node
- * @param {!Window} topWin
+ * @param {!Window=} opt_topWin
  * @return {?HTMLIFrameElement}
  */
-export function getParentWindowFrameElement(node, topWin) {
+export function getParentWindowFrameElement(node, opt_topWin) {
   const childWin = (node.ownerDocument || node).defaultView;
+  const topWin = opt_topWin || getTopWindow(childWin);
   if (childWin && childWin != topWin && getTopWindow(childWin) == topWin) {
     try {
       return /** @type {?HTMLIFrameElement} */ (childWin.frameElement);
@@ -410,8 +413,9 @@ function getServiceInternal(holder, id) {
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
  * @param {?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor Constructor function to new the service. Called with context.
+ * @param {boolean=} opt_override
  */
-function registerServiceInternal(holder, context, id, ctor) {
+function registerServiceInternal(holder, context, id, ctor, opt_override) {
   const services = getServices(holder);
   let s = services[id];
 
@@ -426,7 +430,7 @@ function registerServiceInternal(holder, context, id, ctor) {
     };
   }
 
-  if (s.ctor || s.obj) {
+  if (!opt_override && (s.ctor || s.obj)) {
     // Service already registered.
     return;
   }

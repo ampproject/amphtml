@@ -283,8 +283,11 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
+
+    /** @private @const {!../../../src/service/owners-impl.Owners} */
+    this.owners_ = Services.ownersForDoc(getAmpdoc(this.win_.document));
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
@@ -401,7 +404,7 @@ export class AmpStoryEmbeddedComponent {
     // Resources that previously called `schedulePause` must also call
     // `scheduleResume`. Calling `scheduleResume` on resources that did not
     // previously call `schedulePause` has no effect.
-    this.resources_.scheduleResume(this.storyEl_, embedEl);
+    this.owners_.scheduleResume(this.storyEl_, embedEl);
     if (!this.embedsToBePaused_.includes(embedEl)) {
       this.embedsToBePaused_.push(embedEl);
     }
@@ -480,6 +483,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Builds the tooltip overlay and appends it to the provided story.
    * @private
+   * @return {Node}
    */
   buildFocusedState_() {
     this.shadowRoot_ = this.win_.document.createElement('div');
@@ -596,7 +600,7 @@ export class AmpStoryEmbeddedComponent {
       // Pauses content inside embeds when a page change occurs.
       while (this.embedsToBePaused_.length > 0) {
         const embedEl = this.embedsToBePaused_.pop();
-        this.resources_.schedulePause(this.storyEl_, embedEl);
+        this.owners_.schedulePause(this.storyEl_, embedEl);
       }
     });
   }
@@ -677,13 +681,14 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Gets href from an element containing a url.
    * @param {!Element} target
+   * @return {string}
    * @private
    */
   getElementHref_(target) {
     const elUrl = target.getAttribute('href');
     if (!isProtocolValid(elUrl)) {
       user().error(TAG, 'The tooltip url is invalid');
-      return;
+      return '';
     }
 
     return parseUrlDeprecated(elUrl).href;
@@ -789,7 +794,7 @@ export class AmpStoryEmbeddedComponent {
    * that content around stays put.
    * @param {!Element} pageEl
    * @param {!Element} element
-   * @param {!../../../src/service/resources-impl.Resources} resources
+   * @param {!../../../src/service/resources-impl.ResourcesDef} resources
    */
   static prepareForAnimation(pageEl, element, resources) {
     let elId = null;
