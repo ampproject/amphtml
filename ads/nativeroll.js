@@ -32,6 +32,7 @@ export function nativeroll(global, data) {
 }
 
 /**
+ * @param {!Window} global
  * @param {!Object} data
  */
 function initPlayer(data) {
