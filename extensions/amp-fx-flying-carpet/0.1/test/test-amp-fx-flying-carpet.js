@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpFlyingCarpet} from '../amp-fx-flying-carpet';
+import '../amp-fx-flying-carpet';
 import {Resource} from '../../../../src/service/resource';
 import {Services} from '../../../../src/services';
 
@@ -119,11 +119,12 @@ describes.realWin(
 
     it('should listen to build callback of children', () => {
       const scheduleLayoutStub = sandbox.stub(
-        AmpFlyingCarpet.prototype,
+        Services.ownersForDoc(doc),
         'scheduleLayout'
       );
-      let img;
-      return getAmpFlyingCarpet(() => {
+      let img, flyingCarpet;
+      return getAmpFlyingCarpet(flyingCarpetArg => {
+        flyingCarpet = flyingCarpetArg;
         // Add the image
         img = doc.createElement('amp-img');
         img.setAttribute('src', '/examples/img/sample.jpg');
@@ -132,7 +133,7 @@ describes.realWin(
         return [img];
       }).then(() => {
         expect(scheduleLayoutStub).to.have.been.called;
-        expect(scheduleLayoutStub).to.have.been.calledWith([img]);
+        expect(scheduleLayoutStub).to.have.been.calledWith(flyingCarpet, [img]);
       });
     });
 
@@ -227,13 +228,19 @@ describes.realWin(
     it('should relayout the content on onMeasureChanged', () => {
       return getAmpFlyingCarpet().then(flyingCarpet => {
         const impl = flyingCarpet.implementation_;
-        const scheduleLayoutSpy_ = sandbox.spy(impl, 'scheduleLayout');
+        const scheduleLayoutSpy_ = sandbox.spy(
+          Services.ownersForDoc(impl.element),
+          'scheduleLayout'
+        );
 
         impl.mutateElement = function(callback) {
           callback();
         };
         impl.onMeasureChanged();
-        expect(scheduleLayoutSpy_).to.have.been.calledWith(impl.children_);
+        expect(scheduleLayoutSpy_).to.have.been.calledWith(
+          impl.element,
+          impl.children_
+        );
       });
     });
   }

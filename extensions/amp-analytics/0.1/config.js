@@ -66,7 +66,37 @@ export class AnalyticsConfig {
 
     return this.fetchRemoteConfig_()
       .then(this.processConfigs_.bind(this))
+      .then(this.addExperimentParams_.bind(this))
       .then(() => this.config_);
+  }
+
+  /**
+   * TODO: cleanup #22757 @jonathantyng
+   * Append special param to pageview request for RC and experiment builds
+   * for the googleanalytics component. This is to track pageview changes
+   * in AB experiment
+   */
+  addExperimentParams_() {
+    const type = this.element_.getAttribute('type');
+    const rtv = getMode().rtvVersion;
+    const isRc = rtv ? rtv.substring(0, 2) === '03' : false;
+    // eslint-disable-next-line no-undef
+    const isExperiment = ANALYTICS_VENDOR_SPLIT;
+
+    if (
+      type === 'googleanalytics' &&
+      (isRc || isExperiment) &&
+      this.config_['requests']
+    ) {
+      if (this.config_['requests']['pageview']) {
+        this.config_['requests']['pageview'][
+          'baseUrl'
+        ] += `&aae=${isExperiment}`;
+      }
+      if (this.config_['requests']['timing']) {
+        this.config_['requests']['timing']['baseUrl'] += `&aae=${isExperiment}`;
+      }
+    }
   }
 
   /**
