@@ -163,11 +163,15 @@ export class ExternalReorderHeadTransformer {
     }
     if (
       isAsync &&
-      startsWith(src, urls.cdn) &&
-      (endsWith(src, '/v0.js') ||
-        endsWith(src, '/v0.js.br') ||
-        endsWith(src, '/amp4ads-v0.js') ||
-        endsWith(src, '/amp4ads-v0.js.br'))
+      ((startsWith(src, urls.cdn) &&
+        (endsWith(src, '/v0.js') ||
+          endsWith(src, '/v0.js.br') ||
+          endsWith(src, '/amp4ads-v0.js') ||
+          endsWith(src, '/amp4ads-v0.js.br'))) ||
+        endsWith(src, '/dist/amp.js') ||
+        endsWith(src, '/dist/amp-inabox.js') ||
+        endsWith(src, '/dist/v0.js') ||
+        endsWith(src, '/dist/amp4ads-v0.js'))
     ) {
       this.headComponents_.scriptAmpEngine = element;
       return;
@@ -187,10 +191,6 @@ export class ExternalReorderHeadTransformer {
           endsWith(src, '.js')))
     ) {
       this.headComponents_.scriptAmpViewer = element;
-      return;
-    }
-    if (isAsync && endsWith(src, '/dist/amp4ads-v0.js')) {
-      this.headComponents_.otherScripts.push(element);
       return;
     }
     if (this.headComponents_.other.indexOf(element) == -1) {
