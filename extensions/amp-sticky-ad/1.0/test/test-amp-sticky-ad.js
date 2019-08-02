@@ -16,6 +16,7 @@
 
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-sticky-ad';
+import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
 import {poll} from '../../../../testing/iframe';
@@ -75,7 +76,10 @@ describes.realWin(
       });
 
       it('should not build when scrollTop not greater than 1', () => {
-        const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
+        const scheduleLayoutSpy = sandbox.spy(
+          Services.ownersForDoc(impl.element),
+          'scheduleLayout'
+        );
         const removeOnScrollListenerSpy = sandbox.spy(
           impl,
           'removeOnScrollListener_'

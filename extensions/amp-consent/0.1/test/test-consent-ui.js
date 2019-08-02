@@ -16,6 +16,7 @@
 
 import {CONSENT_ITEM_STATE, constructConsentInfo} from '../consent-info';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
+import {Services} from '../../../../src/services';
 import {dict} from '../../../../src/utils/object';
 import {elementByTag} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
@@ -74,12 +75,12 @@ describes.realWin(
             },
           };
         },
-        scheduleLayout: () => {},
         mutateElement: callback => {
           callback();
           return Promise.resolve();
         },
       };
+      Services.ownersForDoc(doc).scheduleLayout = sandbox.mock();
       resetServiceForTesting(win, 'consentStateManager');
       registerServiceBuilder(win, 'consentStateManager', function() {
         return Promise.resolve({

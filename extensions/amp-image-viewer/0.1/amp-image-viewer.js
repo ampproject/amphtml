@@ -28,6 +28,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
@@ -190,7 +191,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
 
     if (!haveImg) {
-      this.scheduleLayout(ampImg);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, ampImg);
     }
 
     this.loadPromise_ = laidOutPromise

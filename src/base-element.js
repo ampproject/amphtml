@@ -846,44 +846,6 @@ export class BaseElement {
   }
 
   /**
-   * Schedule the layout request for the children element or elements
-   * specified. Resource manager will perform the actual layout based on the
-   * priority of this element and its children.
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  scheduleLayout(elements) {
-    this.element.getResources().scheduleLayout(this.element, elements);
-  }
-
-  /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  schedulePause(elements) {
-    this.element.getResources().schedulePause(this.element, elements);
-  }
-
-  /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  scheduleResume(elements) {
-    this.element.getResources().scheduleResume(this.element, elements);
-  }
-
-  /**
-   * Schedule the preload request for the children element or elements
-   * specified. Resource manager will perform the actual preload based on the
-   * priority of this element and its children.
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  schedulePreload(elements) {
-    this.element.getResources().schedulePreload(this.element, elements);
-  }
-
-  /**
    * Requests the runtime to update the height of this element to the specified
    * value. The runtime will schedule this request and attempt to process it
    * as soon as possible.
