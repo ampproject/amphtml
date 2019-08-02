@@ -47,8 +47,13 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
+import {
+  matches,
+  removeChildren,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 import {px, setStyles, toggle} from '../../../src/style';
-import {removeChildren, scopedQuerySelector} from '../../../src/dom';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 
 /** @const {string} */
@@ -390,7 +395,10 @@ export class AmpList extends AMP.BaseElement {
       if (!element.hasAttribute('role')) {
         element.setAttribute('role', 'listitem');
       }
-      if (!element.hasAttribute('tabindex') && !this.isTabbable_(element)) {
+      if (
+        !element.hasAttribute('tabindex') &&
+        !this.isTabbable_(dev().assertElement(element))
+      ) {
         element.setAttribute('tabindex', '0');
       }
       container.appendChild(element);
@@ -1015,7 +1023,7 @@ export class AmpList extends AMP.BaseElement {
           if (this.loadMoreSrc_) {
             this.getLoadMoreService_().toggleLoadMoreLoading(false);
             if (lastTabbableChild && opt_fromClick) {
-              lastTabbableChild.focus();
+              lastTabbableChild./*REVIEW*/ focus();
             }
           } else {
             this.getLoadMoreService_().setLoadMoreEnded();
@@ -1155,7 +1163,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   lastTabbableChild_(element) {
-    const allTabbableChildren = scopedQuerySelector(
+    const allTabbableChildren = scopedQuerySelectorAll(
       element,
       TABBABLE_ELEMENTS_QUERY
     );
@@ -1180,7 +1188,7 @@ export class AmpList extends AMP.BaseElement {
    */
   isTabbable_(element) {
     return (
-      element.matches(TABBABLE_ELEMENTS_QUERY) ||
+      matches(element, TABBABLE_ELEMENTS_QUERY) ||
       !!this.firstTabbableChild_(element)
     );
   }
