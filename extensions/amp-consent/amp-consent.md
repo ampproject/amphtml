@@ -2,6 +2,7 @@
 $category@: dynamic-content
 formats:
   - websites
+  - stories
 teaser:
   text: Provides the ability to collect and store a user's consent through a UI control.
 ---

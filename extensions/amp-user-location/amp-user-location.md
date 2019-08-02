@@ -1,9 +1,7 @@
 ---
-$category@: presentation
+$category@: ads-analytics
 formats:
-  - ads-analytics
   - websites
-  - dynamic-content
 teaser:
   text: Request the user's precise location.
 experimental: true

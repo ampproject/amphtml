@@ -2,6 +2,7 @@
 $category@: social
 formats:
   - websites
+  - stories
 teaser:
   text: Displays a Twitter tweet.
 ---
