@@ -143,8 +143,10 @@
 }
 
 .i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner {
-  stroke-width: calc(1.5px * 22 / 12);
+  /** Scale down the spinner to a 12px radius, default is 22. */
   transform: scale(calc(12/ 22));
+  /** Increase the stroke-width to counteract the scaling. */
+  stroke-width: calc(1.5px * 22 / 12);
 }
 
 .i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner-path {
