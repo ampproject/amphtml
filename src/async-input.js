@@ -74,7 +74,13 @@ export const AsyncInputClasses = {
    * Required base class that must be added to the async-input
    * element on buildCallback or layoutCallback.
    * This will be used by other amp components to find
-   * and use async-input elements.
+   * and use async-input elements.=
+   *
+   * i-async-require-action
+   *
+   * Class that is added when the async call should be treated 
+   * as a required action for the form. These calls will be
+   * executed before the presubmit calls of all async inputs.
    */
   'ASYNC_INPUT': 'i-amphtml-async-input',
   'ASYNC_REQUIRED_ACTION': 'i-async-require-action',
