@@ -213,11 +213,18 @@ class LoaderBuilder {
    * }}
    */
   getCustomLogo_() {
+    if (this.isAd_()) {
+      return {
+        content: this.getAdsLogo_(),
+      };
+    }
+
     if (isIframeVideoPlayerComponent(this.element_.tagName)) {
       return {
         content: this.getVideoPlayerLogo_(),
       };
     }
+
     return this.element_.createLoaderLogo();
   }
 
@@ -228,8 +235,9 @@ class LoaderBuilder {
   getVideoPlayerLogo_() {
     // Keeping the video logo here short term.
     // This is because there is no single CSS for all players, there is
-    // video-interface but not all players implement it. Also the SVG is not
-    // that big.
+    // video-interface but not all players implement it.
+    // TODO(sparhami) Move this out of amp-loader into something common for
+    // video players.
     const html = htmlFor(this.element_);
     return html`
       <svg viewBox="0 0 72 72">
@@ -244,8 +252,8 @@ class LoaderBuilder {
 
   /**
    * Returns the default logo.
-   * @private
    * @return {!Element}
+   * @private
    */
   getDefaultLogo_() {
     const html = htmlFor(this.element_);
@@ -257,12 +265,48 @@ class LoaderBuilder {
   }
 
   /**
+   * `<amp-ad>s` have several different classes, so putting the code here for
+   * now since it is the safest way to make sure that they all get the correct
+   * loader.
+   *
+   * Since the implementation may have a delay before loading, we would need to
+   * make sure the ads loader is present, even if the implementation has not
+   * yet downloaded.
+   *
+   * TODO(sparhami) Move this out of amp-loader into something common for ads.
+   * @return {!Element}
+   * @private
+   */
+  getAdsLogo_() {
+    const html = htmlFor(this.element_);
+    return html`
+      <svg viewBox="0 0 72 72">
+        <rect
+          fill="none"
+          stroke="currentColor"
+          x="26.5"
+          y="29.5"
+          width="19"
+          height="13"
+          rx="2"
+        ></rect>
+        <text
+          fill="currentColor"
+          class="i-amphtml-ad-badge-label"
+          transform="translate(29.2812 40.167)"
+        >
+          Ad
+        </text>
+      </svg>
+    `;
+  }
+
+  /**
    * Whether the element is an Ad.
    * @private
    * @return {boolean}
    */
   isAd_() {
-    // Not Implemented
     return (
       this.element_.tagName == 'AMP-AD' || this.element_.tagName == 'AMP-EMBED'
     );

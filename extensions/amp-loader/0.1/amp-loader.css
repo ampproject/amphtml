@@ -15,6 +15,7 @@
  */
 
 
+
 /* Placeholder */
 .i-amphtml-default-placeholder {
   background-color: #f8f8f8;
@@ -162,6 +163,12 @@
 
 .i-amphtml-new-loader.amp-active * {
   animation-play-state: running;
+}
+
+/* Ads */
+.i-amphtml-ad-badge-label {
+  font-size: 11px;
+  font-family: sans-serif;
 }
 
 @keyframes i-amphtml-new-loader-fade-in {

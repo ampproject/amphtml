@@ -20,7 +20,6 @@ import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {hasOwn} from '../../../src/utils/object';
-import {htmlFor} from '../../../src/static-template';
 import {userAssert} from '../../../src/log';
 
 /**
@@ -46,8 +45,6 @@ export class AmpAd extends AMP.BaseElement {
 
   /** @override */
   upgradeCallback() {
-    return;
-
     const a4aRegistry = getA4ARegistry();
     // Block whole ad load if a consent is needed.
     /** @const {string} */
@@ -117,29 +114,6 @@ export class AmpAd extends AMP.BaseElement {
         });
       });
     });
-  }
-
-  /** @override */
-  createLoaderLogoCallback() {
-    const html = htmlFor(this.element);
-    return {
-      content: html`
-        <svg viewBox="24 24 72 72">
-          <path
-            fill="currentColor"
-            d="M68,54c0.55,0,1,0.45,1,1v10c0,0.55-0.45,1-1,1H52c-0.55,0-1-0.45-1-1V55c0-0.55,0.45-1,1-1H68 M68,53H52c-1.1,0-2,0.9-2,2
-        v10c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V55C70,53.9,69.1,53,68,53L68,53z"
-          ></path>
-          <text
-            fill="currentColor"
-            class="i-amphtml-ad-badge-label"
-            transform="matrix(1 0 0 1 53.2812 64.167)"
-          >
-            Ad
-          </text>
-        </svg>
-      `,
-    };
   }
 }
 

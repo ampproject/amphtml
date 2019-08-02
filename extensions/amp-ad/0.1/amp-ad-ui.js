@@ -65,7 +65,7 @@ export class AmpAdUIHandler {
    * @return {?Element}
    */
   createPlaceholder() {
-    if (isNewLoaderExperimentEnabled(this)) {
+    if (isNewLoaderExperimentEnabled(this.element_)) {
       return null;
     }
 
