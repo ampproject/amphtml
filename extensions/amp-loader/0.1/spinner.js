@@ -1,3 +1,5 @@
+import {polarToCartesian} from '../../../src/utils/math';
+
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -30,25 +32,6 @@ const svgSize = 48;
  * The radius for the spinner.
  */
 const radius = 22;
-
-/**
- * @param {number} centerX
- * @param {number} centerY
- * @param {number} radius
- * @param {number} angleInDegrees
- * @return {{
- *  x: number,
- *  y: number,
- * }}
- */
-function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
-  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
-
-  return {
-    x: centerX + radius * Math.cos(angleInRadians),
-    y: centerY + radius * Math.sin(angleInRadians),
-  };
-}
 
 /**
  * @param {number} x The x coordinate of the center of a circle.
@@ -118,7 +101,7 @@ function getSpinnerPath() {
    * @param {number} endAngleDelta
    * @param {number} startStep
    */
-  function createPhase(startAngleDelta, endAngleDelta, startStep = 0) {
+  const createPhase = (startAngleDelta, endAngleDelta, startStep = 0) => {
     for (let i = 0; i < steps; i++) {
       if (i >= startStep) {
         pathD +=
@@ -135,7 +118,7 @@ function getSpinnerPath() {
       endAngle += endAngleDelta / steps;
       xOffset += svgSize;
     }
-  }
+  };
 
   // The initial arc needs to be described seprately, since it is a circle and
   // the normal code path does not generate this correctly.
