@@ -1715,20 +1715,21 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
       },
     };
     element.resources_ = {
-      scheduleLayout(el, fb) {
-        if (el == element && fb == fallback) {
-          resourcesSpy();
-        }
-      },
       getResourceForElement: element => {
         return element.resource;
       },
     };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = sandbox.mock();
     const fallback = element.appendChild(createWithAttr('fallback'));
-    const resourcesSpy = sandbox.spy();
     element.toggleFallback(true);
     expect(element).to.have.class('amp-notsupported');
-    expect(resourcesSpy).to.be.calledOnce;
+    expect(owners.scheduleLayout).to.be.calledOnce;
+    expect(owners.scheduleLayout).to.have.been.calledWith(
+      element.element,
+      fallback
+    );
 
     element.toggleFallback(false);
     expect(element).to.not.have.class('amp-notsupported');
@@ -1742,11 +1743,14 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
       },
     };
     element.resources_ = {
-      scheduleLayout: () => {},
       getResourceForElement: element => {
         return element.resource;
       },
     };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = sandbox.mock();
+
     element.appendChild(createWithAttr('fallback'));
     element.toggleFallback(true);
     expect(element).to.not.have.class('amp-notsupported');
