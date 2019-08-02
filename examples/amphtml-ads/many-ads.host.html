@@ -22,6 +22,8 @@
     }
     a {
       display: block;
+      margin-left: 10px;
+      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -71,10 +73,18 @@
 <h3>Lightbox ad</h3>
 <iframe
     src="//ads.localhost:8000/examples/amphtml-ads/lightbox-ad.a4a.html"
-    scrolling="no">
+    scrolling="no"
+    data-amp-allowed="send-positions,full-overlay-frame,cancel-full-overlay-frame">
 </iframe>
 <a href="/inabox/examples/amphtml-ads/lightbox-ad.a4a.html" target="_blank">open in new tab</a>
 <hr>
+<h3>Form ad</h3>
+<iframe
+    src="//ads.localhost:8000/examples/bind/forms.amp.html?inabox=1"
+    scrolling="no"
+    style="height: 360px; background-color: #eee;">
+</iframe>
+<a href="/inabox/examples/bind/forms.amp.html?width=373px&height=360px" target="_blank">open in new tab</a>
 <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
 </body>
 </html>
