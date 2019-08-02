@@ -673,7 +673,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const slides = this.elementsMetadata_[lbgId].map(
       elemMetadata => elemMetadata.element
     );
-    this.schedulePause(slides);
+    Services.ownersForDoc(this.element).schedulePause(this.element, slides);
   }
 
   /**
@@ -761,12 +761,16 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       .then(() => {
         this.isActive_ = true;
 
-        Services.ownersForDoc(this.element).updateInViewport(
+        const owners = Services.ownersForDoc(this.element);
+        owners.updateInViewport(
           this.element,
           dev().assertElement(this.container_),
           true
         );
-        this.scheduleLayout(dev().assertElement(this.container_));
+        owners.scheduleLayout(
+          this.element,
+          dev().assertElement(this.container_)
+        );
 
         this.doc_.documentElement.addEventListener(
           'keydown',
@@ -1197,7 +1201,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         if (this.hasVerticalScrollbarWidth_) {
           this.getViewport().leaveLightboxMode();
         }
-        this.schedulePause(dev().assertElement(this.container_));
+        Services.ownersForDoc(this.element).schedulePause(
+          this.element,
+          dev().assertElement(this.container_)
+        );
         this.pauseLightboxChildren_();
         this.carousel_ = null;
         if (this.historyId_ != -1) {

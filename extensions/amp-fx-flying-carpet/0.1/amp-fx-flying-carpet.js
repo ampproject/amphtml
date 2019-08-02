@@ -76,7 +76,8 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     const childNodes = this.getRealChildNodes();
     this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
-    this.children_.forEach(child => this.setAsOwner(child));
+    const owners = Services.ownersForDoc(this.element);
+    this.children_.forEach(child => owners.setOwner(child, this.element));
 
     const clip = doc.createElement('div');
     clip.setAttribute('class', 'i-amphtml-fx-flying-carpet-clip');
@@ -102,7 +103,10 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       setStyle(this.container_, 'width', width, 'px');
     });
     if (this.firstLayoutCompleted_) {
-      this.scheduleLayout(this.children_);
+      Services.ownersForDoc(this.element).scheduleLayout(
+        this.element,
+        this.children_
+      );
       listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
     }
   }
@@ -159,7 +163,10 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       this./*OK*/ collapse();
       throw e;
     }
-    this.scheduleLayout(this.children_);
+    Services.ownersForDoc(this.element).scheduleLayout(
+      this.element,
+      this.children_
+    );
     listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
     this.firstLayoutCompleted_ = true;
     return Promise.resolve();
@@ -175,7 +182,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
   layoutBuiltChild_(event) {
     const child = dev().assertElement(event.target);
     if (child.getOwner() === this.element) {
-      this.scheduleLayout(child);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, child);
     }
   }
 
