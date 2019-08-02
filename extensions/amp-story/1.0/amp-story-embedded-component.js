@@ -286,6 +286,9 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
 
+    /** @private @const {!../../../src/service/owners-impl.Owners} */
+    this.owners_ = Services.ownersForDoc(getAmpdoc(this.win_.document));
+
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
@@ -401,7 +404,7 @@ export class AmpStoryEmbeddedComponent {
     // Resources that previously called `schedulePause` must also call
     // `scheduleResume`. Calling `scheduleResume` on resources that did not
     // previously call `schedulePause` has no effect.
-    this.resources_.scheduleResume(this.storyEl_, embedEl);
+    this.owners_.scheduleResume(this.storyEl_, embedEl);
     if (!this.embedsToBePaused_.includes(embedEl)) {
       this.embedsToBePaused_.push(embedEl);
     }
@@ -597,7 +600,7 @@ export class AmpStoryEmbeddedComponent {
       // Pauses content inside embeds when a page change occurs.
       while (this.embedsToBePaused_.length > 0) {
         const embedEl = this.embedsToBePaused_.pop();
-        this.resources_.schedulePause(this.storyEl_, embedEl);
+        this.owners_.schedulePause(this.storyEl_, embedEl);
       }
     });
   }

@@ -20,6 +20,7 @@ import {EventType} from '../events';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {PaginationButtons} from '../pagination-buttons';
+import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
@@ -273,8 +274,9 @@ describes.realWin(
     it.skip('should pause/resume pages when switching pages', () => {
       const impl = element.implementation_;
       const pages = createPages(element, 5);
-      impl.schedulePause = sandbox.spy();
-      impl.scheduleResume = sandbox.spy();
+      const owners = Services.ownersForDoc(impl.element);
+      owners.schedulePause = sandbox.spy();
+      owners.scheduleResume = sandbox.spy();
 
       const oldPage = pages[0];
       const newPage = pages[1];
@@ -282,8 +284,14 @@ describes.realWin(
       element.build();
 
       return impl.switchTo_(newPage).then(() => {
-        expect(impl.schedulePause).to.have.been.calledWith(oldPage);
-        expect(impl.scheduleResume).to.have.been.calledWith(newPage);
+        expect(owners.schedulePause).to.have.been.calledWith(
+          impl.element,
+          oldPage
+        );
+        expect(owners.scheduleResume).to.have.been.calledWith(
+          impl.element,
+          newPage
+        );
       });
     });
 

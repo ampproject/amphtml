@@ -161,8 +161,9 @@ class AmpLightbox extends AMP.BaseElement {
           this.container_,
           'E#19457 this.container_'
         );
-        this.scheduleLayout(container);
-        this.scheduleResume(container);
+        const owners = Services.ownersForDoc(this.element);
+        owners.scheduleLayout(this.element, container);
+        owners.scheduleResume(this.element, container);
       },
       500
     );
@@ -368,8 +369,9 @@ class AmpLightbox extends AMP.BaseElement {
 
     // TODO: instead of laying out children all at once, layout children based
     // on visibility.
-    this.scheduleLayout(container);
-    this.scheduleResume(container);
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(this.element, container);
+    owners.scheduleResume(this.element, container);
     this.triggerEvent_(LightboxEvents.OPEN);
 
     this.getHistory_()
@@ -492,7 +494,10 @@ class AmpLightbox extends AMP.BaseElement {
       this.boundCloseOnEscape_
     );
     this.boundCloseOnEscape_ = null;
-    this.schedulePause(dev().assertElement(this.container_));
+    Services.ownersForDoc(this.element).schedulePause(
+      this.element,
+      dev().assertElement(this.container_)
+    );
     this.active_ = false;
     this.triggerEvent_(LightboxEvents.CLOSE);
   }
@@ -586,12 +591,9 @@ class AmpLightbox extends AMP.BaseElement {
     const seen = [];
     this.forEachVisibleChild_(newPos, cell => {
       seen.push(cell);
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        cell,
-        true
-      );
-      this.scheduleLayout(cell);
+      const owners = Services.ownersForDoc(this.element);
+      owners.updateInViewport(this.element, cell, true);
+      owners.scheduleLayout(this.element, cell);
     });
     if (oldPos != newPos) {
       this.forEachVisibleChild_(oldPos, cell => {

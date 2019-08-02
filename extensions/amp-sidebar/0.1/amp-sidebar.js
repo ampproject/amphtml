@@ -363,8 +363,9 @@ export class AmpSidebar extends AMP.BaseElement {
   updateForOpened_() {
     // On open sidebar
     const children = this.getRealChildren();
-    this.scheduleLayout(children);
-    this.scheduleResume(children);
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(this.element, children);
+    owners.scheduleResume(this.element, children);
     // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
     if (!this.isIosWebView_()) {
       // For iOS, we cannot focus the Element itself, since VoiceOver will not
@@ -394,7 +395,10 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForClosed_() {
     toggle(this.element, /* display */ false);
-    this.schedulePause(this.getRealChildren());
+    Services.ownersForDoc(this.element).schedulePause(
+      this.element,
+      this.getRealChildren()
+    );
     this.triggerEvent_(SidebarEvents.CLOSE);
   }
 

@@ -317,7 +317,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    */
   doLayout_(pos) {
     this.withinWindow_(pos, cell => {
-      this.scheduleLayout(cell);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, cell);
     });
   }
 
@@ -330,7 +330,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const nextPos = this.nextPos_(pos, dir);
     if (nextPos != pos) {
       this.withinWindow_(nextPos, cell => {
-        this.schedulePreload(cell);
+        Services.ownersForDoc(this.element).schedulePreload(this.element, cell);
       });
     }
   }
@@ -353,12 +353,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
     if (oldPos != newPos) {
       this.withinWindow_(oldPos, cell => {
         if (!seen.includes(cell)) {
-          Services.ownersForDoc(this.element).updateInViewport(
-            this.element,
-            cell,
-            false
-          );
-          this.schedulePause(cell);
+          const owners = Services.ownersForDoc(this.element);
+          owners.updateInViewport(this.element, cell, false);
+          owners.schedulePause(this.element, cell);
         }
       });
     }
