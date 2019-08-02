@@ -48,7 +48,7 @@ import {
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
-import {removeChildren} from '../../../src/dom';
+import {removeChildren, scopedQuerySelector} from '../../../src/dom';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 
 /** @const {string} */
@@ -1155,11 +1155,12 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   lastTabbableChild_(element) {
-    const all_tabbable_children = element.querySelectorAll(
+    const allTabbableChildren = scopedQuerySelector(
+      element,
       TABBABLE_ELEMENTS_QUERY
     );
-    return all_tabbable_children
-      ? all_tabbable_children[all_tabbable_children.length - 1]
+    return allTabbableChildren
+      ? allTabbableChildren[allTabbableChildren.length - 1]
       : null;
   }
 
@@ -1169,7 +1170,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   firstTabbableChild_(element) {
-    return element.querySelector(TABBABLE_ELEMENTS_QUERY);
+    return scopedQuerySelector(element, TABBABLE_ELEMENTS_QUERY);
   }
 
   /**
