@@ -141,7 +141,10 @@ export class AmpImageViewer extends AMP.BaseElement {
     );
 
     this.sourceAmpImage_ = children[0];
-    this.setAsOwner(this.sourceAmpImage_);
+    Services.ownersForDoc(this.element).setOwner(
+      this.sourceAmpImage_,
+      this.element
+    );
   }
 
   /** @override */

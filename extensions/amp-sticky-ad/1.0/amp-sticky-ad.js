@@ -64,7 +64,7 @@ class AmpStickyAd extends AMP.BaseElement {
     );
 
     this.ad_ = children[0];
-    this.setAsOwner(this.ad_);
+    Services.ownersForDoc(this.element).setOwner(this.ad_, this.element);
 
     this.adReadyPromise_ = whenUpgradedToCustomElement(
       dev().assertElement(this.ad_)
