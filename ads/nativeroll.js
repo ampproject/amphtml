@@ -39,6 +39,9 @@ function initPlayer(data) {
     container: '#c',
     desiredOffset: 50,
     gid: data.gid,
+    onError: () => {
+      window.context.noContentAvailable();
+    },
   };
   // eslint-disable-next-line no-undef
   SeedrPlayer(config);
