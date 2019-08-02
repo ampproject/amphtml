@@ -400,18 +400,6 @@ export class BaseElement {
   }
 
   /**
-   * Sets this element as the owner of the specified element. By setting itself
-   * as an owner, the element declares that it will manage the lifecycle of
-   * the owned element itself. This element, as an owner, will have to call
-   * {@link scheduleLayout}, {@link schedulePreload}, {@link updateInViewport}
-   * and similar methods.
-   * @param {!Element} element
-   */
-  setAsOwner(element) {
-    this.element.getResources().setOwner(element, this.element);
-  }
-
-  /**
    * Subclasses can override this method to opt-in into being called to
    * prerender when document itself is not yet visible (pre-render mode).
    *

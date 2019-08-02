@@ -70,7 +70,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     this.cells_.forEach(cell => {
       if (!this.useLayers_) {
-        this.setAsOwner(cell);
+        Services.ownersForDoc(this.element).setOwner(cell, this.element);
       }
       cell.classList.add('amp-carousel-slide');
       cell.classList.add('amp-scrollable-carousel-slide');

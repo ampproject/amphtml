@@ -192,7 +192,7 @@ class AmpLightbox extends AMP.BaseElement {
   takeOwnershipOfDescendants_() {
     devAssert(this.isScrollable_);
     this.getComponentDescendants_().forEach(child => {
-      this.setAsOwner(child);
+      Services.ownersForDoc(this.element).setOwner(child, this.element);
     });
   }
 
