@@ -101,21 +101,11 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
     hostName = `https://cdn.ampproject.org/rtv/${mode}/`;
     file = file.replace(/https:\/\/cdn\.ampproject\.org\//g, hostName);
 
-    file = file.replace(
-      /\/dist\/v0\/examples\/(.*)\.max.js/g,
-      '/dist/v0/examples/$1.js'
-    );
-    file = file.replace(
-      /\/dist.3p\/current\/(.*)\.max.html/g,
-      hostName + '/dist.3p/current-min/$1.html'
-    );
-
     if (inabox) {
       file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/rtv\/\d{15}\/v0\.js/g,
         hostName + 'amp4ads-v0.js'
       );
-      // file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
     }
   }
   return file;
