@@ -526,13 +526,10 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       this.element.classList.add('i-amphtml-story-page-attachment-open');
       toggle(dev().assertElement(this.containerEl_), true);
     }).then(() => {
-      this.scheduleLayout(this.ampComponents_);
-      this.scheduleResume(this.ampComponents_);
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        this.ampComponents_,
-        true
-      );
+      const owners = Services.ownersForDoc(this.element);
+      owners.scheduleLayout(this.element, this.ampComponents_);
+      owners.scheduleResume(this.element, this.ampComponents_);
+      owners.updateInViewport(this.element, this.ampComponents_, true);
     });
 
     const currentHistoryState = /** @type {!Object} */ (getState(
@@ -595,12 +592,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
         250
       );
     }).then(() => {
-      this.schedulePause(this.ampComponents_);
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        this.ampComponents_,
-        false
-      );
+      const owners = Services.ownersForDoc(this.element);
+      owners.schedulePause(this.element, this.ampComponents_);
+      owners.updateInViewport(this.element, this.ampComponents_, false);
     });
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
