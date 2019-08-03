@@ -412,11 +412,10 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should pass through size and scroll', () => {
-    expect(viewport.getPaddingTop()).to.equal(19);
     expect(updatedPaddingTop).to.equal(19);
     expect(viewport.getSize().width).to.equal(111);
     expect(viewport.getSize().height).to.equal(222);
-    expect(viewport.getTop()).to.equal(17);
+    expect(viewport.getScrollTop()).to.equal(17);
     expect(viewport.getRect().left).to.equal(0);
     expect(viewport.getRect().top).to.equal(17);
     expect(viewport.getRect().width).to.equal(111);

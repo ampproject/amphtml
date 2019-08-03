@@ -369,11 +369,12 @@ describes.realWin(
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
+      const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 50));
       sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      sandbox.stub(viewer, 'getParam').returns('50');
 
       // 525px (The center of the element) - 0.5 * 250px (window height)
       // - 50px (padding top) = 350px.
@@ -386,11 +387,12 @@ describes.realWin(
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
+      const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 500));
       sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      sandbox.stub(viewer, 'getParam').returns('50');
 
       // Scroll to the top of the element with PAGE_TOP_MARGIN margin
       // because it's too tall.
@@ -407,11 +409,12 @@ describes.realWin(
       // Set up an environment where calcTopToCenterHighlightedNodes_
       // returns 350.
       const viewport = Services.viewportForDoc(env.ampdoc);
+      const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 50));
       sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      sandbox.stub(viewer, 'getParam').returns('50');
       // The current top is 500.
       sandbox.stub(viewport, 'getScrollTop').returns(500);
 
