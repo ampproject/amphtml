@@ -57,7 +57,7 @@ amp-script/0.1/test/validator-amp-script.html:34:2 Custom JavaScript is not allo
 |    <!-- Invalid: canvas element outside of amp-script tag. -->
 |    <canvas id="myCanvas" width="100px" height="100px"></canvas>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:55:2 The tag 'canvas' may only appear as a descendant of tag 'amp-script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#canvas) [AMP_TAG_PROBLEM]
+amp-script/0.1/test/validator-amp-script.html:55:2 The tag 'canvas' may only appear as a descendant of tag 'amp-script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags) [AMP_TAG_PROBLEM]
 |
 |    <!-- Invalid: With neither 'script' or 'src' attributes. -->
 |    <amp-script layout=container></amp-script>
