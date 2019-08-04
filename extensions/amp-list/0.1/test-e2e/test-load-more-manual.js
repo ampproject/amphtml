@@ -79,18 +79,6 @@ describes.endtoend(
       await expect(listItems).to.have.length(4);
     });
 
-    it('should call focus on the last element after load more is clicked', async () => {
-      const lastElement = await controller.findElement(
-        'div.item:nth-child(2s)'
-      );
-      const focusSpy = sandbox.spy(lastElement, 'focus');
-
-      const seeMore = await controller.findElement('[load-more-button]');
-      await controller.click(seeMore);
-
-      await expect(focusSpy).to.have.been.called;
-    });
-
     it('should show load-more-end when done', async () => {
       const seeMore = await controller.findElement('[load-more-button]');
       await controller.click(seeMore);
