@@ -46,6 +46,7 @@ import {toggleExperiment} from '../../src/experiments';
 const NOOP = () => {};
 
 describes.fakeWin('Viewport', {}, env => {
+  let sandbox;
   let clock;
   let viewport;
   let binding;
@@ -62,6 +63,7 @@ describes.fakeWin('Viewport', {}, env => {
   let vsyncTasks;
 
   beforeEach(() => {
+    sandbox = env.sandbox;
     clock = sandbox.useFakeTimers();
 
     windowApi = env.win;
@@ -1190,10 +1192,9 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should tolerate scrollTo override failures', () => {
-      Object.defineProperty(windowApi, 'scrollTo', {
+      sandbox.defineProperty(windowApi, 'scrollTo', {
         value: originalScrollTo,
         writable: false,
-        configurable: false,
       });
       sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
       new Viewport(ampdoc, binding, viewer);
@@ -1201,10 +1202,9 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should tolerate scrollY override failures', () => {
-      Object.defineProperty(windowApi, 'scrollY', {
+      sandbox.defineProperty(windowApi, 'scrollY', {
         value: 21,
         writable: false,
-        configurable: false,
       });
       sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
       new Viewport(ampdoc, binding, viewer);
@@ -1407,7 +1407,7 @@ describe('Viewport META', () => {
       viewportMetaString = originalViewportMetaString;
       viewportMeta = Object.create(null);
       viewportMetaSetter = sandbox.spy();
-      Object.defineProperty(viewportMeta, 'content', {
+      sandbox.defineProperty(viewportMeta, 'content', {
         get: () => viewportMetaString,
         set: value => {
           viewportMetaSetter(value);
