@@ -107,79 +107,79 @@ describes.realWin(
           let attributeMutation = getAttributeMutationDefaultStyle(
             'color: #000000 !important;'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(false);
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
 
           // invalid style attribute value "<"
           attributeMutation = getAttributeMutationDefaultStyle(
             'color: <#000000;'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(false);
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
 
         it('NOT allowed style mutations', () => {
           const attributeMutation = getAttributeMutationDefaultStyle(
             'random: abc'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(false);
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
 
         it('style mutations format', () => {
           let attributeMutation = getAttributeMutationDefaultStyle('');
-          expect(attributeMutation.parseAndValidate()).to.be.equal(true);
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
 
           attributeMutation = getAttributeMutationDefaultStyle(
             'background-color red'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(false);
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
 
           attributeMutation = getAttributeMutationDefaultStyle(
             'background-color ::red'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(false);
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
 
           attributeMutation = getAttributeMutationDefaultStyle(
             'background-color: '
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(true);
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
 
           attributeMutation = getAttributeMutationDefaultStyle(
             'background-color: red; ;'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(true);
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
 
           attributeMutation = getAttributeMutationDefaultStyle(
             '  background-color: red      ;background-color:green;   '
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(true);
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
         });
 
         it('background-color mutation', () => {
           let attributeMutation = getAttributeMutationDefaultStyle(
             'background-color: #o7FogD'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(true);
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
 
           attributeMutation = getAttributeMutationDefaultStyle(
             'background-color: red'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(true);
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
 
           attributeMutation = getAttributeMutationDefaultStyle(
             'background-color: invalid'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(true);
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
         });
 
         it('color mutations', () => {
           let attributeMutation = getAttributeMutationDefaultStyle(
             'color: #000000'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(true);
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
 
           attributeMutation = getAttributeMutationDefaultStyle(
             'color: #a0F'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(true);
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
         });
       });
 
@@ -188,21 +188,21 @@ describes.realWin(
           const attributeMutation = getAttributeMutationDefaultUrl(
             'https://amp.dev/'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(true);
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
         });
 
         it('should not allow http:// mutations', () => {
           const attributeMutation = getAttributeMutationDefaultUrl(
             'http://amp.dev/'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(false);
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
 
         it('should not allow non HTTPS mutations', () => {
           const attributeMutation = getAttributeMutationDefaultUrl(
             'tel:555-555-5555'
           );
-          expect(attributeMutation.parseAndValidate()).to.be.equal(false);
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
 
         it('should not allow unsupported element mutations', () => {
@@ -210,7 +210,7 @@ describes.realWin(
             'tel:555-555-5555'
           );
           attributeMutation.elements = [doc.createElement('div')];
-          expect(attributeMutation.parseAndValidate()).to.be.equal(false);
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
       });
     });
@@ -224,7 +224,7 @@ describes.realWin(
         attributeMutation.mutate();
 
         attributeMutation.elements_.forEach(element => {
-          expect(element.getAttribute(attributeName)).to.be.equal(value);
+          expect(element.getAttribute(attributeName)).to.equal(value);
         });
       });
 
@@ -237,7 +237,7 @@ describes.realWin(
           attributeMutation.mutate();
 
           attributeMutation.elements_.forEach(element => {
-            expect(element.getAttribute('style')).to.be.equal(
+            expect(element.getAttribute('style')).to.equal(
               'background-color: rgb(0, 0, 0); color: rgb(0, 0, 0);'
             );
           });
@@ -255,7 +255,7 @@ describes.realWin(
           attributeMutation.parseAndValidate();
           attributeMutation.mutate();
 
-          expect(elements[0].getAttribute('style')).to.be.equal(
+          expect(elements[0].getAttribute('style')).to.equal(
             'width: 30px; ' +
               'background-color: rgb(0, 0, 0); ' +
               'color: rgb(0, 0, 0);'
@@ -272,7 +272,7 @@ describes.realWin(
         attributeMutation.mutate();
 
         attributeMutation.elements_.forEach(element => {
-          expect(element.getAttribute(attributeName)).to.be.equal(value);
+          expect(element.getAttribute(attributeName)).to.equal(value);
         });
       });
     });
