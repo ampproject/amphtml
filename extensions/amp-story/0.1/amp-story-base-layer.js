@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview Base layer from which other layers in a story page extend from.
+ * @fileoverview Base layer from which other layers in a story page extend.
  */
 
 import {Layout} from '../../../src/layout';
