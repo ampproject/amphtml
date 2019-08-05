@@ -5,6 +5,7 @@ formats:
 teaser:
   text: The share tracking feature is under development.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -63,10 +64,15 @@ The share button guesses some defaults for you for some pre-configured providers
 **Example: Passing parameters**
 
 When you want to pass parameters to the share endpoint, you can specify `data-param-<attribute>` that will be appended to the share endpoint.
+
 ```html
-<amp-social-share type="linkedin" width="60" height="44"
+<amp-social-share
+  type="linkedin"
+  width="60"
+  height="44"
   data-param-text="Hello world"
-  data-param-url="https://example.com/">
+  data-param-url="https://example.com/"
+>
 </amp-social-share>
 ```
 
@@ -97,6 +103,7 @@ Some popular providers have pre-configured share endpoints. For details, see the
 </table>
 
 ## Pre-configured providers
+
 The `amp-social-share` component provides [some pre-configured providers](0.1/amp-social-share-config.js) that know their sharing endpoints as well as some default parameters.
 
 <table>
@@ -160,15 +167,6 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
   </tr>
   <tr>
-    <td>G+</td>
-    <td><code>gplus</code></td>
-    <td>
-      <ul>
-        <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
     <td>Tumblr</td>
     <td><code>tumblr</code></td>
     <td>
@@ -217,7 +215,6 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
 </table>
 
-
 ## Non-configured providers
 
 In addition to pre-configured providers, you can use non-configured providers by specifying additional attributes in the `amp-social-share` component.
@@ -227,9 +224,11 @@ In addition to pre-configured providers, you can use non-configured providers by
 The following example creates a share button through Facebook Messenger by setting the `data-share-endpoint` attribute to the correct endpoint for the Facebook Messenger custom protocol.
 
 ```html
-<amp-social-share type="facebookmessenger"
-    data-share-endpoint="fb-messenger://share"
-    data-param-text="Check out this article: TITLE - CANONICAL_URL">
+<amp-social-share
+  type="facebookmessenger"
+  data-share-endpoint="fb-messenger://share"
+  data-param-text="Check out this article: TITLE - CANONICAL_URL"
+>
 </amp-social-share>
 ```
 
@@ -248,19 +247,23 @@ Visit [AMP Start](https://ampstart.com/components#links-and-sharing) for respons
 ### Custom Styles
 
 Sometimes you want to provide your own style. You can simply override the provided styles like the following:
+
 ```css
-amp-social-share[type="twitter"] {
+amp-social-share[type='twitter'] {
   background: red;
   background-image: url(datauri:svg/myownsvgicon);
 }
 ```
 
 ## Variable Substitution
+
 You can use [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. In the example below, `TITLE` is substituted with the page title and `CANONICAL_URL` with the document's canonical URL.
 
 ```html
-<amp-social-share type="whatsapp"
-    data-param-text="Check out this article: TITLE - CANONICAL_URL">
+<amp-social-share
+  type="whatsapp"
+  data-param-text="Check out this article: TITLE - CANONICAL_URL"
+>
 </amp-social-share>
 ```
 

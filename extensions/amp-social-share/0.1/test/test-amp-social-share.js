@@ -141,6 +141,12 @@ describes.realWin(
       });
     });
 
+    it('does not render obsolete provider', () => {
+      getShare('gplus', /* endpoint */ undefined, {}).then(el => {
+        expect(el.style.display).to.be.equal('none');
+      });
+    });
+
     it('renders twitter', () => {
       const params = {
         'url': STRINGS['url'],
