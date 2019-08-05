@@ -156,11 +156,9 @@ export class AmpSidebar extends AMP.BaseElement {
       this.fixIosElasticScrollLeak_();
     }
 
-    if (element.hasAttribute('open')) {
-      this.open_();
-    } else {
-      element.setAttribute('aria-hidden', 'true');
-    }
+    // The element is always closed by default, so update the aria state to
+    // match.
+    element.setAttribute('aria-hidden', 'true');
 
     if (!element.hasAttribute('role')) {
       element.setAttribute('role', 'menu');
