@@ -136,7 +136,7 @@ export class ViewportBindingInabox {
      */
     this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
 
-    /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
+    /** @private @const {?../../3p/iframe-messaging-client.IframeMessagingClient} */
     this.iframeClient_ = iframeMessagingClientFor(win);
 
     /** @private {?Promise<!../layout-rect.LayoutRectDef>} */
