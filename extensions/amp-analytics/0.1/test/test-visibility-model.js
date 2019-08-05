@@ -300,9 +300,10 @@ describes.sandboxed('VisibilityModel', {}, () => {
         firstVisibleTime: 0,
         maxContinuousVisibleTime: 0,
         totalVisibleTime: 0,
+        // variables that are persisted after reset
         loadTimeVisibility: 10,
-        minVisiblePercentage: 0,
-        maxVisiblePercentage: 0,
+        minVisiblePercentage: 20,
+        maxVisiblePercentage: 30,
       });
       expect(vh.eventResolver_).to.not.be.null;
     });
@@ -328,9 +329,10 @@ describes.sandboxed('VisibilityModel', {}, () => {
         firstVisibleTime: 0,
         maxContinuousVisibleTime: 0,
         totalVisibleTime: 0,
+        // variables that are persisted after reset
         loadTimeVisibility: 10,
-        minVisiblePercentage: 0,
-        maxVisiblePercentage: 0,
+        minVisiblePercentage: 20,
+        maxVisiblePercentage: 30,
       });
       expect(vh.eventResolver_).to.not.be.null;
     });

@@ -182,8 +182,6 @@ export class VisibilityModel {
     this.firstSeenTime_ = 0;
     this.lastSeenTime_ = 0;
     this.lastVisibleTime_ = 0;
-    this.minVisiblePercentage_ = 0;
-    this.maxVisiblePercentage_ = 0;
     this.lastVisibleUpdateTime_ = 0;
     this.waitToReset_ = false;
   }
