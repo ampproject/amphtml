@@ -17,6 +17,7 @@
 const app = require('express').Router();
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
+const request = require('request');
 
 // In-a-box envelope.
 // Examples:
@@ -45,6 +46,79 @@ app.use('/inabox/', (req, res) => {
       .replace(/AD_WIDTH/g, req.query.width || '300')
       .replace(/AD_HEIGHT/g, req.query.height || '250');
     res.end(result);
+  });
+});
+
+// In-a-box friendly iframe envelope.
+// Examples:
+// http://localhost:8000/inabox-friendly/examples/animations.amp.html
+// http://localhost:8000/inabox-friendly/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+app.use('/inabox-friendly', (req, res) => {
+  let adUrl = req.url;
+  const templatePath = '/build-system/server-inabox-friendly-template.html';
+  const urlPrefix = getUrlPrefix(req);
+  adUrl = addQueryParam(adUrl, 'inabox', 1);
+  if (req.query.log) {
+    adUrl += '#log=' + req.query.log;
+  }
+  fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
+    request(urlPrefix + adUrl, (error, response, body) => {
+      if (
+        response.headers['content-type'] &&
+        response.headers['content-type'].startsWith('text/html')
+      ) {
+        const newBody = body
+          .replace(/&/g, '&amp;')
+          .replace(/'/g, '&apos;')
+          .replace(/"/g, '&quot;');
+        const result = template
+          .replace(/SRC_DOC/g, newBody)
+          .replace(/AD_URL/g, adUrl)
+          .replace(/OFFSET/g, req.query.offset || '0px')
+          .replace(/AD_WIDTH/g, req.query.width || '300')
+          .replace(/AD_HEIGHT/g, req.query.height || '250');
+        res.end(result);
+      } else {
+        res.redirect(adUrl);
+      }
+    });
+  });
+});
+
+// In-a-box safe frame envelope.
+// Examples:
+// http://localhost:8000/inabox-safeframe/examples/animations.amp.html
+// http://localhost:8000/inabox-safeframe/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+app.use('/inabox-safeframe', (req, res) => {
+  let adUrl = req.url;
+  const templatePath = '/build-system/server-inabox-safeframe-template.html';
+  const urlPrefix = getUrlPrefix(req);
+  adUrl = addQueryParam(adUrl, 'inabox', 1);
+  if (req.query.log) {
+    adUrl += '#log=' + req.query.log;
+  }
+  fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
+    request(urlPrefix + adUrl, (error, response, body) => {
+      if (
+        response.headers['content-type'] &&
+        response.headers['content-type'].startsWith('text/html')
+      ) {
+        const newBody = body
+          .replace(/&/g, '&amp;')
+          .replace(/'/g, '&apos;')
+          .replace(/"/g, '&quot;');
+        const result = template
+          .replace(/BODY/g, newBody)
+          .replace(/LENGTH/g, body.length)
+          .replace(/AD_URL/g, adUrl)
+          .replace(/OFFSET/g, req.query.offset || '0px')
+          .replace(/AD_WIDTH/g, req.query.width || '300')
+          .replace(/AD_HEIGHT/g, req.query.height || '250');
+        res.end(result);
+      } else {
+        res.redirect(adUrl);
+      }
+    });
   });
 });
 
