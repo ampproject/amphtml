@@ -17,7 +17,9 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
+const brotliSize = require('brotli-size');
 const colors = require('ansi-colors');
+const fs = require('fs');
 const log = require('fancy-log');
 const Octokit = require('@octokit/rest');
 const path = require('path');
@@ -43,27 +45,33 @@ const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
 const {red, cyan, yellow} = colors;
 
 /**
- * Get the compressed bundle size of the current build.
+ * Get the gzipped bundle size of the current build.
  *
- * TODO(danielrozenberg): make this report only brotli compression within ~1
- * month.
- *
- * @param {string} compression name of the compression algorithm (either 'gzip'
- *     or 'brotli')
  * @return {string} the bundle size in KB rounded to 2 decimal points.
  */
-function getBundleSize(compression) {
-  const cmd = `npx bundlesize -f "${runtimeFile}" -c ${compression}`;
+function getGzippedBundleSize() {
+  const cmd = `npx bundlesize -f "${runtimeFile}"`;
   log('Running', cyan(cmd) + '...');
   const output = getStdout(cmd).trim();
 
   const bundleSizeOutputMatches = output.match(/PASS .*: (\d+.?\d*KB) .*/);
   if (bundleSizeOutputMatches) {
     const bundleSize = parseFloat(bundleSizeOutputMatches[1]);
-    log('Bundle size', cyan(`(${compression})`), 'is', cyan(`${bundleSize}KB`));
+    log('Bundle size', cyan('gzipped'), 'is', cyan(`${bundleSize}KB`));
     return bundleSize;
   }
   throw Error('could not infer bundle size from output.');
+}
+
+/**
+ * Get the brotli bundle size of the current build.
+ *
+ * @return {string} the bundle size in KB rounded to 2 decimal points.
+ */
+function getBrotliBundleSize() {
+  return parseFloat(
+    (brotliSize.sync(fs.readSync(runtimeFile)) / 1024).toFixed(2)
+  );
 }
 
 /**
@@ -109,8 +117,11 @@ function storeBundleSize() {
   });
 
   const promises = [];
-  for (const [compression, extension] of [['gzip', ''], ['brotli', '.br']]) {
-    const bundleSize = `${getBundleSize(compression)}KB`;
+  for (const [compression, extension, getBundleSize] of [
+    ['gzip', '', getGzippedBundleSize],
+    ['brotli', '.br', getBrotliBundleSize],
+  ]) {
+    const bundleSize = `${getBundleSize()}KB`;
     const commitHash = `${gitCommitHash()}${extension}`;
     const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
       path: path.join('bundle-size', commitHash),
@@ -202,7 +213,7 @@ async function reportBundleSize() {
   if (isTravisPullRequestBuild()) {
     const baseSha = gitTravisMasterBaseline();
     // TODO(danielrozenberg): replace this with 'brotli' within ~1 month.
-    const bundleSize = parseFloat(getBundleSize('gzip'));
+    const bundleSize = getGzippedBundleSize();
     const commitHash = gitCommitHash();
     try {
       const response = await requestPost({
