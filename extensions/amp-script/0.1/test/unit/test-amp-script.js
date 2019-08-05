@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpScriptService, SanitizerImpl, StorageLocation} from '../../amp-script';
+import {
+  AmpScriptService,
+  SanitizerImpl,
+  StorageLocation,
+} from '../../amp-script';
 import {FakeWindow} from '../../../../../testing/fake-dom';
 import {Services} from '../../../../../src/services';
 
@@ -45,7 +49,7 @@ describes.fakeWin('AmpScriptService', {amp: {runtimeOn: false}}, env => {
 
       crypto.sha384Base64.resolves('my_fake_hash');
 
-      const promise = service.checkSha384('console.log("hello world")', 'foo');
+      const promise = service.checkSha384('alert(1)', 'foo');
       return promise.should.be.fulfilled;
     });
 
@@ -56,7 +60,7 @@ describes.fakeWin('AmpScriptService', {amp: {runtimeOn: false}}, env => {
 
       crypto.sha384Base64.resolves('my_fake_hash');
 
-      const promise = service.checkSha384('console.log("hello world")', 'foo');
+      const promise = service.checkSha384('alert(1)', 'foo');
       return promise.should.be.rejected;
     });
   });

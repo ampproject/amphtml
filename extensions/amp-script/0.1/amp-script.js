@@ -281,7 +281,10 @@ export class AmpScript extends AMP.BaseElement {
         if (sameOrigin) {
           // Disallow non-JS content type for same-origin scripts.
           const contentType = r.headers.get('Content-Type');
-          if (!startsWith(contentType, 'application/javascript')) {
+          if (
+            !contentType ||
+            !startsWith(contentType, 'application/javascript')
+          ) {
             throw user().createError(
               '[%s] %s has Content-Type: "%s". ' +
                 'Only "application/javascript" is allowed.',
@@ -376,7 +379,6 @@ export class AmpScriptService {
   checkSha384(script, debugId) {
     const bytes = utf8Encode(script);
     return this.crypto_.sha384Base64(bytes).then(hash => {
-
       if (!hash || !this.sources_.includes('sha384-' + hash)) {
         throw user().createError(
           '[%s] %id must have "sha384-%s" in meta[name="amp-script-src"].',
