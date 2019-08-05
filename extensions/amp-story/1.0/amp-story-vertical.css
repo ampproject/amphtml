@@ -51,7 +51,7 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
   display: block !important;
 }
 
-[i-amphtml-vertical] amp-story-page-attachment {
+[i-amphtml-vertical] amp-story-draggable-drawer {
   position: relative !important;
   height: 178vw !important;
   transform: none !important;
