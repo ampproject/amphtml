@@ -45,17 +45,19 @@ const {red, cyan, yellow} = colors;
 /**
  * Get the gzipped bundle size of the current build.
  *
+ * @param {string} compression name of the compression algorithm (either 'gzip'
+ *     or 'brotli')
  * @return {string} the bundle size in KB rounded to 2 decimal points.
  */
-function getGzippedBundleSize() {
-  const cmd = `npx bundlesize -f "${runtimeFile}"`;
+function getBundleSize(compression) {
+  const cmd = `npx bundlesize -f "${runtimeFile}" -c ${compression}`;
   log('Running', cyan(cmd) + '...');
   const output = getStdout(cmd).trim();
 
   const bundleSizeOutputMatches = output.match(/PASS .*: (\d+.?\d*KB) .*/);
   if (bundleSizeOutputMatches) {
     const bundleSize = parseFloat(bundleSizeOutputMatches[1]);
-    log('Bundle size is', cyan(`${bundleSize}KB`));
+    log('Bundle size', cyan(`(${compression})`), 'is', cyan(`${bundleSize}KB`));
     return bundleSize;
   }
   throw Error('could not infer bundle size from output.');
@@ -99,53 +101,61 @@ function storeBundleSize() {
     return;
   }
 
-  const bundleSize = `${getGzippedBundleSize()}KB`;
-  const commitHash = gitCommitHash();
-  const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
-    path: path.join('bundle-size', commitHash),
-  });
-
   const octokit = new Octokit({
     auth: `token ${process.env.GITHUB_ARTIFACTS_RW_TOKEN}`,
   });
 
-  return octokit.repos
-    .getContents(githubApiCallOptions)
-    .then(() => {
-      log(
-        'The file',
-        cyan(`bundle-size/${commitHash}`),
-        'already exists in the',
-        'build artifacts repository on GitHub. Skipping...'
-      );
-    })
-    .catch(() => {
-      return octokit.repos
-        .createOrUpdateFile(
-          Object.assign(githubApiCallOptions, {
-            message: `bundle-size: ${commitHash} (${bundleSize})`,
-            content: Buffer.from(bundleSize).toString('base64'),
-          })
-        )
+  const promises = [];
+  for (const [compression, extension] of [['gzip', ''], ['brotli', '.br']]) {
+    const bundleSize = `${getBundleSize(compression)}KB`;
+    const commitHash = `${gitCommitHash()}${extension}`;
+    const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
+      path: path.join('bundle-size', commitHash),
+    });
+
+    promises.push(
+      octokit.repos
+        .getContents(githubApiCallOptions)
         .then(() => {
           log(
-            'Stored the new bundle size of',
-            cyan(bundleSize),
-            'in the artifacts',
-            'repository on GitHub'
+            'The file',
+            cyan(`bundle-size/${commitHash}`),
+            'already exists in the',
+            'build artifacts repository on GitHub. Skipping...'
           );
         })
-        .catch(error => {
-          log(
-            red(
-              `ERROR: Failed to create the bundle-size/${commitHash} file in`
-            ),
-            red('the build artifacts repository on GitHub!')
-          );
-          log(red('Error message was:'), error.message);
-          process.exitCode = 1;
-        });
-    });
+        .catch(() => {
+          return octokit.repos
+            .createOrUpdateFile(
+              Object.assign(githubApiCallOptions, {
+                message: `bundle-size: ${commitHash} (${bundleSize})`,
+                content: Buffer.from(bundleSize).toString('base64'),
+              })
+            )
+            .then(() => {
+              log(
+                'Stored the new',
+                cyan(compression),
+                'bundle size of',
+                cyan(bundleSize),
+                'in the artifacts',
+                'repository on GitHub'
+              );
+            })
+            .catch(error => {
+              log(
+                red(
+                  `ERROR: Failed to create the bundle-size/${commitHash} file in`
+                ),
+                red('the build artifacts repository on GitHub!')
+              );
+              log(red('Error message was:'), error.message);
+              process.exitCode = 1;
+            });
+        })
+    );
+  }
+  return Promise.all(promises);
 }
 
 /**
@@ -188,7 +198,7 @@ async function skipBundleSize() {
 async function reportBundleSize() {
   if (isTravisPullRequestBuild()) {
     const baseSha = gitTravisMasterBaseline();
-    const bundleSize = parseFloat(getGzippedBundleSize());
+    const bundleSize = parseFloat(getBundleSize('gzip'));
     const commitHash = gitCommitHash();
     try {
       const response = await requestPost({
