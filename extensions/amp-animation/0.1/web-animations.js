@@ -242,6 +242,7 @@ export class Builder {
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   createScanner_(path, target, index, vars, timing) {
     return new MeasureScanner(

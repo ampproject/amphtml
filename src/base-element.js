@@ -248,7 +248,8 @@ export class BaseElement {
 
   /**
    * DO NOT CALL. Retained for backward compat during rollout.
-   * @public @return {!Window}
+   * @public
+   * @return {!Window}
    */
   getWin() {
     return this.win;
@@ -263,7 +264,10 @@ export class BaseElement {
     return this.element.getAmpDoc();
   }
 
-  /** @public @return {!./service/vsync-impl.Vsync} */
+  /**
+   * @public
+   * @return {!./service/vsync-impl.Vsync}
+   */
   getVsync() {
     return Services.vsyncFor(this.win);
   }
@@ -396,18 +400,6 @@ export class BaseElement {
   }
 
   /**
-   * Sets this element as the owner of the specified element. By setting itself
-   * as an owner, the element declares that it will manage the lifecycle of
-   * the owned element itself. This element, as an owner, will have to call
-   * {@link scheduleLayout}, {@link schedulePreload}, {@link updateInViewport}
-   * and similar methods.
-   * @param {!Element} element
-   */
-  setAsOwner(element) {
-    this.element.getResources().setOwner(element, this.element);
-  }
-
-  /**
    * Subclasses can override this method to opt-in into being called to
    * prerender when document itself is not yet visible (pre-render mode).
    *
@@ -433,10 +425,13 @@ export class BaseElement {
   /**
    * Subclasses can override this method to provide a svg logo that will be
    * displayed as the loader.
-   * @return {?Element}
+   * @return {{
+   *  content: (!Element|undefined),
+   *  color: (string|undefined),
+   * }}
    */
   createLoaderLogoCallback() {
-    return null;
+    return {};
   }
 
   /**
@@ -643,6 +638,7 @@ export class BaseElement {
    *   for the element to be resolved, upgraded and built.
    * @final
    * @package
+   * @return {*} TODO(#23582): Specify return type
    */
   executeAction(invocation, unusedDeferred) {
     let {method} = invocation;
@@ -841,66 +837,6 @@ export class BaseElement {
   }
 
   /**
-   * Schedule the layout request for the children element or elements
-   * specified. Resource manager will perform the actual layout based on the
-   * priority of this element and its children.
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  scheduleLayout(elements) {
-    this.element.getResources().scheduleLayout(this.element, elements);
-  }
-
-  /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  schedulePause(elements) {
-    this.element.getResources().schedulePause(this.element, elements);
-  }
-
-  /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  scheduleResume(elements) {
-    this.element.getResources().scheduleResume(this.element, elements);
-  }
-
-  /**
-   * Schedule the preload request for the children element or elements
-   * specified. Resource manager will perform the actual preload based on the
-   * priority of this element and its children.
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  schedulePreload(elements) {
-    this.element.getResources().schedulePreload(this.element, elements);
-  }
-
-  /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  scheduleUnlayout(elements) {
-    this.element.getResources()./*OK*/ scheduleUnlayout(this.element, elements);
-  }
-
-  /**
-   * Update inViewport state of the specified children element or elements.
-   * Resource manager will perform the actual changes to the inViewport state
-   * based on the state of these elements and their parent subtree.
-   * @param {!Element|!Array<!Element>} elements
-   * @param {boolean} inLocalViewport
-   * @public
-   */
-  updateInViewport(elements, inLocalViewport) {
-    this.element
-      .getResources()
-      .updateInViewport(this.element, elements, inLocalViewport);
-  }
-
-  /**
    * Requests the runtime to update the height of this element to the specified
    * value. The runtime will schedule this request and attempt to process it
    * as soon as possible.
@@ -1089,6 +1025,7 @@ export class BaseElement {
   /**
    * Declares a child element (or ourselves) as a Layer
    * @param {!Element=} opt_element
+   * @return {undefined}
    */
   declareLayer(opt_element) {
     devAssert(

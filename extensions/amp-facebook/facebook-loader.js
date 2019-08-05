@@ -14,29 +14,35 @@
  * limitations under the License.
  */
 
-import {svgFor} from '../../src/static-template';
+import {htmlFor} from '../../src/static-template';
 
 /**
  * Common function to create the facebook loader logo for all amp-facebook-*
  * components.
  * @param {!AmpElement} element
- * @return {!Element}
+ * @return {{
+ *  content: !Element,
+ *  color: string,
+ * }}
  */
 export function createLoaderLogo(element) {
-  const svg = svgFor(element);
-  return svg`
-      <g fill="#4267B2" class="i-amphtml-new-loader-white-on-shim">
+  const html = htmlFor(element);
+  return {
+    color: '#1877F2',
+    content: html`
+      <svg viewBox="0 0 72 72">
         <path
-          fill="#4267B2" class="i-amphtml-new-loader-white-on-shim"
-          d="M68.9,50H51.1c-0.6,0-1.1,0.5-1.1,1.1v17.8c0,0.6,0.5,1.1,1.1,1.1c0,0,0,0,0,0h9.6v-7.7h-2.6v-3h2.6V57
-                  c0-2.6,1.6-4,3.9-4c0.8,0,1.6,0,2.3,0.1v2.7h-1.6c-1.3,0-1.5,0.6-1.5,1.5v1.9h3l-0.4,3h-2.6V70h5.1c0.6,0,1.1-0.5,1.1-1.1l0,0V51.1
-                  C70,50.5,69.5,50,68.9,50C68.9,50,68.9,50,68.9,50z"
-        ></path>
+          fill="currentColor"
+          d="M46,36c0-5.5-4.5-10-10-10s-10,4.5-10,10c0,5,3.7,9.1,8.4,9.9v-7h-2.5V36h2.5v-2.2c0-2.5,1.5-3.9,3.8-3.9
+                c1.1,0,2.2,0.2,2.2,0.2v2.5h-1.3c-1.2,0-1.6,0.8-1.6,1.6V36h2.8l-0.4,2.9h-2.3v7C42.3,45.1,46,41,46,36z"
+        />
         <path
-          fill="#ffffff" class="i-amphtml-new-loader-transparent-on-shim"
-          d="M63.8,70v-7.7h2.6l0.4-3h-3v-1.9c0-0.9,0.2-1.5,1.5-1.5h1.6v-2.7c-0.8-0.1-1.6-0.1-2.3-0.1
-                  c-2.3,0-3.9,1.4-3.9,4v2.2h-2.6v3h2.6V70H63.8z"
-        ></path>
-      </g>
-    `;
+          fill="#ffffff"
+          class="i-amphtml-new-loader-transparent-on-shim"
+          d="M39.9,38.9l0.4-2.9h-2.8v-1.9c0-0.8,0.4-1.6,1.6-1.6h1.3v-2.5c0,0-1.1-0.2-2.2-0.2c-2.3,0-3.8,1.4-3.8,3.9V36
+                h-2.5v2.9h2.5v7c0.5,0.1,1,0.1,1.6,0.1s1.1,0,1.6-0.1v-7H39.9z"
+        />
+      </svg>
+    `,
+  };
 }

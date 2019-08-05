@@ -65,6 +65,7 @@
     "jsdoc/require-param": 2,
     "jsdoc/require-param-name": 2,
     "jsdoc/require-param-type": 2,
+    "jsdoc/require-returns": 2,
     "jsdoc/require-returns-type": 2,
     "local/await-expect": 2,
     "local/closure-type-primitives": 2,
@@ -91,6 +92,7 @@
     "local/no-style-display": 2,
     "local/no-style-property-setting": 2,
     "local/no-swallow-return-from-allow-console-error": 2,
+    "local/no-unload-listener": 2,
     "local/prefer-deferred-promise": 0,
     "local/prefer-destructuring": 2,
     "local/private-prop-names": 2,
@@ -173,6 +175,7 @@
         "jsdoc/require-param": 0,
         "jsdoc/require-param-name": 0,
         "jsdoc/require-param-type": 0,
+        "jsdoc/require-returns": 0,
         "jsdoc/require-returns-type": 0
       },
       "globals": {
