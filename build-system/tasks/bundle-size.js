@@ -57,7 +57,7 @@ function getGzippedBundleSize() {
   const bundleSizeOutputMatches = output.match(/PASS .*: (\d+.?\d*KB) .*/);
   if (bundleSizeOutputMatches) {
     const bundleSize = parseFloat(bundleSizeOutputMatches[1]);
-    log('Bundle size', cyan('gzipped'), 'is', cyan(`${bundleSize}KB`));
+    log('Bundle size', cyan('(gzipped)'), 'is', cyan(`${bundleSize}KB`));
     return bundleSize;
   }
   throw Error('could not infer bundle size from output.');
@@ -69,9 +69,11 @@ function getGzippedBundleSize() {
  * @return {string} the bundle size in KB rounded to 2 decimal points.
  */
 function getBrotliBundleSize() {
-  return parseFloat(
+  const bundleSize = parseFloat(
     (brotliSize.sync(fs.readSync(runtimeFile)) / 1024).toFixed(2)
   );
+  log('Bundle size', cyan('(brotli)'), 'is', cyan(`${bundleSize}KB`));
+  return bundleSize;
 }
 
 /**
