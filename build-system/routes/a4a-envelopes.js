@@ -64,7 +64,7 @@ app.use('/inabox-friendly', (req, res) => {
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     request(urlPrefix + adUrl, (error, response, body) => {
       if (
-        response.headers['content-type'] &&
+        !response.headers['content-type'] ||
         response.headers['content-type'].startsWith('text/html')
       ) {
         const newBody = body
@@ -100,7 +100,7 @@ app.use('/inabox-safeframe', (req, res) => {
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     request(urlPrefix + adUrl, (error, response, body) => {
       if (
-        response.headers['content-type'] &&
+        !response.headers['content-type'] ||
         response.headers['content-type'].startsWith('text/html')
       ) {
         const newBody = body
