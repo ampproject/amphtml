@@ -1335,4 +1335,36 @@ function decryptDocumentKey(encryptedDocumentKey) {
   return parsedJson.key;
 }
 
+// serve local vendor config JSON files
+app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
+  const {vendor} = req.params;
+  const serveMode = pc.env.SERVE_MODE;
+
+  if (serveMode === 'cdn') {
+    const vendorUrl = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
+    request(vendorUrl, (error, response) => {
+      if (error) {
+        res.status(404);
+        res.end();
+      } else {
+        res.send(response);
+      }
+    });
+    return;
+  }
+
+  const max = serveMode === 'default' ? '.max' : '';
+  const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
+
+  fs.readFileAsync(localVendorConfigPath)
+    .then(file => {
+      res.setHeader('Content-Type', 'application/json');
+      res.end(file);
+    })
+    .error(() => {
+      res.status(404);
+      res.end('Not found: ' + localVendorConfigPath);
+    });
+});
+
 module.exports = app;
