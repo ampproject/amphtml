@@ -19,6 +19,7 @@ import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
   getSourceOrigin,
+  getSourceUrl,
   isProtocolValid,
   isProxyOrigin,
   isSecureUrlDeprecated,
@@ -94,7 +95,17 @@ export class Url {
    * @return {string} The source origin of the URL.
    */
   getSourceOrigin(url) {
-    return getSourceOrigin(url);
+    return getSourceOrigin(this.parse(url));
+  }
+
+  /**
+   * Returns the source URL of an AMP document for documents served
+   * on a proxy origin or directly.
+   * @param {string|!Location} url URL of an AMP document.
+   * @return {string}
+   */
+  getSourceUrl(url) {
+    return getSourceUrl(this.parse(url));
   }
 
   /**
@@ -127,7 +138,7 @@ export class Url {
    * @return {boolean}
    */
   isProxyOrigin(url) {
-    return isProxyOrigin(url);
+    return isProxyOrigin(this.parse(url));
   }
 
   /**
