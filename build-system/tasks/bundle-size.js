@@ -43,7 +43,10 @@ const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
 const {red, cyan, yellow} = colors;
 
 /**
- * Get the gzipped bundle size of the current build.
+ * Get the compressed bundle size of the current build.
+ *
+ * TODO(danielrozenberg): make this report only brotli compression within ~1
+ * month.
  *
  * @param {string} compression name of the compression algorithm (either 'gzip'
  *     or 'brotli')
@@ -198,6 +201,7 @@ async function skipBundleSize() {
 async function reportBundleSize() {
   if (isTravisPullRequestBuild()) {
     const baseSha = gitTravisMasterBaseline();
+    // TODO(danielrozenberg): replace this with 'brotli' within ~1 month.
     const bundleSize = parseFloat(getBundleSize('gzip'));
     const commitHash = gitCommitHash();
     try {
