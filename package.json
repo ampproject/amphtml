@@ -41,7 +41,7 @@
     "@babel/preset-env": "7.5.5",
     "@jridgewell/resorcery": "0.0.3",
     "@octokit/rest": "16.28.7",
-    "acorn-globals": "4.3.2",
+    "acorn-globals": "4.3.3",
     "amphtml-validator": "1.0.23",
     "ansi-colors": "4.1.1",
     "ast-replace": "1.1.3",
