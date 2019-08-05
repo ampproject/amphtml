@@ -127,44 +127,45 @@ async function storeBundleSize() {
       path: path.join('bundle-size', bundleSizeFile),
     });
 
-    await octokit.repos.getContents(githubApiCallOptions)
-      .then(() => {
-        log(
-          'The file',
-          cyan(`bundle-size/${bundleSizeFile}`),
-          'already exists in the',
-          'build artifacts repository on GitHub. Skipping...'
-        );
-      })
-      .catch(() => {
-        return octokit.repos
-          .createOrUpdateFile(
-            Object.assign(githubApiCallOptions, {
-              message: `bundle-size: ${bundleSizeFile} (${bundleSize})`,
-              content: Buffer.from(bundleSize).toString('base64'),
-            })
-          )
-          .then(() => {
-            log(
-              'Stored the new',
-              cyan(compression),
-              'bundle size of',
-              cyan(bundleSize),
-              'in the artifacts',
-              'repository on GitHub'
-            );
-          })
-          .catch(error => {
-            log(
-              red(
-                `ERROR: Failed to create the bundle-size/${bundleSizeFile} file in`
-              ),
-              red('the build artifacts repository on GitHub!')
-            );
-            log(red('Error message was:'), error.message);
-            process.exitCode = 1;
-          });
-      });
+    try {
+      await octokit.repos.getContents(githubApiCallOptions);
+      log(
+        'The file',
+        cyan(`bundle-size/${bundleSizeFile}`),
+        'already exists in the',
+        'build artifacts repository on GitHub. Skipping...'
+      );
+      continue;
+    } catch {
+      // The file was not found in the GitHub repository, so continue to create
+      // it...
+    }
+
+    try {
+      await octokit.repos.createOrUpdateFile(
+        Object.assign(githubApiCallOptions, {
+          message: `bundle-size: ${bundleSizeFile} (${bundleSize})`,
+          content: Buffer.from(bundleSize).toString('base64'),
+        })
+      );
+      log(
+        'Stored the new',
+        cyan(compression),
+        'bundle size of',
+        cyan(bundleSize),
+        'in the artifacts',
+        'repository on GitHub'
+      );
+    } catch (error) {
+      log(
+        red(
+          `ERROR: Failed to create the bundle-size/${bundleSizeFile} file in`
+        ),
+        red('the build artifacts repository on GitHub!')
+      );
+      log(red('Error message was:'), error.message);
+      return Promise.reject(error);
+    }
   }
   return Promise.resolve();
 }
