@@ -19,7 +19,7 @@ import * as lolex from 'lolex';
 import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
-import {clearModalStack} from '../../../../src/modal';
+import {clearModalStack, getModalStackLength} from '../../../../src/modal';
 
 // Represents the correct value of KeyboardEvent.which for the Escape key
 const KEYBOARD_EVENT_WHICH_ESCAPE = 27;
@@ -257,6 +257,26 @@ describes.realWin(
         expect(historyPopSpy).to.have.not.been.called;
       });
 
+      it('ignore repeated calls to open', async () => {
+        const sidebarElement = await getAmpSidebar({'stubHistory': true});
+        const impl = sidebarElement.implementation_;
+
+        impl.open_();
+        expect(getModalStackLength()).to.equal(1);
+        impl.open_();
+        expect(getModalStackLength()).to.equal(1);
+      });
+
+      it('ignore repeated calls to close', async () => {
+        const sidebarElement = await getAmpSidebar({'stubHistory': true});
+        const impl = sidebarElement.implementation_;
+
+        impl.open_();
+        impl.close_();
+        // If this was not ignored, it would throw an error.
+        impl.close_();
+      });
+
       it('should close sidebar on button click', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
         const impl = sidebarElement.implementation_;
@@ -379,27 +399,27 @@ describes.realWin(
           owners.schedulePause = sandbox.spy();
           owners.scheduleResume = sandbox.spy();
 
-          expect(impl.isOpen_()).to.be.false;
+          expect(sidebarElement.hasAttribute('open')).to.be.false;
           clock.tick(600);
           expect(owners.schedulePause).to.have.not.been.called;
           expect(owners.scheduleResume).to.have.not.been.called;
           impl.toggle_();
-          expect(impl.isOpen_()).to.be.true;
+          expect(sidebarElement.hasAttribute('open')).to.be.true;
           clock.tick(600);
           expect(owners.schedulePause).to.have.not.been.called;
           expect(owners.scheduleResume).to.be.calledOnce;
           impl.toggle_();
-          expect(impl.isOpen_()).to.be.false;
+          expect(sidebarElement.hasAttribute('open')).to.be.false;
           clock.tick(600);
           expect(owners.schedulePause).to.be.calledOnce;
           expect(owners.scheduleResume).to.be.calledOnce;
           impl.toggle_();
-          expect(impl.isOpen_()).to.be.true;
+          expect(sidebarElement.hasAttribute('open')).to.be.true;
           clock.tick(600);
           expect(owners.schedulePause).to.be.calledOnce;
           expect(owners.scheduleResume).to.have.callCount(2);
           impl.toggle_();
-          expect(impl.isOpen_()).to.be.false;
+          expect(sidebarElement.hasAttribute('open')).to.be.false;
           clock.tick(600);
           expect(owners.schedulePause).to.have.callCount(2);
           expect(owners.scheduleResume).to.have.callCount(2);
