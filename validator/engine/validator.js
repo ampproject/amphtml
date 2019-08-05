@@ -5236,6 +5236,8 @@ class ParsedValidatorRules {
               /* url */'', validationResult);
         }
         break;
+      default:
+        // fallthrough
     }
   }
 
@@ -5901,8 +5903,10 @@ amp.validator.isSeverityWarning = function(error) {
  */
 amp.validator.validateString = function(inputDocContents, opt_htmlFormat) {
   goog.asserts.assertString(inputDocContents, 'Input document is not a string');
-
-  const htmlFormat = opt_htmlFormat || 'AMP';
+  let htmlFormat = 'AMP';
+  if (opt_htmlFormat) {
+      htmlFormat = opt_htmlFormat.toUpperCase();
+   }
   const handler = new amp.validator.ValidationHandler(htmlFormat);
   const parser = new amp.htmlparser.HtmlParser();
   parser.parse(handler, inputDocContents);
