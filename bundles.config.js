@@ -146,6 +146,7 @@ exports.extensionBundles = [
     name: 'amp-addthis',
     version: '0.1',
     latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {

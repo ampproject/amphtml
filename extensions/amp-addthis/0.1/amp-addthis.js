@@ -44,6 +44,7 @@ import {
   SHARE_CONFIG_KEYS,
   SHARE_EVENT,
 } from './constants';
+import {CSS} from '../../../build/amp-addthis-0.1.css';
 import {ActiveToolsMonitor} from './addthis-utils/monitors/active-tools-monitor';
 import {ClickMonitor} from './addthis-utils/monitors/click-monitor';
 import {ConfigManager} from './config-manager';
@@ -230,13 +231,9 @@ class AmpAddThis extends AMP.BaseElement {
           this.win.document,
           'div',
           dict({
-            'id': 'closeButton',
+            'id': 'i-amphtml-addthis-close',
           })
         );
-        setStyle(closeButton, 'float', 'right');
-        setStyle(closeButton, 'cursor', 'pointer');
-        setStyle(closeButton, 'position', 'relative');
-        setStyle(closeButton, 'z-index', '1');
         closeButton.onclick = function() {
           this.parentNode.parentNode.removeChild(this.parentNode);
         };
@@ -458,5 +455,5 @@ class AmpAddThis extends AMP.BaseElement {
 }
 
 AMP.extension('amp-addthis', '0.1', AMP => {
-  AMP.registerElement('amp-addthis', AmpAddThis);
+  AMP.registerElement('amp-addthis', AmpAddThis, CSS);
 });
