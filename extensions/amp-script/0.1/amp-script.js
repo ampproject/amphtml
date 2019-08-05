@@ -366,12 +366,15 @@ class AmpScriptService {
   }
 
   /**
-   * @param {string} string
-   * @param {string} id
+   * Checks if `sha384(script)` exists in `meta[name="amp-script-src"]` element
+   * in document head.
+   *
+   * @param {string} script The script contents.
+   * @param {string} debugId An element identifier for error messages.
    * @return {!Promise}
    */
-  checkSha384(string, id) {
-    const bytes = utf8Encode(string);
+  checkSha384(script, debugId) {
+    const bytes = utf8Encode(script);
     const start = getMode().localDev ? this.ampdoc_.win.performance.now() : 0;
     return this.crypto_.sha384Base64(bytes).then(hash => {
       const end = getMode().localDev ? this.ampdoc_.win.performance.now() : 0;
@@ -381,7 +384,7 @@ class AmpScriptService {
         throw user().createError(
           '[%s] %id must have "sha384-%s" in meta[name="amp-script-src"].',
           TAG,
-          id,
+          debugId,
           hash
         );
       }
@@ -389,6 +392,8 @@ class AmpScriptService {
   }
 
   /**
+   * Adds `size` to current total. Returns true iff new total is <= size cap.
+   *
    * @param {number} size
    * @return {boolean}
    */
