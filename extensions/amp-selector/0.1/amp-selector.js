@@ -415,17 +415,19 @@ export class AmpSelector extends AMP.BaseElement {
     }
 
     // There is a change of the `selected` attribute for the element
-    if (selectedIndex !== index) {
-      this.setSelection_(el);
-      const selectedEl = this.elements_[selectedIndex];
-      if (selectedEl) {
-        this.clearSelection_(selectedEl);
+    this.mutateElement(() => {
+      if (selectedIndex !== index) {
+        this.setSelection_(el);
+        const selectedEl = this.elements_[selectedIndex];
+        if (selectedEl) {
+          this.clearSelection_(selectedEl);
+        }
+      } else {
+        this.clearSelection_(el);
       }
-    } else {
-      this.clearSelection_(el);
-    }
 
-    this.fireSelectEvent_(el);
+      this.fireSelectEvent_(el);
+    });
   }
 
   /**
