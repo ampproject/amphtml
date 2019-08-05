@@ -65,8 +65,9 @@ const Phase = {
 /**
  * See src/transfer/TransferrableStorage.ts in worker-dom.
  * @enum {number}
+ * @visibleForTesting
  */
-const StorageLocation = {
+export const StorageLocation = {
   LOCAL: 0,
   SESSION: 1,
 };
