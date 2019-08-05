@@ -118,10 +118,24 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     supported_layouts: RESPONSIVE
   }
 }
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  tag_name: "DIV"
+  spec_name: "AMP-LIST DIV [fetch-error]"
+  mandatory_ancestor: "AMP-LIST"
+  attrs: { name: "align" }
+  attrs: {
+    name: "fetch-error"
+    mandatory: true
+  }
+}
 
 tags: { # amp-list-load-more
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-LIST-LOAD-MORE"
   requires_extension: "amp-list"
   mandatory_parent: "AMP-LIST"
@@ -150,7 +164,7 @@ tags: { # amp-list-load-more
 # The button element variant allowed in amp-list-load-more.
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   requires_extension: "amp-list"
   tag_name: "BUTTON"
   spec_name: "amp-list-load-more button[load-more-clickable]"

@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * Show the error messaging container on fetch error.
+ */
+amp-list.i-amphtml-list-fetch-error [fetch-error] {
+  display: block;
+}
+
 amp-list[load-more] [load-more-loading].amp-visible,
 amp-list[load-more] [load-more-failed].amp-visible,
 amp-list[load-more] [load-more-button].amp-visible,
