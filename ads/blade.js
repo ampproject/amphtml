@@ -26,7 +26,6 @@ export function blade(global, data) {
   validateData(data, [
     'width',
     'height',
-    'servingDomain',
     'blade_api_key',
     'blade_player_id',
     'blade_player_type',
