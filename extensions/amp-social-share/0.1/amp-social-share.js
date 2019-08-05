@@ -24,6 +24,8 @@ import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {toggle} from '../../../src/style';
 
+const TAG = 'amp-social-share';
+
 class AmpSocialShare extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -90,10 +92,7 @@ class AmpSocialShare extends AMP.BaseElement {
     const typeConfig = getSocialConfig(typeAttr) || dict();
     if (typeConfig['obsolete']) {
       toggle(element, false);
-      user().warn(
-        'amp-social-share',
-        `Skipping obsolete share button ${typeAttr}`
-      );
+      user().warn(TAG, `Skipping obsolete share button ${typeAttr}`);
       return;
     }
     this.shareEndpoint_ = userAssert(
