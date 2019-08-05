@@ -375,7 +375,7 @@ describe
           });
         });
 
-        it('should do simple JSON fetch', () => {
+        it.skip('should do simple JSON fetch', () => {
           sandbox.stub(user(), 'assert');
           return xhr
             .fetchJson(`${baseUrl}/get?k=v1`)
