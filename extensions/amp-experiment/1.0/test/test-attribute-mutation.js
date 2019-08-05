@@ -109,7 +109,7 @@ describes.realWin(
           );
           expect(attributeMutation.parseAndValidate()).to.be.equal(false);
 
-          // <
+          // invalid style attribute value "<"
           attributeMutation = getAttributeMutationDefaultStyle(
             'color: <#000000;'
           );
@@ -155,7 +155,7 @@ describes.realWin(
 
         it('background-color mutation', () => {
           let attributeMutation = getAttributeMutationDefaultStyle(
-            'background-color: #000000'
+            'background-color: #o7FogD'
           );
           expect(attributeMutation.parseAndValidate()).to.be.equal(true);
 
@@ -171,8 +171,13 @@ describes.realWin(
         });
 
         it('color mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultStyle(
+          let attributeMutation = getAttributeMutationDefaultStyle(
             'color: #000000'
+          );
+          expect(attributeMutation.parseAndValidate()).to.be.equal(true);
+
+          attributeMutation = getAttributeMutationDefaultStyle(
+            'color: #a0F'
           );
           expect(attributeMutation.parseAndValidate()).to.be.equal(true);
         });

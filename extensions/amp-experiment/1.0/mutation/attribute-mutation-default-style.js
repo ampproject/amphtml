@@ -34,7 +34,7 @@ const NON_SPACE_REGEX = /\S/;
 export class AttributeMutationDefaultStyle {
   /**
    * @param {!JsonObject} mutationRecord
-   * @param {!Array<Element>} elements
+   * @param {!Array<!Element>} elements
    */
   constructor(mutationRecord, elements) {
     /** @private {!JsonObject} */
@@ -68,15 +68,12 @@ export class AttributeMutationDefaultStyle {
       // In format of key:value
       const pair = pairs[i].split(':');
       if (pair.length != 2) {
-        // more than one :
+        // more than one ":" or no ":"
+        // invalid format
         return false;
       }
 
       const key = pair[0].trim();
-      if (pair[1] === undefined) {
-        // invalid format, value not defined;
-        return false;
-      }
       const value = pair[1].trim();
       if (!this.validateStylePair_(key, value)) {
         return false;
