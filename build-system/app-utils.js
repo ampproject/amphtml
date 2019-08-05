@@ -87,13 +87,7 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
       hostName + '/dist.3p/current-min/$1.html'
     );
     if (inabox) {
-      let filename;
-      if (inabox == '1') {
-        filename = '/dist/amp4ads-v0.js';
-      } else if (inabox == '2') {
-        filename = '/dist/amp4ads-lite-v0.js';
-      }
-      file = file.replace(/\/dist\/v0\.js/g, filename);
+      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
     }
   }
   return file;
