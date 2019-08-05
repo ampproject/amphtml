@@ -271,6 +271,7 @@ export class AmpScript extends AMP.BaseElement {
     const init = {ampCors: false};
     // Disallow redirects for same-origin scripts.
     if (sameOrigin) {
+      // TODO(choumx): Polyfill this in our fetch polyfill.
       init.redirect = 'error';
     }
     return Services.xhrFor(this.win)
