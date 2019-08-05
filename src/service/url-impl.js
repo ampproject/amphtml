@@ -79,6 +79,18 @@ export class Url {
   }
 
   /**
+   * @param {string|!Location} url
+   * @return {!Location}
+   * @private
+   */
+  parse_(url) {
+    if (typeof url !== 'string') {
+      return url;
+    }
+    return this.parse(url);
+  }
+
+  /**
    * Returns whether the URL has valid protocol.
    * Deep link protocol is valid, but not javascript etc.
    * @param {string|!Location} url
@@ -95,7 +107,7 @@ export class Url {
    * @return {string} The source origin of the URL.
    */
   getSourceOrigin(url) {
-    return getSourceOrigin(this.parse(url));
+    return getSourceOrigin(this.parse_(url));
   }
 
   /**
@@ -105,7 +117,7 @@ export class Url {
    * @return {string}
    */
   getSourceUrl(url) {
-    return getSourceUrl(this.parse(url));
+    return getSourceUrl(this.parse_(url));
   }
 
   /**
@@ -138,7 +150,7 @@ export class Url {
    * @return {boolean}
    */
   isProxyOrigin(url) {
-    return isProxyOrigin(this.parse(url));
+    return isProxyOrigin(this.parse_(url));
   }
 
   /**
@@ -148,7 +160,7 @@ export class Url {
    * @return {boolean}
    */
   isSecure(url) {
-    return isSecureUrlDeprecated(this.parse(url));
+    return isSecureUrlDeprecated(this.parse_(url));
   }
 
   /**
@@ -157,7 +169,7 @@ export class Url {
    * @return {string} origin
    */
   getWinOrigin(win) {
-    return win.origin || this.parse(win.location.href).origin;
+    return win.origin || this.parse_(win.location.href).origin;
   }
 
   /**
@@ -171,7 +183,7 @@ export class Url {
       return resourceUrl;
     }
 
-    const {host, hash, pathname, search} = this.parse(resourceUrl);
+    const {host, hash, pathname, search} = this.parse_(resourceUrl);
     const encodedHost = encodeURIComponent(host);
     return `${urls.cdn}/c/${encodedHost}${pathname}${search}${hash}`;
   }
