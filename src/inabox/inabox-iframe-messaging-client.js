@@ -25,7 +25,7 @@ import {tryParseJson} from '../json';
  * @return {?../../3p/iframe-messaging-client.IframeMessagingClient}
  */
 export function iframeMessagingClientFor(win) {
-  return /** @type {!../../3p/iframe-messaging-client.IframeMessagingClient} */ (getExistingServiceOrNull(
+  return /** @type {?../../3p/iframe-messaging-client.IframeMessagingClient} */ (getExistingServiceOrNull(
     win,
     'iframeMessagingClient'
   ));
@@ -36,8 +36,8 @@ export function iframeMessagingClientFor(win) {
  */
 export function installIframeMessagingClient(win) {
   if (
-    isExperimentOn(win, 'inabox-viewport-friendly') &&
-    canInspectWindow(win.top)
+    !isExperimentOn(win, 'inabox-viewport-friendly') ||
+    !canInspectWindow(win.top)
   ) {
     registerServiceBuilder(
       win,
