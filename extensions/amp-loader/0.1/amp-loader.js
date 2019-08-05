@@ -16,6 +16,7 @@
 
 import {CSS} from '../../../build/amp-loader-0.1.css';
 import {Services} from '../../../src/services';
+import {createSpinnerDom} from './spinner';
 import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isIframeVideoPlayerComponent} from '../../../src/layout';
@@ -48,6 +49,41 @@ const DEFAULT_PLACEHOLDER_WHITELIST_NONE_VIDEO = {
 };
 
 /**
+ * Used to cache the loader DOM once created, so we do not need to recreate it
+ * each time.
+ * @type {?Element}
+ */
+let loaderDom = null;
+
+/**
+ * @param {!AmpElement} element Used to get a document to build HTML with.
+ * @return {!Element} The loader DOM.
+ */
+function getLoaderDom(element) {
+  if (!loaderDom) {
+    const html = htmlFor(element);
+    /*
+     * There is an extra inner div here for backward compatibility with
+     * customizing loaders. The common and documented CSS for customizing
+     * loaders includes a style to hide the old three dots via:
+     *  .my-custom-loader .amp-active > div {
+     *     display: none;
+     *  }
+     * The extra div mimic a similar DOM.
+     */
+    loaderDom = html`
+      <div>
+        <div class="i-amphtml-new-loader-shim"></div>
+        <div class="i-amphtml-new-loader-logo"></div>
+      </div>
+    `;
+    loaderDom.appendChild(createSpinnerDom(html));
+  }
+
+  return loaderDom.cloneNode(true);
+}
+
+/**
  * Helper class to build the new loader's DOM.
  */
 class LoaderBuilder {
@@ -75,56 +111,9 @@ class LoaderBuilder {
    * Builds the loader's DOM.
    */
   build() {
-    this.buildContainers_();
+    this.domRoot_.appendChild(getLoaderDom(this.element_));
     this.maybeAddDefaultPlaceholder_();
     this.maybeAddLoaderAnimation_();
-  }
-
-  /**
-   * Builds the wrappers for the loader.
-   * @private
-   */
-  buildContainers_() {
-    /*
-     * There is an extra inner div here for backward compatibility with
-     * customizing loaders. The common and documented CSS for customizing
-     * loaders includes a style to hide the old three dots via:
-     *  .my-custom-loader .amp-active > div {
-     *     display: none;
-     *  }
-     * The extra div mimic a similar DOM.
-     */
-    const html = htmlFor(this.element_);
-    this.domRoot_.appendChild(html`
-      <div>
-        <svg viewBox="0 0 72 72">
-          <circle class="i-amphtml-new-loader-shim" cx="36" cy="36"></circle>
-          <g class="i-amphtml-new-loader-spinner">
-            <circle
-              class="i-amphtml-new-loader-spinner-segment"
-              cx="36"
-              cy="36"
-            />
-            <circle
-              class="i-amphtml-new-loader-spinner-segment"
-              cx="36"
-              cy="36"
-            />
-            <circle
-              class="i-amphtml-new-loader-spinner-segment"
-              cx="36"
-              cy="36"
-            />
-            <circle
-              class="i-amphtml-new-loader-spinner-segment"
-              cx="36"
-              cy="36"
-            />
-          </g>
-          <g class="i-amphtml-new-loader-logo"></g>
-        </svg>
-      </div>
-    `);
   }
 
   /**
@@ -224,28 +213,34 @@ class LoaderBuilder {
    * }}
    */
   getCustomLogo_() {
+    if (isIframeVideoPlayerComponent(this.element_.tagName)) {
+      return {
+        content: this.getVideoPlayerLogo_(),
+      };
+    }
+    return this.element_.createLoaderLogo();
+  }
+
+  /**
+   * @return {!Element} The logo for video players
+   * @private
+   */
+  getVideoPlayerLogo_() {
     // Keeping the video logo here short term.
     // This is because there is no single CSS for all players, there is
     // video-interface but not all players implement it. Also the SVG is not
     // that big.
-    // We need to move most of loaders code out of v0 anyway, see
-    // https://github.com/ampproject/amphtml/issues/23108.
-    if (isIframeVideoPlayerComponent(this.element_.tagName)) {
-      const html = htmlFor(this.element_);
-      const content = html`
-        <svg viewBox="0 0 72 72">
-          <path
-            class="i-amphtml-new-loader-white-on-shim"
-            fill="currentColor"
-            d="M41,34.5V31c0-0.5-0.4-1-1-1H27c-0.5,0-1,0.5-1,1v10c0,0.6,0.5,1,1,1h13c0.6,0,1-0.4,1-1v-3.5l5,4v-11L41,34.5z"
-          />
-        </svg>
-      `;
-      return {
-        content,
-      };
-    }
-    return this.element_.createLoaderLogo();
+    // TODO(sparhami) Figure out how to move this out of amp-loader.
+    const html = htmlFor(this.element_);
+    return html`
+      <svg viewBox="0 0 72 72">
+        <path
+          class="i-amphtml-new-loader-white-on-shim"
+          fill="currentColor"
+          d="M41,34.5V31c0-0.5-0.4-1-1-1H27c-0.5,0-1,0.5-1,1v10c0,0.6,0.5,1,1,1h13c0.6,0,1-0.4,1-1v-3.5l5,4v-11L41,34.5z"
+        />
+      </svg>
+    `;
   }
 
   /**
