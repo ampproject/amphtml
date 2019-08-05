@@ -1192,9 +1192,10 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should tolerate scrollTo override failures', () => {
-      sandbox.defineProperty(windowApi, 'scrollTo', {
+      Object.defineProperty(windowApi, 'scrollTo', {
         value: originalScrollTo,
         writable: false,
+        configurable: false, // make it non-configurable to let it will throw
       });
       sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
       new Viewport(ampdoc, binding, viewer);
@@ -1202,9 +1203,10 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should tolerate scrollY override failures', () => {
-      sandbox.defineProperty(windowApi, 'scrollY', {
+      Object.defineProperty(windowApi, 'scrollY', {
         value: 21,
         writable: false,
+        configurable: false, // make it non-configurable to let it will throw
       });
       sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
       new Viewport(ampdoc, binding, viewer);
@@ -1407,7 +1409,7 @@ describe('Viewport META', () => {
       viewportMetaString = originalViewportMetaString;
       viewportMeta = Object.create(null);
       viewportMetaSetter = sandbox.spy();
-      sandbox.defineProperty(viewportMeta, 'content', {
+      Object.defineProperty(viewportMeta, 'content', {
         get: () => viewportMetaString,
         set: value => {
           viewportMetaSetter(value);
