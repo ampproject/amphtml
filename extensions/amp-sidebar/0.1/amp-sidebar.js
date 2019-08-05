@@ -116,6 +116,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {number} */
     this.initialScrollTop_ = 0;
+
+    /** @private {boolean} */
+    this.opened_ = false;
   }
 
   /** @override */
@@ -153,7 +156,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.fixIosElasticScrollLeak_();
     }
 
-    if (this.isOpen_()) {
+    if (element.hasAttribute('open')) {
       this.open_();
     } else {
       element.setAttribute('aria-hidden', 'true');
@@ -288,21 +291,12 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if the sidebar is opened.
-   * @return {boolean}
-   * @private
-   */
-  isOpen_() {
-    return this.element.hasAttribute('open');
-  }
-
-  /**
    * Toggles the open/close state of the sidebar.
    * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @private
    */
   toggle_(opt_invocation) {
-    if (this.isOpen_()) {
+    if (this.opened_) {
       this.close_();
     } else {
       this.open_(opt_invocation);
@@ -408,9 +402,10 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   open_(opt_invocation) {
-    if (this.isOpen_()) {
+    if (this.opened_) {
       return;
     }
+    this.opened_ = true;
     this.viewport_.enterOverlayMode();
     this.setUpdateFn_(() => this.updateForOpening_());
     this.getHistory_()
@@ -431,9 +426,10 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   close_() {
-    if (!this.isOpen_()) {
+    if (!this.opened_) {
       return false;
     }
+    this.opened_ = false;
     this.viewport_.leaveOverlayMode();
     const scrollDidNotChange =
       this.initialScrollTop_ == this.viewport_.getScrollTop();
@@ -499,7 +495,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   fixIosElasticScrollLeak_() {
     this.element.addEventListener('scroll', e => {
-      if (this.isOpen_()) {
+      if (this.opened_) {
         if (this.element./*OK*/ scrollTop < 1) {
           this.element./*OK*/ scrollTop = 1;
           e.preventDefault();
