@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
@@ -88,6 +88,14 @@ class AmpSocialShare extends AMP.BaseElement {
       }
     }
     const typeConfig = getSocialConfig(typeAttr) || dict();
+    if (typeConfig['obsolete']) {
+      toggle(element, false);
+      user().warn(
+        'amp-social-share',
+        `Skipping obsolete share button ${typeAttr}`
+      );
+      return;
+    }
     this.shareEndpoint_ = userAssert(
       element.getAttribute('data-share-endpoint') ||
         typeConfig['shareEndpoint'],
