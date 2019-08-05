@@ -337,6 +337,7 @@ class AmpViewer {
     };
     el.onerror = () => {
       log('- script failed to load: ', src, el);
+      doc.head.removeChild(el);
       if (fallbackSrc) {
         this.installScript_(fallbackSrc, undefined, customElement, customTemplate);
       }
