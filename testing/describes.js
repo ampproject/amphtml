@@ -407,6 +407,7 @@ class SandboxFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
+    this.defineProperties_ = [];
   }
 
   /** @override */
@@ -417,11 +418,44 @@ class SandboxFixture {
   /** @override */
   setup(env) {
     env.sandbox = sinon.createSandbox();
+    env.sandbox.defineProperty = this.defineProperty_.bind(this);
   }
 
   /** @override */
   teardown(env) {
+    this.restoreDefineProperty_();
     env.sandbox.restore();
+  }
+
+  defineProperty_(obj, propertyKey, descriptor) {
+    if (descriptor.configurable === false) {
+      throw new Error(
+        `sandbox.defineProperty(${obj.constructor.name},${propertyKey},{configurable=false}); ` +
+          `With configurable=false, you will not be able to restore the property!`
+      );
+    }
+    this.defineProperties_.push({
+      obj,
+      propertyKey,
+      descriptor: Object.getOwnPropertyDescriptor(obj, propertyKey),
+    });
+    Object.defineProperty(obj, propertyKey, descriptor);
+  }
+
+  restoreDefineProperty_() {
+    this.defineProperties_.forEach(item => {
+      try {
+        if (item.descriptor === undefined) {
+          delete item.obj[item.propertyKey];
+        } else {
+          Object.defineProperty(item.obj, item.propertyKey, item.descriptor);
+        }
+      } catch (e) {
+        throw new Error(
+          `Failed to restore sandbox.defineProperty(${item.obj.constructor.name},${item.propertyKey})`
+        );
+      }
+    });
   }
 }
 

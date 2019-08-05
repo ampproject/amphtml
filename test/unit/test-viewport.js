@@ -1570,9 +1570,11 @@ describe('createViewport', () => {
       let win;
       let ampDoc;
       let viewer;
+      let sandbox;
 
       beforeEach(() => {
         win = env.win;
+        sandbox = env.sandbox;
         installPlatformService(win);
         installTimerService(win);
         installVsyncService(win);
@@ -1684,7 +1686,7 @@ describe('createViewport', () => {
 
       it('should only bind to "iOS embed SD" when SD is supported', () => {
         // Reset SD support.
-        Object.defineProperty(win.Element.prototype, 'attachShadow', {
+        sandbox.defineProperty(win.Element.prototype, 'attachShadow', {
           value: null,
         });
         sandbox
