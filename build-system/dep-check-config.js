@@ -667,6 +667,9 @@ exports.rules = [
         'src/service/localization.js',
       'extensions/amp-story-auto-ads/0.1/_locales/zu.js->' +
         'src/service/localization.js',
+      // Accessing calculateScriptBaseUrl() for vendor config URLs
+      'extensions/amp-analytics/0.1/config.js->' +
+        'src/service/extension-location.js',
     ],
   },
   {

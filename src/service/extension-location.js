@@ -34,7 +34,7 @@ let ExtensionInfoDef;
  * @param {boolean=} opt_isLocalDev
  * @return {string}
  */
-function calculateScriptBaseUrl(location, opt_isLocalDev) {
+export function calculateScriptBaseUrl(location, opt_isLocalDev) {
   if (opt_isLocalDev) {
     let prefix = `${location.protocol}//${location.host}`;
     if (location.protocol == 'about:') {
