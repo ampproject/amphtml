@@ -272,7 +272,7 @@ export class SystemLayer {
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
     this.systemLayerEl_.querySelector(
-      '.' + SHARE_CLASS
+      '.i-amphtml-story-share-control'
     ).href = Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
