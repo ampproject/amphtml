@@ -248,6 +248,10 @@ app.use('/api/echo/post', (req, res) => {
   res.end(req.body);
 });
 
+app.use('/api/ping', (req, res) => {
+  res.status(204).end();
+});
+
 app.use('/form/html/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
 
