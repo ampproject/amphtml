@@ -52,6 +52,7 @@ import {
   removeChildren,
   scopedQuerySelector,
   scopedQuerySelectorAll,
+  tryFocus,
 } from '../../../src/dom';
 import {px, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
@@ -253,12 +254,13 @@ export class AmpList extends AMP.BaseElement {
         this.getLoadMoreService_().getLoadMoreFailedClickable(),
         'click',
         () =>
-          this.loadMoreCallback_(/*opt_fromClick*/ true, /*opt_reload*/ true)
+          this.loadMoreCallback_(/*opt_reload*/ true, /*opt_fromClick*/ true)
       );
       listen(
         this.getLoadMoreService_().getLoadMoreButtonClickable(),
         'click',
-        () => this.loadMoreCallback_(/*opt_fromClick*/ true)
+        () =>
+          this.loadMoreCallback_(/*opt_reload*/ false, /*opt_fromClick*/ true)
       );
     });
   }
@@ -998,12 +1000,12 @@ export class AmpList extends AMP.BaseElement {
    * Called when 3 viewports above bottom of automatic load-more list, or
    * manually on clicking the load-more-button element. Sets the amp-list
    * src to the bookmarked src and fetches data from it.
-   * @param {boolean=} opt_fromClick
    * @param {boolean=} opt_reload
+   * @param {boolean=} opt_fromClick
    * @return {!Promise}
    * @private
    */
-  loadMoreCallback_(opt_fromClick = false, opt_reload = false) {
+  loadMoreCallback_(opt_reload = false, opt_fromClick = false) {
     if (!!this.loadMoreSrc_) {
       this.element.setAttribute('src', this.loadMoreSrc_);
       // Clear url to avoid repeated fetches from same url
@@ -1023,7 +1025,7 @@ export class AmpList extends AMP.BaseElement {
           if (this.loadMoreSrc_) {
             this.getLoadMoreService_().toggleLoadMoreLoading(false);
             if (lastTabbableChild && opt_fromClick) {
-              lastTabbableChild./*REVIEW*/ focus();
+              tryFocus(lastTabbableChild);
             }
           } else {
             this.getLoadMoreService_().setLoadMoreEnded();

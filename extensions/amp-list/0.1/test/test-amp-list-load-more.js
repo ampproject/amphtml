@@ -225,6 +225,7 @@ describes.realWin(
         expect(list.container_.children).to.have.lengthOf(4);
       });
 
+      // TODO(cathyxz) Create a mirror test for automatic amp-list loading once the automatic tests are unskipped
       it('should call focus on the last element after load more is clicked', async () => {
         sandbox
           .stub(list.ssrTemplateHelper_, 'renderTemplate')
