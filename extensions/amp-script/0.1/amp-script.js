@@ -266,7 +266,6 @@ export class AmpScript extends AMP.BaseElement {
     return Services.xhrFor(this.win)
       .fetchText(authorUrl, {ampCors: false})
       .then(r => {
-        const text = r.text();
         if (sameOrigin) {
           // For same-origin scripts, disallow redirect and non-JS content type.
           if (r.redirected) {
@@ -286,10 +285,12 @@ export class AmpScript extends AMP.BaseElement {
               contentType
             );
           }
-          return text;
+          return r.text();
         } else {
           // For cross-origin, verify hash of script itself.
-          return this.service_.checkSha384(text, scriptId).then(() => text);
+          return r.text().then(text => {
+            return this.service_.checkSha384(text, scriptId).then(() => text);
+          });
         }
       });
   }
