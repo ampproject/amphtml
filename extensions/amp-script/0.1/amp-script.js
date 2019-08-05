@@ -335,15 +335,14 @@ export class AmpScript extends AMP.BaseElement {
 
 /**
  * Service for sharing data across <amp-script> elements.
+ *
+ * @visibleForTesting
  */
-class AmpScriptService {
+export class AmpScriptService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
     /** @private {number} */
     this.cumulativeSize_ = 0;
 
@@ -375,10 +374,7 @@ class AmpScriptService {
    */
   checkSha384(script, debugId) {
     const bytes = utf8Encode(script);
-    const start = getMode().localDev ? this.ampdoc_.win.performance.now() : 0;
     return this.crypto_.sha384Base64(bytes).then(hash => {
-      const end = getMode().localDev ? this.ampdoc_.win.performance.now() : 0;
-      dev().info(TAG, `sha384 ${bytes.length} bytes took ${end - start}ms.`);
 
       if (!hash || !this.sources_.includes('sha384-' + hash)) {
         throw user().createError(

@@ -14,8 +14,53 @@
  * limitations under the License.
  */
 
+import {AmpScriptService, SanitizerImpl, StorageLocation} from '../../amp-script';
 import {FakeWindow} from '../../../../../testing/fake-dom';
-import {SanitizerImpl} from '../../amp-script';
+import {Services} from '../../../../../src/services';
+
+describes.fakeWin('AmpScriptService', {amp: {runtimeOn: false}}, env => {
+  let crypto;
+  let service;
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = env.sandbox;
+
+    crypto = {sha384Base64: sandbox.stub()};
+    sandbox.stub(Services, 'cryptoFor').returns(crypto);
+  });
+
+  function createMetaTag(name, content) {
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', name);
+    meta.setAttribute('content', content);
+    env.ampdoc.getHeadNode().appendChild(meta);
+  }
+
+  describe('checkSha384', () => {
+    it('should resolve if hash exists in meta tag', async () => {
+      createMetaTag('amp-script-src', 'sha384-my_fake_hash');
+
+      service = new AmpScriptService(env.ampdoc);
+
+      crypto.sha384Base64.resolves('my_fake_hash');
+
+      const promise = service.checkSha384('console.log("hello world")', 'foo');
+      return promise.should.be.fulfilled;
+    });
+
+    it('should reject if hash does not exist in meta tag', () => {
+      createMetaTag('amp-script-src', 'sha384-another_fake_hash');
+
+      service = new AmpScriptService(env.ampdoc);
+
+      crypto.sha384Base64.resolves('my_fake_hash');
+
+      const promise = service.checkSha384('console.log("hello world")', 'foo');
+      return promise.should.be.rejected;
+    });
+  });
+});
 
 describe('SanitizerImpl', () => {
   let el;
