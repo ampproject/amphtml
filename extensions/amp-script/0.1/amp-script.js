@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {
   DomPurifyDef,
@@ -36,7 +37,6 @@ import {
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
-import {upgrade} from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -120,8 +120,16 @@ export class AmpScript extends AMP.BaseElement {
         return getElementServiceForDoc(this.element, TAG, TAG);
       })
       .then(service => {
-        this.service_ = service;
+        this.setService(service);
       });
+  }
+
+  /**
+   * @param {!AmpScriptService} service
+   * @visibleForTesting
+   */
+  setService(service) {
+    this.service_ = service;
   }
 
   /** @override */
@@ -187,10 +195,12 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
-    upgrade(this.element, workerAndAuthorScripts, config).then(workerDom => {
-      this.workerDom_ = workerDom;
-    });
-    return Promise.resolve();
+    WorkerDOM.upgrade(this.element, workerAndAuthorScripts, config).then(
+      workerDom => {
+        this.workerDom_ = workerDom;
+      }
+    );
+    return workerAndAuthorScripts;
   }
 
   /**
