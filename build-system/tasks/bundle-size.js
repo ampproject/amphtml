@@ -19,7 +19,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const brotliSize = require('brotli-size');
 const colors = require('ansi-colors');
-const fs = require('fs');
 const log = require('fancy-log');
 const Octokit = require('@octokit/rest');
 const path = require('path');
@@ -70,7 +69,7 @@ function getGzippedBundleSize() {
  */
 function getBrotliBundleSize() {
   const bundleSize = parseFloat(
-    (brotliSize.sync(fs.readSync(runtimeFile)) / 1024).toFixed(2)
+    (brotliSize.default.fileSync(runtimeFile) / 1024).toFixed(2)
   );
   log('Bundle size', cyan('(brotli)'), 'is', cyan(`${bundleSize}KB`));
   return bundleSize;
@@ -82,7 +81,7 @@ function getBrotliBundleSize() {
  *
  * @return {!Promise}
  */
-function storeBundleSize() {
+async function storeBundleSize() {
   if (!isTravisPushBuild()) {
     log(
       yellow('Skipping'),
@@ -118,60 +117,56 @@ function storeBundleSize() {
     auth: `token ${process.env.GITHUB_ARTIFACTS_RW_TOKEN}`,
   });
 
-  const promises = [];
   for (const [compression, extension, getBundleSize] of [
     ['gzip', '', getGzippedBundleSize],
     ['brotli', '.br', getBrotliBundleSize],
   ]) {
     const bundleSize = `${getBundleSize()}KB`;
-    const commitHash = `${gitCommitHash()}${extension}`;
+    const bundleSizeFile = `${gitCommitHash()}${extension}`;
     const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
-      path: path.join('bundle-size', commitHash),
+      path: path.join('bundle-size', bundleSizeFile),
     });
 
-    promises.push(
-      octokit.repos
-        .getContents(githubApiCallOptions)
-        .then(() => {
-          log(
-            'The file',
-            cyan(`bundle-size/${commitHash}`),
-            'already exists in the',
-            'build artifacts repository on GitHub. Skipping...'
-          );
-        })
-        .catch(() => {
-          return octokit.repos
-            .createOrUpdateFile(
-              Object.assign(githubApiCallOptions, {
-                message: `bundle-size: ${commitHash} (${bundleSize})`,
-                content: Buffer.from(bundleSize).toString('base64'),
-              })
-            )
-            .then(() => {
-              log(
-                'Stored the new',
-                cyan(compression),
-                'bundle size of',
-                cyan(bundleSize),
-                'in the artifacts',
-                'repository on GitHub'
-              );
+    await octokit.repos.getContents(githubApiCallOptions)
+      .then(() => {
+        log(
+          'The file',
+          cyan(`bundle-size/${bundleSizeFile}`),
+          'already exists in the',
+          'build artifacts repository on GitHub. Skipping...'
+        );
+      })
+      .catch(() => {
+        return octokit.repos
+          .createOrUpdateFile(
+            Object.assign(githubApiCallOptions, {
+              message: `bundle-size: ${bundleSizeFile} (${bundleSize})`,
+              content: Buffer.from(bundleSize).toString('base64'),
             })
-            .catch(error => {
-              log(
-                red(
-                  `ERROR: Failed to create the bundle-size/${commitHash} file in`
-                ),
-                red('the build artifacts repository on GitHub!')
-              );
-              log(red('Error message was:'), error.message);
-              process.exitCode = 1;
-            });
-        })
-    );
+          )
+          .then(() => {
+            log(
+              'Stored the new',
+              cyan(compression),
+              'bundle size of',
+              cyan(bundleSize),
+              'in the artifacts',
+              'repository on GitHub'
+            );
+          })
+          .catch(error => {
+            log(
+              red(
+                `ERROR: Failed to create the bundle-size/${bundleSizeFile} file in`
+              ),
+              red('the build artifacts repository on GitHub!')
+            );
+            log(red('Error message was:'), error.message);
+            process.exitCode = 1;
+          });
+      });
   }
-  return Promise.all(promises);
+  return Promise.resolve();
 }
 
 /**
