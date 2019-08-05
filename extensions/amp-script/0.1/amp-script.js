@@ -214,13 +214,18 @@ export class AmpScript extends AMP.BaseElement {
   }
 
   /**
-   * Query local or fetch remote author script. Returns promise that resolves
-   * with the script contents. Returns null if script reference is missing.
-   * @param {string} scriptId
+   * Query local or fetch remote author script.
+   *
+   * Returns promise that resolves with the script contents or rejected if the
+   * fetch fails or if the script fails CORS checks.
+   *
+   * Returns null if script reference is missing.
+   *
+   * @param {string} debugId An element identifier for error messages.
    * @return {?Promise<string>}
    * @private
    */
-  getAuthorScript_(scriptId) {
+  getAuthorScript_(debugId) {
     const authorUrl = this.element.getAttribute('src');
     if (authorUrl) {
       const urlService = Services.urlForDoc(this.element);
@@ -229,7 +234,7 @@ export class AmpScript extends AMP.BaseElement {
       const scriptOrigin = urlService.parse(authorUrl).origin;
       const sameOrigin = docOrigin === scriptOrigin;
 
-      return this.fetchAuthorScript_(authorUrl, sameOrigin, scriptId);
+      return this.fetchAuthorScript_(authorUrl, sameOrigin, debugId);
     } else {
       const id = this.element.getAttribute('script');
       if (id) {
@@ -238,7 +243,7 @@ export class AmpScript extends AMP.BaseElement {
           local,
           '[%s] %s could not find element with #%s.',
           TAG,
-          scriptId,
+          debugId,
           id
         );
         const target = local.getAttribute('target');
@@ -249,7 +254,7 @@ export class AmpScript extends AMP.BaseElement {
           id
         );
         const script = local.textContent;
-        return this.service_.checkSha384(script, scriptId).then(() => script);
+        return this.service_.checkSha384(script, debugId).then(() => script);
       }
     }
     // No [src] or [script].
@@ -258,30 +263,28 @@ export class AmpScript extends AMP.BaseElement {
 
   /**
    * @param {string} authorUrl
-   * @param {boolean} sameOrigin
-   * @param {string} scriptId
+   * @param {boolean} sameOrigin Does `authorUrl` have same origin as the page?
+   * @param {string} debugId An element identifier for error messages.
    * @return {!Promise<string>}
    */
-  fetchAuthorScript_(authorUrl, sameOrigin, scriptId) {
+  fetchAuthorScript_(authorUrl, sameOrigin, debugId) {
+    const init = {ampCors: false};
+    // Disallow redirects for same-origin scripts.
+    if (sameOrigin) {
+      init.redirect = 'error';
+    }
     return Services.xhrFor(this.win)
-      .fetchText(authorUrl, {ampCors: false})
+      .fetchText(authorUrl, init)
       .then(r => {
         if (sameOrigin) {
-          // For same-origin scripts, disallow redirect and non-JS content type.
-          if (r.redirected) {
-            throw user().createError(
-              '[%s] %s src URL must not have redirects.',
-              TAG,
-              scriptId
-            );
-          }
+          // Disallow non-JS content type for same-origin scripts.
           const contentType = r.headers.get('Content-Type');
           if (!startsWith(contentType, 'application/javascript')) {
             throw user().createError(
               '[%s] %s has Content-Type: "%s". ' +
                 'Only "application/javascript" is allowed.',
               TAG,
-              scriptId,
+              debugId,
               contentType
             );
           }
@@ -289,7 +292,7 @@ export class AmpScript extends AMP.BaseElement {
         } else {
           // For cross-origin, verify hash of script itself.
           return r.text().then(text => {
-            return this.service_.checkSha384(text, scriptId).then(() => text);
+            return this.service_.checkSha384(text, debugId).then(() => text);
           });
         }
       });
@@ -337,6 +340,9 @@ class AmpScriptService {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @private {number} */
     this.cumulativeSize_ = 0;
 
@@ -365,7 +371,11 @@ class AmpScriptService {
    */
   checkSha384(string, id) {
     const bytes = utf8Encode(string);
+    const start = getMode().localDev ? this.ampdoc_.win.performance.now() : 0;
     return this.crypto_.sha384Base64(bytes).then(hash => {
+      const end = getMode().localDev ? this.ampdoc_.win.performance.now() : 0;
+      dev().info(TAG, `sha384 ${bytes.length} bytes took ${end - start}ms.`);
+
       if (!hash || !this.sources_.includes('sha384-' + hash)) {
         throw user().createError(
           '[%s] %id must have "sha384-%s" in meta[name="amp-script-src"].',
