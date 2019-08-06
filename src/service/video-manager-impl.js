@@ -100,9 +100,6 @@ export class VideoManager {
     /** @private @const */
     this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
-    /** @private {!Array<!UnlistenDef>} */
-    this.unlisteners_ = [];
-
     /**
      * @private
      * @const
@@ -123,9 +120,6 @@ export class VideoManager {
 
   /** @override */
   dispose() {
-    this.unlisteners_.forEach(unlisten => unlisten());
-    this.unlisteners_.length = 0;
-
     this.getAutoFullscreenManager_().dispose();
 
     if (!this.entries_) {
@@ -258,22 +252,18 @@ export class VideoManager {
   maybeInstallVisibilityObserver_(entry) {
     const {element} = entry.video;
 
-    this.unlisteners_.push(
-      listen(element, VideoEvents.VISIBILITY, details => {
-        const data = getData(details);
-        if (data && data['visible'] == true) {
-          entry.updateVisibility(/* opt_forceVisible */ true);
-        } else {
-          entry.updateVisibility();
-        }
-      })
-    );
+    listen(element, VideoEvents.VISIBILITY, details => {
+      const data = getData(details);
+      if (data && data['visible'] == true) {
+        entry.updateVisibility(/* opt_forceVisible */ true);
+      } else {
+        entry.updateVisibility();
+      }
+    });
 
-    this.unlisteners_.push(
-      listen(element, VideoEvents.RELOAD, () => {
-        entry.videoLoaded();
-      })
-    );
+    listen(element, VideoEvents.RELOAD, () => {
+      entry.videoLoaded();
+    });
 
     // TODO(aghassemi, #6425): Use IntersectionObserver
     if (!this.scrollListenerInstalled_) {
@@ -453,9 +443,6 @@ class VideoEntry {
       this.manager_.installAutoplayStyles();
     }
 
-    /** @private {!Array<!UnlistenDef>} */
-    this.unlisteners_ = [];
-
     // Media Session API Variables
 
     /** @private {!../mediasession-helper.MetadataDef} */
@@ -474,22 +461,21 @@ class VideoEntry {
     listenOncePromise(video.element, VideoEvents.LOAD).then(() =>
       this.videoLoaded()
     );
-    this.unlisteners_.push(
-      listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_()),
-      listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_()),
-      listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true)),
-      listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false)),
-      listen(video.element, VideoEvents.ENDED, () => this.videoEnded_()),
-      listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
-        const data = getData(e);
-        const eventType = data['eventType'];
-        const vars = data['vars'];
-        this.logCustomAnalytics_(
-          dev().assertString(eventType, '`eventType` missing'),
-          vars
-        );
-      })
-    );
+    listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
+    listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
+    listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
+    listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false));
+    listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
+
+    listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
+      const data = getData(e);
+      const eventType = data['eventType'];
+      const vars = data['vars'];
+      this.logCustomAnalytics_(
+        dev().assertString(eventType, '`eventType` missing'),
+        vars
+      );
+    });
 
     video
       .signals()
@@ -519,8 +505,6 @@ class VideoEntry {
   /** @public */
   dispose() {
     this.getAnalyticsPercentageTracker_().stop();
-    this.unlisteners_.forEach(unlisten => unlisten());
-    this.unlisteners_.length = 0;
   }
 
   /**
@@ -1014,7 +998,10 @@ export class AutoFullscreenManager {
     /** @private @const {!Array<!../video-interface.VideoOrBaseElementDef>} */
     this.entries_ = [];
 
-    /** @private {!Array<!UnlistenDef>} */
+    /**
+     * Unlisteners for global objects
+     * @private {!Array<!UnlistenDef>}
+     */
     this.unlisteners_ = [];
 
     // eslint-disable-next-line jsdoc/require-returns
@@ -1056,11 +1043,9 @@ export class AutoFullscreenManager {
 
     this.entries_.push(video);
 
-    this.unlisteners_.push(
-      listen(element, VideoEvents.PAUSE, this.boundSelectBestCentered_),
-      listen(element, VideoEvents.PLAYING, this.boundSelectBestCentered_),
-      listen(element, VideoEvents.ENDED, this.boundSelectBestCentered_)
-    );
+    listen(element, VideoEvents.PAUSE, this.boundSelectBestCentered_);
+    listen(element, VideoEvents.PLAYING, this.boundSelectBestCentered_);
+    listen(element, VideoEvents.ENDED, this.boundSelectBestCentered_);
 
     video
       .signals()
