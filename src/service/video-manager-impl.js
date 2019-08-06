@@ -465,6 +465,14 @@ class VideoEntry {
     listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false));
     listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
 
+    listen(video.element, VideoEvents.AD_START, () =>
+      analyticsEvent(this, VideoAnalyticsEvents.AD_START)
+    );
+
+    listen(video.element, VideoEvents.AD_END, () =>
+      analyticsEvent(this, VideoAnalyticsEvents.AD_END)
+    );
+
     listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
       const data = getData(e);
       const eventType = data['eventType'];
