@@ -955,6 +955,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/app-index/amphtml-helpers.js',
       'build-system/app-video-testbench.js',
       'build-system/app.js',
+      'build-system/app-utils.js',
       'build-system/shadow-viewer.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',

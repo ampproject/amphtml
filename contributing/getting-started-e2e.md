@@ -223,6 +223,12 @@ Note that by default each of the pages in the /examples directory uses the unmin
 
   Minified AMP JavaScript is served from `cdn.ampproject.org`.
 
+- http://localhost:8000/serve_mode=<RTV_NUMBER>
+
+  E.g. http://localhost:8000/serve_mode=001907161745080
+
+  Minified AMP JavaScript is served from `cdn.ampproject.org/rtv/<RTV_NUMBER>`, the RTV build from the given RTV number.
+
 When you're ready to make changes, you'll want to follow the steps below for creating a branch, testing and sending your changes for review.
 
 The exact changes you'll be making will depend on the issue/feature you are working on.  If you aren't sure where to start, ask for suggestions on the GitHub issue tracking the work you are doing or reach out to the community as described in [How to get help](#how-to-get-help).
