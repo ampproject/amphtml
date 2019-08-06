@@ -31,7 +31,6 @@ const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
 const request = require('request');
-const {appTestEndpoints} = require('./app-test');
 const pc = process;
 const runVideoTestBench = require('./app-video-testbench');
 const {
@@ -39,17 +38,19 @@ const {
   recaptchaRouter,
 } = require('./recaptcha-router');
 const {renderShadowViewer} = require('./shadow-viewer');
-const {replaceUrls} = require('./app-utils');
+const {replaceUrls, isRtvMode} = require('./app-utils');
 
 const upload = multer();
 
 const TEST_SERVER_PORT = process.env.SERVE_PORT;
 
 app.use(bodyParser.text());
+app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
 app.use('/user-location/', require('./routes/user-location'));
+app.use('/test', require('./routes/test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -64,7 +65,9 @@ app.use((req, res, next) => {
 });
 
 function isValidServeMode(serveMode) {
-  return ['default', 'compiled', 'cdn'].includes(serveMode);
+  return (
+    ['default', 'compiled', 'cdn'].includes(serveMode) || isRtvMode(serveMode)
+  );
 }
 
 function setServeMode(serveMode) {
@@ -88,13 +91,9 @@ if (!global.AMP_TESTING) {
 }
 
 // Changes the current serve mode via query param
-// e.g. /serve_mode_change?mode=(default|compiled|cdn)
+// e.g. /serve_mode_change?mode=(default|compiled|cdn|<RTV_NUMBER>)
 // (See ./app-index/settings.js)
 app.get('/serve_mode_change', (req, res) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   const {mode} = req.query;
   if (isValidServeMode(mode)) {
     setServeMode(mode);
@@ -243,16 +242,16 @@ app.use('/api/dont-show', (req, res) => {
 });
 
 app.use('/api/echo/query', (req, res) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   res.json(JSON.parse(req.query.data));
 });
 
 app.use('/api/echo/post', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.end(req.body);
+});
+
+app.use('/api/ping', (req, res) => {
+  res.status(204).end();
 });
 
 app.use('/form/html/post', (req, res) => {
@@ -407,70 +406,6 @@ app.use('/form/autocomplete/error', (req, res) => {
   res(500);
 });
 
-const autosuggestLanguages = [
-  'ActionScript',
-  'AppleScript',
-  'Asp',
-  'BASIC',
-  'C',
-  'C++',
-  'Clojure',
-  'COBOL',
-  'ColdFusion',
-  'Erlang',
-  'Fortran',
-  'Go',
-  'Groovy',
-  'Haskell',
-  'Java',
-  'JavaScript',
-  'Lisp',
-  'Perl',
-  'PHP',
-  'Python',
-  'Ruby',
-  'Scala',
-  'Scheme',
-];
-
-app.use('/form/autosuggest/query', (req, res) => {
-  cors.assertCors(req, res, ['GET']);
-  const MAX_RESULTS = 4;
-  const query = req.query.q;
-  if (!query) {
-    res.json({
-      items: [
-        {
-          results: autosuggestLanguages.slice(0, MAX_RESULTS),
-        },
-      ],
-    });
-  } else {
-    const lowerCaseQuery = query.toLowerCase();
-    const filtered = autosuggestLanguages.filter(l =>
-      l.toLowerCase().includes(lowerCaseQuery)
-    );
-    res.json({
-      items: [
-        {
-          results: filtered.slice(0, MAX_RESULTS),
-        },
-      ],
-    });
-  }
-});
-
-app.use('/form/autosuggest/search', (req, res) => {
-  cors.assertCors(req, res, ['POST']);
-  const form = new formidable.IncomingForm();
-  form.parse(req, function(err, fields) {
-    res.json({
-      query: fields.query,
-      results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
-    });
-  });
-});
-
 app.use('/form/verify-search-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
@@ -513,10 +448,6 @@ app.use('/form/verify-search-json/post', (req, res) => {
 });
 
 app.use('/share-tracking/get-outgoing-fragment', (req, res) => {
-  res.setHeader(
-    'AMP-Access-Control-Allow-Source-Origin',
-    req.protocol + '://' + req.headers.host
-  );
   res.json({
     fragment: '54321',
   });
@@ -890,76 +821,6 @@ app.get('/iframe-echo-message', (req, res) => {
   );
 });
 
-// A4A envelope.
-// Examples:
-// http://localhost:8000/a4a[-3p]/examples/animations.amp.html
-// http://localhost:8000/a4a[-3p]/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/a4a(|-3p)/', (req, res) => {
-  const force3p = req.baseUrl.indexOf('/a4a-3p') == 0;
-  let adUrl = req.url;
-  const templatePath = '/build-system/server-a4a-template.html';
-  const urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/proxy') && urlPrefix.indexOf('//localhost') != -1) {
-    // This is a special case for testing. `localhost` URLs are transformed to
-    // `ads.localhost` to ensure that the iframe is fully x-origin.
-    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
-  }
-  adUrl = addQueryParam(adUrl, 'inabox', 1);
-  fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
-    const result = template
-      .replace(/CHECKSIG/g, force3p || '')
-      .replace(/DISABLE3PFALLBACK/g, !force3p)
-      .replace(/OFFSET/g, req.query.offset || '0px')
-      .replace(/AD_URL/g, adUrl)
-      .replace(/AD_WIDTH/g, req.query.width || '300')
-      .replace(/AD_HEIGHT/g, req.query.height || '250');
-    res.end(result);
-  });
-});
-
-// In-a-box envelope.
-// Examples:
-// http://localhost:8000/inabox/examples/animations.amp.html
-// http://localhost:8000/inabox/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/inabox/:version/', (req, res) => {
-  let adUrl = req.url;
-  const templatePath = '/build-system/server-inabox-template.html';
-  const urlPrefix = getUrlPrefix(req);
-  if (
-    !adUrl.startsWith('/proxy') && // Ignore /proxy
-    urlPrefix.indexOf('//localhost') != -1
-  ) {
-    // This is a special case for testing. `localhost` URLs are transformed to
-    // `ads.localhost` to ensure that the iframe is fully x-origin.
-    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
-  }
-  adUrl = addQueryParam(adUrl, 'inabox', req.params['version']);
-  fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
-    const result = template
-      .replace(/AD_URL/g, adUrl)
-      .replace(/OFFSET/g, req.query.offset || '0px')
-      .replace(/AD_WIDTH/g, req.query.width || '300')
-      .replace(/AD_HEIGHT/g, req.query.height || '250');
-    res.end(result);
-  });
-});
-
-app.use('/examples/analytics.config.json', (req, res, next) => {
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
-  next();
-});
-
-app.use(
-  ['/examples/*', '/extensions/*', '/test/manual/*'],
-  (req, res, next) => {
-    const sourceOrigin = req.query['__amp_source_origin'];
-    if (sourceOrigin) {
-      res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-    }
-    next();
-  }
-);
-
 /**
  * Append ?sleep=5 to any included JS file in examples to emulate delay in
  * loading that file. This allows you to test issues with your extension being
@@ -1066,8 +927,6 @@ app.get(
       });
   }
 );
-
-appTestEndpoints(app);
 
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1407,6 +1266,7 @@ app.use('/shadow/', (req, res) => {
 /**
  * @param {string} ampJsVersion
  * @param {string} file
+ * @return {*} TODO(#23582): Specify return type
  */
 function addViewerIntegrationScript(ampJsVersion, file) {
   ampJsVersion = parseFloat(ampJsVersion);
@@ -1414,7 +1274,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  // eslint-disable-next-line amphtml-internal/no-es2015-number-props
+  // eslint-disable-next-line local/no-es2015-number-props
   if (Number.isInteger(ampJsVersion)) {
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js
@@ -1437,23 +1297,6 @@ function addViewerIntegrationScript(ampJsVersion, file) {
 
 function getUrlPrefix(req) {
   return req.protocol + '://' + req.headers.host;
-}
-
-/**
- * @param {string} url
- * @param {string} param
- * @param {*} value
- * @return {string}
- */
-function addQueryParam(url, param, value) {
-  const paramValue =
-    encodeURIComponent(param) + '=' + encodeURIComponent(value);
-  if (!url.includes('?')) {
-    url += '?' + paramValue;
-  } else {
-    url += '&' + paramValue;
-  }
-  return url;
 }
 
 function generateInfo(filePath) {
@@ -1493,5 +1336,37 @@ function decryptDocumentKey(encryptedDocumentKey) {
   }
   return parsedJson.key;
 }
+
+// serve local vendor config JSON files
+app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
+  const {vendor} = req.params;
+  const serveMode = pc.env.SERVE_MODE;
+
+  if (serveMode === 'cdn') {
+    const vendorUrl = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
+    request(vendorUrl, (error, response) => {
+      if (error) {
+        res.status(404);
+        res.end();
+      } else {
+        res.send(response);
+      }
+    });
+    return;
+  }
+
+  const max = serveMode === 'default' ? '.max' : '';
+  const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
+
+  fs.readFileAsync(localVendorConfigPath)
+    .then(file => {
+      res.setHeader('Content-Type', 'application/json');
+      res.end(file);
+    })
+    .error(() => {
+      res.status(404);
+      res.end('Not found: ' + localVendorConfigPath);
+    });
+});
 
 module.exports = app;

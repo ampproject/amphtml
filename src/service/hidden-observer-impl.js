@@ -44,6 +44,8 @@ export class HiddenObserver {
    * @param {(!Document|!ShadowRoot)=} opt_root
    */
   constructor(ampdoc, opt_root) {
+    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
+
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
     const doc = this.root_.ownerDocument || this.root_;
@@ -61,6 +63,7 @@ export class HiddenObserver {
   /**
    * @param {!Window} embedWin
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @nocollapse
    */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(

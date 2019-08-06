@@ -20,7 +20,7 @@ import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {ElementStub} from '../../src/element-stub';
 import {Services} from '../../src/services';
-import {adopt, adoptShadowMode, installAmpdocServices} from '../../src/runtime';
+import {adopt, adoptShadowMode} from '../../src/runtime';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {deactivateChunking, runChunksForTesting} from '../../src/chunk';
 import {
@@ -28,9 +28,11 @@ import {
   getServicePromise,
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
-import {installDocumentStateService} from '../../src/service/document-state';
+import {installAmpdocServices} from '../../src/service/core-services';
+import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
@@ -41,6 +43,7 @@ describes.fakeWin(
   },
   env => {
     let win;
+    let sandbox;
     let clock;
     let ampdocService;
     let ampdocServiceMock;
@@ -48,10 +51,12 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
-      clock = env.sandbox.useFakeTimers();
+      sandbox = env.sandbox;
+      clock = sandbox.useFakeTimers();
       extensionElementIndex = 0;
       ampdocService = {
         isSingleDoc: () => true,
+        getSingleDoc: () => null,
         getAmpDoc: () => null,
         installShadowDoc_: () => null,
       };
@@ -61,8 +66,9 @@ describes.fakeWin(
         ampdoc: {obj: ampdocService},
       };
       const ampdoc = new AmpDocSingle(win);
+      ampdocService.getSingleDoc = () => ampdoc;
       ampdocService.getAmpDoc = () => ampdoc;
-      installDocumentStateService(win);
+      installGlobalDocumentStateService(win);
       installPlatformService(win);
       installTimerService(win);
       vsyncForTesting(win);
@@ -204,7 +210,7 @@ describes.fakeWin(
       // JS executing before the rest of the doc has been parsed.
       const {body} = win.document;
       let accessedOnce = false;
-      Object.defineProperty(win.document, 'body', {
+      sandbox.defineProperty(win.document, 'body', {
         get: () => {
           if (accessedOnce) {
             return body;
@@ -696,7 +702,7 @@ describes.fakeWin(
       });
 
       it('should register element without CSS', function*() {
-        const ampdoc = ampdocService.getAmpDoc();
+        const ampdoc = ampdocService.getSingleDoc();
         const servicePromise = getServicePromise(win, 'amp-ext');
         const installStylesStub = sandbox.stub(styles, 'installStylesForDoc');
 
@@ -731,7 +737,7 @@ describes.fakeWin(
       });
 
       it('should register element with CSS', function*() {
-        const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+        const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
         const servicePromise = getServicePromise(win, 'amp-ext');
         let installStylesCallback;
         const installStylesStub = sandbox
@@ -1364,6 +1370,13 @@ describes.realWin(
         expect(viewer.getVisibilityState()).to.equal('inactive');
         expect(viewer.dispose).to.be.calledOnce;
       });
+
+      it('should expose head tag ', () => {
+        const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+        expect(amp.head).to.exist;
+        expect(amp.head.children).to.exist;
+        expect(amp.head.children.length).to.greaterThan(0);
+      });
     });
 
     describe
@@ -1379,6 +1392,7 @@ describes.realWin(
 
         beforeEach(() => {
           deactivateChunking();
+          setShadowDomSupportedVersionForTesting(undefined);
           hostElement = win.document.createElement('div');
           const shadowRoot = createShadowRoot(hostElement);
           ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);

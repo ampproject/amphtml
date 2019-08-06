@@ -37,7 +37,6 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
-import {getServiceForDoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isFiniteNumber} from '../../../src/types';
@@ -571,12 +570,7 @@ export class VideoDocking {
     }
 
     installPositionObserverServiceForDoc(this.ampdoc_);
-
-    // No getter in services.js.
-    return /** @type {!PositionObserver} */ (getServiceForDoc(
-      this.ampdoc_,
-      'position-observer'
-    ));
+    return Services.positionObserverForDoc(this.ampdoc_.getHeadNode());
   }
 
   /**
@@ -909,6 +903,7 @@ export class VideoDocking {
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number=} opt_step
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   dockInTransferLayerStep_(video, target, opt_step) {
@@ -1087,6 +1082,7 @@ export class VideoDocking {
    * @param {number} step in [0..1]
    * @param {number} transitionDurationMs
    * @param {RelativeX=} opt_relativeX
+   * @return {!Promise}
    * @private
    */
   placeAt_(video, x, y, scale, step, transitionDurationMs, opt_relativeX) {

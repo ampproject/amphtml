@@ -41,25 +41,22 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
+    timedExecOrDie('gulp dist --fortesting --single_pass');
     timedExecOrDie(
-      'gulp test --integration --nobuild --compiled --single_pass --headless'
+      'gulp integration --nobuild --compiled --single_pass --headless'
     );
   } else {
     printChangeSummary(FILENAME);
-    const buildTargets = new Set();
-    determineBuildTargets(buildTargets, FILENAME);
-
+    const buildTargets = determineBuildTargets(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
+      timedExecOrDie('gulp dist --fortesting --single_pass');
       timedExecOrDie(
-        'gulp test --integration ' +
-          '--nobuild --compiled --single_pass --headless'
+        'gulp integration --nobuild --compiled --single_pass --headless'
       );
     } else {
       console.log(

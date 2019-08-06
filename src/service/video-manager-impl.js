@@ -100,7 +100,11 @@ export class VideoManager {
     /** @private @const */
     this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
-    /** @private @const */
+    /**
+     * @private
+     * @const
+     * @return {undefined}
+     */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     /** @private @const {function():!AutoFullscreenManager} */
@@ -405,6 +409,7 @@ class VideoEntry {
       analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE)
     );
 
+    // eslint-disable-next-line jsdoc/require-returns
     /** @private @const {function(): !Promise<boolean>} */
     this.supportsAutoplay_ = () => {
       const {win} = this.ampdoc_;
@@ -459,6 +464,14 @@ class VideoEntry {
     listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
     listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false));
     listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
+
+    listen(video.element, VideoEvents.AD_START, () =>
+      analyticsEvent(this, VideoAnalyticsEvents.AD_START)
+    );
+
+    listen(video.element, VideoEvents.AD_END, () =>
+      analyticsEvent(this, VideoAnalyticsEvents.AD_END)
+    );
 
     listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
       const data = getData(e);
@@ -824,8 +837,15 @@ class VideoEntry {
 
     [
       listen(mask, 'click', () => userInteractedWith(video)),
-      listen(element, VideoEvents.AD_START, () => setMaskDisplay(false)),
-      listen(element, VideoEvents.AD_END, () => setMaskDisplay(true)),
+      listen(element, VideoEvents.AD_START, () => {
+        setMaskDisplay(false);
+        video.showControls();
+      }),
+      listen(element, VideoEvents.AD_END, () => {
+        setMaskDisplay(true);
+        video.hideControls();
+      }),
+      listen(element, VideoEvents.UNMUTED, () => userInteractedWith(video)),
     ].forEach(unlistener => unlisteners.push(unlistener));
   }
 
@@ -984,6 +1004,7 @@ export class AutoFullscreenManager {
     /** @private @const {!Array<!../video-interface.VideoOrBaseElementDef>} */
     this.entries_ = [];
 
+    // eslint-disable-next-line jsdoc/require-returns
     /** @private @const {function()} */
     this.boundSelectBestCentered_ = () => this.selectBestCenteredInPortrait_();
 
@@ -1139,6 +1160,7 @@ export class AutoFullscreenManager {
    * Scrolls to a video if it's not in view.
    * @param {!../video-interface.VideoOrBaseElementDef} video
    * @param {?string=} optPos
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   scrollIntoIfNotVisible_(video, optPos = null) {
@@ -1162,18 +1184,27 @@ export class AutoFullscreenManager {
     });
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   getViewport_() {
     return Services.viewportForDoc(this.ampdoc_);
   }
 
-  /** @private @return {!Promise} */
+  /**
+   * @private
+   * @return {!Promise}
+   */
   onceOrientationChanges_() {
     const magicNumber = 330;
     return Services.timerFor(this.ampdoc_.win).promise(magicNumber);
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   selectBestCenteredInPortrait_() {
     if (this.isInLandscape()) {
       return this.currentlyCentered_;
@@ -1337,13 +1368,21 @@ export class AnalyticsPercentageTracker {
 
     this.unlisteners_ = this.unlisteners_ || [];
 
-    this.unlisteners_.push(
-      listenOnce(element, VideoEvents.LOADEDMETADATA, () => {
-        if (this.hasDuration_()) {
-          this.calculate_(this.triggerId_);
-        }
-      }),
+    // If the video has already emitted LOADEDMETADATA, the event below
+    // will never fire, so we check if it's already available here.
+    if (this.hasDuration_()) {
+      this.calculate_(this.triggerId_);
+    } else {
+      this.unlisteners_.push(
+        listenOnce(element, VideoEvents.LOADEDMETADATA, () => {
+          if (this.hasDuration_()) {
+            this.calculate_(this.triggerId_);
+          }
+        })
+      );
+    }
 
+    this.unlisteners_.push(
       listen(element, VideoEvents.ENDED, () => {
         if (this.hasDuration_()) {
           this.maybeTrigger_(/* normalizedPercentage */ 100);

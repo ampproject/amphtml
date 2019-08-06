@@ -281,6 +281,7 @@ export class ActionService {
   /**
    * @param {!Window} embedWin
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @nocollapse
    */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
@@ -515,6 +516,30 @@ export class ActionService {
       return false;
     }
     return action.actionInfos.some(({target}) => !!this.getActionNode_(target));
+  }
+
+  /**
+   * Checks if the given element's registered action resolves to at least one
+   * existing element by id or a global target (e.g. "AMP").
+   * @param {!Element} element
+   * @param {string} actionEventType
+   * @param {!Element} targetElement
+   * @param {!Element=} opt_stopAt
+   * @return {boolean}
+   */
+  hasResolvableActionForTarget(
+    element,
+    actionEventType,
+    targetElement,
+    opt_stopAt
+  ) {
+    const action = this.findAction_(element, actionEventType, opt_stopAt);
+    if (!action) {
+      return false;
+    }
+    return action.actionInfos.some(({target}) => {
+      return this.getActionNode_(target) == targetElement;
+    });
   }
 
   /**

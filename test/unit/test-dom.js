@@ -19,6 +19,7 @@ import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 import {setScopeSelectorSupportedForTesting} from '../../src/css';
+import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 import {toArray} from '../../src/types';
 
 describes.sandboxed('DOM', {}, env => {
@@ -30,6 +31,7 @@ describes.sandboxed('DOM', {}, env => {
 
   afterEach(() => {
     setScopeSelectorSupportedForTesting(undefined);
+    setShadowDomSupportedVersionForTesting(undefined);
     sandbox.restore();
   });
 
@@ -87,35 +89,25 @@ describes.sandboxed('DOM', {}, env => {
   });
 
   it('isConnectedNode (no Node.p.isConnected)', () => {
-    if (!Object.hasOwnProperty.call(Node.prototype, 'isConnected')) {
-      return;
-    }
+    sandbox.deleteProperty(Node.prototype, 'isConnected');
+    expect(dom.isConnectedNode(document)).to.be.true;
 
-    const desc = Object.getOwnPropertyDescriptor(Node.prototype, 'isConnected');
-    try {
-      delete Node.prototype.isConnected;
+    const a = document.createElement('div');
+    expect(dom.isConnectedNode(a)).to.be.false;
 
-      expect(dom.isConnectedNode(document)).to.be.true;
+    const b = document.createElement('div');
+    b.appendChild(a);
 
-      const a = document.createElement('div');
-      expect(dom.isConnectedNode(a)).to.be.false;
+    document.body.appendChild(b);
+    expect(dom.isConnectedNode(a)).to.be.true;
 
-      const b = document.createElement('div');
-      b.appendChild(a);
+    const shadow = a.attachShadow({mode: 'open'});
+    const c = document.createElement('div');
+    shadow.appendChild(c);
+    expect(dom.isConnectedNode(c)).to.be.true;
 
-      document.body.appendChild(b);
-      expect(dom.isConnectedNode(a)).to.be.true;
-
-      const shadow = a.attachShadow({mode: 'open'});
-      const c = document.createElement('div');
-      shadow.appendChild(c);
-      expect(dom.isConnectedNode(c)).to.be.true;
-
-      document.body.removeChild(b);
-      expect(dom.isConnectedNode(c)).to.be.false;
-    } finally {
-      Object.defineProperty(Node.prototype, 'isConnected', desc);
-    }
+    document.body.removeChild(b);
+    expect(dom.isConnectedNode(c)).to.be.false;
   });
 
   it('rootNodeFor', () => {
@@ -132,27 +124,64 @@ describes.sandboxed('DOM', {}, env => {
   });
 
   it('rootNodeFor (no Node.p.getRootNode)', () => {
-    if (!Object.hasOwnProperty.call(Node.prototype, 'getRootNode')) {
-      return;
-    }
+    sandbox.deleteProperty(Node.prototype, 'getRootNode');
 
-    const desc = Object.getOwnPropertyDescriptor(Node.prototype, 'getRootNode');
-    try {
-      delete Node.prototype.getRootNode;
+    const a = document.createElement('div');
+    expect(dom.rootNodeFor(a)).to.equal(a);
 
-      const a = document.createElement('div');
-      expect(dom.rootNodeFor(a)).to.equal(a);
+    const b = document.createElement('div');
+    a.appendChild(b);
+    expect(dom.rootNodeFor(b)).to.equal(a);
 
-      const b = document.createElement('div');
-      a.appendChild(b);
-      expect(dom.rootNodeFor(b)).to.equal(a);
+    const c = document.createElement('div');
+    b.appendChild(c);
+    expect(dom.rootNodeFor(c)).to.equal(a);
 
-      const c = document.createElement('div');
-      b.appendChild(c);
-      expect(dom.rootNodeFor(c)).to.equal(a);
-    } finally {
-      Object.defineProperty(Node.prototype, 'getRootNode', desc);
-    }
+    const polyfill = document.createElement('i-amphtml-shadow-root');
+    const e = document.createElement('div');
+    polyfill.appendChild(e);
+    a.appendChild(polyfill);
+    expect(dom.rootNodeFor(e)).to.equal(polyfill);
+  });
+
+  describe('isShadowRoot', () => {
+    it('should yield false for non-nodes', () => {
+      expect(dom.isShadowRoot(null)).to.be.false;
+      expect(dom.isShadowRoot(undefined)).to.be.false;
+      expect(dom.isShadowRoot('')).to.be.false;
+      expect(dom.isShadowRoot(11)).to.be.false;
+    });
+
+    it('should yield false for other types of nodes', () => {
+      expect(dom.isShadowRoot(document.createElement('div'))).to.be.false;
+      expect(dom.isShadowRoot(document.createTextNode('abc'))).to.be.false;
+    });
+
+    it('should yield true for natively-supported createShadowRoot API', () => {
+      const element = document.createElement('div');
+      if (element.createShadowRoot) {
+        const shadowRoot = element.createShadowRoot();
+        expect(dom.isShadowRoot(shadowRoot)).to.be.true;
+      }
+    });
+
+    it('should yield true for natively-supported attachShadow API', () => {
+      const element = document.createElement('div');
+      if (element.attachShadow) {
+        const shadowRoot = element.attachShadow({mode: 'open'});
+        expect(dom.isShadowRoot(shadowRoot)).to.be.true;
+      }
+    });
+
+    it('should yield false for document-fragment non-shadow-root node', () => {
+      const fragment = document.createDocumentFragment();
+      expect(dom.isShadowRoot(fragment)).to.be.false;
+    });
+
+    it('should yield true for polyfill', () => {
+      expect(dom.isShadowRoot(document.createElement('i-amphtml-shadow-root')))
+        .to.be.true;
+    });
   });
 
   it('closest should find itself', () => {

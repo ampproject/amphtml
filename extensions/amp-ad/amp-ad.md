@@ -42,12 +42,12 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js">&lt;/script></code><br>Note: amp-ad may still work without this script, but we highly recommend it for future compatibility</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-ad/">amp-ad example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-ad/">amp-ad example</a>.</td>
   </tr>
 </table>
 
@@ -58,20 +58,41 @@ custom element called `<amp-ad>`. No ad network-provided JavaScript is allowed t
 different origin (via iframe sandbox) as the AMP document and executes the ad
 network’s JS inside that iframe sandbox.
 
-The `<amp-ad>` requires width and height values to be specified according to the [rule](https://www.ampproject.org/docs/design/amp-html-layout#(tl;dr)-summary-of-layout-requirements-&-behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+The `<amp-ad>` requires width and height values to be specified according to the [rule](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#(tl;dr)-summary-of-layout-requirements-&-behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
 
 #### Example: Displaying a few ads
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="522"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampad.basic.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+
+[example preview="inline" playground="true" imports="amp-ad"]
+```html
+<amp-ad type="a9"
+  data-amzn_assoc_ad_mode="auto"
+  data-divid="amzn-assoc-ad-fe746097-f142-4f8d-8dfb-45ec747632e5"
+  data-recomtype="async"
+  data-adinstanceid="fe746097-f142-4f8d-8dfb-45ec747632e5"
+    width="300"
+    height="250"
+    data-aax_size="300x250"
+    data-aax_pubname="test123"
+    data-aax_src="302">
+  </amp-ad>
+  <amp-ad width="300"
+    height="250"
+    type="industrybrains"
+    data-width="300"
+    data-height="250"
+    data-cid="19626-3798936394">
+  </amp-ad>
+  <amp-embed type="taboola"
+    width="400"
+    height="300"
+    layout="responsive"
+    data-publisher="amp-demo"
+    data-mode="thumbnails-a"
+    data-placement="Ads Example"
+    data-article="auto">
+  </amp-embed>
+```
+[/example]
 
 ## Attributes
 <table>
@@ -97,7 +118,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
   </tr>
   <tr>
     <td width="40%"><strong>data-consent-notification-id (optional)</strong></td>
-    <td>If provided, requires confirming the <a href="https://www.ampproject.org/docs/reference/components/amp-user-notification.html">amp-user-notification</a> with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. This means that ad rendering is delayed until the user confirms the notification.</td>
+    <td>If provided, requires confirming the <a href="https://amp.dev/documentation/components/amp-user-notification.html">amp-user-notification</a> with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. This means that ad rendering is delayed until the user confirms the notification.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-loading-strategy (optional)</strong></td>
@@ -110,13 +131,13 @@ The `<amp-ad>` requires width and height values to be specified according to the
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
 ## Placeholder
 
-Optionally, `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing. Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders).
+Optionally, `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing. Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders).
 
 ```html
 <amp-ad width=300 height=250
@@ -143,11 +164,11 @@ Example with fallback:
 There are 3 ways to monetize videos in AMP with video ads:
 1. AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
 
-2. Use the [amp-ima-video](https://www.ampproject.org/docs/reference/components/amp-ima-video.html) component that comes with a built-in IMA SDK and HTML5 video player
+2. Use the [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video.html) component that comes with a built-in IMA SDK and HTML5 video player
 
-3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
+3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://amp.dev/documentation/examples/components/amp-iframe/).
 When using `amp-iframe` approach:
-    * Make sure there is a poster if loading the player in the first viewport. [Details](https://www.ampproject.org/docs/reference/components/amp-iframe#iframe-with-placeholder).
+    * Make sure there is a poster if loading the player in the first viewport. [Details](https://amp.dev/documentation/components/amp-iframe#iframe-with-placeholder).
     * Video and poster must be served over HTTPS.
 
 
@@ -180,7 +201,7 @@ Enforcing origins can be done with the 3rd argument to `draw3p` and must additio
 
 This is completely optional: It is sometimes desired to enhance the ad request before making the ad request to the ad server.
 
-If your ad network supports [fast fetch](https://www.ampproject.org/docs/ads/adnetwork_integration#creating-an-amp-ad-implementation), then please use [Real Time Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) (RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and RTC)
+If your ad network supports [fast fetch](https://amp.dev/documentation/guides-and-tutorials/contribute/adnetwork_integration#creating-an-amp-ad-implementation), then please use [Real Time Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) (RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and RTC)
 
 If your ad network uses delayed fetch, you can pass a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
 
@@ -223,12 +244,14 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AdmanMedia](../../ads/admanmedia.md)
 - [Admixer](../../ads/admixer.md)
 - [AdOcean](../../ads/adocean.md)
+- [Adop](../../ads/adop.md)
 - [AdPicker](../../ads/adpicker.md)
 - [AdPlugg](../../ads/adplugg.md)
 - [Adpon](../../ads/adpon.md)
 - [AdReactor](../../ads/adreactor.md)
 - [AdSense](../../ads/google/adsense.md)
 - [AdSensor](../../ads/adsensor.md)
+- [AdsLoom](../../ads/adsloom.md)
 - [AdsNative](../../ads/adsnative.md)
 - [AdSpeed](../../ads/adspeed.md)
 - [AdSpirit](../../ads/adspirit.md)
@@ -269,6 +292,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [DistroScale](../../ads/distroscale.md)
 - [Dot and Media](../../ads/dotandads.md)
 - [Doubleclick](../../ads/google/doubleclick.md)
+- [DynAd](../../ads/dynad.md)
 - [eADV](../../ads/eadv.md)
 - [E-Planning](../../ads/eplanning.md)
 - [Ezoic](../../ads/ezoic.md)
@@ -277,6 +301,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [FlexOneHARRIER](../../ads/f1h.md)
 - [Flite](../../ads/flite.md)
 - [fluct](../../ads/fluct.md)
+- [Fork Media](../../ads/forkmedia.md)
 - [FreeWheel](../../ads/freewheel.md)
 - [Fusion](../../ads/fusion.md)
 - [GenieeSSP](../../ads/genieessp.md)
@@ -294,6 +319,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Industrybrains](../../ads/industrybrains.md)
 - [InMobi](../../ads/inmobi.md)
 - [Innity](../../ads/innity.md)
+- [Invibes](../../ads/invibes.md)
 - [Kargo](../../ads/kargo.md)
 - [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
@@ -301,6 +327,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Lentainform](../../ads/lentainform.md)
 - [Ligatus](../../ads/ligatus.md)
 - [LockerDome](../../ads/lockerdome.md)
+- [LOGLY](../../ads/logly.md)
 - [LOKA](../../ads/loka.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
@@ -317,6 +344,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [mox](../../ads/mox.md)
 - [myTarget](../../ads/mytarget.md)
 - [myWidget](../../ads/mywidget.md)
+- [NativeRoll](../../ads/nativeroll.md)
 - [Nativo](../../ads/nativo.md)
 - [Navegg](../../ads/navegg.md)
 - [Nend](../../ads/nend.md)
@@ -348,6 +376,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Relap](../../ads/relap.md)
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
+- [rnetplus](../../ads/rnetplus.md)
 - [Rubicon Project](../../ads/rubicon.md)
 - [RUNative](../../ads/runative.md)
 - [SAS CI 360 Match](../../ads/sas.md)
@@ -362,6 +391,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [SOVRN](../../ads/sovrn.md)
 - [Speakol](../../ads/speakol.md)
 - [SpotX](../../ads/spotx.md)
+- [Streamrail](../../ads/streamrail.md)
 - [SunMedia](../../ads/sunmedia.md)
 - [Swoop](../../ads/swoop.md)
 - [TcsEmotion](../../ads/tcsemotion.md)
@@ -397,7 +427,9 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 
 ## Supported embed types
 
+- [1wo](../../ads/1wo.md)
 - [24smi](../../ads/24smi.md)
+- [AdsLoom](../../ads/adsloom.md)
 - [Bringhub](../../ads/bringhub.md)
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
@@ -408,6 +440,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [PubExchange](../../ads/pubexchange.md)
 - [Smi2](../../ads/smi2.md)
 - [SVK-Native](../../ads/svknative.md)
+- [Strossle](../../ads/strossle.md)
 - [Taboola](../../ads/taboola.md)
 - [Zen](../../ads/zen.md)
 - [ZergNet](../../ads/zergnet.md)

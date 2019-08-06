@@ -1270,20 +1270,6 @@ class ReferencePointMatcher {
       }
     }
   }
-
-  /**
-   * @return {!Array<number>}
-   */
-  getReferencePointsMatched() {
-    return this.referencePointsMatched_;
-  }
-
-  /**
-   * @return {!ParsedReferencePoints}
-   */
-  getParsedReferencePoints() {
-    return this.parsedReferencePoints_;
-  }
 }
 
 // Instances of this class specify which tag names (|allowedTags|)
@@ -4689,8 +4675,11 @@ function validateTagAgainstSpec(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag,
         resultForAttempt);
   }
-  validateDescendantTags(
-      encounteredTag, parsedTagSpec, context, resultForAttempt);
+  // Only validate that this is a valid descendant if it's not already invalid.
+  if (resultForAttempt.status === amp.validator.ValidationResult.Status.PASS) {
+    validateDescendantTags(
+        encounteredTag, parsedTagSpec, context, resultForAttempt);
+  }
   validateNoSiblingsAllowedTags(parsedTagSpec, context, resultForAttempt);
   validateLastChildTags(context, resultForAttempt);
   // If we haven't reached the body element yet, we may not have seen the
@@ -4915,14 +4904,6 @@ class ParsedValidatorRules {
     this.partialMatchCaseiRegexes_ = [];
 
     /**
-     * A tuple of ('amp-form', 'form') would indicate that 'form' is an example
-     * tag name that uses of the extension 'amp-form'.
-     * @type {!Object<string, string>}
-     * @private
-     */
-    this.exampleUsageByExtension_ = {};
-
-    /**
      * Sets type identifiers which are used to determine the set of validation
      * rules to be applied.
      * @type {!Object<string, number>}
@@ -5006,22 +4987,7 @@ class ParsedValidatorRules {
       if (tag.mandatory) {
         this.mandatoryTagSpecs_.push(tagSpecId);
       }
-      // Produce a mapping from every extension to an example tag which
-      // requires that extension.
-      for (let i = 0; i < tag.requiresExtension.length; ++i) {
-        const extension = tag.requiresExtension[i];
-        // Some extensions have multiple tags that require them. Some tags
-        // require multiple extensions. If we have two tags requiring an
-        // extension, we prefer to use the one that lists the extension first
-        // (i === 0) as an example of that extension.
-        if (!this.exampleUsageByExtension_.hasOwnProperty(extension) || i === 0)
-        {this.exampleUsageByExtension_[extension] = getTagSpecName(tag);}
-      }
     }
-    // The amp-ad tag doesn't require amp-ad javascript for historical
-    // reasons. We still want to warn if you include the code but don't
-    // use it.
-    this.exampleUsageByExtension_['amp-ad'] = 'amp-ad';
 
     /**
      * @typedef {{ format: string, specificity: number }}
@@ -5233,6 +5199,8 @@ class ParsedValidatorRules {
               /* url */'', validationResult);
         }
         break;
+      default:
+        // fallthrough
     }
   }
 
@@ -5310,18 +5278,6 @@ class ParsedValidatorRules {
 
     // Equal, so not better than.
     return false;
-  }
-
-  /**
-   * Returns an example tag which uses a given extension, or empty
-   * string if none.
-   * @param {string} extensionName
-   * @return {string}
-   */
-  exampleTagForExtension(extensionName) {
-    return this.exampleUsageByExtension_.hasOwnProperty(extensionName) ?
-      this.exampleUsageByExtension_[extensionName] :
-      '';
   }
 
   /**
@@ -5766,7 +5722,24 @@ amp.validator.ValidationHandler =
         const attrsByKey = encounteredTag.attrsByKey();
         const styleAttr = attrsByKey['style'];
         if (styleAttr !== undefined) {
-          this.context_.addInlineStyleByteSize(byteLength(styleAttr));
+          const styleLen = byteLength(styleAttr);
+          this.context_.addInlineStyleByteSize(styleLen);
+          for (const cssLengthSpec of this.context_.getRules()
+                   .getCssLengthSpec()) {
+            if (cssLengthSpec.maxBytesPerInlineStyle !== undefined &&
+                styleLen > cssLengthSpec.maxBytesPerInlineStyle) {
+              this.context_.addError(
+                  amp.validator.ValidationError.Code.INLINE_STYLE_TOO_LONG,
+                  this.context_.getLineCol(),
+                  /* params */
+                  [
+                    encounteredTag.lowerName(), styleLen.toString(),
+                    cssLengthSpec.maxBytesPerInlineStyle.toString()
+                  ],
+                  cssLengthSpec.specUrl, this.validationResult_);
+              encounteredTag.dedupeAttrs();
+            }
+          }
         }
 
         /** @type {ValidateTagResult} */
@@ -5778,16 +5751,28 @@ amp.validator.ValidationHandler =
         amp.validator.ValidationResult.Status.UNKNOWN;
         const referencePointMatcher =
         this.context_.getTagStack().parentReferencePointMatcher();
+        // We must match the reference point before the TagSpec, as otherwise we
+        // will end up with "unexplained" attributes during tagspec matching
+        // which the reference point takes care of.
         if (referencePointMatcher !== null) {
           resultForReferencePoint =
           referencePointMatcher.validateTag(encounteredTag, this.context_);
-          this.validationResult_.mergeFrom(
-              resultForReferencePoint.validationResult);
         }
 
         const resultForTag = validateTag(
             encounteredTag, resultForReferencePoint.bestMatchTagSpec,
             this.context_);
+        // Only merge in the reference point errors into the final result if the
+        // tag otherwise passes one of the TagSpecs. Otherwise, we end up with
+        // unnecessarily verbose errors.
+        if (referencePointMatcher !== null &&
+            resultForTag.validationResult.status ===
+                amp.validator.ValidationResult.Status.PASS) {
+          this.validationResult_.mergeFrom(
+              resultForReferencePoint.validationResult);
+        }
+
+
         checkForReferencePointCollision(
             resultForReferencePoint.bestMatchTagSpec,
             resultForTag.bestMatchTagSpec,
@@ -5869,8 +5854,10 @@ amp.validator.isSeverityWarning = function(error) {
  */
 amp.validator.validateString = function(inputDocContents, opt_htmlFormat) {
   goog.asserts.assertString(inputDocContents, 'Input document is not a string');
-
-  const htmlFormat = opt_htmlFormat || 'AMP';
+  let htmlFormat = 'AMP';
+  if (opt_htmlFormat) {
+      htmlFormat = opt_htmlFormat.toUpperCase();
+   }
   const handler = new amp.validator.ValidationHandler(htmlFormat);
   const parser = new amp.htmlparser.HtmlParser();
   parser.parse(handler, inputDocContents);
@@ -6185,6 +6172,7 @@ amp.validator.categorizeError = function(error) {
       error.code ===
           amp.validator.ValidationError.Code
               .STYLESHEET_AND_INLINE_STYLE_TOO_LONG ||
+      error.code === amp.validator.ValidationError.Code.INLINE_STYLE_TOO_LONG ||
       (error.code ===
            amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST &&
        isAuthorStylesheet(error.params[0]))) {

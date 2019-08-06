@@ -48,6 +48,7 @@ describes.realWin(
       attributes = {
         'data-ad-client': 'ca-pub-test',
         'type': 'adsense',
+        'data-no-fill': 'true',
       };
     });
 
@@ -81,6 +82,7 @@ describes.realWin(
               expect(ampAd.getAttribute('data-ad-client')).to.equal(
                 'ca-pub-test'
               );
+              expect(ampAd.getAttribute('data-no-fill')).to.equal('true');
               resolve();
             }
           );
@@ -89,7 +91,7 @@ describes.realWin(
         return Promise.all([strategyPromise, expectPromise]);
       });
 
-      it('should not insert sticky ad if not opted in', () => {
+      it('should not insert sticky ad if not opted in anchor ad', () => {
         const anchorAdStrategy = new AnchorAdStrategy(
           env.ampdoc,
           attributes,

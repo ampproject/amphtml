@@ -26,7 +26,7 @@ import {
   getExistingServiceForDocInEmbedScope,
   getParentWindowFrameElement,
 } from '../../../src/service';
-import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {userAssert} from '../../../src/log';
 
 /**
@@ -148,9 +148,7 @@ export class GwdAnimation extends AMP.BaseElement {
     if (gwdPageDeck) {
       userAssert(this.element.id, `The ${TAG} element must have an id.`);
 
-      const setCurrentPageAction = `${
-        this.element.id
-      }.setCurrentPage(index=event.index)`;
+      const setCurrentPageAction = `${this.element.id}.setCurrentPage(index=event.index)`;
       addAction(this.element, gwdPageDeck, 'slideChange', setCurrentPageAction);
     }
 
@@ -196,6 +194,7 @@ export class GwdAnimation extends AMP.BaseElement {
    * Returns whether the given action invocation should be executed.
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   shouldExecuteInvocation_(invocation) {
     if (invocation.method == 'setCurrentPage') {

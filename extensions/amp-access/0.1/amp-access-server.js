@@ -75,7 +75,7 @@ export class AccessServerAdapter {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
+    /** @const @protected {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(ampdoc.win);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
@@ -165,7 +165,6 @@ export class AccessServerAdapter {
             headers: dict({
               'Content-Type': 'application/x-www-form-urlencoded',
             }),
-            requireAmpResponseSourceOrigin: false,
           })
         );
       })

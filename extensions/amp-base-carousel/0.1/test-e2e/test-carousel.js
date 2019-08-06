@@ -24,7 +24,11 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
-    experiments: ['amp-base-carousel', 'layers'],
+    experiments: [
+      'amp-base-carousel',
+      'amp-lightbox-gallery-base-carousel',
+      'layers',
+    ],
     initialRect: {width: pageWidth, height: pageHeight},
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
@@ -51,7 +55,6 @@ describes.endtoend(
         pageWidth * (2 * (SLIDE_COUNT - 1) + 1)
       );
       await waitForCarouselImg(controller, 0);
-      await controller.takeScreenshot('screenshots/render.png');
     });
 
     it('should layout the two adjacent slides', async () => {
@@ -74,11 +77,10 @@ describes.endtoend(
       const snappedScrollLeft = scrollLeft + slideWidth;
       const requestedScrollLeft = snappedScrollLeft + 1;
 
-      await controller.scroll(el, {left: requestedScrollLeft});
+      await controller.scrollTo(el, {left: requestedScrollLeft});
       // We should have snapped to the edge of the slide rather than the
       // requested scroll position.
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
-      await controller.takeScreenshot('screenshots/snapped.png');
     });
 
     it('should reset the window after scroll', async () => {
@@ -95,14 +97,13 @@ describes.endtoend(
       const snappedScrollLeft = scrollLeft + slideWidth;
       const requestedScrollLeft = snappedScrollLeft + 1;
 
-      await controller.scroll(el, {left: requestedScrollLeft});
+      await controller.scrollTo(el, {left: requestedScrollLeft});
       // Wait for the scrolling to settle
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
       // The new scroll width/left should eventually be the same as before,
       // since the windowing should have been reset around the new element.
       await expect(prop(el, 'scrollWidth')).to.equal(scrollWidth);
       await expect(prop(el, 'scrollLeft')).to.equal(scrollLeft);
-      await controller.takeScreenshot('screenshots/after-reset.png');
     });
 
     it('should have the correct scroll position when resizing', async () => {
@@ -133,7 +134,6 @@ describes.endtoend(
         'x': 0,
         'width': 900,
       });
-      await controller.takeScreenshot('screenshots/after-resize.png');
     });
 
     describe('looping', () => {
@@ -150,10 +150,9 @@ describes.endtoend(
         const restingScrollLeft = await prop(el, 'scrollLeft');
         const snappedScrollLeft = restingScrollLeft - slideWidth;
         const requestedScrollLeft = snappedScrollLeft - 1;
-        await controller.scroll(el, {left: requestedScrollLeft});
+        await controller.scrollTo(el, {left: requestedScrollLeft});
 
         await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
-        await controller.takeScreenshot('screenshots/loop-past-start.png');
       });
 
       it('should show the first slide when looping', async () => {
@@ -168,17 +167,16 @@ describes.endtoend(
         const slideWidth = await prop(lastSlide, 'offsetWidth');
         const restingScrollLeft = await prop(el, 'scrollLeft');
         const lastSlideScrollPos = restingScrollLeft - slideWidth;
-        await controller.scroll(el, {left: lastSlideScrollPos});
+        await controller.scrollTo(el, {left: lastSlideScrollPos});
         await expect(prop(el, 'scrollLeft')).to.equal(lastSlideScrollPos);
         await expect(prop(el, 'scrollLeft')).to.equal(restingScrollLeft);
 
         // Go to the next slide by moving the slides width to the right.
         const snappedScrollLeft = restingScrollLeft + slideWidth;
         const requestedScrollLeft = snappedScrollLeft + 1;
-        await controller.scroll(el, {left: requestedScrollLeft});
+        await controller.scrollTo(el, {left: requestedScrollLeft});
 
         await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
-        await controller.takeScreenshot('screenshots/loop-past-end.png');
       });
 
       // When resting the last few slides should be translated to the left.
@@ -204,9 +202,6 @@ describes.endtoend(
           x: 0,
           width: slideWidth,
         });
-        await controller.takeScreenshot(
-          'screenshots/loop-move-forwards-to-end.png'
-        );
       });
 
       // When resting the first few slides should be translated to the right.
@@ -233,9 +228,6 @@ describes.endtoend(
           x: 0,
           width: slideWidth,
         });
-        await controller.takeScreenshot(
-          'screenshots/loop-move-backwards-to-second.png'
-        );
       });
     });
   }

@@ -41,6 +41,7 @@ const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
   'system': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
   'email': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
   'facebook': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
+  'line': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE,
   'linkedin': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
   'pinterest': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
   'gplus': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
@@ -293,9 +294,7 @@ export class ShareWidget {
    * @private
    */
   getAmpDoc_() {
-    return /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (devAssert(
-      this.ampdoc_
-    ));
+    return devAssert(this.ampdoc_);
   }
 
   /** @private */
@@ -359,7 +358,7 @@ export class ShareWidget {
         const failureString = localizationService.getLocalizedString(
           LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
         );
-        Toast.show(this.storyEl, failureString);
+        Toast.show(this.storyEl, dev().assertString(failureString));
       });
       return;
     }

@@ -74,38 +74,26 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'third_party/**/*.js',
     whitelist: [
-      'extensions/amp-crypto-polyfill/**/*.js->' +
-        'third_party/closure-library/sha384-generated.js',
-      'extensions/amp-mustache/**/amp-mustache.js->' +
-        'third_party/mustache/mustache.js',
-      'extensions/amp-ad-network-adzerk-impl/0.1/' +
-        'amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
-      'extensions/amp-timeago/0.1/amp-timeago.js->' +
-        'third_party/timeagojs/timeago.js',
       '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',
-      'src/sanitizer.js->third_party/caja/html-sanitizer.js',
-      'extensions/amp-viz-vega/**->third_party/vega/vega.js',
-      'extensions/amp-viz-vega/**->third_party/d3/d3.js',
-      'src/css.js->third_party/css-escape/css-escape.js',
-      'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
-      'third_party/timeagojs/timeago.js->' +
-        'third_party/timeagojs/timeago-locales.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
+      'extensions/amp-autocomplete/**/*.js->third_party/fuzzysearch/index.js',
+      'extensions/amp-crypto-polyfill/**/*.js->third_party/closure-library/sha384-generated.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
-      'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
-      'extensions/amp-subscriptions/**/*.js->' +
-        'third_party/subscriptions-project/apis.js',
-      'extensions/amp-subscriptions/**/*.js->' +
-        'third_party/subscriptions-project/config.js',
-      'extensions/amp-subscriptions-google/**/*.js->' +
-        'third_party/subscriptions-project/apis.js',
-      'extensions/amp-subscriptions-google/**/*.js->' +
-        'third_party/subscriptions-project/config.js',
-      'extensions/amp-subscriptions-google/**/*.js->' +
-        'third_party/subscriptions-project/swg.js',
-      'extensions/amp-recaptcha-input/**/*.js->' +
-        'third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
-      'extensions/amp-autocomplete/**/*.js->' +
-        'third_party/fuzzysearch/index.js',
+      'extensions/amp-list/**->third_party/set-dom/set-dom.js',
+      'extensions/amp-mustache/**/amp-mustache.js->third_party/mustache/mustache.js',
+      'extensions/amp-recaptcha-input/**/*.js->third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
+      'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/apis.js',
+      'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/config.js',
+      'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
+      'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/apis.js',
+      'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
+      'extensions/amp-timeago/0.1/amp-timeago.js->third_party/timeagojs/timeago.js',
+      'extensions/amp-viz-vega/**->third_party/d3/d3.js',
+      'extensions/amp-viz-vega/**->third_party/vega/vega.js',
+      'src/css.js->third_party/css-escape/css-escape.js',
+      'src/sanitizer.js->third_party/caja/html-sanitizer.js',
+      'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
+      'third_party/timeagojs/timeago.js->third_party/timeagojs/timeago-locales.js',
     ],
   },
   // Rules for 3p
@@ -247,6 +235,12 @@ exports.rules = [
       // Ads needs iframe transports
       'extensions/amp-ad-exit/0.1/config.js->extensions/amp-analytics/0.1/iframe-transport-vendors.js',
 
+      // Facebook components
+      'extensions/amp-facebook/0.1/amp-facebook.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
+
       // Amp geo in group enum
       'extensions/amp-consent/0.1/amp-consent.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
@@ -256,7 +250,6 @@ exports.rules = [
       'extensions/amp-story/1.0/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
-      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/navigation-state.js',
       // TODO(ccordry): remove this after createShadowRootWithStyle is moved to src
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/utils.js',
 
@@ -674,6 +667,9 @@ exports.rules = [
         'src/service/localization.js',
       'extensions/amp-story-auto-ads/0.1/_locales/zu.js->' +
         'src/service/localization.js',
+      // Accessing calculateScriptBaseUrl() for vendor config URLs
+      'extensions/amp-analytics/0.1/config.js->' +
+        'src/service/extension-location.js',
     ],
   },
   {
@@ -697,9 +693,9 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/array-includes.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
-      'src/service/extensions-impl.js->src/polyfills/custom-elements.js',
-      'src/service/extensions-impl.js->src/polyfills/document-contains.js',
-      'src/service/extensions-impl.js->src/polyfills/domtokenlist-toggle.js',
+      'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
+      'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
+      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist-toggle.js',
     ],
   },
   {

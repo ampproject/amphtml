@@ -18,19 +18,18 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
+const conf = require('../build.conf');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpWatch = require('gulp-watch');
-const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
-const touch = require('touch');
 const watchify = require('watchify');
 const wrappers = require('../compile-wrappers');
 const {altMainBundles} = require('../../bundles.config');
@@ -48,7 +47,7 @@ const argv = require('minimist')(process.argv.slice(2));
  * Tasks that should print the `--nobuild` help text.
  * @private @const {!Set<string>}
  */
-const NOBUILD_HELP_TASKS = new Set(['test', 'visual-diff']);
+const NOBUILD_HELP_TASKS = new Set(['e2e', 'integration', 'visual-diff']);
 
 const MODULE_SEPARATOR = ';';
 const EXTENSION_BUNDLE_MAP = {
@@ -71,28 +70,51 @@ const UNMINIFIED_TARGETS = [
 
 const MINIFIED_TARGETS = [
   'v0.js',
-  'v0-esm.js',
   'shadow-v0.js',
   'amp4ads-v0.js',
   'alp.js',
   'f.js',
 ];
 
+const WEB_PUSH_PUBLISHER_FILES = [
+  'amp-web-push-helper-frame',
+  'amp-web-push-permission-dialog',
+];
+
+const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
+
+const BABELIFY_GLOBAL_TRANSFORM = {
+  global: true, // Transform node_modules
+  ignore: devDependencies(), // Ignore devDependencies
+};
+
+const BABELIFY_REPLACE_PLUGIN = {
+  plugins: [conf.getReplacePlugin()],
+};
+
 const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 /**
  * Compile all runtime targets in minified mode and drop them in dist/.
+ * @return {*} TODO(#23582): Specify return type
  */
 function compileAllMinifiedTargets() {
+  if (isTravisBuild()) {
+    log('Minifying multi-pass runtime targets with', cyan('closure-compiler'));
+  }
   return compile(/* watch */ false, /* shouldMinify */ true);
 }
 
 /**
  * Compile all runtime targets in unminified mode and drop them in dist/.
  * @param {boolean} watch
+ * @return {*} TODO(#23582): Specify return type
  */
 function compileAllUnminifiedTargets(watch) {
+  if (isTravisBuild()) {
+    log('Compiling runtime with', cyan('browserify'));
+  }
   return compile(/* watch */ watch);
 }
 
@@ -222,20 +244,6 @@ function compile(watch, shouldMinify) {
     );
   }
 
-  if (argv.with_inabox_lite) {
-    promises.push(
-      // Entry point for inabox runtime.
-      compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
-        toName: 'amp-inabox-lite.js',
-        minifiedName: 'amp4ads-lite-v0.js',
-        includePolyfills: true,
-        extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
-
   thirdPartyFrames.forEach(frameObject => {
     promises.push(
       thirdPartyBootstrap(frameObject.max, frameObject.min, shouldMinify)
@@ -250,34 +258,19 @@ function compile(watch, shouldMinify) {
     });
   }
 
-  return Promise.all(promises)
-    .then(() => {
-      return compileJs('./src/', 'amp.js', './dist', {
-        toName: 'amp.js',
-        minifiedName: 'v0.js',
-        includePolyfills: true,
-        watch,
-        minify: shouldMinify,
-        wrapper: wrappers.mainBinary,
-        singlePassCompilation: argv.single_pass,
-        esmPassCompilation: argv.esm,
-      });
-    })
-    .then(() => {
-      if (!argv.single_pass) {
-        return compileJs('./src/', 'amp.js', './dist', {
-          toName: 'amp-esm.js',
-          minifiedName: 'v0-esm.js',
-          includePolyfills: true,
-          includeOnlyESMLevelPolyfills: true,
-          watch,
-          minify: shouldMinify,
-          wrapper: wrappers.mainBinary,
-        });
-      } else {
-        return Promise.resolve();
-      }
+  return Promise.all(promises).then(() => {
+    return compileJs('./src/', 'amp.js', './dist', {
+      toName: 'amp.js',
+      minifiedName: 'v0.js',
+      includePolyfills: true,
+      watch,
+      minify: shouldMinify,
+      wrapper: wrappers.mainBinary,
+      singlePassCompilation: argv.single_pass,
+      esmPassCompilation: argv.esm,
+      includeOnlyESMLevelPolyfills: argv.esm,
     });
+  });
 }
 
 /**
@@ -354,34 +347,32 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       }
     })
     .then(() => {
-      if (argv.fortesting && options.singlePassCompilation) {
-        const promises = [];
-        altMainBundles.forEach(bundle => {
-          promises.push(enableLocalTesting(`dist/${bundle.name}.js`));
-        });
-        return Promise.all(promises);
+      if (!argv.fortesting || !options.singlePassCompilation) {
+        return;
       }
+      return Promise.all(
+        altMainBundles.map(({name}) => enableLocalTesting(`dist/${name}.js`))
+      );
     });
 }
 
 /**
  * Handles a browserify bundling error
  * @param {Error} err
- * @param {boolean} failOnError
- * @param {string} srcFilename
- * @param {string} startTime
+ * @param {boolean} continueOnError
+ * @param {string} destFilename
  */
-function handleBundleError(err, failOnError, srcFilename, startTime) {
+function handleBundleError(err, continueOnError, destFilename) {
   let message = err;
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
     message = err.stack.replace(/    at[^]*/, '').trim();
   }
   console.error(red(message));
-  if (failOnError) {
-    process.exit(1);
+  if (continueOnError) {
+    log('Error while compiling', cyan(destFilename));
   } else {
-    endBuildStep('Error while compiling', srcFilename, startTime);
+    process.exit(1);
   }
 }
 
@@ -407,6 +398,17 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
 }
 
 /**
+ * Returns array of relative paths to "devDependencies" defined in package.json.
+ * @return {!Array<string>}
+ */
+function devDependencies() {
+  const file = fs.readFileSync('package.json', 'utf8');
+  const packageJson = JSON.parse(file);
+  const devDependencies = Object.keys(packageJson['devDependencies']);
+  return devDependencies.map(p => `./node_modules/${p}`);
+}
+
+/**
  * Transforms a given JavaScript file entry point with browserify, and watches
  * it for changes (if required).
  * @param {string} srcDir
@@ -417,66 +419,63 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
  */
 function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const entryPoint = path.join(srcDir, srcFilename);
-  let bundler = browserify(entryPoint, {debug: true}).transform(babelify);
-  if (options.watch) {
-    bundler = watchify(bundler);
-  }
-
-  // Default wrapper for `gulp build`.
-  // We don't need an explicit function wrapper like we do for `gulp dist`
-  // because Babel handles that for you.
+  const destFilename = options.toName || srcFilename;
   const wrapper = options.wrapper || wrappers.none;
   const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
-  const lazybuild = lazypipe()
-    .pipe(
-      source,
-      srcFilename
-    )
-    .pipe(buffer)
-    .pipe(
-      sourcemaps.init.bind(sourcemaps),
-      {loadMaps: true}
-    )
-    .pipe(
-      regexpSourcemaps,
-      /\$internalRuntimeVersion\$/g,
-      internalRuntimeVersion,
-      'runtime-version'
-    )
-    .pipe(
-      regexpSourcemaps,
-      /([^]+)/,
-      devWrapper,
-      'wrapper'
-    );
+  // TODO: @jonathantyng remove browserifyOptions #22757
+  const browserifyOptions = Object.assign(
+    {},
+    {
+      entries: entryPoint,
+      debug: true,
+    },
+    options.browserifyOptions
+  );
 
-  const lazywrite = lazypipe()
-    .pipe(
-      sourcemaps.write.bind(sourcemaps),
-      './'
-    )
-    .pipe(
-      gulp.dest.bind(gulp),
-      destDir
-    );
+  const babelifyOptions = Object.assign(
+    {},
+    BABELIFY_GLOBAL_TRANSFORM,
+    BABELIFY_REPLACE_PLUGIN
+  );
 
-  const destFilename = options.toName || srcFilename;
+  let bundler = browserify(browserifyOptions).transform(
+    babelify,
+    babelifyOptions
+  );
+
+  if (options.watch) {
+    bundler = watchify(bundler);
+    bundler.on('update', () => performBundle(/* continueOnError */ true));
+  }
+
   /**
-   * @param {boolean} failOnError
+   * @param {boolean} continueOnError
    * @return {Promise}
    */
-  function rebundle(failOnError) {
-    const startTime = Date.now();
+  function performBundle(continueOnError) {
+    let startTime;
     return toPromise(
       bundler
         .bundle()
+        .once('readable', () => (startTime = Date.now()))
         .on('error', err =>
-          handleBundleError(err, failOnError, srcFilename, startTime)
+          handleBundleError(err, continueOnError, destFilename)
         )
-        .pipe(lazybuild())
+        .pipe(source(srcFilename))
+        .pipe(buffer())
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(
+          regexpSourcemaps(
+            /\$internalRuntimeVersion\$/g,
+            internalRuntimeVersion,
+            'runtime-version'
+          )
+        )
+        .pipe(regexpSourcemaps(/([^]+)/, devWrapper, 'wrapper'))
         .pipe(rename(destFilename))
-        .pipe(lazywrite())
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(destDir))
         .on('end', () =>
           finishBundle(srcFilename, destDir, destFilename, options)
         )
@@ -493,30 +492,15 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         if (UNMINIFIED_TARGETS.includes(destFilename)) {
           return enableLocalTesting(`${destDir}/${destFilename}`);
         }
+      })
+      .then(() => {
+        if (isTravisBuild()) {
+          process.stdout.write('.');
+        }
       });
   }
 
-  if (options.watch) {
-    bundler.on('update', function() {
-      rebundle(/* failOnError */ false);
-      // Touch file in unit test set. This triggers rebundling of tests because
-      // karma only considers changes to tests files themselves re-bundle
-      // worthy.
-      touch('test/_init_tests.js');
-    });
-  }
-
-  if (options.watch === false) {
-    // Due to the two step build process, compileJs() is called twice, once with
-    // options.watch set to true and, once with it set to false. However, we do
-    // not need to call rebundle() twice. This avoids the duplicate compile seen
-    // when you run `gulp watch` and touch a file.
-    return Promise.resolve();
-  } else {
-    // This is the default options.watch === true case, and also covers the
-    // `gulp build` / `gulp dist` cases where options.watch is undefined.
-    return rebundle(/* failOnError */ true);
-  }
+  return performBundle(options.continueOnError);
 }
 
 /**
@@ -606,7 +590,7 @@ function printConfigHelp(command) {
 function printNobuildHelp() {
   if (!isTravisBuild()) {
     for (const task of NOBUILD_HELP_TASKS) {
-      // eslint-disable-line amphtml-internal/no-for-of-statement
+      // eslint-disable-line local/no-for-of-statement
       if (argv._.includes(task)) {
         log(
           green('To skip building during future'),
@@ -627,6 +611,7 @@ function printNobuildHelp() {
  * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
  * Called at the end of "gulp build" and "gulp dist --fortesting".
  * @param {string} targetFile File to which the config is to be written.
+ * @return {*} TODO(#23582): Specify return type
  */
 async function enableLocalTesting(targetFile) {
   const config = argv.config === 'canary' ? 'canary' : 'prod';
@@ -710,71 +695,10 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
 }
 
 /**
- * Build all the AMP experiments.html/js.
- *
- * @param {!Object} options
- */
-async function buildExperiments(options) {
-  options = options || {};
-  const path = 'tools/experiments';
-  const htmlPath = path + '/experiments.html';
-  const jsPath = path + '/experiments.js';
-  let {watch} = options;
-  if (watch === undefined) {
-    watch = argv.watch || argv.w;
-  }
-
-  // Building extensions is a 2 step process because of the renaming
-  // and CSS inlining. This watcher watches the original file, copies
-  // it to the destination and adds the CSS.
-  if (watch) {
-    // Do not set watchers again when we get called by the watcher.
-    const copy = Object.create(options);
-    copy.watch = false;
-    gulpWatch(path + '/*', function() {
-      buildExperiments(copy);
-    });
-  }
-
-  // Build HTML.
-  const html = fs.readFileSync(htmlPath, 'utf8');
-  const minHtml = html.replace(
-    '/dist.tools/experiments/experiments.js',
-    `https://${hostname}/v0/experiments.js`
-  );
-  gulp
-    .src(htmlPath)
-    .pipe(file('experiments.cdn.html', minHtml))
-    .pipe(gulp.dest('dist.tools/experiments/'));
-
-  // Build JS.
-  const js = fs.readFileSync(jsPath, 'utf8');
-  const builtName = 'experiments.max.js';
-  const minifiedName = 'experiments.js';
-  return toPromise(
-    gulp
-      .src(path + '/*.js')
-      .pipe(file(builtName, js))
-      .pipe(gulp.dest('build/experiments/'))
-  ).then(function() {
-    return compileJs(
-      './build/experiments/',
-      builtName,
-      './dist.tools/experiments/',
-      {
-        watch: false,
-        minify: options.minify || argv.minify,
-        includePolyfills: true,
-        minifiedName,
-      }
-    );
-  });
-}
-
-/**
  * Build ALP JS.
  *
  * @param {!Object} options
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildAlp(options) {
   options = options || {};
@@ -791,9 +715,9 @@ function buildAlp(options) {
  * Build Examiner JS.
  *
  * @param {!Object} options
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildExaminer(options) {
-  options = options || {};
   return compileJs('./src/examiner/', 'examiner.js', './dist/', {
     toName: 'examiner.max.js',
     watch: options.watch,
@@ -807,15 +731,15 @@ function buildExaminer(options) {
  * Build web worker JS.
  *
  * @param {!Object} options
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildWebWorker(options) {
-  const opts = Object.assign({}, options);
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
     toName: 'ww.max.js',
     minifiedName: 'ww.js',
     includePolyfills: true,
-    watch: opts.watch,
-    minify: opts.minify || argv.minify,
+    watch: options.watch,
+    minify: options.minify || argv.minify,
   });
 }
 
@@ -847,14 +771,18 @@ function toPromise(readable) {
 }
 
 module.exports = {
+  BABELIFY_GLOBAL_TRANSFORM,
+  BABELIFY_REPLACE_PLUGIN,
+  WEB_PUSH_PUBLISHER_FILES,
+  WEB_PUSH_PUBLISHER_VERSIONS,
   buildAlp,
   buildExaminer,
-  buildExperiments,
   buildWebWorker,
   compileAllMinifiedTargets,
   compileAllUnminifiedTargets,
   compileJs,
   compileTs,
+  devDependencies,
   enableLocalTesting,
   endBuildStep,
   hostname,

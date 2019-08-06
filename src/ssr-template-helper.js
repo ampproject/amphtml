@@ -15,12 +15,8 @@
  */
 
 import {dict} from './utils/object';
-import {
-  fromStructuredCloneable,
-  toStructuredCloneable,
-  verifyAmpCORSHeaders,
-} from './utils/xhr-utils';
 import {isArray} from './types';
+import {toStructuredCloneable} from './utils/xhr-utils';
 import {userAssert} from './log';
 
 /**
@@ -76,7 +72,7 @@ export class SsrTemplateHelper {
    *     the payload. If provided, finding the template in the passed in
    *     element is not attempted.
    * @param {!Object=} opt_attributes Additional JSON to send to viewer.
-   * return {!Promise<{data:{?JsonObject|string|undefined}}>}
+   * @return {!Promise<?JsonObject|string|undefined>}
    */
   fetchAndRenderTemplate(
     element,
@@ -178,19 +174,5 @@ export class SsrTemplateHelper {
     });
 
     return data;
-  }
-
-  /**
-   * Constructs the fetch response and verifies AMP CORS headers.
-   * @param {!Window} win
-   * @param {!JsonObject|string|undefined} response
-   * @param {!FetchRequestDef|string} request
-   */
-  verifySsrResponse(win, response, request) {
-    verifyAmpCORSHeaders(
-      win,
-      fromStructuredCloneable(response, request.fetchOpt.responseType),
-      request.fetchOpt
-    );
   }
 }

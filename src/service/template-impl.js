@@ -16,8 +16,7 @@
 
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
-import {dev, devAssert, userAssert} from '../log';
-import {getMode} from '../mode';
+import {dev, userAssert} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {rootNodeFor, scopedQuerySelector} from '../dom';
 
@@ -375,17 +374,6 @@ export class Templates {
   }
 
   /**
-   * For testing only.
-   * @param {string} type
-   * @visibleForTesting
-   */
-  unregisterTemplate(type) {
-    devAssert(getMode().test, 'Should only be used in test mode.');
-    delete this.templateClassMap_[type];
-    delete this.templateClassResolvers_[type];
-  }
-
-  /**
    * @param {!BaseTemplate} impl
    * @param {!JsonObject} data
    * @return {!Element}
@@ -419,6 +407,7 @@ export function installTemplatesService(win) {
  * @param {!Window} win
  * @param {string} type
  * @param {!TemplateClassDef} templateClass
+ * @return {undefined}
  */
 export function registerExtendedTemplate(win, type, templateClass) {
   const templatesService = getService(win, 'templates');

@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
 import mustache from '../../../third_party/mustache/mustache';
@@ -132,11 +129,11 @@ export class AmpMustache extends AMP.BaseTemplate {
   /**
    *
    * @param {string} html
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   purifyAndSetHtml_(html) {
-    const diffing = isExperimentOn(self, 'amp-list-diffing');
-    const body = purifyHtml(html, this.win.document, diffing);
+    const body = purifyHtml(html, this.win.document);
     // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
     // https://github.com/cure53/DOMPurify/pull/295
     const root = this.win.document.createElement('div');
@@ -146,14 +143,5 @@ export class AmpMustache extends AMP.BaseTemplate {
 }
 
 AMP.extension(TAG, '0.2', function(AMP) {
-  // First, unregister template to avoid "Duplicate template type"
-  // error due to multiple versions of amp-mustache in the same unit test run.
-  // This is due to transpilation of test code to ES5 which uses require() and,
-  // unlike import, causes side effects (AMP.registerTemplate) to be run.
-  // For unit tests, it doesn't actually matter which version of amp-mustache is
-  // registered. Integration tests should only have one script version included.
-  if (getMode().test) {
-    Services.templatesFor(window).unregisterTemplate(TAG);
-  }
   AMP.registerTemplate(TAG, AmpMustache);
 });

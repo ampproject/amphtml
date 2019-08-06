@@ -63,6 +63,8 @@ export class StandardActions {
    * @param {!Window=} opt_win
    */
   constructor(ampdoc, opt_win) {
+    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
+
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -70,7 +72,7 @@ export class StandardActions {
       ? opt_win.document.documentElement
       : ampdoc.getHeadNode();
 
-    /** @const @private {!./resources-impl.Resources} */
+    /** @const @private {!./resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @const @private {!./viewport/viewport-impl.Viewport} */
@@ -84,6 +86,7 @@ export class StandardActions {
   /**
    * @param {!Window} embedWin
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @nocollapse
    */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(

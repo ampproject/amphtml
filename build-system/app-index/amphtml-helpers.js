@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable amphtml-internal/html-template */
+/* eslint-disable local/html-template */
 
 const assert = require('assert');
 const boilerPlate = require('./boilerplate');

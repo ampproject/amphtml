@@ -541,9 +541,10 @@ class ManualAdvancement extends AdvancementConfig {
    */
   isHandledByEmbeddedComponent_(event, pageRect) {
     const target = dev().assertElement(event.target);
-    const inExpandedMode =
-      this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
-        .state === EmbeddedComponentState.EXPANDED;
+    const stored = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
+      StateProperty.INTERACTIVE_COMPONENT_STATE
+    ));
+    const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
 
     return (
       inExpandedMode ||
@@ -614,6 +615,7 @@ class ManualAdvancement extends AdvancementConfig {
    * individual section has been previously defined depending on the language
    * settings.
    * @param {!Object} page
+   * @return {number}
    * @private
    */
   getTapDirection_(page) {
@@ -787,7 +789,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(win.document));
 
     /** @private @const {!Array<!Element>} */
@@ -802,10 +804,10 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private {!Array<!UnlistenDef>} */
     this.unlistenFns_ = [];
 
-    /** @private {?UnlistenDef} */
+    /** @protected {?UnlistenDef} */
     this.unlistenEndedFn_ = null;
 
-    /** @private {?UnlistenDef} */
+    /** @protected {?UnlistenDef} */
     this.unlistenTimeupdateFn_ = null;
 
     /** @private {?../../../src/video-interface.VideoInterface} */

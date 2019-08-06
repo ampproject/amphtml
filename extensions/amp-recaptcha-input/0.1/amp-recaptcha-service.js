@@ -26,10 +26,7 @@ import {Services} from '../../../src/services';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {
-  getServiceForDoc,
-  registerServiceBuilderForDoc,
-} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {getSourceOrigin} from '../../../src/url';
 import {internalRuntimeVersion} from '../../../src/internal-version';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
@@ -171,6 +168,7 @@ export class AmpRecaptchaService {
    * Function to create our recaptcha boostrap iframe.
    * Should be assigned to this.iframeLoadPromise_
    * @private
+   * @return {?Promise}
    */
   initialize_() {
     return this.createRecaptchaFrame_().then(iframe => {
@@ -393,16 +391,12 @@ export class AmpRecaptchaService {
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element} element
+ * @return {!Promise<!AmpRecaptchaService>}
  */
-export function installRecaptchaServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'amp-recaptcha', AmpRecaptchaService);
-}
-
-/**
- * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
- * @return {!AmpRecaptchaService}
- */
-export function recaptchaServiceForDoc(elementOrAmpDoc) {
-  return getServiceForDoc(elementOrAmpDoc, 'amp-recaptcha');
+export function recaptchaServiceForDoc(element) {
+  return /** @type {!Promise<!AmpRecaptchaService>} */ (getServicePromiseForDoc(
+    element,
+    'amp-recaptcha'
+  ));
 }

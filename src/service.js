@@ -22,6 +22,7 @@
 
 import {Deferred} from './utils/promise';
 import {dev, devAssert} from './log';
+import {isExperimentOn} from './experiments';
 import {toWin} from './types';
 
 /**
@@ -75,32 +76,26 @@ export class EmbeddableService {
  *
  * @param {!Element|!ShadowRoot} element
  * @param {string} id
- * @param {boolean=} opt_fallbackToTopWin
  * @return {?Object}
  */
-export function getExistingServiceForDocInEmbedScope(
-  element,
-  id,
-  opt_fallbackToTopWin
-) {
+export function getExistingServiceForDocInEmbedScope(element, id) {
+  // TODO(#22733): completely remove this method once ampdoc-fie launches.
   const document = element.ownerDocument;
   const win = toWin(document.defaultView);
+  const topWin = getTopWindow(win);
   // First, try to resolve via local embed window (if applicable).
-  const isEmbed = win != getTopWindow(win);
-  if (isEmbed) {
+  const isEmbed = win != topWin;
+  const ampdocFieExperimentOn = isExperimentOn(topWin, 'ampdoc-fie');
+  if (isEmbed && !ampdocFieExperimentOn) {
     if (isServiceRegistered(win, id)) {
-      const embedService = getServiceInternal(win, id);
-      if (embedService) {
-        return embedService;
-      }
+      return getServiceInternal(win, id);
     }
-    // Don't continue if fallback is not allowed.
-    if (!opt_fallbackToTopWin) {
-      return null;
-    }
+    // Fallback from FIE to parent is intentionally unsupported for safety.
+    return null;
+  } else {
+    // Resolve via the element's ampdoc.
+    return getServiceForDocOrNullInternal(element, id);
   }
-  // Resolve via the element's ampdoc. This falls back to the top-level service.
-  return getServiceForDocOrNullInternal(element, id);
 }
 
 /**
@@ -121,8 +116,20 @@ export function installServiceInEmbedScope(embedWin, id, service) {
     'Service override has already been installed: %s',
     id
   );
-  registerServiceInternal(embedWin, embedWin, id, () => service);
-  getServiceInternal(embedWin, id); // Force service to build.
+  const ampdocFieExperimentOn = isExperimentOn(topWin, 'ampdoc-fie');
+  if (ampdocFieExperimentOn) {
+    const ampdoc = getAmpdoc(embedWin.document);
+    registerServiceInternal(
+      getAmpdocServiceHolder(ampdoc),
+      ampdoc,
+      id,
+      () => service,
+      /* override */ true
+    );
+  } else {
+    registerServiceInternal(embedWin, embedWin, id, () => service);
+    getServiceInternal(embedWin, id); // Force service to build.
+  }
 }
 
 /**
@@ -247,6 +254,7 @@ export function getServiceForDoc(elementOrAmpDoc, id) {
  * If service `id` is not registered, returns null.
  * @param {!Element|!ShadowRoot} element
  * @param {string} id
+ * @return {?Object}
  */
 function getServiceForDocOrNullInternal(element, id) {
   const ampdoc = getAmpdoc(element);
@@ -316,11 +324,12 @@ export function getTopWindow(win) {
 /**
  * Returns the parent "friendly" iframe if the node belongs to a child window.
  * @param {!Node} node
- * @param {!Window} topWin
+ * @param {!Window=} opt_topWin
  * @return {?HTMLIFrameElement}
  */
-export function getParentWindowFrameElement(node, topWin) {
+export function getParentWindowFrameElement(node, opt_topWin) {
   const childWin = (node.ownerDocument || node).defaultView;
+  const topWin = opt_topWin || getTopWindow(childWin);
   if (childWin && childWin != topWin && getTopWindow(childWin) == topWin) {
     try {
       return /** @type {?HTMLIFrameElement} */ (childWin.frameElement);
@@ -404,8 +413,9 @@ function getServiceInternal(holder, id) {
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
  * @param {?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor Constructor function to new the service. Called with context.
+ * @param {boolean=} opt_override
  */
-function registerServiceInternal(holder, context, id, ctor) {
+function registerServiceInternal(holder, context, id, ctor, opt_override) {
   const services = getServices(holder);
   let s = services[id];
 
@@ -420,7 +430,7 @@ function registerServiceInternal(holder, context, id, ctor) {
     };
   }
 
-  if (s.ctor || s.obj) {
+  if (!opt_override && (s.ctor || s.obj)) {
     // Service already registered.
     return;
   }
@@ -607,6 +617,23 @@ export function installServiceInEmbedIfEmbeddable(embedWin, serviceClass) {
   const ampdoc = getAmpdoc(frameElement);
   serviceClass.installInEmbedWindow(embedWin, ampdoc);
   return true;
+}
+
+/**
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} id
+ */
+export function adoptServiceForEmbedDoc(ampdoc, id) {
+  const service = getServiceInternal(
+    getAmpdocServiceHolder(devAssert(ampdoc.getParent())),
+    id
+  );
+  registerServiceInternal(
+    getAmpdocServiceHolder(ampdoc),
+    ampdoc,
+    id,
+    () => service
+  );
 }
 
 /**

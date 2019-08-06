@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '../../../src/layout';
-import {Variants, allocateVariant} from './variant';
+import {Services} from '../../../src/services';
+import {applyExperimentToVariant} from './apply-experiment';
 import {devAssert, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {
   installOriginExperimentsForDoc,
@@ -24,12 +27,8 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
-import {parseMutation} from './mutation-parser';
 
 const TAG = 'amp-experiment';
-
-/** @const {number} */
-const MAX_MUTATIONS = 70;
 
 export class AmpExperiment extends AMP.BaseElement {
   /** @override */
@@ -48,21 +47,43 @@ export class AmpExperiment extends AMP.BaseElement {
       const variantsService = responses[0];
       const enabled = responses[1];
 
-      if (!enabled) {
-        user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
-
-        // Ensure downstream consumers don't wait for the promise forever.
-        variantsService.init(Promise.resolve({}));
-
-        return Promise.reject('Experiment amp-experiment-1.0 is not enabled.');
-      }
+      let config = dict({});
 
       try {
-        const config = this.getConfig_();
+        config = this.getConfig_();
+
+        if (!enabled) {
+          user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
+
+          // Ensure downstream consumers don't wait for the promise forever.
+          variantsService.init(
+            Promise.resolve(this.getEmptyExperimentToVariant_(config))
+          );
+
+          return Promise.reject(
+            'Experiment amp-experiment-1.0 is not enabled.'
+          );
+        }
+
+        const ampdoc = this.getAmpDoc();
+
+        // All experiments can be disabled by a hash param
+        const viewer = Services.viewerForDoc(ampdoc);
+        const override = viewer.getParam(
+          ATTR_PREFIX + 'disable-all-experiments'
+        );
+        if (override !== undefined) {
+          variantsService.init(
+            Promise.resolve(this.getEmptyExperimentToVariant_(config))
+          );
+          return;
+        }
+
         const experimentToVariant = Object.create(null);
         const variants = Object.keys(config).map(experimentName => {
           return allocateVariant(
-            this.getAmpDoc(),
+            ampdoc,
+            viewer,
             experimentName,
             config[experimentName]
           ).then(variantName => {
@@ -73,17 +94,24 @@ export class AmpExperiment extends AMP.BaseElement {
         /** @private @const {!Promise<!Object<string, ?string>>} */
         const experimentVariants = Promise.all(variants)
           .then(() => {
-            this.validateExperimentToVariant_(config, experimentToVariant);
-            const applyExperimentsPromise = this.applyExperimentVariants_(
+            const ampdoc = this.getAmpDoc();
+            const applyExperimentsPromise = applyExperimentToVariant(
+              ampdoc,
               config,
               experimentToVariant
             );
-            variantsService.init(applyExperimentsPromise);
-            return applyExperimentsPromise;
+
+            const experimentToVariantPromise = applyExperimentsPromise.then(
+              () => experimentToVariant
+            );
+            variantsService.init(experimentToVariantPromise);
+            return experimentToVariantPromise;
           })
           .catch(e => {
             // Ensure downstream consumers don't wait for the promise forever.
-            variantsService.init(Promise.resolve({}));
+            variantsService.init(
+              Promise.resolve(this.getEmptyExperimentToVariant_(config))
+            );
             throw e;
           });
 
@@ -130,104 +158,23 @@ export class AmpExperiment extends AMP.BaseElement {
         '<script type="application/json"> child.'
     );
 
-    return /** @type {!JsonObject} */ (devAssert(
-      parseJson(children[0].textContent)
-    ));
+    return devAssert(parseJson(children[0].textContent));
   }
 
   /**
-   * Function to run validations and limitations on the current
-   * chosen Experiment / variant combination.
-   *
+   * Function to return an empty experiment to variant
+   * Object. This is useful for type checking in analytics
+   * and disabling all experiments manually.
    * @param {!JsonObject} config
-   * @param {!Object<string, ?string>} experimentToVariant
+   * @return {!Object<string, ?string>}
    */
-  validateExperimentToVariant_(config, experimentToVariant) {
-    // Ensure that the current experiment / variant
-    // combination does not exceed the maximum mutations.
-    // NOTE: We are not validating the entire config,
-    // As that would take more time, and affect the user,
-    // vs. help the developer.
-    let totalMutations = 0;
-    const experimentToVariantKeys = Object.keys(experimentToVariant);
-
-    for (let i = 0; i < experimentToVariantKeys.length; i++) {
-      const experimentKey = experimentToVariantKeys[i];
-      const variantKey = experimentToVariant[experimentKey];
-      const variant =
-        /** @type {!JsonObject} */ (config[experimentKey]['variants'][
-          variantKey
-        ]);
-      totalMutations += variant['mutations'].length;
-    }
-
-    if (totalMutations > MAX_MUTATIONS) {
-      const numMutationsError =
-        'Max number of mutations for the total ' +
-        `applied experiments exceeded: ${totalMutations} > ` +
-        MAX_MUTATIONS;
-      user().error(TAG, numMutationsError);
-      throw new Error(numMutationsError);
-    }
-  }
-
-  /**
-   * Passes the given experiment and variant pairs to the correct handler,
-   * to apply the experiment to the document.
-   * Experiment with no variant assigned (null) will be skipped.
-   *
-   * For example, the `experimentToVariant` object looks like:
-   * {
-   *   'appliedExperimentName': 'chosenVariantName',
-   *   'anotherAppliedExperimentName': 'chosenVariantName'
-   * }
-   * Which is a simplified version of the config and
-   * represents what variant of each experiment
-   * should be applied.
-   *
-   * @param {!JsonObject} config
-   * @param {!Object<string, ?string>} experimentToVariant
-   * @return {!Promise<!Object<string, ?string>>} a promise of the original
-   *     param passed in
-   * @private
-   */
-  applyExperimentVariants_(config, experimentToVariant) {
-    const appliedExperimentToVariantPromises = [];
-
-    for (const experimentName in experimentToVariant) {
-      const variantName = experimentToVariant[experimentName];
-      if (variantName) {
-        const variantObject = config[experimentName]['variants'][variantName];
-        appliedExperimentToVariantPromises.push(
-          this.applyMutations_(experimentName, variantObject)
-        );
-      }
-    }
-
-    return Promise.all(appliedExperimentToVariantPromises).then(
-      () => experimentToVariant
-    );
-  }
-
-  /**
-   * Passes the given experimentName and variantObject pairs
-   * to the mutation service to be applied to the document.
-   * @param {string} experimentName
-   * @param {!JsonObject} variantObject
-   * @return {!Promise}
-   * @private
-   */
-  applyMutations_(experimentName, variantObject) {
-    const doc = this.getAmpDoc();
-    return doc.whenReady().then(() => {
-      // Parse / Validate all of our mutations
-      const mutationOperations = variantObject['mutations'].map(mutation =>
-        parseMutation(mutation, this.win.document)
-      );
-
-      // Apply our mutations
-      mutationOperations.forEach(mutationOperation => mutationOperation());
+  getEmptyExperimentToVariant_(config) {
+    const experimentToVariant = Object.create(null);
+    Object.keys(config).map(experimentName => {
+      experimentToVariant[experimentName] = null;
     });
+
+    return experimentToVariant;
   }
 
   /**

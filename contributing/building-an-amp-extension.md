@@ -358,7 +358,7 @@ owners.
 this.cells_ = this.getRealChildren();
 
 this.cells_.forEach(cell => {
-  this.setAsOwner(cell);
+  Services.ownersForDoc(this.element).setOwner(cell, this.element);
   cell.style.display = 'inline-block';
   this.container_.appendChild(cell);
 });
@@ -372,12 +372,13 @@ forward/backward in the slides and then calls `scheduleLayout` for the
 current slide when the user moves to it.
 
 ```javascript
-  this.updateInViewport(oldSlide, false);
-  this.updateInViewport(newSlide, true);
-  this.scheduleLayout(newSlide);
+  const owners = Services.ownersForDoc(this.element);
+  owners.updateInViewport(this.element, oldSlide, false);
+  owners.updateInViewport(this.element, newSlide, true);
+  owners.scheduleLayout(this.element, newSlide);
   this.setControlsState();
-  this.schedulePause(oldSlide);
-  this.schedulePreload(nextSlide);
+  owners.schedulePause(this.element, oldSlide);
+  owners.schedulePreload(this.element, nextSlide);
 ```
 
 It's important to understand that the parent/owner element is
@@ -784,7 +785,7 @@ For faster testing during development, consider using --files argument
 to only run your extensions' tests.
 
 ```shell
-$ gulp test --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
+$ gulp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
 ## Type checking

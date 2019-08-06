@@ -32,20 +32,20 @@ FAIL
 |
 |    <amp-truncate-text layout="fixed" width="150" height="80" overflow-style="right">
 |      Hello world
-|      <div slot="expand">Expand</div>
+|      <div slot="collapsed">Expand</div>
 |    </amp-truncate-text>
 |
 |    <amp-truncate-text layout="responsive" width="150" height="80">
 |      Hello world
-|      <div slot="expand">Expand</div>
-|    </amp-truncate-text>
+|      <div slot="collapsed">Expand</div>
+|    </amp-truncate-collapsed>
 |
 |    <!-- Invalid overflow-style -->
 |    <amp-truncate-text layout="fixed" width="150" height="80" overflow-style="left">
 >>   ^~~~~~~~~
 amp-truncate-text/0.1/test/validator-amp-truncate-text.html:43:2 The attribute 'overflow-style' in tag 'amp-truncate-text' is set to the invalid value 'left'. (see https://amp.dev/documentation/components/amp-truncate-text) [DISALLOWED_HTML]
 |      Hello world
-|      <div slot="expand">Expand</div>
+|      <div slot="collapsed">Expand</div>
 |    </amp-truncate-text>
 |  </body>
 |  </html>

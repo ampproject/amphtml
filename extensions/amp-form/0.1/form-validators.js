@@ -17,7 +17,7 @@ import {FormEvents} from './form-events';
 import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {iterateCursor} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 
@@ -26,6 +26,9 @@ const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
 
 /** @const @private {string} */
 const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
+
+/** @const @private {string} */
+const ARIA_DESC_ID_PREFIX = 'i-amphtml-aria-desc-';
 
 /**
  * Validation user message for non-standard pattern mismatch errors.
@@ -82,7 +85,7 @@ export class FormValidator {
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = Services.ampdoc(form);
 
-    /** @const @protected {!../../../src/service/resources-impl.Resources} */
+    /** @const @protected {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources = Services.resourcesForDoc(form);
 
     /** @protected @const {!Document|!ShadowRoot} */
@@ -267,6 +270,18 @@ export class AbstractCustomValidator extends FormValidator {
    */
   constructor(form) {
     super(form);
+
+    /** @private {string} */
+    this.uniqueFormId_ = this.form.id
+      ? this.form.id
+      : String(Date.now() + Math.floor(Math.random() * 100));
+
+    /**
+     * Counter used to create a unique id for every validation message
+     * to be used with `aria-describedby`.
+     * @private {number}
+     */
+    this.ariaDescCounter_ = 0;
   }
 
   /**
@@ -277,6 +292,15 @@ export class AbstractCustomValidator extends FormValidator {
     if (invalidType) {
       this.showValidationFor(input, invalidType);
     }
+  }
+
+  /**
+   * @return {string} A unique ID.
+   * @private
+   */
+  createUniqueAriaDescId_() {
+    return `${ARIA_DESC_ID_PREFIX}${this.uniqueFormId_}-${this
+      .ariaDescCounter_++}`;
   }
 
   /**
@@ -291,19 +315,14 @@ export class AbstractCustomValidator extends FormValidator {
 
   /**
    * @param {!Element} input
-   * @param {string=} invalidType
+   * @param {string=} inputInvalidType
    * @return {?Element}
    */
-  getValidationFor(input, invalidType) {
+  getValidationFor(input, inputInvalidType = undefined) {
     if (!input.id) {
       return null;
     }
-    // <textarea> only supports `pattern` matching. But, it's implemented via
-    // setCustomValidity(), which results in the 'customError' validity state.
-    if (input.tagName === 'TEXTAREA') {
-      devAssert(invalidType === 'customError');
-      invalidType = 'patternMismatch';
-    }
+    const invalidType = this.getInvalidType_(input, inputInvalidType);
     const property = VALIDATION_CACHE_PREFIX + invalidType;
     if (!(property in input)) {
       const selector =
@@ -312,6 +331,29 @@ export class AbstractCustomValidator extends FormValidator {
       input[property] = this.root.querySelector(selector);
     }
     return input[property];
+  }
+
+  /**
+   * Wraps the validity type for inputs to support pattern on <textarea>
+   * @param {!Element} input
+   * @param {string=} inputInvalidType
+   * @return {*} TODO(#23582): Specify return type
+   */
+  getInvalidType_(input, inputInvalidType = undefined) {
+    const {tagName, validationMessage} = input;
+
+    // <textarea> only supports `pattern` and `valueMissing`.
+    // `pattern` is implemented via setCustomValidity(),
+    // which results in the 'customError' validity state.
+    if (
+      tagName === 'TEXTAREA' &&
+      inputInvalidType === 'customError' &&
+      validationMessage === CUSTOM_PATTERN_ERROR
+    ) {
+      return 'patternMismatch';
+    }
+
+    return inputInvalidType;
   }
 
   /**
@@ -328,9 +370,15 @@ export class AbstractCustomValidator extends FormValidator {
     }
     input[VISIBLE_VALIDATION_CACHE] = validation;
 
-    this.resources.mutateElement(input, () =>
-      input.setAttribute('aria-invalid', 'true')
-    );
+    let validationId = validation.getAttribute('id');
+    if (!validationId) {
+      validationId = this.createUniqueAriaDescId_();
+      validation.setAttribute('id', validationId);
+    }
+
+    input.setAttribute('aria-invalid', 'true');
+    input.setAttribute('aria-describedby', validationId);
+
     this.resources.mutateElement(validation, () =>
       validation.classList.add('visible')
     );
@@ -346,9 +394,9 @@ export class AbstractCustomValidator extends FormValidator {
     }
     delete input[VISIBLE_VALIDATION_CACHE];
 
-    this.resources.mutateElement(input, () =>
-      input.removeAttribute('aria-invalid')
-    );
+    input.removeAttribute('aria-invalid');
+    input.removeAttribute('aria-describedby');
+
     this.resources.mutateElement(visibleValidation, () =>
       visibleValidation.classList.remove('visible')
     );

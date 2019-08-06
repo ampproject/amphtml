@@ -1,0 +1,183 @@
+<!doctype html>
+<html amp4ads lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Video Ad</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+
+
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <!-- ## Summary-->
+  <!--
+  Sample AMPHTML ad using [amp-video]({{g.doc('/content/amp-dev/documentation/components/reference/amp-video.md', locale=doc.locale).url.path}}), to display a video ad with layers and playback control.
+  -->
+  <!-- ## Styling -->
+  <!--
+  This is an advanced example that requires some styling to make it look and function properly. The styling designed here is responsive and will work with various ad sizes.
+  -->
+  <style amp-custom>
+    #splash-container, #video-container {
+      /* Set to ad dimensions */
+      width: 300px;
+      height: 168px;
+
+      /* Set so children can position themselves in relation to the container */
+      position: relative;
+
+      /* Basic font styles */
+      font-family: sans-serif;
+      line-height: 1;
+      color: #fff;
+    }
+    .main-link {
+      display: block;
+      color: white;
+    }
+    .brand {
+      /* Place in top-left corner */
+      position: absolute;
+      z-index: 1;
+      top: 10px;
+      left: 10px;
+    }
+    .watch-video {
+      /* Position roughly in vertical center */
+      position: absolute;
+      z-index: 1;
+      top: 70px;
+      left: 10px;
+
+      /* Button styles */
+      padding: 7px;
+      border: gray solid 1px;
+      border-radius: 7px;
+      background-color: rgba(0, 0, 0, 0.8);
+      cursor: pointer;
+    }
+    .title {
+      /* Place beneath "Watch Video" button */
+      position: absolute;
+      z-index: 1;
+      top: 110px;
+      left: 10px;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+
+      /* Font styles */
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .close {
+      /* Place in top-right corner */
+      position: absolute;
+      z-index: 1;
+      right: 10px;
+      top: 10px;
+
+      /* Button styles */
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 18px;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+    }
+    #pause, #play {
+      /* Place in bottom-right corner */
+      position: absolute;
+      z-index: 1;
+      right: 10px;
+      bottom: 10px;
+
+      /* Button styles */
+      border: 1px solid grey;
+      vertical-align: center;
+      text-align: center;
+      background-color: rgba(0,0,0, 0.8);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ## Splash layer -->
+<!--
+Create the necessary markup to show two layers that represent the two ad states.
+
+First, we need a `<div>` that contains a static image, text, and a button to open the video layer.
+
+The buttons contain action handlers that respond to the `tap` event. After tapping the "Watch Video" button, the splash layer will hide, the video layer will show and the video will play.
+
+Note that the splash layer will collapse on this page, but when [previewing the example by itself](/documentation/examples/introduction/video_ad/preview/) the layers will occupy the same position.
+
+-->
+<div id="splash-container">
+  <a href="https://www.google.com/search?q=Best+Hotels+Corp"
+      target="_blank"
+      class="main-link">
+      <span class="brand">
+        Best Hotels Corp
+      </span>
+    <span class="title">
+        Amazing views from our collection of luxury hotel rooms.
+      </span>
+    <amp-img src="https://amp.dev/static/samples/img/tokyo.jpg"
+        width="300"
+        height="168">
+    </amp-img>
+  </a>
+  <div role="button"
+      class="watch-video"
+      on="tap:splash-container.hide,
+              video-container.show,
+              my-video.play,
+              play.hide,
+              pause.show">
+    Watch Video
+  </div>
+</div>
+<!-- ## Video layer -->
+<!--
+A `<div>` that contains the video and buttons to play/pause and close the video layer.
+
+The video is embedded using the [`amp-video` component](https://developers.googleblog.com/2016/12/amp-cache-updates.html), which can be controlled by the `play` and `pause` actions.
+
+Note how the play and pause buttons are two different elements that are hidden and shown based on playback action.
+-->
+<div id="video-container"
+    hidden>
+  <amp-video id="my-video"
+      layout="fixed-height"
+      height="168"
+      src="https://amp.dev/static/samples/video/tokyo.mp4"
+      loop>
+  </amp-video>
+  <div role="button"
+      class="close"
+      on="tap:video-container.hide,
+              splash-container.show,
+              my-video.pause">
+    ×
+  </div>
+  <div role="button"
+      id="pause"
+      on="tap:my-video.pause,
+              play.show,
+              pause.hide">
+    ||
+  </div>
+  <div role="button"
+      id="play"
+      on="tap:my-video.play,
+              play.hide,
+              pause.show">
+    ▶
+  </div>
+</div>
+</body>
+</html>

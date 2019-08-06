@@ -32,7 +32,7 @@ amp-sidebar {
 
 amp-sidebar[side="left"] {
   left: 0 !important;
-  transform: translateX(-100%) !important;
+  transform: translateX(-100%);
   animation-name: i-amphtml-sidebar-slide-out-left;
 }
 
@@ -42,7 +42,7 @@ amp-sidebar[side="left"][open] {
 
 amp-sidebar[side="right"] {
   right: 0 !important;
-  transform: translateX(100%) !important;
+  transform: translateX(100%);
   animation-name: i-amphtml-sidebar-slide-out-right;
 }
 
