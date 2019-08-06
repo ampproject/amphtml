@@ -73,26 +73,26 @@ describes.realWin(
       sandbox.stub(ampState, 'updateState_');
     });
 
-    it('should not fetch until viewer is visible', function*() {
+    it('should not fetch until viewer is visible', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
 
       whenFirstVisiblePromiseReject();
-      yield whenFirstVisiblePromise;
+      await whenFirstVisiblePromise.catch(() => {});
 
       expect(ampState.fetch_).to.not.have.been.called;
       expect(ampState.updateState_).to.not.have.been.called;
     });
 
-    it('should fetch if `src` attribute exists', function*() {
+    it('should fetch if `src` attribute exists', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
 
       whenFirstVisiblePromiseResolve();
-      yield whenFirstVisiblePromise;
+      await whenFirstVisiblePromise;
 
-      // Yield one macro-task to let viewer/fetch promise chains resolve.
-      yield new Promise(resolve => setTimeout(resolve, 0));
+      // await one macro-task to let viewer/fetch promise chains resolve.
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.have.been.calledOnce;
       expect(ampState.fetch_).to.have.been.calledWithExactly(
@@ -105,7 +105,7 @@ describes.realWin(
       expect(ampState.updateState_).calledWithMatch({remote: 'data'});
     });
 
-    it('should trigger "fetch-error" if fetch fails', function*() {
+    it('should trigger "fetch-error" if fetch fails', async () => {
       ampState.fetch_.returns(Promise.reject());
 
       const actions = {trigger: sandbox.spy()};
@@ -117,10 +117,10 @@ describes.realWin(
       expect(actions.trigger).to.not.have.been.called;
 
       whenFirstVisiblePromiseResolve();
-      yield whenFirstVisiblePromise;
+      await whenFirstVisiblePromise;
 
-      // Yield one macro-task to let viewer/fetch promise chains resolve.
-      yield new Promise(resolve => setTimeout(resolve, 0));
+      // await one macro-task to let viewer/fetch promise chains resolve.
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(actions.trigger).to.have.been.calledWithExactly(
         element,
@@ -130,7 +130,7 @@ describes.realWin(
       );
     });
 
-    it('should register "refresh" action', function*() {
+    it('should register "refresh" action', async () => {
       sandbox.spy(ampState, 'registerAction');
 
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
@@ -143,43 +143,43 @@ describes.realWin(
       );
     });
 
-    it('should fetch on "refresh"', function*() {
+    it('should fetch on "refresh"', async () => {
       sandbox.spy(ampState, 'registerAction');
 
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
 
       const action = {method: 'refresh', satisfiesTrust: () => true};
-      yield ampState.executeAction(action);
+      await ampState.executeAction(action);
 
       // Fetch via "refresh" should also wait for viewer visible.
       expect(ampState.fetch_).to.not.have.been.called;
       expect(ampState.updateState_).to.not.have.been.called;
 
       whenFirstVisiblePromiseResolve();
-      yield whenFirstVisiblePromise;
+      await whenFirstVisiblePromise;
 
-      // Yield one macro-task to let viewer/fetch promise chains resolve.
-      yield new Promise(resolve => setTimeout(resolve, 0));
+      // await one macro-task to let viewer/fetch promise chains resolve.
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       // One call from build(), one call from "refresh" action.
       expect(ampState.fetch_).to.have.been.calledTwice;
     });
 
-    it('should parse its child script', function*() {
+    it('should parse its child script', async () => {
       element.innerHTML =
         '<script type="application/json">{"local": "data"}</script>';
       element.build();
 
       expect(ampState.updateState_).calledWithMatch({local: 'data'});
 
-      // Yield one macro-task to let viewer/fetch promise chains resolve.
-      yield new Promise(resolve => setTimeout(resolve, 0));
+      // await one macro-task to let viewer/fetch promise chains resolve.
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.not.have.been.called;
     });
 
-    it('should parse child and fetch `src` if both provided', function*() {
+    it('should parse child and fetch `src` if both provided', async () => {
       element.innerHTML =
         '<script type="application/json">{"local": "data"}</script>';
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
@@ -190,10 +190,10 @@ describes.realWin(
       expect(ampState.updateState_).calledWithMatch({local: 'data'});
 
       whenFirstVisiblePromiseResolve();
-      yield whenFirstVisiblePromise;
+      await whenFirstVisiblePromise;
 
-      // Yield a single macro-task to let promise chains resolve.
-      yield new Promise(resolve => setTimeout(resolve, 0));
+      // await a single macro-task to let promise chains resolve.
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(ampState.updateState_).calledWithMatch({remote: 'data'});
     });
@@ -213,7 +213,7 @@ describes.realWin(
       expect(ampState.fetch_).to.not.have.been.called;
     });
 
-    it('should fetch json if `src` is mutated', function*() {
+    it('should fetch json if `src` is mutated', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
 
@@ -225,19 +225,17 @@ describes.realWin(
       element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
 
       whenFirstVisiblePromiseResolve();
-      yield whenFirstVisiblePromise;
+      await whenFirstVisiblePromise;
 
-      // Yield a single macro-task to let promise chains resolve.
-      yield new Promise(resolve => setTimeout(resolve, 0));
+      // await a single macro-task to let promise chains resolve.
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.have.been.called;
       expect(ampState.updateState_).calledWithMatch({remote: 'data'});
     });
 
-    it(
-      'should fetch with token if ' +
-        '[crossorigin="amp-viewer-auth-token-via-post"]`',
-      function*() {
+    it('should use token with [crossorigin="amp-viewer-auth-token-via-post"]`',
+      async () => {
         xhrUtils.getViewerAuthTokenIfAvailable.returns(
           Promise.resolve('idToken')
         );
@@ -247,10 +245,10 @@ describes.realWin(
         element.build();
 
         whenFirstVisiblePromiseResolve();
-        yield whenFirstVisiblePromise;
+        await whenFirstVisiblePromise;
 
-        // Yield a single macro-task to let promise chains resolve.
-        yield new Promise(resolve => setTimeout(resolve, 0));
+        // await a single macro-task to let promise chains resolve.
+        await new Promise(resolve => setTimeout(resolve, 0));
 
         expect(ampState.fetch_).to.have.been.calledOnce;
         expect(ampState.fetch_).to.have.been.calledWithExactly(
