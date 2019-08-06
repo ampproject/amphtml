@@ -40,7 +40,12 @@ function initPlayer(data) {
     desiredOffset: 50,
     gid: data.gid,
     onError: () => {
-      window.context.noContentAvailable();
+      global.context.noContentAvailable();
+    },
+    onLoad: () => {
+      const height = global.document.getElementsByClassName('nr-player')[0]
+        .offsetHeight;
+      global.context.requestResize(undefined, height);
     },
   };
   // eslint-disable-next-line no-undef
