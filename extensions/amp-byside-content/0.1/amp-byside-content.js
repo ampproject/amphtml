@@ -216,7 +216,10 @@ export class AmpBysideContent extends AMP.BaseElement {
       });
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {string}
+   */
   composeOrigin_() {
     const subDomain =
       this.webcareZone_ === MAIN_WEBCARE_ZONE_
@@ -226,7 +229,10 @@ export class AmpBysideContent extends AMP.BaseElement {
     return 'https://' + encodeURIComponent(subDomain) + '.' + BYSIDE_DOMAIN_;
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   composeSrcUrl_() {
     const src = this.baseUrl_ + 'placeholder.php';
     const params = dict({

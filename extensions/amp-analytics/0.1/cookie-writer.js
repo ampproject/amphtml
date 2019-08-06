@@ -57,7 +57,7 @@ export class CookieWriter {
     this.config_ = config;
 
     /** @const @private {!JsonObject} */
-    this.bindings_ = variableServiceForDoc(element).getMacros();
+    this.bindings_ = variableServiceForDoc(element).getMacros(element);
   }
 
   /**

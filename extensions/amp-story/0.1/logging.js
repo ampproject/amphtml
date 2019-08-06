@@ -19,7 +19,7 @@ import {scopedQuerySelectorAll} from '../../../src/dom';
 import {tryResolve} from '../../../src/utils/promise';
 
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */
-let ElementPredicateDef;
+let ElementPredicate_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * A log type is an abstract rule or best practice that should be followed when
@@ -48,11 +48,11 @@ let ElementPredicateDef;
  *   level: !LogLevel,
  *   moreInfo: (string|undefined),
  *   selector: (string|undefined),
- *   precondition: (!ElementPredicateDef|undefined),
- *   predicate: (!ElementPredicateDef|undefined),
+ *   precondition: (!ElementPredicate_0_1_Def|undefined),
+ *   predicate: (!ElementPredicate_0_1_Def|undefined),
  * }}
  */
-let AmpStoryLogTypeDef;
+let AmpStoryLogType_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * A log entry is a more concrete version of a rule or best practice; it refers
@@ -86,7 +86,7 @@ function getPosterFromVideo(el) {
   });
 }
 
-/** @enum {!AmpStoryLogTypeDef} */
+/** @enum {!AmpStoryLogType_0_1_Def} */
 const LogType = {
   /** Errors */
   VIDEOS_POSTER_SPECIFIED: {
@@ -155,7 +155,7 @@ const LogType = {
 /**
  * Gets the log type associated with the specified key.
  * @param {string} logTypeKey
- * @return {!AmpStoryLogTypeDef}
+ * @return {!AmpStoryLogType_0_1_Def}
  */
 function getLogType(logTypeKey) {
   const logType = LogType[logTypeKey];
@@ -174,7 +174,7 @@ function getLogType(logTypeKey) {
 
 /**
  * @param {!Element} rootElement
- * @param {!AmpStoryLogTypeDef} logType
+ * @param {!AmpStoryLogType_0_1_Def} logType
  * @param {!Element} element
  * @return {!Promise<!AmpStoryLogEntryDef>}
  */
@@ -199,7 +199,7 @@ function getLogEntry(rootElement, logType, element) {
 
 /**
  * @param {!Element} rootElement
- * @param {!AmpStoryLogTypeDef} logType
+ * @param {!AmpStoryLogType_0_1_Def} logType
  * @return {!Array<!Promise<!AmpStoryLogEntryDef>>}
  */
 function getLogEntriesForType(rootElement, logType) {

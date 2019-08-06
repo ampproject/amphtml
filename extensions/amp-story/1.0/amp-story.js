@@ -37,11 +37,7 @@ import {
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
-import {
-  AdvancementMode,
-  AnalyticsEvent,
-  getAnalyticsService,
-} from './story-analytics';
+import {AdvancementMode, getAnalyticsService} from './story-analytics';
 import {AmpEvents} from '../../../src/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
@@ -53,6 +49,7 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
+import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
@@ -73,6 +70,7 @@ import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
+import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {
   SwipeXYRecognizer,
   SwipeYRecognizer,
@@ -108,7 +106,6 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
-import {getVariableService} from './variable-service';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
@@ -631,7 +628,10 @@ export class AmpStory extends AMP.BaseElement {
       StateProperty.MUTED_STATE,
       isMuted => {
         this.onMutedStateUpdate_(isMuted);
-        this.variableService_.onMutedStateChange(isMuted);
+        this.variableService_.onVariableUpdate(
+          AnalyticsVariable.STORY_IS_MUTED,
+          isMuted
+        );
       },
       true /** callToInitialize */
     );
@@ -642,7 +642,9 @@ export class AmpStory extends AMP.BaseElement {
         // We do not want to trigger an analytics event for the initialization of
         // the muted state.
         this.analyticsService_.triggerEvent(
-          isMuted ? AnalyticsEvent.STORY_MUTED : AnalyticsEvent.STORY_UNMUTED
+          isMuted
+            ? StoryAnalyticsEvent.STORY_MUTED
+            : StoryAnalyticsEvent.STORY_UNMUTED
         );
       },
       false /** callToInitialize */
@@ -656,7 +658,10 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(StateProperty.ADVANCEMENT_MODE, mode => {
-      this.variableService_.onAdvancementModeStateChange(mode);
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_ADVANCEMENT_MODE,
+        mode
+      );
     });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
@@ -1408,14 +1413,16 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
-        this.storeService_.dispatch(Action.CHANGE_PAGE, {
-          id: targetPageId,
-          index: pageIndex,
-        });
-
+        let storePageIndex = pageIndex;
         if (targetPage.isAd()) {
           this.storeService_.dispatch(Action.TOGGLE_AD, true);
           setAttributeInMutate(this, Attributes.AD_SHOWING);
+
+          // Keep current page index when an ad is shown. Otherwise it messes
+          // up with the progress variable in the VariableService.
+          storePageIndex = this.storeService_.get(
+            StateProperty.CURRENT_PAGE_INDEX
+          );
         } else {
           this.storeService_.dispatch(Action.TOGGLE_AD, false);
           removeAttributeInMutate(this, Attributes.AD_SHOWING);
@@ -1432,6 +1439,11 @@ export class AmpStory extends AMP.BaseElement {
             );
           }
         }
+
+        this.storeService_.dispatch(Action.CHANGE_PAGE, {
+          id: targetPageId,
+          index: storePageIndex,
+        });
 
         // If first navigation.
         if (!oldPage) {

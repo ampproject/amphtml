@@ -92,7 +92,7 @@ export class AccessService {
     /** @private @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(ampdoc.win);
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @private @const {?../../../src/service/performance-impl.Performance} */
@@ -771,7 +771,10 @@ AMP.extension(TAG, '0.1', function(AMP) {
   });
 });
 
-/** @package Visible for testing only. */
+/**
+ * @package Visible for testing only.
+ * @return {*} TODO(#23582): Specify return type
+ */
 export function getAccessVarsClassForTesting() {
   return AccessVars;
 }

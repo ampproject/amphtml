@@ -30,6 +30,7 @@ import {
 import {computedStyle} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getElementLayoutBox} from './utils';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -105,7 +106,6 @@ INJECTORS[Position.LAST_CHILD] = (anchorElement, elementToInject) => {
 export class Placement {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
    * @param {!Position} position
    * @param {function(!Element, !Element)} injector
@@ -114,7 +114,6 @@ export class Placement {
    */
   constructor(
     ampdoc,
-    resources,
     anchorElement,
     position,
     injector,
@@ -124,8 +123,11 @@ export class Placement {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = resources;
+    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
+    this.resources_ = Services.resourcesForDoc(anchorElement);
+
+    /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(anchorElement);
 
     /** @const @private {!Element} */
     this.anchorElement_ = anchorElement;
@@ -166,11 +168,9 @@ export class Placement {
    * @return {!Promise<number>}
    */
   getEstimatedPosition() {
-    return this.resources_
-      .getElementLayoutBox(this.anchorElement_)
-      .then(layoutBox => {
-        return this.getEstimatedPositionFromAchorLayout_(layoutBox);
-      });
+    return getElementLayoutBox(this.anchorElement_).then(layoutBox => {
+      return this.getEstimatedPositionFromAchorLayout_(layoutBox);
+    });
   }
 
   /**
@@ -254,17 +254,15 @@ export class Placement {
    * @private
    */
   getPlacementSizing_(sizing, isResponsiveEnabled) {
-    const viewport = this.resources_.getViewport();
-    const viewportWidth = viewport.getWidth();
+    const viewportWidth = this.viewport_.getWidth();
     if (isResponsiveEnabled && viewportWidth <= MAXIMUM_RESPONSIVE_WIDTH) {
-      const viewportHeight = viewport.getHeight();
+      const viewportHeight = this.viewport_.getHeight();
       const responsiveHeight = getResponsiveHeightForContext_(
         viewportWidth,
         viewportHeight
       );
       let margins = cloneLayoutMarginsChangeDef(this.margins_);
-      return Services.resourcesForDoc(this.anchorElement_)
-        .getElementLayoutBox(this.anchorElement_)
+      return getElementLayoutBox(this.anchorElement_)
         .then(layoutBox => {
           const direction = computedStyle(this.ampdoc.win, this.anchorElement_)[
             'direction'
@@ -383,7 +381,6 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
     placements.push(
       new Placement(
         ampdoc,
-        Services.resourcesForDoc(anchorElement),
         anchorElement,
         placementObj['pos'],
         injector,
