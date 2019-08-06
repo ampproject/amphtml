@@ -17,13 +17,11 @@
 import {Doc} from '../../../third_party/subscriptions-project/config';
 import {dev} from '../../../src/log';
 
-
 /**
  * Adopts config document to ampdoc.
  * @implements {Doc}
  */
 export class DocImpl {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -69,8 +67,10 @@ export class DocImpl {
   }
 }
 
-
-/** @package Visible for testing only. */
+/**
+ * @package Visible for testing only.
+ * @return {*} TODO(#23582): Specify return type
+ */
 export function getDocClassForTesting() {
   return Doc;
 }

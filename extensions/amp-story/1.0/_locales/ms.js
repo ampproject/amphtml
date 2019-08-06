@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Dapatkan Pautan',
   },
@@ -108,26 +111,27 @@ const strings = {
     string: 'Kembangkan Twit',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Kembangkan ketinggian tetingkap anda untuk melihat pengalaman ' +
-        'ini',
+    string: 'Kembangkan ketinggian tetingkap anda untuk melihat pengalaman ini',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Kembangkan kedua-dua ketinggian dan lebar tetingkap anda untuk ' +
-        'melihat pengalaman ini',
+    string:
+      'Kembangkan kedua-dua ketinggian dan lebar tetingkap anda untuk ' +
+      'melihat pengalaman ini',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Kembangkan lebar tetingkap anda untuk melihat pengalaman ini',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Anda mesti mendayakan eksperimen cerita amp untuk melihat ' +
-        'kandungan ini.',
+    string:
+      'Anda mesti mendayakan eksperimen cerita amp untuk melihat ' +
+      'kandungan ini.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Halaman ini terbaik dilihat dalam mod potret',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Maaf, nampaknya penyemak imbas anda tidak menyokong pengalaman ' +
-        'ini',
+    string:
+      'Maaf, nampaknya penyemak imbas anda tidak menyokong pengalaman ini',
   },
 };
 

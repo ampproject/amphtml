@@ -17,7 +17,6 @@
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 
 export class ServiceAdapter {
-
   /**
    * @param {./amp-subscriptions.SubscriptionService} subscriptionService
    */
@@ -40,6 +39,15 @@ export class ServiceAdapter {
    */
   getReaderId(serviceId) {
     return this.subscriptionService_.getReaderId(serviceId);
+  }
+
+  /**
+   * Returns the encrypted document key for the specified service.
+   * @param {string} serviceId
+   * @return {?string}
+   */
+  getEncryptedDocumentKey(serviceId) {
+    return this.subscriptionService_.getEncryptedDocumentKey(serviceId);
   }
 
   /**
@@ -77,8 +85,12 @@ export class ServiceAdapter {
    * @param {?JsonObject} options
    */
   decorateServiceAction(element, serviceId, action, options) {
-    this.subscriptionService_.decorateServiceAction(element, serviceId,
-        action, options);
+    this.subscriptionService_.decorateServiceAction(
+      element,
+      serviceId,
+      action,
+      options
+    );
   }
 
   /**
@@ -106,8 +118,11 @@ export class ServiceAdapter {
   }
 }
 
-/** @package @VisibleForTesting */
+/**
+ * @package
+ * @visibleForTesting
+ * @return {*} TODO(#23582): Specify return type
+ */
 export function getPageConfigForTesting() {
   return PageConfig;
 }
-

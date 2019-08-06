@@ -18,25 +18,41 @@
 const colors = require('ansi-colors');
 const requestPromise = require('request-promise');
 const {
+  gitBranchCreationPoint,
   gitBranchName,
+  gitCommitHash,
   gitDiffCommitLog,
   gitDiffStatMaster,
-  gitMergeBaseMaster,
   gitTravisMasterBaseline,
   shortSha,
 } = require('../git');
-const {execOrDie, exec} = require('../exec');
-const {isTravisBuild, travisBuildNumber, travisPullRequestSha} = require('../travis');
+const {
+  isTravisBuild,
+  travisBuildNumber,
+  travisPullRequestSha,
+} = require('../travis');
+const {execOrDie, execWithError, exec} = require('../exec');
+const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const BUILD_OUTPUT_FILE =
-    isTravisBuild() ? `amp_build_${travisBuildNumber()}.zip` : '';
-const DIST_OUTPUT_FILE =
-    isTravisBuild() ? `amp_dist_${travisBuildNumber()}.zip` : '';
-const OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
+const BUILD_OUTPUT_FILE = isTravisBuild()
+  ? `amp_build_${travisBuildNumber()}.zip`
+  : '';
+const DIST_OUTPUT_FILE = isTravisBuild()
+  ? `amp_dist_${travisBuildNumber()}.zip`
+  : '';
+
+const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
+const DIST_OUTPUT_DIRS =
+  'build/ dist/ dist.3p/ dist.tools/ EXTENSIONS_CSS_MAP examples/ test/manual/';
+
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
+const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
 const OUTPUT_STORAGE_SERVICE_ACCOUNT =
-    'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
+  'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
+
+const GIT_BRANCH_URL =
+  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -44,25 +60,56 @@ const OUTPUT_STORAGE_SERVICE_ACCOUNT =
  */
 function printChangeSummary(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
+  let commitSha;
 
   if (isTravisBuild()) {
     console.log(
-        `${fileLogPrefix} ${colors.cyan('origin/master')} is currently at ` +
-        `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`);
-    console.log(
-        `${fileLogPrefix} Testing the following changes at commit ` +
-        `${colors.cyan(shortSha(travisPullRequestSha()))}`);
+      `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
+        `in this build: ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
+    );
+    commitSha = travisPullRequestSha();
+  } else {
+    commitSha = gitCommitHash();
   }
+  console.log(
+    `${fileLogPrefix} Testing the following changes at commit ` +
+      `${colors.cyan(shortSha(commitSha))}`
+  );
 
   const filesChanged = gitDiffStatMaster();
   console.log(filesChanged);
 
-  const branchPoint = gitMergeBaseMaster();
-  console.log(
-      `${fileLogPrefix} Commit log since branch ` +
-      `${colors.cyan(gitBranchName())} was forked from ` +
-      `${colors.cyan('master')} at ${colors.cyan(shortSha(branchPoint))}:`);
-  console.log(gitDiffCommitLog() + '\n');
+  const branchCreationPoint = gitBranchCreationPoint();
+  if (branchCreationPoint) {
+    console.log(
+      `${fileLogPrefix} Commit log since branch`,
+      `${colors.cyan(gitBranchName())} was forked from`,
+      `${colors.cyan('master')} at`,
+      `${colors.cyan(shortSha(branchCreationPoint))}:`
+    );
+    console.log(gitDiffCommitLog() + '\n');
+  } else {
+    console.error(
+      fileLogPrefix,
+      colors.yellow('WARNING:'),
+      'Could not find a common ancestor for',
+      colors.cyan(gitBranchName()),
+      'and',
+      colors.cyan('master') + '. (This can happen with older PR branches.)'
+    );
+    console.error(
+      fileLogPrefix,
+      colors.yellow('NOTE 1:'),
+      'If this causes unexpected test failures, try rebasing the PR branch on',
+      colors.cyan('master') + '.'
+    );
+    console.error(
+      fileLogPrefix,
+      colors.yellow('NOTE 2:'),
+      "If rebasing doesn't work, you may have to recreate the branch. See",
+      colors.cyan(GIT_BRANCH_URL) + '.\n'
+    );
+  }
 }
 
 /**
@@ -71,12 +118,17 @@ function printChangeSummary(fileName) {
  */
 async function startSauceConnect(functionName) {
   process.env['SAUCE_USERNAME'] = 'amphtml';
-  const response = await requestPromise('https://amphtml-sauce-token-dealer.appspot.com/getJwtToken');
+  const response = await requestPromise(
+    'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken'
+  );
   process.env['SAUCE_ACCESS_KEY'] = response.trim();
   const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log('\n' + fileLogPrefix,
-      'Starting Sauce Connect Proxy:', colors.cyan(startScCmd));
+  console.log(
+    '\n' + fileLogPrefix,
+    'Starting Sauce Connect Proxy:',
+    colors.cyan(startScCmd)
+  );
   execOrDie(startScCmd);
 }
 
@@ -87,8 +139,11 @@ async function startSauceConnect(functionName) {
 function stopSauceConnect(functionName) {
   const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log('\n' + fileLogPrefix,
-      'Stopping Sauce Connect Proxy:', colors.cyan(stopScCmd));
+  console.log(
+    '\n' + fileLogPrefix,
+    'Stopping Sauce Connect Proxy:',
+    colors.cyan(stopScCmd)
+  );
   execOrDie(stopScCmd);
 }
 
@@ -102,7 +157,10 @@ function startTimer(functionName, fileName) {
   const startTime = Date.now();
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   console.log(
-      '\n' + fileLogPrefix, 'Running', colors.cyan(functionName) + '...');
+    '\n' + fileLogPrefix,
+    'Running',
+    colors.cyan(functionName) + '...'
+  );
   return startTime;
 }
 
@@ -117,22 +175,49 @@ function stopTimer(functionName, fileName, startTime) {
   const endTime = Date.now();
   const executionTime = endTime - startTime;
   const mins = Math.floor(executionTime / 60000);
-  const secs = Math.floor(executionTime % 60000 / 1000);
+  const secs = Math.floor((executionTime % 60000) / 1000);
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   console.log(
-      fileLogPrefix, 'Done running', colors.cyan(functionName),
-      'Total time:', colors.green(mins + 'm ' + secs + 's'));
+    fileLogPrefix,
+    'Done running',
+    colors.cyan(functionName),
+    'Total time:',
+    colors.green(mins + 'm ' + secs + 's')
+  );
+}
+
+/**
+ * Stops the Node process and timer
+ * @param {string} fileName
+ * @param {startTime} startTime
+ */
+function stopTimedJob(fileName, startTime) {
+  stopTimer(fileName, fileName, startTime);
+  process.exitCode = 1;
 }
 
 /**
  * Executes the provided command and times it. Errors, if any, are printed.
  * @param {string} cmd
  * @param {string} fileName
- * @return {<Object>} Process info.
+ * @return {!Object} Node process
  */
 function timedExec(cmd, fileName = 'utils.js') {
   const startTime = startTimer(cmd, fileName);
   const p = exec(cmd);
+  stopTimer(cmd, fileName, startTime);
+  return p;
+}
+
+/**
+ * Executes the provided command and times it. Errors, if any, are returned.
+ * @param {string} cmd
+ * @param {string} fileName
+ * @return {!Object} Node process
+ */
+function timedExecWithError(cmd, fileName = 'utils.js') {
+  const startTime = startTimer(cmd, fileName);
+  const p = execWithError(cmd);
   stopTimer(cmd, fileName, startTime);
   return p;
 }
@@ -153,30 +238,33 @@ function timedExecOrDie(cmd, fileName = 'utils.js') {
  * Download output helper
  * @param {string} functionName
  * @param {string} outputFileName
+ * @param {string} outputDirs
  * @private
  */
-async function downloadOutput_(functionName, outputFileName) {
+function downloadOutput_(functionName, outputFileName, outputDirs) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  const buildOutputDownloadUrl =
-    `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
+  const buildOutputDownloadUrl = `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
 
   console.log(
-      `${fileLogPrefix} Downloading build output from ` +
-      colors.cyan(buildOutputDownloadUrl) + '...');
+    `${fileLogPrefix} Downloading build output from ` +
+      colors.cyan(buildOutputDownloadUrl) +
+      '...'
+  );
   exec('echo travis_fold:start:download_results && echo');
   authenticateWithStorageLocation_();
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
   exec('echo travis_fold:end:download_results');
 
   console.log(
-      `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...');
+    `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...'
+  );
   exec('echo travis_fold:start:unzip_results && echo');
   execOrDie(`unzip -o ${outputFileName}`);
   exec('echo travis_fold:end:unzip_results');
 
   console.log(fileLogPrefix, 'Verifying extracted files...');
   exec('echo travis_fold:start:verify_unzip_results && echo');
-  execOrDie(`ls -laR ${OUTPUT_DIRS}`);
+  execOrDie(`ls -laR ${outputDirs}`);
   exec('echo travis_fold:end:verify_unzip_results');
 }
 
@@ -184,22 +272,30 @@ async function downloadOutput_(functionName, outputFileName) {
  * Upload output helper
  * @param {string} functionName
  * @param {string} outputFileName
+ * @param {string} outputDirs
  * @private
  */
-async function uploadOutput_(functionName, outputFileName) {
+function uploadOutput_(functionName, outputFileName, outputDirs) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
 
   console.log(
-      `\n${fileLogPrefix} Compressing ` +
-      colors.cyan(OUTPUT_DIRS.split(' ').join(', ')) +
-      ' into ' + colors.cyan(outputFileName) + '...');
+    `\n${fileLogPrefix} Compressing ` +
+      colors.cyan(outputDirs.split(' ').join(', ')) +
+      ' into ' +
+      colors.cyan(outputFileName) +
+      '...'
+  );
   exec('echo travis_fold:start:zip_results && echo');
-  execOrDie(`zip -r ${outputFileName} ${OUTPUT_DIRS}`);
+  execOrDie(`zip -r ${outputFileName} ${outputDirs}`);
   exec('echo travis_fold:end:zip_results');
 
   console.log(
-      `${fileLogPrefix} Uploading ` + colors.cyan(outputFileName) + ' to ' +
-      colors.cyan(OUTPUT_STORAGE_LOCATION) + '...');
+    `${fileLogPrefix} Uploading ` +
+      colors.cyan(outputFileName) +
+      ' to ' +
+      colors.cyan(OUTPUT_STORAGE_LOCATION) +
+      '...'
+  );
   exec('echo travis_fold:start:upload_results && echo');
   authenticateWithStorageLocation_();
   execOrDie(`gsutil -m cp -r ${outputFileName} ${OUTPUT_STORAGE_LOCATION}`);
@@ -208,10 +304,13 @@ async function uploadOutput_(functionName, outputFileName) {
 
 function authenticateWithStorageLocation_() {
   decryptTravisKey_();
-  execOrDie('gcloud auth activate-service-account ' +
-  `--key-file ${OUTPUT_STORAGE_KEY_FILE}`);
+  execOrDie(
+    'gcloud auth activate-service-account ' +
+      `--key-file ${OUTPUT_STORAGE_KEY_FILE}`
+  );
   execOrDie(`gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT}`);
   execOrDie('gcloud config set pass_credentials_to_gsutil true');
+  execOrDie(`gcloud config set project ${OUTPUT_STORAGE_PROJECT_ID}`);
   execOrDie('gcloud config list');
 }
 
@@ -220,7 +319,7 @@ function authenticateWithStorageLocation_() {
  * @param {string} functionName
  */
 function downloadBuildOutput(functionName) {
-  downloadOutput_(functionName, BUILD_OUTPUT_FILE);
+  downloadOutput_(functionName, BUILD_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
@@ -228,7 +327,7 @@ function downloadBuildOutput(functionName) {
  * @param {string} functionName
  */
 function downloadDistOutput(functionName) {
-  downloadOutput_(functionName, DIST_OUTPUT_FILE);
+  downloadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
 }
 
 /**
@@ -236,7 +335,7 @@ function downloadDistOutput(functionName) {
  * @param {string} functionName
  */
 function uploadBuildOutput(functionName) {
-  uploadOutput_(functionName, BUILD_OUTPUT_FILE);
+  uploadOutput_(functionName, BUILD_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
@@ -244,7 +343,19 @@ function uploadBuildOutput(functionName) {
  * @param {string} functionName
  */
 function uploadDistOutput(functionName) {
-  uploadOutput_(functionName, DIST_OUTPUT_FILE);
+  uploadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
+}
+
+/**
+ * Replaces URLS in HTML files, zips and uploads dist output,
+ * and signals to the AMP PR Deploy bot that the upload is complete.
+ * @param {string} functionName
+ */
+async function processAndUploadDistOutput(functionName) {
+  await replaceUrls('test/manual');
+  await replaceUrls('examples');
+  uploadDistOutput(functionName);
+  await signalDistUpload('success');
 }
 
 /**
@@ -254,20 +365,25 @@ function decryptTravisKey_() {
   // -md sha256 is required due to encryption differences between
   // openssl 1.1.1a, which was used to encrypt the key, and
   // openssl 1.0.2g, which is used by Travis to decrypt.
-  execOrDie(`openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
-      `build-system/sa-travis-key.json.enc -out ${OUTPUT_STORAGE_KEY_FILE} -d`);
+  execOrDie(
+    `openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
+      `build-system/sa-travis-key.json.enc -out ${OUTPUT_STORAGE_KEY_FILE} -d`
+  );
 }
 
 module.exports = {
   downloadBuildOutput,
   downloadDistOutput,
   printChangeSummary,
+  processAndUploadDistOutput,
   startTimer,
   stopTimer,
   startSauceConnect,
   stopSauceConnect,
+  stopTimedJob,
   timedExec,
   timedExecOrDie,
+  timedExecWithError,
   uploadBuildOutput,
   uploadDistOutput,
 };

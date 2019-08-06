@@ -21,8 +21,10 @@ export const COMSCORE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://sb.scorecardresearch.com',
     'base': '${host}/b?',
-    'pageview': '${base}c1=2' +
+    'pageview':
+      '${base}c1=2' +
       '&c2=${c2}' +
+      '&cs_amp_consent=${consentState}' +
       '&cs_pv=${pageViewId}' +
       '&c12=${clientId(comScore)}' +
       '&rn=${random}' +

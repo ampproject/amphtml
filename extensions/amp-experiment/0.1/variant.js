@@ -23,13 +23,11 @@ import {isObject} from '../../../src/types';
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
 
-
 /**
  * Variants service provides VARIANT variables for the experiment config.
  * @implements {../../../src/render-delaying-services.RenderDelayingService}
  */
 export class Variants {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -69,7 +67,6 @@ export class Variants {
   }
 }
 
-
 /**
  * Allocates the current page view to an experiment variant based on the given
  * experiment config.
@@ -97,13 +94,14 @@ export function allocateVariant(ampdoc, experimentName, config) {
   if (sticky && config['consentNotificationId']) {
     const element = ampdoc.getHeadNode();
     hasConsentPromise = Services.userNotificationManagerForDoc(element)
-        .then(manager => manager.getNotification(
-            config['consentNotificationId']))
-        .then(userNotification => {
-          userAssert(userNotification,
-              `Notification not found: ${config['consentNotificationId']}`);
-          return userNotification.isDismissed();
-        });
+      .then(manager => manager.getNotification(config['consentNotificationId']))
+      .then(userNotification => {
+        userAssert(
+          userNotification,
+          `Notification not found: ${config['consentNotificationId']}`
+        );
+        return userNotification.isDismissed();
+      });
   }
 
   return hasConsentPromise.then(hasConsent => {
@@ -111,21 +109,22 @@ export function allocateVariant(ampdoc, experimentName, config) {
       return null;
     }
     const group = config['group'] || experimentName;
-    return getBucketTicket(ampdoc, group, sticky ? cidScope : null)
-        .then(ticket => {
-          let upperBound = 0;
+    return getBucketTicket(ampdoc, group, sticky ? cidScope : null).then(
+      ticket => {
+        let upperBound = 0;
 
-          // Loop through keys in a specific order since the default object key
-          // enumeration is implementation (browser) dependent.
-          const variantNames = Object.keys(config['variants']).sort();
-          for (let i = 0; i < variantNames.length; i++) {
-            upperBound += config['variants'][variantNames[i]];
-            if (ticket < upperBound) {
-              return variantNames[i];
-            }
+        // Loop through keys in a specific order since the default object key
+        // enumeration is implementation (browser) dependent.
+        const variantNames = Object.keys(config['variants']).sort();
+        for (let i = 0; i < variantNames.length; i++) {
+          upperBound += config['variants'][variantNames[i]];
+          if (ticket < upperBound) {
+            return variantNames[i];
           }
-          return null;
-        });
+        }
+        return null;
+      }
+    );
   });
 }
 
@@ -136,8 +135,10 @@ export function allocateVariant(ampdoc, experimentName, config) {
  */
 function validateConfig(config) {
   const variants = config['variants'];
-  userAssert(isObject(variants) && Object.keys(variants).length > 0,
-      'Missing experiment variants config.');
+  userAssert(
+    isObject(variants) && Object.keys(variants).length > 0,
+    'Missing experiment variants config.'
+  );
   if (config['group']) {
     assertName(config['group']);
   }
@@ -147,15 +148,19 @@ function validateConfig(config) {
       assertName(variantName);
       const percentage = variants[variantName];
       userAssert(
-          typeof percentage === 'number' && percentage > 0 && percentage < 100,
-          'Invalid percentage %s:%s.'
-              + ' Has to be greater than 0 and less than 100',
-          variantName, percentage);
+        typeof percentage === 'number' && percentage > 0 && percentage < 100,
+        'Invalid percentage %s:%s.' +
+          ' Has to be greater than 0 and less than 100',
+        variantName,
+        percentage
+      );
       totalPercentage += percentage;
     }
   }
-  userAssert(totalPercentage./*avoid float precision*/toFixed(6) <= 100,
-      'Total percentage is bigger than 100: ' + totalPercentage);
+  userAssert(
+    totalPercentage./*avoid float precision*/ toFixed(6) <= 100,
+    'Total percentage is bigger than 100: ' + totalPercentage
+  );
 }
 
 /**
@@ -173,14 +178,18 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
   }
 
   const cidPromise = Services.cidForDoc(ampdoc).then(cidService =>
-    cidService.get({
-      scope: dev().assertString(opt_cidScope),
-      createCookieIfNotPresent: true,
-    }, Promise.resolve()));
+    cidService.get(
+      {
+        scope: dev().assertString(opt_cidScope),
+        createCookieIfNotPresent: true,
+      },
+      Promise.resolve()
+    )
+  );
 
   return Promise.all([cidPromise, Services.cryptoFor(ampdoc.win)])
-      .then(results => results[1].uniform(group + ':' + results[0]))
-      .then(hash => hash * 100);
+    .then(results => results[1].uniform(group + ':' + results[0]))
+    .then(hash => hash * 100);
 }
 
 /**
@@ -188,6 +197,9 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
  * @param {string} name
  */
 function assertName(name) {
-  userAssert(nameValidator.test(name),
-      'Invalid name: %s. Allowed chars are [a-zA-Z0-9-_].', name);
+  userAssert(
+    nameValidator.test(name),
+    'Invalid name: %s. Allowed chars are [a-zA-Z0-9-_].',
+    name
+  );
 }

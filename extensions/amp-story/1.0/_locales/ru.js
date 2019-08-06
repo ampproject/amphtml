@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Получить ссылку',
   },
@@ -111,15 +114,16 @@ const strings = {
     string: 'Увеличьте высоту окна браузера, чтобы посмотреть контент.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Увеличьте высоту и ширину окна браузера, чтобы посмотреть ' +
-        'контент.',
+    string:
+      'Увеличьте высоту и ширину окна браузера, чтобы посмотреть контент.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Увеличьте ширину окна браузера, чтобы посмотреть контент.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Для доступа к этому контенту нужно включить эксперимент с ' +
-        'AMP-историями.',
+    string:
+      'Для доступа к этому контенту нужно включить эксперимент с ' +
+      'AMP-историями.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Страница доступна только в вертикальной ориентации.',

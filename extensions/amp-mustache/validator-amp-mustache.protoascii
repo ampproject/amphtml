@@ -17,14 +17,14 @@
 # Specific URL to reference for violations having to do with mustache
 # templates. These are specific to any particular tag, so must live at
 # the top level of this rules file.
-template_spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache"
+template_spec_url: "https://amp.dev/documentation/components/amp-mustache"
 
 tags: {  # amp-mustache
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-mustache"
-    is_custom_template: true
+    extension_type: CUSTOM_TEMPLATE
     version: "0.1"
     version: "0.2"
     version: "latest"
@@ -42,7 +42,7 @@ tags: {  # amp-mustache
   spec_name: "SCRIPT[custom-element=amp-mustache] (AMP4ADS/AMP4EMAIL)"
   extension_spec: {
     name: "amp-mustache"
-    is_custom_template: true
+    extension_type: CUSTOM_TEMPLATE
     version: "0.1"
     version: "0.2"
     version: "latest"
@@ -65,10 +65,6 @@ tags: {
   disallowed_ancestor: "FORM DIV [verify-error][template]"
   requires_extension: "amp-mustache"
   attrs: {
-    disabled_by: "transformed"
-    name: "nonce"
-  }
-  attrs: {
     name: "type"
     mandatory: true
     value_casei: "text/plain"
@@ -79,6 +75,7 @@ tags: {
     value: "amp-mustache"
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  attr_lists: "nonce-attr"
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"
@@ -105,10 +102,6 @@ tags: {
   disallowed_ancestor: "FORM DIV [submitting]"
   requires_extension: "amp-mustache"
   attrs: {
-    disabled_by: "transformed"
-    name: "nonce"
-  }
-  attrs: {
     name: "type"
     mandatory: true
     value_casei: "text/plain"
@@ -119,6 +112,7 @@ tags: {
     value: "amp-mustache"
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  attr_lists: "nonce-attr"
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"

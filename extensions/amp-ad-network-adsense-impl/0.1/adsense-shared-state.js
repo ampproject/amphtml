@@ -22,12 +22,10 @@ import {devAssert} from '../../../src/log';
  * parameters.
  */
 export class AdsenseSharedState {
-
   /**
    * Creates an instance of AdsenseSharedState.
    */
   constructor() {
-
     /** @private {!Array<!{id: string, format: string, client: string, slotname: (string|undefined)}>} */
     this.previousSlots_ = [];
   }
@@ -50,7 +48,7 @@ export class AdsenseSharedState {
       result.prevFmts += (result.prevFmts ? ',' : '') + slot.format;
       if (slot.slotname) {
         result.prevSlotnames +=
-            (result.prevSlotnames ? ',' : '') + slot.slotname;
+          (result.prevSlotnames ? ',' : '') + slot.slotname;
       }
       if (slot.client == client) {
         result.pv = 1;

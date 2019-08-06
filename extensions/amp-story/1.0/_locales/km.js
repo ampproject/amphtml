@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'ទទួលបាន​តំណ',
   },
@@ -123,9 +126,10 @@ const strings = {
     string: 'អាចមើលឃើញ​ទំព័រ​ល្អបំផុត​នៅក្នុង​មុខងារបញ្ឈរ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'សូម​អភ័យទោស ' +
-        // eslint-disable-next-line max-len
-        'កម្មវិធីរុករកតាមអ៊ីនធឺណិត​របស់អ្នក​ហាក់ដូចជា​មិនស្គាល់​បទពិសោធន៍​នេះ​ទេ',
+    string:
+      'សូម​អភ័យទោស ' +
+      // eslint-disable-next-line max-len
+      'កម្មវិធីរុករកតាមអ៊ីនធឺណិត​របស់អ្នក​ហាក់ដូចជា​មិនស្គាល់​បទពិសោធន៍​នេះ​ទេ',
   },
 };
 

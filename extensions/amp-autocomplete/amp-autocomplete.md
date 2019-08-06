@@ -1,7 +1,8 @@
 ---
-$category: misc
-formats: websites
-teaser: 
+$category: dynamic-content
+formats:
+ - websites
+teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
 ---
 <!--
@@ -22,8 +23,6 @@ limitations under the License.
 
 # `amp-autocomplete`
 
-**This feature is experimental and activated by the `amp-autocomplete` experiment.**
-
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -31,14 +30,14 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-     <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+     <td>Launched</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>container</td>
   </tr>
   <tr>
@@ -51,16 +50,12 @@ limitations under the License.
 
 The `amp-autocomplete` extension should be used for suggesting completed items based on user input to help users carry out their task more quickly.
 
-The request is always made from the client, even if the document was served from the AMP Cache. Loading is triggered using normal AMP rules depending on how far the element is from the current viewport.
-
-Filtered results will not be displayed until user focuses on the input field or begins typing into it. Leaving the viewport hides the filtered results.
-
-By default, `<amp-autocomplete>` adds a `list` ARIA role to the filtered results element and a `listitem` role to item elements rendered via the template.
+This can be used to power search experiences, in cases where the user may not know the full range of potential inputs, or in forms to help ensure inputs where there may be multiple ways to express the same intent (using a state abbreviation instead of its full name, for example) yield more predictable results.
 
 Example:
 ```html
   <amp-autocomplete filter="substring" id="myAutocomplete">
-    <input type="text">
+    <input>
     <script type="application/json">
       { "items": ["a", "b", "c"] }
     </script>
@@ -71,7 +66,7 @@ Example:
 
 <table>
   <tr>
-    <td width="40%"><strong>filter [required]</strong></td>
+    <td width="40%"><strong>filter (required)</strong></td>
     <td>The filtering mechanism applied to source data to produce filtered results for user input. In all cases the filtered results will be displayed in array order of data retrieved. If filtering is being done (<code>filter != none</code>), it is done client side. The following are supported values:
     <ul>
       <li><strong>substring</strong>: if the user input is a substring of an item, then the item is suggested</li>
@@ -83,35 +78,49 @@ Example:
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>filter-expr [optional]</strong></td>
+    <td width="40%"><strong>src (optional)</strong></td>
+    <td>The URL of the remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This must be a CORS HTTP service and the URL's protocol must be HTTPS. The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests?referrer=ampproject.org">CORS Requests in AMP</a> spec.
+
+    The src attribute may be omitted if the <code>[src]</code> attribute exists.
+
+    If fetching the data at the src URL fails, the <amp-autocomplete> triggers a fallback.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>filter-expr (optional)</strong></td>
     <td>Required if <code>filter==custom</code></td>
   </tr>
   <tr>
-    <td width="40%"><strong>filter-value [optional]</strong></td>
+    <td width="40%"><strong>filter-value (optional)</strong></td>
     <td>If data is an array of JsonObjects, the filter-value is the property name that will be accessed for client side filtering. This attribute is unnecessary if filter is none. Defaults to "value".</td>
   </tr>
   <tr>
-    <td width="40%"><strong>min-characters [optional]</strong></td>
+    <td width="40%"><strong>min-characters (optional)</strong></td>
     <td>
       The min character length of a user input to provide results, default 1
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>max-entries [optional]</strong></td>
+    <td width="40%"><strong>max-entries (optional)</strong></td>
     <td>
-      The max specified number of items to suggest at once based on a user input, displays all if unspecified 
+      The max specified number of items to suggest at once based on a user input, displays all if unspecified
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>suggest-first [optional]</strong></td>
+    <td width="40%"><strong>suggest-first (optional)</strong></td>
     <td>
       Suggest the first entry in the list of results by marking it active; only possible if <code>filter==prefix</code> (does nothing otherwise)
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>submit-on-enter [optional]</strong></td>
+    <td width="40%"><strong>submit-on-enter (optional)</strong></td>
     <td>
-      The enter key is primarily used for selecting suggestions in autocomplete, so it shouldn’t also submit the form unless the developer explicitly sets it to do so (for search fields/one field forms, et cetera). Defaults to false. 
+      The enter key is primarily used for selecting suggestions in autocomplete, so it shouldn’t also submit the form unless the developer explicitly sets it to do so (for search fields/one field forms, et cetera).
+      The user flow is as follows: If <code>submit-on-enter</code> is <code>true</code>, pressing <code>Enter</code> will select any currently active item and engage in default behavior, including submitting the form if applicable. If <code>submit-on-enter</code> is <code>false</code>, pressing <code>Enter</code> <em>while suggestions are displaying</em> will select any currently active item only and prevent any other default behavior. If suggestions are not displaying, autocomplete allows default behavior. <strong>Defaults to false.</strong>
+    </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>highlight-user-entry (optional)</strong></td>
+    <td>If present, exposes the <code>autocomplete-partial</code> class on the substring within the suggested item that resulted in its match with the user input. This can be used to stylize the corresponding match to stand out to the user. <strong>Defaults to false.</strong>
     </td>
   </tr>
 </table>
@@ -126,7 +135,7 @@ Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
 <table>
   <tr>
     <td width="40%"><strong>select</strong></td>
-    <td><code>amp-autocomplete</code> triggers the <code>select</code> event when the user selects an option via click, tap, keyboard navigation or accepting typeahead.
+    <td><code>amp-autocomplete</code> triggers the <code>select</code> event when the user selects an option via click, tap, keyboard navigation or accepting typeahead. It also fires the <code>select</code> event if a user keyboard navigates to an item and Tabs away from the input field.
     <code>event</code> contains the <code>value</code> attribute value of the selected element.</td>
   </tr>
 

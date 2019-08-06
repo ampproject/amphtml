@@ -27,7 +27,9 @@ let MediaQueriesListAndValueDef;
  * @return {!Array<!MediaQueriesListAndValueDef>}
  */
 function getMediaQueryListsAndValues(value) {
-  return value.split(',')
+  return (
+    value
+      .split(',')
       .map(part => {
         // Find the value portion by looking at the end.
         const result = /[a-z0-9.]+$/.exec(part);
@@ -48,7 +50,8 @@ function getMediaQueryListsAndValues(value) {
       })
       // Remove any items that did not match the regex above and are
       // undefined as a result.
-      .filter(item => item);
+      .filter(item => item)
+  );
 }
 
 /**
@@ -78,6 +81,7 @@ function getMatchingValue(mediaQueryListsAndValues) {
  * * "(min-width: 600px) true"
  *
  * @param {string} str The media query/value string.
+ * @return {*} TODO(#23582): Specify return type
  */
 export function getResponsiveAttributeValue(str) {
   return getMatchingValue(getMediaQueryListsAndValues(str));

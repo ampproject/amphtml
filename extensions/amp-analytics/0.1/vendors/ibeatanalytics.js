@@ -18,29 +18,30 @@ export const IBEATANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://ibeat.indiatimes.com',
     'base': 'https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html',
-    'pageview': '${base}?' +
-              '&h=${h}' +
-              '&d=${h}' +
-              '&url=${url}' +
-              '&k=${key}' +
-              '&ts=${time}' +
-              '&ch=${channel}' +
-              '&sid=${uid}' +
-              '&at=${agentType}' +
-              '&ref=${documentReferrer}' +
-              '&aid=${aid}' +
-              '&loc=1' +
-              '&ct=1' +
-              '&cat=${cat}' +
-              '&scat=${scat}' +
-              '&ac=1' +
-              '&tg=${tags}' +
-              '&ctids=${catIds}' +
-              '&pts=${pagePublishTime}' +
-              '&auth=${author}' +
-              '&pos=${position}' +
-              '&iBeatField=${ibeatFields}' +
-              '&cid=${clientId(MSCSAuthDetails)}',
+    'pageview':
+      '${base}?' +
+      '&h=${h}' +
+      '&d=${h}' +
+      '&url=${url}' +
+      '&k=${key}' +
+      '&ts=${time}' +
+      '&ch=${channel}' +
+      '&sid=${uid}' +
+      '&at=${agentType}' +
+      '&ref=${documentReferrer}' +
+      '&aid=${aid}' +
+      '&loc=1' +
+      '&ct=1' +
+      '&cat=${cat}' +
+      '&scat=${scat}' +
+      '&ac=1' +
+      '&tg=${tags}' +
+      '&ctids=${catIds}' +
+      '&pts=${pagePublishTime}' +
+      '&auth=${author}' +
+      '&pos=${position}' +
+      '&iBeatField=${ibeatFields}' +
+      '&cid=${clientId(MSCSAuthDetails)}',
   },
   'triggers': {
     'defaultPageview': {

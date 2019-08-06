@@ -34,12 +34,12 @@ using a supplied template.
     <td><code>&lt;script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-list/">amp-list example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-list/">amp-list example</a>.</td>
   </tr>
 </table>
 
@@ -48,7 +48,7 @@ using a supplied template.
 The `<amp-list>` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains data, which is rendered in the specified template.
 
 {% call callout('Important', type='caution') %}
-Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
+Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
 {% endcall %}
 
 You can specify a template in one of two ways:
@@ -60,19 +60,22 @@ For more details on templates, see [AMP HTML Templates](../../spec/amp-html-temp
 
 *Example: Displaying a dynamic list*
 
-In the following example, we retrieve JSON data that contains URLs and titles, and render the content in a nested [amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache).
+In the following example, we retrieve JSON data that contains URLs and titles, and render the content in a nested [amp-mustache template](https://amp.dev/documentation/components/amp-mustache).
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="259"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/amplist.basic.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true" imports="amp-list" template="amp-mustache"]
+```html
+<amp-list width="auto"
+  height="100"
+  layout="fixed-height"
+  src="{{server_for_email}}/static/inline-examples/data/amp-list-urls.json">
+  <template type="amp-mustache">{% raw %}
+    <div class="url-entry">
+      <a href="{{url}}">{{title}}</a>
+    </div>
+  {% endraw %}</template>
+</amp-list>
+```
+[/example]
 
 Here is the JSON file that we used:
 
@@ -130,17 +133,27 @@ Optionally, the `<amp-list>` element can contain an element with an `overflow` a
 
 In the following example, we display a list of images and titles. Because the `<amp-list>` content requires more space than available, the AMP Runtime displays the overflow element.
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="213"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/amplist.overflow.embed.html?active-tab=preview&preview-height=213">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
+[example preview="inline" playground="true" imports="amp-list" template="amp-mustache"]
+```html
+<amp-list width="auto"
+  height="140"
+  layout="fixed-height"
+  src="{{server_for_email}}/static/inline-examples/data/amp-list-data.json">
+  <template type="amp-mustache">{% raw %}
+    <div class="image-entry">
+      <amp-img src="{{imageUrl}}"
+        width="100"
+        height="75"></amp-img>
+      <span class="image-title">{{title}}</span>
+    </div>
+  {% endraw %}</template>
+  <div overflow
+    class="list-overflow">
+    See more
+  </div>
+</amp-list>
+```
+[/example]
 
 Here's the CSS for the `overflow`:
 
@@ -160,7 +173,7 @@ Optionally, `<amp-list>` supports a placeholder and/or fallback.
 - A *placeholder* is a child element with the `placeholder` attribute. This element is shown until the `<amp-list>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-list>` fails to load.
 - A *fallback* is a child element with the `fallback` attribute. This element is shown if the `<amp-list>` fails to load.
 
-Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders). Note that a child element cannot be both a placeholder and a fallback.
+Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders). Note that a child element cannot be both a placeholder and a fallback.
 
 ```html
 <amp-list src="https://foo.com/list.json">
@@ -208,9 +221,9 @@ within this `<amp-list>`. This must be a CORS HTTP service. The URL's protocol m
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
 
-The `src` attribute may be omitted if the `[src]` attribute exists.
-
 If fetching the data at the `src` URL fails, the `<amp-list>` triggers a low-trust `fetch-error` event.
+
+The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supports URL and non-URL expression values; see `amp-list` in [`amp-bind` element specific attributes documentation](https://amp.dev/documentation/components/amp-bind/#element-specific-attributes) for details.
 
 ##### credentials (optional)
 
@@ -277,21 +290,21 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 If `binding` attribute is not provided, default is `always`.
 
-##### [is-layout-container] (experimental, optional)
+##### [is-layout-container] (optional)
 
 This is a bindable attribute that should always be `false` by default. When set to `true` via `amp-bind`, it changes the layout of the `<amp-list>` to `container`. This attribute is useful for handling dynamic resizing for amp-list.
 
-This attribute cannot be true by default for the same reason why `<amp-list>` does not support layout `CONTAINER` &mdash; it can cause content jumping on first load. This attribute is experimentally available under `amp-list-resizable-children`.
+This attribute cannot be true by default for the same reason why `<amp-list>` does not support layout `CONTAINER` &mdash; it can cause content jumping on first load.
 
 Alternatively, one may also use the `changeToLayoutContainer` action.
 
 ##### common attributes
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
-## Load more and infinite scroll (experimental)
+## Load more and infinite scroll
 
-We've introduced the `amp-list-load-more` experiment as an implementation for pagination and infinite scroll in `<amp-list>`. You can enable this feature by turning on the 'amp-list-load-more' experiment on the [experiments page](https://cdn.ampproject.org/experiments.html) and adding the `load-more` attribute to `<amp-list>`. This is a feature currently in origin trial, and final APIs may change.
+We've introduced the `load-more` attributes with options `manual` and `auto` to allow pagination and infinite scroll.
 
 #### Sample Usage
 
@@ -331,7 +344,7 @@ An `<amp-list-load-more>` element with the `load-more-button` attribute, which s
 ##### Example:
 
 ```html
-<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
+<amp-list load-more="manual" src="https://www.load.more.example.com/" width="400" height="800">
   ...
   <amp-list-load-more load-more-button>
     <button>See More</button> /* My custom see more button */
@@ -361,7 +374,7 @@ It can be templated via `amp-mustache`.
 This element is a loader that will be displayed if the user reaches the end of the list and the contents are still loading, or as a result of clicking on the `load-more-button` element (while the new children of the `<amp-list>` are still loading). This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-loading`. Example below:
 
 ```html
-<amp-list load-more=auto src="https://www.load.more.example.com/" width="400" height="800">
+<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
   ...
   <amp-list-load-more load-more-loading>
     <svg>...</svg> /* My custom loader */

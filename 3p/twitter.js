@@ -65,21 +65,24 @@ export function twitter(global, data) {
     delete data.height;
 
     if (data.tweetid) {
-      twttr.widgets.createTweet(cleanupTweetId_(data.tweetid), tweet, data)
-          ./*OK*/then(el => tweetCreated(twttr, el));
+      twttr.widgets
+        .createTweet(cleanupTweetId_(data.tweetid), tweet, data)
+        ./*OK*/ then(el => tweetCreated(twttr, el));
     } else if (data.momentid) {
-      twttr.widgets.createMoment(data.momentid, tweet, data)
-          ./*OK*/then(el => tweetCreated(twttr, el));
+      twttr.widgets
+        .createMoment(data.momentid, tweet, data)
+        ./*OK*/ then(el => tweetCreated(twttr, el));
     } else if (data.timelineSourceType) {
       // Extract properties starting with 'timeline'.
       const timelineData = Object.keys(data)
-          .filter(prop => startsWith(prop, 'timeline'))
-          .reduce((newData, prop) => {
-            newData[stripPrefixCamelCase(prop, 'timeline')] = data[prop];
-            return newData;
-          }, {});
-      twttr.widgets.createTimeline(timelineData, tweet, data)
-          ./*OK*/then(el => tweetCreated(twttr, el));
+        .filter(prop => startsWith(prop, 'timeline'))
+        .reduce((newData, prop) => {
+          newData[stripPrefixCamelCase(prop, 'timeline')] = data[prop];
+          return newData;
+        }, {});
+      twttr.widgets
+        .createTimeline(timelineData, tweet, data)
+        ./*OK*/ then(el => tweetCreated(twttr, el));
     }
   });
 
@@ -108,20 +111,22 @@ export function twitter(global, data) {
    * @param {!Element} container
    */
   function resize(container) {
-    const height = container./*OK*/offsetHeight;
+    const height = container./*OK*/ offsetHeight;
     // 0 height is always wrong and we should get another resize request
     // later.
     if (height == 0) {
       return;
     }
     context.updateDimensions(
-        container./*OK*/offsetWidth,
-        height + /* margins */ 20);
+      container./*OK*/ offsetWidth,
+      height + /* margins */ 20
+    );
   }
 
   /**
    * @param {string} input
    * @param {string} prefix
+   * @return {*} TODO(#23582): Specify return type
    */
   function stripPrefixCamelCase(input, prefix) {
     const stripped = input.replace(new RegExp('^' + prefix), '');
@@ -132,6 +137,7 @@ export function twitter(global, data) {
 /**
  * @param {string} tweetid
  * @visibleForTesting
+ * @return {*} TODO(#23582): Specify return type
  */
 export function cleanupTweetId_(tweetid) {
   // 1)

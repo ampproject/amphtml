@@ -20,7 +20,7 @@ import {Layout, LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('amp-img', () => {
   let sandbox;
@@ -35,8 +35,7 @@ describe('amp-img', () => {
     sandbox = sinon.sandbox;
     screenWidth = 320;
     windowWidth = 320;
-    sandbox.stub(BaseElement.prototype, 'isInViewport')
-        .returns(true);
+    sandbox.stub(BaseElement.prototype, 'isInViewport').returns(true);
     sandbox.stub(BaseElement.prototype, 'getViewport').callsFake(() => {
       return {
         getWidth: () => windowWidth,
@@ -84,7 +83,8 @@ describe('amp-img', () => {
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
       expect(ampImg.implementation_.getLayoutPriority()).to.equal(
-          LayoutPriority.CONTENT);
+        LayoutPriority.CONTENT
+      );
       expect(img.getAttribute('alt')).to.equal('An image');
       expect(img.getAttribute('title')).to.equal('Image title');
       expect(img.getAttribute('referrerpolicy')).to.equal('origin');
@@ -102,7 +102,8 @@ describe('amp-img', () => {
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
       expect(ampImg.implementation_.getLayoutPriority()).to.equal(
-          LayoutPriority.CONTENT);
+        LayoutPriority.CONTENT
+      );
     });
   });
 
@@ -147,7 +148,7 @@ describe('amp-img', () => {
       impl.preconnectCallback(true);
       expect(impl.preconnect.url.called).to.be.true;
       expect(impl.preconnect.url).to.have.been.calledWith(
-          '/examples/img/hero@1x.jpg'
+        '/examples/img/hero@1x.jpg'
       );
     });
   });
@@ -188,8 +189,9 @@ describe('amp-img', () => {
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
       expect(img.getAttribute('srcset')).to.equal(SRCSET_STRING);
-      expect(img.getAttribute('sizes')).to
-          .equal('(max-width: 320px) 640px, 100vw');
+      expect(img.getAttribute('sizes')).to.equal(
+        '(max-width: 320px) 640px, 100vw'
+      );
     });
   });
 
@@ -492,7 +494,6 @@ describe('amp-img', () => {
   });
 
   describe('auto-generate sizes', () => {
-
     function getStubbedImg(attributes, layoutWidth) {
       const el = document.createElement('amp-img');
       for (const key in attributes) {
@@ -516,147 +517,160 @@ describe('amp-img', () => {
       return impl;
     }
 
-    beforeEach(() => {
-      toggleExperiment(window, 'amp-img-auto-sizes', true, true);
-    });
-
     it('should not generate sizes for amp-imgs that already have sizes', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         src: '/examples/img/sample.jpg',
         srcset: SRCSET_STRING,
         sizes: '50vw',
         width: 300,
         height: 200,
-      }).then(ampImg => {
-        impl = ampImg.implementation_;
-        impl.buildCallback();
-        return impl.layoutCallback();
-      }).then(() => {
-        const img = impl.img_;
-        expect(img.getAttribute('sizes')).to.equal('50vw');
-      });
+      })
+        .then(ampImg => {
+          impl = ampImg.implementation_;
+          impl.buildCallback();
+          return impl.layoutCallback();
+        })
+        .then(() => {
+          const img = impl.img_;
+          expect(img.getAttribute('sizes')).to.equal('50vw');
+        });
     });
 
     it('should not generate sizes for amp-imgs without srcset', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         src: '/examples/img/sample.jpg',
         width: 300,
         height: 200,
-      }).then(ampImg => {
-        impl = ampImg.implementation_;
-        impl.buildCallback();
-        return impl.layoutCallback();
-      }).then(() => {
-        const img = impl.img_;
-        expect(img.getAttribute('sizes')).to.be.null;
-      });
+      })
+        .then(ampImg => {
+          impl = ampImg.implementation_;
+          impl.buildCallback();
+          return impl.layoutCallback();
+        })
+        .then(() => {
+          const img = impl.img_;
+          expect(img.getAttribute('sizes')).to.be.null;
+        });
     });
 
     it('should not generate sizes for amp-imgs with x descriptors', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         srcset: '/examples/img/hero@1x.jpg, /examples/img/hero@2x.jpg 2x',
         width: 300,
         height: 200,
-      }).then(ampImg => {
-        impl = ampImg.implementation_;
-        impl.buildCallback();
-        return impl.layoutCallback();
-      }).then(() => {
-        const img = impl.img_;
-        expect(img.getAttribute('sizes')).to.be.null;
-      });
+      })
+        .then(ampImg => {
+          impl = ampImg.implementation_;
+          impl.buildCallback();
+          return impl.layoutCallback();
+        })
+        .then(() => {
+          const img = impl.img_;
+          expect(img.getAttribute('sizes')).to.be.null;
+        });
     });
 
     it('should generate correct sizes for layout fixed', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
-      const impl = getStubbedImg({
-        layout: Layout.FIXED,
-        src: 'test.jpg',
-        srcset: 'large.jpg 2000w, small.jpg 1000w',
-        width: 300,
-        height: 200,
-      }, 300);
+      const impl = getStubbedImg(
+        {
+          layout: Layout.FIXED,
+          src: 'test.jpg',
+          srcset: 'large.jpg 2000w, small.jpg 1000w',
+          width: 300,
+          height: 200,
+        },
+        300
+      );
       impl.buildCallback();
       impl.initialize_();
       const img = impl.img_;
       expect(impl.getViewport().getWidth()).to.equal(320);
-      expect(img.getAttribute('sizes')).to
-          .equal('(max-width: 320px) 300px, 300px');
+      expect(img.getAttribute('sizes')).to.equal(
+        '(max-width: 320px) 300px, 300px'
+      );
     });
 
     it('should generate correct sizes for layout responsive', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
-      const impl = getStubbedImg({
-        layout: Layout.RESPONSIVE,
-        src: 'test.jpg',
-        srcset: 'large.jpg 2000w, small.jpg 1000w',
-        width: 300,
-        height: 200,
-      }, 160);
+      const impl = getStubbedImg(
+        {
+          layout: Layout.RESPONSIVE,
+          src: 'test.jpg',
+          srcset: 'large.jpg 2000w, small.jpg 1000w',
+          width: 300,
+          height: 200,
+        },
+        160
+      );
       impl.buildCallback();
       impl.initialize_();
       const img = impl.img_;
       expect(impl.getViewport().getWidth()).to.equal(320);
-      expect(img.getAttribute('sizes')).to
-          .equal('(max-width: 320px) 160px, 100vw');
+      expect(img.getAttribute('sizes')).to.equal(
+        '(max-width: 320px) 160px, 100vw'
+      );
     });
 
     it('should generate correct sizes for layout fixed-height', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
-      const impl = getStubbedImg({
-        layout: Layout.FIXED_HEIGHT,
-        src: 'test.jpg',
-        srcset: 'large.jpg 2000w, small.jpg 1000w',
-        width: 300,
-        height: 200,
-      }, 160);
+      const impl = getStubbedImg(
+        {
+          layout: Layout.FIXED_HEIGHT,
+          src: 'test.jpg',
+          srcset: 'large.jpg 2000w, small.jpg 1000w',
+          width: 300,
+          height: 200,
+        },
+        160
+      );
       impl.buildCallback();
       impl.initialize_();
       const img = impl.img_;
       expect(impl.getViewport().getWidth()).to.equal(320);
-      expect(img.getAttribute('sizes')).to
-          .equal('(max-width: 320px) 160px, 100vw');
+      expect(img.getAttribute('sizes')).to.equal(
+        '(max-width: 320px) 160px, 100vw'
+      );
     });
 
     it('should generate correct sizes for layout fill', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
-      const impl = getStubbedImg({
-        layout: Layout.FILL,
-        src: 'test.jpg',
-        srcset: 'large.jpg 2000w, small.jpg 1000w',
-        width: 300,
-        height: 200,
-      }, 160);
+      const impl = getStubbedImg(
+        {
+          layout: Layout.FILL,
+          src: 'test.jpg',
+          srcset: 'large.jpg 2000w, small.jpg 1000w',
+          width: 300,
+          height: 200,
+        },
+        160
+      );
       impl.buildCallback();
       impl.initialize_();
       const img = impl.img_;
       expect(impl.getViewport().getWidth()).to.equal(320);
-      expect(img.getAttribute('sizes')).to
-          .equal('(max-width: 320px) 160px, 100vw');
+      expect(img.getAttribute('sizes')).to.equal(
+        '(max-width: 320px) 160px, 100vw'
+      );
     });
 
     it('should generate correct sizes for layout flex-item', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
-      const impl = getStubbedImg({
-        layout: Layout.FLEX_ITEM,
-        src: 'test.jpg',
-        srcset: 'large.jpg 2000w, small.jpg 1000w',
-        width: 300,
-        height: 200,
-      }, 160);
+      const impl = getStubbedImg(
+        {
+          layout: Layout.FLEX_ITEM,
+          src: 'test.jpg',
+          srcset: 'large.jpg 2000w, small.jpg 1000w',
+          width: 300,
+          height: 200,
+        },
+        160
+      );
       impl.buildCallback();
       impl.initialize_();
       const img = impl.img_;
       expect(impl.getViewport().getWidth()).to.equal(320);
-      expect(img.getAttribute('sizes')).to
-          .equal('(max-width: 320px) 160px, 100vw');
+      expect(img.getAttribute('sizes')).to.equal(
+        '(max-width: 320px) 160px, 100vw'
+      );
     });
-
   });
 });

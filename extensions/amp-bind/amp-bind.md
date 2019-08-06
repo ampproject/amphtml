@@ -42,15 +42,15 @@ limitations under the License.
     <td class="col-fourty"><strong>Examples</strong></td>
     <td>
       <ul>
-        <li><a href="https://ampbyexample.com/components/amp-bind/">Introductory code example with annotations</a></li>
-        <li><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">Linked image carousels example with annotations</a></li>
-        <li><a href="https://ampbyexample.com/samples_templates/product/">E-commerce product page example with annotations</a></li>
+        <li><a href="https://amp.dev/documentation/examples/components/amp-bind/">Introductory code example with annotations</a></li>
+        <li><a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">Linked image carousels example with annotations</a></li>
+        <li><a href="https://amp.dev/documentation/examples/e-commerce/product_page/">E-commerce product page example with annotations</a></li>
       </ul>
     </td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Tutorials</strong></td>
-    <td><a href="https://www.ampproject.org/docs/tutorials/interactivity">Create interactive AMP pages</a></td>
+    <td><a href="https://amp.dev/documentation/guides-and-tutorials/develop/interactivity/">Create interactive AMP pages</a></td>
   </tr>
 </table>
 
@@ -139,7 +139,7 @@ When the button is pressed:
     - The `amp-img` element will show the image of a cat.
 
 {% call callout('Tip', type='success') %}
-[Try out the **live demo**](https://ampbyexample.com/components/amp-bind/) for this example with code annotations!
+[Try out the **live demo**](https://amp.dev/documentation/examples/components/amp-bind/) for this example with code annotations!
 {% endcall %}
 
 
@@ -371,7 +371,7 @@ A **binding** is a special attribute of the form `[property]` that links an elem
 
 When the **state** changes, expressions are re-evaluated and the bound elements' properties are updated with the new expression results.
 
-`amp-bind` supports data bindings on four types of element state:
+`amp-bind` supports data bindings on five types of element state:
 
 <table>
   <tr>
@@ -398,6 +398,11 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Size of <a href="https://www.ampproject.org/docs/reference/components">AMP elements</a></td>
     <td><code>[width]</code><br><code>[height]</code></td>
     <td>Changes the width and/or height of the AMP element.</td>
+  </tr>
+  <tr>
+    <td>Accessibility states and properties</td>
+    <td><code>[aria-hidden]</code><br><code>[aria-label]</code><br>etc.</td>
+    <td>Used for dynamically updating information available to assistive technologies like screen readers.</td>
   </tr>
   <tr>
     <td>Element-specific attributes</td>
@@ -431,7 +436,7 @@ Only binding to the following components and attributes are allowed:
   <tr>
     <td><code>&lt;amp-carousel type=slides&gt;</code></td>
     <td><code>[slide]</code><sup>*</sup></td>
-    <td>Changes the currently displayed slide index. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
+    <td>Changes the currently displayed slide index. <a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
     <td><code>&lt;amp-date-picker&gt;</code></td>
@@ -477,7 +482,7 @@ Only binding to the following components and attributes are allowed:
   <tr>
     <td><code>&lt;amp-selector&gt;</code></td>
     <td><code>[selected]</code><sup>*</sup><br><code>[disabled]</code></td>
-    <td>Changes the currently selected children element(s)<br>identified by their <code>option</code> attribute values. Supports a comma-separated list of values for multiple selection. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
+    <td>Changes the currently selected children element(s)<br>identified by their <code>option</code> attribute values. Supports a comma-separated list of values for multiple selection. <a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
     <td><code>&lt;amp-state&gt;</code></td>
@@ -535,6 +540,11 @@ Only binding to the following components and attributes are allowed:
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes">optgroup attributes</a></td>
   </tr>
   <tr>
+    <td><code>&lt;section&gt;</code></td>
+    <td><code>[data-expand]</code></td>
+    <td>Changes the expansion of a <code>section</code> in an <a href="https://amp.dev/documentation/components/amp-accordion">amp-accordion</a>.</td>
+  </tr>
+  <tr>
     <td><code>&lt;select&gt;</code></td>
     <td><code>[autofocus]</code><br><code>[disabled]</code><br><code>[multiple]</code><br><code>[required]</code><br><code>[size]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes">select attributes</a>.</td>
@@ -551,8 +561,8 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;textarea&gt;</code></td>
-    <td><code>[autocomplete]</code><br><code>[autofocus]</code><br><code>[cols]</code><br><code>[disabled]</code><br><code>[maxlength]</code><br><code>[minlength]</code><br><code>[placeholder]</code><br><code>[readonly]</code><br><code>[required]</code><br><code>[rows]</code><br><code>[selectiondirection]</code><br><code>[selectionend]</code><br><code>[selectionstart]</code><br><code>[spellcheck]</code><br><code>[wrap]</code></td>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes">textarea attributes</a>.</td>
+    <td><code>[autocomplete]</code><br><code>[autofocus]</code><br><code>[cols]</code><br><code>[disabled]</code><br><code>[defaultText]</code><br><code>[maxlength]</code><br><code>[minlength]</code><br><code>[placeholder]</code><br><code>[readonly]</code><br><code>[required]</code><br><code>[rows]</code><br><code>[selectiondirection]</code><br><code>[selectionend]</code><br><code>[selectionstart]</code><br><code>[spellcheck]</code><br><code>[wrap]</code></td>
+    <td>Use <code>[defaultText]</code> to update initial text, and <code>[text]</code> to update current text.<br>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes">textarea attributes</a>.</td>
   </tr>
 </table>
 <sup>*</sup>Denotes bindable attributes that don't have a non-bindable counterpart.
@@ -657,7 +667,7 @@ AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a sin
     <td><p>The URL of the remote endpoint that will return the JSON that will update this <code>amp-state</code>. This must be a CORS HTTP service.</p>
 <p>The <code>src</code> attribute allows all standard URL variable substitutions. See the <a href="../../spec/amp-var-substitutions.md">Substitutions Guide</a> for more info.</p>
 <p>{% call callout('Important', type='caution') %}
-  The endpoint must implement the requirements specified in the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests">CORS Requests in AMP</a> spec.
+  The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests">CORS Requests in AMP</a> spec.
   {% endcall %}</p></td>
   </tr>
   <tr>

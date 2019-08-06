@@ -16,9 +16,7 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {
-  assertHttpsUrl,
-} from '../../../src/url';
+import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -26,6 +24,7 @@ import {
   insertAfterOrAtStart,
   isAmpElement,
   removeElement,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
@@ -52,14 +51,12 @@ export const consentUiClasses = {
 };
 
 export class ConsentUI {
-
   /**
    * @param {!AMP.BaseElement} baseInstance
    * @param {!JsonObject} config
    * @param {string=} opt_postPromptUI
    */
   constructor(baseInstance, config, opt_postPromptUI) {
-
     /** @private {!AMP.BaseElement} */
     this.baseInstance_ = baseInstance;
 
@@ -82,7 +79,8 @@ export class ConsentUI {
     this.ui_ = null;
 
     /** @private {boolean} */
-    this.overlayEnabled_ = isExperimentOn(baseInstance.win, 'amp-consent-v2') &&
+    this.overlayEnabled_ =
+      isExperimentOn(baseInstance.win, 'amp-consent-v2') &&
       config['uiConfig'] &&
       config['uiConfig']['overlay'] === true;
 
@@ -100,6 +98,9 @@ export class ConsentUI {
 
     /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
+
+    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
     /** @private {!Element} */
     this.parent_ = baseInstance.element;
@@ -137,11 +138,13 @@ export class ConsentUI {
    */
   init_(config, opt_postPromptUI) {
     if (opt_postPromptUI) {
-      const postPromptUI =
-          this.ampdoc_.getElementById(opt_postPromptUI);
+      const postPromptUI = this.ampdoc_.getElementById(opt_postPromptUI);
       if (!postPromptUI) {
-        user().error(TAG, 'postPromptUI element with ' +
-          'id=%s not found', opt_postPromptUI);
+        user().error(
+          TAG,
+          'postPromptUI element with id=%s not found',
+          opt_postPromptUI
+        );
       }
       this.ui_ = dev().assertElement(postPromptUI);
       this.isPostPrompt_ = true;
@@ -153,15 +156,17 @@ export class ConsentUI {
       // Always respect promptUI first
       const promptElement = this.ampdoc_.getElementById(promptUI);
       if (!promptElement || !this.parent_.contains(promptElement)) {
-        user().error(TAG, 'child element of <amp-consent> with ' +
-          'promptUI id %s not found', promptUI);
+        user().error(
+          TAG,
+          'child element of <amp-consent> with promptUI id %s not found',
+          promptUI
+        );
       }
       this.ui_ = dev().assertElement(promptElement);
     } else if (promptUISrc && isExperimentOn(this.win_, 'amp-consent-v2')) {
       // Create an iframe element with the provided src
       this.isCreatedIframe_ = true;
-      this.ui_ =
-          this.createPromptIframeFromSrc_(promptUISrc);
+      this.ui_ = this.createPromptIframeFromSrc_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
     }
@@ -169,8 +174,9 @@ export class ConsentUI {
 
   /**
    * Display the UI.
+   * @param {boolean} isActionPromptTrigger
    */
-  show() {
+  show(isActionPromptTrigger) {
     if (!this.ui_) {
       // No prompt UI specified, nothing to do
       return;
@@ -182,13 +188,12 @@ export class ConsentUI {
     // Add to fixed layer
     this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
     if (this.isCreatedIframe_) {
-      this.loadIframe_().then(() => {
+      this.loadIframe_(isActionPromptTrigger).then(() => {
         // It is safe to assume that the loadIframe_ promise will resolve
         // before resetIframe_. Because the iframe needs to be shown first
         // being hidden. CMP iframe is responsible to call consent-iframe-ready
         // API before consent-response API.
         this.baseInstance_.mutateElement(() => {
-
           if (!this.isPostPrompt_) {
             this.elementWithFocusBeforeShowing_ = this.document_.activeElement;
           }
@@ -198,7 +203,7 @@ export class ConsentUI {
           this.showIframe_();
 
           if (!this.isPostPrompt_) {
-            this.ui_./*OK*/focus();
+            this.ui_./*OK*/ focus();
           }
         });
       });
@@ -211,7 +216,6 @@ export class ConsentUI {
         toggle(this.ui_, true);
 
         if (!this.isPostPrompt_) {
-
           this.elementWithFocusBeforeShowing_ = this.document_.activeElement;
 
           this.maybeShowOverlay_();
@@ -219,18 +223,25 @@ export class ConsentUI {
           // scheduleLayout is required everytime because some AMP element may
           // get un laid out after toggle display (#unlayoutOnPause)
           // for example <amp-iframe>
-          this.baseInstance_.scheduleLayout(this.ui_);
+          Services.ownersForDoc(this.baseInstance_.element).scheduleLayout(
+            this.baseInstance_.element,
+            this.ui_
+          );
 
-          this.ui_./*OK*/focus();
+          this.ui_./*OK*/ focus();
         }
       };
 
       // If the UI is an AMP Element, wait until it's built before showing it,
       // to avoid race conditions where the UI would be hidden by the runtime
       // at build time. (see #18841).
-      isAmpElement(this.ui_) ?
-        this.ui_.whenBuilt().then(() => show()) :
+      if (isAmpElement(this.ui_)) {
+        whenUpgradedToCustomElement(this.ui_)
+          .then(() => this.ui_.whenBuilt())
+          .then(() => show());
+      } else {
         show();
+      }
     }
 
     this.isVisible_ = true;
@@ -240,7 +251,6 @@ export class ConsentUI {
    * Hide the UI
    */
   hide() {
-
     if (!this.ui_) {
       // Nothing to hide from;
       return;
@@ -275,12 +285,12 @@ export class ConsentUI {
       this.isVisible_ = false;
 
       if (this.elementWithFocusBeforeShowing_) {
-        this.elementWithFocusBeforeShowing_./*OK*/focus();
+        this.elementWithFocusBeforeShowing_./*OK*/ focus();
         this.elementWithFocusBeforeShowing_ = null;
       } else if (this.win_.document.body.children.length > 0) {
         // TODO (torch2424): Find if the first child can not be
         // focusable due to styling.
-        this.win_.document.body.children[0]./*OK*/focus();
+        this.win_.document.body.children[0]./*OK*/ focus();
       }
     });
   }
@@ -290,31 +300,31 @@ export class ConsentUI {
    * @param {!JsonObject} data
    */
   handleReady_(data) {
-
     this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
     this.enableBorder_ = DEFAULT_ENABLE_BORDER;
 
     // Set our initial height
     if (data['initialHeight']) {
-      if (typeof data['initialHeight'] === 'string' &&
-        data['initialHeight'].indexOf('vh') >= 0) {
-
+      if (
+        typeof data['initialHeight'] === 'string' &&
+        data['initialHeight'].indexOf('vh') >= 0
+      ) {
         const dataHeight = parseInt(data['initialHeight'], 10);
 
         if (dataHeight >= 10 && dataHeight <= 60) {
           this.initialHeight_ = `${dataHeight}vh`;
         } else {
           user().error(
-              TAG,
-              `Inavlid initial height: ${data['initialHeight']}.` +
-            'Minimum: 10vh. Maximum: 60vh.'
+            TAG,
+            `Inavlid initial height: ${data['initialHeight']}.` +
+              'Minimum: 10vh. Maximum: 60vh.'
           );
         }
       } else {
         user().error(
-            TAG,
-            `Inavlid initial height: ${data['initialHeight']}.` +
-          'Must be a string in "vh" units.'
+          TAG,
+          `Inavlid initial height: ${data['initialHeight']}.` +
+            'Must be a string in "vh" units.'
         );
       }
     }
@@ -337,6 +347,12 @@ export class ConsentUI {
 
     this.resetAnimationStyles_();
 
+    this.viewer_.sendMessage(
+      'requestFullOverlay',
+      dict(),
+      /* cancelUnsent */ true
+    );
+
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeFullscreen);
 
@@ -352,13 +368,13 @@ export class ConsentUI {
    */
   createPromptIframeFromSrc_(promptUISrc) {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
-    let sandbox = 'allow-scripts';
+    const sandbox = ['allow-scripts', 'allow-popups'];
     iframe.src = assertHttpsUrl(promptUISrc, this.parent_);
     const allowSameOrigin = this.allowSameOrigin_(iframe.src);
     if (allowSameOrigin) {
-      sandbox = 'allow-scripts allow-same-origin';
+      sandbox.push('allow-same-origin');
     }
-    iframe.setAttribute('sandbox', sandbox);
+    iframe.setAttribute('sandbox', sandbox.join(' '));
     const {classList} = iframe;
     classList.add(consentUiClasses.fill);
     // Append iframe lazily to save resources.
@@ -406,38 +422,55 @@ export class ConsentUI {
 
   /**
    * Get the client information that needs to be passed to cmp iframe
+   * @param {boolean} isActionPromptTrigger
    * @return {!Promise<JsonObject>}
    */
-  getClientInfoPromise_() {
-    const consentStatePromise =
-        getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
+  getClientInfoPromise_(isActionPromptTrigger) {
+    const consentStatePromise = getServicePromiseForDoc(
+      this.ampdoc_,
+      CONSENT_STATE_MANAGER
+    );
     return consentStatePromise.then(consentStateManager => {
-      return consentStateManager.getConsentInstanceInfo().then(consentInfo => {
-        return dict({
-          'clientConfig': this.clientConfig_,
-          'consentState': getConsentStateValue(consentInfo['consentState']),
-          'consentString': consentInfo['consentString'],
+      return consentStateManager
+        .getLastConsentInstanceInfo()
+        .then(consentInfo => {
+          return dict({
+            'clientConfig': this.clientConfig_,
+            // consentState to be deprecated
+            'consentState': getConsentStateValue(consentInfo['consentState']),
+            'consentStateValue': getConsentStateValue(
+              consentInfo['consentState']
+            ),
+            'consentString': consentInfo['consentString'],
+            'promptTrigger': isActionPromptTrigger ? 'action' : 'load',
+            'isDirty': !!consentInfo['isDirty'],
+          });
         });
-      });
     });
   }
 
   /**
    * Apply placeholder
    * Set up event listener to handle UI related messages.
+   * @param {boolean} isActionPromptTrigger
    * @return {!Promise}
    */
-  loadIframe_() {
+  loadIframe_(isActionPromptTrigger) {
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     if (!elementByTag(this.parent_, 'placeholder')) {
-      insertAfterOrAtStart(this.parent_,
-          dev().assertElement(this.placeholder_), null);
+      insertAfterOrAtStart(
+        this.parent_,
+        dev().assertElement(this.placeholder_),
+        null
+      );
     }
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
-    const iframePromise = this.getClientInfoPromise_().then(clientInfo => {
+    const iframePromise = this.getClientInfoPromise_(
+      isActionPromptTrigger
+    ).then(clientInfo => {
       this.ui_.setAttribute('name', JSON.stringify(clientInfo));
       this.win_.addEventListener('message', this.boundHandleIframeMessages_);
       insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
@@ -498,6 +531,13 @@ export class ConsentUI {
 
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
     classList.remove(consentUiClasses.iframeFullscreen);
+    if (this.isFullscreen_) {
+      this.viewer_.sendMessage(
+        'cancelFullOverlay',
+        dict(),
+        /* cancelUnsent */ true
+      );
+    }
     this.isFullscreen_ = false;
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
@@ -551,7 +591,7 @@ export class ConsentUI {
       this.parent_.ownerDocument.body.appendChild(mask);
       this.maskElement_ = mask;
     }
-    toggle(this.maskElement_, /* display */true);
+    toggle(this.maskElement_, /* display */ true);
     this.disableScroll_();
   }
 
@@ -566,7 +606,7 @@ export class ConsentUI {
     }
 
     if (this.maskElement_) {
-      toggle(this.maskElement_, /* display */false);
+      toggle(this.maskElement_, /* display */ false);
     }
     this.enableScroll_();
   }
@@ -625,11 +665,10 @@ export class ConsentUI {
     }
 
     if (data['action'] === 'ready') {
-      this.handleReady_(/** @type {!JsonObject} */(data));
+      this.handleReady_(/** @type {!JsonObject} */ (data));
     }
 
     if (data['action'] === 'enter-fullscreen') {
-
       // TODO (@torch2424) Send response back if enter fullscreen was succesful
       if (!this.isIframeVisible_) {
         return;

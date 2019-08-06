@@ -17,10 +17,8 @@
 import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
-import {
-  getServiceForDoc,
-  registerServiceBuilderForDoc,
-} from './service';
+import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
+import {isExperimentOn} from './experiments';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
@@ -298,8 +296,7 @@ class StartupTask extends Task {
       return false;
     }
     // Viewers send a URL param if we are not visible.
-    return !(/visibilityState=(hidden|prerender)/.test(
-        this.win_.location.hash));
+    return !/visibilityState=(hidden|prerender)/.test(this.win_.location.hash);
   }
 }
 
@@ -320,6 +317,13 @@ class Chunks {
 
     /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
     this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
+    /** @private {number} */
+    this.timeSinceLastExecution_ = Date.now();
+    /** @private {boolean} */
+    this.macroAfterLongTask_ = isExperimentOn(
+      this.win_,
+      'macro-after-long-task'
+    );
 
     this.win_.addEventListener('message', e => {
       if (getData(e) == 'amp-macro-task') {
@@ -394,6 +398,7 @@ class Chunks {
       return false;
     }
     const before = Date.now();
+    this.timeSinceLastExecution_ = before;
     t.runTask_(idleDeadline);
     resolved.then(() => {
       this.schedule_();
@@ -408,6 +413,16 @@ class Chunks {
    * @private
    */
   executeAsap_(idleDeadline) {
+    // If we've spent over 5 millseconds executing the
+    // last instruction yeild back to the main thread.
+    // 5 milliseconds is a magic number.
+    if (
+      this.macroAfterLongTask_ &&
+      Date.now() - this.timeSinceLastExecution_ > 5
+    ) {
+      this.requestMacroTask_();
+      return;
+    }
     resolved.then(() => {
       this.boundExecute_(idleDeadline);
     });
@@ -429,20 +444,32 @@ class Chunks {
     // If requestIdleCallback exists, schedule a task with it, but
     // do not wait longer than two seconds.
     if (nextTask.useRequestIdleCallback_() && this.win_.requestIdleCallback) {
-      onIdle(this.win_,
-          // Wait until we have a budget of at least 15ms.
-          // 15ms is a magic number. Budgets are higher when the user
-          // is completely idle (around 40), but that occurs too
-          // rarely to be usable. 15ms budgets can happen during scrolling
-          // but only if the device is doing super, super well, and no
-          // real processing is done between frames.
-          15 /* minimumTimeRemaining */,
-          2000 /* timeout */,
-          this.boundExecute_);
+      onIdle(
+        this.win_,
+        // Wait until we have a budget of at least 15ms.
+        // 15ms is a magic number. Budgets are higher when the user
+        // is completely idle (around 40), but that occurs too
+        // rarely to be usable. 15ms budgets can happen during scrolling
+        // but only if the device is doing super, super well, and no
+        // real processing is done between frames.
+        15 /* minimumTimeRemaining */,
+        2000 /* timeout */,
+        this.boundExecute_
+      );
       return;
     }
+    this.requestMacroTask_();
+  }
+
+  /**
+   * Requests executing of a macro task. Yields to the event queue
+   * before executing the task.
+   * Places task on browser message queue which then respectively
+   * triggers dequeuing and execution of a chunk.
+   */
+  requestMacroTask_() {
     // The message doesn't actually matter.
-    this.win_.postMessage/*OK*/('amp-macro-task', '*');
+    this.win_./*OK*/ postMessage('amp-macro-task', '*');
   }
 }
 
@@ -468,8 +495,12 @@ export function onIdle(win, minimumTimeRemaining, timeout, fn) {
         dev().fine(TAG, 'Timed out', timeout, info.didTimeout);
         fn(info);
       } else {
-        dev().fine(TAG, 'Rescheduling with', remainingTimeout,
-            info.timeRemaining());
+        dev().fine(
+          TAG,
+          'Rescheduling with',
+          remainingTimeout,
+          info.timeRemaining()
+        );
         win.requestIdleCallback(rIC, {timeout: remainingTimeout});
       }
     } else {

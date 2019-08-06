@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {iterateCursor} from '../../../src/dom';
 
 /**
  *
@@ -22,7 +23,6 @@
  * @return {!Array<!Element>}
  */
 export function getScopeElements(ampDoc, configOpts) {
-
   const doc = ampDoc.getRootNode();
   let cssSelector = configOpts.section.join(' a, ');
   let selection = doc.querySelectorAll('a');
@@ -33,7 +33,7 @@ export function getScopeElements(ampDoc, configOpts) {
     selection = doc.querySelectorAll(cssSelector);
   }
 
-  selection.forEach(element => {
+  iterateCursor(selection, element => {
     if (hasAttributeValues(element, configOpts)) {
       filteredSelection.push(element);
     }
@@ -48,6 +48,7 @@ export function getScopeElements(ampDoc, configOpts) {
  * corresponding value of the anchor element attribute
  * @param {!Node} htmlElement
  * @param {!Object} configOpts
+ * @return {*} TODO(#23582): Specify return type
  */
 function hasAttributeValues(htmlElement, configOpts) {
   const anchorAttr = configOpts.attribute;

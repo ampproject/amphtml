@@ -112,6 +112,7 @@ export function includes(string, substring, start) {
  *   Defaults to 1, but should be set to a larger value your placeholder tokens
  *   can be expanded to other placeholder tokens. Take caution with large values
  *   as recursively expanding a string can be exponentially expensive.
+ * @return {string}
  */
 export function expandTemplate(template, getter, opt_maxIterations) {
   const maxIterations = opt_maxIterations || 1;
@@ -139,8 +140,35 @@ export function stringHash32(str) {
   const {length} = str;
   let hash = 5381;
   for (let i = 0; i < length; i++) {
-    hash = hash * 33 ^ str.charCodeAt(i);
+    hash = (hash * 33) ^ str.charCodeAt(i);
   }
   // Convert from 32-bit signed to unsigned.
   return String(hash >>> 0);
+}
+
+/**
+ * Trims a string on the end, removing whitespace characters.
+ * @param {string} str  A string to trim.
+ * @return {string} The string, with trailing whitespace removed.
+ */
+export function trimEnd(str) {
+  // TODO(sparhami) Does this get inlined for an ES2019 build?
+  if (str.trimEnd) {
+    return str.trimEnd();
+  }
+
+  return ('_' + str).trim().slice(1);
+}
+
+/**
+ * Trims any leading whitespace from a string.
+ * @param {string} str  A string to trim.
+ * @return {string} The string, with leading whitespace removed.
+ */
+export function trimStart(str) {
+  if (str.trimStart) {
+    return str.trimStart();
+  }
+
+  return (str + '_').trim().slice(0, -1);
 }

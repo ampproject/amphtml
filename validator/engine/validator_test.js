@@ -143,6 +143,8 @@ function findHtmlFilesRelativeToTestdata() {
 /**
  * An AMP Validator test case. This constructor will load the AMP HTML file
  * and also find the adjacent .out file.
+ * TODO(alabiaga): rid of htmlFormat property based on directory path as it
+ * should be read from the ampHtmlFile. Also address nodejs validator changes.
  * @constructor
  * @param {string} ampHtmlFile
  * @param {string=} opt_ampUrl
@@ -335,7 +337,7 @@ describe('ValidatorOutput', () => {
         'feature_tests/no_custom_js.html',
         'http://google.com/foo.html#development=1');
     const results =
-        amp.validator.validateString(test.ampHtmlFileContents, test.htmlFormat);
+        amp.validator.validateString(test.ampHtmlFileContents);
     amp.validator.annotateWithErrorCategories(results);
     const observed =
         amp.validator.renderValidationResult(results, test.ampUrl).join('\n');
@@ -344,6 +346,105 @@ describe('ValidatorOutput', () => {
     {assert.fail(
         '', '', 'expectedSubstr:\n' + expectedSubstr +
           '\nsaw:\n' + observed, '');}
+  });
+
+  it('validate amp format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡><head><meta charset="utf-8">'
+        + '<link rel="canonical" href="self.html" />'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,'
+        + 'end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 '
+        + 'normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@'
+        + '-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:'
+        + 'visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visib'
+        + 'ility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{'
+        + 'visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}</style><noscript><style amp-boilerplate>body'
+        + '{-webkit-animation:none;-moz-animation:none;-ms-animation:none;'
+        + 'animation:none}</style></noscript>'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '</head><body>Hello, AMP world.</body></html>', 'amp');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+    it('default to validating the amp format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡><head><meta charset="utf-8">'
+        + '<link rel="canonical" href="self.html" />'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,'
+        + 'end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 '
+        + 'normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@'
+        + '-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:'
+        + 'visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visib'
+        + 'ility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{'
+        + 'visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}</style><noscript><style amp-boilerplate>body'
+        + '{-webkit-animation:none;-moz-animation:none;-ms-animation:none;'
+        + 'animation:none}</style></noscript>'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '</head><body>Hello, AMP world.</body></html>');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+  it('validate amp4email format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡4email><head><meta charset="utf-8">'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '<style amp4email-boilerplate>body{visibility:hidden}</style>'
+        + '</head><body>Hello, AMP4EMAIL world.</body></html>', 'amp4email');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+  it('validate amp4email format with error', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡4email><head><meta charset="utf-8">'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '</head><body>Hello, AMP4EMAIL world.</body></html>', 'amp4email');
+    assertStrictEqual(results.status, 'FAIL');
+    assertStrictEqual(results.errors[0].params.toString(),
+                      'head > style[amp4email-boilerplate]');
+    assertStrictEqual(results.errors.length, 1);
+  });
+
+  it('validate amp4ads format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html data-some-attribute ⚡4ads>'
+        + '<head><meta charset="utf-8">'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp4ads-boilerplate>body{visibility:hidden}</style>'
+        + '<script async src="https://cdn.ampproject.org/amp4ads-v0.js">'
+        + '</script></head><body>Hello, AMP4ADS world.</body></html>',
+        'amp4ads');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+  it('validate actions format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡ actions><head><meta charset="utf-8">'
+        + '<link rel="canonical" href="self.html" />'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) '
+        + '0s 1 normal both}@-webkit-keyframes -amp-start{from'
+        + '{visibility:hidden}to{visibility:visible}}@-moz-keyframes '
+        + '-amp-start{from{visibility:hidden}to{visibility:visible}}'
+        + '@-ms-keyframes -amp-start{from{visibility:hidden}to'
+        + '{visibility:visible}}@-o-keyframes -amp-start{from'
+        + '{visibility:hidden}to{visibility:visible}}@keyframes '
+        + '-amp-start{from{visibility:hidden}to{visibility:visible}}</style>'
+        + '<noscript><style amp-boilerplate>body{-webkit-animation:none;'
+        + '-moz-animation:none;-ms-animation:none;animation:none}</style>'
+        + '</noscript><script async src="https://cdn.ampproject.org/v0.js">'
+        + '</script></head><body>Hello, AMP world.</body></html>', 'actions');
+    assertStrictEqual(results.status, 'PASS');
   });
 });
 
@@ -407,8 +508,8 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:28:2 The author stylesheet ' +
        'specified in tag \'style amp-custom\' is too long - document ' +
        'contains 50001 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://www.ampproject.org/docs/reference/spec' +
-       '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+       '(see https://amp.dev/documentation/guides-and-tutorials/' +
+       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -428,23 +529,28 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:28:2 The author stylesheet ' +
        'specified in tag \'style amp-custom\' is too long - document ' +
        'contains 50002 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://www.ampproject.org/docs/reference/spec' +
-       '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+       '(see https://amp.dev/documentation/guides-and-tutorials/' +
+       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
-  it('accepts 0 bytes in author stylesheet and 50000 bytes in inline style',
-      () => {
-        const inlineStyle = Array(5001).join(validInlineStyleBlob);
-        assertStrictEqual(50000, inlineStyle.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
+  it('fails on 0 bytes in author stylesheet and 50000 bytes in inline style',
+     () => {
+       const inlineStyle = Array(5001).join(validInlineStyleBlob);
+       assertStrictEqual(50000, inlineStyle.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
-        test.expectedOutput = 'PASS';
-        test.run();
-      });
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/css_length.html:34:2 The inline style specified in ' +
+           'tag \'div\' is too long - it contains 50000 bytes whereas the ' +
+           'limit is 1000 bytes. (see https://amp.dev/documentation/guides' +
+           '-and-tutorials/learn/spec/amphtml#maximum-size) ' +
+           '[AUTHOR_STYLESHEET_PROBLEM]';
+       test.run();
+     });
 
   it('will not accept 0 bytes in author stylesheet and 50001 bytes in ' +
      'inline style',
@@ -458,12 +564,17 @@ describe('ValidatorCssLength', () => {
            .replace('replace_inline_style', inlineStyle);
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-       'feature_tests/css_length.html:36:6 The author stylesheet ' +
-       'specified in tag \'style amp-custom\' and the combined inline ' +
-       'styles is too large - document contains 50001 bytes whereas the ' +
-       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
-       '/author-develop/responsive/style_pages) ' +
-       '[AUTHOR_STYLESHEET_PROBLEM]';
+        'feature_tests/css_length.html:34:2 The inline style specified in ' +
+        'tag \'div\' is too long - it contains 50001 bytes whereas the ' +
+        'limit is 1000 bytes. (see https://amp.dev/documentation/guides' +
+        '-and-tutorials/learn/spec/amphtml#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]\n' +
+        'feature_tests/css_length.html:36:6 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' and the combined inline ' +
+        'styles is too large - document contains 50001 bytes whereas the ' +
+        'limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -482,9 +593,9 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:5036:6 The author stylesheet ' +
        'specified in tag \'style amp-custom\' and the combined inline ' +
        'styles is too large - document contains 50014 bytes whereas the ' +
-       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
-       '/author-develop/responsive/style_pages) ' +
-       '[AUTHOR_STYLESHEET_PROBLEM]';
+       'limit is 50000 bytes. ' +
+       '(see https://amp.dev/documentation/guides-and-tutorials/' +
+       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });
@@ -523,9 +634,9 @@ describe('ValidatorCssLengthWithUrls', () => {
     test.expectedOutput = 'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'contains 50010 bytes whereas the limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -549,9 +660,9 @@ describe('ValidatorCssLengthWithUrls', () => {
     test.expectedOutput = 'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'contains 50010 bytes whereas the limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -575,9 +686,9 @@ describe('ValidatorCssLengthWithUrls', () => {
     test.expectedOutput = 'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'contains 50010 bytes whereas the limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });
@@ -663,9 +774,9 @@ describe('ValidatorTransformedAmpCssLengthWithUrls', () => {
         'transformed_feature_tests/css_length.html:29:2 The author ' +
         'stylesheet specified in tag \'style amp-custom (transformed)\' ' +
         'is too long - document contains 50010 bytes whereas the limit ' +
-        'is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });
@@ -1181,6 +1292,7 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-img': 0,
         'amp-layout': 0,
         'amp-lightbox': 0,
+        'amp-mraid': 0,
         'amp-mustache': 0,
         'amp-pixel': 0,
         'amp-position-observer': 0,
@@ -1204,6 +1316,7 @@ describe('ValidatorRulesMakeSense', () => {
       const whitelistedAmp4EmailExtensions = {
         'AMP-ACCORDION': 0,
         'AMP-ANIM': 0,
+        'AMP-BIND-MACRO': 0,
         'AMP-CAROUSEL': 0,
         'AMP-FIT-TEXT': 0,
         'AMP-IMG': 0,
@@ -1347,7 +1460,7 @@ describe('ValidatorRulesMakeSense', () => {
         // getNameByAttrSpecId() looks like it would do what we want, but it's
         // sufficiently wrapped in private context inside the validator that I
         // don't see a way to call it.  For now just gold the current index.
-        expect(tagSpec.attrLists[0]).toEqual(17);
+        expect(tagSpec.attrLists[0]).toEqual(19);
       });
     }
 

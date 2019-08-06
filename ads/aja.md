@@ -14,27 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Aja
+# AJA
 
-## Example installation of the Aja widget
+The AJA Ads for AMP supports Banner, Native, Video, and Recommendation Widget.
+You have to contact our account manager to create ad spot at first.
+
+## Examples
 
 ### Basic
 
 ```html
-  <amp-ad width="100" height="100"
+  <amp-ad width="300" height="250"
              type="aja"
              layout="responsive"
-             data-ssp-code="ZZZZZ">
+             data-asi="ZZZZZ">
   </amp-ad>
 ```
 
-The above code must be accompanied by AMP-enabled widgets delivered by Aja’s Account Management Team,
-do not directly install this code with existing widgets.
-
-
 ## Configuration
 
-Supported parameters:
+Required parameters:
 
-- SSPCODE
-  - `data-ssp-code`
+- asi
+  - `data-asi`

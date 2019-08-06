@@ -16,7 +16,6 @@
 import {AmpStoryVariableService} from '../variable-service';
 import {StateChangeType} from '../navigation-state';
 
-
 describes.fakeWin('amp-story variable service', {}, () => {
   let variableService;
 

@@ -20,6 +20,7 @@
  * @param {string=} hostName
  * @param {boolean=} inabox
  * @param {boolean=} storyV1
+ * @return {*} TODO(#23582): Specify return type
  */
 const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
   hostName = hostName || '';
@@ -27,61 +28,66 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
     // TODO:(ccordry) remove this when story 0.1 is deprecated
     if (storyV1) {
       file = file.replace(
-          /https:\/\/cdn\.ampproject\.org\/v0\/amp-story-0\.1\.js/g,
-          hostName + '/dist/v0/amp-story-1.0.max.js');
+        /https:\/\/cdn\.ampproject\.org\/v0\/amp-story-0\.1\.js/g,
+        hostName + '/dist/v0/amp-story-1.0.max.js'
+      );
     }
     file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
-        hostName + '/dist/amp.js');
+      /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
+      hostName + '/dist/amp.js'
+    );
     file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
-        hostName + '/dist/amp-shadow.js');
+      /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
+      hostName + '/dist/amp-shadow.js'
+    );
     file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
-        hostName + '/dist/amp-inabox.js');
+      /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
+      hostName + '/dist/amp-inabox.js'
+    );
     file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.js/g,
-        hostName + '/dist/video-iframe-integration.js');
+      /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.js/g,
+      hostName + '/dist/video-iframe-integration.js'
+    );
     file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
-        hostName + '/dist/v0/$1.max.js');
+      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
+      hostName + '/dist/v0/$1.max.js'
+    );
     if (inabox) {
-      let filename;
-      if (inabox == '1') {
-        filename = '/dist/amp-inabox.js';
-      } else if (inabox == '2') {
-        filename = '/dist/amp-inabox-lite.js';
-      }
+      const filename = '/dist/amp-inabox.js';
       file = file.replace(/<html [^>]*>/, '<html amp4ads>');
       file = file.replace(/\/dist\/amp\.js/g, filename);
     }
   } else if (mode == 'compiled') {
     file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
-        hostName + '/dist/v0.js');
+      /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
+      hostName + '/dist/v0.js'
+    );
     file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
-        hostName + '/dist/shadow-v0.js');
+      /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
+      hostName + '/dist/shadow-v0.js'
+    );
     file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
-        hostName + '/dist/amp4ads-v0.js');
+      /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
+      hostName + '/dist/amp4ads-v0.js'
+    );
     file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.js/g,
-        hostName + '/dist/video-iframe-integration-v0.js');
+      /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.js/g,
+      hostName + '/dist/video-iframe-integration-v0.js'
+    );
     file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
-        hostName + '/dist/v0/$1.js');
+      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
+      hostName + '/dist/v0/$1.js'
+    );
     file = file.replace(
-        /\/dist.3p\/current\/(.*)\.max.html/g,
-        hostName + '/dist.3p/current-min/$1.html');
+      /\/dist\/v0\/examples\/(.*)\.max.js/g,
+      '/dist/v0/examples/$1.js'
+    );
+    file = file.replace(
+      /\/dist.3p\/current\/(.*)\.max.html/g,
+      hostName + '/dist.3p/current-min/$1.html'
+    );
     if (inabox) {
-      let filename;
-      if (inabox == '1') {
-        filename = '/dist/amp4ads-v0.js';
-      } else if (inabox == '2') {
-        filename = '/dist/amp4ads-lite-v0.js';
-      }
-      file = file.replace(/\/dist\/v0\.js/g, filename);
+      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
     }
   }
   return file;

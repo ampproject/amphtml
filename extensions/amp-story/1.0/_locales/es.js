@@ -83,6 +83,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Obtener enlace',
   },
@@ -111,15 +114,15 @@ const strings = {
     string: 'Amplía el alto de la ventana para ver esta experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Amplía el alto y el ancho de la ventana para ver esta ' +
-        'experiencia',
+    string: 'Amplía el alto y el ancho de la ventana para ver esta experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Amplía el ancho de la ventana para ver esta experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Para ver este contenido, debes habilitar el experimento de ' +
-        'historia AMP.',
+    string:
+      'Para ver este contenido, debes habilitar el experimento de ' +
+      'historia AMP.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'La página se visualiza mejor en modo vertical',

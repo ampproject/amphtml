@@ -30,13 +30,15 @@ describe('getMode', () => {
   }
 
   it('CDN - lite mode on', () => {
-    const url = 'https://cdn.ampproject.org/v/www.example.com/amp.html?amp_js_v=5&amp_lite#origin=https://www.google.com';
+    const url =
+      'https://cdn.ampproject.org/v/www.example.com/amp.html?amp_js_v=5&amp_lite#origin=https://www.google.com';
     const mode = getMode(getWin(url));
     expect(mode.lite).to.be.true;
   });
 
   it('CDN - lite mode off', () => {
-    const url = 'https://cdn.ampproject.org/v/www.example.com/amp.html?amp_js_v=5#origin=https://www.google.com';
+    const url =
+      'https://cdn.ampproject.org/v/www.example.com/amp.html?amp_js_v=5#origin=https://www.google.com';
     const mode = getMode(getWin(url));
     expect(mode.lite).to.be.false;
   });
@@ -52,6 +54,28 @@ describe('getMode', () => {
     const mode = getMode(getWin(url));
     expect(mode.lite).to.be.false;
   });
+
+  it('should support different html formats for development', () => {
+    let url = 'https://www.amp-site.org#development=1';
+    expect(getMode(getWin(url)).development).to.be.true;
+
+    url = 'https://www.amp-site.org#development=amp';
+    expect(getMode(getWin(url)).development).to.be.true;
+
+    url = 'https://www.amp-site.org#development=amp4email';
+    expect(getMode(getWin(url)).development).to.be.true;
+
+    url = 'https://www.amp-site.org#development=amp4ads';
+    expect(getMode(getWin(url)).development).to.be.true;
+
+    url = 'https://www.amp-site.org#development=actions';
+    expect(getMode(getWin(url)).development).to.be.true;
+  });
+
+  it('should not support invalid format for development', () => {
+    const url = 'https://www.amp-site.org#development=amp4invalid';
+    expect(getMode(getWin(url)).development).to.be.false;
+  });
 });
 
 describe('getRtvVersion', () => {
@@ -66,10 +90,12 @@ describe('getRtvVersion', () => {
 
   it('should default to version', () => {
     // $internalRuntimeVersion$ doesn't get replaced during test
-    expect(getRtvVersionForTesting(window, true))
-        .to.equal('$internalRuntimeVersion$');
-    expect(getRtvVersionForTesting(window, false))
-        .to.equal('01$internalRuntimeVersion$');
+    expect(getRtvVersionForTesting(window, true)).to.equal(
+      '$internalRuntimeVersion$'
+    );
+    expect(getRtvVersionForTesting(window, false)).to.equal(
+      '01$internalRuntimeVersion$'
+    );
   });
 
   it('should use window.AMP_CONFIG.v if not in dev mode', () => {
@@ -79,16 +105,18 @@ describe('getRtvVersion', () => {
       },
       location: parseUrlDeprecated('https://acme.org/doc1'),
     };
-    expect(getRtvVersionForTesting(win, true))
-        .to.equal('$internalRuntimeVersion$');
+    expect(getRtvVersionForTesting(win, true)).to.equal(
+      '$internalRuntimeVersion$'
+    );
     expect(getRtvVersionForTesting(win, false)).to.equal('12345');
     expect(getFreshMode(win).version).to.equal('$internalRuntimeVersion$');
     resetRtvVersionForTesting();
     expect(getFreshMode(win).rtvVersion).to.equal('12345');
 
     delete win.AMP_CONFIG;
-    expect(getRtvVersionForTesting(win, false))
-        .to.equal('01$internalRuntimeVersion$');
+    expect(getRtvVersionForTesting(win, false)).to.equal(
+      '01$internalRuntimeVersion$'
+    );
     expect(getFreshMode(win).version).to.equal('$internalRuntimeVersion$');
     resetRtvVersionForTesting();
     expect(getFreshMode(win).rtvVersion).to.equal('01$internalRuntimeVersion$');

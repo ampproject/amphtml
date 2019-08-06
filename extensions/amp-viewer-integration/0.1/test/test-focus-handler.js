@@ -40,7 +40,6 @@ function fakeFocusEvent(type) {
 
 describes.fakeWin('FocusHandler', {}, env => {
   describe('FocusHandler Unit Tests', function() {
-
     class WindowPortEmulator {
       constructor(win, origin) {
         /** @const {!Window} */
@@ -77,8 +76,10 @@ describes.fakeWin('FocusHandler', {}, env => {
           options,
         });
       };
-      const port =
-        new WindowPortEmulator(this.messageHandlers_, 'origin doesnt matter');
+      const port = new WindowPortEmulator(
+        this.messageHandlers_,
+        'origin doesnt matter'
+      );
       messaging = new Messaging(win, port);
       focusHandler = new FocusHandler(win, messaging);
     });
@@ -100,6 +101,5 @@ describes.fakeWin('FocusHandler', {}, env => {
       focusHandler.forwardEventToViewer_(event);
       expect(messages).to.have.length(0);
     });
-
   });
 });

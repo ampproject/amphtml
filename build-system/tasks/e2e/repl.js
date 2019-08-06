@@ -44,6 +44,7 @@ function installRepl(global, env) {
   /**
    * Usage: in a test, await repl();
    * @param {*} mochaThis
+   * @return {*} TODO(#23582): Specify return type
    */
   global.repl = function(mochaThis) {
     mochaThis.timeout(REPL_INFINITE_TIMEOUT);
@@ -59,7 +60,7 @@ function installRepl(global, env) {
       });
     }
 
-    console./*OK*/log(READY_MESSAGE);
+    console./*OK*/ log(READY_MESSAGE);
 
     return replPromise;
   };
@@ -76,7 +77,7 @@ function installRepl(global, env) {
     delete global.repl.env;
     delete global.repl.continue;
 
-    console./*OK*/log(CONTINUE_MESSAGE);
+    console./*OK*/ log(CONTINUE_MESSAGE);
   }
 }
 

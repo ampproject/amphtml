@@ -74,6 +74,7 @@ In concrete terms this means that:
     }
     </script>
     <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
   </head>
@@ -138,6 +139,10 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
     <td>Replaced with <code>amp-img</code>.<br>
         Please note: <code>&lt;img&gt;</code> is a <a href="https://www.w3.org/TR/html5/syntax.html#void-elements">Void Element according to HTML5</a>, so it does not have an end tag. However, <code>&lt;amp-img&gt;</code> does have an end tag <code>&lt;/amp-img&gt;</code>.</td>
   </tr>
+    <tr>
+    <td width="30%">picture</td>
+    <td>Prohibited. Serve different image formats by using the [fallback](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders?format=websites) attribute or provide multiple [<code>srcset</code> on <code>&lt;amp-img&gt;</code>](https://amp.dev/documentation/components/amp-img#attributes).</td>
+  </tr>
   <tr>
     <td width="30%">video</td>
     <td>Replaced with <code>amp-video</code>.</td>
@@ -176,11 +181,11 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">form</td>
-    <td>Allowed. Require including <a href="https://www.ampproject.org/docs/reference/components/amp-form">amp-form</a> extension.</td>
+    <td>Allowed. Require including <a href="https://amp.dev/documentation/components/amp-form">amp-form</a> extension.</td>
   </tr>
   <tr>
     <td width="30%">input elements</td>
-    <td>Mostly allowed with <a href="https://www.ampproject.org/docs/reference/components/amp-form#inputs-and-fields">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
+    <td>Mostly allowed with <a href="https://amp.dev/documentation/components/amp-form#inputs-and-fields">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
   </tr>
   <tr>
     <td width="30%">button</td>

@@ -20,7 +20,6 @@ import {htmlFor} from '../../../../src/static-template';
 import {setStyles} from '../../../../src/style';
 
 export class LoadMoreService {
-
   /**
    * @param {!Element} element
    */
@@ -55,7 +54,9 @@ export class LoadMoreService {
    */
   initializeLoadMoreButton_() {
     this.loadMoreButton_ = childElementByAttr(
-        this.ampListElement_, 'load-more-button');
+      this.ampListElement_,
+      'load-more-button'
+    );
 
     if (this.loadMoreButton_) {
       this.loadMoreButton_.classList.add('amp-visible');
@@ -83,7 +84,9 @@ export class LoadMoreService {
    */
   initializeLoadMoreLoadingElement_() {
     this.loadMoreLoadingElement_ = childElementByAttr(
-        this.ampListElement_, 'load-more-loading');
+      this.ampListElement_,
+      'load-more-loading'
+    );
 
     if (!this.loadMoreLoadingElement_) {
       this.loadMoreLoadingElement_ = htmlFor(this.ampListElement_)`
@@ -135,7 +138,9 @@ export class LoadMoreService {
    */
   initializeLoadMoreFailedElement_() {
     this.loadMoreFailedElement_ = childElementByAttr(
-        this.ampListElement_, 'load-more-failed');
+      this.ampListElement_,
+      'load-more-failed'
+    );
 
     if (!this.loadMoreFailedElement_) {
       this.loadMoreFailedElement_ = htmlFor(this.ampListElement_)`
@@ -174,8 +179,8 @@ export class LoadMoreService {
   getLoadMoreFailedClickable() {
     if (!this.loadMoreFailedClickable_) {
       const loadFailedElement = this.getLoadMoreFailedElement();
-      this.loadMoreFailedClickable_ = childElementByAttr(
-          loadFailedElement, 'load-more-clickable') ||
+      this.loadMoreFailedClickable_ =
+        childElementByAttr(loadFailedElement, 'load-more-clickable') ||
         loadFailedElement;
     }
     return this.loadMoreFailedClickable_;
@@ -187,7 +192,9 @@ export class LoadMoreService {
   initializeLoadMoreEndElement_() {
     if (!this.loadMoreEndElement_) {
       this.loadMoreEndElement_ = childElementByAttr(
-          this.ampListElement_, 'load-more-end');
+        this.ampListElement_,
+        'load-more-end'
+      );
       if (this.loadMoreEndElement_) {
         this.ampListElement_.appendChild(this.loadMoreEndElement_);
       }
@@ -224,10 +231,10 @@ export class LoadMoreService {
     // If it's loading, then it's no longer failed or ended
     if (state) {
       this.getLoadMoreFailedElement().classList.toggle('amp-visible', false);
-      const loadMoreEndElement = this.getLoadMoreEndElement();
-      if (loadMoreEndElement) {
-        loadMoreEndElement.classList.toggle('amp-visible', false);
-      }
+    }
+    const loadMoreEndElement = this.getLoadMoreEndElement();
+    if (loadMoreEndElement) {
+      loadMoreEndElement.classList.toggle('amp-visible', false);
     }
     this.getLoadMoreButton().classList.toggle('amp-visible', !state);
     this.getLoadMoreLoadingElement().classList.toggle('amp-visible', state);
@@ -247,5 +254,4 @@ export class LoadMoreService {
     loadMoreButton.classList.toggle('amp-visible', false);
     this.getLoadMoreLoadingElement().classList.toggle('amp-visible', false);
   }
-
 }

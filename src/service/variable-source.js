@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from '../services';
 import {devAssert} from '../log';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
@@ -20,15 +21,16 @@ import {loadPromise} from '../event-helper';
 /** @typedef {string|number|boolean|undefined|null} */
 export let ResolverReturnDef;
 
-/** @typedef {function(...*):ResolverReturnDef} */
+/** @typedef {function(...string):ResolverReturnDef} */
 export let SyncResolverDef;
 
-/** @typedef {function(...*):!Promise<ResolverReturnDef>} */
+/** @typedef {function(...string):!Promise<ResolverReturnDef>} */
 export let AsyncResolverDef;
 
 /** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
 let ReplacementDef;
 
+const LOAD_EVENT_END = 'loadEventEnd';
 
 /**
  * Returns navigation timing information based on the start and end events.
@@ -42,7 +44,16 @@ let ReplacementDef;
  * @return {!Promise<ResolverReturnDef>}
  */
 export function getTimingDataAsync(win, startEvent, endEvent) {
-  return loadPromise(win).then(() => {
+  let readyPromise = loadPromise(win);
+  if (startEvent === LOAD_EVENT_END || endEvent === LOAD_EVENT_END) {
+    // performance.timing.loadEventEnd returns 0 before the load event handler
+    // has terminated, that's when the load event is completed.
+    // To wait for the event handler to terminate, wait 1ms and defer to the
+    // event loop.
+    const timer = Services.timerFor(win);
+    readyPromise = readyPromise.then(() => timer.promise(1));
+  }
+  return readyPromise.then(() => {
     return getTimingDataSync(win, startEvent, endEvent);
   });
 }
@@ -66,9 +77,10 @@ export function getTimingDataSync(win, startEvent, endEvent) {
     return;
   }
 
-  const metric = (endEvent === undefined)
-    ? timingInfo[startEvent]
-    : timingInfo[endEvent] - timingInfo[startEvent];
+  const metric =
+    endEvent === undefined
+      ? timingInfo[startEvent]
+      : timingInfo[endEvent] - timingInfo[startEvent];
 
   if (!isFiniteNumber(metric) || metric < 0) {
     // The metric is not supported.
@@ -86,8 +98,7 @@ export function getTimingDataSync(win, startEvent, endEvent) {
  * @private
  */
 export function getNavigationData(win, attribute) {
-  const navigationInfo = win['performance'] &&
-    win['performance']['navigation'];
+  const navigationInfo = win['performance'] && win['performance']['navigation'];
   if (!navigationInfo || navigationInfo[attribute] === undefined) {
     // PerformanceNavigation interface is not supported or attribute is not
     // implemented.
@@ -95,7 +106,6 @@ export function getNavigationData(win, attribute) {
   }
   return navigationInfo[attribute];
 }
-
 
 /**
  * A class to provide variable substitution related features. Extend this class
@@ -159,8 +169,10 @@ export class VariableSource {
    */
   set(varName, syncResolver) {
     devAssert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] =
-        this.replacements_[varName] || {sync: undefined, async: undefined};
+    this.replacements_[varName] = this.replacements_[varName] || {
+      sync: undefined,
+      async: undefined,
+    };
     this.replacements_[varName].sync = syncResolver;
     return this;
   }
@@ -177,8 +189,10 @@ export class VariableSource {
    */
   setAsync(varName, asyncResolver) {
     devAssert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] =
-        this.replacements_[varName] || {sync: undefined, async: undefined};
+    this.replacements_[varName] = this.replacements_[varName] || {
+      sync: undefined,
+      async: undefined,
+    };
     this.replacements_[varName].async = asyncResolver;
     return this;
   }
@@ -200,6 +214,7 @@ export class VariableSource {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *   that can be substituted.
+   * @return {!RegExp}
    */
   getExpr(opt_bindings, opt_whiteList) {
     if (!this.initialized_) {
@@ -273,8 +288,7 @@ export class VariableSource {
 
     // A meta[name="amp-allowed-url-macros"] tag, if present,
     // contains, in its content attribute, a whitelist of variable substitution.
-    const meta =
-      head.querySelector('meta[name="amp-allowed-url-macros"]');
+    const meta = head.querySelector('meta[name="amp-allowed-url-macros"]');
     if (!meta) {
       return null;
     }
@@ -283,8 +297,10 @@ export class VariableSource {
      * The whitelist of variables allowed for variable substitution.
      * @private {?Array<string>}
      */
-    this.variableWhitelist_ = meta.getAttribute('content').split(',')
-        .map(variable => variable.trim());
+    this.variableWhitelist_ = meta
+      .getAttribute('content')
+      .split(',')
+      .map(variable => variable.trim());
     return this.variableWhitelist_;
   }
 }

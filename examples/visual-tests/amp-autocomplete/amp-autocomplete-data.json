@@ -1,0 +1,89 @@
+{
+  "items": 
+    [
+      {
+          "countryCode": "AD",
+          "countryName": "Andorra",
+          "currencyCode": "EUR",
+          "population": "84000",
+          "capital": "Andorra la Vella"
+      },
+      {
+          "countryCode": "AE",
+          "countryName": "United Arab Emirates",
+          "currencyCode": "AED",
+          "population": "4975593",
+          "capital": "Abu Dhabi"
+      },
+      {
+          "countryCode": "AF",
+          "countryName": "Afghanistan",
+          "currencyCode": "AFN",
+          "population": "29121286",
+          "capital": "Kabul"
+      },
+      {
+          "countryCode": "AG",
+          "countryName": "Antigua and Barbuda",
+          "currencyCode": "XCD",
+          "population": "86754",
+          "capital": "St. John's"
+      },
+      {
+          "countryCode": "AI",
+          "countryName": "Anguilla",
+          "currencyCode": "XCD",
+          "population": "13254",
+          "capital": "The Valley"
+      },
+      {
+          "countryCode": "AL",
+          "countryName": "Albania",
+          "currencyCode": "ALL",
+          "population": "2986952",
+          "capital": "Tirana"
+      },
+      {
+          "countryCode": "AM",
+          "countryName": "Armenia",
+          "currencyCode": "AMD",
+          "population": "2968000",
+          "capital": "Yerevan"
+      },
+      {
+          "countryCode": "AO",
+          "countryName": "Angola",
+          "currencyCode": "AOA",
+          "population": "13068161",
+          "capital": "Luanda"
+      },
+      {
+          "countryCode": "AQ",
+          "countryName": "Antarctica",
+          "currencyCode": "",
+          "population": "0",
+          "capital": ""
+      },
+      {
+          "countryCode": "AR",
+          "countryName": "Argentina",
+          "currencyCode": "ARS",
+          "population": "41343201",
+          "capital": "Buenos Aires"
+      },
+      {
+          "countryCode": "AS",
+          "countryName": "American Samoa",
+          "currencyCode": "USD",
+          "population": "57881",
+          "capital": "Pago Pago"
+      },
+      {
+          "countryCode": "AT",
+          "countryName": "Austria",
+          "currencyCode": "EUR",
+          "population": "8205000",
+          "capital": "Vienna"
+      }
+  ]
+}

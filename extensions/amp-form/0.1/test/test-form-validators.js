@@ -35,7 +35,7 @@ describes.realWin('form-validators', {amp: true}, env => {
 
   // Stub validation message for predictable message on any platform.
   function stubValidationMessage(input) {
-    Object.defineProperty(input, 'validationMessage', {
+    sandbox.defineProperty(input, 'validationMessage', {
       get() {
         return this.fakeValidationMessage_;
       },
@@ -54,10 +54,12 @@ describes.realWin('form-validators', {amp: true}, env => {
     [name, email, text, submit].forEach(c => form.appendChild(c));
 
     if (isCustomValidations) {
-      const {noName, noEmail, invalidEmail, invalidText}
-          = getCustomValidations(doc);
-      [noName, noEmail, invalidEmail, invalidText]
-          .forEach(c => doc.body.appendChild(c));
+      const {noName, noEmail, invalidEmail, invalidText} = getCustomValidations(
+        doc
+      );
+      [noName, noEmail, invalidEmail, invalidText].forEach(c =>
+        doc.body.appendChild(c)
+      );
     }
 
     return form;
@@ -99,6 +101,7 @@ describes.realWin('form-validators', {amp: true}, env => {
     const invalidEmail = doc.createElement('div');
     invalidEmail.setAttribute('visible-when-invalid', 'typeMismatch');
     invalidEmail.setAttribute('validation-for', 'email1');
+    invalidEmail.setAttribute('id', 'invalidformat-for-email1');
     invalidEmail.textContent = emailTypeValidationMsg;
 
     const invalidText = doc.createElement('div');
@@ -124,8 +127,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       setReportValiditySupportedForTesting(true);
       expect(getFormValidator(form)).to.be.instanceOf(DefaultValidator);
       setReportValiditySupportedForTesting(false);
-      expect(getFormValidator(form)).to.be.instanceOf(
-          PolyfillDefaultValidator);
+      expect(getFormValidator(form)).to.be.instanceOf(PolyfillDefaultValidator);
     });
 
     it('should return custom validator instances', () => {
@@ -133,18 +135,16 @@ describes.realWin('form-validators', {amp: true}, env => {
       const form = getForm(doc);
       form.setAttribute('custom-validation-reporting', 'as-you-go');
       expect(getFormValidator(form)).to.be.instanceOf(AsYouGoValidator);
-      form.setAttribute(
-          'custom-validation-reporting', 'show-all-on-submit');
+      form.setAttribute('custom-validation-reporting', 'show-all-on-submit');
+      expect(getFormValidator(form)).to.be.instanceOf(ShowAllOnSubmitValidator);
+      form.setAttribute('custom-validation-reporting', 'interact-and-submit');
       expect(getFormValidator(form)).to.be.instanceOf(
-          ShowAllOnSubmitValidator);
-      form.setAttribute(
-          'custom-validation-reporting', 'interact-and-submit');
+        InteractAndSubmitValidator
+      );
+      form.setAttribute('custom-validation-reporting', 'show-first-on-submit');
       expect(getFormValidator(form)).to.be.instanceOf(
-          InteractAndSubmitValidator);
-      form.setAttribute(
-          'custom-validation-reporting', 'show-first-on-submit');
-      expect(getFormValidator(form)).to.be.instanceOf(
-          ShowFirstOnSubmitValidator);
+        ShowFirstOnSubmitValidator
+      );
     });
   });
 
@@ -247,7 +247,9 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(doc.activeElement).to.equal(form.elements[0]);
       expect(validator.validationBubble_.show).to.be.calledOnce;
       expect(validator.validationBubble_.show).to.be.calledWith(
-          form.elements[0], form.elements[0].validationMessage);
+        form.elements[0],
+        form.elements[0].validationMessage
+      );
     });
 
     it('should hide validation bubble onblur', () => {
@@ -270,7 +272,9 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validator.validationBubble_.show).to.be.calledOnce;
       expect(validator.validationBubble_.hide).to.not.be.called;
       expect(validator.validationBubble_.show).to.be.calledWith(
-          form.elements[0], form.elements[0].validationMessage);
+        form.elements[0],
+        form.elements[0].validationMessage
+      );
 
       sandbox.stub(validator.validationBubble_, 'isActiveOn').returns(true);
       validator.onInput({target: form.elements[0]});
@@ -324,6 +328,25 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[3].className).to.not.contain('visible');
     });
 
+    it('should set aria-describedby to the first validation message (generated ID)', () => {
+      validator.report();
+      expect(validations[0].getAttribute('id')).to.be.a('string');
+      expect(form.elements[0].getAttribute('aria-describedby')).to.equal(
+        validations[0].getAttribute('id')
+      );
+    });
+
+    it('should set aria-describedby to the second validation message (existing ID)', () => {
+      form.elements[0].value = 'John Miller';
+      form.elements[1].value = 'invalidemail';
+      form.elements[1].validationMessage = 'Email format is wrong';
+      validator.report();
+      validator.onInput({target: form.elements[1]});
+      expect(form.elements[1].getAttribute('aria-describedby')).to.equal(
+        'invalidformat-for-email1'
+      );
+    });
+
     it('should not report on interaction for non-active inputs', () => {
       validator.onBlur({target: form.elements[0]});
       expect(doc.activeElement).to.not.equal(form.elements[0]);
@@ -372,8 +395,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.contain('visible');
-      expect(validations[2].textContent).to.not.equal(
-          'Email format is wrong');
+      expect(validations[2].textContent).to.not.equal('Email format is wrong');
       expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
       expect(validations[3].className).to.not.contain('visible');
 
@@ -486,8 +508,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.contain('visible');
       expect(validations[3].className).to.contain('visible');
-      expect(validations[2].textContent).to.not.equal(
-          'Email format is wrong');
+      expect(validations[2].textContent).to.not.equal('Email format is wrong');
       expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
 
       form.elements[1].value = 'valid@email.com';
@@ -569,8 +590,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.contain('visible');
       expect(validations[3].className).to.not.contain('visible');
-      expect(validations[2].textContent).to.not.equal(
-          'Email format is wrong');
+      expect(validations[2].textContent).to.not.equal('Email format is wrong');
       expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
 
       form.elements[1].value = 'valid@email.com';
@@ -662,8 +682,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.contain('visible');
       expect(validations[3].className).to.not.contain('visible');
-      expect(validations[2].textContent).to.not.equal(
-          'Email format is wrong');
+      expect(validations[2].textContent).to.not.equal('Email format is wrong');
       expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
 
       form.elements[1].value = 'valid@email.com';
@@ -715,10 +734,12 @@ describes.realWin('form-validators', {amp: true}, env => {
       [name, email, submit].forEach(c => form.appendChild(c));
 
       validations.forEach(v => v.parentNode.removeChild(v));
-      const {noName, noEmail, invalidEmail, invalidText}
-          = getCustomValidations(doc);
-      [noName, noEmail, invalidEmail, invalidText]
-          .forEach(c => doc.body.appendChild(c));
+      const {noName, noEmail, invalidEmail, invalidText} = getCustomValidations(
+        doc
+      );
+      [noName, noEmail, invalidEmail, invalidText].forEach(c =>
+        doc.body.appendChild(c)
+      );
       validations = doc.querySelectorAll('[visible-when-invalid]');
 
       // Test that validation still works.

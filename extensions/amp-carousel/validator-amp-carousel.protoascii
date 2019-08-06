@@ -32,6 +32,7 @@ tags: {  # amp-carousel
 attr_lists: {
   name: "amp-carousel-common"
   attrs: {
+    disabled_by: "amp4email"
     name: "arrows"
     value: ""
   }
@@ -45,6 +46,7 @@ attr_lists: {
     value_regex: "[0-9]+"
   }
   attrs: {
+    disabled_by: "amp4email"
     name: "dots"
     value: ""
   }
@@ -55,6 +57,23 @@ attr_lists: {
   # <amp-bind>
   attrs: { name: "[slide]" }
 }
+# There are 4 variants here, due to two independent axis of differences:
+#  1) type=slides vs. type=carousel
+#     - type=slides is the implied default if type is unspecified. This is
+#       encoded in the rules by making type=carousel mandatory, and
+#       type=slides optional.
+#     - slides vs. carousel implies different sets up supported layouts.
+#  2) presence of `lightbox` attribute.
+#     - lightbox is only allowed in AMP html format.
+#     - lightbox implies additional reference_point requirements of the
+#       amp-lightbox children.
+# The attribute implied rules (different layouts or different children) is not
+# a feature of the validator rules engine. Thus the only supportable ruleset is
+# to implement 1 tagspec for each combination. This produces the desired rules
+# but has undesirable results for some of the error messages, as seen in some
+# of the test cases. The main issue is that since there are two tagspecs with
+# each combination, we cannot use the usual dispatch_key trick for either
+# attribute.
 tags: {  # <amp-carousel type=slides>
   html_format: AMP
   html_format: AMP4ADS
@@ -69,7 +88,7 @@ tags: {  # <amp-carousel type=slides>
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -95,7 +114,7 @@ tags: {  # <amp-carousel type=carousel>
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel"
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -119,7 +138,7 @@ tags: {  # <amp-carousel lightbox type=slides>
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -153,7 +172,7 @@ tags: {  # <amp-carousel lightbox type=carousel>
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel"
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -168,9 +187,6 @@ tags: {  # <amp-carousel lightbox type=carousel>
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-CAROUSEL lightbox [lightbox-exclude]"
   attrs: {
@@ -180,9 +196,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-CAROUSEL lightbox [child]"
   attrs: {

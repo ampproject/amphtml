@@ -25,26 +25,40 @@
 
 'use strict';
 
-const {isTravisBuild} = require('./build-system/travis');
 const minimist = require('minimist');
+const {isTravisBuild} = require('./build-system/travis');
 const argv = minimist(process.argv.slice(2));
 
+const isDist = argv._.includes('dist');
+const {esm} = argv;
+const noModuleTarget = {
+  'browsers': isTravisBuild()
+    ? ['Last 2 versions', 'safari >= 9']
+    : ['Last 2 versions'],
+};
+
+const moduleTarget = {
+  'esmodules': true,
+};
+
+// eslint-disable-next-line local/no-module-exports
 module.exports = function(api) {
   api.cache(true);
-  // Single pass builds do not use any of the default settings below.
-  if (argv._.includes('dist') && argv.single_pass) {
+  // `dist` builds do not use any of the default settings below until its
+  // an esm build. (Both Multipass and Singlepass)
+  if (isDist && !esm) {
     return {};
   }
   return {
     'presets': [
-      ['@babel/env', {
-        'modules': 'commonjs',
-        'loose': true,
-        'targets': {
-          'browsers': isTravisBuild() ?
-            ['Last 2 versions', 'safari >= 9'] : ['Last 2 versions'],
+      [
+        '@babel/preset-env',
+        {
+          'modules': isDist ? false : 'commonjs',
+          'loose': true,
+          'targets': esm ? moduleTarget : noModuleTarget,
         },
-      }],
+      ],
     ],
     'compact': false,
     'sourceType': 'module',

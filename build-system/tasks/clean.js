@@ -16,21 +16,27 @@
 'use strict';
 
 const del = require('del');
-const gulp = require('gulp-help')(require('gulp'));
-
 
 /**
  * Clean up the build artifacts
+ * @return {*} TODO(#23582): Specify return type
  */
-function clean() {
+async function clean() {
   return del([
     'dist',
     'dist.3p',
     'dist.tools',
     'build',
     '.amp-build',
+    'deps.txt',
+    'EXTENSIONS_CSS_MAP',
+    'build-system/runner/build',
+    'build-system/runner/dist',
   ]);
 }
 
+module.exports = {
+  clean,
+};
 
-gulp.task('clean', 'Removes build output', clean);
+clean.description = 'Removes build output';

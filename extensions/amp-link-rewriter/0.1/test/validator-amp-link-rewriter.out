@@ -48,6 +48,6 @@ FAIL
 |  <!-- Example of duplicate amp-link-rewriter tag -->
 |  <amp-link-rewriter layout="nodisplay"></amp-link-rewriter>
 >> ^~~~~~~~~
-amp-link-rewriter/0.1/test/validator-amp-link-rewriter.html:48:0 The tag 'amp-link-rewriter' appears more than once in the document. (see https://www.ampproject.org/docs/reference/components/amp-link-rewriter) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-link-rewriter/0.1/test/validator-amp-link-rewriter.html:48:0 The tag 'amp-link-rewriter' appears more than once in the document. (see https://amp.dev/documentation/components/amp-link-rewriter) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </body>
 |  </html>

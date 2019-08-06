@@ -14,6 +14,7 @@ before_install:
   # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
   - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
   - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+  - pip install --user protobuf
 branches:
   only:
     - master
@@ -23,10 +24,11 @@ branches:
 addons:
   apt:
     packages:
-      - protobuf-compiler
-      - python-protobuf
-      - openssl
+      # Use unbuffer (from expect-dev) for log coloring (github.com/travis-ci/travis-ci/issues/7967)
+      - expect-dev
       - google-cloud-sdk
+      - openssl
+      - protobuf-compiler
   chrome: stable
   hosts:
     - ads.localhost
@@ -45,50 +47,44 @@ jobs:
     - stage: build
       name: "Build"
       script:
-        - node build-system/pr-check/build.js
+        - unbuffer node build-system/pr-check/build.js
     - stage: build
       name: "Checks"
       script:
-        - node build-system/pr-check/checks.js
+        - unbuffer node build-system/pr-check/checks.js
     - stage: build
       name: "Validator Tests"
       script:
-        - node build-system/pr-check/validator-tests.js
+        - unbuffer node build-system/pr-check/validator-tests.js
     - stage: build
-      name: "Dist"
-      if: type != pull_request
+      name: "Dist, Bundle Size"
       script:
-        - node build-system/pr-check/dist.js
+        - unbuffer node build-system/pr-check/dist-bundle-size.js
     - stage: test
-      name: "Dist, Bundle Size, Single Pass Tests"
+      name: "Single Pass Tests"
       script:
-        - node build-system/pr-check/dist-tests.js
+        - unbuffer node build-system/pr-check/single-pass-tests.js
     - stage: test
       name: "Visual Diff Tests"
       script:
-        - node build-system/pr-check/visual-diff-tests.js
+        - unbuffer node build-system/pr-check/visual-diff-tests.js
     - stage: test
       name: "Local Tests"
       script:
-        - node build-system/pr-check/local-tests.js
+        - unbuffer node build-system/pr-check/local-tests.js
     - stage: test
       name: "Remote (Sauce Labs) Tests"
       script:
-        - node build-system/pr-check/remote-tests.js
+        - unbuffer node build-system/pr-check/remote-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
+        - ps -ef
     - stage: test
       name: "End to End Tests"
       script:
-        - node build-system/pr-check/e2e-tests.js
-  fast_finish: true
-
-  # TODO(ampproject/wg-infra): remove when remote tests stabilize
-  allow_failures:
-    - script:
-      - node build-system/pr-check/remote-tests.js
-    - script:
-      - node build-system/pr-check/e2e-tests.js
+        - unbuffer node build-system/pr-check/e2e-tests.js
+      after_script:
+        - ps -ef
 cache:
   directories:
     - node_modules
@@ -98,5 +94,4 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
-    - $HOME/.cache/pip
   yarn: true

@@ -17,15 +17,14 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
 
 const TAG = 'amp-fx-flying-carpet';
 
-
 export class AmpFlyingCarpet extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -34,7 +33,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
      * Preserved so that we may keep track of the "good" children. When an
      * element collapses, we remove it from the list.
      *
-     * @type{!Array<!Element>}
+     * @type {!Array<!Element>}
      * @private
      */
     this.children_ = [];
@@ -61,7 +60,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     this.firstLayoutCompleted_ = false;
   }
 
-
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED_HEIGHT;
@@ -69,7 +67,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
     const doc = this.element.ownerDocument;
     const container = doc.createElement('div');
 
@@ -79,7 +76,8 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     const childNodes = this.getRealChildNodes();
     this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
-    this.children_.forEach(child => this.setAsOwner(child));
+    const owners = Services.ownersForDoc(this.element);
+    this.children_.forEach(child => owners.setOwner(child, this.element));
 
     const clip = doc.createElement('div');
     clip.setAttribute('class', 'i-amphtml-fx-flying-carpet-clip');
@@ -92,7 +90,10 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     // Make the fixed-layer track the container, but never transfer it out of
     // this DOM tree. Tracking allows us to compensate for the Viewer's header,
     // but transferring would break the clipping UI.
-    this.getViewport().addToFixedLayer(container, /* opt_forceTransfer */false);
+    this.getViewport().addToFixedLayer(
+      container,
+      /* opt_forceTransfer */ false
+    );
   }
 
   /** @override */
@@ -102,14 +103,21 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       setStyle(this.container_, 'width', width, 'px');
     });
     if (this.firstLayoutCompleted_) {
-      this.scheduleLayout(this.children_);
+      Services.ownersForDoc(this.element).scheduleLayout(
+        this.element,
+        this.children_
+      );
       listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
     }
   }
 
   /** @override */
   viewportCallback(inViewport) {
-    this.updateInViewport(this.children_, inViewport);
+    Services.ownersForDoc(this.element).updateInViewport(
+      this.element,
+      this.children_,
+      inViewport
+    );
   }
 
   /**
@@ -129,19 +137,21 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     const minTop = viewportHeight * 0.75;
     const maxTop = docHeight - viewportHeight * 0.95;
     userAssert(
-        layoutBox.top >= minTop,
-        '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
-      ' first viewport: %s Current position: %s. Min: %s',
-        this.element,
-        layoutBox.top,
-        minTop);
+      layoutBox.top >= minTop,
+      '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
+        ' first viewport: %s Current position: %s. Min: %s',
+      this.element,
+      layoutBox.top,
+      minTop
+    );
     userAssert(
-        layoutBox.top <= maxTop,
-        '<amp-fx-flying-carpet> elements must be positioned before the last ' +
-      'viewport: %s Current position: %s. Max: %s',
-        this.element,
-        layoutBox.top,
-        maxTop);
+      layoutBox.top <= maxTop,
+      '<amp-fx-flying-carpet> elements must be positioned before the last ' +
+        'viewport: %s Current position: %s. Max: %s',
+      this.element,
+      layoutBox.top,
+      maxTop
+    );
   }
 
   /** @override */
@@ -150,10 +160,13 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       this.assertPosition_();
     } catch (e) {
       // Collapse the element if the effect is broken by the viewport location.
-      this./*OK*/collapse();
+      this./*OK*/ collapse();
       throw e;
     }
-    this.scheduleLayout(this.children_);
+    Services.ownersForDoc(this.element).scheduleLayout(
+      this.element,
+      this.children_
+    );
     listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
     this.firstLayoutCompleted_ = true;
     return Promise.resolve();
@@ -169,7 +182,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
   layoutBuiltChild_(event) {
     const child = dev().assertElement(event.target);
     if (child.getOwner() === this.element) {
-      this.scheduleLayout(child);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, child);
     }
   }
 
@@ -198,6 +211,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    * nodes that only contain whitespace since they do not contribute anything
    * visually, only their surrounding Elements or non-whitespace Texts do.
    * @param {!Array<!Node>} nodes
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   visibileChildren_(nodes) {
@@ -215,7 +229,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     });
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpFlyingCarpet, CSS);

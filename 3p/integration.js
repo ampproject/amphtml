@@ -25,16 +25,10 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import {
-  IntegrationAmpContext,
-} from './ampcontext-integration';
+import {IntegrationAmpContext} from './ampcontext-integration';
 import {dict} from '../src/utils/object.js';
 import {endsWith} from '../src/string';
-import {
-  getAmpConfig,
-  getEmbedType,
-  getLocation,
-} from './frame-metadata';
+import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 import {getMode} from '../src/mode';
 import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {
@@ -44,17 +38,11 @@ import {
   userAssert,
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
+import {internalRuntimeVersion} from '../src/internal-version';
 import {parseJson} from '../src/json';
-import {
-  register,
-  run,
-  setExperimentToggles,
-} from './3p';
+import {register, run, setExperimentToggles} from './3p';
 import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
-
-// Disable auto-sorting of imports from here on.
-/* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
@@ -72,6 +60,7 @@ import {yotpo} from './yotpo';
 import {_ping_} from '../ads/_ping_';
 
 // 3P Ad Networks - please keep in alphabetic order
+import {_1wo} from '../ads/1wo';
 import {_24smi} from '../ads/24smi';
 import {a8} from '../ads/a8';
 import {a9} from '../ads/a9';
@@ -89,12 +78,13 @@ import {adman} from '../ads/adman';
 import {admanmedia} from '../ads/admanmedia';
 import {admixer} from '../ads/admixer';
 import {adocean} from '../ads/adocean';
+import {adop} from '../ads/adop';
 import {adpicker} from '../ads/adpicker';
 import {adplugg} from '../ads/adplugg';
 import {adpon} from '../ads/adpon';
 import {adreactor} from '../ads/adreactor';
-import {adsense} from '../ads/google/adsense';
 import {adsensor} from '../ads/adsensor';
+import {adsloom} from '../ads/adsloom';
 import {adsnative} from '../ads/adsnative';
 import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
@@ -111,10 +101,12 @@ import {adyoulike} from '../ads/adyoulike';
 import {affiliateb} from '../ads/affiliateb';
 import {aja} from '../ads/aja';
 import {amoad} from '../ads/amoad';
+import {aniview} from '../ads/aniview';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
 import {baidu} from '../ads/baidu';
+import {beaverads} from '../ads/beaverads';
 import {bidtellect} from '../ads/bidtellect';
 import {brainy} from '../ads/brainy';
 import {bringhub} from '../ads/bringhub';
@@ -123,7 +115,7 @@ import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
 import {cedato} from '../ads/cedato';
-import {chargeads} from '../ads/chargeads';
+import {chargeads, nws} from '../ads/nws';
 import {colombia} from '../ads/colombia';
 import {connatix} from '../ads/connatix';
 import {contentad} from '../ads/contentad';
@@ -133,6 +125,7 @@ import {dable} from '../ads/dable';
 import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {dotandads} from '../ads/dotandads';
+import {dynad} from '../ads/dynad';
 import {eadv} from '../ads/eadv';
 import {eas} from '../ads/eas';
 import {engageya} from '../ads/engageya';
@@ -144,6 +137,7 @@ import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
+import {forkmedia} from '../ads/forkmedia';
 import {freewheel} from '../ads/freewheel';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
@@ -152,6 +146,7 @@ import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
 import {ibillboard} from '../ads/ibillboard';
+import {idealmedia} from '../ads/idealmedia';
 import {imaVideo} from '../ads/google/imaVideo';
 import {imedia} from '../ads/imedia';
 import {imobile} from '../ads/imobile';
@@ -159,14 +154,17 @@ import {imonomy} from '../ads/imonomy';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
+import {invibes} from '../ads/invibes';
 import {ix} from '../ads/ix';
 import {jubna} from '../ads/jubna';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
 import {kuadio} from '../ads/kuadio';
+import {lentainform} from '../ads/lentainform';
 import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
+import {logly} from '../ads/logly';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
@@ -175,6 +173,7 @@ import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
 import {meg} from '../ads/meg';
+import {mgid} from '../ads/mgid';
 import {microad} from '../ads/microad';
 import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
@@ -182,6 +181,7 @@ import {monetizer101} from '../ads/monetizer101';
 import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
+import {nativeroll} from '../ads/nativeroll';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
 import {nend} from '../ads/nend';
@@ -192,6 +192,7 @@ import {onead} from '../ads/onead';
 import {onnetwork} from '../ads/onnetwork';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
+import {opinary} from '../ads/opinary';
 import {outbrain} from '../ads/outbrain';
 import {pixels} from '../ads/pixels';
 import {plista} from '../ads/plista';
@@ -214,6 +215,7 @@ import {relap} from '../ads/relap';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
+import {rnetplus} from '../ads/rnetplus';
 import {rubicon} from '../ads/rubicon';
 import {runative} from '../ads/runative';
 import {sas} from '../ads/sas';
@@ -227,7 +229,10 @@ import {smi2} from '../ads/smi2';
 import {sogouad} from '../ads/sogouad';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
+import {speakol} from '../ads/speakol';
 import {spotx} from '../ads/spotx';
+import {streamrail} from '../ads/streamrail';
+import {strossle} from '../ads/strossle';
 import {sunmedia} from '../ads/sunmedia';
 import {svknative} from '../ads/svknative';
 import {swoop} from '../ads/swoop';
@@ -264,8 +269,6 @@ import {zedo} from '../ads/zedo';
 import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
-import {speakol} from '../ads/speakol';
-
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -273,16 +276,23 @@ import {speakol} from '../ads/speakol';
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
+  '1wo': true,
   '24smi': true,
+  adsloom: true,
   bringhub: true,
   dable: true,
   engageya: true,
   epeex: true,
+  forkmedia: true,
+  idealmedia: true,
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
+  mgid: true,
   miximedia: true,
   mywidget: true,
+  lentainform: true,
+  opinary: true,
   outbrain: true,
   plista: true,
   postquare: true,
@@ -291,6 +301,7 @@ const AMP_EMBED_ALLOWED = {
   smartclip: true,
   smi2: true,
   svknative: true,
+  strossle: true,
   taboola: true,
   zen: true,
   zergnet: true,
@@ -300,12 +311,12 @@ const AMP_EMBED_ALLOWED = {
 
 init(window);
 
-
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
 }
 
 // Keep the list in alphabetic order
+register('1wo', _1wo);
 register('24smi', _24smi);
 register('3d-gltf', gltfViewer);
 register('a8', a8);
@@ -324,12 +335,13 @@ register('adman', adman);
 register('admanmedia', admanmedia);
 register('admixer', admixer);
 register('adocean', adocean);
+register('adop', adop);
 register('adpicker', adpicker);
 register('adplugg', adplugg);
 register('adpon', adpon);
 register('adreactor', adreactor);
-register('adsense', adsense);
 register('adsensor', adsensor);
+register('adsloom', adsloom);
 register('adsnative', adsnative);
 register('adspeed', adspeed);
 register('adspirit', adspirit);
@@ -346,10 +358,12 @@ register('adyoulike', adyoulike);
 register('affiliateb', affiliateb);
 register('aja', aja);
 register('amoad', amoad);
+register('aniview', aniview);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
 register('baidu', baidu);
+register('beaverads', beaverads);
 register('beopinion', beopinion);
 register('bidtellect', bidtellect);
 register('bodymovinanimation', bodymovinanimation);
@@ -362,7 +376,7 @@ register('caprofitx', caprofitx);
 register('cedato', cedato);
 register('chargeads', chargeads);
 register('colombia', colombia);
-register('connatix',connatix);
+register('connatix', connatix);
 register('contentad', contentad);
 register('criteo', criteo);
 register('csa', csa);
@@ -370,6 +384,7 @@ register('dable', dable);
 register('directadvert', directadvert);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
+register('dynad', dynad);
 register('eadv', eadv);
 register('eas', eas);
 register('embedly', embedly);
@@ -383,6 +398,7 @@ register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
 register('fluct', fluct);
+register('forkmedia', forkmedia);
 register('freewheel', freewheel);
 register('fusion', fusion);
 register('genieessp', genieessp);
@@ -392,6 +408,7 @@ register('gmossp', gmossp);
 register('gumgum', gumgum);
 register('holder', holder);
 register('ibillboard', ibillboard);
+register('idealmedia', idealmedia);
 register('ima-video', imaVideo);
 register('imedia', imedia);
 register('imobile', imobile);
@@ -400,14 +417,17 @@ register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('innity', innity);
+register('invibes', invibes);
 register('ix', ix);
 register('jubna', jubna);
 register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
 register('kuadio', kuadio);
+register('lentainform', lentainform);
 register('ligatus', ligatus);
 register('lockerdome', lockerdome);
+register('logly', logly);
 register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
@@ -418,6 +438,7 @@ register('medianet', medianet);
 register('mediavine', mediavine);
 register('medyanet', medyanet);
 register('meg', meg);
+register('mgid', mgid);
 register('microad', microad);
 register('miximedia', miximedia);
 register('mixpo', mixpo);
@@ -425,16 +446,19 @@ register('monetizer101', monetizer101);
 register('mox', mox);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
+register('nativeroll', nativeroll);
 register('nativo', nativo);
 register('navegg', navegg);
 register('nend', nend);
 register('netletix', netletix);
 register('noddus', noddus);
 register('nokta', nokta);
+register('nws', nws);
 register('onead', onead);
 register('onnetwork', onnetwork);
 register('openadstream', openadstream);
 register('openx', openx);
+register('opinary', opinary);
 register('outbrain', outbrain);
 register('pixels', pixels);
 register('plista', plista);
@@ -458,6 +482,7 @@ register('relap', relap);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rfp', rfp);
+register('rnetplus', rnetplus);
 register('rubicon', rubicon);
 register('runative', runative);
 register('sas', sas);
@@ -472,6 +497,8 @@ register('sogouad', sogouad);
 register('sortable', sortable);
 register('sovrn', sovrn);
 register('spotx', spotx);
+register('streamrail', streamrail);
+register('strossle', strossle);
 register('sunmedia', sunmedia);
 register('svknative', svknative);
 register('swoop', swoop);
@@ -497,7 +524,7 @@ register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
 register('wisteria', wisteria);
 register('wpmedia', wpmedia);
-register('xlift' , xlift);
+register('xlift', xlift);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yandex', yandex);
@@ -527,7 +554,6 @@ const defaultAllowedTypesInCustomFrame = [
   '_ping_',
 ];
 
-
 /**
  * Initialize 3p frame.
  * @param {!Window} win
@@ -544,7 +570,6 @@ function init(win) {
   setExperimentToggles(config.experimentToggles);
 }
 
-
 /**
  * Visible for testing.
  * Draws a 3p embed to the window. Expects the data to include the 3p type.
@@ -559,12 +584,15 @@ function init(win) {
 export function draw3p(win, data, configCallback) {
   const type = data['type'];
 
-  userAssert(isTagNameAllowed(type, win.context.tagName),
-      'Embed type %s not allowed with tag %s', type, win.context.tagName);
+  userAssert(
+    isTagNameAllowed(type, win.context.tagName),
+    'Embed type %s not allowed with tag %s',
+    type,
+    win.context.tagName
+  );
   if (configCallback) {
     configCallback(data, data => {
-      userAssert(data,
-          'Expected configuration to be passed as first argument');
+      userAssert(data, 'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
   } else {
@@ -584,8 +612,11 @@ export function draw3p(win, data, configCallback) {
  * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
  *     that are allowed to embed this frame.
  */
-window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
-  opt_allowedEmbeddingOrigins) {
+window.draw3p = function(
+  opt_configCallback,
+  opt_allowed3pTypes,
+  opt_allowedEmbeddingOrigins
+) {
   try {
     const location = getLocation();
 
@@ -603,9 +634,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     // and the compiler not being able to discern otherwise
     // TODO(alanorozco): Do this more elegantly once old impl is cleaned up.
     draw3p(
-        window,
-        (/** @type {!IntegrationAmpContext} */ (window.context)).data || {},
-        opt_configCallback);
+      window,
+      /** @type {!IntegrationAmpContext} */ (window.context).data || {},
+      opt_configCallback
+    );
 
     window.context.bootstrapLoaded();
   } catch (e) {
@@ -641,9 +673,12 @@ export function validateParentOrigin(window, parentLocation) {
   if (!ancestors || !ancestors.length) {
     return;
   }
-  userAssert(ancestors[0] == parentLocation.origin,
-      'Parent origin mismatch: %s, %s',
-      ancestors[0], parentLocation.origin);
+  userAssert(
+    ancestors[0] == parentLocation.origin,
+    'Parent origin mismatch: %s, %s',
+    ancestors[0],
+    parentLocation.origin
+  );
 }
 
 /**
@@ -669,8 +704,11 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
     return;
   }
-  userAssert(allowedTypes && allowedTypes.indexOf(type) != -1,
-      'Non-whitelisted 3p type for custom iframe: %s', type);
+  userAssert(
+    allowedTypes && allowedTypes.indexOf(type) != -1,
+    'Non-whitelisted 3p type for custom iframe: %s',
+    type
+  );
 }
 
 /**
@@ -693,7 +731,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
     // the referrer. The referrer is used because it should be
     // trustable.
     hostname = parseUrlDeprecated(getSourceUrl(window.document.referrer))
-        .hostname;
+      .hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
     // Either the hostname is exactly as whitelisted…
@@ -705,8 +743,9 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
       return;
     }
   }
-  throw new Error('Invalid embedding hostname: ' + hostname + ' not in '
-      + allowedHostnames);
+  throw new Error(
+    'Invalid embedding hostname: ' + hostname + ' not in ' + allowedHostnames
+  );
 }
 
 /**
@@ -767,10 +806,16 @@ export function isTagNameAllowed(type, tagName) {
  * @param {boolean} isCanary
  */
 function lightweightErrorReport(e, isCanary) {
-  new Image().src = urls.errorReporting +
-      '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
-      '&m=' + encodeURIComponent(e.message) +
-      '&ca=' + (isCanary ? 1 : 0) +
-      '&r=' + encodeURIComponent(document.referrer) +
-      '&s=' + encodeURIComponent(e.stack || '');
+  new Image().src =
+    urls.errorReporting +
+    '?3p=1&v=' +
+    encodeURIComponent(internalRuntimeVersion()) +
+    '&m=' +
+    encodeURIComponent(e.message) +
+    '&ca=' +
+    (isCanary ? 1 : 0) +
+    '&r=' +
+    encodeURIComponent(document.referrer) +
+    '&s=' +
+    encodeURIComponent(e.stack || '');
 }

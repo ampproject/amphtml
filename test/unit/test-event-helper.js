@@ -29,7 +29,6 @@ import {
 } from '../../src/event-helper-listen';
 
 describe('EventHelper', () => {
-
   function getEvent(name, target) {
     const event = document.createEvent('Event');
     event.initEvent(name, true, true);
@@ -203,27 +202,40 @@ describe('EventHelper', () => {
   });
 
   it('loadPromise - error event', () => {
-    const promise = loadPromise(element).then(result => {
-      assert.fail('must never be here: ' + result);
-    }).then(() => {
-      throw new Error('Should not be reached.');
-    }, reason => {
-      expect(reason.message).to.include('Failed to load');
-    });
+    const promise = loadPromise(element)
+      .then(result => {
+        assert.fail('must never be here: ' + result);
+      })
+      .then(
+        () => {
+          throw new Error('Should not be reached.');
+        },
+        reason => {
+          expect(reason.message).to.include('Failed to load');
+        }
+      );
     errorObservable.fire(getEvent('error', element));
     return promise;
   });
 
   it('should polyfill CustomEvent constructor', () => {
-    const native = createCustomEvent(window, 'foo', {bar: 123},
-        {bubbles: true, cancelable: true});
+    const native = createCustomEvent(
+      window,
+      'foo',
+      {bar: 123},
+      {bubbles: true, cancelable: true}
+    );
     expect(native.type).to.equal('foo');
     expect(native.detail).to.deep.equal({bar: 123});
     expect(native.bubbles).to.be.true;
     expect(native.cancelable).to.be.true;
 
-    const polyfilled = createCustomEvent({document}, 'foo', {bar: 123},
-        {bubbles: true, cancelable: true});
+    const polyfilled = createCustomEvent(
+      {document},
+      'foo',
+      {bar: 123},
+      {bubbles: true, cancelable: true}
+    );
     expect(polyfilled.type).to.equal('foo');
     expect(polyfilled.detail).to.deep.equal({bar: 123});
     expect(polyfilled.bubbles).to.be.true;
@@ -258,12 +270,13 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that accepts options
-    addEventListenerStub = sandbox.stub(self, 'addEventListener').callsFake(
-        eventListenerStubAcceptOpts);
+    addEventListenerStub = sandbox
+      .stub(self, 'addEventListener')
+      .callsFake(eventListenerStubAcceptOpts);
     // Simulate a removeEventListener that accepts options
-    removeEventListenerStub =
-        sandbox.stub(self, 'removeEventListener').callsFake(
-            eventListenerStubAcceptOpts);
+    removeEventListenerStub = sandbox
+      .stub(self, 'removeEventListener')
+      .callsFake(eventListenerStubAcceptOpts);
     resetEvtListenerOptsSupportForTesting();
     expect(detectEvtListenerOptsSupport()).to.be.true;
     expect(addEventListenerStub.called).to.be.true;
@@ -289,12 +302,13 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that does not accept options
-    addEventListenerStub = sandbox.stub(self, 'addEventListener').callsFake(
-        eventListenerStubRejectOpts);
+    addEventListenerStub = sandbox
+      .stub(self, 'addEventListener')
+      .callsFake(eventListenerStubRejectOpts);
     // Simulate a removeEventListener that does not accept options
-    removeEventListenerStub =
-        sandbox.stub(self, 'removeEventListener').callsFake(
-            eventListenerStubRejectOpts);
+    removeEventListenerStub = sandbox
+      .stub(self, 'removeEventListener')
+      .callsFake(eventListenerStubRejectOpts);
     resetEvtListenerOptsSupportForTesting();
     expect(detectEvtListenerOptsSupport()).to.be.false;
     expect(addEventListenerStub.called).to.be.true;
@@ -302,5 +316,4 @@ describe('EventHelper', () => {
     expect(detectEvtListenerOptsSupport()).to.be.false;
     expect(removeEventListenerStub.calledOnce).to.be.true;
   });
-
 });

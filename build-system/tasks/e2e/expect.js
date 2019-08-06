@@ -15,7 +15,7 @@
  */
 
 const chai = require('chai');
-const {ControllerPromise} = require('./functional-test-controller');
+const {ControllerPromise} = require('./controller-promise');
 
 let installed;
 let lastExpectError;
@@ -40,118 +40,133 @@ function expect(actual, opt_message) {
   if (!installed) {
     installed = true;
     // See https://www.chaijs.com/guide/helpers/ for details on implementation
-    chai.use(installEqualWrapper);
-    chai.use(installIncludeWrapper);
-    chai.use(installMatchWrapper);
-    chai.use(installLengthWrapper);
-    chai.use(installAboveWrapper);
-    chai.use(installBelowWrapper);
-    chai.use(installIsTrueWrapper);
-    chai.use(installIsFalseWrapper);
-    chai.use(installIsOkWrapper);
-    chai.use(installIsNullWrapper);
+    chai.use(installWrappers);
   }
 
   return chai.expect(actual, opt_message);
 }
 
-function installEqualWrapper(chai, utils) {
+/** @enum {string} */
+const ChaiType = {
+  METHOD: 'method',
+  PROPERTY: 'property',
+  CHAINABLE_METHOD: 'chainable-method',
+};
+
+/**
+ * These properties will be overridden to accept a Promise value and then
+ * continue to process the value like normal.
+ * Only the chai properties that make assertions need to be overwritten.
+ * Not all chai properties need to be overwritten, like those that set
+ * flags or are only language chains e.g. `not` or 'to'
+ * See the Chai implementation for the original definitions:
+ * {@link https://github.com/chaijs/chai/blob/master/lib/chai/core/assertions.js}
+ */
+const chaiMethodsAndProperties = [
+  {name: 'a', type: ChaiType.CHAINABLE_METHOD},
+  {name: 'above', type: ChaiType.METHOD},
+  {name: 'an', type: ChaiType.CHAINABLE_METHOD},
+  {name: 'approximately', type: ChaiType.METHOD},
+  {name: 'arguments', type: ChaiType.PROPERTY},
+  {name: 'Arguments', type: ChaiType.PROPERTY},
+  {name: 'below', type: ChaiType.METHOD},
+  {name: 'by', type: ChaiType.METHOD, unsupported: true},
+  {name: 'change', type: ChaiType.METHOD, unsupported: true},
+  {name: 'changes', type: ChaiType.METHOD, unsupported: true},
+  {name: 'closeTo', type: ChaiType.METHOD},
+  {name: 'contain', type: ChaiType.CHAINABLE_METHOD},
+  {name: 'contains', type: ChaiType.CHAINABLE_METHOD},
+  {name: 'decrease', type: ChaiType.METHOD, unsupported: true},
+  {name: 'decreases', type: ChaiType.METHOD, unsupported: true},
+  {name: 'empty', type: ChaiType.PROPERTY},
+  {name: 'eq', type: ChaiType.METHOD},
+  {name: 'eql', type: ChaiType.METHOD},
+  {name: 'eqls', type: ChaiType.METHOD},
+  {name: 'equal', type: ChaiType.METHOD},
+  {name: 'equals', type: ChaiType.METHOD},
+  {name: 'exist', type: ChaiType.PROPERTY},
+  {name: 'extensible', type: ChaiType.PROPERTY},
+  {name: 'false', type: ChaiType.PROPERTY},
+  {name: 'finite', type: ChaiType.PROPERTY},
+  {name: 'frozen', type: ChaiType.PROPERTY},
+  {name: 'greaterThan', type: ChaiType.METHOD},
+  {name: 'gt', type: ChaiType.METHOD},
+  {name: 'gte', type: ChaiType.METHOD},
+  {name: 'haveOwnProperty', type: ChaiType.METHOD},
+  {name: 'haveOwnPropertyDescriptor', type: ChaiType.METHOD},
+  {name: 'include', type: ChaiType.CHAINABLE_METHOD},
+  {name: 'includes', type: ChaiType.CHAINABLE_METHOD},
+  {name: 'increase', type: ChaiType.METHOD, unsupported: true},
+  {name: 'increases', type: ChaiType.METHOD, unsupported: true},
+  {name: 'instanceof', type: ChaiType.METHOD},
+  {name: 'instanceOf', type: ChaiType.METHOD},
+  {name: 'key', type: ChaiType.METHOD},
+  {name: 'keys', type: ChaiType.METHOD},
+  {name: 'least', type: ChaiType.METHOD},
+  {name: 'length', type: ChaiType.CHAINABLE_METHOD},
+  {name: 'lengthOf', type: ChaiType.CHAINABLE_METHOD},
+  {name: 'lessThan', type: ChaiType.METHOD},
+  {name: 'lt', type: ChaiType.METHOD},
+  {name: 'lte', type: ChaiType.METHOD},
+  {name: 'match', type: ChaiType.METHOD},
+  {name: 'matches', type: ChaiType.METHOD},
+  {name: 'members', type: ChaiType.METHOD},
+  {name: 'most', type: ChaiType.METHOD},
+  {name: 'NaN', type: ChaiType.PROPERTY},
+  {name: 'null', type: ChaiType.PROPERTY},
+  {name: 'ok', type: ChaiType.PROPERTY},
+  {name: 'oneOf', type: ChaiType.METHOD},
+  {name: 'ownProperty', type: ChaiType.METHOD},
+  {name: 'ownPropertyDescriptor', type: ChaiType.METHOD},
+  {name: 'property', type: ChaiType.METHOD},
+  {name: 'respondsTo', type: ChaiType.METHOD, unsupported: true},
+  {name: 'respondTo', type: ChaiType.METHOD, unsupported: true},
+  {name: 'satisfies', type: ChaiType.METHOD},
+  {name: 'satisfy', type: ChaiType.METHOD},
+  {name: 'sealed', type: ChaiType.PROPERTY},
+  {name: 'string', type: ChaiType.METHOD},
+  {name: 'throw', type: ChaiType.METHOD, unsupported: true},
+  {name: 'Throw', type: ChaiType.METHOD, unsupported: true},
+  {name: 'throws', type: ChaiType.METHOD, unsupported: true},
+  {name: 'true', type: ChaiType.PROPERTY},
+  {name: 'undefined', type: ChaiType.PROPERTY},
+  {name: 'within', type: ChaiType.METHOD},
+];
+
+function installWrappers(chai, utils) {
+  const {METHOD, PROPERTY, CHAINABLE_METHOD} = ChaiType;
   const {Assertion} = chai;
 
-  const overwrite = overwriteAlwaysUseSuper(utils);
-  Assertion.overwriteMethod('equal', overwrite);
-  Assertion.overwriteMethod('equals', overwrite);
-  Assertion.overwriteMethod('eq', overwrite);
+  for (const {name, type, unsupported} of chaiMethodsAndProperties) {
+    const overwrite = unsupported
+      ? overwriteUnsupported
+      : overwriteAlwaysUseSuper(utils);
+
+    switch (type) {
+      case METHOD:
+        Assertion.overwriteMethod(name, overwrite);
+        break;
+      case PROPERTY:
+        Assertion.overwriteProperty(name, overwrite);
+        break;
+      case CHAINABLE_METHOD:
+        Assertion.overwriteChainableMethod(
+          name,
+          overwrite,
+          inheritChainingBehavior
+        );
+        break;
+      default:
+        throw new Error('Unknown ChaiType');
+    }
+  }
 }
-
-function installIncludeWrapper(chai, utils) {
-  const {Assertion} = chai;
-
-  const overwrite = overwriteAlwaysUseSuper(utils);
-  Assertion.overwriteChainableMethod(
-      'include', overwrite, inheritChainingBehavior);
-  Assertion.overwriteChainableMethod(
-      'includes', overwrite, inheritChainingBehavior);
-  Assertion.overwriteChainableMethod(
-      'contain', overwrite, inheritChainingBehavior);
-  Assertion.overwriteChainableMethod(
-      'contains', overwrite, inheritChainingBehavior);
-}
-
-function installMatchWrapper(chai, utils) {
-  const {Assertion} = chai;
-
-  const overwrite = overwriteAlwaysUseSuper(utils);
-  Assertion.overwriteMethod('match', overwrite);
-  Assertion.overwriteMethod('matches', overwrite);
-}
-
-function installLengthWrapper(chai, utils) {
-  const {Assertion} = chai;
-
-  const overwrite = overwriteAlwaysUseSuper(utils);
-  Assertion.overwriteChainableMethod(
-      'length', overwrite, inheritChainingBehavior);
-  Assertion.overwriteChainableMethod(
-      'lengthOf', overwrite, inheritChainingBehavior);
-}
-
-function installAboveWrapper(chai, utils) {
-  const {Assertion} = chai;
-
-  const overwrite = overwriteAlwaysUseSuper(utils);
-  Assertion.overwriteMethod('above', overwrite);
-  Assertion.overwriteMethod('gt', overwrite);
-  Assertion.overwriteMethod('greaterThan', overwrite);
-}
-
-function installBelowWrapper(chai, utils) {
-  const {Assertion} = chai;
-
-  const overwrite = overwriteAlwaysUseSuper(utils);
-  Assertion.overwriteMethod('below', overwrite);
-  Assertion.overwriteMethod('lt', overwrite);
-  Assertion.overwriteMethod('lessThan', overwrite);
-}
-
-function installIsTrueWrapper(chai, utils) {
-  const {Assertion} = chai;
-
-  const overwrite = overwriteAlwaysUseSuper(utils);
-  Assertion.overwriteProperty('isTrue', overwrite);
-  Assertion.overwriteProperty('true', overwrite);
-}
-
-function installIsFalseWrapper(chai, utils) {
-  const {Assertion} = chai;
-
-  const overwrite = overwriteAlwaysUseSuper(utils);
-  Assertion.overwriteProperty('isFalse', overwrite);
-  Assertion.overwriteProperty('false', overwrite);
-}
-
-function installIsOkWrapper(chai, utils) {
-  const {Assertion} = chai;
-
-  const overwrite = overwriteAlwaysUseSuper(utils);
-  Assertion.overwriteProperty('isOk', overwrite);
-  Assertion.overwriteProperty('ok', overwrite);
-}
-
-function installIsNullWrapper(chai, utils) {
-  const {Assertion} = chai;
-
-  const overwrite = overwriteAlwaysUseSuper(utils);
-  Assertion.overwriteProperty('isNull', overwrite);
-  Assertion.overwriteProperty('null', overwrite);
-}
-
 
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
   return function(_super) {
-    return async function() {
+    return function() {
       const obj = this._obj;
       const isControllerPromise = obj instanceof ControllerPromise;
       if (!isControllerPromise) {
@@ -159,16 +174,29 @@ function overwriteAlwaysUseSuper(utils) {
       }
       const {waitForValue} = obj;
       if (!waitForValue) {
-        const result = await obj;
-        flag(this, 'object', result);
-        return _super.apply(this, arguments);
+        return obj.then(result => {
+          flag(this, 'object', result);
+          return _super.apply(this, arguments);
+        });
       }
 
-      const resultPromise = waitForValue(obj => {
+      /**
+       * When passed to `waitForValue`, this method causes the Promise
+       * returned by `waitForValue` to resolve only when the value it
+       * polls matches expectation set by the `expect` chain.
+       * @param {*} value
+       * @return {boolean} true if the ControllerPromise polling value
+       * satisfies the `expect` chain.
+       */
+      const valueSatisfiesExpectation = value => {
         try {
-          flag(this, 'object', obj);
+          // Tell chai to use value as the subject of the expect chain.
+          flag(this, 'object', value);
+
           // Run the code that checks the condition.
           _super.apply(this, arguments);
+
+          clearLastExpectError();
           // Let waitForValue know we are done.
           return true;
         } catch (e) {
@@ -180,8 +208,9 @@ function overwriteAlwaysUseSuper(utils) {
         } finally {
           flag(this, 'object', resultPromise);
         }
-      });
+      };
 
+      const resultPromise = waitForValue(valueSatisfiesExpectation);
       flag(this, 'object', resultPromise);
       return resultPromise;
     };
@@ -191,6 +220,19 @@ function overwriteAlwaysUseSuper(utils) {
 function inheritChainingBehavior(_super) {
   return function() {
     _super.apply(this, arguments);
+  };
+}
+
+function overwriteUnsupported(_super) {
+  return function() {
+    const obj = this._obj;
+    const isControllerPromise = obj instanceof ControllerPromise;
+    if (isControllerPromise) {
+      throw new Error(
+        'ControllerPromise used with unsupported expectation. Await the Promise and expect the value.'
+      );
+    }
+    return _super.apply(this, arguments);
   };
 }
 

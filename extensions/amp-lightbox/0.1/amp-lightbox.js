@@ -38,7 +38,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
-import {isInFie} from '../../../src/friendly-iframe-embed';
+import {isInFie} from '../../../src/iframe-helper';
 import {removeElement, tryFocus} from '../../../src/dom';
 import {toArray} from '../../../src/types';
 
@@ -103,7 +103,6 @@ function showCloseButtonHeader(header) {
 }
 
 class AmpLightbox extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -142,35 +141,47 @@ class AmpLightbox extends AMP.BaseElement {
     this.scrollTimerId_ = null;
 
     /** @private @const {string} */
-    this.animationPreset_ =
-        (element.getAttribute('animate-in') || DEFAULT_ANIMATION).toLowerCase();
+    this.animationPreset_ = (
+      element.getAttribute('animate-in') || DEFAULT_ANIMATION
+    ).toLowerCase();
 
     /** @private {?Element} */
     this.closeButtonHeader_ = null;
 
+    const platform = Services.platformFor(this.win);
+
+    /** @private @const {boolean} */
+    this.isIos_ = platform.isIos();
+
     /** @const {function()} */
-    this.boundReschedule_ = debounce(this.win, () => {
-      const container = user().assertElement(this.container_,
-          'E#19457 this.container_');
-      this.scheduleLayout(container);
-      this.scheduleResume(container);
-    }, 500);
+    this.boundReschedule_ = debounce(
+      this.win,
+      () => {
+        const container = user().assertElement(
+          this.container_,
+          'E#19457 this.container_'
+        );
+        const owners = Services.ownersForDoc(this.element);
+        owners.scheduleLayout(this.element, container);
+        owners.scheduleResume(this.element, container);
+      },
+      500
+    );
   }
 
   /** @override */
   buildCallback() {
     this.user().assert(
-        hasOwn(AnimationPresets, this.animationPreset_),
-        'Invalid `animate-in` value %s',
-        this.animationPreset_);
+      hasOwn(AnimationPresets, this.animationPreset_),
+      'Invalid `animate-in` value %s',
+      this.animationPreset_
+    );
 
     this.element.classList.add('i-amphtml-overlay');
     this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeSetTransparentBody_();
 
-    this.registerDefaultAction(
-        unused => this.open_(),
-        'open');
+    this.registerDefaultAction(unused => this.open_(), 'open');
     this.registerAction('close', this.close.bind(this));
   }
 
@@ -181,7 +192,7 @@ class AmpLightbox extends AMP.BaseElement {
   takeOwnershipOfDescendants_() {
     devAssert(this.isScrollable_);
     this.getComponentDescendants_().forEach(child => {
-      this.setAsOwner(child);
+      Services.ownersForDoc(this.element).setOwner(child, this.element);
     });
   }
 
@@ -255,15 +266,18 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
     this.initialize_();
-    this.boundCloseOnEscape_ =
-      /** @type {?function(this:AmpLightbox, Event)} */ (
-        this.closeOnEscape_.bind(this));
+    this.boundCloseOnEscape_ = /** @type {?function(this:AmpLightbox, Event)} */ (this.closeOnEscape_.bind(
+      this
+    ));
     this.win.document.documentElement.addEventListener(
-        'keydown', this.boundCloseOnEscape_);
+      'keydown',
+      this.boundCloseOnEscape_
+    );
 
     const {promise, resolve} = new Deferred();
-    this.getViewport().enterLightboxMode(this.element, promise)
-        .then(() => this.finalizeOpen_(resolve));
+    this.getViewport()
+      .enterLightboxMode(this.element, promise)
+      .then(() => this.finalizeOpen_(resolve));
   }
 
   /** @override */
@@ -297,13 +311,17 @@ class AmpLightbox extends AMP.BaseElement {
   finalizeOpen_(callback) {
     const {element} = this;
 
-    const {durationSeconds, openStyle, closedStyle} =
-        this.getAnimationPresetDef_();
+    const {
+      durationSeconds,
+      openStyle,
+      closedStyle,
+    } = this.getAnimationPresetDef_();
 
     const props = Object.keys(openStyle);
 
-    const transition =
-        props.map(p => `${p} ${durationSeconds}s ease-in`).join(',');
+    const transition = props
+      .map(p => `${p} ${durationSeconds}s ease-in`)
+      .join(',');
 
     this.eventCounter_++;
 
@@ -319,7 +337,7 @@ class AmpLightbox extends AMP.BaseElement {
     toggle(element, true);
 
     this.mutateElement(() => {
-      element./*OK*/scrollTop = 0;
+      element./*OK*/ scrollTop = 0;
     });
 
     this.handleAutofocus_();
@@ -332,7 +350,11 @@ class AmpLightbox extends AMP.BaseElement {
 
     const container = dev().assertElement(this.container_);
     if (!this.isScrollable_) {
-      this.updateInViewport(container, true);
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
+        container,
+        true
+      );
     } else {
       this.scrollHandler_();
       this.updateChildrenInViewport_(this.pos_, this.pos_);
@@ -347,13 +369,16 @@ class AmpLightbox extends AMP.BaseElement {
 
     // TODO: instead of laying out children all at once, layout children based
     // on visibility.
-    this.scheduleLayout(container);
-    this.scheduleResume(container);
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(this.element, container);
+    owners.scheduleResume(this.element, container);
     this.triggerEvent_(LightboxEvents.OPEN);
 
-    this.getHistory_().push(this.close.bind(this)).then(historyId => {
-      this.historyId_ = historyId;
-    });
+    this.getHistory_()
+      .push(this.close.bind(this))
+      .then(historyId => {
+        this.historyId_ = historyId;
+      });
 
     this.active_ = true;
   }
@@ -376,17 +401,20 @@ class AmpLightbox extends AMP.BaseElement {
 
     let headerHeight;
 
-    this.measureMutateElement(() => {
-      headerHeight = header./*OK*/getBoundingClientRect().height;
-    }, () => {
-      // Done in vsync in order to apply transition.
-      showCloseButtonHeader(header);
+    this.measureMutateElement(
+      () => {
+        headerHeight = header./*OK*/ getBoundingClientRect().height;
+      },
+      () => {
+        // Done in vsync in order to apply transition.
+        showCloseButtonHeader(header);
 
-      setImportantStyles(dev().assertElement(this.container_), {
-        'margin-top': px(headerHeight),
-        'min-height': `calc(100vh - ${px(headerHeight)})`,
-      });
-    });
+        setImportantStyles(dev().assertElement(this.container_), {
+          'margin-top': px(headerHeight),
+          'min-height': `calc(100vh - ${px(headerHeight)})`,
+        });
+      }
+    );
   }
 
   /**
@@ -423,8 +451,9 @@ class AmpLightbox extends AMP.BaseElement {
       removeElement(this.closeButtonHeader_);
       this.closeButtonHeader_ = null;
     }
-    this.getViewport().leaveLightboxMode(this.element)
-        .then(() => this.finalizeClose_());
+    this.getViewport()
+      .leaveLightboxMode(this.element)
+      .then(() => this.finalizeClose_());
   }
 
   /**
@@ -439,7 +468,7 @@ class AmpLightbox extends AMP.BaseElement {
       if (event != this.eventCounter_) {
         return;
       }
-      this./*OK*/collapse();
+      this./*OK*/ collapse();
       this.boundReschedule_();
     };
 
@@ -452,16 +481,23 @@ class AmpLightbox extends AMP.BaseElement {
       element.addEventListener('animationend', collapseAndReschedule);
     }
 
-    setStyles(element, assertDoesNotContainDisplay(
-        this.getAnimationPresetDef_().closedStyle));
+    setStyles(
+      element,
+      assertDoesNotContainDisplay(this.getAnimationPresetDef_().closedStyle)
+    );
 
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }
     this.win.document.documentElement.removeEventListener(
-        'keydown', this.boundCloseOnEscape_);
+      'keydown',
+      this.boundCloseOnEscape_
+    );
     this.boundCloseOnEscape_ = null;
-    this.schedulePause(dev().assertElement(this.container_));
+    Services.ownersForDoc(this.element).schedulePause(
+      this.element,
+      dev().assertElement(this.container_)
+    );
     this.active_ = false;
     this.triggerEvent_(LightboxEvents.CLOSE);
   }
@@ -481,9 +517,19 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   scrollHandler_() {
-    // If scroll top is 0, it's set to 1 to avoid scroll-freeze issue.
-    const currentScrollTop = this.element./*OK*/scrollTop || 1;
-    this.element./*OK*/scrollTop = currentScrollTop;
+    const currentScrollTop = this.element./*OK*/ scrollTop;
+
+    if (this.isIos_) {
+      // To avoid scroll-freeze issues in iOS, prevent reaching top/bottom
+      if (currentScrollTop == 0) {
+        this.element./*OK*/ scrollTop = 1;
+      } else if (
+        this.element./*OK*/ scrollHeight ==
+        currentScrollTop + this.element./*OK*/ offsetHeight
+      ) {
+        this.element./*OK*/ scrollTop = currentScrollTop - 1;
+      }
+    }
 
     this.pos_ = currentScrollTop;
 
@@ -499,19 +545,28 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   waitForScroll_(startingScrollTop) {
-    this.scrollTimerId_ = /** @type {number} */ (
-      Services.timerFor(this.win).delay(() => {
-        if (Math.abs(startingScrollTop - this.pos_) < 30) {
-          dev().fine(TAG, 'slow scrolling: %s - %s',
-              startingScrollTop, this.pos_);
-          this.scrollTimerId_ = null;
-          this.update_(this.pos_);
-        } else {
-          dev().fine(TAG, 'fast scrolling: %s - %s',
-              startingScrollTop, this.pos_);
-          this.waitForScroll_(this.pos_);
-        }
-      }, 100));
+    this.scrollTimerId_ = /** @type {number} */ (Services.timerFor(
+      this.win
+    ).delay(() => {
+      if (Math.abs(startingScrollTop - this.pos_) < 30) {
+        dev().fine(
+          TAG,
+          'slow scrolling: %s - %s',
+          startingScrollTop,
+          this.pos_
+        );
+        this.scrollTimerId_ = null;
+        this.update_(this.pos_);
+      } else {
+        dev().fine(
+          TAG,
+          'fast scrolling: %s - %s',
+          startingScrollTop,
+          this.pos_
+        );
+        this.waitForScroll_(this.pos_);
+      }
+    }, 100));
   }
 
   /**
@@ -536,13 +591,18 @@ class AmpLightbox extends AMP.BaseElement {
     const seen = [];
     this.forEachVisibleChild_(newPos, cell => {
       seen.push(cell);
-      this.updateInViewport(cell, true);
-      this.scheduleLayout(cell);
+      const owners = Services.ownersForDoc(this.element);
+      owners.updateInViewport(this.element, cell, true);
+      owners.scheduleLayout(this.element, cell);
     });
     if (oldPos != newPos) {
       this.forEachVisibleChild_(oldPos, cell => {
         if (!seen.includes(cell)) {
-          this.updateInViewport(cell, false);
+          Services.ownersForDoc(this.element).updateInViewport(
+            this.element,
+            cell,
+            false
+          );
         }
       });
     }
@@ -561,17 +621,21 @@ class AmpLightbox extends AMP.BaseElement {
     for (let i = 0; i < descendants.length; i++) {
       const descendant = descendants[i];
       let offsetTop = 0;
-      for (let n = descendant;
+      for (
+        let n = descendant;
         n && this.element.contains(n);
-        n = n./*OK*/offsetParent) {
-        offsetTop += n./*OK*/offsetTop;
+        n = n./*OK*/ offsetParent
+      ) {
+        offsetTop += n./*OK*/ offsetTop;
       }
       // Check whether child element is almost visible in the lightbox given
       // current scrollTop position of lightbox
       // We consider element visible if within 2x containerHeight distance.
       const visibilityMargin = 2 * containerHeight;
-      if (offsetTop + descendant./*OK*/offsetHeight >= pos - visibilityMargin &&
-        offsetTop <= pos + visibilityMargin) {
+      if (
+        offsetTop + descendant./*OK*/ offsetHeight >= pos - visibilityMargin &&
+        offsetTop <= pos + visibilityMargin
+      ) {
         callback(descendant);
       }
     }
@@ -584,8 +648,8 @@ class AmpLightbox extends AMP.BaseElement {
   getSize_() {
     if (!this.size_) {
       this.size_ = {
-        width: this.element./*OK*/clientWidth,
-        height: this.element./*OK*/clientHeight,
+        width: this.element./*OK*/ clientWidth,
+        height: this.element./*OK*/ clientHeight,
       };
     }
     return this.size_;
@@ -628,7 +692,6 @@ class AmpLightbox extends AMP.BaseElement {
   }
 }
 
-
 /**
  * Sets the document body to transparent to allow for frame "merging".
  * @param {!Window} win
@@ -637,35 +700,40 @@ class AmpLightbox extends AMP.BaseElement {
  */
 function setTransparentBody(win, body) {
   const state = {};
-  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc(body);
 
-  Services.resourcesForDoc(ampdoc).measureMutateElement(body,
-      function measure() {
-        state.alreadyTransparent =
-            computedStyle(win, body)['background-color'] == 'rgba(0, 0, 0, 0)';
-      },
-      function mutate() {
-        if (!state.alreadyTransparent && !getMode().test) {
-          // TODO(alanorozco): Create documentation page and link it here once
-          // the A4A lightbox experiment is turned on.
-          user().warn(TAG,
-              'The background of the <body> element has been forced to ' +
-              'transparent. If you need to set background, use an ' +
-              'intermediate container.');
-        }
+  Services.resourcesForDoc(ampdoc).measureMutateElement(
+    body,
+    function measure() {
+      state.alreadyTransparent =
+        computedStyle(win, body)['background-color'] == 'rgba(0, 0, 0, 0)';
+    },
+    function mutate() {
+      if (!state.alreadyTransparent && !getMode().test) {
+        // TODO(alanorozco): Create documentation page and link it here once
+        // the A4A lightbox experiment is turned on.
+        user().warn(
+          TAG,
+          'The background of the <body> element has been forced to ' +
+            'transparent. If you need to set background, use an ' +
+            'intermediate container.'
+        );
+      }
 
-        // set as !important regardless to prevent changes
-        setImportantStyles(body, {background: 'transparent'});
-      });
+      // set as !important regardless to prevent changes
+      setImportantStyles(body, {background: 'transparent'});
+    }
+  );
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   // TODO(alanorozco): refactor this somehow so we don't need to do a direct
   // getMode check
   if (getMode().runtime == 'inabox') {
-    setTransparentBody(window, /** @type {!HTMLBodyElement} */ (
-      devAssert(document.body)));
+    setTransparentBody(
+      window,
+      /** @type {!HTMLBodyElement} */ (devAssert(document.body))
+    );
   }
 
   AMP.registerElement(TAG, AmpLightbox, CSS);

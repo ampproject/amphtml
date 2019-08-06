@@ -17,12 +17,11 @@
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {installFriendlyIframeEmbed}
-  from '../../../../src/friendly-iframe-embed';
+import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
-
 
 describes.realWin('amp-story-page', {amp: true}, env => {
   let win;
@@ -44,6 +43,9 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
 
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization', () => localizationService);
+
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
 
@@ -55,7 +57,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     win.document.body.appendChild(story);
 
     page = new AmpStoryPage(element);
-    page.element.getResources = () => win.services.resources.obj;
+    sandbox.stub(page, 'mutateElement').callsFake(fn => fn());
   });
 
   afterEach(() => {
@@ -105,6 +107,25 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     });
   });
 
+  it('should call waitForMedia after layoutCallback resolves', () => {
+    const spy = sandbox.spy(page, 'waitForMediaLayout_');
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      expect(spy).to.have.been.calledOnce;
+    });
+  });
+
+  it('should mark page as loaded after media is loaded', () => {
+    const waitForMediaLayoutSpy = sandbox.spy(page, 'waitForMediaLayout_');
+    const markPageAsLoadedSpy = sandbox.spy(page, 'markPageAsLoaded_');
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      expect(markPageAsLoadedSpy).to.have.been.calledAfter(
+        waitForMediaLayoutSpy
+      );
+    });
+  });
+
   it('should start the animations if needed when state becomes active', () => {
     // Adding an element that has to be animated.
     const animatedEl = win.document.createElement('div');
@@ -122,6 +143,10 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should perform media operations when state becomes active', done => {
+    sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
     gridLayerEl.appendChild(videoEl);
@@ -129,36 +154,37 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     let mediaPoolMock;
 
     page.buildCallback();
-    page.layoutCallback()
-        .then(() => page.mediaPoolPromise_)
-        .then(mediaPool => {
-          mediaPoolMock = sandbox.mock(mediaPool);
-          mediaPoolMock
-              .expects('register')
-              .withExactArgs(videoEl)
-              .once();
+    page
+      .layoutCallback()
+      .then(() => page.mediaPoolPromise_)
+      .then(mediaPool => {
+        mediaPoolMock = sandbox.mock(mediaPool);
+        mediaPoolMock
+          .expects('register')
+          .withExactArgs(videoEl)
+          .once();
 
-          mediaPoolMock
-              .expects('preload')
-              .withExactArgs(videoEl)
-              .returns(Promise.resolve())
-              .once();
+        mediaPoolMock
+          .expects('preload')
+          .withExactArgs(videoEl)
+          .returns(Promise.resolve())
+          .once();
 
-          mediaPoolMock
-              .expects('play')
-              .withExactArgs(videoEl)
-              .once();
+        mediaPoolMock
+          .expects('play')
+          .withExactArgs(videoEl)
+          .once();
 
-          page.setState(PageState.PLAYING);
+        page.setState(PageState.PLAYING);
 
-          // `setState` runs code that creates subtasks (Promise callbacks).
-          // Waits for the next frame to make sure all the subtasks are
-          // already executed when we run the assertions.
-          win.requestAnimationFrame(() => {
-            mediaPoolMock.verify();
-            done();
-          });
+        // `setState` runs code that creates subtasks (Promise callbacks).
+        // Waits for the next frame to make sure all the subtasks are
+        // already executed when we run the assertions.
+        win.requestAnimationFrame(() => {
+          mediaPoolMock.verify();
+          done();
         });
+      });
   });
 
   it('should perform media operations on fie video when active', done => {
@@ -174,37 +200,42 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
       let mediaPoolMock;
 
+      sandbox
+        .stub(page.resources_, 'getResourceForElement')
+        .returns({isDisplayed: () => true});
+
       page.buildCallback();
-      page.layoutCallback()
-          .then(() => page.mediaPoolPromise_)
-          .then(mediaPool => {
-            mediaPoolMock = sandbox.mock(mediaPool);
-            mediaPoolMock
-                .expects('register')
-                .withExactArgs(videoEl)
-                .once();
+      page
+        .layoutCallback()
+        .then(() => page.mediaPoolPromise_)
+        .then(mediaPool => {
+          mediaPoolMock = sandbox.mock(mediaPool);
+          mediaPoolMock
+            .expects('register')
+            .withExactArgs(videoEl)
+            .once();
 
-            mediaPoolMock
-                .expects('preload')
-                .withExactArgs(videoEl)
-                .returns(Promise.resolve())
-                .once();
+          mediaPoolMock
+            .expects('preload')
+            .withExactArgs(videoEl)
+            .returns(Promise.resolve())
+            .once();
 
-            mediaPoolMock
-                .expects('play')
-                .withExactArgs(videoEl)
-                .once();
+          mediaPoolMock
+            .expects('play')
+            .withExactArgs(videoEl)
+            .once();
 
-            page.setState(PageState.PLAYING);
+          page.setState(PageState.PLAYING);
 
-            // `setState` runs code that creates subtasks (Promise callbacks).
-            // Waits for the next frame to make sure all the subtasks are
-            // already executed when we run the assertions.
-            win.requestAnimationFrame(() => {
-              mediaPoolMock.verify();
-              done();
-            });
+          // `setState` runs code that creates subtasks (Promise callbacks).
+          // Waits for the next frame to make sure all the subtasks are
+          // already executed when we run the assertions.
+          win.requestAnimationFrame(() => {
+            mediaPoolMock.verify();
+            done();
           });
+        });
     });
   });
 
@@ -236,6 +267,10 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should pause/rewind media when state becomes not active', done => {
+    sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
     gridLayerEl.appendChild(videoEl);
@@ -243,25 +278,26 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     let mediaPoolMock;
 
     page.buildCallback();
-    page.layoutCallback()
-        .then(() => page.mediaPoolPromise_)
-        .then(mediaPool => {
-          mediaPoolMock = sandbox.mock(mediaPool);
-          mediaPoolMock
-              .expects('pause')
-              .withExactArgs(videoEl, true /** rewindToBeginning */)
-              .once();
+    page
+      .layoutCallback()
+      .then(() => page.mediaPoolPromise_)
+      .then(mediaPool => {
+        mediaPoolMock = sandbox.mock(mediaPool);
+        mediaPoolMock
+          .expects('pause')
+          .withExactArgs(videoEl, true /** rewindToBeginning */)
+          .once();
 
-          page.setState(PageState.NOT_ACTIVE);
+        page.setState(PageState.NOT_ACTIVE);
 
-          // `setState` runs code that creates subtasks (Promise callbacks).
-          // Waits for the next frame to make sure all the subtasks are
-          // already executed when we run the assertions.
-          win.requestAnimationFrame(() => {
-            mediaPoolMock.verify();
-            done();
-          });
+        // `setState` runs code that creates subtasks (Promise callbacks).
+        // Waits for the next frame to make sure all the subtasks are
+        // already executed when we run the assertions.
+        win.requestAnimationFrame(() => {
+          mediaPoolMock.verify();
+          done();
         });
+      });
   });
 
   it('should stop the advancement when state becomes paused', () => {
@@ -276,6 +312,9 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should pause media when state becomes paused', done => {
+    sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
     gridLayerEl.appendChild(videoEl);
@@ -283,81 +322,128 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     let mediaPoolMock;
 
     page.buildCallback();
-    page.layoutCallback()
-        .then(() => page.mediaPoolPromise_)
-        .then(mediaPool => {
-          mediaPoolMock = sandbox.mock(mediaPool);
-          mediaPoolMock
-              .expects('pause')
-              .withExactArgs(videoEl, false /** rewindToBeginning */)
-              .once();
+    page
+      .layoutCallback()
+      .then(() => page.mediaPoolPromise_)
+      .then(mediaPool => {
+        mediaPoolMock = sandbox.mock(mediaPool);
+        mediaPoolMock
+          .expects('pause')
+          .withExactArgs(videoEl, false /** rewindToBeginning */)
+          .once();
 
-          page.setState(PageState.PAUSED);
+        page.setState(PageState.PAUSED);
 
-          // `setState` runs code that creates subtasks (Promise callbacks).
-          // Waits for the next frame to make sure all the subtasks are
-          // already executed when we run the assertions.
-          win.requestAnimationFrame(() => {
-            mediaPoolMock.verify();
-            done();
-          });
+        // `setState` runs code that creates subtasks (Promise callbacks).
+        // Waits for the next frame to make sure all the subtasks are
+        // already executed when we run the assertions.
+        win.requestAnimationFrame(() => {
+          mediaPoolMock.verify();
+          done();
         });
+      });
   });
 
   it('should find pageIds in a goToPage action', () => {
-    const actionButton = createElementWithAttributes(
-        win.document,
-        'button',
-        {'id': 'actionButton',
-          'on': 'tap:story.goToPage(id=pageId)'});
+    const actionButton = createElementWithAttributes(win.document, 'button', {
+      'id': 'actionButton',
+      'on': 'tap:story.goToPage(id=pageId)',
+    });
     element.appendChild(actionButton);
     page.buildCallback();
 
-    return page.layoutCallback()
-        .then(() => {
-          const actions = page.actions_();
+    return page.layoutCallback().then(() => {
+      const actions = page.actions_();
 
-          expect(actions.length).to.be.equal(1);
-          expect(actions[0]).to.be.equal('pageId');
-        });
+      expect(actions.length).to.be.equal(1);
+      expect(actions[0]).to.be.equal('pageId');
+    });
   });
 
   it('should find pageIds in a goToPage action with multiple actions', () => {
-
     const multipleActionButton = createElementWithAttributes(
-        win.document,
-        'button',
-        {'id': 'actionButton',
-          'on': 'tap:story.goToPage(id=pageId),foo.bar(baz=quux)'});
+      win.document,
+      'button',
+      {
+        'id': 'actionButton',
+        'on': 'tap:story.goToPage(id=pageId),foo.bar(baz=quux)',
+      }
+    );
     element.appendChild(multipleActionButton);
     page.buildCallback();
 
-    return page.layoutCallback()
-        .then(() => {
-          const actions = page.actions_();
+    return page.layoutCallback().then(() => {
+      const actions = page.actions_();
 
-          expect(actions.length).to.be.equal(1);
-          expect(actions[0]).to.be.equal('pageId');
-        });
+      expect(actions.length).to.be.equal(1);
+      expect(actions[0]).to.be.equal('pageId');
+    });
   });
 
   it('should find pageIds in a goToPage action with multiple events', () => {
-
     const multipleEventsButton = createElementWithAttributes(
-        win.document,
-        'button',
-        {'id': 'actionButton',
-          'on':
-            'tap:story.goToPage(id=pageId);action:foo.bar(baz=quux'});
+      win.document,
+      'button',
+      {
+        'id': 'actionButton',
+        'on': 'tap:story.goToPage(id=pageId);action:foo.bar(baz=quux',
+      }
+    );
     element.appendChild(multipleEventsButton);
     page.buildCallback();
 
-    return page.layoutCallback()
-        .then(() => {
-          const actions = page.actions_();
+    return page.layoutCallback().then(() => {
+      const actions = page.actions_();
 
-          expect(actions.length).to.be.equal(1);
-          expect(actions[0]).to.be.equal('pageId');
-        });
+      expect(actions.length).to.be.equal(1);
+      expect(actions[0]).to.be.equal('pageId');
+    });
+  });
+
+  it('should not build the open attachment UI if no attachment', () => {
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      page.setState(PageState.PLAYING);
+
+      const openAttachmentEl = element.querySelector(
+        '.i-amphtml-story-page-open-attachment'
+      );
+      expect(openAttachmentEl).to.not.exist;
+    });
+  });
+
+  it('should build the open attachment UI if attachment', () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      page.setState(PageState.PLAYING);
+
+      const openAttachmentEl = element.querySelector(
+        '.i-amphtml-story-page-open-attachment'
+      );
+      expect(openAttachmentEl).to.exist;
+    });
+  });
+
+  it('should build the open attachment UI with custom CTA label', () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('data-cta-text', 'Custom label');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      page.setState(PageState.PLAYING);
+
+      const openAttachmentLabelEl = element.querySelector(
+        '.i-amphtml-story-page-open-attachment-label'
+      );
+      expect(openAttachmentLabelEl.textContent).to.equal('Custom label');
+    });
   });
 });

@@ -21,8 +21,13 @@ import {
 } from '../form-verifiers';
 
 describes.fakeWin('amp-form async verification', {}, env => {
+  let sandbox;
+  beforeEach(() => {
+    sandbox = env.sandbox;
+  });
+
   function stubValidationMessage(input) {
-    Object.defineProperty(input, 'validationMessage', {
+    sandbox.defineProperty(input, 'validationMessage', {
       get() {
         return this.fakeValidationMessage_;
       },
@@ -32,7 +37,7 @@ describes.fakeWin('amp-form async verification', {}, env => {
     });
 
     const originalSetCustomValidity = input.setCustomValidity.bind(input);
-    Object.defineProperty(input, 'setCustomValidity', {
+    sandbox.defineProperty(input, 'setCustomValidity', {
       value(message) {
         this.validationMessage = message;
         originalSetCustomValidity(message);
@@ -110,11 +115,6 @@ describes.fakeWin('amp-form async verification', {}, env => {
   });
 
   describe('AsyncVerifier', () => {
-    let sandbox;
-    beforeEach(() => {
-      sandbox = env.sandbox;
-    });
-
     it('should not submit when no element has a value', () => {
       const xhrSpy = sandbox.spy(() => Promise.resolve());
       const form = getForm(env.win.document);
@@ -124,35 +124,41 @@ describes.fakeWin('amp-form async verification', {}, env => {
       });
     });
 
-    it('should submit when an element is filled out, mutated, ' +
-          'and committed', () => {
-      const xhrSpy = sandbox.spy(() => Promise.resolve());
-      const form = getForm(env.win.document);
-      const verifier = getFormVerifier(form, xhrSpy);
+    it(
+      'should submit when an element is filled out, mutated, ' +
+        'and committed',
+      () => {
+        const xhrSpy = sandbox.spy(() => Promise.resolve());
+        const form = getForm(env.win.document);
+        const verifier = getFormVerifier(form, xhrSpy);
 
-      form.email.value = 'test@example.com';
+        form.email.value = 'test@example.com';
 
-      return verifier.onCommit().then(() => {
-        expect(xhrSpy).to.be.calledOnce;
-      });
-    });
+        return verifier.onCommit().then(() => {
+          expect(xhrSpy).to.be.calledOnce;
+        });
+      }
+    );
 
-    it('should assign an error to elements that the server ' +
-        'fails to verify', () => {
+    it('should assign an error to elements that the server fails to verify', () => {
       const errorMessage = 'Zip code and city do not match';
       const errorResponse = {
         json() {
           return Promise.resolve({
-            verifyErrors: [{
-              name: 'zip',
-              message: errorMessage,
-            }],
+            verifyErrors: [
+              {
+                name: 'zip',
+                message: errorMessage,
+              },
+            ],
           });
         },
       };
-      const xhrSpy = sandbox.spy(() => Promise.reject({
-        response: errorResponse,
-      }));
+      const xhrSpy = sandbox.spy(() =>
+        Promise.reject({
+          response: errorResponse,
+        })
+      );
       const form = getForm(env.win.document);
       const verifier = getFormVerifier(form, xhrSpy);
 
@@ -164,70 +170,86 @@ describes.fakeWin('amp-form async verification', {}, env => {
       });
     });
 
-    it('should clear errors when any sibling of an input with an error ' +
-        'is mutated', () => {
-      const errorMessage = 'Zip code and city do not match';
-      const errorResponse = {
-        json() {
-          return Promise.resolve({
-            verifyErrors: [{
-              name: 'zip',
-              message: errorMessage,
-            }],
+    it(
+      'should clear errors when any sibling of an input with an error ' +
+        'is mutated',
+      () => {
+        const errorMessage = 'Zip code and city do not match';
+        const errorResponse = {
+          json() {
+            return Promise.resolve({
+              verifyErrors: [
+                {
+                  name: 'zip',
+                  message: errorMessage,
+                },
+              ],
+            });
+          },
+        };
+        const xhrStub = sandbox.stub();
+        xhrStub.onCall(0).returns(Promise.reject({response: errorResponse}));
+        xhrStub.onCall(1).returns(Promise.resolve());
+
+        const form = getForm(env.win.document);
+        const verifier = getFormVerifier(form, xhrStub);
+        form.city.value = 'Palo Alto';
+        form.zip.value = '94043';
+
+        return verifier
+          .onCommit()
+          .then(() => {
+            expect(form.zip.validity.customError).to.be.true;
+            expect(form.zip.validationMessage).to.equal(errorMessage);
+            form.city.value = 'Mountain View';
+            return verifier.onCommit();
+          })
+          .then(() => {
+            expect(form.zip.validity.customError).to.be.false;
+            expect(form.zip.validationMessage).to.be.empty;
           });
-        },
-      };
-      const xhrStub = sandbox.stub();
-      xhrStub.onCall(0).returns(Promise.reject({response: errorResponse}));
-      xhrStub.onCall(1).returns(Promise.resolve());
+      }
+    );
 
-      const form = getForm(env.win.document);
-      const verifier = getFormVerifier(form, xhrStub);
-      form.city.value = 'Palo Alto';
-      form.zip.value = '94043';
+    it(
+      'should not assign verification errors to elements ' +
+        'that are not valid',
+      () => {
+        const zipMessage = 'Zip code and city do not match.';
+        const emailMessage = 'This email is already taken.';
+        const errorResponse = {
+          json() {
+            return Promise.resolve({
+              verifyErrors: [
+                {
+                  name: 'zip',
+                  message: zipMessage,
+                },
+                {
+                  name: 'email',
+                  message: emailMessage,
+                },
+              ],
+            });
+          },
+        };
+        const xhrSpy = sandbox.spy(() =>
+          Promise.reject({
+            response: errorResponse,
+          })
+        );
+        const form = getForm(env.win.document);
+        const verifier = getFormVerifier(form, xhrSpy);
 
-      return verifier.onCommit().then(() => {
-        expect(form.zip.validity.customError).to.be.true;
-        expect(form.zip.validationMessage).to.equal(errorMessage);
         form.city.value = 'Mountain View';
-        return verifier.onCommit();
-      }).then(() => {
-        expect(form.zip.validity.customError).to.be.false;
-        expect(form.zip.validationMessage).to.be.empty;
-      });
-    });
-
-    it('should not assign verification errors to elements ' +
-        'that are not valid', () => {
-      const zipMessage = 'Zip code and city do not match.';
-      const emailMessage = 'This email is already taken.';
-      const errorResponse = {
-        json() {
-          return Promise.resolve({
-            verifyErrors: [{
-              name: 'zip',
-              message: zipMessage,
-            },{
-              name: 'email',
-              message: emailMessage,
-            }],
-          });
-        },
-      };
-      const xhrSpy = sandbox.spy(() => Promise.reject({
-        response: errorResponse,
-      }));
-      const form = getForm(env.win.document);
-      const verifier = getFormVerifier(form, xhrSpy);
-
-      form.city.value = 'Mountain View';
-      form.zip.value = '94043';
-      return verifier.onCommit().then(() => {
-        expect(form.zip.validity.customError).to.be.true;
-        expect(form.zip.validationMessage).to.equal(zipMessage);
-        expect(form.email.validity.customError).to.be.false;
-        expect(form.email.validationMessage).to.not.equal(emailMessage);
-      });
-    });
+        form.zip.value = '94043';
+        return verifier.onCommit().then(() => {
+          expect(form.zip.validity.customError).to.be.true;
+          expect(form.zip.validationMessage).to.equal(zipMessage);
+          expect(form.email.validity.customError).to.be.false;
+          expect(form.email.validationMessage).to.not.equal(emailMessage);
+        });
+      }
+    );
   });
 });

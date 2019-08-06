@@ -29,8 +29,10 @@ export class BindMacro {
     this.argumentNames_ = data.argumentNames || [];
 
     /** @const @private {!BindExpression} */
-    this.expression_ =
-        new BindExpression(data.expressionString, referableMacros);
+    this.expression_ = new BindExpression(
+      data.expressionString,
+      referableMacros
+    );
   }
 
   /**

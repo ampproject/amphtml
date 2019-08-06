@@ -27,15 +27,15 @@ FAIL
 |  <body>
 |    <a href="javascript:alert('boo')">Click here to see an important message.</a>
 >>   ^~~~~~~~~
-feature_tests/javascript_xss.html:27:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/javascript_xss.html:27:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="JavaScript:alert('boo')">It's CAse inSenSitive.</a>
 >>   ^~~~~~~~~
-feature_tests/javascript_xss.html:28:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/javascript_xss.html:28:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="vbscript:bar">vbscript is also dangerous</a>
 >>   ^~~~~~~~~
-feature_tests/javascript_xss.html:29:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/javascript_xss.html:29:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="data:baz">data urls have some risks</a>
 >>   ^~~~~~~~~
-feature_tests/javascript_xss.html:30:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/javascript_xss.html:30:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |  </body>
 |  </html>
