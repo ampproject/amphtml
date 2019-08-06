@@ -149,6 +149,33 @@ Percentages must be set in increments of 5% and must be over zero.
 }
 ```
 
+### Ad Start trigger (`"on": "video-ad-start"`)
+
+The `video-ad-start` trigger is fired when an Ad starts playing.
+
+```javascript
+"triggers": {
+  "adStart": {
+    "on": "video-ad-start",
+    "request": "event",
+    "selector": "#myVideo"
+  },
+}
+```
+
+
+### Ad End trigger (`"on": "video-ad-end"`))
+The `video-ad-start` trigger is fired when an Ad ends playing.
+
+```javascript
+"triggers": {
+  "adEnd": {
+    "on": "video-ad-end",
+    "request": "event",
+    "selector": "#myVideo"
+  },
+}
+```
 
 ## Video spec
 
