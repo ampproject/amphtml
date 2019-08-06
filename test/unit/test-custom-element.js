@@ -30,7 +30,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     .configure()
     .skipSafari()
     .run('CustomElement', () => {
-      let win, doc, ampdoc;
+      let win, doc, ampdoc, sandbox;
       let resources;
       let resourcesMock;
       let clock;
@@ -107,6 +107,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       beforeEach(() => {
         win = env.win;
         doc = win.document;
+        sandbox = env.sandbox;
         ampdoc = env.ampdoc;
         clock = lolex.install({target: win});
         resources = Services.resourcesForDoc(doc);
@@ -250,7 +251,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('Element - handles async connectedCallback when disconnected', () => {
         const element = new ElementClass();
-        Object.defineProperty(element, 'isConnected', {
+        sandbox.defineProperty(element, 'isConnected', {
           value: false,
         });
 
@@ -904,7 +905,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
           .expects('remove')
           .withExactArgs(element)
           .never();
-        Object.defineProperty(element, 'isConnected', {
+        sandbox.defineProperty(element, 'isConnected', {
           value: true,
         });
         container.removeChild(element);

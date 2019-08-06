@@ -36,10 +36,12 @@ describes.realWin(
     this.timeout(5000);
     let win, doc;
     let timer;
+    let sandbox;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      sandbox = env.sandbox;
       timer = Services.timerFor(win);
     });
 
@@ -346,12 +348,12 @@ describes.realWin(
         expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
 
         // Fake out the 404 image response dimensions of YT.
-        Object.defineProperty(imgPlaceholder, 'naturalWidth', {
+        sandbox.defineProperty(imgPlaceholder, 'naturalWidth', {
           get() {
             return 120;
           },
         });
-        Object.defineProperty(imgPlaceholder, 'naturalHeight', {
+        sandbox.defineProperty(imgPlaceholder, 'naturalHeight', {
           get() {
             return 90;
           },

@@ -190,7 +190,7 @@ describes.realWin(
           mouseDownEvent = doc.createEventObject();
           mouseDownEvent.type = 'mousedown';
         }
-        Object.defineProperty(mouseDownEvent, 'target', {value: textarea});
+        sandbox.defineProperty(mouseDownEvent, 'target', {value: textarea});
         // Given 2 mousedown events on the textarea.
         doc.dispatchEvent(mouseDownEvent);
         doc.dispatchEvent(mouseDownEvent);

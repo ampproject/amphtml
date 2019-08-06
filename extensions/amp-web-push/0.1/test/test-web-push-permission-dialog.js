@@ -30,6 +30,7 @@ describes.realWin(
   },
   env => {
     let webPush;
+    let sandbox;
     const webPushConfig = {};
     let iframeWindow = null;
 
@@ -69,6 +70,7 @@ describes.realWin(
     }
 
     beforeEach(() => {
+      sandbox = env.sandbox;
       setDefaultConfigParams_();
       webPush = new WebPushService(env.ampdoc);
     });
@@ -193,9 +195,8 @@ describes.realWin(
 
     it('should show target permission section', () => {
       return setupPermissionDialogFrame().then(() => {
-        Object.defineProperty(iframeWindow.Notification, 'permission', {
+        sandbox.defineProperty(iframeWindow.Notification, 'permission', {
           enumerable: false,
-          configurable: false,
           writable: false,
           value: 'granted',
         });
@@ -221,9 +222,8 @@ describes.realWin(
           localStorage.getItem('amp-web-push-notification-permission')
         ).to.eq(null);
 
-        Object.defineProperty(iframeWindow.Notification, 'permission', {
+        sandbox.defineProperty(iframeWindow.Notification, 'permission', {
           enumerable: false,
-          configurable: false,
           writable: false,
           value: 'granted',
         });
