@@ -38,7 +38,7 @@ const {
   recaptchaRouter,
 } = require('./recaptcha-router');
 const {renderShadowViewer} = require('./shadow-viewer');
-const {replaceUrls} = require('./app-utils');
+const {replaceUrls, isRtvMode} = require('./app-utils');
 
 const upload = multer();
 
@@ -65,7 +65,9 @@ app.use((req, res, next) => {
 });
 
 function isValidServeMode(serveMode) {
-  return ['default', 'compiled', 'cdn'].includes(serveMode);
+  return (
+    ['default', 'compiled', 'cdn'].includes(serveMode) || isRtvMode(serveMode)
+  );
 }
 
 function setServeMode(serveMode) {
@@ -89,7 +91,7 @@ if (!global.AMP_TESTING) {
 }
 
 // Changes the current serve mode via query param
-// e.g. /serve_mode_change?mode=(default|compiled|cdn)
+// e.g. /serve_mode_change?mode=(default|compiled|cdn|<RTV_NUMBER>)
 // (See ./app-index/settings.js)
 app.get('/serve_mode_change', (req, res) => {
   const {mode} = req.query;
