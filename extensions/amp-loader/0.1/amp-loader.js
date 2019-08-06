@@ -289,14 +289,13 @@ class LoaderBuilder {
   }
 
   /**
-   * Whether the element is an Ad.
+   * Whether the element is an Ad. Note that this does not cover amp-embed 
+   * currently.
    * @private
    * @return {boolean}
    */
   isAd_() {
-    return (
-      this.element_.tagName == 'AMP-AD' || this.element_.tagName == 'AMP-EMBED'
-    );
+    return this.element_.tagName == 'AMP-AD';
   }
 
   /**
