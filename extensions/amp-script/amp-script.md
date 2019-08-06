@@ -144,6 +144,34 @@ The rules for mutations are as follows:
 2. The five second interval is extended if the author script performs a `fetch()` as a result of the user gesture.
 3. Mutations are always accepted for `amp-script` elements with `[layout!="container"]` and `height < 300px`.
 
+#### Security features
+
+Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), we've included some additional measures that are checked at runtime:
+
+- Same-origin `src` must have [`Content-Type: application/json`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
+- Cross-origin `src` and local scripts must have matching script hashes in a `meta[name=amp-script-src]` element in the document head. A console error will be emitted with the expected hash string. For example:
+
+```html
+<head>
+  <!-- Script hashes are space-delimited. -->
+  <meta
+    name=amp-script-src
+    content="sha384-abc123 sha384-def456">
+</head>
+<body>
+  <!-- Cross-origin src requires hash: sha384(example.js) == abc123 -->
+  <amp-script src="cross.origin/example.js" layout=container>
+  </amp-script>
+
+  <!-- Local script requires hash: sha384(#myScript) == def456 -->
+  <amp-script script=myScript layout=container>
+  </amp-script>
+  <script type=text/plain target=amp-script id=myScript>
+    document.body.textContent += 'Hello world!';
+  </script>
+</body>
+```
+
 ## Attributes
 
 **src**
