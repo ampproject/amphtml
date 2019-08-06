@@ -24,31 +24,31 @@ amp-addthis[data-widget-type="messages"] {
   width: 100% !important;
   top: 0;
 }
-amp-addthis #i-amphtml-addthis-close {
+amp-addthis .i-amphtml-addthis-close {
   right: 10px;
   top: 10px;
   width: 32px;
   height: 32px;
   opacity: 0.5;
-  float:right;
-  cursor: pointer;
-  position: relative;
-  z-index: 1;
+  float:right!important;
+  cursor: pointer!important;
+  position: relative!important;
+  z-index: 1!important;
 }
-amp-addthis #i-amphtml-addthis-close:hover {
+amp-addthis .i-amphtml-addthis-close:hover {
   opacity: 1;
 }
-amp-addthis #i-amphtml-addthis-close:before, #i-amphtml-addthis-close:after {
+amp-addthis .i-amphtml-addthis-close:before, .i-amphtml-addthis-close:after {
   position: absolute;
   content: ' ';
   height: 20px;
   width: 2px;
   background-color: #fff;
 }
-amp-addthis #i-amphtml-addthis-close:before {
+amp-addthis .i-amphtml-addthis-close:before {
   transform: rotate(45deg);
 }
-amp-addthis #i-amphtml-addthis-close:after {
+amp-addthis .i-amphtml-addthis-close:after {
   transform: rotate(-45deg);
 }
 

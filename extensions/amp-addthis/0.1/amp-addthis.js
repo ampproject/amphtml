@@ -44,8 +44,8 @@ import {
   SHARE_CONFIG_KEYS,
   SHARE_EVENT,
 } from './constants';
-import {ActiveToolsMonitor} from './addthis-utils/monitors/active-tools-monitor';
 import {CSS} from '../../../build/amp-addthis-0.1.css';
+import {ActiveToolsMonitor} from './addthis-utils/monitors/active-tools-monitor';
 import {ClickMonitor} from './addthis-utils/monitors/click-monitor';
 import {ConfigManager} from './config-manager';
 import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
@@ -70,7 +70,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '../../../src/style';
-
 import {userAssert} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
@@ -231,12 +230,10 @@ class AmpAddThis extends AMP.BaseElement {
           this.win.document,
           'div',
           dict({
-            'id': 'i-amphtml-addthis-close',
+            'class': 'i-amphtml-addthis-close',
           })
         );
-        closeButton.onclick = function() {
-          this.parentNode.parentNode.removeChild(this.parentNode);
-        };
+        closeButton.onclick = () => removeElement(this.element);
         this.element.appendChild(closeButton);
       }
     }
