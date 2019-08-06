@@ -19,6 +19,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
 const conf = require('../build.conf');
+const del = require('del');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -562,6 +563,7 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
     .then(thirdPartyConcat)
+    .then(cleanupWeakModuleFiles)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       throw err;
@@ -673,6 +675,16 @@ function postPrepend(extension, prependContents) {
     fs.writeFileSync(path, bundle.toString(), 'utf8');
     fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
   });
+}
+
+/**
+ * Cleans up the weak module files written out by closure compiler.
+ * @return {!Promise}
+ */
+function cleanupWeakModuleFiles() {
+  const weakModuleJsFile = 'dist/$weak$.js';
+  const weakModuleMapFile = 'dist/$weak$.js.map';
+  return del([weakModuleJsFile, weakModuleMapFile]);
 }
 
 function compile(flagsArray) {
