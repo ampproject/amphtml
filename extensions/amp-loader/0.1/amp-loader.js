@@ -289,7 +289,7 @@ class LoaderBuilder {
   }
 
   /**
-   * Whether the element is an Ad. Note that this does not cover amp-embed 
+   * Whether the element is an Ad. Note that this does not cover amp-embed
    * currently.
    * @private
    * @return {boolean}
