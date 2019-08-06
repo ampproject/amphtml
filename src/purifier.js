@@ -24,10 +24,11 @@ import {
   WHITELISTED_TARGETS,
   isValidAttr,
 } from './sanitation';
+import {dev, user} from './log';
 import {isAmp4Email} from './format';
+import {removeElement} from './dom';
 import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
-import {user} from './log';
 import purify from 'dompurify/dist/purify.es';
 
 /**
@@ -114,13 +115,16 @@ function standardPurifyConfig() {
     PURIFY_PROFILES,
     /** @type {!DomPurifyConfig} */ ({
       ADD_ATTR: WHITELISTED_ATTRS,
+      // <use> is an SVG element that is not allowed by default in DOMPurify.
+      // See afterSanitizeAttributes() for special handling.
+      ADD_TAGS: ['use'],
       FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
       // Avoid reparenting of some elements to document head e.g. <script>.
       FORCE_BODY: true,
       // Avoid need for serializing to/from string by returning Node directly.
       RETURN_DOM: true,
-      // Allows native app deeplinks. DOMPurify's remaining checks are sufficient
-      // to prevent code execution.
+      // Allows native app deeplinks. DOMPurify's remaining checks are
+      // sufficient to prevent code execution.
       ALLOW_UNKNOWN_PROTOCOLS: true,
     })
   );
@@ -317,10 +321,10 @@ function addPurifyHooks(purifier, diffing, doc) {
   };
 
   /**
-   * @param {!Node} unusedNode
+   * @param {!Node} node
    * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
    */
-  const afterSanitizeAttributes = function(unusedNode) {
+  const afterSanitizeAttributes = function(node) {
     // DOMPurify doesn't have a tag-specific attribute whitelist API and
     // `allowedAttributes` has a per-invocation scope, so we need to undo
     // changes after sanitizing attributes.
@@ -328,6 +332,17 @@ function addPurifyHooks(purifier, diffing, doc) {
       delete allowedAttributes[attr];
     });
     allowedAttributesChanges.length = 0;
+
+    // Only allow relative references in <use>.
+    const tagName = node.nodeName.toLowerCase();
+    if (tagName === 'use') {
+      const el = dev().assertElement(node);
+      ['href', 'xlink:href'].forEach(attr => {
+        if (el.hasAttribute(attr) && !startsWith(el.getAttribute(attr), '#')) {
+          removeElement(el);
+        }
+      });
+    }
   };
 
   purifier.addHook('uponSanitizeElement', uponSanitizeElement);
