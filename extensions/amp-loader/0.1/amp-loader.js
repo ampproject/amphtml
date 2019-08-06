@@ -280,24 +280,11 @@ class LoaderBuilder {
   getAdsLogo_() {
     const html = htmlFor(this.element_);
     return html`
-      <svg viewBox="0 0 72 72">
-        <rect
-          fill="none"
-          stroke="currentColor"
-          x="26.5"
-          y="29.5"
-          width="19"
-          height="13"
-          rx="2"
-        ></rect>
-        <text
-          fill="currentColor"
-          class="i-amphtml-ad-badge-label"
-          transform="translate(29.2812 40.167)"
-        >
+      <div class="i-amphtml-new-loader-ad-logo">
+        <span class="i-amphtml-new-loader-ad-label">
           Ad
-        </text>
-      </svg>
+        </span>
+      </div>
     `;
   }
 
