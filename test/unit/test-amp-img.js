@@ -195,6 +195,28 @@ describe('amp-img', () => {
     });
   });
 
+  it('warns on oversized images', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      width: 100,
+      height: 100,
+      layout: Layout.FIXED,
+    });
+    const impl = ampImg.implementation_;
+    const userWarnStub = sandbox.stub(impl.user(), 'warn');
+    const warning =
+      'natural img dimensions 641 x 481 too large for actual img dimensions 100 x 100.';
+
+    await impl.layoutCallback();
+    const img = ampImg.querySelector('img');
+    expect(img.naturalWidth).to.equal(641);
+    expect(img.naturalHeight).to.equal(481);
+    expect(img.offsetWidth).to.equal(100);
+    expect(img.offsetHeight).to.equal(100);
+    expect(userWarnStub).to.be.calledOnce;
+    expect(userWarnStub.args[0][1]).to.be.equal(warning);
+  });
+
   describe('#fallback on initial load', () => {
     let el;
     let impl;
