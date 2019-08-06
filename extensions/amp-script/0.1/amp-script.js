@@ -374,6 +374,7 @@ export class AmpScriptService {
         .filter(s => s.length);
     }
 
+    /** @private @const {!../../../src/service/crypto-impl.Crypto} */
     this.crypto_ = Services.cryptoFor(ampdoc.win);
   }
 
