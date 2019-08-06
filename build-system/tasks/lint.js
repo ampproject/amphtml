@@ -214,17 +214,6 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
-  // TODO(amp-infra): Remove this warning after a few weeks.
-  if (argv['local-changes']) {
-    log(
-      colors.yellow('WARNING:'),
-      'The',
-      colors.cyan('--local-changes'),
-      'flag has been renamed to',
-      colors.cyan('--local_changes')
-    );
-    return Promise.resolve();
-  }
   if (argv.files) {
     setFilesToLint(argv.files.split(','));
   } else if (
