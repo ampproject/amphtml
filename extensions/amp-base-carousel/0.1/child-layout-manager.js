@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+
 const NO_INTERSECTION_MARGIN = '0%';
 
 /**
@@ -77,21 +79,25 @@ export class ChildLayoutManager {
    * intersectionElement must be the scrolling container, and not an
    * ancestor in order for `nearbyMargin` to work.
    * @param {{
-   *  ampElement: !BaseElement,
+   *  ampElement: !AMP.BaseElement,
    *  intersectionElement: !Element,
    *  intersectionThreshold: (number|undefined),
-   *  viewportIntersectionCallback: (function(!Element, isIntersecting)|undefined)
+   *  nearbyMargin: (string|undefined),
+   *  viewportIntersectionCallback: (function(!Element, boolean)|undefined)
    * }} config
    */
   constructor({
     ampElement,
     intersectionElement,
-    nearbyMargin = DEFAULT_NEARBY_MARGIN,
     intersectionThreshold = DEFAULT_INTERSECTION_THRESHOLD,
+    nearbyMargin = DEFAULT_NEARBY_MARGIN,
     viewportIntersectionCallback = () => {},
   }) {
     /** @private @const */
     this.ampElement_ = ampElement;
+
+    /** @private @const */
+    this.owners_ = Services.ownersForDoc(ampElement.element);
 
     /** @private @const */
     this.intersectionElement_ = intersectionElement;
@@ -105,7 +111,7 @@ export class ChildLayoutManager {
     /** @private @const */
     this.viewportIntersectionCallback_ = viewportIntersectionCallback;
 
-    /** @private {!IArrayLike<!Node>} */
+    /** @private {!IArrayLike<!Element>} */
     this.children_ = [];
 
     /** @private {?IntersectionObserver}] */
@@ -146,9 +152,9 @@ export class ChildLayoutManager {
     if (isIntersecting) {
       // TODO(sparhami) do we want to delay the layout for the farther
       // away elements? Do we want schedule preload farther away elements?
-      this.ampElement_.scheduleLayout(target);
+      this.owners_.scheduleLayout(this.ampElement_.element, target);
     } else {
-      this.ampElement_./*OK */ scheduleUnlayout(target);
+      this.owners_./*OK */ scheduleUnlayout(this.ampElement_.element, target);
     }
   }
 
@@ -157,7 +163,7 @@ export class ChildLayoutManager {
    * @param {boolean} isIntersecting
    */
   triggerVisibility_(target, isIntersecting) {
-    this.ampElement_.updateInViewport(target, isIntersecting);
+    this.owners_.updateInViewport(this.ampElement_.element, target, isIntersecting);
     this.viewportIntersectionCallback_(target, isIntersecting);
   }
 
@@ -226,7 +232,7 @@ export class ChildLayoutManager {
     }
 
     for (let i = 0; i < this.children_.length; i++) {
-      this.ampElement_.setAsOwner(this.children_[i]);
+      this.owners_.setOwner(this.children_[i], this.ampElement_.element);
     }
 
     // Update the layout state to false so that we stop observing (and holding

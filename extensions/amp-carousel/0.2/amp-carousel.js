@@ -23,7 +23,7 @@ import {Services} from '../../../src/services';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -64,6 +64,9 @@ class AmpCarousel extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private @const  */
+    this.owners_ = Services.ownersForDoc(element);
+
     /** @private {?Carousel} */
     this.carousel_ = null;
 
@@ -98,7 +101,7 @@ class AmpCarousel extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {?ChildLayout} */
+    /** @private {?ChildLayoutManager} */
     this.childLayoutManager_ = null;
   }
 
@@ -146,9 +149,9 @@ class AmpCarousel extends AMP.BaseElement {
       intersectionElement: this.scrollContainer_,
       viewportIntersectionCallback: (child, isIntersecting) => {
         if (isIntersecting) {
-          this.scheduleResume(child);
+          this.owners_.scheduleResume(this.element, child);
         } else {
-          this.schedulePause(child);
+          this.owners_.schedulePause(this.element, child);
         }
       },
     });
@@ -181,8 +184,9 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /** @override */
-  unlayoutcallback() {
+  unlayoutCallback() {
     this.childLayoutManager_.wasUnlaidOut();
+    return true;
   }
 
   /** @override */
@@ -247,7 +251,7 @@ class AmpCarousel extends AMP.BaseElement {
    * @private
    */
   moveScrollOneViewport_(forwards) {
-    const el = this.scrollContainer_;
+    const el = devAssert(this.scrollContainer_);
     const {direction} = computedStyle(this.win, el);
     const forwardsMultiplier = forwards ? 1 : -1;
     const directionMulitplier = direction == 'rtl' ? -1 : 1;
@@ -491,20 +495,12 @@ class AmpCarousel extends AMP.BaseElement {
   updateCurrentIndex_(index) {
     const prevIndex = this.currentIndex_;
     this.currentIndex_ = index;
-
-    this.slides_.forEach((slide, i) => {
-      if (i == index) {
-        this.scheduleResume(slide);
-      } else {
-        this.schedulePause(slide);
-      }
-    });
-    this.triggerAnalyticsEvent_(index, prevIndex);
+    this.triggerAnalyticsEvent_(prevIndex, index);
   }
 
   /**
    *
-   * @param {number} index
+   * @param {?number} index
    * @return {string} An identifier to use for the slide for analytics.
    */
   getSlideId_(index) {
