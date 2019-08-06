@@ -229,6 +229,19 @@ describe('BindEvaluator', () => {
     expect(errors['addThree(oneplusone, 2, 2)']).to.be.undefined;
   });
 
+  it('should evaluate non-primitives', () => {
+    evaluator.addBindings([
+      {
+        tagName: 'AMP-LIST',
+        property: 'src',
+        expressionString: '[0].map(x => ({a: x+1}))',
+      },
+    ]);
+    const {results, errors} = evaluator.evaluateBindings({});
+    expect(results['[0].map(x => ({a: x+1}))']).to.deep.equal([{a: 1}]);
+    expect(errors['[0].map(x => ({a: x+1}))']).to.be.undefined;
+  });
+
   it('should not allow recursive macros', () => {
     evaluator.addMacros([
       {
