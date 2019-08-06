@@ -534,17 +534,23 @@ export class AmpSelector extends AMP.BaseElement {
     }
 
     event.preventDefault();
-
     // Make currently selected option unfocusable
     this.elements_[this.focusedIndex_].tabIndex = -1;
 
-    // Change the focus to the next element in the specified direction.
-    // The selection should loop around if the user attempts to go one
-    // past the beginning or end.
-    this.focusedIndex_ = (this.focusedIndex_ + dir) % this.elements_.length;
-    if (this.focusedIndex_ < 0) {
-      this.focusedIndex_ = this.focusedIndex_ + this.elements_.length;
-    }
+    const originalIndex = this.focusedIndex_;
+    do {
+      // Change the focus to the next element in the specified direction.
+      // The selection should loop around if the user attempts to go one
+      // past the beginning or end.
+      this.focusedIndex_ = (this.focusedIndex_ + dir) % this.elements_.length;
+      if (this.focusedIndex_ < 0) {
+        this.focusedIndex_ = this.focusedIndex_ + this.elements_.length;
+      }
+
+      if (!isElementHidden(this.elements_[this.focusedIndex_])) {
+        break;
+      }
+    } while (this.focusedIndex_ != originalIndex);
 
     // Focus newly selected option
     const newSelectedOption = this.elements_[this.focusedIndex_];
@@ -633,6 +639,17 @@ export class AmpSelector extends AMP.BaseElement {
   getSelectedElementsForTesting() {
     return this.selectedElements_;
   }
+}
+
+/**
+ * Detect if an element is hidden.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function isElementHidden(element) {
+  return (
+    element.hidden || element.clientHeight == 0 || element.clientWidth == 0
+  );
 }
 
 AMP.extension(TAG, '0.1', AMP => {
