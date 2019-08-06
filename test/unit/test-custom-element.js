@@ -30,7 +30,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     .configure()
     .skipSafari()
     .run('CustomElement', () => {
-      let win, doc, ampdoc;
+      let win, doc, ampdoc, sandbox;
       let resources;
       let resourcesMock;
       let clock;
@@ -107,6 +107,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       beforeEach(() => {
         win = env.win;
         doc = win.document;
+        sandbox = env.sandbox;
         ampdoc = env.ampdoc;
         clock = lolex.install({target: win});
         resources = Services.resourcesForDoc(doc);
@@ -250,7 +251,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('Element - handles async connectedCallback when disconnected', () => {
         const element = new ElementClass();
-        Object.defineProperty(element, 'isConnected', {
+        sandbox.defineProperty(element, 'isConnected', {
           value: false,
         });
 
@@ -904,7 +905,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
           .expects('remove')
           .withExactArgs(element)
           .never();
-        Object.defineProperty(element, 'isConnected', {
+        sandbox.defineProperty(element, 'isConnected', {
           value: true,
         });
         container.removeChild(element);
@@ -1715,20 +1716,21 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
       },
     };
     element.resources_ = {
-      scheduleLayout(el, fb) {
-        if (el == element && fb == fallback) {
-          resourcesSpy();
-        }
-      },
       getResourceForElement: element => {
         return element.resource;
       },
     };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = sandbox.mock();
     const fallback = element.appendChild(createWithAttr('fallback'));
-    const resourcesSpy = sandbox.spy();
     element.toggleFallback(true);
     expect(element).to.have.class('amp-notsupported');
-    expect(resourcesSpy).to.be.calledOnce;
+    expect(owners.scheduleLayout).to.be.calledOnce;
+    expect(owners.scheduleLayout).to.have.been.calledWith(
+      element.element,
+      fallback
+    );
 
     element.toggleFallback(false);
     expect(element).to.not.have.class('amp-notsupported');
@@ -1742,11 +1744,14 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
       },
     };
     element.resources_ = {
-      scheduleLayout: () => {},
       getResourceForElement: element => {
         return element.resource;
       },
     };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = sandbox.mock();
+
     element.appendChild(createWithAttr('fallback'));
     element.toggleFallback(true);
     expect(element).to.not.have.class('amp-notsupported');

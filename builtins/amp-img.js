@@ -210,6 +210,7 @@ export class AmpImg extends BaseElement {
 
   /**
    * @param {number} newWidth
+   * @return {boolean}
    * @private
    */
   shouldSetSizes_(newWidth) {

@@ -114,22 +114,14 @@ exports.getFlags = function(config) {
     language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
+    process_common_js_modules: true,
     externs: config.externs,
     define: config.define,
-    // Turn off warning for "Unknown @define" since we use define to pass
-    // args such as FORTESTING to our runner.
-    jscomp_off: ['unknownDefines'],
-    // checkVars: Demote "variable foo is undeclared" errors.
-    // moduleLoad: Demote "module not found" errors to ignore missing files
-    //     in type declarations in the swg.js bundle.
-    jscomp_warning: ['checkVars', 'moduleLoad'],
-    jscomp_error: [
-      'checkTypes',
-      'accessControls',
-      'const',
-      'constantProperty',
-      'globalThis',
-    ],
+    // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
+    // for a full list of closure's default error / warning levels.
+    jscomp_off: ['accessControls', 'unknownDefines'],
+    jscomp_warning: ['checkTypes', 'checkVars', 'moduleLoad'],
+    jscomp_error: ['const', 'constantProperty', 'globalThis'],
     hide_warnings_for: config.hideWarningsFor,
   };
   if (argv.pretty_print) {
@@ -323,9 +315,7 @@ exports.getGraph = function(entryModules, config) {
     // directly and which we don't want to apply during deps finding.
     .transform(babelify, {
       compact: false,
-      plugins: [
-        require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
-      ],
+      plugins: ['transform-es2015-modules-commonjs'],
     });
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
@@ -464,9 +454,16 @@ function setupBundles(graph) {
  * @param {!Object} config
  */
 function transformPathsToTempDir(graph, config) {
-  if (!isTravisBuild()) {
-    log('Writing transforms to', colors.cyan(graph.tmp));
+  if (isTravisBuild()) {
+    // New line after all the compilation progress dots on Travis.
+    console.log('\n');
   }
+  log(
+    'Performing single-pass',
+    colors.cyan('babel'),
+    'transforms in',
+    colors.cyan(graph.tmp)
+  );
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
     // For now, just copy node_module files instead of transforming them.
@@ -485,7 +482,9 @@ function transformPathsToTempDir(graph, config) {
       fs.outputFileSync(`${graph.tmp}/${f}`, code);
       fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
     }
+    process.stdout.write('.');
   });
+  console.log('\n');
 }
 
 // Returns the extension bundle config for the given filename or null.
@@ -677,9 +676,15 @@ function postPrepend(extension, prependContents) {
 }
 
 function compile(flagsArray) {
+  if (isTravisBuild()) {
+    log(
+      'Minifying single-pass runtime targets with',
+      colors.cyan('closure-compiler')
+    );
+  }
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
-    return gulp
+    gulp
       .src(srcs, {base: transformDir})
       .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
       .pipe(sourcemaps.init({loadMaps: true}))

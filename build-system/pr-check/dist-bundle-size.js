@@ -25,25 +25,28 @@
 const colors = require('ansi-colors');
 const {
   printChangeSummary,
+  processAndUploadDistOutput,
   startTimer,
   stopTimer,
+  stopTimedJob,
+  timedExecWithError,
   timedExecOrDie: timedExecOrDieBase,
   uploadDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 const {runYarnChecks} = require('./yarn-checks');
+const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const FILENAME = 'dist-bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
+    stopTimedJob(FILENAME, startTime);
     return;
   }
 
@@ -64,11 +67,20 @@ function main() {
       buildTargets.has('UNIT_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp dist --fortesting');
+
+      const process = timedExecWithError('gulp dist --fortesting', FILENAME);
+      if (process.error) {
+        await signalDistUpload('errored');
+        stopTimedJob(FILENAME, startTime);
+        return;
+      }
+
       timedExecOrDie('gulp bundle-size --on_pr_build');
-      uploadDistOutput(FILENAME);
+      await processAndUploadDistOutput(FILENAME);
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
+      await signalDistUpload('skipped');
+
       console.log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Dist, Bundle Size'),

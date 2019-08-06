@@ -18,11 +18,13 @@ import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {toggle} from '../../../src/style';
+
+const TAG = 'amp-social-share';
 
 class AmpSocialShare extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -88,6 +90,11 @@ class AmpSocialShare extends AMP.BaseElement {
       }
     }
     const typeConfig = getSocialConfig(typeAttr) || dict();
+    if (typeConfig['obsolete']) {
+      toggle(element, false);
+      user().warn(TAG, `Skipping obsolete share button ${typeAttr}`);
+      return;
+    }
     this.shareEndpoint_ = userAssert(
       element.getAttribute('data-share-endpoint') ||
         typeConfig['shareEndpoint'],
@@ -179,7 +186,10 @@ class AmpSocialShare extends AMP.BaseElement {
     }
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   systemShareSupported_() {
     // Chrome exports navigator.share in WebView but does not implement it.
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923

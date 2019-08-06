@@ -86,10 +86,13 @@ function compileCss(watch, opt_compileAll) {
    */
   function writeCss(css, jsFilename, cssFilename, append) {
     return toPromise(
-      // cssText is hardcoded in AmpCodingConvention.java
-      file(jsFilename, 'export const cssText = ' + JSON.stringify(css), {
-        src: true,
-      })
+      file(
+        jsFilename,
+        '/** @noinline */ export const cssText = ' + JSON.stringify(css),
+        {
+          src: true,
+        }
+      )
         .pipe(gulp.dest('build'))
         .on('end', function() {
           mkdirSync('build');
@@ -108,6 +111,7 @@ function compileCss(watch, opt_compileAll) {
    * @param {string} outJs
    * @param {string} outCss
    * @param {boolean} append
+   * @return {*} TODO(#23582): Specify return type
    */
   function writeCssEntryPoint(path, outJs, outCss, append) {
     return jsifyCssAsync(`css/${path}`).then(css =>

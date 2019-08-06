@@ -46,6 +46,7 @@ import {toggleExperiment} from '../../src/experiments';
 const NOOP = () => {};
 
 describes.fakeWin('Viewport', {}, env => {
+  let sandbox;
   let clock;
   let viewport;
   let binding;
@@ -62,6 +63,7 @@ describes.fakeWin('Viewport', {}, env => {
   let vsyncTasks;
 
   beforeEach(() => {
+    sandbox = env.sandbox;
     clock = sandbox.useFakeTimers();
 
     windowApi = env.win;
@@ -1193,7 +1195,7 @@ describes.fakeWin('Viewport', {}, env => {
       Object.defineProperty(windowApi, 'scrollTo', {
         value: originalScrollTo,
         writable: false,
-        configurable: false,
+        configurable: false, // make it non-configurable to let it will throw
       });
       sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
       new Viewport(ampdoc, binding, viewer);
@@ -1204,7 +1206,7 @@ describes.fakeWin('Viewport', {}, env => {
       Object.defineProperty(windowApi, 'scrollY', {
         value: 21,
         writable: false,
-        configurable: false,
+        configurable: false, // make it non-configurable to let it will throw
       });
       sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
       new Viewport(ampdoc, binding, viewer);
@@ -1570,9 +1572,11 @@ describe('createViewport', () => {
       let win;
       let ampDoc;
       let viewer;
+      let sandbox;
 
       beforeEach(() => {
         win = env.win;
+        sandbox = env.sandbox;
         installPlatformService(win);
         installTimerService(win);
         installVsyncService(win);
@@ -1684,7 +1688,7 @@ describe('createViewport', () => {
 
       it('should only bind to "iOS embed SD" when SD is supported', () => {
         // Reset SD support.
-        Object.defineProperty(win.Element.prototype, 'attachShadow', {
+        sandbox.defineProperty(win.Element.prototype, 'attachShadow', {
           value: null,
         });
         sandbox
@@ -1698,6 +1702,24 @@ describe('createViewport', () => {
         expect(viewport.binding_).to.be.instanceof(
           ViewportBindingIosEmbedWrapper_
         );
+      });
+
+      it('should bind to "natural" when iframed, but iOS supports scrollable iframes', () => {
+        toggleExperiment(win, 'ios-scrollable-iframe', true);
+        win.parent = {};
+        sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+        installViewportServiceForDoc(ampDoc);
+        const viewport = Services.viewportForDoc(ampDoc);
+        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+      });
+
+      it('should bind to "natural" when in dev mode, but iOS supports scrollable iframes', () => {
+        toggleExperiment(win, 'ios-scrollable-iframe', true);
+        getMode(win).development = true;
+        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
+        installViewportServiceForDoc(ampDoc);
+        const viewport = Services.viewportForDoc(ampDoc);
+        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
       });
     }
   );
@@ -1726,17 +1748,10 @@ describes.realWin('marginBottomOfLastChild', {}, env => {
     secondChild.style.marginBottom = '22px';
     secondChild.style.height = '2px';
     element.appendChild(secondChild);
-
-    toggleExperiment(win, 'margin-bottom-in-content-height', true, true);
   });
 
   it('should return the marginBottom of the last child', () => {
     expect(marginBottomOfLastChild(win, element)).to.equal(22);
-  });
-
-  it('should return 0 if experiment is disabled', () => {
-    toggleExperiment(win, 'margin-bottom-in-content-height', false, true);
-    expect(marginBottomOfLastChild(win, element)).to.equal(0);
   });
 
   it('should return 0 if element has no children', () => {

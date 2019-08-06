@@ -107,10 +107,6 @@
   margin: 0 2px!important;
   overflow: hidden!important;
   width: 100% !important;
-
-  /* An empty mask image works around Safari not clipping rounded corners.
-   * https://stackoverflow.com/questions/5736503/how-to-make-css3-rounded-corners-hide-overflow-in-chrome-opera/10296258#10296258 */
-  -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC) !important;
 }
 
 .i-amphtml-story-page-progress-value {

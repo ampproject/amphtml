@@ -18,6 +18,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
+const conf = require('../build.conf');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
@@ -87,21 +88,33 @@ const BABELIFY_GLOBAL_TRANSFORM = {
   ignore: devDependencies(), // Ignore devDependencies
 };
 
+const BABELIFY_REPLACE_PLUGIN = {
+  plugins: [conf.getReplacePlugin()],
+};
+
 const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 /**
  * Compile all runtime targets in minified mode and drop them in dist/.
+ * @return {*} TODO(#23582): Specify return type
  */
 function compileAllMinifiedTargets() {
+  if (isTravisBuild()) {
+    log('Minifying multi-pass runtime targets with', cyan('closure-compiler'));
+  }
   return compile(/* watch */ false, /* shouldMinify */ true);
 }
 
 /**
  * Compile all runtime targets in unminified mode and drop them in dist/.
  * @param {boolean} watch
+ * @return {*} TODO(#23582): Specify return type
  */
 function compileAllUnminifiedTargets(watch) {
+  if (isTravisBuild()) {
+    log('Compiling runtime with', cyan('browserify'));
+  }
   return compile(/* watch */ watch);
 }
 
@@ -334,13 +347,12 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       }
     })
     .then(() => {
-      if (argv.fortesting && options.singlePassCompilation) {
-        const promises = [];
-        altMainBundles.forEach(bundle => {
-          promises.push(enableLocalTesting(`dist/${bundle.name}.js`));
-        });
-        return Promise.all(promises);
+      if (!argv.fortesting || !options.singlePassCompilation) {
+        return;
       }
+      return Promise.all(
+        altMainBundles.map(({name}) => enableLocalTesting(`dist/${name}.js`))
+      );
     });
 }
 
@@ -421,9 +433,15 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     options.browserifyOptions
   );
 
+  const babelifyOptions = Object.assign(
+    {},
+    BABELIFY_GLOBAL_TRANSFORM,
+    BABELIFY_REPLACE_PLUGIN
+  );
+
   let bundler = browserify(browserifyOptions).transform(
     babelify,
-    BABELIFY_GLOBAL_TRANSFORM
+    babelifyOptions
   );
 
   if (options.watch) {
@@ -473,6 +491,11 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       .then(() => {
         if (UNMINIFIED_TARGETS.includes(destFilename)) {
           return enableLocalTesting(`${destDir}/${destFilename}`);
+        }
+      })
+      .then(() => {
+        if (isTravisBuild()) {
+          process.stdout.write('.');
         }
       });
   }
@@ -567,7 +590,7 @@ function printConfigHelp(command) {
 function printNobuildHelp() {
   if (!isTravisBuild()) {
     for (const task of NOBUILD_HELP_TASKS) {
-      // eslint-disable-line amphtml-internal/no-for-of-statement
+      // eslint-disable-line local/no-for-of-statement
       if (argv._.includes(task)) {
         log(
           green('To skip building during future'),
@@ -588,6 +611,7 @@ function printNobuildHelp() {
  * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
  * Called at the end of "gulp build" and "gulp dist --fortesting".
  * @param {string} targetFile File to which the config is to be written.
+ * @return {*} TODO(#23582): Specify return type
  */
 async function enableLocalTesting(targetFile) {
   const config = argv.config === 'canary' ? 'canary' : 'prod';
@@ -674,6 +698,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
  * Build ALP JS.
  *
  * @param {!Object} options
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildAlp(options) {
   options = options || {};
@@ -690,6 +715,7 @@ function buildAlp(options) {
  * Build Examiner JS.
  *
  * @param {!Object} options
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildExaminer(options) {
   return compileJs('./src/examiner/', 'examiner.js', './dist/', {
@@ -705,6 +731,7 @@ function buildExaminer(options) {
  * Build web worker JS.
  *
  * @param {!Object} options
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildWebWorker(options) {
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
@@ -745,6 +772,7 @@ function toPromise(readable) {
 
 module.exports = {
   BABELIFY_GLOBAL_TRANSFORM,
+  BABELIFY_REPLACE_PLUGIN,
   WEB_PUSH_PUBLISHER_FILES,
   WEB_PUSH_PUBLISHER_VERSIONS,
   buildAlp,

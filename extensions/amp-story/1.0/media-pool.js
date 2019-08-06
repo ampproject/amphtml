@@ -81,7 +81,7 @@ export let ElementDistanceFnDef;
  * Represents a task to be executed on a media element.
  * @typedef {function(!PoolBoundElementDef, *): !Promise}
  */
-let ElementTaskDef;
+let ElementTask_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @const {string}
@@ -306,6 +306,7 @@ export class MediaPool {
    * current position in the document.
    * @param {!PoolBoundElementDef} mediaA The first element to compare.
    * @param {!PoolBoundElementDef} mediaB The second element to compare.
+   * @return {number}
    * @private
    */
   compareMediaDistances_(mediaA, mediaB) {

@@ -17,7 +17,7 @@
 export const WEBENGAGE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'base':
-      'https://c.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId(we_luid)}&pageUrl=${canonicalUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application',
+      'https://c.${region}.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId(we_luid)}&pageUrl=${canonicalUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application',
     'wePageview': {
       'baseUrl': '${base}&eventName=Page Viewed',
     },

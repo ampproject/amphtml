@@ -26,6 +26,7 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
   uploadBuildOutput,
 } = require('./utils');
@@ -41,8 +42,7 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
+    stopTimedJob(FILENAME, startTime);
     return;
   }
 

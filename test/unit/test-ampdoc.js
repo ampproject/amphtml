@@ -28,6 +28,7 @@ import {
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
+import {Signals} from '../../src/utils/signals';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {setParentWindow} from '../../src/service';
 import {toggleExperiment} from '../../src/experiments';
@@ -633,6 +634,12 @@ describes.realWin('AmpDocFie', {}, env => {
     expect(ampdoc.isSingleDoc()).to.be.false;
     expect(ampdoc.getUrl()).to.equal(URL);
     expect(ampdoc.getParent()).to.equal(parent);
+  });
+
+  it('should create AmpDocFie with provided signals', () => {
+    const signals = new Signals();
+    ampdoc = new AmpDocFie(childWin, URL, parent, {signals});
+    expect(ampdoc.signals()).to.equal(signals);
   });
 
   it('should return window', () => {

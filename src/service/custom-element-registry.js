@@ -70,7 +70,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
       element.tagName.toLowerCase() == name &&
       element.ownerDocument.defaultView == win
     ) {
-      tryUpgradeElementNoInline(element, toClass);
+      tryUpgradeElement_(element, toClass);
       // Remove element from array.
       stubbedElements.splice(i--, 1);
     }
@@ -79,13 +79,12 @@ export function upgradeOrRegisterElement(win, name, toClass) {
 
 /**
  * This method should not be inlined to prevent TryCatch deoptimization.
- * NoInline keyword at the end of function name also prevents Closure compiler
- * from inlining the function.
  * @param {Element} element
  * @param {function(new:../base-element.BaseElement, !Element)} toClass
  * @private
+ * @noinline
  */
-function tryUpgradeElementNoInline(element, toClass) {
+function tryUpgradeElement_(element, toClass) {
   try {
     element.upgrade(toClass);
   } catch (e) {
