@@ -64,8 +64,8 @@ function printChangeSummary(fileName) {
 
   if (isTravisBuild()) {
     console.log(
-      `${fileLogPrefix} ${colors.cyan('origin/master')} is currently at ` +
-        `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
+      `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
+        `in this build: ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
     );
     commitSha = travisPullRequestSha();
   } else {
