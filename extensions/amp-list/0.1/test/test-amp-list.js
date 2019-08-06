@@ -20,7 +20,6 @@ import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.repeated(
   'amp-list',
@@ -32,17 +31,18 @@ describes.repeated(
   },
   (name, variant) => {
     describes.realWin(
-      'amp-list component',
+      '<amp-list>',
       {
         amp: {
           ampdoc: 'single',
           extensions: ['amp-list'],
         },
+        runtimeOn: false,
       },
       env => {
         let win, doc, ampdoc, sandbox;
         let element, list, listMock;
-        let resource;
+        let resource, resources;
         let setBindService;
         let ssrTemplateHelper;
         let templates;
@@ -64,16 +64,11 @@ describes.repeated(
           resource = {
             resetPendingChangeSize: sandbox.stub(),
           };
-          const resources = {
+          resources = {
             getResourceForElement: e => (e === element ? resource : null),
           };
 
-          element = doc.createElement('div');
-          element.setAttribute('src', 'https://data.com/list.json');
-          element.getAmpDoc = () => ampdoc;
-          element.getFallback = () => null;
-          element.getPlaceholder = () => null;
-          element.getResources = () => resources;
+          element = createAmpListElement();
 
           const {templateType} = variant;
           const template = doc.createElement(templateType);
@@ -98,10 +93,7 @@ describes.repeated(
             renderTemplate: sandbox.stub(),
           };
 
-          list = new AmpList(element);
-          list.buildCallback();
-          list.ssrTemplateHelper_ = ssrTemplateHelper;
-          listMock = sandbox.mock(list);
+          list = createAmpList(element);
 
           element.style.height = '10px';
           doc.body.appendChild(element);
@@ -111,6 +103,24 @@ describes.repeated(
           // There should only be one mock to verify.
           listMock.verify();
         });
+
+        function createAmpListElement() {
+          const element = doc.createElement('div');
+          element.setAttribute('src', 'https://data.com/list.json');
+          element.getAmpDoc = () => ampdoc;
+          element.getFallback = () => null;
+          element.getPlaceholder = () => null;
+          element.getResources = () => resources;
+          return element;
+        }
+
+        function createAmpList(element) {
+          const list = new AmpList(element);
+          list.buildCallback();
+          list.ssrTemplateHelper_ = ssrTemplateHelper;
+          listMock = sandbox.mock(list);
+          return list;
+        }
 
         const DEFAULT_LIST_OPTS = {
           expr: 'items',
@@ -500,47 +510,120 @@ describes.repeated(
             );
           });
 
-          describe('DOM diffing', () => {
+          describe('DOM diffing with [diffable]', () => {
+            const newData = [{}];
+
+            function createAmpImg(src) {
+              const img = doc.createElement('amp-img');
+              img.setAttribute('src', src);
+              // The ignore attribute is normally set by amp-mustache.
+              img.setAttribute('i-amphtml-ignore', '');
+              return img;
+            }
+
+            async function renderTwice(first, second) {
+              const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
+                first,
+              ]);
+              await list.layoutCallback().then(() => rendered);
+
+              ssrTemplateHelper.renderTemplate
+                .withArgs(element, newData)
+                .returns(Promise.resolve([second]));
+              await list.mutatedAttributesCallback({src: newData});
+            }
+
             beforeEach(() => {
-              toggleExperiment(win, 'amp-list-diffing', true, true);
+              element.setAttribute('diffable', '');
             });
 
-            it('should keep unchanged elements', function*() {
-              const itemElement = doc.createElement('div');
-              const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
-                itemElement,
-              ]);
-              yield list.layoutCallback().then(() => rendered);
+            it('should keep unchanged elements', async () => {
+              const div = doc.createElement('div');
+              const newDiv = doc.createElement('div');
+              newDiv.setAttribute('class', 'foo');
 
-              const newFetched = [{title: 'Title2'}];
-              const newItemElement = doc.createElement('div');
-              ssrTemplateHelper.renderTemplate
-                .withArgs(element, newFetched)
-                .returns(Promise.resolve([newItemElement]));
-              yield list.mutatedAttributesCallback({src: newFetched});
+              await renderTwice(div, newDiv);
 
-              expect(list.container_.contains(itemElement)).to.be.true;
-              expect(list.container_.contains(newItemElement)).to.be.false;
+              expect(list.container_.contains(div)).to.be.true;
+              expect(list.container_.contains(newDiv)).to.be.false;
+              // Diff algorithm should copy [class] to original div.
+              expect(div.getAttribute('class')).to.equal('foo');
             });
 
-            it('should use i-amphtml-key as a replacement key', function*() {
-              const itemElement = doc.createElement('div');
-              itemElement.setAttribute('i-amphtml-key', '1');
+            it('should use i-amphtml-key as a replacement key', async () => {
+              const div = doc.createElement('div');
+              div.setAttribute('i-amphtml-key', '1');
+
+              const newDiv = doc.createElement('div');
+              newDiv.setAttribute('i-amphtml-key', '2');
+              newDiv.setAttribute('class', 'foo');
+
+              await renderTwice(div, newDiv);
+
+              expect(list.container_.contains(div)).to.be.false;
+              expect(list.container_.contains(newDiv)).to.be.true;
+              expect(div.hasAttribute('class')).to.be.false;
+            });
+
+            it('should keep amp-img if [src] is the same', async () => {
+              const img = createAmpImg('foo.jpg');
+              img.setAttribute('style', 'width:10px');
+              const newImg = createAmpImg('foo.jpg');
+              newImg.setAttribute('class', 'foo');
+              newImg.setAttribute('style', 'color:red');
+              newImg.setAttribute('should-not', 'be-copied');
+
+              await renderTwice(img, newImg);
+
+              expect(list.container_.contains(img)).to.be.true;
+              expect(list.container_.contains(newImg)).to.be.false;
+              // Only [class] and [style] should be manually diffed.
+              expect(img.classList.contains('foo')).to.be.true;
+              expect(img.getAttribute('style')).to.equal(
+                'width:10px;color:red'
+              );
+              // Other attributes will be lost.
+              expect(img.hasAttribute('should-not')).to.be.false;
+            });
+
+            it('should replace amp-img if [src] changes', async () => {
+              const img = createAmpImg('foo.jpg');
+              const newImg = createAmpImg('bar.png');
+
+              await renderTwice(img, newImg);
+
+              expect(list.container_.contains(img)).to.be.false;
+              expect(list.container_.contains(newImg)).to.be.true;
+            });
+
+            it('should diff against initial content', async () => {
+              const img = createAmpImg('foo.jpg');
+              img.setAttribute('class', 'i-amphtml-element');
+              const newImg = createAmpImg('foo.jpg'); // Same src.
+              newImg.setAttribute('class', 'bar');
+
+              const initialContainer = doc.createElement('div');
+              initialContainer.setAttribute('role', 'list');
+              initialContainer.appendChild(img);
+
+              // Initial content must be set before buildCallback(), so use
+              // a new test AmpList instance.
+              element = createAmpListElement();
+              element.setAttribute('diffable', '');
+              element.appendChild(initialContainer);
+              list = createAmpList(element);
+
               const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
-                itemElement,
+                newImg,
               ]);
-              yield list.layoutCallback().then(() => rendered);
+              await list.layoutCallback().then(() => rendered);
 
-              const newFetched = [{title: 'Title2'}];
-              const newItemElement = doc.createElement('div');
-              newItemElement.setAttribute('i-amphtml-key', '2');
-              ssrTemplateHelper.renderTemplate
-                .withArgs(element, newFetched)
-                .returns(Promise.resolve([newItemElement]));
-              yield list.mutatedAttributesCallback({src: newFetched});
-
-              expect(list.container_.contains(itemElement)).to.be.false;
-              expect(list.container_.contains(newItemElement)).to.be.true;
+              expect(list.container_.contains(img)).to.be.true;
+              expect(list.container_.contains(newImg)).to.be.false;
+              // Internal class names should be preserved.
+              expect(img.getAttribute('class')).to.equal(
+                'i-amphtml-element bar'
+              );
             });
           });
 

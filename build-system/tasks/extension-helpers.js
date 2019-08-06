@@ -399,7 +399,7 @@ function buildExtension(
   // recompiles JS.
   if (options.watch) {
     options.watch = false;
-    watch(path + '/*', function() {
+    watch(path + '/**/*', function() {
       buildExtension(
         name,
         version,

@@ -256,3 +256,11 @@ export function setModalAsClosed(element) {
 export function clearModalStack() {
   modalEntryStack.length = 0;
 }
+
+/**
+ * @return {number} The number of entries in the stack, for testing.
+ * @package Visible for testing
+ */
+export function getModalStackLength() {
+  return modalEntryStack.length;
+}

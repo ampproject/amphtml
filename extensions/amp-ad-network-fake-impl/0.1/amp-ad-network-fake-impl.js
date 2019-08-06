@@ -15,6 +15,8 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
+import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
 import {startsWith} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
 
@@ -26,6 +28,11 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+
+    /** @private {!./external-reorder-head-transformer.ExternalReorderHeadTransformer} */
+    this.reorderHeadTransformer_ = new ExternalReorderHeadTransformer();
+    /** @private {!./amp-ad-metadata-transformer.AmpAdMetadataTransformer} */
+    this.metadataTransformer_ = new AmpAdMetadataTransformer();
   }
 
   /** @override */
@@ -106,55 +113,24 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       root.setAttribute('amp4ads', '');
     }
 
-    // Remove all AMP scripts.
-    const extensions = [];
-    const scripts = doc.head.querySelectorAll('script[src]');
-    for (let i = 0; i < scripts.length; i++) {
-      const script = scripts[i];
-      if (script.hasAttribute('custom-element')) {
-        extensions.push(script.getAttribute('custom-element'));
-      } else if (script.hasAttribute('custom-template')) {
-        extensions.push(script.getAttribute('custom-template'));
-      }
-      doc.head.removeChild(script);
+    this.reorderHeadTransformer_.reorderHead(doc.head);
+    const metadata = this.metadataTransformer_.generateMetadata(doc);
+
+    //Removes <amp-ad-metadata> tag if it exists
+    const oldMetadata = doc.querySelector('script[amp-ad-metadata]');
+    if (oldMetadata) {
+      oldMetadata.parentNode.removeChild(oldMetadata);
     }
 
-    // Remove boilerplate styles.
-    const styles = doc.head.querySelectorAll('style[amp-boilerplate]');
-    for (let i = 0; i < styles.length; i++) {
-      const style = styles[i];
-      style.parentNode.removeChild(style);
-    }
-
-    let creative = root./*OK*/ outerHTML;
-
-    // Metadata
-    creative += '<script type="application/json" amp-ad-metadata>';
-    creative += '{';
-
-    if (this.element.hasAttribute('amp-story')) {
-      const ctaTypeMeta = root.querySelector('[name=amp-cta-type]');
-      const ctaType = ctaTypeMeta && ctaTypeMeta.content;
-      creative += `"ctaType": "${ctaType}", `;
-
-      const ctaTypeUrl = root.querySelector('[name=amp-cta-url]');
-      const ctaUrl = ctaTypeUrl && ctaTypeUrl.content;
-      creative += `"ctaUrl": "${ctaUrl}", `;
-    }
-
-    creative += '"ampRuntimeUtf16CharOffsets": [0, 0],';
-    creative += '"customElementExtensions": [';
-    for (let i = 0; i < extensions.length; i++) {
-      if (i > 0) {
-        creative += ',';
-      }
-      creative += `"${extensions[i]}"`;
-    }
-    creative += ']';
-    creative += '}';
-    creative += '</script>';
-
-    return creative;
+    const creative = root./*OK*/ outerHTML;
+    const creativeSplit = creative.split('</body>');
+    const docWithMetadata =
+      creativeSplit[0] +
+      `<script type="application/json" amp-ad-metadata>` +
+      metadata +
+      '</script></body>' +
+      creativeSplit[1];
+    return docWithMetadata;
   }
 }
 
