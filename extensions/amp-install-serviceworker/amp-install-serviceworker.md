@@ -72,7 +72,7 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>data-iframe-src (optional)</strong></td>
-    <td>The URL of an HTML document that installs a ServiceWorker. The URL must use <code>https</code> protocol.</td>
+    <td>The URL of an HTML document that installs a ServiceWorker. The URL must use <code>https</code> protocol. This attribute is necessary if the AMP page is going to be served from an AMP Cache.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-scope (optional)</strong></td>
