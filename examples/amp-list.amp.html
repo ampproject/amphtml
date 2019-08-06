@@ -51,13 +51,41 @@
   ```
   The list content is rendered via an [amp-mustache template](https://amp.dev/documentation/components/amp-mustache). The template can be specified either by id, or by using a nested element.
   -->
+  <h3>amp-list > template[type=amp-mustache]</h3>
   <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
     <template type="amp-mustache" id="amp-template-id">
       <div><a href="{{url}}">{{title}}</a></div>
     </template>
   </amp-list>
 
+  <!-- [diffable] -->
+  <h3>amp-list[diffable]</h3>
+  <amp-list diffable id="list1" width="auto" height="300" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
+    <template type="amp-mustache" id="amp-template-id">
+      <div>
+        <amp-img src="{{image}}" height="50" width="50" alt="{{title}}"></amp-img>
+        <a href="{{url}}">{{title}}</a>
+      </div>
+    </template>
+    <div fetch-error>FETCH-ERROR</div>
+
+    <div role="list"><div role="listitem">
+      <amp-img data-foo=1 alt="amp-carousel" width="50" height="50" src="http://localhost:8000/examples/img/ampicon.png"></amp-img>
+      <a target="_top" href="http://localhost:8000/components/amp-carousel/">amp-carousel</a>
+    </div><div role="listitem">
+      <amp-img data-foo=2 alt="amp-img" width="50" height="50" src="http://localhost:8000/examples/img/ampicon.png"></amp-img>
+      <a target="_top" href="http://localhost:8000/components/amp-img/">amp-img</a>
+    </div><div role="listitem">
+      <amp-img data-foo=3 alt="amp-ad" width="50" height="50" src="http://localhost:8000/examples/img/ampicon.png"></amp-img>
+      <a target="_top" href="http://localhost:8000/components/amp-ad/">amp-ad</a>
+    </div><div role="listitem">
+      <amp-img data-foo=4 alt="amp-accordion" width="50" height="50" src="http://localhost:8000/examples/img/ampicon.png"></amp-img>
+      <a target="_top" href="http://localhost:8000/components/amp-accordion/">amp-accordion</a>
+    </div></div>
+  </amp-list>
+
   <!-- ## Using a script to enclose the template. -->
+  <h3>amp-list > script[type=text/plain][template=amp-mustache]</h3>
   <amp-list width="auto" height="100" layout="fixed-height" src="comments.example.json">
     <script type="text/plain" template="amp-mustache">
       <table>
@@ -81,6 +109,7 @@
     `template` element. This example references the template from the
     previous sample.
   -->
+  <h3>amp-list[template]</h3>
   <amp-list id="list2" width="auto" height="100" layout="fixed-height"  src="list.example.json"
       template="amp-template-id" class="m1">
   </amp-list>
@@ -89,14 +118,13 @@
   <!--
  Use the `max-items` attribute to limit the number of list elements displayed
   -->
+  <h3>amp-list[max-items]</h3>
   <amp-list id="list3" width="auto" height="100" layout="fixed-height"  src="list.example.json" max-items="3"
       template="amp-template-id" class="m1" reset-on-refresh>
   </amp-list>
 
    <!-- ## Single Entry list -->
-  <!--
- If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
-  -->
+  <h3>amp-list[single-item]</h3>
   <amp-list id="list4" width="auto" height="100" layout="fixed-height"  src="list-single.example.json" single-item items="."
   template="amp-template-id" class="m1">
 </amp-list>
@@ -105,6 +133,7 @@
   <!--
  If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
   -->
+  <h3>amp-list > [overflow]</h3>
   <amp-list id="list5" width="auto" height="48" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1" reset-on-refresh>
     <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
       Show more
@@ -115,6 +144,7 @@
   <!--
  If the `amp-list` multiple pages ... .
   -->
+  <h3>amp-list[load-more=auto]</h3>
   <amp-list width="auto" height="200" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1" load-more="auto" load-more-bookmark="next">
     <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
       Show more
