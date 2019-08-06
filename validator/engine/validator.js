@@ -1270,20 +1270,6 @@ class ReferencePointMatcher {
       }
     }
   }
-
-  /**
-   * @return {!Array<number>}
-   */
-  getReferencePointsMatched() {
-    return this.referencePointsMatched_;
-  }
-
-  /**
-   * @return {!ParsedReferencePoints}
-   */
-  getParsedReferencePoints() {
-    return this.parsedReferencePoints_;
-  }
 }
 
 // Instances of this class specify which tag names (|allowedTags|)
@@ -4918,14 +4904,6 @@ class ParsedValidatorRules {
     this.partialMatchCaseiRegexes_ = [];
 
     /**
-     * A tuple of ('amp-form', 'form') would indicate that 'form' is an example
-     * tag name that uses of the extension 'amp-form'.
-     * @type {!Object<string, string>}
-     * @private
-     */
-    this.exampleUsageByExtension_ = {};
-
-    /**
      * Sets type identifiers which are used to determine the set of validation
      * rules to be applied.
      * @type {!Object<string, number>}
@@ -5009,22 +4987,7 @@ class ParsedValidatorRules {
       if (tag.mandatory) {
         this.mandatoryTagSpecs_.push(tagSpecId);
       }
-      // Produce a mapping from every extension to an example tag which
-      // requires that extension.
-      for (let i = 0; i < tag.requiresExtension.length; ++i) {
-        const extension = tag.requiresExtension[i];
-        // Some extensions have multiple tags that require them. Some tags
-        // require multiple extensions. If we have two tags requiring an
-        // extension, we prefer to use the one that lists the extension first
-        // (i === 0) as an example of that extension.
-        if (!this.exampleUsageByExtension_.hasOwnProperty(extension) || i === 0)
-        {this.exampleUsageByExtension_[extension] = getTagSpecName(tag);}
-      }
     }
-    // The amp-ad tag doesn't require amp-ad javascript for historical
-    // reasons. We still want to warn if you include the code but don't
-    // use it.
-    this.exampleUsageByExtension_['amp-ad'] = 'amp-ad';
 
     /**
      * @typedef {{ format: string, specificity: number }}
@@ -5236,6 +5199,8 @@ class ParsedValidatorRules {
               /* url */'', validationResult);
         }
         break;
+      default:
+        // fallthrough
     }
   }
 
@@ -5313,18 +5278,6 @@ class ParsedValidatorRules {
 
     // Equal, so not better than.
     return false;
-  }
-
-  /**
-   * Returns an example tag which uses a given extension, or empty
-   * string if none.
-   * @param {string} extensionName
-   * @return {string}
-   */
-  exampleTagForExtension(extensionName) {
-    return this.exampleUsageByExtension_.hasOwnProperty(extensionName) ?
-      this.exampleUsageByExtension_[extensionName] :
-      '';
   }
 
   /**
@@ -5901,8 +5854,10 @@ amp.validator.isSeverityWarning = function(error) {
  */
 amp.validator.validateString = function(inputDocContents, opt_htmlFormat) {
   goog.asserts.assertString(inputDocContents, 'Input document is not a string');
-
-  const htmlFormat = opt_htmlFormat || 'AMP';
+  let htmlFormat = 'AMP';
+  if (opt_htmlFormat) {
+      htmlFormat = opt_htmlFormat.toUpperCase();
+   }
   const handler = new amp.validator.ValidationHandler(htmlFormat);
   const parser = new amp.htmlparser.HtmlParser();
   parser.parse(handler, inputDocContents);

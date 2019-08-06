@@ -399,7 +399,7 @@ function buildExtension(
   // recompiles JS.
   if (options.watch) {
     options.watch = false;
-    watch(path + '/*', function() {
+    watch(path + '/**/*', function() {
       buildExtension(
         name,
         version,
@@ -422,7 +422,7 @@ function buildExtension(
   }
 
   // minify and copy vendor configs for amp-analytics component
-  if (name === 'amp-analytics' && argv.compile_vendor_configs) {
+  if (name === 'amp-analytics') {
     promises.push(compileVendorConfigs(options));
   }
 
