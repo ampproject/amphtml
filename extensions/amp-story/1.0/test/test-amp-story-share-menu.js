@@ -135,6 +135,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     shareMenu.build();
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    // Create escape keydown event.
     const keydownEvent = new Event("keydown");
     keydownEvent.keyCode = Keys.ESCAPE;
     win.dispatchEvent(new Event(keydownEvent));
