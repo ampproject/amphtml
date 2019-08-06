@@ -245,8 +245,8 @@ export class PlatformStore {
   /**
    * Get scoreFactor states for each platform
    * @return {Promise<!JsonObject>}
-   * 
-   * return value looks somethinglike this 
+   *
+   * return value looks somethinglike this
    * {
    *    isReadyToPay: {
    *     'subscription-google-com': 1,
@@ -262,15 +262,20 @@ export class PlatformStore {
     const rtpStates = dict({});
     return Promise.all(
       Object.values(SubscriptionsScoreFactor).map(scoreFactor => {
-        rtpStates[scoreFactor] = dict()
-        return Promise.all(this.serviceIds_.map(platformId =>
-          this.getScoreFactorPromiseFor_(
-            platformId, scoreFactor)
-          .then(factorValue => {
-            rtpStates[scoreFactor][platformId.replace(/\./g, '_')] = factorValue;
-          })
-        ))
-      })).then(() => rtpStates);
+        rtpStates[scoreFactor] = dict();
+        return Promise.all(
+          this.serviceIds_.map(platformId =>
+            this.getScoreFactorPromiseFor_(platformId, scoreFactor).then(
+              factorValue => {
+                rtpStates[scoreFactor][
+                  platformId.replace(/\./g, '_')
+                ] = factorValue;
+              }
+            )
+          )
+        );
+      })
+    ).then(() => rtpStates);
   }
 
   /**
@@ -282,9 +287,10 @@ export class PlatformStore {
    */
   getScoreFactorPromiseFor_(serviceId, scoreFactor) {
     // Make sure the platform is ready
-    return this.getEntitlementPromiseFor(serviceId)
-    .then(() => {
-      return this.subscriptionPlatforms_[serviceId].getSupportedScoreFactor(scoreFactor);
+    return this.getEntitlementPromiseFor(serviceId).then(() => {
+      return this.subscriptionPlatforms_[serviceId].getSupportedScoreFactor(
+        scoreFactor
+      );
     });
   }
 
@@ -568,7 +574,6 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatformForFactor_(factor) {
-    /** @type {!Array<!PlatformWeightDef>} */
     const platformWeights = this.getAvailablePlatforms().map(platform => {
       const factorValue = platform.getSupportedScoreFactor(factor);
       const weight = (typeof factorValue == 'number') ? factorValue : 0;

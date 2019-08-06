@@ -280,12 +280,12 @@ describes.realWin('Platform store', {}, () => {
         .stub(anotherPlatform, 'getBaseScore')
         .callsFake(() => anotherPlatformBaseScore);
       platformStore = new PlatformStore(
-          ['local','another'],
-          {
-            supportsViewer: 9,
-          },
-          fallbackEntitlement
-        );
+        ['local', 'another'],
+        {
+          supportsViewer: 9,
+        },
+        fallbackEntitlement
+      );
       platformStore.resolvePlatform('local', localPlatform);
       platformStore.resolvePlatform('another', anotherPlatform);
     });
@@ -541,8 +541,9 @@ describes.realWin('Platform store', {}, () => {
           fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
         );
       sandbox
-        .stub(platformStore, 'getEntitlementPromiseFor').callsFake(() => Promise.resolve());
-  
+        .stub(platformStore, 'getEntitlementPromiseFor')
+        .callsFake(() => Promise.resolve());
+
       platformStore.resolveEntitlement(
         'local',
         new Entitlement({
@@ -559,17 +560,18 @@ describes.realWin('Platform store', {}, () => {
           service: 'another',
         })
       );
-      return expect(platformStore.getScoreFactorStates()).to.eventually.deep.equal(
-        {
-          isReadyToPay: {
-            local: 0,
-            another: 0,
-          },
-          supportsViewer: {
-            local: 0,
-            another: 1,
-          },
-        });
+      return expect(
+        platformStore.getScoreFactorStates()
+      ).to.eventually.deep.equal({
+        isReadyToPay: {
+          local: 0,
+          another: 0,
+        },
+        supportsViewer: {
+          local: 0,
+          another: 1,
+        },
+      });
     });
   });
 
