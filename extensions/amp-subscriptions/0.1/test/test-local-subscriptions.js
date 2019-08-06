@@ -26,6 +26,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   let localSubscriptionPlatform;
   let serviceAdapter;
   let getEncryptedDocumentKeyStub;
+  let getScoreFactorStatesStub;
 
   const actionMap = {
     [Action.SUBSCRIBE]: 'https://lipsum.com/subscribe',
@@ -56,12 +57,25 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   };
   const authUrl = configAuthUrl.replace('READER_ID', readerId);
   const pingbackUrl = configPingbackUrl.replace('READER_ID', readerId);
+  const fakeScoreStates = {
+    isReadyToPay: {
+      'subscription-google-com': 1,
+      local: 0,
+    },
+    supportdViewer: {
+      'subscription-google-com': 1,
+      local: 0,
+    },
+  };
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
     serviceAdapter = new ServiceAdapter(null);
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
+    getScoreFactorStatesStub = sandbox
+      .stub(serviceAdapter, 'getScoreFactorStates')
+      .callsFake(() => Promise.resolve(fakeScoreStates));
     sandbox
       .stub(serviceAdapter, 'getPageConfig')
       .callsFake(() => new PageConfig('example.org:basic', true));
@@ -363,6 +377,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       localSubscriptionPlatform.activate(entitlement);
       return localSubscriptionPlatform.actions_.build().then(() => {
         expect(renderStub).to.be.calledOnce;
+        expect(getScoreFactorStatesStub).to.be.calledOnce;
       });
     });
 
