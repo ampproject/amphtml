@@ -15,7 +15,6 @@
  */
 
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {
   sanitizeHtml,
@@ -145,8 +144,7 @@ export class AmpMustache extends AMP.BaseTemplate {
   serializeHtml_(html) {
     const doc = this.win.document;
     const root = doc.createElement('div');
-    const diffing = isExperimentOn(self, 'amp-list-diffing');
-    const sanitized = sanitizeHtml(html, doc, diffing);
+    const sanitized = sanitizeHtml(html, doc);
     root./*OK*/ innerHTML = sanitized;
     return this.unwrap(root);
   }
