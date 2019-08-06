@@ -266,6 +266,14 @@ export class Viewport {
   }
 
   /**
+   * Returns the top padding mandated by the viewer.
+   * @return {number}
+   */
+  getPaddingTop() {
+    return this.paddingTop_;
+  }
+
+  /**
    * Returns the viewport's vertical scroll position.
    * @return {number}
    */

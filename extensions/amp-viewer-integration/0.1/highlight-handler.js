@@ -280,7 +280,7 @@ export class HighlightHandler {
     const viewport = this.viewport_;
     let minTop = Number.MAX_VALUE;
     let maxBottom = 0;
-    const paddingTop = Number(this.viewer_.getParam('paddingTop') || 0);
+    const paddingTop = viewport.getPaddingTop();
     for (let i = 0; i < nodes.length; i++) {
       // top and bottom returned by getLayoutRect includes the header padding
       // size. We need to cancel the padding to calculate the positions in
