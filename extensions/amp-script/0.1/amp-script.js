@@ -239,13 +239,7 @@ export class AmpScript extends AMP.BaseElement {
   getAuthorScript_(debugId) {
     const authorUrl = this.element.getAttribute('src');
     if (authorUrl) {
-      const urlService = Services.urlForDoc(this.element);
-
-      const docOrigin = urlService.getSourceOrigin(this.getAmpDoc().getUrl());
-      const scriptOrigin = urlService.parse(authorUrl).origin;
-      const sameOrigin = docOrigin === scriptOrigin;
-
-      return this.fetchAuthorScript_(authorUrl, sameOrigin, debugId);
+      return this.fetchAuthorScript_(authorUrl, debugId);
     } else {
       const id = this.element.getAttribute('script');
       if (id) {
@@ -264,8 +258,8 @@ export class AmpScript extends AMP.BaseElement {
           TAG,
           id
         );
-        const script = local.textContent;
-        return this.service_.checkSha384(script, debugId).then(() => script);
+        const text = local.textContent;
+        return this.service_.checkSha384(text, debugId).then(() => text);
       }
     }
     // No [src] or [script].
@@ -274,23 +268,16 @@ export class AmpScript extends AMP.BaseElement {
 
   /**
    * @param {string} authorUrl
-   * @param {boolean} sameOrigin Does `authorUrl` have same origin as the page?
    * @param {string} debugId An element identifier for error messages.
    * @return {!Promise<string>}
    */
-  fetchAuthorScript_(authorUrl, sameOrigin, debugId) {
-    const init = {ampCors: false};
-    // Disallow redirects for same-origin scripts.
-    if (sameOrigin) {
-      // TODO(choumx): Polyfill this in our fetch polyfill.
-      init.redirect = 'error';
-    }
+  fetchAuthorScript_(authorUrl, debugId) {
     return Services.xhrFor(this.win)
-      .fetchText(authorUrl, init)
-      .then(r => {
-        if (sameOrigin) {
+      .fetchText(authorUrl, {ampCors: false})
+      .then(response => {
+        if (response.url && this.sameOrigin_(response.url)) {
           // Disallow non-JS content type for same-origin scripts.
-          const contentType = r.headers.get('Content-Type');
+          const contentType = response.headers.get('Content-Type');
           if (
             !contentType ||
             !startsWith(contentType, 'application/javascript')
@@ -303,14 +290,26 @@ export class AmpScript extends AMP.BaseElement {
               contentType
             );
           }
-          return r.text();
+          return response.text();
         } else {
           // For cross-origin, verify hash of script itself.
-          return r.text().then(text => {
+          return response.text().then(text => {
             return this.service_.checkSha384(text, debugId).then(() => text);
           });
         }
       });
+  }
+
+  /**
+   * Returns true iff `url` has the same origin as the AMP document.
+   * @param {string} url
+   * @return {boolean}
+   */
+  sameOrigin_(url) {
+    const urlService = Services.urlForDoc(this.element);
+    const docOrigin = urlService.getSourceOrigin(this.getAmpDoc().getUrl());
+    const scriptOrigin = urlService.parse(url).origin;
+    return docOrigin === scriptOrigin;
   }
 
   /**

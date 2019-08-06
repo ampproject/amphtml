@@ -36,7 +36,6 @@
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
- *   redirect: (string|undefined),
  *
  *   ampCors: (boolean|undefined),
  *   bypassInterceptorForDev: (boolean|undefined),

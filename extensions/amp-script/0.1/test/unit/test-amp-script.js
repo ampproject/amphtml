@@ -58,32 +58,15 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     sandbox.stub(WorkerDOM, 'upgrade').resolves();
   });
 
-  function stubFetch(url, headers, text) {
+  function stubFetch(url, headers, text, responseUrl) {
     xhr.fetchText.withArgs(url).resolves({
       headers: {
         get: h => headers[h],
       },
       text: () => Promise.resolve(text),
+      url: responseUrl || url,
     });
   }
-
-  it('should disallow redirect for same-origin src', async () => {
-    sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
-    element.setAttribute('src', 'https://foo.example/foo.js');
-
-    stubFetch(
-      'https://foo.example/foo.js',
-      {'Content-Type': 'application/javascript; charset=UTF-8'},
-      'alert(1)'
-    );
-
-    await script.layoutCallback();
-
-    expect(xhr.fetchText).to.be.calledWithMatch('https://foo.example/foo.js', {
-      ampCors: false,
-      redirect: 'error',
-    });
-  });
 
   it('should require JS content-type for same-origin src', () => {
     sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
@@ -121,6 +104,22 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       'https://bar.example/bar.js',
       {'Content-Type': 'application/javascript; charset=UTF-8'},
       'alert(1)'
+    );
+
+    service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
+    return script.layoutCallback().should.be.rejected;
+  });
+
+
+  it('should check response URL to handle redirects', () => {
+    sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    element.setAttribute('src', 'https://foo.example/foo.js');
+
+    stubFetch(
+      'https://foo.example/foo.js',
+      {'Content-Type': 'application/javascript; charset=UTF-8'},
+      'alert(1)',
+      'https://bar.example/bar.js' // responseURL !== url
     );
 
     service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
