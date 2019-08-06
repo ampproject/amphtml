@@ -150,10 +150,20 @@ export class LocalSubscriptionBasePlatform {
   /** @override */
   activate(entitlement) {
     const renderState = entitlement.json();
-    this.urlBuilder_.setAuthResponse(renderState);
-    this.actions_.build().then(() => {
+    // Note all platforms are resolved at this stage
+    // Get the ready to pay state of each platform and
+    // add it to the rederState object
+    this.serviceAdapter_.getScoreFactorStates()
+    .then(scoresValues => {
+      renderState.scores = scoresValues;
+      this.urlBuilder_.setAuthResponse(renderState)
+    })
+    .then(this.actions_.build())
+    .then(() => {
       this.renderer_.render(renderState);
     });
+    
+    
   }
 
   /** @override */

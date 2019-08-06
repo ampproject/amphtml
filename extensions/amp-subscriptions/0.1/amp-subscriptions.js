@@ -662,6 +662,14 @@ export class SubscriptionService {
         return getValueForExpr(entitlement.json(), field);
       });
   }
+
+  /**
+   * gets Score factors for all platforms
+   * @return {Promise<!JsonObject>}
+   */
+  getScoreFactorStates() {
+    return this.platformStore_.getScoreFactorStates();
+  }
 }
 
 /**

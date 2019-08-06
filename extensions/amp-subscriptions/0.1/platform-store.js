@@ -243,6 +243,52 @@ export class PlatformStore {
   }
 
   /**
+   * Get scoreFactor states for each platform
+   * @return {Promise<!JsonObject>}
+   * 
+   * return value looks somethinglike this 
+   * {
+   *    isReadyToPay: {
+   *     'subscription-google-com': 1,
+   *     local: 0,
+   *    },
+   *    supportdViewer: {
+   *     'subscription-google-com': 1,
+   *     local: 0,
+   *    },
+   * }
+   */
+  getScoreFactorStates() {
+    const rtpStates = dict({});
+    return Promise.all(
+      Object.values(SubscriptionsScoreFactor).map(scoreFactor => {
+        rtpStates[scoreFactor] = dict()
+        return Promise.all(this.serviceIds_.map(platformId =>
+          this.getScoreFactorPromiseFor_(
+            platformId, scoreFactor)
+          .then(factorValue => {
+            rtpStates[scoreFactor][platformId.replace(/\./g, '_')] = factorValue;
+          })
+        ))
+      })).then(() => rtpStates);
+  }
+
+  /**
+   * Return a score factor for a platform once it's resolved
+   * @param {string} serviceId
+   * @param {string} scoreFactor
+   * @return {!Promise<number>}
+   * @private
+   */
+  getScoreFactorPromiseFor_(serviceId, scoreFactor) {
+    // Make sure the platform is ready
+    return this.getEntitlementPromiseFor(serviceId)
+    .then(() => {
+      return this.subscriptionPlatforms_[serviceId].getSupportedScoreFactor(scoreFactor);
+    });
+  }
+
+  /**
    * @return {!Promise<boolean>}
    */
   getGrantStatus() {
