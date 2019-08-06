@@ -21,6 +21,7 @@ import {layoutRectLtwh} from '../../../src/layout-rect';
 describes.realWin('inabox-host:messaging', {}, env => {
   let win;
   let host;
+  let sandbox;
   let iframe1;
   let iframe2;
   let iframe3;
@@ -28,6 +29,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
   beforeEach(() => {
     win = env.win;
+    sandbox = env.sandbox;
     iframe1 = win.document.createElement('iframe');
     iframe2 = win.document.createElement('iframe');
     iframe3 = win.document.createElement('iframe');
@@ -421,12 +423,12 @@ describes.realWin('inabox-host:messaging', {}, env => {
   }
 
   function breakCanInspectWindowForWindow(win) {
-    Object.defineProperty(win['location'], 'href', {
+    sandbox.defineProperty(win['location'], 'href', {
       get: () => {
         throw new Error('Error!!');
       },
     });
-    Object.defineProperty(win, 'test', {
+    sandbox.defineProperty(win, 'test', {
       get: () => {
         throw new Error('Error!!');
       },
