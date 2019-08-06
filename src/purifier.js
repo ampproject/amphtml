@@ -325,8 +325,11 @@ function addPurifyHooks(purifier, doc) {
     const tagName = element.nodeName.toLowerCase();
     if (tagName === 'use') {
       ['href', 'xlink:href'].forEach(attr => {
-        if (element.hasAttribute(attr) && !startsWith(element.getAttribute(attr), '#')) {
-          removeElement(el);
+        if (
+          element.hasAttribute(attr) &&
+          !startsWith(element.getAttribute(attr), '#')
+        ) {
+          removeElement(element);
         }
       });
     }
