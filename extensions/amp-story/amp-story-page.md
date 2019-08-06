@@ -1,7 +1,6 @@
 ---
 $category@: presentation
 formats:
-  - websites
   - stories
 teaser:
   text: A single screen of an AMP story.
@@ -22,7 +21,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-## Pages: `amp-story-page`
+# Pages: `amp-story-page`
 
 The `<amp-story-page>` component represents the content to display on a single page of a story.
 
@@ -41,7 +40,24 @@ The `<amp-story-page>` component represents the content to display on a single p
   </amp-anim>
 </figure>
 
-### Example
+<table>
+  <tr>
+    <td class="col-fourty"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
+    <td>container</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://amp.dev/documentation/examples/introduction/stories_in_amp">Annotated code example for stories</a></td>
+  </tr>
+</table>
+
+[TOC]
+
+## Example
 
 ```html
 <amp-story-page id="cover">
@@ -59,13 +75,13 @@ The `<amp-story-page>` component represents the content to display on a single p
 </amp-story-page>
 ```
 
-### Attributes
+## Attributes
 
-##### id [required]
+### id [required]
 
 A unique identifier for the page. Can be used for styling the page and its descendants in CSS, and is also used to uniquely identify the page in the URL fragment.
 
-##### auto-advance-after [optional]
+### auto-advance-after [optional]
 
 Specifies when to auto-advance to the next page.  If omitted, the page will not automatically advance. The value for `auto-advance-after` must be either:
 
@@ -78,7 +94,7 @@ For example:
 <amp-story-page id="tokyo" auto-advance-after="1s">
 ```
 
-##### background-audio [optional]
+### background-audio [optional]
 
 A URI to an audio file that plays while this page is in view.
 
@@ -88,6 +104,6 @@ For example:
 <amp-story-page id="zurich" background-audio="./media/switzerland.mp3">
 ```
 
-### Children (of amp-story-page)
+## Children (of amp-story-page)
 
 The `<amp-story-page>` component contains one or more [layers](amp-story-grid-layer.md).  Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).

@@ -427,6 +427,308 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
 
 The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story.  The first page specified in the document order is the first page shown in the story.
 
+#### Optional customization
+
+##### Crop `amp-img` and `amp-video` assets using `object-position`
+
+The `object-position` attribute can be used on `<amp-img>` and `<amp-video>` elements to specify the alignment of the asset within its container (crop).
+By default these assets are centered and, depending on the viewport ratio, have their edges are cropped out of the container. Because the zone of interest of an asset is not always its center, the `object-position` allows specifying what part of the image has to remain visible.
+This attribute accepts any value accepted by the `object-position` CSS property.
+
+Example:
+
+<amp-img alt="Custom crop on amp-img and amp-video assets" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-object-position.gif" width="600" height="689">
+  <noscript>
+    <img alt="Custom crop on amp-img and amp-video assets" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-object-position.gif" />
+  </noscript>
+</amp-img>
+
+This same image can be used for both mobile portrait and landscape desktop using the `object-position` this way:
+
+```html
+<amp-img src="cat.jpg" object-position="75% 40%"></amp-img>
+```
+
+##### `data-text-background-color`
+
+The `data-text-background-color` attribute highlights the text of the element with a specified color. To highlight the entire block, add this attribute directly to the text element. To only highlight the text, add the attribute and text to an inner <span>. Note that works anywhere inside an `<amp-story-page>`, not just in `<amp-story-grid-layer>`.
+
+Example:
+<amp-img alt="text background color only example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" width="145" height="255">
+  <noscript>
+    <img alt="text background color only example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" />
+  </noscript>
+</amp-img>
+```html
+<amp-story-grid-layer template="vertical">
+  <h2>
+    <span data-text-background-color="crimson">
+      Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
+    </span>
+  </h2>
+</amp-story-grid-layer>
+```
+
+Example:
+<amp-img alt="text background color full example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" width="145" height="255">
+  <noscript>
+    <img alt="text background color full example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" />
+  </noscript>
+</amp-img>
+```html
+<amp-story-grid-layer template="vertical">
+  <h2 data-text-background-color="crimson">
+    Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
+  </h2>
+</amp-story-grid-layer>
+```
+
+#### Links in amp-story-grid-layer
+
+We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
+
+#### Interactive components
+
+We support embedding components such as `<amp-twitter>` inside `amp-story-grid-layer`. By default they are not interactive in the story (i.e. tapping on them will not have any effect), but by using the `interactive` attribute, you can make them be fully interactive.
+
+When clicked, the component will be shown in a lightbox-like mode. Here, a user can choose to further interact with the embed, or close the lightbox and go back to the story.
+
+Example:
+<figure class="centered-fig">
+  <span class="special-char">Example:</span>
+  <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
+  <noscript><img width="300" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
+  </amp-anim>
+</figure>
+
+```html
+<amp-twitter width="100"
+  height="100"
+  layout="responsive"
+  data-tweetid="1102562523524579328"
+  interactive>
+</amp-twitter>
+```
+
+#### Customizing tooltip for links or interactive components
+
+You can customize the contents of the tooltip displayed on top of a user interactive element by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
+
+##### `data-tooltip-icon`
+
+Takes in a `src` where the icon image is located.
+
+##### `data-tooltip-text`
+
+A string that will be shown when the tooltip appears.
+
+Example:
+
+```html
+<a href="https://www.google.com" role="link" data-tooltip-icon="./assets/ic_amp_googblue_1x_web_24dp.png" data-tooltip-text="Go to page">
+  Click me!
+</a>
+```
+
+## Animations
+
+Every element inside an `<amp-story-page>` can have an entrance animation.
+
+You can configure animations by specifying a set of [animation attributes](#animation-attributes) on the element; no additional AMP extensions or configuration is needed.
+
+### Animation effects
+
+The following animation effects are available as presets for AMP stories:
+
+
+| Preset name       | Default duration (ms) | Default delay (ms) |
+| ----------------- | --------------------- | ------------------ |
+| `drop`            | 1600                  | 0 |
+| `fade-in`         | 500                   | 0 |
+| `fly-in-bottom`   | 500                   | 0 |
+| `fly-in-left`     | 500                   | 0 |
+| `fly-in-right`    | 500                   | 0 |
+| `fly-in-top`      | 500                   | 0 |
+| `pulse`           | 500                   | 0 |
+| `rotate-in-left`  | 700                   | 0 |
+| `rotate-in-right` | 700                   | 0 |
+| `twirl-in`        | 1000                  | 0 |
+| `whoosh-in-left`  | 500                   | 0 |
+| `whoosh-in-right` | 500                   | 0 |
+| `pan-left`        | 1000                  | 0 |
+| `pan-right`       | 1000                  | 0 |
+| `pan-down`        | 1000                  | 0 |
+| `pan-up`          | 1000                  | 0 |
+| `zoom-in`         | 1000                  | 0 |
+| `zoom-out`        | 1000                  | 0 |
+
+
+{% call callout('Tip', type='success') %}
+See a [live demo of all the AMP story animations](https://amp.dev/documentation/examples/visual-effects/amp_story_animations/) on AMP By Example.
+{% endcall %}
+
+
+### Animation attributes
+
+#####  animate-in [required]
+
+Use this attribute to specify the name of the entrance [animation preset](#animation-effects).
+
+*Example*: A heading flies in from left of the page.
+
+```html
+<h2 animate-in="fly-in-left">
+Fly from left!
+</h2>
+```
+
+##### animate-in-duration [optional]
+
+Use this attribute to specify the duration of the entrance animation, in seconds or milliseconds (e.g., 0.2s or 200ms). The default duration depends on the animation preset you specified.
+
+*Example*: A heading flies in from left of the page and the animation finishes within half a second.
+
+```html
+<h2 animate-in="fly-in-left" animate-in-duration="0.5s" >
+Fly from left!
+</h2>
+```
+
+##### animate-in-timing-function [optional]
+
+Use this attribute to specify the timing function (animation curve) of the entrance animation. The default timing function depends on the animation preset you specified.
+
+*Example*: A heading flies in from left of the page and the animation decelerates (ease-out).
+
+```html
+<h2 animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.0, 0.0, 0.2, 1)" >
+Fly from left!
+</h2>
+```
+
+##### animate-in-delay [optional]
+
+Use this attribute to specify the delay before starting the animation. The value must be greater than or equal to 0, in seconds or milliseconds (for example, 0.2s or 200ms). The default delay depends on the animation preset you specified.
+
+*Example*: After 0.4 seconds, a heading flies in from the left of the page and completes its entrance within 0.5 seconds.
+
+```html
+<h2 animate-in="fly-in-left"
+    animate-in-duration="0.5s"
+    animate-in-delay="0.4s">
+Fly from left!
+</h2>
+```
+
+{% call callout('Note', type='note') %}
+The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as *delay this animation for at least N milliseconds*. This applies to all elements including those with a delay of 0 seconds.
+{% endcall %}
+
+##### animate-in-after [optional]
+
+Use this attribute to chain or sequence animations (for example, animation2 starts after animation1 is complete). Specify the ID of the animated element that this element's animation will follow. The element must be present on the same `<amp-story-page>`. The delay is applied after the previous element's animation has finished. For further details, see the [Sequencing animations](#sequencing-animations) section below.
+
+For example, in the following code, `object2` animates in after `object1` completes their entrance:
+
+```html
+<amp-story-page id="page1">
+  <amp-story-grid-layer template="vertical">
+    <div id="object1"
+        animate-in="rotate-in-left">
+        1
+    </div>
+    <div id="object2"
+        animate-in="fly-in-right"
+        animate-in-after="object1">
+        2 <!-- will start after object1 has finished -->
+    </div>
+  </amp-story-grid-layer>
+</amp-story-page>
+```
+
+##### scale-start, scale-end [optional, only works with `zoom-in` & `zoom-out` animations]
+
+Use these two attributes to further specify the parameters of your zoom-in and zoom-out animations. The value must be greater than or equal to 0, and decimals are allowed. The default will be scale-start: 1 and scale-start: 3 for zoom-in, and the inverse for zoom-out.
+
+*Example*: An image zooming-in from 2x to 5x its size over 4 seconds.
+
+```html
+<amp-img animate-in="zoom-in" scale-start="2" scale-end="5" animate-in-duration="4s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720" height="320">
+</amp-img>
+```
+
+##### translate-x [optional, only works with `pan-left` & `pan-right` animations]
+
+Use this attribute to specify the horizontal panning of your image in a pan-left/pan-right animation. The value must be greater than or equal to 0 in pixels. The default value will pan the whole width of the specified image.
+
+*Example*: An image panning 200px to the left over 10 seconds.
+
+```html
+<amp-img animate-in="pan-left" translate-x="200px" animate-in-duration="10s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720" height="320">
+</amp-img>
+```
+
+##### translate-y [optional, only works with `pan-up` & `pan-down` animations]
+
+Use this attribute to specify the vertical panning of your image in a pan-up/pan-down animation. The value must be greater than or equal to 0 in pixels. The default value will pan the whole height of the specified image.
+
+*Example*: An image panning 50px down over 15 seconds.
+
+```html
+<amp-img animate-in="pan-down" translate-y="50px" animate-in-duration="15s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720" height="320">
+</amp-img>
+```
+
+### Sequencing animations
+
+To chain animations in sequence, use the `animate-in-after` attribute. All elements in a given chain must be present in the same `<amp-story-page>`. Elements without the `animate-in-after` attribute do not belong to a sequence chain, and will start independently on page entrance.
+
+```html
+<amp-story-page id="my-sequencing-page">
+  <amp-story-grid-layer template="vertical">
+    <div class="circle"
+        animate-in="drop-in"
+        animate-in-duration="1.8s">
+      1 <!-- will start independently -->
+    </div>
+    <div id="rotate-in-left-obj"
+        class="square"
+        animate-in="rotate-in-left"
+        animate-in-after="fade-in-obj"
+        animate-in-delay="0.2s">
+      2 <!-- will start after fade-in-obj has finished -->
+    </div>
+    <div class="square"
+        animate-in-after="rotate-in-left-obj"
+        animate-in="whoosh-in-right"
+        animate-in-delay="0.2s">
+      3 <!-- will start after rotate-in-left-obj has finished -->
+    </div>
+    <div id="fade-in-obj"
+        class="circle"
+        animate-in="fade-in"
+        animate-in-duration="2.2s">
+      1 <!-- will start independently -->
+    </div>
+  </amp-story-grid-layer>
+</amp-story-page>
+```
+### Combining multiple animations
+
+You can apply multiple entrance animations on one element (for example, an element flies into the page and fades in at the same time). It's not possible to assign more than one animation preset to a single element; however, elements with different entrance animations can be nested to combine them into one.
+
+```html
+<div animate-in="fly-in-left">
+   <div animate-in="fade-in">
+     I will fly-in and fade-in!
+   </div>
+</div>
+```
+
+{% call callout('Note', type='note') %}
+If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
+{% endcall %}
+
 ## Other components usable in AMP stories
 The following are other components usable in AMP stories that require some story-specific caveats.
 

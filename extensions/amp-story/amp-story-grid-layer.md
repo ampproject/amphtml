@@ -1,7 +1,6 @@
 ---
 $category@: presentation
 formats:
-  - websites
   - stories
 teaser:
   text: A single layer of a single page of an AMP story that positions its content in a grid-based layout.
@@ -23,7 +22,7 @@ limitations under the License.
 -->
 
 
-### `amp-story-grid-layer`
+# `amp-story-grid-layer`
 
 The `<amp-story-grid-layer>` component lays its children out into a grid.  Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
 
@@ -41,15 +40,32 @@ The `<amp-story-grid-layer>` component lays its children out into a grid.  Its i
   <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" /></noscript></amp-img>
 </div>
 
-#### Attributes
+<table>
+  <tr>
+    <td class="col-fourty"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
+    <td>container</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://amp.dev/documentation/examples/introduction/stories_in_amp">Annotated code example for stories</a></td>
+  </tr>
+</table>
+
+[TOC]
+
+## Attributes
 
 
-##### template [required]
+### template [required]
 
 The `template` attribute determines the layout of the grid layer. Available templates are described in the [Templates](#templates) section below.
 
 
-##### grid-area [optional]
+### grid-area [optional]
 
 This attribute is specified on children of `<amp-story-grid-layer>`.  `grid-area` specifies the named area (from using a `template` that defines them) in which the element containing this attribute should appear.
 
@@ -63,7 +79,7 @@ Example:
 </amp-story-grid-layer>
 ```
 
-#### Templates
+## Templates
 
 The following are available templates to specify for the layout of the grid layer.
 
@@ -71,7 +87,7 @@ The following are available templates to specify for the layout of the grid laye
 To see the layout templates in use, check out the [layouts demo on AMP By Example](https://amp.dev/documentation/examples/style-layout/amp_story_layouts/).
 {% endcall %}
 
-##### fill
+### fill
 
 The `fill` template shows its first child full bleed. All other children are not shown.
 
@@ -91,7 +107,7 @@ Example:
 </amp-story-grid-layer>
 ```
 
-##### vertical
+### vertical
 
 The `vertical` template lays its elements out along the y-axis.  By default, its elements are aligned to the top, and can take up the entirety of the screen along the x-axis.
 
@@ -111,7 +127,7 @@ Names Areas: (none)
 </amp-story-grid-layer>
 ```
 
-##### horizontal
+### horizontal
 
 The `horizontal` template lays its elements out along the x-axis.  By default, its elements are aligned to the start of the line and can take up the entirety of the screen along the y-axis.
 
@@ -131,7 +147,7 @@ Names Areas: (none)
 </amp-story-grid-layer>
 ```
 
-##### thirds
+### thirds
 
 The `thirds` template divides the screen into three equally-sized rows, and allows you to slot content into each area.
 
@@ -155,7 +171,7 @@ Named Areas:
 </amp-story-grid-layer>
 ```
 
-#### Children
+## Children
 
 An `amp-story-grid-layer` can contain any of the following elements:
 
@@ -316,9 +332,9 @@ An `amp-story-grid-layer` can contain any of the following elements:
   </tr>
 </table>
 
-#### Pre templated UI
+## Pre templated UI
 
-##### Landscape half-half UI
+### Landscape half-half UI
 
 The landscape half-half pre templated UI will resize the `<amp-story-grid-layer>` element to take half of the screen rather than the full screen, and be positioned either on the half left or half right of the viewport. This attribute only affects landscape viewports, and is ignored on portrait viewports.
 This template makes it easier to design full bleed landscape stories: splitting the screen in two halves gives each half a portrait ratio on most devices, allowing re-using the portrait assets, design, and templates already built for portrait stories.
@@ -344,107 +360,4 @@ Example:
     <h2>Cat ipsum dolor sit amet...</h2>
   </amp-story-grid-layer>
 </amp-story-page>
-```
-
-#### Optional customization
-
-##### Crop `amp-img` and `amp-video` assets using `object-position`
-
-The `object-position` attribute can be used on `<amp-img>` and `<amp-video>` elements to specify the alignment of the asset within its container (crop).
-By default these assets are centered and, depending on the viewport ratio, have their edges are cropped out of the container. Because the zone of interest of an asset is not always its center, the `object-position` allows specifying what part of the image has to remain visible.
-This attribute accepts any value accepted by the `object-position` CSS property.
-
-Example:
-
-<amp-img alt="Custom crop on amp-img and amp-video assets" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-object-position.gif" width="600" height="689">
-  <noscript>
-    <img alt="Custom crop on amp-img and amp-video assets" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-object-position.gif" />
-  </noscript>
-</amp-img>
-
-This same image can be used for both mobile portrait and landscape desktop using the `object-position` this way:
-
-```html
-<amp-img src="cat.jpg" object-position="75% 40%"></amp-img>
-```
-
-##### `data-text-background-color`
-
-The `data-text-background-color` attribute highlights the text of the element with a specified color. To highlight the entire block, add this attribute directly to the text element. To only highlight the text, add the attribute and text to an inner <span>. Note that works anywhere inside an `<amp-story-page>`, not just in `<amp-story-grid-layer>`.
-
-Example:
-<amp-img alt="text background color only example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" width="145" height="255">
-  <noscript>
-    <img alt="text background color only example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" />
-  </noscript>
-</amp-img>
-```html
-<amp-story-grid-layer template="vertical">
-  <h2>
-    <span data-text-background-color="crimson">
-      Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
-    </span>
-  </h2>
-</amp-story-grid-layer>
-```
-
-Example:
-<amp-img alt="text background color full example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" width="145" height="255">
-  <noscript>
-    <img alt="text background color full example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" />
-  </noscript>
-</amp-img>
-```html
-<amp-story-grid-layer template="vertical">
-  <h2 data-text-background-color="crimson">
-    Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
-  </h2>
-</amp-story-grid-layer>
-```
-
-#### Links in amp-story-grid-layer
-
-We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
-
-#### Interactive components
-
-We support embedding components such as `<amp-twitter>` inside `amp-story-grid-layer`. By default they are not interactive in the story (i.e. tapping on them will not have any effect), but by using the `interactive` attribute, you can make them be fully interactive.
-
-When clicked, the component will be shown in a lightbox-like mode. Here, a user can choose to further interact with the embed, or close the lightbox and go back to the story.
-
-Example:
-<figure class="centered-fig">
-  <span class="special-char">Example:</span>
-  <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
-  <noscript><img width="300" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
-  </amp-anim>
-</figure>
-
-```html
-<amp-twitter width="100"
-  height="100"
-  layout="responsive"
-  data-tweetid="1102562523524579328"
-  interactive>
-</amp-twitter>
-```
-
-#### Customizing tooltip for links or interactive components
-
-You can customize the contents of the tooltip displayed on top of a user interactive element by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
-
-##### `data-tooltip-icon`
-
-Takes in a `src` where the icon image is located.
-
-##### `data-tooltip-text`
-
-A string that will be shown when the tooltip appears.
-
-Example:
-
-```html
-<a href="https://www.google.com" role="link" data-tooltip-icon="./assets/ic_amp_googblue_1x_web_24dp.png" data-tooltip-text="Go to page">
-  Click me!
-</a>
 ```
