@@ -120,6 +120,8 @@ export class VideoManager {
 
   /** @override */
   dispose() {
+    this.getAutoFullscreenManager_().dispose();
+
     if (!this.entries_) {
       return;
     }
@@ -1004,6 +1006,12 @@ export class AutoFullscreenManager {
     /** @private @const {!Array<!../video-interface.VideoOrBaseElementDef>} */
     this.entries_ = [];
 
+    /**
+     * Unlisteners for global objects
+     * @private {!Array<!UnlistenDef>}
+     */
+    this.unlisteners_ = [];
+
     // eslint-disable-next-line jsdoc/require-returns
     /** @private @const {function()} */
     this.boundSelectBestCentered_ = () => this.selectBestCenteredInPortrait_();
@@ -1024,6 +1032,12 @@ export class AutoFullscreenManager {
 
     this.installOrientationObserver_();
     this.installFullscreenListener_();
+  }
+
+  /** @public */
+  dispose() {
+    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.length = 0;
   }
 
   /** @param {!VideoEntry} entry */
@@ -1054,10 +1068,12 @@ export class AutoFullscreenManager {
   installFullscreenListener_() {
     const root = this.ampdoc_.getRootNode();
     const exitHandler = () => this.onFullscreenExit_();
-    listen(root, 'webkitfullscreenchange', exitHandler);
-    listen(root, 'mozfullscreenchange', exitHandler);
-    listen(root, 'fullscreenchange', exitHandler);
-    listen(root, 'MSFullscreenChange', exitHandler);
+    this.unlisteners_.push(
+      listen(root, 'webkitfullscreenchange', exitHandler),
+      listen(root, 'mozfullscreenchange', exitHandler),
+      listen(root, 'fullscreenchange', exitHandler),
+      listen(root, 'MSFullscreenChange', exitHandler)
+    );
   }
 
   /**
@@ -1105,11 +1121,15 @@ export class AutoFullscreenManager {
     // exit fullscreen since 'change' does not fire in this case.
     if (screen && 'orientation' in screen) {
       const orient = /** @type {!ScreenOrientation} */ (screen.orientation);
-      listen(orient, 'change', () => this.onRotation_());
+      this.unlisteners_.push(
+        listen(orient, 'change', () => this.onRotation_())
+      );
     }
     // iOS Safari does not have screen.orientation but classifies
     // 'orientationchange' as a user interaction.
-    listen(win, 'orientationchange', () => this.onRotation_());
+    this.unlisteners_.push(
+      listen(win, 'orientationchange', () => this.onRotation_())
+    );
   }
 
   /** @private */
