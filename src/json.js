@@ -223,3 +223,21 @@ function hasOwnProperty(obj, key) {
     key
   );
 }
+
+/**
+ * This helper function handles configurations specified in a JSON format.
+ *
+ * It allows the configuration is to be written in plain JS (which has better
+ * dev ergonomics like comments and trailing commas), and allows the
+ * configuration to be transformed into an efficient JSON-parsed representation
+ * in the dist build.
+ *
+ * @param {!JsonObject} obj
+ * @return {!T}
+ * @template T
+ */
+export function jsonConfiguration(obj) {
+  // Yes, this looks inefficient. But it's compiled into a much better format
+  // in dist.
+  return JSON.parse(JSON.stringify(isObject(obj) ? obj : undefined));
+}

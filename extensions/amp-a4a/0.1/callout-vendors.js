@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {getMode} from '../../../src/mode';
+import {jsonConfiguration} from '../../../src/json';
 
 //////////////////////////////////////////////////////////////////
 //                                                              //
@@ -36,7 +37,7 @@ import {getMode} from '../../../src/mode';
 let RtcVendorDef;
 
 /** @const {!Object<string, RtcVendorDef>} */
-export const RTC_VENDORS = {
+const RTC_VENDORS = jsonConfiguration({
   ////////////////////////////////////////////////////////////////////
   //                                                                //
   //              !!!      IMPORTANT NOTE     !!!                   //
@@ -141,7 +142,7 @@ export const RTC_VENDORS = {
     macros: ['ADSLOT_ID'],
     disableKeyAppend: true,
   },
-};
+});
 
 // DO NOT MODIFY: Setup for tests
 if (getMode().localDev || getMode().test) {
@@ -157,3 +158,5 @@ if (getMode().localDev || getMode().test) {
     disableKeyAppend: true,
   });
 }
+
+export {RTC_VENDORS};
