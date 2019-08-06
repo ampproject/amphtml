@@ -610,6 +610,7 @@ describes.realWin(
           .then(url => expect(url).to.match(/eid=[^&]*21062003/));
       });
       it('returns the right URL', () => {
+        sandbox.stub(impl, 'isXhrAllowed').returns(true);
         element.setAttribute('data-ad-slot', 'some_slot');
         element.setAttribute('data-language', 'lxz');
         return impl.getAdUrl().then(url => {
@@ -674,6 +675,12 @@ describes.realWin(
             expect(url).to.match(/(\?|&)cr_row=rows(&|$)/);
             expect(url).to.match(/(\?|&)cr_col=cols(&|$)/);
           });
+        });
+        it('sets appropriate is_amp for canonical', () => {
+          sandbox.stub(impl, 'isXhrAllowed').returns(false);
+          return expect(impl.getAdUrl()).to.eventually.match(
+            /(\?|&)is_amp=5(&|$)/
+          );
         });
       });
 

@@ -16,6 +16,7 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
+import {Services} from '../../../src/services';
 import {
   computedStyle,
   removeAlphaFromColor,
@@ -63,7 +64,7 @@ class AmpStickyAd extends AMP.BaseElement {
     );
 
     this.ad_ = children[0];
-    this.setAsOwner(this.ad_);
+    Services.ownersForDoc(this.element).setOwner(this.ad_, this.element);
 
     this.adReadyPromise_ = whenUpgradedToCustomElement(
       dev().assertElement(this.ad_)
@@ -96,8 +97,13 @@ class AmpStickyAd extends AMP.BaseElement {
       toggle(this.element, true);
       const borderBottom = this.element./*OK*/ offsetHeight;
       this.viewport_.updatePaddingBottom(borderBottom);
-      this.updateInViewport(dev().assertElement(this.ad_), true);
-      this.scheduleLayout(dev().assertElement(this.ad_));
+      const owners = Services.ownersForDoc(this.element);
+      owners.updateInViewport(
+        this.element,
+        dev().assertElement(this.ad_),
+        true
+      );
+      owners.scheduleLayout(this.element, dev().assertElement(this.ad_));
     }
     return Promise.resolve();
   }
@@ -192,8 +198,9 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   layoutAd_() {
     const ad = dev().assertElement(this.ad_);
-    this.updateInViewport(ad, true);
-    this.scheduleLayout(ad);
+    const owners = Services.ownersForDoc(this.element);
+    owners.updateInViewport(this.element, ad, true);
+    owners.scheduleLayout(this.element, ad);
     // Wait for the earliest: `render-start` or `load-end` signals.
     // `render-start` is expected to arrive first, but it's not emitted by
     // all types of ads.
@@ -242,7 +249,10 @@ class AmpStickyAd extends AMP.BaseElement {
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
       this.visible_ = false;
-      this./*OK*/ scheduleUnlayout(dev().assertElement(this.ad_));
+      Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+        this.element,
+        dev().assertElement(this.ad_)
+      );
       this.viewport_.removeFromFixedLayer(this.element);
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);

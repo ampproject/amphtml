@@ -111,6 +111,7 @@ export function withDatePickerCommon(WrappedComponent) {
    * @param {?moment} endDate
    * @param {boolean} allowBlockedEndDate
    * @param {!moment} day
+   * @return {*} TODO(#23582): Specify return type
    */
   function isDayBlocked(list, startDate, endDate, allowBlockedEndDate, day) {
     const isBlocked = datesListContains(list, day);

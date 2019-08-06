@@ -227,6 +227,18 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>}
+   */
+  static loaderServiceForDoc(element) {
+    return /** @type {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>} */ (getElementServiceForDoc(
+      element,
+      'loader',
+      'amp-loader'
+    ));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/crypto-impl.Crypto}
    */
@@ -338,6 +350,17 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/owners-impl.Owners}
+   */
+  static ownersForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/owners-impl.Owners} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'owners'
+    ));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/performance-impl.Performance}
    */
@@ -385,10 +408,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/resources-impl.Resources}
+   * @return {!./service/resources-impl.ResourcesDef}
    */
   static resourcesForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/resources-impl.Resources} */ (getServiceForDoc(
+    return /** @type {!./service/resources-impl.ResourcesDef} */ (getServiceForDoc(
       elementOrAmpDoc,
       'resources'
     ));
@@ -396,10 +419,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/resources-impl.Resources>}
+   * @return {!Promise<!./service/resources-impl.ResourcesDef>}
    */
   static resourcesPromiseForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/resources-impl.Resources>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/resources-impl.ResourcesDef>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'resources'
     ));

@@ -61,6 +61,7 @@ const forbiddenTerms = {
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
       'extensions/amp-pinterest/0.1/save-button.js',
+      'validator/engine/validator_test.js',
     ],
   },
   '(^i-amp-|\\Wi-amp-)': {
@@ -123,10 +124,13 @@ const forbiddenTerms = {
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
       'build-system/pr-check/yarn-checks.js',
+      'build-system/tasks/build.js',
       'build-system/tasks/check-exact-versions.js',
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
+      'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
+      'build-system/compile/single-pass.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -175,7 +179,7 @@ const forbiddenTerms = {
   'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/action-impl.js',
       'src/service/core-services.js',
       'src/service/standard-actions-impl.js',
@@ -256,7 +260,7 @@ const forbiddenTerms = {
   'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/url-replacements-impl.js',
     ],
@@ -265,7 +269,7 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
-      'src/inabox/amp-inabox.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/viewer-impl.js',
     ],
@@ -299,7 +303,7 @@ const forbiddenTerms = {
   'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
@@ -386,6 +390,7 @@ const forbiddenTerms = {
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-viewer-integration/0.1/highlight-handler.js',
+      'extensions/amp-consent/0.1/consent-ui.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
@@ -471,7 +476,12 @@ const forbiddenTerms = {
     whitelist: ['extension/amp-bind/0.1/test/test-bind-expr.js'],
   },
   'storageForDoc': {
-    message: requiresReviewPrivacy,
+    message:
+      requiresReviewPrivacy +
+      ' Please refer to spec/amp-localstorage.md for more information on' +
+      ' the storage service usage.' +
+      ' Once approved, please also update the spec/amp-localstorage.md to' +
+      ' include your usage.',
     whitelist: [
       // Storage service is not allowed in amp4ads. No usage should there be
       // in extensions listed in the amp4ads spec:
@@ -486,13 +496,14 @@ const forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-access/0.1/amp-access-iframe.js',
+      'extensions/amp-script/0.1/amp-script.js',
+      'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
+      'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
       'src/experiments.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/fake-dom.js',
-      'extensions/amp-access/0.1/amp-access-iframe.js',
-      'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
-      'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
     ],
   },
   'sessionStorage': {
@@ -500,6 +511,8 @@ const forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/amp-access-iframe.js',
       'extensions/amp-accordion/0.1/amp-accordion.js',
+      'extensions/amp-script/0.1/amp-script.js',
+      'testing/fake-dom.js',
     ],
   },
   'indexedDB': {
@@ -1022,6 +1035,7 @@ function isInBuildSystemFixtureFolder(filePath) {
 /**
  * Strip Comments
  * @param {string} contents
+ * @return {*} TODO(#23582): Specify return type
  */
 function stripComments(contents) {
   // Multi-line comments
@@ -1199,6 +1213,7 @@ function isMissingTerms(file) {
 /**
  * Check a file for all the required terms and
  * any forbidden terms and log any errors found.
+ * @return {*} TODO(#23582): Specify return type
  */
 function presubmit() {
   let forbiddenFound = false;

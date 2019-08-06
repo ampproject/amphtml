@@ -17,7 +17,6 @@
 
 const closureCompiler = require('google-closure-compiler');
 const colors = require('ansi-colors');
-const {closureNailgunPort} = require('../tasks/nailgun');
 const {highlight} = require('cli-highlight');
 
 let compilerErrors = '';
@@ -27,6 +26,7 @@ let compilerErrors = '';
  * dropping the closure compiler plugin's logging prefix and then syntax
  * highlighting the error text.
  * @param {string} message
+ * @return {*} TODO(#23582): Specify return type
  */
 function formatClosureCompilerError(message) {
   const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
@@ -37,21 +37,21 @@ function formatClosureCompilerError(message) {
   return message;
 }
 
-exports.handleCompilerError = function(outputFilename) {
+function handleCompilerError(outputFilename) {
   handleError(
     colors.red('Compilation failed for ') +
       colors.cyan(outputFilename) +
       colors.red(':')
   );
-};
+}
 
-exports.handleTypeCheckError = function() {
+function handleTypeCheckError() {
   handleError(colors.red('Type checking failed:'));
-};
+}
 
-exports.handleSinglePassCompilerError = function() {
+function handleSinglePassCompilerError() {
   handleError(colors.red('Single pass compilation failed:'));
-};
+}
 
 /**
  * Prints an error message when compilation fails
@@ -65,9 +65,10 @@ function handleError(message) {
 
 /**
  * @param {Array<string>} compilerOptions
+ * @param {?string} nailgunPort
  * @return {stream.Writable}
  */
-exports.gulpClosureCompile = function(compilerOptions) {
+function gulpClosureCompile(compilerOptions, nailgunPort) {
   const initOptions = {
     extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
   };
@@ -87,7 +88,7 @@ exports.gulpClosureCompile = function(compilerOptions) {
     if (process.platform == 'darwin' || process.platform == 'linux') {
       compilerOptions = [
         '--nailgun-port',
-        closureNailgunPort,
+        nailgunPort,
         'org.ampproject.AmpCommandLineRunner',
         '--',
       ].concat(compilerOptions);
@@ -96,10 +97,17 @@ exports.gulpClosureCompile = function(compilerOptions) {
     } else {
       // For other platforms, use AMP's custom runner.jar
       closureCompiler.compiler.JAR_PATH = require.resolve(
-        '../runner/dist/runner.jar'
+        `../runner/dist/${nailgunPort}/runner.jar`
       );
     }
   }
 
   return closureCompiler.gulp(initOptions)(compilerOptions, pluginOptions);
+}
+
+module.exports = {
+  gulpClosureCompile,
+  handleCompilerError,
+  handleSinglePassCompilerError,
+  handleTypeCheckError,
 };
