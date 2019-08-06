@@ -270,6 +270,9 @@ export class Navigation {
       `Target '${target}' not supported.`
     );
 
+    // Resolve navigateTos relative to the source URL, not the proxy URL.
+    url = urlService.getSourceUrl(url);
+
     // If we have a target of "_blank", we will want to open a new window. A
     // target of "_top" should behave like it would on an anchor tag and
     // update the URL.

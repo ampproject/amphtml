@@ -397,6 +397,7 @@ export class FakeLocation {
     Object.defineProperty(this, 'href', {
       get: () => this.url_.href,
       set: href => this.assign(href),
+      configurable: true,
     });
 
     const properties = [
