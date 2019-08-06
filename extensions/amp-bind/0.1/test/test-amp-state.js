@@ -34,6 +34,7 @@ describes.realWin(
 
     let element;
     let ampState;
+    let bind;
 
     // Viewer-related vars.
     let viewer;
@@ -66,11 +67,14 @@ describes.realWin(
         .stub(xhrUtils, 'getViewerAuthTokenIfAvailable')
         .returns(Promise.resolve());
 
-      // We should only stub fetch_() and updateState_() on ampState.
+      // TODO(choumx): Remove stubbing of private function fetch_() once
+      // batchFetchJsonFor() is easily stub-able.
       sandbox
         .stub(ampState, 'fetch_')
         .returns(Promise.resolve({remote: 'data'}));
-      sandbox.stub(ampState, 'updateState_');
+
+      bind = {setState: sandbox.stub()};
+      sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
     it('should not fetch until viewer is visible', async () => {
@@ -81,7 +85,7 @@ describes.realWin(
       await whenFirstVisiblePromise.catch(() => {});
 
       expect(ampState.fetch_).to.not.have.been.called;
-      expect(ampState.updateState_).to.not.have.been.called;
+      expect(bind.setState).to.not.have.been.called;
     });
 
     it('should fetch if `src` attribute exists', async () => {
@@ -102,7 +106,11 @@ describes.realWin(
         /* token */ sinon.match.falsy
       );
 
-      expect(ampState.updateState_).calledWithMatch({remote: 'data'});
+      expect(bind.setState).calledWithMatch(
+        {myAmpState: {remote: 'data'}},
+        true,
+        false
+      );
     });
 
     it('should trigger "fetch-error" if fetch fails', async () => {
@@ -154,7 +162,7 @@ describes.realWin(
 
       // Fetch via "refresh" should also wait for viewer visible.
       expect(ampState.fetch_).to.not.have.been.called;
-      expect(ampState.updateState_).to.not.have.been.called;
+      expect(bind.setState).to.not.have.been.called;
 
       whenFirstVisiblePromiseResolve();
       await whenFirstVisiblePromise;
@@ -169,9 +177,13 @@ describes.realWin(
     it('should parse its child script', async () => {
       element.innerHTML =
         '<script type="application/json">{"local": "data"}</script>';
-      element.build();
+      await element.build();
 
-      expect(ampState.updateState_).calledWithMatch({local: 'data'});
+      expect(bind.setState).calledWithMatch(
+        {myAmpState: {local: 'data'}},
+        true,
+        false
+      );
 
       // await one macro-task to let viewer/fetch promise chains resolve.
       await new Promise(resolve => setTimeout(resolve, 0));
@@ -183,11 +195,15 @@ describes.realWin(
       element.innerHTML =
         '<script type="application/json">{"local": "data"}</script>';
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.build();
+      await element.build();
 
       // No fetch should happen until viewer is visible.
       expect(ampState.fetch_).to.not.have.been.called;
-      expect(ampState.updateState_).calledWithMatch({local: 'data'});
+      expect(bind.setState).calledWithMatch(
+        {myAmpState: {local: 'data'}},
+        true,
+        false
+      );
 
       whenFirstVisiblePromiseResolve();
       await whenFirstVisiblePromise;
@@ -195,7 +211,11 @@ describes.realWin(
       // await a single macro-task to let promise chains resolve.
       await new Promise(resolve => setTimeout(resolve, 0));
 
-      expect(ampState.updateState_).calledWithMatch({remote: 'data'});
+      expect(bind.setState).calledWithMatch(
+        {myAmpState: {remote: 'data'}},
+        true,
+        false
+      );
     });
 
     it('should not fetch if `src` is mutated and viewer is not visible', () => {
@@ -231,7 +251,11 @@ describes.realWin(
       await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.have.been.called;
-      expect(ampState.updateState_).calledWithMatch({remote: 'data'});
+      expect(bind.setState).calledWithMatch(
+        {myAmpState: {remote: 'data'}},
+        false,
+        true
+      );
     });
 
     it('should use token with [crossorigin="amp-viewer-auth-token-via-post"]`', async () => {
@@ -257,7 +281,11 @@ describes.realWin(
         'idToken'
       );
 
-      expect(ampState.updateState_).calledWithMatch({remote: 'data'});
+      expect(bind.setState).calledWithMatch(
+        {myAmpState: {remote: 'data'}},
+        true,
+        false
+      );
     });
   }
 );
