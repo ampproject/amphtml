@@ -33,7 +33,14 @@ import {
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
-import {childElementByAttr, removeChildren} from '../../../src/dom';
+import {
+  childElementByAttr,
+  matches,
+  removeChildren,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+  tryFocus,
+} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -48,13 +55,6 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {
-  matches,
-  removeChildren,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-  tryFocus,
-} from '../../../src/dom';
 import {px, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 

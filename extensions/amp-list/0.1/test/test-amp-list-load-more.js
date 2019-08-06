@@ -250,7 +250,10 @@ describes.realWin(
         div4.textContent = '4';
         updateBindingsStub.onCall(1).returns(Promise.resolve([div3, div4]));
 
-        await list.loadMoreCallback_(/* opt_fromClick */ true);
+        await list.loadMoreCallback_(
+          /* opt_reload */ false,
+          /* opt_fromClick */ true
+        );
 
         await expect(focusSpy).to.have.been.called;
       });
