@@ -419,6 +419,9 @@ class SandboxFixture {
   setup(env) {
     env.sandbox = sinon.createSandbox();
     env.sandbox.defineProperty = this.defineProperty_.bind(this);
+    env.sandbox.deleteProperty = (obj, propertyKey) => {
+      this.defineProperty_(obj, propertyKey, undefined);
+    };
   }
 
   /** @override */
@@ -428,19 +431,24 @@ class SandboxFixture {
   }
 
   defineProperty_(obj, propertyKey, descriptor) {
-    if (descriptor.configurable === false) {
-      throw new Error(
-        `sandbox.defineProperty(${obj.constructor.name},${propertyKey},{configurable=false}); ` +
-          `With configurable=false, you will not be able to restore the property!`
-      );
-    }
-    descriptor.configurable = true;
     this.defineProperties_.push({
       obj,
       propertyKey,
       descriptor: Object.getOwnPropertyDescriptor(obj, propertyKey),
     });
-    Object.defineProperty(obj, propertyKey, descriptor);
+
+    if (descriptor) {
+      if (descriptor.configurable === false) {
+        throw new Error(
+          `sandbox.defineProperty(${obj.constructor.name},${propertyKey},{configurable=false}); ` +
+            `With configurable=false, you will not be able to restore the property!`
+        );
+      }
+      descriptor.configurable = true;
+      Object.defineProperty(obj, propertyKey, descriptor);
+    } else {
+      delete obj[propertyKey];
+    }
   }
 
   restoreDefineProperty_() {
