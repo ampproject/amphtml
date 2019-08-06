@@ -39,6 +39,9 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'sizes',
 ];
 
+/** @type {string} */
+const TAG = 'amp-img';
+
 export class AmpImg extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -148,7 +151,7 @@ export class AmpImg extends BaseElement {
     if (this.element.getAttribute('role') == 'img') {
       this.element.removeAttribute('role');
       this.user().error(
-        'AMP-IMG',
+        TAG,
         'Setting role=img on amp-img elements breaks ' +
           'screen readers please just set alt or ARIA attributes, they will ' +
           'be correctly propagated for the underlying <img> element.'
@@ -239,7 +242,26 @@ export class AmpImg extends BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    return this.loadPromise(img);
+    return this.loadPromise(img).then(() => this.warnAgainstOversizedImages_());
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  warnAgainstOversizedImages_() {
+    return this.measureElement(() => {
+      const {naturalWidth, naturalHeight} = this.img_;
+      const {scrollWidth, scrollHeight} = this.element;
+      const widthRatio = naturalWidth / scrollWidth;
+      const heightRatio = naturalHeight / scrollHeight;
+      if (widthRatio > this.getDpr() * 2 || heightRatio > this.getDpr() * 2) {
+        this.user().warn(
+          TAG,
+          `natural img dimensions ${naturalWidth} x ${naturalHeight} too large for actual img dimensions ${scrollWidth} x ${scrollHeight}.`
+        );
+      }
+    });
   }
 
   /** @override */
@@ -307,5 +329,5 @@ export class AmpImg extends BaseElement {
  * @this {undefined}  // Make linter happy
  */
 export function installImg(win) {
-  registerElement(win, 'amp-img', AmpImg);
+  registerElement(win, TAG, AmpImg);
 }
