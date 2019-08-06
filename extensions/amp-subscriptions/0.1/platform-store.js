@@ -576,7 +576,7 @@ export class PlatformStore {
   selectApplicablePlatformForFactor_(factor) {
     const platformWeights = this.getAvailablePlatforms().map(platform => {
       const factorValue = platform.getSupportedScoreFactor(factor);
-      const weight = (typeof factorValue == 'number') ? factorValue : 0;
+      const weight = typeof factorValue == 'number' ? factorValue : 0;
       return {platform, weight};
     });
     return this.rankPlatformsByWeight_(platformWeights);
