@@ -110,7 +110,6 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     return script.layoutCallback().should.be.rejected;
   });
 
-
   it('should check response URL to handle redirects', () => {
     sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
     element.setAttribute('src', 'https://foo.example/foo.js');
