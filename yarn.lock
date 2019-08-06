@@ -1722,15 +1722,10 @@ ansi-colors@3.2.3:
   resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.2.3.tgz#57d35b8686e851e2cc04c403f1c00203976a1813"
   integrity sha512-LEHHyuhlPY3TmuUYMh2oz89lTShfvgbmzaBcxve9t/9Wuy7Dwf4yoAKcND7KFT1HAQfqZ12qtc+DUrBMeKF9nw==
 
-ansi-colors@4.1.1:
+ansi-colors@4.1.1, ansi-colors@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-4.1.1.tgz#cbb9ae256bf750af1eab344f229aa27fe94ba348"
   integrity sha512-JoX0apGbHaUJBNl6yF+p6JAFYZ666/hhCGKN5t9QFjbJQKUU/g8MNbFDbvfrgKXvI1QpZplPOnwIo99lX/AAmA==
-
-ansi-colors@^3.2.3:
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.2.4.tgz#e3a3da4bfbae6c86a9c285625de124a234026fbf"
-  integrity sha512-hHUXGagefjN2iRrID63xckIvotOXOojhQKWIPUZ4mNUZ9nLZW+7FMNoE1lOkEhNWYsx/7ysGIuJYCiMAA9FnrA==
 
 ansi-cyan@^0.1.1:
   version "0.1.1"
@@ -6663,17 +6658,17 @@ gulp-jest@4.0.2:
     plugin-error "^1.0.1"
     through2 "^2.0.1"
 
-gulp-jsonlint@1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/gulp-jsonlint/-/gulp-jsonlint-1.3.0.tgz#8203e5d533f947472c498d83526a7f179abb4a5c"
-  integrity sha512-Hjg5EK07j6SLvZ9KapQ6P/TggpX4D90aVGKitJ0E5npzB8AfhVK2z6gIBj8s3C+h7jthnwPJT8E9V/uQbMhJ9w==
+gulp-jsonlint@1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/gulp-jsonlint/-/gulp-jsonlint-1.3.1.tgz#6ebb117f50e2eb7cd8a4ff20094998110b55d296"
+  integrity sha512-vZmMMp2D+z8SpDc8PoSJ6IdxaaPk9zpwNjIPaHFe/qu+WyAoGQ0HTxulokLnZx7qsOx4GFwAjCEwXQyUI6Hi4A==
   dependencies:
-    ansi-colors "^3.2.3"
+    ansi-colors "^4.1.1"
     fancy-log "^1.3.3"
     jsonlint "1.6.3"
     map-stream "0.0.7"
     plugin-error "1.0.1"
-    through2 "^3.0.0"
+    through2 "^3.0.1"
 
 gulp-jsonminify@1.1.0:
   version "1.1.0"
