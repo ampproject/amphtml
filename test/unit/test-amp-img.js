@@ -211,8 +211,8 @@ describe('amp-img', () => {
     const img = ampImg.querySelector('img');
     expect(img.naturalWidth).to.equal(641);
     expect(img.naturalHeight).to.equal(481);
-    expect(img.offsetWidth).to.equal(100);
-    expect(img.offsetHeight).to.equal(100);
+    expect(img.clientWidth).to.equal(100);
+    expect(img.clientWidth).to.equal(100);
     expect(userWarnStub).to.be.calledOnce;
     expect(userWarnStub.args[0][1]).to.be.equal(warning);
   });

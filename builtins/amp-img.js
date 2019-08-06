@@ -252,13 +252,13 @@ export class AmpImg extends BaseElement {
   warnAgainstOversizedImages_() {
     return this.measureElement(() => {
       const {naturalWidth, naturalHeight} = this.img_;
-      const {scrollWidth, scrollHeight} = this.element;
-      const widthRatio = naturalWidth / scrollWidth;
-      const heightRatio = naturalHeight / scrollHeight;
+      const {clientWidth, clientHeight} = this.element;
+      const widthRatio = naturalWidth / clientWidth;
+      const heightRatio = naturalHeight / clientHeight;
       if (widthRatio > this.getDpr() * 2 || heightRatio > this.getDpr() * 2) {
         this.user().warn(
           TAG,
-          `natural img dimensions ${naturalWidth} x ${naturalHeight} too large for actual img dimensions ${scrollWidth} x ${scrollHeight}.`
+          `natural img dimensions ${naturalWidth} x ${naturalHeight} too large for actual img dimensions ${clientWidth} x ${clientWidth}.`
         );
       }
     });
