@@ -149,20 +149,32 @@ export class LocalSubscriptionBasePlatform {
 
   /** @override */
   activate(entitlement) {
-    const renderState = entitlement.json();
     // Note all platforms are resolved at this stage
-    // Get the ready to pay state of each platform and
-    // add it to the rederState object
-    this.serviceAdapter_
+    // Get the factor states of each platform and
+    // add them to the renderState object
+    this.createRenderState_(entitlement).then(renderState => {
+      this.renderer_.render(renderState);
+    });
+  }
+
+  /**
+   * Factored out for testability
+   * @param {./entitlement.Entitlement} entitlement
+   * @return {!Promise<!JsonObject>}
+   * @private
+   */
+  createRenderState_(entitlement) {
+    const renderState = entitlement.json();
+    return this.serviceAdapter_
       .getScoreFactorStates()
       .then(scoresValues => {
         renderState['scores'] = scoresValues;
-        this.urlBuilder_.setAuthResponse(renderState);
+        return this.urlBuilder_.setAuthResponse(renderState);
       })
-      .then(() => this.actions_.build())
       .then(() => {
-        this.renderer_.render(renderState);
-      });
+        return this.actions_.build();
+      })
+      .then(() => renderState);
   }
 
   /** @override */

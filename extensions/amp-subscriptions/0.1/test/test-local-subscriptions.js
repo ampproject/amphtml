@@ -26,7 +26,6 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   let localSubscriptionPlatform;
   let serviceAdapter;
   let getEncryptedDocumentKeyStub;
-  let getScoreFactorStatesStub;
 
   const actionMap = {
     [Action.SUBSCRIBE]: 'https://lipsum.com/subscribe',
@@ -73,7 +72,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     serviceAdapter = new ServiceAdapter(null);
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
-    getScoreFactorStatesStub = sandbox
+    sandbox
       .stub(serviceAdapter, 'getScoreFactorStates')
       .callsFake(() => Promise.resolve(fakeScoreStates));
     sandbox
@@ -374,10 +373,35 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         localSubscriptionPlatform.renderer_,
         'render'
       );
+      const stateSub = sandbox
+        .stub(localSubscriptionPlatform, 'createRenderState_')
+        .callsFake(() => Promise.resolve({foo: 'bar'}));
       localSubscriptionPlatform.activate(entitlement);
-      return localSubscriptionPlatform.actions_.build().then(() => {
+      expect(stateSub).to.be.calledOnce;
+      return Promise.resolve().then(() => {
         expect(renderStub).to.be.calledOnce;
-        expect(getScoreFactorStatesStub).to.be.calledOnce;
+      });
+    });
+
+    it('should build renderState', () => {
+      return expect(
+        localSubscriptionPlatform.createRenderState_(entitlement)
+      ).to.eventually.deep.equal({
+        'source': 'sample-source',
+        'service': '',
+        'granted': true,
+        'grantReason': 'SUBSCRIBER',
+        'data': null,
+        'scores': {
+          'isReadyToPay': {
+            'subscription-google-com': 1,
+            'local': 0,
+          },
+          'supportdViewer': {
+            'subscription-google-com': 1,
+            'local': 0,
+          },
+        },
       });
     });
 
