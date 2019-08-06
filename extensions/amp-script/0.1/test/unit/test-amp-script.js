@@ -131,7 +131,8 @@ describe('SanitizerImpl', () => {
     });
 
     describe('changeStorage()', () => {
-      it('should set items', () => {
+      // TODO(choumx, #23717): Fix this on Travis.
+      it.skip('should set items', () => {
         s.changeStorage('local', 'x', '1');
         expect(win.localStorage.length).to.equal(1);
         expect(win.localStorage.getItem('x')).to.equal('1');
@@ -155,7 +156,8 @@ describe('SanitizerImpl', () => {
         expect(win.sessionStorage.getItem('amp-y')).to.be.null;
       });
 
-      it('should remove items', () => {
+      // TODO(choumx, #23717): Fix this on Travis.
+      it.skip('should remove items', () => {
         win.localStorage.setItem('x', '1');
         s.changeStorage('local', 'x', null);
         expect(win.localStorage.length).to.equal(0);
