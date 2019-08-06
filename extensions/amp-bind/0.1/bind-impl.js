@@ -547,10 +547,6 @@ export class Bind {
       .then(() => {
         // Listen for DOM updates (e.g. template render) to rescan for bindings.
         root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
-        // In dev mode, check default values against initial expression results.
-        if (getMode().development) {
-          return this.evaluate_().then(results => this.verify_(results));
-        }
       })
       .then(() => {
         const ampStates = root.querySelectorAll('AMP-STATE');
@@ -565,6 +561,10 @@ export class Bind {
         return Promise.all(whenParsed);
       })
       .then(() => {
+        // In dev mode, check default values against initial expression results.
+        if (getMode().development) {
+          return this.evaluate_().then(results => this.verify_(results));
+        }
         // Bind is "ready" when its initialization completes _and_ all <amp-state>
         // elements' local data is parsed and processed (not remote data).
         this.viewer_.sendMessage('bindReady', undefined);

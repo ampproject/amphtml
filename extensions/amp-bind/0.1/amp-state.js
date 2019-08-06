@@ -121,7 +121,7 @@ export class AmpState extends AMP.BaseElement {
   parseAndUpdate() {
     if (this.localData_ === undefined) {
       this.localData_ = this.parse_();
-      if (this.localData_) {
+      if (this.localData_ !== null) {
         return this.updateState_(this.localData_, /* isInit */ true);
       }
     }
