@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,18 +25,18 @@ amp-addthis[data-widget-type="messages"] {
   top: 0;
 }
 amp-addthis .i-amphtml-addthis-close {
-  right: 10px;
-  top: 10px;
-  width: 32px;
-  height: 32px;
-  opacity: 0.5;
+  right: 10px!important;
+  top: 10px!important;
+  width: 32px!important;
+  height: 32px!important;
+  opacity: 0.5!important;
   float:right!important;
   cursor: pointer!important;
   position: relative!important;
   z-index: 1!important;
 }
 amp-addthis .i-amphtml-addthis-close:hover {
-  opacity: 1;
+  opacity: 1!important;
 }
 amp-addthis .i-amphtml-addthis-close:before, .i-amphtml-addthis-close:after {
   position: absolute;

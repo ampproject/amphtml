@@ -228,7 +228,7 @@ class AmpAddThis extends AMP.BaseElement {
       if (this.element.getAttribute('data-widget-type') === 'messages') {
         const closeButton = createElementWithAttributes(
           this.win.document,
-          'div',
+          'button',
           dict({
             'class': 'i-amphtml-addthis-close',
           })
