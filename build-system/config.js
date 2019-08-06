@@ -78,10 +78,16 @@ const chaiAsPromised = ['test/chai-as-promised/chai-as-promised.js'];
 const unitTestPaths = [
   'test/unit/**/*.js',
   'ads/**/test/test-*.js',
+  'ads/**/test/unit/test-*.js',
   'extensions/**/test/*.js',
+  'extensions/**/test/unit/*.js',
 ];
 
-const unitTestOnSaucePaths = ['test/unit/**/*.js', 'ads/**/test/test-*.js'];
+const unitTestOnSaucePaths = [
+  'test/unit/**/*.js',
+  'ads/**/test/test-*.js',
+  'ads/**/test/unit/test-*.js',
+];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
