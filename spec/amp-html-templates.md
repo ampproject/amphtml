@@ -87,7 +87,7 @@ a specific AMP element how `templateElement` and `data` are provided.
 
 ## Templates
 
-Here's a list of available extended templates:
+Here's a list of available templates:
 
 | Template  | Description |
 | --------- | ----------- |
