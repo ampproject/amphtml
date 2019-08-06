@@ -234,32 +234,30 @@ describes.realWin(
       expect(ampState.updateState_).calledWithMatch({remote: 'data'});
     });
 
-    it('should use token with [crossorigin="amp-viewer-auth-token-via-post"]`',
-      async () => {
-        xhrUtils.getViewerAuthTokenIfAvailable.returns(
-          Promise.resolve('idToken')
-        );
+    it('should use token with [crossorigin="amp-viewer-auth-token-via-post"]`', async () => {
+      xhrUtils.getViewerAuthTokenIfAvailable.returns(
+        Promise.resolve('idToken')
+      );
 
-        element.setAttribute('src', 'https://foo.com/bar?baz=1');
-        element.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-        element.build();
+      element.setAttribute('src', 'https://foo.com/bar?baz=1');
+      element.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
+      element.build();
 
-        whenFirstVisiblePromiseResolve();
-        await whenFirstVisiblePromise;
+      whenFirstVisiblePromiseResolve();
+      await whenFirstVisiblePromise;
 
-        // await a single macro-task to let promise chains resolve.
-        await new Promise(resolve => setTimeout(resolve, 0));
+      // await a single macro-task to let promise chains resolve.
+      await new Promise(resolve => setTimeout(resolve, 0));
 
-        expect(ampState.fetch_).to.have.been.calledOnce;
-        expect(ampState.fetch_).to.have.been.calledWithExactly(
-          /* ampdoc */ sinon.match.any,
-          UrlReplacementPolicy.ALL,
-          /* refresh */ sinon.match.falsy,
-          'idToken'
-        );
+      expect(ampState.fetch_).to.have.been.calledOnce;
+      expect(ampState.fetch_).to.have.been.calledWithExactly(
+        /* ampdoc */ sinon.match.any,
+        UrlReplacementPolicy.ALL,
+        /* refresh */ sinon.match.falsy,
+        'idToken'
+      );
 
-        expect(ampState.updateState_).calledWithMatch({remote: 'data'});
-      }
-    );
+      expect(ampState.updateState_).calledWithMatch({remote: 'data'});
+    });
   }
 );
