@@ -418,7 +418,7 @@ describe('cid', () => {
     it('should expire on read after 365 days', () => {
       const expected =
         'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
-        return compare('e2', expected).then(() => {
+      return compare('e2', expected).then(() => {
         clock.tick(364 * DAY);
         seed = 2;
         return compare('e2', expected).then(() => {
