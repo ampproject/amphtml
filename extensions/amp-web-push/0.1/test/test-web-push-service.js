@@ -32,8 +32,10 @@ describes.realWin(
   },
   env => {
     let webPush;
+    let sandbox;
 
     beforeEach(() => {
+      sandbox = env.sandbox;
       webPush = new WebPushService(env.ampdoc);
     });
 
@@ -42,9 +44,8 @@ describes.realWin(
     });
 
     it('should not support environment missing Notification API', () => {
-      Object.defineProperty(env.win, 'Notification', {
+      sandbox.defineProperty(env.win, 'Notification', {
         enumerable: false,
-        configurable: false,
         writable: false,
         value: undefined,
       });
@@ -52,9 +53,8 @@ describes.realWin(
     });
 
     it('should not support environment missing Service Worker API', () => {
-      Object.defineProperty(env.win.navigator, 'serviceWorker', {
+      sandbox.defineProperty(env.win.navigator, 'serviceWorker', {
         enumerable: false,
-        configurable: false,
         writable: false,
         value: undefined,
       });
@@ -62,9 +62,8 @@ describes.realWin(
     });
 
     it('should not support environment missing PushManager API', () => {
-      Object.defineProperty(env.win, 'PushManager', {
+      sandbox.defineProperty(env.win, 'PushManager', {
         enumerable: false,
-        configurable: false,
         writable: false,
         value: undefined,
       });
@@ -73,9 +72,8 @@ describes.realWin(
 
     it('an unsupported environment should prevent initializing', () => {
       // Cause push to not be supported on this environment
-      Object.defineProperty(env.win, 'PushManager', {
+      sandbox.defineProperty(env.win, 'PushManager', {
         enumerable: false,
-        configurable: false,
         writable: false,
         value: undefined,
       });

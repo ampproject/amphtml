@@ -37,6 +37,7 @@ describes.realWin(
   },
   env => {
     let win;
+    let sandbox;
     let ampStickyAd;
     let ampAd;
     let impl;
@@ -45,6 +46,7 @@ describes.realWin(
     describe('with valid child 1.0', () => {
       beforeEach(() => {
         win = env.win;
+        sandbox = env.sandbox;
         ampStickyAd = win.document.createElement('amp-sticky-ad');
         ampStickyAd.setAttribute('layout', 'nodisplay');
         ampAd = createElementWithAttributes(win.document, 'amp-ad', {
@@ -370,7 +372,7 @@ describes.realWin(
       impl.vsync_.mutate = function(callback) {
         callback();
       };
-      Object.defineProperty(impl.element, 'offsetHeight', {value: 20});
+      sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});
 
       impl.display_();
       impl.ad_.signals().signal('built');
@@ -415,7 +417,7 @@ describes.realWin(
       impl.vsync_.mutate = function(callback) {
         callback();
       };
-      Object.defineProperty(impl.element, 'offsetHeight', {value: 20});
+      sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});
 
       impl.display_();
       impl.ad_.signals().signal('built');

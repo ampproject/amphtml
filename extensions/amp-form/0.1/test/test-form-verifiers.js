@@ -21,8 +21,13 @@ import {
 } from '../form-verifiers';
 
 describes.fakeWin('amp-form async verification', {}, env => {
+  let sandbox;
+  beforeEach(() => {
+    sandbox = env.sandbox;
+  });
+
   function stubValidationMessage(input) {
-    Object.defineProperty(input, 'validationMessage', {
+    sandbox.defineProperty(input, 'validationMessage', {
       get() {
         return this.fakeValidationMessage_;
       },
@@ -32,7 +37,7 @@ describes.fakeWin('amp-form async verification', {}, env => {
     });
 
     const originalSetCustomValidity = input.setCustomValidity.bind(input);
-    Object.defineProperty(input, 'setCustomValidity', {
+    sandbox.defineProperty(input, 'setCustomValidity', {
       value(message) {
         this.validationMessage = message;
         originalSetCustomValidity(message);
@@ -110,11 +115,6 @@ describes.fakeWin('amp-form async verification', {}, env => {
   });
 
   describe('AsyncVerifier', () => {
-    let sandbox;
-    beforeEach(() => {
-      sandbox = env.sandbox;
-    });
-
     it('should not submit when no element has a value', () => {
       const xhrSpy = sandbox.spy(() => Promise.resolve());
       const form = getForm(env.win.document);

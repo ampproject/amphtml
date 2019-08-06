@@ -307,7 +307,7 @@ describe('chunk', () => {
     },
     env => {
       beforeEach(() => {
-        Object.defineProperty(env.win.document, 'hidden', {
+        env.sandbox.defineProperty(env.win.document, 'hidden', {
           get: () => false,
         });
       });
@@ -328,7 +328,7 @@ describe('chunk', () => {
         env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
           return false;
         });
-        Object.defineProperty(env.win.document, 'hidden', {
+        env.sandbox.defineProperty(env.win.document, 'hidden', {
           get: () => false,
         });
       });

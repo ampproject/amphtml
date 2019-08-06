@@ -43,6 +43,7 @@ describes.fakeWin(
   },
   env => {
     let win;
+    let sandbox;
     let clock;
     let ampdocService;
     let ampdocServiceMock;
@@ -50,7 +51,8 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
-      clock = env.sandbox.useFakeTimers();
+      sandbox = env.sandbox;
+      clock = sandbox.useFakeTimers();
       extensionElementIndex = 0;
       ampdocService = {
         isSingleDoc: () => true,
@@ -208,7 +210,7 @@ describes.fakeWin(
       // JS executing before the rest of the doc has been parsed.
       const {body} = win.document;
       let accessedOnce = false;
-      Object.defineProperty(win.document, 'body', {
+      sandbox.defineProperty(win.document, 'body', {
         get: () => {
           if (accessedOnce) {
             return body;

@@ -434,6 +434,7 @@ class SandboxFixture {
           `With configurable=false, you will not be able to restore the property!`
       );
     }
+    descriptor.configurable = true;
     this.defineProperties_.push({
       obj,
       propertyKey,
@@ -452,7 +453,7 @@ class SandboxFixture {
         }
       } catch (e) {
         throw new Error(
-          `Failed to restore sandbox.defineProperty(${item.obj.constructor.name},${item.propertyKey})`
+          `Failed to restore sandbox.defineProperty(${item.obj.constructor.name},${item.propertyKey}); ${e}`
         );
       }
     });
