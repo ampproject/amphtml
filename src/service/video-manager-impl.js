@@ -100,6 +100,9 @@ export class VideoManager {
     /** @private @const */
     this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
+    /** @private {!Array<!UnlistenDef>} */
+    this.unlisteners_ = [];
+
     /**
      * @private
      * @const
@@ -120,6 +123,11 @@ export class VideoManager {
 
   /** @override */
   dispose() {
+    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.length = 0;
+
+    this.getAutoFullscreenManager_().dispose();
+
     if (!this.entries_) {
       return;
     }
@@ -250,18 +258,22 @@ export class VideoManager {
   maybeInstallVisibilityObserver_(entry) {
     const {element} = entry.video;
 
-    listen(element, VideoEvents.VISIBILITY, details => {
-      const data = getData(details);
-      if (data && data['visible'] == true) {
-        entry.updateVisibility(/* opt_forceVisible */ true);
-      } else {
-        entry.updateVisibility();
-      }
-    });
+    this.unlisteners_.push(
+      listen(element, VideoEvents.VISIBILITY, details => {
+        const data = getData(details);
+        if (data && data['visible'] == true) {
+          entry.updateVisibility(/* opt_forceVisible */ true);
+        } else {
+          entry.updateVisibility();
+        }
+      })
+    );
 
-    listen(element, VideoEvents.RELOAD, () => {
-      entry.videoLoaded();
-    });
+    this.unlisteners_.push(
+      listen(element, VideoEvents.RELOAD, () => {
+        entry.videoLoaded();
+      })
+    );
 
     // TODO(aghassemi, #6425): Use IntersectionObserver
     if (!this.scrollListenerInstalled_) {
@@ -441,6 +453,9 @@ class VideoEntry {
       this.manager_.installAutoplayStyles();
     }
 
+    /** @private {!Array<!UnlistenDef>} */
+    this.unlisteners_ = [];
+
     // Media Session API Variables
 
     /** @private {!../mediasession-helper.MetadataDef} */
@@ -459,21 +474,22 @@ class VideoEntry {
     listenOncePromise(video.element, VideoEvents.LOAD).then(() =>
       this.videoLoaded()
     );
-    listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
-    listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
-    listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
-    listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false));
-    listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
-
-    listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
-      const data = getData(e);
-      const eventType = data['eventType'];
-      const vars = data['vars'];
-      this.logCustomAnalytics_(
-        dev().assertString(eventType, '`eventType` missing'),
-        vars
-      );
-    });
+    this.unlisteners_.push(
+      listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_()),
+      listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_()),
+      listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true)),
+      listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false)),
+      listen(video.element, VideoEvents.ENDED, () => this.videoEnded_()),
+      listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
+        const data = getData(e);
+        const eventType = data['eventType'];
+        const vars = data['vars'];
+        this.logCustomAnalytics_(
+          dev().assertString(eventType, '`eventType` missing'),
+          vars
+        );
+      })
+    );
 
     video
       .signals()
@@ -503,6 +519,8 @@ class VideoEntry {
   /** @public */
   dispose() {
     this.getAnalyticsPercentageTracker_().stop();
+    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.length = 0;
   }
 
   /**
@@ -996,6 +1014,9 @@ export class AutoFullscreenManager {
     /** @private @const {!Array<!../video-interface.VideoOrBaseElementDef>} */
     this.entries_ = [];
 
+    /** @private {!Array<!UnlistenDef>} */
+    this.unlisteners_ = [];
+
     // eslint-disable-next-line jsdoc/require-returns
     /** @private @const {function()} */
     this.boundSelectBestCentered_ = () => this.selectBestCenteredInPortrait_();
@@ -1018,6 +1039,12 @@ export class AutoFullscreenManager {
     this.installFullscreenListener_();
   }
 
+  /** @public */
+  dispose() {
+    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.length = 0;
+  }
+
   /** @param {!VideoEntry} entry */
   register(entry) {
     const {video} = entry;
@@ -1029,9 +1056,11 @@ export class AutoFullscreenManager {
 
     this.entries_.push(video);
 
-    listen(element, VideoEvents.PAUSE, this.boundSelectBestCentered_);
-    listen(element, VideoEvents.PLAYING, this.boundSelectBestCentered_);
-    listen(element, VideoEvents.ENDED, this.boundSelectBestCentered_);
+    this.unlisteners_.push(
+      listen(element, VideoEvents.PAUSE, this.boundSelectBestCentered_),
+      listen(element, VideoEvents.PLAYING, this.boundSelectBestCentered_),
+      listen(element, VideoEvents.ENDED, this.boundSelectBestCentered_)
+    );
 
     video
       .signals()
@@ -1046,10 +1075,12 @@ export class AutoFullscreenManager {
   installFullscreenListener_() {
     const root = this.ampdoc_.getRootNode();
     const exitHandler = () => this.onFullscreenExit_();
-    listen(root, 'webkitfullscreenchange', exitHandler);
-    listen(root, 'mozfullscreenchange', exitHandler);
-    listen(root, 'fullscreenchange', exitHandler);
-    listen(root, 'MSFullscreenChange', exitHandler);
+    this.unlisteners_.push(
+      listen(root, 'webkitfullscreenchange', exitHandler),
+      listen(root, 'mozfullscreenchange', exitHandler),
+      listen(root, 'fullscreenchange', exitHandler),
+      listen(root, 'MSFullscreenChange', exitHandler)
+    );
   }
 
   /**
@@ -1097,11 +1128,15 @@ export class AutoFullscreenManager {
     // exit fullscreen since 'change' does not fire in this case.
     if (screen && 'orientation' in screen) {
       const orient = /** @type {!ScreenOrientation} */ (screen.orientation);
-      listen(orient, 'change', () => this.onRotation_());
+      this.unlisteners_.push(
+        listen(orient, 'change', () => this.onRotation_())
+      );
     }
     // iOS Safari does not have screen.orientation but classifies
     // 'orientationchange' as a user interaction.
-    listen(win, 'orientationchange', () => this.onRotation_());
+    this.unlisteners_.push(
+      listen(win, 'orientationchange', () => this.onRotation_())
+    );
   }
 
   /** @private */
