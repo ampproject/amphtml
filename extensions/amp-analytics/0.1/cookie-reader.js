@@ -16,7 +16,7 @@
 
 import {getCookie} from '../../../src/cookies';
 import {getMode} from '../../../src/mode';
-import {isInFie} from '../../../src/friendly-iframe-embed';
+import {isInFie} from '../../../src/iframe-helper';
 import {isProxyOrigin} from '../../../src/url';
 
 /**

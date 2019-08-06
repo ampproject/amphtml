@@ -366,12 +366,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
-    id: 'amp-force-prerender-visible-elements',
-    name:
-      'Force builds the AMP elements that are visible and in the viewport ' +
-      'during prerendering, beyond the 20 elements limit.',
-    spec: 'https://github.com/ampproject/amphtml/issues/21791',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21792',
+    id: 'inabox-no-chunking',
+    name: 'Experiment to disable startup chunking in inabox runtime',
+    spec: 'https://github.com/ampproject/amphtml/issues/23573',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23573',
   },
   {
     id: 'amp-user-location',
@@ -380,12 +378,6 @@ const EXPERIMENTS = [
       'access after user interaction and approval',
     spec: 'https://github.com/ampproject/amphtml/issues/8929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
-  },
-  {
-    id: 'margin-bottom-in-content-height',
-    name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
-    spec: 'https://github.com/ampproject/amphtml/issues/22718',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
   },
   {
     id: 'untrusted-xhr-interception',
@@ -400,6 +392,13 @@ const EXPERIMENTS = [
     name: 'New default loaders',
     spec: 'https://github.com/ampproject/amphtml/issues/20237',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
+  },
+  {
+    id: 'macro-after-long-task',
+    name:
+      'If applicable, convert remaining micro tasks to the next macro ' +
+      ' tasks if a previous micro task execution took too long',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
   },
 ];
 
@@ -465,6 +464,7 @@ function build() {
 /**
  * Builds one row in the channel or experiments table.
  * @param {!ExperimentDef} experiment
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildExperimentRow(experiment) {
   const tr = document.createElement('tr');
@@ -647,6 +647,7 @@ function showConfirmation_(message, callback) {
  * Loads the AMP_CONFIG objects from whatever the v0.js is that the
  * user has (depends on whether they opted into canary or RC), so that
  * experiment state can reflect the default activated experiments.
+ * @return {*} TODO(#23582): Specify return type
  */
 function getAmpConfig() {
   const deferred = new Deferred();

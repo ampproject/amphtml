@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from '../amp-events';
-import {Deferred} from '../utils/promise';
+import {Deferred, tryResolve} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
@@ -132,7 +132,7 @@ export class Resource {
   /**
    * @param {number} id
    * @param {!AmpElement} element
-   * @param {!./resources-impl.Resources} resources
+   * @param {!./resources-impl.ResourcesDef} resources
    */
   constructor(id, element, resources) {
     element[RESOURCE_PROP_] = this;
@@ -149,7 +149,7 @@ export class Resource {
     /** @const {!Window} */
     this.hostWin = toWin(element.ownerDocument.defaultView);
 
-    /** @const @private {!./resources-impl.Resources} */
+    /** @const @private {!./resources-impl.ResourcesDef} */
     this.resources_ = resources;
 
     /** @const @private {boolean} */
@@ -491,14 +491,14 @@ export class Resource {
 
   /** Use resources for measurement */
   measureViaResources_() {
-    const viewport = this.resources_.getViewport();
-    const box = this.resources_.getViewport().getLayoutRect(this.element);
+    const viewport = Services.viewportForDoc(this.element);
+    const box = viewport.getLayoutRect(this.element);
     this.layoutBox_ = box;
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
     if (viewport.supportsPositionFixed() && this.isDisplayed()) {
-      const {win} = this.resources_;
+      const {win} = this.resources_.getAmpdoc();
       const {body} = win.document;
       for (let n = this.element; n && n != body; n = n./*OK*/ offsetParent) {
         if (n.isAlwaysFixed && n.isAlwaysFixed()) {
@@ -622,7 +622,7 @@ export class Resource {
     if (!this.isFixed_) {
       return this.layoutBox_;
     }
-    const viewport = this.resources_.getViewport();
+    const viewport = Services.viewportForDoc(this.element);
     return moveLayoutRect(
       this.layoutBox_,
       viewport.getScrollLeft(),
@@ -645,6 +645,22 @@ export class Resource {
     }
 
     return this.layoutBox_;
+  }
+
+  /**
+   * Returns the resource's layout box relative to the page. It will be
+   * measured if the resource hasn't ever be measured.
+   *
+   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   */
+  getPageLayoutBoxAsync() {
+    if (this.hasBeenMeasured()) {
+      return tryResolve(() => this.getPageLayoutBox());
+    }
+    return Services.vsyncFor(this.hostWin).measurePromise(() => {
+      this.measure();
+      return this.getPageLayoutBox();
+    });
   }
 
   /**
@@ -753,7 +769,8 @@ export class Resource {
 
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
-    const viewportBox = this.resources_.getViewport().getRect();
+    const viewport = Services.viewportForDoc(this.element);
+    const viewportBox = viewport.getRect();
     const layoutBox = this.getLayoutBox();
     const scrollDirection = this.resources_.getScrollDirection();
     let scrollPenalty = 1;

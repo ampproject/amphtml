@@ -407,6 +407,7 @@ class SandboxFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
+    this.defineProperties_ = [];
   }
 
   /** @override */
@@ -417,11 +418,53 @@ class SandboxFixture {
   /** @override */
   setup(env) {
     env.sandbox = sinon.createSandbox();
+    env.sandbox.defineProperty = this.defineProperty_.bind(this);
+    env.sandbox.deleteProperty = (obj, propertyKey) => {
+      this.defineProperty_(obj, propertyKey, undefined);
+    };
   }
 
   /** @override */
   teardown(env) {
+    this.restoreDefineProperty_();
     env.sandbox.restore();
+  }
+
+  defineProperty_(obj, propertyKey, descriptor) {
+    this.defineProperties_.push({
+      obj,
+      propertyKey,
+      descriptor: Object.getOwnPropertyDescriptor(obj, propertyKey),
+    });
+
+    if (descriptor) {
+      if (descriptor.configurable === false) {
+        throw new Error(
+          `sandbox.defineProperty(${obj.constructor.name},${propertyKey},{configurable=false}); ` +
+            `With configurable=false, you will not be able to restore the property!`
+        );
+      }
+      descriptor.configurable = true;
+      Object.defineProperty(obj, propertyKey, descriptor);
+    } else {
+      delete obj[propertyKey];
+    }
+  }
+
+  restoreDefineProperty_() {
+    this.defineProperties_.forEach(item => {
+      try {
+        if (item.descriptor === undefined) {
+          delete item.obj[item.propertyKey];
+        } else {
+          Object.defineProperty(item.obj, item.propertyKey, item.descriptor);
+        }
+      } catch (e) {
+        throw new Error(
+          `Failed to restore sandbox.defineProperty(${item.obj.constructor.name},${item.propertyKey}); ${e}`
+        );
+      }
+    });
   }
 }
 
@@ -615,7 +658,7 @@ class RealWinFixture {
         resolve();
       };
       iframe.onerror = reject;
-      document.body.appendChild(iframe);
+      document.body.insertBefore(iframe, document.body.firstChild);
     });
   }
 

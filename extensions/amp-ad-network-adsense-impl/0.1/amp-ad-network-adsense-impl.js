@@ -46,6 +46,7 @@ import {
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
 import {Navigation} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {
@@ -292,6 +293,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
       },
+      [[FIE_CSS_CLEANUP_EXP.branch]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [FIE_CSS_CLEANUP_EXP.control],
+          [FIE_CSS_CLEANUP_EXP.experiment],
+        ],
+      },
     });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
     Object.keys(setExps).forEach(expName =>
@@ -492,11 +500,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   isXhrAllowed() {
-    return (
-      isCdnProxy(this.win) ||
-      getMode(this.win).localDev ||
-      getMode(this.win).test
-    );
+    return isCdnProxy(this.win);
   }
 
   /** @override */

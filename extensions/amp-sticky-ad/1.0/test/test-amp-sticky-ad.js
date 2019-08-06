@@ -16,6 +16,7 @@
 
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-sticky-ad';
+import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
 import {poll} from '../../../../testing/iframe';
@@ -36,6 +37,7 @@ describes.realWin(
   },
   env => {
     let win;
+    let sandbox;
     let ampStickyAd;
     let ampAd;
     let impl;
@@ -44,6 +46,7 @@ describes.realWin(
     describe('with valid child 1.0', () => {
       beforeEach(() => {
         win = env.win;
+        sandbox = env.sandbox;
         ampStickyAd = win.document.createElement('amp-sticky-ad');
         ampStickyAd.setAttribute('layout', 'nodisplay');
         ampAd = createElementWithAttributes(win.document, 'amp-ad', {
@@ -75,7 +78,10 @@ describes.realWin(
       });
 
       it('should not build when scrollTop not greater than 1', () => {
-        const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
+        const scheduleLayoutSpy = sandbox.spy(
+          Services.ownersForDoc(impl.element),
+          'scheduleLayout'
+        );
         const removeOnScrollListenerSpy = sandbox.spy(
           impl,
           'removeOnScrollListener_'
@@ -366,7 +372,7 @@ describes.realWin(
       impl.vsync_.mutate = function(callback) {
         callback();
       };
-      Object.defineProperty(impl.element, 'offsetHeight', {value: 20});
+      sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});
 
       impl.display_();
       impl.ad_.signals().signal('built');
@@ -411,7 +417,7 @@ describes.realWin(
       impl.vsync_.mutate = function(callback) {
         callback();
       };
-      Object.defineProperty(impl.element, 'offsetHeight', {value: 20});
+      sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});
 
       impl.display_();
       impl.ad_.signals().signal('built');

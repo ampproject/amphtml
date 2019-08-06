@@ -35,7 +35,7 @@ import {
   createNewLoaderElement,
   isNewLoaderExperimentEnabled,
 } from '../src/loader.js';
-import {dev, devAssert, rethrowAsync, user} from './log';
+import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
@@ -192,7 +192,7 @@ function createBaseCustomElementClass(win) {
 
       /**
        * Resources can only be looked up when an element is attached.
-       * @private {?./service/resources-impl.Resources}
+       * @private {?./service/resources-impl.ResourcesDef}
        */
       this.resources_ = null;
 
@@ -342,7 +342,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Returns Resources manager. Only available after attachment. It throws
      * exception before the element is attached.
-     * @return {!./service/resources-impl.Resources}
+     * @return {!./service/resources-impl.ResourcesDef}
      * @final @this {!Element}
      * @package
      */
@@ -351,7 +351,7 @@ function createBaseCustomElementClass(win) {
         this.resources_,
         'no resources yet, since element is not attached'
       );
-      return /** @typedef {!./service/resources-impl.Resources} */ this
+      return /** @typedef {!./service/resources-impl.ResourcesDef} */ this
         .resources_;
     }
 
@@ -446,15 +446,14 @@ function createBaseCustomElementClass(win) {
         this.layout_ != Layout.NODISPLAY &&
         !this.implementation_.isLayoutSupported(this.layout_)
       ) {
-        let error = 'Layout not supported: ' + this.layout_;
-        if (!this.getAttribute('layout')) {
-          error +=
-            '. The element did not specify a layout attribute. ' +
-            'Check https://www.ampproject.org/docs/guides/' +
-            'responsive/control_layout and the respective element ' +
-            'documentation for details.';
-        }
-        throw user().createError(error);
+        userAssert(
+          this.getAttribute('layout'),
+          'The element did not specify a layout attribute. ' +
+            'Check https://amp.dev/documentation/guides-and-tutorials/' +
+            'develop/style_and_layout/control_layout and the respective ' +
+            'element documentation for details.'
+        );
+        userAssert(false, `Layout not supported: ${this.layout_}`);
       }
     }
 
@@ -1032,6 +1031,18 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Creates a loader logo.
+     * @return {{
+     *  content: (!Element|undefined),
+     *  color: (string|undefined),
+     * }}
+     * @final @this {!Element}
+     */
+    createLoaderLogo() {
+      return this.implementation_.createLoaderLogoCallback();
+    }
+
+    /**
      * Whether the element should ever render when it is not in viewport.
      * @return {boolean|number}
      * @final @this {!Element}
@@ -1600,7 +1611,10 @@ function createBaseCustomElementClass(win) {
       if (show == true) {
         const fallbackElement = this.getFallback();
         if (fallbackElement) {
-          this.getResources().scheduleLayout(this, fallbackElement);
+          Services.ownersForDoc(this.getAmpDoc()).scheduleLayout(
+            this.element,
+            fallbackElement
+          );
         }
       }
     }
@@ -1640,10 +1654,11 @@ function createBaseCustomElementClass(win) {
       }
 
       if (
+        this.layoutCount_ > 0 ||
+        this.layoutWidth_ <= 0 || // Layout is not ready or invisible
         this.loadingDisabled_ ||
         !isLoadingAllowed(this) ||
         isTooSmallForLoader(this) ||
-        this.layoutCount_ > 0 ||
         isInternalOrServiceNode(this) ||
         !isLayoutSizeDefined(this.layout_)
       ) {
@@ -1677,7 +1692,6 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.loadingContainer_) {
         const doc = this.ownerDocument;
-        const win = toWin(doc.defaultView);
         devAssert(doc);
 
         const container = htmlFor(/** @type {!Document} */ (doc))`
@@ -1685,8 +1699,9 @@ function createBaseCustomElementClass(win) {
               amp-hidden"></div>`;
 
         let loadingElement;
-        if (isNewLoaderExperimentEnabled(win)) {
+        if (isNewLoaderExperimentEnabled(this)) {
           loadingElement = createNewLoaderElement(
+            this.ampdoc_,
             this,
             this.layoutWidth_,
             this.layoutHeight_
@@ -1858,7 +1873,10 @@ function createBaseCustomElementClass(win) {
   return win.BaseCustomElementClass;
 }
 
-/** @param {!Element} element */
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
 function isInputPlaceholder(element) {
   return 'placeholder' in element;
 }
@@ -1903,8 +1921,8 @@ function isInternalOrServiceNode(node) {
  * @return {boolean}
  */
 function isTooSmallForLoader(element) {
-  if (isNewLoaderExperimentEnabled(toWin(element.ownerDocument.defaultView))) {
-    // New loaders experiments has its own sizing heuristics
+  // New loaders experiments has its own sizing heuristics
+  if (isNewLoaderExperimentEnabled(element)) {
     return false;
   }
 

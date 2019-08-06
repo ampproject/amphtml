@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createLoaderLogo} from '../facebook-loader';
 import {dashToUnderline} from '../../../src/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
@@ -123,6 +124,11 @@ class AmpFacebook extends AMP.BaseElement {
         this.toggleLoadingCounter_++;
       }
     }
+  }
+
+  /** @override */
+  createLoaderLogoCallback() {
+    return createLoaderLogo(this.element);
   }
 
   /** @override */
