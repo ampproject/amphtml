@@ -451,26 +451,36 @@ describe
           expect(purify('<amp-youtube>')).to.equal('');
         });
 
-        expect(purify('<amp-accordion>')).to.equal(
-          '<amp-accordion></amp-accordion>'
+        expect(purify('<amp-img>')).to.equal(
+          '<amp-img i-amphtml-ignore=""></amp-img>'
         );
-        expect(purify('<amp-anim>')).to.equal('<amp-anim></amp-anim>');
-        expect(purify('<amp-bind-macro>')).to.equal(
-          '<amp-bind-macro></amp-bind-macro>'
+        expect(purify('<amp-accordion>')).to.match(
+          /<amp-accordion i-amphtml-key="(\d+)"><\/amp-accordion>/
         );
-        expect(purify('<amp-carousel>')).to.equal(
-          '<amp-carousel></amp-carousel>'
+        expect(purify('<amp-anim>')).to.match(
+          /<amp-anim i-amphtml-key="(\d+)"><\/amp-anim>/
         );
-        expect(purify('<amp-fit-text>')).to.equal(
-          '<amp-fit-text></amp-fit-text>'
+        expect(purify('<amp-bind-macro>')).to.match(
+          /<amp-bind-macro i-amphtml-key="(\d+)"><\/amp-bind-macro>/
         );
-        expect(purify('<amp-img>')).to.equal('<amp-img></amp-img>');
-        expect(purify('<amp-layout>')).to.equal('<amp-layout></amp-layout>');
-        expect(purify('<amp-selector>')).to.equal(
-          '<amp-selector></amp-selector>'
+        expect(purify('<amp-carousel>')).to.match(
+          /<amp-carousel i-amphtml-key="(\d+)"><\/amp-carousel>/
         );
-        expect(purify('<amp-sidebar>')).to.equal('<amp-sidebar></amp-sidebar>');
-        expect(purify('<amp-timeago>')).to.equal('<amp-timeago></amp-timeago>');
+        expect(purify('<amp-fit-text>')).to.match(
+          /<amp-fit-text i-amphtml-key="(\d+)"><\/amp-fit-text>/
+        );
+        expect(purify('<amp-layout>')).to.match(
+          /<amp-layout i-amphtml-key="(\d+)"><\/amp-layout>/
+        );
+        expect(purify('<amp-selector>')).to.match(
+          /<amp-selector i-amphtml-key="(\d+)"><\/amp-selector>/
+        );
+        expect(purify('<amp-sidebar>')).to.match(
+          /<amp-sidebar i-amphtml-key="(\d+)"><\/amp-sidebar>/
+        );
+        expect(purify('<amp-timeago>')).to.match(
+          /<amp-timeago i-amphtml-key="(\d+)"><\/amp-timeago>/
+        );
       });
     });
 
