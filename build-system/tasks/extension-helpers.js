@@ -26,6 +26,7 @@ const {
   verifyExtensionBundles,
   verifyExtensionAliasBundles,
 } = require('../../bundles.config');
+const {buildParsers} = require('./compile-expr');
 const {compileJs, mkdirSync} = require('./helpers');
 const {isTravisBuild} = require('../travis');
 const {jsifyCssAsync} = require('./jsify-css');
@@ -385,10 +386,11 @@ function buildExtension(
       return promise;
     }
   }
-  return promise.then(() => {
+  return promise.then(async () => {
     if (argv.single_pass) {
       return Promise.resolve();
     } else {
+      await buildParsers();
       return buildExtensionJs(path, name, version, latestVersion, options);
     }
   });

@@ -21,7 +21,7 @@ import {accessParser as parser} from './access-expr-impl';
  *
  * The grammar is defined in the `access-expr-impl.jison` and compiled using
  * (Jison)[https://zaach.github.io/jison/] parser. The compilation steps are
- * described in the [access-expr-impl.md].
+ * built into the `gulp build` and `gulp dist` tasks.
  *
  * Grammar highlights:
  * - Shorthand truthy expressions are allowed, such as `field`. Truthy value

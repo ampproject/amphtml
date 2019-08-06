@@ -17,13 +17,9 @@
 
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const glob = require('glob');
 const log = require('fancy-log');
-const path = require('path');
-const {compileExpr2} = require('./compile-expr');
 const {exec, execOrDie, getStderr} = require('../exec');
 const {isTravisBuild} = require('../travis');
-const {jisonPaths} = require('../config');
 
 const argv = require('minimist')(process.argv.slice(2));
 
@@ -59,27 +55,6 @@ function replaceInFile(filePath, newFilePath, ...args) {
     file = file.replace(searchValue, replaceValue);
   }
   writeIfUpdated(newFilePath, file);
-}
-
-/**
- * Generates parsers for extensions with *.jison files
- */
-function generateParsers() {
-  jisonPaths.forEach(jisonPath => {
-    glob.sync(jisonPath).forEach(jisonFile => {
-      const jsDir = path.dirname(jisonFile);
-      const jsFile = path.basename(jisonFile, '.jison');
-
-      const extension = jsFile.substring(0, jsFile.indexOf('-'));
-      const parser = extension + 'Parser';
-
-      // write JS file to same directory as .jison file
-      const newJsFile = `${jsDir}/${jsFile}.js`;
-
-      compileExpr2(newJsFile, jisonFile, parser);
-      log(colors.green('Created ') + colors.cyan(newJsFile));
-    });
-  });
 }
 
 /**
@@ -251,7 +226,6 @@ async function updatePackages() {
   if (!isTravisBuild()) {
     runYarnCheck();
   }
-  generateParsers();
   patchWebAnimations();
   patchRegisterElement();
   patchWorkerDom();

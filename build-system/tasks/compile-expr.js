@@ -16,18 +16,47 @@
 'use strict';
 
 const fs = require('fs-extra');
+const glob = require('glob');
 const jison = require('jison');
+const path = require('path');
+const {jisonPaths} = require('../config');
+
+const imports = new Map();
+imports.set('cssParser', "import * as ast from './css-expr-ast';");
+imports.set(
+  'bindParser',
+  "import {AstNode, AstNodeType} from './bind-expr-defines';"
+);
 
 /**
- * Helper function that uses jison to generate a parser for the input file.
- * @param {string} path
- * @param {string} jisonFilename
- * @param {string} imports
- * @param {string} parserName
- * @param {string} jsFilename
+ * Builds parsers for extensions with *.jison files.
+ * Uses jison file path to name the parser to export.
+ * For example, css-expr-impl.jison creates `cssParser`
+ * @return {!Promise<void>}
  */
-function compileExpr(path, jisonFilename, imports, parserName, jsFilename) {
-  const bnf = fs.readFileSync(path + jisonFilename, 'utf8');
+function buildParsers() {
+  const promises = [];
+  jisonPaths.forEach(jisonPath => {
+    glob.sync(jisonPath).forEach(jisonFile => {
+      const jsDir = path.dirname(jisonFile);
+      const jsFile = path.basename(jisonFile, '.jison');
+      const extension = jsFile.replace('-expr-impl', '');
+      const parser = extension + 'Parser';
+      const newFilePath = `${jsDir}/${jsFile}.js`;
+      promises.push(compileExpr(jisonFile, parser, newFilePath));
+    });
+  });
+
+  return Promise.all(promises);
+}
+/**
+ * Helper function that uses jison to generate a parser for the input file.
+ * @param {string} jisonFilePath
+ * @param {string} parserName
+ * @param {string} newFilePath
+ */
+async function compileExpr(jisonFilePath, parserName, newFilePath) {
+  const bnf = await fs.readFile(jisonFilePath, 'utf8');
   const settings = {
     type: 'lalr',
     debug: false,
@@ -41,72 +70,20 @@ function compileExpr(path, jisonFilename, imports, parserName, jsFilename) {
     '/** @fileoverview ' +
     '@suppress {checkTypes, suspiciousCode, uselessCode} */';
   const jsExports = 'export const ' + parserName + ' = parser;';
-
+  console.log(parserName);
+  console.log(imports.get(parserName));
   const out =
-    [license, suppressCheckTypes, imports, jsModule, jsExports]
+    [license, suppressCheckTypes, imports.get(parserName), jsModule, jsExports]
       .join('\n\n')
       // Required in order to support babel 7, since 'token-stack: true' will
       // adversely affect lexer performance.
       // See https://github.com/ampproject/amphtml/pull/18574#discussion_r223506153.
       .replace(/[ \t]*_token_stack:[ \t]*/, '') + '\n';
-  fs.writeFileSync(path + jsFilename, out);
-}
-
-function compileExpr2(jsFilePath, jisonFilePath, parserName) {
-  const bnf = fs.readFileSync(jisonFilePath, 'utf8');
-  const settings = {
-    type: 'lalr',
-    debug: false,
-    moduleType: 'js',
-  };
-  const generator = new jison.Generator(bnf, settings);
-  const jsModule = generator.generate(settings);
-  const jsExports = 'export const ' + parserName + ' = parser;';
-
-  const out =
-    [jsModule, jsExports]
-      .join('\n\n')
-      // Required in order to support babel 7, since 'token-stack: true' will
-      // adversely affect lexer performance.
-      // See https://github.com/ampproject/amphtml/pull/18574#discussion_r223506153.
-      .replace(/[ \t]*_token_stack:[ \t]*/, '') + '\n';
-  fs.writeFileSync(jsFilePath, out);
-}
-
-async function compileAccessExpr() {
-  const path = 'extensions/amp-access/0.1/';
-  const jisonFilename = 'access-expr-impl.jison';
-  const imports = '';
-  const parserName = 'accessParser';
-  const jsFilename = 'access-expr-impl.js';
-  compileExpr(path, jisonFilename, imports, parserName, jsFilename);
-}
-
-async function compileBindExpr() {
-  const path = 'extensions/amp-bind/0.1/';
-  const jisonFilename = 'bind-expr-impl.jison';
-  const imports = "import {AstNode, AstNodeType} from './bind-expr-defines';";
-  const parserName = 'bindParser';
-  const jsFilename = 'bind-expr-impl.js';
-  compileExpr(path, jisonFilename, imports, parserName, jsFilename);
-}
-
-async function compileCssExpr() {
-  const path = 'extensions/amp-animation/0.1/parsers/';
-  const jisonFilename = 'css-expr-impl.jison';
-  const imports = "import * as ast from './css-expr-ast';";
-  const parserName = 'cssParser';
-  const jsFilename = 'css-expr-impl.js';
-  compileExpr(path, jisonFilename, imports, parserName, jsFilename);
+  return fs.writeFile(newFilePath, out);
 }
 
 module.exports = {
-  compileExpr2,
-  compileAccessExpr,
-  compileBindExpr,
-  compileCssExpr,
+  buildParsers,
 };
 
-compileAccessExpr.description = 'Use jison to create a parser for amp-access';
-compileBindExpr.description = 'Use jison to create a parser for amp-bind';
-compileCssExpr.description = 'Use jison to create a parser for amp-animation';
+buildParsers.description = 'Use jison to create parsers';

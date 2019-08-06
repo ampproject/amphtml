@@ -23,11 +23,6 @@ const {
   dist,
 } = require('./build-system/tasks/dist');
 const {
-  compileAccessExpr,
-  compileBindExpr,
-  compileCssExpr,
-} = require('./build-system/tasks/compile-expr');
-const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
@@ -80,9 +75,6 @@ gulp.task('check-links', checkLinks);
 gulp.task('check-types', checkTypes);
 gulp.task('clean', clean);
 gulp.task('codecov-upload', codecovUpload);
-gulp.task('compile-access-expr', compileAccessExpr);
-gulp.task('compile-bind-expr', compileBindExpr);
-gulp.task('compile-css-expr', compileCssExpr);
 gulp.task('create-golden-css', createGoldenCss);
 gulp.task('css', css);
 gulp.task('csvify-size', csvifySize);
