@@ -467,6 +467,24 @@ export const VideoAnalyticsEvents = {
    * @event video-custom
    */
   PERCENTAGE_PLAYED: 'video-percentage-played',
+
+  /**
+   * video-ad-start
+   *
+   * Indicates that an ad begins to play.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-ad-start
+   */
+  AD_START: 'video-ad-start',
+
+  /**
+   * video-ad-end
+   *
+   * Indicates that an ad ended.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-ad-end
+   */
+  AD_END: 'video-ad-end',
 };
 
 /**
