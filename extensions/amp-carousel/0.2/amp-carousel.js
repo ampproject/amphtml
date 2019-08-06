@@ -401,6 +401,7 @@ class AmpCarousel extends AMP.BaseElement {
 
   /**
    * @param {number} index
+   * @return {string} The title of the button.
    * @private
    */
   getPrevButtonTitle_(index) {
@@ -413,6 +414,7 @@ class AmpCarousel extends AMP.BaseElement {
 
   /**
    * @param {number} index
+   * @return {string} The title of the button.
    * @private
    */
   getNextButtonTitle_(index) {
@@ -503,6 +505,7 @@ class AmpCarousel extends AMP.BaseElement {
   /**
    *
    * @param {number} index
+   * @return {string} An identifier to use for the slide for analytics.
    */
   getSlideId_(index) {
     if (index == null) {
