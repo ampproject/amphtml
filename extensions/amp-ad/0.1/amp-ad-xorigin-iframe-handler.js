@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import {
-  ADSENSE_EXPERIMENTS,
-  ADSENSE_EXP_NAMES,
-} from '../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
@@ -32,8 +28,9 @@ import {
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
-import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getHtml} from '../../../src/get-html';
+import {isExperimentOn} from '../../../src/experiments';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 import {removeElement} from '../../../src/dom';
 import {reportErrorToAnalytics} from '../../../src/error';
 import {setStyle} from '../../../src/style';
@@ -117,17 +114,13 @@ export class AmpAdXOriginIframeHandler {
       () => this.sendEmbedInfo_(this.baseInstance_.isInViewport())
     );
 
-    // TODO(bradfrizzell): Would be better to turn this on if
-    // A4A.isXhrEnabled() is false, or if we simply decide it is
-    // ok to turn this on for all traffic.
+    // Enable creative position observer if inabox experiment enabled OR
+    // adsense running on non-CDN cache where AMP creatives are xdomained and
+    // may require this information.
     if (
-      getExperimentBranch(
-        this.win_,
-        ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL
-      ) == ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP ||
-      getExperimentBranch(this.win_, ADSENSE_EXP_NAMES.CANONICAL) ==
-        ADSENSE_EXPERIMENTS.CANONICAL_EXP ||
-      isExperimentOn(this.win_, 'inabox-position-api')
+      isExperimentOn(this.win_, 'inabox-position-api') ||
+      (/^adsense$/i.test(this.element_.getAttribute('type')) &&
+        !isGoogleAdsA4AValidEnvironment(this.win_))
     ) {
       // To provide position to inabox.
       this.inaboxPositionApi_ = new SubscriptionApi(
