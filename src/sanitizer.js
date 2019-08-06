@@ -67,12 +67,6 @@ const SELF_CLOSING_TAGS = dict({
 const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 
 /**
- * Monotonically increasing counter used for keying nodes.
- * @private {number}
- */
-let KEY_COUNTER = 0;
-
-/**
  * Sanitizes the provided HTML.
  *
  * This function expects the HTML to be already pre-sanitized and thus it does
@@ -81,10 +75,9 @@ let KEY_COUNTER = 0;
  *
  * @param {string} html
  * @param {!Document} doc
- * @param {boolean=} diffing
  * @return {string}
  */
-export function sanitizeHtml(html, doc, diffing) {
+export function sanitizeHtml(html, doc) {
   const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
     parsed.getScheme() === 'https' ? parsed : null
   );
@@ -205,16 +198,6 @@ export function sanitizeHtml(html, doc, diffing) {
         // Set a custom attribute to identify elements with bindings.
         // This is an optimization that avoids the need for a DOM scan later.
         attribs.push('i-amphtml-binding', '');
-      }
-      // Elements with bindings and AMP elements must opt-out of DOM diffing.
-      // - Opt-out nodes with bindings because amp-bind scans newly
-      //   rendered elements and discards _all_ old elements _before_ diffing,
-      //   so preserving some old elements would cause loss of functionality.
-      // - Opt-out AMP elements because they don't support arbitrary mutation.
-      if (hasBindings || isAmpElement) {
-        if (diffing) {
-          attribs.push('i-amphtml-key', String(KEY_COUNTER++));
-        }
       }
       emit('<');
       emit(tagName);
