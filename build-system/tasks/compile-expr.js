@@ -54,6 +54,7 @@ function buildParsers() {
  * @param {string} jisonFilePath
  * @param {string} parserName
  * @param {string} newFilePath
+ * @return {!Promise<void>}
  */
 async function compileExpr(jisonFilePath, parserName, newFilePath) {
   const bnf = await fs.readFile(jisonFilePath, 'utf8');
@@ -70,8 +71,6 @@ async function compileExpr(jisonFilePath, parserName, newFilePath) {
     '/** @fileoverview ' +
     '@suppress {checkTypes, suspiciousCode, uselessCode} */';
   const jsExports = 'export const ' + parserName + ' = parser;';
-  console.log(parserName);
-  console.log(imports.get(parserName));
   const out =
     [license, suppressCheckTypes, imports.get(parserName), jsModule, jsExports]
       .join('\n\n')

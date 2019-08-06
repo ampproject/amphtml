@@ -336,6 +336,7 @@ function buildExtensions(options) {
   const extensionsToBuild = options.compileAll ? [] : getExtensionsToBuild();
 
   const results = [];
+  results.push(buildParsers());
   for (const key in extensions) {
     if (
       extensionsToBuild.length > 0 &&
@@ -427,11 +428,10 @@ function buildExtension(
     promises.push(compileVendorConfigs(options));
   }
 
-  return Promise.all(promises).then(async () => {
+  return Promise.all(promises).then(() => {
     if (argv.single_pass) {
       return Promise.resolve();
     } else {
-      await buildParsers();
       return buildExtensionJs(path, name, version, latestVersion, options);
     }
   });
