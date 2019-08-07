@@ -23,6 +23,9 @@ import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
 
+/** @const {string} */
+const TAG = 'amp-img';
+
 /**
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
@@ -72,6 +75,23 @@ export class AmpImg extends BaseElement {
       const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
         value => mutations[value] !== undefined
       );
+      // Mutating src should override existing srcset, so remove the latter.
+      if (
+        mutations['src'] &&
+        !mutations['srcset'] &&
+        this.element.hasAttribute('srcset')
+      ) {
+        // propagateAttributes() will remove [srcset] from this.img_.
+        this.element.removeAttribute('srcset');
+        attrs.push('srcset');
+
+        this.user().warn(
+          TAG,
+          'Removed [srcset] since [src] was mutated. Recommend adding a ' +
+            '[srcset] binding to support responsive images.',
+          this.element
+        );
+      }
       this.propagateAttributes(
         attrs,
         this.img_,
@@ -148,7 +168,7 @@ export class AmpImg extends BaseElement {
     if (this.element.getAttribute('role') == 'img') {
       this.element.removeAttribute('role');
       this.user().error(
-        'AMP-IMG',
+        TAG,
         'Setting role=img on amp-img elements breaks ' +
           'screen readers please just set alt or ARIA attributes, they will ' +
           'be correctly propagated for the underlying <img> element.'
@@ -307,5 +327,5 @@ export class AmpImg extends BaseElement {
  * @this {undefined}  // Make linter happy
  */
 export function installImg(win) {
-  registerElement(win, 'amp-img', AmpImg);
+  registerElement(win, TAG, AmpImg);
 }
