@@ -50,7 +50,7 @@ describes.realWin(
         const numberOfChildren = config.count || 3;
         let selectedCount = config.selectedCount || 0;
         let disabledCount = config.disabledCount || 0;
-
+        const rectArray = [];
         for (let i = 0; i < numberOfChildren; i++) {
           const child = win.document.createElement('div');
           child.setAttribute('width', '10');
@@ -75,7 +75,7 @@ describes.realWin(
               disabledCount--;
             }
           }
-
+          rectArray.push({width: 10, height: 10});
           const childAttributes = options.optionAttributes || {};
           Object.keys(childAttributes).forEach(key => {
             child.setAttribute(key, childAttributes[key]);
@@ -83,6 +83,9 @@ describes.realWin(
 
           ampSelector.appendChild(child);
         }
+        sandbox
+          .stub(ampSelector.implementation_, 'getElementsSizes_')
+          .resolves(rectArray);
         win.document.body.appendChild(ampSelector);
         return ampSelector;
       }
@@ -94,7 +97,7 @@ describes.realWin(
           preventDefault: () => {},
           target: opt_target,
         };
-        impl.keyDownHandler_(event);
+        return impl.keyDownHandler_(event);
       }
 
       it('should build properly', function*() {
@@ -1144,14 +1147,18 @@ describes.realWin(
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
-            keyPress(ampSelector, Keys.LEFT_ARROW);
-            expect(ampSelector.children[0].tabIndex).to.equal(-1);
-            expect(ampSelector.children[1].tabIndex).to.equal(-1);
-            expect(ampSelector.children[2].tabIndex).to.equal(0);
-            keyPress(ampSelector, Keys.RIGHT_ARROW);
-            expect(ampSelector.children[0].tabIndex).to.equal(0);
-            expect(ampSelector.children[1].tabIndex).to.equal(-1);
-            expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            return keyPress(ampSelector, Keys.LEFT_ARROW)
+              .then(() => {
+                expect(ampSelector.children[0].tabIndex).to.equal(-1);
+                expect(ampSelector.children[1].tabIndex).to.equal(-1);
+                expect(ampSelector.children[2].tabIndex).to.equal(0);
+                return keyPress(ampSelector, Keys.RIGHT_ARROW);
+              })
+              .then(() => {
+                expect(ampSelector.children[0].tabIndex).to.equal(0);
+                expect(ampSelector.children[1].tabIndex).to.equal(-1);
+                expect(ampSelector.children[2].tabIndex).to.equal(-1);
+              });
           }
         );
 
@@ -1211,14 +1218,24 @@ describes.realWin(
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-          keyPress(ampSelector, Keys.DOWN_ARROW);
-          expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
-          expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
-          expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-          keyPress(ampSelector, Keys.UP_ARROW);
-          expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
-          expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
-          expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+          return keyPress(ampSelector, Keys.DOWN_ARROW)
+            .then(() => {
+              expect(ampSelector.children[0].hasAttribute('selected')).to.be
+                .false;
+              expect(ampSelector.children[1].hasAttribute('selected')).to.be
+                .true;
+              expect(ampSelector.children[2].hasAttribute('selected')).to.be
+                .false;
+              return keyPress(ampSelector, Keys.UP_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].hasAttribute('selected')).to.be
+                .true;
+              expect(ampSelector.children[1].hasAttribute('selected')).to.be
+                .false;
+              expect(ampSelector.children[2].hasAttribute('selected')).to.be
+                .false;
+            });
         });
       });
 
@@ -1306,29 +1323,35 @@ describes.realWin(
           expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
           // Note that the newly added third child is ignored.
-          keyPress(ampSelector, Keys.LEFT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(0);
-          expect(ampSelector.children[2].tabIndex).to.equal(-1);
+          keyPress(ampSelector, Keys.LEFT_ARROW)
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
-          const e = new CustomEvent(AmpEvents.DOM_UPDATE, {bubbles: true});
-          newChild.dispatchEvent(e);
+              const e = new CustomEvent(AmpEvents.DOM_UPDATE, {bubbles: true});
+              newChild.dispatchEvent(e);
 
-          // `newChild` should be focused since it has the 'selected' attribute.
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(-1);
-          expect(ampSelector.children[2].tabIndex).to.equal(0);
+              // `newChild` should be focused since it has the 'selected' attribute.
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(-1);
+              expect(ampSelector.children[2].tabIndex).to.equal(0);
 
-          // Tabbing between children now works for `newChild`.
-          keyPress(ampSelector, Keys.LEFT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(0);
-          expect(ampSelector.children[2].tabIndex).to.equal(-1);
+              // Tabbing between children now works for `newChild`.
+              return keyPress(ampSelector, Keys.LEFT_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
-          keyPress(ampSelector, Keys.RIGHT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(-1);
-          expect(ampSelector.children[2].tabIndex).to.equal(0);
+              return keyPress(ampSelector, Keys.RIGHT_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(-1);
+              expect(ampSelector.children[2].tabIndex).to.equal(0);
+            });
         });
       });
     });
