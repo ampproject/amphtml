@@ -54,12 +54,13 @@ describe('cid', () => {
   let trustedViewer;
   let shouldSendMessageTimeout;
   let storageGetStub;
+  let seed;
 
   const hasConsent = Promise.resolve();
   const timer = Services.timerFor(window);
 
   beforeEach(() => {
-    let call = 1;
+    seed = 1;
     sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
@@ -86,7 +87,7 @@ describe('cid', () => {
       },
       crypto: {
         getRandomValues: array => {
-          array[0] = call++;
+          array[0] = seed;
           array[1] = 2;
           array[2] = 3;
           array[15] = 15;
@@ -276,14 +277,14 @@ describe('cid', () => {
       const expected =
         'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
       return compare('e2', expected).then(() => {
+        seed = 2;
         return compare('e2', expected).then(() => {
           storage['amp-cid'] = undefined;
           removeMemoryCacheOfCid();
           return compare(
             'e2',
             'sha384(sha384([' +
-              // 2 because we increment the first value on each random
-              // call.
+              // 2 because we set the seed to 2
               '2' +
               ',2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)'
           );
@@ -324,7 +325,7 @@ describe('cid', () => {
         .then(() => {
           expect(viewerSendMessageStub).to.be.calledOnce;
           expect(viewerSendMessageStub).to.be.calledWith('cid');
-
+          seed = 2;
           // Ensure it's called only once since we cache it in memory.
           return compare(
             'e3',
@@ -392,7 +393,7 @@ describe('cid', () => {
               cid: expectedBaseCid,
             })
           );
-
+          seed = 2;
           // Ensure it's called only once since we cache it in memory.
           return compare(
             'e3',
@@ -419,14 +420,14 @@ describe('cid', () => {
         'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
       return compare('e2', expected).then(() => {
         clock.tick(364 * DAY);
+        seed = 2;
         return compare('e2', expected).then(() => {
           clock.tick(365 * DAY + 1);
           removeMemoryCacheOfCid();
           return compare(
             'e2',
             'sha384(sha384([' +
-              // 2 because we increment the first value on each random
-              // call.
+              // 2 because we set the seed to 2
               '2' +
               ',2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)'
           );
@@ -464,6 +465,7 @@ describe('cid', () => {
       }
       clock.tick(100);
       return compare('e2', expected).then(() => {
+        seed = 2;
         expect(getStoredTime()).to.equal(100);
         removeMemoryCacheOfCid();
         clock.tick(3600);
@@ -488,6 +490,7 @@ describe('cid', () => {
       }
       clock.tick(100);
       return compare('e2', expected).then(() => {
+        seed = 2;
         expect(getStoredTime()).to.equal(100);
         removeMemoryCacheOfCid();
         clock.tick(3600);
