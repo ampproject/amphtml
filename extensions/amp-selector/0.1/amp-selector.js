@@ -533,7 +533,7 @@ export class AmpSelector extends AMP.BaseElement {
         dir = 1;
         break;
       default:
-        return;
+        return Promise.resolve();
     }
 
     event.preventDefault();
