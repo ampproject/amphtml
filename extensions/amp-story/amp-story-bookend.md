@@ -21,17 +21,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Bookend: `amp-story-bookend`
+# `amp-story-bookend`
 
 The `amp-story-bookend` is the last screen of the story. It contains related links, sharing options, call to action links, and more.
-
-<figure class="centered-fig">
-  <amp-anim alt="related article example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/related-articles.gif">
-    <noscript>
-    <img alt="related article example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/related-articles.gif" />
-  </noscript>
-  </amp-anim>
-</figure>
 
 <table>
   <tr>
@@ -49,6 +41,16 @@ The `amp-story-bookend` is the last screen of the story. It contains related lin
 </table>
 
 [TOC]
+
+<figure class="centered-fig">
+  <amp-anim alt="related article example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/related-articles.gif">
+    <noscript>
+    <img alt="related article example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/related-articles.gif" />
+  </noscript>
+  </amp-anim>
+</figure>
+
+## Configuration
 
 Importing the JSON configuration through the `src` attribute:
 
