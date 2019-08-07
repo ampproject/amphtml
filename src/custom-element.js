@@ -45,6 +45,7 @@ import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from '../src/consent';
 import {toWin} from './types';
 import {tryResolve} from '../src/utils/promise';
+import {startupChunk} from './chunk';
 
 const TAG = 'CustomElement';
 
@@ -837,38 +838,41 @@ function createBaseCustomElementClass(win) {
         }
         this.getLayers().add(this);
       }
-      this.getResources().add(this);
-
-      if (this.everAttached) {
-        const reconstruct = this.reconstructWhenReparented();
-        if (reconstruct) {
-          this.reset_();
-        }
-        if (this.isUpgraded()) {
-          if (reconstruct) {
-            this.getResources().upgraded(this);
-          }
-          this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
-        }
-      } else {
-        this.everAttached = true;
-
+      if (!this.everAttached) {
         try {
           this.layout_ = applyStaticLayout(this);
         } catch (e) {
           reportError(e, this);
         }
-        if (!isStub(this.implementation_)) {
-          this.tryUpgrade_();
-        }
-        if (!this.isUpgraded()) {
-          this.classList.add('amp-unresolved');
-          this.classList.add('i-amphtml-unresolved');
-          // amp:attached is dispatched from the ElementStub class when it
-          // replayed the firstAttachedCallback call.
-          this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
-        }
       }
+      startupChunk(this.ownerDocument, () => {
+        this.getResources().add(this);
+
+        if (this.everAttached) {
+          const reconstruct = this.reconstructWhenReparented();
+          if (reconstruct) {
+            this.reset_();
+          }
+          if (this.isUpgraded()) {
+            if (reconstruct) {
+              this.getResources().upgraded(this);
+            }
+            this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
+          }
+        } else {
+          this.everAttached = true;
+          if (!isStub(this.implementation_)) {
+            this.tryUpgrade_();
+          }
+          if (!this.isUpgraded()) {
+            this.classList.add('amp-unresolved');
+            this.classList.add('i-amphtml-unresolved');
+            // amp:attached is dispatched from the ElementStub class when it
+            // replayed the firstAttachedCallback call.
+            this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
+          }
+        }
+      });
     }
 
     /**
