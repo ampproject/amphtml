@@ -9749,6 +9749,13 @@ mkdirp@0.5.1, mkdirp@0.x.x, mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.1:
   dependencies:
     minimist "0.0.8"
 
+mocha-silent-reporter@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/mocha-silent-reporter/-/mocha-silent-reporter-1.0.0.tgz#f1f2fcafa4e2eaee989ac6cd00b76b8204f890bb"
+  integrity sha1-8fL8r6Ti6u6YmsbNALdrggT4kLs=
+  dependencies:
+    chalk "^0.5.1"
+
 mocha@6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/mocha/-/mocha-6.2.0.tgz#f896b642843445d1bb8bca60eabd9206b8916e56"
