@@ -152,7 +152,7 @@ E2E test code runs in `node` and the code under test runs in the browser with th
 ### node inspect
 
 ```sh
-node --inspect-brk $(which gulp) e2e # --nobuild --testnames --files=extensions/amp-foo/0.1/test-e2e/test-amp-foo-basic.js
+node --inspect-brk $(which gulp) e2e --nobuild --testnames --files=extensions/amp-foo/0.1/test-e2e/test-amp-foo-basic.js
 ```
 
 Open Chrome DevTools and click the Node logo in the top left.
