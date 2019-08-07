@@ -220,9 +220,8 @@ Expressions are similar to JavaScript with some important differences.
 #### Differences from JavaScript
 
 - Expressions may only access the containing document's [state](#state).
-- Expressions **do not** have access to globals like `window` or `document`.
-- Only [white-listed functions](#white-listed-functions) and operators may be used.
-- Custom functions, classes and loops are generally disallowed. Arrow functions are allowed as parameters, e.g. `Array.prototype.map`.
+- Expressions **do not** have access to `window` or `document`. `global` references the top-level state.
+- Only [white-listed functions](#white-listed-functions) and operators may be used. Custom functions, classes and loops are disallowed. Arrow functions are allowed as function parameters e.g. `[1, 2, 3].map(x => x + 1)`.
 - Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
 - A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
 
@@ -607,7 +606,7 @@ There are several types of runtime errors that may be encountered when working w
   </tr>
   <tr>
     <td class="col-thirty">Invalid binding</td>
-    <td class="col-fourty"><em>Binding to [someBogusAttribute] on &lt;P> is not allowed</em>.</td>
+    <td class="col-fourty"><em>Binding to [foo] on &lt;P> is not allowed</em>.</td>
     <td class="col-thirty">Use only <a href="#element-specific-attributes">white-listed bindings</a>.</td>
   </tr>
   <tr>
@@ -657,7 +656,9 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 
 #### XHR batching
 
-AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.  For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
+AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.
+
+For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
 
 #### Attributes
 
@@ -688,14 +689,27 @@ When `AMP.setState()` is called `amp-bind` deep-merges the provided object liter
 Consider the following example:
 
 ```javascript
-{
-<!-- State is empty -->
-}
+// State is empty.
+{}
 ```
 
 ```html
-<button on="tap:AMP.setState({employee: {name: 'John Smith', age: 47, vehicle: 'Car'}})"...></button>
-<button on="tap:AMP.setState({employee: {age: 64}})"...></button>
+<button on="tap:AMP.setState({
+  employee: {
+    name: 'John Smith',
+    age: 47,
+    vehicle: 'Car'
+  }
+})">
+  Set employee to John Smith
+</button>
+<button on="tap:AMP.setState({
+  employee: {
+    age: 64
+  }
+})">
+  Set employee age to 64
+</button>
 ```
 
 When the first button is pressed, the state changes to:
@@ -724,39 +738,18 @@ When the second button is pressed, `amp-bind` will recursively merge the object 
 
 `employee.age` has been updated, however `employee.name` and `employee.vehicle` keys have not changed.
 
-Please note that `amp-bind` will throw an error if you call `AMP.setState()` with an object literal that contains circular references.
+#### Circular references
+
+`AMP.setState(object)` will throw a runtime error if `object` contains a circular reference.
 
 #### Removing a variable
 
-Remove an existing state variable by setting its value to `null` in `AMP.setState()`. Starting with the state from the previous example, pressing:
+Remove an existing state variable by setting its value to `null` in `AMP.setState()`.
+
+For example:
 
 ```html
-<button on="tap:AMP.setState({employee: {vehicle: null}})"...></button>
-```
-
-Will change the state to:
-
-```javascript
-{
-  employee: {
-    name: 'John Smith',
-    age: 48,
-  }
-}
-```
-
-Similarly:
-
-```html
-<button on="tap:AMP.setState({employee: null})"...></button>
-```
-
-Will change the state to:
-
-```javascript
-{
-<!-- State is empty -->
-}
+<button on="tap:AMP.setState({removeMe: null})"></button>
 ```
 
 ### Expression grammar
@@ -771,12 +764,13 @@ expr:
   | '(' expr ')'
   | variable
   | literal
+  ;
 
 operation:
     '!' expr
-  | '-' expr
-  | '+' expr
-  | expr '+' expr
+  | '-' expr %prec UMINUS
+  | '+' expr %prec UPLUS
+  |  expr '+' expr
   | expr '-' expr
   | expr '*' expr
   | expr '/' expr
@@ -790,9 +784,25 @@ operation:
   | expr '!=' expr
   | expr '==' expr
   | expr '?' expr ':' expr
+  ;
 
 invocation:
-    expr '.' NAME args
+    NAME args
+  | expr '.' NAME args
+  | expr '.' NAME '(' arrow_function ')'
+  | expr '.' NAME '(' arrow_function ',' expr ')'
+  ;
+
+arrow_function:
+    '(' ')' '=>' expr
+  | NAME '=>' expr
+  | '(' params ')' '=>' expr
+  ;
+
+params:
+    NAME ',' NAME
+  | params ',' NAME
+  ;
 
 args:
     '(' ')'
@@ -806,36 +816,55 @@ member_access:
 member:
     '.' NAME
   | '[' expr ']'
+  ;
 
 variable:
     NAME
   ;
 
 literal:
+    primitive
+  | object_literal
+  | array_literal
+  ;
+
+primitive:
     STRING
   | NUMBER
   | TRUE
   | FALSE
   | NULL
-  | object_literal
-  | array_literal
+  ;
 
 array_literal:
     '[' ']'
   | '[' array ']'
+  | '[' array ',' ']'
+  ;
 
 array:
     expr
   | array ',' expr
+  ;
 
 object_literal:
     '{' '}'
   | '{' object '}'
+  | '{' object ',' '}'
+  ;
 
 object:
     key_value
   | object ',' key_value
+  ;
 
 key_value:
-  expr ':' expr
+  key ':' expr
+  ;
+
+key:
+    NAME
+  | primitive
+  | '[' expr ']'
+  ;
 ```

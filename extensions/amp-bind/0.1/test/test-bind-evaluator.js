@@ -137,19 +137,41 @@ describe('BindEvaluator', () => {
     expect(errors['oneplusone + 2']).to.be.undefined;
   });
 
-  it('should treat out-of-scope vars as null', () => {
+  it('should support "global"', () => {
+    evaluator.addBindings([
+      {
+        tagName: 'P',
+        property: 'text',
+        expressionString: 'global',
+      },
+    ]);
+    let {results, errors} = evaluator.evaluateBindings({x: 1});
+    expect(results['global']).to.deep.include({x: 1});
+    expect(results['global']).to.have.property('global');
+    expect(errors['global']).to.be.undefined;
+
+    // "global" should be overridable by user-defined variables.
+    ({results, errors} = evaluator.evaluateBindings({
+      x: 1,
+      global: {x: 2},
+    }));
+    expect(results['global']).to.deep.equal({x: 2});
+    expect(errors['global']).to.be.undefined;
+  });
+
+  it('should treat undefined vars as null', () => {
     expect(numberOfBindings()).to.equal(0);
     evaluator.addBindings([
       {
         tagName: 'P',
         property: 'text',
-        expressionString: 'outOfScope',
+        expressionString: 'doesntExist',
       },
     ]);
     expect(numberOfBindings()).to.equal(1);
     const {results, errors} = evaluator.evaluateBindings({});
-    expect(results['outOfScope']).to.be.null;
-    expect(errors['outOfScope']).to.be.undefined;
+    expect(results['doesntExist']).to.be.null;
+    expect(errors['doesntExist']).to.be.undefined;
   });
 
   it('should validate a common expression on each respective binding', () => {
