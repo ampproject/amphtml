@@ -21,6 +21,7 @@ import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
+import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
@@ -154,8 +155,20 @@ export class ViewportBindingInabox {
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
 
+    /** @private @const {boolean} */
+    this.isFriendlyIframed_ =
+      isExperimentOn(this.win, 'inabox-viewport-friendly') &&
+      canInspectWindow(this.win.top);
+
     /** @private {?../../ads/inabox/position-observer.PositionObserver} */
-    this.topWindowPositionObserver_ = null;
+    this.topWindowPositionObserver_ = this.isFriendlyIframed_
+      ? getPositionObserver(this.win.top)
+      : null;
+
+    /** @private {?../../ads/inabox/frame-overlay-manager.FrameOverlayManager} */
+    this.topWindowFrameOverlayManager_ = this.isFriendlyIframed_
+      ? getFrameOverlayManager(this.win.top)
+      : null;
 
     /** @private {?UnlistenDef} */
     this.unobserveFunction_ = null;
@@ -165,10 +178,7 @@ export class ViewportBindingInabox {
 
   /** @override */
   connect() {
-    if (
-      isExperimentOn(this.win, 'inabox-viewport-friendly') &&
-      canInspectWindow(this.win.top)
-    ) {
+    if (this.isFriendlyIframed_) {
       return this.listenForPositionSameDomain_();
     } else {
       return this.listenForPosition_();
@@ -200,7 +210,6 @@ export class ViewportBindingInabox {
     return Services.resourcesPromiseForDoc(
       this.win.document.documentElement
     ).then(() => {
-      this.topWindowPositionObserver_ = getPositionObserver(this.win.top);
       this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
         // If the window is the top window (not sitting in an iframe) then
         // frameElement doesn't exist. In that case we observe the scrolling
@@ -340,10 +349,7 @@ export class ViewportBindingInabox {
 
   /** @override */
   getRootClientRectAsync() {
-    if (
-      isExperimentOn(this.win, 'inabox-viewport-friendly') &&
-      canInspectWindow(this.win.top)
-    ) {
+    if (this.isFriendlyIframed_) {
       // Set up the listener if we haven't already.
       return this.listenForPositionSameDomain_().then(() =>
         this.topWindowPositionObserver_.getTargetRect(
@@ -412,19 +418,30 @@ export class ViewportBindingInabox {
    */
   requestFullOverlayFrame_() {
     return new Promise((resolve, reject) => {
-      const unlisten = this.iframeClient_.makeRequest(
-        MessageType.FULL_OVERLAY_FRAME,
-        MessageType.FULL_OVERLAY_FRAME_RESPONSE,
-        response => {
-          unlisten();
-          if (response['success']) {
-            this.updateBoxRect_(response['boxRect']);
+      if (this.isFriendlyIframed_) {
+        const iframe = /** @type {?HTMLIFrameElement}*/ (this.win.frameElement);
+        if (iframe) {
+          this.topWindowFrameOverlayManager_.expandFrame(iframe, boxRect => {
+            this.updateBoxRect_(boxRect);
             resolve();
-          } else {
-            reject('Request to open lightbox rejected by host document');
-          }
+          });
+        } else {
+          reject('Request to open lightbox failed; frame does not exist.');
         }
-      );
+      } else {
+        this.iframeClient_.requestOnce(
+          MessageType.FULL_OVERLAY_FRAME,
+          MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+          response => {
+            if (response['success']) {
+              this.updateBoxRect_(response['boxRect']);
+              resolve();
+            } else {
+              reject('Request to open lightbox rejected by host document');
+            }
+          }
+        );
+      }
     });
   }
 
@@ -433,16 +450,27 @@ export class ViewportBindingInabox {
    * @private
    */
   requestCancelFullOverlayFrame_() {
-    return new Promise(resolve => {
-      const unlisten = this.iframeClient_.makeRequest(
-        MessageType.CANCEL_FULL_OVERLAY_FRAME,
-        MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
-        response => {
-          unlisten();
-          this.updateBoxRect_(response['boxRect']);
-          resolve();
+    return new Promise((resolve, reject) => {
+      if (this.isFriendlyIframed_) {
+        const iframe = /** @type {?HTMLIFrameElement}*/(this.win.frameElement);
+        if (iframe) {
+          this.topWindowFrameOverlayManager_.collapseFrame(iframe, boxRect => {
+            this.updateBoxRect_(boxRect);
+            resolve();
+          });
+        } else {
+          reject('Request to open lightbox failed; frame does not exist.');
         }
-      );
+      } else {
+        this.iframeClient_.requestOnce(
+          MessageType.CANCEL_FULL_OVERLAY_FRAME,
+          MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
+          response => {
+            this.updateBoxRect_(response['boxRect']);
+            resolve();
+          }
+        );
+      }
     });
   }
 
