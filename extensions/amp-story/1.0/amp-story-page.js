@@ -49,6 +49,7 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
+import {VideoUtils} from '../../../src/utils/video';
 import {
   childElement,
   closestAncestorElementBySelector,
@@ -140,6 +141,17 @@ const buildPlayMessageElement = element =>
  * @param {!Element} element
  * @return {!Element}
  */
+const buildErrorMessageElement = element =>
+  htmlFor(element)`
+      <div class="i-amphtml-story-page-error i-amphtml-story-system-reset">
+        <span class="i-amphtml-story-page-error-label"></span>
+        <span class='i-amphtml-story-page-error-icon'></span>
+      </div>`;
+
+/**
+ * @param {!Element} element
+ * @return {!Element}
+ */
 const buildOpenAttachmentElement = element =>
   htmlFor(element)`
       <div class="
@@ -222,6 +234,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.playMessageEl_ = null;
+
+    /** @private {?Element} */
+    this.errorMessageEl_ = null;
 
     /** @private {?Element} */
     this.openAttachmentEl_ = null;
@@ -408,6 +423,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.stop();
 
     this.stopListeningToVideoEvents_();
+    this.toggleErrorMessage_(false);
     this.togglePlayMessage_(false);
     this.playAudioElementFromTimestamp_ = null;
 
@@ -691,6 +707,15 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Promise<boolean>}
+   * @private
+   */
+  isAutoplaySupported_() {
+    VideoUtils.resetIsAutoplaySupported();
+    return VideoUtils.isAutoplaySupported(this.win, getMode(this.win).lite);
+  }
+
+  /**
    * Applies the specified callback to each media element on the page, after the
    * media element is loaded.
    * @param {!function(!./media-pool.MediaPool, !Element)} callbackFn The
@@ -782,7 +807,21 @@ export class AmpStoryPage extends AMP.BaseElement {
           // get a user gesture to bless the media elements, and play them.
           if (mediaEl.tagName === 'VIDEO') {
             this.debounceToggleLoadingSpinner_(false);
-            this.togglePlayMessage_(true);
+
+            // If the error came from the <video> and not from a <source>
+            // descendant.
+            if (mediaEl.error) {
+              this.toggleErrorMessage_(true);
+              return;
+            }
+
+            // If autoplay got rejected, display a "play" button. If autoplay
+            // was supported, dispay an error message.
+            this.isAutoplaySupported_().then(isAutoplaySupported => {
+              isAutoplaySupported
+                ? this.toggleErrorMessage_(true)
+                : this.togglePlayMessage_(true);
+            });
           }
 
           if (mediaEl.tagName === 'AUDIO') {
@@ -1366,6 +1405,47 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.mutateElement(() =>
       toggle(dev().assertElement(this.playMessageEl_), true)
+    );
+  }
+
+  /**
+   * Builds and appends a message and icon to indicate a video error state.
+   * @private
+   */
+  buildAndAppendErrorMessage_() {
+    const localizationService = Services.localizationService(this.win);
+
+    this.errorMessageEl_ = buildErrorMessageElement(this.element);
+    const labelEl = this.errorMessageEl_.querySelector(
+      '.i-amphtml-story-page-error-label'
+    );
+    labelEl.textContent = localizationService.getLocalizedString(
+      LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO
+    );
+
+    this.mutateElement(() => this.element.appendChild(this.errorMessageEl_));
+  }
+
+  /**
+   * Toggles the visibility of the "Play video" fallback message.
+   * @param {boolean} isActive
+   * @private
+   */
+  toggleErrorMessage_(isActive) {
+    if (!isActive) {
+      this.errorMessageEl_ &&
+        this.mutateElement(() =>
+          toggle(dev().assertElement(this.errorMessageEl_), false)
+        );
+      return;
+    }
+
+    if (!this.errorMessageEl_) {
+      this.buildAndAppendErrorMessage_();
+    }
+
+    this.mutateElement(() =>
+      toggle(dev().assertElement(this.errorMessageEl_), true)
     );
   }
 

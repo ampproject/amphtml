@@ -94,6 +94,11 @@ const strings = {
       'Label for a button to open a drawer containing additional ' +
       'content via a "swipe up" user gesture.',
   },
+  [LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO]: {
+    string: 'Video failed to play',
+    description:
+      'Label indicating that the video visible on the page failed to play.',
+  },
   [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
     string: 'Play video',
     description: 'Label for a button to play the video visible on the page.',
