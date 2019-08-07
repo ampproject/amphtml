@@ -123,13 +123,17 @@ if (shouldMainBootstrapRun) {
           // Pre-stub already known elements.
           stubElementsForDoc(ampdoc);
         });
-        startupChunk(self.document, function final() {
-          installPullToRefreshBlocker(self);
-          installAutoLightboxExtension(ampdoc);
+        startupChunk(
+          self.document,
+          function final() {
+            installPullToRefreshBlocker(self);
+            installAutoLightboxExtension(ampdoc);
 
-          maybeValidate(self);
-          makeBodyVisible(self.document);
-        });
+            maybeValidate(self);
+            makeBodyVisible(self.document);
+          },
+          /* makes the body visible */ true
+        );
         startupChunk(self.document, function finalTick() {
           perf.tick('e_is');
           Services.resourcesForDoc(ampdoc).ampInitComplete();
