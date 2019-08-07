@@ -103,6 +103,16 @@ class FunctionalTestController {
    * subsequent commands.
    * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
    *
+   * @param {number} unusedIndex
+   * @return {!Promise}
+   */
+  async switchToFrameNum(unusedIndex) {}
+  /**
+   * Selects the current top-level browsing context or a child browsing context
+   * of the current browsing context to use as the current browsing context for
+   * subsequent commands.
+   * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
+   *
    * @return {!Promise}
    */
   async switchToParent() {}

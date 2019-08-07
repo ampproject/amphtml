@@ -18,7 +18,7 @@ describes.endtoend(
   'amp-subscriptions-google',
   {
     testUrl:
-      'http://localhost:8000/test/manual/amp-subscriptions-google/swg.amp.html',
+      'http://localhost:8000/test/fixtures/e2e/amp-subscriptions-google/swg.amp.html',
     environments: ['single'],
   },
   env => {
@@ -32,9 +32,32 @@ describes.endtoend(
       const btn = await controller.findElement('#swg_button');
       await controller.click(btn);
 
-      // Check the SwG subscription offer dialog iframe.
-      const iframe = await controller.findElement('.swg-dialog');
-      await expect(iframe).to.exist;
+      // Switch to SwG's outer iFrame
+      controller.switchToFrameNum(2);
+
+      // Switch to SwG's inner iFrame
+      controller.switchToFrameNum(0);
+
+      const text = await controller.findElement('.K2Fgzb');
+      await expect(text).to.exist;
+      await expect(controller.getElementText(text)).to.equal(
+        'Subscribe with your Google Account'
+      );
+
+      const basicAccessText = await controller.findElement('.amekj');
+      await expect(controller.getElementText(basicAccessText)).to.equal(
+        'Basic Access'
+      );
+
+      const basicAccessDesc = await controller.findElement('.a02uaf');
+      await expect(controller.getElementText(basicAccessDesc)).to.equal(
+        'Basic access charged weekly'
+      );
+
+      const basicAccessPrice = await controller.findElement('.mojnzf');
+      await expect(controller.getElementText(basicAccessPrice)).to.equal(
+        '$1.99/week*'
+      );
     });
   }
 );
