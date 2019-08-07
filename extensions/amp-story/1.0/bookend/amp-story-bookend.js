@@ -219,9 +219,10 @@ export class AmpStoryBookend extends DraggableDrawer {
   buildCallback() {
     super.buildCallback();
 
-    const customClass = 'i-amphtml-story-draggable-drawer-bookend';
-    this.headerEl_.classList.add(customClass);
-    this.element.classList.add(customClass);
+    this.headerEl_.classList.add(
+      'i-amphtml-story-draggable-drawer-header-bookend'
+    );
+    this.element.classList.add('i-amphtml-story-draggable-drawer-bookend');
 
     const handleEl = this.win.document.createElement('div');
     handleEl.classList.add('i-amphtml-story-bookend-handle');
