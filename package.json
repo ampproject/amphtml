@@ -56,6 +56,7 @@
     "base62": "2.0.1",
     "bluebird": "3.5.5",
     "body-parser": "1.19.0",
+    "brotli-size": "3.0.1",
     "browserify": "16.3.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
