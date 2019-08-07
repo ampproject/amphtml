@@ -40,7 +40,7 @@ import {getExperimentBranch, isExperimentOn} from './experiments';
 import {getMode} from './mode';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDOMTokenListToggle} from './polyfills/domtokenlist-toggle';
+import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from './style-installer';
@@ -869,7 +869,7 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
-  installDOMTokenListToggle(childWin);
+  installDOMTokenList(childWin);
   // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
   // is DCE'd from production builds. Note: When the hack is removed, remove the
   // @suppress {suspiciousCode} annotation at the top of this function.
