@@ -21,7 +21,7 @@ const {isTravisBuild} = require('../travis');
 
 /**
  * Runs ava tests.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Vinyl}
  */
 async function ava() {
   return gulp

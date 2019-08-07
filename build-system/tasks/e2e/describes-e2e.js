@@ -111,7 +111,7 @@ function getConfig() {
 /**
  * Configure and launch a Puppeteer instance
  * @param {!PuppeteerConfigDef=} opt_config
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function createPuppeteer(opt_config = {}) {
   const browser = await puppeteer.launch({
@@ -276,7 +276,7 @@ class ItConfig {
  * that also sets up the provided fixtures and returns the corresponding
  * environment objects of each fixture to the test method.
  * @param {function(!Object):!Array<?Fixture>} factory
- * @return {*} TODO(#23582): Specify return type
+ * @return {function()}
  */
 function describeEnv(factory) {
   /**
@@ -284,7 +284,7 @@ function describeEnv(factory) {
    * @param {!Object} spec
    * @param {function(!Object)} fn
    * @param {function(string, function())} describeFunc
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   const templateFunc = function(suiteName, spec, fn, describeFunc) {
     const fixture = factory(spec);
@@ -390,7 +390,7 @@ function describeEnv(factory) {
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   const mainFunc = function(name, spec, fn) {
     return templateFunc(name, spec, fn, describe);
@@ -400,7 +400,7 @@ function describeEnv(factory) {
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   mainFunc.only = function(name, spec, fn) {
     return templateFunc(name, spec, fn, describe./*OK*/ only);
@@ -459,7 +459,7 @@ class EndToEndFixture {
  * Get the controller object for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
- * @return {*} TODO(#23582): Specify return type
+ * @return {!SeleniumWebDriverController}
  */
 async function getController(
   {engine = 'selenium', headless = false},
