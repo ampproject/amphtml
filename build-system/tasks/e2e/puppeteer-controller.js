@@ -559,7 +559,8 @@ class PuppeteerController {
    * @override
    */
   async getActiveElement() {
-    const getter = () => document.activeElement;
+    const root = await this.getRoot_();
+    const getter = () => root.ownerDocument.activeElement;
     const element = await this.evaluate(getter);
     return new ElementHandle(element);
   }
