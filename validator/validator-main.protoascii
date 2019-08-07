@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 923
+spec_file_revision: 924
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -3085,12 +3085,16 @@ attr_lists: {
     css_declaration: { name: "text-decoration-color" }
     css_declaration: { name: "text-decoration-line" }
     css_declaration: { name: "text-decoration-style" }
+    css_declaration: { name: "text-fill-color" }
     css_declaration: { name: "text-indent" }
     css_declaration: { name: "text-justify" }
     css_declaration: { name: "text-orientation" }
     css_declaration: { name: "text-overflow" }
     css_declaration: { name: "text-rendering" } # SVG
     css_declaration: { name: "text-shadow" }
+    css_declaration: { name: "text-stroke" }
+    css_declaration: { name: "text-stroke-color" }
+    css_declaration: { name: "text-stroke-width" }
     css_declaration: { name: "text-transform" }
     css_declaration: { name: "text-underline-position" }
     css_declaration: { name: "top" }
@@ -6319,11 +6323,15 @@ attr_lists: {
     css_declaration: { name: "text-decoration-color" }
     css_declaration: { name: "text-decoration-line" }
     css_declaration: { name: "text-decoration-style" }
+    css_declaration: { name: "text-fill-color" }
     css_declaration: { name: "text-indent" }
     css_declaration: { name: "text-justify" }
     css_declaration: { name: "text-orientation" }
     css_declaration: { name: "text-overflow" }
     css_declaration: { name: "text-shadow" }
+    css_declaration: { name: "text-stroke" }
+    css_declaration: { name: "text-stroke-color" }
+    css_declaration: { name: "text-stroke-width" }
     css_declaration: { name: "text-transform" }
     css_declaration: { name: "text-underline-position" }
     css_declaration: { name: "top" }
