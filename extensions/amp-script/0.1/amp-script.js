@@ -96,7 +96,7 @@ export class AmpScript extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     return getElementServiceForDoc(this.element, TAG, TAG).then(service => {
-      this.setService(service);
+      this.setService(/** @type {!AmpScriptService} */ (service));
     });
   }
 
