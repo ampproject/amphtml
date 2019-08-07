@@ -255,7 +255,7 @@ export class AmpImg extends BaseElement {
       const {clientWidth, clientHeight} = this.element;
       const widthRatio = naturalWidth / clientWidth;
       const heightRatio = naturalHeight / clientHeight;
-      // TODO: this check can be improved to handle object-fit and transform
+      // TODO (cathyxz): this check can be improved to handle object-fit and transform
       // but not worth the bundle size increase. We could ship more robust
       // checks as part of a developer-only bundle if possible in the future.
       if (widthRatio > this.getDpr() * 2 || heightRatio > this.getDpr() * 2) {
