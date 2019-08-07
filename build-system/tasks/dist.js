@@ -175,7 +175,7 @@ async function dist() {
  * Build AMP experiments.js.
  *
  * @param {!Object} options
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function buildExperiments(options) {
   return compileJs(
@@ -196,7 +196,7 @@ function buildExperiments(options) {
  *
  * @param {string} version
  * @param {!Object} options
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function buildLoginDone(version, options) {
   const buildDir = `build/all/amp-access-${version}/`;
@@ -220,7 +220,7 @@ function buildLoginDone(version, options) {
  * Build amp-web-push publisher files HTML page.
  *
  * @param {!Object} options
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function buildWebPushPublisherFiles(options) {
   const distDir = 'dist/v0';
@@ -355,7 +355,7 @@ function postBuildWebPushPublisherFilesVersion() {
 
 /**
  * Precompilation steps required to build experiment js binaries.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function preBuildExperiments() {
   const path = 'tools/experiments';
