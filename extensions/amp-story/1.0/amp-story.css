@@ -205,7 +205,7 @@ amp-story-page[active] {
   animation-name: i-amphtml-sidebar-slide-in-right;
 }
 
-[desktop] .i-amphtml-story-sidebar[open] {
+[desktop] .i-amphtml-story-sidebar {
   min-width: 25% !important;
   max-width: 600px !important;
 }
