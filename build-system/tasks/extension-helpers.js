@@ -25,7 +25,7 @@ const {
   verifyExtensionBundles,
   verifyExtensionAliasBundles,
 } = require('../../bundles.config');
-const {buildParsers} = require('./compile-expr');
+const {compileExprs} = require('./compile-expr');
 const {compileJs, mkdirSync} = require('./helpers');
 const {compileVendorConfigs} = require('./vendor-configs');
 const {isTravisBuild} = require('../travis');
@@ -336,7 +336,9 @@ function buildExtensions(options) {
   const extensionsToBuild = options.compileAll ? [] : getExtensionsToBuild();
 
   const results = [];
-  results.push(buildParsers());
+  if (!options.compileOnlyCss) {
+    results.push(compileExprs());
+  }
   for (const key in extensions) {
     if (
       extensionsToBuild.length > 0 &&
