@@ -480,11 +480,12 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Handles keyboard events.
    * @param {!Event} event
+   * @return {!Promise}
    * @private
    */
   keyDownHandler_(event) {
     if (this.element.hasAttribute('disabled')) {
-      return;
+      return Promise.resolve();
     }
     const {key} = event;
     switch (key) {
@@ -493,20 +494,22 @@ export class AmpSelector extends AMP.BaseElement {
       case Keys.RIGHT_ARROW: /* fallthrough */
       case Keys.DOWN_ARROW:
         if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
-          this.navigationKeyDownHandler_(event);
+          return this.navigationKeyDownHandler_(event);
         }
-        return;
+        return Promise.resolve();
       case Keys.ENTER: /* fallthrough */
       case Keys.SPACE:
         this.selectionKeyDownHandler_(event);
-        return;
+        return Promise.resolve();
     }
+    return Promise.resolve();
   }
 
   /**
    * Handles keyboard navigation events. Should not be called if
    * keyboard selection is disabled.
    * @param {!Event} event
+   * @return {!Promise}
    * @private
    */
   navigationKeyDownHandler_(event) {
@@ -530,31 +533,41 @@ export class AmpSelector extends AMP.BaseElement {
         dir = 1;
         break;
       default:
-        return;
+        return Promise.resolve();
     }
 
     event.preventDefault();
-
     // Make currently selected option unfocusable
     this.elements_[this.focusedIndex_].tabIndex = -1;
 
-    // Change the focus to the next element in the specified direction.
-    // The selection should loop around if the user attempts to go one
-    // past the beginning or end.
-    this.focusedIndex_ = (this.focusedIndex_ + dir) % this.elements_.length;
-    if (this.focusedIndex_ < 0) {
-      this.focusedIndex_ = this.focusedIndex_ + this.elements_.length;
-    }
+    return this.getElementsSizes_().then(sizes => {
+      const originalIndex = this.focusedIndex_;
+      do {
+        // Change the focus to the next element in the specified direction.
+        // The selection should loop around if the user attempts to go one
+        // past the beginning or end.
+        this.focusedIndex_ = (this.focusedIndex_ + dir) % this.elements_.length;
+        if (this.focusedIndex_ < 0) {
+          this.focusedIndex_ = this.focusedIndex_ + this.elements_.length;
+        }
+      } while (
+        isElementHidden(
+          this.elements_[this.focusedIndex_],
+          sizes[this.focusedIndex_]
+        ) &&
+        this.focusedIndex_ != originalIndex
+      );
 
-    // Focus newly selected option
-    const newSelectedOption = this.elements_[this.focusedIndex_];
-    newSelectedOption.tabIndex = 0;
-    tryFocus(newSelectedOption);
+      // Focus newly selected option
+      const newSelectedOption = this.elements_[this.focusedIndex_];
+      newSelectedOption.tabIndex = 0;
+      tryFocus(newSelectedOption);
 
-    const focusedOption = this.elements_[this.focusedIndex_];
-    if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES.SELECT) {
-      this.onOptionPicked_(focusedOption);
-    }
+      const focusedOption = this.elements_[this.focusedIndex_];
+      if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES.SELECT) {
+        this.onOptionPicked_(focusedOption);
+      }
+    });
   }
 
   /**
@@ -633,6 +646,30 @@ export class AmpSelector extends AMP.BaseElement {
   getSelectedElementsForTesting() {
     return this.selectedElements_;
   }
+
+  /**
+   * Cache the rects of each of the elements.
+   * @return {!Promise<!Array<!ClientRect>>}
+   * @private
+   */
+  getElementsSizes_() {
+    return this.measureElement(() => {
+      return this.elements_.map(element =>
+        element./*OK*/ getBoundingClientRect()
+      );
+    });
+  }
+}
+
+/**
+ * Detect if an element is hidden.
+ * @param {!Element} element
+ * @param {!ClientRect} rect
+ * @return {boolean}
+ */
+function isElementHidden(element, rect) {
+  const {width, height} = rect;
+  return element.hidden || width == 0 || height == 0;
 }
 
 AMP.extension(TAG, '0.1', AMP => {
