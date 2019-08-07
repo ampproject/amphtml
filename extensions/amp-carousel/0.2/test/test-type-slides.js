@@ -27,6 +27,7 @@ import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 /**
  * @param {!Element} el
  * @param {number=} index An intex to wait for.
+ * @return {!Promise<undefined>}
  */
 async function afterIndexUpdate(el, index) {
   const event = await listenOncePromise(el, 'indexchange');

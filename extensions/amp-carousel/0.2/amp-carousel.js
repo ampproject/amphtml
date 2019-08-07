@@ -64,9 +64,6 @@ class AmpCarousel extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const  */
-    this.owners_ = Services.ownersForDoc(element);
-
     /** @private {?Carousel} */
     this.carousel_ = null;
 
@@ -144,14 +141,15 @@ class AmpCarousel extends AMP.BaseElement {
     this.prevButton_.addEventListener('click', () => this.interactionPrev());
     this.nextButton_.addEventListener('click', () => this.interactionNext());
 
+    const owners = Services.ownersForDoc(element);
     this.childLayoutManager_ = new ChildLayoutManager({
       ampElement: this,
       intersectionElement: this.scrollContainer_,
       viewportIntersectionCallback: (child, isIntersecting) => {
         if (isIntersecting) {
-          this.owners_.scheduleResume(this.element, child);
+          owners.scheduleResume(this.element, child);
         } else {
-          this.owners_.schedulePause(this.element, child);
+          owners.schedulePause(this.element, child);
         }
       },
     });
