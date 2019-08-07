@@ -547,10 +547,6 @@ export class Bind {
       .then(() => {
         // Listen for DOM updates (e.g. template render) to rescan for bindings.
         root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
-        // In dev mode, check default values against initial expression results.
-        if (getMode().development) {
-          return this.evaluate_().then(results => this.verify_(results));
-        }
       })
       .then(() => {
         const ampStates = root.querySelectorAll('AMP-STATE');
@@ -565,6 +561,10 @@ export class Bind {
         return Promise.all(whenParsed);
       })
       .then(() => {
+        // In dev mode, check default values against initial expression results.
+        if (getMode().development) {
+          return this.evaluate_().then(results => this.verify_(results));
+        }
         // Bind is "ready" when its initialization completes _and_ all <amp-state>
         // elements' local data is parsed and processed (not remote data).
         this.viewer_.sendMessage('bindReady', undefined);
@@ -1355,6 +1355,11 @@ export class Bind {
             // when a child option[selected] attribute changes.
             this.updateSelectForSafari_(element, property, newValue);
           }
+        } else if (typeof newValue === 'object' && newValue !== null) {
+          // If newValue is an object or array (e.g. amp-list[src] binding),
+          // don't bother updating the element since attribute values like
+          // "[Object object]" have no meaning in the DOM.
+          mutated = true;
         } else if (newValue !== oldValue) {
           mutated = this.rewriteAttributes_(
             element,

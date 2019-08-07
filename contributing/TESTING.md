@@ -131,8 +131,9 @@ There are 3 serving modes:
 - DEFAULT mode serves unminified AMP. You want to use this during normal dev.
 - COMPILED mode serves minified AMP. This is closer to the prod setup. This is only available after running `gulp dist --fortesting`. Serve MIN mode by adding `--compiled` to `gulp` command.
 - CDN mode serves prod. These remote files would not reflect your local changes. Serve CDN mode by adding `--cdn` to `gulp` command.
+- <RTV_NUMBER> mode serves the bundle from the given RTV number, where <RTV_NUMBER> is a 15 digit number. Ex. `001907161745080`
 
-To switch serving mode during runtime, go to http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the following values: `default`, `compiled,` or `cdn`.
+To switch serving mode during runtime, go to http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the following values: `default`, `compiled`, `cdn` or `<RTV_NUMBER>`.
 
 ### Examples
 
@@ -256,7 +257,7 @@ If a Percy test flakes and you would like to trigger a rerun, you can't do that 
 
 ### Running Visual Diff Tests Locally
 
-You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<org>/<project>/settings`. Once the environment variables are set up, you can run the AMP visual diff tests as described below.
+You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<org>/<project>/integrations`. Once the environment variables are set up, you can run the AMP visual diff tests as described below.
 
 First, build the AMP runtime and run the gulp task that invokes the visual diff script:
 ```
