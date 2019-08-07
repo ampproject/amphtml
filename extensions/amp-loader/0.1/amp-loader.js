@@ -213,11 +213,18 @@ class LoaderBuilder {
    * }}
    */
   getCustomLogo_() {
+    if (this.isAd_()) {
+      return {
+        content: this.getAdsLogo_(),
+      };
+    }
+
     if (isIframeVideoPlayerComponent(this.element_.tagName)) {
       return {
         content: this.getVideoPlayerLogo_(),
       };
     }
+
     return this.element_.createLoaderLogo();
   }
 
@@ -245,8 +252,8 @@ class LoaderBuilder {
 
   /**
    * Returns the default logo.
-   * @private
    * @return {!Element}
+   * @private
    */
   getDefaultLogo_() {
     const html = htmlFor(this.element_);
@@ -258,13 +265,37 @@ class LoaderBuilder {
   }
 
   /**
-   * Whether the element is an Ad.
+   * `<amp-ad>s` have several different classes, so putting the code here for
+   * now since it is the safest way to make sure that they all get the correct
+   * loader.
+   *
+   * Since the implementation may have a delay before loading, we would need to
+   * make sure the ads loader is present, even if the implementation has not
+   * yet downloaded.
+   *
+   * TODO(sparhami) Move this out of amp-loader into something common for ads.
+   * @return {!Element}
+   * @private
+   */
+  getAdsLogo_() {
+    const html = htmlFor(this.element_);
+    return html`
+      <div class="i-amphtml-new-loader-ad-logo">
+        <span class="i-amphtml-new-loader-ad-label">
+          Ad
+        </span>
+      </div>
+    `;
+  }
+
+  /**
+   * Whether the element is an Ad. Note that this does not cover amp-embed
+   * currently.
    * @private
    * @return {boolean}
    */
   isAd_() {
-    // Not Implemented
-    return false;
+    return this.element_.tagName == 'AMP-AD';
   }
 
   /**
