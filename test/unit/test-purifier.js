@@ -737,6 +737,27 @@ describe
             '<circle r="400"></circle></a></svg>'
         );
       });
+
+      it('should output <use> only if href is relative', () => {
+        const href =
+          '<svg xmlns="http://www.w3.org/2000/svg"><use href="#foo"></use></svg>';
+        expect(purify(href)).to.equal(href);
+
+        const xlink =
+          '<svg xmlns="http://www.w3.org/2000/svg"><use xlink:href="#foo"></use></svg>';
+        expect(purify(xlink)).to.equal(xlink);
+
+        expect(
+          purify(
+            '<svg xmlns="http://www.w3.org/2000/svg"><use href="//evil"></svg>'
+          )
+        ).to.equal('<svg xmlns="http://www.w3.org/2000/svg"></svg>');
+        expect(
+          purify(
+            '<svg xmlns="http://www.w3.org/2000/svg"><use xlink:href="//evil"></svg>'
+          )
+        ).to.equal('<svg xmlns="http://www.w3.org/2000/svg"></svg>');
+      });
     });
   });
 
