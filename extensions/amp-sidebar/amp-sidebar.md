@@ -67,7 +67,7 @@ for content within the sidebar to be displayed on other parts of the main conten
 - The max-height of the sidebar is 100vh, if the height exceeds 100vh then a vertical scrollbar appears. The default height is set to 100vh in CSS and is overridable in CSS.
 - The width of the sidebar can be set and adjusted using CSS (minimum width is 45px).
 - Touch zoom is disabled on the `amp-sidebar` and its mask when the sidebar is open.
-- `<amp-sidebar>` is *recommended* to be be a direct child of the `<body>` to preserve a logical DOM order (for accessibility) as well as to avoid altering its behavior by a container element.
+- `<amp-sidebar>` is *recommended* to be be a direct child of the `<body>` to preserve a logical DOM order (for accessibility) as well as to avoid altering its behavior by a container element. Note that having an ancestor of `amp-sidebar` with a set `z-index` may cause the sidebar to appear below other elements (such as headers), breaking its functionality.
 
 *Example:*
 
