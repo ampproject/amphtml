@@ -206,13 +206,13 @@ amp-story-page[active] {
 }
 
 [desktop] .i-amphtml-story-sidebar[open] {
-  max-width: 320px !important;
+  min-width: 25% !important;
+  max-width: 600px !important;
 }
 
 .i-amphtml-story-sidebar {
-  max-width: 280px !important;
-  min-width: 280px !important;
-  width: 280px !important;
+  min-width: 75% !important;
+  max-width: 360px !important;
   animation-timing-function: cubic-bezier(0.4, 0.0, 1, 1)  !important;
   animation-duration: 0.2s !important;
   animation-name: i-amphtml-sidebar-slide-out-right;
