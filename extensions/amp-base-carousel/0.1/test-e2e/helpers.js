@@ -15,7 +15,7 @@
  */
 
 const TAG_NAME = 'amp-base-carousel';
-const SLOTTED_CLASS = 'i-amphtml-base-carousel-slotted';
+const SLOTTED_CLASS = 'i-amphtml-carousel-slotted';
 const SPACER_CLASS = 'i-amphtml-carousel-spacer';
 const SCROLLER_SELECTOR = `${TAG_NAME} .i-amphtml-carousel-scroll`;
 const PREV_ARROW_SLOT_SELECTOR = '.i-amphtml-base-carousel-arrow-prev-slot';
