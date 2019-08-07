@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {DomFingerprint} from '../../src/utils/dom-fingerprint';
-import {Services} from '../../src/services';
+import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {Services} from '../../../src/services';
 import {
   addDataAndJsonAttributes_,
   applySandbox,
@@ -26,15 +26,14 @@ import {
   preloadBootstrap,
   resetBootstrapBaseUrlForTesting,
   resetCountForTesting,
-} from '../../src/3p-frame';
+} from '../../../src/3p-frame';
 import {
   deserializeMessage,
   serializeMessage,
-} from '../../src/3p-frame-messaging';
-import {dev} from '../../src/log';
-import {loadPromise} from '../../src/event-helper';
-import {preconnectForElement} from '../../src/preconnect';
-import {toggleExperiment} from '../../src/experiments';
+} from '../../../src/3p-frame-messaging';
+import {dev} from '../../../src/log';
+import {preconnectForElement} from '../../../src/preconnect';
+import {toggleExperiment} from '../../../src/experiments';
 
 describe
   .configure()
@@ -137,7 +136,7 @@ describe
     });
 
     // TODO(bradfrizzell) break this out into a test-iframe-attributes
-    it.skip('should create an iframe', () => {
+    it('should create an iframe', () => {
       window.AMP_MODE = {
         localDev: true,
         development: false,
@@ -181,97 +180,81 @@ describe
       expect(locationHref).to.not.be.empty;
       const docInfo = Services.documentInfoForDoc(window.document);
       expect(docInfo.pageViewId).to.not.be.empty;
-      const name = JSON.parse(decodeURIComponent(iframe.name));
+      const name = JSON.parse(iframe.name);
       const sentinel = name.attributes._context['sentinel'];
-      const fragment =
-        '{"testAttr":"value","ping":"pong","width":50,"height":100,' +
-        '"type":"_ping_",' +
-        '"_context":{"referrer":"http://acme.org/",' +
-        '"ampcontextVersion": "$internalRuntimeVersion$",' +
-        '"ampcontextFilepath": "https://3p.ampproject.net/' +
-        '$internalRuntimeVersion$/ampcontext-v0.js",' +
-        '"canonicalUrl":"' +
-        docInfo.canonicalUrl +
-        '",' +
-        '"sourceUrl":"' +
-        locationHref +
-        '",' +
-        '"pageViewId":"' +
-        docInfo.pageViewId +
-        '","clientId":"cidValue",' +
-        '"initialLayoutRect": ' +
-        JSON.stringify(div.getPageLayoutBox()) +
-        ',' +
-        '"initialIntersection": ' +
-        JSON.stringify(div.getIntersectionChangeEntry()) +
-        ',' +
-        '"location":{"href":"' +
-        locationHref +
-        '"},"tagName":"MY-ELEMENT",' +
-        '"mode":{"localDev":true,"development":false,"minified":false,' +
-        '"test":false,"version":"$internalRuntimeVersion$"}' +
-        ',"canary":true' +
-        ',"hidden":false' +
-        // Note that DOM fingerprint will change if the document DOM changes
-        // Note also that running it using --files uses different DOM.
-        ',"domFingerprint":"1725030182"' +
-        ',"startTime":1234567888' +
-        ',"experimentToggles":{"exp-a":true,"exp-b":true}' +
-        ',"sentinel":"' +
-        sentinel +
-        '"' +
-        ',"initialIntersection":{"time":1234567888,' +
-        '"rootBounds":{"left":0,"top":0,"width":' +
-        width +
-        ',"height":' +
-        height +
-        ',"bottom":' +
-        height +
-        ',"right":' +
-        width +
-        ',"x":0,"y":0},"boundingClientRect":' +
-        '{"width":100,"height":200},"intersectionRect":{' +
-        '"left":0,"top":0,"width":0,"height":0,"bottom":0,' +
-        '"right":0,"x":0,"y":0}}}}';
+      const fragment = {
+        'testAttr': 'value',
+        'ping': 'pong',
+        'width': 50,
+        'height': 100,
+        'type': '_ping_',
+        '_context': {
+          'referrer': 'http://acme.org/',
+          'ampcontextVersion': '$internalRuntimeVersion$',
+          'ampcontextFilepath':
+            'https://3p.ampproject.net/$internalRuntimeVersion$/ampcontext-v0.js',
+          'canonicalUrl': docInfo.canonicalUrl,
+          'sourceUrl': locationHref,
+          'pageViewId': docInfo.pageViewId,
+          'clientId': 'cidValue',
+          'initialLayoutRect': div.getPageLayoutBox(),
+          'location': {'href': locationHref},
+          'tagName': 'MY-ELEMENT',
+          'mode': {
+            'localDev': true,
+            'development': false,
+            'minified': false,
+            'test': false,
+            'version': '$internalRuntimeVersion$',
+          },
+          'canary': true,
+          'hidden': false,
+          // Note that DOM fingerprint will change if the document DOM changes
+          // Note also that running it using --files uses different DOM.
+          'domFingerprint': '1725030182',
+          'startTime': 1234567888,
+          'experimentToggles': {'exp-a': true, 'exp-b': true},
+          'sentinel': sentinel,
+          'initialIntersection': {
+            'time': 1234567888,
+            'rootBounds': {
+              'left': 0,
+              'top': 0,
+              'width': width,
+              'height': height,
+              'bottom': height,
+              'right': width,
+              'x': 0,
+              'y': 0,
+            },
+            'boundingClientRect': {'width': 100, 'height': 200},
+            'intersectionRect': {
+              'left': 0,
+              'top': 0,
+              'width': 0,
+              'height': 0,
+              'bottom': 0,
+              'right': 0,
+              'x': 0,
+              'y': 0,
+            },
+          },
+        },
+      };
       expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html'
       );
-      const parsedFragment = JSON.parse(fragment);
       // Since DOM fingerprint changes between browsers and documents, to have
       // stable tests, we can only verify its existence.
       expect(name.attributes._context.domFingerprint).to.exist;
       delete name.attributes._context.domFingerprint;
-      delete parsedFragment._context.domFingerprint;
+      delete fragment._context.domFingerprint;
       // Value changes between tests.
       // TODO: Switch test to isolated window.
       expect(name.attributes._context.experimentToggles).to.exist;
       delete name.attributes._context.experimentToggles;
-      delete parsedFragment._context.experimentToggles;
-      expect(name.attributes).to.deep.jsonEqual(parsedFragment);
-
-      // Switch to same origin for inner tests.
-      iframe.src = '/dist.3p/current/frame.max.html';
-      document.body.appendChild(iframe);
-      return loadPromise(iframe).then(() => {
-        const win = iframe.contentWindow;
-        expect(win.context.canonicalUrl).to.equal(docInfo.canonicalUrl);
-        expect(win.context.domFingerprint).to.equal('MY-MOCK-FINGERPRINT');
-        expect(win.context.sourceUrl).to.equal(locationHref);
-        expect(win.context.location.href).to.equal(locationHref);
-        expect(win.context.location.origin).to.equal('http://localhost:9876');
-        expect(win.context.pageViewId).to.equal(docInfo.pageViewId);
-        expect(win.context.referrer).to.equal('http://acme.org/');
-        expect(win.context.data.testAttr).to.equal('value');
-        expect(win.context.noContentAvailable).to.be.a('function');
-        expect(win.context.observeIntersection).to.be.a('function');
-        expect(win.context.reportRenderedEntityIdentifier).to.be.a('function');
-        const c = win.document.getElementById('c');
-        expect(c).to.not.be.null;
-        expect(c.textContent).to.contain('pong');
-        expect(win.context.data).to.have.property('ping', 'pong');
-        expect(win.context.data).to.have.property('testAttr', 'value');
-        document.head.removeChild(link);
-      });
+      delete fragment._context.experimentToggles;
+      expect(name.attributes).to.deep.jsonEqual(fragment);
     });
 
     it('should copy attributes to iframe', () => {
