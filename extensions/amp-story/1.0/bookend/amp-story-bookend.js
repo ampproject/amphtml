@@ -18,12 +18,12 @@ import {Action, StateProperty, UIType} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
-import {DraggableDrawer} from '../amp-story-draggable-drawer';
 import {
   DEPRECATED_SHARE_PROVIDERS_KEY,
   SHARE_PROVIDERS_KEY,
   ScrollableShareWidget,
 } from '../amp-story-share';
+import {DraggableDrawer} from '../amp-story-draggable-drawer';
 import {EventType, dispatch} from '../events';
 import {
   HistoryState,
@@ -43,9 +43,6 @@ import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
 import {toggle} from '../../../../src/style';
-
-/** @private @const {string} */
-const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
 
 // TODO(#14591): Clean when bookend API v0.1 is deprecated.
 const BOOKEND_VERSION_1 = 'v1.0';
@@ -209,9 +206,7 @@ export class AmpStoryBookend extends DraggableDrawer {
      */
     this.bookendEl_ = null;
 
-    const {win} = this;
-
-    /** @private {!Element} */
+    /** @private {?Element} */
     this.shadowHost_ = null;
 
     /** @private {?ScrollableShareWidget} */
