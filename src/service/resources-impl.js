@@ -35,6 +35,7 @@ import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
+import {Deferred} from '../utils/promise';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -279,6 +280,11 @@ export class ResourcesDef extends MutatorsAndOwnersDef {
   onNextPass(callback) {}
 
   /**
+   * @return {!Promise} when first pass executed.
+   */
+  whenFirstPass() {}
+
+  /**
    * Called when main AMP binary is fully initialized.
    * May never be called in Shadow Mode.
    */
@@ -451,6 +457,9 @@ export class Resources {
     /** @const @private {!Array<function()>} */
     this.passCallbacks_ = [];
 
+    /** @const @private {!Deferred} */
+    this.firstPassDone_ = new Deferred();
+
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.viewer_.getVisibilityState()
@@ -500,7 +509,7 @@ export class Resources {
       this.checkPendingChangeSize_(element);
     });
 
-    this.schedulePass();
+    this.schedulePass(1);
 
     this.rebuildDomWhenReady_();
   }
@@ -2529,6 +2538,13 @@ export class Resources {
   }
 
   /**
+   * @return {!Promise} when first pass executed.
+   */
+  whenFirstPass() {
+    return this.firstPassDone_.promise;
+  }
+
+  /**
    * Calls iterator on each sub-resource
    * @param {!FiniteStateMachine<!VisibilityState>} vsm
    */
@@ -2562,6 +2578,7 @@ export class Resources {
         } else {
           dev().fine(TAG_, 'document is not visible: no scheduling');
         }
+        this.firstPassDone_.resolve();
       }
     };
     const noop = () => {};
