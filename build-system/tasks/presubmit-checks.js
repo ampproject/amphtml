@@ -875,7 +875,6 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Always supply a reason in rejections. ' +
       'error.cancellation() may be applicable.',
-    whitelist: ['extensions/**/*-expr-impl.js'],
   },
   '[^.]loadPromise': {
     message: 'Most users should use BaseElement…loadPromise.',
