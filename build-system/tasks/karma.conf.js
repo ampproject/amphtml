@@ -81,6 +81,7 @@ module.exports = {
   browserify: {
     watch: true,
     debug: true,
+    fast: true,
     basedir: __dirname + '/../../',
     transform: [['babelify', BABELIFY_CONFIG]],
     // Prevent "cannot find module" errors on Travis. See #14166.
