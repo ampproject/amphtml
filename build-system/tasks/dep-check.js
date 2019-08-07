@@ -204,7 +204,10 @@ function getGraph(entryModule) {
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  const bundler = browserify(entryModule, {debug: true}).transform(
+  const bundler = browserify(entryModule, {
+    debug: true,
+    fast: true,
+  }).transform(
     babelify,
     Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {compact: false})
   );
