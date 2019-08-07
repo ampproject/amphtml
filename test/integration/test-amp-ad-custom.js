@@ -21,8 +21,10 @@ describe
   .configure()
   .retryOnSaucelabs()
   .run('amp custom ad', () => {
+    let sandbox;
     let fixture;
     beforeEach(() => {
+      sandbox = sinon.sandbox;
       return createFixtureIframe('test/fixtures/amp-ad-custom.html', 500).then(
         f => {
           fixture = f;
@@ -30,8 +32,11 @@ describe
       );
     });
 
-    /** TODO(#15329): unskip */
-    it.skip('should render template', () => {
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('should render template', () => {
       return fixture.awaitEvent(AmpEvents.LOAD_END, 6).then(function() {
         expect(fixture.doc.querySelectorAll('amp-img')).to.have.length(3);
 
