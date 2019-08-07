@@ -148,6 +148,10 @@ export class BindEvaluator {
       if (result === undefined) {
         return;
       }
+      // Don't validate non-primitive expression results e.g. arrays, objects.
+      if (result !== null && typeof result === 'object') {
+        return;
+      }
       // IMPORTANT: We need to validate expression results on each binding
       // since validity depends on the `tagName` and `property` rather than
       // just the `result`.
