@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 925
+spec_file_revision: 926
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -656,6 +656,23 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-recaptcha-input"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
+# AMP metadata, name=amp-script-src
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-script-src"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-script-src"
     dispatch_key: NAME_VALUE_DISPATCH
   }
 }
