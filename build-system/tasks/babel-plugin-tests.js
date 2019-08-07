@@ -21,7 +21,7 @@ const {isTravisBuild} = require('../travis');
 
 /**
  * Simple wrapper around the jest tests for custom babel plugins.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Vinyl}
  */
 function babelPluginTests() {
   return gulp.src('./build-system/babel-plugins/testSetupFile.js').pipe(
