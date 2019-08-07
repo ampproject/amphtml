@@ -393,8 +393,8 @@ export class Navigation {
     const baseHref =
       getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
     const curLoc = this.parseUrl_(baseHref);
-    const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
-    const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
+    const tgtHref = getHref(tgtLoc);
+    const curHref = getHref(curLoc);
 
     if (tgtHref == curHref && tgtLoc.hash) {
       // If the current target anchor link is the same origin + path
@@ -549,8 +549,8 @@ export class Navigation {
    * @private
    */
   handleNavClick_(e, target, tgtLoc, curLoc) {
-    const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
-    const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
+    const tgtHref = getHref(tgtLoc);
+    const curHref = getHref(curLoc);
 
     // If the current target anchor link is the same origin + path
     // as the current document then we know we are just linking to an
@@ -738,4 +738,13 @@ function maybeExpandUrlParams(ampdoc, e) {
     }
     target.setAttribute('href', newHref);
   }
+}
+
+/**
+ * Calculate and return the href from the Location
+ * @param {!Location} location
+ * @return {string}
+ */
+function getHref(location) {
+  return `${location.origin}${location.pathname}${location.search}`
 }
