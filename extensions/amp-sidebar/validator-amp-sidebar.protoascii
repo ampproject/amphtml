@@ -44,7 +44,6 @@ tags: {  # <amp-sidebar> not in amp-story
   tag_name: "AMP-SIDEBAR"
   # There is an alternate spec for amp-sidebar in amp-story.
   disallowed_ancestor: "AMP-STORY"
-  mandatory_parent: "BODY"
   requires_extension: "amp-sidebar"
   attrs: {
     name: "side"
