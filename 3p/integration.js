@@ -559,12 +559,12 @@ const defaultAllowedTypesInCustomFrame = [
  * @param {!Window} win
  */
 function init(win) {
+  initLogConstructor();
   const config = getAmpConfig();
 
   // Overriding to short-circuit src/mode#getMode()
   win.AMP_MODE = config.mode;
 
-  initLogConstructor();
   setReportError(console.error.bind(console));
 
   setExperimentToggles(config.experimentToggles);
