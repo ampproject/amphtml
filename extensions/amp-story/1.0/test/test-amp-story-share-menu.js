@@ -136,7 +136,11 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
     // Create escape keydown event.
+<<<<<<< HEAD
     const keydownEvent = new Event('keydown');
+=======
+    const keydownEvent = new Event("keydown");
+>>>>>>> dfc35a9df5f04f84e3f497b24f9f35c8056a3afb
     keydownEvent.keyCode = Keys.ESCAPE;
     win.dispatchEvent(new Event(keydownEvent));
 
@@ -144,6 +148,10 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
   });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> dfc35a9df5f04f84e3f497b24f9f35c8056a3afb
   it('should render the amp-social-share button if system share', () => {
     isSystemShareSupported = true;
 
