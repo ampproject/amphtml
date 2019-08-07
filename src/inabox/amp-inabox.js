@@ -113,11 +113,15 @@ startupChunk(self.document, function initial() {
         // Pre-stub already known elements.
         stubElementsForDoc(ampdoc);
       });
-      startupChunk(self.document, function final() {
-        Navigation.installAnchorClickInterceptor(ampdoc, self);
-        maybeValidate(self);
-        makeBodyVisible(self.document);
-      });
+      startupChunk(
+        self.document,
+        function final() {
+          Navigation.installAnchorClickInterceptor(ampdoc, self);
+          maybeValidate(self);
+          makeBodyVisible(self.document);
+        },
+        /* makes the body visible */ true
+      );
       startupChunk(self.document, function finalTick() {
         perf.tick('e_is');
         Services.resourcesForDoc(ampdoc).ampInitComplete();
