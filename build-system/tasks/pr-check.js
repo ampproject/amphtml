@@ -56,6 +56,7 @@ async function prCheck(cb) {
 
   printChangeSummary(FILENAME);
   const buildTargets = determineBuildTargets(FILENAME);
+  runCheck('gulp compile-exprs');
   runCheck('gulp lint --local_changes');
   runCheck('gulp presubmit');
   runCheck('gulp check-exact-versions');
