@@ -344,7 +344,7 @@ function toArrayOrDefault(value, defaultValue) {
  * Flatten array of arrays.
  *
  * @param {!Array<!Array>} arr
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Array}
  */
 function flatten(arr) {
   return [].concat.apply([], arr);
