@@ -18,7 +18,7 @@
  * Changes the values of IS_DEV to false and IS_MINIFIED to true.
  * The above said variables are in src/mode.js file.
  * @param {Object} babelTypes
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Object}
  */
 module.exports = function(babelTypes) {
   const {types: t} = babelTypes;

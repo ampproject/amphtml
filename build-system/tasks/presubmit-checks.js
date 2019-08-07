@@ -1036,7 +1036,7 @@ function isInBuildSystemFixtureFolder(filePath) {
 /**
  * Strip Comments
  * @param {string} contents
- * @return {*} TODO(#23582): Specify return type
+ * @return {string}
  */
 function stripComments(contents) {
   // Multi-line comments
@@ -1214,7 +1214,7 @@ function isMissingTerms(file) {
 /**
  * Check a file for all the required terms and
  * any forbidden terms and log any errors found.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function presubmit() {
   let forbiddenFound = false;

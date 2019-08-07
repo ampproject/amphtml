@@ -25,7 +25,7 @@ const expectedCaches = ['cloudflare', 'google'];
 
 /**
  * Fail if caches.json is missing some expected caches.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function cachesJson() {
   return gulp.src(['caches.json']).pipe(
@@ -61,7 +61,7 @@ async function cachesJson() {
 
 /**
  * Fail if JSON files are valid.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function jsonSyntax() {
   let hasError = false;
