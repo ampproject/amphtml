@@ -19,7 +19,7 @@
 import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDOMTokenListToggle} from './polyfills/domtokenlist-toggle';
+import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {install as installFetch} from './polyfills/fetch';
 import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
@@ -39,7 +39,7 @@ installArrayIncludes(self);
 
 // Polyfills that depend on DOM availability
 if (self.document) {
-  installDOMTokenListToggle(self);
+  installDOMTokenList(self);
   installDocContains(self);
   installGetBoundingClientRect(self);
 

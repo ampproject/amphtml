@@ -684,7 +684,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
-      'src/polyfills.js->src/polyfills/domtokenlist-toggle.js',
+      'src/polyfills.js->src/polyfills/domtokenlist.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/fetch.js',
       'src/polyfills.js->src/polyfills/math-sign.js',
@@ -695,7 +695,7 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
-      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist-toggle.js',
+      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
     ],
   },
   {
