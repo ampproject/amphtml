@@ -351,8 +351,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(updateBoxRectStub).to.be.calledWith(boxRect);
   });
 
-  it('should update box rect when expanding/collapsing - friendly iframe case',
-    function*() {
+  it('should update box rect when expanding/collapsing - friendly iframe case', function*() {
     const boxRect = {
       left: 20,
       top: 10,
@@ -370,21 +369,25 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       height: 30,
     };
     sandbox
-        .stub(FrameOverlayManager.prototype, 'expandFrame')
-        .callsFake((i, callback) => {
-          callback(boxRect);
-        });
+      .stub(FrameOverlayManager.prototype, 'expandFrame')
+      .callsFake((i, callback) => {
+        callback(boxRect);
+      });
     sandbox
-        .stub(FrameOverlayManager.prototype, 'collapseFrame')
-        .callsFake((i, callback) => {
-          callback(boxRect2);
-        });
+      .stub(FrameOverlayManager.prototype, 'collapseFrame')
+      .callsFake((i, callback) => {
+        callback(boxRect2);
+      });
 
     const updateBoxRectStub = sandbox
       .stub(bindingFriendly, 'updateBoxRect_')
       .callsFake(NOOP);
-    sandbox.stub(bindingFriendly, 'prepareBodyForOverlay_').returns(Promise.resolve());
-    sandbox.stub(bindingFriendly, 'resetBodyForOverlay_').returns(Promise.resolve());
+    sandbox
+      .stub(bindingFriendly, 'prepareBodyForOverlay_')
+      .returns(Promise.resolve());
+    sandbox
+      .stub(bindingFriendly, 'resetBodyForOverlay_')
+      .returns(Promise.resolve());
 
     yield bindingFriendly.updateLightboxMode(true);
 

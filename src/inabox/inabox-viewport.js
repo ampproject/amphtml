@@ -452,7 +452,7 @@ export class ViewportBindingInabox {
   requestCancelFullOverlayFrame_() {
     return new Promise((resolve, reject) => {
       if (this.isFriendlyIframed_) {
-        const iframe = /** @type {?HTMLIFrameElement}*/(this.win.frameElement);
+        const iframe = /** @type {?HTMLIFrameElement}*/ (this.win.frameElement);
         if (iframe) {
           this.topWindowFrameOverlayManager_.collapseFrame(iframe, boxRect => {
             this.updateBoxRect_(boxRect);
