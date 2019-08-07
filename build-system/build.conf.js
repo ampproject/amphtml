@@ -32,7 +32,7 @@ const defaultPlugins = [
 
 const esmRemovedImports = {
   './polyfills/document-contains': ['installDocContains'],
-  './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
+  './polyfills/domtokenlist': ['installDOMTokenList'],
   './polyfills/fetch': ['installFetch'],
   './polyfills/math-sign': ['installMathSign'],
   './polyfills/object-assign': ['installObjectAssign'],

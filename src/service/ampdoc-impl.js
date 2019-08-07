@@ -61,6 +61,9 @@ export class AmpDocService {
 
     /** @private {boolean} */
     this.ampdocFieExperimentOn_ = isExperimentOn(win, 'ampdoc-fie');
+
+    /** @private {boolean} */
+    this.mightHaveShadowRoots_ = !isSingleDoc;
   }
 
   /**
@@ -149,6 +152,10 @@ export class AmpDocService {
         continue;
       }
 
+      if (!this.mightHaveShadowRoots_) {
+        break;
+      }
+
       // Shadow doc.
       const shadowRoot =
         n.nodeType == /* DOCUMENT */ 9 ? n : getShadowRootNode(n);
@@ -203,6 +210,7 @@ export class AmpDocService {
    * @restricted
    */
   installShadowDoc(url, shadowRoot) {
+    this.mightHaveShadowRoots_ = true;
     devAssert(
       !shadowRoot[AMPDOC_PROP],
       'The shadow root already contains ampdoc'
@@ -213,7 +221,7 @@ export class AmpDocService {
   }
 
   /**
-   * Creates and installs the ampdoc for the shadow root.
+   * Creates and installs the ampdoc for the fie root.
    * @param {string} url
    * @param {!Window} childWin
    * @param {!AmpDocOptions=} opt_options

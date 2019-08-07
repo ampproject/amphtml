@@ -35,7 +35,8 @@ function domTokenListTogglePolyfill(token, opt_force) {
 }
 
 /**
- * Polyfills `DOMTokenList.prototype.toggle` API in IE.
+ * Polyfills `DOMTokenList.prototype.toggle` API and makes `.add` accepts N
+ * classes in IE.
  * @param {!Window} win
  */
 export function install(win) {
@@ -46,6 +47,13 @@ export function install(win) {
       writable: true,
       value: domTokenListTogglePolyfill,
     });
+
+    const {add} = win.DOMTokenList.prototype;
+    win.DOMTokenList.prototype.add = function() {
+      for (let i = 0; i < arguments.length; i++) {
+        add.call(this, arguments[i]);
+      }
+    };
   }
 }
 
