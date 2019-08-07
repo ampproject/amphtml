@@ -17,8 +17,10 @@
 import {installServiceInEmbedScope, registerServiceBuilder} from '../service';
 import {reportError} from '../error';
 import {user} from '../log';
+import {getMode} from '../mode';
 
 const TAG = 'timer';
+let timersForTesting;
 
 /**
  * Helper with all things Timer.
@@ -84,7 +86,14 @@ export class Timer {
         throw e;
       }
     };
-    return this.win.setTimeout(wrapped, opt_delay);
+    const index = this.win.setTimeout(wrapped, opt_delay);
+    if (getMode().test) {
+      if (!timersForTesting) {
+        timersForTesting = [];
+      }
+      timersForTesting.push(index);
+    }
+    return index;
   }
 
   /**
@@ -178,4 +187,12 @@ export function installTimerService(window) {
  */
 export function installTimerInEmbedWindow(embedWin) {
   installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
+}
+
+export function cancelTimersForTesting() {
+  if (!timersForTesting) {
+    return;
+  }
+  timersForTesting.forEach(clearTimeout);
+  timersForTesting = null;
 }
