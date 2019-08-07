@@ -611,11 +611,18 @@ class SeleniumWebDriverController {
   }
 
   async switchToShadow(handle) {
+    const getter = shadowHost => shadowHost.shadowRoot.body;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  async switchToShadowRoot(handle) {
+    const getter = shadowHost => shadowHost.shadowRoot;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  async switchToShadowInternal_(handle, getter) {
     const shadowHost = handle.getElement();
-    const shadowRootBody = await this.evaluate(
-      shadowHost => shadowHost.shadowRoot.body,
-      shadowHost
-    );
+    const shadowRootBody = await this.evaluate(getter, shadowHost);
     this.shadowRoot_ = shadowRootBody;
   }
 

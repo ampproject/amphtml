@@ -664,9 +664,18 @@ class PuppeteerController {
     this.currentFrame_ = frame;
   }
 
-  async switchToShadow(handle) {
-    const shadowHost = handle.getElement();
+  switchToShadow(handle) {
     const getter = shadowHost => shadowHost.shadowRoot.body;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  switchToShadowRoot(handle) {
+    const getter = shadowHost => shadowHost.shadowRoot;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  async switchToShadowInternal_(handle, getter) {
+    const shadowHost = handle.getElement();
     const shadowRootBodyHandle = await this.evaluate(getter, shadowHost);
     this.shadowRoot_ = shadowRootBodyHandle.asElement();
   }
