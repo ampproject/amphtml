@@ -294,12 +294,14 @@ function addPurifyHooks(purifier, doc) {
         attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
       }
     } else {
+      data.keepAttr = false;
       user().error(
         TAG,
-        `Removing "${attrName}" attribute with invalid ` +
-          `value in <${tagName} ${attrName}="${attrValue}">.`
+        'Removed invalid attribute %s[%s="%s"].',
+        tagName,
+        attrName,
+        attrValue
       );
-      data.keepAttr = false;
     }
 
     // Update attribute value.
@@ -330,6 +332,10 @@ function addPurifyHooks(purifier, doc) {
           !startsWith(element.getAttribute(attr), '#')
         ) {
           removeElement(element);
+          user().error(
+            TAG,
+            'Removed invalid <use>. use[href] must start with "#".'
+          );
         }
       });
     }
