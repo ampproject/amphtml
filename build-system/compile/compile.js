@@ -40,10 +40,9 @@ const queue = [];
 let inProgress = 0;
 
 // There's a race in the gulp plugin of closure compiler that gets exposed
-// during slower compilation operations.
+// during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS =
-  argv.pseudo_names || argv.full_sourcemaps ? 1 : 4;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
