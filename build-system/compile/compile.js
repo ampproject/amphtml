@@ -99,6 +99,7 @@ exports.closureCompile = async function(
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
+  del.sync('build/parsers');
   fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
@@ -121,8 +122,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/webcomponentsjs/',
     'node_modules/',
     'build/patched-module/',
-    // Generated code.
-    'extensions/amp-access/0.1/access-expr-impl.js',
+    'build/parsers/',
   ];
   const baseExterns = [
     'build-system/amp.extern.js',
@@ -281,6 +281,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         'build/patched-module/',
         'build/fake-module/',
         'build/fake-polyfills/',
+        'build/parsers',
       ],
       entry_point: entryModuleFilenames,
       module_resolution: 'NODE',
