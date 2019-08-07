@@ -318,7 +318,16 @@ export function getParentWindow(win) {
  * @return {!Window}
  */
 export function getTopWindow(win) {
-  return win.__AMP_TOP || win;
+  const top = win.__AMP_TOP;
+  if (top === null) {
+    return win;
+  }
+  if (top != null) {
+    return top;
+  }
+  // Make this defined but null to speed up future lookups.
+  win.__AMP_TOP = null;
+  return win;
 }
 
 /**

@@ -803,9 +803,11 @@ function createBaseCustomElementClass(win) {
       this.isConnected_ = true;
 
       if (!this.everAttached) {
-        this.classList.add('i-amphtml-element');
-        this.classList.add('i-amphtml-notbuilt');
-        this.classList.add('amp-notbuilt');
+        this.classList.add(
+          'i-amphtml-element',
+          'i-amphtml-notbuilt',
+          'amp-notbuilt'
+        );
       }
 
       if (!this.ampdoc_) {
@@ -862,8 +864,7 @@ function createBaseCustomElementClass(win) {
           this.tryUpgrade_();
         }
         if (!this.isUpgraded()) {
-          this.classList.add('amp-unresolved');
-          this.classList.add('i-amphtml-unresolved');
+          this.classList.add('amp-unresolved', 'i-amphtml-unresolved');
           // amp:attached is dispatched from the ElementStub class when it
           // replayed the firstAttachedCallback call.
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
