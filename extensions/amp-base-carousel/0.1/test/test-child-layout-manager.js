@@ -38,13 +38,16 @@ function afterRenderPromise() {
  */
 function whenVisiblePromise(el, root) {
   return new Promise(resolve => {
-    const io = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) {
-        resolve();
+    const io = new IntersectionObserver(
+      entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          resolve();
+        }
+      },
+      {
+        root,
       }
-    }, {
-      root,
-    });
+    );
     io.observe(el);
   });
 }
@@ -267,7 +270,7 @@ describes.realWin('child layout manager', {}, env => {
 
     ownersMock.scheduleLayout.resetHistory();
     await afterScrollAndIntersectingPromise(el.children[1], el);
-   
+
     expect(ownersMock.scheduleLayout)
       .to.have.callCount(1)
       .to.have.been.calledWith(domElementMock, el.children[2]);
