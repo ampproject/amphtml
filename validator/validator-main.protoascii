@@ -676,23 +676,6 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
 }
-# AMP metadata, name=amp-script-src
-tags: {
-  html_format: AMP
-  tag_name: "META"
-  spec_name: "meta name=amp-script-src"
-  mandatory_parent: "HEAD"
-  attrs: {
-    name: "content"
-    mandatory: true
-  }
-  attrs: {
-    name: "name"
-    mandatory: true
-    value_casei: "amp-script-src"
-    dispatch_key: NAME_VALUE_DISPATCH
-  }
-}
 # AMP4ADS metadata, name=amp4ads-id
 # https://github.com/ampproject/amphtml/issues/7730
 tags: {
@@ -3876,9 +3859,6 @@ tags: {
 
 # 4.8 Links
 # Links are a concept, rather than a tag. See tagspecs for "LINK", "A", etc.
-
-# 4.8.11 The canvas element
-# See extensions/amp-mustache/validator-amp-script.protoascii
 
 # 4.8.11 The canvas element
 # See extensions/amp-mustache/validator-amp-script.protoascii
