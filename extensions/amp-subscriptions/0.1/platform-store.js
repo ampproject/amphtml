@@ -259,15 +259,15 @@ export class PlatformStore {
    * }
    */
   getScoreFactorStates() {
-    const rtpStates = dict({});
+    const states = dict({});
     return Promise.all(
       Object.values(SubscriptionsScoreFactor).map(scoreFactor => {
-        rtpStates[scoreFactor] = dict();
+        states[scoreFactor] = dict();
         return Promise.all(
           this.serviceIds_.map(platformId =>
             this.getScoreFactorPromiseFor_(platformId, scoreFactor).then(
               factorValue => {
-                rtpStates[scoreFactor][
+                states[scoreFactor][
                   platformId.replace(/\./g, '_')
                 ] = factorValue;
               }
@@ -275,7 +275,7 @@ export class PlatformStore {
           )
         );
       })
-    ).then(() => rtpStates);
+    ).then(() => states);
   }
 
   /**
