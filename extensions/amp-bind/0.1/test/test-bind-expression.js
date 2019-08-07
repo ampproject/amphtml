@@ -796,6 +796,11 @@ describe('BindExpression', () => {
       expect(() => evaluate('[1, 2, 3].map((x) => x * x)')).to.throw();
     });
 
+    it('return a non-primitive', () => {
+      expect(evaluate('[0].map(x => ({a: x + 1}))')).to.deep.equal([{a: 1}]);
+      expect(evaluate('[0].map(x => [x, x+1])')).to.deep.equal([[0, 1]]);
+    });
+
     it('Array#map()', () => {
       const a = [1, 2, 3];
       expect(evaluate('a.map(() => 5)', {a})).to.deep.equal([5, 5, 5]);

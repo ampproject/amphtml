@@ -69,7 +69,7 @@
 
     <script>
       // Hack to delay everything!
-      window.AMP_MODE = {test: true};
+      window.AMP_MODE = {test: true, localDev: true};
       const delay = parseInt(window.location.search.replace('?', '')) || 5000;
       document.addEventListener(
         'amp:attached',
@@ -802,12 +802,9 @@
       </div>
 
       <div role="tab" option>
-        amp-ad (not implemented yet)
+        amp-ad
       </div>
       <div role="tabpanel">
-        <h1>
-          NOT IMPLEMENTED - should get the old loaders regardless of experiment
-        </h1>
         <section>
           <h2>normal amp-ad</h2>
           <amp-ad

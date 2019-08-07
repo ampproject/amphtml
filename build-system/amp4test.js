@@ -238,7 +238,7 @@ app.get('/a4a/:bid', (req, res) => {
 
 /**
  * @param {{body: string, css: string|undefined, extensions: Array<string>|undefined, head: string|undefined, spec: string|undefined}} config
- * @return {*} TODO(#23582): Specify return type
+ * @return {string}
  */
 function composeDocument(config) {
   const {body, css, extensions, head, spec, mode} = config;
