@@ -115,11 +115,6 @@ export function createNewLoaderElement(
  * @return {boolean}
  */
 export function isNewLoaderExperimentEnabled(element) {
-  // TODO(sparhami): Implement loader for Ads
-  // Temporarily excluding the amp-ads from this experiment
-  if (element.tagName == 'AMP-AD' || element.tagName == 'AMP-EMBED') {
-    return false;
-  }
   const win = toWin(element.ownerDocument.defaultView);
   return isExperimentOn(win, 'new-loaders');
 }
