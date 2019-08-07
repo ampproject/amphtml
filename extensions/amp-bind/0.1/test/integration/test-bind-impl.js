@@ -401,6 +401,17 @@ describe
           });
         });
 
+        it('should not update attribute for non-primitive new values', () => {
+          const list = createElement(env, container, `[src]="x"`, 'amp-list');
+          list.setAttribute('src', 'https://foo.example/data.json');
+
+          return onBindReadyAndSetState(env, bind, {x: [1, 2, 3]}).then(() => {
+            expect(list.getAttribute('src')).to.equal(
+              'https://foo.example/data.json'
+            );
+          });
+        });
+
         it('should scan fixed layer for bindings', () => {
           // Mimic FixedLayer by creating a sibling <body> element.
           const doc = env.win.document;
