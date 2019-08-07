@@ -26,15 +26,16 @@ export function nativeroll(global, data) {
     global,
     'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
     () => {
-      initPlayer(data);
+      initPlayer(global, data);
     }
   );
 }
 
 /**
+ * @param {!Window} global
  * @param {!Object} data
  */
-function initPlayer(data) {
+function initPlayer(global, data) {
   const config = {
     container: '#c',
     desiredOffset: 50,
