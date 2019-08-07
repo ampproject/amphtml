@@ -15,7 +15,7 @@
  */
 
 import {Deferred, tryResolve} from '../../../src/utils/promise';
-import {LOAD_FAILURE_PROPERTY} from '../../../src/event-helper';
+import {LOAD_FAILURE_PROPERTY, loadPromise} from '../../../src/event-helper';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
 
@@ -45,11 +45,11 @@ const PROTECTED_CSS_CLASS_NAMES = [
 const PROTECTED_ATTRIBUTES = ['id', 'src', 'class', 'autoplay'];
 
 /**
- * Property names that should be propagated/removed from an element when
- * swapping it into/out of the DOM.
+ * Property names that should be removed from an element when updating its
+ * sources.
  * @const {!Array<string>}
  */
-const WHITELISTED_PROPERTIES = [LOAD_FAILURE_PROPERTY];
+const PROPERTIES_TO_REMOVE = [LOAD_FAILURE_PROPERTY];
 
 /**
  * Determines whether a CSS class name is allowed to be removed or copied from
@@ -131,18 +131,14 @@ function copyAttributes(fromEl, toEl) {
 }
 
 /**
- * Rotates custom properties from fromEl to toEl.
- * @param {!Element} fromEl The element from which properties should
- *     be copied.
- * @param {!Element} toEl The element to which properties should be
- *     copied.
+ * Removes properties from element.
+ * @param {!Element} el
  * @private
  */
-function rotateWhitelistedProperties(fromEl, toEl) {
-  for (let i = 0; i < WHITELISTED_PROPERTIES.length; i++) {
-    const property = WHITELISTED_PROPERTIES[i];
-    toEl[property] = fromEl[property];
-    fromEl[property] = undefined;
+function removeProperties(el) {
+  for (let i = 0; i < PROPERTIES_TO_REMOVE.length; i++) {
+    const property = PROPERTIES_TO_REMOVE[i];
+    el[property] = undefined;
   }
 }
 
@@ -379,9 +375,10 @@ export class UpdateSourcesTask extends MediaTask {
   /**
    * @param {!Sources} newSources The sources to which the media element should
    *     be updated.
+   * @param {!Object=} options
    */
-  constructor(newSources) {
-    super('update-src');
+  constructor(newSources, options = {listenForLoadPromise: true}) {
+    super('update-src', options);
 
     /** @private @const {!Sources} */
     this.newSources_ = newSources;
@@ -390,6 +387,12 @@ export class UpdateSourcesTask extends MediaTask {
   /** @override */
   executeInternal(mediaEl) {
     Sources.removeFrom(mediaEl);
+    removeProperties(mediaEl);
+    // Starts listening for success/error events to ensure they are caught and
+    // properly set success/error properties.
+    if (this.options.listenForLoadPromise) {
+      loadPromise(mediaEl);
+    }
     this.newSources_.applyToElement(mediaEl);
     return Promise.resolve();
   }
@@ -419,7 +422,6 @@ export class SwapIntoDomTask extends MediaTask {
 
     copyCssClasses(this.placeholderEl_, mediaEl);
     copyAttributes(this.placeholderEl_, mediaEl);
-    rotateWhitelistedProperties(this.placeholderEl_, mediaEl);
     this.placeholderEl_.parentElement.replaceChild(
       mediaEl,
       this.placeholderEl_
@@ -447,7 +449,6 @@ export class SwapOutOfDomTask extends MediaTask {
   executeInternal(mediaEl) {
     copyCssClasses(mediaEl, this.placeholderEl_);
     copyAttributes(mediaEl, this.placeholderEl_);
-    rotateWhitelistedProperties(mediaEl, this.placeholderEl_);
     mediaEl.parentElement.replaceChild(this.placeholderEl_, mediaEl);
     return Promise.resolve();
   }

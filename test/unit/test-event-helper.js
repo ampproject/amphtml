@@ -194,14 +194,7 @@ describe('EventHelper', () => {
     });
   });
 
-  it('loadPromise - HTMLMediaElement src already errored', () => {
-    element.error = {code: 4, message: 'Media error'};
-    return loadPromise(element).catch(result => {
-      expect(result).to.equal(element);
-    });
-  });
-
-  it('loadPromise - other element already errored', () => {
+  it('loadPromise - element already errored', () => {
     element[LOAD_FAILURE_PROPERTY] = true;
     return loadPromise(element).catch(result => {
       expect(result).to.equal(element);

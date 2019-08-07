@@ -277,7 +277,10 @@ export class MediaPool {
         const sources = this.getDefaultSource_(type);
         mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
         mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
-        this.enqueueMediaElementTask_(mediaEl, new UpdateSourcesTask(sources));
+        this.enqueueMediaElementTask_(
+          mediaEl,
+          new UpdateSourcesTask(sources, {listenForLoadPromise: false})
+        );
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
         // is returned.  If so, we should adjust the pool size/distribution
         // between media types.

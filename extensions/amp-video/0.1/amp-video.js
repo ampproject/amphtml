@@ -15,7 +15,6 @@
  */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {LOAD_FAILURE_PROPERTY, listen} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
@@ -36,6 +35,7 @@ import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listen} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
   propagateObjectFitStyles,
@@ -325,16 +325,9 @@ class AmpVideo extends AMP.BaseElement {
     }
 
     // loadPromise for media elements listens to `loadedmetadata`.
-    const promise = this.loadPromise(this.video_).then(
-      () => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      },
-      () => {
-        // Ensures the load failure property is set on the right video element,
-        // as they can be swapped by the Stories media pool.
-        this.video_[LOAD_FAILURE_PROPERTY] = this.video_.error || true;
-      }
-    );
+    const promise = this.loadPromise(this.video_).then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {

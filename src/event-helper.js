@@ -165,7 +165,7 @@ export function isLoaded(eleOrWindow) {
  * @return {boolean}
  */
 function isErrored(eleOrWindow) {
-  return !!(eleOrWindow.error || eleOrWindow[LOAD_FAILURE_PROPERTY]);
+  return !!eleOrWindow[LOAD_FAILURE_PROPERTY];
 }
 
 /**
