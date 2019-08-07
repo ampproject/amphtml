@@ -21,55 +21,59 @@ import {tryParseJson} from '../src/json';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function streamrail(global, data) {
+export function blade(global, data) {
   // ensure mandatory fields
   validateData(data, [
     'width',
     'height',
-    'streamrail_api_key',
-    'streamrail_player_id',
-    'streamrail_player_type',
+    'blade_api_key',
+    'blade_player_id',
+    'blade_player_type',
   ]);
 
-  const marcosObj = tryParseJson(data['streamrail_macros']) || {};
+  const marcosObj = tryParseJson(data['blade_macros']) || {};
   marcosObj['rand'] = Math.random().toString();
   marcosObj['page_url'] = marcosObj['page_url'] || global.context.canonicalUrl;
   const macros = Object.assign({}, marcosObj);
   macros.width = data.width;
   macros.height = data.height;
 
-  const conatinerId = `${data['streamrail_api_key']}-${
-    data['streamrail_player_id']
+  const containerId = `player-${data['blade_api_key']}-${
+    data['blade_player_id']
   }`;
-  createContainer(conatinerId);
+  createContainer(containerId);
 
-  global._streamrailConfig = {
-    playerId: data['streamrail_player_id'],
-    apiKey: data['streamrail_api_key'],
+  global[`_bladeConfig-${containerId}`] = {
+    playerId: data['blade_player_id'],
+    apiKey: data['blade_api_key'],
     version: '1.0',
     macros,
   };
   const ctx = global.context;
 
-  global._streamrailOnLoad = function(error, player) {
+  global[`_bladeOnLoad-${containerId}`] = function(error, player) {
     if (error) {
       global.context.noContentAvailable();
       return;
     }
-    ctx.reportRenderedEntityIdentifier(conatinerId);
+    ctx.reportRenderedEntityIdentifier(containerId);
     ctx.renderStart({
       width: player.width,
       height: player.height,
     });
   };
 
+  const servingDomain = data.servingDomain
+    ? encodeURIComponent(data.servingDomain)
+    : 'ssr.streamrail.net';
+
   loadScript(
     global,
-    `https://ssp.streamrail.net/js/${data['streamrail_api_key']}/${
-      data['streamrail_player_id']
+    `https://${servingDomain}/js/${data['blade_api_key']}/${
+      data['blade_player_id']
     }/player.js?t=${
-      data['streamrail_player_type']
-    }&callback=_streamrailOnLoad&config=_streamrailConfig&c=${conatinerId}`,
+      data['blade_player_type']
+    }&callback=_bladeOnLoad&config=_bladeConfig&c=${containerId}`,
     undefined,
     () => {
       global.context.noContentAvailable();
@@ -83,6 +87,6 @@ export function streamrail(global, data) {
 function createContainer(elemId) {
   const d = global.document.createElement('div');
   d.id = elemId;
-  d.classList.add('streamrail');
+  d.classList.add('blade');
   global.document.getElementById('c').appendChild(d);
 }
