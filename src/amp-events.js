@@ -19,7 +19,6 @@
  * @enum {string}
  */
 export const AmpEvents = {
-  BUILT: 'amp:built',
   DOM_UPDATE: 'amp:dom-update',
   FORM_DIRTINESS_CHANGE: 'amp:form-dirtiness-change',
   FORM_VALUE_CHANGE: 'amp:form-value-change',
