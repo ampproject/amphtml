@@ -459,7 +459,7 @@ class EndToEndFixture {
  * Get the controller object for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
- * @return {SeleniumWebDriverController}
+ * @return {!SeleniumWebDriverController}
  */
 async function getController(
   {engine = 'selenium', headless = false},

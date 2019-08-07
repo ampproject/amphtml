@@ -165,7 +165,7 @@ function handleIssue(issue) {
  * Fetches issues?page=${opt_page}
  *
  * @param {number=} opt_page
- * @return {!Promise<!Array<}
+ * @return {!Promise<!Array>}
  */
 function getIssues(opt_page) {
   // We need to use the issue API because assignee is only available with it.
@@ -208,7 +208,7 @@ function getPullRequestFiles(pr) {
 /**
  * Determine the type of a give pull request
  * @param {?Array<!Object>} files
- * @return {number|undefined}
+ * @return {number|null|undefined}
  */
 function analyzeChangedFiles(files) {
   if (!files) {
