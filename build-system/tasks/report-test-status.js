@@ -75,9 +75,14 @@ function inferTestType() {
 function postReport(type, action) {
   if (type !== null && isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
-    const postUrl = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
-    return requestPromise
-      .post(postUrl)
+    return requestPromise({
+      method: 'POST',
+      uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
+      body: {
+        travisJobUrl: process.env.TRAVIS_JOB_WEB_URL,
+      },
+      json: true,
+    })
       .then(body => {
         log(
           green('INFO:'),
