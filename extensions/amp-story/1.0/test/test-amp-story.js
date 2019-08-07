@@ -367,24 +367,6 @@ describes.realWin(
       });
     });
 
-    it('should update bookend status in browser history', () => {
-      const pageCount = 1;
-      createPages(story.element, pageCount, ['last-page']);
-
-      sandbox.stub(AmpStoryBookend.prototype, 'build');
-
-      story.buildCallback();
-
-      return story.layoutCallback().then(() => {
-        story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
-
-        return expect(replaceStateStub).to.have.been.calledWith(
-          {ampStoryBookendActive: true},
-          ''
-        );
-      });
-    });
-
     it('should not block layoutCallback when bookend xhr fails', () => {
       createPages(story.element, 1, ['page-1']);
       sandbox.stub(AmpStoryBookend.prototype, 'build');
