@@ -376,23 +376,40 @@ export class Navigation {
   handleClick_(target, e) {
     this.expandVarsForAnchor_(target);
 
-    let location = this.parseUrl_(target.href);
+    let tgtLoc = this.parseUrl_(target.href);
 
     // Handle AMP-to-AMP navigation if rel=amphtml.
-    if (this.handleA2AClick_(e, target, location)) {
+    if (this.handleA2AClick_(e, target, tgtLoc)) {
       return;
     }
 
     // Handle navigating to custom protocol if applicable.
-    if (this.handleCustomProtocolClick_(e, target, location)) {
+    if (this.handleCustomProtocolClick_(e, target, tgtLoc)) {
       return;
     }
 
+    // In test mode, we're not able to properly fix the anchor tag's base URL.
+    // So, we have to use the (mocked) window's location instead.
+    const baseHref =
+      getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
+    const curLoc = this.parseUrl_(baseHref);
+    const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
+    const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
+
+    if (tgtHref == curHref && tgtLoc.hash) {
+      // If the current target anchor link is the same origin + path
+      // as the current document then we know we are just linking to an
+      // identifier in the document. Otherwise, it's an external navigation.
+      this.handleInternalNavigation_(e, tgtLoc, curLoc);
+      return;
+    }
+
+    // External navigation. Need to apply anchor mutators first
     this.applyAnchorMutators_(target, e);
-    location = this.parseUrl_(target.href);
+    tgtLoc = this.parseUrl_(target.href);
 
     // Finally, handle normal click-navigation behavior.
-    this.handleNavClick_(e, target, location);
+    this.handleNavClick_(e, target, tgtLoc, curLoc);
   }
 
   /**
@@ -528,14 +545,10 @@ export class Navigation {
    * @param {!Event} e
    * @param {!Element} target
    * @param {!Location} tgtLoc
+   * @param {!Location} curLoc
    * @private
    */
-  handleNavClick_(e, target, tgtLoc) {
-    // In test mode, we're not able to properly fix the anchor tag's base URL.
-    // So, we have to use the (mocked) window's location instead.
-    const baseHref =
-      getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
-    const curLoc = this.parseUrl_(baseHref);
+  handleNavClick_(e, target, tgtLoc, curLoc) {
     const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
     const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
 
@@ -574,6 +587,17 @@ export class Navigation {
       return;
     }
 
+    this.handleInternalNavigation_(e, tgtLoc, curLoc);
+  }
+
+  /**
+   * Handles clicking on an internal link
+   * @param {!Event} e
+   * @param {!Location} tgtLoc
+   * @param {!Location} curLoc
+   * @private
+   */
+  handleInternalNavigation_(e, tgtLoc, curLoc) {
     // We prevent default so that the current click does not push
     // into the history stack as this messes up the external documents
     // history which contains the amp document.
