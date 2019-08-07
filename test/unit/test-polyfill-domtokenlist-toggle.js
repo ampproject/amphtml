@@ -138,11 +138,12 @@ describes.fakeWin(
       expect(polyfillAdd).to.not.equal(originalToggle);
 
       element.classList.add('foo');
+      expect(toArray(element.classList)).to.contain('foo');
       element.classList.add('one', 'two', 'three');
-      expect(toArray(element.classList)).to.not.contain('foo');
-      expect(toArray(element.classList)).to.not.contain('one');
-      expect(toArray(element.classList)).to.not.contain('two');
-      expect(toArray(element.classList)).to.not.contain('three');
+      expect(toArray(element.classList)).to.contain('foo');
+      expect(toArray(element.classList)).to.contain('one');
+      expect(toArray(element.classList)).to.contain('two');
+      expect(toArray(element.classList)).to.contain('three');
     });
   }
 );
