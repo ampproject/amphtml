@@ -64,7 +64,7 @@ export class Timer {
    * @return {number|string}
    */
   delay(callback, opt_delay) {
-    let id = 'p' + this.taskCount_++;
+    const id = 'p' + this.taskCount_++;
     if (!opt_delay) {
       // For a delay of zero,  schedule a promise based micro task since
       // they are predictably fast.
@@ -95,7 +95,7 @@ export class Timer {
     const delayEnd = Date.now() + opt_delay;
     if (!this.delayQueue_[delayEnd]) {
       this.delayQueue_[delayEnd] = [];
-      id = this.win.setTimeout(
+      this.win.setTimeout(
         this.callCallbacksForDelay_.bind(this),
         opt_delay,
         delayEnd
