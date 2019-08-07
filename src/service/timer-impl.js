@@ -61,7 +61,7 @@ export class Timer {
    * Returns the timer ID that can be used to cancel the timer (cancel method).
    * @param {function()} callback
    * @param {number=} opt_delay
-   * @return {number|string}
+   * @return {string}
    */
   delay(callback, opt_delay) {
     const id = 'p' + this.taskCount_++;
