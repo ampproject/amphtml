@@ -243,7 +243,7 @@ export class BindExpression {
 
   /**
    * Evaluates the expression given a scope.
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @throws {Error} On illegal function invocation.
    * @return {BindExpressionResultDef}
    */
@@ -326,7 +326,7 @@ export class BindExpression {
   /**
    * Recursively evaluates and returns value of `node` and its children.
    * @param {./bind-expr-defines.AstNode} node
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @throws {Error}
    * @return {BindExpressionResultDef}
    * @private
