@@ -678,9 +678,8 @@ export class BaseElement {
     attributes = isArray(attributes) ? attributes : [attributes];
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i];
-      const val = this.element.getAttribute(attr);
-      if (val !== null) {
-        element.setAttribute(attr, val);
+      if (this.element.hasAttribute(attr)) {
+        element.setAttribute(attr, this.element.getAttribute(attr));
       } else if (opt_removeMissingAttrs) {
         element.removeAttribute(attr);
       }

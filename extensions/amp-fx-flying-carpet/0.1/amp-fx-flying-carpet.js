@@ -186,7 +186,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
         for (let n = 0; n < addedNodes.length; n++) {
           const node = addedNodes[n];
           if (!node.signals) {
-            return;
+            continue;
           }
           node
             .signals()
