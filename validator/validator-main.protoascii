@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 926
+spec_file_revision: 927
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -3876,6 +3876,9 @@ tags: {
 
 # 4.8 Links
 # Links are a concept, rather than a tag. See tagspecs for "LINK", "A", etc.
+
+# 4.8.11 The canvas element
+# See extensions/amp-mustache/validator-amp-script.protoascii
 
 # 4.8.11 The canvas element
 # See extensions/amp-mustache/validator-amp-script.protoascii
