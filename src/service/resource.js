@@ -208,7 +208,7 @@ export class Resource {
 
     const deferred = new Deferred();
 
-    /** @private @const {!Promise} */
+    /** @private @const {!Promise<number>} */
     this.loadPromise_ = deferred.promise;
 
     /** @private {?Function} */
@@ -960,7 +960,7 @@ export class Resource {
    */
   layoutComplete_(success, opt_reason) {
     if (this.loadPromiseResolve_) {
-      this.loadPromiseResolve_();
+      this.loadPromiseResolve_(Date.now());
       this.loadPromiseResolve_ = null;
     }
     this.layoutPromise_ = null;
@@ -993,7 +993,9 @@ export class Resource {
    * for the first time and the resource was loaded. Note that the resource
    * could be unloaded subsequently. This method returns resolved promise for
    * sunch unloaded elements.
-   * @return {!Promise}
+   * The number returned by the promise is the time in millis when the event
+   * happened
+   * @return {!Promise<number>}
    */
   loadedOnce() {
     return this.loadPromise_;

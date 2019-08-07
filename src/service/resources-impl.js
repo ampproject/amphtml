@@ -1670,6 +1670,9 @@ export class Resources {
    * @private
    */
   discoverWork_() {
+    if (this.resources_.length == 0) {
+      return;
+    }
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
     const now = Date.now();

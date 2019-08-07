@@ -520,11 +520,11 @@ export class Performance {
       this.mark('visible');
     });
 
-    this.whenViewportLayoutComplete_().then(() => {
+    this.whenViewportLayoutComplete_(lastLoadEvent).then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime =
           docVisibleTime > -1
-            ? this.win.Date.now() - docVisibleTime
+            ? lastLoadEvent - docVisibleTime
             : //  Prerender was complete before visibility.
               0;
         this.viewer_.whenFirstVisible().then(() => {
@@ -541,10 +541,10 @@ export class Performance {
         // If it didnt start in prerender, no need to calculate anything
         // and we just need to tick `pc`. (it will give us the relative
         // time since the viewer initialized the timer)
-        this.tick('pc');
+        this.tickDelta('pc', lastLoadEvent - docVisibleTime);
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
-        this.prerenderComplete_(this.win.Date.now() - docVisibleTime);
+        this.prerenderComplete_(lastLoadEvent - docVisibleTime);
       }
       this.flush();
     });
@@ -557,12 +557,17 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
+    var before = Date.now();
     const {documentElement} = this.win.document;
     const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_
       .getResourcesInRect(this.win, rect, /* isInPrerender */ true)
-      .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
+      .then(resources => Promise.all(resources.map(r => r.loadedOnce())))
+      .then(timestamps => {
+        timestamps.push(before);
+        return Math.max.apply(Math, timestamps);
+      });
   }
 
   /**
