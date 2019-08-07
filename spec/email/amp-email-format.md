@@ -58,7 +58,7 @@ The entire AMPHTML markup must not exceed 102,400 bytes.
 AMP for Email relies on the standard `multipart/alternative` [MIME](https://en.wikipedia.org/wiki/MIME) subtype, as defined in
 [RFC 1521, section 7.2.3](https://tools.ietf.org/html/rfc1521#section-7.2.3).
 
-*For more information, see [Structure and rendering of AMP emails](amp-email-structure.md).
+*For more information, see [Structure and rendering of AMP emails](amp-email-structure.md).*
 
 ## Supported AMP components
 
@@ -108,7 +108,7 @@ Note: The entire `<style>` tag cannot exceed 50,000 bytes. The validator will ch
 
 To ensure your email messages meet the strict criteria for the AMP for Email format, you can use AMP's existing validation tools.
 
-See [Validate AMP Email](https://amp.dev/documentation/guides-and-tutorials/develop/validate_emails) for more information.
+See [Validate AMP Email](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_emails/) for more information.
 
 ## Privacy and Security
 
@@ -122,7 +122,7 @@ The following AMP-specific analytic techniques are not supported:
 *   [AMP `CLIENT_ID`](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics_basics#user-identification)
 *   [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
 *   [`amp-pixel`](https://amp.dev/documentation/components/amp-pixel)
-*   [AMP Variable Substitution](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics_basics.html#variable-substitution)
+*   [AMP Variable Substitution](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics_basics/#variable-substitution)
 
 ### Component-specific considerations
 
