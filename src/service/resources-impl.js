@@ -25,7 +25,6 @@ import {VisibilityState} from '../visibility-state';
 import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
-import {debounce} from '../utils/rate-limit';
 import {dev, devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
 import {getSourceUrl} from '../url';
@@ -425,16 +424,6 @@ export class Resources {
 
     /** @private {?Array<!Resource>} */
     this.pendingBuildResources_ = [];
-
-    /** @private {?Array<!Resource>} */
-    this.pendingPreconnectResources_ = [];
-
-    /** @private */
-    this.eventuallyCallPreconnects_ = debounce(
-      this.win,
-      this.callPreconnects_.bind(this),
-      1
-    );
 
     /** @private {boolean} */
     this.isCurrentlyBuildingPendingResources_ = false;
@@ -849,29 +838,6 @@ export class Resources {
     const resource = Resource.forElement(element);
     this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'element upgraded:', resource.debugid);
-  }
-
-  /**
-   * Schedule resources for preconnecting.
-   * @param {!Element} element
-   */
-  requestPreconnect(element) {
-    const resource = Resource.forElement(element);
-    this.pendingPreconnectResources_.push(resource);
-    this.eventuallyCallPreconnects_();
-  }
-
-  /**
-   * Calls resource manager's preconnect and removes resource from the pending
-   * buffer.
-   * @private
-   */
-  callPreconnects_() {
-    for (let i = 0; i < this.pendingPreconnectResources_.length; i++) {
-      const resource = this.pendingPreconnectResources_[i];
-      resource.preconnect();
-      this.pendingPreconnectResources_.splice(i, 1);
-    }
   }
 
   /** @override */

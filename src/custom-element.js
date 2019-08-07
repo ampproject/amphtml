@@ -162,7 +162,7 @@ function createBaseCustomElementClass(win) {
      */
     createdCallback() {
       // Flag "notbuilt" is removed by Resource manager when the resource is
-      // considered to be built. See "isBuilt" method.
+      // considered to be built. See "setBuilt" method.
       /** @private {boolean} */
       this.built_ = false;
 
@@ -535,7 +535,7 @@ function createBaseCustomElementClass(win) {
         }
       }).then(
         () => {
-          this.maybePreconnect(/* onLayout */ false);
+          this.preconnect(/* onLayout */ false);
           this.built_ = true;
           this.classList.remove('i-amphtml-notbuilt');
           this.classList.remove('amp-notbuilt');
@@ -573,35 +573,29 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Called to instruct the element to preconnect to hosts it uses during
-     * layout. If attempting an early preconnect, it requests to preconnect
-     * to resources beforehand.
+     * layout.
      * @param {boolean} onLayout Whether this was called after a layout.
      * @this {!Element}
      */
-    maybePreconnect(onLayout) {
+    preconnect(onLayout) {
       if (onLayout) {
         this.implementation_.preconnectCallback(onLayout);
       } else {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
-        this.getResources().requestPreconnect(this);
+        Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
+          const TAG = this.tagName;
+          if (!this.ownerDocument) {
+            dev().error(TAG, 'preconnect without ownerDocument');
+            return;
+          } else if (!this.ownerDocument.defaultView) {
+            dev().error(TAG, 'preconnect without defaultView');
+            return;
+          }
+          this.implementation_.preconnectCallback(onLayout);
+        }, 1);
       }
-    }
-
-    /**
-     * Preconnect to host.
-     */
-    preconnect() {
-      const TAG = this.tagName;
-      if (!this.ownerDocument) {
-        dev().error(TAG, 'preconnect without ownerDocument');
-        return;
-      } else if (!this.ownerDocument.defaultView) {
-        dev().error(TAG, 'preconnect without defaultView');
-        return;
-      }
-      this.implementation_.preconnectCallback(/* opt_onLayout */ false);
     }
 
     /**
@@ -1207,7 +1201,7 @@ function createBaseCustomElementClass(win) {
       }
 
       const promise = tryResolve(() => this.implementation_.layoutCallback());
-      this.maybePreconnect(/* onLayout */ true);
+      this.preconnect(/* onLayout */ true);
       this.classList.add('i-amphtml-layout');
 
       return promise.then(

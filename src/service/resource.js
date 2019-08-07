@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../amp-events';
 import {Deferred, tryResolve} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
@@ -339,6 +340,9 @@ export class Resource {
         }
         // TODO(dvoytenko): merge with the standard BUILT signal.
         this.element.signals().signal('res-built');
+        // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+        // in PROD.
+        this.element.dispatchCustomEvent(AmpEvents.BUILT);
       },
       reason => {
         this.maybeReportErrorOnBuildFailure(reason);
@@ -1090,12 +1094,5 @@ export class Resource {
   disconnect() {
     delete this.element[RESOURCE_PROP_];
     this.element.disconnect(/* opt_pretendDisconnected */ true);
-  }
-
-  /**
-   * Calls element's preconnectCallback.
-   */
-  preconnect() {
-    this.element.preconnect();
   }
 }
