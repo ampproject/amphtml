@@ -38,14 +38,13 @@ const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
 
 /**
  * Replaces the default compiler binary with nailgun on linux and macos
- * @return {*} TODO(#23582): Specify return type
+ * @return {?NodeRequire}
  */
 function maybeReplaceDefaultCompiler() {
   if (process.platform == 'darwin') {
     return require('require-hijack')
       .replace('google-closure-compiler-osx')
       .with(nailgunRunner);
-    return true;
   } else if (process.platform == 'linux') {
     return require('require-hijack')
       .replace('google-closure-compiler-linux')
