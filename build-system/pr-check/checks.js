@@ -38,7 +38,7 @@ const FILENAME = 'checks.js';
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
     stopTimedJob(FILENAME, startTime);
@@ -60,7 +60,7 @@ function main() {
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
-    reportAllExpectedTests(buildTargets);
+    await reportAllExpectedTests(buildTargets);
     timedExecOrDie('gulp update-packages');
 
     timedExecOrDie('gulp check-exact-versions');

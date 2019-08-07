@@ -223,7 +223,7 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
  * before the instagram implementation loads.
  */
 amp-instagram {
-  padding: 64px 0px 0px 0px !important;
+  padding: 54px 0px 0px 0px !important;
   background-color: white;
 }
 

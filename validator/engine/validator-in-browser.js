@@ -17,6 +17,7 @@
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.validateString');
 goog.require('goog.Promise');
+goog.require('goog.uri.utils');
 
 goog.provide('amp.validator.validateInBrowser');
 goog.provide('amp.validator.validateUrlAndLog');
@@ -93,7 +94,17 @@ amp.validator.validateUrlAndLog = function(
   }
   getUrl(url).then(
       function(html) { // Success
-        const validationResult = amp.validator.validateString(html);
+        const fragment  = goog.uri.utils.getFragment(url);
+        let format = 'AMP';
+        if (fragment.indexOf('development') != -1) {
+          fragment.split('&').forEach(hashValue => {
+            const keyValue = hashValue.split('=');
+            if (keyValue[0] === 'development') {
+              format = keyValue[1] === '1' ? 'AMP' : format = keyValue[1];
+            }
+          });
+        }
+        const validationResult = amp.validator.validateString(html, format);
         if (opt_doc) {
           const browserResult = amp.validator.validateInBrowser(opt_doc);
           validationResult.mergeFrom(browserResult);

@@ -23,8 +23,10 @@ import {
 
 describes.realWin('getFormAsObject', {}, env => {
   let form;
+  let sandbox;
 
   beforeEach(() => {
+    sandbox = env.sandbox;
     form = env.win.document.createElement('form');
     env.win.document.body.appendChild(form);
   });
@@ -247,7 +249,7 @@ describes.realWin('getFormAsObject', {}, env => {
     input2.value = 'quux';
     form.appendChild(input2);
 
-    Object.defineProperty(form, 'ownerDocument', {
+    sandbox.defineProperty(form, 'ownerDocument', {
       get() {
         return {activeElement: input};
       },
@@ -270,7 +272,7 @@ describes.realWin('getFormAsObject', {}, env => {
 
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
 
-    Object.defineProperty(form, 'ownerDocument', {
+    sandbox.defineProperty(form, 'ownerDocument', {
       get() {
         return {activeElement: input2};
       },
@@ -289,7 +291,7 @@ describes.realWin('getFormAsObject', {}, env => {
     input2.value = 'quux';
     form.appendChild(input2);
 
-    Object.defineProperty(form, 'ownerDocument', {
+    sandbox.defineProperty(form, 'ownerDocument', {
       get() {
         return {activeElement: env.win.document.body};
       },
@@ -310,7 +312,7 @@ describes.realWin('getFormAsObject', {}, env => {
 
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
 
-    Object.defineProperty(form, 'ownerDocument', {
+    sandbox.defineProperty(form, 'ownerDocument', {
       get() {
         return {activeElement: input2};
       },

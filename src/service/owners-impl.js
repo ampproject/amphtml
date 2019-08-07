@@ -22,6 +22,15 @@
  */
 export class Owners {
   /**
+   * Assigns an owner for the specified element. This means that the resources
+   * within this element will be managed by the owner and not Resources manager.
+   * @param {!Element} element
+   * @param {!AmpElement} owner
+   * @package
+   */
+  setOwner(element, owner) {}
+
+  /**
    * Schedules preload for the specified sub-elements that are children of the
    * parent element. The parent element may choose to send this signal either
    * because it's an owner (see {@link setOwner}) or because it wants the

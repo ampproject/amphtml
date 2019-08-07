@@ -75,21 +75,7 @@ let ChangeSizeRequestDef;
 /**
  * @interface
  */
-class OwnersDef extends Owners {
-  /**
-   * Assigns an owner for the specified element. This means that the resources
-   * within this element will be managed by the owner and not Resources manager.
-   * @param {!Element} element
-   * @param {!AmpElement} owner
-   * @package
-   */
-  setOwner(element, owner) {}
-}
-
-/**
- * @interface
- */
-class MutatorsAndOwnersDef extends OwnersDef {
+class MutatorsAndOwnersDef extends Owners {
   /**
    * Requests the runtime to change the element's size. When the size is
    * successfully updated then the opt_callback is called.
