@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Owners} from './owners-impl';
@@ -35,7 +36,6 @@ import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
-import {Deferred} from '../utils/promise';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
