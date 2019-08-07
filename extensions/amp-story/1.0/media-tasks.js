@@ -15,6 +15,7 @@
  */
 
 import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {LOAD_FAILURE_PROPERTY} from '../../../src/event-helper';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
 
@@ -42,6 +43,13 @@ const PROTECTED_CSS_CLASS_NAMES = [
  * @const {!Array<string>}
  */
 const PROTECTED_ATTRIBUTES = ['id', 'src', 'class', 'autoplay'];
+
+/**
+ * Property names that should be propagated/removed from an element when
+ * swapping it into/out of the DOM.
+ * @const {!Array<string>}
+ */
+const WHITELISTED_PROPERTIES = [LOAD_FAILURE_PROPERTY];
 
 /**
  * Determines whether a CSS class name is allowed to be removed or copied from
@@ -119,6 +127,22 @@ function copyAttributes(fromEl, toEl) {
     if (!isProtectedAttributeName(attributeName)) {
       toEl.setAttribute(attributeName, attributeValue);
     }
+  }
+}
+
+/**
+ * Rotates custom properties from fromEl to toEl.
+ * @param {!Element} fromEl The element from which properties should
+ *     be copied.
+ * @param {!Element} toEl The element to which properties should be
+ *     copied.
+ * @private
+ */
+function rotateWhitelistedProperties(fromEl, toEl) {
+  for (let i = 0; i < WHITELISTED_PROPERTIES.length; i++) {
+    const property = WHITELISTED_PROPERTIES[i];
+    toEl[property] = fromEl[property];
+    fromEl[property] = undefined;
   }
 }
 
@@ -395,6 +419,7 @@ export class SwapIntoDomTask extends MediaTask {
 
     copyCssClasses(this.placeholderEl_, mediaEl);
     copyAttributes(this.placeholderEl_, mediaEl);
+    rotateWhitelistedProperties(this.placeholderEl_, mediaEl);
     this.placeholderEl_.parentElement.replaceChild(
       mediaEl,
       this.placeholderEl_
@@ -422,6 +447,7 @@ export class SwapOutOfDomTask extends MediaTask {
   executeInternal(mediaEl) {
     copyCssClasses(mediaEl, this.placeholderEl_);
     copyAttributes(mediaEl, this.placeholderEl_);
+    rotateWhitelistedProperties(mediaEl, this.placeholderEl_);
     mediaEl.parentElement.replaceChild(this.placeholderEl_, mediaEl);
     return Promise.resolve();
   }

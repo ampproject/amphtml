@@ -21,6 +21,9 @@ import {user} from './log';
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
+/** @const {string} */
+export const LOAD_FAILURE_PROPERTY = '__AMP_LOAD_FAILURE';
+
 /**
  * Returns a CustomEvent with a given type and detail; supports fallback for IE.
  * @param {!Window} win
@@ -157,6 +160,15 @@ export function isLoaded(eleOrWindow) {
 }
 
 /**
+ * Whether the specified element/window has errored already.
+ * @param {!Element|!Window} eleOrWindow
+ * @return {boolean}
+ */
+function isErrored(eleOrWindow) {
+  return !!(eleOrWindow.error || eleOrWindow[LOAD_FAILURE_PROPERTY]);
+}
+
+/**
  * Returns a promise that will resolve or fail based on the eleOrWindow's 'load'
  * and 'error' events. Optionally this method takes a timeout, which will reject
  * the promise if the resource has not loaded by then.
@@ -169,6 +181,9 @@ export function loadPromise(eleOrWindow) {
   let unlistenError;
   if (isLoaded(eleOrWindow)) {
     return Promise.resolve(eleOrWindow);
+  }
+  if (isErrored(eleOrWindow)) {
+    return Promise.reject(eleOrWindow);
   }
   const loadingPromise = new Promise((resolve, reject) => {
     const isMediaElement = isHTMLMediaElement(eleOrWindow);
@@ -225,6 +240,12 @@ export function loadPromise(eleOrWindow) {
  *     case Windows.
  */
 function failedToLoad(eleOrWindow) {
+  // Mark the element as errored since some elements - like HTMLMediaElement
+  // using HTMLSourceElement - do not provide any synchronous way to verify if
+  // they already errored, even though the error event was already dispatched.
+  // If possible, keeps the MediaError object.
+  eleOrWindow[LOAD_FAILURE_PROPERTY] = eleOrWindow.error || true;
+
   // Report failed loads as user errors so that they automatically go
   // into the "document error" bucket.
   let target = eleOrWindow;

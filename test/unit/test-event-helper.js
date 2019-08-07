@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../src/observable';
 import {
+  LOAD_FAILURE_PROPERTY,
   createCustomEvent,
   isLoaded,
   listen,
@@ -23,6 +23,7 @@ import {
   listenOncePromise,
   loadPromise,
 } from '../../src/event-helper';
+import {Observable} from '../../src/observable';
 import {
   detectEvtListenerOptsSupport,
   resetEvtListenerOptsSupportForTesting,
@@ -193,6 +194,20 @@ describe('EventHelper', () => {
     });
   });
 
+  it('loadPromise - HTMLMediaElement src already errored', () => {
+    element.error = {code: 4, message: 'Media error'};
+    return loadPromise(element).catch(result => {
+      expect(result).to.equal(element);
+    });
+  });
+
+  it('loadPromise - other element already errored', () => {
+    element[LOAD_FAILURE_PROPERTY] = true;
+    return loadPromise(element).catch(result => {
+      expect(result).to.equal(element);
+    });
+  });
+
   it('loadPromise - load event', () => {
     const promise = loadPromise(element).then(result => {
       expect(result).to.equal(element);
@@ -212,6 +227,23 @@ describe('EventHelper', () => {
         },
         reason => {
           expect(reason.message).to.include('Failed to load');
+        }
+      );
+    errorObservable.fire(getEvent('error', element));
+    return promise;
+  });
+
+  it('loadPromise - error event should mark element as errored', () => {
+    const promise = loadPromise(element)
+      .then(result => {
+        assert.fail('must never be here: ' + result);
+      })
+      .then(
+        () => {
+          throw new Error('Should not be reached.');
+        },
+        () => {
+          expect(element[LOAD_FAILURE_PROPERTY]).to.be.true;
         }
       );
     errorObservable.fire(getEvent('error', element));
