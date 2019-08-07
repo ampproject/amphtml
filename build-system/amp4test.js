@@ -31,7 +31,7 @@ const upload = multer();
 
 const KARMA_SERVER_PORT = 9876;
 const {SERVE_MODE} = process.env;
-const CUSTOM_EXTENSIONS = ['amp-mustache'];
+const CUSTOM_TEMPLATES = ['amp-mustache'];
 
 /**
  * Logs the given messages to the console when --verbose is specified.
@@ -295,7 +295,7 @@ function composeDocument(config) {
         const src = cdn
           ? `https://cdn.ampproject.org/v0/${name}-${version}.js`
           : `/dist/v0/${name}-${version}.${compiled ? '' : 'max.'}js`;
-        const type = CUSTOM_EXTENSIONS.includes(name)
+        const type = CUSTOM_TEMPLATES.includes(name)
           ? 'custom-template'
           : 'custom-element';
         return `<script async ${type}="${name}" src="${src}"></script>`;
@@ -330,7 +330,7 @@ function composeDocument(config) {
     if (extensions) {
       end = topHalfOfHtml.indexOf(extensionScripts) + extensionScripts.length;
       // Filter out extensions that are not custom elements, e.g. amp-mustache.
-      customElements = extensions.filter(e => !CUSTOM_EXTENSIONS.includes(e));
+      customElements = extensions.filter(e => !CUSTOM_TEMPLATES.includes(e));
       extensionsMap = customElements.map(ce => {
         return {
           'custom-element': ce,
