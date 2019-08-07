@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 |
@@ -38,7 +38,7 @@ FAIL
 |          <!-- This should fail because amp-video has the [controls] attribute. -->
 |          <amp-video width="480"
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-video-controls.html:38:8 The attribute 'controls' may not appear in tag 'amp-story >> amp-video'. (see https://amp.dev/documentation/components/amp-video) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-video-controls.html:38:8 The attribute 'controls' in tag 'amp-story >> amp-video' is deprecated - use '- no replacement' instead. (see https://github.com/ampproject/amphtml/issues/23798) [DEPRECATION]
 |                     height="270"
 |                     src="/video/tokyo.mp4"
 |                     layout="responsive"

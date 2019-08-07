@@ -43,6 +43,10 @@ attr_lists: {
     name: "autoplay"
     value: ""
   }
+  attrs: {
+    name: "controls"
+    value: ""
+  }
   attrs: { name: "controlslist" }
   attrs: { name: "crossorigin" }
   attrs: {
@@ -93,6 +97,7 @@ attr_lists: {
   attrs: { name: "[artist]" }
   attrs: { name: "[artwork]" }
   attrs: { name: "[attribution]" }
+  attrs: { name: "[controls]" }
   attrs: { name: "[controlslist]" }
   attrs: { name: "[loop]" }
   attrs: { name: "[poster]" }
@@ -113,11 +118,6 @@ tags: {  # <amp-video> not in amp-story.
   # of making this a validation error.
   also_requires_tag_warning: "amp-video extension .js script"
   attrs: { name: "poster" }
-  attrs: {
-    name: "controls"
-    value: ""
-  }
-  attrs: { name: "[controls]" }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
   attr_lists: "lightboxable-elements"
@@ -143,6 +143,17 @@ tags: {  # <amp-video> in amp-story
     name: "autoplay"
     value: ""
     mandatory: true
+  }
+  attrs: {
+    name: "controls"
+    value: ""
+    deprecation: "- no replacement"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/23798"
+  }
+  attrs: {
+    name: "[controls]"
+    deprecation: "- no replacement"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/23798"
   }
   attrs: {
     name: "poster"
