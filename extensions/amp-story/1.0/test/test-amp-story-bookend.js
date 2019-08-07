@@ -136,6 +136,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     registerServiceBuilder(win, 'localization', () => localizationService);
 
     bookend = new AmpStoryBookend(bookendElem);
+    bookend.buildCallback();
 
     // Force sync mutateElement.
     sandbox.stub(bookend, 'mutateElement').callsArg(0);

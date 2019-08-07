@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Action,
-  StateProperty,
-  UIType,
-  getStoreService,
-} from '../amp-story-store-service';
+import {Action, StateProperty, UIType} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
@@ -28,12 +23,18 @@ import {
   SHARE_PROVIDERS_KEY,
   ScrollableShareWidget,
 } from '../amp-story-share';
+import {DraggableDrawer} from '../amp-story-draggable-drawer';
 import {EventType, dispatch} from '../events';
+import {
+  HistoryState,
+  createShadowRootWithStyle,
+  getHistoryState,
+  setHistoryState,
+} from '../utils';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../../src/localized-strings';
 import {Services} from '../../../../src/services';
 import {closest} from '../../../../src/dom';
-import {createShadowRootWithStyle} from '../utils';
 import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
@@ -42,9 +43,6 @@ import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
 import {toggle} from '../../../../src/style';
-
-/** @private @const {string} */
-const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
 
 // TODO(#14591): Clean when bookend API v0.1 is deprecated.
 const BOOKEND_VERSION_1 = 'v1.0';
@@ -69,40 +67,28 @@ const DEPRECATED_BOOKEND_VERSION_KEY = 'bookend-version';
 const AMP_CUSTOM_LINKER_TARGET = '__AMP_CUSTOM_LINKER_TARGET__';
 
 /**
- * @param {string} hidden
- * @return {!../simple-template.ElementDef}
+ * @const {!../simple-template.ElementDef}
  */
-const buildRootTemplate = hidden => {
-  return /** @type {!../simple-template.ElementDef} */ ({
-    tag: 'section',
-    attrs: dict({
-      'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset ' + hidden,
-    }),
-    children: [
-      // Overflow container that gets pushed to the bottom when content height
-      // is smaller than viewport.
-      {
-        tag: 'div',
-        attrs: dict({'class': 'i-amphtml-story-bookend-overflow'}),
-        children: [
-          // Holds bookend content.
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-bookend-inner'}),
-          },
-        ],
-      },
-    ],
-  });
+const rootTemplate = {
+  tag: 'section',
+  attrs: dict({
+    'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset',
+  }),
+  children: [
+    {
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-bookend-handle'}),
+    },
+  ],
 };
 
-/** @private @const {!../simple-template.ElementDef} */
+/** @const {!../simple-template.ElementDef} */
 const REPLAY_ICON_TEMPLATE = {
   tag: 'div',
   attrs: dict({'class': 'i-amphtml-story-bookend-replay-icon'}),
 };
 
-/** @type {string} */
+/** @const {string} */
 const TAG = 'amp-story-bookend';
 
 /**
@@ -195,7 +181,7 @@ const buildPromptConsentTemplate = consentId => {
  * through the 'build' and 'loadConfig' method. It can then be toggled by
  * dispatching the store TOGGLE_BOOKEND action.
  */
-export class AmpStoryBookend extends AMP.BaseElement {
+export class AmpStoryBookend extends DraggableDrawer {
   /**
    * @param {!Element} element
    */
@@ -220,32 +206,52 @@ export class AmpStoryBookend extends AMP.BaseElement {
      */
     this.bookendEl_ = null;
 
-    const {win} = this;
+    /** @private {?Element} */
+    this.shadowHost_ = null;
 
     /** @private {?ScrollableShareWidget} */
     this.shareWidget_ = null;
+  }
 
-    /** @private @const {!../amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(win);
+  /**
+   * @override
+   */
+  buildCallback() {
+    super.buildCallback();
+
+    this.headerEl_.classList.add(
+      'i-amphtml-story-draggable-drawer-header-bookend'
+    );
+    this.element.classList.add('i-amphtml-story-draggable-drawer-bookend');
+
+    const handleEl = this.win.document.createElement('div');
+    handleEl.classList.add('i-amphtml-story-bookend-handle');
+    this.headerEl_.appendChild(handleEl);
+  }
+
+  /**
+   * @override
+   */
+  layoutCallback() {
+    return Promise.resolve();
   }
 
   /**
    * Builds the bookend components and appends it to the provided story.
-   * @param {boolean} skipAnimation Skips opening animation of the bookend.
    */
-  build(skipAnimation = false) {
+  build() {
     if (this.isBuilt_) {
       return;
     }
 
     this.isBuilt_ = true;
 
-    this.bookendEl_ = renderAsElement(
-      this.win.document,
-      buildRootTemplate(skipAnimation ? '' : HIDDEN_CLASSNAME)
-    );
+    this.bookendEl_ = renderAsElement(this.win.document, rootTemplate);
 
-    createShadowRootWithStyle(this.element, this.bookendEl_, CSS);
+    this.shadowHost_ = this.win.document.createElement('div');
+
+    createShadowRootWithStyle(this.shadowHost_, this.bookendEl_, CSS);
+    this.contentEl_.appendChild(this.shadowHost_);
 
     this.replayButton_ = this.buildReplayButton_();
 
@@ -254,9 +260,8 @@ export class AmpStoryBookend extends AMP.BaseElement {
       dev().assertElement(this.element.parentElement)
     );
 
-    const innerContainer = this.getInnerContainer_();
-    innerContainer.appendChild(this.replayButton_);
-    innerContainer.appendChild(
+    this.bookendEl_.appendChild(this.replayButton_);
+    this.bookendEl_.appendChild(
       this.shareWidget_.build(getAmpdoc(this.win.document))
     );
 
@@ -267,7 +272,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
         this.win.document,
         buildPromptConsentTemplate(String(consentId))
       );
-      innerContainer.appendChild(promptConsentEl);
+      this.bookendEl_.appendChild(promptConsentEl);
     }
 
     this.initializeListeners_();
@@ -278,12 +283,13 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
-   * @private
+   * @override
    */
   initializeListeners_() {
-    this.getShadowRoot().addEventListener('click', event =>
-      this.onClick_(event)
-    );
+    super.initializeListeners_();
+
+    this.element.addEventListener('click', event => this.onClick_(event));
+
     this.replayButton_.addEventListener('click', event =>
       this.onReplayButtonClick_(event)
     );
@@ -294,7 +300,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
       }
       if (event.key == Keys.ESCAPE) {
         event.preventDefault();
-        this.close_();
+        this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
       }
     });
 
@@ -306,14 +312,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
       StateProperty.CAN_SHOW_SHARING_UIS,
       show => {
         this.onCanShowSharingUisUpdate_(show);
-      },
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.UI_STATE,
-      uiState => {
-        this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
@@ -352,12 +350,24 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
+   * @override
+   */
+  close_() {
+    this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
+  }
+
+  /**
    * Reacts to bookend state updates.
    * @param {boolean} isActive
    * @private
    */
   onBookendStateUpdate_(isActive) {
-    this.toggle_(isActive);
+    const shouldAnimate = !getHistoryState(
+      this.win,
+      HistoryState.BOOKEND_ACTIVE
+    );
+    isActive ? this.open(shouldAnimate) : this.closeInternal_();
+    setHistoryState(this.win, HistoryState.BOOKEND_ACTIVE, isActive);
   }
 
   /**
@@ -376,11 +386,11 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
-   * Reacts to UI state updates.
-   * @param {!UIType} uiState
-   * @private
+   * @override
    */
   onUIStateUpdate_(uiState) {
+    super.onUIStateUpdate_(uiState);
+
     this.mutateElement(() => {
       [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState)
         ? this.getShadowRoot().setAttribute('desktop', '')
@@ -500,10 +510,9 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   onClick_(event) {
     const target = dev().assertElement(event.target);
-
     if (this.elementOutsideUsableArea_(target)) {
       event.stopPropagation();
-      this.close_();
+      this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
       return;
     }
 
@@ -518,30 +527,12 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
-   * Closes the bookend.
-   * @private
-   */
-  close_() {
-    this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
-  }
-
-  /**
    * @param {!Element} el
    * @return {boolean}
    * @private
    */
   elementOutsideUsableArea_(el) {
-    return !closest(el, el => el == this.getInnerContainer_());
-  }
-
-  /**
-   * @param {boolean} show
-   * @private
-   */
-  toggle_(show) {
-    this.mutateElement(() => {
-      this.getShadowRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
-    });
+    return !closest(el, el => el === this.shadowHost_);
   }
 
   /**
@@ -588,7 +579,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
         );
         const container = dev().assertElement(
           BookendComponent.buildContainer(
-            this.getInnerContainer_(),
+            this.getShadowRoot(),
             this.win.document
           )
         );
@@ -604,24 +595,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
   getShadowRoot() {
     this.assertBuilt_();
     return dev().assertElement(this.bookendEl_);
-  }
-
-  /**
-   * Gets container for bookend content.
-   * @return {!Element}
-   * @private
-   */
-  getInnerContainer_() {
-    return dev().assertElement(this.getOverflowContainer_().firstElementChild);
-  }
-
-  /**
-   * Gets outer container that gets scrolled.
-   * @return {!Element}
-   * @private
-   */
-  getOverflowContainer_() {
-    return dev().assertElement(this.getShadowRoot().firstElementChild);
   }
 
   /**

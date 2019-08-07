@@ -945,7 +945,7 @@ export class AmpStory extends AMP.BaseElement {
         if (bookendInHistory) {
           return this.hasBookend_().then(hasBookend => {
             if (hasBookend) {
-              this.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
+              return this.showBookend_();
             }
           });
         }
@@ -2072,7 +2072,6 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
-    setHistoryState(this.win, HistoryState.BOOKEND_ACTIVE, isActive);
   }
 
   /**
@@ -2285,9 +2284,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildAndPreloadBookend_() {
-    this.bookend_.build(
-      !!getHistoryState(this.win, HistoryState.BOOKEND_ACTIVE)
-    );
+    this.bookend_.build();
     return this.bookend_.loadConfigAndMaybeRenderBookend();
   }
 

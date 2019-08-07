@@ -55,6 +55,12 @@
   white-space: nowrap !important;
 }
 
+/** Overrides. */
+
 .i-amphtml-story-page-attachment-theme-dark .i-amphtml-story-page-attachment-title {
   color: #fff !important;
+}
+
+.i-amphtml-story-draggable-drawer-header-bookend {
+  display: none !important;
 }

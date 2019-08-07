@@ -91,7 +91,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     /** @protected {!DrawerState} */
     this.state_ = DrawerState.CLOSED;
 
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    /** @protected @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
     /** @private {boolean} */
@@ -179,7 +179,7 @@ export class DraggableDrawer extends AMP.BaseElement {
   /**
    * Reacts to UI state updates.
    * @param {!UIType} uiState
-   * @private
+   * @protected
    */
   onUIStateUpdate_(uiState) {
     uiState === UIType.MOBILE
@@ -191,21 +191,27 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @private
    */
   startListeningForTouchEvents_() {
-    // Enforced by AMP validation rules.
-    const storyPageEl = dev().assertElement(this.element.parentElement);
+    // If the element is a direct descendant of amp-story-page, authorize
+    // swiping up by listening to events at the page level. Otherwise, only
+    // authorize swiping down to close by listening to events at the current
+    // element level.
+    const parentEl = this.element.parentElement;
+    const el = dev().assertElement(
+      parentEl.tagName === 'AMP-STORY-PAGE' ? parentEl : this.element
+    );
 
     this.touchEventUnlisteners_.push(
-      listen(storyPageEl, 'touchstart', this.onTouchStart_.bind(this), {
+      listen(el, 'touchstart', this.onTouchStart_.bind(this), {
         capture: true,
       })
     );
     this.touchEventUnlisteners_.push(
-      listen(storyPageEl, 'touchmove', this.onTouchMove_.bind(this), {
+      listen(el, 'touchmove', this.onTouchMove_.bind(this), {
         capture: true,
       })
     );
     this.touchEventUnlisteners_.push(
-      listen(storyPageEl, 'touchend', this.onTouchEnd_.bind(this), {
+      listen(el, 'touchend', this.onTouchEnd_.bind(this), {
         capture: true,
       })
     );
@@ -436,7 +442,6 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.state_ = DrawerState.OPEN;
 
-    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
     this.mutateElement(() => {
@@ -479,7 +484,6 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.state_ = DrawerState.CLOSED;
 
-    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
 
     this.mutateElement(() => {
