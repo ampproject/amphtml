@@ -38,7 +38,7 @@ const {
   recaptchaRouter,
 } = require('./recaptcha-router');
 const {renderShadowViewer} = require('./shadow-viewer');
-const {replaceUrls} = require('./app-utils');
+const {replaceUrls, isRtvMode} = require('./app-utils');
 
 const upload = multer();
 
@@ -65,7 +65,9 @@ app.use((req, res, next) => {
 });
 
 function isValidServeMode(serveMode) {
-  return ['default', 'compiled', 'cdn'].includes(serveMode);
+  return (
+    ['default', 'compiled', 'cdn'].includes(serveMode) || isRtvMode(serveMode)
+  );
 }
 
 function setServeMode(serveMode) {
@@ -89,7 +91,7 @@ if (!global.AMP_TESTING) {
 }
 
 // Changes the current serve mode via query param
-// e.g. /serve_mode_change?mode=(default|compiled|cdn)
+// e.g. /serve_mode_change?mode=(default|compiled|cdn|<RTV_NUMBER>)
 // (See ./app-index/settings.js)
 app.get('/serve_mode_change', (req, res) => {
   const {mode} = req.query;
@@ -1264,7 +1266,7 @@ app.use('/shadow/', (req, res) => {
 /**
  * @param {string} ampJsVersion
  * @param {string} file
- * @return {*} TODO(#23582): Specify return type
+ * @return {string}
  */
 function addViewerIntegrationScript(ampJsVersion, file) {
   ampJsVersion = parseFloat(ampJsVersion);
@@ -1334,5 +1336,37 @@ function decryptDocumentKey(encryptedDocumentKey) {
   }
   return parsedJson.key;
 }
+
+// serve local vendor config JSON files
+app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
+  const {vendor} = req.params;
+  const serveMode = pc.env.SERVE_MODE;
+
+  if (serveMode === 'cdn') {
+    const vendorUrl = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
+    request(vendorUrl, (error, response) => {
+      if (error) {
+        res.status(404);
+        res.end();
+      } else {
+        res.send(response);
+      }
+    });
+    return;
+  }
+
+  const max = serveMode === 'default' ? '.max' : '';
+  const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
+
+  fs.readFileAsync(localVendorConfigPath)
+    .then(file => {
+      res.setHeader('Content-Type', 'application/json');
+      res.end(file);
+    })
+    .error(() => {
+      res.status(404);
+      res.end('Not found: ' + localVendorConfigPath);
+    });
+});
 
 module.exports = app;
