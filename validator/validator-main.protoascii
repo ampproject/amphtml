@@ -3856,6 +3856,9 @@ tags: {
 # 4.8 Links
 # Links are a concept, rather than a tag. See tagspecs for "LINK", "A", etc.
 
+# 4.8.11 The canvas element
+# See extensions/amp-mustache/validator-amp-script.protoascii
+
 # 4.9 Tabular data
 # 4.9.1 The table element
 tags: {

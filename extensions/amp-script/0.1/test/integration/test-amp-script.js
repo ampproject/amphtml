@@ -40,7 +40,7 @@ describe
       {
         /* eslint-disable max-len */
         body: `
-      <amp-script layout=container src="/examples/amp-script/hello-world.js">
+      <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert Hello World!</button>
         <button id="long">Long task</button>
       </amp-script>
@@ -119,7 +119,7 @@ describe
       {
         /* eslint-disable max-len */
         body: `
-      <amp-script layout=container src="/examples/amp-script/hello-world.js">
+      <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <p>Number of mutations: <span id="mutationCount">0</span></p>
         <button id="script">Insert script</button>
         <button id="img">Insert img</button>
@@ -186,7 +186,7 @@ describe
         /* eslint-disable max-len */
         body: `
       <amp-script layout=fixed width=300 height=200
-          src="/examples/amp-script/hello-world.js">
+          src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert</button>
       </amp-script>
     `,
@@ -226,7 +226,7 @@ describe
         /* eslint-disable max-len */
         body: `
       <amp-script layout=fixed width=300 height=301
-          src="/examples/amp-script/hello-world.js">
+          src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert</button>
       </amp-script>
     `,
