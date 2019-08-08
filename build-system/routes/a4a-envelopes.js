@@ -40,12 +40,7 @@ app.use('/inabox/', (req, res) => {
     adUrl += '#log=' + req.query.log;
   }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
-    const result = template
-      .replace(/AD_URL/g, adUrl)
-      .replace(/OFFSET/g, req.query.offset || '0px')
-      .replace(/AD_WIDTH/g, req.query.width || '300')
-      .replace(/AD_HEIGHT/g, req.query.height || '250');
-    res.end(result);
+    res.end(fillTemplate(template, adUrl, req.query));
   });
 });
 
@@ -62,26 +57,13 @@ app.use('/inabox-friendly', (req, res) => {
     adUrl += '#log=' + req.query.log;
   }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
-    request(urlPrefix + adUrl, (error, response, body) => {
-      if (
-        !response.headers['content-type'] ||
-        response.headers['content-type'].startsWith('text/html')
-      ) {
-        const newBody = body
-          .replace(/&/g, '&amp;')
-          .replace(/'/g, '&apos;')
-          .replace(/"/g, '&quot;');
-        const result = template
-          .replace(/SRC_DOC/g, newBody)
-          .replace(/AD_URL/g, adUrl)
-          .replace(/OFFSET/g, req.query.offset || '0px')
-          .replace(/AD_WIDTH/g, req.query.width || '300')
-          .replace(/AD_HEIGHT/g, req.query.height || '250');
-        res.end(result);
-      } else {
-        res.redirect(adUrl);
-      }
-    });
+    return requestFromUrl(template, urlPrefix + adUrl, req.query);
+  }).then(result => {
+    if (result) {
+      res.end(result);
+    } else {
+      res.redirect(adUrl);
+    }
   });
 });
 
@@ -98,27 +80,13 @@ app.use('/inabox-safeframe', (req, res) => {
     adUrl += '#log=' + req.query.log;
   }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
-    request(urlPrefix + adUrl, (error, response, body) => {
-      if (
-        !response.headers['content-type'] ||
-        response.headers['content-type'].startsWith('text/html')
-      ) {
-        const newBody = body
-          .replace(/&/g, '&amp;')
-          .replace(/'/g, '&apos;')
-          .replace(/"/g, '&quot;');
-        const result = template
-          .replace(/BODY/g, newBody)
-          .replace(/LENGTH/g, body.length)
-          .replace(/AD_URL/g, adUrl)
-          .replace(/OFFSET/g, req.query.offset || '0px')
-          .replace(/AD_WIDTH/g, req.query.width || '300')
-          .replace(/AD_HEIGHT/g, req.query.height || '250');
-        res.end(result);
-      } else {
-        res.redirect(adUrl);
-      }
-    });
+    return requestFromUrl(template, urlPrefix + adUrl, req.query);
+  }).then(result => {
+    if (result) {
+      res.end(result);
+    } else {
+      res.redirect(adUrl);
+    }
   });
 });
 
@@ -138,14 +106,7 @@ app.use('/a4a(|-3p)/', (req, res) => {
   }
   adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
-    const result = template
-      .replace(/CHECKSIG/g, force3p || '')
-      .replace(/DISABLE3PFALLBACK/g, !force3p)
-      .replace(/OFFSET/g, req.query.offset || '0px')
-      .replace(/AD_URL/g, adUrl)
-      .replace(/AD_WIDTH/g, req.query.width || '300')
-      .replace(/AD_HEIGHT/g, req.query.height || '250');
-    res.end(result);
+    res.end(fillTemplate(template, adUrl, req.query, undefined, force3p));
   });
 });
 
@@ -168,6 +129,54 @@ function addQueryParam(url, param, value) {
     url += '&' + paramValue;
   }
   return url;
+}
+
+/**
+ * Fetch a page from the target URL and fill its content into the template.
+ * If the URL does not return text, returns null.
+ */
+function requestFromUrl(template, url, query) {
+  return new Promise((resolve, reject) => {
+    request(url, (error, response, body) => {
+      if (error) {
+        reject(error);
+      }
+      if (
+          !response.headers['content-type'] ||
+          response.headers['content-type'].startsWith('text/html')
+         ) {
+        resolve(fillTemplate(template, url, query, body));
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
+
+/**
+ * Fill out a template with the specified variables.
+ */
+function fillTemplate(template, url, query, body, force3p) {
+  let newBody;
+  let length;
+  if (body) {
+    newBody = body
+        .replace(/&/g, '&amp;')
+        .replace(/'/g, '&apos;')
+        .replace(/"/g, '&quot;');
+    length = body.length;
+  } else {
+    length = 0;
+  }
+  return template
+      .replace(/BODY/g, newBody)
+      .replace(/LENGTH/g, length)
+      .replace(/AD_URL/g, url)
+      .replace(/OFFSET/g, query.offset || '0px')
+      .replace(/AD_WIDTH/g, query.width || '300')
+      .replace(/AD_HEIGHT/g, query.height || '250')
+      .replace(/CHECKSIG/g, force3p || '')
+      .replace(/DISABLE3PFALLBACK/g, !force3p);
 }
 
 module.exports = app;
