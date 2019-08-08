@@ -153,8 +153,11 @@ class AmpCarousel extends AMP.BaseElement {
         }
       },
     });
+
     this.childLayoutManager_.updateChildren(this.slides_);
     this.carousel_.updateSlides(this.slides_);
+    // Need to wait for slides to exist first.
+    this.carousel_.goToSlide(Number(this.element.getAttribute('slide') || "0"));
     // Signal for runtime to check children for layout.
     return this.mutateElement(() => {});
   }
@@ -320,6 +323,7 @@ class AmpCarousel extends AMP.BaseElement {
     });
     this.toggleAutoplay_(autoAdvance);
     this.updateType_(type, slides);
+
     this.updateUi_();
   }
 
