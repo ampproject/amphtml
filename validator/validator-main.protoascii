@@ -4468,8 +4468,7 @@ tags: {
   }
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  # Note that this amp-bind attribute is not available for the AMP4Email format
-  # thus we add this manually for the formats that should.
+  # amp-bind's [type] is only allowed in formats other than AMP4EMAIL.
   attrs: { name: "[type]" }
   spec_url: "https://amp.dev/documentation/components/amp-form"
 }
@@ -4505,10 +4504,12 @@ tags: {
   }
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
+  # amp-bind's [type] is only allowed in formats other than AMP4EMAIL.
+  attrs: { name: "[type]" }
   mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://amp.dev/documentation/components/amp-form"
 }
-# amp-bind usage of [type] is not allowed in AMP4EMAIL
+# amp-bind's [type] is not allowed in AMP4EMAIL.
 tags: {
   html_format: AMP4EMAIL
   tag_name: "INPUT"
