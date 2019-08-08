@@ -25,7 +25,7 @@ amp-base-carousel {
  * This is a flex container containing the arrow slots. Since this uses flex,
  * it will reverse the arrow positions when using RTL.
  */
-.i-amphtml-carousel-arrows {
+.i-amphtml-base-carousel-arrows {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -39,30 +39,30 @@ amp-base-carousel {
   pointer-events: none;
 }
 
-.i-amphtml-carousel-arrow-prev-slot,
-.i-amphtml-carousel-arrow-next-slot {
+.i-amphtml-base-carousel-arrow-prev-slot,
+.i-amphtml-base-carousel-arrow-next-slot {
   position: relative;
   z-index: 1;
   display: flex;
   align-items: center;
 }
 
-.i-amphtml-carousel-arrow-prev-slot > *,
-.i-amphtml-carousel-arrow-next-slot > * {
+.i-amphtml-base-carousel-arrow-prev-slot > *,
+.i-amphtml-base-carousel-arrow-next-slot > * {
   /* Reenable pointer events stopped at the parent container. */
   pointer-events: all;
 }
 
 /* Rotate arrow slots for RTL. This applies to default / custom arrows. */
-amp-base-carousel[dir="rtl"] .i-amphtml-carousel-arrow-prev-slot,
-amp-base-carousel[dir="rtl"] .i-amphtml-carousel-arrow-next-slot {
+amp-base-carousel[dir="rtl"] .i-amphtml-base-carousel-arrow-prev-slot,
+amp-base-carousel[dir="rtl"] .i-amphtml-base-carousel-arrow-next-slot {
   transform: scaleX(-1);
 }
 
-amp-base-carousel[loop="false"] .i-amphtml-carousel-arrow-prev-slot > [disabled],
-amp-base-carousel[loop="false"] .i-amphtml-carousel-arrow-next-slot > [disabled],
-amp-base-carousel[i-amphtml-carousel-hide-buttons] .i-amphtml-carousel-arrow-prev-slot,
-amp-base-carousel[i-amphtml-carousel-hide-buttons] .i-amphtml-carousel-arrow-next-slot {
+amp-base-carousel[loop="false"] .i-amphtml-base-carousel-arrow-prev-slot > [disabled],
+amp-base-carousel[loop="false"] .i-amphtml-base-carousel-arrow-next-slot > [disabled],
+amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-prev-slot,
+amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-next-slot {
   opacity: 0;
   /** 
    * Note, screen readers can still activate the buttons when hide buttons is
@@ -71,8 +71,8 @@ amp-base-carousel[i-amphtml-carousel-hide-buttons] .i-amphtml-carousel-arrow-nex
   pointer-events: none;
 }
 
-.i-amphtml-carousel-prev,
-.i-amphtml-carousel-next {
+.i-amphtml-base-carousel-prev,
+.i-amphtml-base-carousel-next {
   filter: drop-shadow(0px 1px 2px #4a4a4a);
   width: 40px;
   height: 40px;
@@ -82,11 +82,11 @@ amp-base-carousel[i-amphtml-carousel-hide-buttons] .i-amphtml-carousel-arrow-nex
   outline: none;
 }
 
-.i-amphtml-carousel-prev {
+.i-amphtml-base-carousel-prev {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path  d="M14,7.4 L9.4,12 L14,16.6" fill="none" stroke="#fff" stroke-width="2px" stroke-linejoin="round" stroke-linecap="round" /></svg>');
 }
 
-.i-amphtml-carousel-next {
+.i-amphtml-base-carousel-next {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path  d="M10,7.4 L14.6,12 L10,16.6" fill="none" stroke="#fff" stroke-width="2px" stroke-linejoin="round" stroke-linecap="round" /></svg>');
 }
 

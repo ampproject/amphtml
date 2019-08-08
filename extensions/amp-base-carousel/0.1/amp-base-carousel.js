@@ -166,10 +166,10 @@ class AmpCarousel extends AMP.BaseElement {
       scrollContainer.appendChild(slide);
     });
     this.prevArrowSlot_ = this.element.querySelector(
-      '.i-amphtml-carousel-arrow-prev-slot'
+      '.i-amphtml-base-carousel-arrow-prev-slot'
     );
     this.nextArrowSlot_ = this.element.querySelector(
-      '.i-amphtml-carousel-arrow-next-slot'
+      '.i-amphtml-base-carousel-arrow-next-slot'
     );
     // Slot the arrows, with defaults
     this.prevArrowSlot_.appendChild(prevArrow || this.createPrevArrow_());
@@ -273,9 +273,9 @@ class AmpCarousel extends AMP.BaseElement {
     return html`
       <div class="i-amphtml-carousel-content">
         <div class="i-amphtml-carousel-scroll"></div>
-        <div class="i-amphtml-carousel-arrows">
-          <div class="i-amphtml-carousel-arrow-prev-slot"></div>
-          <div class="i-amphtml-carousel-arrow-next-slot"></div>
+        <div class="i-amphtml-base-carousel-arrows">
+          <div class="i-amphtml-base-carousel-arrow-prev-slot"></div>
+          <div class="i-amphtml-base-carousel-arrow-next-slot"></div>
         </div>
       </div>
     `;
@@ -289,7 +289,7 @@ class AmpCarousel extends AMP.BaseElement {
     const html = htmlFor(this.element);
     return html`
       <button
-        class="i-amphtml-carousel-next"
+        class="i-amphtml-base-carousel-next"
         aria-label="Next item in carousel"
       ></button>
     `;
@@ -303,7 +303,7 @@ class AmpCarousel extends AMP.BaseElement {
     const html = htmlFor(this.element);
     return html`
       <button
-        class="i-amphtml-carousel-prev"
+        class="i-amphtml-base-carousel-prev"
         aria-label="Previous item in carousel"
       ></button>
     `;
@@ -369,7 +369,7 @@ class AmpCarousel extends AMP.BaseElement {
     });
     toggleAttribute(
       this.element,
-      'i-amphtml-carousel-hide-buttons',
+      'i-amphtml-base-carousel-hide-buttons',
       this.hadTouch_
     );
   }
