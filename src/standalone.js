@@ -14,41 +14,32 @@
  * limitations under the License.
  */
 
+import {ChunkPriority, chunk} from './chunk';
 import {Services} from './services';
-
-/** @type {?Promise<!../extensions/amp-standalone/0.1/amp-standalone.StandaloneService>} */
-const standaloneServicePromise = null;
+import {isAmphtml} from './format';
 
 /**
- * Gets a Promise for the LoaderService, initiating a request to download the
- * code.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Element} element
- * @return {!Promise<!../extensions/amp-standalone/0.1/amp-standalone.StandaloneService>}
  */
-function getStandaloneServicePromise(ampdoc, element) {
-  if (!standaloneServicePromise) {
-    standaloneServicePromise = Services.extensionsFor(ampdoc.win)
-      .installExtensionForDoc(ampdoc, 'amp-standalone')
-      .then(() => Services.standaloneServiceForDoc(element));
+export function installStandaloneExtension(ampdoc) {
+  const {win} = ampdoc;
+  // Only enabled when the document is tagged as <html amp> or <html ⚡>.
+  if (!isAmphtml(win.document)) {
+    return;
   }
 
-  return standaloneServicePromise;
-}
-
-/**
- * Creates a default "loading indicator" element based on the new design.
- *
- * Please see https://github.com/ampproject/amphtml/issues/20237 for details,
- * screenshots and various states of the new loader design.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- */
-export function initializeStandalone(ampdoc) {
   if (!Services.platformFor(ampdoc.win).isStandalone()) {
     return;
   }
 
-  getStandaloneServicePromise(ampdoc).then(standaloneService => {
-    standaloneService.initialize();
-  });
+  chunk(
+    ampdoc,
+    () => {
+      Services.extensionsFor(win)
+        .installExtensionForDoc(ampdoc, 'amp-standalone')
+        .then(() => Services.standaloneServiceForDoc(ampdoc))
+        .then(standaloneService => standaloneService.initialize());
+    },
+    ChunkPriority.LOW
+  );
 }

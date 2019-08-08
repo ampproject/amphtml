@@ -19,80 +19,98 @@ import {getWinOrigin} from '../../../src/url';
 import {listen} from '../../../src/event-helper';
 
 /**
- * Solves both Chrome and Safari problems with standalone mode.
+ * Safari and Chrome PWAs have undesirable behaviors in standalone mode,
+ * i.e. with Add to homescreen. When pages link to other documents on the
+ * local domain or to an external domain they may open in a way that prevents
+ * the user from navigating normally.
  */
 export class StandaloneService {
   /**
-   *
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    /** @private @const */
     this.ampdoc_ = ampdoc;
   }
 
   /**
-   * @param {!AmpElement} ampdoc
+   * @return {!../../../src/service/platform-impl.Platform}
+   * @private visibleForTesting
    */
-  initialize(ampdoc) {
-    const platformService = Services.platformFor(ampdoc.win);
+  getPlatform_() {
+    return Services.platformFor(this.ampdoc_.win);
+  }
 
-    if (platformService.isSafari()) {
-      this.initializeSafariPlatform_();
+  /**
+   * Add an event listener to change the link navigation behavior.
+   */
+  initialize() {
+    listen(this.ampdoc_.getRootNode(), 'click', event =>
+      this.handleClick_(event)
+    );
+  }
+
+  /**
+   * Handle the click event
+   * @param {!Event} event
+   * @return {boolean|undefined}
+   */
+  handleClick_(event) {
+    const {target} = event;
+    if (target.tagName !== 'A') {
+      return;
     }
 
-    if (platformService.isChrome()) {
-      this.initializeChromePlatform();
+    const platform = this.getPlatform_();
+    if (platform.isSafari()) {
+      return (event.returnValue = this.handleSafariStandalone_(target));
+    }
+    if (platform.isChrome()) {
+      this.handleChromeStandalone_(target);
     }
   }
 
   /**
-   * If Chrome
-   * Find all links and add target=_blank to links to external pages
-   * Monitor the page for new elements and do the above
+   * Force Chrome PWAs to load external domain documents in a new tab.
+   * This prevents users from getting stuck on a page without a way to
+   * navigate back to the original app.
+   * @param {!Element} a
    */
-  initializeChromePlatform() {
-    listen(this.ampdoc_.getRootNode(), 'click', event => {
-      const a = event.target;
-      const {tagName, origin, target} = a;
+  handleChromeStandalone_(a) {
+    const {target, origin} = a;
+    if (target === '_blank') {
+      return;
+    }
 
-      if (tagName !== 'A') {
-        return;
-      }
+    if (getWinOrigin(this.ampdoc_.win) === origin) {
+      return;
+    }
 
-      if (target === '_blank') {
-        return;
-      }
-
-      if (getWinOrigin(this.ampdoc_.win) === origin) {
-        return;
-      }
-
-      a.target = '_blank';
-    });
+    a.target = '_blank';
   }
 
   /**
-   * If Safari
-   * Use window.location.href to change non-blank URLs.
+   * Force iOS PWAs to load internal domain documents in the original tab.
+   * By default, iOS PWAs will load all links in the Safari app with the
+   * "new tab" UX.
+   * @param {!Element} a
+   * @return {boolean}
    */
-  initializeSafariPlatform_() {
-    listen(this.ampdoc_.getRootNode(), 'click', event => {
-      const {tagName, href, target} = event.target;
-      if (tagName !== 'A') {
-        return;
-      }
+  handleSafariStandalone_(a) {
+    const {target, href, origin} = a;
+    if (target === '_blank') {
+      return true; // Allow the link navigate to proceed normally
+    }
 
-      if (target === '_blank') {
-        return;
-      }
+    if (getWinOrigin(this.ampdoc_.win) !== origin) {
+      return true; // Allow the link navigate to proceed normally
+    }
 
-      if (getWinOrigin(this.ampdoc_.win) !== origin) {
-        return;
-      }
+    this.ampdoc_.win.location.href = href;
 
-      top.location.href = href;
-      event.returnValue = false;
-    });
+    // The href assignment will cause the navigation, so prevent the link
+    // click from causing navigation.
+    return false;
   }
 }
 
