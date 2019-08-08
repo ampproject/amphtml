@@ -740,5 +740,5 @@ function maybeExpandUrlParams(ampdoc, e) {
  * @return {string}
  */
 function getHref(location) {
-  return `${location.origin}${location.pathname}${location.search}`
+  return `${location.origin}${location.pathname}${location.search}`;
 }
