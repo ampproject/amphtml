@@ -85,11 +85,15 @@ function getReplacePlugin() {
 
     // check experiment expiration times
     if (experimentsConfig[experiment]['name'] && !expirationTimestampMs) {
-      throw new Error(`Invalid expiration date for ${experiment}`);
+      if (defineFlag) {
+        throw new Error(`Invalid expiration date for ${experiment}`);
+      }
     } else if (expirationTimestampMs < currentTimestampMs) {
-      throw new Error(
-        `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
-      );
+      if (defineFlag) {
+        throw new Error(
+          `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
+        );
+      }
     }
 
     const experimentDefine =
