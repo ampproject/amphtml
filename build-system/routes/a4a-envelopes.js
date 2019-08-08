@@ -40,6 +40,7 @@ app.use('/inabox/', (req, res) => {
     adUrl += '#log=' + req.query.log;
   }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
+    template = template.replace(/SOURCE/g, 'AD_URL');
     res.end(fillTemplate(template, adUrl, req.query));
   });
 });
@@ -50,16 +51,27 @@ app.use('/inabox/', (req, res) => {
 // http://localhost:8000/inabox-friendly/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/inabox-(friendly|safeframe)', (req, res) => {
   let adUrl = req.url;
-  const templatePath = req.baseUrl.startsWith('/inabox-friendly')
-    ? '/build-system/server-inabox-friendly-template.html'
-    : '/build-system/server-inabox-safeframe-template.html';
-  const urlPrefix = getUrlPrefix(req);
+  const urlPrefix = getUrlPrefix(req).replace('localhost', 'ads.localhost');
+  const templatePath = '/build-system/server-inabox-template.html';
   adUrl = addQueryParam(adUrl, 'inabox', 1);
   if (req.query.log) {
     adUrl += '#log=' + req.query.log;
   }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8')
     .then(template => {
+      if (req.baseUrl == '/inabox-friendly') {
+        template = template.replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"');
+      } else {
+        template = template
+          .replace(
+            /NAME/g,
+            '1-0-31;LENGTH;BODY{&quot;uid&quot;:&quot;test&quot;}'
+          )
+          .replace(
+            /SOURCE/g,
+            urlPrefix + '/test/fixtures/served/iframe-safeframe.html'
+          );
+      }
       return requestFromUrl(template, urlPrefix + adUrl, req.query);
     })
     .then(result => {
@@ -87,7 +99,11 @@ app.use('/a4a(|-3p)/', (req, res) => {
   }
   adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
-    res.end(fillTemplate(template, adUrl, req.query, undefined, force3p));
+    res.end(
+      fillTemplate(template, adUrl, req.query)
+        .replace(/CHECKSIG/g, force3p || '')
+        .replace(/DISABLE3PFALLBACK/g, !force3p)
+    );
   });
 });
 
@@ -139,15 +155,14 @@ function requestFromUrl(template, url, query) {
 }
 
 /**
- * Fill out a template with the specified variables.
+ * Fill out a template with some common variables.
  * @param {string} template
  * @param {string} url
  * @param {Object} query
  * @param {?string} body
- * @param {?boolean} force3p
  * @return {string}
  */
-function fillTemplate(template, url, query, body, force3p) {
+function fillTemplate(template, url, query, body) {
   let newBody;
   let length;
   if (body) {
@@ -159,15 +174,19 @@ function fillTemplate(template, url, query, body, force3p) {
   } else {
     length = 0;
   }
-  return template
-    .replace(/BODY/g, newBody)
-    .replace(/LENGTH/g, length)
-    .replace(/AD_URL/g, url)
-    .replace(/OFFSET/g, query.offset || '0px')
-    .replace(/AD_WIDTH/g, query.width || '300')
-    .replace(/AD_HEIGHT/g, query.height || '250')
-    .replace(/CHECKSIG/g, force3p || '')
-    .replace(/DISABLE3PFALLBACK/g, !force3p);
+  return (
+    template
+      .replace(/BODY/g, newBody)
+      .replace(/LENGTH/g, length)
+      .replace(/AD_URL/g, url)
+      .replace(/OFFSET/g, query.offset || '0px')
+      .replace(/AD_WIDTH/g, query.width || '300')
+      .replace(/AD_HEIGHT/g, query.height || '250')
+      // Clear out variables that are not already replaced beforehand.
+      .replace(/NAME/g, 'inabox')
+      .replace(/SOURCE/g, '')
+      .replace('SRCDOC_ATTRIBUTE', '')
+  );
 }
 
 module.exports = app;
