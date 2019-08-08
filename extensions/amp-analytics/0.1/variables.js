@@ -277,7 +277,7 @@ export class VariableService {
         );
       }
 
-      const bindings = this.getMacros();
+      const bindings = this.getMacros(element);
       const urlReplacements = Services.urlReplacementsForDoc(element);
       const whitelist = element.hasAttribute('sandbox')
         ? SANDBOX_AVAILABLE_VARS
@@ -312,6 +312,7 @@ export class VariableService {
    * @param {string} str
    * @param {RegExp} regex
    * @param {Function} replacer
+   * @return {!Promise<string>}
    */
   asyncStringReplace_(str, regex, replacer) {
     const stringBuilder = [];
@@ -441,3 +442,23 @@ export function stringToBool(str) {
     str !== 'undefined'
   );
 }
+
+// ${some_macro(${a}, ${another_macro(${b}))}
+// // config
+// {
+//   final: ${some_macro(${a}, ${another_macro(${b}))},
+//   a: 'foo',
+//   b: [1, 2, 3],
+// }
+
+// 1st match in asyncStringReplace_ => 'some_macro(${a}, ${another_macro(${b}))}';
+// 2nd match => 'a'
+// 3rd match => 'another_macro(${b})'
+// 4th match => 'b'
+
+// // This should work
+// {
+//   top: ${some_macro(${a}, ${b})},
+//   b: ${another_macro(${c})},
+//   c: '123',
+// }
