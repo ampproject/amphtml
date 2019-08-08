@@ -291,7 +291,9 @@ case 41: case 42: case 43: case 61:
 break;
 case 44:
 
-        const string = JSON.parse(yytext);
+        // Replace leading/trailing single-quote with double-quote chars and
+        // use JSON.parse() to process special chars e.g. '\n'.
+        const string = JSON.parse(`"${yytext.substr(1, yyleng - 2)}"`);
         this.$ = new AstNode(AstNodeType.LITERAL, null, string);
       
 break;

@@ -279,7 +279,9 @@ literal:
 primitive:
     STRING
       %{
-        const string = JSON.parse(yytext);
+        // Replace leading/trailing single-quote with double-quote chars and
+        // use JSON.parse() to process special chars e.g. '\n'.
+        const string = JSON.parse(`"${yytext.substr(1, yyleng - 2)}"`);
         $$ = new AstNode(AstNodeType.LITERAL, null, string);
       %}
   | NUMBER
