@@ -94,6 +94,12 @@
     <template type="amp-mustache">{{iso}}</template>
   </amp-date-display>
 
+    <!-- valid, with referenced template -->
+    <amp-date-display datetime="now" display-in="utc" layout="fixed" width="360" height="20" template="myTemplate">
+    </amp-date-display>
+    <template type="amp-mustache" id="myTemplate">{{iso}}</template>
+
+
   <!-- invalid, no date provided -->
   <amp-date-display layout="fixed" width="360" height="20">
     <template type="amp-mustache">{{iso}}</template>
