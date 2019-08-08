@@ -75,6 +75,10 @@
     "base": "https://sb.scorecardresearch.com/b?",
     "pageview": "https://sb.scorecardresearch.com/b?c1=2&c2=1000001&cs_amp_consent=&cs_pv=_page_view_id_&c12=_client_id_&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
   },
+  "contentsquare": {
+    "base": "https://c.contentsquare.net",
+    "pageview": "https://c.contentsquare.net/pageview?pid=!projectId&pn=_counter_&hd=_timestamp_&dw=_screenWidth_&dh=_scrollHeight_&sw=_screenWidth_&sh=_screenHeight_&dr=_document_referrer_&urlamp=_ampdoc_url_&la=_browserLanguage_&v=!version&uu=!uuid"
+  },
   "cxense": {
     "host": "https://scomcluster.cxense.com",
     "base": "https://scomcluster.cxense.com/Repo/rep.gif",
