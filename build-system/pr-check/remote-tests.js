@@ -45,6 +45,7 @@ async function main() {
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp compile-exprs');
 
     await startSauceConnect(FILENAME);
     timedExecOrDie('gulp unit --nobuild --saucelabs');
@@ -71,6 +72,8 @@ async function main() {
     }
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp compile-exprs');
+
     await startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {

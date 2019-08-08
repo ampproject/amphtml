@@ -43,6 +43,7 @@ function main() {
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp compile-exprs');
     timedExecOrDie('gulp integration --nobuild --headless --coverage');
     timedExecOrDie('gulp unit --nobuild --headless --coverage');
     timedExecOrDie('gulp codecov-upload');
@@ -67,6 +68,7 @@ function main() {
 
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp compile-exprs');
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
       timedExecOrDie('gulp unit --nobuild --headless --local_changes');

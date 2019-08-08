@@ -31,3 +31,4 @@ firebase
 .firebaserc
 firebase.json
 .firebase/
+extensions/**/*-expr-impl.js

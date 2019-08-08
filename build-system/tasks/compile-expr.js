@@ -22,15 +22,11 @@ const path = require('path');
 const {endBuildStep} = require('./helpers');
 const {jisonPaths} = require('../config');
 
-// Set imports for parsers located in build/parsers
 const imports = new Map();
-imports.set(
-  'cssParser',
-  "import * as ast from '../../extensions/amp-animation/0.1/parsers/css-expr-ast';"
-);
+imports.set('cssParser', "import * as ast from './css-expr-ast';");
 imports.set(
   'bindParser',
-  "import {AstNode, AstNodeType} from '../../extensions/amp-bind/0.1/bind-expr-defines';"
+  "import {AstNode, AstNodeType} from './bind-expr-defines';"
 );
 
 /**
@@ -40,26 +36,24 @@ imports.set(
  * @return {!Promise<void>}
  */
 function compileExprs() {
-  const startTime = Date.now();
   const promises = [];
-  fs.mkdirSync('build/parsers', {recursive: true});
   jisonPaths.forEach(jisonPath => {
     glob.sync(jisonPath).forEach(jisonFile => {
+      const startTime = Date.now();
+      const jsDir = path.dirname(jisonFile);
       const jsFile = path.basename(jisonFile, '.jison');
       const extension = jsFile.replace('-expr-impl', '');
       const parser = extension + 'Parser';
-      const newFilePath = `build/parsers/${jsFile}.js`;
-      promises.push(compileExpr(jisonFile, parser, newFilePath));
+      const newFilePath = `${jsDir}/${jsFile}.js`;
+      promises.push(
+        compileExpr(jisonFile, parser, newFilePath).then(() => {
+          endBuildStep('Compiled parser', newFilePath, startTime);
+        })
+      );
     });
   });
 
-  return Promise.all(promises).then(() => {
-    endBuildStep(
-      'Compiled all jison parsers into',
-      'build/parsers/',
-      startTime
-    );
-  });
+  return Promise.all(promises);
 }
 /**
  * Helper function that uses jison to generate a parser for the input file.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
+import {accessParser as parser} from './access-expr-impl';
 
 /**
  * Evaluates access expression.

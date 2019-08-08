@@ -32,6 +32,7 @@ async function clean() {
     'EXTENSIONS_CSS_MAP',
     'build-system/runner/build',
     'build-system/runner/dist',
+    'extensions/**/*-expr-impl.js',
   ]);
 }
 
