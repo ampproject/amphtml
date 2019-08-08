@@ -912,3 +912,14 @@ export function toggleAttribute(element, name, forced) {
 
   return enabled;
 }
+
+/**
+ * @param {!Window} win
+ * @return {number} The width of the vertical scrollbar, in pixels.
+ */
+export function getVerticalScrollbarWidth(win) {
+  const {documentElement} = win.document;
+  const windowWidth = win./*OK*/ innerWidth;
+  const documentWidth = documentElement./*OK*/ clientWidth;
+  return windowWidth - documentWidth;
+}
