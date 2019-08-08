@@ -141,7 +141,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
     <tr>
     <td width="30%">picture</td>
-    <td>Prohibited. Serve different image formats by using the [fallback](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders?format=websites) attribute or provide multiple [<code>srcset</code> on <code>&lt;amp-img&gt;</code>](https://amp.dev/documentation/components/amp-img#attributes).</td>
+    <td>Prohibited. Serve different image formats by using the <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders?format=websites">fallback</a> attribute or provide multiple <a href="https://amp.dev/documentation/components/amp-img#attributes"><code>srcset</code> on <code>&lt;amp-img&gt;</code></a>.</td>
   </tr>
   <tr>
     <td width="30%">video</td>
