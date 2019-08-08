@@ -442,23 +442,3 @@ export function stringToBool(str) {
     str !== 'undefined'
   );
 }
-
-// ${some_macro(${a}, ${another_macro(${b}))}
-// // config
-// {
-//   final: ${some_macro(${a}, ${another_macro(${b}))},
-//   a: 'foo',
-//   b: [1, 2, 3],
-// }
-
-// 1st match in asyncStringReplace_ => 'some_macro(${a}, ${another_macro(${b}))}';
-// 2nd match => 'a'
-// 3rd match => 'another_macro(${b})'
-// 4th match => 'b'
-
-// // This should work
-// {
-//   top: ${some_macro(${a}, ${b})},
-//   b: ${another_macro(${c})},
-//   c: '123',
-// }
