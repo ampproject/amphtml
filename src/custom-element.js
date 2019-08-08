@@ -16,7 +16,6 @@
 
 import * as dom from './dom';
 import {AmpEvents} from './amp-events';
-import {ChunkPriority, chunk, startupChunk} from './chunk';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {
@@ -44,6 +43,7 @@ import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from '../src/consent';
+import {startupChunk} from './chunk';
 import {toWin} from './types';
 import {tryResolve} from '../src/utils/promise';
 
