@@ -242,7 +242,8 @@ class SeleniumWebDriverController {
    */
   async getActiveElement() {
     const root = await this.getRoot_();
-    const getter = root => root.ownerDocument.activeElement;
+    const getter = root =>
+      root.activeElement || root.ownerDocument.activeElement;
     const activeElement = await this.driver.executeScript(getter, root);
     return new ElementHandle(activeElement);
   }

@@ -560,8 +560,9 @@ class PuppeteerController {
    */
   async getActiveElement() {
     const root = await this.getRoot_();
-    const getter = () => root.ownerDocument.activeElement;
-    const element = await this.evaluate(getter);
+    const getter = root =>
+      root.activeElement || root.ownerDocument.activeElement;
+    const element = await this.evaluate(getter, root);
     return new ElementHandle(element);
   }
 
