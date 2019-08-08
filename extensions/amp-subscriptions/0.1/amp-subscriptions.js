@@ -664,7 +664,7 @@ export class SubscriptionService {
   }
 
   /**
-   * gets Score factors for all platforms
+   * Gets Score Factors for all platforms
    * @return {!Promise<!JsonObject>}
    */
   getScoreFactorStates() {
