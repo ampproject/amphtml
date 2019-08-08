@@ -40,7 +40,6 @@ requirement: {
   error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/history.js'
   value: 'History.prototype.state'
   whitelist: 'src/history.js'
-  whitelist: 'extensions/amp-date-picker/0.1/react-utils.js'
 }
 
 # Strings
