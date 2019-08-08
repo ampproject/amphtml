@@ -1270,20 +1270,6 @@ class ReferencePointMatcher {
       }
     }
   }
-
-  /**
-   * @return {!Array<number>}
-   */
-  getReferencePointsMatched() {
-    return this.referencePointsMatched_;
-  }
-
-  /**
-   * @return {!ParsedReferencePoints}
-   */
-  getParsedReferencePoints() {
-    return this.parsedReferencePoints_;
-  }
 }
 
 // Instances of this class specify which tag names (|allowedTags|)
@@ -4782,7 +4768,6 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // to return a GENERAL_DISALLOWED_TAG error.
   // calling HasDispatchKeys here is only an optimization to skip the loop
   // over encountered attributes in the case where we have no dispatches.
-  let bestMatchTagSpec = null;
   if (tagSpecDispatch.hasDispatchKeys()) {
     for (const attr of encounteredTag.attrs()) {
       const tagSpecIds = tagSpecDispatch.matchingDispatchKey(
@@ -4791,6 +4776,12 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
           // match dispatch keys in a case-insensitive manner and then
           // validate using whatever the tagspec requests.
           attr.value.toLowerCase(), context.getTagStack().parentTagName());
+      let ret = {
+        validationResult: new amp.validator.ValidationResult(),
+        bestMatchTagSpec: null
+      };
+      ret.validationResult.status =
+          amp.validator.ValidationResult.Status.UNKNOWN;
       for (const tagSpecId of tagSpecIds) {
         const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
         // Skip TagSpecs that aren't used for these type identifiers.
@@ -4798,13 +4789,22 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
             context.getTypeIdentifiers())) {
           continue;
         }
-        bestMatchTagSpec = parsedTagSpec;
-        return {
-          bestMatchTagSpec,
-          validationResult: validateTagAgainstSpec(
-              bestMatchTagSpec, bestMatchReferencePoint, context,
-              encounteredTag),
-        };
+        let result_for_attempt = validateTagAgainstSpec(
+            parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
+        if (context.getRules().betterValidationResultThan(
+                result_for_attempt, ret.validationResult)) {
+          ret.bestMatchTagSpec = parsedTagSpec;
+          ret.validationResult = result_for_attempt;
+          // Exit early on success
+          if (ret.validationResult.status ===
+              amp.validator.ValidationResult.Status.PASS) {
+            return ret;
+          }
+        }
+      }
+      if (ret.validationResult.status !==
+          amp.validator.ValidationResult.Status.UNKNOWN) {
+        return ret;
       }
     }
   }
@@ -4836,6 +4836,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // tried them all.
   const resultForBestAttempt = new amp.validator.ValidationResult();
   resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
+  let bestMatchTagSpec = null;
   for (const parsedTagSpec of filteredTagSpecs) {
     const resultForAttempt = validateTagAgainstSpec(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
@@ -4843,6 +4844,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
         resultForAttempt, resultForBestAttempt)) {
       resultForBestAttempt.copyFrom(resultForAttempt);
       bestMatchTagSpec = parsedTagSpec;
+      // Exit early
       if (resultForBestAttempt.status ===
           amp.validator.ValidationResult.Status.PASS) {
         return {
@@ -4916,14 +4918,6 @@ class ParsedValidatorRules {
      * @private
      */
     this.partialMatchCaseiRegexes_ = [];
-
-    /**
-     * A tuple of ('amp-form', 'form') would indicate that 'form' is an example
-     * tag name that uses of the extension 'amp-form'.
-     * @type {!Object<string, string>}
-     * @private
-     */
-    this.exampleUsageByExtension_ = {};
 
     /**
      * Sets type identifiers which are used to determine the set of validation
@@ -5009,22 +5003,7 @@ class ParsedValidatorRules {
       if (tag.mandatory) {
         this.mandatoryTagSpecs_.push(tagSpecId);
       }
-      // Produce a mapping from every extension to an example tag which
-      // requires that extension.
-      for (let i = 0; i < tag.requiresExtension.length; ++i) {
-        const extension = tag.requiresExtension[i];
-        // Some extensions have multiple tags that require them. Some tags
-        // require multiple extensions. If we have two tags requiring an
-        // extension, we prefer to use the one that lists the extension first
-        // (i === 0) as an example of that extension.
-        if (!this.exampleUsageByExtension_.hasOwnProperty(extension) || i === 0)
-        {this.exampleUsageByExtension_[extension] = getTagSpecName(tag);}
-      }
     }
-    // The amp-ad tag doesn't require amp-ad javascript for historical
-    // reasons. We still want to warn if you include the code but don't
-    // use it.
-    this.exampleUsageByExtension_['amp-ad'] = 'amp-ad';
 
     /**
      * @typedef {{ format: string, specificity: number }}
@@ -5236,6 +5215,8 @@ class ParsedValidatorRules {
               /* url */'', validationResult);
         }
         break;
+      default:
+        // fallthrough
     }
   }
 
@@ -5283,6 +5264,29 @@ class ParsedValidatorRules {
   }
 
   /**
+   * Returns true iff the error codes in errorsB are a subset of the error
+   * codes in errorsA.
+   * @param {!Array<!amp.validator.ValidationError>} errorsA
+   * @param {!Array<!amp.validator.ValidationError>} errorsB
+   * @return {boolean}
+   * @private
+   */
+  isErrorSubset_(errorsA, errorsB) {
+    let codesA = {};
+    for (const error of errorsA) codesA[error.code] = 1;
+    let codesB = {};
+    for (const error of errorsB) {
+      codesB[error.code] = 1;
+      // If error is not in codesA, errorsB is not a subset of errorsA.
+      if (!codesA.hasOwnProperty(error.code)) {
+        return false;
+      }
+    }
+    // Every code in B is also in A. If they are the same, not a subset.
+    return Object.keys(codesA).length > Object.keys(codesB).length;
+  }
+
+  /**
    * Returns true iff resultA is a better result than resultB.
    * @param {!amp.validator.ValidationResult} resultA
    * @param {!amp.validator.ValidationResult} resultB
@@ -5291,6 +5295,17 @@ class ParsedValidatorRules {
   betterValidationResultThan(resultA, resultB) {
     if (resultA.status !== resultB.status)
     {return this.betterValidationStatusThan_(resultA.status, resultB.status);}
+
+    // If one of the error sets by error.code is a subset of the other
+    // error set's error.codes, use the subset one. It's essentially saying, if
+    // you fix these errors that we both complain about, then you'd be passing
+    // for my tagspec, but not the other one, regardless of specificity.
+    if (this.isErrorSubset_(resultB.errors, resultA.errors)) {
+      return true;
+    }
+    if (this.isErrorSubset_(resultA.errors, resultB.errors)) {
+      return false;
+    }
 
     // Prefer the most specific error found in either set.
     if (this.maxSpecificity(resultA.errors) >
@@ -5313,18 +5328,6 @@ class ParsedValidatorRules {
 
     // Equal, so not better than.
     return false;
-  }
-
-  /**
-   * Returns an example tag which uses a given extension, or empty
-   * string if none.
-   * @param {string} extensionName
-   * @return {string}
-   */
-  exampleTagForExtension(extensionName) {
-    return this.exampleUsageByExtension_.hasOwnProperty(extensionName) ?
-      this.exampleUsageByExtension_[extensionName] :
-      '';
   }
 
   /**
@@ -5901,8 +5904,10 @@ amp.validator.isSeverityWarning = function(error) {
  */
 amp.validator.validateString = function(inputDocContents, opt_htmlFormat) {
   goog.asserts.assertString(inputDocContents, 'Input document is not a string');
-
-  const htmlFormat = opt_htmlFormat || 'AMP';
+  let htmlFormat = 'AMP';
+  if (opt_htmlFormat) {
+      htmlFormat = opt_htmlFormat.toUpperCase();
+   }
   const handler = new amp.validator.ValidationHandler(htmlFormat);
   const parser = new amp.htmlparser.HtmlParser();
   parser.parse(handler, inputDocContents);

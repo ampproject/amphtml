@@ -68,6 +68,7 @@ export class BaseCarousel extends AMP.BaseElement {
    * Builds a carousel button for next/prev.
    * @param {string} className
    * @param {function()} onInteraction
+   * @return {?Element}
    */
   buildButton(className, onInteraction) {
     const button = this.element.ownerDocument.createElement('div');

@@ -207,7 +207,10 @@ export class Activity {
     this.setUpActivityListeners_();
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {number}
+   */
   getTimeSinceStart_() {
     const timeSinceStart = Date.now() - this.startTime_;
     // Ensure that a negative time is never returned. This may cause loss of

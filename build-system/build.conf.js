@@ -27,16 +27,18 @@ const defaultPlugins = [
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
+  getReplacePlugin(),
 ];
 
 const esmRemovedImports = {
   './polyfills/document-contains': ['installDocContains'],
-  './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
+  './polyfills/domtokenlist': ['installDOMTokenList'],
   './polyfills/fetch': ['installFetch'],
   './polyfills/math-sign': ['installMathSign'],
   './polyfills/object-assign': ['installObjectAssign'],
   './polyfills/object-values': ['installObjectValues'],
   './polyfills/promise': ['installPromise'],
+  './polyfills/array-includes': ['installArrayIncludes'],
 };
 
 /**
@@ -83,11 +85,15 @@ function getReplacePlugin() {
 
     // check experiment expiration times
     if (experimentsConfig[experiment]['name'] && !expirationTimestampMs) {
-      throw new Error(`Invalid expiration date for ${experiment}`);
+      if (defineFlag) {
+        throw new Error(`Invalid expiration date for ${experiment}`);
+      }
     } else if (expirationTimestampMs < currentTimestampMs) {
-      throw new Error(
-        `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
-      );
+      if (defineFlag) {
+        throw new Error(
+          `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
+        );
+      }
     }
 
     const experimentDefine =

@@ -97,16 +97,24 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 /**
  * Compile all runtime targets in minified mode and drop them in dist/.
+ * @return {!Promise}
  */
 function compileAllMinifiedTargets() {
+  if (isTravisBuild()) {
+    log('Minifying multi-pass runtime targets with', cyan('closure-compiler'));
+  }
   return compile(/* watch */ false, /* shouldMinify */ true);
 }
 
 /**
  * Compile all runtime targets in unminified mode and drop them in dist/.
  * @param {boolean} watch
+ * @return {!Promise}
  */
 function compileAllUnminifiedTargets(watch) {
+  if (isTravisBuild()) {
+    log('Compiling runtime with', cyan('browserify'));
+  }
   return compile(/* watch */ watch);
 }
 
@@ -339,13 +347,12 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       }
     })
     .then(() => {
-      if (argv.fortesting && options.singlePassCompilation) {
-        const promises = [];
-        altMainBundles.forEach(bundle => {
-          promises.push(enableLocalTesting(`dist/${bundle.name}.js`));
-        });
-        return Promise.all(promises);
+      if (!argv.fortesting || !options.singlePassCompilation) {
+        return;
       }
+      return Promise.all(
+        altMainBundles.map(({name}) => enableLocalTesting(`dist/${name}.js`))
+      );
     });
 }
 
@@ -422,6 +429,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     {
       entries: entryPoint,
       debug: true,
+      fast: true,
     },
     options.browserifyOptions
   );
@@ -484,6 +492,11 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       .then(() => {
         if (UNMINIFIED_TARGETS.includes(destFilename)) {
           return enableLocalTesting(`${destDir}/${destFilename}`);
+        }
+      })
+      .then(() => {
+        if (isTravisBuild()) {
+          process.stdout.write('.');
         }
       });
   }
@@ -578,7 +591,7 @@ function printConfigHelp(command) {
 function printNobuildHelp() {
   if (!isTravisBuild()) {
     for (const task of NOBUILD_HELP_TASKS) {
-      // eslint-disable-line amphtml-internal/no-for-of-statement
+      // eslint-disable-line local/no-for-of-statement
       if (argv._.includes(task)) {
         log(
           green('To skip building during future'),
@@ -599,6 +612,7 @@ function printNobuildHelp() {
  * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
  * Called at the end of "gulp build" and "gulp dist --fortesting".
  * @param {string} targetFile File to which the config is to be written.
+ * @return {!Promise}
  */
 async function enableLocalTesting(targetFile) {
   const config = argv.config === 'canary' ? 'canary' : 'prod';
@@ -685,6 +699,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
  * Build ALP JS.
  *
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildAlp(options) {
   options = options || {};
@@ -701,6 +716,7 @@ function buildAlp(options) {
  * Build Examiner JS.
  *
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildExaminer(options) {
   return compileJs('./src/examiner/', 'examiner.js', './dist/', {
@@ -716,6 +732,7 @@ function buildExaminer(options) {
  * Build web worker JS.
  *
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildWebWorker(options) {
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {

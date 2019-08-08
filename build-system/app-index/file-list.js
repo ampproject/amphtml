@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable amphtml-internal/html-template */
+/* eslint-disable local/html-template */
 /* eslint-disable indent */
 
 const documentModes = require('./document-modes');

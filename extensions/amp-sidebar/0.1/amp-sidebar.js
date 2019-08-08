@@ -116,6 +116,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {number} */
     this.initialScrollTop_ = 0;
+
+    /** @private {boolean} */
+    this.opened_ = false;
   }
 
   /** @override */
@@ -153,11 +156,9 @@ export class AmpSidebar extends AMP.BaseElement {
       this.fixIosElasticScrollLeak_();
     }
 
-    if (this.isOpen_()) {
-      this.open_();
-    } else {
-      element.setAttribute('aria-hidden', 'true');
-    }
+    // The element is always closed by default, so update the aria state to
+    // match.
+    element.setAttribute('aria-hidden', 'true');
 
     if (!element.hasAttribute('role')) {
       element.setAttribute('role', 'menu');
@@ -288,21 +289,12 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if the sidebar is opened.
-   * @return {boolean}
-   * @private
-   */
-  isOpen_() {
-    return this.element.hasAttribute('open');
-  }
-
-  /**
    * Toggles the open/close state of the sidebar.
    * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @private
    */
   toggle_(opt_invocation) {
-    if (this.isOpen_()) {
+    if (this.opened_) {
       this.close_();
     } else {
       this.open_(opt_invocation);
@@ -363,8 +355,9 @@ export class AmpSidebar extends AMP.BaseElement {
   updateForOpened_() {
     // On open sidebar
     const children = this.getRealChildren();
-    this.scheduleLayout(children);
-    this.scheduleResume(children);
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(this.element, children);
+    owners.scheduleResume(this.element, children);
     // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
     if (!this.isIosWebView_()) {
       // For iOS, we cannot focus the Element itself, since VoiceOver will not
@@ -394,7 +387,10 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForClosed_() {
     toggle(this.element, /* display */ false);
-    this.schedulePause(this.getRealChildren());
+    Services.ownersForDoc(this.element).schedulePause(
+      this.element,
+      this.getRealChildren()
+    );
     this.triggerEvent_(SidebarEvents.CLOSE);
   }
 
@@ -404,9 +400,10 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   open_(opt_invocation) {
-    if (this.isOpen_()) {
+    if (this.opened_) {
       return;
     }
+    this.opened_ = true;
     this.viewport_.enterOverlayMode();
     this.setUpdateFn_(() => this.updateForOpening_());
     this.getHistory_()
@@ -427,9 +424,10 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   close_() {
-    if (!this.isOpen_()) {
+    if (!this.opened_) {
       return false;
     }
+    this.opened_ = false;
     this.viewport_.leaveOverlayMode();
     const scrollDidNotChange =
       this.initialScrollTop_ == this.viewport_.getScrollTop();
@@ -495,7 +493,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   fixIosElasticScrollLeak_() {
     this.element.addEventListener('scroll', e => {
-      if (this.isOpen_()) {
+      if (this.opened_) {
         if (this.element./*OK*/ scrollTop < 1) {
           this.element./*OK*/ scrollTop = 1;
           e.preventDefault();
@@ -528,7 +526,8 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * @private @return {!../../../src/service/history-impl.History}
+   * @private
+   * @return {!../../../src/service/history-impl.History}
    */
   getHistory_() {
     return Services.historyForDoc(this.getAmpDoc());

@@ -406,7 +406,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
-      Object.defineProperty(env.win.document, 'referrer', {
+      sandbox.defineProperty(env.win.document, 'referrer', {
         value: 'https://www.google.com/',
       });
       const docInfo = Services.documentInfoForDoc(element);

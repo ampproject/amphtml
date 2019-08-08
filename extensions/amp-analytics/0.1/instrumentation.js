@@ -15,10 +15,10 @@
  */
 
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
-import {AnalyticsEvent, CustomEventTracker} from './events';
+import {AnalyticsEvent, AnalyticsEventType, CustomEventTracker} from './events';
 import {AnalyticsGroup} from './analytics-group';
 import {Services} from '../../../src/services';
-import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
   getParentWindowFrameElement,
   getServiceForDoc,
@@ -78,7 +78,7 @@ export class InstrumentationService {
     const event = new AnalyticsEvent(target, eventType, opt_vars);
     const root = this.findRoot_(target);
     const tracker = /** @type {!CustomEventTracker} */ (root.getTracker(
-      'custom',
+      AnalyticsEventType.CUSTOM,
       CustomEventTracker
     ));
     tracker.trigger(event);

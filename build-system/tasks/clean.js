@@ -19,6 +19,7 @@ const del = require('del');
 
 /**
  * Clean up the build artifacts
+ * @return {!Promise}
  */
 async function clean() {
   return del([

@@ -14,17 +14,61 @@
  * limitations under the License.
  */
 
-import {dict} from './utils/object';
+import {dict, map} from './utils/object';
 import {isAmp4Email} from './format';
 import {isUrlAttribute} from './url-rewrite';
 import {startsWith} from './string';
 
-/** @private @const {string} */
+/** @const {string} */
 export const BIND_PREFIX = 'data-amp-bind-';
+
+/** @const {string} */
+export const DIFF_KEY = 'i-amphtml-key';
+
+/** @const {string} */
+export const DIFF_IGNORE = 'i-amphtml-ignore';
+
+/**
+ * Map of AMP element tag name to attributes that, if changed, require
+ * replacement of the original element.
+ * @const {!Object<string, !Array<string>>}
+ */
+export const DIFFABLE_AMP_ELEMENTS = {
+  'AMP-IMG': ['src', 'srcset', 'layout', 'width', 'height'],
+};
+
+/**
+ * Most AMP elements don't support ad hoc mutation and should be replaced
+ * instead of DOM diff'ed. Some AMP elements can be manually diff'ed.
+ *
+ * Both of these cases require a special attribute to enable special handling in
+ * the diffing algorithm. This function sets the appropriate attribute.
+ *
+ * @param {!Element} element
+ * @param {function(): string} generateKey
+ */
+export function markElementForDiffing(element, generateKey) {
+  const isAmpElement = startsWith(element.tagName, 'AMP-');
+  // Don't DOM diff nodes with bindings because amp-bind scans newly rendered
+  // elements and discards _all_ old elements _before_ diffing, so preserving
+  // old elements would cause loss of functionality.
+  const hasBinding = element.hasAttribute('i-amphtml-binding');
+
+  if (!hasBinding && DIFFABLE_AMP_ELEMENTS[element.tagName]) {
+    // Nodes marked with "ignore" will not be touched (old element stays).
+    // We want this to allow manual diffing afterwards.
+    element.setAttribute(DIFF_IGNORE, '');
+  } else if (hasBinding || isAmpElement) {
+    // Diff'ed node pairs with unique "key" will always be replaced.
+    if (!element.hasAttribute(DIFF_KEY)) {
+      element.setAttribute(DIFF_KEY, generateKey());
+    }
+  }
+}
 
 /**
  * @const {!Object<string, boolean>}
- * See https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
+ * @see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
  */
 export const BLACKLISTED_TAGS = {
   'applet': true,
@@ -40,6 +84,27 @@ export const BLACKLISTED_TAGS = {
   'object': true,
   'style': true,
   'video': true,
+};
+
+/**
+ * AMP elements allowed in AMP4EMAIL, modulo:
+ * - amp-list, which cannot be nested.
+ * - amp-lightbox and amp-image-lightbox, which are deprecated.
+ * @const {!Object<string, boolean>}
+ * @see https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-components.md
+ */
+export const EMAIL_WHITELISTED_AMP_TAGS = {
+  'amp-accordion': true,
+  'amp-anim': true,
+  'amp-bind-macro': true,
+  'amp-carousel': true,
+  'amp-fit-text': true,
+  'amp-img': true,
+  'amp-layout': true,
+  'amp-selector': true,
+  'amp-sidebar': true,
+  'amp-state': true,
+  'amp-timeago': true,
 };
 
 /**
@@ -138,53 +203,64 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
 export const WHITELISTED_TARGETS = ['_top', '_blank'];
 
 /** @const {!Array<string>} */
-const BLACKLISTED_ATTR_VALUES = [
+const BLACKLISTED_ATTR_VALUES = Object.freeze([
   /*eslint no-script-url: 0*/ 'javascript:',
   /*eslint no-script-url: 0*/ 'vbscript:',
   /*eslint no-script-url: 0*/ 'data:',
   /*eslint no-script-url: 0*/ '<script',
   /*eslint no-script-url: 0*/ '</script',
-];
+]);
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
-  'input': {
-    'type': /(?:image|button)/i,
-  },
-});
+const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
+  dict({
+    'input': {
+      'type': /(?:image|button)/i,
+    },
+  })
+);
 
-/** @const {!Object<string, !Object<string, !RegExp>>} */
-const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
-  'input': {
-    'type': /(?:button|file|image|password)/i,
-  },
-});
+/**
+ * Rules in addition to BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES for AMP4EMAIL.
+ * @const {!Object<string, !Object<string, !RegExp>>}
+ */
+const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
+  dict({
+    'input': {
+      'type': /(?:button|file|image|password)/i,
+    },
+  })
+);
 
 /** @const {!Array<string>} */
-const BLACKLISTED_FIELDS_ATTR = [
+const BLACKLISTED_FIELDS_ATTR = Object.freeze([
   'form',
   'formaction',
   'formmethod',
   'formtarget',
   'formnovalidate',
   'formenctype',
-];
+]);
 
 /** @const {!Object<string, !Array<string>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
-  'input': BLACKLISTED_FIELDS_ATTR,
-  'textarea': BLACKLISTED_FIELDS_ATTR,
-  'select': BLACKLISTED_FIELDS_ATTR,
-});
+const BLACKLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
+  dict({
+    'input': BLACKLISTED_FIELDS_ATTR,
+    'textarea': BLACKLISTED_FIELDS_ATTR,
+    'select': BLACKLISTED_FIELDS_ATTR,
+  })
+);
 
-/** @const {!Object<string, !Array<string>>} */
-const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
-  'amp-anim': ['controls'],
-  'form': ['name'],
-  'input': BLACKLISTED_FIELDS_ATTR,
-  'textarea': BLACKLISTED_FIELDS_ATTR,
-  'select': BLACKLISTED_FIELDS_ATTR,
-});
+/**
+ * Rules in addition to BLACKLISTED_TAG_SPECIFIC_ATTRS for AMP4EMAIL.
+ * @const {!Object<string, !Array<string>>}
+ */
+const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
+  dict({
+    'amp-anim': ['controls'],
+    'form': ['name'],
+  })
+);
 
 /**
  * Test for invalid `style` attribute values.
@@ -247,19 +323,25 @@ export function isValidAttr(
     return false;
   }
 
+  const isEmail = isAmp4Email(doc);
+
   // Remove blacklisted attributes from specific tags e.g. input[formaction].
-  const attrBlacklist = isAmp4Email(doc)
-    ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName]
-    : BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
+  const attrBlacklist = Object.assign(
+    map(),
+    BLACKLISTED_TAG_SPECIFIC_ATTRS,
+    isEmail ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS : {}
+  )[tagName];
   if (attrBlacklist && attrBlacklist.indexOf(attrName) != -1) {
     return false;
   }
 
   // Remove blacklisted values for specific attributes for specific tags
   // e.g. input[type=image].
-  const attrValueBlacklist = isAmp4Email(doc)
-    ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName]
-    : BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  const attrValueBlacklist = Object.assign(
+    map(),
+    BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES,
+    isEmail ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES : {}
+  )[tagName];
   if (attrValueBlacklist) {
     const blacklistedValuesRegex = attrValueBlacklist[attrName];
     if (

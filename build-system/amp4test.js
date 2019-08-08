@@ -31,6 +31,7 @@ const upload = multer();
 
 const KARMA_SERVER_PORT = 9876;
 const {SERVE_MODE} = process.env;
+const CUSTOM_TEMPLATES = ['amp-mustache'];
 
 /**
  * Logs the given messages to the console when --verbose is specified.
@@ -144,11 +145,15 @@ app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
   log('SERVER-LOG [WITHDRAW]: ' + key);
   const result = bank[req.params.bid][key];
   if (typeof result === 'function') {
-    return res.status(500).send('another client is withdrawing this ID');
+    return res
+      .status(500)
+      .send(`another client is withdrawing this ID [${key}]`);
   }
   const callback = function(result) {
     if (result === undefined) {
-      res.status(404).end();
+      // This happens when tearDown is called but no request
+      // of given ID has been received yet.
+      res.status(404).send(`Request of given ID not found: [${key}]`);
     } else {
       res.json({
         headers: result.headers,
@@ -234,6 +239,7 @@ app.get('/a4a/:bid', (req, res) => {
 
 /**
  * @param {{body: string, css: string|undefined, extensions: Array<string>|undefined, head: string|undefined, spec: string|undefined}} config
+ * @return {string}
  */
 function composeDocument(config) {
   const {body, css, extensions, head, spec, mode} = config;
@@ -289,7 +295,10 @@ function composeDocument(config) {
         const src = cdn
           ? `https://cdn.ampproject.org/v0/${name}-${version}.js`
           : `/dist/v0/${name}-${version}.${compiled ? '' : 'max.'}js`;
-        return `<script async custom-element="${name}" src="${src}"></script>`;
+        const type = CUSTOM_TEMPLATES.includes(name)
+          ? 'custom-template'
+          : 'custom-element';
+        return `<script async ${type}="${name}" src="${src}"></script>`;
       })
       .join('\n');
   }
@@ -321,7 +330,7 @@ function composeDocument(config) {
     if (extensions) {
       end = topHalfOfHtml.indexOf(extensionScripts) + extensionScripts.length;
       // Filter out extensions that are not custom elements, e.g. amp-mustache.
-      customElements = extensions.filter(e => e !== 'amp-mustache');
+      customElements = extensions.filter(e => !CUSTOM_TEMPLATES.includes(e));
       extensionsMap = customElements.map(ce => {
         return {
           'custom-element': ce,

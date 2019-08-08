@@ -53,8 +53,10 @@ const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {formatExtractedMessages} = require('../compile/log-messages');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
+const {VERSION} = require('../internal-version');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -63,9 +65,12 @@ const babel = require('@babel/core');
 const deglob = require('globs-to-files');
 
 function transferSrcsToTempDir() {
-  if (!isTravisBuild()) {
-    log('Transforming and executing JS files to', cyan(SRC_TEMP_DIR));
-  }
+  log(
+    'Performing multi-pass',
+    colors.cyan('babel'),
+    'transforms in',
+    colors.cyan(SRC_TEMP_DIR)
+  );
   const files = deglob.sync(BABEL_SRC_GLOBS);
   files.forEach(file => {
     if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
@@ -83,7 +88,9 @@ function transferSrcsToTempDir() {
     });
     const name = `${SRC_TEMP_DIR}${file.replace(process.cwd(), '')}`;
     fs.outputFileSync(name, code);
+    process.stdout.write('.');
   });
+  console.log('\n');
 }
 
 /**
@@ -117,67 +124,59 @@ async function dist() {
   } else {
     parseExtensionFlags();
   }
-  return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
-    .then(async () => {
-      await startNailgunServer(distNailgunPort, /* detached */ false);
-    })
-    .then(() => {
-      // Single pass has its own tmp directory processing. Only do this for
-      // multipass.
-      // We need to execute this after `compileCss` so that we can copy that
-      // over to the tmp directory.
-      if (!argv.single_pass) {
-        transferSrcsToTempDir();
-      }
-      return Promise.all([
-        compileAllMinifiedTargets(),
-        // NOTE: When adding a line here,
-        // consider whether you need to include polyfills
-        // and whether you need to init logging (initLogConstructor).
-        buildAlp({minify: true, watch: false}),
-        buildExaminer({minify: true, watch: false}),
-        buildWebWorker({minify: true, watch: false}),
-        buildExtensions({minify: true, watch: false}),
-        buildExperiments({minify: true, watch: false}),
-        buildLoginDone('0.1', {minify: true, watch: false}),
-        buildWebPushPublisherFiles({minify: true, watch: false}).then(
-          postBuildWebPushPublisherFilesVersion
-        ),
-        copyCss(),
-      ]);
-    })
-    .then(() => {
-      if (isTravisBuild()) {
-        // New line after all the compilation progress dots on Travis.
-        console.log('\n');
-      }
-    })
-    .then(async () => {
-      await stopNailgunServer(distNailgunPort);
-    })
-    .then(() => {
-      return copyAliasExtensions();
-    })
-    .then(() => {
-      if (argv.esm) {
-        return Promise.all([
-          createModuleCompatibleES5Bundle('v0.js'),
-          createModuleCompatibleES5Bundle('amp4ads-v0.js'),
-          createModuleCompatibleES5Bundle('shadow-v0.js'),
-        ]);
-      } else {
-        return Promise.resolve();
-      }
-    })
-    .then(() => {
-      return exitCtrlcHandler(handlerProcess);
-    });
+  await compileCss(/* watch */ undefined, /* opt_compileAll */ true);
+  await startNailgunServer(distNailgunPort, /* detached */ false);
+
+  // Single pass has its own tmp directory processing. Only do this for
+  // multipass.
+  // We need to execute this after `compileCss` so that we can copy that
+  // over to the tmp directory.
+  if (!argv.single_pass) {
+    transferSrcsToTempDir();
+  }
+
+  await Promise.all([
+    compileAllMinifiedTargets(),
+    // NOTE: When adding a line here,
+    // consider whether you need to include polyfills
+    // and whether you need to init logging (initLogConstructor).
+    buildAlp({minify: true, watch: false}),
+    buildExaminer({minify: true, watch: false}),
+    buildWebWorker({minify: true, watch: false}),
+    buildExtensions({minify: true, watch: false}),
+    buildExperiments({minify: true, watch: false}),
+    buildLoginDone('0.1', {minify: true, watch: false}),
+    buildWebPushPublisherFiles({minify: true, watch: false}).then(
+      postBuildWebPushPublisherFilesVersion
+    ),
+    copyCss(),
+  ]);
+
+  if (isTravisBuild()) {
+    // New line after all the compilation progress dots on Travis.
+    console.log('\n');
+  }
+
+  await stopNailgunServer(distNailgunPort);
+  await copyAliasExtensions();
+  await formatExtractedMessages();
+
+  if (argv.esm) {
+    await Promise.all([
+      createModuleCompatibleES5Bundle('v0.js'),
+      createModuleCompatibleES5Bundle('amp4ads-v0.js'),
+      createModuleCompatibleES5Bundle('shadow-v0.js'),
+    ]);
+  }
+
+  return exitCtrlcHandler(handlerProcess);
 }
 
 /**
  * Build AMP experiments.js.
  *
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildExperiments(options) {
   return compileJs(
@@ -198,6 +197,7 @@ function buildExperiments(options) {
  *
  * @param {string} version
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildLoginDone(version, options) {
   const buildDir = `build/all/amp-access-${version}/`;
@@ -221,6 +221,7 @@ function buildLoginDone(version, options) {
  * Build amp-web-push publisher files HTML page.
  *
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildWebPushPublisherFiles(options) {
   const distDir = 'dist/v0';
@@ -355,6 +356,7 @@ function postBuildWebPushPublisherFilesVersion() {
 
 /**
  * Precompilation steps required to build experiment js binaries.
+ * @return {!Promise}
  */
 async function preBuildExperiments() {
   const path = 'tools/experiments';
@@ -363,10 +365,12 @@ async function preBuildExperiments() {
 
   // Build HTML.
   const html = fs.readFileSync(htmlPath, 'utf8');
-  const minHtml = html.replace(
-    '/dist.tools/experiments/experiments.js',
-    `https://${hostname}/v0/experiments.js`
-  );
+  const minHtml = html
+    .replace(
+      '/dist.tools/experiments/experiments.js',
+      `https://${hostname}/v0/experiments.js`
+    )
+    .replace(/\$internalRuntimeVersion\$/g, VERSION);
 
   await toPromise(
     gulp

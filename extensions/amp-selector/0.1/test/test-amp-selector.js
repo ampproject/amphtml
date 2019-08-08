@@ -50,7 +50,7 @@ describes.realWin(
         const numberOfChildren = config.count || 3;
         let selectedCount = config.selectedCount || 0;
         let disabledCount = config.disabledCount || 0;
-
+        const rectArray = [];
         for (let i = 0; i < numberOfChildren; i++) {
           const child = win.document.createElement('div');
           child.setAttribute('width', '10');
@@ -75,7 +75,7 @@ describes.realWin(
               disabledCount--;
             }
           }
-
+          rectArray.push({width: 10, height: 10});
           const childAttributes = options.optionAttributes || {};
           Object.keys(childAttributes).forEach(key => {
             child.setAttribute(key, childAttributes[key]);
@@ -83,6 +83,9 @@ describes.realWin(
 
           ampSelector.appendChild(child);
         }
+        sandbox
+          .stub(ampSelector.implementation_, 'getElementsSizes_')
+          .resolves(rectArray);
         win.document.body.appendChild(ampSelector);
         return ampSelector;
       }
@@ -94,7 +97,7 @@ describes.realWin(
           preventDefault: () => {},
           target: opt_target,
         };
-        impl.keyDownHandler_(event);
+        return impl.keyDownHandler_(event);
       }
 
       it('should build properly', function*() {
@@ -373,6 +376,24 @@ describes.realWin(
 
         impl.setSelection_(options[3]);
         impl.setInputs_();
+        expect(impl.inputs_.length).to.equal(1);
+        expect(impl.getSelectedElementsForTesting()).to.include.members([
+          options[3],
+        ]);
+
+        impl.executeAction({
+          method: 'selectDown',
+          satisfiesTrust: () => true,
+        });
+        expect(impl.inputs_.length).to.equal(1);
+        expect(impl.getSelectedElementsForTesting()).to.include.members([
+          options[0],
+        ]);
+
+        impl.executeAction({
+          method: 'selectUp',
+          satisfiesTrust: () => true,
+        });
         expect(impl.inputs_.length).to.equal(1);
         expect(impl.getSelectedElementsForTesting()).to.include.members([
           options[3],
@@ -887,7 +908,7 @@ describes.realWin(
 
       it(
         'should trigger `select` action when user uses ' +
-          '`selectUp`/`selectDown` action with default delta value of 1',
+          '`selectDown` action with default delta value of 1',
         () => {
           const ampSelector = getSelector({
             attributes: {
@@ -900,6 +921,7 @@ describes.realWin(
           ampSelector.children[0].setAttribute('selected', '');
           ampSelector.build();
           const impl = ampSelector.implementation_;
+          const triggerSpy = sandbox.spy(impl.action_, 'trigger');
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
@@ -911,10 +933,48 @@ describes.realWin(
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
 
+          expect(triggerSpy).to.be.calledOnce;
+          expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
+
+          const event = triggerSpy.firstCall.args[2];
+          expect(event).to.have.property('detail');
+          expect(event.detail).to.have.property('targetOption', '1');
+          expect(event.detail).to.have.deep.property('selectedOptions', ['1']);
+        }
+      );
+
+      it(
+        'should trigger `select` action when user uses ' +
+          '`selectUp` action with default delta value of 1',
+        () => {
+          const ampSelector = getSelector({
+            attributes: {
+              id: 'ampSelector',
+            },
+            config: {
+              count: 6,
+            },
+          });
+          ampSelector.children[0].setAttribute('selected', '');
+          ampSelector.build();
+          const impl = ampSelector.implementation_;
+          const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+
+          expect(ampSelector.hasAttribute('multiple')).to.be.false;
+          expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
           impl.executeAction({method: 'selectUp', satisfiesTrust: () => true});
 
-          expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
-          expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+          expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+          expect(ampSelector.children[5].hasAttribute('selected')).to.be.true;
+
+          expect(triggerSpy).to.be.calledOnce;
+          expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
+
+          const event = triggerSpy.firstCall.args[2];
+          expect(event).to.have.property('detail');
+          expect(event.detail).to.have.property('targetOption', '5');
+          expect(event.detail).to.have.deep.property('selectedOptions', ['5']);
         }
       );
 
@@ -1087,14 +1147,18 @@ describes.realWin(
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
-            keyPress(ampSelector, Keys.LEFT_ARROW);
-            expect(ampSelector.children[0].tabIndex).to.equal(-1);
-            expect(ampSelector.children[1].tabIndex).to.equal(-1);
-            expect(ampSelector.children[2].tabIndex).to.equal(0);
-            keyPress(ampSelector, Keys.RIGHT_ARROW);
-            expect(ampSelector.children[0].tabIndex).to.equal(0);
-            expect(ampSelector.children[1].tabIndex).to.equal(-1);
-            expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            return keyPress(ampSelector, Keys.LEFT_ARROW)
+              .then(() => {
+                expect(ampSelector.children[0].tabIndex).to.equal(-1);
+                expect(ampSelector.children[1].tabIndex).to.equal(-1);
+                expect(ampSelector.children[2].tabIndex).to.equal(0);
+                return keyPress(ampSelector, Keys.RIGHT_ARROW);
+              })
+              .then(() => {
+                expect(ampSelector.children[0].tabIndex).to.equal(0);
+                expect(ampSelector.children[1].tabIndex).to.equal(-1);
+                expect(ampSelector.children[2].tabIndex).to.equal(-1);
+              });
           }
         );
 
@@ -1154,14 +1218,24 @@ describes.realWin(
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-          keyPress(ampSelector, Keys.DOWN_ARROW);
-          expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
-          expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
-          expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-          keyPress(ampSelector, Keys.UP_ARROW);
-          expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
-          expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
-          expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+          return keyPress(ampSelector, Keys.DOWN_ARROW)
+            .then(() => {
+              expect(ampSelector.children[0].hasAttribute('selected')).to.be
+                .false;
+              expect(ampSelector.children[1].hasAttribute('selected')).to.be
+                .true;
+              expect(ampSelector.children[2].hasAttribute('selected')).to.be
+                .false;
+              return keyPress(ampSelector, Keys.UP_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].hasAttribute('selected')).to.be
+                .true;
+              expect(ampSelector.children[1].hasAttribute('selected')).to.be
+                .false;
+              expect(ampSelector.children[2].hasAttribute('selected')).to.be
+                .false;
+            });
         });
       });
 
@@ -1249,29 +1323,35 @@ describes.realWin(
           expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
           // Note that the newly added third child is ignored.
-          keyPress(ampSelector, Keys.LEFT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(0);
-          expect(ampSelector.children[2].tabIndex).to.equal(-1);
+          keyPress(ampSelector, Keys.LEFT_ARROW)
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
-          const e = new CustomEvent(AmpEvents.DOM_UPDATE, {bubbles: true});
-          newChild.dispatchEvent(e);
+              const e = new CustomEvent(AmpEvents.DOM_UPDATE, {bubbles: true});
+              newChild.dispatchEvent(e);
 
-          // `newChild` should be focused since it has the 'selected' attribute.
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(-1);
-          expect(ampSelector.children[2].tabIndex).to.equal(0);
+              // `newChild` should be focused since it has the 'selected' attribute.
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(-1);
+              expect(ampSelector.children[2].tabIndex).to.equal(0);
 
-          // Tabbing between children now works for `newChild`.
-          keyPress(ampSelector, Keys.LEFT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(0);
-          expect(ampSelector.children[2].tabIndex).to.equal(-1);
+              // Tabbing between children now works for `newChild`.
+              return keyPress(ampSelector, Keys.LEFT_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
-          keyPress(ampSelector, Keys.RIGHT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(-1);
-          expect(ampSelector.children[2].tabIndex).to.equal(0);
+              return keyPress(ampSelector, Keys.RIGHT_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(-1);
+              expect(ampSelector.children[2].tabIndex).to.equal(0);
+            });
         });
       });
     });

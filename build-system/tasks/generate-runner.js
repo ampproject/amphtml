@@ -102,7 +102,7 @@ function writeGeneratedAtCommitFile(runnerJarDir) {
  * Generates the custom closure compiler binary (runner.jar) and drops it in the
  * given subdirectory of build-system/runner/dist/ (to enable concurrent usage)
  * @param {string} subDir
- *
+ * @return {!Promise}
  */
 async function generateRunner(subDir) {
   const generateCmd = `${antExecutable} -buildfile ${buildFile} -Ddist.dir dist/${subDir} jar`;
