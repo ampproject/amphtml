@@ -893,7 +893,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/transport.js',
       'extensions/amp-web-push/0.1/iframehost.js',
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
-      'extensions/amp-story/1.0/media-tasks.js',
       'dist.3p/current/integration.js',
     ],
   },

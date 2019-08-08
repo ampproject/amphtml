@@ -15,7 +15,7 @@
  */
 
 import {Deferred, tryResolve} from '../../../src/utils/promise';
-import {LOAD_FAILURE_PROPERTY, loadPromise} from '../../../src/event-helper';
+import {LOAD_FAILURE_PROPERTY} from '../../../src/event-helper';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
 
@@ -375,10 +375,9 @@ export class UpdateSourcesTask extends MediaTask {
   /**
    * @param {!Sources} newSources The sources to which the media element should
    *     be updated.
-   * @param {!Object=} options
    */
-  constructor(newSources, options = {listenForLoadPromise: true}) {
-    super('update-src', options);
+  constructor(newSources) {
+    super('update-src');
 
     /** @private @const {!Sources} */
     this.newSources_ = newSources;
@@ -388,11 +387,6 @@ export class UpdateSourcesTask extends MediaTask {
   executeInternal(mediaEl) {
     Sources.removeFrom(mediaEl);
     removeProperties(mediaEl);
-    // Starts listening for success/error events to ensure they are caught and
-    // properly set success/error properties.
-    if (this.options.listenForLoadPromise) {
-      loadPromise(mediaEl);
-    }
     this.newSources_.applyToElement(mediaEl);
     return Promise.resolve();
   }
