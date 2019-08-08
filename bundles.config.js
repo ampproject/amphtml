@@ -270,7 +270,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-carousel',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,

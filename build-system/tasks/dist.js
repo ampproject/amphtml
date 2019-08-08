@@ -56,6 +56,7 @@ const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
+const {VERSION} = require('../internal-version');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -364,10 +365,12 @@ async function preBuildExperiments() {
 
   // Build HTML.
   const html = fs.readFileSync(htmlPath, 'utf8');
-  const minHtml = html.replace(
-    '/dist.tools/experiments/experiments.js',
-    `https://${hostname}/v0/experiments.js`
-  );
+  const minHtml = html
+    .replace(
+      '/dist.tools/experiments/experiments.js',
+      `https://${hostname}/v0/experiments.js`
+    )
+    .replace(/\$internalRuntimeVersion\$/g, VERSION);
 
   await toPromise(
     gulp
@@ -457,4 +460,6 @@ dist.flags = {
     '  The directory closure compiler will write out to ' +
     'with --single_pass mode. The default directory is `dist`',
   full_sourcemaps: '  Includes source code content in sourcemaps',
+  disable_nailgun:
+    "  Doesn't use nailgun to invoke closure compiler (much slower)",
 };
