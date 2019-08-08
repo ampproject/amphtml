@@ -417,6 +417,7 @@ export class AmpSelector extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    // TODO(wassgha, #23820): Add an e2e test to catch race conditions here
     // There is a change of the `selected` attribute for the element
     return this.mutateElement(() => {
       if (selectedIndex !== index) {
