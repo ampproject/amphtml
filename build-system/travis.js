@@ -64,7 +64,7 @@ function travisBuildNumber() {
 }
 
 /**
- * Returns the job number of the ongoing Travis build.
+ * Returns the job number of the ongoing Travis job.
  * @return {string}
  */
 function travisJobNumber() {
@@ -76,6 +76,21 @@ function travisJobNumber() {
     );
   }
   return process.env.TRAVIS_JOB_NUMBER;
+}
+
+/**
+ * Return the job URL of the ongoing Travis job.
+ * @return {string}
+ */
+function travisJobUrl() {
+  if (!isTravisBuild()) {
+    log(
+      red('ERROR:'),
+      'This is not a Travis build. Cannot get',
+      cyan('process.env.TRAVIS_JOB_WEB_URL') + '.'
+    );
+  }
+  return process.env.TRAVIS_JOB_WEB_URL;
 }
 
 /**
@@ -145,6 +160,7 @@ module.exports = {
   travisBuildNumber,
   travisCommitSha,
   travisJobNumber,
+  travisJobUrl,
   travisPullRequestBranch,
   travisPullRequestSha,
   travisRepoSlug,
