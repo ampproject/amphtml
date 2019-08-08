@@ -78,10 +78,13 @@ function postReport(type, action) {
     return requestPromise({
       method: 'POST',
       uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
-      body: {
+      body: JSON.stringify({
         travisJobUrl: travisJobUrl(),
+      }),
+      headers: {
+        'Content-Type': 'application/json',
       },
-      json: true,
+      // Do not use `json: true` because the response is a string, not JSON.
     })
       .then(body => {
         log(
