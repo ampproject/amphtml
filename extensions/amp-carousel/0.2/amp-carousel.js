@@ -54,6 +54,7 @@ class AmpCarousel extends AMP.BaseElement {
     this.registerAction(
       'toggleAutoplay',
       ({args}) => {
+        // args will be `null` if not present, so we cannot use a default value above
         const toggle = args ? args['toggleOn'] : undefined;
         this.toggleAutoplay_(toggle);
       },
