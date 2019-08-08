@@ -145,6 +145,17 @@ tags: {  # <amp-video> in amp-story
     mandatory: true
   }
   attrs: {
+    name: "controls"
+    value: ""
+    deprecation: "- no replacement"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/23798"
+  }
+  attrs: {
+    name: "[controls]"
+    deprecation: "- no replacement"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/23798"
+  }
+  attrs: {
     name: "poster"
     mandatory: true
   }
