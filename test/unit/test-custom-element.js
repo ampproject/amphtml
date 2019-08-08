@@ -734,14 +734,11 @@ describes.realWin('CustomElement', {amp: true}, env => {
         return element.buildingPromise_.then(() => {
           expect(element.isBuilt()).to.equal(true);
           expect(testElementBuildCallback).to.be.calledOnce;
-          expect(testElementPreconnectCallback).to.have.not.been.called;
 
           // Call again.
           return element.build().then(() => {
             expect(element.isBuilt()).to.equal(true);
             expect(testElementBuildCallback).to.be.calledOnce;
-            expect(testElementPreconnectCallback).to.have.not.been.called;
-            clock.tick(1);
             expect(testElementPreconnectCallback).to.be.calledOnce;
           });
         });
@@ -968,9 +965,6 @@ describes.realWin('CustomElement', {amp: true}, env => {
         return element.build().then(() => {
           expect(element.isBuilt()).to.equal(true);
           expect(testElementLayoutCallback).to.have.not.been.called;
-          clock.tick(1);
-          expect(testElementPreconnectCallback).to.be.calledOnce;
-          expect(testElementPreconnectCallback.getCall(0).args[0]).to.be.false;
 
           const p = element.layoutCallback();
           expect(testElementLayoutCallback).to.be.calledOnce;
