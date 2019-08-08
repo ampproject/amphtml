@@ -55,6 +55,10 @@ attr_lists: {
     name: "loop"
     value: ""
   }
+    attrs: {
+    name: "slide"
+    value_regex: "[0-9]+"
+  }
   # <amp-bind>
   attrs: { name: "[slide]" }
 }
