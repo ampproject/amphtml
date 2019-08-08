@@ -193,6 +193,8 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://ad.ad-stir.com',
   },
 
+  'adstyle': {},
+
   'adtech': {
     prefetch: 'https://s.aolcdn.com/os/ads/adsWrapper3.js',
     preconnect: ['https://mads.at.atwola.com', 'https://aka-cdn.adtechus.com'],
