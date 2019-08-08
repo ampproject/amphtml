@@ -23,6 +23,7 @@ tags: {  # amp-carousel
   extension_spec: {
     name: "amp-carousel"
     version: "0.1"
+    version: "0.2"
     version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true

@@ -38,29 +38,32 @@
 
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch !important;
-  
-  /*
-   * Hide scrollbars, with three different methods:
-   *
-   * 1. scrollbar-width
-   *  - Note: this is actually scrollbar *thickness* and applies to horizontal
-   *    scrollbars as well
-   * 2. ::-webkit-scrollbar
-   * 3. Using padding to push scrollbar outside of the overflow
-   *
-   * The last method has side-effect of having the bottom of the slides being
-   * cut-off, since the height (or width) of the scrollbar is included when
-   * calculating the 100% height (or width) of the slide.
-   */
-  scrollbar-width: none; /* Firefox */
-  box-sizing: content-box !important;
 
   --visible-count: 1;
 }
 
-/* Chrome, Safari */
-.i-amphtml-carousel-scroll::-webkit-scrollbar {
+/*
+ * Hide scrollbars, with three different methods:
+ *
+ * 1. scrollbar-width
+ *  - Note: this is actually scrollbar *thickness* and applies to horizontal
+ *    scrollbars as well
+ * 2. ::-webkit-scrollbar
+ * 3. Using padding to push scrollbar outside of the overflow
+ *
+ * The last method has side-effect of having the bottom of the slides being
+ * cut-off, since the height (or width) of the scrollbar is included when
+ * calculating the 100% height (or width) of the slide.
+*/
+/* Firefox */
+.i-amphtml-carousel-scroll[hide-scrollbar="true"] {
+  scrollbar-width: none; 
+}
+
+ /* Chrome, Safari */
+.i-amphtml-carousel-scroll[hide-scrollbar="true"]::-webkit-scrollbar {
   display: none;
+  box-sizing: content-box !important;
 }
 
 .i-amphtml-carousel-scroll[horizontal="true"] {
