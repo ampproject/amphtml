@@ -719,7 +719,7 @@ describes.realWin(
       it(
         'should trigger `toggle` action even when no `value` argument is' +
           ' provided to the function',
-        () => {
+        async () => {
           const ampSelector = getSelector({
             config: {
               count: 5,
@@ -734,8 +734,9 @@ describes.realWin(
 
           // Test the case where the element to be `selected` and the currently
           // selected element are different
+
           let args = {'index': 2};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -746,11 +747,12 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are the same
           args = {'index': 2};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
           });
+
           expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
         }
       );
@@ -758,7 +760,7 @@ describes.realWin(
       it(
         'should trigger `toggle` action even with specified `value`' +
           ' argument',
-        () => {
+        async () => {
           const ampSelector = getSelector({
             config: {
               count: 5,
@@ -774,7 +776,7 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are different
           let args = {'index': 2, 'value': true};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -785,7 +787,7 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are the same
           args = {'index': 2, 'value': true};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -795,7 +797,7 @@ describes.realWin(
           // Test the case where the element to be removed as `selected` and
           // the currently selected element are the same
           args = {'index': 2, 'value': false};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -808,7 +810,7 @@ describes.realWin(
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
 
           args = {'index': 2, 'value': false};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -842,7 +844,7 @@ describes.realWin(
         expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
       });
 
-      it('should trigger "select" event when an item is toggled', () => {
+      it('should trigger "select" event when an item is toggled', async () => {
         const ampSelector = getSelector({
           config: {
             count: 5,
@@ -855,7 +857,7 @@ describes.realWin(
 
         const triggerSpy = sandbox.spy(impl.action_, 'trigger');
         const args = {'index': 3, 'value': true};
-        impl.executeAction({
+        await impl.executeAction({
           method: 'toggle',
           args,
           satisfiesTrust: () => true,

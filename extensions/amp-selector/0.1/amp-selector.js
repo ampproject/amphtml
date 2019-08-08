@@ -150,7 +150,9 @@ export class AmpSelector extends AMP.BaseElement {
             'be less than the length of options in the <amp-selector>'
         );
         if (args && args['index'] !== undefined) {
-          this.toggle_(args['index'], args['value']);
+          return this.toggle_(args['index'], args['value']);
+        } else {
+          return Promise.reject();
         }
       },
       ActionTrust.LOW
@@ -398,6 +400,7 @@ export class AmpSelector extends AMP.BaseElement {
    * Handles toggle action.
    * @param {number} index
    * @param {boolean=} opt_value
+   * @return {!Promise}
    * @private
    */
   toggle_(index, opt_value) {
@@ -411,11 +414,11 @@ export class AmpSelector extends AMP.BaseElement {
     const selectedIndex = this.elements_.indexOf(this.selectedElements_[0]);
 
     if (indexFinalStatus === indexCurrentStatus) {
-      return;
+      return Promise.resolve();
     }
 
     // There is a change of the `selected` attribute for the element
-    this.mutateElement(() => {
+    return this.mutateElement(() => {
       if (selectedIndex !== index) {
         this.setSelection_(el);
         const selectedEl = this.elements_[selectedIndex];
