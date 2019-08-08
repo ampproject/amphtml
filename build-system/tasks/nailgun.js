@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 const sleep = require('sleep-promise');
@@ -38,14 +39,13 @@ const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
 
 /**
  * Replaces the default compiler binary with nailgun on linux and macos
- * @return {*} TODO(#23582): Specify return type
+ * @return {?NodeRequire}
  */
 function maybeReplaceDefaultCompiler() {
   if (process.platform == 'darwin') {
     return require('require-hijack')
       .replace('google-closure-compiler-osx')
       .with(nailgunRunner);
-    return true;
   } else if (process.platform == 'linux') {
     return require('require-hijack')
       .replace('google-closure-compiler-linux')
@@ -75,12 +75,16 @@ function maybeReplaceDefaultCompiler() {
  * @param {boolean} detached
  */
 async function startNailgunServer(port, detached) {
+  await maybeGenerateRunner(port);
+
+  if (argv.disable_nailgun) {
+    return;
+  }
+
   nailgunRunnerReplacer = maybeReplaceDefaultCompiler();
   if (!nailgunRunnerReplacer) {
     return;
   }
-
-  await maybeGenerateRunner(port);
 
   // Start up the nailgun server after cleaning up old instances (if any)
   const customRunner = require.resolve(`../runner/dist/${port}/runner.jar`);
@@ -132,6 +136,10 @@ async function startNailgunServer(port, detached) {
  * @param {string} port
  */
 async function stopNailgunServer(port) {
+  if (argv.disable_nailgun) {
+    return;
+  }
+
   if (nailgunRunnerReplacer) {
     nailgunRunnerReplacer.restore();
   }
