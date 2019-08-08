@@ -214,6 +214,11 @@ describe('BindExpression', () => {
       expect(evaluate("'\\n'")).to.equal('\n');
       expect(evaluate("'\\t'")).to.equal('\t');
       expect(evaluate("'\\u041f'")).to.equal('\u041f');
+
+      // Escaping special chars should work.
+      expect(evaluate('"\\\\n"')).to.equal('\\n');
+      expect(evaluate('"\\\\t"')).to.equal('\\t');
+      expect(evaluate('"\\\\u041f"')).to.equal('\\u041f');
     });
 
     it('whitelisted functions', () => {
