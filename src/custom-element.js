@@ -16,6 +16,7 @@
 
 import * as dom from './dom';
 import {AmpEvents} from './amp-events';
+import {ChunkPriority, chunk, startupChunk} from './chunk';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {
@@ -584,7 +585,7 @@ function createBaseCustomElementClass(win) {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
-        Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
+        startupChunk(this.ownerDocument, () => {
           const TAG = this.tagName;
           if (!this.ownerDocument) {
             dev().error(TAG, 'preconnect without ownerDocument');
@@ -594,7 +595,7 @@ function createBaseCustomElementClass(win) {
             return;
           }
           this.implementation_.preconnectCallback(onLayout);
-        }, 1);
+        });
       }
     }
 

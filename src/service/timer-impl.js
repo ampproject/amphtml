@@ -15,7 +15,6 @@
  */
 
 import {installServiceInEmbedScope, registerServiceBuilder} from '../service';
-import {map} from '../utils/object';
 import {reportError} from '../error';
 import {user} from '../log';
 
@@ -39,8 +38,6 @@ export class Timer {
 
     this.canceled_ = {};
 
-    this.delayQueue_ = map();
-
     /** @const {number} */
     this.startTime_ = Date.now();
   }
@@ -61,13 +58,13 @@ export class Timer {
    * Returns the timer ID that can be used to cancel the timer (cancel method).
    * @param {function()} callback
    * @param {number=} opt_delay
-   * @return {string}
+   * @return {number|string}
    */
   delay(callback, opt_delay) {
-    const id = 'p' + this.taskCount_++;
     if (!opt_delay) {
       // For a delay of zero,  schedule a promise based micro task since
       // they are predictably fast.
+      const id = 'p' + this.taskCount_++;
       this.resolved_
         .then(() => {
           if (this.canceled_[id]) {
@@ -81,44 +78,13 @@ export class Timer {
     }
     const wrapped = () => {
       try {
-        if (this.canceled_[id]) {
-          delete this.canceled_[id];
-          return;
-        }
         callback();
       } catch (e) {
         reportError(e);
         throw e;
       }
     };
-
-    const delayEnd = Date.now() + opt_delay;
-    if (!this.delayQueue_[delayEnd]) {
-      this.delayQueue_[delayEnd] = [];
-      this.win.setTimeout(
-        this.callCallbacksForDelay_.bind(this),
-        opt_delay,
-        delayEnd
-      );
-    }
-
-    this.delayQueue_[delayEnd].push(wrapped);
-    return id;
-  }
-
-  /**
-   * Calls previously batched callbacks for a given ms key.
-   * @param {number} delay
-   * @private
-   */
-  callCallbacksForDelay_(delay) {
-    const callbacks = this.delayQueue_[delay];
-    delete this.delayQueue_[delay];
-
-    for (let i = 0; i < callbacks.length; i++) {
-      const cb = callbacks[i];
-      cb();
-    }
+    return this.win.setTimeout(wrapped, opt_delay);
   }
 
   /**
