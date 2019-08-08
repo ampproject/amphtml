@@ -79,7 +79,7 @@ export class AmpImgur extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
 
-    const sanitizedID = this.imgurid_.startsWith('a/')
+    const sanitizedID = startsWith(this.imgurid_, 'a/')
       ? 'a/' + encodeURIComponent(this.imgurid_.replace('a/', ''))
       : encodeURIComponent(this.imgurid_);
     iframe.src = 'https://imgur.com/' + sanitizedID + '/embed?pub=true';
