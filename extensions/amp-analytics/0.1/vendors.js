@@ -101,7 +101,6 @@ import {isCanary} from '../../../src/experiments';
 // Disable auto-sorting of imports from here on.
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
-
 const DEFAULT_CONFIG = {
   'transport': {'beacon': true, 'xhrpost': true, 'image': true},
   'vars': {
