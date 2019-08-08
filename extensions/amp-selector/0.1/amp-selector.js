@@ -152,7 +152,7 @@ export class AmpSelector extends AMP.BaseElement {
         if (args && args['index'] !== undefined) {
           return this.toggle_(args['index'], args['value']);
         } else {
-          return Promise.reject();
+          return Promise.reject("'index' must be specified");
         }
       },
       ActionTrust.LOW
