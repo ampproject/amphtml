@@ -729,24 +729,24 @@
       "interactive_tests": "examples/visual-tests/amp-autocomplete/amp-autocomplete.js",
     },
     {
-      "url": "examples/visual-tests/amphtml-ad/amp-fie-adchoices.html",
-      "name": "amphtml-ad: friendly iframe adchoices",
-      "interactive_tests": "examples/visual-tests/amphtml-ad/adchoices.js",
+      "url": "examples/visual-tests/amphtml-ads/amp-fie-adchoices.html",
+      "name": "amphtml-ads: friendly iframe adchoices",
+      "interactive_tests": "examples/visual-tests/amphtml-ads/adchoices.js",
       "no_base_test": true
     },
     {
-      "url": "examples/visual-tests/amphtml-ad/amp-inabox-adchoices.html",
-      "name": "amphtml-ad: inabox adchoices",
-      "interactive_tests": "examples/visual-tests/amphtml-ad/adchoices.js",
+      "url": "examples/visual-tests/amphtml-ads/amp-inabox-adchoices.html",
+      "name": "amphtml-ads: inabox adchoices",
+      "interactive_tests": "examples/visual-tests/amphtml-ads/adchoices.js",
       "no_base_test": true
     },
     {
-      "url": "examples/visual-tests/amphtml-ad/amp-inabox-static.html",
-      "name": "amphtml-ad: inabox static",
+      "url": "examples/visual-tests/amphtml-ads/amp-inabox-static.html",
+      "name": "amphtml-ads: inabox static",
       "loading_complete_selectors": [
         ".view", ".activeview"
       ],
-      "interactive_tests": "examples/visual-tests/amphtml-ad/static.js",
+      "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",
       "no_base_test": true
     },
   ]
