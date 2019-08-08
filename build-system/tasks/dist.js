@@ -460,4 +460,6 @@ dist.flags = {
     '  The directory closure compiler will write out to ' +
     'with --single_pass mode. The default directory is `dist`',
   full_sourcemaps: '  Includes source code content in sourcemaps',
+  disable_nailgun:
+    "  Doesn't use nailgun to invoke closure compiler (much slower)",
 };
