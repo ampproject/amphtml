@@ -109,10 +109,10 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
       );
     }
   } else if (inabox) {
-      file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
-        'https://cdn.ampproject.org/amp4ads-v0.js'
-      );
+    file = file.replace(
+      /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
+      'https://cdn.ampproject.org/amp4ads-v0.js'
+    );
   }
   return file;
 };
