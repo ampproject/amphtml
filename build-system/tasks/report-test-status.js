@@ -20,7 +20,7 @@ const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {cyan, green, yellow} = require('ansi-colors');
 const {gitCommitHash} = require('../git');
-const {isTravisPullRequestBuild} = require('../travis');
+const {travisJobUrl, isTravisPullRequestBuild} = require('../travis');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -75,9 +75,17 @@ function inferTestType() {
 function postReport(type, action) {
   if (type !== null && isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
-    const postUrl = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
-    return requestPromise
-      .post(postUrl)
+    return requestPromise({
+      method: 'POST',
+      uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
+      body: JSON.stringify({
+        travisJobUrl: travisJobUrl(),
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Do not use `json: true` because the response is a string, not JSON.
+    })
       .then(body => {
         log(
           green('INFO:'),
