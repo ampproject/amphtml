@@ -133,7 +133,7 @@ In the following example, we have a carousel of three images with preview button
     <td width="40%"><strong>type</strong></td>
     <td>Specifies the display type for the carousel items, which can be:
 <ul>
-  <li><strong><code>carousel</code></strong> (default): All slides are shown and are scrollable horizontally. Each slide my specify a different width using CSS.</li>
+  <li><strong><code>carousel</code></strong> (default): All slides are shown and are scrollable horizontally. Each slide may specify a different width using CSS.</li>
   <li><strong><code>slides</code></strong>: Shows a single slide at a time, with each slide snapping into place as the user swipes.</li>
 </ul></td>
   </tr>
@@ -203,7 +203,7 @@ The visibility of arrows can also be controlled via styling, and a media query c
   </tr>
   <tr>
     <td width="40%"><strong>slide (optional)</strong></td>
-    <td>Specifies what index should be shown when the carousel is first rendered. This can be updated with <code>amp-bind</code> to change which index is shown.</td>
+    <td>Specifies what index should be shown when the carousel is first rendered. This can be updated with <code><a href="https://amp.dev/documentation/components/amp-bind">amp-bind</a></code> to change which index is shown.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
@@ -248,14 +248,14 @@ The visibility of arrows can also be controlled via styling, and a media query c
 
 ## Differences from `<amp-carousel>` 0.1
 
-- Autoplay is now allowed on `type="carousel"`
-- Loop is now allowed on `type="carousel"`
+- `autoplay` is allowed on `type="carousel"`
+- `loop` is allowed on `type="carousel"`
 
 ### Migration Notes
 
-- You will need to change the required script from `amp-carousel-0.1` to `amp-carousel-0.2`.
-- The next and previous arrows are now positioned using a flex container rather than absolute positioning. If you previously had custom positioning for arrows, you will need to update your CSS.
-- The internal DOM structure of `<amp-carousel>` 0.2 is slightly different than 0.1. If you rely on CSS selectors targetting internal elements (e.g `amp-carousel > div`), you may find some of your CSS no longer works.
+- Update the required script from `amp-carousel-0.1` to `amp-carousel-0.2`.
+- Ensure any CSS for positioning next/previous arrows is still valid. See the [styling](#styling) for more information on arrow positioning.
+- Ensure any CSS used to style the carousel is still valid. The internal DOM structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors targetting internal elements such as `amp-carousel > div`. Any selectors using the `.amp-class-name` format should still work.
 
 ## Validation
 
