@@ -26,7 +26,7 @@ FAIL
 |  <!doctype html>
 |  <html ⚡ ampdevmode>
 >> ^~~~~~~~~
-feature_tests/dev_mode.html:26:0 Tag 'html' marked with attribute 'amphtml-dev-mode'. Validator will suppress errors regarding any other tag with this attribute. [GENERIC]
+feature_tests/dev_mode.html:26:0 Tag 'html' marked with attribute 'ampdevmode'. Validator will suppress errors regarding any other tag with this attribute. [GENERIC]
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
