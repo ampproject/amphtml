@@ -136,4 +136,10 @@ module.exports = {
   checkTypes,
 };
 
+/* eslint "google-camelcase/google-camelcase": 0 */
+
 checkTypes.description = 'Check source code for JS type errors';
+checkTypes.flags = {
+  disable_nailgun:
+    "  Doesn't use nailgun to invoke closure compiler (much slower)",
+};

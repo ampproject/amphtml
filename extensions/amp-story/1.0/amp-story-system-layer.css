@@ -34,6 +34,7 @@
 
 .i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
   opacity: 0.3 !important;
+  z-index: 1 !important;
   transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 

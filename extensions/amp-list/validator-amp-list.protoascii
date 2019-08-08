@@ -201,6 +201,12 @@ tags: {  # <amp-list>
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
   disallowed_ancestor: "TEMPLATE"
+  attrs: {
+    name: "binding"
+    value: "always"
+    value: "no"
+    value: "refresh"
+  }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: { name: "single-item" }

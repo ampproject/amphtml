@@ -429,6 +429,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     {
       entries: entryPoint,
       debug: true,
+      fast: true,
     },
     options.browserifyOptions
   );

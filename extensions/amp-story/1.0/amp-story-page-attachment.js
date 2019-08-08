@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {Action, StateProperty} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './utils';
 import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
 import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {dev} from '../../../src/log';
 import {getAnalyticsService} from './story-analytics';
@@ -136,6 +136,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   open(shouldAnimate = true) {
     super.open(shouldAnimate);
 
+    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+
     const currentHistoryState = /** @type {!Object} */ (getState(
       this.win.history
     ));
@@ -177,6 +179,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   closeInternal_() {
     super.closeInternal_();
+
+    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
 
