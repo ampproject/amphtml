@@ -20,7 +20,7 @@ const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {cyan, green, yellow} = require('ansi-colors');
 const {gitCommitHash} = require('../git');
-const {isTravisPullRequestBuild} = require('../travis');
+const {travisJobUrl, isTravisPullRequestBuild} = require('../travis');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -79,7 +79,7 @@ function postReport(type, action) {
       method: 'POST',
       uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
       body: {
-        travisJobUrl: process.env.TRAVIS_JOB_WEB_URL,
+        travisJobUrl: travisJobUrl(),
       },
       json: true,
     })
