@@ -79,9 +79,12 @@ export class AmpImgur extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
 
-    const sanitizedID = startsWith(this.imgurid_, 'a/')
-      ? 'a/' + encodeURIComponent(this.imgurid_.replace('a/', ''))
-      : encodeURIComponent(this.imgurid_);
+    const sanitizedID = this.imgurid_.replace(
+      /^(a\/)?(.*)/,
+      (match, aSlash, rest) => {
+        return (aSlash || '') + encodeURIComponent(rest);
+      }
+    );
     iframe.src = 'https://imgur.com/' + sanitizedID + '/embed?pub=true';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
