@@ -2,7 +2,7 @@
 $category@: presentation
 formats:
   - websites
-  - emails
+  - email
   - ads
   - stories
 teaser:
