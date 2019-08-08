@@ -4768,7 +4768,6 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // to return a GENERAL_DISALLOWED_TAG error.
   // calling HasDispatchKeys here is only an optimization to skip the loop
   // over encountered attributes in the case where we have no dispatches.
-  let bestMatchTagSpec = null;
   if (tagSpecDispatch.hasDispatchKeys()) {
     for (const attr of encounteredTag.attrs()) {
       const tagSpecIds = tagSpecDispatch.matchingDispatchKey(
@@ -4777,6 +4776,12 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
           // match dispatch keys in a case-insensitive manner and then
           // validate using whatever the tagspec requests.
           attr.value.toLowerCase(), context.getTagStack().parentTagName());
+      let ret = {
+        validationResult: new amp.validator.ValidationResult(),
+        bestMatchTagSpec: null
+      };
+      ret.validationResult.status =
+          amp.validator.ValidationResult.Status.UNKNOWN;
       for (const tagSpecId of tagSpecIds) {
         const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
         // Skip TagSpecs that aren't used for these type identifiers.
@@ -4784,13 +4789,22 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
             context.getTypeIdentifiers())) {
           continue;
         }
-        bestMatchTagSpec = parsedTagSpec;
-        return {
-          bestMatchTagSpec,
-          validationResult: validateTagAgainstSpec(
-              bestMatchTagSpec, bestMatchReferencePoint, context,
-              encounteredTag),
-        };
+        let result_for_attempt = validateTagAgainstSpec(
+            parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
+        if (context.getRules().betterValidationResultThan(
+                result_for_attempt, ret.validationResult)) {
+          ret.bestMatchTagSpec = parsedTagSpec;
+          ret.validationResult = result_for_attempt;
+          // Exit early on success
+          if (ret.validationResult.status ===
+              amp.validator.ValidationResult.Status.PASS) {
+            return ret;
+          }
+        }
+      }
+      if (ret.validationResult.status !==
+          amp.validator.ValidationResult.Status.UNKNOWN) {
+        return ret;
       }
     }
   }
@@ -4822,6 +4836,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // tried them all.
   const resultForBestAttempt = new amp.validator.ValidationResult();
   resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
+  let bestMatchTagSpec = null;
   for (const parsedTagSpec of filteredTagSpecs) {
     const resultForAttempt = validateTagAgainstSpec(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
@@ -4829,6 +4844,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
         resultForAttempt, resultForBestAttempt)) {
       resultForBestAttempt.copyFrom(resultForAttempt);
       bestMatchTagSpec = parsedTagSpec;
+      // Exit early
       if (resultForBestAttempt.status ===
           amp.validator.ValidationResult.Status.PASS) {
         return {
@@ -5248,6 +5264,29 @@ class ParsedValidatorRules {
   }
 
   /**
+   * Returns true iff the error codes in errorsB are a subset of the error
+   * codes in errorsA.
+   * @param {!Array<!amp.validator.ValidationError>} errorsA
+   * @param {!Array<!amp.validator.ValidationError>} errorsB
+   * @return {boolean}
+   * @private
+   */
+  isErrorSubset_(errorsA, errorsB) {
+    let codesA = {};
+    for (const error of errorsA) codesA[error.code] = 1;
+    let codesB = {};
+    for (const error of errorsB) {
+      codesB[error.code] = 1;
+      // If error is not in codesA, errorsB is not a subset of errorsA.
+      if (!codesA.hasOwnProperty(error.code)) {
+        return false;
+      }
+    }
+    // Every code in B is also in A. If they are the same, not a subset.
+    return Object.keys(codesA).length > Object.keys(codesB).length;
+  }
+
+  /**
    * Returns true iff resultA is a better result than resultB.
    * @param {!amp.validator.ValidationResult} resultA
    * @param {!amp.validator.ValidationResult} resultB
@@ -5256,6 +5295,17 @@ class ParsedValidatorRules {
   betterValidationResultThan(resultA, resultB) {
     if (resultA.status !== resultB.status)
     {return this.betterValidationStatusThan_(resultA.status, resultB.status);}
+
+    // If one of the error sets by error.code is a subset of the other
+    // error set's error.codes, use the subset one. It's essentially saying, if
+    // you fix these errors that we both complain about, then you'd be passing
+    // for my tagspec, but not the other one, regardless of specificity.
+    if (this.isErrorSubset_(resultB.errors, resultA.errors)) {
+      return true;
+    }
+    if (this.isErrorSubset_(resultA.errors, resultB.errors)) {
+      return false;
+    }
 
     // Prefer the most specific error found in either set.
     if (this.maxSpecificity(resultA.errors) >

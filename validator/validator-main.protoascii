@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 920
+spec_file_revision: 929
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -222,7 +222,7 @@ tags: {
         "preload|"  # Handled separately below, has specific requirements.
         "serviceworker|"
         "stylesheet|"  # Handled separately below, has specific requirements.
-        "subresource|"
+        "subresource"
         ")(\\s|$)"
     # It is worth noting that user-authored tags for dns-prefectch, preconnect,
     # prefetch, and prerender will be disabled by the transformations applied
@@ -1905,7 +1905,7 @@ tags: {
         "prerender|"
         "serviceworker|"
         "stylesheet|"  # Only allowed for link tags, specific req's for AMP.
-        "subresource|"
+        "subresource"
         ")(\\s|$)"
   }
   attrs: {
@@ -3085,12 +3085,16 @@ attr_lists: {
     css_declaration: { name: "text-decoration-color" }
     css_declaration: { name: "text-decoration-line" }
     css_declaration: { name: "text-decoration-style" }
+    css_declaration: { name: "text-fill-color" }
     css_declaration: { name: "text-indent" }
     css_declaration: { name: "text-justify" }
     css_declaration: { name: "text-orientation" }
     css_declaration: { name: "text-overflow" }
     css_declaration: { name: "text-rendering" } # SVG
     css_declaration: { name: "text-shadow" }
+    css_declaration: { name: "text-stroke" }
+    css_declaration: { name: "text-stroke-color" }
+    css_declaration: { name: "text-stroke-width" }
     css_declaration: { name: "text-transform" }
     css_declaration: { name: "text-underline-position" }
     css_declaration: { name: "top" }
@@ -6319,11 +6323,15 @@ attr_lists: {
     css_declaration: { name: "text-decoration-color" }
     css_declaration: { name: "text-decoration-line" }
     css_declaration: { name: "text-decoration-style" }
+    css_declaration: { name: "text-fill-color" }
     css_declaration: { name: "text-indent" }
     css_declaration: { name: "text-justify" }
     css_declaration: { name: "text-orientation" }
     css_declaration: { name: "text-overflow" }
     css_declaration: { name: "text-shadow" }
+    css_declaration: { name: "text-stroke" }
+    css_declaration: { name: "text-stroke-color" }
+    css_declaration: { name: "text-stroke-width" }
     css_declaration: { name: "text-transform" }
     css_declaration: { name: "text-underline-position" }
     css_declaration: { name: "top" }
@@ -6867,6 +6875,14 @@ error_specificity {
   code: DOCUMENT_SIZE_LIMIT_EXCEEDED
   specificity: 120
 }
+error_specificity {
+  code: DEV_MODE_ONLY
+  # This should always trump any other error. It is asserting
+  # that the developer intends for this tag to be an error but
+  # that no additional errors should be reported for this tag.
+  specificity: 1000
+}
+
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -7330,4 +7346,9 @@ error_formats {
 error_formats {
   code: DOCUMENT_SIZE_LIMIT_EXCEEDED
   format: "Document exceeded %1 bytes limit. Actual size %2 bytes."
+}
+error_formats {
+  code: DEV_MODE_ONLY
+  format: "Tag 'html' marked with attribute 'amphtml-dev-mode'. Validator "
+          "will suppress errors regarding any other tag with this attribute."
 }
