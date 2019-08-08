@@ -962,7 +962,8 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * Show or hide arrows based on current page
+   * Show or hide arrows based on current page.
+   * @private
    */
   updateNavButtons_() {
     if (!this.isLastPage_()) {
@@ -983,7 +984,7 @@ export class AmpStoryEmbeddedComponent {
   isLastPage_() {
     const pageIndex = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
     const pageCount = this.storeService_.get(StateProperty.PAGE_IDS).length;
-    return pageIndex + 1 >= pageCount;
+    return pageIndex + 1 === pageCount;
   }
 
   /**
