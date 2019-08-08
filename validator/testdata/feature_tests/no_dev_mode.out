@@ -62,7 +62,7 @@ feature_tests/no_dev_mode.html:49:4 The tag 'anotherfaketag' is disallowed. [DIS
 |
 |    <amp-autocomplete ampdevmode></amp-autocomplete>
 >>   ^~~~~~~~~
-feature_tests/no_dev_mode.html:52:2 The tag 'amp-autocomplete' may only appear as a descendant of tag 'form'. (see https://amp.dev/documentation/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+feature_tests/no_dev_mode.html:52:2 The attribute 'ampdevmode' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete) [DISALLOWED_HTML]
 |
 |  </body>
 |  </html>
