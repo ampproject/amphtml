@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {getMode} from '../mode';
 import {installServiceInEmbedScope, registerServiceBuilder} from '../service';
 import {reportError} from '../error';
 import {user} from '../log';
-import {getMode} from '../mode';
 
 const TAG = 'timer';
 let timersForTesting;
@@ -189,6 +189,9 @@ export function installTimerInEmbedWindow(embedWin) {
   installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
 }
 
+/**
+ * Cancels all timers scheduled during the current test
+ */
 export function cancelTimersForTesting() {
   if (!timersForTesting) {
     return;

@@ -21,6 +21,7 @@ import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
 import {adopt} from '../src/runtime';
+import {cancelTimersForTesting} from '../src/service/timer-impl';
 import {
   installAmpdocServices,
   installRuntimeServices,
@@ -37,7 +38,6 @@ import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
-import {cancelTimersForTesting} from '../src/service/timer-impl';
 
 // Used to print warnings for unexpected console errors.
 let that;
