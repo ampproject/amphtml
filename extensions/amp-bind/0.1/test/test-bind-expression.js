@@ -205,6 +205,12 @@ describe('BindExpression', () => {
       expect(evaluate('+"1"')).to.equal(1);
     });
 
+    it('should parse special characters', () => {
+      expect(evaluate('"\\n"')).to.equal('\n');
+      expect(evaluate('"\\t"')).to.equal('\t');
+      expect(evaluate('"\\u041f"')).to.equal('\u041f');
+    });
+
     it('whitelisted functions', () => {
       expect(evaluate('"abc".charAt(0)')).to.equal('a');
       expect(evaluate('"abc".charCodeAt(0)')).to.equal(97);

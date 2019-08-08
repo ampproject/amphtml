@@ -291,7 +291,7 @@ case 41: case 42: case 43: case 61:
 break;
 case 44:
 
-        const string = yytext.substr(1, yyleng - 2);
+        const string = JSON.parse(yytext);
         this.$ = new AstNode(AstNodeType.LITERAL, null, string);
       
 break;

@@ -279,7 +279,7 @@ literal:
 primitive:
     STRING
       %{
-        const string = yytext.substr(1, yyleng - 2);
+        const string = JSON.parse(yytext);
         $$ = new AstNode(AstNodeType.LITERAL, null, string);
       %}
   | NUMBER
