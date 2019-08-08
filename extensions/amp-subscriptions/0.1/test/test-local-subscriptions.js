@@ -58,11 +58,11 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   const pingbackUrl = configPingbackUrl.replace('READER_ID', readerId);
   const fakeScoreStates = {
     isReadyToPay: {
-      'subscription-google-com': 1,
+      'subscribe-google-com': 1,
       local: 0,
     },
-    supportdViewer: {
-      'subscription-google-com': 1,
+    supportsViewer: {
+      'subscribe-google-com': 1,
       local: 0,
     },
   };
@@ -394,11 +394,11 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         'data': null,
         'scores': {
           'isReadyToPay': {
-            'subscription-google-com': 1,
+            'subscribe-google-com': 1,
             'local': 0,
           },
-          'supportdViewer': {
-            'subscription-google-com': 1,
+          'supportsViewer': {
+            'subscribe-google-com': 1,
             'local': 0,
           },
         },

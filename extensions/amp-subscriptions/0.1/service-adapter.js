@@ -60,7 +60,7 @@ export class ServiceAdapter {
 
   /**
    * gets Score factors for all platforms
-   * @return {Promise<!JsonObject>}
+   * @return {!Promise<!JsonObject>}
    */
   getScoreFactorStates() {
     return this.subscriptionService_.getScoreFactorStates();

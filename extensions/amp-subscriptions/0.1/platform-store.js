@@ -244,16 +244,16 @@ export class PlatformStore {
 
   /**
    * Get scoreFactor states for each platform
-   * @return {Promise<!JsonObject>}
+   * @return {!Promise<!JsonObject>}
    *
    * return value looks somethinglike this
    * {
    *    isReadyToPay: {
-   *     'subscription-google-com': 1,
+   *     'subscribe_google_com': 1,
    *     local: 0,
    *    },
    *    supportdViewer: {
-   *     'subscription-google-com': 1,
+   *     'subscribe_google_com': 1,
    *     local: 0,
    *    },
    * }
