@@ -141,7 +141,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 * [Device and Browser](#device-and-browser)
 * [Interaction](#interaction)
 * [Visibility](#visibility)
-* [AMP Components] (#amp-components)
+* [AMP Components](#amp-components)
 * [Miscellaneous](#miscellaneous)
 
 ### Page and Content
@@ -249,10 +249,10 @@ The tables below list the available URL variables grouped by type of usage. Furt
 ### AMP Components
 | Variable Name | Platform Variable | amp-analytics Variable | Required AMP Components
 |---------------|-------------------|------------------------|-----------------------|
-| [Variant](#experiment-variant) | VARIANT | N/A | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md) |
-| [Variants](#experiment-variants) | VARIANTS | N/A | [`<amp-experiment>`] |(https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md)
+| [Variant](#experiment-variant) | `VARIANT` | N/A | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md) |
+| [Variants](#experiment-variants) | `VARIANTS` | N/A | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md) |
 | [Geolocation](#geolocation) | `AMP_GEO` | `${ampGeo}` | [`<amp-geo>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md) |
-| [User Location](#user-location) | `AMP_USER_LOCATION` | `${ampUserLocation}` | [`<amp-user-location>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-location/amp-user-location.md)
+| [User Location](#user-location) | `AMP_USER_LOCATION` | `${ampUserLocation}` | [`<amp-user-location>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-location/amp-user-location.md) |
 
 
 ### Miscellaneous
