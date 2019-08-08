@@ -396,17 +396,11 @@ export class Navigation {
     const tgtHref = getHref(tgtLoc);
     const curHref = getHref(curLoc);
 
-    if (tgtHref == curHref && tgtLoc.hash) {
-      // If the current target anchor link is the same origin + path
-      // as the current document then we know we are just linking to an
-      // identifier in the document. Otherwise, it's an external navigation.
-      this.handleInternalNavigation_(e, tgtLoc, curLoc);
-      return;
+    if (tgtHref != curHref) {
+      // Only apply anchor mutator if this is an external navigation
+      this.applyAnchorMutators_(target, e);
+      tgtLoc = this.parseUrl_(target.href);
     }
-
-    // External navigation. Need to apply anchor mutators first
-    this.applyAnchorMutators_(target, e);
-    tgtLoc = this.parseUrl_(target.href);
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, tgtLoc, curLoc);
