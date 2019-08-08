@@ -32,18 +32,18 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <!-- Valid: input and script tags as direct child to FORM -->
+  <!-- Valid: input and script tags -->
   <amp-autocomplete>
     <input>
     <script type="application/json"> {} </script>
   </amp-autocomplete>
 
-  <!-- Valid: input and src attr as direct child to FORM -->
+  <!-- Valid: input and src attr -->
   <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
     <input>
   </amp-autocomplete>
 
-  <!-- Valid: input and [src] attr as direct child to FORM -->
+  <!-- Valid: input and [src] attr -->
   <amp-autocomplete [src]="foo.bar">
     <input>
   </amp-autocomplete>
@@ -64,29 +64,6 @@
   <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
     <input>
   </amp-autocomplete>
-
-  <!-- Valid: deeply nested with FORM still as ancestor -->
-  <div>
-    <div>
-      <div>
-        <amp-autocomplete>
-          <input>
-          <script type="application/json"> {} </script>
-        </amp-autocomplete>
-      </div>
-    </div>
-  </div>
-
-  <!-- Valid: deeply nested with remote data and FORM still as ancestor -->
-  <div>
-    <div>
-      <div>
-        <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-          <input>
-        </amp-autocomplete>
-      </div>
-    </div>
-  </div>
 
   <!-- Valid: amp-component with static data and filter=prefix attribute -->
   <amp-autocomplete filter="prefix">
