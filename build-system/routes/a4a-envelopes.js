@@ -44,38 +44,15 @@ app.use('/inabox/', (req, res) => {
   });
 });
 
-// In-a-box friendly iframe envelope.
+// In-a-box friendly iframe and safeframe envelope.
 // Examples:
 // http://localhost:8000/inabox-friendly/examples/animations.amp.html
 // http://localhost:8000/inabox-friendly/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/inabox-friendly', (req, res) => {
+app.use('/inabox-(friendly|safeframe)', (req, res) => {
   let adUrl = req.url;
-  const templatePath = '/build-system/server-inabox-friendly-template.html';
-  const urlPrefix = getUrlPrefix(req);
-  adUrl = addQueryParam(adUrl, 'inabox', 1);
-  if (req.query.log) {
-    adUrl += '#log=' + req.query.log;
-  }
-  fs.readFileAsync(process.cwd() + templatePath, 'utf8')
-    .then(template => {
-      return requestFromUrl(template, urlPrefix + adUrl, req.query);
-    })
-    .then(result => {
-      if (result) {
-        res.end(result);
-      } else {
-        res.redirect(adUrl);
-      }
-    });
-});
-
-// In-a-box safe frame envelope.
-// Examples:
-// http://localhost:8000/inabox-safeframe/examples/animations.amp.html
-// http://localhost:8000/inabox-safeframe/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/inabox-safeframe', (req, res) => {
-  let adUrl = req.url;
-  const templatePath = '/build-system/server-inabox-safeframe-template.html';
+  const templatePath = req.baseUrl.startsWith('/inabox-friendly')
+    ? '/build-system/server-inabox-friendly-template.html'
+    : '/build-system/server-inabox-safeframe-template.html';
   const urlPrefix = getUrlPrefix(req);
   adUrl = addQueryParam(adUrl, 'inabox', 1);
   if (req.query.log) {
