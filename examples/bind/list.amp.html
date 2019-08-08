@@ -83,23 +83,23 @@
     <strong>foo</strong>=<span data-amp-bind-text="foo">?</span>
   </template>
 
-  <h3>Default</h3>
-  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template" reset-on-refresh="always">
+  <h3>amp-list:not([binding])</h3>
+  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template">
     <div placeholder>(Placeholder)</div>
   </amp-list>
 
-  <h3>binding="always"</h3>
-  <amp-list binding="always" layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template" reset-on-refresh="always">
+  <h3>amp-list[binding=always]</h3>
+  <amp-list binding="always" layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template">
     <div placeholder>(Placeholder)</div>
   </amp-list>
 
-  <h3>binding="refresh"</h3>
-  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template" reset-on-refresh="always">
+  <h3>amp-list[binding=refresh]</h3>
+  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template">
     <div placeholder>(Placeholder)</div>
   </amp-list>
 
-  <h3>binding="no"</h3>
-  <amp-list binding="no" layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template" reset-on-refresh="always">
+  <h3>amp-list[binding=no]</h3>
+  <amp-list binding="no" layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template">
     <div placeholder>(Placeholder)</div>
   </amp-list>
 
@@ -111,8 +111,8 @@
     <li>Tap the "Increment foo" button.</li>
   </ol>
   <p>Expected: The amp-list's children should update their "Foo:" values.</p>
-  <h3>binding="refresh"</h3>
-  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" width="600" height="100" template="my-template" reset-on-refresh="always">
+  <h3>amp-list vs. amp-bind race condition test</h3>
+  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" width="600" height="100" template="my-template">
     <div placeholder>(Placeholder)</div>
   </amp-list>
 </body>

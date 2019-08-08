@@ -23,9 +23,7 @@ describe('Caja-based', () => {
   beforeEach(() => {
     html = document.createElement('html');
     const documentEl = {documentElement: html};
-    sanitize = (html, opt_diffing = false) => {
-      return sanitizeHtml(html, documentEl, opt_diffing);
-    };
+    sanitize = html => sanitizeHtml(html, documentEl);
   });
 
   runSanitizerTests();
@@ -373,23 +371,6 @@ function runSanitizerTests() {
       expect(sanitize('<amp-lightbox scrollable></amp-lightbox>')).to.equal(
         '<amp-lightbox scrollable=""></amp-lightbox>'
       );
-    });
-
-    it('should output "i-amphtml-key" attribute if diffing is enabled', () => {
-      // Elements with bindings should have i-amphtml-key="<number>".
-      expect(sanitize('<p [text]="foo"></p>', true)).to.match(
-        /<p \[text\]="foo" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/p>/
-      );
-      // AMP elements should have i-amphtml-key="<number>".
-      expect(sanitize('<amp-img></amp-img>', true)).to.match(
-        /<amp-img i-amphtml-key="(\d+)"><\/amp-img>/
-      );
-      // AMP elements with bindings should have i-amphtml-key="<number>".
-      expect(sanitize('<amp-img [text]="foo"></amp-img>', true)).to.match(
-        /<amp-img \[text\]="foo" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/amp-img>/
-      );
-      // Other elements should NOT have i-amphtml-key-set.
-      expect(sanitize('<p></p>', true)).to.equal('<p></p>');
     });
 
     it('should sanitize invalid attributes', () => {

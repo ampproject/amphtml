@@ -23,6 +23,7 @@ tags: {  # amp-carousel
   extension_spec: {
     name: "amp-carousel"
     version: "0.1"
+    version: "0.2"
     version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
@@ -111,6 +112,7 @@ tags: {  # <amp-carousel type=carousel>
     name: "type"
     value: "carousel"
     mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
@@ -169,6 +171,7 @@ tags: {  # <amp-carousel lightbox type=carousel>
     name: "type"
     value: "carousel"
     mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"

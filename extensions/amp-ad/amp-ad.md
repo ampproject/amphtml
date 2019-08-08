@@ -276,6 +276,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [BeaverAds](../../ads/beaverads.md)
 - [BeOpinion](../amp-beopinion/amp-beopinion.md)
 - [Bidtellect](../../ads/bidtellect.md)
+- [Blade](../../ads/blade.md)
 - [brainy](../../ads/brainy.md)
 - [Broadstreet Ads](../../ads/broadstreetads.md)
 - [CA A.J.A. Infeed](../../ads/caajainfeed.md)
