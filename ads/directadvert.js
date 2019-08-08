@@ -24,10 +24,10 @@ import {serializeQueryString} from '../src/url';
 export function directadvert(global, data) {
   validateData(data, ['blockId']);
 
-  const params = {
+  const params = /** @type {!JsonObject} */ ({
     'async': 1,
     'div': 'c',
-  };
+  });
 
   if (global.context.referrer) {
     params['amp_rref'] = encodeURIComponent(global.context.referrer);
