@@ -210,8 +210,9 @@ async function skipBundleSize() {
 async function reportBundleSize() {
   if (isTravisPullRequestBuild()) {
     const baseSha = gitTravisMasterBaseline();
-    // TODO(danielrozenberg): replace this with 'brotli' within ~1 month.
-    const bundleSize = getGzippedBundleSize();
+    // TODO(#21275): remove gzipped reporting within ~1 month.
+    const gzippedBundleSize = getGzippedBundleSize();
+    const brotliBundleSize = getBrotliBundleSize();
     const commitHash = gitCommitHash();
     try {
       const response = await requestPost({
@@ -222,7 +223,11 @@ async function reportBundleSize() {
         json: true,
         body: {
           baseSha,
-          bundleSize,
+          // TODO(#21275): replace the default bundleSize value from the gzipped
+          // to the brotli value, once the bundle-size app prefers those.
+          bundleSize: gzippedBundleSize,
+          gzippedBundleSize,
+          brotliBundleSize,
         },
       });
       if (response.statusCode < 200 || response.statusCode >= 300) {
