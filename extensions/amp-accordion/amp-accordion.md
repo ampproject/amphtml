@@ -92,7 +92,7 @@ The events below will be triggered on `section`s of `accordion`.
     <td>This event is triggered on the target <code>section</code> that changes from collapsed state to expanded state. Notice that calling <code>expand</code> on an already expanded <code>section</code> would not trigger this event.</td>
   </tr>
   <tr>
-    <td width="40%"><strong><strong><code>collapse</code></strong></td>
+    <td width="40%"><strong><code>collapse</code></strong></td>
     <td>This event is triggered on the target <code>section</code> that changes from expanded state to collapsed state. Notice that calling <code>collapse</code> on an already collapsed <code>section</code> would not trigger this event.</td>
   </tr>
 </table>
