@@ -67,8 +67,7 @@ function getReplacePlugin() {
   // add define flags from arguments
   if (Array.isArray(defineFlag)) {
     if (defineFlag.length > 1) {
-      console.error('Only one defineExperimentConstant flag is allowed');
-      return;
+      throw new Error('Only one defineExperimentConstant flag is allowed');
     } else {
       replacements.push(createReplacement(defineFlag[0], true));
     }
@@ -86,13 +85,15 @@ function getReplacePlugin() {
 
     // check experiment expiration times
     if (experimentsConfig[experiment]['name'] && !expirationTimestampMs) {
-      console.error(`Invalid expiration date for ${experiment}`);
-      return;
+      if (defineFlag) {
+        throw new Error(`Invalid expiration date for ${experiment}`);
+      }
     } else if (expirationTimestampMs < currentTimestampMs) {
-      console.error(
-        `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
-      );
-      return;
+      if (defineFlag) {
+        throw new Error(
+          `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
+        );
+      }
     }
 
     const experimentDefine =
