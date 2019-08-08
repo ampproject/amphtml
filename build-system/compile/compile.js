@@ -120,8 +120,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/webcomponentsjs/',
     'node_modules/',
     'build/patched-module/',
-    // Generated code.
-    'extensions/**/*-expr-impl.js',
   ];
   const baseExterns = [
     'build-system/amp.extern.js',

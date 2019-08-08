@@ -26,6 +26,7 @@ const {
 } = require('./helpers');
 const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
+const {compileExprs} = require('./compile-expr');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
@@ -72,6 +73,7 @@ async function performBuild(watch) {
         buildWebWorker({watch}),
         buildExtensions({watch}),
         compileAllUnminifiedTargets(watch),
+        compileExprs(),
       ]);
     })
     .then(() => {

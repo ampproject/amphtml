@@ -47,7 +47,6 @@ async function main() {
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp compile-exprs');
     timedExecOrDie('gulp check-exact-versions');
     timedExecOrDie('gulp lint');
     timedExecOrDie('gulp presubmit');
@@ -63,7 +62,6 @@ async function main() {
     const buildTargets = determineBuildTargets(FILENAME);
     await reportAllExpectedTests(buildTargets);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp compile-exprs');
     timedExecOrDie('gulp check-exact-versions');
     timedExecOrDie('gulp lint');
     timedExecOrDie('gulp presubmit');

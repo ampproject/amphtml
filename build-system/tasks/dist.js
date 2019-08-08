@@ -52,6 +52,7 @@ const {
 const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
+const {compileExprs} = require('./compile-expr');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {isTravisBuild} = require('../travis');
@@ -125,6 +126,7 @@ async function dist() {
     parseExtensionFlags();
   }
   await compileCss(/* watch */ undefined, /* opt_compileAll */ true);
+  await compileExprs();
   await startNailgunServer(distNailgunPort, /* detached */ false);
 
   // Single pass has its own tmp directory processing. Only do this for

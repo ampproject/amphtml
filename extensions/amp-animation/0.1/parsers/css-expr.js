@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {cssParser as parser} from './css-expr-impl';
+import {cssParser as parser} from '../../../../build/parsers/css-expr-impl';
 
 /**
  * @param {string} cssString
