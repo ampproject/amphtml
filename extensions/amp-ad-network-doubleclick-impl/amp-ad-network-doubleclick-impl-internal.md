@@ -83,12 +83,12 @@ limitations under the License.
   <tr>
     <td><a href="sra.md">SRA: Single Request Architecture</a></td>
     <td>When enabled, all eligible slots on the page will be serviced by a single ad request.</td>
-    <td>Beta</td>
+    <td>Launched</td>
   </tr>
   <tr>
     <td><a href="single-page-ad.md">Single Page Ads</a></td>
     <td>Ads that appear within an AMP story, the new ad format for visual storytelling.</td>
-    <td>Beta</td>
+    <td>Launched</td>
   <tr>
     <td><a href="amp-consent.md">AMP Consent Integration</a></td>
     <td>Integration with AMP Consent extension.</td>
