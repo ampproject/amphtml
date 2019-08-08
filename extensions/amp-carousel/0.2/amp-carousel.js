@@ -53,8 +53,9 @@ class AmpCarousel extends AMP.BaseElement {
     );
     this.registerAction(
       'toggleAutoplay',
-      ({args = {}}) => {
-        this.toggleAutoplay_(args['toggleOn']);
+      ({args}) => {
+        const toggle = args ? args['toggleOn'] : undefined;
+        this.toggleAutoplay_(toggle);
       },
       ActionTrust.LOW
     );
