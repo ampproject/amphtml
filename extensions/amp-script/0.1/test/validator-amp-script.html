@@ -45,6 +45,14 @@
   <!-- Valid: 'sandbox' attribute. -->
   <amp-script layout=container src="https://example.com/foo.js" sandbox="allow-forms">
   </amp-script>
+ 
+  <!-- Valid: with canvas element. -->
+  <amp-script layout=container src="https://example.com/foo.js">
+    <canvas id="myCanvas" width="100px" height="100px"></canvas>
+  </amp-script>
+
+  <!-- Invalid: canvas element outside of amp-script tag. -->
+  <canvas id="myCanvas" width="100px" height="100px"></canvas>
 
   <!-- Invalid: With neither 'script' or 'src' attributes. -->
   <amp-script layout=container></amp-script>

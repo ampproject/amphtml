@@ -270,7 +270,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-carousel',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -680,8 +680,8 @@ exports.extensionBundles = [
         'amp-story-bookend',
         'amp-story-tooltip',
         'amp-story-consent',
+        'amp-story-draggable-drawer-header',
         'amp-story-hint',
-        'amp-story-page-attachment-header',
         'amp-story-unsupported-browser-layer',
         'amp-story-viewport-warning-layer',
         'amp-story-info-dialog',

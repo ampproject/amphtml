@@ -205,7 +205,10 @@ function getGraph(entryModule) {
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  const bundler = browserify(entryModule, {debug: true}).transform(
+  const bundler = browserify(entryModule, {
+    debug: true,
+    fast: true,
+  }).transform(
     babelify,
     Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {compact: false})
   );
@@ -346,7 +349,7 @@ function toArrayOrDefault(value, defaultValue) {
  * Flatten array of arrays.
  *
  * @param {!Array<!Array>} arr
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Array}
  */
 function flatten(arr) {
   return [].concat.apply([], arr);

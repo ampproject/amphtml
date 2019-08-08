@@ -311,6 +311,7 @@ exports.getGraph = function(entryModules, config) {
     debug: true,
     deps: true,
     detectGlobals: false,
+    fast: true,
   })
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
