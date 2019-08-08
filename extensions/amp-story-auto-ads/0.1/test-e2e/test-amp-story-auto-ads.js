@@ -16,7 +16,7 @@
 
 const viewport = {
   HEIGHT: 823,
-  WIDTH: 500, // 411
+  WIDTH: 411,
 };
 
 describes.endtoend(
