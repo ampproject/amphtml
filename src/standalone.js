@@ -37,7 +37,7 @@ export function installStandaloneExtension(ampdoc) {
     () => {
       Services.extensionsFor(win)
         .installExtensionForDoc(ampdoc, 'amp-standalone')
-        .then(() => Services.standaloneServiceForDoc(ampdoc))
+        .then(() => Services.standaloneServiceForDoc(ampdoc.getBody()))
         .then(standaloneService => standaloneService.initialize());
     },
     ChunkPriority.LOW

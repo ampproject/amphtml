@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
 import {getWinOrigin} from '../../../src/url';
 import {listen} from '../../../src/event-helper';
 
@@ -63,10 +64,12 @@ export class StandaloneService {
 
     const platform = this.getPlatform_();
     if (platform.isSafari()) {
-      return (event.returnValue = this.handleSafariStandalone_(target));
+      return (event.returnValue = this.handleSafariStandalone_(
+        dev().assertElement(target)
+      ));
     }
     if (platform.isChrome()) {
-      this.handleChromeStandalone_(target);
+      this.handleChromeStandalone_(dev().assertElement(target));
     }
   }
 
