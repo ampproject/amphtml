@@ -108,6 +108,7 @@ const GOOGLEANALYTICS_CONFIG = jsonLiteral({
     },
     'storyProgress': {
       'on': 'story-page-visible',
+      'enabled': false,
       'request': 'event',
       'vars': {
           'eventAction': 'story_progress',
@@ -117,6 +118,7 @@ const GOOGLEANALYTICS_CONFIG = jsonLiteral({
     },
     'storyEnd': {
       'on': 'story-last-page-visible',
+      'enabled': false,
       'request': 'event',
       'vars': {
           'eventAction': 'story_complete',

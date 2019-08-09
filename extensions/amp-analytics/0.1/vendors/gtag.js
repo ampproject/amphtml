@@ -121,6 +121,7 @@ const GTAG_CONFIG = jsonLiteral({
   'triggers': {
     'storyProgress': {
       'on': 'story-page-visible',
+      'enabled': false,
       'request': 'uaEvent',
       'vars': {
         'eventAction': 'story_progress',
@@ -130,6 +131,7 @@ const GTAG_CONFIG = jsonLiteral({
     },
     'storyEnd': {
       'on': 'story-last-page-visible',
+      'enabled': false,
       'request': 'uaEvent',
       'vars': {
         'eventAction': 'story_complete',
