@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createLoaderLogo} from '../../amp-facebook/facebook-loader';
 import {dashToUnderline} from '../../../src/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
@@ -113,6 +114,11 @@ class AmpFacebookComments extends AMP.BaseElement {
     if (eventData['action'] == 'ready') {
       this.toggleLoading(false);
     }
+  }
+
+  /** @override */
+  createLoaderLogoCallback() {
+    return createLoaderLogo(this.element);
   }
 
   /** @override */

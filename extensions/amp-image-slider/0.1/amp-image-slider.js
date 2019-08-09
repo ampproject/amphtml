@@ -151,8 +151,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     ) {
       // see comment in layoutCallback
       // When layers not enabled
-      this.setAsOwner(dev().assertElement(this.leftAmpImage_));
-      this.setAsOwner(dev().assertElement(this.rightAmpImage_));
+      const owners = Services.ownersForDoc(this.element);
+      owners.setOwner(dev().assertElement(this.leftAmpImage_), this.element);
+      owners.setOwner(dev().assertElement(this.rightAmpImage_), this.element);
     }
 
     this.container_ = this.doc_.createElement('div');
@@ -560,6 +561,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Get current slider's percentage to the left
    * Should be wrapped inside measureElement
    * @private
+   * @return {number}
    */
   getCurrentSliderPercentage_() {
     const {left: barLeft} = this.bar_./*OK*/ getBoundingClientRect();
@@ -693,6 +695,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Limit percentage between 0 and 1
    * @param {number} percentage
    * @private
+   * @return {number}
    */
   limitPercentage_(percentage) {
     return clamp(percentage, 0, 1);
@@ -718,14 +721,21 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // Extensions such as amp-carousel still uses .setAsOwner()
+    // Extensions such as amp-carousel still uses .setOwner()
     // This would break the rendering of the images as carousel
     // will call .scheduleLayout on the slider but not the contents
     // while Resources would found amp-imgs' parent has owner and
     // refuse to run the normal scheduling in discoverWork_.
     // SIMPLER SOL: simply always call scheduleLayout no matter what
-    this.scheduleLayout(dev().assertElement(this.leftAmpImage_));
-    this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(
+      this.element,
+      dev().assertElement(this.leftAmpImage_)
+    );
+    owners.scheduleLayout(
+      this.element,
+      dev().assertElement(this.rightAmpImage_)
+    );
 
     this.registerEvents_();
 

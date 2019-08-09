@@ -253,6 +253,7 @@ export class WebPushService {
    * Given a URL string, returns the URL without the permission dialog URL query
    * parameter fragment indicating a redirect.
    * @param {string} url
+   * @return {string}
    */
   removePermissionPopupUrlFragmentFromUrl(url) {
     let urlWithoutFragment = url.replace(
@@ -610,7 +611,10 @@ export class WebPushService {
       });
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   updateWidgetVisibilitiesServiceWorkerActivated_() {
     return Services.timerFor(this.ampdoc.win).timeoutPromise(
       5000,
@@ -758,6 +762,7 @@ export class WebPushService {
    * notification permissions when subscribing.
    *
    * @param {Array<?>} result
+   * @return {*} TODO(#23582): Specify return type
    */
   handlePermissionDialogInteraction(result) {
     /*
@@ -786,7 +791,10 @@ export class WebPushService {
     }
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   onPermissionGrantedSubscribe_() {
     return this.subscribeForPushRemotely().then(() => {
       return this.updateWidgetVisibilities();

@@ -27,6 +27,13 @@ import {rootNodeFor, waitForBodyOpenPromise} from '../dom';
 const AMPDOC_PROP = '__AMPDOC';
 
 /**
+ * @typedef {{
+ *   signals: (?Signals|undefined),
+ * }}
+ */
+export let AmpDocOptions;
+
+/**
  * This service helps locate an ampdoc (`AmpDoc` instance) for any node,
  * either in the single-doc or shadow-doc environments.
  *
@@ -54,6 +61,9 @@ export class AmpDocService {
 
     /** @private {boolean} */
     this.ampdocFieExperimentOn_ = isExperimentOn(win, 'ampdoc-fie');
+
+    /** @private {boolean} */
+    this.mightHaveShadowRoots_ = !isSingleDoc;
   }
 
   /**
@@ -142,6 +152,10 @@ export class AmpDocService {
         continue;
       }
 
+      if (!this.mightHaveShadowRoots_) {
+        break;
+      }
+
       // Shadow doc.
       const shadowRoot =
         n.nodeType == /* DOCUMENT */ 9 ? n : getShadowRootNode(n);
@@ -196,6 +210,7 @@ export class AmpDocService {
    * @restricted
    */
   installShadowDoc(url, shadowRoot) {
+    this.mightHaveShadowRoots_ = true;
     devAssert(
       !shadowRoot[AMPDOC_PROP],
       'The shadow root already contains ampdoc'
@@ -206,17 +221,23 @@ export class AmpDocService {
   }
 
   /**
-   * Creates and installs the ampdoc for the shadow root.
+   * Creates and installs the ampdoc for the fie root.
    * @param {string} url
    * @param {!Window} childWin
+   * @param {!AmpDocOptions=} opt_options
    * @return {!AmpDocFie}
    * @restricted
    */
-  installFieDoc(url, childWin) {
+  installFieDoc(url, childWin, opt_options) {
     const doc = childWin.document;
     devAssert(!doc[AMPDOC_PROP], 'The fie already contains ampdoc');
     const frameElement = devAssert(childWin.frameElement);
-    const ampdoc = new AmpDocFie(childWin, url, this.getAmpDoc(frameElement));
+    const ampdoc = new AmpDocFie(
+      childWin,
+      url,
+      this.getAmpDoc(frameElement),
+      opt_options
+    );
     doc[AMPDOC_PROP] = ampdoc;
     return ampdoc;
   }
@@ -232,17 +253,23 @@ export class AmpDocService {
 export class AmpDoc {
   /**
    * @param {!Window} win
+   * @param {!AmpDocOptions=} opt_options
    */
-  constructor(win) {
+  constructor(win, opt_options) {
     /** @public @const {!Window} */
     this.win = win;
 
     /** @private @const */
-    this.signals_ = new Signals();
+    this.signals_ = (opt_options && opt_options.signals) || new Signals();
 
     /** @private @const {!Array<string>} */
     this.declaredExtensions_ = [];
   }
+
+  /**
+   * Dispose the document.
+   */
+  dispose() {}
 
   /**
    * Whether the runtime in the single-doc mode. Alternative is the shadow-doc
@@ -400,9 +427,10 @@ export class AmpDoc {
 export class AmpDocSingle extends AmpDoc {
   /**
    * @param {!Window} win
+   * @param {!AmpDocOptions=} opt_options
    */
-  constructor(win) {
-    super(win);
+  constructor(win, opt_options) {
+    super(win, opt_options);
 
     /** @private @const {!Promise<!Element>} */
     this.bodyPromise_ = this.win.document.body
@@ -474,9 +502,10 @@ export class AmpDocShadow extends AmpDoc {
    * @param {!Window} win
    * @param {string} url
    * @param {!ShadowRoot} shadowRoot
+   * @param {!AmpDocOptions=} opt_options
    */
-  constructor(win, url, shadowRoot) {
-    super(win);
+  constructor(win, url, shadowRoot, opt_options) {
+    super(win, opt_options);
     /** @private @const {string} */
     this.url_ = url;
     /** @private @const {!ShadowRoot} */
@@ -588,9 +617,10 @@ export class AmpDocFie extends AmpDoc {
    * @param {!Window} win
    * @param {string} url
    * @param {!AmpDoc} parent
+   * @param {!AmpDocOptions=} opt_options
    */
-  constructor(win, url, parent) {
-    super(win);
+  constructor(win, url, parent, opt_options) {
+    super(win, opt_options);
 
     /** @private @const {string} */
     this.url_ = url;

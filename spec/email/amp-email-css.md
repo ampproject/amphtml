@@ -18,6 +18,24 @@ limitations under the License.
 
 This document outlines the CSS features currently supported inside AMP emails.
 
+## Applying CSS
+
+### Internal stylesheet
+
+When using an internal stylesheet, the CSS is specified inside a single
+`<style amp-custom>` tag located in the `<head>` tag of the email.
+
+### Inline styles
+
+In addition to an internal stylesheet, inline styles can be specified on any
+element using the [`style` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-style).
+
+### External stylesheet
+
+External stylesheets are **not** supported in AMP for Email.
+
+Using `<link rel="stylesheet" href="...">` is not allowed anywhere in the email.
+
 ## Supported CSS selectors
 
 ### Simple selectors
@@ -140,6 +158,7 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 *   [`display`](https://developer.mozilla.org/en-US/docs/Web/CSS/display)
 *   `elevation`
 *   [`empty-cells`](https://developer.mozilla.org/en-US/docs/Web/CSS/empty-cells)
+*   [`filter`](https://developer.mozilla.org/en-US/docs/Web/CSS/filter)
 *   [`flex`](https://developer.mozilla.org/en-US/docs/Web/CSS/flex)
 *   [`flex-basis`](https://developer.mozilla.org/en-US/docs/Web/CSS/flex-basis)
 *   [`flex-direction`](https://developer.mozilla.org/en-US/docs/Web/CSS/flex-direction)
@@ -269,6 +288,11 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 *   [`transform-box`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box)
 *   [`transform-origin`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-origin)
 *   [`transform-style`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-style)
+*   [`transition`](https://developer.mozilla.org/en-US/docs/Web/CSS/transition)
+*   [`transition-delay`](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-delay)
+*   [`transition-duration`](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-duration)
+*   [`transition-property`](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-property)
+*   [`transition-timing-function`](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
 *   [`unicode-bidi`](https://developer.mozilla.org/en-US/docs/Web/CSS/unicode-bidi)
 *   [`vertical-align`](https://developer.mozilla.org/en-US/docs/Web/CSS/vertical-align)
 *   [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility)
@@ -289,9 +313,19 @@ The following CSS properties have additional restrictions:
 | ------- | ----------- |
 | [`cursor`](https://developer.mozilla.org/en-US/docs/Web/CSS/cursor) | The only allowed values are `pointer` and `initial`. |
 | [`filter`](https://developer.mozilla.org/en-US/docs/Web/CSS/filter) | `url()` is not allowed. |
-| [`transition`](https://developer.mozilla.org/en-US/docs/Web/CSS/transition) | A limited subset of properties can be animated. |
+| [`transition`](https://developer.mozilla.org/en-US/docs/Web/CSS/transition) | Only `opacity`, `transform`, `visibility` and `offset-distance` can be animated. |
 | [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility) | The only allowed values are `hidden`, `visible` and `initial`. |
 | [`z-index`](https://developer.mozilla.org/en-US/docs/Web/CSS/z-index) | Only values between -100 and 100 are allowed. |
+
+## At-rules
+
+The only [at-rule](https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule)
+currently supported is `@media`. See [Media features](#media-features) for more
+information.
+
+### Custom fonts (`@font-face`)
+
+Custom fonts are **not** supported in AMP for Email.
 
 ## Media features
 
@@ -303,6 +337,7 @@ supported for conditionally applying rules via `@media` queries.
       *   `min-device-width`
 *   [`hover`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/hover)
 *   [`orientation`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/orientation)
+*   [`pointer`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/pointer)
 *   [`resolution`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/resolution)
       *   `max-resolution`
       *   `min-resolution`

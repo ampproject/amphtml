@@ -178,6 +178,7 @@ export class CustomEventReporterBuilder {
    * matter) before #build() is called.
    * @param {string} eventType
    * @param {string|!Array<string>} request
+   * @return {!CustomEventReporterBuilder}
    */
   track(eventType, request) {
     request = isArray(request) ? request : [request];
@@ -202,6 +203,7 @@ export class CustomEventReporterBuilder {
    * Call the #build() method to build and get the CustomEventReporter instance.
    * One CustomEventReporterBuilder instance can only build one reporter, which
    * means #build() should only be called once after all eventType are added.
+   * @return {!CustomEventReporter}
    */
   build() {
     devAssert(this.config_, 'CustomEventReporter already built');

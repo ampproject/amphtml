@@ -283,8 +283,11 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
+
+    /** @private @const {!../../../src/service/owners-impl.Owners} */
+    this.owners_ = Services.ownersForDoc(getAmpdoc(this.win_.document));
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
@@ -320,6 +323,12 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private {EmbeddedComponentState} */
     this.state_ = EmbeddedComponentState.HIDDEN;
+
+    /** @private {?Element} */
+    this.buttonLeft_ = null;
+
+    /** @private {?Element} */
+    this.buttonRight_ = null;
   }
 
   /**
@@ -401,7 +410,7 @@ export class AmpStoryEmbeddedComponent {
     // Resources that previously called `schedulePause` must also call
     // `scheduleResume`. Calling `scheduleResume` on resources that did not
     // previously call `schedulePause` has no effect.
-    this.resources_.scheduleResume(this.storyEl_, embedEl);
+    this.owners_.scheduleResume(this.storyEl_, embedEl);
     if (!this.embedsToBePaused_.includes(embedEl)) {
       this.embedsToBePaused_.push(embedEl);
     }
@@ -480,6 +489,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Builds the tooltip overlay and appends it to the provided story.
    * @private
+   * @return {Node}
    */
   buildFocusedState_() {
     this.shadowRoot_ = this.win_.document.createElement('div');
@@ -596,7 +606,7 @@ export class AmpStoryEmbeddedComponent {
       // Pauses content inside embeds when a page change occurs.
       while (this.embedsToBePaused_.length > 0) {
         const embedEl = this.embedsToBePaused_.pop();
-        this.resources_.schedulePause(this.storyEl_, embedEl);
+        this.owners_.schedulePause(this.storyEl_, embedEl);
       }
     });
   }
@@ -633,6 +643,7 @@ export class AmpStoryEmbeddedComponent {
     this.updateTooltipText_(component.element, embedConfig);
     this.updateTooltipComponentIcon_(component.element, embedConfig);
     this.updateTooltipActionIcon_(embedConfig);
+    this.updateNavButtons_();
     this.positionTooltip_(component);
   }
 
@@ -677,13 +688,14 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Gets href from an element containing a url.
    * @param {!Element} target
+   * @return {string}
    * @private
    */
   getElementHref_(target) {
     const elUrl = target.getAttribute('href');
     if (!isProtocolValid(elUrl)) {
       user().error(TAG, 'The tooltip url is invalid');
-      return;
+      return '';
     }
 
     return parseUrlDeprecated(elUrl).href;
@@ -789,7 +801,7 @@ export class AmpStoryEmbeddedComponent {
    * that content around stays put.
    * @param {!Element} pageEl
    * @param {!Element} element
-   * @param {!../../../src/service/resources-impl.Resources} resources
+   * @param {!../../../src/service/resources-impl.ResourcesDef} resources
    */
   static prepareForAnimation(pageEl, element, resources) {
     let elId = null;
@@ -947,6 +959,32 @@ export class AmpStoryEmbeddedComponent {
         tooltipCustomIcon.classList.add(embedConfig.customIconClassName);
       }
     );
+  }
+
+  /**
+   * Show or hide arrows based on current page.
+   * @private
+   */
+  updateNavButtons_() {
+    if (!this.isLastPage_()) {
+      this.buttonLeft_.removeAttribute('hidden');
+      this.buttonRight_.removeAttribute('hidden');
+    } else {
+      this.storeService_.get(StateProperty.RTL_STATE)
+        ? this.buttonLeft_.setAttribute('hidden', true)
+        : this.buttonRight_.setAttribute('hidden', true);
+    }
+  }
+
+  /**
+   * Is last page.
+   * @return {boolean}
+   * @private
+   */
+  isLastPage_() {
+    const pageIndex = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
+    const pageCount = this.storeService_.get(StateProperty.PAGE_IDS).length;
+    return pageIndex + 1 === pageCount;
   }
 
   /**
@@ -1132,16 +1170,18 @@ export class AmpStoryEmbeddedComponent {
 
     this.tooltip_ = tooltip;
     this.tooltipArrow_ = arrow;
+    this.buttonLeft_ = buttonLeft;
+    this.buttonRight_ = buttonRight;
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
-    buttonLeft.addEventListener('click', e =>
+    this.buttonLeft_.addEventListener('click', e =>
       this.onNavigationalClick_(
         e,
         rtlState ? EventType.NEXT_PAGE : EventType.PREVIOUS_PAGE
       )
     );
 
-    buttonRight.addEventListener('click', e =>
+    this.buttonRight_.addEventListener('click', e =>
       this.onNavigationalClick_(
         e,
         rtlState ? EventType.PREVIOUS_PAGE : EventType.NEXT_PAGE

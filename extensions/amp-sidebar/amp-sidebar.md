@@ -2,7 +2,9 @@
 $category@: layout
 formats:
   - websites
+  - stories
   - email
+  - stories
 teaser:
   text: Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus.
 ---
@@ -55,7 +57,6 @@ for content within the sidebar to be displayed on other parts of the main conten
 
 ## Behavior
 
-- The `<amp-sidebar>` should be a direct child of the `<body>`.
 - The sidebar can only appear on the left or right side of a page.
 - The `<amp-sidebar>` may contain any valid HTML elements (supported by AMP).
 - The `<amp-sidebar>` may contain any of the following AMP elements:
@@ -67,7 +68,8 @@ for content within the sidebar to be displayed on other parts of the main conten
     - `<amp-social-share>`
 - The max-height of the sidebar is 100vh, if the height exceeds 100vh then a vertical scrollbar appears. The default height is set to 100vh in CSS and is overridable in CSS.
 - The width of the sidebar can be set and adjusted using CSS (minimum width is 45px).
-- Touch zoom is disabled on the `amp-sidebar` and it's mask when the sidebar is open.
+- Touch zoom is disabled on the `amp-sidebar` and its mask when the sidebar is open.
+- `<amp-sidebar>` is *recommended* to be be a direct child of the `<body>` to preserve a logical DOM order (for accessibility) as well as to avoid altering its behavior by a container element. Note that having an ancestor of `amp-sidebar` with a set `z-index` may cause the sidebar to appear below other elements (such as headers), breaking its functionality.
 
 *Example:*
 

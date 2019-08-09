@@ -38,13 +38,14 @@ const {
   recaptchaRouter,
 } = require('./recaptcha-router');
 const {renderShadowViewer} = require('./shadow-viewer');
-const {replaceUrls} = require('./app-utils');
+const {replaceUrls, isRtvMode} = require('./app-utils');
 
 const upload = multer();
 
 const TEST_SERVER_PORT = process.env.SERVE_PORT;
 
 app.use(bodyParser.text());
+app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
@@ -64,7 +65,9 @@ app.use((req, res, next) => {
 });
 
 function isValidServeMode(serveMode) {
-  return ['default', 'compiled', 'cdn'].includes(serveMode);
+  return (
+    ['default', 'compiled', 'cdn'].includes(serveMode) || isRtvMode(serveMode)
+  );
 }
 
 function setServeMode(serveMode) {
@@ -88,7 +91,7 @@ if (!global.AMP_TESTING) {
 }
 
 // Changes the current serve mode via query param
-// e.g. /serve_mode_change?mode=(default|compiled|cdn)
+// e.g. /serve_mode_change?mode=(default|compiled|cdn|<RTV_NUMBER>)
 // (See ./app-index/settings.js)
 app.get('/serve_mode_change', (req, res) => {
   const {mode} = req.query;
@@ -245,6 +248,10 @@ app.use('/api/echo/query', (req, res) => {
 app.use('/api/echo/post', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.end(req.body);
+});
+
+app.use('/api/ping', (req, res) => {
+  res.status(204).end();
 });
 
 app.use('/form/html/post', (req, res) => {
@@ -814,60 +821,6 @@ app.get('/iframe-echo-message', (req, res) => {
   );
 });
 
-// A4A envelope.
-// Examples:
-// http://localhost:8000/a4a[-3p]/examples/animations.amp.html
-// http://localhost:8000/a4a[-3p]/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/a4a(|-3p)/', (req, res) => {
-  const force3p = req.baseUrl.indexOf('/a4a-3p') == 0;
-  let adUrl = req.url;
-  const templatePath = '/build-system/server-a4a-template.html';
-  const urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/proxy') && urlPrefix.indexOf('//localhost') != -1) {
-    // This is a special case for testing. `localhost` URLs are transformed to
-    // `ads.localhost` to ensure that the iframe is fully x-origin.
-    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
-  }
-  adUrl = addQueryParam(adUrl, 'inabox', 1);
-  fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
-    const result = template
-      .replace(/CHECKSIG/g, force3p || '')
-      .replace(/DISABLE3PFALLBACK/g, !force3p)
-      .replace(/OFFSET/g, req.query.offset || '0px')
-      .replace(/AD_URL/g, adUrl)
-      .replace(/AD_WIDTH/g, req.query.width || '300')
-      .replace(/AD_HEIGHT/g, req.query.height || '250');
-    res.end(result);
-  });
-});
-
-// In-a-box envelope.
-// Examples:
-// http://localhost:8000/inabox/examples/animations.amp.html
-// http://localhost:8000/inabox/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/inabox/:version/', (req, res) => {
-  let adUrl = req.url;
-  const templatePath = '/build-system/server-inabox-template.html';
-  const urlPrefix = getUrlPrefix(req);
-  if (
-    !adUrl.startsWith('/proxy') && // Ignore /proxy
-    urlPrefix.indexOf('//localhost') != -1
-  ) {
-    // This is a special case for testing. `localhost` URLs are transformed to
-    // `ads.localhost` to ensure that the iframe is fully x-origin.
-    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
-  }
-  adUrl = addQueryParam(adUrl, 'inabox', req.params['version']);
-  fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
-    const result = template
-      .replace(/AD_URL/g, adUrl)
-      .replace(/OFFSET/g, req.query.offset || '0px')
-      .replace(/AD_WIDTH/g, req.query.width || '300')
-      .replace(/AD_HEIGHT/g, req.query.height || '250');
-    res.end(result);
-  });
-});
-
 /**
  * Append ?sleep=5 to any included JS file in examples to emulate delay in
  * loading that file. This allows you to test issues with your extension being
@@ -1313,6 +1266,7 @@ app.use('/shadow/', (req, res) => {
 /**
  * @param {string} ampJsVersion
  * @param {string} file
+ * @return {string}
  */
 function addViewerIntegrationScript(ampJsVersion, file) {
   ampJsVersion = parseFloat(ampJsVersion);
@@ -1320,7 +1274,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  // eslint-disable-next-line amphtml-internal/no-es2015-number-props
+  // eslint-disable-next-line local/no-es2015-number-props
   if (Number.isInteger(ampJsVersion)) {
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js
@@ -1343,23 +1297,6 @@ function addViewerIntegrationScript(ampJsVersion, file) {
 
 function getUrlPrefix(req) {
   return req.protocol + '://' + req.headers.host;
-}
-
-/**
- * @param {string} url
- * @param {string} param
- * @param {*} value
- * @return {string}
- */
-function addQueryParam(url, param, value) {
-  const paramValue =
-    encodeURIComponent(param) + '=' + encodeURIComponent(value);
-  if (!url.includes('?')) {
-    url += '?' + paramValue;
-  } else {
-    url += '&' + paramValue;
-  }
-  return url;
 }
 
 function generateInfo(filePath) {
@@ -1399,5 +1336,37 @@ function decryptDocumentKey(encryptedDocumentKey) {
   }
   return parsedJson.key;
 }
+
+// serve local vendor config JSON files
+app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
+  const {vendor} = req.params;
+  const serveMode = pc.env.SERVE_MODE;
+
+  if (serveMode === 'cdn') {
+    const vendorUrl = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
+    request(vendorUrl, (error, response) => {
+      if (error) {
+        res.status(404);
+        res.end();
+      } else {
+        res.send(response);
+      }
+    });
+    return;
+  }
+
+  const max = serveMode === 'default' ? '.max' : '';
+  const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
+
+  fs.readFileAsync(localVendorConfigPath)
+    .then(file => {
+      res.setHeader('Content-Type', 'application/json');
+      res.end(file);
+    })
+    .error(() => {
+      res.status(404);
+      res.end('Not found: ' + localVendorConfigPath);
+    });
+});
 
 module.exports = app;

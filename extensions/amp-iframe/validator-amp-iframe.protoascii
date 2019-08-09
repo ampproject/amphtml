@@ -61,6 +61,10 @@ tags: {  # <amp-iframe>
     value: "yes"
   }
   attrs: {
+    name: "tabindex"
+    value_regex: "-?\\d+"
+  }
+  attrs: {
     name: "src"
     mandatory_oneof: "['src', 'srcdoc']"
     value_url: {
