@@ -172,3 +172,26 @@ export function trimStart(str) {
 
   return (str + '_').trim().slice(0, -1);
 }
+
+/**
+ * Wrapper around String.replace that handles asynchronous resolution.
+ * @param {string} str
+ * @param {RegExp} regex
+ * @param {Function} replacer
+ * @return {!Promise<string>}
+ */
+export function asyncStringReplace(str, regex, replacer) {
+  const stringBuilder = [];
+  let lastIndex = 0;
+
+  str.replace(regex, (match, key, matchIndex) => {
+    stringBuilder.push(str.slice(lastIndex, matchIndex));
+    // Store the promise in it's eventual string position.
+    const replacementPromise = replacer(match, key);
+    stringBuilder.push(replacementPromise);
+    lastIndex = matchIndex + match.length;
+  });
+
+  stringBuilder.push(str.slice(lastIndex));
+  return Promise.all(stringBuilder).then(resolved => resolved.join(''));
+}

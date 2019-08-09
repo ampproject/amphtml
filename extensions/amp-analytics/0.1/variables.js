@@ -16,6 +16,7 @@
 
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
+import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
@@ -241,7 +242,7 @@ export class VariableService {
    * @return {!Promise<string>} The expanded string.
    */
   expandTemplate(template, options, element) {
-    return this.asyncStringReplace_(template, /\${([^}]*)}/g, (match, key) => {
+    return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
           TAG,
@@ -305,29 +306,6 @@ export class VariableService {
           return value;
         });
     });
-  }
-
-  /**
-   * Wrapper around String.replace that handles asynchronous resolution.
-   * @param {string} str
-   * @param {RegExp} regex
-   * @param {Function} replacer
-   * @return {!Promise<string>}
-   */
-  asyncStringReplace_(str, regex, replacer) {
-    const stringBuilder = [];
-    let lastIndex = 0;
-
-    str.replace(regex, (match, key, matchIndex) => {
-      stringBuilder.push(str.slice(lastIndex, matchIndex));
-      // Store the promise in it's eventual string position.
-      const replacementPromise = replacer(match, key);
-      stringBuilder.push(replacementPromise);
-      lastIndex = matchIndex + match.length;
-    });
-
-    stringBuilder.push(str.slice(lastIndex));
-    return Promise.all(stringBuilder).then(resolved => resolved.join(''));
   }
 
   /**
