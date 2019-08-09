@@ -223,17 +223,17 @@ Used with the live-story attribute. Time interval (in milliseconds) between chec
 
 ### Metadata guidelines
 
-We've added metadata attributes to the `<amp-story>` element. These metadata attributes will be used for displaying a preview of the story across the AMP stories ecosystem. For example, these attributes can be used to render an engaging preview link in the bookend of a related story. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP stories surfaces to come.
+Metadata attributes display a preview of the story across the AMP stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rick, embedded experience AMP stories surfaces to come.
 
-Note that these metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
+These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
 
 #### `publisher-logo-src` guidelines
 
-The following guidelines apply to the image for the publisher logo:
+These guidelines apply to the publisher logo image:
 
-- The file should be a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
+- Provide a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
 - Avoid animated images, such as animated gifs.
-- The graphic part of the logo should be legible on the background color.
+- Image logo should be legible on the background color.
 
 <table>
   <tr>
@@ -273,18 +273,17 @@ The following guidelines apply to the image for the publisher logo:
   </tr>
 </table>
 
-- The logo shape should be a square, not a rectangle.
-- The background color should not be transparent.
+- Logos should be at least 96x96 pixels and a perfect square.
+- The background should not be transparent.
 - Use one logo per brand that is consistent across AMP stories.
-- The logo should be at least 96x96 pixels.
 
 #### Poster guidelines (for `poster-portrait-src`, `poster-landscape-src`, and `poster-square-src`)
 
-The following guidelines apply to the image for the story poster image(s):
+These guidelines apply to the story poster image(s):
 
 - The poster image should be representative of the entire AMP story.
-- The poster image should be visible to the user when the user begins the AMP story.  However, the image file URL used in the metadata does not have to match exactly the URL used on the first page of the story.  The URL used in the metadata can include sizing, cropping, or minor styling changes for the preview purpose.
-- The poster image should be a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
+- The poster image should be visible to the user when the AMP story begins. To accommodate sizing, cropping or minor styling changes or preview purposes, the image file URL used in the metadata does not need to be an exact match to the URL on the first page of the story.
+- Provide a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
 - The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
 - If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
 - Each poster image should meet the recommended minimium size:
