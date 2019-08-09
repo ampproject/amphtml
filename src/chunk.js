@@ -435,8 +435,7 @@ class Chunks {
         .then(() => {
           this.scheduledImmediateInvocation_ = false;
           this.durationOfLastExecution_ += Date.now() - before;
-          //dev().fine
-          console.log(
+          dev().fine(
             TAG,
             t.getName_(),
             'Chunk duration',
@@ -464,7 +463,6 @@ class Chunks {
       this.bodyIsVisible_ &&
       this.durationOfLastExecution_ > 5
     ) {
-      console.info('Macro please', this.durationOfLastExecution_);
       this.durationOfLastExecution_ = 0;
       this.requestMacroTask_();
       return;
