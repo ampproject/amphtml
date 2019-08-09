@@ -610,7 +610,7 @@ export class AmpForm {
 
   /**
    * Handle form error for presubmit async calls
-   * @param error
+   * @param {Object} error
    * @return {Promise}
    */
   handlePresubmitError_(error) {
