@@ -53,6 +53,7 @@ function exec(cmd, options) {
  *
  * @param {string} script
  * @param {?Object} options
+ * @return {!Object}
  */
 function execScriptAsync(script, options) {
   return childProcess.spawn(shellCmd, [shellFlag, script], options);
@@ -66,9 +67,23 @@ function execScriptAsync(script, options) {
  */
 function execOrDie(cmd, options) {
   const p = exec(cmd, options);
-  if (p.status != 0) {
+  if (p.status && p.status != 0) {
     process.exit(p.status);
   }
+}
+
+/**
+ * Executes the provided command, piping the parent process' stderr, updating
+ * the error to process if stderr is not empty, and returns process object.
+ * @param {string} cmd
+ * @return {!Object}
+ */
+function execWithError(cmd) {
+  const p = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
+  if (p.stderr.length > 0) {
+    p.error = new Error(p.stderr.toString());
+  }
+  return p;
 }
 
 /**
@@ -111,6 +126,8 @@ module.exports = {
   exec,
   execOrDie,
   execScriptAsync,
+  execWithError,
+  getOutput,
   getStderr,
   getStdout,
 };

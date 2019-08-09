@@ -21,9 +21,7 @@
  * @type {RegExp}
  */
 const ORIGIN_REGEX = new RegExp(
-  '^https?://localhost:8000|' +
-    '^https?://.+.localhost:8000|' +
-    '^https?://.+.herokuapp.com'
+  '^https?://localhost:8000|^https?://.+.localhost:8000'
 );
 
 /**
@@ -33,9 +31,7 @@ const ORIGIN_REGEX = new RegExp(
  * @type {RegExp}
  */
 const SOURCE_ORIGIN_REGEX = new RegExp(
-  '^https?://localhost:8000|' +
-    '^https?://.+.localhost:8000|' +
-    '^https?://.+.herokuapp.com'
+  '^https?://localhost:8000|^https?://.+.localhost:8000'
 );
 
 function assertCors(
@@ -102,16 +98,8 @@ function enableCors(req, res, origin, opt_exposeHeaders) {
   }
   res.setHeader(
     'Access-Control-Expose-Headers',
-    ['AMP-Access-Control-Allow-Source-Origin']
-      .concat(opt_exposeHeaders || [])
-      .join(', ')
+    (opt_exposeHeaders || []).join(', ')
   );
-  if (req.query.__amp_source_origin) {
-    res.setHeader(
-      'AMP-Access-Control-Allow-Source-Origin',
-      req.query.__amp_source_origin
-    );
-  }
 }
 
 function getUrlPrefix(req) {

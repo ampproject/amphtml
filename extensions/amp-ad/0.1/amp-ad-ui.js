@@ -16,6 +16,10 @@
 
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
+import {isNewLoaderExperimentEnabled} from '../../../src/loader';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-ad';
 
 export class AmpAdUIHandler {
   /**
@@ -58,8 +62,13 @@ export class AmpAdUIHandler {
   /**
    * Create a default placeholder if not provided.
    * Should be called in baseElement createPlaceholderCallback.
+   * @return {?Element}
    */
   createPlaceholder() {
+    if (isNewLoaderExperimentEnabled(this.element_)) {
+      return null;
+    }
+
     return this.addDefaultUiComponent_('placeholder');
   }
 
@@ -158,9 +167,10 @@ export class AmpAdUIHandler {
    * @param {number|string|undefined} width
    * @param {number} iframeHeight
    * @param {number} iframeWidth
+   * @param {!MessageEvent} event
    * @return {!Promise<!Object>}
    */
-  updateSize(height, width, iframeHeight, iframeWidth) {
+  updateSize(height, width, iframeHeight, iframeWidth, event) {
     // Calculate new width and height of the container to include the padding.
     // If padding is negative, just use the requested width and height directly.
     let newHeight, newWidth;
@@ -195,11 +205,19 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
+    user().expectedError(TAG, 'RESIZE_REQUEST');
     return this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(
       () => {
         return resizeInfo;
       },
       () => {
+        user().expectedError(TAG, 'RESIZE_REJECT');
+        const activated =
+          event && event.userActivation && event.userActivation.hasBeenActive;
+        if (activated) {
+          // Report false negatives.
+          user().expectedError(TAG, 'RESIZE_REJECT_ACTIVE');
+        }
         resizeInfo.success = false;
         return resizeInfo;
       }

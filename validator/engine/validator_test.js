@@ -143,6 +143,8 @@ function findHtmlFilesRelativeToTestdata() {
 /**
  * An AMP Validator test case. This constructor will load the AMP HTML file
  * and also find the adjacent .out file.
+ * TODO(alabiaga): rid of htmlFormat property based on directory path as it
+ * should be read from the ampHtmlFile. Also address nodejs validator changes.
  * @constructor
  * @param {string} ampHtmlFile
  * @param {string=} opt_ampUrl
@@ -335,7 +337,7 @@ describe('ValidatorOutput', () => {
         'feature_tests/no_custom_js.html',
         'http://google.com/foo.html#development=1');
     const results =
-        amp.validator.validateString(test.ampHtmlFileContents, test.htmlFormat);
+        amp.validator.validateString(test.ampHtmlFileContents);
     amp.validator.annotateWithErrorCategories(results);
     const observed =
         amp.validator.renderValidationResult(results, test.ampUrl).join('\n');
@@ -344,6 +346,105 @@ describe('ValidatorOutput', () => {
     {assert.fail(
         '', '', 'expectedSubstr:\n' + expectedSubstr +
           '\nsaw:\n' + observed, '');}
+  });
+
+  it('validate amp format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡><head><meta charset="utf-8">'
+        + '<link rel="canonical" href="self.html" />'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,'
+        + 'end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 '
+        + 'normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@'
+        + '-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:'
+        + 'visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visib'
+        + 'ility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{'
+        + 'visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}</style><noscript><style amp-boilerplate>body'
+        + '{-webkit-animation:none;-moz-animation:none;-ms-animation:none;'
+        + 'animation:none}</style></noscript>'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '</head><body>Hello, AMP world.</body></html>', 'amp');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+    it('default to validating the amp format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡><head><meta charset="utf-8">'
+        + '<link rel="canonical" href="self.html" />'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,'
+        + 'end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 '
+        + 'normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@'
+        + '-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:'
+        + 'visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visib'
+        + 'ility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{'
+        + 'visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}</style><noscript><style amp-boilerplate>body'
+        + '{-webkit-animation:none;-moz-animation:none;-ms-animation:none;'
+        + 'animation:none}</style></noscript>'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '</head><body>Hello, AMP world.</body></html>');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+  it('validate amp4email format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡4email><head><meta charset="utf-8">'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '<style amp4email-boilerplate>body{visibility:hidden}</style>'
+        + '</head><body>Hello, AMP4EMAIL world.</body></html>', 'amp4email');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+  it('validate amp4email format with error', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡4email><head><meta charset="utf-8">'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '</head><body>Hello, AMP4EMAIL world.</body></html>', 'amp4email');
+    assertStrictEqual(results.status, 'FAIL');
+    assertStrictEqual(results.errors[0].params.toString(),
+                      'head > style[amp4email-boilerplate]');
+    assertStrictEqual(results.errors.length, 1);
+  });
+
+  it('validate amp4ads format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html data-some-attribute ⚡4ads>'
+        + '<head><meta charset="utf-8">'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp4ads-boilerplate>body{visibility:hidden}</style>'
+        + '<script async src="https://cdn.ampproject.org/amp4ads-v0.js">'
+        + '</script></head><body>Hello, AMP4ADS world.</body></html>',
+        'amp4ads');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+  it('validate actions format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡ actions><head><meta charset="utf-8">'
+        + '<link rel="canonical" href="self.html" />'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) '
+        + '0s 1 normal both}@-webkit-keyframes -amp-start{from'
+        + '{visibility:hidden}to{visibility:visible}}@-moz-keyframes '
+        + '-amp-start{from{visibility:hidden}to{visibility:visible}}'
+        + '@-ms-keyframes -amp-start{from{visibility:hidden}to'
+        + '{visibility:visible}}@-o-keyframes -amp-start{from'
+        + '{visibility:hidden}to{visibility:visible}}@keyframes '
+        + '-amp-start{from{visibility:hidden}to{visibility:visible}}</style>'
+        + '<noscript><style amp-boilerplate>body{-webkit-animation:none;'
+        + '-moz-animation:none;-ms-animation:none;animation:none}</style>'
+        + '</noscript><script async src="https://cdn.ampproject.org/v0.js">'
+        + '</script></head><body>Hello, AMP world.</body></html>', 'actions');
+    assertStrictEqual(results.status, 'PASS');
   });
 });
 
@@ -1215,6 +1316,7 @@ describe('ValidatorRulesMakeSense', () => {
       const whitelistedAmp4EmailExtensions = {
         'AMP-ACCORDION': 0,
         'AMP-ANIM': 0,
+        'AMP-BIND-MACRO': 0,
         'AMP-CAROUSEL': 0,
         'AMP-FIT-TEXT': 0,
         'AMP-IMG': 0,
@@ -1358,7 +1460,7 @@ describe('ValidatorRulesMakeSense', () => {
         // getNameByAttrSpecId() looks like it would do what we want, but it's
         // sufficiently wrapped in private context inside the validator that I
         // don't see a way to call it.  For now just gold the current index.
-        expect(tagSpec.attrLists[0]).toEqual(17);
+        expect(tagSpec.attrLists[0]).toEqual(19);
       });
     }
 

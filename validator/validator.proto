@@ -318,7 +318,7 @@ message AncestorMarker {
   enum Marker {
     UNKNOWN = 0;
     // Set by <amp-sidebar> tags to allow autoscroll attributes on descendants.
-    // See https://github.com/ampproject/amphtml/20524 for more context.
+    // See https://github.com/ampproject/amphtml/pull/20524 for more context.
     AUTOSCROLL = 1;
   }
   repeated Marker marker = 1;
@@ -729,7 +729,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [default = ERROR];
-  // NEXT AVAILABLE TAG: 108
+  // NEXT AVAILABLE TAG: 110
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -802,6 +802,8 @@ message ValidationError {
     ATTR_MISSING_REQUIRED_EXTENSION = 97;
     DOCUMENT_TOO_COMPLEX = 86;
     INVALID_UTF8 = 96;
+    DOCUMENT_SIZE_LIMIT_EXCEEDED = 108;
+    DEV_MODE_ONLY = 109;
 
     CSS_SYNTAX_INVALID_AT_RULE = 29;
     CSS_SYNTAX_STRAY_TRAILING_BACKSLASH = 38;

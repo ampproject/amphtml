@@ -18,16 +18,23 @@
 
 const gulp = require('gulp-help')(require('gulp'));
 const {
+  checkExactVersions,
+} = require('./build-system/tasks/check-exact-versions');
+const {
   compileAccessExpr,
   compileBindExpr,
   compileCssExpr,
 } = require('./build-system/tasks/compile-expr');
+const {
+  generateVendorJsons,
+} = require('./build-system/tasks/generate-vendor-jsons');
 const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
   processGithubIssues,
 } = require('./build-system/tasks/process-github-issues');
+const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
 const {build, defaultTask, watch} = require('./build-system/tasks/build');
@@ -57,14 +64,15 @@ const {presubmit} = require('./build-system/tasks/presubmit-checks');
 const {releaseTag} = require('./build-system/tasks/release-tagging');
 const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
-const {test} = require('./build-system/tasks/runtime-test');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
 const {validator, validatorWebui} = require('./build-system/tasks/validator');
+const {vendorConfigs} = require('./build-system/tasks/vendor-configs');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
 
 // Keep this list alphabetized.
+gulp.task('a4a', a4a);
 gulp.task('ava', ava);
 gulp.task('babel-plugin-tests', babelPluginTests);
 gulp.task('build', build);
@@ -72,6 +80,7 @@ gulp.task('bundle-size', bundleSize);
 gulp.task('caches-json', cachesJson);
 gulp.task('changelog', changelog);
 gulp.task('changelog:update', changelogUpdate);
+gulp.task('check-exact-versions', checkExactVersions);
 gulp.task('check-links', checkLinks);
 gulp.task('check-types', checkTypes);
 gulp.task('clean', clean);
@@ -88,6 +97,7 @@ gulp.task('dev-dashboard-tests', devDashboardTests);
 gulp.task('dist', dist);
 gulp.task('e2e', e2e);
 gulp.task('firebase', firebase);
+gulp.task('generate-vendor-jsons', generateVendorJsons);
 gulp.task('get-zindex', getZindex);
 gulp.task('integration', integration);
 gulp.task('json-syntax', jsonSyntax);
@@ -101,7 +111,6 @@ gulp.task('presubmit', presubmit);
 gulp.task('process-3p-github-pr', process3pGithubPr);
 gulp.task('process-github-issues', processGithubIssues);
 gulp.task('release:tag', releaseTag);
-gulp.task('test', test);
 gulp.task('serve', serve);
 gulp.task('size', size);
 gulp.task('todos:find-closed', todosFindClosed);
@@ -109,5 +118,6 @@ gulp.task('unit', unit);
 gulp.task('update-packages', updatePackages);
 gulp.task('validator', validator);
 gulp.task('validator-webui', validatorWebui);
+gulp.task('vendor-configs', vendorConfigs);
 gulp.task('visual-diff', visualDiff);
 gulp.task('watch', watch);

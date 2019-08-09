@@ -108,7 +108,7 @@ export class LightboxControls {
     /** @private @const */
     this.element_ = element;
 
-    /** @private @const */
+    /** @protected @const */
     this.measureMutateElement_ = measureMutateElement;
 
     this.element_.addEventListener('click', event => {

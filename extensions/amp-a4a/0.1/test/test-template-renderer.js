@@ -41,6 +41,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     },
   };
 
+  let doc;
   let containerElement;
   let context;
   let renderer;
@@ -49,10 +50,11 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
   let sandbox;
 
   beforeEach(() => {
+    doc = env.win.document;
     renderer = new TemplateRenderer();
     validator = new TemplateValidator();
 
-    containerElement = document.createElement('div');
+    containerElement = doc.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
     containerElement.signals = () => ({
@@ -74,7 +76,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     containerElement.getIntersectionChangeEntry = () => ({});
     containerElement.isInViewport = () => true;
     containerElement.getAmpDoc = () => env.ampdoc;
-    document.body.appendChild(containerElement);
+    doc.body.appendChild(containerElement);
 
     context = {
       win: env.win,
@@ -104,7 +106,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
 
   afterEach(() => {
     sandbox.restore();
-    document.body.removeChild(containerElement);
+    doc.body.removeChild(containerElement);
   });
 
   it('should append iframe child with correct template values', () => {

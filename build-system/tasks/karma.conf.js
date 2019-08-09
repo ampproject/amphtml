@@ -15,6 +15,10 @@
  */
 'use strict';
 
+const {
+  BABELIFY_GLOBAL_TRANSFORM,
+  BABELIFY_REPLACE_PLUGIN,
+} = require('./helpers');
 const {gitCommitterEmail} = require('../git');
 const {isTravisBuild, travisJobNumber} = require('../travis');
 
@@ -34,6 +38,15 @@ const SAUCE_TIMEOUT_CONFIG = {
   commandTimeout: 10 * 60,
   idleTimeout: 5 * 60,
 };
+
+const BABELIFY_CONFIG = Object.assign(
+  {},
+  BABELIFY_GLOBAL_TRANSFORM,
+  BABELIFY_REPLACE_PLUGIN,
+  {
+    sourceMapsAbsolute: true,
+  }
+);
 
 const preprocessors = ['browserify'];
 
@@ -63,13 +76,14 @@ module.exports = {
   // Details: https://support.saucelabs.com/hc/en-us/articles/115010079868
   hostname: 'localhost',
 
+  babelifyConfig: BABELIFY_CONFIG,
+
   browserify: {
     watch: true,
     debug: true,
+    fast: true,
     basedir: __dirname + '/../../',
-    transform: [
-      ['babelify', {'global': isTravisBuild(), 'sourceMapsAbsolute': true}],
-    ],
+    transform: [['babelify', BABELIFY_CONFIG]],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
   },
@@ -288,13 +302,13 @@ module.exports = {
   captureTimeout: 4 * 60 * 1000,
   failOnEmptyTestSuite: false,
 
-  // AMP tests on Sauce take ~9 minutes, so don't fail if the browser doesn't
-  // communicate with the proxy for up to 10 minutes.
+  // AMP tests on Sauce can take upto 12-13 minutes, so don't fail if the
+  // browser doesn't communicate with the proxy for up to 15 minutes.
   // TODO(rsimha): Reduce this number once keepalives are implemented by
   // karma-sauce-launcher.
   // See https://github.com/karma-runner/karma-sauce-launcher/pull/161.
-  browserDisconnectTimeout: 10 * 60 * 1000,
-  browserNoActivityTimeout: 10 * 60 * 1000,
+  browserDisconnectTimeout: 15 * 60 * 1000,
+  browserNoActivityTimeout: 15 * 60 * 1000,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
   browserDisconnectTolerance: isTravisBuild() ? 2 : 0,

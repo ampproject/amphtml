@@ -20,7 +20,7 @@ const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {cyan, green, yellow} = require('ansi-colors');
 const {gitCommitHash} = require('../git');
-const {isTravisPullRequestBuild} = require('../travis');
+const {travisJobUrl, isTravisPullRequestBuild} = require('../travis');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -34,7 +34,7 @@ const IS_SINGLE_PASS = !!argv.single_pass;
 
 const TEST_TYPE_SUBTYPES = new Map([
   ['integration', ['local', 'single-pass', 'saucelabs']],
-  ['unit', ['local', 'local_changes', 'saucelabs']],
+  ['unit', ['local', 'local-changes', 'saucelabs']],
   ['e2e', ['local']],
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -58,7 +58,7 @@ function inferTestType() {
   }
 
   if (IS_LOCAL_CHANGES) {
-    return `${type}/local_changes`;
+    return `${type}/local-changes`;
   }
 
   if (IS_SAUCELABS) {
@@ -75,9 +75,17 @@ function inferTestType() {
 function postReport(type, action) {
   if (type !== null && isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
-    const postUrl = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
-    return requestPromise
-      .post(postUrl)
+    return requestPromise({
+      method: 'POST',
+      uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
+      body: JSON.stringify({
+        travisJobUrl: travisJobUrl(),
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Do not use `json: true` because the response is a string, not JSON.
+    })
       .then(body => {
         log(
           green('INFO:'),

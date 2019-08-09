@@ -21,8 +21,9 @@ const {isTravisBuild} = require('../travis');
 
 /**
  * Runs ava tests.
+ * @return {!Vinyl}
  */
-function ava() {
+async function ava() {
   return gulp
     .src([
       require.resolve('./csvify-size/test.js'),

@@ -70,7 +70,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     this.cells_.forEach(cell => {
       if (!this.useLayers_) {
-        this.setAsOwner(cell);
+        Services.ownersForDoc(this.element).setOwner(cell, this.element);
       }
       cell.classList.add('amp-carousel-slide');
       cell.classList.add('amp-scrollable-carousel-slide');
@@ -161,6 +161,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * Scrolls to the slide at the given slide index.
    * @param {number} index
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   goToSlide_(index) {
     const noOfSlides = this.cells_.length;
@@ -203,6 +204,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   /**
    * Calculates the target scroll position for the given slide index.
    * @param {number} index
+   * @return {number}
    */
   getPosForSlideIndex_(index) {
     const containerWidth = this.element./*OK*/ offsetWidth;
@@ -315,7 +317,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    */
   doLayout_(pos) {
     this.withinWindow_(pos, cell => {
-      this.scheduleLayout(cell);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, cell);
     });
   }
 
@@ -328,7 +330,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const nextPos = this.nextPos_(pos, dir);
     if (nextPos != pos) {
       this.withinWindow_(nextPos, cell => {
-        this.schedulePreload(cell);
+        Services.ownersForDoc(this.element).schedulePreload(this.element, cell);
       });
     }
   }
@@ -342,13 +344,18 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const seen = [];
     this.withinWindow_(newPos, cell => {
       seen.push(cell);
-      this.updateInViewport(cell, true);
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
+        cell,
+        true
+      );
     });
     if (oldPos != newPos) {
       this.withinWindow_(oldPos, cell => {
         if (!seen.includes(cell)) {
-          this.updateInViewport(cell, false);
-          this.schedulePause(cell);
+          const owners = Services.ownersForDoc(this.element);
+          owners.updateInViewport(this.element, cell, false);
+          owners.schedulePause(this.element, cell);
         }
       });
     }

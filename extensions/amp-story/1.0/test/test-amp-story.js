@@ -165,21 +165,14 @@ describes.realWin(
         });
     });
 
-    it('should update the navigation state when built', () => {
-      const firstPageId = 'cover';
-      const pageCount = 2;
-      createPages(story.element, pageCount, [firstPageId, 'page-1']);
-      const updateActivePageStub = sandbox.stub(
-        story.navigationState_,
-        'updateActivePage'
-      );
-
+    it('should remove text child nodes when built', () => {
+      createPages(story.element, 1, ['cover']);
+      const textToRemove = 'this should be removed';
+      const textNode = win.document.createTextNode(textToRemove);
+      story.element.appendChild(textNode);
+      story.buildCallback();
       return story.layoutCallback().then(() => {
-        expect(updateActivePageStub).to.have.been.calledWith(
-          0,
-          pageCount,
-          firstPageId
-        );
+        expect(story.element.innerText).to.not.have.string(textToRemove);
       });
     });
 
@@ -310,10 +303,7 @@ describes.realWin(
       createPages(story.element, 2, ['cover', 'page-1']);
 
       return story.layoutCallback().then(() => {
-        const paginationButtonsStub = {
-          attach: sandbox.spy(),
-          onNavigationStateChange: sandbox.spy(),
-        };
+        const paginationButtonsStub = {attach: sandbox.spy()};
         sandbox
           .stub(PaginationButtons, 'create')
           .returns(paginationButtonsStub);
@@ -372,24 +362,6 @@ describes.realWin(
       return story.layoutCallback().then(() => {
         return expect(replaceStateStub).to.have.been.calledWith(
           {ampStoryPageId: firstPageId},
-          ''
-        );
-      });
-    });
-
-    it('should update bookend status in browser history', () => {
-      const pageCount = 1;
-      createPages(story.element, pageCount, ['last-page']);
-
-      sandbox.stub(AmpStoryBookend.prototype, 'build');
-
-      story.buildCallback();
-
-      return story.layoutCallback().then(() => {
-        story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
-
-        return expect(replaceStateStub).to.have.been.calledWith(
-          {ampStoryBookendActive: true},
           ''
         );
       });
@@ -1555,6 +1527,50 @@ describes.realWin(
             );
             expect(hintEl).to.not.exist;
           });
+        });
+      });
+    });
+
+    describe('amp-story rewriteStyles', () => {
+      beforeEach(() => {
+        toggleExperiment(win, 'amp-story-responsive-units', true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'amp-story-responsive-units', false);
+      });
+
+      it('should rewrite vw styles', () => {
+        createPages(story.element, 1, ['cover']);
+        const styleEl = win.document.createElement('style');
+        styleEl.setAttribute('amp-custom', '');
+        styleEl.textContent = 'foo {transform: translate3d(100vw, 0, 0);}';
+        win.document.head.appendChild(styleEl);
+
+        story.buildCallback();
+
+        return story.layoutCallback().then(() => {
+          expect(styleEl.textContent).to.equal(
+            'foo {transform: ' +
+              'translate3d(calc(100 * var(--story-page-vw)), 0, 0);}'
+          );
+        });
+      });
+
+      it('should rewrite negative vh styles', () => {
+        createPages(story.element, 1, ['cover']);
+        const styleEl = win.document.createElement('style');
+        styleEl.setAttribute('amp-custom', '');
+        styleEl.textContent = 'foo {transform: translate3d(-100vh, 0, 0);}';
+        win.document.head.appendChild(styleEl);
+
+        story.buildCallback();
+
+        return story.layoutCallback().then(() => {
+          expect(styleEl.textContent).to.equal(
+            'foo {transform: ' +
+              'translate3d(calc(-100 * var(--story-page-vh)), 0, 0);}'
+          );
         });
       });
     });

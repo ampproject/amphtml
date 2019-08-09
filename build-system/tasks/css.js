@@ -53,7 +53,12 @@ const cssEntryPoints = [
   {
     path: 'video-autoplay.css',
     outJs: 'video-autoplay.css.js',
-    outCss: 'video-autoplay.css',
+    // When the .css.js files are imported, the .js extension is omitted
+    // e.g. '../../build/file.css' attempts to load 'build/file.css.js'
+    // but if a file which matches without the .js extension, it will
+    // be preferred. We should rename the out.css to have a different name
+    // than the JS file to avoid loading CSS as JS
+    outCss: 'video-autoplay-out.css',
   },
 ];
 
@@ -81,10 +86,13 @@ function compileCss(watch, opt_compileAll) {
    */
   function writeCss(css, jsFilename, cssFilename, append) {
     return toPromise(
-      // cssText is hardcoded in AmpCodingConvention.java
-      file(jsFilename, 'export const cssText = ' + JSON.stringify(css), {
-        src: true,
-      })
+      file(
+        jsFilename,
+        '/** @noinline */ export const cssText = ' + JSON.stringify(css),
+        {
+          src: true,
+        }
+      )
         .pipe(gulp.dest('build'))
         .on('end', function() {
           mkdirSync('build');
@@ -103,6 +111,7 @@ function compileCss(watch, opt_compileAll) {
    * @param {string} outJs
    * @param {string} outCss
    * @param {boolean} append
+   * @return {!Promise}
    */
   function writeCssEntryPoint(path, outJs, outCss, append) {
     return jsifyCssAsync(`css/${path}`).then(css =>

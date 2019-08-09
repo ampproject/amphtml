@@ -20,6 +20,7 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExec,
 } = require('../pr-check/utils');
 const {determineBuildTargets} = require('../pr-check/build-targets');
@@ -49,21 +50,15 @@ async function prCheck(cb) {
 
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
+    stopTimedJob(FILENAME, startTime);
     return;
   }
 
   printChangeSummary(FILENAME);
-  const buildTargets = new Set();
-  if (!determineBuildTargets(buildTargets, FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
-    return;
-  }
-
-  runCheck('gulp lint --local-changes');
+  const buildTargets = determineBuildTargets(FILENAME);
+  runCheck('gulp lint --local_changes');
   runCheck('gulp presubmit');
+  runCheck('gulp check-exact-versions');
 
   if (buildTargets.has('AVA')) {
     runCheck('gulp ava');
@@ -104,7 +99,7 @@ async function prCheck(cb) {
       runCheck('gulp clean');
       runCheck('gulp dist --fortesting');
     }
-    runCheck('gulp test --nobuild --compiled --integration --headless');
+    runCheck('gulp integration --nobuild --compiled --headless');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {

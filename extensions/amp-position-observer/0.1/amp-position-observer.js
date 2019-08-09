@@ -31,7 +31,6 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getServiceForDoc} from '../../../src/service';
 import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
 
 const TAG = 'amp-position-observer';
@@ -429,6 +428,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * Readjusts the given rect using the configured exclusion margins.
    * @param {!../../../src/layout-rect.LayoutRectDef} rect viewport rect adjusted for margins.
    * @private
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    */
   applyMargins_(rect) {
     devAssert(rect);
@@ -476,15 +476,12 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   maybeInstallPositionObserver_() {
     if (!this.positionObserver_) {
       installPositionObserverServiceForDoc(this.getAmpDoc());
-      this.positionObserver_ = getServiceForDoc(
-        this.getAmpDoc(),
-        'position-observer'
-      );
+      this.positionObserver_ = Services.positionObserverForDoc(this.element);
     }
   }
 
   /**
-   * @private
+   * @protected
    */
   maybeUninstallPositionObserver_() {
     if (this.positionObserver_) {

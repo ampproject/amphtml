@@ -161,17 +161,14 @@ export class AmpVizVega extends AMP.BaseElement {
       ));
       return Promise.resolve();
     } else {
-      // TODO(aghassemi): We may need to expose credentials and set
-      // requireAmpResponseSourceOrigin to true as well. But for now Vega
+      // TODO(aghassemi): We may need to expose credentials. But for now Vega
       // runtime also does XHR to load subresources (e.g. Vega spec can
       // point to other Vega specs) an they don't include credentials on those
       // calls. We may want to intercept all "urls" in spec and do the loading
       // and parsing ourselves.
 
       return Services.xhrFor(this.win)
-        .fetchJson(dev().assertString(this.src_), {
-          requireAmpResponseSourceOrigin: false,
-        })
+        .fetchJson(dev().assertString(this.src_), {})
         .then(res => res.json())
         .then(data => {
           this.data_ = data;
@@ -223,7 +220,10 @@ export class AmpVizVega extends AMP.BaseElement {
     });
 
     return parsePromise.then(
-      /** @param {!VegaChartFactory} chartFactory */
+      /**
+       * @param {!VegaChartFactory} chartFactory
+       * @return {*} TODO(#23582): Specify return type
+       */
       chartFactory => {
         return Services.vsyncFor(this.win).mutatePromise(() => {
           dom.removeChildren(dev().assertElement(this.container_));

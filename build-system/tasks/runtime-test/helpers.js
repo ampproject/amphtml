@@ -26,9 +26,9 @@ const webserver = require('gulp-webserver');
 const {
   reportTestErrored,
   reportTestFinished,
+  reportTestRunComplete,
 } = require('../report-test-status');
 const {app} = require('../../test-server');
-const {exec} = require('../../exec');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {Server} = require('karma');
@@ -36,8 +36,23 @@ const {Server} = require('karma');
 const BATCHSIZE = 4; // Number of Sauce Lab browsers
 const CHROMEBASE = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
 const chromeFlags = [];
-const IS_GULP_UNIT = argv._[0] === 'unit';
-const IS_GULP_INTEGRATION = argv._[0] === 'integration';
+
+/**
+ * Validates arguments before test runs
+ * @return {boolean}
+ */
+function shouldNotRun() {
+  if (argv.saucelabs) {
+    if (!process.env.SAUCE_USERNAME) {
+      throw new Error('Missing SAUCE_USERNAME Env variable');
+    }
+    if (!process.env.SAUCE_ACCESS_KEY) {
+      throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
+    }
+  }
+
+  return false;
+}
 
 /**
  * Returns an array of ad types.
@@ -53,10 +68,10 @@ function getAdTypes() {
     weborama: ['weborama-display'],
   };
 
-  // Start with Google ad types
-  const adTypes = ['adsense'];
+  const adTypes = [];
 
-  // Add all other ad types
+  // Add ad types (google networks not included as they full support native
+  // implementations).
   const files = fs.readdirSync('./ads/');
   for (let i = 0; i < files.length; i++) {
     if (
@@ -79,88 +94,10 @@ function getAdTypes() {
 }
 
 /**
- * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
- * by refreshing the wd cache so that Karma can launch without an error.
- */
-function refreshKarmaWdCache() {
-  exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
-}
-
-function getBrowserConfig() {
-  if (argv.saucelabs) {
-    if (IS_GULP_UNIT) {
-      return {browsers: ['SL_Safari_12', 'SL_Firefox']};
-    }
-
-    if (IS_GULP_INTEGRATION) {
-      return {
-        browsers: [
-          'SL_Chrome',
-          'SL_Firefox',
-          'SL_Edge_17',
-          'SL_Safari_12',
-          'SL_IE_11',
-          // TODO(amp-infra): Evaluate and add more platforms here.
-          //'SL_Chrome_Android_7',
-          //'SL_iOS_11',
-          //'SL_iOS_12',
-          'SL_Chrome_Beta',
-          'SL_Firefox_Beta',
-        ],
-      };
-    }
-
-    throw new Error(
-      'The --saucelabs flag is valid only for `gulp unit` and `gulp integration`.'
-    );
-  }
-
-  const chromeFlags = [];
-  if (argv.chrome_flags) {
-    argv.chrome_flags.split(',').forEach(flag => {
-      chromeFlags.push('--'.concat(flag));
-    });
-  }
-
-  const options = new Map();
-  options
-    .set('chrome_canary', {browsers: ['ChromeCanary']})
-    .set('chrome_flags', {
-      browsers: ['Chrome_flags'],
-      customLaunchers: {
-        // eslint-disable-next-line
-        Chrome_flags: {
-          base: 'Chrome',
-          flags: chromeFlags,
-        },
-      },
-    })
-    .set('edge', {browsers: ['Edge']})
-    .set('firefox', {browsers: ['Firefox']})
-    .set('headless', {browsers: ['Chrome_no_extensions_headless']})
-    .set('ie', {
-      browsers: ['IE'],
-      customLaunchers: {
-        IeNoAddOns: {
-          base: 'IE',
-          flags: ['-extoff'],
-        },
-      },
-    })
-    .set('safari', {browsers: ['Safari']});
-
-  for (const key of Array.from(options.keys())) {
-    if (argv[key]) {
-      return options.get(key);
-    }
-  }
-}
-
-/**
  * Prints help messages for args if tests are being run for local development.
  */
 function maybePrintArgvMessages() {
-  if (argv.nohelp) {
+  if (argv.nohelp || isTravisBuild()) {
     return;
   }
 
@@ -169,7 +106,8 @@ function maybePrintArgvMessages() {
     firefox: 'Running tests on Firefox.',
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
-    'chrome_canary': 'Running tests on Chrome Canary.',
+    // eslint-disable-next-line
+    chrome_canary: 'Running tests on Chrome Canary.',
     saucelabs: 'Running tests on Sauce Labs browsers.',
     nobuild: 'Skipping build.',
     watch:
@@ -178,12 +116,6 @@ function maybePrintArgvMessages() {
     verbose: 'Enabling verbose mode. Expect lots of output!',
     testnames: 'Listing the names of all tests being run.',
     files: 'Running tests in the file(s): ' + cyan(argv.files),
-    integration:
-      'Running only the integration tests. Prerequisite: ' +
-      cyan('gulp dist --fortesting'),
-    unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
-    a4a: 'Running only A4A tests.',
-    compiled: 'Running tests against minified code.',
     grep:
       'Only running tests that match the pattern "' + cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
@@ -201,42 +133,43 @@ function maybePrintArgvMessages() {
       cyan(chromeFlags)
     );
   }
-  if (!isTravisBuild()) {
-    log(
-      green('Run'),
-      cyan('gulp help'),
-      green('to see a list of all test flags.')
-    );
-    log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));
+
+  log(
+    green('Run'),
+    cyan('gulp help'),
+    green('to see a list of all test flags.')
+  );
+  log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));
+  log(
+    green('⤷ Use'),
+    cyan('--local_changes'),
+    green('to run unit tests from files commited to the local branch.')
+  );
+  if (!argv.testnames && !argv.files && !argv.local_changes) {
     log(
       green('⤷ Use'),
-      cyan('--local_changes'),
-      green('to run unit tests from files commited to the local branch.')
+      cyan('--testnames'),
+      green('to see the names of all tests being run.')
     );
-    if (!argv.testnames && !argv.files && !argv.local_changes) {
-      log(
-        green('⤷ Use'),
-        cyan('--testnames'),
-        green('to see the names of all tests being run.')
-      );
-    }
-    if (!argv.headless) {
-      log(
-        green('⤷ Use'),
-        cyan('--headless'),
-        green('to run tests in a headless Chrome window.')
-      );
-    }
-    if (!argv.compiled) {
-      log(green('Running tests against unminified code.'));
-    }
-    Object.keys(argv).forEach(arg => {
-      const message = argvMessages[arg];
-      if (message) {
-        log(yellow(`--${arg}:`), green(message));
-      }
-    });
   }
+  if (!argv.headless) {
+    log(
+      green('⤷ Use'),
+      cyan('--headless'),
+      green('to run tests in a headless Chrome window.')
+    );
+  }
+  if (argv.compiled || !argv.nobuild) {
+    log(green('Running tests against minified code.'));
+  } else {
+    log(green('Running tests against unminified code.'));
+  }
+  Object.keys(argv).forEach(arg => {
+    const message = argvMessages[arg];
+    if (message) {
+      log(yellow(`--${arg}:`), green(message));
+    }
+  });
 }
 
 function maybePrintCoverageMessage() {
@@ -249,36 +182,9 @@ function maybePrintCoverageMessage() {
   opn(url, {wait: false});
 }
 
-function maybeSetCoverageConfig(config, reportName) {
-  if (!argv.coverage) {
-    return;
-  }
-
-  config.plugins.push('karma-coverage-istanbul-reporter');
-  config.coverageIstanbulReporter = {
-    dir: 'test/coverage',
-    reports: isTravisBuild() ? ['lcovonly'] : ['html', 'text', 'text-summary'],
-    'report-config': {lcovonly: {file: reportName}},
-  };
-
-  const plugin = [
-    'istanbul',
-    {
-      exclude: [
-        'ads/**/*.js',
-        'third_party/**/*.js',
-        'test/**/*.js',
-        'extensions/**/test/**/*.js',
-        'testing/**/*.js',
-      ],
-    },
-  ];
-
-  config.browserify.transform = [['babelify', {plugins: [plugin]}]];
-}
-
 function karmaBrowserComplete(browser) {
   const result = browser.lastResult;
+  result.total = result.success + result.failed + result.skipped;
   // Prevent cases where Karma detects zero tests and still passes. #16851.
   if (result.total == 0) {
     log(red('ERROR: Zero tests detected by Karma.'));
@@ -307,14 +213,6 @@ function karmaBrowserComplete(browser) {
 function karmaBrowsersReady() {
   console./*OK*/ log('\n');
   log(green('Done. Running tests...'));
-}
-
-function karmaRunComplete(results) {
-  if (results.error) {
-    reportTestErrored();
-  } else {
-    reportTestFinished(results.success, results.failed);
-  }
 }
 
 function karmaRunStart() {
@@ -357,13 +255,32 @@ async function runTestInBatches(config) {
       browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable'
     ].push(browserId);
   }
+
+  let errored = false;
+  let totalStableSuccess = 0;
+  let totalStableFailed = 0;
+  const partialTestRunCompleteFn = async (browsers, results) => {
+    if (results.error) {
+      errored = true;
+    } else {
+      totalStableSuccess += results.success;
+      totalStableFailed += results.failed;
+    }
+  };
+
   if (browsers.stable.length) {
     const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
       'stable',
       browsers.stable,
-      config
+      config,
+      partialTestRunCompleteFn
     );
-    if (allBatchesExitCodes) {
+    if (errored) {
+      await reportTestErrored();
+    } else {
+      await reportTestFinished(totalStableSuccess, totalStableFailed);
+    }
+    if (allBatchesExitCodes || errored) {
       log(
         yellow('Some tests have failed on'),
         cyan('stable'),
@@ -371,14 +288,16 @@ async function runTestInBatches(config) {
         cyan('beta'),
         yellow('browsers.')
       );
-      return allBatchesExitCodes;
+      return allBatchesExitCodes || Number(errored);
     }
   }
 
   if (browsers.beta.length) {
     const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
       'beta',
-      browsers.beta
+      browsers.beta,
+      config,
+      /* runCompleteFn */ () => {}
     );
     if (allBatchesExitCodes) {
       log(
@@ -402,11 +321,19 @@ async function runTestInBatches(config) {
  *
  * @param {string} batchName a human readable name for the batch.
  * @param {!Array{string}} browsers list of SauceLabs browsers as
- *     customLaunchers IDs.
+ *     customLaunchers IDs. *
  * @param {Object} config karma config
+ * @param {function()} runCompleteFn a function to execute on the
+ *     `run_complete` event. It should take two arguments, (browser, results),
+ *     and return nothing.
  * @return {number} processExitCode
  */
-async function runTestInBatchesWithBrowsers(batchName, browsers, config) {
+async function runTestInBatchesWithBrowsers(
+  batchName,
+  browsers,
+  config,
+  runCompleteFn
+) {
   let batch = 1;
   let startIndex = 0;
   let endIndex = BATCHSIZE;
@@ -428,7 +355,7 @@ async function runTestInBatchesWithBrowsers(batchName, browsers, config) {
       cyan(configBatch.browsers.length),
       green('Sauce Labs browser(s)...')
     );
-    batchExitCodes.push(await createKarmaServer(configBatch));
+    batchExitCodes.push(await createKarmaServer(configBatch, runCompleteFn));
     startIndex = batch * BATCHSIZE;
     batch++;
     endIndex = Math.min(batch * BATCHSIZE, browsers.length);
@@ -437,13 +364,24 @@ async function runTestInBatchesWithBrowsers(batchName, browsers, config) {
   return batchExitCodes.every(exitCode => exitCode == 0) ? 0 : 1;
 }
 
-async function createKarmaServer(config) {
+/**
+ * Creates and starts karma server
+ * @param {!Object} configBatch
+ * @param {function()} runCompleteFn a function to execute on the
+ *     `run_complete` event. It should take two arguments, (browser, results),
+ *     and return nothing.
+ * @return {!Promise<number>}
+ */
+async function createKarmaServer(
+  configBatch,
+  runCompleteFn = reportTestRunComplete
+) {
   let resolver;
   const deferred = new Promise(resolverIn => {
     resolver = resolverIn;
   });
 
-  const karmaServer = new Server(config, exitCode => {
+  const karmaServer = new Server(configBatch, exitCode => {
     maybePrintCoverageMessage();
     resolver(exitCode);
   });
@@ -452,7 +390,7 @@ async function createKarmaServer(config) {
     .on('run_start', () => karmaRunStart())
     .on('browsers_ready', () => karmaBrowsersReady())
     .on('browser_complete', browser => karmaBrowserComplete(browser))
-    .on('run_complete', (unusedBrowsers, results) => karmaRunComplete(results));
+    .on('run_complete', runCompleteFn);
 
   karmaServer.start();
 
@@ -462,10 +400,8 @@ async function createKarmaServer(config) {
 module.exports = {
   createKarmaServer,
   getAdTypes,
-  getBrowserConfig,
-  maybeSetCoverageConfig,
   maybePrintArgvMessages,
-  refreshKarmaWdCache,
   runTestInBatches,
+  shouldNotRun,
   startTestServer,
 };

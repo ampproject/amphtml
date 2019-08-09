@@ -39,6 +39,7 @@ const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
  * Escapes a string of HTML elements to HTML entities.
  *
  * @param {string} html HTML as string to escape.
+ * @return {string}
  */
 function escapeHtml(html) {
   return html.replace(HTML_ESCAPE_REGEX, c => HTML_ESCAPE_CHARS[c]);

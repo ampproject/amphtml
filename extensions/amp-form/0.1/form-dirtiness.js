@@ -14,25 +14,33 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
+import {createCustomEvent} from '../../../src/event-helper';
+import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {dev} from '../../../src/log';
+import {dict, map} from '../../../src/utils/object';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
-import {map} from '../../../src/utils/object';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 
 /** @private {!Object<string, boolean>} */
-const SUPPORTED_TYPES = {
-  'text': true,
-  'textarea': true,
+const SUPPORTED_TAG_NAMES = {
+  'INPUT': true,
+  'SELECT': true,
+  'TEXTAREA': true,
 };
 
 export class FormDirtiness {
   /**
    * @param {!HTMLFormElement} form
+   * @param {!Window} win
    */
-  constructor(form) {
+  constructor(form, win) {
     /** @private @const {!HTMLFormElement} */
     this.form_ = form;
+
+    /** @private @const {!Window} */
+    this.win_ = win;
 
     /** @private {number} */
     this.dirtyFieldCount_ = 0;
@@ -40,8 +48,14 @@ export class FormDirtiness {
     /** @private {!Object<string, boolean>} */
     this.isFieldNameDirty_ = map();
 
+    /** @private {?FormData} */
+    this.submittedFormData_ = null;
+
     /** @private {boolean} */
     this.isSubmitting_ = false;
+
+    /** @private {boolean} */
+    this.wasDirty_ = false;
 
     this.installEventHandlers_();
   }
@@ -52,7 +66,7 @@ export class FormDirtiness {
    */
   onSubmitting() {
     this.isSubmitting_ = true;
-    this.updateDirtinessClass_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -61,7 +75,7 @@ export class FormDirtiness {
    */
   onSubmitError() {
     this.isSubmitting_ = false;
-    this.updateDirtinessClass_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -70,18 +84,41 @@ export class FormDirtiness {
    */
   onSubmitSuccess() {
     this.isSubmitting_ = false;
+    this.submittedFormData_ = this.takeFormDataSnapshot_();
     this.clearDirtyFields_();
-    this.updateDirtinessClass_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
-   * Adds the `amp-form-dirty` class when there are dirty fields and the form
-   * is not being submitted, otherwise removes the class.
+   * @return {!FormData}
    * @private
    */
-  updateDirtinessClass_() {
+  takeFormDataSnapshot_() {
+    return createFormDataWrapper(this.win_, this.form_).getFormData();
+  }
+
+  /**
+   * Adds or removes the `amp-form-dirty` class and dispatches a
+   * `FORM_DIRTINESS_CHANGE` event that reflects the current dirtiness state,
+   * when the form dirtiness state changes. Does nothing otherwise.
+   * @private
+   */
+  updateClassAndDispatchEventIfDirtyStateChanged_() {
     const isDirty = this.dirtyFieldCount_ > 0 && !this.isSubmitting_;
-    this.form_.classList.toggle(DIRTINESS_INDICATOR_CLASS, isDirty);
+
+    if (isDirty !== this.wasDirty_) {
+      this.form_.classList.toggle(DIRTINESS_INDICATOR_CLASS, isDirty);
+
+      const formDirtinessChangeEvent = createCustomEvent(
+        this.win_,
+        AmpEvents.FORM_DIRTINESS_CHANGE,
+        dict({'isDirty': isDirty}),
+        {bubbles: true}
+      );
+      this.form_.dispatchEvent(formDirtinessChangeEvent);
+    }
+
+    this.wasDirty_ = isDirty;
   }
 
   /**
@@ -90,6 +127,13 @@ export class FormDirtiness {
   installEventHandlers_() {
     this.form_.addEventListener('input', this.onInput_.bind(this));
     this.form_.addEventListener('reset', this.onReset_.bind(this));
+
+    // `amp-bind` dispatches the custom event `FORM_VALUE_CHANGE` when it
+    // mutates the value of a form field (e.g. textarea, input, etc)
+    this.form_.addEventListener(
+      AmpEvents.FORM_VALUE_CHANGE,
+      this.onInput_.bind(this)
+    );
   }
 
   /**
@@ -101,7 +145,7 @@ export class FormDirtiness {
   onInput_(event) {
     const field = dev().assertElement(event.target);
     this.checkDirtinessAfterUserInteraction_(field);
-    this.updateDirtinessClass_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -111,7 +155,7 @@ export class FormDirtiness {
    */
   onReset_(unusedEvent) {
     this.clearDirtyFields_();
-    this.updateDirtinessClass_();
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**
@@ -124,11 +168,30 @@ export class FormDirtiness {
       return;
     }
 
-    if (isFieldEmpty(field) || isFieldDefault(field)) {
+    if (
+      isFieldEmpty(field) ||
+      isFieldDefault(field) ||
+      this.isFieldSameAsLastSubmission_(field)
+    ) {
       this.removeDirtyField_(field.name);
     } else {
       this.addDirtyField_(field.name);
     }
+  }
+
+  /**
+   * Returns true if the form field's current value matches its most recent
+   * submitted value.
+   * @param {!Element} field
+   * @return {boolean}
+   * @private
+   */
+  isFieldSameAsLastSubmission_(field) {
+    if (!this.submittedFormData_) {
+      return false;
+    }
+    const {name, value} = field;
+    return this.submittedFormData_.get(name) === value;
   }
 
   /**
@@ -175,10 +238,9 @@ export class FormDirtiness {
  * @return {boolean}
  */
 function shouldSkipDirtinessCheck(field) {
-  const {type, name, hidden} = field;
+  const {tagName, name, hidden} = field;
 
-  // TODO: add support for radio buttons, checkboxes, and dropdown menus
-  if (!SUPPORTED_TYPES[type]) {
+  if (!SUPPORTED_TAG_NAMES[tagName]) {
     return true;
   }
 

@@ -24,17 +24,13 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CarouselCriteria} from './carousel-criteria';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
-  matches,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {resolveFalse, resolveTrue} from './utils/promise';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 
@@ -72,9 +68,6 @@ export const RENDER_AREA_RATIO = 1.2;
 /** Factor of renderArea vs viewportArea to lightbox. */
 export const VIEWPORT_AREA_RATIO = 0.25;
 
-/** @const {!Array<string>} */
-const CANDIDATES = ['amp-img', 'amp-carousel'];
-
 /**
  * Selector for subnodes by attribute for which the auto-lightbox treatment
  * does not apply. These can be set directly on the candidate or on an ancestor.
@@ -110,7 +103,7 @@ const DISABLED_ANCESTORS = [
   // No nested lightboxes.
   'amp-lightbox',
 
-  // Special treatment.
+  // Already actionable in vast majority of cases, explicit API.
   'amp-carousel',
 ].join(',');
 
@@ -130,42 +123,13 @@ const getRootNode = ampdoc => ampdoc.getRootNode();
 export class Criteria {
   /**
    * @param {!Element} element
-   * @return {!Promise<boolean>}
-   */
-  static meetsAll(element) {
-    if (
-      !Criteria.meetsSimpleCriteria(element) ||
-      !Criteria.meetsTreeShapeCriteria(element)
-    ) {
-      return resolveFalse();
-    }
-    return Criteria.meetsComplexCriteria(element);
-  }
-
-  /**
-   * Criteria that is "simple", ie runs quickly and discards elements in order
-   * to shortcircuit.
-   * @param {!Element} element
    * @return {boolean}
    */
-  static meetsSimpleCriteria(element) {
-    if (element.tagName.toUpperCase() == 'AMP-IMG') {
-      return ImageCriteria.meetsSizingCriteria(element);
-    }
-    return true;
-  }
-
-  /**
-   * Criteria that is "complex", ie takes longer to run and discards elements
-   * after they're likely to be good candidates per previous conditions.
-   * @param {!Element} element
-   * @return {!Promise<boolean>}
-   */
-  static meetsComplexCriteria(element) {
-    if (element.tagName.toUpperCase() == 'AMP-CAROUSEL') {
-      return CarouselCriteria.meetsAll(element);
-    }
-    return resolveTrue();
+  static meetsAll(element) {
+    return (
+      Criteria.meetsSizingCriteria(element) &&
+      Criteria.meetsTreeShapeCriteria(element)
+    );
   }
 
   /**
@@ -178,23 +142,13 @@ export class Criteria {
       element,
       disabledSelector
     );
-    // since we lookup both amp-img and amp-carousel at the same level, and
-    // we'd like to give amp-carousel special treatment by containing amp-img's,
-    // we need to filter out images inside carousels, but not carousels
-    // themselves.
-    if (
-      disabledAncestor &&
-      (disabledAncestor != element ||
-        matches(disabledAncestor, DISABLED_BY_ATTR))
-    ) {
+    if (disabledAncestor) {
       return false;
     }
     const actions = Services.actionServiceForDoc(element);
     return !actions.hasResolvableAction(element, 'tap');
   }
-}
 
-class ImageCriteria {
   /**
    * @param {!Element} element
    * @return {boolean}
@@ -289,7 +243,7 @@ export class Scanner {
    * @return {!Array<!Element>}
    */
   static getCandidates(root) {
-    const selector = CANDIDATES.map(candidateSelector).join(',');
+    const selector = candidateSelector('amp-img');
     const candidates = toArray(root.querySelectorAll(selector));
     candidates.forEach(markAsVisited);
     return candidates;
@@ -384,30 +338,6 @@ function usesLightboxExplicitly(ampdoc) {
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {boolean}
- */
-function isProxyOriginOrLocalDev(ampdoc) {
-  // Allow `localDev` in lieu of proxy origin for manual testing, except in
-  // tests where we need to actually perform the check.
-  const {win} = ampdoc;
-  if (getMode(win).localDev && !getMode(win).test) {
-    return true;
-  }
-
-  // An attached node is required for proxy origin check. If no elements are
-  // present, short-circuit.
-  const {firstElementChild} = ampdoc.getBody();
-  if (!firstElementChild) {
-    return false;
-  }
-
-  // TODO(alanorozco): Additionally check for transformed, webpackaged flag.
-  // See git.io/fhQ0a (#20359) for details.
-  return Services.urlForDoc(firstElementChild).isProxyOrigin(win.location);
-}
-
-/**
  * Determines whether auto-lightbox is enabled for a document.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {boolean}
@@ -417,13 +347,10 @@ export function isEnabledForDoc(ampdoc) {
   if (usesLightboxExplicitly(ampdoc)) {
     return false;
   }
-  if (
-    !DocMetaAnnotations.hasValidOgType(ampdoc) &&
-    !DocMetaAnnotations.hasValidLdJsonType(ampdoc)
-  ) {
-    return false;
-  }
-  return isProxyOriginOrLocalDev(ampdoc);
+  return (
+    DocMetaAnnotations.hasValidOgType(ampdoc) ||
+    DocMetaAnnotations.hasValidLdJsonType(ampdoc)
+  );
 }
 
 /** @private {number} */
@@ -467,13 +394,11 @@ export function apply(ampdoc, element) {
 export function runCandidates(ampdoc, candidates) {
   return candidates.map(candidate =>
     whenLoaded(candidate).then(() => {
-      return Criteria.meetsAll(candidate).then(meetsAll => {
-        if (!meetsAll) {
-          return;
-        }
-        dev().info(TAG, 'apply', candidate);
-        return apply(ampdoc, candidate);
-      });
+      if (!Criteria.meetsAll(candidate)) {
+        return;
+      }
+      dev().info(TAG, 'apply', candidate);
+      return apply(ampdoc, candidate);
     }, NOOP)
   );
 }

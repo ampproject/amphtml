@@ -29,7 +29,6 @@ tags: {  # <amp-autocomplete>
   tag_name: "AMP-AUTOCOMPLETE"
   spec_name: "amp-autocomplete"
   requires_extension: "amp-autocomplete"
-  mandatory_ancestor: "FORM"
   attrs: {
     name: "filter"
     value_casei: "custom"
@@ -58,8 +57,8 @@ tags: {  # <amp-autocomplete>
     }
   }
   attrs: { name: "submit-on-enter" }
-  attrs: { 
-    name: "suggest-first" 
+  attrs: {
+    name: "suggest-first"
     trigger: {
       also_requires_attr: "filter"
     }
@@ -96,16 +95,13 @@ tags: {  # amp-autocomplete JSON
   spec_name: "amp-autocomplete JSON"
   requires_extension: "amp-autocomplete"
   mandatory_parent: "AMP-AUTOCOMPLETE"
-  attrs: { 
-    name: "nonce" 
-    disabled_by: "transformed"
-  }
   attrs: {
     name: "type"
     mandatory: true
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
+  attr_lists: "nonce-attr"
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"

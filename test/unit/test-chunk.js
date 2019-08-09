@@ -23,6 +23,7 @@ import {
   startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('chunk', () => {
   beforeEach(() => {
@@ -40,6 +41,7 @@ describe('chunk', () => {
 
     beforeEach(() => {
       fakeWin = env.win;
+
       // If there is a viewer, wait for it, so we run with it being
       // installed.
       if (env.win.services.viewer) {
@@ -47,6 +49,7 @@ describe('chunk', () => {
           // Make sure we make a chunk instance, so all runs
           // have a viewer.
           chunkInstanceForTesting(env.win.document);
+          return Promise.resolve();
         });
       }
     });
@@ -305,7 +308,7 @@ describe('chunk', () => {
     },
     env => {
       beforeEach(() => {
-        Object.defineProperty(env.win.document, 'hidden', {
+        env.sandbox.defineProperty(env.win.document, 'hidden', {
           get: () => false,
         });
       });
@@ -326,11 +329,98 @@ describe('chunk', () => {
         env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
           return false;
         });
-        Object.defineProperty(env.win.document, 'hidden', {
+        env.sandbox.defineProperty(env.win.document, 'hidden', {
           get: () => false,
         });
       });
       basicTests(env);
+    }
+  );
+});
+
+describe('long tasks', () => {
+  describes.fakeWin(
+    'long chunk tasks force a macro task between work',
+    {
+      amp: true,
+    },
+    env => {
+      let subscriptions;
+      let sandbox;
+      let clock;
+      let progress;
+
+      function complete(str, long) {
+        return function(unusedIdleDeadline) {
+          if (long) {
+            // Ensure this task takes a long time beyond the 5ms buffer.
+            clock.tick(100);
+          }
+          progress += str;
+        };
+      }
+
+      function runSubs() {
+        subscriptions['message']
+          .slice()
+          .forEach(method => method({data: 'amp-macro-task'}));
+      }
+
+      beforeEach(() => {
+        subscriptions = {};
+        sandbox = sinon.sandbox;
+        clock = sandbox.useFakeTimers();
+        toggleExperiment(env.win, 'macro-after-long-task', true);
+
+        env.win.addEventListener = function(type, handler) {
+          if (subscriptions[type] && !subscriptions[type].includes(handler)) {
+            subscriptions[type].push(handler);
+          } else {
+            subscriptions[type] = [handler];
+          }
+        };
+
+        env.win.postMessage = function(key) {
+          expect(key).to.equal('amp-macro-task');
+        };
+
+        progress = '';
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should not run macro tasks with invisible bodys', done => {
+        startupChunk(env.win.document, complete('init', true));
+        startupChunk(env.win.document, complete('a', true));
+        startupChunk(env.win.document, complete('b', true));
+        startupChunk(env.win.document, () => {
+          expect(progress).to.equal('initab');
+          done();
+        });
+      });
+
+      it('should execute chunks after long task in a macro task', done => {
+        startupChunk(env.win.document, complete('before', true));
+        startupChunk(
+          env.win.document,
+          complete('init', false),
+          /* make body visible */ true
+        );
+
+        startupChunk(env.win.document, complete('a', false));
+        startupChunk(env.win.document, complete('b', false));
+        startupChunk(env.win.document, () => {
+          expect(progress).to.equal('beforeinitab');
+          complete('c', true)();
+          runSubs();
+        });
+        startupChunk(env.win.document, () => {
+          expect(progress).to.equal('beforeinitabc');
+          done();
+        });
+      });
     }
   );
 });

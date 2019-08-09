@@ -4,6 +4,7 @@ formats:
   - websites
   - stories
   - email
+  - stories
 teaser:
   text: Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus.
 ---
@@ -39,12 +40,12 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-sidebar/">amp-sidebar example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-sidebar/">amp-sidebar example</a>.</td>
   </tr>
 </table>
 
@@ -56,7 +57,6 @@ for content within the sidebar to be displayed on other parts of the main conten
 
 ## Behavior
 
-- The `<amp-sidebar>` should be a direct child of the `<body>`.
 - The sidebar can only appear on the left or right side of a page.
 - The `<amp-sidebar>` may contain any valid HTML elements (supported by AMP).
 - The `<amp-sidebar>` may contain any of the following AMP elements:
@@ -68,7 +68,8 @@ for content within the sidebar to be displayed on other parts of the main conten
     - `<amp-social-share>`
 - The max-height of the sidebar is 100vh, if the height exceeds 100vh then a vertical scrollbar appears. The default height is set to 100vh in CSS and is overridable in CSS.
 - The width of the sidebar can be set and adjusted using CSS (minimum width is 45px).
-- Touch zoom is disabled on the `amp-sidebar` and it's mask when the sidebar is open.
+- Touch zoom is disabled on the `amp-sidebar` and its mask when the sidebar is open.
+- `<amp-sidebar>` is *recommended* to be be a direct child of the `<body>` to preserve a logical DOM order (for accessibility) as well as to avoid altering its behavior by a container element. Note that having an ancestor of `amp-sidebar` with a set `z-index` may cause the sidebar to appear below other elements (such as headers), breaking its functionality.
 
 *Example:*
 
@@ -207,7 +208,7 @@ In the following example, we display a `toolbar` if the window width is less tha
 
 
 {% call callout('Tip', type='success') %}
-See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sidebar/).
+See live demos at [AMP By Example](https://amp.dev/documentation/examples/components/amp-sidebar/).
 {% endcall %}
 
 ## Sidebar for Stories
@@ -282,7 +283,7 @@ This attribute is present on child `<nav toolbar="(media-query)" toolbar-target=
 
 ##### common attributes<a name="common"></a>
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Styling
 

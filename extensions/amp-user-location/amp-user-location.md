@@ -22,7 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-user-location`
+# amp-user-location
 
 <table>
   <tr>
@@ -31,14 +31,14 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental. The `amp-user-location` experiment must be enabled to use this component.</td>
+    <td>Experimental. The <code>amp-user-location</code> experiment must be enabled to use this component.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-user-location" src="https://cdn.ampproject.org/v0/amp-user-location-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <!-- TODO(cvializ) -->
@@ -56,7 +56,38 @@ location with a form or an analytics request, the Variable Substitution variable
 
 ## Attributes
 
-The `amp-user-location` component only requires an `id` attribute.
+##### id (required)
+
+The `id` attribute is required and allows the component to be referenced in AMP Actions and Events.
+
+##### src (optional)
+
+The `src` attribute specifies a remote configuration for the `amp-user-location` component.
+
+```html
+<amp-user-location
+  id="location"
+  src="https://www.example.com/amp-user-location.json"
+  layout="nodisplay"
+></amp-user-location>
+```
+
+Alternatively, a local configuration can be specified in a `script` tag.
+
+```html
+<amp-user-location
+  id="location"
+  layout="nodisplay"
+>
+<script type="application/json">
+{
+  "fallback": {"lat": 40, "lon": -40},
+  "maximumAge": 60000,
+  "timeout": 5000
+}
+</script>
+</amp-user-location>
+```
 
 ## AMP Actions
 
@@ -81,14 +112,14 @@ for the current domain, if the user has not already.
 </tr>
 <tr>
 <td><code>approve</code></td>
-<td>This event is fired when the user triggers the `request` action and then approves the browser prompt to access their location, or the user has previously approved the prompt. The `event` object contains `lat` `lon` and `source` properties.</td>
+<td>This event is fired when the user triggers the <code>request</code> action and then approves the browser prompt to access their location, or the user has previously approved the prompt. The <code>event</code> object contains <code>lat</code>, <code>lon</code>, and <code>source</code> properties.</td>
 </tr>
 <tr>
 <td><code>deny</code></td>
-<td>This event is fired when the user triggers the `request` action and then denies the browser prompt to access their location, or the user has previously denied the prompt.</td>
+<td>This event is fired when the user triggers the <code>request</code> action and then denies the browser prompt to access their location, or the user has previously denied the prompt.</td>
 </tr>
 <td><code>error</code></td>
-<td>This event is fired when the user triggers the `request` action and and error occurs. This can happen if the browser takes too long to retrieve the location information, if the hardware is unavailable, or other errors occur.</td>
+<td>This event is fired when the user triggers the <code>request</code> action and and error occurs. This can happen if the browser takes too long to retrieve the location information, if the hardware is unavailable, or other errors occur.</td>
 </tr>
 </table>
 

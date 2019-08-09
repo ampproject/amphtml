@@ -44,6 +44,11 @@ describes.realWin(
 
       container = doc.createElement('div');
       doc.body.appendChild(container);
+      // Stub whenBuilt to resolve immediately to handle upgrade for AdSense
+      // to FF impl.
+      sinon
+        .stub(win.BaseCustomElementClass.prototype, 'whenBuilt')
+        .callsFake(() => Promise.resolve());
     });
 
     it('should call placeAd with correct parameters', () => {

@@ -36,6 +36,97 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     delete ANALYTICS_CONFIG['-test-venfor'];
   });
 
+  describe('handles top level fields correctly', () => {
+    it('propogates requestOrigin into each request object', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': 'https://example.com',
+        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: 'https://example.com',
+            baseUrl: '/test1',
+          },
+          'test2': {
+            origin: 'https://example.com',
+            baseUrl: '/test1/test2',
+          },
+        });
+      });
+    });
+
+    it('does not overwrite existing origin in request object', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': 'https://toplevel.com',
+        'requests': {
+          'test1': {
+            origin: 'https://nested.com',
+            baseUrl: '/test1',
+          },
+        },
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: 'https://nested.com',
+            baseUrl: '/test1',
+          },
+        });
+      });
+    });
+
+    it('handles empty string request origin', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': '',
+        'requests': {
+          'test1': {
+            baseUrl: '/test1',
+          },
+        },
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: '',
+            baseUrl: '/test1',
+          },
+        });
+      });
+    });
+
+    it('handles undefined request origin', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': undefined,
+        'requests': {
+          'test1': {
+            baseUrl: '/test1',
+          },
+        },
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: undefined,
+            baseUrl: '/test1',
+          },
+        });
+      });
+    });
+  });
+
   describe('merges requests correctly', () => {
     it('inline and vendor both string', () => {
       ANALYTICS_CONFIG['-test-venfor'] = {
@@ -412,9 +503,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
-        expect(xhrStub).to.be.calledWith('//config1', {
-          requireAmpResponseSourceOrigin: false,
-        });
+        expect(xhrStub).to.be.calledWith('//config1', {});
         expect(config['vars']['title']).to.equal('remote');
         // iframe transport from remote config is ignored
         expect(config['transport']['iframe']).to.be.undefined;
@@ -465,7 +554,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(xhrStub).to.be.calledWith('//config1', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: false,
         });
         expect(config['vars']['title']).to.equal('remote');
       });
@@ -507,7 +595,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
 
         expect(config['requests']['foo']).to.deep.equal({
@@ -561,7 +648,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -604,7 +690,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -640,7 +725,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -681,7 +765,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -720,7 +803,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
 
         expect(config['requests']['foo']).to.deep.equal({

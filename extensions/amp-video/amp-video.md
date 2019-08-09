@@ -37,11 +37,11 @@ A replacement for the HTML5 <code>video</code> tag; only to be used for direct H
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>AMP By Example's:<ul>
-      <li><a href="https://ampbyexample.com/components/amp-video/">amp-video example</a></li>
-      <li><a href="https://ampbyexample.com/advanced/click-to-play_overlay_for_amp-video/">Click-to-play overlay for amp-video</a></td>
+      <li><a href="https://amp.dev/documentation/examples/components/amp-video/">amp-video example</a></li>
+      <li><a href="https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/">Click-to-play overlay for amp-video</a></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
 </table>
@@ -59,18 +59,23 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 #### Example
 
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="293"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampvideo.basic.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-
-</div>
+[example preview="inline" playground="true" imports="amp-video"]
+```html
+<amp-video {% if format=='stories'%}autoplay {% endif %}controls
+  width="640"
+  height="360"
+  layout="responsive"
+  poster="{{server_for_email}}/static/inline-examples/images/kitten-playing.png">
+  <source src="{{server_for_email}}/static/inline-examples/videos/kitten-playing.webm"
+    type="video/webm" />
+  <source src="{{server_for_email}}/static/inline-examples/videos/kitten-playing.mp4"
+    type="video/mp4" />
+  <div fallback>
+    <p>This browser does not support the video element.</p>
+  </div>
+</amp-video>
+```
+[/example]
 
 ## Analytics
 
@@ -136,7 +141,7 @@ when the video has autoplay.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
@@ -181,7 +186,7 @@ This example contains both the `poster` and `artwork` attributes. The `poster` s
 
 Providing a click-to-play overlay is a common UX feature for video players on the web.  For example, you could display a custom play icon that the user can click, as well as include the title of the video, different sized poster images, and so on.  Because the `amp-video` component supports the standard `play` AMP action, you can easily implement click-to-play.
 
-For a detailed example, visit AMP By Example's  [Click-to-play overlay for amp-video](https://ampbyexample.com/advanced/click-to-play_overlay_for_amp-video/).
+For a detailed example, visit AMP By Example's  [Click-to-play overlay for amp-video](https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/).
 
 ## Validation
 

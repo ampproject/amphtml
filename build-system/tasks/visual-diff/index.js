@@ -223,6 +223,7 @@ async function launchBrowser() {
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {JsonObject} viewport optional viewport size object with numeric
  *     fields `width` and `height`.
+ * @return {!Promise<!Puppeteer.Page>}
  */
 async function newPage(browser, viewport = null) {
   log('verbose', 'Creating new tab');
@@ -438,9 +439,10 @@ async function generateSnapshots(percy, webpages) {
   // no interactions, and each test that has in interactive tests file should
   // load those tests here.
   for (const webpage of webpages) {
-    webpage.tests_ = {
-      '': async () => {},
-    };
+    webpage.tests_ = {};
+    if (!webpage.no_base_test) {
+      webpage.tests_[''] = async () => {};
+    }
     if (webpage.interactive_tests) {
       try {
         Object.assign(
@@ -761,6 +763,7 @@ async function createEmptyBuild() {
 
 /**
  * Runs the AMP visual diff tests.
+ * @return {!Promise}
  */
 async function visualDiff() {
   ensureOrBuildAmpRuntimeInTestMode_();
@@ -841,7 +844,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
     }
   } else {
     execOrDie('gulp clean');
-    execOrDie('gulp dist --fortesting');
+    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
   }
 }
 
@@ -885,6 +888,8 @@ visualDiff.flags = {
   'master': '  Includes a blank snapshot (baseline for skipped builds)',
   'empty': '  Creates a dummy Percy build with only a blank snapshot',
   'chrome_debug': '  Prints debug info from Chrome',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'webserver_debug': '  Prints debug info from the local gulp webserver',
   'debug': '  Prints all the above debug info',
   'grep': '  Runs tests that match the pattern',

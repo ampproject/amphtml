@@ -20,12 +20,15 @@
  * The "init" argument of the Fetch API. Externed due to being passes across
  * component/runtime boundary.
  *
- * Currently, only "credentials: include" is implemented.
+ * For `credentials` property, only "include" is implemented.
  *
- * Note ampCors === false indicates that __amp_source_origin should not be
+ * Custom properties:
+ * - `ampCors === false` indicates that __amp_source_origin should not be
  * appended to the URL to allow for potential caching or response across pages.
+ * - `bypassInterceptorForDev` disables XHR interception in local dev mode.
+ * - `prerenderSafe` allows firing requests while viewer is not yet visible.
  *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch
  *
  * @typedef {{
  *   body: (!JsonObject|!FormData|!FormDataWrapperInterface|undefined|string),
@@ -33,8 +36,10 @@
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
+ *
+ *   ampCors: (boolean|undefined),
+ *   bypassInterceptorForDev: (boolean|undefined),
+ *   prerenderSafe: (boolean|undefined),
  * }}
  */
 var FetchInitDef;
@@ -299,6 +304,19 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function() {};
+let RRule;
+/**
+ * @param {Date} unusedDt
+ * @param {boolean} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.before = function(unusedDt, unusedInc) {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.after = function(unusedDt, unusedInc) {};
 
 /**
  * @dict
@@ -689,6 +707,12 @@ let BindEvaluateBindingsResultDef;
  */
 let BindEvaluateExpressionResultDef;
 
+/**
+ * Options for Bind.rescan().
+ * @typedef {{update: (boolean|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
+ */
+let BindRescanOptionsDef;
+
 /////////////////////////////
 ////// Web Anmomation externs
 /////////////////////////////
@@ -817,3 +841,8 @@ var WebAnimationSelectorDef;
  * }}
  */
 var WebAnimationSubtargetDef;
+
+var ampInaboxPositionObserver;
+ampInaboxPositionObserver.observe;
+ampInaboxPositionObserver.getTargetRect;
+ampInaboxPositionObserver.getViewportRect;

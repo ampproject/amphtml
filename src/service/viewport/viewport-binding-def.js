@@ -1,3 +1,5 @@
+import {computedStyle} from '../../style';
+
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
@@ -199,4 +201,31 @@ export class ViewportBindingDef {
    * @return {boolean}
    */
   getScrollingElementScrollsLikeViewport() {}
+}
+
+/**
+ * Returns the margin-bottom of the last child of `element` that affects
+ * document height (is static/relative position with non-zero height),
+ * if any. Otherwise, returns 0.
+ *
+ * TODO(choumx): This is a weird location, so refactor to improve code sharing
+ * among implementations of ViewportBindingDef generally.
+ *
+ * @param {!Window} win
+ * @param {!Element} element
+ * @return {number}
+ */
+export function marginBottomOfLastChild(win, element) {
+  let style;
+  for (let n = element.lastElementChild; n; n = n.previousElementSibling) {
+    const r = n./*OK*/ getBoundingClientRect();
+    if (r.height > 0) {
+      const s = computedStyle(win, n);
+      if (s.position == 'static' || s.position == 'relative') {
+        style = s;
+        break;
+      }
+    }
+  }
+  return style ? parseInt(style.marginBottom, 10) : 0;
 }

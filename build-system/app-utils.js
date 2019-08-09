@@ -15,11 +15,20 @@
  */
 
 /**
+ * @param {string} serveMode
+ * @return {boolean}
+ */
+const isRtvMode = serveMode => {
+  return /^\d{15}$/.test(serveMode);
+};
+
+/**
  * @param {string} mode
  * @param {string} file
  * @param {string=} hostName
  * @param {boolean=} inabox
  * @param {boolean=} storyV1
+ * @return {string}
  */
 const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
   hostName = hostName || '';
@@ -52,12 +61,7 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
       hostName + '/dist/v0/$1.max.js'
     );
     if (inabox) {
-      let filename;
-      if (inabox == '1') {
-        filename = '/dist/amp-inabox.js';
-      } else if (inabox == '2') {
-        filename = '/dist/amp-inabox-lite.js';
-      }
+      const filename = '/dist/amp-inabox.js';
       file = file.replace(/<html [^>]*>/, '<html amp4ads>');
       file = file.replace(/\/dist\/amp\.js/g, filename);
     }
@@ -90,17 +94,27 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
       /\/dist.3p\/current\/(.*)\.max.html/g,
       hostName + '/dist.3p/current-min/$1.html'
     );
+
     if (inabox) {
-      let filename;
-      if (inabox == '1') {
-        filename = '/dist/amp4ads-v0.js';
-      } else if (inabox == '2') {
-        filename = '/dist/amp4ads-lite-v0.js';
-      }
-      file = file.replace(/\/dist\/v0\.js/g, filename);
+      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
     }
+  } else if (isRtvMode(mode)) {
+    hostName = `https://cdn.ampproject.org/rtv/${mode}/`;
+    file = file.replace(/https:\/\/cdn\.ampproject\.org\//g, hostName);
+
+    if (inabox) {
+      file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/rtv\/\d{15}\/v0\.js/g,
+        hostName + 'amp4ads-v0.js'
+      );
+    }
+  } else if (inabox) {
+    file = file.replace(
+      /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
+      'https://cdn.ampproject.org/amp4ads-v0.js'
+    );
   }
   return file;
 };
 
-module.exports = {replaceUrls};
+module.exports = {replaceUrls, isRtvMode};

@@ -98,7 +98,7 @@ export class RealTimeConfigManager {
     /** @private {?RtcConfigDef} */
     this.rtcConfig_ = null;
 
-    /** @private !../../../src/service/ampdoc-impl.AmpDoc */
+    /** @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampDoc_ = this.a4aElement_.getAmpDoc();
 
     /** @private {?CONSENT_POLICY_STATE} */
@@ -270,6 +270,7 @@ export class RealTimeConfigManager {
    * Assigns constant macros that should exist for all RTC to object of custom
    * per-network macros.
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
+   * @return {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>}
    */
   assignMacros(macros) {
     macros['TIMEOUT'] = () => this.rtcConfig_.timeoutMillis;
@@ -369,6 +370,7 @@ export class RealTimeConfigManager {
      * async call. Thus, however long the URL replacement took is treated as a
      * time penalty.
      * @param {string} url
+     * @return {*} TODO(#23582): Specify return type
      */
     const send = url => {
       if (Object.keys(this.seenUrls_).length == MAX_RTC_CALLOUTS) {

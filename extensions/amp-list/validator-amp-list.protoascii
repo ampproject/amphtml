@@ -118,10 +118,24 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     supported_layouts: RESPONSIVE
   }
 }
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  tag_name: "DIV"
+  spec_name: "AMP-LIST DIV [fetch-error]"
+  mandatory_ancestor: "AMP-LIST"
+  attrs: { name: "align" }
+  attrs: {
+    name: "fetch-error"
+    mandatory: true
+  }
+}
 
 tags: { # amp-list-load-more
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-LIST-LOAD-MORE"
   requires_extension: "amp-list"
   mandatory_parent: "AMP-LIST"
@@ -144,7 +158,38 @@ tags: { # amp-list-load-more
     name: "load-more-end"
     value: ""
     mandatory_oneof: "['load-more-button', 'load-more-failed', 'load-more-end', 'load-more-loading']"
+  },
+}
+
+# The button element variant allowed in amp-list-load-more.
+tags: {
+  html_format: AMP
+  html_format: ACTIONS
+  requires_extension: "amp-list"
+  tag_name: "BUTTON"
+  spec_name: "amp-list-load-more button[load-more-clickable]"
+  mandatory_parent: "AMP-LIST-LOAD-MORE"
+  attrs: {
+    name: "disabled"
+    value: ""
   }
+  attrs: {
+    name: "load-more-clickable"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+    value: ""
+  }
+  attrs: {
+    name: "role"
+    implicit: true
+  }
+  attrs: {
+    name: "tabindex"
+    implicit: true
+  }
+  attrs: { name: "type" }
+  attrs: { name: "value" }
+  attr_lists: "name-attr"
 }
 
 # AMP4EMAIL disallows mustache in src attribute.
@@ -156,6 +201,12 @@ tags: {  # <amp-list>
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
   disallowed_ancestor: "TEMPLATE"
+  attrs: {
+    name: "binding"
+    value: "always"
+    value: "no"
+    value: "refresh"
+  }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: { name: "single-item" }
@@ -172,8 +223,6 @@ tags: {  # <amp-list>
   # TODO(gregable): Implement validation that requires the template attr value
   # to reference the id of an existing template element.
   attrs: { name: "template" }
-  # <amp-bind>
-  attrs: { name: "[state]" }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

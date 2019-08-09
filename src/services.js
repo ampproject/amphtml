@@ -141,11 +141,11 @@ export class Services {
 
   /**
    * Returns the AmpDoc for the specified context node.
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
    * @return {!./service/ampdoc-impl.AmpDoc}
    */
-  static ampdoc(elementOrAmpDoc) {
-    return getAmpdoc(elementOrAmpDoc);
+  static ampdoc(nodeOrAmpDoc) {
+    return getAmpdoc(nodeOrAmpDoc);
   }
 
   /**
@@ -206,10 +206,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/cid-impl.Cid>}
+   * @return {!Promise<!./service/cid-impl.CidDef>}
    */
   static cidForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/cid-impl.Cid>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/cid-impl.CidDef>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'cid'
     ));
@@ -223,6 +223,18 @@ export class Services {
     return /** @type {!./service/navigation.Navigation} */ (getServiceForDoc(
       elementOrAmpDoc,
       'navigation'
+    ));
+  }
+
+  /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>}
+   */
+  static loaderServiceForDoc(element) {
+    return /** @type {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>} */ (getElementServiceForDoc(
+      element,
+      'loader',
+      'amp-loader'
     ));
   }
 
@@ -260,27 +272,12 @@ export class Services {
   }
 
   /**
-   * TODO(#22414): Remove this in favor of the async API.
-   * Returns a service to register callbacks we wish to execute when an
-   * amp-form is submitted. This is the sync version used by amp-form only, all
-   * other extensions should use `formSubmitPromiseForDoc` below.
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {../extensions/amp-form/0.1/form-submit-service.FormSubmitService}
-   */
-  static formSubmitForDoc(elementOrAmpDoc) {
-    return /** @type {!../extensions/amp-form/0.1/form-submit-service.FormSubmitService} */ (getServiceForDoc(
-      elementOrAmpDoc,
-      'form-submit-service'
-    ));
-  }
-
-  /**
    * Returns a service to register callbacks we wish to execute when an
    * amp-form is submitted.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>}
    */
-  static formSubmitPromiseForDoc(elementOrAmpDoc) {
+  static formSubmitForDoc(elementOrAmpDoc) {
     return /** @type {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'form-submit-service'
@@ -353,6 +350,17 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/owners-impl.Owners}
+   */
+  static ownersForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/owners-impl.Owners} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'owners'
+    ));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/performance-impl.Performance}
    */
@@ -386,11 +394,24 @@ export class Services {
   }
 
   /**
+   * Not installed by default; must be installed in extension code before use.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/position-observer/position-observer-impl.PositionObserver}
+   * @throws If the service is not installed.
+   */
+  static positionObserverForDoc(element) {
+    return /** @type {!./service/position-observer/position-observer-impl.PositionObserver} */ (getServiceForDoc(
+      element,
+      'position-observer'
+    ));
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/resources-impl.Resources}
+   * @return {!./service/resources-impl.ResourcesDef}
    */
   static resourcesForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/resources-impl.Resources} */ (getServiceForDoc(
+    return /** @type {!./service/resources-impl.ResourcesDef} */ (getServiceForDoc(
       elementOrAmpDoc,
       'resources'
     ));
@@ -398,10 +419,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/resources-impl.Resources>}
+   * @return {!Promise<!./service/resources-impl.ResourcesDef>}
    */
   static resourcesPromiseForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/resources-impl.Resources>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/resources-impl.ResourcesDef>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'resources'
     ));
@@ -421,6 +442,7 @@ export class Services {
   }
 
   /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
    * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
    */
@@ -428,6 +450,17 @@ export class Services {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
       (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', true))
+    );
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService}
+   */
+  static storyVariableService(win) {
+    return (
+      /** @type {?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService} */
+      (getExistingServiceOrNull(win, 'story-variable'))
     );
   }
 
@@ -497,6 +530,7 @@ export class Services {
   }
 
   /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
    * @return {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>}
    */

@@ -27,26 +27,27 @@ describes.realWin('Resource', {amp: true}, env => {
   let elementMock;
   let resources;
   let resource;
-  let viewportMock;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    sandbox = env.sandbox;
 
     element = env.createAmpElement('amp-ad');
+    doc.body.appendChild(element);
     sandbox
       .stub(element, 'getLayoutPriority')
       .callsFake(() => LayoutPriority.ADS);
     elementMock = sandbox.mock(element);
 
-    const viewer = Services.viewerForDoc(document);
+    const viewer = Services.viewerForDoc(doc);
     sandbox.stub(viewer, 'isRuntimeOn').callsFake(() => false);
     sandbox
-      .stub(Resources.prototype, 'rebuildDomWhenReady')
+      .stub(Resources.prototype, 'rebuildDomWhenReady_')
       .callsFake(() => {});
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new Resources(env.ampdoc);
     resource = new Resource(1, element, resources);
-    viewportMock = sandbox.mock(resources.viewport_);
 
     const vsync = Services.vsyncFor(win);
     sandbox.stub(vsync, 'mutate').callsFake(mutator => {
@@ -64,7 +65,6 @@ describes.realWin('Resource', {amp: true}, env => {
   });
 
   afterEach(() => {
-    viewportMock.verify();
     elementMock.verify();
   });
 
@@ -111,27 +111,6 @@ describes.realWin('Resource', {amp: true}, env => {
       .returns(buildPromise)
       .once();
     elementMock.expects('updateLayoutBox').never();
-    return resource.build().then(() => {
-      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
-    });
-  });
-
-  it('should not build if permission is not granted', () => {
-    let permission = false;
-    elementMock
-      .expects('isUpgraded')
-      .returns(true)
-      .atLeast(1);
-    sandbox.stub(resources, 'grantBuildPermission').callsFake(() => permission);
-    elementMock.expects('updateLayoutBox').never();
-    expect(resource.build()).to.be.null;
-    expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
-
-    permission = true;
-    elementMock
-      .expects('build')
-      .returns(Promise.resolve())
-      .once();
     return resource.build().then(() => {
       expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
     });
@@ -261,18 +240,12 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('isUpgraded')
       .returns(false)
       .atLeast(1);
-    const viewport = {
-      getLayoutRect() {
-        return layoutRectLtwh(0, 100, 300, 100);
-      },
-      isDeclaredFixed() {
-        return false;
-      },
-      supportsPositionFixed() {
-        return true;
-      },
-    };
-    resource.resources_.getViewport = () => viewport;
+    const viewport = Services.viewportForDoc(resource.element);
+    sandbox
+      .stub(viewport, 'getLayoutRect')
+      .returns(layoutRectLtwh(0, 100, 300, 100));
+    sandbox.stub(viewport, 'isDeclaredFixed').returns(false);
+    sandbox.stub(viewport, 'supportsPositionFixed').returns(true);
     expect(() => {
       resource.measure();
     }).to.not.throw();
@@ -474,11 +447,9 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('getBoundingClientRect')
       .returns(layoutRectLtwh(0, 0, 10, 10))
       .once();
-    viewportMock
-      .expects('getScrollTop')
-      .returns(11)
-      .atLeast(0);
-    Object.defineProperty(element, 'offsetParent', {
+    const viewport = Services.viewportForDoc(resource.element);
+    sandbox.stub(viewport, 'getScrollTop').returns(11);
+    sandbox.defineProperty(element, 'offsetParent', {
       value: {
         isAlwaysFixed: () => true,
       },
@@ -499,24 +470,22 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('getBoundingClientRect')
       .returns(layoutRectLtwh(0, 0, 10, 10))
       .once();
-    viewportMock
-      .expects('getScrollTop')
-      .returns(11)
-      .atLeast(0);
+
+    const viewport = Services.viewportForDoc(resource.element);
+    sandbox.stub(viewport, 'getScrollTop').returns(11);
+
     const fixedParent = doc.createElement('div');
     fixedParent.style.position = 'fixed';
     doc.body.appendChild(fixedParent);
     fixedParent.appendChild(element);
-    viewportMock
-      .expects('isDeclaredFixed')
-      .withExactArgs(element)
-      .returns(false)
-      .once();
-    viewportMock
-      .expects('isDeclaredFixed')
-      .withExactArgs(fixedParent)
-      .returns(true)
-      .once();
+    sandbox.stub(viewport, 'isDeclaredFixed').callsFake(el => {
+      if (el == element) {
+        return false;
+      }
+      if (el == fixedParent) {
+        return true;
+      }
+    });
     resource.measure();
     expect(resource.isFixed()).to.be.true;
     // layoutBox != pageLayoutBox
@@ -524,12 +493,35 @@ describes.realWin('Resource', {amp: true}, env => {
     expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
+  describe('getPageLayoutBoxAsync', () => {
+    it('should return layout box when the resource has NOT been measured', () => {
+      sandbox.stub(element, 'isUpgraded').returns(true);
+      sandbox
+        .stub(element, 'getBoundingClientRect')
+        .returns(layoutRectLtwh(0, 0, 10, 10));
+      return expect(resource.getPageLayoutBoxAsync()).to.eventually.eql(
+        layoutRectLtwh(0, 0, 10, 10)
+      );
+    });
+
+    it('should return layout box when the resource has been measured', () => {
+      sandbox.stub(element, 'isUpgraded').returns(true);
+      sandbox
+        .stub(element, 'getBoundingClientRect')
+        .returns(layoutRectLtwh(0, 0, 10, 10));
+      resource.measure();
+      return expect(resource.getPageLayoutBoxAsync()).to.eventually.eql(
+        layoutRectLtwh(0, 0, 10, 10)
+      );
+    });
+  });
+
   describe('placeholder measure', () => {
     let rect;
 
     beforeEach(() => {
       element.setAttribute('placeholder', '');
-      Object.defineProperty(element, 'parentElement', {
+      sandbox.defineProperty(element, 'parentElement', {
         value: doc.createElement('amp-iframe'),
         configurable: true,
         writable: true,
@@ -769,10 +761,10 @@ describes.realWin('Resource', {amp: true}, env => {
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
 
+    /* global fail: false */
     return promise
       .then(
         () => {
-          /* global fail: false */
           fail('should not be here');
         },
         () => {
@@ -786,7 +778,6 @@ describes.realWin('Resource', {amp: true}, env => {
       )
       .then(
         () => {
-          /* global fail: false */
           fail('should not be here');
         },
         reason => {
@@ -1213,7 +1204,7 @@ describe('Resource idleRenderOutsideViewport', () => {
   });
 });
 
-describe('Resource renderOutsideViewport', () => {
+describes.realWin('Resource renderOutsideViewport', {amp: true}, env => {
   let sandbox;
   let element;
   let resources;
@@ -1223,43 +1214,20 @@ describe('Resource renderOutsideViewport', () => {
   let resolveWithinViewportSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
+    sandbox = env.sandbox;
 
-    element = {
-      ownerDocument: {defaultView: window},
-      tagName: 'AMP-AD',
-      hasAttribute: () => false,
-      isBuilt: () => false,
-      isUpgraded: () => false,
-      prerenderAllowed: () => false,
-      renderOutsideViewport: () => true,
-      build: () => false,
-      getBoundingClientRect: () => null,
-      updateLayoutBox: () => {},
-      isRelayoutNeeded: () => false,
-      layoutCallback: () => {},
-      changeSize: () => {},
-      unlayoutOnPause: () => false,
-      unlayoutCallback: () => true,
-      pauseCallback: () => false,
-      resumeCallback: () => false,
-      viewportCallback: () => {},
-      getLayoutPriority: () => LayoutPriority.CONTENT,
-    };
+    element = env.createAmpElement('amp-ad');
+    env.win.document.body.appendChild(element);
 
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new Resources(env.ampdoc);
     resource = new Resource(1, element, resources);
-    viewport = resources.viewport_;
+    viewport = Services.viewportForDoc(env.ampdoc);
     renderOutsideViewport = sandbox.stub(element, 'renderOutsideViewport');
     sandbox.stub(viewport, 'getRect').returns(layoutRectLtwh(0, 0, 100, 100));
     resolveWithinViewportSpy = sandbox.spy(
       resource,
       'resolveDeferredsWhenWithinViewports_'
     );
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('boolean API', () => {

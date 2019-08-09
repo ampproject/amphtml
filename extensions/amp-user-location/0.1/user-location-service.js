@@ -80,7 +80,7 @@ const DEFAULT_MAXIMUM_AGE = 60000;
  * pass between calling getCurrentPosition and calling its success callback.
  * At this time, the error callback will be called with code TIMEOUT.
  */
-const DEFAULT_TIMEOUT = 30000;
+const DEFAULT_TIMEOUT = 5000; // wait at most 5s before triggering error
 
 export class UserLocationService {
   /**
@@ -264,6 +264,7 @@ export class UserLocationService {
    * @param {string} expr
    * @param {string} type
    * @param {boolean=} poll
+   * @return {*} TODO(#23582): Specify return type
    */
   getReplacementLocation(expr, type, poll = false) {
     return this.getLocation(poll).then(position => {
@@ -324,7 +325,8 @@ export class UserLocationService {
       /** @type {!PositionOptionsDef} */ ({
         enableHighAccuracy: false,
         maximumAge: config.maximumAge || DEFAULT_MAXIMUM_AGE,
-        timeout: config.timeout || DEFAULT_TIMEOUT,
+        timeout:
+          config.timeout || (getMode().localDev ? 30000 : DEFAULT_TIMEOUT),
       })
     );
 
