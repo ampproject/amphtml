@@ -245,6 +245,8 @@ const envPresets = {
     AmpdocEnvironment.SHADOW_DEMO,
     AmpdocEnvironment.A4A_FIE,
     AmpdocEnvironment.A4A_INABOX,
+    AmpdocEnvironment.A4A_INABOX_FRIENDLY,
+    AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
   ],
 };
 
