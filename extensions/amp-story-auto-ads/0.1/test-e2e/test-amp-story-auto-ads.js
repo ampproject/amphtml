@@ -23,7 +23,7 @@ describes.endtoend(
   'amp-story-auto-ads',
   {
     testUrl:
-      'http://localhost:8000/test/manual/amp-story-auto-ads/amp-story-auto-ads-basic.html',
+      'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/basic.html',
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
     // TODO(ccordry): reenable shadow demo? fails while waiting for
     // .amp-doc-host[style="visibility: visible;"]
@@ -45,7 +45,7 @@ describes.endtoend(
       await validateCta(controller);
     });
 
-    // TODO:(ccordry): write test that checks attribution click -- will
+    // TODO(ccordry): write test that checks attribution click -- will
     // require additional changes to controller interface.
   }
 );
@@ -97,7 +97,7 @@ async function validateCta(controller) {
   await expect(controller.getElementAttribute(ctaButton, 'role')).to.equal(
     'link'
   );
-  // Design spec: 32px from bottom, min-width 120px, 36px hight.
+  // Design spec: 32px from bottom, min-width 120px, 36px height.
   await expect(controller.getElementRect(ctaButton)).to.include({
     bottom: viewport.HEIGHT - 32,
     height: 36,
