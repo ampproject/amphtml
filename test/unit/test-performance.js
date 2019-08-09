@@ -1262,8 +1262,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         return performanceObserver;
       });
 
-      fakeWin.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
-
       // Install services on fakeWin so some behaviors can be stubbed.
       installRuntimeServices(fakeWin);
 
@@ -1300,12 +1298,78 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       (windowEventListeners[eventName] || []).forEach(cb => cb(event));
     }
 
-    it('for browsers that support the visibilitychange event', () => {
+    it('for Chrome 76', () => {
       // Specify an Android Chrome user agent, which supports the
       // visibilitychange event.
       sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
       sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
       sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
+
+      // Fake the Performance API.
+      fakeWin.PerformanceObserver.supportedEntryTypes = ['layoutShift'];
+
+      // Document should be initially visible.
+      expect(fakeWin.document.visibilityState).to.equal('visible');
+
+      // Fake layoutShift that occured before the Performance service is started.
+      fakeWin.performance.getEntriesByType
+        .withArgs('layoutShift')
+        .returns([
+          {entryType: 'layoutShift', value: 0.25},
+          {entryType: 'layoutShift', value: 0.3},
+        ]);
+
+      const perf = getPerformance();
+      // visibilitychange/beforeunload listeners are now added.
+      perf.coreServicesAvailable();
+
+      // The document has become hidden, e.g. via the user switching tabs.
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'cls',
+        delta: 0.55,
+      });
+
+      // The user returns to the tab, and more layout shift occurs.
+      toggleVisibility(fakeWin, true);
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layoutShift', value: 1},
+            {entryType: 'layoutShift', value: 0.0001},
+          ];
+        },
+      });
+
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[1]).to.be.jsonEqual({
+        label: 'cls-2',
+        delta: 1.5501,
+      });
+
+      // Any more layout shift shouldn't be reported.
+      toggleVisibility(fakeWin, true);
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [{entryType: 'layoutShift', value: 2}];
+        },
+      });
+
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(2);
+    });
+
+    it('for Chrome 77', () => {
+      // Specify an Android Chrome user agent, which supports the
+      // visibilitychange event.
+      sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
+
+      // Fake the Performance API.
+      fakeWin.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
 
       // Document should be initially visible.
       expect(fakeWin.document.visibilityState).to.equal('visible');
@@ -1376,6 +1440,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       // the visibilitychange event.
       sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(true);
 
+      // Fake the Performance API.
+      fakeWin.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
+
       // Document should be initially visible.
       expect(fakeWin.document.visibilityState).to.equal('visible');
 
@@ -1410,6 +1477,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
       sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
       sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
+
+
+      // Fake the Performance API.
+      fakeWin.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
 
       const perf = getPerformance();
       perf.coreServicesAvailable();

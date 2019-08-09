@@ -140,11 +140,23 @@ export class Performance {
     this.aggregateShiftScore_ = 0;
 
     /**
-     * Whether the user agent supports the Layout Instability API.
+     * Whether the user agent supports the Layout Instability API that shipped
+     * with Chrome 76.
      *
      * @private {boolean}
      */
-    this.supportsLayoutInstabilityAPI_ =
+    this.supportsLayoutInstabilityAPIv76_ =
+      this.win.PerformanceObserver &&
+      this.win.PerformanceObserver.supportedEntryTypes &&
+      this.win.PerformanceObserver.supportedEntryTypes.includes('layoutShift');
+
+    /**
+     * Whether the user agent supports the Layout Instability API that shipped
+     * with Chrome 77.
+     *
+     * @private {boolean}
+     */
+    this.supportsLayoutInstabilityAPIv77_ =
       this.win.PerformanceObserver &&
       this.win.PerformanceObserver.supportedEntryTypes &&
       this.win.PerformanceObserver.supportedEntryTypes.includes('layout-shift');
@@ -218,7 +230,7 @@ export class Performance {
       this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
     }
 
-    if (this.supportsLayoutInstabilityAPI_) {
+    if (this.supportsLayoutInstabilityAPIv76_ || this.supportsLayoutInstabilityAPIv77_) {
       // Register a handler to record the layout shift metric when the page
       // enters the hidden lifecycle state.
       this.win.addEventListener(
@@ -302,6 +314,8 @@ export class Performance {
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layoutJank') {
         this.aggregateJankScore_ += entry.fraction;
+      } else if (entry.entryType === 'layoutShift') {
+        this.aggregateShiftScore_ += entry.value;
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
         // likely in response to the user's action.
@@ -336,7 +350,17 @@ export class Performance {
       entryTypesToObserve.push('layoutJank');
     }
 
-    if (this.supportsLayoutInstabilityAPI_) {
+    if (this.supportsLayoutInstabilityAPIv76_) {
+      // Programmatically read once as currently PerformanceObserver does not
+      // report past entries as of Chrome 61.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+      this.win.performance
+        .getEntriesByType('layoutShift')
+        .forEach(processEntry);
+      entryTypesToObserve.push('layoutShift');
+    }
+
+    if (this.supportsLayoutInstabilityAPIv77_) {
       // Layout shift entries are not available from the Performance Timeline
       // through `getEntriesByType`, so a separate PerformanceObserver is
       // required for this metric.
@@ -392,7 +416,7 @@ export class Performance {
       if (this.win.PerformanceLayoutJank) {
         this.tickLayoutJankScore_();
       }
-      if (this.supportsLayoutInstabilityAPI_) {
+      if (this.supportsLayoutInstabilityAPIv76_ || this.supportsLayoutInstabilityAPIv77_) {
         this.tickLayoutShiftScore_();
       }
     }
@@ -407,7 +431,7 @@ export class Performance {
       if (this.win.PerformanceLayoutJank) {
         this.tickLayoutJankScore_();
       }
-      if (this.supportsLayoutInstabilityAPI_) {
+      if (this.supportsLayoutInstabilityAPIv76_ || this.supportsLayoutInstabilityAPIv77_) {
         this.tickLayoutShiftScore_();
       }
     }
