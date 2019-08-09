@@ -485,6 +485,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   createAdOverlay_() {
     const root = this.doc_.createElement('div');
+    root.className = 'i-amphtml-ad-overlay-host';
 
     this.adBadgeContainer_ = this.doc_.createElement('aside');
     this.adBadgeContainer_.className = 'i-amphtml-ad-overlay-container';
@@ -1017,6 +1018,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       'div',
       dict({
         'role': 'button',
+        'class': 'i-amphtml-attribution-host',
       })
     );
 
