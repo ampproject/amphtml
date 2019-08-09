@@ -265,13 +265,12 @@ function serialize(entries, resourceTimingSpec, element) {
 
 /**
  * Serializes resource timing entries according to the resource timing spec.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element amp-analytics element.
  * @param {!JsonObject} resourceTimingSpec
  * @return {!Promise<string>}
  */
-function serializeResourceTiming(ampdoc, element, resourceTimingSpec) {
-  const {win} = ampdoc;
+function serializeResourceTiming(element, resourceTimingSpec) {
+  const {win} = element.getAmpDoc();
   // Check that the performance timing API exists before and that the spec is
   // valid before proceeding. If not, we simply return an empty string.
   if (
@@ -309,16 +308,15 @@ function serializeResourceTiming(ampdoc, element, resourceTimingSpec) {
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element amp-analytics element.
  * @param {!JsonObject|undefined} spec resource timing spec.
  * @param {number} startTime start timestamp.
  * @return {!Promise<string>}
  */
-export function getResourceTiming(ampdoc, element, spec, startTime) {
+export function getResourceTiming(element, spec, startTime) {
   // Only allow collecting timing within 1s
   if (spec && Date.now() < startTime + 60 * 1000) {
-    return serializeResourceTiming(ampdoc, element, spec);
+    return serializeResourceTiming(element, spec);
   } else {
     return Promise.resolve('');
   }

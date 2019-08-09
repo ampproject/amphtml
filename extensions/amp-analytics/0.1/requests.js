@@ -129,7 +129,6 @@ export class RequestHandler {
     this.lastTrigger_ = trigger;
     const bindings = this.variableService_.getMacros(this.element_);
     bindings['RESOURCE_TIMING'] = getResourceTiming(
-      this.ampdoc_,
       this.element_,
       trigger['resourceTimingSpec'],
       this.startTime_
