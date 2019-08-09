@@ -22,6 +22,7 @@ const path = require('path');
 const {endBuildStep} = require('./helpers');
 const {jisonPaths} = require('../config');
 
+// set imports for each parser from directory build/parsers/
 const imports = new Map();
 imports.set(
   'cssParser',
@@ -29,7 +30,8 @@ imports.set(
 );
 imports.set(
   'bindParser',
-  "import {AstNode, AstNodeType} from '../../extensions/amp-bind/0.1/bind-expr-defines';"
+  "import {AstNode, AstNodeType} from '../../extensions/amp-bind/0.1/bind-expr-defines';\n" +
+    "import {tryParseJson} from '../../src/json';"
 );
 
 /**

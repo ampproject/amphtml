@@ -127,6 +127,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'build-system/dompurify.extern.js',
     'build-system/event-timing.extern.js',
     'build-system/layout-jank.extern.js',
+    'build-system/layout-shift.extern.js',
     'build-system/performance-observer.extern.js',
     'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
@@ -330,13 +331,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       );
       compilerOptions.conformance_configs =
         'build-system/conformance-config.textproto';
-      // TODO(cvializ, #23417): Remove these after fixing React.Component type errors.
-      compilerOptions.hide_warnings_for.push(
-        'extensions/amp-date-picker/0.1/date-picker-common.js',
-        'extensions/amp-date-picker/0.1/react-utils.js',
-        'extensions/amp-date-picker/0.1/single-date-picker.js',
-        'extensions/amp-date-picker/0.1/wrappers/maximum-nights.js'
-      );
     } else {
       compilerOptions.jscomp_warning.push('accessControls', 'moduleLoad');
       compilerOptions.jscomp_off.push('unknownDefines');
