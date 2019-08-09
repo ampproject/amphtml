@@ -114,8 +114,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         'foo': 'AAA(BBB(1))',
       })
         .then(() =>
-          // TODO: fix this, should be 'AAA(BBB(1,2))'
-          // This is a resutl of `getNameArgs` strange behavior. Leaving here as
+          // This is a result of `getNameArgs` strange behavior. Leaving here as
           // pseudo documentation. We mostly avoid this problem, as now we expand any
           // valid macros when they are seen in `Variables#expandTemplate`.
           check('${foo}', 'AAA(BBB(1%2C2))', {
@@ -129,7 +128,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
           })
         )
         .then(() =>
-          // TODO: fix this, should be 'AAA(1,2)%26BBB(3,4)%26CCC(5,6)%26DDD(7,8)
           // See comment about getNameArgs above.
           check('${all}', 'AAA(1%2C2)%26BBB(3%2C4)%26CCC(5%2C6)%26DDD(7,8)', {
             'a': 'AAA',
