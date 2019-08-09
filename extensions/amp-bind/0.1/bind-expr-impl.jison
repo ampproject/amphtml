@@ -283,7 +283,7 @@ primitive:
         // JSON doesn't recognize single-quotes, so use double-quote in
         // leading/trailing chars and escape double-quote in the string.
         const string = yytext.substr(1, yyleng - 2);
-        const parsed = tryParseJson(`"${string.replace('"', '\\"')}"`);
+        const parsed = tryParseJson(`"${string.replace(/"/g, '\\"')}"`);
         this.$ = new AstNode(AstNodeType.LITERAL, null, parsed || string);
       %}
   | NUMBER

@@ -221,8 +221,7 @@ describe('BindExpression', () => {
       expect(evaluate('"\\\\u041f"')).to.equal('\\u041f');
 
       // Double quotes inside the string should be escaped.
-      expect(evaluate("'a\"b'")).to.equal('a"b');
-      expect(evaluate('"a\'b"')).to.equal("a'b");
+      expect(evaluate('\'a"b"c\'')).to.equal('a"b"c');
     });
 
     it('whitelisted functions', () => {
