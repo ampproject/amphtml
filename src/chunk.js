@@ -66,12 +66,12 @@ export function startupChunk(document, fn, opt_makesBodyVisible) {
     return;
   }
   const service = chunkServiceForDoc(document.documentElement);
+  service.runForStartup(fn);
   if (opt_makesBodyVisible) {
     service.runForStartup(() => {
       service.bodyIsVisible_ = true;
     });
   }
-  service.runForStartup(fn);
 }
 
 /**
@@ -310,7 +310,7 @@ class Chunks {
     /** @private @const {function(?IdleDeadline)} */
     this.boundExecute_ = this.execute_.bind(this);
     /** @private {number} */
-    this.timeSinceLastExecution_ = Date.now();
+    this.durationOfLastExecution_ = 0;
     /** @private {boolean} */
     this.macroAfterLongTask_ = isExperimentOn(
       this.win_,
@@ -408,20 +408,43 @@ class Chunks {
    * @private
    */
   execute_(idleDeadline) {
-    this.scheduledImmediateInvocation_ = false;
     const t = this.nextTask_(/* opt_dequeue */ true);
     if (!t) {
+      this.scheduledImmediateInvocation_ = false;
+      this.durationOfLastExecution_ = 0;
       return false;
     }
+    let before;
     try {
-      const before = Date.now();
-      this.timeSinceLastExecution_ = before;
+      before = Date.now();
       t.runTask_(idleDeadline);
-      dev().fine(TAG, t.getName_(), 'Chunk duration', Date.now() - before);
     } finally {
-      resolved.then(() => {
-        this.schedule_();
-      });
+      // We want to capture the time of the entire task duration including
+      // scheduled immediate (from resolved promises) micro tasks.
+      // Lacking a better way to do this we just scheduled 10 nested
+      // micro tasks.
+      resolved
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then(() => {
+          this.scheduledImmediateInvocation_ = false;
+          this.durationOfLastExecution_ += Date.now() - before;
+          dev().fine(
+            TAG,
+            t.getName_(),
+            'Chunk duration',
+            Date.now() - before,
+            this.durationOfLastExecution_
+          );
+
+          this.schedule_();
+        });
     }
     return true;
   }
@@ -438,8 +461,9 @@ class Chunks {
     if (
       this.macroAfterLongTask_ &&
       this.bodyIsVisible_ &&
-      Date.now() - this.timeSinceLastExecution_ > 5
+      this.durationOfLastExecution_ > 5
     ) {
+      this.durationOfLastExecution_ = 0;
       this.requestMacroTask_();
       return;
     }
