@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 'use strict';
 
-const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
+const {fillIframeSrcdoc} = require('./helpers');
 
 /**
  * Percy preserves the DOM object as snapshot so the content of iframe is not
@@ -24,8 +25,6 @@ const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-dif
  */
 module.exports = {
   'page view': async (page, name) => {
-    await page.$eval("iframe", el => {
-        el.srcdoc = el.contentDocument.documentElement.innerHTML;
-    });
+    await fillIframeSrcdoc(page);
   },
 };

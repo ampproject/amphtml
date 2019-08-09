@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>AMP Inabox Test</title>
+</head>
+
+<body>
+  <script>
+    window.addEventListener('message', function(event) {
+      if ((event.data) == 'view') {
+        document.documentElement.classList.add('view');
+      }
+      if ((event.data) == 'activeview') {
+        document.documentElement.classList.add('activeview');
+      }
+    });
+  </script>
+  <h1>AMPHTML ad - Inabox - /amphtml-ads/resource/amp-creative.html</h1>
+  <iframe
+      frameBorder="0"
+      class="inabox-test"
+      id="iframe"
+      src="/examples/visual-tests/amphtml-ads/resource/amp-creative.html"
+      scrolling="no"
+      width="300" height="200">
+  </iframe>
+  <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
+</body>
