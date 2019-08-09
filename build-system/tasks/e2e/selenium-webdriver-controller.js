@@ -603,14 +603,6 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @param {number} index
-   * @return {!Promise}
-   */
-  async switchToFrameNum(index) {
-    await this.driver.switchTo().frame(index);
-  }
-
-  /**
    * @return {!Promise}
    */
   async switchToParent() {
