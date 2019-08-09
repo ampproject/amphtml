@@ -2,8 +2,8 @@
 $category@: dynamic-content
 formats:
   - websites
-  - email
   - stories
+  - email
 teaser:
   text: Dynamically downloads data and creates list items using a template.
 ---
