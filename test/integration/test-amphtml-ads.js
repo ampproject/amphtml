@@ -268,9 +268,9 @@ describe('A more real AMPHTML image ad', () => {
     );
     return Promise.all([viewPromise, visiblePromise, activeViewPromise]).then(
       () => {
-        // Add a 200ms "buffer" to account for possible browser jankiness
-        expect(visibleTime - viewTime).to.be.above(visibleDelay - 200);
-        expect(activeViewTime - viewTime).to.be.above(activeViewDelay - 200);
+        // Add a 500ms "buffer" to account for possible browser jankiness
+        expect(visibleTime - viewTime).to.be.above(visibleDelay - 500);
+        expect(activeViewTime - viewTime).to.be.above(activeViewDelay - 500);
       }
     );
   }
