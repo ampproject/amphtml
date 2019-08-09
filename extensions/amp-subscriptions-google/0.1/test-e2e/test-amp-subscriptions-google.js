@@ -33,10 +33,12 @@ describes.endtoend(
       await controller.click(btn);
 
       // Switch to SwG's outer iFrame
-      controller.switchToFrameNum(2);
+      const outerFrame = await controller.findElement('iframe.swg-dialog');
+      await controller.switchToFrame(outerFrame);
 
       // Switch to SwG's inner iFrame
-      controller.switchToFrameNum(0);
+      const innerFrame = await controller.findElement('iframe');
+      await controller.switchToFrame(innerFrame);
 
       const text = await controller.findElement('.K2Fgzb');
       await expect(text).to.exist;
