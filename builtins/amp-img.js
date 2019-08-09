@@ -198,6 +198,11 @@ export class AmpImg extends BaseElement {
     if (sizes) {
       return;
     }
+    // Auto-sizes are not compatible with intrinsic layout.
+    const layout = this.getLayout();
+    if (layout === Layout.INTRINSIC) {
+      return;
+    }
     // Sizes is useless without the srcset attribute or if the srcset
     // attribute uses the x descriptor.
     const srcset = this.element.getAttribute('srcset');
@@ -215,7 +220,7 @@ export class AmpImg extends BaseElement {
     const entry = `(max-width: ${viewportWidth}px) ${width}px, `;
     let defaultSize = width + 'px';
 
-    if (this.getLayout() !== Layout.FIXED) {
+    if (layout !== Layout.FIXED) {
       const ratio = Math.round((width * 100) / viewportWidth);
       defaultSize = Math.max(ratio, 100) + 'vw';
     }
