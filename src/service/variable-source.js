@@ -43,6 +43,10 @@ const WAITFOR_EVENTS = {
   LOAD_END: 4,
 };
 
+/**
+ * A list of events on which event they should wait
+ * @const {!Object<string, number>}
+ */
 const NAV_TIMING_WAITFOR_EVENTS = {
   // ready on viewer first visible
   'navigationStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
@@ -85,14 +89,9 @@ export function getTimingDataAsync(win, startEvent, endEvent) {
     NAV_TIMING_WAITFOR_EVENTS[startEvent] || WAITFOR_EVENTS.LOAD;
   const endWaitForEvent = endEvent
     ? NAV_TIMING_WAITFOR_EVENTS[endEvent] || WAITFOR_EVENTS.LOAD
-    : null;
+    : startWaitForEvent;
 
-  let waitForEvent;
-  if (!endWaitForEvent) {
-    waitForEvent = startWaitForEvent;
-  } else {
-    waitForEvent = Math.max(startWaitForEvent, endWaitForEvent);
-  }
+  const waitForEvent = Math.max(startWaitForEvent, endWaitForEvent);
 
   // set wait for onload to be default
   let readyPromise;
@@ -109,10 +108,9 @@ export function getTimingDataAsync(win, startEvent, endEvent) {
     // event loop.
     const timer = Services.timerFor(win);
     readyPromise = loadPromise(win).then(() => timer.promise(1));
-  } else {
-    dev().error('NAV-TIMING', 'waitForEvent not found %s', waitForEvent);
-    readyPromise = loadPromise(win);
   }
+
+  devAssert(readyPromise, 'waitForEvent not supported ' + waitForEvent);
 
   return readyPromise.then(() => {
     return getTimingDataSync(win, startEvent, endEvent);
