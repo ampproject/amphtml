@@ -177,7 +177,7 @@ const PAGE_LOAD_TIMEOUT_MS = 5000;
  * prevent accidental duplicate advances.
  * @private @const {number}
  */
-const NAVIGATION_DEBOUNCE_THRESHOLD_MS = 750;
+const NAVIGATION_DEBOUNCE_THRESHOLD_MS = 300;
 
 /**
  * Single page ads may be injected later. If the original story contains 0 media
@@ -1377,7 +1377,7 @@ export class AmpStory extends AMP.BaseElement {
         isAutomaticAdvancement(previousAdvancement.mode) &&
         isManualAdvancement(currentAdvancement.mode)
       ) {
-        return;
+        return Promise.resolve();
       }
     }
 
