@@ -1307,14 +1307,38 @@ describes.realWin('CustomElement', {amp: true}, env => {
         const sizer = doc.createElement('div');
         element.sizerElement = sizer;
         element.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
-        expect(parseInt(sizer.style.paddingTop, 10)).to.equal(0);
-        expect(element.sizerElement).to.be.null;
         expect(element.style.height).to.equal('111px');
         expect(element.style.width).to.equal('222px');
         expect(element.style.marginTop).to.equal('1px');
         expect(element.style.marginRight).to.equal('2px');
         expect(element.style.marginBottom).to.equal('3px');
         expect(element.style.marginLeft).to.equal('4px');
+      });
+
+      it('should reset sizer for responsive layout', () => {
+        const element = new ElementClass();
+        element.layout_ = Layout.RESPONSIVE;
+        const sizer = doc.createElement('div');
+        element.sizerElement = sizer;
+        element.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
+        expect(sizer.style.paddingTop).to.equal('0px');
+        expect(element.sizerElement).to.be.null;
+      });
+
+      it('should reset sizer for intrinsic layout', () => {
+        const element = new ElementClass();
+        element.layout_ = Layout.INTRINSIC;
+        const sizer = doc.createElement('i-amphtml-sizer');
+        const intrinsicSizer = doc.createElement('img');
+        intrinsicSizer.classList.add('i-amphtml-intrinsic-sizer');
+        intrinsicSizer.setAttribute(
+          'src',
+          'data:image/svg+xml;charset=utf-8,<svg height=&quot;610&quot; width=&quot;1080&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>'
+        );
+        sizer.appendChild(intrinsicSizer);
+        element.appendChild(sizer);
+        element.changeSize(111);
+        expect(intrinsicSizer.getAttribute('src')).to.equal('');
       });
 
       it('should NOT apply media condition in template', () => {
