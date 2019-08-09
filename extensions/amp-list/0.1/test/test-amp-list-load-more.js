@@ -224,6 +224,39 @@ describes.realWin(
         list.container_;
         expect(list.container_.children).to.have.lengthOf(4);
       });
+
+      // TODO(cathyxz) Create a mirror test for automatic amp-list loading once the automatic tests are unskipped
+      it('should call focus on the last element after load more is clicked', async () => {
+        sandbox
+          .stub(list.ssrTemplateHelper_, 'renderTemplate')
+          .returns(Promise.resolve([]));
+        const updateBindingsStub = sandbox.stub(list, 'updateBindings_');
+        sandbox
+          .stub(list, 'maybeRenderLoadMoreTemplates_')
+          .returns(Promise.resolve([]));
+
+        const div1 = doc.createElement('div');
+        div1.textContent = '1';
+        const div2 = doc.createElement('div');
+        div2.textContent = '2';
+        updateBindingsStub.onCall(0).returns(Promise.resolve([div1, div2]));
+        const focusSpy = sandbox.spy(div2, 'focus');
+
+        await list.layoutCallback();
+
+        const div3 = doc.createElement('div');
+        div3.textContent = '3';
+        const div4 = doc.createElement('div');
+        div4.textContent = '4';
+        updateBindingsStub.onCall(1).returns(Promise.resolve([div3, div4]));
+
+        await list.loadMoreCallback_(
+          /* opt_reload */ false,
+          /* opt_fromClick */ true
+        );
+
+        await expect(focusSpy).to.have.been.called;
+      });
     });
   }
 );
