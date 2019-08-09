@@ -230,7 +230,10 @@ export class Performance {
       this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
     }
 
-    if (this.supportsLayoutInstabilityAPIv76_ || this.supportsLayoutInstabilityAPIv77_) {
+    if (
+      this.supportsLayoutInstabilityAPIv76_ ||
+      this.supportsLayoutInstabilityAPIv77_
+    ) {
       // Register a handler to record the layout shift metric when the page
       // enters the hidden lifecycle state.
       this.win.addEventListener(
@@ -416,7 +419,10 @@ export class Performance {
       if (this.win.PerformanceLayoutJank) {
         this.tickLayoutJankScore_();
       }
-      if (this.supportsLayoutInstabilityAPIv76_ || this.supportsLayoutInstabilityAPIv77_) {
+      if (
+        this.supportsLayoutInstabilityAPIv76_ ||
+        this.supportsLayoutInstabilityAPIv77_
+      ) {
         this.tickLayoutShiftScore_();
       }
     }
@@ -431,7 +437,10 @@ export class Performance {
       if (this.win.PerformanceLayoutJank) {
         this.tickLayoutJankScore_();
       }
-      if (this.supportsLayoutInstabilityAPIv76_ || this.supportsLayoutInstabilityAPIv77_) {
+      if (
+        this.supportsLayoutInstabilityAPIv76_ ||
+        this.supportsLayoutInstabilityAPIv77_
+      ) {
         this.tickLayoutShiftScore_();
       }
     }

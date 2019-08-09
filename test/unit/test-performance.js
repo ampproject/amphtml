@@ -1478,7 +1478,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
       sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
 
-
       // Fake the Performance API.
       fakeWin.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
 
