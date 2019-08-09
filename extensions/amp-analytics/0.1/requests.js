@@ -140,7 +140,9 @@ export class RequestHandler {
       this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
         this.baseUrl,
         expansionOption,
-        this.element_
+        this.element_,
+        bindings,
+        this.whiteList_
       );
 
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {

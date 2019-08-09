@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
 import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
@@ -241,9 +240,11 @@ export class VariableService {
    * @param {string} template The template to expand.
    * @param {!ExpansionOptions} options configuration to use for expansion.
    * @param {!Element} element amp-analytics element.
+   * @param {?} opt_bindings
+   * @param {?} opt_whitelist
    * @return {!Promise<string>} The expanded string.
    */
-  expandTemplate(template, options, element) {
+  expandTemplate(template, options, element, opt_bindings, opt_whitelist) {
     return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
@@ -276,29 +277,28 @@ export class VariableService {
             options.iterations - 1,
             true /* noEncode */
           ),
-          element
+          element,
+          opt_bindings,
+          opt_whitelist
         );
       }
 
-      const bindings = this.getMacros(element);
+      const bindings = opt_bindings || this.getMacros(element);
       const urlReplacements = Services.urlReplacementsForDoc(element);
-      const whitelist = element.hasAttribute('sandbox')
-        ? SANDBOX_AVAILABLE_VARS
-        : undefined;
 
       return Promise.resolve(value)
         .then(value => {
           if (isArray(value)) {
             return Promise.all(
               value.map(item =>
-                urlReplacements.expandStringAsync(item, bindings, whitelist)
+                urlReplacements.expandStringAsync(item, bindings, opt_whitelist)
               )
             );
           }
           return urlReplacements.expandStringAsync(
             value + argList,
             bindings,
-            whitelist
+            opt_whitelist
           );
         })
         .then(value => {
