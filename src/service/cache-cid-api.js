@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {dev, user} from '../log';
+import {dev} from '../log';
 import {dict} from '../utils/object';
 import {getSourceOrigin} from '../url';
 
