@@ -15,7 +15,6 @@
  */
 
 import {Deferred, tryResolve} from '../../../src/utils/promise';
-import {LOAD_FAILURE_PROPERTY} from '../../../src/event-helper';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
 
@@ -43,13 +42,6 @@ const PROTECTED_CSS_CLASS_NAMES = [
  * @const {!Array<string>}
  */
 const PROTECTED_ATTRIBUTES = ['id', 'src', 'class', 'autoplay'];
-
-/**
- * Property names that should be removed from an element when updating its
- * sources.
- * @const {!Array<string>}
- */
-const PROPERTIES_TO_REMOVE = [LOAD_FAILURE_PROPERTY];
 
 /**
  * Determines whether a CSS class name is allowed to be removed or copied from
@@ -127,18 +119,6 @@ function copyAttributes(fromEl, toEl) {
     if (!isProtectedAttributeName(attributeName)) {
       toEl.setAttribute(attributeName, attributeValue);
     }
-  }
-}
-
-/**
- * Removes properties from element.
- * @param {!Element} el
- * @private
- */
-function removeProperties(el) {
-  for (let i = 0; i < PROPERTIES_TO_REMOVE.length; i++) {
-    const property = PROPERTIES_TO_REMOVE[i];
-    el[property] = undefined;
   }
 }
 
@@ -386,7 +366,6 @@ export class UpdateSourcesTask extends MediaTask {
   /** @override */
   executeInternal(mediaEl) {
     Sources.removeFrom(mediaEl);
-    removeProperties(mediaEl);
     this.newSources_.applyToElement(mediaEl);
     return Promise.resolve();
   }

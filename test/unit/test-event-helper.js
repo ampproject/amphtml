@@ -15,7 +15,7 @@
  */
 
 import {
-  LOAD_FAILURE_PROPERTY,
+  MEDIA_LOAD_FAILURE_SRC_PROPERTY,
   createCustomEvent,
   isLoaded,
   listen,
@@ -57,8 +57,10 @@ describe('EventHelper', () => {
           loadObservable.add(callback);
         } else if (type == 'error') {
           errorObservable.add(callback);
+        } else if (type == 'loadedmetadata') {
+          loadObservable.add(callback);
         } else {
-          expect(type).to.equal('load or error');
+          expect(type).to.equal('load, loadedmetadata, or error');
         }
       },
       removeEventListener(type, callback) {
@@ -66,9 +68,14 @@ describe('EventHelper', () => {
           loadObservable.remove(callback);
         } else if (type == 'error') {
           errorObservable.remove(callback);
+        } else if (type == 'loadedmetadata') {
+          loadObservable.remove(callback);
         } else {
-          expect(type).to.equal('load or error');
+          expect(type).to.equal('load, loadedmetadata, or error');
         }
+      },
+      hasAttribute(attr) {
+        return !!this[attr];
       },
     };
   });
@@ -194,11 +201,25 @@ describe('EventHelper', () => {
     });
   });
 
-  it('loadPromise - element already errored', () => {
-    element[LOAD_FAILURE_PROPERTY] = true;
+  it('loadPromise - media element already errored', () => {
+    element.tagName = 'VIDEO';
+    element.currentSrc = 'foo.com/video.mp4';
+    element[MEDIA_LOAD_FAILURE_SRC_PROPERTY] = 'foo.com/video.mp4';
     return loadPromise(element).catch(result => {
       expect(result).to.equal(element);
     });
+  });
+
+  it('loadPromise - media element errored but retries diffent src', () => {
+    element.tagName = 'VIDEO';
+    element.src = 'foo.com/video.mp4';
+    element.currentSrc = 'foo.com/video.mp4';
+    element[MEDIA_LOAD_FAILURE_SRC_PROPERTY] = 'bar.com/other-video.mp4';
+    const promise = loadPromise(element).then(result => {
+      expect(result).to.equal(element);
+    });
+    loadObservable.fire(getEvent('loadedmetadata', element));
+    return promise;
   });
 
   it('loadPromise - load event', () => {
@@ -226,7 +247,9 @@ describe('EventHelper', () => {
     return promise;
   });
 
-  it('loadPromise - error event should mark element as errored', () => {
+  it('loadPromise - error event should mark media element as errored', () => {
+    element.tagName = 'VIDEO';
+    element.currentSrc = 'foo.com/video.mp4';
     const promise = loadPromise(element)
       .then(result => {
         assert.fail('must never be here: ' + result);
@@ -236,7 +259,9 @@ describe('EventHelper', () => {
           throw new Error('Should not be reached.');
         },
         () => {
-          expect(element[LOAD_FAILURE_PROPERTY]).to.be.true;
+          expect(element[MEDIA_LOAD_FAILURE_SRC_PROPERTY]).to.equal(
+            element.currentSrc
+          );
         }
       );
     errorObservable.fire(getEvent('error', element));

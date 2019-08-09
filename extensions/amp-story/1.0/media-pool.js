@@ -28,7 +28,7 @@ import {
   UnmuteTask,
   UpdateSourcesTask,
 } from './media-tasks';
-import {LOAD_FAILURE_PROPERTY} from '../../../src/event-helper';
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
@@ -301,7 +301,7 @@ export class MediaPool {
       return;
     }
     const media = target.tagName === 'SOURCE' ? target.parentElement : target;
-    media[LOAD_FAILURE_PROPERTY] = media.error || true;
+    media[MEDIA_LOAD_FAILURE_SRC_PROPERTY] = media.currentSrc || true;
   }
 
   /**
