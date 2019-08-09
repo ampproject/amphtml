@@ -40,10 +40,9 @@ const queue = [];
 let inProgress = 0;
 
 // There's a race in the gulp plugin of closure compiler that gets exposed
-// during slower compilation operations.
+// during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS =
-  argv.pseudo_names || argv.full_sourcemaps ? 1 : 4;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
@@ -332,13 +331,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       );
       compilerOptions.conformance_configs =
         'build-system/conformance-config.textproto';
-      // TODO(cvializ, #23417): Remove these after fixing React.Component type errors.
-      compilerOptions.hide_warnings_for.push(
-        'extensions/amp-date-picker/0.1/date-picker-common.js',
-        'extensions/amp-date-picker/0.1/react-utils.js',
-        'extensions/amp-date-picker/0.1/single-date-picker.js',
-        'extensions/amp-date-picker/0.1/wrappers/maximum-nights.js'
-      );
     } else {
       compilerOptions.jscomp_warning.push('accessControls', 'moduleLoad');
       compilerOptions.jscomp_off.push('unknownDefines');
