@@ -25,7 +25,7 @@ import {
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {toggleExperiment} from '../../src/experiments';
 
-describe('chunk', () => {
+describe('chunk2', () => {
   beforeEach(() => {
     activateChunkingForTesting();
   });
@@ -101,6 +101,22 @@ describe('chunk', () => {
       });
 
       basicTests(env);
+
+      it('should support nested micro tasks in chunks', done => {
+        let progress = '';
+        startupChunk(env.win.document, () => {
+          progress += '1';
+          Promise.resolve()
+            .then(() => (progress += 2))
+            .then(() => (progress += 3))
+            .then(() => (progress += 4))
+            .then(() => (progress += 5));
+        });
+        startupChunk(env.win.document, () => {
+          expect(progress).to.equal('12345');
+          done();
+        });
+      });
     }
   );
 
@@ -349,6 +365,7 @@ describe('long tasks', () => {
       let sandbox;
       let clock;
       let progress;
+      let postMessageCalls;
 
       function complete(str, long) {
         return function(unusedIdleDeadline) {
@@ -367,6 +384,7 @@ describe('long tasks', () => {
       }
 
       beforeEach(() => {
+        postMessageCalls = 0;
         subscriptions = {};
         sandbox = sinon.sandbox;
         clock = sandbox.useFakeTimers();
@@ -382,6 +400,8 @@ describe('long tasks', () => {
 
         env.win.postMessage = function(key) {
           expect(key).to.equal('amp-macro-task');
+          postMessageCalls++;
+          runSubs();
         };
 
         progress = '';
@@ -402,25 +422,59 @@ describe('long tasks', () => {
       });
 
       it('should execute chunks after long task in a macro task', done => {
-        startupChunk(env.win.document, complete('before', true));
+        startupChunk(env.win.document, complete('1', true));
+        startupChunk(env.win.document, complete('2', false));
         startupChunk(
           env.win.document,
-          complete('init', false),
+          function() {
+            complete('3', false)();
+            expect(progress).to.equal('123');
+            expect(postMessageCalls).to.equal(0);
+          },
           /* make body visible */ true
         );
-
-        startupChunk(env.win.document, complete('a', false));
-        startupChunk(env.win.document, complete('b', false));
         startupChunk(env.win.document, () => {
-          expect(progress).to.equal('beforeinitab');
-          complete('c', true)();
-          runSubs();
+          expect(postMessageCalls).to.equal(1);
+          expect(progress).to.equal('123');
+          complete('4', false)();
         });
         startupChunk(env.win.document, () => {
-          expect(progress).to.equal('beforeinitabc');
+          expect(postMessageCalls).to.equal(1);
+          expect(progress).to.equal('1234');
+        });
+        startupChunk(env.win.document, complete('5', true));
+        startupChunk(env.win.document, () => {
+          expect(postMessageCalls).to.equal(2);
+          expect(progress).to.equal('12345');
           done();
         });
       });
+
+      // Skipping Firefox due to issues with the promise ordering in
+      // the async-await polyfill that this test relies on.
+      it.configure()
+        .skipFirefox()
+        .run('should not issue a macro task after having been idle', done => {
+          (async function() {
+            startupChunk(
+              env.win.document,
+              complete('1', false),
+              /* make body visible */ true
+            );
+            // Unwind the promise queue so that subsequent invocations
+            // are scheduled into an empty task queue.
+            for (let i = 0; i < 100; i++) {
+              await Promise.resolve();
+            }
+            expect(progress).to.equal('1');
+            complete('2', true)();
+            startupChunk(env.win.document, () => {
+              expect(postMessageCalls).to.equal(0);
+              expect(progress).to.equal('12');
+              done();
+            });
+          })();
+        });
     }
   );
 });

@@ -239,6 +239,18 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<!../extensions/amp-standalone/0.1/amp-standalone.StandaloneService>}
+   */
+  static standaloneServiceForDoc(element) {
+    return /** @type {!Promise<!../extensions/amp-standalone/0.1/amp-standalone.StandaloneService>} */ (getElementServiceForDoc(
+      element,
+      'standalone',
+      'amp-standalone'
+    ));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/crypto-impl.Crypto}
    */
