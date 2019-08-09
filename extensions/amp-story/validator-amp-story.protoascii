@@ -804,6 +804,7 @@ descendant_tag_list {
   tag: "AMP-LIVE-LIST"
   tag: "AMP-LIVE-LIST"
   tag: "AMP-MATHML"
+  tag: "AMP-MEGAPHONE"
   tag: "AMP-MOWPLAYER"
   tag: "AMP-NEXXTV-PLAYER"
   tag: "AMP-O2-PLAYER"
