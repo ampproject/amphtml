@@ -36,7 +36,6 @@ import {startsWith} from '../string';
 import {urls} from '../config';
 
 const TAG_ = 'Viewer';
-const SENTINEL_ = '__AMP__';
 
 /** @enum {string} */
 export const Capability = {
@@ -73,9 +72,8 @@ let RequestResponderDef;
 export class Viewer {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Object<string, string>=} opt_initParams
    */
-  constructor(ampdoc, opt_initParams) {
+  constructor(ampdoc) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -138,15 +136,12 @@ export class Viewer {
      */
     this.messageQueue_ = [];
 
-    /** @const @private {!Object<string, string>} */
-    this.params_ = {};
-
     /**
      * Subset of this.params_ that only contains parameters in the URL hash,
      * e.g. "#foo=bar".
      * @const @private {!Object<string, string>}
      */
-    this.hashParams_ = {};
+    this.hashParams_ = map();
 
     /** @private {?Promise} */
     this.nextVisiblePromise_ = null;
@@ -172,35 +167,23 @@ export class Viewer {
     /** @private {?function()} */
     this.whenFirstVisibleResolve_ = deferred.resolve;
 
-    // Params can be passed either directly in multi-doc environment or via
-    // iframe hash/name with hash taking precedence.
-    if (opt_initParams) {
-      Object.assign(this.params_, opt_initParams);
-    } else {
-      if (this.win.name && this.win.name.indexOf(SENTINEL_) == 0) {
-        parseParams_(this.win.name.substring(SENTINEL_.length), this.params_);
-      }
-      if (this.win.location.hash) {
-        parseParams_(this.win.location.hash, this.hashParams_);
-        Object.assign(this.params_, this.hashParams_);
-      }
+    if (ampdoc.isSingleDoc()) {
+      Object.assign(this.hashParams_, parseQueryString(this.win.location.hash));
     }
 
-    dev().fine(TAG_, 'Viewer params:', this.params_);
-
-    this.isRuntimeOn_ = !parseInt(this.params_['off'], 10);
+    this.isRuntimeOn_ = !parseInt(ampdoc.getParam('off'), 10);
     dev().fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
 
     this.overtakeHistory_ = !!(
-      parseInt(this.params_['history'], 10) || this.overtakeHistory_
+      parseInt(ampdoc.getParam('history'), 10) || this.overtakeHistory_
     );
     dev().fine(TAG_, '- history:', this.overtakeHistory_);
 
-    this.setVisibilityState_(this.params_['visibilityState']);
+    this.setVisibilityState_(ampdoc.getParam('visibilityState'));
     dev().fine(TAG_, '- visibilityState:', this.getVisibilityState());
 
     this.prerenderSize_ =
-      parseInt(this.params_['prerenderSize'], 10) || this.prerenderSize_;
+      parseInt(ampdoc.getParam('prerenderSize'), 10) || this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     /**
@@ -240,19 +223,19 @@ export class Viewer {
     /** @private {string} */
     this.unconfirmedReferrerUrl_ =
       this.isEmbedded() &&
-      'referrer' in this.params_ &&
+      ampdoc.getParam('referrer') != null &&
       this.isTrustedAncestorOrigins_() !== false
-        ? this.params_['referrer']
+        ? ampdoc.getParam('referrer')
         : this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise(resolve => {
-      if (this.isEmbedded() && 'referrer' in this.params_) {
+      if (this.isEmbedded() && ampdoc.getParam('referrer') != null) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
         this.isTrustedViewer().then(isTrusted => {
           if (isTrusted) {
-            resolve(this.params_['referrer']);
+            resolve(ampdoc.getParam('referrer'));
           } else {
             resolve(this.win.document.referrer);
             if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
@@ -278,7 +261,7 @@ export class Viewer {
     /** @const @private {!Promise<string>} */
     this.viewerUrl_ = new Promise(resolve => {
       /** @const {string} */
-      const viewerUrlOverride = this.params_['viewerUrl'];
+      const viewerUrlOverride = ampdoc.getParam('viewerUrl');
       if (this.isEmbedded() && viewerUrlOverride) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
@@ -303,7 +286,7 @@ export class Viewer {
 
     // Remove hash when we have an incoming click tracking string
     // (see impression.js).
-    if (this.params_['click']) {
+    if (this.hashParams_['click']) {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
@@ -352,8 +335,8 @@ export class Viewer {
         // for visibilityState.
         // After https://github.com/ampproject/amphtml/issues/6070
         // is fixed we should probably only keep the amp_js_v check here.
-        (this.params_['origin'] ||
-          this.params_['visibilityState'] ||
+        (this.ampdoc.getParam('origin') ||
+          this.ampdoc.getParam('visibilityState') ||
           // Parent asked for viewer JS. We must be embedded.
           this.win.location.search.indexOf('amp_js_v') != -1)) ||
       this.isWebviewEmbedded() ||
@@ -401,7 +384,7 @@ export class Viewer {
    * @export
    */
   getParam(name) {
-    return this.params_[name];
+    return this.ampdoc.getParam(name);
   }
 
   /**
@@ -411,7 +394,7 @@ export class Viewer {
    * @return {boolean}
    */
   hasCapability(name) {
-    const capabilities = this.params_['cap'];
+    const capabilities = this.ampdoc.getParam('cap');
     if (!capabilities) {
       return false;
     }
@@ -432,7 +415,7 @@ export class Viewer {
    * @return {boolean}
    */
   isWebviewEmbedded() {
-    return !this.isIframed_ && this.params_['webview'] == '1';
+    return !this.isIframed_ && this.ampdoc.getParam('webview') == '1';
   }
 
   /**
@@ -1104,22 +1087,6 @@ export class Viewer {
 }
 
 /**
- * Parses the viewer parameters as a string.
- *
- * Visible for testing only.
- *
- * @param {string} str
- * @param {!Object<string, string>} allParams
- * @private
- */
-function parseParams_(str, allParams) {
-  const params = parseQueryString(str);
-  for (const k in params) {
-    allParams[k] = params[k];
-  }
-}
-
-/**
  * Creates an error for the case where a channel cannot be established.
  * @param {*=} opt_reason
  * @return {!Error}
@@ -1145,15 +1112,12 @@ export function setViewerVisibilityState(viewer, state) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!Object<string, string>=} opt_initParams
  */
-export function installViewerServiceForDoc(ampdoc, opt_initParams) {
+export function installViewerServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
     ampdoc,
     'viewer',
-    function() {
-      return new Viewer(ampdoc, opt_initParams);
-    },
+    Viewer,
     /* opt_instantiate */ true
   );
 }

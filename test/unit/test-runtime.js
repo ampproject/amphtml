@@ -1023,6 +1023,7 @@ describes.realWin(
       let importDoc;
       let hostElement;
       let ampdoc;
+      let shadowDocOptions;
 
       beforeEach(() => {
         deactivateChunking();
@@ -1030,21 +1031,27 @@ describes.realWin(
         hostElement = win.document.createElement('div');
         importDoc = win.document.implementation.createHTMLDocument('');
         importDoc.body.appendChild(win.document.createElement('child'));
-        const shadowRoot = createShadowRoot(hostElement);
-        ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
+        createShadowRoot(hostElement);
+        ampdoc = null;
 
         ampdocServiceMock
           .expects('installShadowDoc')
           .withExactArgs(
             docUrl,
-            sinon.match(arg => arg == getShadowRoot(hostElement))
+            sinon.match(arg => arg == getShadowRoot(hostElement)),
+            sinon.match(arg => {
+              shadowDocOptions = arg;
+              return 'params' in shadowDocOptions;
+            })
           )
-          .returns(ampdoc)
+          .callsFake((url, shadowRoot, options) => {
+            return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
+          })
           .atLeast(0);
         ampdocServiceMock
           .expects('getAmpDoc')
           .withExactArgs(sinon.match(arg => arg == getShadowRoot(hostElement)))
-          .returns(ampdoc)
+          .callsFake(() => ampdoc)
           .atLeast(0);
       });
 
@@ -1099,7 +1106,8 @@ describes.realWin(
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
           'test1': '12',
         });
-
+        expect(shadowDocOptions.params).to.deep.equal({'test1': '12'});
+        expect(ampdoc.getParam('test1')).to.equal('12');
         const viewer = getServiceForDoc(ampdoc, 'viewer');
         expect(viewer.getParam('test1')).to.equal('12');
       });
@@ -1389,28 +1397,35 @@ describes.realWin(
         let ampdoc;
         let shadowDoc;
         let writer;
+        let shadowDocOptions;
 
         beforeEach(() => {
           deactivateChunking();
           setShadowDomSupportedVersionForTesting(undefined);
           hostElement = win.document.createElement('div');
-          const shadowRoot = createShadowRoot(hostElement);
-          ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
+          createShadowRoot(hostElement);
+          ampdoc = null;
 
           ampdocServiceMock
             .expects('installShadowDoc')
             .withExactArgs(
               docUrl,
-              sinon.match(arg => arg == getShadowRoot(hostElement))
+              sinon.match(arg => arg == getShadowRoot(hostElement)),
+              sinon.match(arg => {
+                shadowDocOptions = arg;
+                return 'params' in shadowDocOptions;
+              })
             )
-            .returns(ampdoc)
+            .callsFake((url, shadowRoot, options) => {
+              return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
+            })
             .atLeast(0);
           ampdocServiceMock
             .expects('getAmpDoc')
             .withExactArgs(
               sinon.match(arg => arg == getShadowRoot(hostElement))
             )
-            .returns(ampdoc)
+            .callsFake(() => ampdoc)
             .atLeast(0);
         });
 
@@ -1812,7 +1827,7 @@ describes.realWin(
 
           ampdocServiceMock
             .expects('installShadowDoc')
-            .withExactArgs(
+            .withArgs(
               docUrl,
               sinon.match(arg => arg == getShadowRoot(hostElement))
             )
