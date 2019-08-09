@@ -2287,6 +2287,9 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "importance" }  # Not yet part of the html spec
+  attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
+  attrs: { name: "loading" }  # Not yet part of the html spec
   attrs: {
     name: "src"
     alternative_names: "srcset"
