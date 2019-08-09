@@ -22,6 +22,10 @@ import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
+import {
+  activateChunkingForTesting,
+  chunkInstanceForTesting,
+} from '../../src/chunk';
 import {createAmpElementForTesting} from '../../src/custom-element';
 
 describes.realWin('CustomElement', {amp: true}, env => {
@@ -142,6 +146,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
         testElementUnlayoutCallback = sandbox.spy();
         testElementPauseCallback = sandbox.spy();
         testElementResumeCallback = sandbox.spy();
+
+        chunkInstanceForTesting(env.ampdoc);
       });
 
       afterEach(() => {
