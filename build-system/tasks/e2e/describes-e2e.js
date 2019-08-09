@@ -231,6 +231,14 @@ const EnvironmentVariantMap = {
     name: 'AMPHTML ads inabox environment',
     value: {environment: 'a4a-inabox'},
   },
+  [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
+    name: 'AMPHTML ads inabox friendly frame environment',
+    value: {environment: 'a4a-inabox-friendly'},
+  },
+  [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
+    name: 'AMPHTML ads inabox safeframe environment',
+    value: {environment: 'a4a-inabox-safeframe'},
+  },
 };
 
 const envPresets = {
