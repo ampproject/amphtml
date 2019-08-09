@@ -574,7 +574,9 @@ tags: {
     value_casei: "amp-experiment-token"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  satisfies: "amp-experiment-token"
+  # Disabled because there are no active origin experiments; uncomment when
+  # there is at least one corresponding `requires` clause.
+  # satisfies: "amp-experiment-token"
 }
 # AMP metadata, name=amp-link-variable-allowed-origin
 # https://github.com/ampproject/amphtml/issues/8132

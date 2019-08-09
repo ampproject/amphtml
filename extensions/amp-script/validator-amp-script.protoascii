@@ -59,7 +59,6 @@ tags: {  # <amp-script>
   tag_name: "AMP-SCRIPT"
   disallowed_ancestor: "AMP-SCRIPT"
   requires_extension: "amp-script"
-  requires: "amp-experiment-token"
   attrs: { name: "sandbox" }
   attrs: {
     name: "script"
