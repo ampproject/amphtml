@@ -1612,7 +1612,7 @@ function createBaseCustomElementClass(win) {
         const fallbackElement = this.getFallback();
         if (fallbackElement) {
           Services.ownersForDoc(this.getAmpDoc()).scheduleLayout(
-            this.element,
+            this,
             fallbackElement
           );
         }
