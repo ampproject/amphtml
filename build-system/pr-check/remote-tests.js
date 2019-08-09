@@ -71,7 +71,6 @@ async function main() {
     }
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-
     await startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
