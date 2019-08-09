@@ -85,19 +85,15 @@ describes.endtoend(
     });
 
     it('should show/hide vid controls when the control binding changes', async () => {
-      const showButton = await controller.findElement(
-        '#showVidControlsButton'
-      );
-      const hideButton = await controller.findElement(
-        '#hideVidControlsButton'
-      );
+      const showButton = await controller.findElement('#showVidControlsButton');
+      const hideButton = await controller.findElement('#hideVidControlsButton');
       const video = await controller.findElement('#video');
       await expect(controller.getElementAttribute(video, 'controls')).to.be
         .null;
 
       await controller.click(showButton);
-      await expect(controller.getElementAttribute(video, 'controls')).to.not
-        .be.null;
+      await expect(controller.getElementAttribute(video, 'controls')).to.not.be
+        .null;
 
       await controller.click(hideButton);
       await expect(controller.getElementAttribute(video, 'controls')).to.be
