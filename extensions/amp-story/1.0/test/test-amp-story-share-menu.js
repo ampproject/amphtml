@@ -134,14 +134,16 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   it('should hide the share menu on escape key press', () => {
     shareMenu.build();
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
-    // Create escape keydown event.
-    const keydownEvent = new Event('keydown');
-    keydownEvent.keyCode = Keys.ESCAPE;
-    win.dispatchEvent(new Event(keydownEvent));
+    const clickCallbackSpy = sandbox.spy();
+    win.addEventListener('keyup', clickCallbackSpy);
 
-    expect(shareMenu.element_).not.to.have.class(VISIBLE_CLASS);
-    expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
+    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    // Create escape keyup event.
+    const keyupEvent = new Event('keyup');
+    keyupEvent.keyCode = Keys.ESCAPE;
+    win.dispatchEvent(keyupEvent);
+
+    expect(clickCallbackSpy).to.have.been.calledOnce;
   });
 
   it('should render the amp-social-share button if system share', () => {
