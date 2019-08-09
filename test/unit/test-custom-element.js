@@ -1751,10 +1751,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     element.toggleFallback(true);
     expect(element).to.have.class('amp-notsupported');
     expect(owners.scheduleLayout).to.be.calledOnce;
-    expect(owners.scheduleLayout).to.have.been.calledWith(
-      element.element,
-      fallback
-    );
+    expect(owners.scheduleLayout).to.have.been.calledWith(element, fallback);
 
     element.toggleFallback(false);
     expect(element).to.not.have.class('amp-notsupported');
