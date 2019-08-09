@@ -36,8 +36,13 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
-import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
-import {AdvancementMode, getAnalyticsService} from './story-analytics';
+import {
+  AdvancementConfig,
+  AdvancementMode,
+  TapNavigationDirection,
+  isAutomaticAdvancement,
+  isManualAdvancement,
+} from './page-advancement';
 import {AmpEvents} from '../../../src/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
@@ -102,6 +107,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
+import {getAnalyticsService} from './story-analytics';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
@@ -1365,18 +1371,11 @@ export class AmpStory extends AMP.BaseElement {
     if (previousAdvancement) {
       const elapsedMsSinceLastNavigation =
         currentAdvancement.timestamp - previousAdvancement.timestamp;
-      const previousAdvancementWasAutoAdvance =
-        previousAdvancement.mode === AdvancementMode.AUTO_ADVANCE_TIME ||
-        previousAdvancement.mode === AdvancementMode.AUTO_ADVANCE_MEDIA;
-      const currentAdvancementIsManualAdvance =
-        currentAdvancement.mode === AdvancementMode.MANUAL_ADVANCE ||
-        currentAdvancement.mode === AdvancementMode.ADVANCE_TO_ADS ||
-        currentAdvancement.mode === AdvancementMode.GO_TO_PAGE;
 
       if (
         elapsedMsSinceLastNavigation < NAVIGATION_DEBOUNCE_THRESHOLD_MS &&
-        previousAdvancementWasAutoAdvance &&
-        currentAdvancementIsManualAdvance
+        isAutomaticAdvancement(previousAdvancement.mode) &&
+        isManualAdvancement(currentAdvancement.mode)
       ) {
         return;
       }

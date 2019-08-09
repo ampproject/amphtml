@@ -20,14 +20,6 @@ import {getVariableService} from './variable-service';
 import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 
-/** @enum {string} */
-export const AdvancementMode = {
-  GO_TO_PAGE: 'goToPageAction',
-  AUTO_ADVANCE_TIME: 'autoAdvanceTime',
-  AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
-  MANUAL_ADVANCE: 'manualAdvance',
-  ADVANCE_TO_ADS: 'manualAdvanceFromAd',
-};
 
 /**
  * Util function to retrieve the analytics service. Ensures we can retrieve the

@@ -18,7 +18,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
+import {AdvancementMode} from './page-advancement';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {devAssert} from '../../../src/log';

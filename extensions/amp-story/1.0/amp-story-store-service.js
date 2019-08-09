@@ -104,7 +104,7 @@ export let InteractiveComponentDef;
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
- *    previousAdvancement: {timestamp: number, mode: !./story-analytics.AdvancementMode},
+ *    previousAdvancement: {timestamp: number, mode: !./page-advancement.AdvancementMode},
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
  * }}

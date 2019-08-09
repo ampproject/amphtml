@@ -20,7 +20,6 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
@@ -62,6 +61,36 @@ export const TapNavigationDirection = {
   'NEXT': 1,
   'PREVIOUS': 2,
 };
+
+/** @enum {string} */
+export const AdvancementMode = {
+  GO_TO_PAGE: 'goToPageAction',
+  AUTO_ADVANCE_TIME: 'autoAdvanceTime',
+  AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
+  MANUAL_ADVANCE: 'manualAdvance',
+  ADVANCE_TO_ADS: 'manualAdvanceFromAd',
+};
+
+/**
+ * @param {!AdvancementMode} advancementMode The AdvancementMode to check
+ * @return {boolean} true if the specified AdvancementMode is an automatic
+ *   advancement; false otherwise.
+ */
+export function isAutomaticAdvancement(advancementMode) {
+  return (
+    advancementMode === AdvancementMode.AUTO_ADVANCE_MEDIA ||
+    advancementMode === AdvancementMode.AUTO_ADVANCE_TIME
+  );
+}
+
+/**
+ * @param {!AdvancementMode} advancementMode The AdvancementMode to check
+ * @return {boolean} true if the specified AdvancementMode is a manual
+ *   advancement; false otherwise.
+ */
+export function isManualAdvancement(advancementMode) {
+  return !isAutomaticAdvancement(advancementMode);
+}
 
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
