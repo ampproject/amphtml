@@ -1295,7 +1295,8 @@ let DescendantConstraints;
  *             lastChildErrorLineCol: LineCol,
  *             cdataMatcher: ?CdataMatcher,
  *             childTagMatcher: ?ChildTagMatcher,
- *             referencePointMatcher: ?ReferencePointMatcher }}
+ *             referencePointMatcher: ?ReferencePointMatcher,
+ *             devMode: boolean }}
  */
 let TagStackEntry;
 
@@ -1351,6 +1352,7 @@ class TagStack {
       cdataMatcher: null,
       childTagMatcher: null,
       referencePointMatcher: null,
+      devMode: false,
     };
   }
 
@@ -1398,6 +1400,7 @@ class TagStack {
    * @private
    */
   updateStackEntryFromTagResult_(result, parsedRules, lineCol) {
+    if (result.devModeSuppress) this.setDevMode();
     if (result.bestMatchTagSpec === null) {return;}
     const parsedTagSpec = result.bestMatchTagSpec;
 
@@ -1515,6 +1518,13 @@ class TagStack {
   }
 
   /**
+   * Records that tag currently on the stack is using ampdevmode.
+   */
+  setDevMode() {
+    this.back_().devMode = true;
+  }
+
+  /**
    * @return {?ReferencePointMatcher}
    */
   parentReferencePointMatcher() {
@@ -1560,6 +1570,14 @@ class TagStack {
    */
   parentChildCount() {
     return this.parentStackEntry_().numChildren;
+  }
+
+  /**
+   * True if the current stack leaf has dev mode set.
+   * @return {boolean}
+   */
+  isDevMode() {
+    return this.parentStackEntry_().devMode;
   }
 
   /**
@@ -2720,6 +2738,14 @@ class Context {
    */
   isTransformed() {
     return this.typeIdentifiers_.includes('transformed');
+  }
+
+  /**
+   * Returns true iff "ampdevmode" is a type identifier in this document.
+   * @return {boolean}
+   */
+  isDevMode() {
+    return this.typeIdentifiers_.includes('ampdevmode');
   }
 
   /**
@@ -4225,6 +4251,25 @@ function validateAttrDeclaration(
 }
 
 /**
+ * Returns true if errors reported on this tag should be suppressed, due to
+ * ampdevmode annotations.
+ * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
+ * @param {!Context} context
+ * @return {boolean}
+ */
+function ShouldSuppressDevModeErrors(encounteredTag, context) {
+  if (!context.isDevMode()) return false;
+  // Cannot suppress errors on HTML tag. The "ampdevmode" here is a
+  // type identifier. Suppressing errors here would suppress all errors since
+  // HTML is the root of the document.
+  if (encounteredTag.upperName() === 'HTML') return false;
+  for (const attr of encounteredTag.attrs()) {
+    if (attr.name === 'ampdevmode') return true;
+  }
+  return context.getTagStack().isDevMode();
+}
+
+/**
  * Validates whether the attributes set on |encountered_tag| conform to this
  * tag specification. All mandatory attributes must appear. Only attributes
  * explicitly mentioned by this tag spec may appear.
@@ -4768,7 +4813,6 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // to return a GENERAL_DISALLOWED_TAG error.
   // calling HasDispatchKeys here is only an optimization to skip the loop
   // over encountered attributes in the case where we have no dispatches.
-  let bestMatchTagSpec = null;
   if (tagSpecDispatch.hasDispatchKeys()) {
     for (const attr of encounteredTag.attrs()) {
       const tagSpecIds = tagSpecDispatch.matchingDispatchKey(
@@ -4777,6 +4821,12 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
           // match dispatch keys in a case-insensitive manner and then
           // validate using whatever the tagspec requests.
           attr.value.toLowerCase(), context.getTagStack().parentTagName());
+      let ret = {
+        validationResult: new amp.validator.ValidationResult(),
+        bestMatchTagSpec: null
+      };
+      ret.validationResult.status =
+          amp.validator.ValidationResult.Status.UNKNOWN;
       for (const tagSpecId of tagSpecIds) {
         const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
         // Skip TagSpecs that aren't used for these type identifiers.
@@ -4784,13 +4834,22 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
             context.getTypeIdentifiers())) {
           continue;
         }
-        bestMatchTagSpec = parsedTagSpec;
-        return {
-          bestMatchTagSpec,
-          validationResult: validateTagAgainstSpec(
-              bestMatchTagSpec, bestMatchReferencePoint, context,
-              encounteredTag),
-        };
+        let result_for_attempt = validateTagAgainstSpec(
+            parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
+        if (context.getRules().betterValidationResultThan(
+                result_for_attempt, ret.validationResult)) {
+          ret.bestMatchTagSpec = parsedTagSpec;
+          ret.validationResult = result_for_attempt;
+          // Exit early on success
+          if (ret.validationResult.status ===
+              amp.validator.ValidationResult.Status.PASS) {
+            return ret;
+          }
+        }
+      }
+      if (ret.validationResult.status !==
+          amp.validator.ValidationResult.Status.UNKNOWN) {
+        return ret;
       }
     }
   }
@@ -4822,6 +4881,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // tried them all.
   const resultForBestAttempt = new amp.validator.ValidationResult();
   resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
+  let bestMatchTagSpec = null;
   for (const parsedTagSpec of filteredTagSpecs) {
     const resultForAttempt = validateTagAgainstSpec(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
@@ -4829,6 +4889,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
         resultForAttempt, resultForBestAttempt)) {
       resultForBestAttempt.copyFrom(resultForAttempt);
       bestMatchTagSpec = parsedTagSpec;
+      // Exit early
       if (resultForBestAttempt.status ===
           amp.validator.ValidationResult.Status.PASS) {
         return {
@@ -4918,6 +4979,7 @@ class ParsedValidatorRules {
     this.typeIdentifiers_['amp4email'] = 0;
     this.typeIdentifiers_['actions'] = 0;
     this.typeIdentifiers_['transformed'] = 0;
+    this.typeIdentifiers_['ampdevmode'] = 0;
 
     /**
      * @type {function(!amp.validator.TagSpec) : boolean}
@@ -5128,7 +5190,8 @@ class ParsedValidatorRules {
           // The type identifier "actions" and "transformed" are not considered
           // mandatory unlike other type identifiers.
           if (typeIdentifier !== 'actions' &&
-              typeIdentifier !== 'transformed') {
+              typeIdentifier !== 'transformed' &&
+              typeIdentifier !== 'ampdevmode') {
             hasMandatoryTypeIdentifier = true;
           }
           // The type identifier "transformed" has restrictions on it's value.
@@ -5145,6 +5208,15 @@ class ParsedValidatorRules {
                   'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
                   validationResult);
             }
+          }
+          if (typeIdentifier === 'ampdevmode') {
+            // https://github.com/ampproject/amphtml/issues/20974
+            // We always emit an error for this type identifier, but it
+            // suppresses other errors later in the document.
+            context.addError(
+                amp.validator.ValidationError.Code.DEV_MODE_ONLY,
+                context.getLineCol(), /*params=*/[], /*url*/ '',
+                validationResult);
           }
         } else {
           context.addError(
@@ -5176,21 +5248,22 @@ class ParsedValidatorRules {
     switch (this.htmlFormat_) {
       case 'AMP':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡', 'amp', 'transformed'], context,
+            htmlTag.attrs(), ['⚡', 'amp', 'transformed', 'ampdevmode'], context,
             validationResult);
         break;
       case 'AMP4ADS':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡4ads', 'amp4ads'], context, validationResult);
+            htmlTag.attrs(), ['⚡4ads', 'amp4ads', 'ampdevmode'], context,
+            validationResult);
         break;
       case 'AMP4EMAIL':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡4email', 'amp4email'], context,
+            htmlTag.attrs(), ['⚡4email', 'amp4email', 'ampdevmode'], context,
             validationResult);
         break;
       case 'ACTIONS':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡', 'amp', 'actions'], context,
+            htmlTag.attrs(), ['⚡', 'amp', 'actions', 'ampdevmode'], context,
             validationResult);
         if (validationResult.typeIdentifier.indexOf('actions') === -1) {
           context.addError(
@@ -5248,6 +5321,29 @@ class ParsedValidatorRules {
   }
 
   /**
+   * Returns true iff the error codes in errorsB are a subset of the error
+   * codes in errorsA.
+   * @param {!Array<!amp.validator.ValidationError>} errorsA
+   * @param {!Array<!amp.validator.ValidationError>} errorsB
+   * @return {boolean}
+   * @private
+   */
+  isErrorSubset_(errorsA, errorsB) {
+    let codesA = {};
+    for (const error of errorsA) codesA[error.code] = 1;
+    let codesB = {};
+    for (const error of errorsB) {
+      codesB[error.code] = 1;
+      // If error is not in codesA, errorsB is not a subset of errorsA.
+      if (!codesA.hasOwnProperty(error.code)) {
+        return false;
+      }
+    }
+    // Every code in B is also in A. If they are the same, not a subset.
+    return Object.keys(codesA).length > Object.keys(codesB).length;
+  }
+
+  /**
    * Returns true iff resultA is a better result than resultB.
    * @param {!amp.validator.ValidationResult} resultA
    * @param {!amp.validator.ValidationResult} resultB
@@ -5256,6 +5352,17 @@ class ParsedValidatorRules {
   betterValidationResultThan(resultA, resultB) {
     if (resultA.status !== resultB.status)
     {return this.betterValidationStatusThan_(resultA.status, resultB.status);}
+
+    // If one of the error sets by error.code is a subset of the other
+    // error set's error.codes, use the subset one. It's essentially saying, if
+    // you fix these errors that we both complain about, then you'd be passing
+    // for my tagspec, but not the other one, regardless of specificity.
+    if (this.isErrorSubset_(resultB.errors, resultA.errors)) {
+      return true;
+    }
+    if (this.isErrorSubset_(resultA.errors, resultB.errors)) {
+      return false;
+    }
 
     // Prefer the most specific error found in either set.
     if (this.maxSpecificity(resultA.errors) >
@@ -5746,6 +5853,7 @@ amp.validator.ValidationHandler =
         let resultForReferencePoint = {
           bestMatchTagSpec: null,
           validationResult: new amp.validator.ValidationResult(),
+          devModeSuppress: false,
         };
         resultForReferencePoint.validationResult.status =
         amp.validator.ValidationResult.Status.UNKNOWN;
@@ -5762,12 +5870,15 @@ amp.validator.ValidationHandler =
         const resultForTag = validateTag(
             encounteredTag, resultForReferencePoint.bestMatchTagSpec,
             this.context_);
+        resultForTag.devModeSuppress =
+            ShouldSuppressDevModeErrors(encounteredTag, this.context_);
         // Only merge in the reference point errors into the final result if the
         // tag otherwise passes one of the TagSpecs. Otherwise, we end up with
         // unnecessarily verbose errors.
         if (referencePointMatcher !== null &&
             resultForTag.validationResult.status ===
-                amp.validator.ValidationResult.Status.PASS) {
+                amp.validator.ValidationResult.Status.PASS &&
+            !resultForTag.devModeSuppress) {
           this.validationResult_.mergeFrom(
               resultForReferencePoint.validationResult);
         }
@@ -5777,7 +5888,8 @@ amp.validator.ValidationHandler =
             resultForReferencePoint.bestMatchTagSpec,
             resultForTag.bestMatchTagSpec,
             this.context_, resultForTag.validationResult);
-        this.validationResult_.mergeFrom(resultForTag.validationResult);
+        if (!resultForTag.devModeSuppress)
+          this.validationResult_.mergeFrom(resultForTag.validationResult);
 
         this.context_.updateFromTagResults(
             encounteredTag, resultForReferencePoint, resultForTag);

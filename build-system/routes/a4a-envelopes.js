@@ -17,6 +17,7 @@
 const app = require('express').Router();
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
+const request = require('request');
 
 // In-a-box envelope.
 // Examples:
@@ -39,13 +40,47 @@ app.use('/inabox/', (req, res) => {
     adUrl += '#log=' + req.query.log;
   }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
-    const result = template
-      .replace(/AD_URL/g, adUrl)
-      .replace(/OFFSET/g, req.query.offset || '0px')
-      .replace(/AD_WIDTH/g, req.query.width || '300')
-      .replace(/AD_HEIGHT/g, req.query.height || '250');
-    res.end(result);
+    template = template.replace(/SOURCE/g, 'AD_URL');
+    res.end(fillTemplate(template, adUrl, req.query));
   });
+});
+
+// In-a-box friendly iframe and safeframe envelope.
+// Examples:
+// http://localhost:8000/inabox-friendly/examples/animations.amp.html
+// http://localhost:8000/inabox-friendly/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+app.use('/inabox-(friendly|safeframe)', (req, res) => {
+  let adUrl = req.url;
+  const urlPrefix = getUrlPrefix(req).replace('localhost', 'ads.localhost');
+  const templatePath = '/build-system/server-inabox-template.html';
+  adUrl = addQueryParam(adUrl, 'inabox', 1);
+  if (req.query.log) {
+    adUrl += '#log=' + req.query.log;
+  }
+  fs.readFileAsync(process.cwd() + templatePath, 'utf8')
+    .then(template => {
+      if (req.baseUrl == '/inabox-friendly') {
+        template = template.replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"');
+      } else {
+        template = template
+          .replace(
+            /NAME/g,
+            '1-0-31;LENGTH;BODY{&quot;uid&quot;:&quot;test&quot;}'
+          )
+          .replace(
+            /SOURCE/g,
+            urlPrefix + '/test/fixtures/served/iframe-safeframe.html'
+          );
+      }
+      return requestFromUrl(template, urlPrefix + adUrl, req.query);
+    })
+    .then(result => {
+      if (result) {
+        res.end(result);
+      } else {
+        res.redirect(adUrl);
+      }
+    });
 });
 
 // A4A envelope.
@@ -64,14 +99,11 @@ app.use('/a4a(|-3p)/', (req, res) => {
   }
   adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
-    const result = template
-      .replace(/CHECKSIG/g, force3p || '')
-      .replace(/DISABLE3PFALLBACK/g, !force3p)
-      .replace(/OFFSET/g, req.query.offset || '0px')
-      .replace(/AD_URL/g, adUrl)
-      .replace(/AD_WIDTH/g, req.query.width || '300')
-      .replace(/AD_HEIGHT/g, req.query.height || '250');
-    res.end(result);
+    res.end(
+      fillTemplate(template, adUrl, req.query)
+        .replace(/CHECKSIG/g, force3p || '')
+        .replace(/DISABLE3PFALLBACK/g, !force3p)
+    );
   });
 });
 
@@ -94,6 +126,67 @@ function addQueryParam(url, param, value) {
     url += '&' + paramValue;
   }
   return url;
+}
+
+/**
+ * Fetch a page from the target URL and fill its content into the template.
+ * If the URL does not return text, returns null.
+ * @param {string} template
+ * @param {string} url
+ * @param {Object} query
+ * @return {!Promise<?string>}
+ */
+function requestFromUrl(template, url, query) {
+  return new Promise((resolve, reject) => {
+    request(url, (error, response, body) => {
+      if (error) {
+        reject(error);
+      }
+      if (
+        !response.headers['content-type'] ||
+        response.headers['content-type'].startsWith('text/html')
+      ) {
+        resolve(fillTemplate(template, url, query, body));
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
+
+/**
+ * Fill out a template with some common variables.
+ * @param {string} template
+ * @param {string} url
+ * @param {Object} query
+ * @param {?string} body
+ * @return {string}
+ */
+function fillTemplate(template, url, query, body) {
+  let newBody;
+  let length;
+  if (body) {
+    newBody = body
+      .replace(/&/g, '&amp;')
+      .replace(/'/g, '&apos;')
+      .replace(/"/g, '&quot;');
+    length = body.length;
+  } else {
+    length = 0;
+  }
+  return (
+    template
+      .replace(/BODY/g, newBody)
+      .replace(/LENGTH/g, length)
+      .replace(/AD_URL/g, url)
+      .replace(/OFFSET/g, query.offset || '0px')
+      .replace(/AD_WIDTH/g, query.width || '300')
+      .replace(/AD_HEIGHT/g, query.height || '250')
+      // Clear out variables that are not already replaced beforehand.
+      .replace(/NAME/g, 'inabox')
+      .replace(/SOURCE/g, '')
+      .replace('SRCDOC_ATTRIBUTE', '')
+  );
 }
 
 module.exports = app;

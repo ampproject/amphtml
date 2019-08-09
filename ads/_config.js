@@ -306,6 +306,11 @@ export const adConfig = {
 
   'bidtellect': {},
 
+  'blade': {
+    prefetch: 'https://sdk.streamrail.com/blade/sr.blade.js',
+    renderStartImplemented: true,
+  },
+
   'brainy': {},
 
   'bringhub': {
@@ -932,11 +937,6 @@ export const adConfig = {
 
   'spotx': {
     preconnect: 'https://js.spotx.tv',
-    renderStartImplemented: true,
-  },
-
-  'streamrail': {
-    prefetch: 'https://sdk.streamrail.com/blade/sr.blade.js',
     renderStartImplemented: true,
   },
 
