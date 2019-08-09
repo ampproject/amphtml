@@ -20,7 +20,6 @@ import {getVariableService} from './variable-service';
 import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 
-
 /**
  * Util function to retrieve the analytics service. Ensures we can retrieve the
  * service synchronously from the amp-story codebase without running into race
