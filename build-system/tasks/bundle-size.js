@@ -69,7 +69,7 @@ function getGzippedBundleSize() {
  */
 function getBrotliBundleSize() {
   const bundleSize = parseFloat(
-    (brotliSize.default.fileSync(runtimeFile) / 1024).toFixed(2)
+    (brotliSize.fileSync(runtimeFile) / 1024).toFixed(2)
   );
   log('Bundle size', cyan('(brotli)'), 'is', cyan(`${bundleSize}KB`));
   return bundleSize;
