@@ -23,7 +23,7 @@
  */
 const fs = require('fs');
 const https = require('https');
-const {getStdout} = require('./exec');
+const {getStdout, getStderr} = require('./exec');
 
 const setupInstructionsUrl =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
@@ -33,6 +33,7 @@ const gulpHelpUrl =
 
 const yarnExecutable = 'npx yarn';
 const gulpExecutable = 'npx gulp';
+const pythonExecutable = 'python';
 
 const warningDelaySecs = 10;
 
@@ -319,6 +320,44 @@ function runGulpChecks() {
   }
 }
 
+function checkPythonVersion() {
+  // Python prints its version to stderr: https://bugs.python.org/issue18338
+  const pythonVersionResult = getStderr(`${pythonExecutable} --version`).trim();
+  const pythonVersion = pythonVersionResult.match(/Python (.*?)$/);
+  if (pythonVersion && pythonVersion.length == 2) {
+    const recommendedVersion = '2.7';
+    const versionNumber = pythonVersion[1];
+    if (versionNumber.startsWith(recommendedVersion)) {
+      console.log(
+        green('Detected'),
+        cyan('python'),
+        green('version'),
+        cyan(versionNumber) + green('.')
+      );
+    } else {
+      console.log(
+        yellow('WARNING: Detected python version'),
+        cyan(versionNumber) +
+          yellow('. Recommended version for AMP development is'),
+        cyan(recommendedVersion) + yellow('.')
+      );
+      console.log(
+        yellow('⤷ To fix this, install the correct version from'),
+        cyan(`https://www.python.org/download/releases/${recommendedVersion}`) +
+          yellow('.')
+      );
+    }
+  } else {
+    console.log(
+      yellow(
+        'WARNING: ' +
+          'Could not determine the local version of python. ' +
+          'AMP development requires python 2.7.'
+      )
+    );
+  }
+}
+
 function main() {
   // Yarn is already used by default on Travis, so there is nothing more to do.
   if (process.env.TRAVIS) {
@@ -327,6 +366,7 @@ function main() {
   ensureYarn();
   return checkNodeVersion().then(() => {
     runGulpChecks();
+    checkPythonVersion();
     checkYarnVersion();
     if (!process.env.TRAVIS && updatesNeeded.size > 0) {
       console.log(
