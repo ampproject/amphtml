@@ -109,6 +109,14 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       return check('MACRO(a,b)', 'MACRO(a,b)', {});
     });
 
+    it('does not handle nested macros using ${} syntax', () => {
+      // VariableService.expandTemplate's regex cannot parse nested ${}.
+      return check('${a${b}}', '}', {
+        'a': 'TITLE',
+        'b': 'TITLE',
+      });
+    });
+
     it('supports macro args', () =>
       check('${foo}', 'AAA(BBB(1))', {
         'foo': 'AAA(BBB(1))',

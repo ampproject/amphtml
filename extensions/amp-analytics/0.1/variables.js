@@ -236,6 +236,8 @@ export class VariableService {
   }
 
   /**
+   * Converts templates from ${} format to MACRO() and resolves any platform
+   * level macros when encountered.
    * @param {string} template The template to expand.
    * @param {!ExpansionOptions} options configuration to use for expansion.
    * @param {!Element} element amp-analytics element.
