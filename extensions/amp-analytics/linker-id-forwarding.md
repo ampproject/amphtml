@@ -21,7 +21,7 @@ This document outlines the configuration options that will determine in which co
 - `paramName` - This user defined name determines the name of the query parameter appended to the links.
 - `ids` - An object containing key-value pairs that is partially encoded and passed along in the param.
 - `proxyOnly` - (optional) Flag indicating whether the links should only be appended on pages served on a proxy origin. Defaults to `true`.
-- `destinationDomains` - (optional) Links will be decorated if their domains are included in this array. Defaults to [`canonical`](https://github.com/ampproject/amphtml/blob/3b0feadab3b9b12ddb80edc9a30f959087134905/spec/amp-html-format.md#canon) and `source` domains. A link matching the exact same hostname will not be decorated unless specified in this array.c
+- `destinationDomains` - (optional) Links will be decorated if their domains are included in this array. Defaults to [`canonical`](https://github.com/ampproject/amphtml/blob/3b0feadab3b9b12ddb80edc9a30f959087134905/spec/amp-html-format.md#canon) and `source` domains. A link matching the exact same hostname will not be decorated unless specified in this array.
 - `enabled` - Publishers must explicity set this to `true` to opt-in to using this feature.
 
 This linker uses this configuration to generate a string in this structure: `<paramName>=<version>*<checkSum>*<idName1>*<idValue1>*<idName2>*<idValue2>...` For more details see [Linker Param Format](./linker-id-receiving.md#Format)
@@ -98,14 +98,15 @@ Example:
   "proxyOnly" : false,
   "linker1" : {
     "ids" : {
-      "cid": "CLIENT_ID(_ga)",
+      "cid": "CLIENT_ID(_ga)"
     }
   },
   "linker2" : {
     "proxyOnly": true
     "ids" : {
-      "gid": "CLIENT_ID(foo)",
+      "gid": "CLIENT_ID(foo)"
     }
+  }
 }
 ```
 
