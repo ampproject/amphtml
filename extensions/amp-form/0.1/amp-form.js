@@ -578,26 +578,48 @@ export class AmpForm {
     // Set ourselves to the SUBMITTING State
     this.setState_(FormState.SUBMITTING);
 
+    // Promises to run before submit without timeout.
+    const requiredActionPromises = [];
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
     iterateCursor(asyncInputs, asyncInput => {
-      presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+      const asyncCall = this.getValueForAsyncInput_(asyncInput);
+      if (
+        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+      ) {
+        requiredActionPromises.push(asyncCall);
+      } else {
+        presubmitPromises.push(asyncCall);
+      }
     });
 
-    return this.waitOnPromisesOrTimeout_(
-      presubmitPromises,
-      SUBMIT_TIMEOUT
-    ).then(
-      () => this.handlePresubmitSuccess_(trust),
-      error => {
-        const detail = dict();
-        if (error && error.message) {
-          detail['error'] = error.message;
-        }
-        return this.handleSubmitFailure_(error, detail);
-      }
+    return Promise.all(requiredActionPromises).then(
+      () => {
+        return this.waitOnPromisesOrTimeout_(
+          presubmitPromises,
+          SUBMIT_TIMEOUT
+        ).then(
+          () => this.handlePresubmitSuccess_(trust),
+          error => this.handlePresubmitError_(error)
+        );
+      },
+      error => this.handlePresubmitError_(error)
     );
+  }
+
+  /**
+   * @private
+   * Handle form error for presubmit async calls
+   * @param {*} error
+   * @return {Promise}
+   */
+  handlePresubmitError_(error) {
+    const detail = dict();
+    if (error && error.message) {
+      detail['error'] = error.message;
+    }
+    return this.handleSubmitFailure_(error, detail);
   }
 
   /**
