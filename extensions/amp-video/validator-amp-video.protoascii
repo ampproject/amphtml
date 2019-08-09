@@ -137,7 +137,7 @@ tags: {  # <amp-video> in amp-story-page-attachment (same rules as regular AMPHT
   html_format: AMP4ADS
   html_format: ACTIONS
   tag_name: "AMP-VIDEO"
-  spec_name: "amp-story >> amp-page-attachment >> amp-video"
+  spec_name: "amp-story >> amp-story-page-attachment >> amp-video"
   mandatory_ancestor: "AMP-STORY-PAGE-ATTACHMENT"
   also_requires_tag_warning: "amp-video extension .js script"
   attrs: { name: "poster" }
@@ -154,7 +154,6 @@ tags: {  # <amp-video> in amp-story-page-attachment (same rules as regular AMPHT
     supported_layouts: RESPONSIVE
   }
 }
-
 
 tags: {  # <amp-video> in amp-story
   html_format: AMP
