@@ -222,6 +222,7 @@ describe('BindExpression', () => {
 
       // Double quotes inside the string should be escaped.
       expect(evaluate('\'a"b"c\'')).to.equal('a"b"c');
+      expect(evaluate('\'a"\\n"c\'')).to.equal('a"\n"c');
     });
 
     it('whitelisted functions', () => {
