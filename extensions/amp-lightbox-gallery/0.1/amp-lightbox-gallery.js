@@ -34,6 +34,7 @@ import {
   closest,
   closestAncestorElementBySelector,
   elementByTag,
+  getVerticalScrollbarWidth,
   scopedQuerySelectorAll,
   toggleAttribute,
 } from '../../../src/dom';
@@ -745,8 +746,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.sourceElement_ = element;
     const lightboxGroupId = element.getAttribute('lightbox') || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
-    this.hasVerticalScrollbarWidth_ =
-      this.getViewport().getVerticalScrollbarWidth() > 0;
+    this.hasVerticalScrollbarWidth_ = getVerticalScrollbarWidth(this.win) > 0;
     return this.findOrInitializeLightbox_(lightboxGroupId)
       .then(() => {
         return this.getViewport().enterLightboxMode();
