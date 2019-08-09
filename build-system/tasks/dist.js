@@ -131,7 +131,7 @@ async function dist() {
 
   // Single pass has its own tmp directory processing. Only do this for
   // multipass.
-  // We need to execute this after `compileCss` so that we can copy that
+  // We need to execute this after `compileCss` and `compileExprs` so that we can copy that
   // over to the tmp directory.
   if (!argv.single_pass) {
     transferSrcsToTempDir();
@@ -152,6 +152,7 @@ async function dist() {
       postBuildWebPushPublisherFilesVersion
     ),
     copyCss(),
+    copyParsers(),
   ]);
 
   if (isTravisBuild()) {
@@ -268,7 +269,19 @@ function copyCss() {
       .src('build/css/amp-*.css', {base: 'build/css/'})
       .pipe(gulp.dest('dist/v0'))
   ).then(() => {
-    endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
+    endBuildStep('Copied', 'build/css/*.css to dist/v0/*.css', startTime);
+  });
+}
+
+/**
+ * Copies parsers from the build folder to the dist folder
+ * @return {!Promise}
+ */
+function copyParsers() {
+  const startTime = Date.now();
+  //dist/v0 ?
+  return fs.copy('build/parsers', 'dist/v0').then(() => {
+    endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
   });
 }
 
