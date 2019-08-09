@@ -101,13 +101,12 @@ function isTemplateTagSupported() {
  * @return {!Function} The custom element class.
  */
 export function createCustomElementClass(win, name) {
-  const baseCustomElement = /** @type {Function} */ (createBaseCustomElementClass(
+  const baseCustomElement = /** @type {function(new:HTMLElement)} */ (createBaseCustomElementClass(
     win
   ));
   /**
    * @extends {HTMLElement}
-   * @suppress {checkTypes}
-   **/
+   */
   class CustomAmpElement extends baseCustomElement {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
@@ -138,11 +137,10 @@ function createBaseCustomElementClass(win) {
   if (win.BaseCustomElementClass) {
     return win.BaseCustomElementClass;
   }
-  const htmlElement = /** @type {Function} */ (win.HTMLElement);
+  const htmlElement = /** @type {function(new:HTMLElement)} */ (win.HTMLElement);
   /**
    * @abstract @extends {HTMLElement}
-   * @suppress {checkTypes}
-   **/
+   */
   class BaseCustomElement extends htmlElement {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
@@ -1634,7 +1632,7 @@ function createBaseCustomElementClass(win) {
         const fallbackElement = this.getFallback();
         if (fallbackElement) {
           Services.ownersForDoc(this.getAmpDoc()).scheduleLayout(
-            this.element,
+            this,
             fallbackElement
           );
         }
@@ -1723,7 +1721,7 @@ function createBaseCustomElementClass(win) {
         let loadingElement;
         if (isNewLoaderExperimentEnabled(this)) {
           loadingElement = createNewLoaderElement(
-            this.ampdoc_,
+            devAssert(this.ampdoc_),
             this,
             this.layoutWidth_,
             this.layoutHeight_
