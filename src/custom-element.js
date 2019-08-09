@@ -672,11 +672,13 @@ function createBaseCustomElementClass(win) {
         return;
       }
       if (this.layout_ === Layout.INTRINSIC) {
-        const sizerElement = sizer.querySelector('.i-amphtml-intrinsic-sizer');
-        if (!sizerElement) {
+        const intrinsicSizerImg = sizer.querySelector(
+          '.i-amphtml-intrinsic-sizer'
+        );
+        if (!intrinsicSizerImg) {
           return;
         }
-        sizerElement.setAttribute('src', '');
+        intrinsicSizerImg.setAttribute('src', '');
         return;
       }
     }
