@@ -108,7 +108,7 @@ class FunctionalTestController {
   async switchToParent() {}
 
   /**
-   * Selects a subtree inside a ShadowDOM ShadowRoot to use as the current
+   * Selects the body of a subtree inside a ShadowDOM ShadowRoot to use as the current
    * browsing context for subsequent commands.
    * {@link https://github.com/w3c/webdriver/pull/1320}
    * https://github.com/SeleniumHQ/selenium/issues/5869
@@ -117,6 +117,17 @@ class FunctionalTestController {
    * @return {!Promise}
    */
   async switchToShadow(unusedHandle) {}
+
+  /**
+   * Selects a subtree inside a ShadowDOM ShadowRoot to use as the current
+   * browsing context for subsequent commands.
+   * {@link https://github.com/w3c/webdriver/pull/1320}
+   * https://github.com/SeleniumHQ/selenium/issues/5869
+   *
+   * @param {!ElementHandle} unusedHandle
+   * @return {!Promise}
+   */
+  async switchToShadowRoot(unusedHandle) {}
 
   /**
    * Selects the main top-level DOM tree to use as the current

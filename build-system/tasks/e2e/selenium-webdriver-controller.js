@@ -242,7 +242,8 @@ class SeleniumWebDriverController {
    */
   async getActiveElement() {
     const root = await this.getRoot_();
-    const getter = root => root.parentNode.activeElement;
+    const getter = root =>
+      root.activeElement || root.ownerDocument.activeElement;
     const activeElement = await this.driver.executeScript(getter, root);
     return new ElementHandle(activeElement);
   }
@@ -610,12 +611,33 @@ class SeleniumWebDriverController {
     await this.driver.switchTo().defaultContent();
   }
 
+  /**
+   * Switch controller to shadowRoot body hosted by given element.
+   * @param {!ElementHandle<!WebElement>} handle
+   * @return {!Promise}
+   */
   async switchToShadow(handle) {
+    const getter = shadowHost => shadowHost.shadowRoot.body;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  /**
+   * Switch controller to shadowRoot hosted by given element.
+   * @param {!ElementHandle<!WebElement>} handle
+   * @return {!Promise}
+   */
+  async switchToShadowRoot(handle) {
+    const getter = shadowHost => shadowHost.shadowRoot;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  /**.
+   * @param {!ElementHandle<!WebElement>} handle
+   * @param {!Function} getter
+   */
+  async switchToShadowInternal_(handle, getter) {
     const shadowHost = handle.getElement();
-    const shadowRootBody = await this.evaluate(
-      shadowHost => shadowHost.shadowRoot.body,
-      shadowHost
-    );
+    const shadowRootBody = await this.evaluate(getter, shadowHost);
     this.shadowRoot_ = shadowRootBody;
   }
 
