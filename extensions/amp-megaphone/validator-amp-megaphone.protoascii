@@ -21,8 +21,6 @@ tags: {  # amp-megaphone
     name: "amp-megaphone"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
@@ -34,6 +32,7 @@ tags: {  # <amp-megaphone> for playlists
     name: "data-playlist"
     mandatory: true
     value_regex: "[A-Za-z0-9]+"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "data-light"
@@ -52,7 +51,6 @@ tags: {  # <amp-megaphone> for playlists
 
   attr_lists: "extended-amp-global"
   amp_layout: {
-    supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: NODISPLAY
@@ -67,6 +65,7 @@ tags: {  # <amp-megaphone> for episodes
     name: "data-episode"
     mandatory: true
     value_regex: "[A-Za-z0-9]+"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "data-start"
@@ -90,7 +89,6 @@ tags: {  # <amp-megaphone> for episodes
 
   attr_lists: "extended-amp-global"
   amp_layout: {
-    supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: NODISPLAY

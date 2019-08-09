@@ -67,10 +67,18 @@ class AmpMegaphone extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
+    return this.isLayoutFixedSize_(layout);
+  }
+
+  /**
+   * @param {!Layout} layout
+   * @return {boolean}
+   * @private
+   */
+  isLayoutFixedSize_(layout) {
     return (
       layout == Layout.FIXED ||
       layout == Layout.FIXED_HEIGHT ||
-      layout == Layout.FILL ||
       layout == Layout.NODISPLAY
     );
   }

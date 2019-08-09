@@ -34,7 +34,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getMegaphone(mediaid, isPlaylist, opt_attrs) {
+    async function getMegaphone(mediaid, isPlaylist, opt_attrs) {
       const mpplayer = doc.createElement('amp-megaphone');
       if (isPlaylist) {
         mpplayer.setAttribute('data-playlist', mediaid);
@@ -50,70 +50,64 @@ describes.realWin(
       }
 
       doc.body.appendChild(mpplayer);
-      return mpplayer
-        .build()
-        .then(() => mpplayer.layoutCallback())
-        .then(() => mpplayer);
+      await mpplayer.build();
+      await mpplayer.layoutCallback();
+      return mpplayer;
     }
 
-    it('renders episode', () => {
-      return getMegaphone('OSC7749686951').then(mpplayer => {
-        const iframe = mpplayer.firstChild;
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(episodeEmbedUrl);
-      });
+    it('renders episode', async () => {
+      const mpplayer = await getMegaphone('OSC7749686951');
+      const iframe = mpplayer.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(episodeEmbedUrl);
     });
 
-    it('renders playlist', () => {
-      return getMegaphone('DEM6640968282', true).then(mpplayer => {
-        const iframe = mpplayer.firstChild;
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(playlistEmbedUrl);
-      });
+    it('renders playlist', async () => {
+      const mpplayer = await getMegaphone('DEM6640968282', true);
+      const iframe = mpplayer.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(playlistEmbedUrl);
     });
 
-    it('renders fixed-height', () => {
-      return getMegaphone('OSC7749686951', false, {
+    it('renders fixed-height', async () => {
+      const mpplayer = await getMegaphone('OSC7749686951', false, {
         layout: 'fixed-height',
-      }).then(mpplayer => {
-        expect(mpplayer.className).to.match(/i-amphtml-layout-fixed-height/);
       });
+      expect(mpplayer.className).to.match(/i-amphtml-layout-fixed-height/);
     });
 
-    it('renders with optional parameters for an episode', () => {
-      return getMegaphone('OSC7749686951', false, {
+    it('renders with optional parameters for an episode', async () => {
+      const mpplayer = await getMegaphone('OSC7749686951', false, {
         'data-light': true,
         'data-start': '5.4',
         'data-tile': 'true',
         'data-sharing': 'false',
         'data-episodes': '4',
-      }).then(scplayer => {
-        const iframe = scplayer.firstChild;
-        expect(iframe.src).to.include('light=true');
-        expect(iframe.src).to.include('start=5.4');
-        expect(iframe.src).to.include('tile=true');
-        expect(iframe.src).to.include('sharing=false');
-        expect(iframe.src).not.to.include('episodes');
       });
+      const iframe = mpplayer.firstChild;
+      expect(iframe.src).to.include('light=true');
+      expect(iframe.src).to.include('start=5.4');
+      expect(iframe.src).to.include('tile=true');
+      expect(iframe.src).to.include('sharing=false');
+      expect(iframe.src).not.to.include('episodes');
     });
 
-    it('renders with optional parameters for a playlist', () => {
-      return getMegaphone('DEM6640968282', true, {
+    it('renders with optional parameters for a playlist', async () => {
+      const mpplayer = await getMegaphone('DEM6640968282', true, {
         'data-light': true,
         'data-start': '5.4',
         'data-tile': 'true',
         'data-sharing': 'false',
         'data-episodes': '4',
-      }).then(scplayer => {
-        const iframe = scplayer.firstChild;
-        expect(iframe.src).to.include('light=true');
-        expect(iframe.src).to.include('sharing=false');
-        expect(iframe.src).to.include('episodes=4');
-        expect(iframe.src).not.to.include('start');
-        expect(iframe.src).not.to.include('tile');
       });
+      const iframe = mpplayer.firstChild;
+      expect(iframe.src).to.include('light=true');
+      expect(iframe.src).to.include('sharing=false');
+      expect(iframe.src).to.include('episodes=4');
+      expect(iframe.src).not.to.include('start');
+      expect(iframe.src).not.to.include('tile');
     });
   }
 );
