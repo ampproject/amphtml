@@ -19,6 +19,7 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
+import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
@@ -128,6 +129,21 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     shareMenu.innerContainerEl_.dispatchEvent(new Event('click'));
 
     expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
+  });
+
+  it('should hide the share menu on escape key press', () => {
+    shareMenu.build();
+
+    const clickCallbackSpy = sandbox.spy();
+    win.addEventListener('keyup', clickCallbackSpy);
+
+    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    // Create escape keyup event.
+    const keyupEvent = new Event('keyup');
+    keyupEvent.keyCode = Keys.ESCAPE;
+    win.dispatchEvent(keyupEvent);
+
+    expect(clickCallbackSpy).to.have.been.calledOnce;
   });
 
   it('should render the amp-social-share button if system share', () => {
