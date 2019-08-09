@@ -323,6 +323,12 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private {EmbeddedComponentState} */
     this.state_ = EmbeddedComponentState.HIDDEN;
+
+    /** @private {?Element} */
+    this.buttonLeft_ = null;
+
+    /** @private {?Element} */
+    this.buttonRight_ = null;
   }
 
   /**
@@ -637,6 +643,7 @@ export class AmpStoryEmbeddedComponent {
     this.updateTooltipText_(component.element, embedConfig);
     this.updateTooltipComponentIcon_(component.element, embedConfig);
     this.updateTooltipActionIcon_(embedConfig);
+    this.updateNavButtons_();
     this.positionTooltip_(component);
   }
 
@@ -955,6 +962,32 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
+   * Show or hide arrows based on current page.
+   * @private
+   */
+  updateNavButtons_() {
+    if (!this.isLastPage_()) {
+      this.buttonLeft_.removeAttribute('hidden');
+      this.buttonRight_.removeAttribute('hidden');
+    } else {
+      this.storeService_.get(StateProperty.RTL_STATE)
+        ? this.buttonLeft_.setAttribute('hidden', true)
+        : this.buttonRight_.setAttribute('hidden', true);
+    }
+  }
+
+  /**
+   * Is last page.
+   * @return {boolean}
+   * @private
+   */
+  isLastPage_() {
+    const pageIndex = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
+    const pageCount = this.storeService_.get(StateProperty.PAGE_IDS).length;
+    return pageIndex + 1 === pageCount;
+  }
+
+  /**
    * Positions tooltip and its pointing arrow according to the position of the
    * target.
    * @param {!InteractiveComponentDef} component
@@ -1137,16 +1170,18 @@ export class AmpStoryEmbeddedComponent {
 
     this.tooltip_ = tooltip;
     this.tooltipArrow_ = arrow;
+    this.buttonLeft_ = buttonLeft;
+    this.buttonRight_ = buttonRight;
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
-    buttonLeft.addEventListener('click', e =>
+    this.buttonLeft_.addEventListener('click', e =>
       this.onNavigationalClick_(
         e,
         rtlState ? EventType.NEXT_PAGE : EventType.PREVIOUS_PAGE
       )
     );
 
-    buttonRight.addEventListener('click', e =>
+    this.buttonRight_.addEventListener('click', e =>
       this.onNavigationalClick_(
         e,
         rtlState ? EventType.PREVIOUS_PAGE : EventType.NEXT_PAGE
