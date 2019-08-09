@@ -69,7 +69,7 @@ export class StandaloneService {
       ));
     }
     if (platform.isChrome()) {
-      this.handleChromeStandalone_(dev().assertElement(target));
+      this.handleChromeStandalone_(target);
     }
   }
 

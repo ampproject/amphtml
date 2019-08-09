@@ -39,7 +39,10 @@ describes.sandboxed('amp-standalone', {}, () => {
     const handlerStub = sandbox.stub(service, 'handleSafariStandalone_');
 
     const fakeEvent = {
-      target: {tagName: 'BUTTON'},
+      target: {
+        nodeType: 1,
+        tagName: 'BUTTON',
+      },
     };
     service.handleClick_(fakeEvent);
 
@@ -55,7 +58,10 @@ describes.sandboxed('amp-standalone', {}, () => {
     const handlerStub = sandbox.stub(service, 'handleSafariStandalone_');
 
     const fakeEvent = {
-      target: {tagName: 'A'},
+      target: {
+        nodeType: 1,
+        tagName: 'A',
+      },
     };
     service.handleClick_(fakeEvent);
 
@@ -73,6 +79,7 @@ describes.sandboxed('amp-standalone', {}, () => {
 
       const fakeEvent = {
         target: {
+          nodeType: 1,
           tagName: 'A',
           target: null,
           origin: 'http://www.example.com',
@@ -97,6 +104,7 @@ describes.sandboxed('amp-standalone', {}, () => {
 
       const fakeEvent = {
         target: {
+          nodeType: 1,
           tagName: 'A',
           target: '_blank',
           origin: 'http://www.example.com',
@@ -117,6 +125,7 @@ describes.sandboxed('amp-standalone', {}, () => {
 
       const fakeEvent = {
         target: {
+          nodeType: 1,
           tagName: 'A',
           target: null,
           origin: 'http://www.google.com',
@@ -139,6 +148,7 @@ describes.sandboxed('amp-standalone', {}, () => {
 
       const fakeEvent = {
         target: {
+          nodeType: 1,
           tagName: 'A',
           target: null,
           origin: 'http://www.example.com',
@@ -159,6 +169,7 @@ describes.sandboxed('amp-standalone', {}, () => {
 
       const fakeEvent = {
         target: {
+          nodeType: 1,
           tagName: 'A',
           target: '_blank',
           origin: 'http://www.example.com',
@@ -179,6 +190,7 @@ describes.sandboxed('amp-standalone', {}, () => {
 
       const fakeEvent = {
         target: {
+          nodeType: 1,
           tagName: 'A',
           target: null,
           origin: 'http://www.google.com',

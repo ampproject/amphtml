@@ -71,6 +71,7 @@ describe('Platform', () => {
         standalone: standAloneBoolean,
         userAgent: userAgentString,
       },
+      matchMedia() {},
     });
     expect(platform.isStandalone()).to.equal(isStandalone);
   }
