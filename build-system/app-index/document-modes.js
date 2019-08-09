@@ -19,5 +19,7 @@ module.exports = {
   'shadow': '/shadow/',
   'a4a': '/a4a/',
   'a4a-3p': '/a4a-3p/',
-  'inabox': '/inabox/1/',
+  'inabox': '/inabox/',
+  'inabox-friendly': '/inabox-friendly/',
+  'inabox-safeframe': '/inabox-safeframe/',
 };

@@ -235,6 +235,11 @@ exports.rules = [
       // Ads needs iframe transports
       'extensions/amp-ad-exit/0.1/config.js->extensions/amp-analytics/0.1/iframe-transport-vendors.js',
 
+      // Amp carousel (and friends) depending on base carousel
+      'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/action-source.js',
+      'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/carousel.js',
+      'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
+
       // Facebook components
       'extensions/amp-facebook/0.1/amp-facebook.js->extensions/amp-facebook/facebook-loader.js',
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
@@ -667,6 +672,9 @@ exports.rules = [
         'src/service/localization.js',
       'extensions/amp-story-auto-ads/0.1/_locales/zu.js->' +
         'src/service/localization.js',
+      // Accessing calculateScriptBaseUrl() for vendor config URLs
+      'extensions/amp-analytics/0.1/config.js->' +
+        'src/service/extension-location.js',
     ],
   },
   {
@@ -681,7 +689,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
-      'src/polyfills.js->src/polyfills/domtokenlist-toggle.js',
+      'src/polyfills.js->src/polyfills/domtokenlist.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/fetch.js',
       'src/polyfills.js->src/polyfills/math-sign.js',
@@ -692,7 +700,7 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
-      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist-toggle.js',
+      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
     ],
   },
   {

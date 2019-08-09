@@ -44,11 +44,7 @@ FAIL
 |  -->
 |  <amp-carousel
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_carousel.html:44:0 The specified layout 'RESPONSIVE' is not supported by tag 'AMP-CAROUSEL [type=carousel]'. (see https://amp.dev/documentation/components/amp-carousel) [AMP_LAYOUT_PROBLEM]
->> ^~~~~~~~~
-amp4email_feature_tests/amp_carousel.html:44:0 The attribute 'arrows' may not appear in tag 'AMP-CAROUSEL [type=carousel]'. (see https://amp.dev/documentation/components/amp-carousel) [DISALLOWED_HTML]
->> ^~~~~~~~~
-amp4email_feature_tests/amp_carousel.html:44:0 The attribute 'type' in tag 'AMP-CAROUSEL [type=carousel]' is set to the invalid value 'slides'. (see https://amp.dev/documentation/components/amp-carousel) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_carousel.html:44:0 The attribute 'arrows' may not appear in tag 'AMP-CAROUSEL'. (see https://amp.dev/documentation/components/amp-carousel) [DISALLOWED_HTML]
 |    arrows
 |    width="800" height="600"
 |    layout="responsive"

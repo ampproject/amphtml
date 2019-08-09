@@ -653,12 +653,34 @@ function createBaseCustomElementClass(win) {
     getSizer_() {
       if (
         this.sizerElement === undefined &&
-        this.layout_ === Layout.RESPONSIVE
+        (this.layout_ === Layout.RESPONSIVE ||
+          this.layout_ === Layout.INTRINSIC)
       ) {
         // Expect sizer to exist, just not yet discovered.
         this.sizerElement = this.querySelector('i-amphtml-sizer');
       }
       return this.sizerElement || null;
+    }
+
+    /**
+     * @param {Element} sizer
+     * @private
+     */
+    resetSizer_(sizer) {
+      if (this.layout_ === Layout.RESPONSIVE) {
+        setStyle(sizer, 'paddingTop', '0');
+        return;
+      }
+      if (this.layout_ === Layout.INTRINSIC) {
+        const intrinsicSizerImg = sizer.querySelector(
+          '.i-amphtml-intrinsic-sizer'
+        );
+        if (!intrinsicSizerImg) {
+          return;
+        }
+        intrinsicSizerImg.setAttribute('src', '');
+        return;
+      }
     }
 
     /**
@@ -742,7 +764,7 @@ function createBaseCustomElementClass(win) {
         // responsible for managing its height. Aspect ratio is no longer
         // preserved.
         this.sizerElement = null;
-        setStyle(sizer, 'paddingTop', '0');
+        this.resetSizer_(sizer);
         this.mutateOrInvoke_(() => {
           dom.removeElement(sizer);
         });
@@ -1032,7 +1054,10 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Creates a loader logo.
-     * @return {?Element}
+     * @return {{
+     *  content: (!Element|undefined),
+     *  color: (string|undefined),
+     * }}
      * @final @this {!Element}
      */
     createLoaderLogo() {
@@ -1608,7 +1633,10 @@ function createBaseCustomElementClass(win) {
       if (show == true) {
         const fallbackElement = this.getFallback();
         if (fallbackElement) {
-          this.getResources().scheduleLayout(this, fallbackElement);
+          Services.ownersForDoc(this.getAmpDoc()).scheduleLayout(
+            this.element,
+            fallbackElement
+          );
         }
       }
     }

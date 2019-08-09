@@ -293,12 +293,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
   },
   {
-    id: 'amp-list-diffing',
-    name: 'Enables DOM diffing of amp-list renders via set-dom',
-    spec: 'https://github.com/ampproject/amphtml/pull/17000',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
-  },
-  {
     id: 'custom-elements-v1',
     name: 'Enable a new custom elements v1 polyfill',
     spec: 'https://github.com/ampproject/amphtml/pull/17205',
@@ -354,14 +348,6 @@ const EXPERIMENTS = [
     name:
       'Experiment to prevent regression after a major CSS clean up' +
       ' for AMPHTML Ads in FIE rendering mode',
-    spec: 'https://github.com/ampproject/amphtml/issues/22418',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
-  },
-  {
-    id: 'inabox-css-cleanup',
-    name:
-      'Experiment to prevent regression after a major CSS clean up' +
-      ' for AMPHTML Ads in inabox rendering mode',
     spec: 'https://github.com/ampproject/amphtml/issues/22418',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },

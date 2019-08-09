@@ -306,6 +306,11 @@ export const adConfig = {
 
   'bidtellect': {},
 
+  'blade': {
+    prefetch: 'https://sdk.streamrail.com/blade/sr.blade.js',
+    renderStartImplemented: true,
+  },
+
   'brainy': {},
 
   'bringhub': {
@@ -935,11 +940,6 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  'streamrail': {
-    prefetch: 'https://sdk.streamrail.com/blade/sr.blade.js',
-    renderStartImplemented: true,
-  },
-
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',
@@ -1013,10 +1013,7 @@ export const adConfig = {
 
   'valuecommerce': {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
-    preconnect: [
-      'https://ad.jp.ap.valuecommerce.com',
-      'https://ad.omks.valuecommerce.com',
-    ],
+    preconnect: ['https://ad.jp.ap.valuecommerce.com'],
     renderStartImplemented: true,
   },
 
