@@ -2,8 +2,8 @@
 $category@: layout
 formats:
   - websites
-  - email
   - ads
+  - email
 teaser:
   text: Provides a way for viewers to have a glance at the outline of the content and jump to a section of their choice at will.
 ---
