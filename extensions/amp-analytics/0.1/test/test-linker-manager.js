@@ -651,23 +651,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       });
     });
 
-    it('should not rewrite url if href is fragment', async () => {
-      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
-      await lm.init();
-      // Using a real anchor el here because of a.href getter will actually
-      // return the full url, not just the fragment.
-      const a = doc.createElement('a');
-      a.href = '#hello';
-      a.hostname = 'amp.source.com';
-
-      const get = (obj, prop) => obj[prop];
-      const set = sandbox.spy();
-      const aProxy = new Proxy(a, {get, set});
-
-      anchorClickHandlers.forEach(handler => handler(aProxy, {type: 'click'}));
-      expect(set, 'set on a[href=#fragment]').not.to.have.been.called;
-    });
-
     it('should not add linker if href is relative', () => {
       const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
       return lm.init().then(() => {
