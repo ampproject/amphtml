@@ -900,12 +900,31 @@ export class AmpStory extends AMP.BaseElement {
    * @return {!Promise}
    */
   switchTo_(targetPageId) {
+    // Debounce the navigation, in case the user has tapped manually to advance
+    // very recently before or after an automatic advancement.
+    const previousAdvancementTimestampMillis = this.storeService_.get(
+      StateProperty.PREVIOUS_ADVANCEMENT_TIMESTAMP_MILLIS
+    );
+
+    const currentTimestampMillis = Date.now();
+
+    if (
+      currentTimestampMillis - previousAdvancementTimestampMillis <
+      MANUAL_NAVIGATION_AFTER_AUTO_DEBOUNCE_THRESHOLD
+    ) {
+      console.log('tapped too fast!! ', currentTimestampMillis - previousAdvancementTimestampMillis, 'vs.', MANUAL_NAVIGATION_AFTER_AUTO_DEBOUNCE_THRESHOLD);
+      return;
+    }
+
+    console.log('advancing!');
+
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
     this.storeService_.dispatch(Action.CHANGE_PAGE, {
       id: targetPageId,
       index: pageIndex,
+      timestampMillis: currentTimestampMillis,
     });
 
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);

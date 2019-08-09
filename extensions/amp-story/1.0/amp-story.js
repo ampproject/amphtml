@@ -166,6 +166,14 @@ const Attributes = {
 const PAGE_LOAD_TIMEOUT_MS = 5000;
 
 /**
+ * The duration of time (in milliseconds) after a story has automatically
+ * advanced during which the user will not be able to manually advance, to
+ * prevent accidental duplicate advances.
+ * @private @const {number}
+ */
+const NAVIGATION_DEBOUNCE_THRESHOLD_MS = 300;
+
+/**
  * Single page ads may be injected later. If the original story contains 0 media
  * elements the mediaPool will not be able to handle the injected audio/video
  * Therefore we preallocate a minimum here.
@@ -1343,6 +1351,37 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    // Debounce the navigation, in case the user has tapped manually to advance
+    // very recently before or after an automatic advancement.
+    const previousAdvancement = this.storeService_.get(
+      StateProperty.PREVIOUS_ADVANCEMENT
+    );
+
+    const currentAdvancement = {
+      timestamp: Date.now(),
+      mode: this.storeService_.get(StateProperty.ADVANCEMENT_MODE),
+    };
+
+    if (previousAdvancement) {
+      const elapsedMsSinceLastNavigation =
+        currentAdvancement.timestamp - previousAdvancement.timestamp;
+      const previousAdvancementWasAutoAdvance =
+        previousAdvancement.mode === AdvancementMode.AUTO_ADVANCE_TIME ||
+        previousAdvancement.mode === AdvancementMode.AUTO_ADVANCE_MEDIA;
+      const currentAdvancementIsManualAdvance =
+        currentAdvancement.mode === AdvancementMode.MANUAL_ADVANCE ||
+        currentAdvancement.mode === AdvancementMode.ADVANCE_TO_ADS ||
+        currentAdvancement.mode === AdvancementMode.GO_TO_PAGE;
+
+      if (
+        elapsedMsSinceLastNavigation < NAVIGATION_DEBOUNCE_THRESHOLD_MS &&
+        previousAdvancementWasAutoAdvance &&
+        currentAdvancementIsManualAdvance
+      ) {
+        return;
+      }
+    }
+
     // If the next page might be paywall protected, and the access
     // authorizations did not resolve yet, wait before navigating.
     // TODO(gmajoulet): implement a loading state.
@@ -1443,6 +1482,7 @@ export class AmpStory extends AMP.BaseElement {
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
           id: targetPageId,
           index: storePageIndex,
+          advancementDetails: currentAdvancement,
         });
 
         // If first navigation.

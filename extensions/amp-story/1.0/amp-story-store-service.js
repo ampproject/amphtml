@@ -104,6 +104,7 @@ export let InteractiveComponentDef;
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
+ *    previousAdvancement: {timestamp: number, mode: !./story-analytics.AdvancementMode},
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
  * }}
@@ -149,6 +150,7 @@ export const StateProperty = {
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
   ADVANCEMENT_MODE: 'advancementMode',
+  PREVIOUS_ADVANCEMENT: 'previousAdvancement',
   PAGE_IDS: 'pageIds',
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
 };
@@ -342,6 +344,7 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.CURRENT_PAGE_ID]: data.id,
         [StateProperty.CURRENT_PAGE_INDEX]: data.index,
+        [StateProperty.PREVIOUS_ADVANCEMENT]: data.advancementDetails,
       }));
     case Action.SET_ADVANCEMENT_MODE:
       return /** @type {!State} */ (Object.assign({}, state, {
