@@ -103,20 +103,19 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     expectedResult
   ) {
     sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
-    return getResourceTiming(
-      ampdoc,
-      element,
-      resourceTimingSpec,
-      Date.now()
-    ).then(result => {
-      expect(result).to.equal(expectedResult);
-    });
+    return getResourceTiming(element, resourceTimingSpec, Date.now()).then(
+      result => {
+        expect(result).to.equal(expectedResult);
+      }
+    );
   };
 
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    element = env.win.document.documentElement;
+    element = document.createElement('amp-analytics');
+    element.getAmpDoc = () => ampdoc;
+    env.win.document.body.appendChild(element);
     installVariableServiceForTesting(ampdoc);
     installLinkerReaderService(win);
   });
@@ -614,13 +613,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${initiatorType}.${startTime}.${duration}';
 
-    return getResourceTiming(ampdoc, element, spec, Date.now())
+    return getResourceTiming(element, spec, Date.now())
       .then(result => {
         expect(result).to.equal('link.100.400');
         expect(spec['responseAfter']).to.equal(600);
 
         // Check resource timings a second time.
-        return getResourceTiming(ampdoc, element, spec, Date.now());
+        return getResourceTiming(element, spec, Date.now());
       })
       .then(result => {
         expect(result).to.equal('script.200.500');
