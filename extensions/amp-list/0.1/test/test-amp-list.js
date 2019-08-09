@@ -471,6 +471,38 @@ describes.repeated(
             });
           });
 
+          it('should set tabbindex only if the list item is not tabbable', () => {
+            // A list item with a no tabindex value or tabbable child
+            const nonTabbableItemElement = doc.createElement('div');
+
+            // A list item with a pre-set tabindex value
+            const tabbableItemElement = doc.createElement('div');
+            tabbableItemElement.setAttribute('tabindex', '4');
+
+            // A list item with a tabbable element (<a href>)
+            const childTabbableItemElement = doc.createElement('div');
+            const childTabbableItemChild = doc.createElement('a');
+            childTabbableItemChild.setAttribute('href', 'https://google.com/');
+            childTabbableItemElement.appendChild(childTabbableItemChild);
+
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [
+              nonTabbableItemElement,
+              tabbableItemElement,
+              childTabbableItemElement,
+            ]);
+
+            return list.layoutCallback().then(() => {
+              expect(nonTabbableItemElement.getAttribute('tabindex')).to.equal(
+                '0'
+              );
+              expect(tabbableItemElement.getAttribute('tabindex')).to.equal(
+                '4'
+              );
+              expect(childTabbableItemElement.getAttribute('tabindex')).to.be
+                .null;
+            });
+          });
+
           it('should not show placeholder on fetch failure', function*() {
             // Stub fetch_() to fail.
             listMock
