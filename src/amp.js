@@ -37,6 +37,7 @@ import {installErrorReporting} from './error';
 import {installPerformanceService} from './service/performance-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {installStandaloneExtension} from './standalone';
 import {
   installStylesForDoc,
   makeBodyVisible,
@@ -128,7 +129,7 @@ if (shouldMainBootstrapRun) {
           function final() {
             installPullToRefreshBlocker(self);
             installAutoLightboxExtension(ampdoc);
-
+            installStandaloneExtension(ampdoc);
             maybeValidate(self);
             makeBodyVisible(self.document);
           },
