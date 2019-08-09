@@ -27,14 +27,13 @@ FAIL
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
-|    <meta name="amp-experiment-token" content="{copy your token here}">
 |  </head>
 |  <body>
 |    <!-- Valid: With 'script' attribute. -->
 |    <amp-script layout=container script=hello></amp-script>
 |    <script type=text/plain target=amp-script id=hello>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:34:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp-script/0.1/test/validator-amp-script.html:33:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |      document.body.textContent = "Hello world!";
 |    </script>
 |
@@ -57,55 +56,55 @@ amp-script/0.1/test/validator-amp-script.html:34:2 Custom JavaScript is not allo
 |    <!-- Invalid: canvas element outside of amp-script tag. -->
 |    <canvas id="myCanvas" width="100px" height="100px"></canvas>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:55:2 The tag 'canvas' may only appear as a descendant of tag 'amp-script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags) [AMP_TAG_PROBLEM]
+amp-script/0.1/test/validator-amp-script.html:54:2 The tag 'canvas' may only appear as a descendant of tag 'amp-script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags) [AMP_TAG_PROBLEM]
 |
 |    <!-- Invalid: With neither 'script' or 'src' attributes. -->
 |    <amp-script layout=container></amp-script>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:58:2 The tag 'amp-script' is missing a mandatory attribute - pick at least one of ['script', 'src']. (see https://amp.dev/documentation/components/amp-script) [AMP_TAG_PROBLEM]
+amp-script/0.1/test/validator-amp-script.html:57:2 The tag 'amp-script' is missing a mandatory attribute - pick at least one of ['script', 'src']. (see https://amp.dev/documentation/components/amp-script) [AMP_TAG_PROBLEM]
 |
 |    <!-- Invalid: Relative URL. -->
 |    <amp-script layout=container src="/foo.js"></amp-script>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:61:2 The relative URL '/foo.js' for attribute 'src' in tag 'amp-script' is disallowed. (see https://amp.dev/documentation/components/amp-script) [AMP_TAG_PROBLEM]
+amp-script/0.1/test/validator-amp-script.html:60:2 The relative URL '/foo.js' for attribute 'src' in tag 'amp-script' is disallowed. (see https://amp.dev/documentation/components/amp-script) [AMP_TAG_PROBLEM]
 |
 |    <!-- Invalid: Non-https 'src' attribute. -->
 |    <amp-script layout=container src="http://not.https.url"></amp-script>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:64:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-script'. (see https://amp.dev/documentation/components/amp-script) [AMP_TAG_PROBLEM]
+amp-script/0.1/test/validator-amp-script.html:63:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-script'. (see https://amp.dev/documentation/components/amp-script) [AMP_TAG_PROBLEM]
 |
 |    <!-- Invalid: Local script without 'target' or 'id' attributes. -->
 |    <script type=text/plain>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:67:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp-script/0.1/test/validator-amp-script.html:66:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |      document.body.textContent = "Hello World!";
 |    </script>
 |
 |    <!-- Invalid: Local script with invalid 'type'. -->
 |    <script type=text/amp-script target=amp-script id=hello>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:72:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp-script/0.1/test/validator-amp-script.html:71:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |      document.body.textContent = "Hello World!";
 |    </script>
 |
 |    <!-- Invalid: Local script with invalid 'target'. -->
 |    <script type=text/plain target=amp-js id=hello>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:77:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp-script/0.1/test/validator-amp-script.html:76:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |      document.body.textContent = "Hello World!";
 |    </script>
 |
 |    <!-- Invalid: Local script without 'target' attribute. -->
 |    <script type=text/plain id=hello>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:82:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp-script/0.1/test/validator-amp-script.html:81:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |      document.body.textContent = "Hello World!";
 |    </script>
 |
 |    <!-- Invalid: Local script without 'id' attribute. -->
 |    <script type=text/plain target=amp-script>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:87:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp-script/0.1/test/validator-amp-script.html:86:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |      document.body.textContent = "Hello World!";
 |    </script>
 |  </body>
