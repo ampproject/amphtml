@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../services';
-import {dev, devAssert} from '../log';
+import {devAssert} from '../log';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
 import {whenDocumentComplete} from '../document-ready';
