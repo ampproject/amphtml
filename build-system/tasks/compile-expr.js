@@ -66,7 +66,7 @@ async function compileBindExpr() {
   const jisonFilename = 'bind-expr-impl.jison';
   const imports =
     "import {AstNode, AstNodeType} from './bind-expr-defines';\n" +
-    "import {parseJson} from '../../../src/json';";
+    "import {tryParseJson} from '../../../src/json';";
   const parserName = 'bindParser';
   const jsFilename = 'bind-expr-impl.js';
   compileExpr(path, jisonFilename, imports, parserName, jsFilename);
