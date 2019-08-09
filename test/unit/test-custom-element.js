@@ -22,10 +22,7 @@ import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
-import {
-  activateChunkingForTesting,
-  chunkInstanceForTesting,
-} from '../../src/chunk';
+import {chunkInstanceForTesting} from '../../src/chunk';
 import {createAmpElementForTesting} from '../../src/custom-element';
 
 describes.realWin('CustomElement', {amp: true}, env => {
@@ -119,6 +116,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         resourcesMock = sandbox.mock(resources);
         container = doc.createElement('div');
         doc.body.appendChild(container);
+        chunkInstanceForTesting(env.ampdoc);
 
         ElementClass = createAmpElementForTesting(win, 'amp-test', TestElement);
         StubElementClass = createAmpElementForTesting(
@@ -146,8 +144,6 @@ describes.realWin('CustomElement', {amp: true}, env => {
         testElementUnlayoutCallback = sandbox.spy();
         testElementPauseCallback = sandbox.spy();
         testElementResumeCallback = sandbox.spy();
-
-        chunkInstanceForTesting(env.ampdoc);
       });
 
       afterEach(() => {
@@ -745,7 +741,9 @@ describes.realWin('CustomElement', {amp: true}, env => {
           return element.build().then(() => {
             expect(element.isBuilt()).to.equal(true);
             expect(testElementBuildCallback).to.be.calledOnce;
-            expect(testElementPreconnectCallback).to.be.calledOnce;
+            setTimeout(() => {
+              expect(testElementPreconnectCallback).to.be.calledOnce;
+            }, 0);
           });
         });
       });
@@ -974,10 +972,12 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
           const p = element.layoutCallback();
           expect(testElementLayoutCallback).to.be.calledOnce;
-          expect(testElementPreconnectCallback).to.have.callCount(2);
-          expect(testElementPreconnectCallback.getCall(1).args[0]).to.be.true;
           expect(element.signals().get(CommonSignals.LOAD_START)).to.be.ok;
           expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          setTimeout(() => {
+            expect(testElementPreconnectCallback).to.have.callCount(2);
+            expect(testElementPreconnectCallback.getCall(1).args[0]).to.be.true;
+          }, 0);
           return p.then(() => {
             expect(element.readyState).to.equal('complete');
             expect(element.signals().get(CommonSignals.LOAD_END)).to.be.ok;
