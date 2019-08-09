@@ -24,7 +24,7 @@ limitations under the License.
 
 # <a name="`amp-story`"></a> `amp-story`
 
-The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
+The `amp-story` extension provides a format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
 
 <table>
   <tr>
