@@ -2,8 +2,8 @@
 $category@: layout
 formats:
   - websites
-  - email
   - ads
+  - email
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis.
 ---

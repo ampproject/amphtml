@@ -2,8 +2,8 @@
 $category@: media
 formats:
   - websites
-  - email
   - ads
+  - email
 teaser:
   text: Manages an animated image, typically a GIF.
 ---

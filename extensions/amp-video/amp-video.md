@@ -2,8 +2,8 @@
 $category@: media
 formats:
   - websites
-  - ads
   - stories
+  - ads
 teaser:
   text: Replaces the HTML5 video tag.
 ---

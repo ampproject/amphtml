@@ -2,8 +2,8 @@
 $category@: dynamic-content
 formats:
   - websites
-  - email
   - ads
+  - email
 teaser:
   text: Allows you to create forms to submit input fields in an AMP document.
 ---

@@ -2,6 +2,7 @@
 $category@: layout
 formats:
   - websites
+  - stories
   - email
   - stories
 teaser:

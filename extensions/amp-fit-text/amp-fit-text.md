@@ -2,9 +2,9 @@
 $category@: presentation
 formats:
   - websites
-  - email
-  - ads
   - stories
+  - ads
+  - email
 teaser:
   text: Expands or shrinks font size to fit the content within the space given.
 ---
