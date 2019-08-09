@@ -177,7 +177,7 @@ const PAGE_LOAD_TIMEOUT_MS = 5000;
  * prevent accidental duplicate advances.
  * @private @const {number}
  */
-const NAVIGATION_DEBOUNCE_THRESHOLD_MS = 300;
+const NAVIGATION_DEBOUNCE_THRESHOLD_MS = 750;
 
 /**
  * Single page ads may be injected later. If the original story contains 0 media
