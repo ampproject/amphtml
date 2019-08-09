@@ -184,6 +184,9 @@ export const WHITELISTED_ATTRS = [
   'subscriptions-display',
   'subscriptions-section',
   'subscriptions-service',
+  // A global attribute used for structured data.
+  // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemprop
+  'itemprop',
 ];
 
 /**
