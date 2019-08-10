@@ -89,6 +89,14 @@ describe
             return 0.123456789;
           },
         },
+        crypto: {
+          getRandomValues: array => {
+            array[0] = 1;
+            array[1] = 2;
+            array[2] = 3;
+            array[15] = 15;
+          },
+        },
         location: {
           href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
         },
@@ -115,6 +123,14 @@ describe
         Math: {
           random() {
             return 0.123456789;
+          },
+        },
+        crypto: {
+          getRandomValues: array => {
+            array[0] = 1;
+            array[1] = 2;
+            array[2] = 3;
+            array[15] = 15;
           },
         },
         location: {
@@ -302,6 +318,14 @@ describe
             return 0.123456789;
           },
         },
+        crypto: {
+          getRandomValues: array => {
+            array[0] = 1;
+            array[1] = 2;
+            array[2] = 3;
+            array[15] = 15;
+          },
+        },
         location: {
           href: base + '?f=0&amp_r=test%3Dhello%20world',
         },
@@ -331,6 +355,14 @@ describe
             return 0.123456789;
           },
         },
+        crypto: {
+          getRandomValues: array => {
+            array[0] = 1;
+            array[1] = 2;
+            array[2] = 3;
+            array[15] = 15;
+          },
+        },
         location: {
           href: base + '?f=0&amp_r=test%3Dhello%20world',
         },
@@ -357,6 +389,14 @@ describe
         Math: {
           random() {
             return 0.123456789;
+          },
+        },
+        crypto: {
+          getRandomValues: array => {
+            array[0] = 1;
+            array[1] = 2;
+            array[2] = 3;
+            array[15] = 15;
           },
         },
         location: {
