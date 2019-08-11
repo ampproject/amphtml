@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@import './amp-story-shadow-reset.css';
+
 .i-amphtml-story-draggable-drawer-header {
   display: flex !important;
   position: relative !important;
