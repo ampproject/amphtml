@@ -827,6 +827,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'readmo': {},
+
   'realclick': {
     renderStartImplemented: true,
   },

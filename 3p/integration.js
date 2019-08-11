@@ -210,6 +210,7 @@ import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
 import {rbinfox} from '../ads/rbinfox';
+import {readmo} from '../ads/readmo';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
 import {relap} from '../ads/relap';
@@ -294,6 +295,7 @@ const AMP_EMBED_ALLOWED = {
   lentainform: true,
   opinary: true,
   outbrain: true,
+  readmo: true,
   plista: true,
   postquare: true,
   pubexchange: true,
@@ -476,6 +478,7 @@ register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
 register('rbinfox', rbinfox);
+register('readmo', readmo);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
