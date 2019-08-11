@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@import './amp-story-shadow-reset.css';
+
 .i-amphtml-story-no-rotation-overlay {
   position: absolute !important;
   z-index: 200000!important; /** unsupported-browser-overlay - 1 */
