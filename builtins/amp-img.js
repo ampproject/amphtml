@@ -199,6 +199,7 @@ export class AmpImg extends BaseElement {
       return;
     }
     // Auto-sizes are not compatible with intrinsic layout.
+    // See https://github.com/ampproject/amphtml/issues/23453 for context.
     const layout = this.getLayout();
     if (layout === Layout.INTRINSIC) {
       return;
