@@ -167,7 +167,7 @@ export class ProgressBar {
           }
         });
 
-        // Segment overflow.
+        // Initialize progress bar ellipsis.
         if (
           this.segmentCount_ > MAX_SEGMENTS &&
           this.storeService_.get(StateProperty.UI_STATE) !==
@@ -178,9 +178,15 @@ export class ProgressBar {
               ? MAX_SEGMENT_ELLIPSIS
               : this.segmentCount_ % MAX_SEGMENTS;
           this.setSegmentSize_(this.getSegmentWidth_(ellipsisCount));
+          const upperIndexHead =
+            MAX_SEGMENTS +
+            Math.min(
+              MAX_SEGMENT_ELLIPSIS - 1,
+              this.segmentCount_ % MAX_SEGMENTS
+            );
           this.ellipsis_.headIndices = this.shrinkSegments_(
             MAX_SEGMENTS,
-            this.getUpperSegmentLimit_(MAX_SEGMENTS, 1 /** direction */)
+            upperIndexHead
           );
         } else {
           this.setSegmentSize_();
@@ -442,12 +448,12 @@ export class ProgressBar {
   }
 
   /**
-   * @param {*} lowerIndex
-   * @param {*} direction
+   * @param {number} lowerIndex
+   * @param {number} direction
    * @return {number}
    * @private
    */
-  getUpperSegmentLimit_(lowerIndex, direction) {
+  getUpperIndexForHeadEllipsis_(lowerIndex, direction) {
     const limitIndex =
       lowerIndex + direction * MAX_SEGMENT_ELLIPSIS + direction * -1;
     return direction === 1
