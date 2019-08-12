@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonLiteral} from '../../../src/json';
+import {jsonLiteral} from '../../../../src/json';
 
 const NIELSEN_MARKETING_CLOUD_CONFIG = jsonLiteral({
   'transport': {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonLiteral} from '../../../src/json';
+import {jsonLiteral} from '../../../../src/json';
 
 const ADOBEANALYTICS_CONFIG = jsonLiteral({
   'transport': {'xhrpost': false, 'beacon': false, 'image': true},

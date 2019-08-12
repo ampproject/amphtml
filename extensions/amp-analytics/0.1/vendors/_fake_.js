@@ -15,7 +15,7 @@
  */
 
 import {getMode} from '../../../../src/mode';
-import {jsonLiteral} from '../../../../src/json.js';
+import {jsonLiteral} from '../../../../src/json';
 
 let _FAKE_ = jsonLiteral({
   'requests': {

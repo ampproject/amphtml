@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonLiteral} from '../../../src/json';
+import {jsonLiteral} from '../../../../src/json';
 
 const UPSCORE_CONFIG = jsonLiteral({
   'requests': {

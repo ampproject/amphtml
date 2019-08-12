@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonLiteral} from '../../../src/json';
+import {jsonLiteral} from '../../../../src/json';
 
 const GOOGLEADWORDS_CONFIG = jsonLiteral({
   // https://developers.google.com/adwords/amp/landing-pages

@@ -74,30 +74,10 @@ module.exports = function(context) {
         return;
       }
 
-      if (node.name === 'JSON') {
-        return;
-      }
-
       const {parent} = node;
       if (
         parent.type === 'CallExpression' &&
         parent.callee.name === 'includeJsonLiteral'
-      ) {
-        return;
-      }
-
-      if (
-        parent.type === 'MemberExpression' &&
-        parent.property === node &&
-        !parent.computed
-      ) {
-        return;
-      }
-
-      if (
-        parent.type === 'Property' &&
-        parent.key === node &&
-        !parent.computed
       ) {
         return;
       }

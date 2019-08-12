@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {includeJsonLiteral, jsonLiteral} from '../../../src/json';
+import {includeJsonLiteral, jsonLiteral} from '../../../../src/json';
 
 const load = jsonLiteral(
   JSON.stringify(

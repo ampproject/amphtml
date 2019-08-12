@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonLiteral} from '../../../src/json';
+import {jsonLiteral} from '../../../../src/json';
 
 const OEWADIRECT_CONFIG = jsonLiteral({
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
