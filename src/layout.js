@@ -40,6 +40,20 @@ export const Layout = {
   INTRINSIC: 'intrinsic',
 };
 
+/** @const {!Array<string>} */
+const SIZE_DEFINED_LAYOUTS = [
+  Layout.FIXED,
+  Layout.FIXED_HEIGHT,
+  Layout.RESPONSIVE,
+  Layout.FILL,
+  Layout.FLEX_ITEM,
+  Layout.FLUID,
+  Layout.INTRINSIC,
+];
+
+/** @const {!Array<string>} */
+const SIZE_FIXED_LAYOUTS = [Layout.FIXED, Layout.FIXED_HEIGHT];
+
 /**
  * Layout priorities to use with BaseElement#getLayoutPriority() and
  * BaseElement#updateLayoutPriority().
@@ -143,15 +157,16 @@ export function getLayoutClass(layout) {
  * @return {boolean}
  */
 export function isLayoutSizeDefined(layout) {
-  return (
-    layout == Layout.FIXED ||
-    layout == Layout.FIXED_HEIGHT ||
-    layout == Layout.RESPONSIVE ||
-    layout == Layout.FILL ||
-    layout == Layout.FLEX_ITEM ||
-    layout == Layout.FLUID ||
-    layout == Layout.INTRINSIC
-  );
+  return SIZE_DEFINED_LAYOUTS.includes(layout);
+}
+
+/**
+ * Whether an element with this layout has a fixed dimension.
+ * @param {!Layout} layout
+ * @return {boolean}
+ */
+export function isLayoutSizeFixed(layout) {
+  return SIZE_FIXED_LAYOUTS.includes(layout);
 }
 
 /**

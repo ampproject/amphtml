@@ -186,7 +186,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || layout == Layout.FIXED_HEIGHT;
+    return [Layout.CONTAINER, Layout.FIXED_HEIGHT].includes(layout);
   }
 
   /** @override */
