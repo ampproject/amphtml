@@ -59,7 +59,6 @@ describe.configure().run('amp-ad 3P', () => {
         });
       })
       .then(context => {
-        throw JSON.stringify(context);
         expect(context.canary).to.be.a('boolean');
         expect(context.canonicalUrl).to.equal(
           'https://www.example.com/doubleclick.html'

@@ -233,11 +233,10 @@ function hasOwnProperty(obj, key) {
  * in the dist build.
  *
  * @param {!Object} obj
- * @return {!T}
- * @template T
+ * @return {!JsonObject}
  */
 export function jsonConfiguration(obj) {
-  return obj;
+  return /** @type {!JsonObject} */ (obj);
 }
 
 /**
