@@ -92,7 +92,7 @@
     "fs-extra": "8.1.0",
     "fuse.js": "3.4.5",
     "globs-to-files": "1.0.0",
-    "google-closure-compiler": "20190709.0.0",
+    "google-closure-compiler": "20190729.0.0",
     "gulp": "4.0.2",
     "gulp-ava": "2.0.0",
     "gulp-eslint": "6.0.0",
