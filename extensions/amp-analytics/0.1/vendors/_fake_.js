@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getMode} from '../../../src/mode';
-import {jsonLiteral} from '../../../src/json';
+import {getMode} from '../../../../src/mode';
+import {jsonLiteral} from '../../../../src/json.js';
 
 let _FAKE_ = jsonLiteral({
   'requests': {
@@ -54,7 +54,7 @@ let _FAKE_ = jsonLiteral({
 });
 
 if (!getMode().test && !getMode().localDev) {
-  _FAKE_ = jsonLiteral({});
+  _FAKE_ = jsonLiteral(null);
 }
 
 export {_FAKE_};

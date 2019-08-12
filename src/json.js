@@ -241,15 +241,6 @@ export function jsonConfiguration(obj) {
 }
 
 /**
- * @typedef {{
- *   YOU_MUST_USE: string,
- *   jsonLiteral: function(),
- *   TO_MAKE_THIS_TYPE: string,
- * }}
- */
-let InternalJsonLiteralTypeDef;
-
-/**
  * This converts an Object into a suitable type to be used in `includeJsonLiteral`.
  * This doesn't actually do any conversion, it only changes the closure type.
  *
