@@ -223,7 +223,10 @@ export class ConsentUI {
           // scheduleLayout is required everytime because some AMP element may
           // get un laid out after toggle display (#unlayoutOnPause)
           // for example <amp-iframe>
-          this.baseInstance_.scheduleLayout(this.ui_);
+          Services.ownersForDoc(this.baseInstance_.element).scheduleLayout(
+            this.baseInstance_.element,
+            this.ui_
+          );
 
           this.ui_./*OK*/ focus();
         }

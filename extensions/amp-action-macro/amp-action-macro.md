@@ -30,7 +30,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-action-macro.amp.html">amp-action-macro.amp.html</a></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-action-macro.html">amp-action-macro.html</a></td>
   </tr>
 </table>
 

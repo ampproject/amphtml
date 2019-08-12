@@ -399,7 +399,7 @@ function buildExtension(
   // recompiles JS.
   if (options.watch) {
     options.watch = false;
-    watch(path + '/*', function() {
+    watch(path + '/**/*', function() {
       buildExtension(
         name,
         version,
@@ -440,7 +440,7 @@ function buildExtension(
  * @param {string} name
  * @param {string} version
  * @param {!Object} options
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function buildExtensionCss(path, name, version, options) {
   /**

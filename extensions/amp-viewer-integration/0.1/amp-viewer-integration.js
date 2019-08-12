@@ -222,7 +222,12 @@ export class AmpViewerIntegration {
 
     viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging), origin);
 
-    listenOnce(this.win, 'unload', this.handleUnload_.bind(this, messaging));
+    // TODO(#23634): Remove, explain or adjust the usage of the unload listener
+    listenOnce(
+      this.win,
+      /*OK*/ 'unload',
+      this.handleUnload_.bind(this, messaging)
+    );
 
     if (viewer.hasCapability('swipe')) {
       this.initTouchHandler_(messaging);

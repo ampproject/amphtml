@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
-import {listen} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
 
 const TAG = 'amp-fx-flying-carpet';
@@ -76,7 +75,8 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     const childNodes = this.getRealChildNodes();
     this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
-    this.children_.forEach(child => this.setAsOwner(child));
+    const owners = Services.ownersForDoc(this.element);
+    this.children_.forEach(child => owners.setOwner(child, this.element));
 
     const clip = doc.createElement('div');
     clip.setAttribute('class', 'i-amphtml-fx-flying-carpet-clip');
@@ -102,8 +102,11 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       setStyle(this.container_, 'width', width, 'px');
     });
     if (this.firstLayoutCompleted_) {
-      this.scheduleLayout(this.children_);
-      listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
+      Services.ownersForDoc(this.element).scheduleLayout(
+        this.element,
+        this.children_
+      );
+      this.observeNewChildren_();
     }
   }
 
@@ -159,23 +162,56 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       this./*OK*/ collapse();
       throw e;
     }
-    this.scheduleLayout(this.children_);
-    listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
+    Services.ownersForDoc(this.element).scheduleLayout(
+      this.element,
+      this.children_
+    );
+    this.observeNewChildren_();
     this.firstLayoutCompleted_ = true;
     return Promise.resolve();
+  }
+
+  /**
+   * Makes sure we schedule layout for elements as they are added
+   * to the flying carpet.
+   * @private
+   */
+  observeNewChildren_() {
+    const observer = new MutationObserver(changes => {
+      for (let i = 0; i < changes.length; i++) {
+        const {addedNodes} = changes[i];
+        if (!addedNodes) {
+          continue;
+        }
+        for (let n = 0; n < addedNodes.length; n++) {
+          const node = addedNodes[n];
+          if (!node.signals) {
+            continue;
+          }
+          node
+            .signals()
+            .whenSignal(CommonSignals.BUILT)
+            .then(this.layoutBuiltChild_.bind(this, node));
+        }
+      }
+    });
+    observer.observe(this.element, {
+      childList: true,
+      subtree: true,
+    });
   }
 
   /**
    * Listens for children element to be built, and schedules their layout.
    * Necessary since not all children will be built by the time the
    * flying-carpet has its #layoutCallback called.
-   * @param {!Event} event
+   * @param {!Node} node
    * @private
    */
-  layoutBuiltChild_(event) {
-    const child = dev().assertElement(event.target);
+  layoutBuiltChild_(node) {
+    const child = dev().assertElement(node);
     if (child.getOwner() === this.element) {
-      this.scheduleLayout(child);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, child);
     }
   }
 

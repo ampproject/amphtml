@@ -16,6 +16,7 @@
 
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
+import {isNewLoaderExperimentEnabled} from '../../../src/loader';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-ad';
@@ -61,9 +62,13 @@ export class AmpAdUIHandler {
   /**
    * Create a default placeholder if not provided.
    * Should be called in baseElement createPlaceholderCallback.
-   * @return {*} TODO(#23582): Specify return type
+   * @return {?Element}
    */
   createPlaceholder() {
+    if (isNewLoaderExperimentEnabled(this.element_)) {
+      return null;
+    }
+
     return this.addDefaultUiComponent_('placeholder');
   }
 

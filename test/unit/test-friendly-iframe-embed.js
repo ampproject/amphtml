@@ -94,8 +94,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     });
   }
 
-  // TODO: fix tests. #19650
-  it.skip('should follow main install steps', () => {
+  it('should follow main install steps', () => {
     // Resources are not involved.
     extensionsMock.expects('preloadExtension').never();
     resourcesMock.expects('add').never();
