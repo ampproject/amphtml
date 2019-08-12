@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as CID from '../../src/service/cid-impl';
+
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -27,6 +29,7 @@ describe
 
     beforeEach(() => {
       sandbox = sinon.sandbox;
+      sandbox.stub(CID, 'getRandomString64').returns('abcdef');
     });
 
     afterEach(() => {
@@ -89,14 +92,6 @@ describe
             return 0.123456789;
           },
         },
-        crypto: {
-          getRandomValues: array => {
-            array[0] = 1;
-            array[1] = 2;
-            array[2] = 3;
-            array[15] = 15;
-          },
-        },
         location: {
           href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
         },
@@ -125,14 +120,6 @@ describe
             return 0.123456789;
           },
         },
-        crypto: {
-          getRandomValues: array => {
-            array[0] = 1;
-            array[1] = 2;
-            array[2] = 3;
-            array[15] = 15;
-          },
-        },
         location: {
           href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
         },
@@ -157,6 +144,17 @@ describe
         );
         expect(Services.documentInfoForDoc(win.document).pageViewId).to.equal(
           '1234'
+        );
+      });
+    });
+
+    it('should provide the pageViewId64', () => {
+      return getWin({'canonical': ['https://twitter.com/']}).then(win => {
+        expect(Services.documentInfoForDoc(win.document).pageViewId64).to.equal(
+          'abcdef'
+        );
+        expect(Services.documentInfoForDoc(win.document).pageViewId64).to.equal(
+          'abcdef'
         );
       });
     });
@@ -318,14 +316,6 @@ describe
             return 0.123456789;
           },
         },
-        crypto: {
-          getRandomValues: array => {
-            array[0] = 1;
-            array[1] = 2;
-            array[2] = 3;
-            array[15] = 15;
-          },
-        },
         location: {
           href: base + '?f=0&amp_r=test%3Dhello%20world',
         },
@@ -355,14 +345,6 @@ describe
             return 0.123456789;
           },
         },
-        crypto: {
-          getRandomValues: array => {
-            array[0] = 1;
-            array[1] = 2;
-            array[2] = 3;
-            array[15] = 15;
-          },
-        },
         location: {
           href: base + '?f=0&amp_r=test%3Dhello%20world',
         },
@@ -389,14 +371,6 @@ describe
         Math: {
           random() {
             return 0.123456789;
-          },
-        },
-        crypto: {
-          getRandomValues: array => {
-            array[0] = 1;
-            array[1] = 2;
-            array[2] = 3;
-            array[15] = 15;
           },
         },
         location: {
