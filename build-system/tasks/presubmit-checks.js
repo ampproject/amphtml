@@ -631,6 +631,7 @@ const forbiddenTerms = {
       'src/chunk.js',
       'src/inabox/amp-inabox.js',
       'src/runtime.js',
+      'src/custom-element.js',
     ],
   },
   'AMP_CONFIG': {
