@@ -230,7 +230,7 @@ function hasOwnProperty(obj, key) {
  * It allows the configuration is to be written in plain JS (which has better
  * dev ergonomics like comments and trailing commas), and allows the
  * configuration to be transformed into an efficient JSON-parsed representation
- * in the dist build.
+ * in the dist build. See https://v8.dev/blog/cost-of-javascript-2019#json
  *
  * @param {!Object} obj
  * @return {!JsonObject}
