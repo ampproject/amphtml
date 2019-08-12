@@ -23,11 +23,6 @@
 module.exports = function(context) {
   return {
     'CallExpression[callee.name=jsonConfiguration]': function(node) {
-      const {callee} = node;
-      if (callee.type !== 'Identifier') {
-        return;
-      }
-
       const args = node.arguments;
 
       if (
@@ -46,11 +41,6 @@ module.exports = function(context) {
     },
 
     'CallExpression[callee.name=includeJsonLiteral]': function(node) {
-      const {callee} = node;
-      if (callee.type !== 'Identifier') {
-        return;
-      }
-
       const args = node.arguments;
 
       if (args.length === 1 && args[0].type === 'Identifier') {
@@ -63,9 +53,7 @@ module.exports = function(context) {
       });
     },
 
-    'CallExpression[callee.name=jsonConfiguration] > :matches(ObjectExpression, ArrayExpression) Identifier': function(
-      node
-    ) {
+    'CallExpression[callee.name=jsonConfiguration] Identifier': function(node) {
       if (node.name === 'undefined') {
         return;
       }
