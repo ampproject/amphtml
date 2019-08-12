@@ -37,6 +37,12 @@ export const AFFILIATE_LINK_SELECTOR = 'a.i-amphtml-story-affiliate-link';
  */
 export const AFFILIATE_LINK_BUILT = '__AMP_AFFILIATE_LINK_BUILT';
 
+/**
+ * Tag
+ * @const {string}
+ */
+export const TAG = 'amphtml-story-affiliate-link';
+
 export class AmpStoryAffiliateLink {
   /**
    * @param {!Window} win
@@ -103,7 +109,7 @@ export class AmpStoryAffiliateLink {
     const textEl = this.element_.querySelector(
       '.i-amphtml-story-affiliate-link-text'
     );
-    textEl.innerText = this.element_.innerText;
+    textEl.textContent = this.element_.textContent;
   }
 
   /**
@@ -133,10 +139,7 @@ export class AmpStoryAffiliateLink {
   getElementHref_(target) {
     const elUrl = target.getAttribute('href');
     if (!isProtocolValid(elUrl)) {
-      user().error(
-        'amp-story-affiliate-link',
-        'The affiliate link url is invalid'
-      );
+      user().error(TAG, 'The affiliate link url is invalid');
       return;
     }
 
