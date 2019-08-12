@@ -140,7 +140,7 @@ export class AmpStoryAffiliateLink {
     const elUrl = target.getAttribute('href');
     if (!isProtocolValid(elUrl)) {
       user().error(TAG, 'The affiliate link url is invalid');
-      return;
+      return '';
     }
 
     return parseUrlDeprecated(elUrl).href;

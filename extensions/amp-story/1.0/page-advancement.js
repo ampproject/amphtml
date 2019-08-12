@@ -562,13 +562,13 @@ class ManualAdvancement extends AdvancementConfig {
 
   /**
    * Check if click should be handled by the affiliate link logic
-   * @param {!Event} event
+   * @param {!Element} target
    * @private
    * @return {boolean}
    */
-  isHandledByAffiliateLink_(event) {
+  isHandledByAffiliateLink_(target) {
     const expanded = this.storeService_.get(StateProperty.AFFILIATE_LINK_STATE);
-    const clickedOnLink = matches(event.target, AFFILIATE_LINK_SELECTOR);
+    const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
 
     if (expanded) {
       // do not handle if clicking on expanded affiliate link
@@ -603,7 +603,7 @@ class ManualAdvancement extends AdvancementConfig {
       return;
     }
 
-    if (this.isHandledByAffiliateLink_(event)) {
+    if (this.isHandledByAffiliateLink_(target)) {
       event.preventDefault();
       const expanded = this.storeService_.get(
         StateProperty.AFFILIATE_LINK_STATE
