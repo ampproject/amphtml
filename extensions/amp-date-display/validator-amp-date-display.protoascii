@@ -42,6 +42,9 @@ tags: {  # <amp-date-display>
     value_regex: "-?\\d+"
   }
   attrs: { name: "locale" }
+  # TODO(gregable): Implement validation that requires the template attr value
+  # to reference the id of an existing template element.
+  attrs: { name: "template" }
   attrs: {
     name: "timestamp-ms"
     mandatory_oneof: "['datetime', 'timestamp-ms', 'timestamp-seconds']"
