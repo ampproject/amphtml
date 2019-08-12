@@ -279,7 +279,6 @@ function copyCss() {
  */
 function copyParsers() {
   const startTime = Date.now();
-  //dist/v0 ?
   return fs.copy('build/parsers', 'dist/v0').then(() => {
     endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
   });
