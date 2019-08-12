@@ -22,7 +22,7 @@ const path = require('path');
 const {endBuildStep} = require('./helpers');
 const {jisonPaths} = require('../config');
 
-// set imports for each parser from directory build/parsers/
+// set imports for each parser from directory build/parsers/.
 const imports = new Map();
 imports.set(
   'cssParser',
@@ -37,30 +37,33 @@ imports.set(
 /**
  * Builds parsers for extensions with *.jison files.
  * Uses jison file path to name the parser to export.
- * For example, css-expr-impl.jison creates `cssParser`
+ * For example, css-expr-impl.jison creates `cssParser`.
  * @return {!Promise<void>}
  */
-function compileExprs() {
+function compileJison() {
   const startTime = Date.now();
   fs.mkdirSync('build/parsers', {recursive: true});
   const promises = [];
   jisonPaths.forEach(jisonPath => {
     glob.sync(jisonPath).forEach(jisonFile => {
+      const startTime = Date.now();
       const jsFile = path.basename(jisonFile, '.jison');
       const extension = jsFile.replace('-expr-impl', '');
       const parser = extension + 'Parser';
       const newFilePath = `build/parsers/${jsFile}.js`;
-      promises.push(compileExpr(jisonFile, parser, newFilePath));
+      promises.push(
+        compileExpr(jisonFile, parser, newFilePath).then(() => {
+          endBuildStep(
+            'Compiled',
+            `${jsFile}.jison → ${newFilePath} as ${parser}`,
+            startTime
+          );
+        })
+      );
     });
   });
 
-  return Promise.all(promises).then(() => {
-    endBuildStep(
-      'Recompiled all jison parsers into',
-      'build/parsers/',
-      startTime
-    );
-  });
+  return Promise.all(promises);
 }
 /**
  * Helper function that uses jison to generate a parser for the input file.
@@ -95,7 +98,7 @@ async function compileExpr(jisonFilePath, parserName, newFilePath) {
 }
 
 module.exports = {
-  compileExprs,
+  compileJison,
 };
 
-compileExprs.description = 'Use jison to create parsers';
+compileJison.description = 'Use jison to create parsers';

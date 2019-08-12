@@ -24,7 +24,7 @@ const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {compileExprs} = require('./compile-expr');
+const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
 
@@ -40,7 +40,7 @@ class Runner extends RuntimeTestRunner {
     }
 
     await css();
-    await compileExprs();
+    await compileJison();
   }
 }
 

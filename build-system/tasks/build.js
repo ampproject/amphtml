@@ -26,7 +26,7 @@ const {
 } = require('./helpers');
 const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
-const {compileExprs} = require('./compile-expr');
+const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
@@ -64,7 +64,7 @@ async function performBuild(watch) {
   printNobuildHelp();
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
   parseExtensionFlags();
-  return compileCss(watch)
+  return Promise.all([compileCss(watch), compileJison()])
     .then(() => {
       return Promise.all([
         polyfillsForTests(),
@@ -73,7 +73,6 @@ async function performBuild(watch) {
         buildWebWorker({watch}),
         buildExtensions({watch}),
         compileAllUnminifiedTargets(watch),
-        compileExprs(),
       ]);
     })
     .then(() => {
