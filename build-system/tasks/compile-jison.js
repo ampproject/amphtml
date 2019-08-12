@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,17 @@ const {endBuildStep} = require('./helpers');
 const {jisonPaths} = require('../config');
 
 // set imports for each parser from directory build/parsers/.
-const imports = new Map();
-imports.set(
-  'cssParser',
-  "import * as ast from '../../extensions/amp-animation/0.1/parsers/css-expr-ast';"
-);
-imports.set(
-  'bindParser',
-  "import {AstNode, AstNodeType} from '../../extensions/amp-bind/0.1/bind-expr-defines';\n" +
-    "import {tryParseJson} from '../../src/json';"
-);
+const imports = new Map([
+  [
+    'cssParser',
+    "import * as ast from '../../extensions/amp-animation/0.1/parsers/css-expr-ast';",
+  ],
+  [
+    'bindParser',
+    "import {AstNode, AstNodeType} from '../../extensions/amp-bind/0.1/bind-expr-defines';\n" +
+      "import {tryParseJson} from '../../src/json';",
+  ],
+]);
 
 /**
  * Builds parsers for extensions with *.jison files.
