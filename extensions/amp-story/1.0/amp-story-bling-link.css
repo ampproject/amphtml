@@ -21,7 +21,7 @@
   font-size: 0 !important;
 }
 
-amp-story-page[active] .i-amphtml-story-bling-link[expanded], amp-story-page[active] .i-amphtml-story-bling-link[expanded] .i-amphtml-story-bling-link-circle {
+amp-story-page[active] .i-amphtml-story-bling-link[expanded], amp-story-page[active] .i-amphtml-story-bling-link[expanded]  .i-amphtml-story-bling-link-circle {
   width: 150px !important;
   transition: width 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
@@ -34,11 +34,11 @@ amp-story-page[active] .i-amphtml-story-bling-link[expanded], amp-story-page[act
   width: 40px !important;
   height: 40px !important;
   transition: 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-  transition-property: width, border-radius !important;
+  transition-property: width, border-radius !important;   
 }
 
 .i-amphtml-story-bling-link[expanded] .i-amphtml-story-bling-link-circle {  
-  border-radius: 20px !important;  
+  border-radius: 20px !important;
   overflow: hidden !important;
 }
 
@@ -106,6 +106,7 @@ amp-story-page[active] .i-amphtml-story-bling-link-pulse {
 }
 
 .i-amphtml-story-bling-link:hover .i-amphtml-story-bling-link-pulse {
+  background: none !important;
   animation: none !important;
 }
 

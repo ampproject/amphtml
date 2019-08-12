@@ -609,7 +609,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Adds icon and pulse animation to bling links
+   * Initializes bling links.
    */
   addStylesToBlingLinks_() {
     scopedQuerySelectorAll(this.element, BLING_LINK_SELECTOR).forEach(el => {

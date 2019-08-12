@@ -32,7 +32,7 @@ import {user} from '../../../src/log';
 export const BLING_LINK_SELECTOR = 'a.i-amphtml-story-bling-link';
 
 /**
- * Custom property signifying a built link
+ * Custom property signifying a built link.
  * @const {string}
  */
 export const BLING_LINK_BUILT = '__AMP_BLING_LINK_BUILT';
@@ -57,7 +57,6 @@ export class AmpStoryBlingLink {
    * Builds bling link
    */
   build() {
-    //TODO(esth): does this logic still work bc you're instantiating class in amp-story-page.js
     if (this.element_[BLING_LINK_BUILT]) {
       return;
     }

@@ -564,6 +564,7 @@ class ManualAdvancement extends AdvancementConfig {
    * Check if click should be handled by the bling link logic
    * @param {!Event} event
    * @private
+   * @return {boolean}
    */
   isHandledByBlingLink_(event) {
     const expanded = this.storeService_.get(StateProperty.BLING_LINK_STATE);
