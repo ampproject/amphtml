@@ -28,6 +28,7 @@ tags: {  # <amp-megaphone> for playlists
   html_format: AMP
   tag_name: "AMP-MEGAPHONE"
   requires_extension: "amp-megaphone"
+  spec_name: "amp-megaphone [data-playlist]"
   attrs: {
     name: "data-playlist"
     mandatory: true
@@ -59,6 +60,7 @@ tags: {  # <amp-megaphone> for episodes
   html_format: AMP
   tag_name: "AMP-MEGAPHONE"
   requires_extension: "amp-megaphone"
+  spec_name: "amp-megaphone [data-episode]"
   attrs: {
     name: "data-episode"
     mandatory: true
