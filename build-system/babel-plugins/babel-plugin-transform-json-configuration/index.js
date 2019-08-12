@@ -53,12 +53,14 @@ module.exports = function({template, types: t}) {
         proxy
       );
       const json = JSON.stringify(obj);
-      const regex = new RegExp(`((?:(?!${uniq}).)*)(${uniq}|$)`, 'g');
+      const escaped = String(uniq).replace('.', '\\.');
+      const regex = new RegExp(`((?:(?!${escaped}).)*)(${escaped}|$)`, 'g');
       json.replace(regex, function(_, match, uniq) {
         if (match || uniq) {
           const raw = match.replace(/\${|\\/g, '\\$&');
           quasis.push(t.templateElement({raw}));
         }
+        return '';
       });
     } catch (e) {
       const ref = arg || path;
