@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const MEDIATOR_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const MEDIATOR_CONFIG = jsonLiteral({
   'requests': {
     'host': '//collector.mediator.media/script/${mediator_id}/amp/',
     'renderstart': '${host}init/?url=${canonicalUrl}',
@@ -78,3 +80,5 @@ export const MEDIATOR_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {MEDIATOR_CONFIG};

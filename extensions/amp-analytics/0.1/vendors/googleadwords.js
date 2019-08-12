@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const GOOGLEADWORDS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const GOOGLEADWORDS_CONFIG = jsonLiteral({
   // https://developers.google.com/adwords/amp/landing-pages
   'requests': {
     'conversion_prefix': 'https://www.googleadservices.com/pagead/conversion/',
@@ -51,3 +53,5 @@ export const GOOGLEADWORDS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {GOOGLEADWORDS_CONFIG};

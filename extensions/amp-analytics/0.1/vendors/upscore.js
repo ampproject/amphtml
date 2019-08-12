@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const UPSCORE_CONFIG = /**@type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const UPSCORE_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://hit-pool.upscore.com/amp?',
     'basePrefix':
@@ -71,3 +73,5 @@ export const UPSCORE_CONFIG = /**@type {!JsonObject} */ ({
     'image': false,
   },
 });
+
+export {UPSCORE_CONFIG};

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const AFSANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const AFSANALYTICS_CONFIG = jsonLiteral({
   'vars': {
     'server': 'www',
     'websiteid': 'xxxxxxxx',
@@ -47,3 +49,5 @@ export const AFSANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {AFSANALYTICS_CONFIG};

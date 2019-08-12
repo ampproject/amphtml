@@ -69,6 +69,15 @@ FormData.prototype.entries = function () {};
 function JsonObject() {}
 
 /**
+ * @typedef {{
+ *   YOU_MUST_USE: string,
+ *   jsonLiteral: function(),
+ *   TO_MAKE_THIS_TYPE: string,
+ * }}
+ */
+var InternalJsonLiteralTypeDef;
+
+/**
  * Force the dataset property to be handled as a JsonObject.
  * @type {!JsonObject}
  */

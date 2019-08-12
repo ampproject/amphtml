@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const EPICA_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const EPICA_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,
@@ -46,3 +48,5 @@ export const EPICA_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {EPICA_CONFIG};

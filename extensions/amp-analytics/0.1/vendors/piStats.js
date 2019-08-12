@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const PISTATS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const PISTATS_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://events.pi-stats.com',
     'basePrefix':
@@ -45,3 +47,5 @@ export const PISTATS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {PISTATS_CONFIG};

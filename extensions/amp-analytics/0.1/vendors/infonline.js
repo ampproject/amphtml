@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const INFONLINE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const INFONLINE_CONFIG = jsonLiteral({
   'vars': {
     'sv': 'ke',
     'ap': '1',
@@ -38,3 +40,5 @@ export const INFONLINE_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {INFONLINE_CONFIG};

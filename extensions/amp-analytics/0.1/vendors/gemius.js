@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const GEMIUS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const GEMIUS_CONFIG = jsonLiteral({
   'vars': {
     'dnt': '0',
   },
@@ -36,3 +38,5 @@ export const GEMIUS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {GEMIUS_CONFIG};

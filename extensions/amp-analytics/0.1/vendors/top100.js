@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const TOP100_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const TOP100_CONFIG = jsonLiteral({
   'vars': {
     'pid': '',
     'rid': 'PAGE_VIEW_ID',
@@ -54,3 +56,5 @@ export const TOP100_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {TOP100_CONFIG};

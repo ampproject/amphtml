@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const DYNATRACE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const DYNATRACE_CONFIG = jsonLiteral({
   'requests': {
     'endpoint':
       '${protocol}://${tenant}${separator}${environment}:${port}/ampbf/${tenantpath}',
@@ -77,3 +79,5 @@ export const DYNATRACE_CONFIG = /** @type {!JsonObject} */ ({
     'separator': '.',
   },
 });
+
+export {DYNATRACE_CONFIG};

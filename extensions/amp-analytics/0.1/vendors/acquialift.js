@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const ACQUIALIFT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const ACQUIALIFT_CONFIG = jsonLiteral({
   'vars': {
     'decisionApiUrl': 'us-east-1-decisionapi.lift.acquia.com',
     'accountId': 'xxxxxxxx',
@@ -42,3 +44,5 @@ export const ACQUIALIFT_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {ACQUIALIFT_CONFIG};
