@@ -26,7 +26,7 @@ const {expect} = require('chai');
 
 const {NoSuchElementError} = error;
 
-const ELEMENT_WAIT_TIMEOUT = 5000;
+const ELEMENT_WAIT_TIMEOUT = 10000;
 
 /** @enum {string} */
 const KeyToSeleniumMap = {
