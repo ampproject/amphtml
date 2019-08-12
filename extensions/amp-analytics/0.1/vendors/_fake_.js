@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {getMode} from '../../../../src/mode';
-import {jsonLiteral} from '../../../../src/json';
-
-let _FAKE_ = jsonLiteral({
+export const _FAKE_ = /** @type {!JsonObject} */ ({
   'requests': {
     'endpoint': '/analytics/fake',
   },
@@ -52,9 +49,3 @@ let _FAKE_ = jsonLiteral({
     'dataSource': 'AMP',
   },
 });
-
-if (!getMode().test && !getMode().localDev) {
-  _FAKE_ = jsonLiteral(null);
-}
-
-export {_FAKE_};

@@ -18,6 +18,7 @@ import {
   IFRAME_TRANSPORTS,
   IFRAME_TRANSPORTS_CANARY,
 } from './iframe-transport-vendors';
+import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
 import {
   includeJsonLiteral,
@@ -25,9 +26,6 @@ import {
   jsonLiteral,
 } from '../../../src/json';
 import {isCanary} from '../../../src/experiments';
-
-// Disable auto-sorting of imports from here on.
-/* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 import {ACQUIALIFT_CONFIG} from './vendors/acquialift';
 import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics';
@@ -185,7 +183,6 @@ export const ANALYTICS_CONFIG =
   ANALYTICS_VENDOR_SPLIT
     ? jsonConfiguration({'default': includeJsonLiteral(DEFAULT_CONFIG)})
     : jsonConfiguration({
-        '_fake_': includeJsonLiteral(_FAKE_),
         // Default parent configuration applied to all amp-analytics tags.
         'default': includeJsonLiteral(DEFAULT_CONFIG),
         'acquialift': includeJsonLiteral(ACQUIALIFT_CONFIG),
@@ -271,6 +268,10 @@ export const ANALYTICS_CONFIG =
 
 // eslint-disable-next-line no-undef
 if (!ANALYTICS_VENDOR_SPLIT) {
+  if (getMode().test || getMode().localDev) {
+    ANALYTICS_CONFIG['_fake_'] = _FAKE_;
+  }
+
   ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframePing'] = true;
 
   ANALYTICS_CONFIG['adobeanalytics_nativeConfig']['triggers']['pageLoad'][
