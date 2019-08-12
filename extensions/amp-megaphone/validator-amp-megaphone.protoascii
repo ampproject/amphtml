@@ -32,17 +32,15 @@ tags: {  # <amp-megaphone> for playlists
     name: "data-playlist"
     mandatory: true
     value_regex: "[A-Za-z0-9]+"
-    dispatch_key: NAME_VALUE_DISPATCH
+    dispatch_key: NAME_DISPATCH
   }
   attrs: {
     name: "data-light"
-    value_casei: "false"
-    value_casei: "true"
+    value: ""
   }
   attrs: {
     name: "data-sharing"
-    value_casei: "false"
-    value_casei: "true"
+    value: ""
   }
   attrs: {
     name: "data-episodes"
@@ -65,7 +63,7 @@ tags: {  # <amp-megaphone> for episodes
     name: "data-episode"
     mandatory: true
     value_regex: "[A-Za-z0-9]+"
-    dispatch_key: NAME_VALUE_DISPATCH
+    dispatch_key: NAME_DISPATCH
   }
   attrs: {
     name: "data-start"
@@ -73,18 +71,15 @@ tags: {  # <amp-megaphone> for episodes
   }
   attrs: {
     name: "data-tile"
-    value_casei: "false"
-    value_casei: "true"
+    value: ""
   }
   attrs: {
     name: "data-light"
-    value_casei: "false"
-    value_casei: "true"
+    value: ""
   }
   attrs: {
     name: "data-sharing"
-    value_casei: "false"
-    value_casei: "true"
+    value: ""
   }
 
   attr_lists: "extended-amp-global"

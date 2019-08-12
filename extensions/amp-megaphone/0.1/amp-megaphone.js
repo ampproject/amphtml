@@ -60,8 +60,11 @@ class AmpMegaphone extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
+    // Pre-connects to the iframe source itself
     this.preconnect.url(this.baseUrl_, opt_onLayout);
+    // Pre-connects to the megaphone static documents server (serves CSS and JS)
     this.preconnect.url('https://assets.megaphone.fm', opt_onLayout);
+    // Pre-connects to the image assets server (for UI elements and playlist cover art)
     this.preconnect.url('https://megaphone.imgix.net', opt_onLayout);
   }
 
@@ -89,34 +92,15 @@ class AmpMegaphone extends AMP.BaseElement {
   }
 
   /** @override */
-  mutatedAttributesCallback(mutations) {
-    const playlist = mutations['data-playlist'];
-    const episode = mutations['data-playlist'];
-    if (playlist !== undefined || episode !== undefined) {
-      this.updateBaseUrl_();
-    }
-
-    const light = mutations['data-light'];
-    const sharing = mutations['data-sharing'];
-    const episodes = mutations['data-episodes'];
-    const start = mutations['data-start'];
-    const tile = mutations['data-tile'];
-    if (
-      light !== undefined ||
-      sharing !== undefined ||
-      episodes !== undefined ||
-      start !== undefined ||
-      tile !== undefined
-    ) {
-      if (this.iframe_) {
-        this.iframe_.src = this.getIframeSrc_();
-      }
+  mutatedAttributesCallback() {
+    this.updateBaseUrl_();
+    if (this.iframe_) {
+      this.iframe_.src = this.getIframeSrc_();
     }
   }
 
   /**@override*/
   layoutCallback() {
-    const height = this.element.getAttribute('height');
     const iframe = this.element.ownerDocument.createElement('iframe');
 
     iframe.setAttribute('frameborder', 'no');
@@ -131,7 +115,6 @@ class AmpMegaphone extends AMP.BaseElement {
     );
 
     this.applyFillContent(iframe);
-    iframe.height = height;
     this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
@@ -157,7 +140,7 @@ class AmpMegaphone extends AMP.BaseElement {
    */
   getIframeSrc_() {
     this.updateBaseUrl_();
-    let url = this.baseUrl_ + '/';
+
     const mediaid = userAssert(
       this.element.getAttribute('data-playlist') ||
         this.element.getAttribute('data-episode'),
@@ -165,27 +148,25 @@ class AmpMegaphone extends AMP.BaseElement {
       this.element
     );
 
-    if (!this.isPlaylist_) {
-      url += mediaid + '/';
-    }
-
-    const hasLightTheme = this.element.getAttribute('data-light') === 'true';
-    const hasSharingDisabled =
-      this.element.getAttribute('data-sharing') === 'false';
+    const hasLightTheme = this.element.hasAttribute('data-light');
+    const hasSharing = this.element.hasAttribute('data-sharing');
     const episodes = this.element.getAttribute('data-episodes');
     const start = this.element.getAttribute('data-start');
-    const hasTile = this.element.getAttribute('data-tile') === 'true';
+    const hasTile = this.element.hasAttribute('data-tile');
 
     const queryParams = dict({
       'p': this.isPlaylist_ ? mediaid : undefined,
       'light': hasLightTheme || undefined,
-      'sharing': hasSharingDisabled ? 'false' : undefined,
+      'sharing': hasSharing || undefined,
       'episodes': (this.isPlaylist_ && episodes) || undefined,
       'start': (!this.isPlaylist_ && start) || undefined,
       'tile': (!this.isPlaylist_ && hasTile) || undefined,
     });
 
-    return addParamsToUrl(url, queryParams);
+    return addParamsToUrl(
+      this.baseUrl_ + '/' + (this.isPlaylist_ ? '' : mediaid + '/'),
+      queryParams
+    );
   }
 
   /**

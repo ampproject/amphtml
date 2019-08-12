@@ -43,10 +43,8 @@ describes.realWin(
       }
       mpplayer.setAttribute('height', '150');
 
-      if (opt_attrs) {
-        for (const attr in opt_attrs) {
-          mpplayer.setAttribute(attr, opt_attrs[attr]);
-        }
+      for (const attr in opt_attrs) {
+        mpplayer.setAttribute(attr, opt_attrs[attr]);
       }
 
       doc.body.appendChild(mpplayer);

@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Megaphone.fm podcast episode or playlist.
 ---
+
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -47,19 +48,25 @@ Displays a <a href="https://megaphone.fm/">Megaphone.fm</a> podcast episode or p
 With the fixed height layout, the element will expand to fill the width of the page while keeping the `height` constant:
 
 Light Mode:
+
 ```html
-<amp-megaphone height="166"
-    layout="fixed-height"
-    data-episode="OSC7749686951"
-    data-light="true"></amp-megaphone>
+<amp-megaphone
+  height="166"
+  layout="fixed-height"
+  data-episode="OSC7749686951"
+  data-light
+></amp-megaphone>
 ```
 
 Dark Mode:
+
 ```html
-<amp-megaphone height="166"
-    layout="fixed-height"
-    data-episode="OSC7749686951"
-    data-light="true"></amp-megaphone>
+<amp-megaphone
+  height="166"
+  layout="fixed-height"
+  data-episode="OSC7749686951"
+  data-light
+></amp-megaphone>
 ```
 
 ## Attributes
@@ -85,15 +92,15 @@ The value for this attribute is the Megaphone.fm ID of a playlist.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-tile (optional)</strong></td>
-    <td>(for episodes only) If set to <code>true</code>, displays the player in a "tile" mode where the internal components are layed out vertically. The default value is <code>false</code>.</td>
+    <td>(for episodes only) If present, displays the player in a "tile" mode where the internal components are layed out vertically.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-light (optional)</strong></td>
-    <td>If set to <code>true</code>, this will switch the player theme to the "light" scheme as opposed to the default dark version. The default value is <code>false</code>.</td>
+    <td>If present, this will switch the player theme to the "light" scheme as opposed to the default dark version.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-sharing (optional)</strong></td>
-    <td>If set to <code>false</code>, this will disable the social sharing button on the embedded player. The default value is <code>false</code>.</td>
+    <td>If present, this will enable the social sharing button on the embedded player. The default value is to disable the button.</td>
   </tr>
   <tr>
     <td width="40%"><strong>width and height</strong></td>
