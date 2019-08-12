@@ -27,23 +27,19 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    // TODO(lannka): unskip this test. It passes locally but fails on Travis:
-    // https://travis-ci.org/ampproject/amphtml/jobs/570977015
-    it.configure()
-      .skipA4aFie()
-      .run('should support binding to src', async () => {
-        const button = await controller.findElement('#changeVidSrcButton');
-        const video = await controller.findElement('#video');
+    it('should support binding to src', async () => {
+      const button = await controller.findElement('#changeVidSrcButton');
+      const video = await controller.findElement('#video');
 
-        await expect(controller.getElementAttribute(video, 'src')).to.equal(
-          'https://www.google.com/unbound.webm'
-        );
+      await expect(controller.getElementAttribute(video, 'src')).to.equal(
+        'https://www.google.com/unbound.webm'
+      );
 
-        await controller.click(button);
-        await expect(controller.getElementAttribute(video, 'src')).to.equal(
-          'https://www.google.com/bound.webm'
-        );
-      });
+      await controller.click(button);
+      await expect(controller.getElementAttribute(video, 'src')).to.equal(
+        'https://www.google.com/bound.webm'
+      );
+    });
 
     it('should NOT change src when new value is a blocked URL', async () => {
       const button = await controller.findElement('#disallowedVidUrlButton');
