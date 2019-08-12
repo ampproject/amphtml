@@ -40,7 +40,6 @@ requirement: {
   error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/history.js'
   value: 'History.prototype.state'
   whitelist: 'src/history.js'
-  whitelist: 'extensions/amp-date-picker/0.1/react-utils.js'
 }
 
 # Strings
@@ -249,7 +248,7 @@ requirement: {
 
 requirement: {
   type: BANNED_NAME
-  error_message: 'Use jsonParse instead. Usage in 3p ads can be whitelisted for now.'
+  error_message: 'Use parseJson instead. Usage in 3p ads can be whitelisted for now.'
   value: 'JSON.parse'
   whitelist: 'ads/adfox.js'
   whitelist: 'ads/adincube.js'
@@ -258,7 +257,7 @@ requirement: {
   whitelist: 'ads/mads.js'
   whitelist: 'ads/google/imaVideo.js'
   whitelist: 'ads/zen.js'
-  whitelist: 'src/json.js' # Where jsonParse itself is implemented.
+  whitelist: 'src/json.js' # Where parseJson itself is implemented.
 }
 
 requirement: {

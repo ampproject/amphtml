@@ -53,8 +53,10 @@ class AmpCarousel extends AMP.BaseElement {
     );
     this.registerAction(
       'toggleAutoplay',
-      ({args = {}}) => {
-        this.toggleAutoplay_(args['toggleOn']);
+      ({args}) => {
+        // args will be `null` if not present, so we cannot use a default value above
+        const toggle = args ? args['toggleOn'] : undefined;
+        this.toggleAutoplay_(toggle);
       },
       ActionTrust.LOW
     );
@@ -132,6 +134,7 @@ class AmpCarousel extends AMP.BaseElement {
 
     // Setup actions and listeners
     this.setupActions_();
+    this.stopTouchMovePropagation_();
     this.element.addEventListener('indexchange', event => {
       this.onIndexChanged_(event);
     });
@@ -153,8 +156,11 @@ class AmpCarousel extends AMP.BaseElement {
         }
       },
     });
+
     this.childLayoutManager_.updateChildren(this.slides_);
     this.carousel_.updateSlides(this.slides_);
+    // Need to wait for slides to exist first.
+    this.carousel_.goToSlide(Number(this.element.getAttribute('slide') || '0'));
     // Signal for runtime to check children for layout.
     return this.mutateElement(() => {});
   }
@@ -320,6 +326,7 @@ class AmpCarousel extends AMP.BaseElement {
     });
     this.toggleAutoplay_(autoAdvance);
     this.updateType_(type, slides);
+
     this.updateUi_();
   }
 
@@ -590,6 +597,24 @@ class AmpCarousel extends AMP.BaseElement {
     this.element.dispatchCustomEvent(name, data);
     this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
     this.updateCurrentIndex_(index);
+  }
+
+  /**
+   * Stops touchmove events from propagating up to the viewer. Ideally we would
+   * have a separate piece of logic to not forward touchmoves if they occurred
+   * in a scrollable container instead of stopping propagation entirely for
+   * horizontal and vertical swipes. See:
+   * https://github.com/ampproject/amphtml/issues/4754.
+   * @private
+   */
+  stopTouchMovePropagation_() {
+    this.scrollContainer_.addEventListener(
+      'touchmove',
+      event => event.stopPropagation(),
+      {
+        passive: true,
+      }
+    );
   }
 }
 

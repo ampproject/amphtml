@@ -2,7 +2,9 @@
 $category@: layout
 formats:
   - websites
+  - stories
   - email
+  - stories
 teaser:
   text: Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus.
 ---
