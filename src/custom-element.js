@@ -43,6 +43,7 @@ import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from '../src/consent';
+import {startupChunk} from './chunk';
 import {toWin} from './types';
 import {tryResolve} from '../src/utils/promise';
 
@@ -584,7 +585,7 @@ function createBaseCustomElementClass(win) {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
-        Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
+        startupChunk(self.document, () => {
           const TAG = this.tagName;
           if (!this.ownerDocument) {
             dev().error(TAG, 'preconnect without ownerDocument');
@@ -594,7 +595,7 @@ function createBaseCustomElementClass(win) {
             return;
           }
           this.implementation_.preconnectCallback(onLayout);
-        }, 1);
+        });
       }
     }
 
@@ -653,12 +654,34 @@ function createBaseCustomElementClass(win) {
     getSizer_() {
       if (
         this.sizerElement === undefined &&
-        this.layout_ === Layout.RESPONSIVE
+        (this.layout_ === Layout.RESPONSIVE ||
+          this.layout_ === Layout.INTRINSIC)
       ) {
         // Expect sizer to exist, just not yet discovered.
         this.sizerElement = this.querySelector('i-amphtml-sizer');
       }
       return this.sizerElement || null;
+    }
+
+    /**
+     * @param {Element} sizer
+     * @private
+     */
+    resetSizer_(sizer) {
+      if (this.layout_ === Layout.RESPONSIVE) {
+        setStyle(sizer, 'paddingTop', '0');
+        return;
+      }
+      if (this.layout_ === Layout.INTRINSIC) {
+        const intrinsicSizerImg = sizer.querySelector(
+          '.i-amphtml-intrinsic-sizer'
+        );
+        if (!intrinsicSizerImg) {
+          return;
+        }
+        intrinsicSizerImg.setAttribute('src', '');
+        return;
+      }
     }
 
     /**
@@ -742,7 +765,7 @@ function createBaseCustomElementClass(win) {
         // responsible for managing its height. Aspect ratio is no longer
         // preserved.
         this.sizerElement = null;
-        setStyle(sizer, 'paddingTop', '0');
+        this.resetSizer_(sizer);
         this.mutateOrInvoke_(() => {
           dom.removeElement(sizer);
         });
@@ -1612,7 +1635,7 @@ function createBaseCustomElementClass(win) {
         const fallbackElement = this.getFallback();
         if (fallbackElement) {
           Services.ownersForDoc(this.getAmpDoc()).scheduleLayout(
-            this.element,
+            this,
             fallbackElement
           );
         }
