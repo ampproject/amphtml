@@ -21,6 +21,10 @@
  */
 
 module.exports = function(context) {
+  const configurationCalls = ['jsonConfiguration', 'jsonLiteral'].map(
+    name => `CallExpression[callee.name=${name}]`
+  );
+
   return {
     'CallExpression[callee.name=jsonConfiguration]': function(node) {
       const args = node.arguments;
@@ -40,22 +44,7 @@ module.exports = function(context) {
       });
     },
 
-    'CallExpression[callee.name=includeJsonLiteral]': function(node) {
-      const args = node.arguments;
-
-      if (args.length === 1 && args[0].type === 'Identifier') {
-        return;
-      }
-
-      return context.report({
-        node: args[0] || node,
-        message: 'Expected identifier with json json literal value',
-      });
-    },
-
-    'CallExpression[callee.name=jsonConfiguration] * Identifier': function(
-      node
-    ) {
+    [`:matches(${configurationCalls}) * Identifier`]: function(node) {
       if (node.name === 'undefined') {
         return;
       }
@@ -82,7 +71,41 @@ module.exports = function(context) {
 
       context.report({
         node,
-        message: 'Unexpected dynamic value inside json configuration object',
+        message:
+          'Unexpected dynamic reference inside json configuration object. Did you mean to use includeJsonLiteral?',
+      });
+    },
+
+    'CallExpression[callee.name=jsonLiteral]': function(node) {
+      const args = node.arguments;
+
+      if (
+        args.length === 1 &&
+        (args[0].type === 'ObjectExpression' ||
+          args[0].type === 'ArrayExpression' ||
+          args[0].type === 'Literal' ||
+          args[0].type === 'TemplateLiteral')
+      ) {
+        return;
+      }
+
+      return context.report({
+        node: args[0] || node,
+        message:
+          'Expected json literal to pass in literal boolean, string, number, object, or array. Did you pass a reference to one?',
+      });
+    },
+
+    'CallExpression[callee.name=includeJsonLiteral]': function(node) {
+      const args = node.arguments;
+
+      if (args.length === 1 && args[0].type === 'Identifier') {
+        return;
+      }
+
+      return context.report({
+        node: args[0] || node,
+        message: 'Expected reference identifier to a json literal value',
       });
     },
   };
