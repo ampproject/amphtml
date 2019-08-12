@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {jsonConfiguration} from '../src/json';
+
 /**
  * @typedef {{
  *   prefetch: (string|undefined),
@@ -63,7 +65,7 @@ let AdNetworkConfigDef;
  *
  * @const {!Object<string, !AdNetworkConfigDef>}}
  */
-export const adConfig = {
+const adConfig = jsonConfiguration({
   '_ping_': {
     renderStartImplemented: true,
     clientIdScope: '_PING_',
@@ -1137,4 +1139,6 @@ export const adConfig = {
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
     renderStartImplemented: true,
   },
-};
+});
+
+export {adConfig};

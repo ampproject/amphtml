@@ -240,6 +240,6 @@ export function jsonConfiguration(obj) {
   // Yes, this looks inefficient. But it's compiled into a much better format
   // in dist.
   return JSON.parse(
-    isObject(obj) ? JSON.stringify(/** @type {!JsonObject} */ (obj)) : undefined
+    JSON.stringify(isObject(obj) ? /** @type {!JsonObject} */ (obj) : undefined)
   );
 }
