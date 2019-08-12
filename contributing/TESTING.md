@@ -69,7 +69,8 @@ Command                                                                 | Descri
 `gulp build --fortesting`                                               | Builds the AMP library and sets the `test` field in `AMP_CONFIG` to `true`.
 `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.
 `gulp clean`                                                            | Removes build output.
-`gulp css`                                                              | Recompiles css to build directory and builds the embedded css into js files for the AMP library.
+`gulp css`                                                              | Recompiles css to the build directory and builds the embedded css into js files for the AMP library.
+`gulp compile-jison`                                                    | Compiles jison parsers for extensions to build directory.
 `gulp watch`                                                            | Watches for changes in files, re-builds.
 `gulp watch --extensions=amp-foo,amp-bar`                               | Watches for changes in files, re-builds only the listed extensions.
 `gulp watch --extensions=minimal_set`                                   | Watches for changes in files, re-builds only the extensions needed to load `article.amp.html`.

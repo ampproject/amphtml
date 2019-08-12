@@ -52,6 +52,7 @@ const {
 const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
+const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {isTravisBuild} = require('../travis');
@@ -125,11 +126,12 @@ async function dist() {
     parseExtensionFlags();
   }
   await compileCss(/* watch */ undefined, /* opt_compileAll */ true);
+  await compileJison();
   await startNailgunServer(distNailgunPort, /* detached */ false);
 
   // Single pass has its own tmp directory processing. Only do this for
   // multipass.
-  // We need to execute this after `compileCss` so that we can copy that
+  // We need to execute this after `compileCss` and `compileJison` so that we can copy that
   // over to the tmp directory.
   if (!argv.single_pass) {
     transferSrcsToTempDir();
@@ -150,6 +152,7 @@ async function dist() {
       postBuildWebPushPublisherFilesVersion
     ),
     copyCss(),
+    copyParsers(),
   ]);
 
   if (isTravisBuild()) {
@@ -266,7 +269,18 @@ function copyCss() {
       .src('build/css/amp-*.css', {base: 'build/css/'})
       .pipe(gulp.dest('dist/v0'))
   ).then(() => {
-    endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
+    endBuildStep('Copied', 'build/css/*.css to dist/v0/*.css', startTime);
+  });
+}
+
+/**
+ * Copies parsers from the build folder to the dist folder
+ * @return {!Promise}
+ */
+function copyParsers() {
+  const startTime = Date.now();
+  return fs.copy('build/parsers', 'dist/v0').then(() => {
+    endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
   });
 }
 
