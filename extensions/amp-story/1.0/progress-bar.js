@@ -167,27 +167,12 @@ export class ProgressBar {
           }
         });
 
-        // Initialize progress bar ellipsis.
         if (
           this.segmentCount_ > MAX_SEGMENTS &&
           this.storeService_.get(StateProperty.UI_STATE) !==
             UIType.DESKTOP_PANELS
         ) {
-          const ellipsisCount =
-            this.segmentCount_ >= MAX_SEGMENTS + MAX_SEGMENT_ELLIPSIS
-              ? MAX_SEGMENT_ELLIPSIS
-              : this.segmentCount_ % MAX_SEGMENTS;
-          this.setSegmentSize_(this.getSegmentWidth_(ellipsisCount));
-          const upperIndexHead =
-            MAX_SEGMENTS +
-            Math.min(
-              MAX_SEGMENT_ELLIPSIS - 1,
-              this.segmentCount_ % MAX_SEGMENTS
-            );
-          this.ellipsis_.headIndices = this.shrinkSegments_(
-            MAX_SEGMENTS,
-            upperIndexHead
-          );
+          this.initializeOverflowProgressBar_();
         } else {
           this.setSegmentSize_();
         }
@@ -264,6 +249,26 @@ export class ProgressBar {
   }
 
   /**
+   * Initializes progressbar with ellipsis when it overflows.
+   */
+  initializeOverflowProgressBar_() {
+    const ellipsisCount =
+      this.segmentCount_ >= MAX_SEGMENTS + MAX_SEGMENT_ELLIPSIS
+        ? MAX_SEGMENT_ELLIPSIS
+        : this.segmentCount_ % MAX_SEGMENTS;
+
+    this.setSegmentSize_(this.getSegmentWidth_(ellipsisCount));
+
+    const upperIndexHead =
+      MAX_SEGMENTS +
+      Math.min(MAX_SEGMENT_ELLIPSIS - 1, this.segmentCount_ % MAX_SEGMENTS);
+
+    this.ellipsis_.headIndices = this.shrinkSegments_(
+      MAX_SEGMENTS,
+      upperIndexHead
+    );
+  }
+  /**
    * Checks if an index is past the overlfow limit.
    * @param {number} previousSegmentIndex
    * @param {number} segmentIndex
@@ -275,20 +280,19 @@ export class ProgressBar {
     ) {
       return;
     }
-    // todo(do this only using index numbers (store indices that are ellipsis insted of querying))
-    const segs = this.getRoot().querySelectorAll(
-      '.i-amphtml-story-page-progress-bar'
-    );
+
     if (force) {
       segmentIndex = segmentIndex - (segmentIndex % SEGMENT_INCREMENT);
       previousSegmentIndex = segmentIndex - 1;
     }
     if (
-      segs[segmentIndex].classList.contains(
-        'i-amphtml-story-progress-ellipsis'
-      ) ||
+      this.ellipsis_.tailIndices.includes(segmentIndex) ||
+      this.ellipsis_.headIndices.includes(segmentIndex) ||
       force
     ) {
+      const segs = this.getRoot().querySelectorAll(
+        '.i-amphtml-story-page-progress-bar'
+      );
       // grow previous ellipsis
       const ellipses = this.getRoot().querySelectorAll(
         '.i-amphtml-story-progress-ellipsis'
@@ -455,7 +459,7 @@ export class ProgressBar {
    * @private
    */
   shrinkSegments_(firstEllipsis, secondEllipsis) {
-    const dotsArray = [];
+    const ellipsisIndices = [];
     const segs = this.getRoot().querySelectorAll(
       '.i-amphtml-story-page-progress-bar'
     );
@@ -463,9 +467,9 @@ export class ProgressBar {
     const lower = Math.min(firstEllipsis, secondEllipsis);
     for (let i = lower; i < this.segmentCount_ && i <= upper; i++) {
       segs[i].classList.add('i-amphtml-story-progress-ellipsis');
-      dotsArray.push(i);
+      ellipsisIndices.push(i);
     }
-    return dotsArray;
+    return ellipsisIndices;
   }
 
   /**
