@@ -135,9 +135,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/react-externs/externs.js',
   ];
   const define = [`VERSION=${internalRuntimeVersion}`];
-  if (argv.pseudo_names) {
-    define.push('PSEUDO_NAMES=true');
-  }
   if (argv.fortesting) {
     define.push('FORTESTING=true');
   }
@@ -298,6 +295,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       jscomp_off: [],
       define,
       hide_warnings_for: hideWarningsFor,
+      debug: !!argv.pseudo_names,
     };
     if (argv.pseudo_names) {
       // Some optimizations get turned off when pseudo_names is on.

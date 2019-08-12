@@ -124,6 +124,7 @@ exports.getFlags = function(config) {
     jscomp_warning: ['checkTypes', 'checkVars', 'moduleLoad'],
     jscomp_error: ['const', 'constantProperty', 'globalThis'],
     hide_warnings_for: config.hideWarningsFor,
+    debug: !!argv.pseudo_names,
   };
   if (argv.pretty_print) {
     flags.formatting = 'PRETTY_PRINT';

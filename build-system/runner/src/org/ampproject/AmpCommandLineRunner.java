@@ -36,8 +36,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
    */
   private boolean typecheck_only = false;
 
-  private boolean pseudo_names = false;
-
   private boolean is_production_env = true;
 
   /**
@@ -81,7 +79,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setRenamingPolicy(VariableRenamingPolicy.ALL,
         PropertyRenamingPolicy.ALL_UNQUOTED);
     options.setDisambiguatePrivateProperties(true);
-    options.setGeneratePseudoNames(pseudo_names);
     return options;
   }
 
@@ -109,8 +106,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         runner.typecheck_only = true;
       } else if (arg.contains("FORTESTING=true")) {
         runner.is_production_env = false;
-      } else if (arg.contains("PSEUDO_NAMES=true")) {
-        runner.pseudo_names = true;
       }
     }
 
