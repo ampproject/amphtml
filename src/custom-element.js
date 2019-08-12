@@ -43,6 +43,7 @@ import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from '../src/consent';
+import {startupChunk} from './chunk';
 import {toWin} from './types';
 import {tryResolve} from '../src/utils/promise';
 
@@ -587,7 +588,7 @@ function createBaseCustomElementClass(win) {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
-        Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
+        startupChunk(self.document, () => {
           const TAG = this.tagName;
           if (!this.ownerDocument) {
             dev().error(TAG, 'preconnect without ownerDocument');
@@ -597,7 +598,7 @@ function createBaseCustomElementClass(win) {
             return;
           }
           this.implementation_.preconnectCallback(onLayout);
-        }, 1);
+        });
       }
     }
 
