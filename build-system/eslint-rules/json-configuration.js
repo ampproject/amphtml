@@ -82,6 +82,14 @@ module.exports = function(context) {
         return;
       }
 
+      if (
+        parent.type === 'Property' &&
+        parent.key === node &&
+        !parent.computed
+      ) {
+        return;
+      }
+
       context.report({
         node,
         message: 'Unexpected dynamic value inside json configuration object',
