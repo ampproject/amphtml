@@ -45,15 +45,19 @@ module.exports = function(context) {
     },
 
     [`:matches(${configurationCalls}) * Identifier`]: function(node) {
-      if (node.name === 'undefined') {
+      const {name, parent} = node;
+      if (name === 'undefined') {
         return;
       }
 
-      if (node.name === 'includeJsonLiteral') {
+      if (name === 'includeJsonLiteral') {
         return;
       }
 
-      const {parent} = node;
+      if (name in global) {
+        return;
+      }
+
       if (
         parent.type === 'CallExpression' &&
         parent.callee.name === 'includeJsonLiteral'
@@ -69,6 +73,14 @@ module.exports = function(context) {
         return;
       }
 
+      if (
+        parent.type === 'MemberExpression' &&
+        parent.property === node &&
+        !parent.computed
+      ) {
+        return;
+      }
+
       context.report({
         node,
         message:
@@ -79,13 +91,7 @@ module.exports = function(context) {
     'CallExpression[callee.name=jsonLiteral]': function(node) {
       const args = node.arguments;
 
-      if (
-        args.length === 1 &&
-        (args[0].type === 'ObjectExpression' ||
-          args[0].type === 'ArrayExpression' ||
-          args[0].type === 'Literal' ||
-          args[0].type === 'TemplateLiteral')
-      ) {
+      if (args.length === 1 && args[0].type !== 'Identifier') {
         return;
       }
 
