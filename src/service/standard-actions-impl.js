@@ -421,9 +421,9 @@ export class StandardActions {
       args['class'],
       "Argument 'class' must be a string."
     );
-    // prevent toggling amp internal classes
+    // prevent toggling of amp internal classes
     if (AMP_CSS_RE.test(className)) {
-      return;
+      return null;
     }
 
     this.resources_.mutateElement(target, () => {
