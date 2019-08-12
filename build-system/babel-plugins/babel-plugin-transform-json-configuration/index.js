@@ -34,7 +34,9 @@ module.exports = function({template, types: t}) {
           json = JSON.stringify(obj);
         } catch (e) {
           const ref = arg || path;
-          throw ref.buildCodeFrameError('failed to JSON configuration');
+          throw ref.buildCodeFrameError(
+            'failed to parse JSON configuration. Is this a statically computable value?'
+          );
         }
 
         const literal = t.templateLiteral(

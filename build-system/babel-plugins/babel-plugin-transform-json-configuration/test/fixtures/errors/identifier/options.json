@@ -1,0 +1,4 @@
+{
+  "plugins": ["../../../../../babel-plugin-transform-json-configuration"],
+  "throws": "failed to parse JSON configuration. Is this a statically computable value?"
+}

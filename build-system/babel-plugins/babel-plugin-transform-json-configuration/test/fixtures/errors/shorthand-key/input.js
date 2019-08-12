@@ -14,16 +14,4 @@
  * limitations under the License.
  */
 
-jsonConfiguration({});
-
-jsonConfiguration({a: 1});
-
-jsonConfiguration({'b': ['test']});
-
-jsonConfiguration({
-  // comment
-  c: true,
-  d: {
-    e: false,
-  }
-});
+jsonConfiguration({local});

@@ -13,7 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-JSON.parse(`{}`);
-JSON.parse(`{"a":1}`);
-JSON.parse(`{"b":["test"]}`);
-JSON.parse(`{"c":true,"d":{"e":false}}`);
+
+jsonConfiguration({});
+
+jsonConfiguration({a: 1});
+
+jsonConfiguration({'b': ['test']});
+
+jsonConfiguration({
+  // comment
+  c: true,
+  d: {
+    e: false,
+  }
+});
+
+jsonConfiguration({
+  f: null,
+  g: undefined,
+});
+
+jsonConfiguration({
+  h: `test`,
+});
