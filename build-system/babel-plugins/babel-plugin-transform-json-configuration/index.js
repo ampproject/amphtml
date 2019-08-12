@@ -55,10 +55,10 @@ module.exports = function({template, types: t}) {
       const json = JSON.stringify(obj);
       const escaped = String(uniq).replace('.', '\\.');
       const regex = new RegExp(`((?:(?!${escaped}).)*)(${escaped}|$)`, 'g');
-      json.replace(regex, function(_, match, uniq) {
-        if (match || uniq) {
-          const raw = match.replace(/\${|\\/g, '\\$&');
-          quasis.push(t.templateElement({raw}));
+      json.replace(regex, function(_, cooked, uniq) {
+        if (cooked || uniq) {
+          const raw = cooked.replace(/\${|\\/g, '\\$&');
+          quasis.push(t.templateElement({cooked, raw}));
         }
         return '';
       });
