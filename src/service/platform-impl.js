@@ -29,7 +29,7 @@ export class Platform {
     this.navigator_ = /** @type {!Navigator} */ (win.navigator);
 
     /** @const @private */
-    this.matchMedia_ = win.matchMedia;
+    this.win_ = win;
   }
 
   /**
@@ -135,7 +135,7 @@ export class Platform {
     return (
       (this.isIos() && this.navigator_.standalone) ||
       (this.isChrome() &&
-        this.matchMedia_('(display-mode: standalone)').matches)
+        this.win_.matchMedia('(display-mode: standalone)').matches)
     );
   }
 
