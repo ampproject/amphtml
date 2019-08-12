@@ -14,4 +14,14 @@
  * limitations under the License.
  */
 
-jsonConfiguration({a: `${local}`});
+innerJsonConfiguration({
+  'dblquote': 'a[href$=".pdf"]',
+  'interpolate': '${foo}',
+  'escape': '\\u00f8C',
+});
+
+jsonConfiguration({
+  'dblquote': 'a[href$=".pdf"]',
+  'interpolate': '${foo}',
+  'escape': '\\u00f8C',
+});

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const ALEXAMETRICS_CONFIG = /** @type {!JsonObject} */ ({
+import {innerJsonConfiguration} from '../../../src/json';
+
+const ALEXAMETRICS_CONFIG = innerJsonConfiguration({
   'requests': {
     'base':
       'https://${ampAtrkHost}/atrk.gif?account=${atrk_acct}&domain=${domain}',
@@ -45,3 +47,5 @@ export const ALEXAMETRICS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {ALEXAMETRICS_CONFIG};

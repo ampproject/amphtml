@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const MPULSE_CONFIG = /** @type {!JsonObject} */ ({
+import {innerJsonConfiguration} from '../../../src/json';
+
+const MPULSE_CONFIG = innerJsonConfiguration({
   'requests': {
     'onvisible':
       'https://${beacon_url}?' +
@@ -77,3 +79,5 @@ export const MPULSE_CONFIG = /** @type {!JsonObject} */ ({
     'custom_metric.': 'cmet.',
   },
 });
+
+export {MPULSE_CONFIG};

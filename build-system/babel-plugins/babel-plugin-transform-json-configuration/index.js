@@ -15,42 +15,86 @@
  */
 
 module.exports = function({template, types: t}) {
-  // eslint-disable-next-line no-eval
-  const e = eval;
+  function uniqInString(str) {
+    let uniq = '';
+    while (str.includes(uniq)) {
+      uniq = Math.random();
+    }
+    return uniq;
+  }
+
+  function stringifyValue(path) {
+    const arg = path.get('arguments.0');
+    const sourceText = arg.toString();
+    const uniq = uniqInString(sourceText);
+
+    const quasis = [];
+    const expressions = [];
+    try {
+      const proxy = new Proxy(
+        {},
+        {
+          has(target, prop) {
+            return !(prop in global);
+          },
+          get(target, prop) {
+            if (prop === Symbol.unscopables) {
+              return;
+            }
+            if (prop === 'jsonLiteral') {
+              return s => s;
+            }
+            expressions.push(t.identifier(prop));
+            return uniq;
+          },
+        }
+      );
+      const obj = new Function('proxy', `with (proxy) return ${sourceText}`)(
+        proxy
+      );
+      const json = JSON.stringify(obj);
+      const regex = new RegExp(`((?:(?!${uniq}).)*)(${uniq}|$)`, 'g');
+      json.replace(regex, function(_, match, uniq) {
+        if (match || uniq) {
+          const raw = match.replace(/\${|\\/g, '\\$&');
+          quasis.push(t.templateElement({raw}));
+        }
+      });
+    } catch (e) {
+      const ref = arg || path;
+      throw ref.buildCodeFrameError(
+        'failed to parse JSON value. Is this a statically computable value?'
+      );
+    }
+
+    return t.templateLiteral(quasis, expressions);
+  }
+
+  const handlers = Object.assign(Object.create(null), {
+    jsonConfiguration(path) {
+      path.replaceWith(template.expression.ast`
+        JSON.parse(${stringifyValue(path)})
+      `);
+    },
+
+    jsonLiteral(path) {
+      path.replaceWith(path.node.arguments[0]);
+    },
+
+    innerJsonConfiguration(path) {
+      path.replaceWith(stringifyValue(path));
+    },
+  });
 
   return {
     name: 'transform-json-configuration',
 
     visitor: {
       CallExpression(path) {
-        if (path.node.callee.name !== 'jsonConfiguration') {
-          return;
+        const handler = handlers[path.node.callee.name];
+        if (handler) {
+          handler(path);
         }
-
-        const arg = path.get('arguments.0');
-        let json;
-        try {
-          const obj = e(`(${arg.toString()})`);
-          json = JSON.stringify(obj);
-        } catch (e) {
-          const ref = arg || path;
-          throw ref.buildCodeFrameError(
-            'failed to parse JSON configuration. Is this a statically computable value?'
-          );
-        }
-
-        const literal = t.templateLiteral(
-          [
-            t.templateElement({
-              cooked: json,
-              raw: json,
-            }),
-          ],
-          []
-        );
-        path.replaceWith(template.expression.ast`
-          JSON.parse(${literal})
-        `);
       },
     },
   };

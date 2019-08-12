@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const RETARGETLY_CONFIG = /** @type {!JsonObject} */ ({
+import {innerJsonConfiguration} from '../../../src/json';
+
+const RETARGETLY_CONFIG = innerJsonConfiguration({
   'requests': {
     'host': 'https://api.retargetly.com',
     'page':
@@ -34,3 +36,5 @@ export const RETARGETLY_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {RETARGETLY_CONFIG};

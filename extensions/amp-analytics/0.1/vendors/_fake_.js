@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-export const _FAKE_ = /** @type {!JsonObject} */ ({
+import {getMode} from '../../../src/mode';
+import {innerJsonConfiguration} from '../../../src/json';
+
+let _FAKE_ = innerJsonConfiguration({
   'requests': {
     'endpoint': '/analytics/fake',
   },
@@ -49,3 +52,9 @@ export const _FAKE_ = /** @type {!JsonObject} */ ({
     'dataSource': 'AMP',
   },
 });
+
+if (!getMode().test && !getMode().localDev) {
+  _FAKE_ = innerJsonConfiguration(null);
+}
+
+export {_FAKE_};

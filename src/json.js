@@ -243,3 +243,35 @@ export function jsonConfiguration(obj) {
     JSON.stringify(isObject(obj) ? /** @type {!JsonObject} */ (obj) : undefined)
   );
 }
+
+/**
+ * @typedef {{
+ *   __JSON_INTERNAL__: *,
+ *   YOU_MUST_USE: *,
+ *   innerJsonConfiguration: function(),
+ *   TO_MAKE_THIS_TYPE: *,
+ * }}
+ */
+let InternalJsonConfigurationDef;
+
+/**
+ * This converts an Object into a suitable type to be used in `jsonLiteral`.
+ * This doesn't actually do any conversion, it only changes the closure type.
+ *
+ * @param {!Object} obj
+ * @return {!InternalJsonConfigurationDef}
+ */
+export function innerJsonConfiguration(obj) {
+  return /** @type {!InternalJsonConfigurationDef} */ (obj);
+}
+
+/**
+ * Allows inclusion of a variable (that's wrapped in a innerJsonConfiguration
+ * call) to be included inside a jsonConfiguration.
+ *
+ * @param {!InternalJsonConfigurationDef} value
+ * @return {*}
+ */
+export function jsonLiteral(value) {
+  return value;
+}

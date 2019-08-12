@@ -21,8 +21,23 @@
  */
 
 module.exports = function(context) {
+  const jsonNames = [
+    'jsonConfiguration',
+    'innerJsonConfiguration',
+    'jsonLiteral',
+  ];
+  const calls = jsonNames
+    .map(name => `CallExpression[callee.name=${name}]`)
+    .join(',');
+  const innerIdentifiers = jsonNames
+    .map(
+      name =>
+        `CallExpression[callee.name=${name}] > :matches(ObjectExpression, ArrayExpression) Identifier`
+    )
+    .join(',');
+
   return {
-    'CallExpression[callee.name=jsonConfiguration]': function(node) {
+    [calls]: function(node) {
       const {callee} = node;
       if (callee.type !== 'Identifier') {
         return;
@@ -34,50 +49,51 @@ module.exports = function(context) {
 
       const args = node.arguments;
 
-      if (args.length !== 1 || args[0].type !== 'ObjectExpression') {
-        return context.report({
-          node: args[0] || node,
-          message: 'Expected json configuration to pass in object literal',
-        });
+      if (
+        args.length === 1 &&
+        (args[0].type === 'ObjectExpression' ||
+          args[0].type === 'ArrayExpression')
+      ) {
+        return;
       }
+
+      return context.report({
+        node: args[0] || node,
+        message:
+          'Expected json configuration to pass in object or array literal',
+      });
     },
 
-    'CallExpression[callee.name=jsonConfiguration] > ObjectExpression *': function(
-      node
-    ) {
-      if (node.type === 'Literal') {
-        return;
-      }
-      if (node.type === 'ArrayExpression') {
-        return;
-      }
-      if (node.type === 'ObjectExpression') {
-        return;
-      }
-      if (node.type === 'Identifier' && node.name === 'undefined') {
+    [innerIdentifiers]: function(node) {
+      if (node.name === 'undefined') {
         return;
       }
 
-      // Handle the string version of a property key
-      if (node.type === 'Property') {
+      if (node.name === 'jsonLiteral') {
         return;
       }
 
-      // Handle the identifier key of an object expression.
       const {parent} = node;
       if (
-        parent.type === 'Property' &&
-        parent.key === node &&
+        parent.type === 'CallExpression' &&
+        parent.callee.name === 'jsonLiteral'
+      ) {
+        return;
+      }
+
+      if (
+        parent.type === 'MemberExpression' &&
+        parent.property === node &&
         !parent.computed
       ) {
         return;
       }
 
-      // Template literals are nice to avoid escaping issues.
-      if (node.type === 'TemplateLiteral' && node.expressions.length === 0) {
-        return;
-      }
-      if (node.type === 'TemplateElement') {
+      if (
+        parent.type === 'Property' &&
+        parent.key === node &&
+        !parent.computed
+      ) {
         return;
       }
 

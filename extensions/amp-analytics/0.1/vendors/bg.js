@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-export const BG_CONFIG = /** @type {!JsonObject} */ ({});
+import {innerJsonConfiguration} from '../../../src/json';
+
+const BG_CONFIG = innerJsonConfiguration({});
+
+export {BG_CONFIG};

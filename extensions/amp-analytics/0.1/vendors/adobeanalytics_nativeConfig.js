@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const ADOBEANALYTICS_NATIVECONFIG_CONFIG = /** @type {!JsonObject} */ ({
+import {innerJsonConfiguration} from '../../../src/json';
+
+const ADOBEANALYTICS_NATIVECONFIG_CONFIG = innerJsonConfiguration({
   'triggers': {
     'pageLoad': {
       'on': 'visible',
@@ -22,3 +24,5 @@ export const ADOBEANALYTICS_NATIVECONFIG_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {ADOBEANALYTICS_NATIVECONFIG_CONFIG};

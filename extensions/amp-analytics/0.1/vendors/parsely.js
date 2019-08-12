@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const PARSELY_CONFIG = /** @type {!JsonObject} */ ({
+import {innerJsonConfiguration} from '../../../src/json';
+
+const PARSELY_CONFIG = innerJsonConfiguration({
   'requests': {
     'host': 'https://srv.pixel.parsely.com',
     'basePrefix':
@@ -57,3 +59,5 @@ export const PARSELY_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {PARSELY_CONFIG};

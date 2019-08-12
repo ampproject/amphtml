@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const NAVEGG_CONFIG = /** @type {!JsonObject} */ ({
+import {innerJsonConfiguration} from '../../../src/json';
+
+const NAVEGG_CONFIG = innerJsonConfiguration({
   'requests': {
     'pageview':
       'https://amp.navdmp.com/amp?' +
@@ -38,3 +40,5 @@ export const NAVEGG_CONFIG = /** @type {!JsonObject} */ ({
     'image': {'suppressWarnings': true},
   },
 });
+
+export {NAVEGG_CONFIG};

@@ -18,8 +18,12 @@ import {
   IFRAME_TRANSPORTS,
   IFRAME_TRANSPORTS_CANARY,
 } from './iframe-transport-vendors';
-import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
+import {
+  innerJsonConfiguration,
+  jsonConfiguration,
+  jsonLiteral,
+} from '../../../src/json';
 import {isCanary} from '../../../src/experiments';
 
 // Disable auto-sorting of imports from here on.
@@ -100,7 +104,7 @@ import {NAVEGG_CONFIG} from './vendors/navegg';
 import {VPONANALYTICS_CONFIG} from './vendors/vponanalytics';
 import {WEBENGAGE_CONFIG} from './vendors/webengage';
 
-const DEFAULT_CONFIG = {
+const DEFAULT_CONFIG = innerJsonConfiguration({
   'transport': {'beacon': true, 'xhrpost': true, 'image': true},
   'vars': {
     'accessReaderId': 'ACCESS_READER_ID',
@@ -171,98 +175,98 @@ const DEFAULT_CONFIG = {
     'viewportHeight': 'VIEWPORT_HEIGHT',
     'viewportWidth': 'VIEWPORT_WIDTH',
   },
-};
+});
 
 /**
  * @const {!JsonObject}
  */
-// eslint-disable-next-line no-undef
-export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
-  ? /** @type {!JsonObject} */ ({'default': DEFAULT_CONFIG})
-  : /** @type {!JsonObject} */ ({
-      // Default parent configuration applied to all amp-analytics tags.
-      'default': DEFAULT_CONFIG,
-      'acquialift': ACQUIALIFT_CONFIG,
-      'adobeanalytics': ADOBEANALYTICS_CONFIG,
-      'adobeanalytics_nativeConfig': ADOBEANALYTICS_NATIVECONFIG_CONFIG,
-      'afsanalytics': AFSANALYTICS_CONFIG,
-      'alexametrics': ALEXAMETRICS_CONFIG,
-      'amplitude': AMPLITUDE_CONFIG,
-      'atinternet': ATINTERNET_CONFIG,
-      'baiduanalytics': BAIDUANALYTICS_CONFIG,
-      'bg': BG_CONFIG,
-      'burt': BURT_CONFIG,
-      'byside': BYSIDE_CONFIG,
-      'chartbeat': CHARTBEAT_CONFIG,
-      'clicky': CLICKY_CONFIG,
-      'colanalytics': COLANALYTICS_CONFIG,
-      'comscore': COMSCORE_CONFIG,
-      'cxense': CXENSE_CONFIG,
-      'dynatrace': DYNATRACE_CONFIG,
-      'epica': EPICA_CONFIG,
-      'euleriananalytics': EULERIANANALYTICS_CONFIG,
-      'facebookpixel': FACEBOOKPIXEL_CONFIG,
-      'gemius': GEMIUS_CONFIG,
-      'googleadwords': GOOGLEADWORDS_CONFIG,
-      'googleanalytics': GOOGLEANALYTICS_CONFIG,
-      'gtag': GTAG_CONFIG,
-      'ibeatanalytics': IBEATANALYTICS_CONFIG,
-      'infonline': INFONLINE_CONFIG,
-      'iplabel': IPLABEL_CONFIG,
-      'keen': KEEN_CONFIG,
-      'kenshoo': KENSHOO_CONFIG,
-      'krux': KRUX_CONFIG,
-      'linkpulse': LINKPULSE_CONFIG,
-      'lotame': LOTAME_CONFIG,
-      'marinsoftware': MARINSOFTWARE_CONFIG,
-      'mediametrie': MEDIAMETRIE_CONFIG,
-      'mediarithmics': MEDIARITHMICS_CONFIG,
-      'mediator': MEDIATOR_CONFIG,
-      'metrika': METRIKA_CONFIG,
-      'moat': MOAT_CONFIG,
-      'mobify': MOBIFY_CONFIG,
-      'mparticle': MPARTICLE_CONFIG,
-      'mpulse': MPULSE_CONFIG,
-      'navegg': NAVEGG_CONFIG,
-      'newrelic': NEWRELIC_CONFIG,
-      'nielsen': NIELSEN_CONFIG,
-      'nielsen-marketing-cloud': NIELSEN_MARKETING_CLOUD_CONFIG,
-      'oewa': OEWA_CONFIG,
-      'oewadirect': OEWADIRECT_CONFIG,
-      'oracleInfinityAnalytics': ORACLEINFINITYANALYTICS_CONFIG,
-      'parsely': PARSELY_CONFIG,
-      'piStats': PISTATS_CONFIG,
-      'permutive': PERMUTIVE_CONFIG,
-      'piano': PIANO_CONFIG,
-      'pinpoll': PINPOLL_CONFIG,
-      'pressboard': PRESSBOARD_CONFIG,
-      'quantcast': QUANTCAST_CONFIG,
-      'retargetly': RETARGETLY_CONFIG,
-      'rakam': RAKAM_CONFIG,
-      'reppublika': REPPUBLIKA_CONFIG,
-      'segment': SEGMENT_CONFIG,
-      'shinystat': SHINYSTAT_CONFIG,
-      'simplereach': SIMPLEREACH_CONFIG,
-      'snowplow': SNOWPLOW_CONFIG,
-      'teaanalytics': TEAANALYTICS_CONFIG,
-      'tealiumcollect': TEALIUMCOLLECT_CONFIG,
-      'top100': TOP100_CONFIG,
-      'topmailru': TOPMAILRU_CONFIG,
-      'treasuredata': TREASUREDATA_CONFIG,
-      'umenganalytics': UMENGANALYTICS_CONFIG,
-      'upscore': UPSCORE_CONFIG,
-      'vponanalytics': VPONANALYTICS_CONFIG,
-      'webengage': WEBENGAGE_CONFIG,
-      'webtrekk': WEBTREKK_CONFIG,
-      'webtrekk_v2': WEBTREKK_V2_CONFIG,
-    });
+export const ANALYTICS_CONFIG =
+  // eslint-disable-next-line no-undef
+  ANALYTICS_VENDOR_SPLIT
+    ? jsonConfiguration({'default': jsonLiteral(DEFAULT_CONFIG)})
+    : jsonConfiguration({
+        '_fake_': jsonLiteral(_FAKE_),
+        // Default parent configuration applied to all amp-analytics tags.
+        'default': jsonLiteral(DEFAULT_CONFIG),
+        'acquialift': jsonLiteral(ACQUIALIFT_CONFIG),
+        'adobeanalytics': jsonLiteral(ADOBEANALYTICS_CONFIG),
+        'adobeanalytics_nativeConfig': jsonLiteral(
+          ADOBEANALYTICS_NATIVECONFIG_CONFIG
+        ),
+        'afsanalytics': jsonLiteral(AFSANALYTICS_CONFIG),
+        'alexametrics': jsonLiteral(ALEXAMETRICS_CONFIG),
+        'amplitude': jsonLiteral(AMPLITUDE_CONFIG),
+        'atinternet': jsonLiteral(ATINTERNET_CONFIG),
+        'baiduanalytics': jsonLiteral(BAIDUANALYTICS_CONFIG),
+        'bg': jsonLiteral(BG_CONFIG),
+        'burt': jsonLiteral(BURT_CONFIG),
+        'byside': jsonLiteral(BYSIDE_CONFIG),
+        'chartbeat': jsonLiteral(CHARTBEAT_CONFIG),
+        'clicky': jsonLiteral(CLICKY_CONFIG),
+        'colanalytics': jsonLiteral(COLANALYTICS_CONFIG),
+        'comscore': jsonLiteral(COMSCORE_CONFIG),
+        'cxense': jsonLiteral(CXENSE_CONFIG),
+        'dynatrace': jsonLiteral(DYNATRACE_CONFIG),
+        'epica': jsonLiteral(EPICA_CONFIG),
+        'euleriananalytics': jsonLiteral(EULERIANANALYTICS_CONFIG),
+        'facebookpixel': jsonLiteral(FACEBOOKPIXEL_CONFIG),
+        'gemius': jsonLiteral(GEMIUS_CONFIG),
+        'googleadwords': jsonLiteral(GOOGLEADWORDS_CONFIG),
+        'googleanalytics': jsonLiteral(GOOGLEANALYTICS_CONFIG),
+        'gtag': jsonLiteral(GTAG_CONFIG),
+        'ibeatanalytics': jsonLiteral(IBEATANALYTICS_CONFIG),
+        'infonline': jsonLiteral(INFONLINE_CONFIG),
+        'iplabel': jsonLiteral(IPLABEL_CONFIG),
+        'keen': jsonLiteral(KEEN_CONFIG),
+        'kenshoo': jsonLiteral(KENSHOO_CONFIG),
+        'krux': jsonLiteral(KRUX_CONFIG),
+        'linkpulse': jsonLiteral(LINKPULSE_CONFIG),
+        'lotame': jsonLiteral(LOTAME_CONFIG),
+        'marinsoftware': jsonLiteral(MARINSOFTWARE_CONFIG),
+        'mediametrie': jsonLiteral(MEDIAMETRIE_CONFIG),
+        'mediarithmics': jsonLiteral(MEDIARITHMICS_CONFIG),
+        'mediator': jsonLiteral(MEDIATOR_CONFIG),
+        'metrika': jsonLiteral(METRIKA_CONFIG),
+        'moat': jsonLiteral(MOAT_CONFIG),
+        'mobify': jsonLiteral(MOBIFY_CONFIG),
+        'mparticle': jsonLiteral(MPARTICLE_CONFIG),
+        'mpulse': jsonLiteral(MPULSE_CONFIG),
+        'navegg': jsonLiteral(NAVEGG_CONFIG),
+        'newrelic': jsonLiteral(NEWRELIC_CONFIG),
+        'nielsen': jsonLiteral(NIELSEN_CONFIG),
+        'nielsen-marketing-cloud': jsonLiteral(NIELSEN_MARKETING_CLOUD_CONFIG),
+        'oewa': jsonLiteral(OEWA_CONFIG),
+        'oewadirect': jsonLiteral(OEWADIRECT_CONFIG),
+        'oracleInfinityAnalytics': jsonLiteral(ORACLEINFINITYANALYTICS_CONFIG),
+        'parsely': jsonLiteral(PARSELY_CONFIG),
+        'piStats': jsonLiteral(PISTATS_CONFIG),
+        'permutive': jsonLiteral(PERMUTIVE_CONFIG),
+        'piano': jsonLiteral(PIANO_CONFIG),
+        'pinpoll': jsonLiteral(PINPOLL_CONFIG),
+        'pressboard': jsonLiteral(PRESSBOARD_CONFIG),
+        'quantcast': jsonLiteral(QUANTCAST_CONFIG),
+        'retargetly': jsonLiteral(RETARGETLY_CONFIG),
+        'rakam': jsonLiteral(RAKAM_CONFIG),
+        'reppublika': jsonLiteral(REPPUBLIKA_CONFIG),
+        'segment': jsonLiteral(SEGMENT_CONFIG),
+        'shinystat': jsonLiteral(SHINYSTAT_CONFIG),
+        'simplereach': jsonLiteral(SIMPLEREACH_CONFIG),
+        'snowplow': jsonLiteral(SNOWPLOW_CONFIG),
+        'teaanalytics': jsonLiteral(TEAANALYTICS_CONFIG),
+        'tealiumcollect': jsonLiteral(TEALIUMCOLLECT_CONFIG),
+        'top100': jsonLiteral(TOP100_CONFIG),
+        'topmailru': jsonLiteral(TOPMAILRU_CONFIG),
+        'treasuredata': jsonLiteral(TREASUREDATA_CONFIG),
+        'umenganalytics': jsonLiteral(UMENGANALYTICS_CONFIG),
+        'upscore': jsonLiteral(UPSCORE_CONFIG),
+        'vponanalytics': jsonLiteral(VPONANALYTICS_CONFIG),
+        'webengage': jsonLiteral(WEBENGAGE_CONFIG),
+        'webtrekk': jsonLiteral(WEBTREKK_CONFIG),
+        'webtrekk_v2': jsonLiteral(WEBTREKK_V2_CONFIG),
+      });
 
 // eslint-disable-next-line no-undef
 if (!ANALYTICS_VENDOR_SPLIT) {
-  if (getMode().test || getMode().localDev) {
-    ANALYTICS_CONFIG['_fake_'] = _FAKE_;
-  }
-
   ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframePing'] = true;
 
   ANALYTICS_CONFIG['adobeanalytics_nativeConfig']['triggers']['pageLoad'][

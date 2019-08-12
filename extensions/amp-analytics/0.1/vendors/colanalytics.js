@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const COLANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {innerJsonConfiguration} from '../../../src/json';
+
+const COLANALYTICS_CONFIG = innerJsonConfiguration({
   'requests': {
     'host': 'https://ase.clmbtech.com',
     'base': '${host}/message',
@@ -49,3 +51,5 @@ export const COLANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {COLANALYTICS_CONFIG};

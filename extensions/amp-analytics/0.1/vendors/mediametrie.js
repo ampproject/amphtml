@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const MEDIAMETRIE_CONFIG = /** @type {!JsonObject} */ ({
+import {innerJsonConfiguration} from '../../../src/json';
+
+const MEDIAMETRIE_CONFIG = innerJsonConfiguration({
   'requests': {
     'host': 'https://prof.estat.com/m/web',
     'pageview':
@@ -46,3 +48,5 @@ export const MEDIAMETRIE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {MEDIAMETRIE_CONFIG};

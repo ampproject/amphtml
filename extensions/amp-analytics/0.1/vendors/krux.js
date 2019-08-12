@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const KRUX_CONFIG = /** @type {!JsonObject} */ ({
+import {innerJsonConfiguration} from '../../../src/json';
+
+const KRUX_CONFIG = innerJsonConfiguration({
   'requests': {
     'beaconHost': 'https://beacon.krxd.net',
     'timing':
@@ -52,3 +54,5 @@ export const KRUX_CONFIG = /** @type {!JsonObject} */ ({
     'page.': '_kpa_',
   },
 });
+
+export {KRUX_CONFIG};

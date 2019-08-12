@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const MARINSOFTWARE_CONFIG = /** @type {!JsonObject} */ ({
+import {innerJsonConfiguration} from '../../../src/json';
+
+const MARINSOFTWARE_CONFIG = innerJsonConfiguration({
   'requests': {
     'base': 'https://tracker.marinsm.com/tp',
     'baseParams':
@@ -44,3 +46,5 @@ export const MARINSOFTWARE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {MARINSOFTWARE_CONFIG};

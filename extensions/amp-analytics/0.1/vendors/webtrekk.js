@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const WEBTREKK_CONFIG = /** @type {!JsonObject} */ ({
+import {innerJsonConfiguration} from '../../../src/json';
+
+const WEBTREKK_CONFIG = innerJsonConfiguration({
   'requests': {
     'trackURL': 'https://${trackDomain}/${trackId}/wt',
     'parameterPrefix':
@@ -55,3 +57,5 @@ export const WEBTREKK_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {WEBTREKK_CONFIG};
