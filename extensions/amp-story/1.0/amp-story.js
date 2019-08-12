@@ -97,6 +97,7 @@ import {
   px,
   resetStyles,
   setImportantStyles,
+  setStyles,
   toggle,
 } from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
@@ -588,7 +589,8 @@ export class AmpStory extends AMP.BaseElement {
         mutate: state => {
           this.win.document.documentElement.setAttribute(
             'style',
-            `--story-page-vh: ${px(state.vh)};` +
+            this.win.document.documentElement.getAttribute('style') +
+              `--story-page-vh: ${px(state.vh)};` +
               `--story-page-vw: ${px(state.vw)};` +
               `--story-page-vmin: ${px(state.vmin)};` +
               `--story-page-vmax: ${px(state.vmax)};`

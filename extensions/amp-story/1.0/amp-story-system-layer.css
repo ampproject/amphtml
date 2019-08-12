@@ -86,14 +86,17 @@
   border: 0 !important;
   display: flex !important;
   height: 2px !important;
-  left: 0 !important;
   margin: 4px 0 0 !important;
-  padding: 0 2px !important;
+  padding: 0 !important;
   position: absolute !important;
-  right: 0 !important;
   top: 0 !important;
   visibility: visible !important;
+  transition: transform 1.5s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   z-index: 100001 !important;
+}
+
+.i-amphtml-story-progress-ellipsis {
+  width: 3px !important;
 }
 
 [ad-showing] .i-amphtml-story-progress-bar {
@@ -105,9 +108,10 @@
   border-radius: 1px !important;
   height: 100% !important;
   list-style-type: none !important;
-  margin: 0 2px!important;
-  overflow: hidden!important;
-  width: 100% !important;
+  margin: 0 2px !important;
+  overflow: hidden !important;
+  width: var(--segment-width);
+  transition: width 1.5s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-page-progress-value {

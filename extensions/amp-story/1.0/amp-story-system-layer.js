@@ -235,7 +235,7 @@ export class SystemLayer {
     this.buttonsContainer_ = null;
 
     /** @private @const {!ProgressBar} */
-    this.progressBar_ = ProgressBar.create(win);
+    this.progressBar_ = ProgressBar.create(win, parentEl);
 
     /** @private {!DevelopmentModeLog} */
     this.developerLog_ = DevelopmentModeLog.create(win);
