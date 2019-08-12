@@ -232,12 +232,14 @@ function hasOwnProperty(obj, key) {
  * configuration to be transformed into an efficient JSON-parsed representation
  * in the dist build.
  *
- * @param {!JsonObject} obj
+ * @param {!Object} obj
  * @return {!T}
  * @template T
  */
 export function jsonConfiguration(obj) {
   // Yes, this looks inefficient. But it's compiled into a much better format
   // in dist.
-  return JSON.parse(JSON.stringify(isObject(obj) ? obj : undefined));
+  return JSON.parse(
+    isObject(obj) ? JSON.stringify(/** @type {!JsonObject} */ (obj)) : undefined
+  );
 }
