@@ -365,7 +365,7 @@ export class Viewer {
       return null;
     }
     return Services.timerFor(this.win)
-      .timeoutPromise(20000, messagingPromise)
+      .timeoutPromise(20000, messagingPromise, 'initMessagingChannel')
       .catch(reason => {
         const error = getChannelError(
           /** @type {!Error|string|undefined} */ (reason)
