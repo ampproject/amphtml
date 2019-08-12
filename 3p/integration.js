@@ -83,7 +83,6 @@ import {adpicker} from '../ads/adpicker';
 import {adplugg} from '../ads/adplugg';
 import {adpon} from '../ads/adpon';
 import {adreactor} from '../ads/adreactor';
-import {adsense} from '../ads/google/adsense';
 import {adsensor} from '../ads/adsensor';
 import {adsloom} from '../ads/adsloom';
 import {adsnative} from '../ads/adsnative';
@@ -109,6 +108,7 @@ import {atomx} from '../ads/atomx';
 import {baidu} from '../ads/baidu';
 import {beaverads} from '../ads/beaverads';
 import {bidtellect} from '../ads/bidtellect';
+import {blade} from '../ads/blade';
 import {brainy} from '../ads/brainy';
 import {bringhub} from '../ads/bringhub';
 import {broadstreetads} from '../ads/broadstreetads';
@@ -138,6 +138,7 @@ import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
+import {forkmedia} from '../ads/forkmedia';
 import {freewheel} from '../ads/freewheel';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
@@ -164,6 +165,7 @@ import {kuadio} from '../ads/kuadio';
 import {lentainform} from '../ads/lentainform';
 import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
+import {logly} from '../ads/logly';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
@@ -180,6 +182,7 @@ import {monetizer101} from '../ads/monetizer101';
 import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
+import {nativeroll} from '../ads/nativeroll';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
 import {nend} from '../ads/nend';
@@ -280,6 +283,7 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  forkmedia: true,
   idealmedia: true,
   jubna: true,
   kuadio: true,
@@ -287,6 +291,7 @@ const AMP_EMBED_ALLOWED = {
   mgid: true,
   miximedia: true,
   mywidget: true,
+  lentainform: true,
   opinary: true,
   outbrain: true,
   plista: true,
@@ -335,7 +340,6 @@ register('adpicker', adpicker);
 register('adplugg', adplugg);
 register('adpon', adpon);
 register('adreactor', adreactor);
-register('adsense', adsense);
 register('adsensor', adsensor);
 register('adsloom', adsloom);
 register('adsnative', adsnative);
@@ -362,6 +366,7 @@ register('baidu', baidu);
 register('beaverads', beaverads);
 register('beopinion', beopinion);
 register('bidtellect', bidtellect);
+register('blade', blade);
 register('bodymovinanimation', bodymovinanimation);
 register('brainy', brainy);
 register('bringhub', bringhub);
@@ -394,6 +399,7 @@ register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
 register('fluct', fluct);
+register('forkmedia', forkmedia);
 register('freewheel', freewheel);
 register('fusion', fusion);
 register('genieessp', genieessp);
@@ -422,6 +428,7 @@ register('kuadio', kuadio);
 register('lentainform', lentainform);
 register('ligatus', ligatus);
 register('lockerdome', lockerdome);
+register('logly', logly);
 register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
@@ -440,6 +447,7 @@ register('monetizer101', monetizer101);
 register('mox', mox);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
+register('nativeroll', nativeroll);
 register('nativo', nativo);
 register('navegg', navegg);
 register('nend', nend);
@@ -551,12 +559,12 @@ const defaultAllowedTypesInCustomFrame = [
  * @param {!Window} win
  */
 function init(win) {
+  initLogConstructor();
   const config = getAmpConfig();
 
   // Overriding to short-circuit src/mode#getMode()
   win.AMP_MODE = config.mode;
 
-  initLogConstructor();
   setReportError(console.error.bind(console));
 
   setExperimentToggles(config.experimentToggles);

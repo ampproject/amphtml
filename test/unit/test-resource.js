@@ -27,10 +27,12 @@ describes.realWin('Resource', {amp: true}, env => {
   let elementMock;
   let resources;
   let resource;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    sandbox = env.sandbox;
 
     element = env.createAmpElement('amp-ad');
     doc.body.appendChild(element);
@@ -447,7 +449,7 @@ describes.realWin('Resource', {amp: true}, env => {
       .once();
     const viewport = Services.viewportForDoc(resource.element);
     sandbox.stub(viewport, 'getScrollTop').returns(11);
-    Object.defineProperty(element, 'offsetParent', {
+    sandbox.defineProperty(element, 'offsetParent', {
       value: {
         isAlwaysFixed: () => true,
       },
@@ -491,12 +493,35 @@ describes.realWin('Resource', {amp: true}, env => {
     expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
+  describe('getPageLayoutBoxAsync', () => {
+    it('should return layout box when the resource has NOT been measured', () => {
+      sandbox.stub(element, 'isUpgraded').returns(true);
+      sandbox
+        .stub(element, 'getBoundingClientRect')
+        .returns(layoutRectLtwh(0, 0, 10, 10));
+      return expect(resource.getPageLayoutBoxAsync()).to.eventually.eql(
+        layoutRectLtwh(0, 0, 10, 10)
+      );
+    });
+
+    it('should return layout box when the resource has been measured', () => {
+      sandbox.stub(element, 'isUpgraded').returns(true);
+      sandbox
+        .stub(element, 'getBoundingClientRect')
+        .returns(layoutRectLtwh(0, 0, 10, 10));
+      resource.measure();
+      return expect(resource.getPageLayoutBoxAsync()).to.eventually.eql(
+        layoutRectLtwh(0, 0, 10, 10)
+      );
+    });
+  });
+
   describe('placeholder measure', () => {
     let rect;
 
     beforeEach(() => {
       element.setAttribute('placeholder', '');
-      Object.defineProperty(element, 'parentElement', {
+      sandbox.defineProperty(element, 'parentElement', {
         value: doc.createElement('amp-iframe'),
         configurable: true,
         writable: true,

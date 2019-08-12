@@ -36,6 +36,7 @@ import {findIndex, remove} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
+import {isAmp4Email} from '../../../src/format';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
@@ -176,7 +177,7 @@ export class Bind {
      */
     this.maxNumberOfBindings_ = 1000;
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /**
@@ -531,7 +532,7 @@ export class Bind {
    */
   initialize_(root) {
     // Disallow URL property bindings in AMP4EMAIL.
-    const allowUrlProperties = !this.isAmp4Email_();
+    const allowUrlProperties = !isAmp4Email(this.localWin_.document);
     this.validator_ = new BindValidator(allowUrlProperties);
 
     // The web worker's evaluator also has an instance of BindValidator
@@ -546,10 +547,6 @@ export class Bind {
       .then(() => {
         // Listen for DOM updates (e.g. template render) to rescan for bindings.
         root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
-        // In dev mode, check default values against initial expression results.
-        if (getMode().development) {
-          return this.evaluate_().then(results => this.verify_(results));
-        }
       })
       .then(() => {
         const ampStates = root.querySelectorAll('AMP-STATE');
@@ -564,22 +561,15 @@ export class Bind {
         return Promise.all(whenParsed);
       })
       .then(() => {
+        // In dev mode, check default values against initial expression results.
+        if (getMode().development) {
+          return this.evaluate_().then(results => this.verify_(results));
+        }
         // Bind is "ready" when its initialization completes _and_ all <amp-state>
         // elements' local data is parsed and processed (not remote data).
         this.viewer_.sendMessage('bindReady', undefined);
         this.dispatchEventForTesting_(BindEvents.INITIALIZE);
       });
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isAmp4Email_() {
-    const html = this.localWin_.document.documentElement;
-    const amp4email =
-      html.hasAttribute('amp4email') || html.hasAttribute('⚡4email');
-    return amp4email;
   }
 
   /**
@@ -1365,6 +1355,11 @@ export class Bind {
             // when a child option[selected] attribute changes.
             this.updateSelectForSafari_(element, property, newValue);
           }
+        } else if (typeof newValue === 'object' && newValue !== null) {
+          // If newValue is an object or array (e.g. amp-list[src] binding),
+          // don't bother updating the element since attribute values like
+          // "[Object object]" have no meaning in the DOM.
+          mutated = true;
         } else if (newValue !== oldValue) {
           mutated = this.rewriteAttributes_(
             element,

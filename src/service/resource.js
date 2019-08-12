@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../amp-events';
-import {Deferred} from '../utils/promise';
+import {Deferred, tryResolve} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
@@ -132,7 +131,7 @@ export class Resource {
   /**
    * @param {number} id
    * @param {!AmpElement} element
-   * @param {!./resources-impl.Resources} resources
+   * @param {!./resources-impl.ResourcesDef} resources
    */
   constructor(id, element, resources) {
     element[RESOURCE_PROP_] = this;
@@ -149,7 +148,7 @@ export class Resource {
     /** @const {!Window} */
     this.hostWin = toWin(element.ownerDocument.defaultView);
 
-    /** @const @private {!./resources-impl.Resources} */
+    /** @const @private {!./resources-impl.ResourcesDef} */
     this.resources_ = resources;
 
     /** @const @private {boolean} */
@@ -340,9 +339,6 @@ export class Resource {
         }
         // TODO(dvoytenko): merge with the standard BUILT signal.
         this.element.signals().signal('res-built');
-        // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
-        // in PROD.
-        this.element.dispatchCustomEvent(AmpEvents.BUILT);
       },
       reason => {
         this.maybeReportErrorOnBuildFailure(reason);
@@ -498,7 +494,7 @@ export class Resource {
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
     if (viewport.supportsPositionFixed() && this.isDisplayed()) {
-      const {win} = this.resources_;
+      const {win} = this.resources_.getAmpdoc();
       const {body} = win.document;
       for (let n = this.element; n && n != body; n = n./*OK*/ offsetParent) {
         if (n.isAlwaysFixed && n.isAlwaysFixed()) {
@@ -645,6 +641,22 @@ export class Resource {
     }
 
     return this.layoutBox_;
+  }
+
+  /**
+   * Returns the resource's layout box relative to the page. It will be
+   * measured if the resource hasn't ever be measured.
+   *
+   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   */
+  getPageLayoutBoxAsync() {
+    if (this.hasBeenMeasured()) {
+      return tryResolve(() => this.getPageLayoutBox());
+    }
+    return Services.vsyncFor(this.hostWin).measurePromise(() => {
+      this.measure();
+      return this.getPageLayoutBox();
+    });
   }
 
   /**

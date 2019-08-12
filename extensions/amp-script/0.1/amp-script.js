@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {
   DomPurifyDef,
@@ -29,13 +30,9 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
-import {
-  installOriginExperimentsForDoc,
-  originExperimentsForDoc,
-} from '../../../src/service/origin-experiments-impl';
-import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {upgrade} from '@ampproject/worker-dom/dist/amp/main.mjs';
+import {startsWith} from '../../../src/string';
+import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -51,8 +48,25 @@ const MAX_TOTAL_SCRIPT_SIZE = 150000;
  */
 const MAX_FREE_MUTATION_HEIGHT = 300;
 
-const PHASE_HYDRATING = 1;
-const PHASE_MUTATING = 2;
+/**
+ * See src/transfer/Phase.ts in worker-dom.
+ * @enum {number}
+ */
+const Phase = {
+  INITIALIZING: 0,
+  HYDRATING: 1,
+  MUTATING: 2,
+};
+
+/**
+ * See src/transfer/TransferrableStorage.ts in worker-dom.
+ * @enum {number}
+ * @visibleForTesting
+ */
+export const StorageLocation = {
+  LOCAL: 0,
+  SESSION: 1,
+};
 
 export class AmpScript extends AMP.BaseElement {
   /**
@@ -79,32 +93,31 @@ export class AmpScript extends AMP.BaseElement {
     return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
   }
 
-  /** @return {!Promise<boolean>} */
-  isExperimentOn_() {
-    if (isExperimentOn(this.win, 'amp-script')) {
-      return Promise.resolve(true);
-    }
-    installOriginExperimentsForDoc(this.getAmpDoc());
-    return originExperimentsForDoc(this.element)
-      .getExperiments()
-      .then(trials => trials && trials.includes(TAG));
-  }
-
   /** @override */
   buildCallback() {
-    return this.isExperimentOn_().then(on => {
-      if (!on) {
-        // Return rejected Promise to buildCallback() to disable component.
-        throw user().createError(TAG, `Experiment "${TAG}" is not enabled.`);
-      }
+    return getElementServiceForDoc(this.element, TAG, TAG).then(service => {
+      this.setService(/** @type {!AmpScriptService} */ (service));
     });
+  }
+
+  /**
+   * @param {!AmpScriptService} service
+   * @visibleForTesting
+   */
+  setService(service) {
+    this.service_ = service;
   }
 
   /** @override */
   layoutCallback() {
     this.userActivation_ = new UserActivationTracker(this.element);
 
-    const authorScriptPromise = this.getAuthorScript_();
+    // The displayed name of the combined script in dev tools.
+    const sourceURL = this.element.hasAttribute('src')
+      ? `amp-script[src="${this.element.getAttribute('src')}"].js`
+      : `amp-script[script=#${this.element.getAttribute('script')}].js`;
+
+    const authorScriptPromise = this.getAuthorScript_(sourceURL);
     if (!authorScriptPromise) {
       const error = user().createError(
         '[%s] "src" or "script" attribute is required.',
@@ -116,11 +129,9 @@ export class AmpScript extends AMP.BaseElement {
     const workerAndAuthorScripts = Promise.all([
       this.getWorkerScript_(),
       authorScriptPromise,
-      getElementServiceForDoc(this.element, TAG, TAG),
     ]).then(results => {
       const workerScript = results[0];
       const authorScript = results[1];
-      this.service_ = results[2];
 
       if (this.service_.sizeLimitExceeded(authorScript.length)) {
         user().error(
@@ -134,11 +145,6 @@ export class AmpScript extends AMP.BaseElement {
       }
       return [workerScript, authorScript];
     });
-
-    // The displayed name of the combined script in dev tools.
-    const sourceURL = this.element.hasAttribute('src')
-      ? `amp-script[src="${this.element.getAttribute('src')}"].js`
-      : `amp-script[script=#${this.element.getAttribute('script')}].js`;
 
     const sandbox = this.element.getAttribute('sandbox') || '';
     const sandboxTokens = sandbox.split(' ').map(s => s.trim());
@@ -165,10 +171,12 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
-    upgrade(this.element, workerAndAuthorScripts, config).then(workerDom => {
-      this.workerDom_ = workerDom;
-    });
-    return Promise.resolve();
+    WorkerDOM.upgrade(this.element, workerAndAuthorScripts, config).then(
+      workerDom => {
+        this.workerDom_ = workerDom;
+      }
+    );
+    return workerAndAuthorScripts;
   }
 
   /**
@@ -193,21 +201,32 @@ export class AmpScript extends AMP.BaseElement {
   }
 
   /**
-   * Query local or fetch remote author script. Returns promise that resolves
-   * with the script contents. Returns null if script reference is missing.
+   * Query local or fetch remote author script.
+   *
+   * Returns promise that resolves with the script contents or rejected if the
+   * fetch fails or if the script fails CORS checks.
+   *
+   * Returns null if script reference is missing.
+   *
+   * @param {string} debugId An element identifier for error messages.
    * @return {?Promise<string>}
    * @private
    */
-  getAuthorScript_() {
+  getAuthorScript_(debugId) {
     const authorUrl = this.element.getAttribute('src');
     if (authorUrl) {
-      return Services.xhrFor(this.win)
-        .fetchText(authorUrl, {ampCors: false})
-        .then(r => r.text());
+      return this.fetchAuthorScript_(authorUrl, debugId);
     } else {
       const id = this.element.getAttribute('script');
       if (id) {
         const local = this.getAmpDoc().getElementById(id);
+        userAssert(
+          local,
+          '[%s] %s could not find element with #%s.',
+          TAG,
+          debugId,
+          id
+        );
         const target = local.getAttribute('target');
         userAssert(
           target === 'amp-script',
@@ -215,10 +234,58 @@ export class AmpScript extends AMP.BaseElement {
           TAG,
           id
         );
-        return Promise.resolve(local.textContent);
+        const text = local.textContent;
+        return this.service_.checkSha384(text, debugId).then(() => text);
       }
     }
+    // No [src] or [script].
     return null;
+  }
+
+  /**
+   * @param {string} authorUrl
+   * @param {string} debugId An element identifier for error messages.
+   * @return {!Promise<string>}
+   */
+  fetchAuthorScript_(authorUrl, debugId) {
+    return Services.xhrFor(this.win)
+      .fetchText(authorUrl, {ampCors: false})
+      .then(response => {
+        if (response.url && this.sameOrigin_(response.url)) {
+          // Disallow non-JS content type for same-origin scripts.
+          const contentType = response.headers.get('Content-Type');
+          if (
+            !contentType ||
+            !startsWith(contentType, 'application/javascript')
+          ) {
+            throw user().createError(
+              '[%s] %s has Content-Type: "%s". ' +
+                'Only "application/javascript" is allowed.',
+              TAG,
+              debugId,
+              contentType
+            );
+          }
+          return response.text();
+        } else {
+          // For cross-origin, verify hash of script itself.
+          return response.text().then(text => {
+            return this.service_.checkSha384(text, debugId).then(() => text);
+          });
+        }
+      });
+  }
+
+  /**
+   * Returns true iff `url` has the same origin as the AMP document.
+   * @param {string} url
+   * @return {boolean}
+   */
+  sameOrigin_(url) {
+    const urlService = Services.urlForDoc(this.element);
+    const docOrigin = urlService.getSourceOrigin(this.getAmpDoc().getUrl());
+    const scriptOrigin = urlService.parse(url).origin;
+    return docOrigin === scriptOrigin;
   }
 
   /**
@@ -227,14 +294,14 @@ export class AmpScript extends AMP.BaseElement {
    * @private
    */
   mutationPump_(flush, phase) {
-    if (phase == PHASE_HYDRATING) {
+    if (phase == Phase.HYDRATING) {
       this.vsync_.mutate(() =>
         this.element.classList.add('i-amphtml-hydrated')
       );
     }
     const allowMutation =
       // Hydration is always allowed.
-      phase != PHASE_MUTATING ||
+      phase != Phase.MUTATING ||
       // Mutation depends on the gesture state and long tasks.
       this.userActivation_.isActive() ||
       // If the element is size-contained and small enough.
@@ -257,17 +324,61 @@ export class AmpScript extends AMP.BaseElement {
 
 /**
  * Service for sharing data across <amp-script> elements.
+ *
+ * @visibleForTesting
  */
-class AmpScriptService {
+export class AmpScriptService {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(unusedAmpdoc) {
+  constructor(ampdoc) {
     /** @private {number} */
     this.cumulativeSize_ = 0;
+
+    /** @private {!Array<string>} */
+    this.sources_ = [];
+
+    // Query the meta tag once per document.
+    const allowedHashes = ampdoc
+      .getHeadNode()
+      .querySelector('meta[name="amp-script-src"]');
+    if (allowedHashes && allowedHashes.hasAttribute('content')) {
+      const content = allowedHashes.getAttribute('content');
+      this.sources_ = content
+        .split(' ')
+        .map(s => s.trim())
+        .filter(s => s.length);
+    }
+
+    /** @private @const {!../../../src/service/crypto-impl.Crypto} */
+    this.crypto_ = Services.cryptoFor(ampdoc.win);
   }
 
   /**
+   * Checks if `sha384(script)` exists in `meta[name="amp-script-src"]` element
+   * in document head.
+   *
+   * @param {string} script The script contents.
+   * @param {string} debugId An element identifier for error messages.
+   * @return {!Promise}
+   */
+  checkSha384(script, debugId) {
+    const bytes = utf8Encode(script);
+    return this.crypto_.sha384Base64(bytes).then(hash => {
+      if (!hash || !this.sources_.includes('sha384-' + hash)) {
+        throw user().createError(
+          '[%s] %id must have "sha384-%s" in meta[name="amp-script-src"].',
+          TAG,
+          debugId,
+          hash
+        );
+      }
+    });
+  }
+
+  /**
+   * Adds `size` to current total. Returns true iff new total is <= size cap.
+   *
    * @param {number} size
    * @return {boolean}
    */
@@ -302,6 +413,9 @@ export class SanitizerImpl {
    * @param {!Array<string>} sandboxTokens
    */
   constructor(win, sandboxTokens) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
     /** @private @const {!DomPurifyDef} */
     this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
 
@@ -347,7 +461,7 @@ export class SanitizerImpl {
    * @param {string|null} value
    * @return {boolean}
    */
-  mutateAttribute(node, attribute, value) {
+  changeAttribute(node, attribute, value) {
     // TODO(choumx): Call mutatedAttributesCallback() on AMP elements e.g.
     // so an amp-img can update its child img when [src] is changed.
 
@@ -401,7 +515,7 @@ export class SanitizerImpl {
    * @param {string} value
    * @return {boolean}
    */
-  mutateProperty(node, property, value) {
+  changeProperty(node, property, value) {
     const prop = property.toLowerCase();
 
     // worker-dom's supported properties and corresponding attribute name
@@ -411,6 +525,63 @@ export class SanitizerImpl {
       return true;
     }
     return false;
+  }
+
+  /**
+   * @param {!StorageLocation} location
+   * @return {?Object}
+   */
+  getStorage(location) {
+    // Note that filtering out amp-* keys will affect the predictability of
+    // Storage.key(). We could preserve indices by adding empty entries but
+    // that might be even more confusing.
+    const storage = this.storageFor_(location);
+    const output = {};
+    for (let i = 0; i < storage.length; i++) {
+      const key = storage.key(i);
+      if (key && !startsWith(key, 'amp-')) {
+        output[key] = storage.getItem(key);
+      }
+    }
+    return output;
+  }
+
+  /**
+   * @param {!StorageLocation} location
+   * @param {?string} key
+   * @param {?string} value
+   */
+  changeStorage(location, key, value) {
+    const storage = this.storageFor_(location);
+    if (key === null) {
+      if (value === null) {
+        user().error(TAG, 'Storage.clear() is not supported in amp-script.');
+      }
+    } else {
+      if (startsWith(key, 'amp-')) {
+        user().error(TAG, 'Invalid "amp-" prefix for storage key: %s', key);
+      } else {
+        if (value === null) {
+          storage.removeItem(key);
+        } else {
+          storage.setItem(key, value);
+        }
+      }
+    }
+  }
+
+  /**
+   * @param {!StorageLocation} location
+   * @return {?Storage}
+   * @private
+   */
+  storageFor_(location) {
+    if (location === StorageLocation.LOCAL) {
+      return this.win_.localStorage;
+    } else if (location === StorageLocation.SESSION) {
+      return this.win_.sessionStorage;
+    }
+    return null;
   }
 }
 

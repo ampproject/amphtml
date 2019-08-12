@@ -66,7 +66,7 @@ const DEFAULT_MESSAGES = {
  *   sandbox: (boolean|undefined),
  * }}
  */
-let LaterpayConfigDef;
+let LaterpayConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @typedef {{
@@ -79,18 +79,18 @@ let LaterpayConfigDef;
  *   validity_value: number
  * }}
  */
-let PurchaseOptionDef;
+let PurchaseOption_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @typedef {{
  *   access: boolean,
  *   apl: string,
- *   premiumcontent: !PurchaseOptionDef,
- *   timepasses: (!Array<PurchaseOptionDef>|undefined),
- *   subscriptions: (!Array<PurchaseOptionDef>|undefined)
+ *   premiumcontent: !PurchaseOption_0_1_Def,
+ *   timepasses: (!Array<PurchaseOption_0_1_Def>|undefined),
+ *   subscriptions: (!Array<PurchaseOption_0_1_Def>|undefined)
  * }}
  */
-let PurchaseConfigDef;
+let PurchaseConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @implements {../../amp-access/0.1/access-vendor.AccessVendor}
@@ -110,10 +110,10 @@ export class LaterpayVendor {
     /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
-    /** @const @private {!JsonObject} For shape see LaterpayConfigDef */
+    /** @const @private {!JsonObject} For shape see LaterpayConfig_0_1_Def */
     this.laterpayConfig_ = this.accessSource_.getAdapterConfig();
 
-    /** @private {?JsonObject} For shape see PurchaseConfigDef */
+    /** @private {?JsonObject} For shape see PurchaseConfig_0_1_Def */
     this.purchaseConfig_ = null;
 
     /** @private {?Function} */
@@ -413,7 +413,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!JsonObject} option Shape: PurchaseOptionDef
+   * @param {!JsonObject} option Shape: PurchaseOption_0_1_Def
    * @return {!Element}
    * @private
    */
@@ -439,7 +439,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!JsonObject} option Shape: PurchaseOptionDef
+   * @param {!JsonObject} option Shape: PurchaseOption_0_1_Def
    * @return {!Element}
    * @private
    */

@@ -16,12 +16,12 @@
 
 import {MessageType} from '../../src/3p-frame-messaging';
 import {Observable} from '../observable';
-import {PositionObserver} from '../../ads/inabox/position-observer';
 import {Services} from '../services';
 import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
+import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
 import {layoutRectLtwh, moveLayoutRect} from '../layout-rect';
@@ -38,6 +38,7 @@ const MIN_EVENT_INTERVAL = 100;
 /**
  * @param {!Window} win
  * @param {!Element} bodyElement
+ * @return {!Promise}
  * @visibleForTesting
  */
 export function prepareBodyForOverlay(win, bodyElement) {
@@ -70,6 +71,7 @@ export function prepareBodyForOverlay(win, bodyElement) {
 /**
  * @param {!Window} win
  * @param {!Element} bodyElement
+ * @return {!Promise}
  * @visibleForTesting
  */
 export function resetBodyForOverlay(win, bodyElement) {
@@ -198,10 +200,13 @@ export class ViewportBindingInabox {
     return Services.resourcesPromiseForDoc(
       this.win.document.documentElement
     ).then(() => {
-      this.topWindowPositionObserver_ =
-        this.topWindowPositionObserver_ || new PositionObserver(this.win.top);
+      this.topWindowPositionObserver_ = getPositionObserver(this.win.top);
       this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
-        /** @type {!HTMLIFrameElement} */ (this.win.frameElement),
+        // If the window is the top window (not sitting in an iframe) then
+        // frameElement doesn't exist. In that case we observe the scrolling
+        // element.
+        /** @type {!HTMLIFrameElement|!HTMLElement} */
+        (this.win.frameElement || this.getScrollingElement()),
         data => {
           this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
         }
@@ -342,7 +347,8 @@ export class ViewportBindingInabox {
       // Set up the listener if we haven't already.
       return this.listenForPositionSameDomain_().then(() =>
         this.topWindowPositionObserver_.getTargetRect(
-          /** @type {!HTMLIFrameElement} */ (this.win.frameElement)
+          /** @type {!HTMLIFrameElement|!HTMLElement} */
+          (this.win.frameElement || this.getScrollingElement())
         )
       );
     }

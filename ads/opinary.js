@@ -23,9 +23,19 @@ import {loadScript, validateData} from '../3p/3p';
 export function opinary(global, data) {
   validateData(data, ['client']);
 
+  // create div for automatic poll placement
   const div = global.document.createElement('div');
   div.setAttribute('id', 'opinary-automation-placeholder');
-  global.document.getElementById('c').appendChild(div);
+
+  // create div for internal event system AMP awknowledgement
+  const div2 = global.document.createElement('div');
+  div2.setAttribute('id', 'opinaryAMP');
+
+  // append divs to page
+  global.document
+    .getElementById('c')
+    .appendChild(div)
+    .appendChild(div2);
 
   if (!document.querySelector("link[rel='canonical']")) {
     const link = document.createElement('link');
