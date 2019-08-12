@@ -128,6 +128,7 @@ export class AmpStoryBlingLink {
    * Gets href from an element containing a url.
    * @param {!Element} target
    * @private
+   * @return {string}
    */
   getElementHref_(target) {
     const elUrl = target.getAttribute('href');
