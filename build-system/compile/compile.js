@@ -159,12 +159,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   }
 
   return new Promise(function(resolve, reject) {
-    let entryModuleFilename;
-    if (entryModuleFilenames instanceof Array) {
-      entryModuleFilename = entryModuleFilenames[0];
-    } else {
-      entryModuleFilename = entryModuleFilenames;
-      entryModuleFilenames = [entryModuleFilename];
+    if (!(entryModuleFilenames instanceof Array)) {
+      entryModuleFilenames = [entryModuleFilenames];
     }
     const unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
