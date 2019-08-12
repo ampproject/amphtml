@@ -25,6 +25,33 @@ module.exports = function(context) {
     name => `CallExpression[callee.name=${name}]`
   );
 
+  function verifyPath(node) {
+    for (let n = node; n; n = n.parent) {
+      const {parent} = n;
+      const {type} = parent;
+
+      if (type === 'ArrayExpression' || type === 'ObjectExpression') {
+        continue;
+      }
+
+      if (type === 'Property' && parent.value === n) {
+        continue;
+      }
+
+      if (type === 'CallExpression') {
+        const {name} = parent.callee;
+        if (name === 'jsonConfiguration' || name === 'jsonLiteral') {
+          break;
+        }
+      }
+
+      return context.report({
+        node,
+        message: 'Value must descend from object/array literals only.',
+      });
+    }
+  }
+
   return {
     'CallExpression[callee.name=jsonConfiguration]': function(node) {
       const args = node.arguments;
@@ -105,14 +132,14 @@ module.exports = function(context) {
     'CallExpression[callee.name=includeJsonLiteral]': function(node) {
       const args = node.arguments;
 
-      if (args.length === 1 && args[0].type === 'Identifier') {
-        return;
+      if (args.length !== 1 || args[0].type !== 'Identifier') {
+        return context.report({
+          node: args[0] || node,
+          message: 'Expected reference identifier to a json literal value',
+        });
       }
 
-      return context.report({
-        node: args[0] || node,
-        message: 'Expected reference identifier to a json literal value',
-      });
+      return verifyPath(node);
     },
   };
 };
