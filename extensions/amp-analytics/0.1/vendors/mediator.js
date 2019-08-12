@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const MEDIATOR_CONFIG = innerJsonConfiguration({
+const MEDIATOR_CONFIG = jsonLiteral({
   'requests': {
     'host': '//collector.mediator.media/script/${mediator_id}/amp/',
     'renderstart': '${host}init/?url=${canonicalUrl}',

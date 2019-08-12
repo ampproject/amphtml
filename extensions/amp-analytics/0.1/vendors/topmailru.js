@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const TOPMAILRU_CONFIG = innerJsonConfiguration({
+const TOPMAILRU_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,

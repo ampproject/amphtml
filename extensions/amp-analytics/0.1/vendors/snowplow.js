@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const SNOWPLOW_CONFIG = innerJsonConfiguration({
+const SNOWPLOW_CONFIG = jsonLiteral({
   'vars': {
     'duid': 'CLIENT_ID(_sp_id)',
   },

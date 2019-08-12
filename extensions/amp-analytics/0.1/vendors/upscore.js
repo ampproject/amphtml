@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const UPSCORE_CONFIG = innerJsonConfiguration({
+const UPSCORE_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://hit-pool.upscore.com/amp?',
     'basePrefix':

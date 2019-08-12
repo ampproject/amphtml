@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const AMPLITUDE_CONFIG = innerJsonConfiguration({
+const AMPLITUDE_CONFIG = jsonLiteral({
   'transport': {
     'beacon': true,
     'xhrpost': true,

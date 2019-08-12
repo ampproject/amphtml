@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const ATINTERNET_CONFIG = innerJsonConfiguration({
+const ATINTERNET_CONFIG = jsonLiteral({
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
   'vars': {
     'pixelPath': 'hit.xiti',

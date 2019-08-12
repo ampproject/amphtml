@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const PRESSBOARD_CONFIG = innerJsonConfiguration({
+const PRESSBOARD_CONFIG = jsonLiteral({
   'vars': {
     'mediaId': '',
     'campaignId': '',

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const ACQUIALIFT_CONFIG = innerJsonConfiguration({
+const ACQUIALIFT_CONFIG = jsonLiteral({
   'vars': {
     'decisionApiUrl': 'us-east-1-decisionapi.lift.acquia.com',
     'accountId': 'xxxxxxxx',

@@ -41,7 +41,7 @@ module.exports = function({template, types: t}) {
             if (prop === Symbol.unscopables) {
               return;
             }
-            if (prop === 'jsonLiteral') {
+            if (prop === 'includeJsonLiteral') {
               return s => s;
             }
             expressions.push(t.identifier(prop));
@@ -77,11 +77,11 @@ module.exports = function({template, types: t}) {
       `);
     },
 
-    jsonLiteral(path) {
+    includeJsonLiteral(path) {
       path.replaceWith(path.node.arguments[0]);
     },
 
-    innerJsonConfiguration(path) {
+    jsonLiteral(path) {
       path.replaceWith(stringifyValue(path));
     },
   });

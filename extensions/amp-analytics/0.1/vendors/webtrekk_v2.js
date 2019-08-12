@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const WEBTREKK_V2_CONFIG = innerJsonConfiguration({
+const WEBTREKK_V2_CONFIG = jsonLiteral({
   'vars': {
     'actionName': 'webtrekk_ignore',
     'contentId': '${title}',

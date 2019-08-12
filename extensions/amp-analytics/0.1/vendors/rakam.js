@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const RAKAM_CONFIG = innerJsonConfiguration({
+const RAKAM_CONFIG = jsonLiteral({
   'vars': {
     'deviceId': 'CLIENT_ID(rakam_device_id)',
   },

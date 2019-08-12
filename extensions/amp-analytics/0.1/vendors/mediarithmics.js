@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const MEDIARITHMICS_CONFIG = innerJsonConfiguration({
+const MEDIARITHMICS_CONFIG = jsonLiteral({
   'vars': {
     'domain': 'events.mediarithmics.com',
     'url': 'SOURCE_URL',

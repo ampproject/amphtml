@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const INFONLINE_CONFIG = innerJsonConfiguration({
+const INFONLINE_CONFIG = jsonLiteral({
   'vars': {
     'sv': 'ke',
     'ap': '1',

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const ADOBEANALYTICS_NATIVECONFIG_CONFIG = innerJsonConfiguration({
+const ADOBEANALYTICS_NATIVECONFIG_CONFIG = jsonLiteral({
   'triggers': {
     'pageLoad': {
       'on': 'visible',

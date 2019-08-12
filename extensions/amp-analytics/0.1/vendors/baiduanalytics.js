@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const BAIDUANALYTICS_CONFIG = innerJsonConfiguration({
+const BAIDUANALYTICS_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://hm.baidu.com',
     'base': '${host}/hm.gif?si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const DYNATRACE_CONFIG = innerJsonConfiguration({
+const DYNATRACE_CONFIG = jsonLiteral({
   'requests': {
     'endpoint':
       '${protocol}://${tenant}${separator}${environment}:${port}/ampbf/${tenantpath}',

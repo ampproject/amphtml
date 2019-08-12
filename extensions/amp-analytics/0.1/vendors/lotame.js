@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const LOTAME_CONFIG = innerJsonConfiguration({
+const LOTAME_CONFIG = jsonLiteral({
   'requests': {
     'pageview': 'https://bcp.crwdcntrl.net/amp?c=${account}&pv=y',
   },

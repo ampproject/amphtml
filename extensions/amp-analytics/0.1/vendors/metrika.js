@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const METRIKA_CONFIG = innerJsonConfiguration({
+const METRIKA_CONFIG = jsonLiteral({
   'transport': {'beacon': true, 'xhrpost': true, 'image': false},
   'requests': {
     'pageview': '${_watch}?browser-info=${_brInfo}&${_siteInfo}&${_suffix}',

@@ -15,9 +15,9 @@
  */
 
 import {getMode} from '../../../src/mode';
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-let _FAKE_ = innerJsonConfiguration({
+let _FAKE_ = jsonLiteral({
   'requests': {
     'endpoint': '/analytics/fake',
   },
@@ -54,7 +54,7 @@ let _FAKE_ = innerJsonConfiguration({
 });
 
 if (!getMode().test && !getMode().localDev) {
-  _FAKE_ = innerJsonConfiguration(null);
+  _FAKE_ = jsonLiteral({});
 }
 
 export {_FAKE_};

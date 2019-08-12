@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const NEWRELIC_CONFIG = innerJsonConfiguration({
+const NEWRELIC_CONFIG = jsonLiteral({
   'requests': {
     'pageview':
       'https://${beacon}/amp?appId=${appId}' +

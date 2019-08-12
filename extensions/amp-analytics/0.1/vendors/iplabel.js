@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const IPLABEL_CONFIG = innerJsonConfiguration({
+const IPLABEL_CONFIG = jsonLiteral({
   'requests': {
     'collectorUrl': 'm.col.ip-label.net',
     'endpoint': 'https://${collectorUrl}/coll/',

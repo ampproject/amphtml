@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const GOOGLEANALYTICS_CONFIG = innerJsonConfiguration({
+const GOOGLEANALYTICS_CONFIG = jsonLiteral({
   'vars': {
     'eventValue': '0',
     'documentLocation': 'SOURCE_URL',

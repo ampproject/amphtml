@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const IBEATANALYTICS_CONFIG = innerJsonConfiguration({
+const IBEATANALYTICS_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://ibeat.indiatimes.com',
     'base': 'https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html',

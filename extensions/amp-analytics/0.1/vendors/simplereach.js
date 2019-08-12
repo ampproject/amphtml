@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const SIMPLEREACH_CONFIG = innerJsonConfiguration({
+const SIMPLEREACH_CONFIG = jsonLiteral({
   'vars': {
     'pid': '',
     'published_at': '',

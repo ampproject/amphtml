@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const REPPUBLIKA_CONFIG = innerJsonConfiguration({
+const REPPUBLIKA_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://t5.mindtake.com',
     'basePrefix': '/tag/cid/',

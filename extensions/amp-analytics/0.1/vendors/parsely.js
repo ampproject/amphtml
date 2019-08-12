@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const PARSELY_CONFIG = innerJsonConfiguration({
+const PARSELY_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://srv.pixel.parsely.com',
     'basePrefix':

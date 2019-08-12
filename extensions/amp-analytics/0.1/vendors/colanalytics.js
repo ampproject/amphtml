@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const COLANALYTICS_CONFIG = innerJsonConfiguration({
+const COLANALYTICS_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://ase.clmbtech.com',
     'base': '${host}/message',

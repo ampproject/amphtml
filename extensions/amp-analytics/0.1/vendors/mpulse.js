@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const MPULSE_CONFIG = innerJsonConfiguration({
+const MPULSE_CONFIG = jsonLiteral({
   'requests': {
     'onvisible':
       'https://${beacon_url}?' +

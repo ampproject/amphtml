@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-innerJsonConfiguration({
+jsonLiteral({
   'dblquote': 'a[href$=".pdf"]',
   'interpolate': '${foo}',
   'escape': '\\u00f8C',

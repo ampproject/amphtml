@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const LINKPULSE_CONFIG = innerJsonConfiguration({
+const LINKPULSE_CONFIG = jsonLiteral({
   'vars': {
     'id': '',
     'pageUrl': 'CANONICAL_URL',

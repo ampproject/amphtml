@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const PINPOLL_CONFIG = innerJsonConfiguration({
+const PINPOLL_CONFIG = jsonLiteral({
   'requests': {
     'pageview':
       '${protocol}://${host}/${version}?' +

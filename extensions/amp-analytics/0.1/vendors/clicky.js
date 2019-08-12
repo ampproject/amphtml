@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const CLICKY_CONFIG = innerJsonConfiguration({
+const CLICKY_CONFIG = jsonLiteral({
   'vars': {
     'site_id': '',
   },

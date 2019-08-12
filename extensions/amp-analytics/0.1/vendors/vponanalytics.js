@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const VPONANALYTICS_CONFIG = innerJsonConfiguration({
+const VPONANALYTICS_CONFIG = jsonLiteral({
   'vars': {
     'ctid': '${clientId(vpadn-ctid)}',
   },

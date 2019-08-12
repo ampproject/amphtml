@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const TOP100_CONFIG = innerJsonConfiguration({
+const TOP100_CONFIG = jsonLiteral({
   'vars': {
     'pid': '',
     'rid': 'PAGE_VIEW_ID',

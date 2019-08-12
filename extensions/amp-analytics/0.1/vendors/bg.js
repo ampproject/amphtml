@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const BG_CONFIG = innerJsonConfiguration({});
+const BG_CONFIG = jsonLiteral({});
 
 export {BG_CONFIG};

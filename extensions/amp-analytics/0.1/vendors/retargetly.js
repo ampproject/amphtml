@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const RETARGETLY_CONFIG = innerJsonConfiguration({
+const RETARGETLY_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://api.retargetly.com',
     'page':

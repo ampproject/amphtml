@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const PERMUTIVE_CONFIG = innerJsonConfiguration({
+const PERMUTIVE_CONFIG = jsonLiteral({
   'vars': {
     'identity': '${clientId(_ga)}',
   },

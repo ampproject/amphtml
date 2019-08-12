@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const FACEBOOKPIXEL_CONFIG = innerJsonConfiguration({
+const FACEBOOKPIXEL_CONFIG = jsonLiteral({
   'vars': {
     'pixelId': 'PIXEL-ID',
   },

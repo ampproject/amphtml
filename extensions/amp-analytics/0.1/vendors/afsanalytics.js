@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const AFSANALYTICS_CONFIG = innerJsonConfiguration({
+const AFSANALYTICS_CONFIG = jsonLiteral({
   'vars': {
     'server': 'www',
     'websiteid': 'xxxxxxxx',

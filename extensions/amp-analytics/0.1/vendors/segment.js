@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const SEGMENT_CONFIG = innerJsonConfiguration({
+const SEGMENT_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,

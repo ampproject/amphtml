@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const NIELSEN_MARKETING_CLOUD_CONFIG = innerJsonConfiguration({
+const NIELSEN_MARKETING_CLOUD_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,

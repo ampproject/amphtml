@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const CHARTBEAT_CONFIG = innerJsonConfiguration({
+const CHARTBEAT_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://ping.chartbeat.net',
     'basePrefix':

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const GOOGLEADWORDS_CONFIG = innerJsonConfiguration({
+const GOOGLEADWORDS_CONFIG = jsonLiteral({
   // https://developers.google.com/adwords/amp/landing-pages
   'requests': {
     'conversion_prefix': 'https://www.googleadservices.com/pagead/conversion/',

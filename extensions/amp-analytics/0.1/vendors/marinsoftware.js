@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const MARINSOFTWARE_CONFIG = innerJsonConfiguration({
+const MARINSOFTWARE_CONFIG = jsonLiteral({
   'requests': {
     'base': 'https://tracker.marinsm.com/tp',
     'baseParams':

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const UMENGANALYTICS_CONFIG = innerJsonConfiguration({
+const UMENGANALYTICS_CONFIG = jsonLiteral({
   'vars': {
     'siteid': '',
     'initial_view_time': '',

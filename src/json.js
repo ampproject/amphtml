@@ -27,7 +27,7 @@ import {isObject} from './types';
 
 /**
  * JSON scalar. It's either string, number or boolean.
- * @typedef {*} should be string|number|boolean
+ * @typedef {*} should be string|number|boolean|null
  */
 let JSONScalarDef;
 
@@ -237,41 +237,36 @@ function hasOwnProperty(obj, key) {
  * @template T
  */
 export function jsonConfiguration(obj) {
-  // Yes, this looks inefficient. But it's compiled into a much better format
-  // in dist.
-  return JSON.parse(
-    JSON.stringify(isObject(obj) ? /** @type {!JsonObject} */ (obj) : undefined)
-  );
+  return obj;
 }
 
 /**
  * @typedef {{
- *   __JSON_INTERNAL__: *,
- *   YOU_MUST_USE: *,
- *   innerJsonConfiguration: function(),
- *   TO_MAKE_THIS_TYPE: *,
+ *   YOU_MUST_USE: string,
+ *   jsonLiteral: function(),
+ *   TO_MAKE_THIS_TYPE: string,
  * }}
  */
-let InternalJsonConfigurationDef;
+let InternalJsonLiteralTypeDef;
 
 /**
- * This converts an Object into a suitable type to be used in `jsonLiteral`.
+ * This converts an Object into a suitable type to be used in `includeJsonLiteral`.
  * This doesn't actually do any conversion, it only changes the closure type.
  *
- * @param {!Object} obj
- * @return {!InternalJsonConfigurationDef}
+ * @param {!Object|!Array|string|number|boolean|null} value
+ * @return {!InternalJsonLiteralTypeDef}
  */
-export function innerJsonConfiguration(obj) {
-  return /** @type {!InternalJsonConfigurationDef} */ (obj);
+export function jsonLiteral(value) {
+  return /** @type {!InternalJsonLiteralTypeDef} */ (value);
 }
 
 /**
- * Allows inclusion of a variable (that's wrapped in a innerJsonConfiguration
+ * Allows inclusion of a variable (that's wrapped in a jsonLiteral
  * call) to be included inside a jsonConfiguration.
  *
- * @param {!InternalJsonConfigurationDef} value
+ * @param {!InternalJsonLiteralTypeDef} value
  * @return {*}
  */
-export function jsonLiteral(value) {
+export function includeJsonLiteral(value) {
   return value;
 }

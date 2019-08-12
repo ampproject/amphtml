@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const TREASUREDATA_CONFIG = innerJsonConfiguration({
+const TREASUREDATA_CONFIG = jsonLiteral({
   'vars': {
     'host': 'in.treasuredata.com',
     'writeKey': '',

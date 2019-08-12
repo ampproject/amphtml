@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const BURT_CONFIG = innerJsonConfiguration({
+const BURT_CONFIG = jsonLiteral({
   'vars': {
     'trackingKey': 'ignore',
     'category': '',

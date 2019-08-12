@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const NAVEGG_CONFIG = innerJsonConfiguration({
+const NAVEGG_CONFIG = jsonLiteral({
   'requests': {
     'pageview':
       'https://amp.navdmp.com/amp?' +

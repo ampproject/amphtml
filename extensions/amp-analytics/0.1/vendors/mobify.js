@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const MOBIFY_CONFIG = innerJsonConfiguration({
+const MOBIFY_CONFIG = jsonLiteral({
   'vars': {
     'projectSlug': 'mobify-project-id',
     'templateName': 'page-type',

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const MEDIAMETRIE_CONFIG = innerJsonConfiguration({
+const MEDIAMETRIE_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://prof.estat.com/m/web',
     'pageview':

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const KRUX_CONFIG = innerJsonConfiguration({
+const KRUX_CONFIG = jsonLiteral({
   'requests': {
     'beaconHost': 'https://beacon.krxd.net',
     'timing':

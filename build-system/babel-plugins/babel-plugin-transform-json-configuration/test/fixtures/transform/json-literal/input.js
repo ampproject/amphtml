@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-const inner = innerJsonConfiguration({
+const inner = jsonLiteral({
   inner: true,
 });
 
 jsonConfiguration({
-  config: jsonLiteral(inner),
+  config: includeJsonLiteral(inner),
 });

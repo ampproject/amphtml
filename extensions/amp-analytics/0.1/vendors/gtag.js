@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const GTAG_CONFIG = innerJsonConfiguration({
+const GTAG_CONFIG = jsonLiteral({
   'configRewriter': {
     'url': 'https://www.googletagmanager.com/gtag/amp',
     'varGroups': {

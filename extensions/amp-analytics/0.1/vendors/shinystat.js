@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const SHINYSTAT_CONFIG = innerJsonConfiguration({
+const SHINYSTAT_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,

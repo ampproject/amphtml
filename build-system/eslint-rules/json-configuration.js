@@ -21,29 +21,10 @@
  */
 
 module.exports = function(context) {
-  const jsonNames = [
-    'jsonConfiguration',
-    'innerJsonConfiguration',
-    'jsonLiteral',
-  ];
-  const calls = jsonNames
-    .map(name => `CallExpression[callee.name=${name}]`)
-    .join(',');
-  const innerIdentifiers = jsonNames
-    .map(
-      name =>
-        `CallExpression[callee.name=${name}] > :matches(ObjectExpression, ArrayExpression) Identifier`
-    )
-    .join(',');
-
   return {
-    [calls]: function(node) {
+    'CallExpression[callee.name=jsonConfiguration]': function(node) {
       const {callee} = node;
       if (callee.type !== 'Identifier') {
-        return;
-      }
-
-      if (callee.name !== 'jsonConfiguration') {
         return;
       }
 
@@ -64,19 +45,43 @@ module.exports = function(context) {
       });
     },
 
-    [innerIdentifiers]: function(node) {
+    'CallExpression[callee.name=includeJsonLiteral]': function(node) {
+      const {callee} = node;
+      if (callee.type !== 'Identifier') {
+        return;
+      }
+
+      const args = node.arguments;
+
+      if (args.length === 1 && args[0].type === 'Identifier') {
+        return;
+      }
+
+      return context.report({
+        node: args[0] || node,
+        message: 'Expected identifier with json json literal value',
+      });
+    },
+
+    'CallExpression[callee.name=jsonConfiguration] > :matches(ObjectExpression, ArrayExpression) Identifier': function(
+      node
+    ) {
       if (node.name === 'undefined') {
         return;
       }
 
-      if (node.name === 'jsonLiteral') {
+      if (node.name === 'includeJsonLiteral') {
+        return;
+      }
+
+      if (node.name === 'JSON') {
         return;
       }
 
       const {parent} = node;
       if (
         parent.type === 'CallExpression' &&
-        parent.callee.name === 'jsonLiteral'
+        parent.callee.name === 'includeJsonLiteral'
       ) {
         return;
       }

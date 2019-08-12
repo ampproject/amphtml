@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const PISTATS_CONFIG = innerJsonConfiguration({
+const PISTATS_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://events.pi-stats.com',
     'basePrefix':

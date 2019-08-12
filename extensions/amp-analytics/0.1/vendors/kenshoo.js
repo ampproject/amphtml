@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const KENSHOO_CONFIG = innerJsonConfiguration({
+const KENSHOO_CONFIG = jsonLiteral({
   'vars': {
     'clientId': 'CLIENT_ID(ken_amp_id)',
     'channelClickId': 'QUERY_PARAM(gclid)',

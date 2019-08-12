@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const ALEXAMETRICS_CONFIG = innerJsonConfiguration({
+const ALEXAMETRICS_CONFIG = jsonLiteral({
   'requests': {
     'base':
       'https://${ampAtrkHost}/atrk.gif?account=${atrk_acct}&domain=${domain}',

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const TEALIUMCOLLECT_CONFIG = innerJsonConfiguration({
+const TEALIUMCOLLECT_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,

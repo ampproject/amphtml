@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const TEAANALYTICS_CONFIG = innerJsonConfiguration({
+const TEAANALYTICS_CONFIG = jsonLiteral({
   vars: {
     userUniqueId: '${clientId(__tea_sdk__user_unique_id)}',
     debug: 0,

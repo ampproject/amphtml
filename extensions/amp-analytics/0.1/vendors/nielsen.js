@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const NIELSEN_CONFIG = innerJsonConfiguration({
+const NIELSEN_CONFIG = jsonLiteral({
   'vars': {
     'sessionId': 'CLIENT_ID(imrworldwide)',
     'prefix': '',

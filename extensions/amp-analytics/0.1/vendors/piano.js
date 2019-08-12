@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const PIANO_CONFIG = innerJsonConfiguration({
+const PIANO_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://api-v3.tinypass.com',
     'basePrefix': '/api/v3',

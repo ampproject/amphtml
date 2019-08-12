@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const QUANTCAST_CONFIG = innerJsonConfiguration({
+const QUANTCAST_CONFIG = jsonLiteral({
   'vars': {
     'labels': '',
   },

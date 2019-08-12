@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const GEMIUS_CONFIG = innerJsonConfiguration({
+const GEMIUS_CONFIG = jsonLiteral({
   'vars': {
     'dnt': '0',
   },

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const KEEN_CONFIG = innerJsonConfiguration({
+const KEEN_CONFIG = jsonLiteral({
   'requests': {
     'base': 'https://api.keen.io/3.0/projects/${projectId}/events',
     'pageview': '${base}/pageviews?api_key=${writeKey}',

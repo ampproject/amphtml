@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {innerJsonConfiguration} from '../../../src/json';
+import {jsonLiteral} from '../../../src/json';
 
-const BYSIDE_CONFIG = innerJsonConfiguration({
+const BYSIDE_CONFIG = jsonLiteral({
   'vars': {
     'webcareZone': 'webcare',
     'webcareId': '',
