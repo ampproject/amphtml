@@ -413,6 +413,7 @@ export class ProgressBar {
       return this.ellipsis_.headIndices.length;
     }
     this.ellipsis_.upperIndexHead = 0;
+    this.ellipsis_.headIndices = [];
     return 0;
   }
 
