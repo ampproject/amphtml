@@ -149,7 +149,7 @@ describes.repeated(
           return form;
         }
 
-        function getAmpFormWithAsyncInput() {
+        function getAmpFormWithAsyncInput(includeRequiredAction) {
           return getAmpForm(getForm()).then(ampForm => {
             const form = ampForm.form_;
 
@@ -173,6 +173,42 @@ describes.repeated(
               });
 
             form.appendChild(asyncInput);
+
+            if (includeRequiredAction) {
+              // Create our async input element
+              // With the required fields
+              const asyncInputRequiredAction = createElement(
+                'amp-mock-async-input-required-action'
+              );
+              asyncInputRequiredAction.classList.add(
+                AsyncInputClasses.ASYNC_INPUT
+              );
+              asyncInputRequiredAction.classList.add(
+                AsyncInputClasses.ASYNC_REQUIRED_ACTION
+              );
+              asyncInput.setAttribute(
+                AsyncInputAttributes.NAME,
+                'mock-async-input-required-action'
+              );
+
+              // Create stubs that can be used for observing the async input
+              const asyncInputValueRequiredAction =
+                'async-input-value-required-action';
+              const getValueStubRequiredAction = sandbox
+                .stub()
+                .returns(Promise.resolve(asyncInputValueRequiredAction));
+              asyncInputRequiredAction.getImpl = () =>
+                Promise.resolve({
+                  getValue: getValueStubRequiredAction,
+                });
+
+              form.appendChild(asyncInputRequiredAction);
+
+              return Promise.resolve({
+                ampForm,
+                getValueStubRequiredAction,
+              });
+            }
             return Promise.resolve({
               ampForm,
               asyncInput,
@@ -2883,6 +2919,23 @@ describes.repeated(
               });
             }
           );
+
+          it('should submit with async input required action ', () => {
+            return getAmpFormWithAsyncInput(
+              true /*includeRequiredAction*/
+            ).then(response => {
+              const {ampForm, getValueStubRequiredAction} = response;
+
+              const handlePresubmitSuccessStub = sandbox.stub(
+                ampForm,
+                'handlePresubmitSuccess_'
+              );
+              return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                expect(getValueStubRequiredAction).to.be.called;
+                expect(handlePresubmitSuccessStub).to.be.called;
+              });
+            });
+          });
 
           it(
             'should handle errors when, ' +
