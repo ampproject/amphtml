@@ -241,10 +241,9 @@ exports.rules = [
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
 
       // Facebook components
-      'extensions/amp-facebook/0.1/amp-facebook.js->extensions/amp-facebook/facebook-loader.js',
-      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
-      'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/facebook-loader.js',
-      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
       // Amp geo in group enum
       'extensions/amp-consent/0.1/amp-consent.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
