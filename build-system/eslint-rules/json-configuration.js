@@ -53,7 +53,7 @@ module.exports = function(context) {
       });
     },
 
-    'CallExpression[callee.name=jsonConfiguration] Identifier': function(node) {
+    'CallExpression[callee.name=jsonConfiguration] * Identifier': function(node) {
       if (node.name === 'undefined') {
         return;
       }
