@@ -174,7 +174,7 @@ export class ProgressBar {
         ) {
           this.initializeOverflowProgressBar_();
         } else {
-          this.setSegmentSize_();
+          this.setSegmentSize_(this.getSegmentWidth_(0));
         }
 
         if (this.isBuilt_) {
@@ -485,11 +485,14 @@ export class ProgressBar {
       .getBoundingClientRect().width;
     const ellipseSize = ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX;
 
+    const segmentCount =
+      this.segmentCount_ > MAX_SEGMENTS ? MAX_SEGMENTS : this.segmentCount_;
+
     return (
       (barWidth -
-        MAX_SEGMENTS * SEGMENTS_MARGIN_PX -
+        segmentCount * SEGMENTS_MARGIN_PX -
         ellipsisCount * ellipseSize) /
-      MAX_SEGMENTS
+      segmentCount
     );
   }
 
