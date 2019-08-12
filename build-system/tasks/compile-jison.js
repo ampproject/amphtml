@@ -41,7 +41,6 @@ imports.set(
  * @return {!Promise<void>}
  */
 function compileJison() {
-  const startTime = Date.now();
   fs.mkdirSync('build/parsers', {recursive: true});
   const promises = [];
   jisonPaths.forEach(jisonPath => {
