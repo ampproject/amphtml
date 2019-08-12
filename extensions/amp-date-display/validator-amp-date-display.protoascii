@@ -42,6 +42,7 @@ tags: {  # <amp-date-display>
     value_regex: "-?\\d+"
   }
   attrs: { name: "locale" }
+  attrs: { name: "template" }
   attrs: {
     name: "timestamp-ms"
     mandatory_oneof: "['datetime', 'timestamp-ms', 'timestamp-seconds']"
