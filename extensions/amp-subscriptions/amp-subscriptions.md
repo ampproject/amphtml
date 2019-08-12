@@ -377,13 +377,13 @@ The fallback content is marked up using `subscriptions-section="content-not-gran
 ## Using Scores to Display Content
 
 The score factors returned by ewach configured service can be used to control the disaplay
-of content within dialogs. For example `scores.isReadyToPay.subscribe_google_com` would be the "ready to pay" score factor from the `subscribe.google.com` service (also known as `amp-subscriptions-google`). Similarly `scores.isReadyToPay.local` would be for the local service and `scores.suppotsViewer.subscribe_google_com` would be the score factor for the Google service supporting the current viewer. 
+of content within dialogs. For example `factors['subscribe.google.com'].isReadyToPay` would be the "ready to pay" score factor from the `subscribe.google.com` service (also known as `amp-subscriptions-google`). Similarly `factors['local'].isReadyToPay` would be for the local service and `scores['subscribe.google.com'].supporsViewer` would be the score factor for the Google service supporting the current viewer. 
 
 Sample usage:
 
 ```html
     <!-- Shows a Subscribe with Google button if the user is ready to pay -->
-    <button subscriptions-display="scores.isReadyToPay.subscribe_google_com"
+    <button subscriptions-display="factors['subscribe.google.com'].isReadyToPay"
       subscriptions-action="subscribe"
       subscriptions-service="subscribe.google.com"
       subscriptions-decorate>Subscribe with Google</button>

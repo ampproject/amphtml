@@ -248,28 +248,26 @@ export class PlatformStore {
    *
    * return value looks somethinglike this
    * {
-   *    isReadyToPay: {
-   *     'subscribe_google_com': 1,
-   *     local: 0,
-   *    },
-   *    supportdViewer: {
-   *     'subscribe_google_com': 1,
-   *     local: 0,
-   *    },
+   *   'subscribe.google.com': {
+   *     isReadyToPay: 1,
+   *     supportsViewer: 1,
+   *   },
+   *   local: {
+   *     isReadyToPay: 0,
+   *     supportsViewer: 0,
+   *   },
    * }
    */
   getScoreFactorStates() {
     const states = dict({});
     return Promise.all(
-      Object.values(SubscriptionsScoreFactor).map(scoreFactor => {
-        states[scoreFactor] = dict();
+      this.serviceIds_.map(platformId => {
+        states[platformId] = dict();
         return Promise.all(
-          this.serviceIds_.map(platformId =>
+          Object.values(SubscriptionsScoreFactor).map(scoreFactor =>
             this.getScoreFactorPromiseFor_(platformId, scoreFactor).then(
               factorValue => {
-                states[scoreFactor][
-                  platformId.replace(/\./g, '_')
-                ] = factorValue;
+                states[platformId][scoreFactor] = factorValue;
               }
             )
           )

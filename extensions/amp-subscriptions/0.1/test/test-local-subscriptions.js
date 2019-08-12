@@ -57,13 +57,13 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   const authUrl = configAuthUrl.replace('READER_ID', readerId);
   const pingbackUrl = configPingbackUrl.replace('READER_ID', readerId);
   const fakeScoreStates = {
-    isReadyToPay: {
-      'subscribe-google-com': 1,
-      local: 0,
+    'subscribe.google.com': {
+      'isReadyToPay': 1,
+      'supportsViewer': 1,
     },
-    supportsViewer: {
-      'subscribe-google-com': 1,
-      local: 0,
+    'local': {
+      'isReadyToPay': 0,
+      'supportsViewer': 0,
     },
   };
 
@@ -392,14 +392,14 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         'granted': true,
         'grantReason': 'SUBSCRIBER',
         'data': null,
-        'scores': {
-          'isReadyToPay': {
-            'subscribe-google-com': 1,
-            'local': 0,
+        'factors': {
+          'subscribe.google.com': {
+            'isReadyToPay': 1,
+            'supportsViewer': 1,
           },
-          'supportsViewer': {
-            'subscribe-google-com': 1,
-            'local': 0,
+          'local': {
+            'isReadyToPay': 0,
+            'supportsViewer': 0,
           },
         },
       });

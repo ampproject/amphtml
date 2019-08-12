@@ -563,13 +563,13 @@ describes.realWin('Platform store', {}, () => {
       return expect(
         platformStore.getScoreFactorStates()
       ).to.eventually.deep.equal({
-        isReadyToPay: {
-          local: 0,
-          another: 0,
+        local: {
+          isReadyToPay: 0,
+          supportsViewer: 0,
         },
-        supportsViewer: {
-          local: 0,
-          another: 1,
+        another: {
+          isReadyToPay: 0,
+          supportsViewer: 1,
         },
       });
     });

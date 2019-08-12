@@ -168,7 +168,7 @@ export class LocalSubscriptionBasePlatform {
     return this.serviceAdapter_
       .getScoreFactorStates()
       .then(scoresValues => {
-        renderState['scores'] = scoresValues;
+        renderState['factors'] = scoresValues;
         return this.urlBuilder_.setAuthResponse(renderState);
       })
       .then(() => {

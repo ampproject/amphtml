@@ -382,12 +382,12 @@
   <template type="amp-mustache" subscriptions-dialog subscriptions-display="NOT loggedIn">
     <div>Dialog for non logged in users<div>
     <!-- Shows a Subscribe with Google button if the user is ready to pay -->
-    <button subscriptions-display="scores.isReadyToPay.subscribe_google_com"
+    <button subscriptions-display="factors['subscribe.google.com'].isReadyToPay"
       subscriptions-action="subscribe"
       subscriptions-service="subscribe.google.com"
       subscriptions-decorate>Subscribe with Google</button>
     <!-- Shows a Publisher button if the user is not ready to pay -->
-    <button subscriptions-display="NOT scores.isReadyToPay.subscribe_google_com"
+    <button subscriptions-display="NOT factors['subscribe.google.com'].isReadyToPay"
       subscriptions-action="subscribe"
       subscriptions-service="local"
       subscriptions-decorate>Publisher offer</button>
