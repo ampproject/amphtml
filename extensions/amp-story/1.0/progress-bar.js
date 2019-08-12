@@ -448,22 +448,9 @@ export class ProgressBar {
   }
 
   /**
-   * @param {number} lowerIndex
-   * @param {number} direction
-   * @return {number}
-   * @private
-   */
-  getUpperIndexForHeadEllipsis_(lowerIndex, direction) {
-    const limitIndex =
-      lowerIndex + direction * MAX_SEGMENT_ELLIPSIS + direction * -1;
-    return direction === 1
-      ? Math.min(limitIndex, this.segmentCount_ - 1)
-      : Math.max(limitIndex, 0);
-  }
-
-  /**
-   * @param {*} firstEllipsis
-   * @param {*} secondEllipsis
+   * Shrinks segments to become ellipse size.
+   * @param {number} firstEllipsis
+   * @param {number} secondEllipsis
    * @return {number}
    * @private
    */
@@ -482,7 +469,7 @@ export class ProgressBar {
   }
 
   /**
-   * @param {*} ellipsisCount
+   * @param {number} ellipsisCount
    * @return {number}
    * @private
    */
@@ -491,17 +478,19 @@ export class ProgressBar {
     const barWidth = this.storyEl_
       .querySelector('amp-story-page')
       .getBoundingClientRect().width;
-    const dotSize = ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX;
+    const ellipseSize = ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX;
 
     return (
-      (barWidth - MAX_SEGMENTS * SEGMENTS_MARGIN_PX - ellipsisCount * dotSize) /
+      (barWidth -
+        MAX_SEGMENTS * SEGMENTS_MARGIN_PX -
+        ellipsisCount * ellipseSize) /
       MAX_SEGMENTS
     );
   }
 
   /**
-   *
-   * @param {*} width
+   * Sets size for the segments or 100% width if not specified.
+   * @param {?number} width
    */
   setSegmentSize_(width = null) {
     const segmentWidth = width ? width + 'px' : '100%';
