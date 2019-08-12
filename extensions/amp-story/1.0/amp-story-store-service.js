@@ -83,7 +83,7 @@ export let InteractiveComponentDef;
  *    canShowSystemLayerButtons: boolean,
  *    accessState: boolean,
  *    adState: boolean,
- *    blingLinkState: boolean,
+ *    affiliateLinkState: boolean,
  *    bookendState: boolean,
  *    desktopState: boolean,
  *    hasSidebarState: boolean,
@@ -125,7 +125,7 @@ export const StateProperty = {
   ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
   BOOKEND_STATE: 'bookendState',
-  BLING_LINK_STATE: 'blingLinkState',
+  AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
@@ -164,7 +164,7 @@ export const Action = {
   SET_PAGE_IDS: 'addToPageIds',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
-  TOGGLE_BLING_LINK: 'toggleBlingLink',
+  TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_BOOKEND: 'toggleBookend',
   TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
@@ -238,10 +238,10 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.AD_STATE]: !!data,
       }));
-    // Expands or collapses the bling link.
-    case Action.TOGGLE_BLING_LINK:
+    // Expands or collapses the affiliate link.
+    case Action.TOGGLE_AFFILIATE_LINK:
       return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.BLING_LINK_STATE]: !!data,
+        [StateProperty.AFFILIATE_LINK_STATE]: !!data,
       }));
     // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
@@ -462,7 +462,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
-      [StateProperty.BLING_LINK_STATE]: false,
+      [StateProperty.AFFILIATE_LINK_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,

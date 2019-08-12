@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
   Action,
   EmbeddedComponentState,
@@ -21,7 +22,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {BLING_LINK_SELECTOR} from './amp-story-bling-link';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
@@ -486,7 +486,7 @@ class ManualAdvancement extends AdvancementConfig {
   /**
    * For an element to trigger a tooltip it has to be descendant of
    * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
-   * Also it cannot be a bling link.
+   * Also it cannot be an affiliate link.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
@@ -501,7 +501,7 @@ class ManualAdvancement extends AdvancementConfig {
       return false;
     }
 
-    if (target.matches(BLING_LINK_SELECTOR)) {
+    if (target.matches(AFFILIATE_LINK_SELECTOR)) {
       return false;
     }
 
@@ -561,21 +561,21 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Check if click should be handled by the bling link logic
+   * Check if click should be handled by the affiliate link logic
    * @param {!Event} event
    * @private
    * @return {boolean}
    */
-  isHandledByBlingLink_(event) {
-    const expanded = this.storeService_.get(StateProperty.BLING_LINK_STATE);
-    const clickedOnLink = event.target.matches(BLING_LINK_SELECTOR);
+  isHandledByAffiliateLink_(event) {
+    const expanded = this.storeService_.get(StateProperty.AFFILIATE_LINK_STATE);
+    const clickedOnLink = event.target.matches(AFFILIATE_LINK_SELECTOR);
 
     if (expanded) {
-      // do not handle if clicking on expanded bling link
+      // do not handle if clicking on expanded affiliate link
       return !clickedOnLink;
     }
 
-    // handle if clicking on collapsed bling link
+    // handle if clicking on collapsed affiliate link
     return clickedOnLink;
   }
 
@@ -603,10 +603,12 @@ class ManualAdvancement extends AdvancementConfig {
       return;
     }
 
-    if (this.isHandledByBlingLink_(event)) {
+    if (this.isHandledByAffiliateLink_(event)) {
       event.preventDefault();
-      const expanded = this.storeService_.get(StateProperty.BLING_LINK_STATE);
-      this.storeService_.dispatch(Action.TOGGLE_BLING_LINK, !expanded);
+      const expanded = this.storeService_.get(
+        StateProperty.AFFILIATE_LINK_STATE
+      );
+      this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, !expanded);
       return;
     }
 

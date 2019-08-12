@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview Bling link component that expands when clicked.
+ * @fileoverview Affiliate link component that expands when clicked.
  */
 
 import {StateProperty, getStoreService} from './amp-story-store-service';
@@ -26,18 +26,18 @@ import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {user} from '../../../src/log';
 
 /**
- * Links that are bling links.
+ * Links that are affiliate links.
  * @const {string}
  */
-export const BLING_LINK_SELECTOR = 'a.i-amphtml-story-bling-link';
+export const AFFILIATE_LINK_SELECTOR = 'a.i-amphtml-story-affiliate-link';
 
 /**
  * Custom property signifying a built link.
  * @const {string}
  */
-export const BLING_LINK_BUILT = '__AMP_BLING_LINK_BUILT';
+export const AFFILIATE_LINK_BUILT = '__AMP_AFFILIATE_LINK_BUILT';
 
-export class AmpStoryBlingLink {
+export class AmpStoryAffiliateLink {
   /**
    * @param {!Window} win
    * @param {!Element} element
@@ -54,10 +54,10 @@ export class AmpStoryBlingLink {
   }
 
   /**
-   * Builds bling link
+   * Builds affiliate link
    */
   build() {
-    if (this.element_[BLING_LINK_BUILT]) {
+    if (this.element_[AFFILIATE_LINK_BUILT]) {
       return;
     }
 
@@ -66,7 +66,7 @@ export class AmpStoryBlingLink {
     this.addPulseElement_();
     this.validateHref_();
     this.initializeListeners_();
-    this.element_[BLING_LINK_BUILT] = true;
+    this.element_[AFFILIATE_LINK_BUILT] = true;
   }
 
   /**
@@ -74,7 +74,7 @@ export class AmpStoryBlingLink {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.BLING_LINK_STATE,
+      StateProperty.AFFILIATE_LINK_STATE,
       toggleExpand => {
         this.element_.toggleAttribute('expanded', toggleExpand);
       }
@@ -82,15 +82,15 @@ export class AmpStoryBlingLink {
   }
 
   /**
-   * Adds icon as a child element of <amp-story-bling-link>
+   * Adds icon as a child element of <amp-story-affiliate-link>
    * @private
    */
   addIconElement_() {
     const iconEl = htmlFor(this.element_)`
-      <div class="i-amphtml-story-bling-link-circle">
-        <i class="i-amphtml-story-bling-link-icon i-amphtml-story-bling-link-shopping-cart"></i>
-        <span class="i-amphtml-story-bling-link-text"></span>
-        <i class="i-amphtml-story-bling-link-launch"></i>
+      <div class="i-amphtml-story-affiliate-link-circle">
+        <i class="i-amphtml-story-affiliate-link-icon i-amphtml-story-affiliate-link-shopping-cart"></i>
+        <span class="i-amphtml-story-affiliate-link-text"></span>
+        <i class="i-amphtml-story-affiliate-link-launch"></i>
       </div>`;
     this.element_.appendChild(iconEl);
   }
@@ -101,18 +101,18 @@ export class AmpStoryBlingLink {
    */
   addText_() {
     const textEl = this.element_.querySelector(
-      '.i-amphtml-story-bling-link-text'
+      '.i-amphtml-story-affiliate-link-text'
     );
     textEl.innerText = this.element_.innerText;
   }
 
   /**
-   * Adds pulse as a child element of <amp-story-bling-link>
+   * Adds pulse as a child element of <amp-story-affiliate-link>
    * @private
    */
   addPulseElement_() {
     const pulseEl = htmlFor(this.element_)`
-      <div class="i-amphtml-story-bling-link-pulse"></div>`;
+      <div class="i-amphtml-story-affiliate-link-pulse"></div>`;
     this.element_.appendChild(pulseEl);
   }
 
@@ -133,7 +133,10 @@ export class AmpStoryBlingLink {
   getElementHref_(target) {
     const elUrl = target.getAttribute('href');
     if (!isProtocolValid(elUrl)) {
-      user().error('amp-story-bling-link', 'The bling link url is invalid');
+      user().error(
+        'amp-story-affiliate-link',
+        'The affiliate link url is invalid'
+      );
       return;
     }
 
