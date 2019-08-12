@@ -240,8 +240,8 @@ export class VariableService {
    * @param {string} template The template to expand.
    * @param {!ExpansionOptions} options configuration to use for expansion.
    * @param {!Element} element amp-analytics element.
-   * @param {?} opt_bindings
-   * @param {?} opt_whitelist
+   * @param {!JsonObject=} opt_bindings
+   * @param {!Object=} opt_whitelist
    * @return {!Promise<string>} The expanded string.
    */
   expandTemplate(template, options, element, opt_bindings, opt_whitelist) {
