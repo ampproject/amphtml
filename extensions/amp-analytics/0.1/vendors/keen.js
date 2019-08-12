@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const KEEN_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const KEEN_CONFIG = jsonLiteral({
   'requests': {
     'base': 'https://api.keen.io/3.0/projects/${projectId}/events',
     'pageview': '${base}/pageviews?api_key=${writeKey}',
@@ -72,3 +74,5 @@ export const KEEN_CONFIG = /** @type {!JsonObject} */ ({
     'useBody': true,
   },
 });
+
+export {KEEN_CONFIG};

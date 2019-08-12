@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const AMPLITUDE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const AMPLITUDE_CONFIG = jsonLiteral({
   'transport': {
     'beacon': true,
     'xhrpost': true,
@@ -52,3 +54,5 @@ export const AMPLITUDE_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {AMPLITUDE_CONFIG};

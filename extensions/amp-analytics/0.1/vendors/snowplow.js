@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const SNOWPLOW_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const SNOWPLOW_CONFIG = jsonLiteral({
   'vars': {
     'duid': 'CLIENT_ID(_sp_id)',
   },
@@ -41,3 +43,5 @@ export const SNOWPLOW_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {SNOWPLOW_CONFIG};

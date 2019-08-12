@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const SEGMENT_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,
@@ -59,3 +61,5 @@ export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {SEGMENT_CONFIG};

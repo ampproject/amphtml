@@ -72,6 +72,7 @@
     "local/dict-string-keys": 2,
     "local/html-template": 2,
     "local/is-experiment-on": 2,
+    "local/json-configuration": 2,
     "local/no-array-destructuring": 2,
     "local/no-deep-destructuring": 2,
     "local/no-duplicate-import": 2,

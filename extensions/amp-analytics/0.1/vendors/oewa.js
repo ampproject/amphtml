@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const OEWA_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const OEWA_CONFIG = jsonLiteral({
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
   'requests': {
     'pageview':
@@ -31,3 +33,5 @@ export const OEWA_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {OEWA_CONFIG};

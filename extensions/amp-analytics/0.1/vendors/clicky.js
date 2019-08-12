@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const CLICKY_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const CLICKY_CONFIG = jsonLiteral({
   'vars': {
     'site_id': '',
   },
@@ -52,3 +54,5 @@ export const CLICKY_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {CLICKY_CONFIG};

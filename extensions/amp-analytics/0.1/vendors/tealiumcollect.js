@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const TEALIUMCOLLECT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const TEALIUMCOLLECT_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,
@@ -66,3 +68,5 @@ export const TEALIUMCOLLECT_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {TEALIUMCOLLECT_CONFIG};

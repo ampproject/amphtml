@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const SIMPLEREACH_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const SIMPLEREACH_CONFIG = jsonLiteral({
   'vars': {
     'pid': '',
     'published_at': '',
@@ -57,3 +59,5 @@ export const SIMPLEREACH_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {SIMPLEREACH_CONFIG};

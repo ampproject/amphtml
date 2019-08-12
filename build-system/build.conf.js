@@ -27,6 +27,7 @@ const defaultPlugins = [
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
+  getJsonConfigurationPlugin(),
   getReplacePlugin(),
 ];
 
@@ -116,6 +117,10 @@ const eliminateIntermediateBundles = () => [
   localPlugin('transform-prune-namespace'),
 ];
 
+function getJsonConfigurationPlugin() {
+  return localPlugin('transform-json-configuration');
+}
+
 /**
  * Resolves babel plugin set to apply before compiling on singlepass.
  * @param {!Object<string, boolean>} buildFlags
@@ -145,4 +150,9 @@ function plugins({isEsmBuild, isForTesting, isSinglePass}) {
   return applied;
 }
 
-module.exports = {plugins, eliminateIntermediateBundles, getReplacePlugin};
+module.exports = {
+  plugins,
+  eliminateIntermediateBundles,
+  getReplacePlugin,
+  getJsonConfigurationPlugin,
+};

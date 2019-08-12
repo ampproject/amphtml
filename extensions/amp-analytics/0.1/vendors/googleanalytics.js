@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const GOOGLEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const GOOGLEANALYTICS_CONFIG = jsonLiteral({
   'vars': {
     'eventValue': '0',
     'documentLocation': 'SOURCE_URL',
@@ -124,3 +126,5 @@ export const GOOGLEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {GOOGLEANALYTICS_CONFIG};

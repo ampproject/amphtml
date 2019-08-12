@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const CHARTBEAT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const CHARTBEAT_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://ping.chartbeat.net',
     'basePrefix':
@@ -76,3 +78,5 @@ export const CHARTBEAT_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {CHARTBEAT_CONFIG};

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const IBEATANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const IBEATANALYTICS_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://ibeat.indiatimes.com',
     'base': 'https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html',
@@ -50,3 +52,5 @@ export const IBEATANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {IBEATANALYTICS_CONFIG};

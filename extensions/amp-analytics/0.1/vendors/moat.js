@@ -14,110 +14,132 @@
  * limitations under the License.
  */
 
-export const MOAT_CONFIG = /** @type {!JsonObject} */ ({
+import {includeJsonLiteral, jsonLiteral} from '../../../../src/json';
+
+const load = jsonLiteral(
+  JSON.stringify(
+    /** @type {!JsonObject} */ ({
+      'type': 'load',
+      'pcode': '${pcode}',
+      'l0t': '${l0t}',
+      'acctType': '${acctType}',
+      'adType': '${adType}',
+      'qs': '${qs}',
+      'element': {
+        'src': '${htmlAttr(img,src,width)}',
+        'viewer': '${viewer}',
+      },
+      'document': {
+        'AMPDocumentHostname': '${ampdocHostname}',
+        'AMPDocumentURL': '${ampdocUrl}',
+        'canonicalHost': '${canonicalHost}',
+        'canonicalHostname': '${canonicalHostname}',
+        'canonicalPath': '${canonicalPath}',
+        'canonicalURL': '${canonicalUrl}',
+        'documentCharset': '${documentCharset}',
+        'documentReferrer': '${documentReferrer}',
+        'externalReferrer': '${externalReferrer}',
+        'sourceURL': '${sourceUrl}',
+        'sourceHost': '${sourceHost}',
+        'sourceHostname': '${sourceHostname}',
+        'sourcePath': '${sourcePath}',
+        'title': '${title}',
+        'viewer': '${viewer}',
+      },
+      'device': {
+        'availableScreenHeight': '${availableScreenHeight}',
+        'availableScreenWidth': '${availableScreenWidth}',
+        'browserLanguage': '${browserLanguage}',
+        'screenColorDepth': '${screenColorDepth}',
+        'screenHeight': '${screenHeight}',
+        'screenWidth': '${screenWidth}',
+        'scrollHeight': '${scrollHeight}',
+        'scrollWidth': '${scrollWidth}',
+        'scrollLeft': '${scrollLeft}',
+        'scrollTop': '${scrollTop}',
+        'timezone': '${timezone}',
+        'userAgent': '${userAgent}',
+        'viewportHeight': '${viewportHeight}',
+        'viewportWidth': '${viewportWidth}',
+      },
+      'requestCount': '${requestCount}',
+      'timeStamp': '${timestamp}',
+    })
+  )
+);
+
+const unload = jsonLiteral(
+  JSON.stringify(
+    /** @type {!JsonObject} */ ({
+      'type': 'unload',
+      'pcode': '${pcode}',
+      'l0t': '${l0t}',
+      'requestCount': '${requestCount}',
+      'timeStamp': '${timestamp}',
+    })
+  )
+);
+
+const click = jsonLiteral(
+  JSON.stringify(
+    /** @type {!JsonObject} */ ({
+      'type': 'click',
+      'pcode': '${pcode}',
+      'l0t': '${l0t}',
+      'requestCount': '${requestCount}',
+      'timeStamp': '${timestamp}',
+    })
+  )
+);
+
+const viewability = jsonLiteral(
+  JSON.stringify(
+    /** @type {!JsonObject} */ ({
+      'type': 'viewability',
+      'pcode': '${pcode}',
+      'l0t': '${l0t}',
+      'backgroundState': '${backgroundState}',
+      'intersectionRect': '${intersectionRect}',
+      'intersectionRatio': '${intersectionRatio}',
+      'maxVisiblePercentage': '${maxVisiblePercentage}',
+      'minVisiblePercentage': '${minVisiblePercentage}',
+      'x': '${elementX}',
+      'y': '${elementY}',
+      'height': '${elementHeight}',
+      'width': '${elementWidth}',
+      'viewportHeight': '${viewportHeight}',
+      'viewportWidth': '${viewportWidth}',
+      'opacity': '${opacity}',
+      'timeStamp': '${timestamp}',
+      'requestCount': '${requestCount}',
+    })
+  )
+);
+
+const iframe = jsonLiteral(
+  JSON.stringify(
+    /** @type {!JsonObject} */ ({
+      'type': 'iframe',
+      'pcode': '${pcode}',
+      'height': '${elementHeight}',
+      'width': '${elementWidth}',
+      'x': '${elementX}',
+      'y': '${elementY}',
+      'requestCount': '${requestCount}',
+    })
+  )
+);
+
+const MOAT_CONFIG = jsonLiteral({
   'vars': {
     'element': ':root',
   },
   'requests': {
-    'load': JSON.stringify(
-      /** @type {!JsonObject} */ ({
-        'type': 'load',
-        'pcode': '${pcode}',
-        'l0t': '${l0t}',
-        'acctType': '${acctType}',
-        'adType': '${adType}',
-        'qs': '${qs}',
-        'element': {
-          'src': '${htmlAttr(img,src,width)}',
-          'viewer': '${viewer}',
-        },
-        'document': {
-          'AMPDocumentHostname': '${ampdocHostname}',
-          'AMPDocumentURL': '${ampdocUrl}',
-          'canonicalHost': '${canonicalHost}',
-          'canonicalHostname': '${canonicalHostname}',
-          'canonicalPath': '${canonicalPath}',
-          'canonicalURL': '${canonicalUrl}',
-          'documentCharset': '${documentCharset}',
-          'documentReferrer': '${documentReferrer}',
-          'externalReferrer': '${externalReferrer}',
-          'sourceURL': '${sourceUrl}',
-          'sourceHost': '${sourceHost}',
-          'sourceHostname': '${sourceHostname}',
-          'sourcePath': '${sourcePath}',
-          'title': '${title}',
-          'viewer': '${viewer}',
-        },
-        'device': {
-          'availableScreenHeight': '${availableScreenHeight}',
-          'availableScreenWidth': '${availableScreenWidth}',
-          'browserLanguage': '${browserLanguage}',
-          'screenColorDepth': '${screenColorDepth}',
-          'screenHeight': '${screenHeight}',
-          'screenWidth': '${screenWidth}',
-          'scrollHeight': '${scrollHeight}',
-          'scrollWidth': '${scrollWidth}',
-          'scrollLeft': '${scrollLeft}',
-          'scrollTop': '${scrollTop}',
-          'timezone': '${timezone}',
-          'userAgent': '${userAgent}',
-          'viewportHeight': '${viewportHeight}',
-          'viewportWidth': '${viewportWidth}',
-        },
-        'requestCount': '${requestCount}',
-        'timeStamp': '${timestamp}',
-      })
-    ),
-    'unload': JSON.stringify(
-      /** @type {!JsonObject} */ ({
-        'type': 'unload',
-        'pcode': '${pcode}',
-        'l0t': '${l0t}',
-        'requestCount': '${requestCount}',
-        'timeStamp': '${timestamp}',
-      })
-    ),
-    'click': JSON.stringify(
-      /** @type {!JsonObject} */ ({
-        'type': 'click',
-        'pcode': '${pcode}',
-        'l0t': '${l0t}',
-        'requestCount': '${requestCount}',
-        'timeStamp': '${timestamp}',
-      })
-    ),
-    'viewability': JSON.stringify(
-      /** @type {!JsonObject} */ ({
-        'type': 'viewability',
-        'pcode': '${pcode}',
-        'l0t': '${l0t}',
-        'backgroundState': '${backgroundState}',
-        'intersectionRect': '${intersectionRect}',
-        'intersectionRatio': '${intersectionRatio}',
-        'maxVisiblePercentage': '${maxVisiblePercentage}',
-        'minVisiblePercentage': '${minVisiblePercentage}',
-        'x': '${elementX}',
-        'y': '${elementY}',
-        'height': '${elementHeight}',
-        'width': '${elementWidth}',
-        'viewportHeight': '${viewportHeight}',
-        'viewportWidth': '${viewportWidth}',
-        'opacity': '${opacity}',
-        'timeStamp': '${timestamp}',
-        'requestCount': '${requestCount}',
-      })
-    ),
-    'iframe': JSON.stringify(
-      /** @type {!JsonObject} */ ({
-        'type': 'iframe',
-        'pcode': '${pcode}',
-        'height': '${elementHeight}',
-        'width': '${elementWidth}',
-        'x': '${elementX}',
-        'y': '${elementY}',
-        'requestCount': '${requestCount}',
-      })
-    ),
+    'load': includeJsonLiteral(load),
+    'unload': includeJsonLiteral(unload),
+    'click': includeJsonLiteral(click),
+    'viewability': includeJsonLiteral(viewability),
+    'iframe': includeJsonLiteral(iframe),
   },
   'triggers': {
     'load': {
@@ -177,3 +199,5 @@ export const MOAT_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {MOAT_CONFIG};

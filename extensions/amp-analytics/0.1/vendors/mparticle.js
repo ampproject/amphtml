@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const MPARTICLE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const MPARTICLE_CONFIG = jsonLiteral({
   'vars': {
     'eventType': 'Unknown',
     'debug': false,
@@ -58,3 +60,5 @@ export const MPARTICLE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {MPARTICLE_CONFIG};

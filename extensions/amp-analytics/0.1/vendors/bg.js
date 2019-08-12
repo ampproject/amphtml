@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-export const BG_CONFIG = /** @type {!JsonObject} */ ({});
+import {jsonLiteral} from '../../../../src/json';
+
+const BG_CONFIG = jsonLiteral({});
+
+export {BG_CONFIG};

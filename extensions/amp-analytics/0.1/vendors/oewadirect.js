@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const OEWADIRECT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const OEWADIRECT_CONFIG = jsonLiteral({
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
   'requests': {
     'pageview':
@@ -27,3 +29,5 @@ export const OEWADIRECT_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {OEWADIRECT_CONFIG};
