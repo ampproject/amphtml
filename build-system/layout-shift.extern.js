@@ -13,20 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
-
-const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
 /**
- * Percy preserves the DOM object as snapshot so the content of iframe is not
- * included. This interactive test is created to backfill the iframe to the
- * parent DOM object so that it can be included in the Percy snapshot.
+ * @fileoverview Definitions for the Layout Shift API.
+ *
+ * Created from
+ * @see https://github.com/WICG/layout-instability/blob/master/README.md
+ *
+ * @todo This should be removed when the definitions are released
+ * in closure-compiler.
+ *
+ * @externs
  */
-module.exports = {
-  'page view': async (page, name) => {
-    const adElement = await page.$("amp-ad");
-    await adElement.$eval("iframe", el => {
-        el.srcdoc = el.contentDocument.documentElement.innerHTML;
-    });
-  },
-};
+
+/**
+ * @constructor
+ * @extends {PerformanceEntry}
+ */
+function LayoutShift() {}
+/** @type {number} */ LayoutShift.prototype.value;
+/** @type {boolean} */ LayoutShift.prototype.hadRecentInput;
+/** @type {number} */ LayoutShift.prototype.lastInputTime;

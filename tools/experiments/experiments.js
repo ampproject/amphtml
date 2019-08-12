@@ -325,11 +325,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13575',
   },
   {
-    id: 'amp-script',
-    name: 'Enables <amp-script>.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
-  },
-  {
     id: 'hidden-mutation-observer',
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
@@ -348,14 +343,6 @@ const EXPERIMENTS = [
     name:
       'Experiment to prevent regression after a major CSS clean up' +
       ' for AMPHTML Ads in FIE rendering mode',
-    spec: 'https://github.com/ampproject/amphtml/issues/22418',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
-  },
-  {
-    id: 'inabox-css-cleanup',
-    name:
-      'Experiment to prevent regression after a major CSS clean up' +
-      ' for AMPHTML Ads in inabox rendering mode',
     spec: 'https://github.com/ampproject/amphtml/issues/22418',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },

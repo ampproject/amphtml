@@ -1,6 +1,6 @@
 FAIL
 |  <!--
-|    Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+|    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 |
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
@@ -16,36 +16,46 @@ FAIL
 |  -->
 |  <!--
 |    Test Description:
-|    Tests for the amp-carousel tag. See the inline comments.
+|    This tests the logic for ampdevmode attributes.
+|    See https://github.com/ampproject/amphtml/issues/20974 for the
+|    original motivation. The idea is that an author can tag a document with
+|    the ampdevmode type identifier, which will emit an error and make
+|    the document invalid. However, any other tags marked with the same
+|    identifier will no longer emit errors, regardless of the error type.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ ampdevmode>
+>> ^~~~~~~~~
+feature_tests/dev_mode.html:26:0 Tag 'html' marked with attribute 'ampdevmode'. Validator will suppress errors regarding any other tag with this attribute. [GENERIC]
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
-|    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+|    <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
 |  </head>
 |  <body>
-|    <!-- Invalid: Wrong delay attribute usage -->
-|    <amp-carousel layout="fixed" width=500 height=500 autoplay delay>
+|
+|    <!-- Still produces an error -->
+|    <faketag></faketag>
 >>   ^~~~~~~~~
-amp-carousel/0.1/test/validator-amp-carousel.html:32:2 The attribute 'delay' in tag 'AMP-CAROUSEL [type=slides]' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-carousel) [DISALLOWED_HTML]
-|    </amp-carousel>
-|    <!-- Valid: Correct delay attribute usage -->
-|    <amp-carousel layout="fixed" width=500 height=500 autoplay delay=5000>
-|    </amp-carousel>
-|    <!-- Valid: default carousel autoplay usage w/o delay -->
-|    <amp-carousel layout="fixed" width=500 height=500 autoplay>
-|    </amp-carousel>
-|    <!-- Valid: default carousel autoplay usage with loops specified -->
-|    <amp-carousel layout="fixed" width=500 height=500 autoplay=5>
-|    </amp-carousel>
-|    <!-- Valid: amp-carousel with bindable [slide] attr -->
-|    <amp-carousel type="slides" layout="fixed" width=500 height=500
-|        [slide]="foo.bar">
-|    </amp-carousel>
+feature_tests/dev_mode.html:38:2 The tag 'faketag' is disallowed. [DISALLOWED_HTML]
+|    <anotherfaketag></anotherfaketag>
+>>   ^~~~~~~~~
+feature_tests/dev_mode.html:39:2 The tag 'anotherfaketag' is disallowed. [DISALLOWED_HTML]
+|
+|    <!-- Tagged with ampdevmode, so errors are suppressed. -->
+|    <faketag ampdevmode></faketag>
+|
+|    <!-- Also suppresses the entire tree. -->
+|    <faketag ampdevmode>
+|      <anotherfaketag></anotherfaketag>
+|    </faketag>
+|
+|    <!-- Yet, it does not prevent the tag from satisfying conditions, such as
+|         the amp-autocomplete-0.1.js being used -->
+|    <amp-autocomplete ampdevmode></amp-autocomplete>
+|
 |  </body>
 |  </html>

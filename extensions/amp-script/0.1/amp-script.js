@@ -30,11 +30,6 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
-import {
-  installOriginExperimentsForDoc,
-  originExperimentsForDoc,
-} from '../../../src/service/origin-experiments-impl';
-import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {utf8Encode} from '../../../src/utils/bytes';
@@ -98,30 +93,11 @@ export class AmpScript extends AMP.BaseElement {
     return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
   }
 
-  /** @return {!Promise<boolean>} */
-  isExperimentOn_() {
-    if (isExperimentOn(this.win, 'amp-script')) {
-      return Promise.resolve(true);
-    }
-    installOriginExperimentsForDoc(this.getAmpDoc());
-    return originExperimentsForDoc(this.element)
-      .getExperiments()
-      .then(trials => trials && trials.includes(TAG));
-  }
-
   /** @override */
   buildCallback() {
-    return this.isExperimentOn_()
-      .then(on => {
-        if (!on) {
-          // Return rejected Promise to buildCallback() to disable component.
-          throw user().createError('Experiment "%s" is not enabled.', TAG);
-        }
-        return getElementServiceForDoc(this.element, TAG, TAG);
-      })
-      .then(service => {
-        this.setService(service);
-      });
+    return getElementServiceForDoc(this.element, TAG, TAG).then(service => {
+      this.setService(/** @type {!AmpScriptService} */ (service));
+    });
   }
 
   /**
