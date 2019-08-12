@@ -34,7 +34,7 @@
   "doubleclickSraReportExcludedBlock": 0.1,
   "fie-css-cleanup": 1,
   "fixed-elements-in-lightbox": 1,
-  "flexAdSlots": 0.05,
+  "flexAdSlots": 0.95,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 1,
   "ios-scrollable-iframe": 0,
