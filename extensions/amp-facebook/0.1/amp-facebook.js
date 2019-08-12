@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createLoaderLogo} from '../facebook-loader';
+import {createLoaderLogo} from './facebook-loader';
 import {dashToUnderline} from '../../../src/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
