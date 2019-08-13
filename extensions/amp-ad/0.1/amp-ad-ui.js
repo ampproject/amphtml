@@ -17,6 +17,7 @@
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
 import {isNewLoaderExperimentEnabled} from '../../../src/loader';
+import {isProxyOrigin} from '../../../src/url';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-ad';
@@ -205,23 +206,32 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
-    user().expectedError(TAG, 'RESIZE_REQUEST');
-    return this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(
-      () => {
-        return resizeInfo;
-      },
-      () => {
-        user().expectedError(TAG, 'RESIZE_REJECT');
-        const activated =
-          event && event.userActivation && event.userActivation.hasBeenActive;
-        if (activated) {
-          // Report false negatives.
-          user().expectedError(TAG, 'RESIZE_REJECT_ACTIVE');
+    const isProxy = isProxyOrigin(this.baseInstance_.win.location);
+    if (isProxy) {
+      user().expectedError(TAG, 'RESIZE_REQUEST');
+    }
+    return this.baseInstance_
+      .attemptChangeSize(newHeight, newWidth, event)
+      .then(
+        () => {
+          return resizeInfo;
+        },
+        () => {
+          if (isProxy) {
+            user().expectedError(TAG, 'RESIZE_REJECT');
+            const activated =
+              event &&
+              event.userActivation &&
+              event.userActivation.hasBeenActive;
+            if (activated) {
+              // Report false negatives.
+              user().expectedError(TAG, 'RESIZE_REJECT_ACTIVE');
+            }
+          }
+          resizeInfo.success = false;
+          return resizeInfo;
         }
-        resizeInfo.success = false;
-        return resizeInfo;
-      }
-    );
+      );
   }
 }
 
