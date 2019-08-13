@@ -206,6 +206,8 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
+    // TODO(#23926): cleanup once user activation for resize is
+    // implemented.
     const isProxy = isProxyOrigin(this.baseInstance_.win.location);
     if (isProxy) {
       user().expectedError(TAG, 'RESIZE_REQUEST');
@@ -218,6 +220,8 @@ export class AmpAdUIHandler {
         },
         () => {
           if (isProxy) {
+            // TODO(#23926): cleanup once user activation for resize is
+            // implemented.
             user().expectedError(TAG, 'RESIZE_REJECT');
             const activated =
               event &&

@@ -65,7 +65,7 @@ let MarginChangeDef;
  *   newHeight: (number|undefined),
  *   newWidth: (number|undefined),
  *   marginChange: (!MarginChangeDef|undefined),
- *   event: (!Event|undefined),
+ *   event: (?Event|undefined),
  *   force: boolean,
  *   callback: (function(boolean)|undefined),
  * }}
@@ -1429,6 +1429,9 @@ export class Resources {
             event &&
             event.userActivation
           ) {
+            // Report false positives.
+            // TODO(#23926): cleanup once user activation for resize is
+            // implemented.
             user().expectedError(TAG_, 'RESIZE_APPROVE');
             if (!event.userActivation.hasBeenActive) {
               user().expectedError(TAG_, 'RESIZE_APPROVE_NOT_ACTIVE');
