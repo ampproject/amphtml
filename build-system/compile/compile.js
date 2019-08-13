@@ -259,10 +259,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      /*
-       * Transpile from ES6 to ES5 if not running with `--esm`
-       * otherwise transpilation is done by Babel
-       */
+      // Transpile from ES6 to ES5 if not running with `--esm`
+      // otherwise transpilation is done by Babel
       language_in: 'ECMASCRIPT6',
       language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
       // We do not use the polyfills provided by closure compiler.
@@ -282,7 +280,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       process_common_js_modules: true,
       // This strips all files from the input set that aren't explicitly
       // required.
-      only_closure_dependencies: true,
+      dependency_mode: 'PRUNE',
       output_wrapper: wrapper,
       source_map_include_content: !!argv.full_sourcemaps,
       source_map_location_mapping: '|' + sourceMapBase,
