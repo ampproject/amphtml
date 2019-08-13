@@ -862,6 +862,14 @@ app.get(
           file = replaceUrls(mode, file, '', inabox);
         }
 
+        if (inabox) {
+          // TODO: remove this when inabox-viewport-friendly is fully launched.
+          file = file.replace(
+            '<head>',
+            '<head><meta name="amp-experiments-opt-in" content="inabox-viewport-friendly">'
+          );
+        }
+
         // Extract amp-ad for the given 'type' specified in URL query.
         if (req.path.indexOf('/examples/ads.amp.html') == 0 && req.query.type) {
           const ads = file.match(

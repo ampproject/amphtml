@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const COMSCORE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const COMSCORE_CONFIG = jsonLiteral({
   'vars': {
     'c2': '1000001',
   },
@@ -45,3 +47,5 @@ export const COMSCORE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {COMSCORE_CONFIG};
