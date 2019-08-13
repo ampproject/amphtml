@@ -497,7 +497,7 @@ export class Resource {
           break;
         }
         if (
-          viewport.isDeclaredFixed(n) &&
+          Services.fixedLayerForDoc(this.element).isDeclaredFixed(n) &&
           computedStyle(win, n).position == 'fixed'
         ) {
           isFixed = true;

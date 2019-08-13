@@ -284,6 +284,17 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/fixed-layer.FixedLayer}
+   */
+  static fixedLayerForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/fixed-layer.FixedLayer} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'fixed-layer'
+    ));
+  }
+
+  /**
    * Returns a service to register callbacks we wish to execute when an
    * amp-form is submitted.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc

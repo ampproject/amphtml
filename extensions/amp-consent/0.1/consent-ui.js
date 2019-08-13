@@ -99,6 +99,9 @@ export class ConsentUI {
     /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
+    /** @private {!../../../src/service/fixed-layer.FixedLayer} */
+    this.fixedLayer_ = Services.fixedLayerForDoc(this.ampdoc_);
+
     /** @private {?../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
@@ -186,7 +189,7 @@ export class ConsentUI {
     classList.add('amp-active');
     classList.remove('amp-hidden');
     // Add to fixed layer
-    this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
+    this.fixedLayer_.addElement(this.parent_);
     if (this.isCreatedIframe_) {
       this.loadIframe_(isActionPromptTrigger).then(() => {
         // It is safe to assume that the loadIframe_ promise will resolve
@@ -277,10 +280,10 @@ export class ConsentUI {
       // NOTE (torch2424): This is very sensitive. Fixed layer applies
       // a `top: calc(0px)` in order to fix some bugs, thus
       // We should be careful in moving this around as
-      // `removeFromFixedLayer` will remove the `top` styling.
+      // `fixedLayer.removeElement` will remove the `top` styling.
       // This will preserve The animation,
       // and prevent element flashing.
-      this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
+      this.fixedLayer_.removeElement(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
       this.isVisible_ = false;
 

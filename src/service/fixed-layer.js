@@ -31,6 +31,7 @@ import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {isExperimentOn} from '../experiments';
+import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
 
 const TAG = 'FixedLayer';
@@ -49,6 +50,67 @@ function isLightbox(el) {
   return el.tagName.indexOf('LIGHTBOX') !== -1;
 }
 
+/* eslint-disable no-unused-vars */
+/**
+ * @interface
+ */
+export class FixedLayer {
+  /**
+   * Whether the element is declared as fixed in any of the user's stylesheets.
+   * Will include any matches, not necessarily currently fixed elements.
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  isDeclaredFixed(element) {}
+
+  /**
+   * Updates the fixed layer.
+   * @return {!Promise}
+   */
+  update() {}
+
+  /**
+   * Adds the element to the fixed layer.
+   * @param {!Element} element
+   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
+   *    to be forcefully transferred to the fixed layer.
+   * @return {!Promise}
+   */
+  addElement(element, opt_forceTransfer) {}
+
+  /**
+   * Removes the element from the fixed layer.
+   * @param {!Element} element
+   */
+  removeElement(element) {}
+}
+/* eslint-enable no-unused-vars */
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./vsync-impl.Vsync} vsync
+ * @param {number} borderTop
+ * @param {number} paddingTop
+ * @param {boolean} transfer
+ */
+export function installFixedLayerForDoc(
+  ampdoc,
+  vsync,
+  borderTop,
+  paddingTop,
+  transfer
+) {
+  const builder = ampdoc => {
+    return new FixedLayerImpl(ampdoc, vsync, borderTop, paddingTop, transfer);
+  };
+  registerServiceBuilderForDoc(
+    ampdoc,
+    'fixed-layer',
+    builder,
+    /* opt_instantiate */ true
+  );
+}
+
 /**
  * The fixed layer is a *sibling* of the body element. I.e. it's a direct
  * child of documentElement. It's used to manage the `position:fixed` and
@@ -59,8 +121,10 @@ function isLightbox(el) {
  * This implementation finds all elements that could be `fixed` or `sticky`
  * and checks on major relayouts if they are indeed `fixed`/`sticky`.
  * Some `fixed` elements may be moved into the "transfer layer".
+ *
+ * @implements {FixedLayer}
  */
-export class FixedLayer {
+export class FixedLayerImpl {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!./vsync-impl.Vsync} vsync
@@ -373,12 +437,7 @@ export class FixedLayer {
     }
   }
 
-  /**
-   * Whether the element is declared as fixed in any of the user's stylesheets.
-   * Will include any matches, not necessarily currently fixed elements.
-   * @param {!Element} element
-   * @return {boolean}
-   */
+  /** @override */
   isDeclaredFixed(element) {
     return !!element[DECLARED_FIXED_PROP];
   }
@@ -393,13 +452,7 @@ export class FixedLayer {
     return !!element[DECLARED_STICKY_PROP];
   }
 
-  /**
-   * Performs fixed/sticky actions.
-   * 1. Updates `top` styling if necessary.
-   * 2. On iOS/Iframe moves elements between fixed layer and BODY depending on
-   * whether they are currently visible and fixed
-   * @return {!Promise}
-   */
+  /** @override */
   update() {
     // Some of the elements may no longer be in DOM.
     /** @type {!Array<!ElementDef>} */

@@ -22,6 +22,7 @@ import {
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {childElementByAttr} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {user, userAssert} from '../../../src/log';
@@ -121,6 +122,9 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
+    /** @private {?../../../src/service/fixed-layer.FixedLayer} */
+    this.fixedLayer_ = null;
+
     /** @private {?LiveListManager} */
     this.manager_ = null;
 
@@ -192,6 +196,7 @@ export class AmpLiveList extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.viewport_ = this.getViewport();
+    this.fixedLayer_ = Services.fixedLayerForDoc(this.getAmpDoc());
 
     LiveListManager.forDoc(this.element).then(manager => {
       this.manager_ = manager;
@@ -302,7 +307,7 @@ export class AmpLiveList extends AMP.BaseElement {
       }
       this.mutateElement(() => {
         this.toggleUpdateButton_(true);
-        this.viewport_.updateFixedLayer();
+        this.fixedLayer_.update();
       });
     } else if (
       this.pendingItemsReplace_.length > 0 ||

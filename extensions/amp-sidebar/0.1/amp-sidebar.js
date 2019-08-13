@@ -330,7 +330,10 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForOpening_() {
     toggle(this.element, /* display */ true);
-    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
+    Services.fixedLayerForDoc(this.getAmpDoc()).addElement(
+      this.element,
+      /* forceTransfer */ true
+    );
     this.mutateElement(() => {
       // Wait for mutateElement, so that the element has been transfered to the
       // fixed layer. This is needed to hide the correct elements.

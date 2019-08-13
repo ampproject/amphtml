@@ -40,6 +40,9 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
+    /** @private {?../../../src/service/fixed-layer.FixedLayer} */
+    this.fixedLayer_ = null;
+
     /** @private {boolean} */
     this.visible_ = false;
 
@@ -56,6 +59,7 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.viewport_ = this.getViewport();
+    this.fixedLayer_ = Services.fixedLayerForDoc(this.getAmpDoc());
     this.element.classList.add('i-amphtml-sticky-ad-layout');
     const children = this.getRealChildren();
     userAssert(
@@ -173,8 +177,8 @@ class AmpStickyAd extends AMP.BaseElement {
         }
         this.visible_ = true;
         this.addCloseButton_();
-        this.viewport_
-          .addToFixedLayer(this.element, /* forceTransfer */ true)
+        this.fixedLayer_
+          .addElement(this.element, /* forceTransfer */ true)
           .then(() => this.scheduleLayoutForAd_());
       });
     });
@@ -253,7 +257,7 @@ class AmpStickyAd extends AMP.BaseElement {
         this.element,
         dev().assertElement(this.ad_)
       );
-      this.viewport_.removeFromFixedLayer(this.element);
+      this.fixedLayer_.removeElement(this.element);
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
     });

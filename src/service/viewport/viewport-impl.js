@@ -15,7 +15,6 @@
  */
 
 import {Animation} from '../../animation';
-import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
@@ -38,6 +37,7 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../../service';
+import {installFixedLayerForDoc} from './../fixed-layer';
 import {installLayersServiceForDoc} from '../layers-impl';
 import {isExperimentOn} from '../../experiments';
 import {
@@ -167,14 +167,19 @@ export class Viewport {
       );
     }
 
-    /** @private @const {!FixedLayer} */
-    this.fixedLayer_ = new FixedLayer(
+    // TODO(lannka): move this installation out to core-services.js
+    installFixedLayerForDoc(
       ampdoc,
       this.vsync_,
       this.binding_.getBorderTop(),
       this.paddingTop_,
       this.binding_.requiresFixedLayerTransfer()
     );
+
+    /** @private @const {!../fixed-layer.FixedLayerImpl} */
+    this.fixedLayer_ = /** @type {!../fixed-layer.FixedLayerImpl} */ (Services.fixedLayerForDoc(
+      ampdoc
+    ));
     ampdoc.whenReady().then(() => this.fixedLayer_.setup());
 
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
@@ -495,16 +500,6 @@ export class Viewport {
    */
   supportsPositionFixed() {
     return this.binding_.supportsPositionFixed();
-  }
-
-  /**
-   * Whether the element is declared as fixed in any of the user's stylesheets.
-   * Will include any matches, not necessarily currently fixed elements.
-   * @param {!Element} element
-   * @return {boolean}
-   */
-  isDeclaredFixed(element) {
-    return this.fixedLayer_.isDeclaredFixed(element);
   }
 
   /**
@@ -958,32 +953,6 @@ export class Viewport {
       return this.setViewportMetaString_(this.originalViewportMetaString_);
     }
     return false;
-  }
-
-  /**
-   * Updates the fixed layer.
-   */
-  updateFixedLayer() {
-    this.fixedLayer_.update();
-  }
-
-  /**
-   * Adds the element to the fixed layer.
-   * @param {!Element} element
-   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
-   *    to be forcefully transferred to the fixed layer.
-   * @return {!Promise}
-   */
-  addToFixedLayer(element, opt_forceTransfer) {
-    return this.fixedLayer_.addElement(element, opt_forceTransfer);
-  }
-
-  /**
-   * Removes the element from the fixed layer.
-   * @param {!Element} element
-   */
-  removeFromFixedLayer(element) {
-    this.fixedLayer_.removeElement(element);
   }
 
   /**

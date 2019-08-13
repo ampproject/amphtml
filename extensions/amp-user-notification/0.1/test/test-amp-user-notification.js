@@ -609,8 +609,8 @@ describes.realWin(
       impl.buildCallback();
       impl.dialogPromise_ = Promise.resolve();
       const addToFixedLayerStub = sandbox.stub(
-        impl.getViewport(),
-        'addToFixedLayer'
+        Services.fixedLayerForDoc(ampdoc),
+        'addElement'
       );
 
       expect(el).to.not.have.class('amp-active');
@@ -667,8 +667,8 @@ describes.realWin(
       impl.dialogPromise_ = Promise.resolve();
       impl.dialogResolve_ = function() {};
       const removeFromFixedLayerStub = sandbox.stub(
-        impl.getViewport(),
-        'removeFromFixedLayer'
+        Services.fixedLayerForDoc(ampdoc),
+        'removeElement'
       );
 
       expect(el).to.not.have.class('amp-active');

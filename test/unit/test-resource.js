@@ -233,10 +233,11 @@ describes.realWin('Resource', {amp: true}, env => {
       .returns(false)
       .atLeast(1);
     const viewport = Services.viewportForDoc(resource.element);
+    const fixedLayer = Services.fixedLayerForDoc(resource.element);
     sandbox
       .stub(viewport, 'getLayoutRect')
       .returns(layoutRectLtwh(0, 100, 300, 100));
-    sandbox.stub(viewport, 'isDeclaredFixed').returns(false);
+    sandbox.stub(fixedLayer, 'isDeclaredFixed').returns(false);
     sandbox.stub(viewport, 'supportsPositionFixed').returns(true);
     expect(() => {
       resource.measure();

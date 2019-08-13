@@ -16,7 +16,7 @@
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
-import {FixedLayer} from '../../src/service/fixed-layer';
+import {FixedLayerImpl} from '../../src/service/fixed-layer';
 import {Services} from '../../src/services';
 import {endsWith} from '../../src/string';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
@@ -461,7 +461,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       let fixedLayer;
 
       beforeEach(() => {
-        fixedLayer = new FixedLayer(
+        fixedLayer = new FixedLayerImpl(
           ampdoc,
           vsyncApi,
           /* borderTop */ 0,
@@ -1255,7 +1255,7 @@ describes.sandboxed('FixedLayer', {}, () => {
     const transfer = true;
 
     beforeEach(() => {
-      fixedLayer = new FixedLayer(
+      fixedLayer = new FixedLayerImpl(
         ampdoc,
         vsyncApi,
         borderTop,
@@ -1271,7 +1271,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       installPlatformService(win);
       installTimerService(win);
 
-      const fixedLayer = new FixedLayer(
+      const fixedLayer = new FixedLayerImpl(
         ampdoc,
         vsyncApi,
         borderTop,
@@ -1724,7 +1724,7 @@ describes.realWin('FixedLayer', {}, env => {
         installTimerService(win);
         ampdoc = new AmpDocSingle(win);
         shadowRoot = win.document.body.attachShadow({mode: 'open'});
-        fixedLayer = new FixedLayer(
+        fixedLayer = new FixedLayerImpl(
           ampdoc,
           vsyncApi,
           /* borderTop */ 0,

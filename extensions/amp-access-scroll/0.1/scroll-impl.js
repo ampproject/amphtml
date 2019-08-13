@@ -274,7 +274,7 @@ class ScrollElement {
     ampdoc.getBody().appendChild(this.scrollBar_);
 
     // Promote to fixed layer.
-    Services.viewportForDoc(ampdoc).addToFixedLayer(this.scrollBar_);
+    Services.fixedLayerForDoc(ampdoc).addElement(this.scrollBar_);
   }
 
   /**

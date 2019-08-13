@@ -89,7 +89,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     // Make the fixed-layer track the container, but never transfer it out of
     // this DOM tree. Tracking allows us to compensate for the Viewer's header,
     // but transferring would break the clipping UI.
-    this.getViewport().addToFixedLayer(
+    Services.fixedLayerForDoc(this.element).addElement(
       container,
       /* opt_forceTransfer */ false
     );

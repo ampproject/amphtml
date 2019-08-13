@@ -155,6 +155,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
       {
         element: this.element,
         viewport: this.getViewport(),
+        fixedLayer: Services.fixedLayerForDoc(this.getAmpDoc()),
       }
     );
   }
@@ -169,6 +170,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
       {
         element: this.element,
         viewport: this.getViewport(),
+        fixedLayer: Services.fixedLayerForDoc(this.getAmpDoc()),
       }
     );
   }
@@ -526,7 +528,7 @@ function handleDismiss(state) {
  * @param {!Object} state
  */
 function hideBanner(state) {
-  state.viewport.removeFromFixedLayer(state.element);
+  state.fixedLayer.removeElement(state.element);
   removeElement(state.element);
   state.viewport.updatePaddingBottom(0);
 }
@@ -545,7 +547,7 @@ function measureBanner(state) {
  */
 function updateViewportPadding(state) {
   state.viewport.updatePaddingBottom(state.bannerHeight);
-  state.viewport.addToFixedLayer(state.element);
+  state.fixedLayer.addElement(state.element);
 }
 
 AMP.extension(TAG, '0.1', AMP => {

@@ -60,7 +60,7 @@ describes.realWin(
         impl = ampStickyAd.implementation_;
         addToFixedLayerPromise = Promise.resolve();
         addToFixedLayerStub = sandbox
-          .stub(impl.viewport_, 'addToFixedLayer')
+          .stub(impl.fixedLayer_, 'addElement')
           .callsFake(() => addToFixedLayerPromise);
       });
 
@@ -350,7 +350,7 @@ describes.realWin(
       impl = ampStickyAd.implementation_;
       addToFixedLayerPromise = Promise.resolve();
       sandbox
-        .stub(impl.viewport_, 'addToFixedLayer')
+        .stub(impl.fixedLayer_, 'addElement')
         .callsFake(() => addToFixedLayerPromise);
       return ampAd.implementation_.upgradeCallback();
     });

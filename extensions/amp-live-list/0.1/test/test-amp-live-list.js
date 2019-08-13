@@ -405,10 +405,10 @@ describes.realWin(
         expect(stub).to.be.calledOnce;
       });
 
-      it('should call updateFixedLayer on update with inserts', () => {
+      it('should update fixedLayer on update with inserts', () => {
         buildElement(elem, dftAttrs);
         liveList.buildCallback();
-        const spy = sandbox.spy(liveList.viewport_, 'updateFixedLayer');
+        const spy = sandbox.spy(liveList.fixedLayer_, 'update');
         expect(liveList.itemsSlot_.childElementCount).to.equal(0);
         const fromServer1 = createFromServer([{id: 'id0'}]);
         expect(spy).to.have.not.been.called;

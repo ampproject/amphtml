@@ -63,10 +63,7 @@ describes.realWin(
         element: parent,
         win,
         getViewport: () => {
-          return {
-            addToFixedLayer: () => {},
-            removeFromFixedLayer: () => {},
-          };
+          return {};
         },
         getVsync: () => {
           return {
