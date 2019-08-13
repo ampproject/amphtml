@@ -26,6 +26,8 @@
 </head>
 <body>
 <p>Scroll down to see content</p>
+
+<div id="anim-idasdf2">asdf2</div>
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
 
@@ -83,13 +85,14 @@ Container for analytics tags. Positioned far away from top to make sure that doe
       "visibility": {
         "on": "visible",
         "request": "visibility",
-        "selector": "#anim-id",
+        "selector": "#anim-idasdf",
         "visibilitySpec": {
-          "visiblePercentageMin": 20,
-          "visiblePercentageMax": 80,
-          "totalTimeMin": 5000,
-          "continuousTimeMin": 2000,
-          "waitFor": "ini-load"
+          "visiblePercentageMin": 0,
+          "visiblePercentageMax": 100,
+          "totalTimeMin": 0,
+          "continuousTimeMin": 0,
+          "waitFor": "ini-load",
+          "repeat": true
         },
         "vars": {
           "type": "visible"
@@ -279,7 +282,11 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
 </p>
+<amp-iframe width="500" height="281"
+    sandbox="allow-scripts allow-same-origin allow-popups" allowfullscreen frameborder="0"
+    src="http://iframe.localhost:8000/test/fixtures/served/iframe-intersection.html" [src]="bling">
 <div id="anim-idasdf">asdf</div>
+</amp-iframe>
 <amp-anim src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464-hp.gif" id="anim-id" width="665" height="220" layout="responsive">
   <amp-img placeholder src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>
   <amp-analytics id="nestedAnalytics">
@@ -294,7 +301,7 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
           "on": "visible",
           "request": "visibility",
           "visibilitySpec": {
-            "selector": "amp-img",
+            "selector": "amp-img2",
             "selectionMethod": "scope",
             "visiblePercentageMin": 10
           },
@@ -304,7 +311,7 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
           "on": "visible",
           "request": "visibility",
           "visibilitySpec": {
-            "selector": "amp-anim",
+            "selector": "amp-anim2",
             "selectionMethod": "closest",
             "visiblePercentageMin": 20
           },

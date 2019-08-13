@@ -425,6 +425,24 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, () => {
       expect(callbackSpy).to.be.calledOnce;
     });
 
+    describe('non-AMP element - w/o getLayoutBox()', () => {
+      it('should trigger for new observed element', () => {
+        io = new IntersectionObserverPolyfill(callbackSpy, {
+          threshold: [0, 1],
+        });
+        // non-AMP elements use the native getBoundingClientRect() instead of
+        // getLayoutBox()
+        element.getBoundingClientRect = () => {
+          return layoutRectLtwh(0, 0, 100, 100);
+        };
+        io.tick(layoutRectLtwh(0, 90, 100, 100));
+
+        // Observe after tick.
+        io.observe(element);
+        expect(callbackSpy).to.be.calledOnce;
+      });
+    });
+
     describe('mutation observer', () => {
       it('should create a mutation observer, on initial observer', () => {
         io = new IntersectionObserverPolyfill(callbackSpy, {

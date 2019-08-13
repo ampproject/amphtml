@@ -266,6 +266,80 @@ describe('amp-analytics', function() {
   );
 
   describes.integration(
+    'non-AMP element visible trigger',
+    {
+      body: `
+      <amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "visible": {
+              "on": "visible",
+              "request": "endpoint",
+              "visibilitySpec": {
+                "selector": "img",
+                "selectionMethod": "scope",
+                "visiblePercentageMin": 50,
+                "totalTimeMin": 500
+              },
+              "extraUrlParams": {
+                "timestamp": "\${timestamp}",
+                "loadTimeVisibility": "\${loadTimeVisibility}",
+                "maxVisiblePercentage": "\${maxVisiblePercentage}",
+                "totalVisibleTime": "\${totalVisibleTime}"
+              }
+            }
+          }
+        }
+        </script>
+      </amp-analytics>
+      <div class="block" style="height: 100vh; background: red">
+        1st viewport
+      </div>
+      <img width="300" height="150"
+          src="/examples/img/bigbuckbunny.jpg"></img>
+      `,
+      extensions: ['amp-analytics'],
+    },
+    env => {
+      let browser;
+
+      beforeEach(() => {
+        browser = new BrowserController(env.win);
+        return browser.waitForElementLayout('amp-analytics');
+      });
+
+      it('should trigger when image being 50% visible for 0.5s', () => {
+        let scrollTime = Infinity;
+        const reqPromise = RequestBank.withdraw().then(req => {
+          const q = parseQueryString(req.url.substr(1));
+          expect(Date.now()).to.be.not.below(scrollTime + 500);
+          expect(parseInt(q['timestamp'], 10)).to.be.not.below(
+            scrollTime + 500
+          );
+          expect(q['loadTimeVisibility']).to.equal('0');
+          expect(parseFloat(q['maxVisiblePercentage'])).to.be.above(50);
+          expect(parseFloat(q['totalVisibleTime'])).to.be.not.below(500);
+        });
+
+        browser
+          .wait(1000) // wait for amp-analytics to start so loadTimeVisibility=0
+          .then(() => browser.scrollTo(50)) // image 50/150 visible
+          .then(() => browser.wait(1000)) // wait for a 1s to make sure no trigger
+          .then(() => {
+            scrollTime = Date.now();
+            browser.scrollTo(80); // image 80/150 visible
+            // keep visible for 0.5s to fire a ping
+          });
+        return reqPromise;
+      });
+    }
+  );
+
+  describes.integration(
     'timer trigger',
     {
       body: `

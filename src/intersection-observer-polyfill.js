@@ -98,6 +98,7 @@ export function getIntersectionChangeEntry(element, owner, hostViewport) {
  * @return {boolean}
  */
 export function nativeIntersectionObserverSupported(win) {
+  // return false;
   return (
     'IntersectionObserver' in win &&
     'IntersectionObserverEntry' in win &&
@@ -293,8 +294,9 @@ export class IntersectionObserverPolyfill {
    * @param {!Element} element
    */
   observe(element) {
+    // console.log(element);
     // Check the element is an AMP element.
-    devAssert(element.getLayoutBox);
+    // devAssert(element.getLayoutBox);
 
     // If the element already exists in current observeEntries, do nothing
     for (let i = 0; i < this.observeEntries_.length; i++) {
@@ -420,8 +422,45 @@ export class IntersectionObserverPolyfill {
   getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
     const {element} = state;
 
-    const elementRect = element.getLayoutBox();
-    const owner = element.getOwner();
+    /**
+     * Return position of element relative to top-left of document. Uses
+     * getBoundingClientRect(), which is expensive
+     * @param {Object} element
+     * @param {Object} hostViewport
+     * @return {Object}
+     */
+    function getAbsoluteClientRect(element, hostViewport) {
+      const rect = element.getBoundingClientRect();
+      // const ampdoc = Services.ampdoc(element);
+      // const {scrollX, scrollY} = self.window; //ampdoc.win;
+      const {top: viewportTop, left: viewportLeft} = hostViewport;
+
+      // getBoundingClientRect() returns position relative to viewport. We want
+      // position relative to top-left of document so we add top/left of viewport
+      return {
+        top: rect.top + viewportTop,
+        bottom: rect.bottom + viewportTop,
+        left: rect.left + viewportLeft,
+        right: rect.right + viewportLeft,
+        height: rect.height,
+        width: rect.width,
+        x: rect.x,
+        y: rect.y,
+      };
+    }
+
+    const elementRect = element.getLayoutBox //element.classList.contains('i-amphtml-element')
+      ? element.getLayoutBox()
+      : getAbsoluteClientRect(element, hostViewport);
+
+    // if (!element.classList.contains('i-amphtml-element')) {
+      // console.log('asdf');
+      // console.log('viewport for ' + element.id);
+      // console.log(hostViewport);
+      // console.log(elementRect);
+    // }
+
+    const owner = element.getOwner && element.getOwner();
     const ownerRect = owner && owner.getLayoutBox();
 
     // calculate intersectionRect. that the element intersects with hostViewport
@@ -465,7 +504,7 @@ export class IntersectionObserverPolyfill {
 
   /**
    * Handle Mutation Observer Pass
-   * This performas the tick, and is wrapped in a paas
+   * This performs the tick, and is wrapped in a pass
    * To handle throttling of the observer
    * @param {!Element} element
    * @private
