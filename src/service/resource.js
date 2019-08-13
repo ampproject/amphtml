@@ -331,12 +331,7 @@ export class Resource {
     return this.element.build().then(
       () => {
         this.isBuilding_ = false;
-        if (this.hasBeenMeasured()) {
-          this.state_ = ResourceState.READY_FOR_LAYOUT;
-          this.element.updateLayoutBox(this.getLayoutBox(), true);
-        } else {
-          this.state_ = ResourceState.NOT_LAID_OUT;
-        }
+        this.state_ = ResourceState.NOT_LAID_OUT;
         // TODO(dvoytenko): merge with the standard BUILT signal.
         this.element.signals().signal('res-built');
       },
