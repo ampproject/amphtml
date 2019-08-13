@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const BURT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const BURT_CONFIG = jsonLiteral({
   'vars': {
     'trackingKey': 'ignore',
     'category': '',
@@ -68,3 +70,5 @@ export const BURT_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {BURT_CONFIG};

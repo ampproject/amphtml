@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const WEBTREKK_V2_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const WEBTREKK_V2_CONFIG = jsonLiteral({
   'vars': {
     'actionName': 'webtrekk_ignore',
     'contentId': '${title}',
@@ -66,3 +68,5 @@ export const WEBTREKK_V2_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {WEBTREKK_V2_CONFIG};

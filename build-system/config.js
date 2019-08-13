@@ -98,6 +98,8 @@ const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/*.js'];
 
 const devDashboardTestPaths = ['build-system/app-index/test/**/*.js'];
 
+const jisonPaths = ['extensions/**/*.jison'];
+
 const lintGlobs = [
   '**/*.js',
   // To ignore a file / directory, add it to .eslintignore.
@@ -141,6 +143,7 @@ module.exports = {
   e2eTestPaths,
   lintGlobs,
   devDashboardTestPaths,
+  jisonPaths,
   thirdPartyFrames,
   jsonGlobs: [
     '**/*.json',

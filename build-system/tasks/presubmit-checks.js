@@ -876,11 +876,6 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Always supply a reason in rejections. ' +
       'error.cancellation() may be applicable.',
-    whitelist: [
-      'extensions/amp-access/0.1/access-expr-impl.js',
-      'extensions/amp-animation/0.1/parsers/css-expr-impl.js',
-      'extensions/amp-bind/0.1/bind-expr-impl.js',
-    ],
   },
   '[^.]loadPromise': {
     message: 'Most users should use BaseElement…loadPromise.',
