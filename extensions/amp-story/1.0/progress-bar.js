@@ -22,6 +22,7 @@ import {
 } from './amp-story-store-service';
 import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '../../../src/css';
+import {findIndex} from '../../../src/utils/array';
 import {hasOwn, map} from '../../../src/utils/object';
 import {removeChildren, scopedQuerySelector} from '../../../src/dom';
 import {scale, setImportantStyles, setStyle} from '../../../src/style';
@@ -263,7 +264,7 @@ export class ProgressBar {
       MAX_SEGMENTS +
       Math.min(MAX_SEGMENT_ELLIPSIS - 1, this.segmentCount_ % MAX_SEGMENTS);
 
-    this.ellipsis_.headIndices = this.shrinkSegments_(
+    this.ellipsis_.tailIndices = this.shrinkSegments_(
       MAX_SEGMENTS,
       upperIndexHead
     );
@@ -302,7 +303,10 @@ export class ProgressBar {
       );
 
       const previousTailLength = this.ellipsis_.tailIndices.length;
-      const prevDotsLeft = ellipses.length > 3 ? 1 : 0;
+      const prevDotsLeft =
+        findIndex(this.ellipsis_.tailIndices, idx => idx < segmentIndex) >= 0
+          ? 1
+          : 0;
 
       // todo(use enum)
       const navigationDirection = segmentIndex > previousSegmentIndex ? 1 : -1;
@@ -340,11 +344,7 @@ export class ProgressBar {
         // previously shrank dots on the left
 
         const shrinkDiff =
-          prevDotsLeft *
-          previousTailLength *
-          (prevWidth +
-            SEGMENTS_MARGIN_PX -
-            (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX));
+          prevDotsLeft * previousTailLength * (prevWidth - ELLIPSE_WIDTH_PX);
 
         const sizeDiff = this.ellipsis_.upperIndexTail * (segWidth - prevWidth);
         translate =
