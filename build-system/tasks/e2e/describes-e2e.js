@@ -223,13 +223,42 @@ const EnvironmentVariantMap = {
     name: 'Shadow environment',
     value: {environment: 'shadow-demo'},
   },
+  [AmpdocEnvironment.A4A_FIE]: {
+    name: 'AMPHTML ads FIE environment',
+    value: {environment: 'a4a-fie'},
+  },
+  [AmpdocEnvironment.A4A_INABOX]: {
+    name: 'AMPHTML ads inabox environment',
+    value: {environment: 'a4a-inabox'},
+  },
+  [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
+    name: 'AMPHTML ads inabox friendly frame environment',
+    value: {environment: 'a4a-inabox-friendly'},
+  },
+  [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
+    name: 'AMPHTML ads inabox safeframe environment',
+    value: {environment: 'a4a-inabox-safeframe'},
+  },
 };
 
-const defaultEnvironments = [
-  AmpdocEnvironment.SINGLE,
-  AmpdocEnvironment.VIEWER_DEMO,
-  AmpdocEnvironment.SHADOW_DEMO,
-];
+const envPresets = {
+  'ampdoc-preset': [
+    AmpdocEnvironment.SINGLE,
+    AmpdocEnvironment.VIEWER_DEMO,
+    AmpdocEnvironment.SHADOW_DEMO,
+  ],
+  'ampdoc-amp4ads-preset': [
+    AmpdocEnvironment.SINGLE,
+    AmpdocEnvironment.VIEWER_DEMO,
+    AmpdocEnvironment.SHADOW_DEMO,
+    // TODO(lannka): unskip this test. It passes locally but fails on Travis:
+    // https://travis-ci.org/ampproject/amphtml/jobs/570977015
+    // AmpdocEnvironment.A4A_FIE,
+    AmpdocEnvironment.A4A_INABOX,
+    AmpdocEnvironment.A4A_INABOX_FRIENDLY,
+    AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
+  ],
+};
 
 /**
  * Helper class to skip E2E tests in a specific AMP environment.
@@ -257,6 +286,11 @@ class ItConfig {
 
   skipViewerDemo() {
     this.skip = this.skip ? this.skip : this.env.environment == 'viewer-demo';
+    return this;
+  }
+
+  skipA4aFie() {
+    this.skip = this.skip ? this.skip : this.env.environment == 'a4a-fie';
     return this;
   }
 
@@ -288,7 +322,13 @@ function describeEnv(factory) {
    */
   const templateFunc = function(suiteName, spec, fn, describeFunc) {
     const fixture = factory(spec);
-    const environments = spec.environments || defaultEnvironments;
+    let environments = spec.environments || 'ampdoc-preset';
+    if (typeof environments === 'string') {
+      environments = envPresets[environments];
+    }
+    if (!environments) {
+      throw new Error('Invalid environment preset: ' + spec.environments);
+    }
     const variants = Object.create(null);
     environments.forEach(environment => {
       const o = EnvironmentVariantMap[environment];
