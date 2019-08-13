@@ -810,13 +810,6 @@ export class AmpStoryPage extends AMP.BaseElement {
               if (mediaEl.tagName === 'VIDEO') {
                 this.debounceToggleLoadingSpinner_(false);
 
-                // If the error came from the <video> and not from a <source>
-                // descendant.
-                if (mediaEl.error) {
-                  this.toggleErrorMessage_(true);
-                  return;
-                }
-
                 // If autoplay got rejected, display a "play" button. If
                 // autoplay was supported, dispay an error message.
                 this.isAutoplaySupported_().then(isAutoplaySupported => {
