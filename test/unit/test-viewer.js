@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {parseUrlDeprecated, removeFragment} from '../../src/url';
+
 import {Services} from '../../src/services';
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
@@ -22,7 +24,6 @@ import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-
 import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {parseUrlDeprecated, removeFragment} from '../../src/url';
 
 describes.sandboxed('Viewer', {}, () => {
   let windowMock;
@@ -56,6 +57,7 @@ describes.sandboxed('Viewer', {}, () => {
     const WindowApi = function() {};
     windowApi = new WindowApi();
     windowApi.Math = window.Math;
+    windowApi.crypto = window.crypto;
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
     windowApi.Promise = window.Promise;
