@@ -98,6 +98,7 @@ exports.closureCompile = async function(
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
+  del.sync('build/parsers');
   fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
@@ -120,14 +121,13 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/webcomponentsjs/',
     'node_modules/',
     'build/patched-module/',
-    // Generated code.
-    'extensions/amp-access/0.1/access-expr-impl.js',
   ];
   const baseExterns = [
     'build-system/amp.extern.js',
     'build-system/dompurify.extern.js',
     'build-system/event-timing.extern.js',
     'build-system/layout-jank.extern.js',
+    'build-system/layout-shift.extern.js',
     'build-system/performance-observer.extern.js',
     'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
@@ -159,12 +159,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   }
 
   return new Promise(function(resolve, reject) {
-    let entryModuleFilename;
-    if (entryModuleFilenames instanceof Array) {
-      entryModuleFilename = entryModuleFilenames[0];
-    } else {
-      entryModuleFilename = entryModuleFilenames;
-      entryModuleFilenames = [entryModuleFilename];
+    if (!(entryModuleFilenames instanceof Array)) {
+      entryModuleFilenames = [entryModuleFilenames];
     }
     const unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
