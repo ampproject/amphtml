@@ -88,8 +88,8 @@ const BABELIFY_GLOBAL_TRANSFORM = {
   ignore: devDependencies(), // Ignore devDependencies
 };
 
-const BABELIFY_REPLACE_PLUGIN = {
-  plugins: [conf.getReplacePlugin()],
+const BABELIFY_PLUGINS = {
+  plugins: [conf.getReplacePlugin(), conf.getJsonConfigurationPlugin()],
 };
 
 const hostname = argv.hostname || 'cdn.ampproject.org';
@@ -97,7 +97,7 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 /**
  * Compile all runtime targets in minified mode and drop them in dist/.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function compileAllMinifiedTargets() {
   if (isTravisBuild()) {
@@ -109,7 +109,7 @@ function compileAllMinifiedTargets() {
 /**
  * Compile all runtime targets in unminified mode and drop them in dist/.
  * @param {boolean} watch
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function compileAllUnminifiedTargets(watch) {
   if (isTravisBuild()) {
@@ -429,6 +429,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     {
       entries: entryPoint,
       debug: true,
+      fast: true,
     },
     options.browserifyOptions
   );
@@ -436,7 +437,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const babelifyOptions = Object.assign(
     {},
     BABELIFY_GLOBAL_TRANSFORM,
-    BABELIFY_REPLACE_PLUGIN
+    BABELIFY_PLUGINS
   );
 
   let bundler = browserify(browserifyOptions).transform(
@@ -611,7 +612,7 @@ function printNobuildHelp() {
  * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
  * Called at the end of "gulp build" and "gulp dist --fortesting".
  * @param {string} targetFile File to which the config is to be written.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function enableLocalTesting(targetFile) {
   const config = argv.config === 'canary' ? 'canary' : 'prod';
@@ -698,7 +699,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
  * Build ALP JS.
  *
  * @param {!Object} options
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function buildAlp(options) {
   options = options || {};
@@ -715,7 +716,7 @@ function buildAlp(options) {
  * Build Examiner JS.
  *
  * @param {!Object} options
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function buildExaminer(options) {
   return compileJs('./src/examiner/', 'examiner.js', './dist/', {
@@ -731,7 +732,7 @@ function buildExaminer(options) {
  * Build web worker JS.
  *
  * @param {!Object} options
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function buildWebWorker(options) {
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
@@ -772,7 +773,7 @@ function toPromise(readable) {
 
 module.exports = {
   BABELIFY_GLOBAL_TRANSFORM,
-  BABELIFY_REPLACE_PLUGIN,
+  BABELIFY_PLUGINS,
   WEB_PUSH_PUBLISHER_FILES,
   WEB_PUSH_PUBLISHER_VERSIONS,
   buildAlp,

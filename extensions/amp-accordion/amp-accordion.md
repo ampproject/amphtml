@@ -2,8 +2,8 @@
 $category@: layout
 formats:
   - websites
-  - email
   - ads
+  - email
 teaser:
   text: Provides a way for viewers to have a glance at the outline of the content and jump to a section of their choice at will.
 ---
@@ -92,17 +92,13 @@ The events below will be triggered on `section`s of `accordion`.
     <td>This event is triggered on the target <code>section</code> that changes from collapsed state to expanded state. Notice that calling <code>expand</code> on an already expanded <code>section</code> would not trigger this event.</td>
   </tr>
   <tr>
-    <td width="40%"><strong><strong><code>collapse</code></strong></td>
+    <td width="40%"><strong><code>collapse</code></strong></td>
     <td>This event is triggered on the target <code>section</code> that changes from expanded state to collapsed state. Notice that calling <code>collapse</code> on an already collapsed <code>section</code> would not trigger this event.</td>
   </tr>
 </table>
 
 ### Actions
 <table>
-  <tr>
-    <td width="40%"><strong><code>expand</code></strong></td>
-    <td>This event is triggered on the target <code>section</code> that changes from collapsed state to expanded state. Notice that calling <code>expand</code> on an already expanded <code>section</code> would not trigger this event.</td>
-  </tr>
   <tr>
     <td width="40%"><strong><code>toggle</code></strong></td>
     <td>This action toggles between the <code>expanded</code> and <code>collapsed</code> states of the <code>amp-accordion</code>. When called with no arguments, it will toggle all sections of the accordion. A single section may be specified with the <code>section</code> argument and the corresponding <code>id</code> as the value.</td>

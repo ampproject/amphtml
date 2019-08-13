@@ -165,6 +165,31 @@
   animation-play-state: running;
 }
 
+/* Ads */
+.i-amphtml-new-loader-ad-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.i-amphtml-new-loader-ad-label {
+  /*
+   * Make sure inherited font properties or those set via other selectors do
+   * not impact rendering of the label.
+   */
+  all: initial !important; 
+  display: inline-block !important;
+  padding: 0 0.4ch !important;
+  border: 1px solid currentColor !important;
+  border-radius: 2px !important;
+  color: currentColor !important;
+  font-size: 11px !important;
+  font-family: sans-serif !important;
+  line-height: 1.1 !important;
+}
+
 @keyframes i-amphtml-new-loader-fade-in {
   0% {
     opacity: 0;

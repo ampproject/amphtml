@@ -88,6 +88,14 @@ module.exports = {
         ) {
           return;
         }
+
+        if (
+          parent.type === 'Property' &&
+          parent.key === node &&
+          parent.parent.type === 'ObjectPattern'
+        ) {
+          return;
+        }
       }
 
       const message = [
@@ -221,6 +229,28 @@ module.exports = {
         const {name} = node.property;
         const {used} = current();
         used.add(name);
+      },
+
+      'ClassBody VariableDeclarator > ObjectPattern': function(node) {
+        if (shouldIgnoreFile()) {
+          return;
+        }
+
+        if (node.parent.init.type !== 'ThisExpression') {
+          return;
+        }
+
+        const {properties} = node;
+        for (let i = 0; i < properties.length; i++) {
+          const prop = properties[i];
+          if (prop.computed || !isPrivateName(prop.key)) {
+            continue;
+          }
+
+          const {name} = prop.key;
+          const {used} = current();
+          used.add(name);
+        }
       },
     };
   },

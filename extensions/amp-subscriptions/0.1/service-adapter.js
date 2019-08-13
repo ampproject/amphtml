@@ -59,6 +59,14 @@ export class ServiceAdapter {
   }
 
   /**
+   * gets Score factors for all platforms
+   * @return {!Promise<!JsonObject>}
+   */
+  getScoreFactorStates() {
+    return this.subscriptionService_.getScoreFactorStates();
+  }
+
+  /**
    * Delegates actions to local platform.
    * @param {string} action
    * @return {!Promise<boolean>}
