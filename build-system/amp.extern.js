@@ -408,7 +408,11 @@ var AmpElement;
 /** @return {!Signals} */
 AmpElement.prototype.signals = function() {};
 
-/** @return {string} */
+/**
+ * Must be externed to avoid Closure DCE'ing this function on
+ * custom-element.CustomAmpElement.prototype in single-pass compilation.
+ * @return {string}
+ */
 AmpElement.prototype.elementName = function() {};
 
 var Signals = class {};
