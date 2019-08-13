@@ -225,11 +225,14 @@ export class Bind {
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
 
-    /** @private @const {!Array} */
+    /**
+     * A queue of history replace/push to adhere to browser rate-limits.
+     * @private @const {!Array<{operation: string, data: !JsonObject, onPop: (!Function|undefined)}>}
+     */
     this.historyQueue_ = [];
 
     /** @private @const {!Function} */
-    this.scheduleFlushHistoryQueue_ = debounce(
+    this.flushHistoryQueueSoon_ = debounce(
       this.win_,
       () => this.flushHistoryQueue_(),
       1000
@@ -360,7 +363,7 @@ export class Bind {
         const data = this.getDataForHistory_();
         if (data) {
           this.historyQueue_.push({operation: 'replace', data});
-          this.scheduleFlushHistoryQueue_();
+          this.flushHistoryQueueSoon_();
         }
       });
     return this.setStatePromise_;
@@ -392,7 +395,7 @@ export class Bind {
         const data = this.getDataForHistory_();
         if (data) {
           this.historyQueue_.push({operation: 'push', data, onPop});
-          this.scheduleFlushHistoryQueue_();
+          this.flushHistoryQueueSoon_();
         }
       });
     });
@@ -405,13 +408,15 @@ export class Bind {
     for (let i = 0; i < this.historyQueue_.length; i++) {
       const {operation, data, onPop} = this.historyQueue_[i];
       if (operation === 'replace') {
-        // Collapse consecutive "replace" operations.
+        // Skip consecutive "replace" operations.
         const next = this.historyQueue_[i + 1];
         if (next && next.operation == 'replace') {
           continue;
         }
         this.history_.replace(data);
       } else if (operation === 'push') {
+        // TODO(choumx): As an optimization, a "push" can be merged with
+        // subsequent "replace" operations.
         this.history_.push(onPop, data);
       }
     }
