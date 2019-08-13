@@ -219,11 +219,24 @@ export class Bind {
     /** @const @private {!Deferred} */
     this.addMacrosDeferred_ = new Deferred();
 
-    /** @private {Promise} */
+    /** @private {?Promise} */
     this.setStatePromise_ = null;
 
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
+
+    /** @private {?Deferred} */
+    this.replaceHistoryDeferred_ = null;
+
+    /** @private {!Promise} */
+    this.pushHistoryPromise_ = Promise.resolve();
+
+    /** @private @const {!Function} */
+    this.debouncedReplaceHistory_ = debounce(
+      this.win_,
+      () => this.replaceHistory_(),
+      1000
+    );
 
     // Install debug tools.
     const g = self.AMP;
@@ -346,12 +359,11 @@ export class Bind {
     dev().info(TAG, 'setState:', expression);
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
       .then(result => this.setState(result))
-      .then(() => this.getDataForHistory_())
-      .then(data => {
-        // Don't bother calling History.replace with empty data.
-        if (data) {
-          this.history_.replace(data);
+      .then(() => {
+        if (!this.replaceHistoryDeferred_) {
+          this.replaceHistoryDeferred_ = new Deferred();
         }
+        this.debouncedReplaceHistory_();
       });
     return this.setStatePromise_;
   }
@@ -378,12 +390,42 @@ export class Bind {
       });
 
       const onPop = () => this.setState(oldState);
-      return this.setState(result)
-        .then(() => this.getDataForHistory_())
-        .then(data => {
-          this.history_.push(onPop, data);
-        });
+      return this.setState(result).then(() => this.pushHistory_(onPop));
     });
+  }
+
+  /**
+   * Replaces current history entry with the current state.
+   * @return {!Promise}
+   */
+  replaceHistory_() {
+    return this.pushHistoryPromise_
+      .then(() => this.getDataForHistory_())
+      .then(data => {
+        // Don't bother calling History.replace with empty data.
+        if (data) {
+          this.history_.replace(data);
+        }
+        devAssert(this.replaceHistoryDeferred_).promise.resolve();
+        this.replaceHistoryDeferred_ = null;
+      });
+  }
+
+  /**
+   * Pushes a new history entry with the current state.
+   * @param {!Function} onPop
+   * @return {!Promise}
+   */
+  pushHistory_(onPop) {
+    const waitFor = this.replaceHistoryDeferred_
+      ? this.replaceHistoryDeferred_.promise
+      : Promise.resolve();
+    this.pushHistoryPromise_ = waitFor
+      .then(() => this.getDataForHistory_())
+      .then(data => {
+        this.history_.push(onPop, data);
+      });
+    return this.pushHistoryPromise_;
   }
 
   /**
