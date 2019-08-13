@@ -667,8 +667,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
   /** @override */
   observe(element, listener) {
-    // this.polyfillAmpElementIfNeeded_(element);
-
     const id = getElementId(element);
     let trackedElement = this.trackedElements_[id];
     if (!trackedElement) {
@@ -768,33 +766,11 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     return intersectionObserverPolyfill;
   }
 
-  // /**
-  //  * @param {!Element} element
-  //  * @private
-  //  */
-  // polyfillAmpElementIfNeeded_(element) {
-  //   const {win} = this.ampdoc;
-  //   if (nativeIntersectionObserverSupported(win)) {
-  //     return;
-  //   }
-  //
-  //   // InOb polyfill requires partial AmpElement implementation.
-  //   if (typeof element.getLayoutBox == 'function') {
-  //     return;
-  //   }
-  //   element.getLayoutBox = () => {
-  //     return this.viewport_.getLayoutRect(element);
-  //   };
-  //   element.getOwner = () => null;
-  // }
-
   /**
    * @param {!Array<!IntersectionObserverEntry>} entries
    * @private
    */
   onIntersectionChanges_(entries) {
-    // console.log('asdf callback for ' + entries[0].target.id);
-    // console.log(entries[0].target.id);
     entries.forEach(change => {
       let intersection = change.intersectionRect;
       // IntersectionRect type now changed from ClientRect to DOMRectReadOnly.

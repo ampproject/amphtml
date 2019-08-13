@@ -280,3 +280,30 @@ export function cloneLayoutMarginsChangeDef(marginsChange) {
     right: marginsChange.right,
   };
 }
+
+/**
+ * Return position of element relative to top-left of document. Uses
+ * getBoundingClientRect(), which is expensive
+ * @param {Object} element
+ * @param {Object} hostViewport
+ * @return {Object}
+ */
+export function getClientRectRelativeDoc(element, hostViewport) {
+  const rect = element.getBoundingClientRect();
+  // const ampdoc = Services.ampdoc(element);
+  // const {scrollX, scrollY} = self.window; //ampdoc.win;
+  const {top: viewportTop, left: viewportLeft} = hostViewport;
+
+  // getBoundingClientRect() returns position relative to viewport. We want
+  // position relative to top-left of document so we add top/left of viewport
+  return {
+    top: rect.top + viewportTop,
+    bottom: rect.bottom + viewportTop,
+    left: rect.left + viewportLeft,
+    right: rect.right + viewportLeft,
+    height: rect.height,
+    width: rect.width,
+    x: rect.x,
+    y: rect.y,
+  };
+}

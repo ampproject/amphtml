@@ -20,7 +20,12 @@ import {SubscriptionApi} from './iframe-helper';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
 import {isArray, isFiniteNumber} from './types';
-import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
+import {
+  layoutRectLtwh,
+  moveLayoutRect,
+  rectIntersection,
+  getClientRectRelativeDoc,
+} from './layout-rect';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -294,10 +299,6 @@ export class IntersectionObserverPolyfill {
    * @param {!Element} element
    */
   observe(element) {
-    // console.log(element);
-    // Check the element is an AMP element.
-    // devAssert(element.getLayoutBox);
-
     // If the element already exists in current observeEntries, do nothing
     for (let i = 0; i < this.observeEntries_.length; i++) {
       if (this.observeEntries_[i].element === element) {
@@ -422,43 +423,9 @@ export class IntersectionObserverPolyfill {
   getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
     const {element} = state;
 
-    /**
-     * Return position of element relative to top-left of document. Uses
-     * getBoundingClientRect(), which is expensive
-     * @param {Object} element
-     * @param {Object} hostViewport
-     * @return {Object}
-     */
-    function getAbsoluteClientRect(element, hostViewport) {
-      const rect = element.getBoundingClientRect();
-      // const ampdoc = Services.ampdoc(element);
-      // const {scrollX, scrollY} = self.window; //ampdoc.win;
-      const {top: viewportTop, left: viewportLeft} = hostViewport;
-
-      // getBoundingClientRect() returns position relative to viewport. We want
-      // position relative to top-left of document so we add top/left of viewport
-      return {
-        top: rect.top + viewportTop,
-        bottom: rect.bottom + viewportTop,
-        left: rect.left + viewportLeft,
-        right: rect.right + viewportLeft,
-        height: rect.height,
-        width: rect.width,
-        x: rect.x,
-        y: rect.y,
-      };
-    }
-
-    const elementRect = element.getLayoutBox //element.classList.contains('i-amphtml-element')
+    const elementRect = element.getLayoutBox
       ? element.getLayoutBox()
-      : getAbsoluteClientRect(element, hostViewport);
-
-    // if (!element.classList.contains('i-amphtml-element')) {
-      // console.log('asdf');
-      // console.log('viewport for ' + element.id);
-      // console.log(hostViewport);
-      // console.log(elementRect);
-    // }
+      : getClientRectRelativeDoc(element, hostViewport);
 
     const owner = element.getOwner && element.getOwner();
     const ownerRect = owner && owner.getLayoutBox();
