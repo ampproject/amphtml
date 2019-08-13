@@ -20,6 +20,7 @@ const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
+const sleep = require('sleep-promise');
 const {
   buildExtensions,
   extensionAliasFilePath,
@@ -58,7 +59,7 @@ const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../internal-version');
 
-const {green, cyan} = colors;
+const {green, cyan, bold, yellow} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
 const babel = require('@babel/core');
@@ -98,6 +99,13 @@ function transferSrcsToTempDir() {
  * @return {!Promise}
  */
 async function dist() {
+  if (argv.pseudo_names) {
+    log(
+      bold(yellow('--pseudo_names is deprecated, Please use --debug instead.'))
+    );
+    // Give a 3 second delay for user to see the warning.
+    await sleep(3000);
+  }
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
