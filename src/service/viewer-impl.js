@@ -220,12 +220,13 @@ export class Viewer {
     /** @private {?Promise<string>} */
     this.viewerOrigin_ = null;
 
+    const referrerParam = ampdoc.getParam('referrer');
     /** @private {string} */
     this.unconfirmedReferrerUrl_ =
       this.isEmbedded() &&
-      ampdoc.getParam('referrer') != null &&
+      referrerParam != null &&
       this.isTrustedAncestorOrigins_() !== false
-        ? devAssert(ampdoc.getParam('referrer'))
+        ? referrerParam
         : this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */

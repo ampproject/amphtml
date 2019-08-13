@@ -747,7 +747,7 @@ function extractSingleDocParams(win, initParams) {
         parseQueryString(win.name.substring(PARAMS_SENTINEL.length))
       );
     }
-    if (win.location.hash) {
+    if (win.location && win.location.hash) {
       Object.assign(params, parseQueryString(win.location.hash));
     }
   }
