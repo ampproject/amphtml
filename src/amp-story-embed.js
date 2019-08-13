@@ -18,6 +18,15 @@
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
  */
-export class AmpStoryEmbed {
-  
+export class AmpStoryEmbed extends HTMLElement {
+  /** @constructor */
+  constructor() {
+    super();
+    console.log('embed!');
+  }
+
+  /** @override */
+  connectedCallback() {
+    console.log('connected');
+  }
 }
