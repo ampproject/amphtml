@@ -559,13 +559,13 @@ export class AmpSelector extends AMP.BaseElement {
     return this.getElementsSizes_().then(sizes => {
       const originalIndex = this.focusedIndex_;
 
-      // For Home/End keys, start from beginning/end, respectively
+      // For Home/End keys, start at end/beginning respectively and wrap around
       switch (event.key) {
         case Keys.HOME:
-          this.focusedIndex_ = -1;
+          this.focusedIndex_ = this.elements_.length - 1;
           break;
         case Keys.END:
-          this.focusedIndex_ = this.elements_.length;
+          this.focusedIndex_ = 0;
           break;
       }
 
