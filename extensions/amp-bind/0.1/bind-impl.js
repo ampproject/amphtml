@@ -225,16 +225,13 @@ export class Bind {
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
 
-    /** @private {?Deferred} */
-    this.replaceHistoryDeferred_ = null;
-
-    /** @private {!Promise} */
-    this.pushHistoryPromise_ = Promise.resolve();
+    /** @private @const {!Array} */
+    this.historyQueue_ = [];
 
     /** @private @const {!Function} */
-    this.debouncedReplaceHistory_ = debounce(
+    this.scheduleFlushHistoryQueue_ = debounce(
       this.win_,
-      () => this.replaceHistory_(),
+      () => this.flushHistoryQueue_(),
       1000
     );
 
@@ -360,10 +357,11 @@ export class Bind {
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
       .then(result => this.setState(result))
       .then(() => {
-        if (!this.replaceHistoryDeferred_) {
-          this.replaceHistoryDeferred_ = new Deferred();
+        const data = this.getDataForHistory_();
+        if (data) {
+          this.historyQueue_.push({operation: 'replace', data});
+          this.scheduleFlushHistoryQueue_();
         }
-        this.debouncedReplaceHistory_();
       });
     return this.setStatePromise_;
   }
@@ -390,42 +388,34 @@ export class Bind {
       });
 
       const onPop = () => this.setState(oldState);
-      return this.setState(result).then(() => this.pushHistory_(onPop));
+      return this.setState(result).then(() => {
+        const data = this.getDataForHistory_();
+        if (data) {
+          this.historyQueue_.push({operation: 'push', data, onPop});
+          this.scheduleFlushHistoryQueue_();
+        }
+      });
     });
   }
 
   /**
-   * Replaces current history entry with the current state.
-   * @return {!Promise}
+   * @private
    */
-  replaceHistory_() {
-    return this.pushHistoryPromise_
-      .then(() => this.getDataForHistory_())
-      .then(data => {
-        // Don't bother calling History.replace with empty data.
-        if (data) {
-          this.history_.replace(data);
+  flushHistoryQueue_() {
+    for (let i = 0; i < this.historyQueue_.length; i++) {
+      const {operation, data, onPop} = this.historyQueue_[i];
+      if (operation === 'replace') {
+        // Collapse consecutive "replace" operations.
+        const next = this.historyQueue_[i + 1];
+        if (next && next.operation == 'replace') {
+          continue;
         }
-        devAssert(this.replaceHistoryDeferred_).promise.resolve();
-        this.replaceHistoryDeferred_ = null;
-      });
-  }
-
-  /**
-   * Pushes a new history entry with the current state.
-   * @param {!Function} onPop
-   * @return {!Promise}
-   */
-  pushHistory_(onPop) {
-    const waitFor = this.replaceHistoryDeferred_
-      ? this.replaceHistoryDeferred_.promise
-      : Promise.resolve();
-    this.pushHistoryPromise_ = waitFor
-      .then(() => this.getDataForHistory_())
-      .then(data => {
+        this.history_.replace(data);
+      } else if (operation === 'push') {
         this.history_.push(onPop, data);
-      });
-    return this.pushHistoryPromise_;
+      }
+    }
+    this.historyQueue_.length = 0;
   }
 
   /**
