@@ -121,7 +121,7 @@ export const RTC_VENDORS = {
       'PUBLISHER_SUB_ID',
       'LINE_ITEM_RANGES',
       'CONSENT_STATE',
-      'CONSENT_STRING'
+      'CONSENT_STRING',
     ],
     disableKeyAppend: true,
   },
