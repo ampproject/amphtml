@@ -15,6 +15,7 @@
  */
 
 import {BrowserController, RequestBank} from '../../testing/test-helper';
+
 import {parseQueryString} from '../../src/url';
 
 describe('amp-analytics', function() {

@@ -265,6 +265,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Client ID](#client-id) | `CLIENT_ID` | `${clientId}` |
 | [Extra URL Parameters](#extra-url-parameters) | N/A | `${extraUrlParams}` |
 | [Page View ID](#page-view-id) | `PAGE_VIEW_ID` | `${pageViewId}` |
+| [Page View ID 64](#page-view-id-64) | `PAGE_VIEW_ID_64` | `${pageViewId64}` |
 | [Query Parameter](#query-parameter) | `QUERY_PARAM` | `${queryParam}` |
 | [Random](#random) | `RANDOM` | `${random}` |
 | [Request Count](#request-count) | N/A | `${requestCount}` |
@@ -900,6 +901,18 @@ Provides a string that is intended to be random and likely to be unique per URL,
   ```
 * **amp-analytics variable**: `${pageViewId}`
   * Example value: `978`
+
+#### Page View ID 64
+
+Provides a string that is intended to be random with a high entropy and likely to be unique per URL, user and day.
+
+* **platform variable**: `PAGE_VIEW_ID_64`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?pid=PAGE_VIEW_ID_64"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${pageViewId64}`
+  * Example value: `U6XEpUs3yaeQyR2DKATQH1pTZ6kg140fvuLbtl5nynb`
 
 #### Query Parameter
 
