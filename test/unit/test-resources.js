@@ -1792,6 +1792,9 @@ describe('Resources changeSize', () => {
     resources = new Resources(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
     resources.win = {
+      location: {
+        href: 'https://example.org/doc1',
+      },
       getComputedStyle: el => {
         return el.fakeComputedStyle
           ? el.fakeComputedStyle
@@ -3339,7 +3342,7 @@ describes.realWin('Resources mutateElement and collapse', {amp: true}, env => {
     sandbox
       .stub(resources, 'scheduleChangeSize_')
       .callsFake(
-        (resource, newHeight, newWidth, newMargins, force, callback) => {
+        (resource, newHeight, newWidth, newMargins, event, force, callback) => {
           callback(true);
         }
       );
@@ -3351,7 +3354,7 @@ describes.realWin('Resources mutateElement and collapse', {amp: true}, env => {
     sandbox
       .stub(resources, 'scheduleChangeSize_')
       .callsFake(
-        (resource, newHeight, newWidth, newMargins, force, callback) => {
+        (resource, newHeight, newWidth, newMargins, event, force, callback) => {
           callback(false);
         }
       );
