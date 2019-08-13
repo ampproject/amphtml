@@ -18,7 +18,7 @@ import {Deferred, tryResolve} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
-import {dev, duplicateErrorIfNecessary} from '../log';
+import {dev, devAssert, duplicateErrorIfNecessary} from '../log';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -225,7 +225,7 @@ export class Viewer {
       this.isEmbedded() &&
       ampdoc.getParam('referrer') != null &&
       this.isTrustedAncestorOrigins_() !== false
-        ? ampdoc.getParam('referrer')
+        ? devAssert(ampdoc.getParam('referrer'))
         : this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
@@ -260,14 +260,14 @@ export class Viewer {
 
     /** @const @private {!Promise<string>} */
     this.viewerUrl_ = new Promise(resolve => {
-      /** @const {string} */
+      /** @const {?string} */
       const viewerUrlOverride = ampdoc.getParam('viewerUrl');
       if (this.isEmbedded() && viewerUrlOverride) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
         this.isTrustedViewer().then(isTrusted => {
           if (isTrusted) {
-            this.resolvedViewerUrl_ = viewerUrlOverride;
+            this.resolvedViewerUrl_ = devAssert(viewerUrlOverride);
           } else {
             dev().expectedError(
               TAG_,
@@ -380,7 +380,7 @@ export class Viewer {
    * Returns the value of a viewer's startup parameter with the specified
    * name or "undefined" if the parameter wasn't defined at startup time.
    * @param {string} name
-   * @return {string|undefined}
+   * @return {?string}
    * @export
    */
   getParam(name) {
@@ -538,7 +538,7 @@ export class Viewer {
 
   /**
    * Sets the viewer defined visibility state.
-   * @param {string|undefined} state
+   * @param {?string|undefined} state
    * @private
    */
   setVisibilityState_(state) {

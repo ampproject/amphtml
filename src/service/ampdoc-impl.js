@@ -62,22 +62,9 @@ export class AmpDocService {
     /** @private {?AmpDoc} */
     this.singleDoc_ = null;
     if (isSingleDoc) {
-      // Params can be passed via iframe hash/name with hash taking precedence.
-      const params = map();
-      if (opt_initParams) {
-        Object.assign(params, opt_initParams);
-      } else {
-        if (win.name && win.name.indexOf(PARAMS_SENTINEL) == 0) {
-          Object.assign(
-            params,
-            parseQueryString(win.name.substring(PARAMS_SENTINEL.length))
-          );
-        }
-        if (win.location.hash) {
-          Object.assign(params, parseQueryString(win.location.hash));
-        }
-      }
-      this.singleDoc_ = new AmpDocSingle(win, {params});
+      this.singleDoc_ = new AmpDocSingle(win, {
+        params: extractSingleDocParams(win, opt_initParams),
+      });
       win.document[AMPDOC_PROP] = this.singleDoc_;
     }
 
@@ -740,6 +727,31 @@ export class AmpDocFie extends AmpDoc {
     this.readyResolver_();
     this.readyResolver_ = undefined;
   }
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Object<string, string>|undefined} initParams
+ * @return {!Object<string, string>}
+ */
+function extractSingleDocParams(win, initParams) {
+  const params = map();
+  if (initParams) {
+    // The initialization params take the highest precedence.
+    Object.assign(params, initParams);
+  } else {
+    // Params can be passed via iframe hash/name with hash taking precedence.
+    if (win.name && win.name.indexOf(PARAMS_SENTINEL) == 0) {
+      Object.assign(
+        params,
+        parseQueryString(win.name.substring(PARAMS_SENTINEL.length))
+      );
+    }
+    if (win.location.hash) {
+      Object.assign(params, parseQueryString(win.location.hash));
+    }
+  }
+  return params;
 }
 
 /**

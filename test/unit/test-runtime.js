@@ -1002,18 +1002,17 @@ describes.realWin(
     let win;
     let extensions;
     let extensionsMock;
-    let ampdocServiceMock;
+    let ampdocService;
 
     beforeEach(() => {
       win = env.win;
       extensions = env.extensions;
       extensionsMock = sandbox.mock(extensions);
-      ampdocServiceMock = sandbox.mock(env.ampdocService);
+      ampdocService = env.ampdocService;
     });
 
     afterEach(() => {
       extensionsMock.verify();
-      ampdocServiceMock.verify();
     });
 
     describe('attachShadowDoc', () => {
@@ -1023,7 +1022,6 @@ describes.realWin(
       let importDoc;
       let hostElement;
       let ampdoc;
-      let shadowDocOptions;
 
       beforeEach(() => {
         deactivateChunking();
@@ -1034,25 +1032,17 @@ describes.realWin(
         createShadowRoot(hostElement);
         ampdoc = null;
 
-        ampdocServiceMock
-          .expects('installShadowDoc')
-          .withExactArgs(
-            docUrl,
-            sinon.match(arg => arg == getShadowRoot(hostElement)),
-            sinon.match(arg => {
-              shadowDocOptions = arg;
-              return 'params' in shadowDocOptions;
-            })
-          )
+        sandbox
+          .stub(ampdocService, 'installShadowDoc')
           .callsFake((url, shadowRoot, options) => {
+            expect(url).to.equal(docUrl);
+            expect(shadowRoot).to.equal(getShadowRoot(hostElement));
             return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
-          })
-          .atLeast(0);
-        ampdocServiceMock
-          .expects('getAmpDoc')
-          .withExactArgs(sinon.match(arg => arg == getShadowRoot(hostElement)))
-          .callsFake(() => ampdoc)
-          .atLeast(0);
+          });
+        sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
+          expect(node).to.equal(getShadowRoot(hostElement));
+          return ampdoc;
+        });
       });
 
       it('should install services and styles', () => {
@@ -1106,7 +1096,6 @@ describes.realWin(
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
           'test1': '12',
         });
-        expect(shadowDocOptions.params).to.deep.equal({'test1': '12'});
         expect(ampdoc.getParam('test1')).to.equal('12');
         const viewer = getServiceForDoc(ampdoc, 'viewer');
         expect(viewer.getParam('test1')).to.equal('12');
@@ -1397,7 +1386,6 @@ describes.realWin(
         let ampdoc;
         let shadowDoc;
         let writer;
-        let shadowDocOptions;
 
         beforeEach(() => {
           deactivateChunking();
@@ -1406,27 +1394,17 @@ describes.realWin(
           createShadowRoot(hostElement);
           ampdoc = null;
 
-          ampdocServiceMock
-            .expects('installShadowDoc')
-            .withExactArgs(
-              docUrl,
-              sinon.match(arg => arg == getShadowRoot(hostElement)),
-              sinon.match(arg => {
-                shadowDocOptions = arg;
-                return 'params' in shadowDocOptions;
-              })
-            )
+          sandbox
+            .stub(ampdocService, 'installShadowDoc')
             .callsFake((url, shadowRoot, options) => {
+              expect(url).to.equal(docUrl);
+              expect(shadowRoot).to.equal(getShadowRoot(hostElement));
               return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
-            })
-            .atLeast(0);
-          ampdocServiceMock
-            .expects('getAmpDoc')
-            .withExactArgs(
-              sinon.match(arg => arg == getShadowRoot(hostElement))
-            )
-            .callsFake(() => ampdoc)
-            .atLeast(0);
+            });
+          sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
+            expect(node).to.equal(getShadowRoot(hostElement));
+            return ampdoc;
+          });
         });
 
         it('should install services and styles', () => {
@@ -1804,8 +1782,11 @@ describes.realWin(
       },
       (name, isStubbedDocumentContains) => {
         let doc1, doc2, doc3;
+        let ampdocServiceMock;
 
         beforeEach(() => {
+          ampdocServiceMock = sandbox.mock(env.ampdocService);
+
           if (isStubbedDocumentContains) {
             // Some browsers implement document.contains wrong, and it returns
             // `false` even when this is incorrect. Repeat these tests with the
@@ -1816,6 +1797,10 @@ describes.realWin(
           doc1 = attach('https://example.org/doc1');
           doc2 = attach('https://example.org/doc2');
           doc3 = attach('https://example.org/doc3');
+        });
+
+        afterEach(() => {
+          ampdocServiceMock.verify();
         });
 
         function attach(docUrl) {
