@@ -111,11 +111,13 @@ export class ProgressBar {
 
     /**
      * Ellipsis are applied when a story contains more pages than MAX_SEGMENTS.
+     * Tail corresponds to the ellipsis on the opposite direction of navigation.
+     * Head corresponds to the ellipsis towards the side of navigation.
      * @private {!Object}
      */
     this.ellipsis_ = {
-      upperIndexTail: 0,
-      upperIndexHead: 0,
+      upperIndexTail: 0, // Index furthest from the active index in the tail ellipsis.
+      upperIndexHead: 0, // Index furthest from the active index in the head ellipsis.
       headIndices: [],
       tailIndices: [],
     };
@@ -170,8 +172,7 @@ export class ProgressBar {
 
         if (
           this.segmentCount_ > MAX_SEGMENTS &&
-          this.storeService_.get(StateProperty.UI_STATE) !==
-            UIType.DESKTOP_PANELS
+          this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE
         ) {
           this.initializeOverflowProgressBar_();
         } else {
@@ -276,9 +277,7 @@ export class ProgressBar {
    * @param {boolean} force
    */
   checkIndexForOverflow_(previousSegmentIndex, segmentIndex, force = false) {
-    if (
-      this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP_PANELS
-    ) {
+    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType.MOBILE) {
       return;
     }
 
@@ -497,12 +496,11 @@ export class ProgressBar {
   }
 
   /**
-   * Sets size for the segments or 100% width if not specified.
+   * Sets size for the segments.
    * @param {?number} width
    */
-  setSegmentSize_(width = null) {
+  setSegmentSize_(width) {
     const segmentWidth = width ? width + 'px' : '100%';
-
     this.win_.document.documentElement.setAttribute(
       'style',
       this.win_.document.documentElement.getAttribute('style') +
