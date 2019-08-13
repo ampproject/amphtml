@@ -94,6 +94,7 @@ extensions = [].concat.apply([], extensions);
 const jsFilesToWrap = [];
 
 exports.getFlags = function(config) {
+  const debug = !!(argv.debug || argv.pseudo_names);
   config.define.push('SINGLE_FILE_COMPILATION=true');
   config.define.push(`VERSION=${internalRuntimeVersion}`);
   /* eslint "google-camelcase/google-camelcase": 0 */
@@ -124,7 +125,7 @@ exports.getFlags = function(config) {
     jscomp_warning: ['checkTypes', 'checkVars', 'moduleLoad'],
     jscomp_error: ['const', 'constantProperty', 'globalThis'],
     hide_warnings_for: config.hideWarningsFor,
-    debug: !!argv.pseudo_names,
+    debug,
   };
   if (argv.pretty_print) {
     flags.formatting = 'PRETTY_PRINT';

@@ -444,7 +444,7 @@ module.exports = {
 
 dist.description = 'Build production binaries';
 dist.flags = {
-  pseudo_names:
+  debug:
     '  Compiles with readable names. ' +
     'Great for profiling and debugging production code.',
   pretty_print:

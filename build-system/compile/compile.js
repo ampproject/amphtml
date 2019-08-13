@@ -106,6 +106,7 @@ function cleanupBuildDir() {
 exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
+  const debug = !!(argv.debug || argv.pseudo_names);
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -295,10 +296,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       jscomp_off: [],
       define,
       hide_warnings_for: hideWarningsFor,
-      debug: !!argv.pseudo_names,
+      debug,
     };
-    if (argv.pseudo_names) {
-      // Some optimizations get turned off when pseudo_names is on.
+    if (debug) {
+      // Some optimizations get turned off when debug is on.
       // This causes some errors caused by the babel transformations
       // that we apply like unreachable code because we turn a conditional
       // falsey. (ex. is IS_DEV transformation which causes some conditionals
