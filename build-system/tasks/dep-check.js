@@ -27,6 +27,7 @@ const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
 const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
+const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {css} = require('./css');
 const {cyan, red, yellow} = require('ansi-colors');
@@ -204,7 +205,10 @@ function getGraph(entryModule) {
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  const bundler = browserify(entryModule, {debug: true}).transform(
+  const bundler = browserify(entryModule, {
+    debug: true,
+    fast: true,
+  }).transform(
     babelify,
     Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {compact: false})
   );
@@ -296,6 +300,7 @@ function runRules(modules) {
 async function depCheck() {
   const handlerProcess = createCtrlcHandler('dep-check');
   await css();
+  await compileJison();
   if (!isTravisBuild()) {
     log('Checking dependencies...');
   }

@@ -30,13 +30,6 @@ limitations under the License.
 
 <table>
   <tr>
-    <td><strong>Availability</strong></td>
-    <td>
-      <a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental#origin-trials">Origin Trial</a><br/>
-      This component is available under Origin Trial. To sign up for an Origin Trial please sign up at bit.ly/amp-script-trial.
-    </td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
       <div>
@@ -67,10 +60,6 @@ limitations under the License.
 
 The `amp-script` component allows you run custom JavaScript to render UI elements, such as a React component.
 
-{% call callout('Important', type='caution') %}
-`amp-script` is in active development and under [experimental availability](https://amp.dev/documentation/guides-and-tutorials/learn/experimental). It's subject to breaking API changes and should not yet be used in production.
-{% endcall %}
-
 ### A simple example
 
 An `amp-script` element can load a JavaScript file from a URL:
@@ -97,10 +86,6 @@ An `amp-script` element can load a JavaScript file from a URL:
   });
 </script>
 ```
-
-{% call callout('Tip', type='success') %}
-Enable the experiment via `AMP.toggleExperiment('amp-script')` in dev console.
-{% endcall %}
 
 ### How does it work?
 
@@ -142,7 +127,7 @@ The rules for mutations are as follows:
 
 1. Mutations are always accepted for five seconds after a user gesture.
 2. The five second interval is extended if the author script performs a `fetch()` as a result of the user gesture.
-3. Mutations are always accepted for `amp-script` elements with `[layout!="container"]` and `height < 300px`.
+3. Mutations are always accepted for `amp-script` elements with [`[layout!="container"]`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute) and `height < 300px`.
 
 #### Security features
 

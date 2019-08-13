@@ -113,7 +113,7 @@ exports.getFlags = function(config) {
     // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
     language_out: config.language_out || 'ES5',
-    module_output_path_prefix: config.writeTo || 'out/',
+    chunk_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
     process_common_js_modules: true,
     externs: config.externs,
@@ -210,7 +210,7 @@ exports.getBundleFlags = function(g) {
         name,
       };
     }
-    // And now build --module $name:$numberOfJsFiles:$bundleDeps
+    // And now build --chunk $name:$numberOfJsFiles:$bundleDeps
     let cmd = name + ':' + bundle.modules.length;
     const bundleDeps = [];
     if (!isMain) {
@@ -229,7 +229,7 @@ exports.getBundleFlags = function(g) {
         }
       }
     }
-    flagsArray.push('--module', cmd);
+    flagsArray.push('--chunk', cmd);
     if (bundleKeys.length > 1) {
       function massageWrapper(w) {
         return w.replace('<%= contents %>', '%s');
@@ -244,7 +244,7 @@ exports.getBundleFlags = function(g) {
         const configEntry = getExtensionBundleConfig(originalName);
         const marker = configEntry ? SPLIT_MARKER : '';
         flagsArray.push(
-          '--module_wrapper',
+          '--chunk_wrapper',
           name +
             ':' +
             massageWrapper(
@@ -311,6 +311,7 @@ exports.getGraph = function(entryModules, config) {
     debug: true,
     deps: true,
     detectGlobals: false,
+    fast: true,
   })
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.

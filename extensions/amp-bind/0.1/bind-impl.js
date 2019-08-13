@@ -1355,6 +1355,11 @@ export class Bind {
             // when a child option[selected] attribute changes.
             this.updateSelectForSafari_(element, property, newValue);
           }
+        } else if (typeof newValue === 'object' && newValue !== null) {
+          // If newValue is an object or array (e.g. amp-list[src] binding),
+          // don't bother updating the element since attribute values like
+          // "[Object object]" have no meaning in the DOM.
+          mutated = true;
         } else if (newValue !== oldValue) {
           mutated = this.rewriteAttributes_(
             element,

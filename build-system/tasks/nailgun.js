@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 const sleep = require('sleep-promise');
@@ -74,12 +75,16 @@ function maybeReplaceDefaultCompiler() {
  * @param {boolean} detached
  */
 async function startNailgunServer(port, detached) {
+  await maybeGenerateRunner(port);
+
+  if (argv.disable_nailgun) {
+    return;
+  }
+
   nailgunRunnerReplacer = maybeReplaceDefaultCompiler();
   if (!nailgunRunnerReplacer) {
     return;
   }
-
-  await maybeGenerateRunner(port);
 
   // Start up the nailgun server after cleaning up old instances (if any)
   const customRunner = require.resolve(`../runner/dist/${port}/runner.jar`);
@@ -131,6 +136,10 @@ async function startNailgunServer(port, detached) {
  * @param {string} port
  */
 async function stopNailgunServer(port) {
+  if (argv.disable_nailgun) {
+    return;
+  }
+
   if (nailgunRunnerReplacer) {
     nailgunRunnerReplacer.restore();
   }

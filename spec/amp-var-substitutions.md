@@ -141,6 +141,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 * [Device and Browser](#device-and-browser)
 * [Interaction](#interaction)
 * [Visibility](#visibility)
+* [AMP Components](#amp-components)
 * [Miscellaneous](#miscellaneous)
 
 ### Page and Content
@@ -245,6 +246,15 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Timer Duration](#timer-duration) | N/A | `${timerDuration}` |
 | [Timer Start Time](#timer-start) | N/A | `${timerStart}` |
 
+### AMP Components
+| Variable Name | Platform Variable | amp-analytics Variable | Required AMP Components
+|---------------|-------------------|------------------------|-----------------------|
+| [Variant](#experiment-variant) | `VARIANT` | N/A | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md) |
+| [Variants](#experiment-variants) | `VARIANTS` | N/A | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md) |
+| [Geolocation](#geolocation) | `AMP_GEO` | `${ampGeo}` | [`<amp-geo>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md) |
+| [User Location](#user-location) | `AMP_USER_LOCATION` | `${ampUserLocation}` | [`<amp-user-location>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-location/amp-user-location.md) |
+
+
 ### Miscellaneous
 
 |  Variable Name | Platform Variable  | amp-analytics Variable |
@@ -254,9 +264,8 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Background State](#background-state) | `BACKGROUND_STATE` | `${backgroundState}` |
 | [Client ID](#client-id) | `CLIENT_ID` | `${clientId}` |
 | [Extra URL Parameters](#extra-url-parameters) | N/A | `${extraUrlParams}` |
-| [Geolocation](#geolocation) | `AMP_GEO` | `${ampGeo}` |
-| [User Location](#user-location) | `AMP_USER_LOCATION` | `${ampUserLocation}` |
 | [Page View ID](#page-view-id) | `PAGE_VIEW_ID` | `${pageViewId}` |
+| [Page View ID 64](#page-view-id-64) | `PAGE_VIEW_ID_64` | `${pageViewId64}` |
 | [Query Parameter](#query-parameter) | `QUERY_PARAM` | `${queryParam}` |
 | [Random](#random) | `RANDOM` | `${random}` |
 | [Request Count](#request-count) | N/A | `${requestCount}` |
@@ -595,6 +604,21 @@ Provides the message of the error that triggered an user error event. This varia
 * **amp-analytics variable**: `${errorMessage}`
   * Example value: `Invalid multi-size data format`
 
+#### Experiment Variant
+
+Provide the allocated variant information from the `<amp-experiment>` component. The allocated variant name is returned. The variable resolves to string `none` if no variant is allocated.
+
+* **platform variable**: `VARIANT(experiment)`
+* **amp-analytics variable**: N/A
+
+#### Experiment Variants
+
+Provide the all variants information from the `<amp-experiment>` component. The variable will be serialized in the following format.
+
+* **platform variable**: `VARIANT(experiment)`
+* **amp-analytics variable**: N/A
+  * Example value: `{experiment1}.{variant}!{experiment2}.{variant}...`
+
 #### Error Name
 
 Provides the name of the error that triggered an user error event. This variable is only available in a `trigger` of type `user-error`
@@ -877,6 +901,18 @@ Provides a string that is intended to be random and likely to be unique per URL,
   ```
 * **amp-analytics variable**: `${pageViewId}`
   * Example value: `978`
+
+#### Page View ID 64
+
+Provides a string that is intended to be random with a high entropy and likely to be unique per URL, user and day.
+
+* **platform variable**: `PAGE_VIEW_ID_64`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?pid=PAGE_VIEW_ID_64"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${pageViewId64}`
+  * Example value: `U6XEpUs3yaeQyR2DKATQH1pTZ6kg140fvuLbtl5nynb`
 
 #### Query Parameter
 

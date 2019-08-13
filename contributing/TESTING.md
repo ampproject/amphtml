@@ -69,7 +69,8 @@ Command                                                                 | Descri
 `gulp build --fortesting`                                               | Builds the AMP library and sets the `test` field in `AMP_CONFIG` to `true`.
 `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.
 `gulp clean`                                                            | Removes build output.
-`gulp css`                                                              | Recompiles css to build directory and builds the embedded css into js files for the AMP library.
+`gulp css`                                                              | Recompiles css to the build directory and builds the embedded css into js files for the AMP library.
+`gulp compile-jison`                                                    | Compiles jison parsers for extensions to build directory.
 `gulp watch`                                                            | Watches for changes in files, re-builds.
 `gulp watch --extensions=amp-foo,amp-bar`                               | Watches for changes in files, re-builds only the listed extensions.
 `gulp watch --extensions=minimal_set`                                   | Watches for changes in files, re-builds only the extensions needed to load `article.amp.html`.
@@ -257,7 +258,7 @@ If a Percy test flakes and you would like to trigger a rerun, you can't do that 
 
 ### Running Visual Diff Tests Locally
 
-You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<org>/<project>/settings`. Once the environment variables are set up, you can run the AMP visual diff tests as described below.
+You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<org>/<project>/integrations`. Once the environment variables are set up, you can run the AMP visual diff tests as described below.
 
 First, build the AMP runtime and run the gulp task that invokes the visual diff script:
 ```
