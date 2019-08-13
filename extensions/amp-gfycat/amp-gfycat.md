@@ -41,7 +41,7 @@ Displays a <a href="https://gfycat.com/">Gfycat</a> video GIF.
       <ul>
       <li><a href="https://amp.dev/documentation/examples/components/amp-gfycat/">Annotated code example for amp-gfycat</a></li>
       <li>Other example: <a href="https://github.com/ampproject/amphtml/blob/master/examples/gfycat.amp.html">Source</a>,
-      <a href="https://cdn.rawgit.com/ampproject/amphtml/master/examples/gfycat.amp.html">Rendered</a></li>
+      <a href="https://raw.githack.com/ampproject/amphtml/master/examples/gfycat.amp.html">Rendered</a></li>
     </ul>
     </td>
   </tr>
