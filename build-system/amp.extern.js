@@ -408,6 +408,9 @@ var AmpElement;
 /** @return {!Signals} */
 AmpElement.prototype.signals = function() {};
 
+/** @return {string} */
+AmpElement.prototype.elementName = function() {};
+
 var Signals = class {};
 /**
   * @param {string} unusedName

@@ -99,15 +99,12 @@ function isTemplateTagSupported() {
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {string} name The name of the custom element.
- * @return {!Function} The custom element class.
+ * @return {function(new:AmpElement)} The custom element class.
  */
 export function createCustomElementClass(win, name) {
   const baseCustomElement = /** @type {function(new:HTMLElement)} */ (createBaseCustomElementClass(
     win
   ));
-  /**
-   * @extends {HTMLElement}
-   */
   class CustomAmpElement extends baseCustomElement {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
@@ -125,14 +122,14 @@ export function createCustomElementClass(win, name) {
       return name;
     }
   }
-  return CustomAmpElement;
+  return /** @type {function(new:AmpElement)} */ (CustomAmpElement);
 }
 
 /**
  * Creates a base custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
- * @return {!Function}
+ * @return {function(new:HTMLElement)}
  */
 function createBaseCustomElementClass(win) {
   if (win.BaseCustomElementClass) {
@@ -1895,7 +1892,7 @@ function createBaseCustomElementClass(win) {
     }
   }
   win.BaseCustomElementClass = BaseCustomElement;
-  return win.BaseCustomElementClass;
+  return /** @type {function(new:HTMLElement)} */ (win.BaseCustomElementClass);
 }
 
 /**
