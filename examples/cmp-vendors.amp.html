@@ -163,6 +163,31 @@
         </amp-consent>
         <!-- End didomi example -->
 
+      <!-- SourcePoint example -->
+      <amp-consent id='consent' layout='nodisplay' type='SourcePoint'>
+        <script type="application/json">
+          {
+            "consents": {},
+            "postPromptUI": "my-consent-prompt-ui",
+            "clientConfig": {
+              "accountId": 22,
+              "siteName": "mobile.demo",
+              "siteId": 2372,
+              "privacyManagerId": "5c0e81b7d74b3c30c6852301",
+              "stageCampaign": false,
+              "authId": "MY-UUID",
+              "targetingParams": {
+                "MyPrivacyManager": "false"
+              }
+            }
+          }
+        </script>
+        <div id="my-consent-prompt-ui">
+          Post Prompt UI
+          <button on="tap.consent.prompt(consent=SourcePoint)" role="button">Privacy Settings</button>
+        </div>
+      </amp-consent>
+      <!-- End SourcePoint example -->
     </div>
   </body>
 </html>

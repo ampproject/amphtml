@@ -525,4 +525,5 @@ Join in on the discussion where we are discussing [upcoming potential features](
 ## Supported Consent Management Platforms
 
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
+- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](https://help.sourcepoint.com/en)
 - Your Integrated platform here!
