@@ -104,6 +104,12 @@ export class ProgressBar {
     this.storyEl_ = storyEl;
 
     /**
+     * Width of the progress bar in pixels.
+     * @private {number}
+     */
+    this.barWidthPx_ = 0;
+
+    /**
      * Translate applied to a progress bar when the overflow point is passed.
      * @private {number}
      */
@@ -156,6 +162,9 @@ export class ProgressBar {
 
     this.root_ = this.win_.document.createElement('ol');
     this.root_.classList.add('i-amphtml-story-progress-bar');
+    this.barWidthPx_ = this.storyEl_
+      .querySelector('amp-story-page')
+      .getBoundingClientRect().width;
 
     this.storeService_.subscribe(
       StateProperty.PAGE_IDS,
@@ -190,8 +199,29 @@ export class ProgressBar {
       true /** callToInitialize */
     );
 
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      rtlState => {
+        this.onRtlStateUpdate_(rtlState);
+      },
+      true /** callToInitialize */
+    );
+
     this.isBuilt_ = true;
     return this.getRoot();
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.vsync_.mutate(() => {
+      rtlState
+        ? this.getRoot().setAttribute('dir', 'rtl')
+        : this.getRoot().removeAttribute('dir');
+    });
   }
 
   /**
@@ -290,6 +320,7 @@ export class ProgressBar {
       this.ellipsis_.headIndices.includes(segmentIndex) ||
       force
     ) {
+      const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
       const segs = this.getRoot().querySelectorAll(
         '.i-amphtml-story-page-progress-bar'
       );
@@ -333,32 +364,40 @@ export class ProgressBar {
         navigationDirection
       );
 
-      // update segment size [if there are now 2 set of ellipsis] and apply transform
       const prevWidth = segs[0].getBoundingClientRect().width;
       const segWidth = this.getSegmentWidth_(ellipsisCount);
       this.setSegmentSize_(segWidth);
 
       let translate;
+      const translateDirection = rtlState ? 1 : -1;
       if (navigationDirection === 1) {
-        // previously shrank dots on the left
-
         const shrinkDiff =
           prevDotsLeft * previousTailLength * (prevWidth - ELLIPSE_WIDTH_PX);
-
         const sizeDiff = this.ellipsis_.upperIndexTail * (segWidth - prevWidth);
+        const upperIndexTailRect = segs[
+          this.ellipsis_.upperIndexTail
+        ].getBoundingClientRect();
+
+        const distanceFromOrigin = rtlState
+          ? this.barWidthPx_ - upperIndexTailRect.right
+          : upperIndexTailRect.left;
+
         translate =
-          -1 *
-            (shrinkDiff +
-              segs[this.ellipsis_.upperIndexTail].getBoundingClientRect().left -
-              SEGMENTS_MARGIN_PX / 2) -
-          sizeDiff;
+          translateDirection *
+            (shrinkDiff + distanceFromOrigin - SEGMENTS_MARGIN_PX / 2) +
+          translateDirection * sizeDiff;
       } else {
-        const segRect = segs[
+        const upperIndexHeadRect = segs[
           this.ellipsis_.upperIndexHead
         ].getBoundingClientRect();
         const sizeDiff = this.ellipsis_.upperIndexHead * (segWidth - prevWidth);
+        const distanceFromOrigin = rtlState
+          ? upperIndexHeadRect.right - this.barWidthPx_
+          : Math.abs(upperIndexHeadRect.left);
 
-        translate = Math.abs(segRect.left) - sizeDiff + SEGMENTS_MARGIN_PX / 2;
+        translate =
+          (distanceFromOrigin - sizeDiff + SEGMENTS_MARGIN_PX / 2) *
+          (translateDirection * -1);
       }
 
       if (
@@ -373,10 +412,7 @@ export class ProgressBar {
         return;
       }
 
-      this.barTransladeDelta_ = translate;
       this.barTranslateX_ += translate;
-      this.previousDirection_ = navigationDirection;
-
       setStyle(
         this.root_,
         'transform',
@@ -478,17 +514,13 @@ export class ProgressBar {
    * @private
    */
   getSegmentWidth_(ellipsisCount) {
-    // todo: Move somewhere else where it's computed only 1 time.
-    const barWidth = this.storyEl_
-      .querySelector('amp-story-page')
-      .getBoundingClientRect().width;
     const ellipseSize = ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX;
 
     const segmentCount =
       this.segmentCount_ > MAX_SEGMENTS ? MAX_SEGMENTS : this.segmentCount_;
 
     return (
-      (barWidth -
+      (this.barWidthPx_ -
         segmentCount * SEGMENTS_MARGIN_PX -
         ellipsisCount * ellipseSize) /
       segmentCount
