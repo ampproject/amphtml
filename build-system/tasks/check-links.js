@@ -17,12 +17,12 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
-const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const path = require('path');
 const {gitDiffAddedNameOnlyMaster, gitDiffNameOnlyMaster} = require('../git');
+const {green, magenta, red, yellow} = require('ansi-colors');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
@@ -68,44 +68,44 @@ async function checkLinks() {
         if (result.status === 'dead') {
           deadLinksFound = true;
           deadLinksFoundInFile = true;
-          log('[%s] %s', colors.red('✖'), result.link);
+          log(`[${red('✖')}] ${result.link} (${red(result.statusCode)})`);
         } else if (!isTravisBuild()) {
-          log('[%s] %s', colors.green('✔'), result.link);
+          log(`[${green('✔')}] ${result.link}`);
         }
       });
       if (deadLinksFoundInFile) {
         filesWithDeadLinks.push(markdownFiles[index]);
         log(
-          colors.red('ERROR'),
+          red('ERROR'),
           'Possible dead link(s) found in',
-          colors.magenta(markdownFiles[index])
+          magenta(markdownFiles[index])
         );
       } else {
         log(
-          colors.green('SUCCESS'),
+          green('SUCCESS'),
           'All links in',
-          colors.magenta(markdownFiles[index]),
+          magenta(markdownFiles[index]),
           'are alive.'
         );
       }
     });
     if (deadLinksFound) {
       log(
-        colors.red('ERROR'),
+        red('ERROR'),
         'Please update dead link(s) in',
-        colors.magenta(filesWithDeadLinks.join(',')),
+        magenta(filesWithDeadLinks.join(',')),
         'or whitelist them in build-system/tasks/check-links.js'
       );
       log(
-        colors.yellow('NOTE'),
+        yellow('NOTE'),
         'If the link(s) above are not meant to resolve to a real webpage',
         'surrounding them with backticks will exempt them from the link',
         'checker.'
       );
-      process.exit(1);
+      process.exitCode = 1;
     } else {
       log(
-        colors.green('SUCCESS'),
+        green('SUCCESS'),
         'All links in all markdown files in this branch are alive.'
       );
     }
@@ -147,18 +147,6 @@ function filterWhitelistedLinks(markdown) {
 
   // Links inside a <pre> block (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/<pre>([^]*?)<\/pre>/g, '');
-
-  // The Googlebot help page is currently only available to signed-in users.
-  filteredMarkdown = filteredMarkdown.replace(
-    /\(https:\/\/support\.google\.com\/webmasters\/answer\/182072\)/g,
-    ''
-  );
-
-  // https://github.com/ampproject/amphtml/issues/23203
-  filteredMarkdown = filteredMarkdown.replace(
-    /\(https:\/\/developer.microsoft.com\/en-us\/microsoft-edge\/platform\/issues\/1173754\/\)/g,
-    ''
-  );
 
   // After all whitelisting is done, clean up any remaining empty blocks bounded
   // by backticks. Otherwise, `` will be treated as the start of a code block
