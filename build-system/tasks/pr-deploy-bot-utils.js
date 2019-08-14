@@ -63,13 +63,17 @@ async function signalDistUpload(result) {
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
   const url = `${baseUrl}travisbuilds/${travisBuild}/headshas/${sha}/${result}`;
 
-  await request.post(url);
-  log(
-    green('INFO:'),
-    'reported ',
-    cyan(`dist: ${result}`),
-    'to the pr-deploy GitHub App'
-  );
+  try {
+    await request.post(url);
+    log(
+      green('INFO:'),
+      'reported ',
+      cyan(`dist: ${result}`),
+      'to the pr-deploy GitHub App'
+    );
+  } catch (ex) {
+    log(ex);
+  }
 }
 
 module.exports = {
