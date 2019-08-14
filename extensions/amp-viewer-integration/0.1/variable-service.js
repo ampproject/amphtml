@@ -15,7 +15,7 @@
  */
 
 /**
- * @typedef {{ancestorOrigin: function(string, string):string, fragmentParam: function(string, string):string}}
+ * @typedef {{ancestorOrigin: function(string, string):string}}
  */
 export let ViewerIntegrationVariableDef;
 
