@@ -82,7 +82,7 @@ export class StandardActions {
     /** @const @private {!./resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
-    /** @const @private {!./viewport/viewport-impl.Viewport} */
+    /** @const @private {!./viewport/viewport-def.ViewportDef} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     // Explicitly not setting `Action` as a member to scope installation to one

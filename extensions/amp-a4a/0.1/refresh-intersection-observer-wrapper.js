@@ -41,7 +41,7 @@ export class RefreshIntersectionObserverWrapper {
      */
     this.viewportCallbacks_ = {};
 
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-def.ViewportDef} */
     this.viewport_ = baseElement.getViewport();
 
     /**

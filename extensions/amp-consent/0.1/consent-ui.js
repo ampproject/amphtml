@@ -96,7 +96,7 @@ export class ConsentUI {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = baseInstance.getAmpDoc();
 
-    /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {!../../../src/service/viewport/viewport-def.ViewportDef} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @private {?../../../src/service/viewer-impl.Viewer} */

@@ -147,7 +147,7 @@ export class FxElement {
     /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = Services.positionObserverForDoc(element);
 
-    /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../../src/service/viewport/viewport-def.ViewportDef} */
     this.viewport_ = Services.viewportForDoc(element);
 
     /** @const @private {!../../../../src/service/resources-impl.ResourcesDef} */

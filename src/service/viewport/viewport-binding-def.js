@@ -18,7 +18,7 @@ import {computedStyle} from '../../style';
 
 /**
  * ViewportBindingDef is an interface that defines an underlying technology
- * behind the {@link Viewport}.
+ * behind the {@link ViewportDef}.
  * @interface
  */
 export class ViewportBindingDef {
