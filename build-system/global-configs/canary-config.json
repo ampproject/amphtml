@@ -40,7 +40,6 @@
   "ios-fixed-no-transfer": 1,
   "ios-scrollable-iframe": 0,
   "layers": 1,
-  "new-loaders": 1,
   "pump-early-frame": 1,
   "version-locking": 1,
   "macro-after-long-task": 1
