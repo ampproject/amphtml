@@ -52,6 +52,13 @@ export function getAutofocusElementForShowAction(element) {
 const TAG = 'STANDARD-ACTIONS';
 
 /**
+ * Regular expression that identifies AMP CSS classes.
+ * Includes 'i-amphtml-', '-amp-', and 'amp-' prefixes.
+ * @type {!RegExp}
+ */
+const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
+
+/**
  * This service contains implementations of some of the most typical actions,
  * such as hiding DOM elements.
  * @implements {../service.EmbeddableService}
@@ -75,7 +82,7 @@ export class StandardActions {
     /** @const @private {!./resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
-    /** @const @private {!./viewport/viewport-impl.Viewport} */
+    /** @const @private {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     // Explicitly not setting `Action` as a member to scope installation to one
@@ -414,6 +421,10 @@ export class StandardActions {
       args['class'],
       "Argument 'class' must be a string."
     );
+    // prevent toggling of amp internal classes
+    if (AMP_CSS_RE.test(className)) {
+      return null;
+    }
 
     this.resources_.mutateElement(target, () => {
       if (args['force'] !== undefined) {

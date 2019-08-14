@@ -25,6 +25,9 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {toggleExperiment} from '../../src/experiments';
 
+/** @type {?Event|undefined} */
+const NO_EVENT = undefined;
+
 /*eslint "google-camelcase/google-camelcase": 0*/
 describe('Resources', () => {
   let sandbox;
@@ -1789,6 +1792,9 @@ describe('Resources changeSize', () => {
     resources = new Resources(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
     resources.win = {
+      location: {
+        href: 'https://example.org/doc1',
+      },
       getComputedStyle: el => {
         return el.fakeComputedStyle
           ? el.fakeComputedStyle
@@ -1808,8 +1814,22 @@ describe('Resources changeSize', () => {
   });
 
   it('should schedule separate requests', () => {
-    resources.scheduleChangeSize_(resource1, 111, 100, undefined, false);
-    resources.scheduleChangeSize_(resource2, 222, undefined, undefined, true);
+    resources.scheduleChangeSize_(
+      resource1,
+      111,
+      100,
+      undefined,
+      NO_EVENT,
+      false
+    );
+    resources.scheduleChangeSize_(
+      resource2,
+      222,
+      undefined,
+      undefined,
+      NO_EVENT,
+      true
+    );
 
     expect(resources.requestsChangeSize_.length).to.equal(2);
     expect(resources.requestsChangeSize_[0].resource).to.equal(resource1);
@@ -1824,7 +1844,14 @@ describe('Resources changeSize', () => {
   });
 
   it('should schedule height only size change', () => {
-    resources.scheduleChangeSize_(resource1, 111, undefined, undefined, false);
+    resources.scheduleChangeSize_(
+      resource1,
+      111,
+      undefined,
+      undefined,
+      NO_EVENT,
+      false
+    );
     expect(resources.requestsChangeSize_.length).to.equal(1);
     expect(resources.requestsChangeSize_[0].resource).to.equal(resource1);
     expect(resources.requestsChangeSize_[0].newHeight).to.equal(111);
@@ -1834,8 +1861,22 @@ describe('Resources changeSize', () => {
   });
 
   it('should remove request change size for unloaded resources', () => {
-    resources.scheduleChangeSize_(resource1, 111, undefined, undefined, false);
-    resources.scheduleChangeSize_(resource2, 111, undefined, undefined, false);
+    resources.scheduleChangeSize_(
+      resource1,
+      111,
+      undefined,
+      undefined,
+      NO_EVENT,
+      false
+    );
+    resources.scheduleChangeSize_(
+      resource2,
+      111,
+      undefined,
+      undefined,
+      NO_EVENT,
+      false
+    );
     expect(resources.requestsChangeSize_.length).to.equal(2);
     resource1.unload();
     resources.cleanupTasks_(resource1);
@@ -1844,7 +1885,14 @@ describe('Resources changeSize', () => {
   });
 
   it('should schedule width only size change', () => {
-    resources.scheduleChangeSize_(resource1, undefined, 111, undefined, false);
+    resources.scheduleChangeSize_(
+      resource1,
+      undefined,
+      111,
+      undefined,
+      NO_EVENT,
+      false
+    );
     expect(resources.requestsChangeSize_.length).to.equal(1);
     expect(resources.requestsChangeSize_[0].resource).to.equal(resource1);
     expect(resources.requestsChangeSize_[0].newWidth).to.equal(111);
@@ -1859,6 +1907,7 @@ describe('Resources changeSize', () => {
       undefined,
       undefined,
       {top: 1, right: 2, bottom: 3, left: 4},
+      NO_EVENT,
       false
     );
     resources.vsync_.runScheduledTasks_();
@@ -1874,8 +1923,22 @@ describe('Resources changeSize', () => {
   });
 
   it('should only schedule latest request for the same resource', () => {
-    resources.scheduleChangeSize_(resource1, 111, 100, undefined, true);
-    resources.scheduleChangeSize_(resource1, 222, 300, undefined, false);
+    resources.scheduleChangeSize_(
+      resource1,
+      111,
+      100,
+      undefined,
+      NO_EVENT,
+      true
+    );
+    resources.scheduleChangeSize_(
+      resource1,
+      222,
+      300,
+      undefined,
+      NO_EVENT,
+      false
+    );
 
     expect(resources.requestsChangeSize_.length).to.equal(1);
     expect(resources.requestsChangeSize_[0].resource).to.equal(resource1);
@@ -1885,7 +1948,14 @@ describe('Resources changeSize', () => {
   });
 
   it("should NOT change size if it didn't change", () => {
-    resources.scheduleChangeSize_(resource1, 100, 100, undefined, true);
+    resources.scheduleChangeSize_(
+      resource1,
+      100,
+      100,
+      undefined,
+      NO_EVENT,
+      true
+    );
     resources.mutateWork_();
     expect(resources.relayoutTop_).to.equal(-1);
     expect(resources.requestsChangeSize_.length).to.equal(0);
@@ -1893,7 +1963,14 @@ describe('Resources changeSize', () => {
   });
 
   it('should change size', () => {
-    resources.scheduleChangeSize_(resource1, 111, 222, undefined, true);
+    resources.scheduleChangeSize_(
+      resource1,
+      111,
+      222,
+      undefined,
+      NO_EVENT,
+      true
+    );
     resources.mutateWork_();
     expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     expect(resources.requestsChangeSize_.length).to.equal(0);
@@ -1903,22 +1980,50 @@ describe('Resources changeSize', () => {
   });
 
   it('should change size when only width changes', () => {
-    resources.scheduleChangeSize_(resource1, 111, 100, undefined, true);
+    resources.scheduleChangeSize_(
+      resource1,
+      111,
+      100,
+      undefined,
+      NO_EVENT,
+      true
+    );
     resources.mutateWork_();
     expect(resource1.changeSize).to.be.calledOnce;
     expect(resource1.changeSize.firstCall).to.have.been.calledWith(111, 100);
   });
 
   it('should change size when only height changes', () => {
-    resources.scheduleChangeSize_(resource1, 100, 111, undefined, true);
+    resources.scheduleChangeSize_(
+      resource1,
+      100,
+      111,
+      undefined,
+      NO_EVENT,
+      true
+    );
     resources.mutateWork_();
     expect(resource1.changeSize).to.be.calledOnce;
     expect(resource1.changeSize.firstCall).to.have.been.calledWith(100, 111);
   });
 
   it('should pick the smallest relayoutTop', () => {
-    resources.scheduleChangeSize_(resource2, 111, 222, undefined, true);
-    resources.scheduleChangeSize_(resource1, 111, 222, undefined, true);
+    resources.scheduleChangeSize_(
+      resource2,
+      111,
+      222,
+      undefined,
+      NO_EVENT,
+      true
+    );
+    resources.scheduleChangeSize_(
+      resource1,
+      111,
+      222,
+      undefined,
+      NO_EVENT,
+      true
+    );
     resources.mutateWork_();
     expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
   });
@@ -1928,8 +2033,22 @@ describe('Resources changeSize', () => {
     resource1.measure = sandbox.spy();
     resource2.measure = sandbox.spy();
 
-    resources.scheduleChangeSize_(resource1, 111, 200, undefined, true);
-    resources.scheduleChangeSize_(resource2, 111, 222, undefined, true);
+    resources.scheduleChangeSize_(
+      resource1,
+      111,
+      200,
+      undefined,
+      NO_EVENT,
+      true
+    );
+    resources.scheduleChangeSize_(
+      resource2,
+      111,
+      222,
+      undefined,
+      NO_EVENT,
+      true
+    );
     expect(resource1.hasBeenMeasured()).to.be.false;
     expect(resource2.hasBeenMeasured()).to.be.true;
 
@@ -1987,6 +2106,7 @@ describe('Resources changeSize', () => {
         50,
         /* width */ undefined,
         undefined,
+        NO_EVENT,
         false,
         callback
       );
@@ -2017,6 +2137,7 @@ describe('Resources changeSize', () => {
         50,
         /* width */ undefined,
         {top: 1, right: 2, bottom: 3, left: 4},
+        NO_EVENT,
         false,
         callback
       );
@@ -2052,6 +2173,7 @@ describe('Resources changeSize', () => {
         50,
         /* width */ undefined,
         {top: 1, right: 2, bottom: 4, left: 4},
+        NO_EVENT,
         false,
         callback
       );
@@ -2065,7 +2187,14 @@ describe('Resources changeSize', () => {
     });
 
     it('should change size when forced', () => {
-      resources.scheduleChangeSize_(resource1, 111, 222, undefined, true);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        true
+      );
       resources.mutateWork_();
       expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.be.calledOnce;
@@ -2081,7 +2210,14 @@ describe('Resources changeSize', () => {
         sandbox
           .stub(resources.viewer_, 'getVisibilityState')
           .returns(VisibilityState.PRERENDER);
-        resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+        resources.scheduleChangeSize_(
+          resource1,
+          111,
+          222,
+          undefined,
+          NO_EVENT,
+          false
+        );
         resources.mutateWork_();
         expect(resources.requestsChangeSize_).to.be.empty;
         expect(resource1.changeSize).to.be.calledOnce;
@@ -2091,7 +2227,14 @@ describe('Resources changeSize', () => {
 
     it('should change size when active', () => {
       resource1.element.contains = () => true;
-      resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.be.calledOnce;
@@ -2107,7 +2250,14 @@ describe('Resources changeSize', () => {
         bottom: 1050,
         height: 50,
       };
-      resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.be.calledOnce;
@@ -2123,7 +2273,14 @@ describe('Resources changeSize', () => {
         bottom: 300,
         height: 100,
       };
-      resources.scheduleChangeSize_(resource1, 111, 222, {top: 20}, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        {top: 20},
+        NO_EVENT,
+        false
+      );
 
       expect(vsyncSpy).to.be.calledOnce;
       const marginsTask = vsyncSpy.lastCall.args[0];
@@ -2153,7 +2310,14 @@ describe('Resources changeSize', () => {
           marginBottom: '0px',
           marginLeft: '0px',
         };
-        resources.scheduleChangeSize_(resource1, 111, 222, {top: 100}, false);
+        resources.scheduleChangeSize_(
+          resource1,
+          111,
+          222,
+          {top: 100},
+          NO_EVENT,
+          false
+        );
 
         expect(vsyncSpy).to.be.calledOnce;
         const marginsTask = vsyncSpy.lastCall.args[0];
@@ -2189,6 +2353,7 @@ describe('Resources changeSize', () => {
           111,
           222,
           {top: 20},
+          NO_EVENT,
           false,
           callback
         );
@@ -2215,7 +2380,14 @@ describe('Resources changeSize', () => {
       };
       resources.lastVelocity_ = 10;
       resources.lastScrollTime_ = Date.now();
-      resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       expect(resources.requestsChangeSize_.length).to.equal(1);
       expect(resource1.changeSize).to.not.been.called;
@@ -2236,7 +2408,14 @@ describe('Resources changeSize', () => {
         };
         resources.lastVelocity_ = 10;
         resources.lastScrollTime_ = Date.now();
-        resources.scheduleChangeSize_(resource1, 111, 222, false);
+        resources.scheduleChangeSize_(
+          resource1,
+          111,
+          222,
+          undefined,
+          NO_EVENT,
+          false
+        );
         resources.mutateWork_();
         expect(resources.requestsChangeSize_.length).to.equal(1);
         expect(resource1.changeSize).to.not.been.called;
@@ -2262,7 +2441,14 @@ describe('Resources changeSize', () => {
         };
         resources.lastVelocity_ = 10;
         resources.lastScrollTime_ = Date.now();
-        resources.scheduleChangeSize_(resource1, 111, 222, false);
+        resources.scheduleChangeSize_(
+          resource1,
+          111,
+          222,
+          undefined,
+          NO_EVENT,
+          false
+        );
         resources.mutateWork_();
         expect(resources.requestsChangeSize_.length).to.equal(0);
         expect(resource1.changeSize).to.not.been.called;
@@ -2289,7 +2475,14 @@ describe('Resources changeSize', () => {
       };
       resources.lastVelocity_ = 0;
       clock.tick(5000);
-      resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.not.been.called;
@@ -2325,7 +2518,14 @@ describe('Resources changeSize', () => {
       };
       resources.lastVelocity_ = 0;
       clock.tick(5000);
-      resources.scheduleChangeSize_(resource1, 0, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        0,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       expect(vsyncSpy).to.be.calledOnce;
       vsyncSpy.resetHistory();
       resources.mutateWork_();
@@ -2352,8 +2552,22 @@ describe('Resources changeSize', () => {
       };
       resources.lastVelocity_ = 0;
       clock.tick(5000);
-      resources.scheduleChangeSize_(resource2, 200, 222, undefined, false);
-      resources.scheduleChangeSize_(resource1, 0, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource2,
+        200,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
+      resources.scheduleChangeSize_(
+        resource1,
+        0,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
 
       const task = vsyncSpy.lastCall.args[0];
@@ -2391,8 +2605,22 @@ describe('Resources changeSize', () => {
       };
       resources.lastVelocity_ = 0;
       clock.tick(5000);
-      resources.scheduleChangeSize_(resource1, 92, 222, undefined, false);
-      resources.scheduleChangeSize_(resource2, 92, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        92,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
+      resources.scheduleChangeSize_(
+        resource2,
+        92,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       const task = vsyncSpy.lastCall.args[0];
       const state = {};
@@ -2419,7 +2647,14 @@ describe('Resources changeSize', () => {
       };
       resources.lastVelocity_ = 0;
       clock.tick(5000);
-      resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.not.been.called;
@@ -2460,7 +2695,14 @@ describe('Resources changeSize', () => {
       };
       resources.lastVelocity_ = 0;
       clock.tick(5000);
-      resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       const task = vsyncSpy.lastCall.args[0];
       const state = {};
@@ -2481,7 +2723,14 @@ describe('Resources changeSize', () => {
         .expects('getContentHeight')
         .returns(10000)
         .atLeast(1);
-      resources.scheduleChangeSize_(resource1, 10, 11, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        10,
+        11,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.not.been.called;
@@ -2506,6 +2755,7 @@ describe('Resources changeSize', () => {
           111,
           222,
           {top: 1, right: 2, bottom: 3, left: 4},
+          NO_EVENT,
           false
         );
 
@@ -2543,6 +2793,7 @@ describe('Resources changeSize', () => {
           111,
           222,
           {top: 1, right: 2, bottom: 3, left: 4},
+          NO_EVENT,
           false
         );
 
@@ -2573,6 +2824,7 @@ describe('Resources changeSize', () => {
         111,
         222,
         {top: 1, right: 2, bottom: 3, left: 4},
+        NO_EVENT,
         false
       );
 
@@ -2616,6 +2868,7 @@ describe('Resources changeSize', () => {
           50,
           222,
           {top: 1, right: 2, bottom: 3, left: 4},
+          NO_EVENT,
           false
         );
 
@@ -2653,6 +2906,7 @@ describe('Resources changeSize', () => {
           undefined,
           undefined,
           {bottom: 22},
+          NO_EVENT,
           false
         );
 
@@ -2705,6 +2959,7 @@ describe('Resources changeSize', () => {
         undefined,
         undefined,
         {top: 1},
+        NO_EVENT,
         false
       );
 
@@ -2744,12 +2999,26 @@ describe('Resources changeSize', () => {
         .expects('getContentHeight')
         .returns(10000)
         .atLeast(1);
-      resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       expect(resource1.getPendingChangeSize().height).to.equal(111);
       expect(resource1.getPendingChangeSize().width).to.equal(222);
 
-      resources.scheduleChangeSize_(resource1, 112, 223, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        112,
+        223,
+        undefined,
+        NO_EVENT,
+        false
+      );
       expect(resource1.getPendingChangeSize()).to.be.undefined;
     });
 
@@ -2758,7 +3027,14 @@ describe('Resources changeSize', () => {
         .expects('getContentHeight')
         .returns(10000)
         .atLeast(1);
-      resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       expect(resource1.getPendingChangeSize()).to.jsonEqual({
         height: 111,
@@ -2797,7 +3073,14 @@ describe('Resources changeSize', () => {
         .expects('getContentHeight')
         .returns(10000)
         .once();
-      resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       expect(resource1.changeSize).to.not.been.called;
     });
@@ -2807,7 +3090,14 @@ describe('Resources changeSize', () => {
         .expects('getContentHeight')
         .returns(110)
         .once();
-      resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
       resources.mutateWork_();
       expect(resource1.changeSize).to.be.calledOnce;
     });
@@ -3052,7 +3342,7 @@ describes.realWin('Resources mutateElement and collapse', {amp: true}, env => {
     sandbox
       .stub(resources, 'scheduleChangeSize_')
       .callsFake(
-        (resource, newHeight, newWidth, newMargins, force, callback) => {
+        (resource, newHeight, newWidth, newMargins, event, force, callback) => {
           callback(true);
         }
       );
@@ -3064,7 +3354,7 @@ describes.realWin('Resources mutateElement and collapse', {amp: true}, env => {
     sandbox
       .stub(resources, 'scheduleChangeSize_')
       .callsFake(
-        (resource, newHeight, newWidth, newMargins, force, callback) => {
+        (resource, newHeight, newWidth, newMargins, event, force, callback) => {
           callback(false);
         }
       );

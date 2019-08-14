@@ -239,6 +239,18 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<!../extensions/amp-standalone/0.1/amp-standalone.StandaloneService>}
+   */
+  static standaloneServiceForDoc(element) {
+    return /** @type {!Promise<!../extensions/amp-standalone/0.1/amp-standalone.StandaloneService>} */ (getElementServiceForDoc(
+      element,
+      'standalone',
+      'amp-standalone'
+    ));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/crypto-impl.Crypto}
    */
@@ -817,10 +829,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/viewport/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */
   static viewportForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/viewport/viewport-impl.Viewport} */ (getServiceForDoc(
+    return /** @type {!./service/viewport/viewport-interface.ViewportInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
       'viewport'
     ));

@@ -2,8 +2,8 @@
 $category@: dynamic-content
 formats:
   - websites
-  - email
   - ads
+  - email
 teaser:
   text: Allows rendering of Mustache.js templates.
 ---

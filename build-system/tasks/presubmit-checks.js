@@ -631,6 +631,7 @@ const forbiddenTerms = {
       'src/chunk.js',
       'src/inabox/amp-inabox.js',
       'src/runtime.js',
+      'src/custom-element.js',
     ],
   },
   'AMP_CONFIG': {
@@ -837,6 +838,7 @@ const forbiddenTermsSrcInclusive = {
       'src/service/viewport/viewport-binding-ios-embed-wrapper.js',
       'src/service/viewport/viewport-binding-natural.js',
       'src/service/viewport/viewport-impl.js',
+      'src/service/viewport/viewport-interface.js',
     ],
   },
   'preloadExtension': {
@@ -875,11 +877,6 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Always supply a reason in rejections. ' +
       'error.cancellation() may be applicable.',
-    whitelist: [
-      'extensions/amp-access/0.1/access-expr-impl.js',
-      'extensions/amp-animation/0.1/parsers/css-expr-impl.js',
-      'extensions/amp-bind/0.1/bind-expr-impl.js',
-    ],
   },
   '[^.]loadPromise': {
     message: 'Most users should use BaseElement…loadPromise.',

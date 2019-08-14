@@ -59,15 +59,14 @@ tags: {  # <amp-script>
   tag_name: "AMP-SCRIPT"
   disallowed_ancestor: "AMP-SCRIPT"
   requires_extension: "amp-script"
-  requires: "amp-experiment-token"
   attrs: { name: "sandbox" }
   attrs: {
     name: "script"
-    mandatory_anyof: "['script', 'src']"
+    mandatory_oneof: "['script', 'src']"
   }
   attrs: {
     name: "src"
-    mandatory_anyof: "['script', 'src']"
+    mandatory_oneof: "['script', 'src']"
     value_url: {
       protocol: "https"
       allow_relative: false

@@ -2,8 +2,8 @@
 $category@: ads-analytics
 formats:
   - websites
-  - ads
   - stories
+  - ads
 teaser:
   text: Captures analytics data from an AMP document.
 ---

@@ -171,7 +171,7 @@ export function layoutRectsRelativePos(r1, r2) {
  * Determines if any portion of a layoutBox would be onscreen in the given
  * viewport, when scrolled to the specified position.
  * @param {!LayoutRectDef} layoutBox
- * @param {!./service/viewport/viewport-impl.Viewport} viewport
+ * @param {!./service/viewport/viewport-interface.ViewportInterface} viewport
  * @param {number} scrollPos
  * @return {RelativePositions}
  */

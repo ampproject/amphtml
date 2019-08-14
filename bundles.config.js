@@ -644,6 +644,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-standalone',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-sticky-ad',
     version: '1.0',
     latestVersion: '1.0',

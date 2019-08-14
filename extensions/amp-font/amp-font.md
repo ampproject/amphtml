@@ -2,8 +2,8 @@
 $category@: presentation
 formats:
   - websites
-  - ads
   - stories
+  - ads
 teaser:
   text: Triggers and monitors the loading of custom fonts.
 ---

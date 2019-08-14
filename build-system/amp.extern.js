@@ -69,6 +69,15 @@ FormData.prototype.entries = function () {};
 function JsonObject() {}
 
 /**
+ * @typedef {{
+ *   YOU_MUST_USE: string,
+ *   jsonLiteral: function(),
+ *   TO_MAKE_THIS_TYPE: string,
+ * }}
+ */
+var InternalJsonLiteralTypeDef;
+
+/**
  * Force the dataset property to be handled as a JsonObject.
  * @type {!JsonObject}
  */
@@ -407,6 +416,13 @@ var AmpElement;
 
 /** @return {!Signals} */
 AmpElement.prototype.signals = function() {};
+
+/**
+ * Must be externed to avoid Closure DCE'ing this function on
+ * custom-element.CustomAmpElement.prototype in single-pass compilation.
+ * @return {string}
+ */
+AmpElement.prototype.elementName = function() {};
 
 var Signals = class {};
 /**
