@@ -79,6 +79,13 @@ export class AmpStoryEmbed extends HTMLElement {
 
     // Parse JSON
     this.config_ = JSON.parse(scriptEl.textContent);
+    console.assert(
+      this.config_ && this.config_.stories && this.config_.stories.length > 0,
+      'Must specify at least one story in the configuration.'
+    );
+
+    this.currentStory_ = this.config_.stories[0];
+    console.assert(this.currentStory_.src, 'Story must have a src.');
   }
 
   /** @private */
@@ -98,7 +105,7 @@ export class AmpStoryEmbed extends HTMLElement {
   /** @private */
   buildIframe_() {
     this.iframeEl_ = document.createElement('iframe');
-    this.iframeEl_.setAttribute('src', this.config_.src);
+    this.iframeEl_.setAttribute('src', this.config_.stories[0].src);
     this.initializeLoadingListeners_();
     this.rootEl_.appendChild(this.iframeEl_);
   }
