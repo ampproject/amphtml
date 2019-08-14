@@ -57,6 +57,7 @@ const TAG_ = 'Viewport';
  * and how.
  *
  * @implements {ViewportInterface}
+ * @visibleForTesting
  */
 export class ViewportImpl {
   /**
@@ -129,7 +130,7 @@ export class ViewportImpl {
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
 
-    /** @private @const {!Observable} */
+    /** @private @const {!Observable<!./viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
     /** @private {?Element|undefined} */
