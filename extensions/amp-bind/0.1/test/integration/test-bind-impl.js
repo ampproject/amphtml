@@ -907,6 +907,21 @@ describe
               });
             });
 
+            it('should collapse consecutive replaces', async () => {
+              await bind.setStateWithExpression('{foo: 1}', {});
+              await bind.setStateWithExpression('{foo: 2}', {});
+
+              expect(history.replace).to.not.be.called;
+
+              clock.tick(1000);
+
+              expect(history.replace).calledOnce;
+              expect(history.replace).calledWith({
+                data: {'amp-bind': {foo: 2}},
+                title: '',
+              });
+            });
+
             it('should flush history immediately after push', async () => {
               await bind.setStateWithExpression('{foo: 1}', {});
 

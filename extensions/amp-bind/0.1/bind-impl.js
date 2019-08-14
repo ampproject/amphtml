@@ -237,7 +237,7 @@ export class Bind {
      * A queue of history replace/push to adhere to browser rate-limits.
      * @private @const {!Array<{
      *   op: !HistoryOp,
-     *   data: !JsonObject,
+     *   data: (!JsonObject|undefined),
      *   onPop: (!Function|undefined)
      * }>}
      */
@@ -373,14 +373,18 @@ export class Bind {
       .then(result => this.setState(result))
       .then(() => {
         return this.getDataForHistory_().then(data => {
-          if (data) {
-            // Use deep copy of `data` so subsequent modifications won't
-            // affect the stored object reference.
-            const copy = this.copyJsonObject_(data);
-            this.historyQueue_.push({op: HistoryOp.REPLACE, data: copy});
-            // Debounce flush queue on "replace" to rate limit History.replace.
-            this.debouncedFlushHistoryQueue_();
+          if (!data) {
+            return;
           }
+          // Use deep copy of `data` so subsequent modifications won't
+          // affect the stored object reference.
+          const copy = this.copyJsonObject_(data);
+          if (!copy) {
+            return;
+          }
+          this.historyQueue_.push({op: HistoryOp.REPLACE, data: copy});
+          // Debounce flush queue on "replace" to rate limit History.replace.
+          this.debouncedFlushHistoryQueue_();
         });
       });
     return this.setStatePromise_;
@@ -442,7 +446,7 @@ export class Bind {
   /**
    * Returns data that should be saved in browser history on AMP.setState() or
    * AMP.pushState(). This enables features like restoring browser tabs.
-   * @return {!Promise<?JsonObject>}
+   * @return {!Promise<(!JsonObject|undefined)>}
    */
   getDataForHistory_() {
     const data = dict({
@@ -456,7 +460,7 @@ export class Bind {
     // Only pass state for history updates to trusted viewers, since they
     // may contain user data e.g. form input.
     return this.viewer_.isTrustedViewer().then(trusted => {
-      return trusted ? data : null;
+      return trusted ? data : undefined;
     });
   }
 
