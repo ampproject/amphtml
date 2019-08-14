@@ -828,8 +828,8 @@ describe
 
         describe('history', () => {
           beforeEach(() => {
-            sandbox.spy(history, 'replace');
-            sandbox.spy(history, 'push');
+            sandbox.stub(history, 'replace');
+            sandbox.stub(history, 'push');
             sandbox.stub(viewer, 'isEmbedded').returns(true);
           });
 
@@ -842,6 +842,9 @@ describe
                 {one: 1}
               );
               return promise.then(() => {
+                // History.replace has a 1s debounce.
+                clock.tick(1000);
+
                 // Shouldn't call replace() with null `data`.
                 expect(history.replace).to.not.be.called;
               });
@@ -875,6 +878,11 @@ describe
                 {one: 1}
               );
               return promise.then(() => {
+                expect(history.replace).to.not.be.called;
+
+                // History.replace has a 1s debounce.
+                clock.tick(1000);
+
                 expect(history.replace).calledOnce;
                 // `data` param should exist on trusted viewers.
                 expect(history.replace).calledWith({
@@ -896,6 +904,24 @@ describe
                   data: {'amp-bind': {foo: 'bar'}},
                   title: '',
                 });
+              });
+            });
+
+            it('should flush history immediately after push', async () => {
+              await bind.setStateWithExpression('{foo: 1}', {});
+
+              expect(history.replace).to.not.be.called;
+              expect(history.push).to.not.be.called;
+
+              await bind.pushStateWithExpression('{bar: 2}', {});
+
+              expect(history.replace).calledWith({
+                data: {'amp-bind': {foo: 1}},
+                title: '',
+              });
+              expect(history.push).calledWith(sinon.match.func, {
+                data: {'amp-bind': {foo: 1, bar: 2}},
+                title: '',
               });
             });
           });

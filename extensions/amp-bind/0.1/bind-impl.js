@@ -374,7 +374,10 @@ export class Bind {
       .then(() => {
         return this.getDataForHistory_().then(data => {
           if (data) {
-            this.historyQueue_.push({op: HistoryOp.REPLACE, data});
+            // Use deep copy of `data` so subsequent modifications won't
+            // affect the stored object reference.
+            const copy = this.copyJsonObject_(data);
+            this.historyQueue_.push({op: HistoryOp.REPLACE, data: copy});
             // Debounce flush queue on "replace" to rate limit History.replace.
             this.debouncedFlushHistoryQueue_();
           }
@@ -407,12 +410,10 @@ export class Bind {
       const onPop = () => this.setState(oldState);
       return this.setState(result).then(() => {
         return this.getDataForHistory_().then(data => {
-          if (data) {
-            this.historyQueue_.push({op: HistoryOp.PUSH, data, onPop});
-            // Immediately flush queue on "push" to avoid adding latency to
-            // the browser "back" functionality.
-            this.flushHistoryQueue_();
-          }
+          this.historyQueue_.push({op: HistoryOp.PUSH, data, onPop});
+          // Immediately flush queue on "push" to avoid adding latency to
+          // the browser "back" functionality.
+          this.flushHistoryQueue_();
         });
       });
     });
