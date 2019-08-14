@@ -21,13 +21,19 @@ import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {isExperimentOn} from '../experiments';
+import {map} from '../utils/object';
+import {parseQueryString} from '../url';
 import {rootNodeFor, waitForBodyOpenPromise} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
 
+/** @const {string} */
+const PARAMS_SENTINEL = '__AMP__';
+
 /**
  * @typedef {{
+ *   params: (!Object<string, string>|undefined),
  *   signals: (?Signals|undefined),
  * }}
  */
@@ -47,15 +53,18 @@ export class AmpDocService {
   /**
    * @param {!Window} win
    * @param {boolean} isSingleDoc
+   * @param {!Object<string, string>=} opt_initParams
    */
-  constructor(win, isSingleDoc) {
+  constructor(win, isSingleDoc, opt_initParams) {
     /** @const {!Window} */
     this.win = win;
 
     /** @private {?AmpDoc} */
     this.singleDoc_ = null;
     if (isSingleDoc) {
-      this.singleDoc_ = new AmpDocSingle(win);
+      this.singleDoc_ = new AmpDocSingle(win, {
+        params: extractSingleDocParams(win, opt_initParams),
+      });
       win.document[AMPDOC_PROP] = this.singleDoc_;
     }
 
@@ -206,16 +215,17 @@ export class AmpDocService {
    * Creates and installs the ampdoc for the shadow root.
    * @param {string} url
    * @param {!ShadowRoot} shadowRoot
+   * @param {!AmpDocOptions=} opt_options
    * @return {!AmpDocShadow}
    * @restricted
    */
-  installShadowDoc(url, shadowRoot) {
+  installShadowDoc(url, shadowRoot, opt_options) {
     this.mightHaveShadowRoots_ = true;
     devAssert(
       !shadowRoot[AMPDOC_PROP],
       'The shadow root already contains ampdoc'
     );
-    const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
+    const ampdoc = new AmpDocShadow(this.win, url, shadowRoot, opt_options);
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
   }
@@ -262,6 +272,9 @@ export class AmpDoc {
     /** @private @const */
     this.signals_ = (opt_options && opt_options.signals) || new Signals();
 
+    /** @private {!Object<string, string>} */
+    this.params_ = (opt_options && opt_options.params) || map();
+
     /** @private @const {!Array<string>} */
     this.declaredExtensions_ = [];
   }
@@ -300,6 +313,17 @@ export class AmpDoc {
   /** @return {!Signals} */
   signals() {
     return this.signals_;
+  }
+
+  /**
+   * Returns the value of a ampdoc's startup parameter with the specified
+   * name or `null` if the parameter wasn't defined at startup time.
+   * @param {string} name
+   * @return {?string}
+   */
+  getParam(name) {
+    const v = this.params_[name];
+    return v == null ? null : v;
   }
 
   /**
@@ -706,15 +730,41 @@ export class AmpDocFie extends AmpDoc {
 }
 
 /**
+ * @param {!Window} win
+ * @param {!Object<string, string>|undefined} initParams
+ * @return {!Object<string, string>}
+ */
+function extractSingleDocParams(win, initParams) {
+  const params = map();
+  if (initParams) {
+    // The initialization params take the highest precedence.
+    Object.assign(params, initParams);
+  } else {
+    // Params can be passed via iframe hash/name with hash taking precedence.
+    if (win.name && win.name.indexOf(PARAMS_SENTINEL) == 0) {
+      Object.assign(
+        params,
+        parseQueryString(win.name.substring(PARAMS_SENTINEL.length))
+      );
+    }
+    if (win.location && win.location.hash) {
+      Object.assign(params, parseQueryString(win.location.hash));
+    }
+  }
+  return params;
+}
+
+/**
  * Install the ampdoc service and immediately configure it for either a
  * single-doc or a shadow-doc mode. The mode cannot be changed after the
  * initial configuration.
  * @param {!Window} win
  * @param {boolean} isSingleDoc
+ * @param {!Object<string, string>=} opt_initParams
  */
-export function installDocService(win, isSingleDoc) {
+export function installDocService(win, isSingleDoc, opt_initParams) {
   registerServiceBuilder(win, 'ampdoc', function() {
-    return new AmpDocService(win, isSingleDoc);
+    return new AmpDocService(win, isSingleDoc, opt_initParams);
   });
 }
 
