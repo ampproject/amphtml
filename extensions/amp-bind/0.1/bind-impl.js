@@ -87,6 +87,14 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
+ * @enum {number}
+ */
+const HistoryOp = {
+  REPLACE: 0,
+  PUSH: 1,
+};
+
+/**
  * A map of tag names to arrays of attributes that do not have non-bind
  * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
  * but does not support a `slide` attribute.
@@ -227,7 +235,11 @@ export class Bind {
 
     /**
      * A queue of history replace/push to adhere to browser rate-limits.
-     * @private @const {!Array<{operation: string, data: !JsonObject, onPop: (!Function|undefined)}>}
+     * @private @const {!Array<{
+     *   op: !HistoryOp,
+     *   data: !JsonObject,
+     *   onPop: (!Function|undefined)
+     * }>}
      */
     this.historyQueue_ = [];
 
@@ -362,7 +374,7 @@ export class Bind {
       .then(() => {
         const data = this.getDataForHistory_();
         if (data) {
-          this.historyQueue_.push({operation: 'replace', data});
+          this.historyQueue_.push({op: HistoryOp.REPLACE, data});
           this.flushHistoryQueueSoon_();
         }
       });
@@ -394,7 +406,7 @@ export class Bind {
       return this.setState(result).then(() => {
         const data = this.getDataForHistory_();
         if (data) {
-          this.historyQueue_.push({operation: 'push', data, onPop});
+          this.historyQueue_.push({op: HistoryOp.PUSH, data, onPop});
           this.flushHistoryQueueSoon_();
         }
       });
@@ -406,15 +418,15 @@ export class Bind {
    */
   flushHistoryQueue_() {
     for (let i = 0; i < this.historyQueue_.length; i++) {
-      const {operation, data, onPop} = this.historyQueue_[i];
-      if (operation === 'replace') {
+      const {op, data, onPop} = this.historyQueue_[i];
+      if (op === HistoryOp.REPLACE) {
         // Skip consecutive "replace" operations.
         const next = this.historyQueue_[i + 1];
-        if (next && next.operation == 'replace') {
+        if (next && next.operation === HistoryOp.REPLACE) {
           continue;
         }
         this.history_.replace(data);
-      } else if (operation === 'push') {
+      } else if (op === HistoryOp.PUSH) {
         // TODO(choumx): As an optimization, a "push" can be merged with
         // subsequent "replace" operations.
         this.history_.push(onPop, data);
