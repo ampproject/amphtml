@@ -64,6 +64,10 @@ amp-sidebar[side] {
   animation-fill-mode: forwards;
 }
 
+amp-sidebar[style] {
+  --story-page-vh: 1vh;
+}
+
 .i-amphtml-toolbar > ul, .i-amphtml-toolbar > ol {
   display: flex;
   justify-content: flex-start;
