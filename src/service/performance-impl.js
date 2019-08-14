@@ -161,6 +161,29 @@ export class Performance {
       this.win.PerformanceObserver.supportedEntryTypes &&
       this.win.PerformanceObserver.supportedEntryTypes.includes('layout-shift');
 
+    /**
+     * Whether the user agent supports the Event Timing API that shipped
+     * with Chrome 76.
+     *
+     * @private {boolean}
+     */
+    this.supportsEventTimingAPIv76_ =
+    this.win.PerformanceObserver &&
+    this.win.PerformanceObserver.supportedEntryTypes &&
+    this.win.PerformanceObserver.supportedEntryTypes.includes('firstInput');
+
+    /**
+     * Whether the user agent supports the Event Timing API that shipped
+     * with Chrome 77.
+     *
+     * @private {boolean}
+     */
+    this.supportsEventTimingAPIv77_ =
+    this.win.PerformanceObserver &&
+    this.win.PerformanceObserver.supportedEntryTypes &&
+    this.win.PerformanceObserver.supportedEntryTypes.includes('first-input');
+
+
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
     this.boundTickLayoutShiftScore_ = this.tickLayoutShiftScore_.bind(this);
@@ -312,7 +335,11 @@ export class Performance {
       ) {
         this.tickDelta('fcp', entry.startTime + entry.duration);
         recordedFirstContentfulPaint = true;
-      } else if (entry.entryType === 'firstInput' && !recordedFirstInputDelay) {
+      } else if (
+        (entry.entryType === 'firstInput' ||
+          entry.entryType === 'first-input') &&
+        !recordedFirstInputDelay
+      ) {
         this.tickDelta('fid', entry.processingStart - entry.startTime);
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layoutJank') {
@@ -337,12 +364,22 @@ export class Performance {
       entryTypesToObserve.push('paint');
     }
 
-    if (this.win.PerformanceEventTiming) {
+    if (this.supportsEventTimingAPIv76_) {
       // Programmatically read once as currently PerformanceObserver does not
       // report past entries as of Chrome 61.
       // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
       this.win.performance.getEntriesByType('firstInput').forEach(processEntry);
       entryTypesToObserve.push('firstInput');
+    }
+
+    if (this.supportsEventTimingAPIv77_) {
+      // Programmatically read once as currently PerformanceObserver does not
+      // report past entries as of Chrome 61.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+      this.win.performance
+        .getEntriesByType('first-input')
+        .forEach(processEntry);
+      entryTypesToObserve.push('first-input');
     }
 
     if (this.win.PerformanceLayoutJank) {

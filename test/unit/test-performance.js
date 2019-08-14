@@ -905,6 +905,21 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
   });
 
   describe('should forward first input metrics for performance entries', () => {
+
+    let PerformanceObserverConstructorStub, performanceObserver;
+    beforeEach(() => {
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = env.sandbox.stub();
+
+      PerformanceObserverStub.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      PerformanceObserverConstructorStub = env.sandbox
+        .stub(env.win, 'PerformanceObserver');
+        PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
+
+    });
     it('created before performance service registered', () => {
       // Pretend that the EventTiming API exists.
       env.win.PerformanceEventTiming = true;
@@ -942,19 +957,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
 
     it('created after performance service registered', () => {
       // Pretend that the EventTiming API exists.
-      env.win.PerformanceEventTiming = true;
-
-      // Stub and fake the PerformanceObserver constructor.
-      const PerformanceObserverStub = env.sandbox.stub();
-
-      let performanceObserver;
-      PerformanceObserverStub.callsFake(callback => {
-        performanceObserver = new PerformanceObserverImpl(callback);
-        return performanceObserver;
-      });
-      env.sandbox
-        .stub(env.win, 'PerformanceObserver')
-        .callsFake(PerformanceObserverStub);
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['firstInput'];
 
       installPerformanceService(env.win);
 
@@ -983,6 +986,41 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         label: 'fid',
         delta: 3,
       });
+      delete env.win.PerformanceEventTiming;
+    });
+
+    it('created before performance service registered for Chrome 77', () => {
+      // Pretend that the EventTiming API exists.
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['first-input'];
+
+      const entries = [
+        {
+          cancelable: true,
+          duration: 8,
+          entryType: 'first-input',
+          name: 'mousedown',
+          processingEnd: 105,
+          processingStart: 103,
+          startTime: 100,
+        },
+      ];
+      const getEntriesByType = env.sandbox.stub();
+      getEntriesByType.withArgs('first-input').returns(entries);
+      getEntriesByType.returns([]);
+      env.sandbox
+        .stub(env.win.performance, 'getEntriesByType')
+        .callsFake(getEntriesByType);
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'fid',
+        delta: 3,
+      });
+
       delete env.win.PerformanceEventTiming;
     });
   });
