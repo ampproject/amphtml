@@ -104,7 +104,7 @@ export class Navigation {
     /** @private @const {!Document|!ShadowRoot} */
     this.rootNode_ = opt_rootNode || ampdoc.getRootNode();
 
-    /** @private @const {!./viewport/viewport-impl.Viewport} */
+    /** @private @const {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./viewer-impl.Viewer} */
