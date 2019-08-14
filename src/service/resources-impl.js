@@ -25,9 +25,9 @@ import {VisibilityState} from '../visibility-state';
 import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
-import {dev, devAssert} from '../log';
+import {dev, devAssert, user} from '../log';
 import {dict, hasOwn} from '../utils/object';
-import {getSourceUrl} from '../url';
+import {getSourceUrl, isProxyOrigin} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isArray} from '../types';
 import {isBlockedByConsent, reportError} from '../error';
@@ -65,8 +65,9 @@ let MarginChangeDef;
  *   newHeight: (number|undefined),
  *   newWidth: (number|undefined),
  *   marginChange: (!MarginChangeDef|undefined),
+ *   event: (?Event|undefined),
  *   force: boolean,
- *   callback: (function(boolean)|undefined)
+ *   callback: (function(boolean)|undefined),
  * }}
  */
 let ChangeSizeRequestDef;
@@ -75,72 +76,7 @@ let ChangeSizeRequestDef;
 /**
  * @interface
  */
-class OwnersDef extends Owners {
-  /**
-   * Assigns an owner for the specified element. This means that the resources
-   * within this element will be managed by the owner and not Resources manager.
-   * @param {!Element} element
-   * @param {!AmpElement} owner
-   * @package
-   */
-  setOwner(element, owner) {}
-
-  /**
-   * Schedules layout for the specified sub-elements that are children of the
-   * parent element. The parent element may choose to send this signal either
-   * because it's an owner (see {@link setOwner}) or because it wants the
-   * layouts to be done sooner. In either case, both parent's and children's
-   * priority is observed when scheduling this work.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  scheduleLayout(parentElement, subElements) {}
-
-  /**
-   * Invokes `unload` on the elements' resource which in turn will invoke
-   * the `documentBecameInactive` callback on the custom element.
-   * Resources that call `schedulePause` must also call `scheduleResume`.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  schedulePause(parentElement, subElements) {}
-
-  /**
-   * Invokes `resume` on the elements' resource which in turn will invoke
-   * `resumeCallback` only on paused custom elements.
-   * Resources that call `schedulePause` must also call `scheduleResume`.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  scheduleResume(parentElement, subElements) {}
-
-  /**
-   * Schedules preload for the specified sub-elements that are children of the
-   * parent element. The parent element may choose to send this signal either
-   * because it's an owner (see {@link setOwner}) or because it wants the
-   * preloads to be done sooner. In either case, both parent's and children's
-   * priority is observed when scheduling this work.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  schedulePreload(parentElement, subElements) {}
-
-  /**
-   * A parent resource, especially in when it's an owner (see {@link setOwner}),
-   * may request the Resources manager to update children's inViewport state.
-   * A child's inViewport state is a logical AND between inLocalViewport
-   * specified here and parent's own inViewport state.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   * @param {boolean} inLocalViewport
-   */
-  updateInViewport(parentElement, subElements, inLocalViewport) {}
-}
-
-/**
- * @interface
- */
-class MutatorsAndOwnersDef extends OwnersDef {
+class MutatorsAndOwnersDef extends Owners {
   /**
    * Requests the runtime to change the element's size. When the size is
    * successfully updated then the opt_callback is called.
@@ -169,8 +105,9 @@ class MutatorsAndOwnersDef extends OwnersDef {
    * @param {number|undefined} newWidth
    * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    * @return {!Promise}
+   * @param {?Event=} opt_event
    */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {}
+  attemptChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {}
 
   /**
    * Expands the element.
@@ -1020,19 +957,21 @@ export class Resources {
       newHeight,
       newWidth,
       opt_newMargins,
+      /* event */ undefined,
       /* force */ true,
       opt_callback
     );
   }
 
   /** @override */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
+  attemptChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(
         Resource.forElement(element),
         newHeight,
         newWidth,
         opt_newMargins,
+        opt_event,
         /* force */ false,
         success => {
           if (success) {
@@ -1189,7 +1128,8 @@ export class Resources {
         Resource.forElement(element),
         0,
         0,
-        undefined,
+        /* newMargin */ undefined,
+        /* event */ undefined,
         /* force */ false,
         success => {
           if (success) {
@@ -1424,7 +1364,10 @@ export class Resources {
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
-        const {resource} = /** @type {!ChangeSizeRequestDef} */ (request);
+        const {
+          resource,
+          event,
+        } = /** @type {!ChangeSizeRequestDef} */ (request);
         const box = resource.getLayoutBox();
 
         let topMarginDiff = 0;
@@ -1481,6 +1424,19 @@ export class Resources {
           // 3. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
+          if (
+            isProxyOrigin(this.win.location) &&
+            event &&
+            event.userActivation
+          ) {
+            // Report false positives.
+            // TODO(#23926): cleanup once user activation for resize is
+            // implemented.
+            user().expectedError(TAG_, 'RESIZE_APPROVE');
+            if (!event.userActivation.hasBeenActive) {
+              user().expectedError(TAG_, 'RESIZE_APPROVE_NOT_ACTIVE');
+            }
+          }
         } else if (
           topUnchangedBoundary >= viewportRect.bottom - bottomOffset ||
           (topMarginDiff == 0 &&
@@ -1717,6 +1673,7 @@ export class Resources {
         pendingChangeSize.height,
         pendingChangeSize.width,
         pendingChangeSize.margins,
+        /* event */ undefined,
         /* force */ true
       );
     }
@@ -2182,6 +2139,7 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {!../layout-rect.LayoutMarginsChangeDef|undefined} newMargins
+   * @param {?Event|undefined} event
    * @param {boolean} force
    * @param {function(boolean)=} opt_callback A callback function
    * @private
@@ -2191,6 +2149,7 @@ export class Resources {
     newHeight,
     newWidth,
     newMargins,
+    event,
     force,
     opt_callback
   ) {
@@ -2200,6 +2159,7 @@ export class Resources {
         newHeight,
         newWidth,
         undefined,
+        event,
         force,
         opt_callback
       );
@@ -2224,6 +2184,7 @@ export class Resources {
           newHeight,
           newWidth,
           marginChange,
+          event,
           force,
           opt_callback
         );
@@ -2252,6 +2213,7 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {!MarginChangeDef|undefined} marginChange
+   * @param {?Event|undefined} event
    * @param {boolean} force
    * @param {function(boolean)=} opt_callback A callback function
    * @private
@@ -2261,6 +2223,7 @@ export class Resources {
     newHeight,
     newWidth,
     marginChange,
+    event,
     force,
     opt_callback
   ) {
@@ -2305,6 +2268,7 @@ export class Resources {
       request.newHeight = newHeight;
       request.newWidth = newWidth;
       request.marginChange = marginChange;
+      request.event = event;
       request.force = force || request.force;
       request.callback = opt_callback;
     } else {
@@ -2314,6 +2278,7 @@ export class Resources {
           newHeight,
           newWidth,
           marginChange,
+          event,
           force,
           callback: opt_callback,
         }

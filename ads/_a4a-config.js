@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {adsenseIsA4AEnabled} from '../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
 import {cloudflareIsA4AEnabled} from '../extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config';
 import {gmosspIsA4AEnabled} from '../extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config';
 import {map} from '../src/utils/object';
@@ -42,7 +41,7 @@ let a4aRegistry;
 export function getA4ARegistry() {
   if (!a4aRegistry) {
     a4aRegistry = map({
-      'adsense': adsenseIsA4AEnabled,
+      'adsense': () => true,
       'adzerk': () => true,
       'doubleclick': () => true,
       'triplelift': tripleliftIsA4AEnabled,

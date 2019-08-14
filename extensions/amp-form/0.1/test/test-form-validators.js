@@ -35,7 +35,7 @@ describes.realWin('form-validators', {amp: true}, env => {
 
   // Stub validation message for predictable message on any platform.
   function stubValidationMessage(input) {
-    Object.defineProperty(input, 'validationMessage', {
+    sandbox.defineProperty(input, 'validationMessage', {
       get() {
         return this.fakeValidationMessage_;
       },

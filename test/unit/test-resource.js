@@ -27,10 +27,12 @@ describes.realWin('Resource', {amp: true}, env => {
   let elementMock;
   let resources;
   let resource;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    sandbox = env.sandbox;
 
     element = env.createAmpElement('amp-ad');
     doc.body.appendChild(element);
@@ -140,7 +142,7 @@ describes.realWin('Resource', {amp: true}, env => {
     );
   });
 
-  it('should mark as ready for layout if already measured', () => {
+  it('should mark as not ready for layout even if already measured', () => {
     const box = layoutRectLtwh(0, 0, 100, 200);
     elementMock
       .expects('isUpgraded')
@@ -150,15 +152,9 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('build')
       .returns(Promise.resolve())
       .once();
-    elementMock
-      .expects('updateLayoutBox')
-      .withExactArgs(box, true)
-      .once();
-    const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
     resource.layoutBox_ = box;
     return resource.build().then(() => {
-      expect(stub).to.be.calledOnce;
-      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
     });
   });
 
@@ -171,9 +167,7 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('build')
       .returns(Promise.resolve())
       .once();
-    const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(false);
     return resource.build().then(() => {
-      expect(stub.calledOnce).to.be.true;
       expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
     });
   });
@@ -447,7 +441,7 @@ describes.realWin('Resource', {amp: true}, env => {
       .once();
     const viewport = Services.viewportForDoc(resource.element);
     sandbox.stub(viewport, 'getScrollTop').returns(11);
-    Object.defineProperty(element, 'offsetParent', {
+    sandbox.defineProperty(element, 'offsetParent', {
       value: {
         isAlwaysFixed: () => true,
       },
@@ -519,7 +513,7 @@ describes.realWin('Resource', {amp: true}, env => {
 
     beforeEach(() => {
       element.setAttribute('placeholder', '');
-      Object.defineProperty(element, 'parentElement', {
+      sandbox.defineProperty(element, 'parentElement', {
         value: doc.createElement('amp-iframe'),
         configurable: true,
         writable: true,

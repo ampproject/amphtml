@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const PERMUTIVE_CONFIG = jsonLiteral({
   'vars': {
     'identity': '${clientId(_ga)}',
   },
@@ -72,3 +74,5 @@ export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
     'properties.': '_ep_',
   },
 });
+
+export {PERMUTIVE_CONFIG};

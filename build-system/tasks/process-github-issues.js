@@ -112,7 +112,7 @@ function getIssues(opt_page) {
  * gets all the Labels we are interested in,
  * depending if missing milestone or label,
  * tasks applied as per design go/ampgithubautomation
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function updateGitHubIssues() {
   let promise = Promise.resolve();

@@ -24,7 +24,11 @@ import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrap
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
 import {clamp} from '../../utils/math';
-import {closestAncestorElementBySelector, isIframed} from '../../dom';
+import {
+  closestAncestorElementBySelector,
+  getVerticalScrollbarWidth,
+  isIframed,
+} from '../../dom';
 import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
@@ -270,16 +274,6 @@ export class Viewport {
   }
 
   /**
-   * Returns the viewport's top position in the document. This is essentially
-   * the scroll position.
-   * @return {number}
-   * @deprecated Use {@link getScrollTop}
-   */
-  getTop() {
-    return this.getScrollTop();
-  }
-
-  /**
    * Returns the viewport's vertical scroll position.
    * @return {number}
    */
@@ -308,18 +302,6 @@ export class Viewport {
   setScrollTop(scrollPos) {
     this./*OK*/ scrollTop_ = null;
     this.binding_.setScrollTop(scrollPos);
-  }
-
-  /**
-   * @return {number} The width of the vertical scrollbar, in pixels.
-   */
-  getVerticalScrollbarWidth() {
-    const {win} = this.ampdoc;
-    const {documentElement} = win.document;
-    const windowWidth = win./*OK*/ innerWidth;
-    const documentWidth = documentElement./*OK*/ clientWidth;
-
-    return windowWidth - documentWidth;
   }
 
   /**
@@ -903,7 +885,7 @@ export class Viewport {
     // platforms that have a width-taking scrollbar.
     this.vsync_.measure(() => {
       const existingMargin = computedStyle(win, documentElement).marginRight;
-      const scrollbarWidth = this.getVerticalScrollbarWidth();
+      const scrollbarWidth = getVerticalScrollbarWidth(this.ampdoc.win);
 
       requestedMarginRight = parseInt(existingMargin, 10) + scrollbarWidth;
     });
@@ -976,14 +958,6 @@ export class Viewport {
       return this.setViewportMetaString_(this.originalViewportMetaString_);
     }
     return false;
-  }
-
-  /**
-   * Returns whether the user has scrolled yet.
-   * @return {boolean}
-   */
-  hasScrolled() {
-    return this.scrollCount_ > 0;
   }
 
   /**

@@ -21,6 +21,7 @@ import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
 import {adopt} from '../src/runtime';
+import {cancelTimersForTesting} from '../src/service/timer-impl';
 import {
   installAmpdocServices,
   installRuntimeServices,
@@ -483,6 +484,7 @@ afterEach(function() {
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
+  cancelTimersForTesting();
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

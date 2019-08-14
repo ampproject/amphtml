@@ -1576,7 +1576,15 @@ acorn-dynamic-import@^4.0.0:
   resolved "https://registry.yarnpkg.com/acorn-dynamic-import/-/acorn-dynamic-import-4.0.0.tgz#482210140582a36b83c3e342e1cfebcaa9240948"
   integrity sha512-d3OEjQV4ROpoflsnUA8HozoIR504TFxNivYEUi6uwz0IYhBkTDXGuWlNdMtybRt3nqVx/L6XqMt0FxkXuWKZhw==
 
-acorn-globals@4.3.2, acorn-globals@^4.1.0, acorn-globals@^4.3.2:
+acorn-globals@4.3.3:
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/acorn-globals/-/acorn-globals-4.3.3.tgz#a86f75b69680b8780d30edd21eee4e0ea170c05e"
+  integrity sha512-vkR40VwS2SYO98AIeFvzWWh+xyc2qi9s7OoXSFEGIP/rOJKzjnhykaZJNnHdoq4BL2gGxI5EZOU16z896EYnOQ==
+  dependencies:
+    acorn "^6.0.1"
+    acorn-walk "^6.0.1"
+
+acorn-globals@^4.1.0, acorn-globals@^4.3.2:
   version "4.3.2"
   resolved "https://registry.yarnpkg.com/acorn-globals/-/acorn-globals-4.3.2.tgz#4e2c2313a597fd589720395f6354b41cd5ec8006"
   integrity sha512-BbzvZhVtZP+Bs1J1HcwrQe8ycfO0wStkSGxuul3He3GkHOIZ6eTqOkPuw9IP1X3+IkOo4wiJmwkobzXYz4wewQ==
@@ -1714,15 +1722,10 @@ ansi-colors@3.2.3:
   resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.2.3.tgz#57d35b8686e851e2cc04c403f1c00203976a1813"
   integrity sha512-LEHHyuhlPY3TmuUYMh2oz89lTShfvgbmzaBcxve9t/9Wuy7Dwf4yoAKcND7KFT1HAQfqZ12qtc+DUrBMeKF9nw==
 
-ansi-colors@4.1.1:
+ansi-colors@4.1.1, ansi-colors@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-4.1.1.tgz#cbb9ae256bf750af1eab344f229aa27fe94ba348"
   integrity sha512-JoX0apGbHaUJBNl6yF+p6JAFYZ666/hhCGKN5t9QFjbJQKUU/g8MNbFDbvfrgKXvI1QpZplPOnwIo99lX/AAmA==
-
-ansi-colors@^3.2.3:
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.2.4.tgz#e3a3da4bfbae6c86a9c285625de124a234026fbf"
-  integrity sha512-hHUXGagefjN2iRrID63xckIvotOXOojhQKWIPUZ4mNUZ9nLZW+7FMNoE1lOkEhNWYsx/7ysGIuJYCiMAA9FnrA==
 
 ansi-cyan@^0.1.1:
   version "0.1.1"
@@ -2806,6 +2809,13 @@ brorand@^1.0.1:
   resolved "https://registry.yarnpkg.com/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
   integrity sha1-EsJe/kCkXjwyPrhnWgoM5XsiNx8=
 
+brotli-size@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/brotli-size/-/brotli-size-4.0.0.tgz#a05ee3faad3c0e700a2f2da826ba6b4d76e69e5e"
+  integrity sha512-uA9fOtlTRC0iqKfzff1W34DXUA3GyVqbUaeo3Rw3d4gd1eavKVCETXrn3NzO74W+UVkG3UHu8WxUi+XvKI/huA==
+  dependencies:
+    duplexer "0.1.1"
+
 browser-pack@^6.0.1:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/browser-pack/-/browser-pack-6.1.0.tgz#c34ba10d0b9ce162b5af227c7131c92c2ecd5774"
@@ -2894,7 +2904,61 @@ browserify-zlib@~0.2.0:
   dependencies:
     pako "~1.0.5"
 
-browserify@16.3.0, browserify@^16.1.0:
+browserify@16.5.0:
+  version "16.5.0"
+  resolved "https://registry.yarnpkg.com/browserify/-/browserify-16.5.0.tgz#a1c2bc0431bec11fd29151941582e3f645ede881"
+  integrity sha512-6bfI3cl76YLAnCZ75AGu/XPOsqUhRyc0F/olGIJeCxtfxF2HvPKEcmjU9M8oAPxl4uBY1U7Nry33Q6koV3f2iw==
+  dependencies:
+    JSONStream "^1.0.3"
+    assert "^1.4.0"
+    browser-pack "^6.0.1"
+    browser-resolve "^1.11.0"
+    browserify-zlib "~0.2.0"
+    buffer "^5.0.2"
+    cached-path-relative "^1.0.0"
+    concat-stream "^1.6.0"
+    console-browserify "^1.1.0"
+    constants-browserify "~1.0.0"
+    crypto-browserify "^3.0.0"
+    defined "^1.0.0"
+    deps-sort "^2.0.0"
+    domain-browser "^1.2.0"
+    duplexer2 "~0.1.2"
+    events "^2.0.0"
+    glob "^7.1.0"
+    has "^1.0.0"
+    htmlescape "^1.1.0"
+    https-browserify "^1.0.0"
+    inherits "~2.0.1"
+    insert-module-globals "^7.0.0"
+    labeled-stream-splicer "^2.0.0"
+    mkdirp "^0.5.0"
+    module-deps "^6.0.0"
+    os-browserify "~0.3.0"
+    parents "^1.0.1"
+    path-browserify "~0.0.0"
+    process "~0.11.0"
+    punycode "^1.3.2"
+    querystring-es3 "~0.2.0"
+    read-only-stream "^2.0.0"
+    readable-stream "^2.0.2"
+    resolve "^1.1.4"
+    shasum "^1.0.0"
+    shell-quote "^1.6.1"
+    stream-browserify "^2.0.0"
+    stream-http "^3.0.0"
+    string_decoder "^1.1.1"
+    subarg "^1.0.0"
+    syntax-error "^1.1.1"
+    through2 "^2.0.0"
+    timers-browserify "^1.0.1"
+    tty-browserify "0.0.1"
+    url "~0.11.0"
+    util "~0.10.1"
+    vm-browserify "^1.0.0"
+    xtend "^4.0.0"
+
+browserify@^16.1.0:
   version "16.3.0"
   resolved "https://registry.yarnpkg.com/browserify/-/browserify-16.3.0.tgz#4d414466e0b07492fff493a009ea883a9f2db230"
   integrity sha512-BWaaD7alyGZVEBBwSTYx4iJF5DswIGzK17o8ai9w4iKRbYpk3EOiprRHMRRA8DCZFmFeOdx7A385w2XdFvxWmg==
@@ -4745,7 +4809,7 @@ duplexer3@^0.1.4:
   resolved "https://registry.yarnpkg.com/duplexer3/-/duplexer3-0.1.4.tgz#ee01dd1cac0ed3cbc7fdbea37dc0a8f1ce002ce2"
   integrity sha1-7gHdHKwO08vH/b6jfcCo8c4ALOI=
 
-duplexer@^0.1.1, duplexer@~0.1.1:
+duplexer@0.1.1, duplexer@^0.1.1, duplexer@~0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/duplexer/-/duplexer-0.1.1.tgz#ace6ff808c1ce66b57d1ebf97977acb02334cfc1"
   integrity sha1-rOb/gIwc5mtX0ev5eXessCM0z8E=
@@ -5126,10 +5190,10 @@ eslint-plugin-jasmine@2.10.1:
   resolved "https://registry.yarnpkg.com/eslint-plugin-jasmine/-/eslint-plugin-jasmine-2.10.1.tgz#5733b709e751f4bc40e31e1c16989bd2cdfbec97"
   integrity sha1-VzO3CedR9LxA4x4cFpib0s377Jc=
 
-eslint-plugin-jsdoc@15.7.2:
-  version "15.7.2"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-15.7.2.tgz#2def358e61b8376de60927c63546af49d99c232f"
-  integrity sha512-xQFqyc/pWxpY1dlEeYpO3kpd/zwX9TVnMn0krvVuCe7l0MpqXxBVm/+wRpgI6E6jpE5l3yA0gQshipYyxbVLIg==
+eslint-plugin-jsdoc@15.8.0:
+  version "15.8.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-15.8.0.tgz#74cf0f35dec8524a6bd011f0cf199d24e09517f2"
+  integrity sha512-J6ozWkaAgBh1eLdQE+C2wcXhoEgDmGJOSB6zMF5ktEtMBnU62xT3wfHcUacuTnv6rt+ollC0uZThaEpGA+sTNg==
   dependencies:
     comment-parser "^0.6.1"
     debug "^4.1.1"
@@ -6445,46 +6509,46 @@ glogg@^1.0.0:
   dependencies:
     sparkles "^1.0.0"
 
-google-closure-compiler-java@^20190709.0.0:
-  version "20190709.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-java/-/google-closure-compiler-java-20190709.0.0.tgz#090a1280146fed6d0ba4ed1c5b23880b9f8c5d7b"
-  integrity sha512-9dtvYFL76kjJl9X1EmtLcR505uYUJHtNgZtBPhNPg0e5K8/syJurCIRy34hv0yB3uS63oSapVs3e7wZB7fkO/A==
+google-closure-compiler-java@^20190729.0.0:
+  version "20190729.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-java/-/google-closure-compiler-java-20190729.0.0.tgz#e531ead3f0e0fb7bad207fdae1fc686011e891de"
+  integrity sha512-SGStZiyasN31tlmKUMMzCNRXTZqeij5N7iEeHSIGOsUdlKw5Zj8VPbaqbCcHvfgpQaUbn29zCTgTYiYFJRkbwA==
 
-google-closure-compiler-js@^20190709.0.0:
-  version "20190709.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-js/-/google-closure-compiler-js-20190709.0.0.tgz#16ea10e334ec2b9760e4d5394ab8ea8fb07a42b4"
-  integrity sha512-bZOW2UAa5M461y0+RjjRWOM4xjI9mDxklobrkK0S8GcqfKBnnc+1NlWpZkDYluD821a/vqVdlYv8NdMLNItJvg==
+google-closure-compiler-js@^20190729.0.0:
+  version "20190729.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-js/-/google-closure-compiler-js-20190729.0.0.tgz#96e27f29f98e45aae9288b9a696ef8e30e846e51"
+  integrity sha512-ZDJRK3eiNfKLsO1+uVxHnvB8RTQMLHlJNKouMBcPzPNOAurEFRboHf5nx/0llO+MXVWZDIPhxpbuuD3WnQsprA==
 
-google-closure-compiler-linux@^20190709.0.0:
-  version "20190709.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-linux/-/google-closure-compiler-linux-20190709.0.0.tgz#114a9bd941c1637bcdffe7f83c928b64a674ce31"
-  integrity sha512-qwsHdDIEqDIV5TTU8sMxAFAJj2EXwak09ektA9FOLx6N9v7TdGCE3vaVCCV85BR+c8KxmzaUY93OLox34QMMqg==
+google-closure-compiler-linux@^20190729.0.0:
+  version "20190729.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-linux/-/google-closure-compiler-linux-20190729.0.0.tgz#74c2f0386295d2c8bd8ec27d0ace315224caf733"
+  integrity sha512-W4TRrQ1+FrCFu3yn4M0JTWTJCFsqLlBjkliB/xLFuWb5E7XQ8Xe/sPtkmeNzCo+ftd6B/KD7acaH2oMU0brMag==
 
-google-closure-compiler-osx@^20190709.0.0:
-  version "20190709.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20190709.0.0.tgz#e075f562a164696126729f07c17b72a89fc90f0e"
-  integrity sha512-bIHLOWGFpHXc9cZwefHEYZ/hlnDaOKFANAbdUb9qzcl7T2rk5UQsqW4xDGaoUOdWdUzz8tO2QZSdNj+sXcwK0w==
+google-closure-compiler-osx@^20190729.0.0:
+  version "20190729.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20190729.0.0.tgz#586bd4e4335f21c8e8e7328902f45d7655c39283"
+  integrity sha512-g3mLUVFD85nRwVyl8X6ywZ14YFP6fo+kXdIvrBGxxUkUU8VbeIgr6GlgtAUS0eZ0WVs2hr5w6kjk7+5kyeBSJg==
 
-google-closure-compiler-windows@^20190709.0.0:
-  version "20190709.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-windows/-/google-closure-compiler-windows-20190709.0.0.tgz#cbab215e83c168b8771cd1fd60a7a847ec386282"
-  integrity sha512-vhq8eFNlBLCildtghFkgLLZ86D6cahZiVYH73pdxx9jq1ybJ7tZtMdyEVt4iNBpqxIg3u6d/aOm4l+owaqtlMg==
+google-closure-compiler-windows@^20190729.0.0:
+  version "20190729.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-windows/-/google-closure-compiler-windows-20190729.0.0.tgz#f6b7b8f86c19ea86f4a82cf4d4706841155708c3"
+  integrity sha512-tzFfu2ixOoAWJUcCsagNFE4o0xHV+LI4cD3AmI36ll2e0NW1aUjDPhiG5TSfAnMIvZwgkikG5tqnPnk8ljauAA==
 
-google-closure-compiler@20190709.0.0:
-  version "20190709.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20190709.0.0.tgz#e052c250cd660bae8b5aa23d6ecf5b107baded2d"
-  integrity sha512-NhyGe1QhRcf/9D1f/PtVzmhwqoyWqkCnuBvqnp2ijN3nvA7WjsK+3ei33r01y61+Ev7fTlG47SaLlAHv7KivPw==
+google-closure-compiler@20190729.0.0:
+  version "20190729.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20190729.0.0.tgz#9f822f2e5e59478be5345c6f464709f9b5087b24"
+  integrity sha512-z+egAPJmOkEgop6ZUjrE+bIOKqbKdx57J+SAGVgq9DAQnr3yVxQ+h9b8PSLcpgzMw/Y0rMCHpM3HkCTE2Y1ePQ==
   dependencies:
     chalk "2.x"
-    google-closure-compiler-java "^20190709.0.0"
-    google-closure-compiler-js "^20190709.0.0"
+    google-closure-compiler-java "^20190729.0.0"
+    google-closure-compiler-js "^20190729.0.0"
     minimist "1.x"
     vinyl "2.x"
     vinyl-sourcemaps-apply "^0.2.0"
   optionalDependencies:
-    google-closure-compiler-linux "^20190709.0.0"
-    google-closure-compiler-osx "^20190709.0.0"
-    google-closure-compiler-windows "^20190709.0.0"
+    google-closure-compiler-linux "^20190729.0.0"
+    google-closure-compiler-osx "^20190729.0.0"
+    google-closure-compiler-windows "^20190729.0.0"
 
 got@^6.7.1:
   version "6.7.1"
@@ -6655,17 +6719,17 @@ gulp-jest@4.0.2:
     plugin-error "^1.0.1"
     through2 "^2.0.1"
 
-gulp-jsonlint@1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/gulp-jsonlint/-/gulp-jsonlint-1.3.0.tgz#8203e5d533f947472c498d83526a7f179abb4a5c"
-  integrity sha512-Hjg5EK07j6SLvZ9KapQ6P/TggpX4D90aVGKitJ0E5npzB8AfhVK2z6gIBj8s3C+h7jthnwPJT8E9V/uQbMhJ9w==
+gulp-jsonlint@1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/gulp-jsonlint/-/gulp-jsonlint-1.3.1.tgz#6ebb117f50e2eb7cd8a4ff20094998110b55d296"
+  integrity sha512-vZmMMp2D+z8SpDc8PoSJ6IdxaaPk9zpwNjIPaHFe/qu+WyAoGQ0HTxulokLnZx7qsOx4GFwAjCEwXQyUI6Hi4A==
   dependencies:
-    ansi-colors "^3.2.3"
+    ansi-colors "^4.1.1"
     fancy-log "^1.3.3"
     jsonlint "1.6.3"
     map-stream "0.0.7"
     plugin-error "1.0.1"
-    through2 "^3.0.0"
+    through2 "^3.0.1"
 
 gulp-jsonminify@1.1.0:
   version "1.1.0"
@@ -9219,7 +9283,12 @@ log4js@^4.0.0:
     rfdc "^1.1.4"
     streamroller "^1.0.6"
 
-lolex@4.1.0, lolex@^4.0.1, lolex@^4.1.0:
+lolex@4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/lolex/-/lolex-4.2.0.tgz#ddbd7f6213ca1ea5826901ab1222b65d714b3cd7"
+  integrity sha512-gKO5uExCXvSm6zbF562EvM+rd1kQDnB9AZBbiQVzf1ZmdDpxUSvpnAaVOP83N/31mRK8Ml8/VE8DMvsAZQ+7wg==
+
+lolex@^4.0.1, lolex@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/lolex/-/lolex-4.1.0.tgz#ecdd7b86539391d8237947a3419aa8ac975f0fe1"
   integrity sha512-BYxIEXiVq5lGIXeVHnsFzqa1TxN5acnKnPCdlZSpzm8viNEOhiigupA4vTQ9HEFQ6nLTQ9wQOgBknJgzUYQ9Aw==
@@ -9740,6 +9809,13 @@ mkdirp@0.5.1, mkdirp@0.x.x, mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.1:
   integrity sha1-MAV0OOrGz3+MR2fzhkjWaX11yQM=
   dependencies:
     minimist "0.0.8"
+
+mocha-silent-reporter@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/mocha-silent-reporter/-/mocha-silent-reporter-1.0.0.tgz#f1f2fcafa4e2eaee989ac6cd00b76b8204f890bb"
+  integrity sha1-8fL8r6Ti6u6YmsbNALdrggT4kLs=
+  dependencies:
+    chalk "^0.5.1"
 
 mocha@6.2.0:
   version "6.2.0"
@@ -11373,10 +11449,10 @@ prettier@1.18.2:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.18.2.tgz#6823e7c5900017b4bd3acf46fe9ac4b4d7bda9ea"
   integrity sha512-OeHeMc0JhFE9idD4ZdtNibzY0+TPHSpSSb9h8FqtP+YnoZZ1sl8Vc9b1sasjfymH3SonAF4QcA2+mzHPhMvIiw==
 
-pretty-bytes@5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/pretty-bytes/-/pretty-bytes-5.2.0.tgz#96c92c6e95a0b35059253fb33c03e260d40f5a1f"
-  integrity sha512-ujANBhiUsl9AhREUDUEY1GPOharMGm8x8juS7qOHybcLi7XsKfrYQ88hSly1l2i0klXHTDYrlL8ihMCG55Dc3w==
+pretty-bytes@5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/pretty-bytes/-/pretty-bytes-5.3.0.tgz#f2849e27db79fb4d6cfe24764fc4134f165989f2"
+  integrity sha512-hjGrh+P926p4R4WbaB6OckyRtO0F0/lQBiT+0gnxjV+5kjPBrfVBFCsCLbMqVQeydvIoouYTCmmEURiH3R1Bdg==
 
 pretty-format@^24.8.0:
   version "24.8.0"
@@ -11716,15 +11792,15 @@ react-dates@15.5.3:
     react-with-styles "=2.2.0"
     react-with-styles-interface-css "^3.0.0"
 
-react-dom@16.8.6:
-  version "16.8.6"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.8.6.tgz#71d6303f631e8b0097f56165ef608f051ff6e10f"
-  integrity sha512-1nL7PIq9LTL3fthPqwkvr2zY7phIPjYrT0jp4HjyEQrEROnw4dG41VVwi/wfoCneoleqrNX7iAD+pXebJZwrwA==
+react-dom@16.9.0:
+  version "16.9.0"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.9.0.tgz#5e65527a5e26f22ae3701131bcccaee9fb0d3962"
+  integrity sha512-YFT2rxO9hM70ewk9jq0y6sQk8cL02xm4+IzYBz75CQGlClQQ1Bxq0nhHF6OtSbit+AIahujJgb/CPRibFkMNJQ==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.2"
-    scheduler "^0.13.6"
+    scheduler "^0.15.0"
 
 react-externs@0.13.6:
   version "0.13.6"
@@ -11783,15 +11859,14 @@ react-with-styles@=2.2.0:
     hoist-non-react-statics "^2.3.1"
     prop-types "^15.6.0"
 
-react@16.8.6:
-  version "16.8.6"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.8.6.tgz#ad6c3a9614fd3a4e9ef51117f54d888da01f2bbe"
-  integrity sha512-pC0uMkhLaHm11ZSJULfOBqV4tIZkx87ZLvbbQYunNixAAvjnC+snJCg0XQXn9VIsttVsbZP/H/ewzgsd5fxKXw==
+react@16.9.0:
+  version "16.9.0"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.9.0.tgz#40ba2f9af13bc1a38d75dbf2f4359a5185c4f7aa"
+  integrity sha512-+7LQnFBwkiw+BobzOF6N//BdoNw0ouwmSJTEm9cglOOmsg/TMiFHZLe2sEoN5M7LgJTj9oHH0gxklfnQe66S1w==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.2"
-    scheduler "^0.13.6"
 
 read-cache@^1.0.0:
   version "1.0.0"
@@ -11859,7 +11934,7 @@ readable-stream@1.1.x, readable-stream@~1.1.8, readable-stream@~1.1.9:
     isarray "0.0.1"
     string_decoder "~0.10.x"
 
-"readable-stream@2 || 3", readable-stream@^3.1.1:
+"readable-stream@2 || 3", readable-stream@^3.0.6, readable-stream@^3.1.1:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-3.4.0.tgz#a51c26754658e0a3c21dbf59163bd45ba6f447fc"
   integrity sha512-jItXPLmrSR8jmTRmRWJXCnGJsfy85mB3Wd/uINMXA65yrnFo0cPClFIUWzo2najVNSl+mx7/4W8ttlLWJe99pQ==
@@ -12491,10 +12566,10 @@ saxes@^3.1.9:
   dependencies:
     xmlchars "^2.1.1"
 
-scheduler@^0.13.6:
-  version "0.13.6"
-  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.13.6.tgz#466a4ec332467b31a91b9bf74e5347072e4cd889"
-  integrity sha512-IWnObHt413ucAYKsD9J1QShUKkbKLQQHdxRyw73sw4FN26iWr3DY/H34xGPe4nmL1DwXyWmSWmMrA9TfQbE/XQ==
+scheduler@^0.15.0:
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.15.0.tgz#6bfcf80ff850b280fed4aeecc6513bc0b4f17f8e"
+  integrity sha512-xAefmSfN6jqAa7Kuq7LIJY0bwAPG3xlCj0HMEBQk1lxYiDKZscY2xJ5U/61ZTrYbmNQbXa+gc7czPkVo11tnCg==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
@@ -12644,11 +12719,6 @@ set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/set-blocking/-/set-blocking-2.0.0.tgz#045f9782d011ae9a6803ddd382b24392b3d890f7"
   integrity sha1-BF+XgtARrppoA93TgrJDkrPYkPc=
-
-set-dom@7.5.2:
-  version "7.5.2"
-  resolved "https://registry.yarnpkg.com/set-dom/-/set-dom-7.5.2.tgz#e1f013dc442d2e0b23279ea5ae436ab4d9af878f"
-  integrity sha512-IJFPF+cuS5aIfJsCnOmIWnBcuGXsgPFXNkmzmGelxwFUbJN/HFoVzfeseViK0NxGkpdYkInaM/fsnMg1dyyUNQ==
 
 set-immediate-shim@~1.0.1:
   version "1.0.1"
@@ -13100,6 +13170,16 @@ stream-http@^2.0.0:
     inherits "^2.0.1"
     readable-stream "^2.3.6"
     to-arraybuffer "^1.0.0"
+    xtend "^4.0.0"
+
+stream-http@^3.0.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/stream-http/-/stream-http-3.1.0.tgz#22fb33fe9b4056b4eccf58bd8f400c4b993ffe57"
+  integrity sha512-cuB6RgO7BqC4FBYzmnvhob5Do3wIdIsXAgGycHJnW+981gHqoYcYz9lqjJrk8WXRddbwPuqPYRl+bag6mYv4lw==
+  dependencies:
+    builtin-status-codes "^3.0.0"
+    inherits "^2.0.1"
+    readable-stream "^3.0.6"
     xtend "^4.0.0"
 
 stream-shift@^1.0.0:
