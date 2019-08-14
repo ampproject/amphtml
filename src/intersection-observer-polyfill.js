@@ -19,13 +19,13 @@ import {Services} from './services';
 import {SubscriptionApi} from './iframe-helper';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {isArray, isFiniteNumber} from './types';
 import {
+  getClientRectRelativeDoc,
   layoutRectLtwh,
   moveLayoutRect,
   rectIntersection,
-  getClientRectRelativeDoc,
 } from './layout-rect';
+import {isArray, isFiniteNumber} from './types';
 
 /**
  * The structure that defines the rectangle used in intersection observers.

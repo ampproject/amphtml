@@ -373,7 +373,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     );
   });
 
-  it('should support polyfill on non-amp root element', () => {
+  it('should support visibility trigger on non-AMP root element', () => {
     delete win.IntersectionObserver;
     const inOb = root.getIntersectionObserver_();
 
@@ -383,10 +383,6 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     const model = root.models_[0];
     expect(inOb.observeEntries_).to.have.length(1);
 
-    // AMP API is polyfilled.
-    expect(rootElement.getLayoutBox).to.be.a('function');
-    expect(rootElement.getOwner()).to.be.null;
-
     // Starts as invisible.
     expect(model.getVisibility_()).to.equal(0);
 
@@ -394,13 +390,10 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     sandbox.stub(viewport, 'getRect').callsFake(() => {
       return layoutRectLtwh(0, 0, 100, 100);
     });
-    sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
-      if (element == rootElement) {
-        return layoutRectLtwh(0, 50, 100, 100);
-      }
-      return null;
+    sandbox.stub(rootElement, 'getBoundingClientRect').callsFake(() => {
+      return layoutRectLtwh(0, 50, 100, 100);
     });
-    expect(rootElement.getLayoutBox()).to.contain({
+    expect(rootElement.getBoundingClientRect()).to.contain({
       left: 0,
       top: 50,
       width: 100,

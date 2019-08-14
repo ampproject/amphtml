@@ -289,9 +289,7 @@ export function cloneLayoutMarginsChangeDef(marginsChange) {
  * @return {Object}
  */
 export function getClientRectRelativeDoc(element, hostViewport) {
-  const rect = element.getBoundingClientRect();
-  // const ampdoc = Services.ampdoc(element);
-  // const {scrollX, scrollY} = self.window; //ampdoc.win;
+  const rect = element./*OK*/ getBoundingClientRect();
   const {top: viewportTop, left: viewportLeft} = hostViewport;
 
   // getBoundingClientRect() returns position relative to viewport. We want
