@@ -347,6 +347,14 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
+    id: 'inabox-css-cleanup',
+    name:
+      'Experiment to prevent regression after a major CSS clean up' +
+      ' for AMPHTML Ads in inabox rendering mode',
+    spec: 'https://github.com/ampproject/amphtml/issues/22418',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
+  },
+  {
     id: 'inabox-no-chunking',
     name: 'Experiment to disable startup chunking in inabox runtime',
     spec: 'https://github.com/ampproject/amphtml/issues/23573',
