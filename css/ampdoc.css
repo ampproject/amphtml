@@ -54,16 +54,6 @@ body {
 }
 
 /**
- * We intentionally break with HTML5's default [hidden] styling to apply
- * !important.
- */
-[hidden] {
-  /* This must be !important, else the toggle helper system would break down
-     due to specificity */
-  display: none !important;
-}
-
-/**
  * The enables passive touch handlers, e.g. for document swipe, since they
  * no will longer need to try to cancel vertical scrolls during swipes.
  * This is only done in the embedded mode because (a) the document swipe
