@@ -21,6 +21,9 @@ import {user} from './log';
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
+/** @const {string} */
+export const MEDIA_LOAD_FAILURE_SRC_PROPERTY = '__AMP_MEDIA_LOAD_FAILURE_SRC';
+
 /**
  * Returns a CustomEvent with a given type and detail; supports fallback for IE.
  * @param {!Window} win
@@ -170,8 +173,14 @@ export function loadPromise(eleOrWindow) {
   if (isLoaded(eleOrWindow)) {
     return Promise.resolve(eleOrWindow);
   }
+  const isMediaElement = isHTMLMediaElement(eleOrWindow);
+  if (
+    isMediaElement &&
+    eleOrWindow[MEDIA_LOAD_FAILURE_SRC_PROPERTY] === eleOrWindow.currentSrc
+  ) {
+    return Promise.reject(eleOrWindow);
+  }
   const loadingPromise = new Promise((resolve, reject) => {
-    const isMediaElement = isHTMLMediaElement(eleOrWindow);
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
     if (isMediaElement) {
@@ -225,6 +234,14 @@ export function loadPromise(eleOrWindow) {
  *     case Windows.
  */
 function failedToLoad(eleOrWindow) {
+  // Mark the element as errored since some elements - like HTMLMediaElement
+  // using HTMLSourceElement - do not provide any synchronous way to verify if
+  // they already errored, even though the error event was already dispatched.
+  if (isHTMLMediaElement(eleOrWindow)) {
+    eleOrWindow[MEDIA_LOAD_FAILURE_SRC_PROPERTY] =
+      eleOrWindow.currentSrc || true;
+  }
+
   // Report failed loads as user errors so that they automatically go
   // into the "document error" bucket.
   let target = eleOrWindow;

@@ -795,39 +795,40 @@ export class AmpStoryPage extends AMP.BaseElement {
       mediaEl.play();
       return Promise.resolve();
     } else {
-      return mediaPool
-        .play(/** @type {!./media-pool.DomElementDef} */ (mediaEl))
-        .catch(unusedError => {
-          if (!this.isMediaDisplayed_(mediaEl)) {
-            return;
-          }
+      if (!this.isMediaDisplayed_(mediaEl)) {
+        return Promise.resolve();
+      }
 
-          // Auto playing the media failed, which could be caused by a data
-          // saver, or a battery saving mode. Display a message so we can
-          // get a user gesture to bless the media elements, and play them.
-          if (mediaEl.tagName === 'VIDEO') {
-            this.debounceToggleLoadingSpinner_(false);
+      return this.loadPromise(mediaEl).then(
+        () => {
+          return mediaPool
+            .play(/** @type {!./media-pool.DomElementDef} */ (mediaEl))
+            .catch(unusedError => {
+              // Auto playing the media failed, which could be caused by a data
+              // saver, or a battery saving mode. Display a message so we can
+              // get a user gesture to bless the media elements, and play them.
+              if (mediaEl.tagName === 'VIDEO') {
+                this.debounceToggleLoadingSpinner_(false);
 
-            // If the error came from the <video> and not from a <source>
-            // descendant.
-            if (mediaEl.error) {
-              this.toggleErrorMessage_(true);
-              return;
-            }
+                // If autoplay got rejected, display a "play" button. If
+                // autoplay was supported, dispay an error message.
+                this.isAutoplaySupported_().then(isAutoplaySupported => {
+                  isAutoplaySupported
+                    ? this.toggleErrorMessage_(true)
+                    : this.togglePlayMessage_(true);
+                });
+              }
 
-            // If autoplay got rejected, display a "play" button. If autoplay
-            // was supported, dispay an error message.
-            this.isAutoplaySupported_().then(isAutoplaySupported => {
-              isAutoplaySupported
-                ? this.toggleErrorMessage_(true)
-                : this.togglePlayMessage_(true);
+              if (mediaEl.tagName === 'AUDIO') {
+                this.playAudioElementFromTimestamp_ = Date.now();
+              }
             });
-          }
-
-          if (mediaEl.tagName === 'AUDIO') {
-            this.playAudioElementFromTimestamp_ = Date.now();
-          }
-        });
+        },
+        () => {
+          this.debounceToggleLoadingSpinner_(false);
+          this.toggleErrorMessage_(true);
+        }
+      );
     }
   }
 
