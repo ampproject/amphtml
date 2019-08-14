@@ -176,3 +176,18 @@ describes.sandboxed('Signals', {}, () => {
     expect(signals.promiseMap_['sig']).to.be.undefined;
   });
 });
+
+describes.sandboxed('Signals with zero for tests', {}, () => {
+  let clock;
+  let signals;
+
+  beforeEach(() => {
+    clock = sandbox.useFakeTimers();
+    signals = new Signals();
+  });
+
+  it('should register signal without promise', () => {
+    signals.signal('sig');
+    expect(signals.get('sig')).to.equal(0);
+  });
+});
