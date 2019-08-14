@@ -244,7 +244,7 @@ export class Bind {
     this.historyQueue_ = [];
 
     /** @private @const {!Function} */
-    this.flushHistoryQueueSoon_ = debounce(
+    this.debouncedFlushHistoryQueue_ = debounce(
       this.win_,
       () => this.flushHistoryQueue_(),
       1000
@@ -372,11 +372,13 @@ export class Bind {
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
       .then(result => this.setState(result))
       .then(() => {
-        const data = this.getDataForHistory_();
-        if (data) {
-          this.historyQueue_.push({op: HistoryOp.REPLACE, data});
-          this.flushHistoryQueueSoon_();
-        }
+        return this.getDataForHistory_().then(data => {
+          if (data) {
+            this.historyQueue_.push({op: HistoryOp.REPLACE, data});
+            // Debounce flush queue on "replace" to rate limit History.replace.
+            this.debouncedFlushHistoryQueue_();
+          }
+        });
       });
     return this.setStatePromise_;
   }
@@ -404,11 +406,14 @@ export class Bind {
 
       const onPop = () => this.setState(oldState);
       return this.setState(result).then(() => {
-        const data = this.getDataForHistory_();
-        if (data) {
-          this.historyQueue_.push({op: HistoryOp.PUSH, data, onPop});
-          this.flushHistoryQueueSoon_();
-        }
+        return this.getDataForHistory_().then(data => {
+          if (data) {
+            this.historyQueue_.push({op: HistoryOp.PUSH, data, onPop});
+            // Immediately flush queue on "push" to avoid adding latency to
+            // the browser "back" functionality.
+            this.flushHistoryQueue_();
+          }
+        });
       });
     });
   }
@@ -427,8 +432,6 @@ export class Bind {
         }
         this.history_.replace(data);
       } else if (op === HistoryOp.PUSH) {
-        // TODO(choumx): As an optimization, a "push" can be merged with
-        // subsequent "replace" operations.
         this.history_.push(onPop, data);
       }
     }
