@@ -28,6 +28,10 @@
   z-index: 100001 !important;
 }
 
+.i-amphtml-story-bookend-overflow {
+  padding-top: 88px !important;
+}
+
 .i-amphtml-story-bookend-handle {
   height: 4px !important;
   width: 40px !important;
