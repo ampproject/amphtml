@@ -45,6 +45,47 @@ describe('AmpDocService', () => {
     delete window.document['__AMPDOC'];
   });
 
+  describe('params', {}, () => {
+    let doc, win;
+
+    beforeEach(() => {
+      doc = {
+        body: null,
+        visibilityState: 'visible',
+        addEventListener: function() {},
+        removeEventListener: function() {},
+      };
+      win = {
+        location: {},
+        document: doc,
+      };
+    });
+
+    it('should read params from window name and fragment', () => {
+      win.name = '__AMP__viewportType=natural&other=one';
+      win.location.hash = '#paddingTop=17&other=two';
+      const ampdoc = new AmpDocService(win, true).getSingleDoc();
+
+      // Fragment parameters take precedence.
+      expect(ampdoc.getParam('viewportType')).to.equal('natural');
+      expect(ampdoc.getParam('other')).to.equal('two');
+      expect(ampdoc.getParam('paddingTop')).to.equal('17');
+    });
+
+    it('should ignore window name and fragment with explicit params', () => {
+      win.name = '__AMP__viewportType=natural&other=one';
+      win.location.hash = '#paddingTop=17&other=two';
+      const ampdoc = new AmpDocService(win, true, {
+        'other': 'zero',
+      }).getSingleDoc();
+
+      // Fragment parameters take precedence.
+      expect(ampdoc.getParam('other')).to.equal('three');
+      expect(ampdoc.getParam('viewportType')).to.be.null;
+      expect(ampdoc.getParam('paddingTop')).to.be.null;
+    });
+  });
+
   describe('single-doc mode', () => {
     let service;
 
@@ -54,17 +95,16 @@ describe('AmpDocService', () => {
 
     it('should initialize as single-doc', () => {
       expect(service.isSingleDoc()).to.be.true;
-      expect(service.singleDoc_).to.exist;
-      expect(service.singleDoc_).to.be.instanceOf(AmpDocSingle);
+      expect(service.getSingleDoc()).to.exist;
+      expect(service.getSingleDoc()).to.be.instanceOf(AmpDocSingle);
     });
 
     it('should always yield the single document', () => {
       expect(() => service.getAmpDoc(null)).to.throw;
-      expect(service.getSingleDoc()).to.equal(service.singleDoc_);
-      expect(service.getAmpDoc(document)).to.equal(service.singleDoc_);
+      expect(service.getAmpDoc(document)).to.equal(service.getSingleDoc());
       const div = document.createElement('div');
       document.body.appendChild(div);
-      expect(service.getAmpDoc(div)).to.equal(service.singleDoc_);
+      expect(service.getAmpDoc(div)).to.equal(service.getSingleDoc());
     });
 
     // For example, <amp-next-page> creates shadow documents in single-doc
@@ -106,6 +146,19 @@ describe('AmpDocService', () => {
         );
         const ampDoc = service.getAmpDoc(content);
         expect(ampDoc).to.equal(newAmpDoc);
+      });
+
+      it('should pass shadow doc params', () => {
+        if (!shadowRoot) {
+          return;
+        }
+
+        const ampdoc = service.installShadowDoc('https://a.org/', shadowRoot, {
+          params: {
+            'other': 'one',
+          },
+        });
+        expect(ampdoc.getParam('other')).to.equal('one');
       });
     });
   });
@@ -276,7 +329,7 @@ describe('AmpDocService', () => {
 
     it('should initialize as single-doc', () => {
       expect(service.isSingleDoc()).to.be.true;
-      expect(service.singleDoc_).to.exist;
+      expect(service.getSingleDoc()).to.exist;
     });
 
     it('should yield custom-element doc when exists', () => {
@@ -323,7 +376,7 @@ describe('AmpDocService', () => {
       if (!shadowRoot) {
         return;
       }
-      expect(service.getAmpDoc(host)).to.equal(service.singleDoc_);
+      expect(service.getAmpDoc(host)).to.equal(service.getSingleDoc());
     });
 
     it('should fail to install shadow doc twice', () => {
@@ -383,8 +436,17 @@ describe('AmpDocService', () => {
         childWin.document.body.appendChild(content);
         const ampDoc = service.getAmpDoc(content);
         expect(ampDoc).to.equal(newAmpDoc);
-        expect(ampDoc.getParent()).to.equal(service.singleDoc_);
+        expect(ampDoc.getParent()).to.equal(service.getSingleDoc());
         expect(childWin.document['__AMPDOC']).to.equal(ampDoc);
+      });
+
+      it('should pass fie doc params', () => {
+        const ampdoc = service.installFieDoc('https://a.org/', childWin, {
+          params: {
+            'other': 'one',
+          },
+        });
+        expect(ampdoc.getParam('other')).to.equal('one');
       });
     });
   });
@@ -624,7 +686,7 @@ describes.realWin('AmpDocFie', {}, env => {
     service = new AmpDocService(window, /* isSingleDoc */ true);
     childWin = env.win;
     setParentWindow(childWin, window);
-    parent = service.singleDoc_;
+    parent = service.getSingleDoc();
     ampdoc = new AmpDocFie(childWin, URL, parent);
   });
 

@@ -709,7 +709,7 @@ class AmpFixture {
     }
     const ampdocType = spec.ampdoc || 'single';
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
-    installDocService(win, singleDoc);
+    installDocService(win, singleDoc, spec.params);
     const ampdocService = Services.ampdocServiceFor(win);
     env.ampdocService = ampdocService;
     installExtensionsService(win);
@@ -724,7 +724,7 @@ class AmpFixture {
       completePromise = installRuntimeStylesPromise(win);
       const ampdoc = ampdocService.getAmpDoc(win.document);
       env.ampdoc = ampdoc;
-      installAmpdocServices(ampdoc, spec.params);
+      installAmpdocServices(ampdoc);
       adopt(win);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
     } else if (ampdocType == 'multi' || ampdocType == 'shadow') {

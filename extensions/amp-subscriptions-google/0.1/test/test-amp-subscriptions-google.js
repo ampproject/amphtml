@@ -60,7 +60,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
-    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     serviceAdapter = new ServiceAdapter(null);
     serviceAdapterMock = sandbox.mock(serviceAdapter);
     sandbox.stub(serviceAdapter, 'getPageConfig').callsFake(() => pageConfig);
@@ -406,17 +406,17 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should infer the viewer from viewerUrl', () => {
-    delete viewer.params_['viewerUrl'];
+    delete ampdoc.params_['viewerUrl'];
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
     expect(platform.isGoogleViewer_).to.be.false;
 
-    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
     expect(platform.isGoogleViewer_).to.be.true;
   });
 
   it('should infer the viewer from origin', () => {
-    delete viewer.params_['viewerUrl'];
+    delete ampdoc.params_['viewerUrl'];
     let viewerOrigin = null;
     sandbox.stub(viewer, 'getViewerOrigin').callsFake(() => viewerOrigin);
 
@@ -448,7 +448,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should allow prerender if in a google viewer', () => {
-    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
     expect(platform.isPrerenderSafe()).to.be.true;
   });

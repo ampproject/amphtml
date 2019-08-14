@@ -88,7 +88,7 @@ export function allocateVariant(
   // Variant can be overridden from URL fragment.
   const override = viewer.getParam(ATTR_PREFIX + experimentName);
   if (override && hasOwn(experimentObject['variants'], override)) {
-    return Promise.resolve(/** @type {?string} */ (override));
+    return Promise.resolve(override);
   }
 
   const sticky = experimentObject['sticky'] !== false;
