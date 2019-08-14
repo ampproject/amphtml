@@ -188,7 +188,7 @@ export function isTrustedReferrer(referrer) {
 function handleClickUrl(win) {
   const viewer = Services.viewerForDoc(win.document.documentElement);
 
-  /** @const {string|undefined} */
+  /** @const {?string} */
   const clickUrl = viewer.getParam('click');
   if (!clickUrl) {
     return Promise.resolve();

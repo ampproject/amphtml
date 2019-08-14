@@ -121,7 +121,7 @@ export class Messaging {
    * @param {!Window} win
    * @param {!MessagePort|!WindowPortEmulator} port
    * @param {boolean=} opt_isWebview
-   * @param {string=} opt_token
+   * @param {?string=} opt_token
    */
   constructor(win, port, opt_isWebview, opt_token) {
     /** @const {!Window} */
@@ -156,9 +156,9 @@ export class Messaging {
      * would not be able to steal this token under the same origin policy,
      * because the token is inside the viewer document at a different origin
      * and the attacker can't access it.
-     * @const @private {string|undefined}
+     * @const @private {?string}
      */
-    this.token_ = opt_token;
+    this.token_ = opt_token || null;
 
     /** @private {number} */
     this.requestIdCounter_ = 0;
