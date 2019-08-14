@@ -149,9 +149,13 @@ export class Owners {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.pause();
-    });
+    this.resources_.findResourcesInElements(
+      parentResource,
+      subElements,
+      resource => {
+        resource.pause();
+      }
+    );
   }
 
   /** @override */
@@ -159,9 +163,13 @@ export class Owners {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.resume();
-    });
+    this.resources_.findResourcesInElements(
+      parentResource,
+      subElements,
+      resource => {
+        resource.resume();
+      }
+    );
   }
 
   /** @override */
@@ -169,9 +177,13 @@ export class Owners {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.unlayout();
-    });
+    this.resources_.findResourcesInElements(
+      parentResource,
+      subElements,
+      resource => {
+        resource.unlayout();
+      }
+    );
   }
 
   /** @override */
@@ -192,36 +204,27 @@ export class Owners {
    * @private
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      if (resource.getState() === ResourceState.NOT_BUILT) {
-        resource.whenBuilt().then(() => {
+    this.resources_.findResourcesInElements(
+      parentResource,
+      subElements,
+      resource => {
+        if (resource.getState() === ResourceState.NOT_BUILT) {
+          resource.whenBuilt().then(() => {
+            this.resources_.measureAndTryScheduleLayout(
+              resource,
+              !layout,
+              parentResource.getLayoutPriority()
+            );
+          });
+        } else {
           this.resources_.measureAndTryScheduleLayout(
             resource,
             !layout,
             parentResource.getLayoutPriority()
           );
-        });
-      } else {
-        this.resources_.measureAndTryScheduleLayout(
-          resource,
-          !layout,
-          parentResource.getLayoutPriority()
-        );
+        }
       }
-    });
-  }
-
-  /**
-   * Finds resources within the parent resource's shallow subtree.
-   * @param {!Resource} parentResource
-   * @param {!Array<!Element>} elements
-   * @param {function(!Resource)} callback
-   */
-  discoverResourcesForArray_(parentResource, elements, callback) {
-    elements.forEach(element => {
-      devAssert(parentResource.element.contains(element));
-      this.discoverResourcesForElement_(element, callback);
-    });
+    );
   }
 
   /**
@@ -237,42 +240,13 @@ export class Owners {
     inLocalViewport
   ) {
     const inViewport = parentResource.isInViewport() && inLocalViewport;
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.setInViewport(inViewport);
-    });
-  }
-
-  /**
-   * @param {!Element} element
-   * @param {function(!Resource)} callback
-   */
-  discoverResourcesForElement_(element, callback) {
-    // Breadth-first search.
-    if (element.classList.contains('i-amphtml-element')) {
-      callback(this.resources_.getResourceForElement(element));
-      // Also schedule amp-element that is a placeholder for the element.
-      const placeholder = element.getPlaceholder();
-      if (placeholder) {
-        this.discoverResourcesForElement_(placeholder, callback);
+    this.resources_.findResourcesInElements(
+      parentResource,
+      subElements,
+      resource => {
+        resource.setInViewport(inViewport);
       }
-    } else {
-      const ampElements = element.getElementsByClassName('i-amphtml-element');
-      const seen = [];
-      for (let i = 0; i < ampElements.length; i++) {
-        const ampElement = ampElements[i];
-        let covered = false;
-        for (let j = 0; j < seen.length; j++) {
-          if (seen[j].contains(ampElement)) {
-            covered = true;
-            break;
-          }
-        }
-        if (!covered) {
-          seen.push(ampElement);
-          callback(this.resources_.getResourceForElement(ampElement));
-        }
-      }
-    }
+    );
   }
 }
 

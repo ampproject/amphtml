@@ -265,6 +265,14 @@ export class ResourcesDef extends MutatorsDef {
   removeForChildWindow(childWin) {}
 
   /**
+   * Finds resources within the parent resource's shallow subtree.
+   * @param {!Resource} parentResource
+   * @param {!Array<!Element>} elements
+   * @param {function(!Resource)} callback
+   */
+  findResourcesInElements(parentResource, elements, callback) {}
+
+  /**
    * @param {!Resource} resource
    * @param {boolean} isPreload
    * @param {number=} opt_parentPriority
@@ -826,6 +834,14 @@ export class Resources {
   removeForChildWindow(childWin) {
     const toRemove = this.resources_.filter(r => r.hostWin == childWin);
     toRemove.forEach(r => this.removeResource_(r, /* disconnect */ true));
+  }
+
+  /** @override */
+  findResourcesInElements(parentResource, elements, callback) {
+    elements.forEach(element => {
+      devAssert(parentResource.element.contains(element));
+      this.discoverResourcesForElement_(element, callback);
+    });
   }
 
   /** @override */
@@ -2274,7 +2290,7 @@ export class Resources {
   discoverResourcesForElement_(element, callback) {
     // Breadth-first search.
     if (element.classList.contains('i-amphtml-element')) {
-      callback(Resource.forElement(element));
+      callback(this.getResourceForElement(element));
       // Also schedule amp-element that is a placeholder for the element.
       const placeholder = element.getPlaceholder();
       if (placeholder) {
@@ -2294,7 +2310,7 @@ export class Resources {
         }
         if (!covered) {
           seen.push(ampElement);
-          callback(Resource.forElement(ampElement));
+          callback(this.getResourceForElement(ampElement));
         }
       }
     }
