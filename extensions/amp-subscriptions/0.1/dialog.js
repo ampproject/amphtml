@@ -33,7 +33,7 @@ export class Dialog {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /**
-     * @private @const {!../../../src/service/viewport/viewport-def.ViewportDef}
+     * @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface}
      */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 

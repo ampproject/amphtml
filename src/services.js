@@ -829,10 +829,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/viewport/viewport-def.ViewportDef}
+   * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */
   static viewportForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/viewport/viewport-def.ViewportDef} */ (getServiceForDoc(
+    return /** @type {!./service/viewport/viewport-interface.ViewportInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
       'viewport'
     ));

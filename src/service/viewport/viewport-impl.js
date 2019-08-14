@@ -22,7 +22,7 @@ import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedShadowRoot_} from './viewport-binding-ios-embed-sd';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
-import {ViewportDef} from './viewport-def';
+import {ViewportInterface} from './viewport-interface';
 import {VisibilityState} from '../../visibility-state';
 import {clamp} from '../../utils/math';
 import {
@@ -56,7 +56,7 @@ const TAG_ = 'Viewport';
  * and other events and notifies interesting parties when viewport has changed
  * and how.
  *
- * @implements {ViewportDef}
+ * @implements {ViewportInterface}
  */
 export class ViewportImpl {
   /**
@@ -123,7 +123,7 @@ export class ViewportImpl {
     /** @private {number} */
     this.scrollCount_ = 0;
 
-    /** @private @const {!Observable<!./viewport-def.ViewportChangedEventDef>} */
+    /** @private @const {!Observable<!./viewport-interface.ViewportChangedEventDef>} */
     this.changeObservable_ = new Observable();
 
     /** @private @const {!Observable} */

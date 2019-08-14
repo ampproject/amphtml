@@ -118,7 +118,7 @@ export class GlobalVariableSource extends VariableSource {
     const {win} = this.ampdoc;
     const element = this.ampdoc.getHeadNode();
 
-    /** @const {!./viewport/viewport-def.ViewportDef} */
+    /** @const {!./viewport/viewport-interface.ViewportInterface} */
     const viewport = Services.viewportForDoc(this.ampdoc);
 
     // Returns a random value for cache busters.

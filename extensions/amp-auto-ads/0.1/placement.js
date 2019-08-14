@@ -126,7 +126,7 @@ export class Placement {
     /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(anchorElement);
 
-    /** @const @private {!../../../src/service/viewport/viewport-def.ViewportDef} */
+    /** @const @private {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(anchorElement);
 
     /** @const @private {!Element} */

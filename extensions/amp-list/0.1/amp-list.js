@@ -94,7 +94,7 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?Element} */
     this.container_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-def.ViewportDef} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {boolean} */

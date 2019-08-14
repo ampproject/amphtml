@@ -430,7 +430,7 @@ export class Resources {
     /** @private {boolean} */
     this.isCurrentlyBuildingPendingResources_ = false;
 
-    /** @private @const {!./viewport/viewport-def.ViewportDef} */
+    /** @private @const {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */

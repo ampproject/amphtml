@@ -838,6 +838,7 @@ const forbiddenTermsSrcInclusive = {
       'src/service/viewport/viewport-binding-ios-embed-wrapper.js',
       'src/service/viewport/viewport-binding-natural.js',
       'src/service/viewport/viewport-impl.js',
+      'src/service/viewport/viewport-interface.js',
     ],
   },
   'preloadExtension': {
