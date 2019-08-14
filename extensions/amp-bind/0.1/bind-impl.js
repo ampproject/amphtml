@@ -422,7 +422,7 @@ export class Bind {
       if (op === HistoryOp.REPLACE) {
         // Skip consecutive "replace" operations.
         const next = this.historyQueue_[i + 1];
-        if (next && next.operation === HistoryOp.REPLACE) {
+        if (next && next.op === HistoryOp.REPLACE) {
           continue;
         }
         this.history_.replace(data);
