@@ -146,6 +146,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
+    sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
@@ -193,6 +194,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       url: 'https://amp.dev',
       html: '<video src="https://example.com/video.mp3"></video>',
     });
+    sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
     fiePromise.then(fie => {
       const fieDoc = fie.win.document;
