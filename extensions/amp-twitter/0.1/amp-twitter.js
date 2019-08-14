@@ -124,7 +124,6 @@ class AmpTwitter extends AMP.BaseElement {
       if (this.userPlaceholder_) {
         this.togglePlaceholder(false);
       }
-
       this./*OK*/ changeHeight(height);
     });
   }
