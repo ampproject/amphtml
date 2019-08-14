@@ -1165,6 +1165,57 @@ describes.realWin(
         );
 
         it(
+          'should update focus when the user presses the home key when ' +
+            'keyboard-select-mode is enabled',
+          () => {
+            const ampSelector = getSelector({
+              attributes: {
+                'keyboard-select-mode': 'focus',
+              },
+              config: {
+                count: 3,
+              },
+            });
+            ampSelector.children[2].setAttribute('selected', '');
+            ampSelector.children[0].setAttribute('hidden', '');
+            ampSelector.build();
+            expect(ampSelector.children[0].tabIndex).to.equal(-1);
+            expect(ampSelector.children[1].tabIndex).to.equal(-1);
+            expect(ampSelector.children[2].tabIndex).to.equal(0);
+            return keyPress(ampSelector, Keys.HOME).then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            });
+          }
+        );
+
+        it(
+          'should update focus when the user presses the end key when ' +
+            'keyboard-select-mode is enabled',
+          () => {
+            const ampSelector = getSelector({
+              attributes: {
+                'keyboard-select-mode': 'focus',
+              },
+              config: {
+                count: 3,
+              },
+            });
+            ampSelector.children[2].setAttribute('hidden', '');
+            ampSelector.build();
+            expect(ampSelector.children[0].tabIndex).to.equal(0);
+            expect(ampSelector.children[1].tabIndex).to.equal(-1);
+            expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            return keyPress(ampSelector, Keys.END).then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            });
+          }
+        );
+
+        it(
           'should update focus for single-select when ' +
             'selection is changed without user interaction',
           () => {
