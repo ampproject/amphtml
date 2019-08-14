@@ -52,7 +52,8 @@ export class Signals {
    * @return {number|!Error|null}
    */
   get(name) {
-    return this.map_[name] || null;
+    const v = this.map_[name];
+    return v == null ? null : v;
   }
 
   /**
