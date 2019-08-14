@@ -178,15 +178,15 @@ describes.sandboxed('Signals', {}, () => {
 });
 
 describes.sandboxed('Signals with zero for tests', {}, () => {
-  let clock;
   let signals;
 
   beforeEach(() => {
-    clock = sandbox.useFakeTimers();
+    sandbox.useFakeTimers();
     signals = new Signals();
   });
 
   it('should register signal without promise', () => {
+    // The signal value is often 0 in tests due to the fake timer.
     signals.signal('sig');
     expect(signals.get('sig')).to.equal(0);
   });

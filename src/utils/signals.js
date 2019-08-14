@@ -53,7 +53,7 @@ export class Signals {
    */
   get(name) {
     const v = this.map_[name];
-    return v === 0 ? v : v || null;
+    return v == null ? null : v;
   }
 
   /**
