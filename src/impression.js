@@ -168,6 +168,7 @@ function handleReplaceUrl(win) {
 
 /**
  * @param {string} referrer
+ * @return {boolean}
  * @visibleForTesting
  */
 export function isTrustedReferrer(referrer) {

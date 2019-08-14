@@ -160,7 +160,7 @@ git branch -u upstream/master master
 
 Now that you have all of the files copied locally you can actually build the code and run a local server to try things out. We use Node.js, the Yarn package manager, Closure Compiler, and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.
 
-* Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). An easy way to do so is with `nvm` (Mac and Linux: [here](https://github.com/creationix/nvm), Windows: [here](https://github.com/coreybutler/nvm-windows))
+* Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). If you're on Mac or Linux, an easy way to install Node.js is with `nvm`: [here](https://github.com/creationix/nvm).
 
    ```
    nvm install --lts
@@ -222,6 +222,12 @@ Note that by default each of the pages in the /examples directory uses the unmin
 - [http://localhost:8000/serve_mode=cdn](http://localhost:8000/serve_mode=cdn)
 
   Minified AMP JavaScript is served from `cdn.ampproject.org`.
+
+- http://localhost:8000/serve_mode=<RTV_NUMBER>
+
+  E.g. http://localhost:8000/serve_mode=001907161745080
+
+  Minified AMP JavaScript is served from `cdn.ampproject.org/rtv/<RTV_NUMBER>`, the RTV build from the given RTV number.
 
 When you're ready to make changes, you'll want to follow the steps below for creating a branch, testing and sending your changes for review.
 
@@ -354,7 +360,7 @@ For example, if you use [Visual Studio Code](https://code.visualstudio.com/), yo
 
 Alternatively, you can manually fix lint errors in your code by running:
 ```
-gulp lint --local-changes --fix
+gulp lint --local_changes --fix
 ```
 
 # Testing your changes

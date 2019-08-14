@@ -150,7 +150,7 @@ export class FxElement {
     /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(element);
 
-    /** @const @private {!../../../../src/service/resources-impl.Resources} */
+    /** @const @private {!../../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(element);
 
     /** @type {?number} */

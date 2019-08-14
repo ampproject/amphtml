@@ -428,6 +428,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * Readjusts the given rect using the configured exclusion margins.
    * @param {!../../../src/layout-rect.LayoutRectDef} rect viewport rect adjusted for margins.
    * @private
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    */
   applyMargins_(rect) {
     devAssert(rect);
@@ -480,7 +481,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 
   /**
-   * @private
+   * @protected
    */
   maybeUninstallPositionObserver_() {
     if (this.positionObserver_) {

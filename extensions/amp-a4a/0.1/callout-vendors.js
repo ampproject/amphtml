@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {getMode} from '../../../src/mode';
+import {jsonConfiguration} from '../../../src/json';
 
 //////////////////////////////////////////////////////////////////
 //                                                              //
@@ -36,7 +37,7 @@ import {getMode} from '../../../src/mode';
 let RtcVendorDef;
 
 /** @const {!Object<string, RtcVendorDef>} */
-export const RTC_VENDORS = {
+const RTC_VENDORS = jsonConfiguration({
   ////////////////////////////////////////////////////////////////////
   //                                                                //
   //              !!!      IMPORTANT NOTE     !!!                   //
@@ -128,7 +129,20 @@ export const RTC_VENDORS = {
     disableKeyAppend: true,
     macros: ['PLACEMENT_ID', '_DIVIDER_'],
   },
-};
+  kargo: {
+    url:
+      'https://krk.kargo.com/api/v1/amprtc?slot=SLOT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&pslot=ATTR(data-slot)&pvid=PAGEVIEWID&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&acid=ADCID&purl=HREF',
+    macros: ['SLOT_ID'],
+    errorReportingUrl:
+      'https://krk.kargo.com/api/v1/event/amprtc-error?error_type=ERROR_TYPE&url=HREF',
+    disableKeyAppend: true,
+  },
+  yieldlab: {
+    url: 'https://ad.yieldlab.net/yp/ADSLOT_ID?content=amp&t=amp%3D1',
+    macros: ['ADSLOT_ID'],
+    disableKeyAppend: true,
+  },
+});
 
 // DO NOT MODIFY: Setup for tests
 if (getMode().localDev || getMode().test) {
@@ -144,3 +158,5 @@ if (getMode().localDev || getMode().test) {
     disableKeyAppend: true,
   });
 }
+
+export {RTC_VENDORS};

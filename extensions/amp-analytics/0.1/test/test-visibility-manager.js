@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AnalyticsEventType} from '../events';
 import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
@@ -405,7 +406,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       width: 100,
       height: 100,
     });
-    viewport.scrollObservable_.fire({type: 'scroll'});
+    viewport.scrollObservable_.fire({type: AnalyticsEventType.SCROLL});
     expect(model.getVisibility_()).to.equal(0.5);
 
     return eventPromise.then(() => {

@@ -225,7 +225,10 @@ export class AmpShareTracking extends AMP.BaseElement {
     return result;
   }
 
-  /** @private @return {!../../../src/service/history-impl.History} */
+  /**
+   * @private
+   * @return {!../../../src/service/history-impl.History}
+   */
   getHistory_() {
     return Services.historyForDoc(this.getAmpDoc());
   }

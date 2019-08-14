@@ -37,6 +37,7 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  * @param {!Object<string, !../localized-strings.LocalizedStringBundleDef>} localizedStringBundles
  * @param {!Array<string>} languageCodes
  * @param {!LocalizedStringId} localizedStringId
+ * @return {string|null}
  */
 function findLocalizedString(
   localizedStringBundles,
@@ -141,6 +142,7 @@ export class LocalizationService {
    *     used.  The language is based on the language at that part of the
    *     document.  If unspecified, will use the document-level language, if
    *     one exists, or the default otherwise.
+   * @return {string|null}
    */
   getLocalizedString(localizedStringId, elementToUse = undefined) {
     const languageCodes = elementToUse

@@ -52,7 +52,7 @@ export class Xhr {
     // TODO(alabiaga): This should be investigated and fixed
     /** @private {?./ampdoc-impl.AmpDoc} */
     this.ampdocSingle_ = ampdocService.isSingleDoc()
-      ? ampdocService.getAmpDoc()
+      ? ampdocService.getSingleDoc()
       : null;
   }
 
@@ -125,10 +125,9 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
    * @return {!Promise<!Response>}
    */
-  fetchJson(input, opt_init, opt_allowFailure) {
+  fetchJson(input, opt_init) {
     return this.fetch(input, setupJsonFetchInit(opt_init));
   }
 

@@ -143,7 +143,7 @@ export class AmpForm {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(this.form_);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
@@ -578,26 +578,48 @@ export class AmpForm {
     // Set ourselves to the SUBMITTING State
     this.setState_(FormState.SUBMITTING);
 
+    // Promises to run before submit without timeout.
+    const requiredActionPromises = [];
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
     iterateCursor(asyncInputs, asyncInput => {
-      presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+      const asyncCall = this.getValueForAsyncInput_(asyncInput);
+      if (
+        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+      ) {
+        requiredActionPromises.push(asyncCall);
+      } else {
+        presubmitPromises.push(asyncCall);
+      }
     });
 
-    return this.waitOnPromisesOrTimeout_(
-      presubmitPromises,
-      SUBMIT_TIMEOUT
-    ).then(
-      () => this.handlePresubmitSuccess_(trust),
-      error => {
-        const detail = dict();
-        if (error && error.message) {
-          detail['error'] = error.message;
-        }
-        return this.handleSubmitFailure_(error, detail);
-      }
+    return Promise.all(requiredActionPromises).then(
+      () => {
+        return this.waitOnPromisesOrTimeout_(
+          presubmitPromises,
+          SUBMIT_TIMEOUT
+        ).then(
+          () => this.handlePresubmitSuccess_(trust),
+          error => this.handlePresubmitError_(error)
+        );
+      },
+      error => this.handlePresubmitError_(error)
     );
+  }
+
+  /**
+   * @private
+   * Handle form error for presubmit async calls
+   * @param {*} error
+   * @return {Promise}
+   */
+  handlePresubmitError_(error) {
+    const detail = dict();
+    if (error && error.message) {
+      detail['error'] = error.message;
+    }
+    return this.handleSubmitFailure_(error, detail);
   }
 
   /**
@@ -1185,6 +1207,7 @@ export class AmpForm {
    * Returns a promise that resolves when tempalte render finishes. The promise
    * will be null if the template render has not started.
    * @visibleForTesting
+   * @return {*} TODO(#23582): Specify return type
    */
   renderTemplatePromiseForTesting() {
     return this.renderTemplatePromise_;
@@ -1194,6 +1217,7 @@ export class AmpForm {
    * Returns a promise that resolves when xhr submit finishes. The promise
    * will be null if xhr submit has not started.
    * @visibleForTesting
+   * @return {*} TODO(#23582): Specify return type
    */
   xhrSubmitPromiseForTesting() {
     return this.xhrSubmitPromise_;

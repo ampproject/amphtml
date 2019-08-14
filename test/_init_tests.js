@@ -21,6 +21,7 @@ import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
 import {adopt} from '../src/runtime';
+import {cancelTimersForTesting} from '../src/service/timer-impl';
 import {
   installAmpdocServices,
   installRuntimeServices,
@@ -420,7 +421,7 @@ function beforeTest() {
   };
   window.AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
-  const ampdoc = Services.ampdocServiceFor(window).getAmpDoc();
+  const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
   Services.resourcesForDoc(ampdoc).ampInitComplete();
@@ -456,6 +457,7 @@ afterEach(function() {
   window.AMP_DEV_MODE = false;
   window.context = undefined;
   window.AMP_MODE = undefined;
+  delete window.document['__AMPDOC'];
 
   if (windowState.length != initialWindowState.length) {
     for (let i = initialWindowState.length; i < windowState.length; ++i) {
@@ -482,6 +484,7 @@ afterEach(function() {
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
+  cancelTimersForTesting();
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

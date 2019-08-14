@@ -24,11 +24,15 @@ import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrap
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
 import {clamp} from '../../utils/math';
-import {closestAncestorElementBySelector, isIframed} from '../../dom';
+import {
+  closestAncestorElementBySelector,
+  getVerticalScrollbarWidth,
+  isIframed,
+} from '../../dom';
 import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
-import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
+import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
 import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,
@@ -208,13 +212,6 @@ export class Viewport {
       globalDocElement.classList.add('i-amphtml-webview');
     }
 
-    // Doc Level CSS Experiments
-    if (!isExperimentOn(this.ampdoc.win, 'inabox-remove-height-auto')) {
-      // This is a double negative, to allow going from 0 -> 100
-      // When deploying the experiment
-      globalDocElement.classList.add('i-amphtml-inabox-preserve-height-auto');
-    }
-
     // To avoid browser restore scroll position when traverse history
     if (isIframed(win) && 'scrollRestoration' in win.history) {
       win.history.scrollRestoration = 'manual';
@@ -277,16 +274,6 @@ export class Viewport {
   }
 
   /**
-   * Returns the viewport's top position in the document. This is essentially
-   * the scroll position.
-   * @return {number}
-   * @deprecated Use {@link getScrollTop}
-   */
-  getTop() {
-    return this.getScrollTop();
-  }
-
-  /**
    * Returns the viewport's vertical scroll position.
    * @return {number}
    */
@@ -315,18 +302,6 @@ export class Viewport {
   setScrollTop(scrollPos) {
     this./*OK*/ scrollTop_ = null;
     this.binding_.setScrollTop(scrollPos);
-  }
-
-  /**
-   * @return {number} The width of the vertical scrollbar, in pixels.
-   */
-  getVerticalScrollbarWidth() {
-    const {win} = this.ampdoc;
-    const {documentElement} = win.document;
-    const windowWidth = win./*OK*/ innerWidth;
-    const documentWidth = documentElement./*OK*/ clientWidth;
-
-    return windowWidth - documentWidth;
   }
 
   /**
@@ -910,7 +885,7 @@ export class Viewport {
     // platforms that have a width-taking scrollbar.
     this.vsync_.measure(() => {
       const existingMargin = computedStyle(win, documentElement).marginRight;
-      const scrollbarWidth = this.getVerticalScrollbarWidth();
+      const scrollbarWidth = getVerticalScrollbarWidth(this.ampdoc.win);
 
       requestedMarginRight = parseInt(existingMargin, 10) + scrollbarWidth;
     });
@@ -983,14 +958,6 @@ export class Viewport {
       return this.setViewportMetaString_(this.originalViewportMetaString_);
     }
     return false;
-  }
-
-  /**
-   * Returns whether the user has scrolled yet.
-   * @return {boolean}
-   */
-  hasScrolled() {
-    return this.scrollCount_ > 0;
   }
 
   /**
@@ -1422,9 +1389,14 @@ function getViewportType(win, viewer) {
   ) {
     return viewportType;
   }
+  const isIosIframeScrollableOn = isExperimentOn(win, 'ios-scrollable-iframe');
   // Enable iOS Embedded mode so that it's easy to test against a more
   // realistic iOS environment w/o an iframe.
-  if (!isIframed(win) && (getMode(win).localDev || getMode(win).development)) {
+  if (
+    !isIframed(win) &&
+    (getMode(win).localDev || getMode(win).development) &&
+    !isIosIframeScrollableOn
+  ) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
 
@@ -1434,7 +1406,7 @@ function getViewportType(win, viewer) {
   }
 
   // Override to ios-embed for iframe-viewer mode.
-  if (isIframed(win) && viewer.isEmbedded()) {
+  if (isIframed(win) && viewer.isEmbedded() && !isIosIframeScrollableOn) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
   return viewportType;

@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import {
-  ADSENSE_EXPERIMENTS,
-  ADSENSE_EXP_NAMES,
-} from '../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
@@ -32,8 +28,9 @@ import {
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
-import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getHtml} from '../../../src/get-html';
+import {isExperimentOn} from '../../../src/experiments';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 import {removeElement} from '../../../src/dom';
 import {reportErrorToAnalytics} from '../../../src/error';
 import {setStyle} from '../../../src/style';
@@ -92,9 +89,11 @@ export class AmpAdXOriginIframeHandler {
    * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
    * @param {boolean=} opt_isA4A when true do not listen to ad response
+   * @param {boolean=} opt_letCreativeTriggerRenderStart Whether to wait for
+   *    render start from the creative, or simply trigger it in here.
    * @return {!Promise} awaiting render complete promise
    */
-  init(iframe, opt_isA4A) {
+  init(iframe, opt_isA4A, opt_letCreativeTriggerRenderStart) {
     devAssert(!this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
@@ -115,17 +114,13 @@ export class AmpAdXOriginIframeHandler {
       () => this.sendEmbedInfo_(this.baseInstance_.isInViewport())
     );
 
-    // TODO(bradfrizzell): Would be better to turn this on if
-    // A4A.isXhrEnabled() is false, or if we simply decide it is
-    // ok to turn this on for all traffic.
+    // Enable creative position observer if inabox experiment enabled OR
+    // adsense running on non-CDN cache where AMP creatives are xdomained and
+    // may require this information.
     if (
-      getExperimentBranch(
-        this.win_,
-        ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL
-      ) == ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP ||
-      getExperimentBranch(this.win_, ADSENSE_EXP_NAMES.CANONICAL) ==
-        ADSENSE_EXPERIMENTS.CANONICAL_EXP ||
-      isExperimentOn(this.win_, 'inabox-position-api')
+      isExperimentOn(this.win_, 'inabox-position-api') ||
+      (/^adsense$/i.test(this.element_.getAttribute('type')) &&
+        !isGoogleAdsA4AValidEnvironment(this.win_))
     ) {
       // To provide position to inabox.
       this.inaboxPositionApi_ = new SubscriptionApi(
@@ -167,11 +162,17 @@ export class AmpAdXOriginIframeHandler {
       listenFor(
         this.iframe,
         'embed-size',
-        (data, source, origin) => {
+        (data, source, origin, event) => {
           if (!!data['hasOverflow']) {
             this.element_.warnOnMissingOverflow = false;
           }
-          this.handleResize_(data['height'], data['width'], source, origin);
+          this.handleResize_(
+            data['height'],
+            data['width'],
+            source,
+            origin,
+            event
+          );
         },
         true,
         true
@@ -264,7 +265,7 @@ export class AmpAdXOriginIframeHandler {
     });
 
     this.element_.appendChild(this.iframe);
-    if (opt_isA4A) {
+    if (opt_isA4A && !opt_letCreativeTriggerRenderStart) {
       // A4A writes creative frame directly to page once creative is received
       // and therefore does not require render start message so attach and
       // impose no loader delay.  Network is using renderStart or
@@ -346,7 +347,8 @@ export class AmpAdXOriginIframeHandler {
       data['height'],
       data['width'],
       info['source'],
-      info['origin']
+      info['origin'],
+      info['event']
     );
   }
 
@@ -410,9 +412,10 @@ export class AmpAdXOriginIframeHandler {
    * @param {number|string|undefined} width
    * @param {!Window} source
    * @param {string} origin
+   * @param {!MessageEvent} event
    * @private
    */
-  handleResize_(height, width, source, origin) {
+  handleResize_(height, width, source, origin, event) {
     this.baseInstance_.getVsync().mutate(() => {
       if (!this.iframe) {
         // iframe can be cleanup before vsync.
@@ -420,18 +423,20 @@ export class AmpAdXOriginIframeHandler {
       }
       const iframeHeight = this.iframe./*OK*/ offsetHeight;
       const iframeWidth = this.iframe./*OK*/ offsetWidth;
-      this.uiHandler_.updateSize(height, width, iframeHeight, iframeWidth).then(
-        info => {
-          this.sendEmbedSizeResponse_(
-            info.success,
-            info.newWidth,
-            info.newHeight,
-            source,
-            origin
-          );
-        },
-        () => {}
-      );
+      this.uiHandler_
+        .updateSize(height, width, iframeHeight, iframeWidth, event)
+        .then(
+          info => {
+            this.sendEmbedSizeResponse_(
+              info.success,
+              info.newWidth,
+              info.newHeight,
+              source,
+              origin
+            );
+          },
+          () => {}
+        );
     });
   }
 
@@ -486,6 +491,7 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * Retrieve iframe position entry in next animation frame.
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   getIframePositionPromise_() {

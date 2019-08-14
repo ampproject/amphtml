@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* eslint-disable amphtml-internal/html-template */
+/* eslint-disable local/html-template */
 /* eslint-disable indent */
 
 const {html} = require('./app-index/html');

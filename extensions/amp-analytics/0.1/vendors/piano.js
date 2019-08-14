@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const PIANO_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const PIANO_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://api-v3.tinypass.com',
     'basePrefix': '/api/v3',
@@ -29,3 +31,5 @@ export const PIANO_CONFIG = /** @type {!JsonObject} */ ({
       'screen=${screenWidth}x${screenHeight}${baseSuffix}',
   },
 });
+
+export {PIANO_CONFIG};

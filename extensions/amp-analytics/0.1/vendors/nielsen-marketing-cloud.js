@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const NIELSEN_MARKETING_CLOUD_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const NIELSEN_MARKETING_CLOUD_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,
@@ -36,3 +38,5 @@ export const NIELSEN_MARKETING_CLOUD_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {NIELSEN_MARKETING_CLOUD_CONFIG};

@@ -63,6 +63,7 @@ import {
   isPubId,
   isWidgetId,
 } from './addthis-utils/mode';
+import {getOgImage} from './addthis-utils/meta';
 import {getWidgetOverload} from './addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
@@ -87,6 +88,7 @@ let shouldRegisterView = true;
 
 /**
  * Redirection to prevent eslint issues.
+ * @return {*} TODO(#23582): Specify return type
  */
 export function getConfigManager() {
   return configManager;
@@ -350,6 +352,8 @@ class AmpAddThis extends AMP.BaseElement {
           params[key] = this.getAmpDoc().getUrl();
         } else if (key === 'title') {
           params[key] = this.getAmpDoc().win.document.title;
+        } else if (key === 'media') {
+          params[key] = getOgImage(this.getAmpDoc().win.document);
         }
       }
     });

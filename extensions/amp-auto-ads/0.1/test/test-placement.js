@@ -15,6 +15,7 @@
  */
 
 import '../../../amp-ad/0.1/amp-ad';
+import * as Utils from '../utils';
 import {AdTracker} from '../ad-tracker';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {Services} from '../../../../src/services';
@@ -44,6 +45,11 @@ describes.realWin(
 
       container = doc.createElement('div');
       doc.body.appendChild(container);
+      // Stub whenBuilt to resolve immediately to handle upgrade for AdSense
+      // to FF impl.
+      sinon
+        .stub(win.BaseCustomElementClass.prototype, 'whenBuilt')
+        .callsFake(() => Promise.resolve());
     });
 
     describe('getAdElement', () => {
@@ -205,6 +211,7 @@ describes.realWin(
               type: 1,
             },
           ],
+          console,
         });
         expect(placements).to.have.lengthOf(1);
 
@@ -661,7 +668,7 @@ describes.realWin(
         sandbox.stub(win, 'getComputedStyle').callsFake(() => {
           return {direction: 'ltr'};
         });
-        sandbox.stub(resource, 'getElementLayoutBox').callsFake(() => {
+        sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
           return Promise.resolve({left: 20});
         });
 
@@ -714,7 +721,7 @@ describes.realWin(
         sandbox.stub(win, 'getComputedStyle').callsFake(() => {
           return {direction: 'rtl'};
         });
-        sandbox.stub(resource, 'getElementLayoutBox').callsFake(() => {
+        sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
           return Promise.resolve({left: 20});
         });
 

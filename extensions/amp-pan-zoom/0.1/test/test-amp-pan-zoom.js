@@ -15,6 +15,7 @@
  */
 
 import '../amp-pan-zoom';
+import {Services} from '../../../../src/services';
 import {createPointerEvent} from '../../../../testing/test-helper';
 import {htmlFor} from '../../../../src/static-template';
 import {listenOncePromise} from '../../../../src/event-helper';
@@ -88,11 +89,14 @@ describes.realWin(
       let scheduleLayoutSpy;
       return getPanZoom()
         .then(() => {
-          scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
+          scheduleLayoutSpy = sandbox.spy(
+            Services.ownersForDoc(impl.element),
+            'scheduleLayout'
+          );
           el.layoutCallback();
         })
         .then(() => {
-          expect(scheduleLayoutSpy).to.be.calledOnceWith(svg);
+          expect(scheduleLayoutSpy).to.be.calledOnceWith(impl.element, svg);
         });
     });
 

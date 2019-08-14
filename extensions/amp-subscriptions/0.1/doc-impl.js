@@ -67,7 +67,10 @@ export class DocImpl {
   }
 }
 
-/** @package Visible for testing only. */
+/**
+ * @package Visible for testing only.
+ * @return {*} TODO(#23582): Specify return type
+ */
 export function getDocClassForTesting() {
   return Doc;
 }

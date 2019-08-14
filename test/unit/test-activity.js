@@ -99,6 +99,7 @@ describe('Activity getTotalEngagedTime', () => {
       obj: {
         getAmpDoc: () => ampdoc,
         isSingleDoc: () => true,
+        getSingleDoc: () => ampdoc,
       },
     };
 
@@ -320,6 +321,7 @@ describe('Activity getIncrementalEngagedTime', () => {
       obj: {
         getAmpDoc: () => ampdoc,
         isSingleDoc: () => true,
+        getSingleDoc: () => ampdoc,
       },
     };
 

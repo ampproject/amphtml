@@ -71,12 +71,11 @@ function logOnSameLine(message) {
 
 /**
  * Runs the linter on the given stream using the given options.
- * @param {string} filePath
  * @param {!ReadableStream} stream
  * @param {!Object} options
  * @return {boolean}
  */
-function runLinter(filePath, stream, options) {
+function runLinter(stream, options) {
   if (!isTravisBuild()) {
     log(colors.green('Starting linter...'));
   }
@@ -85,17 +84,17 @@ function runLinter(filePath, stream, options) {
     .pipe(eslint(options))
     .pipe(
       eslint.formatEach('stylish', function(msg) {
-        logOnSameLine(msg.trim() + '\n');
+        logOnSameLine(msg.replace(`${rootDir}/`, '').trim() + '\n');
       })
     )
-    .pipe(eslintIfFixed(filePath))
+    .pipe(eslintIfFixed(rootDir))
     .pipe(
       eslint.result(function(result) {
+        const relativePath = path.relative(rootDir, result.filePath);
         if (!isTravisBuild()) {
-          logOnSameLine(colors.green('Linted: ') + result.filePath);
+          logOnSameLine(colors.green('Linted: ') + relativePath);
         }
         if (options.fix && result.fixed) {
-          const relativePath = path.relative(rootDir, result.filePath);
           const status =
             result.errorCount == 0
               ? colors.green('Fixed: ')
@@ -131,7 +130,7 @@ function runLinter(filePath, stream, options) {
               colors.yellow('NOTE 1:'),
               'You may be able to automatically fix some of these warnings ' +
                 '/ errors by running',
-              colors.cyan('gulp lint --local-changes --fix'),
+              colors.cyan('gulp lint --local_changes --fix'),
               'from your local branch.'
             );
             log(
@@ -219,7 +218,7 @@ function lint() {
     setFilesToLint(argv.files.split(','));
   } else if (
     !eslintRulesChanged() &&
-    (process.env.LOCAL_PR_CHECK || argv['local-changes'])
+    (process.env.LOCAL_PR_CHECK || argv.local_changes)
   ) {
     const jsFiles = jsFilesChanged();
     if (jsFiles.length == 0) {
@@ -228,9 +227,8 @@ function lint() {
     }
     setFilesToLint(jsFiles);
   }
-  const basePath = '.';
-  const stream = initializeStream(config.lintGlobs, {base: basePath});
-  return runLinter(basePath, stream, options);
+  const stream = initializeStream(config.lintGlobs, {base: rootDir});
+  return runLinter(stream, options);
 }
 
 module.exports = {
@@ -241,6 +239,6 @@ lint.description = 'Validates against Google Closure Linter';
 lint.flags = {
   'watch': '  Watches for changes in files, validates against the linter',
   'fix': '  Fixes simple lint errors (spacing etc)',
-  'local-changes': '  Lints just the changes commited to the local branch',
+  'local_changes': '  Lints just the files changed in the local branch',
   'quiet': '  Suppress warnings from outputting',
 };

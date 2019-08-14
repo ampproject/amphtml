@@ -238,6 +238,7 @@ export function addParamsToUrl(url, params) {
  * exist in current query string.
  * @param {string} url
  * @param {!JsonObject<string, string|!Array<string>>} params
+ * @return {string}
  */
 export function addMissingParamsToUrl(url, params) {
   const location = parseUrlDeprecated(url);

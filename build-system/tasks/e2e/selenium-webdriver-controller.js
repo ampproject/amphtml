@@ -16,12 +16,12 @@
 
 const fs = require('fs');
 const {
-  ControllerPromise,
   DOMRectDef,
   ElementHandle,
   Key,
 } = require('./functional-test-controller');
 const {By, Condition, Key: SeleniumKey, error} = require('selenium-webdriver');
+const {ControllerPromise} = require('./controller-promise');
 const {expect} = require('chai');
 
 const {NoSuchElementError} = error;
@@ -242,7 +242,8 @@ class SeleniumWebDriverController {
    */
   async getActiveElement() {
     const root = await this.getRoot_();
-    const getter = root => root.parentNode.activeElement;
+    const getter = root =>
+      root.activeElement || root.ownerDocument.activeElement;
     const activeElement = await this.driver.executeScript(getter, root);
     return new ElementHandle(activeElement);
   }
@@ -521,25 +522,6 @@ class SeleniumWebDriverController {
    * @return {!Promise}
    * @override
    */
-  async scroll(handle, opt_scrollToOptions) {
-    const webElement = handle.getElement();
-    const scrollTo = (element, opt_scrollToOptions) => {
-      element./*OK*/ scrollTo(opt_scrollToOptions);
-    };
-
-    return await this.driver.executeScript(
-      scrollTo,
-      webElement,
-      opt_scrollToOptions
-    );
-  }
-
-  /**
-   * @param {!ElementHandle<!WebElement>} handle
-   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
-   * @return {!Promise}
-   * @override
-   */
   async scrollBy(handle, opt_scrollToOptions) {
     const webElement = handle.getElement();
     const scrollBy = (element, opt_scrollToOptions) => {
@@ -629,12 +611,33 @@ class SeleniumWebDriverController {
     await this.driver.switchTo().defaultContent();
   }
 
+  /**
+   * Switch controller to shadowRoot body hosted by given element.
+   * @param {!ElementHandle<!WebElement>} handle
+   * @return {!Promise}
+   */
   async switchToShadow(handle) {
+    const getter = shadowHost => shadowHost.shadowRoot.body;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  /**
+   * Switch controller to shadowRoot hosted by given element.
+   * @param {!ElementHandle<!WebElement>} handle
+   * @return {!Promise}
+   */
+  async switchToShadowRoot(handle) {
+    const getter = shadowHost => shadowHost.shadowRoot;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  /**.
+   * @param {!ElementHandle<!WebElement>} handle
+   * @param {!Function} getter
+   */
+  async switchToShadowInternal_(handle, getter) {
     const shadowHost = handle.getElement();
-    const shadowRootBody = await this.evaluate(
-      shadowHost => shadowHost.shadowRoot.body,
-      shadowHost
-    );
+    const shadowRootBody = await this.evaluate(getter, shadowHost);
     this.shadowRoot_ = shadowRootBody;
   }
 

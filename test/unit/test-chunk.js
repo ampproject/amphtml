@@ -23,8 +23,9 @@ import {
   startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import {toggleExperiment} from '../../src/experiments';
 
-describe('chunk', () => {
+describe('chunk2', () => {
   beforeEach(() => {
     activateChunkingForTesting();
   });
@@ -40,6 +41,7 @@ describe('chunk', () => {
 
     beforeEach(() => {
       fakeWin = env.win;
+
       // If there is a viewer, wait for it, so we run with it being
       // installed.
       if (env.win.services.viewer) {
@@ -47,6 +49,7 @@ describe('chunk', () => {
           // Make sure we make a chunk instance, so all runs
           // have a viewer.
           chunkInstanceForTesting(env.win.document);
+          return Promise.resolve();
         });
       }
     });
@@ -98,6 +101,22 @@ describe('chunk', () => {
       });
 
       basicTests(env);
+
+      it('should support nested micro tasks in chunks', done => {
+        let progress = '';
+        startupChunk(env.win.document, () => {
+          progress += '1';
+          Promise.resolve()
+            .then(() => (progress += 2))
+            .then(() => (progress += 3))
+            .then(() => (progress += 4))
+            .then(() => (progress += 5));
+        });
+        startupChunk(env.win.document, () => {
+          expect(progress).to.equal('12345');
+          done();
+        });
+      });
     }
   );
 
@@ -305,7 +324,7 @@ describe('chunk', () => {
     },
     env => {
       beforeEach(() => {
-        Object.defineProperty(env.win.document, 'hidden', {
+        env.sandbox.defineProperty(env.win.document, 'hidden', {
           get: () => false,
         });
       });
@@ -326,11 +345,136 @@ describe('chunk', () => {
         env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
           return false;
         });
-        Object.defineProperty(env.win.document, 'hidden', {
+        env.sandbox.defineProperty(env.win.document, 'hidden', {
           get: () => false,
         });
       });
       basicTests(env);
+    }
+  );
+});
+
+describe('long tasks', () => {
+  describes.fakeWin(
+    'long chunk tasks force a macro task between work',
+    {
+      amp: true,
+    },
+    env => {
+      let subscriptions;
+      let sandbox;
+      let clock;
+      let progress;
+      let postMessageCalls;
+
+      function complete(str, long) {
+        return function(unusedIdleDeadline) {
+          if (long) {
+            // Ensure this task takes a long time beyond the 5ms buffer.
+            clock.tick(100);
+          }
+          progress += str;
+        };
+      }
+
+      function runSubs() {
+        subscriptions['message']
+          .slice()
+          .forEach(method => method({data: 'amp-macro-task'}));
+      }
+
+      beforeEach(() => {
+        postMessageCalls = 0;
+        subscriptions = {};
+        sandbox = sinon.sandbox;
+        clock = sandbox.useFakeTimers();
+        toggleExperiment(env.win, 'macro-after-long-task', true);
+
+        env.win.addEventListener = function(type, handler) {
+          if (subscriptions[type] && !subscriptions[type].includes(handler)) {
+            subscriptions[type].push(handler);
+          } else {
+            subscriptions[type] = [handler];
+          }
+        };
+
+        env.win.postMessage = function(key) {
+          expect(key).to.equal('amp-macro-task');
+          postMessageCalls++;
+          runSubs();
+        };
+
+        progress = '';
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should not run macro tasks with invisible bodys', done => {
+        startupChunk(env.win.document, complete('init', true));
+        startupChunk(env.win.document, complete('a', true));
+        startupChunk(env.win.document, complete('b', true));
+        startupChunk(env.win.document, () => {
+          expect(progress).to.equal('initab');
+          done();
+        });
+      });
+
+      it('should execute chunks after long task in a macro task', done => {
+        startupChunk(env.win.document, complete('1', true));
+        startupChunk(env.win.document, complete('2', false));
+        startupChunk(
+          env.win.document,
+          function() {
+            complete('3', false)();
+            expect(progress).to.equal('123');
+            expect(postMessageCalls).to.equal(0);
+          },
+          /* make body visible */ true
+        );
+        startupChunk(env.win.document, () => {
+          expect(postMessageCalls).to.equal(1);
+          expect(progress).to.equal('123');
+          complete('4', false)();
+        });
+        startupChunk(env.win.document, () => {
+          expect(postMessageCalls).to.equal(1);
+          expect(progress).to.equal('1234');
+        });
+        startupChunk(env.win.document, complete('5', true));
+        startupChunk(env.win.document, () => {
+          expect(postMessageCalls).to.equal(2);
+          expect(progress).to.equal('12345');
+          done();
+        });
+      });
+
+      // Skipping Firefox due to issues with the promise ordering in
+      // the async-await polyfill that this test relies on.
+      it.configure()
+        .skipFirefox()
+        .run('should not issue a macro task after having been idle', done => {
+          (async function() {
+            startupChunk(
+              env.win.document,
+              complete('1', false),
+              /* make body visible */ true
+            );
+            // Unwind the promise queue so that subsequent invocations
+            // are scheduled into an empty task queue.
+            for (let i = 0; i < 100; i++) {
+              await Promise.resolve();
+            }
+            expect(progress).to.equal('1');
+            complete('2', true)();
+            startupChunk(env.win.document, () => {
+              expect(postMessageCalls).to.equal(0);
+              expect(progress).to.equal('12');
+              done();
+            });
+          })();
+        });
     }
   );
 });

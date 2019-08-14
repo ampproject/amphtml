@@ -15,6 +15,7 @@
  */
 
 import '../amp-instagram';
+import {Services} from '../../../../src/services';
 
 describes.realWin(
   'amp-instagram',
@@ -35,7 +36,8 @@ describes.realWin(
       shortcode,
       opt_responsive,
       opt_beforeLayoutCallback,
-      opt_captioned
+      opt_captioned,
+      opt_visibilityPromise
     ) {
       const ins = doc.createElement('amp-instagram');
       ins.setAttribute('data-shortcode', shortcode);
@@ -48,6 +50,16 @@ describes.realWin(
       if (opt_captioned) {
         ins.setAttribute('data-captioned', '');
       }
+      const visibilityPromise = env.sandbox.stub(
+        Services.viewerForDoc(doc),
+        'whenFirstVisible'
+      );
+      visibilityPromise.returns(
+        opt_visibilityPromise ||
+          new Promise(resolve => {
+            resolve();
+          })
+      );
       ins.implementation_.getVsync = () => {
         return {
           mutate(cb) {
@@ -84,7 +96,6 @@ describes.realWin(
       expect(image.getAttribute('src')).to.equal(
         'https://www.instagram.com/p/fBwFP/media/?size=l'
       );
-      expect(image.getAttribute('layout')).to.equal('fill');
       expect(image.getAttribute('alt')).to.equal('Testing');
       expect(image.getAttribute('referrerpolicy')).to.equal('origin');
     }
@@ -92,7 +103,7 @@ describes.realWin(
     function testIframe(iframe) {
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
-        'https://www.instagram.com/p/fBwFP/embed/?cr=1&v=9'
+        'https://www.instagram.com/p/fBwFP/embed/?cr=1&v=12'
       );
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
       expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
@@ -101,7 +112,7 @@ describes.realWin(
     function testIframeCaptioned(iframe) {
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
-        'https://www.instagram.com/p/fBwFP/embed/captioned/?cr=1&v=9'
+        'https://www.instagram.com/p/fBwFP/embed/captioned/?cr=1&v=12'
       );
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
       expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
@@ -110,22 +121,31 @@ describes.realWin(
     it('renders', () => {
       return getIns('fBwFP').then(ins => {
         testIframe(ins.querySelector('iframe'));
-        testImage(ins.querySelector('amp-img'));
+        testImage(ins.querySelector('img'));
       });
     });
 
     it('renders captioned', () => {
       return getIns('fBwFP', undefined, undefined, true).then(ins => {
         testIframeCaptioned(ins.querySelector('iframe'));
-        testImage(ins.querySelector('amp-img'));
+        testImage(ins.querySelector('img'));
       });
     });
 
-    it('sets noprerender on amp-img', () => {
-      return getIns('fBwFP').then(ins => {
-        expect(ins.querySelector('amp-img').hasAttribute('noprerender')).to.be
-          .true;
-      });
+    it('only sets src on placeholder after prerender', () => {
+      let becomeVisible;
+      const visible = new Promise(resolve => (becomeVisible = resolve));
+      return getIns('fBwFP', undefined, undefined, undefined, visible).then(
+        ins => {
+          expect(ins.querySelector('img').getAttribute('src')).to.be.null;
+          becomeVisible();
+          return visible.then(() => {
+            expect(ins.querySelector('img').getAttribute('src')).to.equal(
+              'https://www.instagram.com/p/fBwFP/media/?size=l'
+            );
+          });
+        }
+      );
     });
 
     it('builds a placeholder image without inserting iframe', () => {
@@ -134,7 +154,7 @@ describes.realWin(
         const iframe = ins.querySelector('iframe');
         expect(iframe).to.be.null;
         expect(placeholder).to.not.have.display('');
-        testImage(placeholder.querySelector('amp-img'));
+        testImage(placeholder.querySelector('img'));
       }).then(ins => {
         const placeholder = ins.querySelector('[placeholder]');
         const iframe = ins.querySelector('iframe');
@@ -144,7 +164,7 @@ describes.realWin(
           };
         };
         testIframe(iframe);
-        testImage(placeholder.querySelector('amp-img'));
+        testImage(placeholder.querySelector('img'));
         ins.implementation_.iframePromise_.then(() => {
           expect(placeholder).to.be.have.display('none');
         });

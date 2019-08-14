@@ -22,19 +22,20 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
-import {CacheCidApi} from './cache-cid-api';
 import {GoogleCidApi, TokenStatus} from './cid-api';
+import {dev, rethrowAsync, user, userAssert} from '../log';
+import {getCookie, setCookie} from '../cookies';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
+import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
+import {parseJson, tryParseJson} from '../json';
+
+import {CacheCidApi} from './cache-cid-api';
 import {Services} from '../services';
 import {ViewerCidApi} from './viewer-cid-api';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {dev, rethrowAsync, user, userAssert} from '../log';
 import {dict} from '../utils/object';
-import {getCookie, setCookie} from '../cookies';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
 import {isIframed} from '../dom';
-import {parseJson, tryParseJson} from '../json';
 import {tryResolve} from '../utils/promise';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
@@ -96,7 +97,47 @@ let BaseCidInfoDef;
  */
 let GetCidDef;
 
-export class Cid {
+/**
+ * @interface
+ */
+export class CidDef {
+  /**
+   * @param {!GetCidDef} unusedGetCidStruct an object provides CID scope name for
+   *     proxy case and cookie name for non-proxy case.
+   * @param {!Promise} unusedConsent Promise for when the user has given consent
+   *     (if deemed necessary by the publisher) for use of the client
+   *     identifier.
+   * @param {!Promise=} opt_persistenceConsent Dedicated promise for when
+   *     it is OK to persist a new tracking identifier. This could be
+   *     supplied ONLY by the code that supplies the actual consent
+   *     cookie.
+   *     If this is given, the consent param should be a resolved promise
+   *     because this call should be only made in order to get consent.
+   *     The consent promise passed to other calls should then itself
+   *     depend on the opt_persistenceConsent promise (and the actual
+   *     consent, of course).
+   * @return {!Promise<?string>} A client identifier that should be used
+   *      within the current source origin and externalCidScope. Might be
+   *      null if user has opted out of cid or no identifier was found
+   *      or it could be made.
+   *      This promise may take a long time to resolve if consent isn't
+   *      given.
+   */
+  get(unusedGetCidStruct, unusedConsent, opt_persistenceConsent) {}
+
+  /**
+   * User will be opted out of Cid issuance for all scopes.
+   * When opted-out Cid service will reject all `get` requests.
+   *
+   * @return {!Promise}
+   */
+  optOut() {}
+}
+
+/**
+ * @implements {CidDef}
+ */
+class Cid {
   /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
     /** @const */
@@ -134,28 +175,7 @@ export class Cid {
     this.apiKeyMap_ = null;
   }
 
-  /**
-   * @param {!GetCidDef} getCidStruct an object provides CID scope name for
-   *     proxy case and cookie name for non-proxy case.
-   * @param {!Promise} consent Promise for when the user has given consent
-   *     (if deemed necessary by the publisher) for use of the client
-   *     identifier.
-   * @param {!Promise=} opt_persistenceConsent Dedicated promise for when
-   *     it is OK to persist a new tracking identifier. This could be
-   *     supplied ONLY by the code that supplies the actual consent
-   *     cookie.
-   *     If this is given, the consent param should be a resolved promise
-   *     because this call should be only made in order to get consent.
-   *     The consent promise passed to other calls should then itself
-   *     depend on the opt_persistenceConsent promise (and the actual
-   *     consent, of course).
-   * @return {!Promise<?string>} A client identifier that should be used
-   *      within the current source origin and externalCidScope. Might be
-   *      null if user has opted out of cid or no identifier was found
-   *      or it could be made.
-   *      This promise may take a long time to resolve if consent isn't
-   *      given.
-   */
+  /** @override */
   get(getCidStruct, consent, opt_persistenceConsent) {
     userAssert(
       SCOPE_NAME_VALIDATOR.test(getCidStruct.scope) &&
@@ -194,12 +214,7 @@ export class Cid {
       });
   }
 
-  /**
-   * User will be opted out of Cid issuance for all scopes.
-   * When opted-out Cid service will reject all `get` requests.
-   *
-   * @return {!Promise}
-   */
+  /** @override */
   optOut() {
     return optOutOfCid(this.ampdoc);
   }
@@ -401,7 +416,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
     return /** @type {!Promise<?string>} */ (Promise.resolve(existingCookie));
   }
 
-  const newCookiePromise = getNewCidForCookie(win)
+  const newCookiePromise = getRandomString64(win)
     // Create new cookie, always prefixed with "amp-", so that we can see from
     // the value whether we created it.
     .then(randomStr => 'amp-' + randomStr);
@@ -634,7 +649,7 @@ function getEntropy(win) {
  * @param {!Window} win
  * @return {!Promise<string>} The cid
  */
-function getNewCidForCookie(win) {
+export function getRandomString64(win) {
   const entropy = getEntropy(win);
   if (typeof entropy == 'string') {
     return Services.cryptoFor(win).sha384Base64(entropy);
@@ -652,6 +667,7 @@ function getNewCidForCookie(win) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {*} TODO(#23582): Specify return type
  */
 export function installCidService(ampdoc) {
   return registerServiceBuilderForDoc(ampdoc, 'cid', Cid);

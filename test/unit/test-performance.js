@@ -1216,4 +1216,292 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       });
     });
   });
+
+  describe('forwards cumulative layout shift metric', () => {
+    let fakeWin;
+    let windowEventListeners;
+    let performanceObserver;
+    let viewerVisibilityState;
+
+    beforeEach(() => {
+      // Fake window to fake `document.visibilityState` and the
+      // `PeformanceObserver` implementation.
+      fakeWin = {
+        Date: env.win.Date,
+        PerformanceObserver: env.sandbox.stub(),
+        addEventListener: env.sandbox.stub(),
+        removeEventListener: env.win.removeEventListener,
+        dispatchEvent: env.win.dispatchEvent,
+        document: {
+          addEventListener: env.sandbox.stub(),
+          hidden: false,
+          readyState: 'complete',
+          removeEventListener: env.sandbox.stub(),
+          visibilityState: 'visible',
+        },
+        location: env.win.location,
+        performance: {
+          getEntriesByType: env.sandbox.stub(),
+        },
+      };
+
+      // Fake window.addEventListener to fake `visibilitychange` and
+      // `beforeunload` events.
+      windowEventListeners = {};
+      fakeWin.addEventListener.callsFake((eventType, handler) => {
+        if (!windowEventListeners[eventType]) {
+          windowEventListeners[eventType] = [];
+        }
+        windowEventListeners[eventType].push(handler);
+      });
+
+      // Fake the PerformanceObserver implementation so we can send
+      // fake PerformanceEntry objects to listeners.
+      fakeWin.PerformanceObserver.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+
+      // Install services on fakeWin so some behaviors can be stubbed.
+      installRuntimeServices(fakeWin);
+
+      const unresolvedPromise = new Promise(() => {});
+      const viewportSize = {width: 0, height: 0};
+      sandbox.stub(Services, 'viewerForDoc').returns({
+        isEmbedded: () => {},
+        hasBeenVisible: () => {},
+        onVisibilityChanged: () => {},
+        whenFirstVisible: () => unresolvedPromise,
+        whenMessagingReady: () => {},
+        getVisibilityState: () => viewerVisibilityState,
+      });
+      sandbox.stub(Services, 'resourcesForDoc').returns({
+        getResourcesInRect: () => unresolvedPromise,
+      });
+      sandbox.stub(Services, 'viewportForDoc').returns({
+        getSize: () => viewportSize,
+      });
+    });
+
+    function getPerformance() {
+      installPerformanceService(fakeWin);
+      return Services.performanceFor(fakeWin);
+    }
+
+    function toggleVisibility(win, on) {
+      win.document.visibilityState = on ? 'visible' : 'hidden';
+      fireEvent('visibilitychange');
+    }
+
+    function fireEvent(eventName) {
+      const event = new Event(eventName);
+      (windowEventListeners[eventName] || []).forEach(cb => cb(event));
+    }
+
+    it('for Chrome 76', () => {
+      // Specify an Android Chrome user agent, which supports the
+      // visibilitychange event.
+      sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
+
+      // Fake the Performance API.
+      fakeWin.PerformanceObserver.supportedEntryTypes = ['layoutShift'];
+
+      // Document should be initially visible.
+      expect(fakeWin.document.visibilityState).to.equal('visible');
+
+      // Fake layoutShift that occured before the Performance service is started.
+      fakeWin.performance.getEntriesByType
+        .withArgs('layoutShift')
+        .returns([
+          {entryType: 'layoutShift', value: 0.25},
+          {entryType: 'layoutShift', value: 0.3},
+        ]);
+
+      const perf = getPerformance();
+      // visibilitychange/beforeunload listeners are now added.
+      perf.coreServicesAvailable();
+
+      // The document has become hidden, e.g. via the user switching tabs.
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'cls',
+        delta: 0.55,
+      });
+
+      // The user returns to the tab, and more layout shift occurs.
+      toggleVisibility(fakeWin, true);
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layoutShift', value: 1},
+            {entryType: 'layoutShift', value: 0.0001},
+          ];
+        },
+      });
+
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[1]).to.be.jsonEqual({
+        label: 'cls-2',
+        delta: 1.5501,
+      });
+
+      // Any more layout shift shouldn't be reported.
+      toggleVisibility(fakeWin, true);
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [{entryType: 'layoutShift', value: 2}];
+        },
+      });
+
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(2);
+    });
+
+    it('for Chrome 77', () => {
+      // Specify an Android Chrome user agent, which supports the
+      // visibilitychange event.
+      sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
+
+      // Fake the Performance API.
+      fakeWin.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
+
+      // Document should be initially visible.
+      expect(fakeWin.document.visibilityState).to.equal('visible');
+
+      const perf = getPerformance();
+      // visibilitychange/beforeunload listeners are now added.
+      perf.coreServicesAvailable();
+
+      // Fake layout-shift that occured before the Performance service is started.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 0.25, hadRecentInput: false},
+            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
+          ];
+        },
+      });
+
+      // The document has become hidden, e.g. via the user switching tabs.
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'cls',
+        delta: 0.55,
+      });
+
+      // The user returns to the tab, and more layout shift occurs.
+      toggleVisibility(fakeWin, true);
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 1, hadRecentInput: false},
+            {entryType: 'layout-shift', value: 0.0001, hadRecentInput: false},
+          ];
+        },
+      });
+
+      // User input occurs which triggers layout shift, which is ignored.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 0.3, hadRecentInput: true},
+          ];
+        },
+      });
+
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[1]).to.be.jsonEqual({
+        label: 'cls-2',
+        delta: 1.5501,
+      });
+
+      // Any more layout shift shouldn't be reported.
+      toggleVisibility(fakeWin, true);
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [{entryType: 'layout-shift', value: 2, hadRecentInput: false}];
+        },
+      });
+
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(2);
+    });
+
+    it("for browsers that don't support the visibilitychange event", () => {
+      // Specify an iPhone Safari user agent, which does not support
+      // the visibilitychange event.
+      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(true);
+
+      // Fake the Performance API.
+      fakeWin.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
+
+      // Document should be initially visible.
+      expect(fakeWin.document.visibilityState).to.equal('visible');
+
+      const perf = getPerformance();
+      // visibilitychange/beforeunload listeners are now added.
+      perf.coreServicesAvailable();
+
+      // Fake layout-shift that occured before the Performance service is started.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 0.25, hadRecentInput: false},
+            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
+          ];
+        },
+      });
+
+      // The document has become hidden, e.g. via the user switching tabs.
+      // Note: Don't fire visibilitychange (not supported in this case).
+      fakeWin.document.visibilityState = 'hidden';
+      fireEvent('beforeunload');
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'cls',
+        delta: 0.55,
+      });
+    });
+
+    it('when the viewer visibility changes to inactive', () => {
+      // Specify an Android Chrome user agent.
+      sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
+
+      // Fake the Performance API.
+      fakeWin.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
+
+      const perf = getPerformance();
+      perf.coreServicesAvailable();
+
+      // Fake layout-shift that occured before the Performance service is started.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 0.25, hadRecentInput: false},
+            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
+          ];
+        },
+      });
+
+      viewerVisibilityState = VisibilityState.INACTIVE;
+      perf.onViewerVisibilityChange_();
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'cls',
+        delta: 0.55,
+      });
+    });
+  });
 });

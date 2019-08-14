@@ -72,7 +72,7 @@ export class SsrTemplateHelper {
    *     the payload. If provided, finding the template in the passed in
    *     element is not attempted.
    * @param {!Object=} opt_attributes Additional JSON to send to viewer.
-   * return {!Promise<{data:{?JsonObject|string|undefined}}>}
+   * @return {!Promise<?JsonObject|string|undefined>}
    */
   fetchAndRenderTemplate(
     element,

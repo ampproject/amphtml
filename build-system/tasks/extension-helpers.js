@@ -26,6 +26,7 @@ const {
   verifyExtensionAliasBundles,
 } = require('../../bundles.config');
 const {compileJs, mkdirSync} = require('./helpers');
+const {compileVendorConfigs} = require('./vendor-configs');
 const {isTravisBuild} = require('../travis');
 const {jsifyCssAsync} = require('./jsify-css');
 
@@ -44,6 +45,33 @@ const MINIMAL_EXTENSION_SET = [
   'amp-image-lightbox',
   'amp-lightbox',
   'amp-sidebar',
+  'amp-video',
+];
+
+/**
+ * Extensions to build when `--extensions=inabox`.
+ * See AMPHTML ads spec for supported extensions:
+ * https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/
+ *
+ * @private @const {!Array<string>}
+ */
+const INABOX_EXTENSION_SET = [
+  'amp-accordion',
+  'amp-ad-exit',
+  'amp-analytics',
+  'amp-anim',
+  'amp-animation',
+  'amp-audio',
+  'amp-bind',
+  'amp-carousel',
+  'amp-fit-text',
+  'amp-font',
+  'amp-form',
+  'amp-layout',
+  'amp-lightbox',
+  'amp-mustache',
+  'amp-position-observer',
+  'amp-social-share',
   'amp-video',
 ];
 
@@ -167,6 +195,8 @@ function getExtensionsToBuild() {
   if (!!argv.extensions) {
     if (argv.extensions === 'minimal_set') {
       argv.extensions = MINIMAL_EXTENSION_SET.join(',');
+    } else if (argv.extensions === 'inabox') {
+      argv.extensions = INABOX_EXTENSION_SET.join(',');
     }
     extensionsToBuild = argv.extensions.split(',');
   }
@@ -201,6 +231,11 @@ function parseExtensionFlags() {
       green('to build just the extensions needed to load ') +
       cyan('article.amp.html') +
       green('.');
+    const inaboxSetMessage =
+      green('⤷ Use ') +
+      cyan('--extensions=inabox ') +
+      green('to build just the extensions that are supported in AMPHTML ads') +
+      green('.');
     const extensionsFromMessage =
       green('⤷ Use ') +
       cyan('--extensions_from=examples/foo.amp.html ') +
@@ -211,6 +246,7 @@ function parseExtensionFlags() {
         log(noExtensionsMessage);
         log(extensionsMessage);
         log(minimalSetMessage);
+        log(inaboxSetMessage);
         log(extensionsFromMessage);
         process.exit(1);
       }
@@ -230,6 +266,7 @@ function parseExtensionFlags() {
     log(noExtensionsMessage);
     log(extensionsMessage);
     log(minimalSetMessage);
+    log(inaboxSetMessage);
     log(extensionsFromMessage);
   }
 }
@@ -355,31 +392,45 @@ function buildExtension(
   if (options.compileOnlyCss && !hasCss) {
     return Promise.resolve();
   }
+  const path = 'extensions/' + name + '/' + version;
+
   // Use a separate watcher for extensions to copy / inline CSS and compile JS
   // instead of relying on the watcher used by compileUnminifiedJs, which only
   // recompiles JS.
-  const path = 'extensions/' + name + '/' + version;
-  const optionsCopy = Object.create(options);
   if (options.watch) {
-    optionsCopy.watch = false;
-    watch(path + '/*', function() {
-      buildExtension(name, version, latestVersion, hasCss, optionsCopy);
+    options.watch = false;
+    watch(path + '/**/*', function() {
+      buildExtension(
+        name,
+        version,
+        latestVersion,
+        hasCss,
+        Object.assign({}, options, {continueOnError: true})
+      );
     });
   }
-  let promise = Promise.resolve();
+  const promises = [];
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    promise = buildExtensionCss(path, name, version, optionsCopy);
+    const buildCssPromise = buildExtensionCss(path, name, version, options);
     if (options.compileOnlyCss) {
-      return promise;
+      return buildCssPromise;
     }
+
+    promises.push(buildCssPromise);
   }
-  return promise.then(() => {
+
+  // minify and copy vendor configs for amp-analytics component
+  if (name === 'amp-analytics') {
+    promises.push(compileVendorConfigs(options));
+  }
+
+  return Promise.all(promises).then(() => {
     if (argv.single_pass) {
       return Promise.resolve();
     } else {
-      return buildExtensionJs(path, name, version, latestVersion, optionsCopy);
+      return buildExtensionJs(path, name, version, latestVersion, options);
     }
   });
 }
@@ -389,6 +440,7 @@ function buildExtension(
  * @param {string} name
  * @param {string} version
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildExtensionCss(path, name, version, options) {
   /**
@@ -455,13 +507,14 @@ function buildExtensionJs(path, name, version, latestVersion, options) {
         : wrappers.extension(name, options.loadPriority),
     })
   ).then(() => {
-    // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
+    // Copy @ampproject/worker-dom/dist/amp/worker/worker.js to dist/ folder.
     if (name === 'amp-script') {
-      // TODO(choumx): Compile this when worker-dom externs are available.
-      const dir = 'node_modules/@ampproject/worker-dom/dist/';
+      const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
       const file = `dist/v0/amp-script-worker-${version}`;
-      fs.copyFileSync(dir + 'worker.safe.js', `${file}.js`);
-      fs.copyFileSync(dir + 'unminified.worker.safe.js', `${file}.max.js`);
+      // The "js" output is minified and transpiled to ES5.
+      fs.copyFileSync(dir + 'worker.js', `${file}.js`);
+      // The "mjs" output is unminified ES6 and has debugging flags enabled.
+      fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
     }
   });
 }

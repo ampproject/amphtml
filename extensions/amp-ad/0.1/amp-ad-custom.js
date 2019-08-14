@@ -30,13 +30,13 @@ import {userAssert} from '../../../src/log';
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
 
-/** @var {Object} A map of promises for each value of data-url. The promise
+/** @type {Object} A map of promises for each value of data-url. The promise
  *  will fetch data for the URL for the ad server, and return it as a map of
  *  objects, keyed by slot; each object contains the variables to be
  *   substituted into the mustache template. */
 const ampCustomadXhrPromises = {};
 
-/** @var {Object} a map of full urls (i.e. including the ampslots parameter)
+/** @type {Object} a map of full urls (i.e. including the ampslots parameter)
  * for each value of data-url */
 let ampCustomadFullUrls = null;
 
@@ -63,8 +63,8 @@ export class AmpAdCustom extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    /** @TODO Add proper support for more layouts, and figure out which ones
-     *  we're permitting */
+    // TODO: Add proper support for more layouts, and figure out which ones
+    // we're permitting
     return isLayoutSizeDefined(layout);
   }
 
@@ -78,6 +78,12 @@ export class AmpAdCustom extends AMP.BaseElement {
     userAssert(
       this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
       'custom ad slot should be alphanumeric: ' + this.slot_
+    );
+
+    const urlService = Services.urlForDoc(this.element);
+    userAssert(
+      this.url_ && urlService.isSecure(this.url_),
+      'custom ad url must be an HTTPS URL'
     );
 
     this.uiHandler = new AmpAdUIHandler(this);
@@ -206,7 +212,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   getFullUrl_() {
     // If this ad doesn't have a slot defined, just return the base URL
     if (this.slot_ === null) {
-      return /** @type {string} */ (this.url_);
+      return userAssert(this.url_);
     }
     if (ampCustomadFullUrls === null) {
       // The array of ad urls has not yet been built, do so now.

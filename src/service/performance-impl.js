@@ -88,7 +88,7 @@ export class Performance {
     /** @private {?./viewer-impl.Viewer} */
     this.viewer_ = null;
 
-    /** @private {?./resources-impl.Resources} */
+    /** @private {?./resources-impl.ResourcesDef} */
     this.resources_ = null;
 
     /** @private {boolean} */
@@ -117,6 +117,13 @@ export class Performance {
     this.jankScoresTicked_ = 0;
 
     /**
+     * How many times a layout shift metric has been ticked.
+     *
+     * @private {number}
+     */
+    this.shiftScoresTicked_ = 0;
+
+    /**
      * The sum of all layout jank fractions triggered on the page from the
      * Layout Jank API.
      *
@@ -124,8 +131,39 @@ export class Performance {
      */
     this.aggregateJankScore_ = 0;
 
+    /**
+     * The sum of all layout shift fractions triggered on the page from the
+     * Layout Instability API.
+     *
+     * @private {number}
+     */
+    this.aggregateShiftScore_ = 0;
+
+    /**
+     * Whether the user agent supports the Layout Instability API that shipped
+     * with Chrome 76.
+     *
+     * @private {boolean}
+     */
+    this.supportsLayoutInstabilityAPIv76_ =
+      this.win.PerformanceObserver &&
+      this.win.PerformanceObserver.supportedEntryTypes &&
+      this.win.PerformanceObserver.supportedEntryTypes.includes('layoutShift');
+
+    /**
+     * Whether the user agent supports the Layout Instability API that shipped
+     * with Chrome 77.
+     *
+     * @private {boolean}
+     */
+    this.supportsLayoutInstabilityAPIv77_ =
+      this.win.PerformanceObserver &&
+      this.win.PerformanceObserver.supportedEntryTypes &&
+      this.win.PerformanceObserver.supportedEntryTypes.includes('layout-shift');
+
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
+    this.boundTickLayoutShiftScore_ = this.tickLayoutShiftScore_.bind(this);
     this.onViewerVisibilityChange_ = this.onViewerVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
@@ -182,9 +220,36 @@ export class Performance {
       // See https://bugs.webkit.org/show_bug.cgi?id=151234
       const platform = Services.platformFor(this.win);
       if (platform.isSafari()) {
+        // TODO(#23634): Remove, explain or adjust the usage of the unload listener
         this.win.addEventListener(
           BEFORE_UNLOAD_EVENT,
           this.boundTickLayoutJankScore_
+        );
+      }
+
+      this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
+    }
+
+    if (
+      this.supportsLayoutInstabilityAPIv76_ ||
+      this.supportsLayoutInstabilityAPIv77_
+    ) {
+      // Register a handler to record the layout shift metric when the page
+      // enters the hidden lifecycle state.
+      this.win.addEventListener(
+        VISIBILITY_CHANGE_EVENT,
+        this.boundOnVisibilityChange_,
+        {capture: true}
+      );
+
+      // Safari does not reliably fire the `pagehide` or `visibilitychange`
+      // events when closing a tab, so we have to use `beforeunload`.
+      // See https://bugs.webkit.org/show_bug.cgi?id=151234
+      const platform = Services.platformFor(this.win);
+      if (platform.isSafari()) {
+        this.win.addEventListener(
+          BEFORE_UNLOAD_EVENT,
+          this.boundTickLayoutShiftScore_
         );
       }
 
@@ -252,6 +317,14 @@ export class Performance {
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layoutJank') {
         this.aggregateJankScore_ += entry.fraction;
+      } else if (entry.entryType === 'layoutShift') {
+        this.aggregateShiftScore_ += entry.value;
+      } else if (entry.entryType === 'layout-shift') {
+        // Ignore layout shift that occurs within 500ms of user input, as it is
+        // likely in response to the user's action.
+        if (!entry.hadRecentInput) {
+          this.aggregateShiftScore_ += entry.value;
+        }
       }
     };
 
@@ -278,6 +351,29 @@ export class Performance {
       // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
       this.win.performance.getEntriesByType('layoutJank').forEach(processEntry);
       entryTypesToObserve.push('layoutJank');
+    }
+
+    if (this.supportsLayoutInstabilityAPIv76_) {
+      // Programmatically read once as currently PerformanceObserver does not
+      // report past entries as of Chrome 61.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+      this.win.performance
+        .getEntriesByType('layoutShift')
+        .forEach(processEntry);
+      entryTypesToObserve.push('layoutShift');
+    }
+
+    if (this.supportsLayoutInstabilityAPIv77_) {
+      // Layout shift entries are not available from the Performance Timeline
+      // through `getEntriesByType`, so a separate PerformanceObserver is
+      // required for this metric.
+      const layoutInstabilityObserver = new this.win.PerformanceObserver(
+        list => {
+          list.getEntries().forEach(processEntry);
+          this.flush();
+        }
+      );
+      layoutInstabilityObserver.observe({type: 'layout-shift', buffered: true});
     }
 
     if (entryTypesToObserve.length === 0) {
@@ -320,7 +416,15 @@ export class Performance {
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
-      this.tickLayoutJankScore_();
+      if (this.win.PerformanceLayoutJank) {
+        this.tickLayoutJankScore_();
+      }
+      if (
+        this.supportsLayoutInstabilityAPIv76_ ||
+        this.supportsLayoutInstabilityAPIv77_
+      ) {
+        this.tickLayoutShiftScore_();
+      }
     }
   }
 
@@ -330,7 +434,15 @@ export class Performance {
    */
   onViewerVisibilityChange_() {
     if (this.viewer_.getVisibilityState() === VisibilityState.INACTIVE) {
-      this.tickLayoutJankScore_();
+      if (this.win.PerformanceLayoutJank) {
+        this.tickLayoutJankScore_();
+      }
+      if (
+        this.supportsLayoutInstabilityAPIv76_ ||
+        this.supportsLayoutInstabilityAPIv77_
+      ) {
+        this.tickLayoutShiftScore_();
+      }
     }
   }
 
@@ -365,6 +477,41 @@ export class Performance {
       this.win.removeEventListener(
         BEFORE_UNLOAD_EVENT,
         this.boundTickLayoutJankScore_
+      );
+    }
+  }
+
+  /**
+   * Tick the layout shift score metric.
+   *
+   * A value of the metric is recorded in under two names, `cls` and `cls-2`,
+   * for the first two times the page transitions into a hidden lifecycle state
+   * (when the page is navigated a way from, the tab is backgrounded for
+   * another tab, or the user backgrounds the browser application).
+   *
+   * Since we can't reliably detect when a page session finally ends,
+   * recording the value for these first two events should provide a fair
+   * amount of visibility into this metric.
+   */
+  tickLayoutShiftScore_() {
+    if (this.shiftScoresTicked_ === 0) {
+      this.tickDelta('cls', this.aggregateShiftScore_);
+      this.flush();
+      this.shiftScoresTicked_ = 1;
+    } else if (this.shiftScoresTicked_ === 1) {
+      this.tickDelta('cls-2', this.aggregateShiftScore_);
+      this.flush();
+      this.shiftScoresTicked_ = 2;
+
+      // No more work to do, so clean up event listeners.
+      this.win.removeEventListener(
+        VISIBILITY_CHANGE_EVENT,
+        this.boundOnVisibilityChange_,
+        {capture: true}
+      );
+      this.win.removeEventListener(
+        BEFORE_UNLOAD_EVENT,
+        this.boundTickLayoutShiftScore_
       );
     }
   }

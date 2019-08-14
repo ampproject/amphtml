@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as CID from '../../src/service/cid-impl';
+
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -27,6 +29,7 @@ describe
 
     beforeEach(() => {
       sandbox = sinon.sandbox;
+      sandbox.stub(CID, 'getRandomString64').returns('abcdef');
     });
 
     afterEach(() => {
@@ -76,9 +79,12 @@ describe
     it('should provide the sourceUrl', () => {
       const win = {
         document: {
-          nodeType: /* document */ 9,
+          nodeType: /* DOCUMENT */ 9,
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
+          },
+          getRootNode() {
+            return win.document;
           },
         },
         Math: {
@@ -104,6 +110,9 @@ describe
           nodeType: /* document */ 9,
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
+          },
+          getRootNode() {
+            return win.document;
           },
         },
         Math: {
@@ -135,6 +144,17 @@ describe
         );
         expect(Services.documentInfoForDoc(win.document).pageViewId).to.equal(
           '1234'
+        );
+      });
+    });
+
+    it('should provide the pageViewId64', () => {
+      return getWin({'canonical': ['https://twitter.com/']}).then(win => {
+        expect(Services.documentInfoForDoc(win.document).pageViewId64).to.equal(
+          'abcdef'
+        );
+        expect(Services.documentInfoForDoc(win.document).pageViewId64).to.equal(
+          'abcdef'
         );
       });
     });
@@ -287,6 +307,9 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
+          getRootNode() {
+            return win.document;
+          },
         },
         Math: {
           random() {
@@ -313,6 +336,9 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
+          getRootNode() {
+            return win.document;
+          },
         },
         Math: {
           random() {
@@ -337,6 +363,9 @@ describe
           nodeType: /* document */ 9,
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
+          },
+          getRootNode() {
+            return win.document;
           },
         },
         Math: {

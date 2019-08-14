@@ -414,8 +414,7 @@ describes.realWin(
         });
       });
 
-      // TODO(lannka, #12476): Make this test work with sinon 4.0.
-      it.skip('fills internally provided trigger vars', function() {
+      it('fills internally provided trigger vars', function() {
         const analytics = getAnalyticsTag({
           'requests': {
             'timer':
@@ -433,8 +432,8 @@ describes.realWin(
         });
 
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest(
-            /https:\/\/e.com\/start=[0-9]+&duration=0/
+          requestVerifier.verifyRequestMatch(
+            /https:\/\/e.com\/start=[0-9]+&duration=[0-9]/
           );
           requestVerifier.verifyRequest('https://e.com/totalVisibleTime=0');
         });
@@ -741,7 +740,7 @@ describes.realWin(
 
     describe('expand selector', () => {
       it('expands selector with config variable', () => {
-        const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+        const tracker = ins.root_.getTracker('click', ClickEventTracker);
         const addStub = sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag({
           requests: {foo: 'https://example.com/bar'},
@@ -757,10 +756,7 @@ describes.realWin(
 
       function selectorExpansionTest(selector) {
         it('expand selector value: ' + selector, () => {
-          const tracker = ins.ampdocRoot_.getTracker(
-            'click',
-            ClickEventTracker
-          );
+          const tracker = ins.root_.getTracker('click', ClickEventTracker);
           const addStub = sandbox.stub(tracker, 'add');
           const analytics = getAnalyticsTag({
             requests: {foo: 'https://example.com/bar'},
@@ -800,7 +796,7 @@ describes.realWin(
       ].map(selectorExpansionTest);
 
       it('does not expands selector with platform variable', () => {
-        const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+        const tracker = ins.root_.getTracker('click', ClickEventTracker);
         const addStub = sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag({
           requests: {foo: 'https://example.com/bar'},
@@ -1488,7 +1484,7 @@ describes.realWin(
       it('should not add listener when eventType is not whitelist', function() {
         expectAsyncConsoleError(clickTrackerNotSupportedError);
         // Right now we only whitelist VISIBLE & HIDDEN
-        const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+        const tracker = ins.root_.getTracker('click', ClickEventTracker);
         const addStub = sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag(
           {
@@ -1506,10 +1502,7 @@ describes.realWin(
       });
 
       it('replace selector and selectionMethod when in scope', () => {
-        const tracker = ins.ampdocRoot_.getTracker(
-          'visible',
-          VisibilityTracker
-        );
+        const tracker = ins.root_.getTracker('visible', VisibilityTracker);
         const addStub = sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag(
           {

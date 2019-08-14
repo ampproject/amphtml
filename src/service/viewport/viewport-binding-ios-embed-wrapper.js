@@ -46,7 +46,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private {!../vsync-impl.Vsync} */
+    /** @protected {!../vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(win);
 
     const doc = this.win.document;
@@ -69,6 +69,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {function()} */
     this.boundScrollEventListener_ = this.onScrolled_.bind(this);
 
+    // eslint-disable-next-line jsdoc/require-returns
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 

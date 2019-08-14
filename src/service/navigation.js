@@ -44,6 +44,12 @@ const VALID_TARGETS = ['_top', '_blank'];
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
 /**
+ * Key used for retargeting event target originating from shadow DOM.
+ * @const {string}
+ */
+const AMP_CUSTOM_LINKER_TARGET = '__AMP_CUSTOM_LINKER_TARGET__';
+
+/**
  * @enum {number} Priority reserved for extensions in anchor mutations.
  * The higher the priority, the sooner it's invoked.
  */
@@ -90,6 +96,8 @@ export class Navigation {
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
   constructor(ampdoc, opt_rootNode) {
+    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
+
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -116,7 +124,8 @@ export class Navigation {
       isIframed(this.ampdoc.win) && this.viewer_.isOvertakeHistory();
 
     /** @private @const {boolean} */
-    this.isEmbed_ = this.rootNode_ != this.ampdoc.getRootNode();
+    this.isEmbed_ =
+      this.rootNode_ != this.ampdoc.getRootNode() || !!this.ampdoc.getParent();
 
     /** @private @const {boolean} */
     this.isInABox_ = getMode(this.ampdoc.win).runtime == 'inabox';
@@ -261,6 +270,9 @@ export class Navigation {
       `Target '${target}' not supported.`
     );
 
+    // Resolve navigateTos relative to the source URL, not the proxy URL.
+    url = urlService.getSourceUrl(url);
+
     // If we have a target of "_blank", we will want to open a new window. A
     // target of "_top" should behave like it would on an anchor tag and
     // update the URL.
@@ -341,7 +353,9 @@ export class Navigation {
     if (e.defaultPrevented) {
       return;
     }
-    const element = dev().assertElement(e.target);
+    const element = dev().assertElement(
+      e[AMP_CUSTOM_LINKER_TARGET] || e.target
+    );
     const target = closestAncestorElementBySelector(element, 'A');
     if (!target || !target.href) {
       return;
@@ -362,23 +376,34 @@ export class Navigation {
   handleClick_(target, e) {
     this.expandVarsForAnchor_(target);
 
-    let location = this.parseUrl_(target.href);
+    let tgtLoc = this.parseUrl_(target.href);
 
     // Handle AMP-to-AMP navigation if rel=amphtml.
-    if (this.handleA2AClick_(e, target, location)) {
+    if (this.handleA2AClick_(e, target, tgtLoc)) {
       return;
     }
 
     // Handle navigating to custom protocol if applicable.
-    if (this.handleCustomProtocolClick_(e, target, location)) {
+    if (this.handleCustomProtocolClick_(e, target, tgtLoc)) {
       return;
     }
 
-    this.applyAnchorMutators_(target, e);
-    location = this.parseUrl_(target.href);
+    // In test mode, we're not able to properly fix the anchor tag's base URL.
+    // So, we have to use the (mocked) window's location instead.
+    const baseHref =
+      getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
+    const curLoc = this.parseUrl_(baseHref);
+    const tgtHref = getHref(tgtLoc);
+    const curHref = getHref(curLoc);
+
+    if (tgtHref != curHref) {
+      // Only apply anchor mutator if this is an external navigation
+      this.applyAnchorMutators_(target, e);
+      tgtLoc = this.parseUrl_(target.href);
+    }
 
     // Finally, handle normal click-navigation behavior.
-    this.handleNavClick_(e, target, location);
+    this.handleNavClick_(e, target, tgtLoc, curLoc);
   }
 
   /**
@@ -514,16 +539,12 @@ export class Navigation {
    * @param {!Event} e
    * @param {!Element} target
    * @param {!Location} tgtLoc
+   * @param {!Location} curLoc
    * @private
    */
-  handleNavClick_(e, target, tgtLoc) {
-    // In test mode, we're not able to properly fix the anchor tag's base URL.
-    // So, we have to use the (mocked) window's location instead.
-    const baseHref =
-      getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
-    const curLoc = this.parseUrl_(baseHref);
-    const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
-    const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
+  handleNavClick_(e, target, tgtLoc, curLoc) {
+    const tgtHref = getHref(tgtLoc);
+    const curHref = getHref(curLoc);
 
     // If the current target anchor link is the same origin + path
     // as the current document then we know we are just linking to an
@@ -560,6 +581,17 @@ export class Navigation {
       return;
     }
 
+    this.handleInternalNavigation_(e, tgtLoc, curLoc);
+  }
+
+  /**
+   * Handles clicking on an internal link
+   * @param {!Event} e
+   * @param {!Location} tgtLoc
+   * @param {!Location} curLoc
+   * @private
+   */
+  handleInternalNavigation_(e, tgtLoc, curLoc) {
     // We prevent default so that the current click does not push
     // into the history stack as this messes up the external documents
     // history which contains the amp document.
@@ -700,4 +732,13 @@ function maybeExpandUrlParams(ampdoc, e) {
     }
     target.setAttribute('href', newHref);
   }
+}
+
+/**
+ * Calculate and return the href from the Location
+ * @param {!Location} location
+ * @return {string}
+ */
+function getHref(location) {
+  return `${location.origin}${location.pathname}${location.search}`;
 }

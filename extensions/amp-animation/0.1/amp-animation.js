@@ -23,7 +23,7 @@ import {WebAnimationService} from './web-animation-service';
 import {childElementByTag} from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
 import {getDetail, listen} from '../../../src/event-helper';
-import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
@@ -222,7 +222,6 @@ export class AmpAnimation extends AMP.BaseElement {
    * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @return {?Promise}
    * @private
-   * @visibleForTesting
    */
   startAction_(opt_invocation) {
     // The animation has been triggered, but there's no guarantee that it

@@ -15,7 +15,6 @@
  */
 
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
 import mustache from '../../../third_party/mustache/mustache';
@@ -130,11 +129,11 @@ export class AmpMustache extends AMP.BaseTemplate {
   /**
    *
    * @param {string} html
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   purifyAndSetHtml_(html) {
-    const diffing = isExperimentOn(self, 'amp-list-diffing');
-    const body = purifyHtml(html, this.win.document, diffing);
+    const body = purifyHtml(html, this.win.document);
     // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
     // https://github.com/cure53/DOMPurify/pull/295
     const root = this.win.document.createElement('div');

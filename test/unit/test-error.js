@@ -120,9 +120,11 @@ describe('reportErrorToServerOrViewer', () => {
     optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
 
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
+    const ampdoc = {getRootNode: () => optedInDoc};
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
-      getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+      getAmpDoc: () => ampdoc,
+      getSingleDoc: () => ampdoc,
     });
 
     viewer = {
@@ -151,9 +153,11 @@ describe('reportErrorToServerOrViewer', () => {
 
   it('should report to server if AMP doc is not opted in', () => {
     const nonOptedInDoc = window.document.implementation.createHTMLDocument('');
+    const ampdoc = {getRootNode: () => nonOptedInDoc};
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
-      getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+      getAmpDoc: () => ampdoc,
+      getSingleDoc: () => ampdoc,
     });
     return reportErrorToServerOrViewer(win, data).then(() => {
       expect(createXhr).to.be.calledOnce;
@@ -194,6 +198,7 @@ describe('reportErrorToServerOrViewer', () => {
         expect(data['a']).to.not.be.undefined;
         expect(data['s']).to.not.be.undefined;
         expect(data['el']).to.not.be.undefined;
+        expect(data['ex']).to.not.be.undefined;
         expect(data['v']).to.not.be.undefined;
         expect(data['jse']).to.not.be.undefined;
       });
@@ -876,7 +881,6 @@ describes.fakeWin('user error reporting', {amp: true}, env => {
     sandbox = env.sandbox;
     win = env.win;
     analyticsEventSpy = sandbox.spy(analytics, 'triggerAnalyticsEvent');
-    toggleExperiment(win, 'user-error-reporting', true);
   });
 
   it('should trigger triggerAnalyticsEvent with correct arguments', () => {

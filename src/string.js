@@ -112,6 +112,7 @@ export function includes(string, substring, start) {
  *   Defaults to 1, but should be set to a larger value your placeholder tokens
  *   can be expanded to other placeholder tokens. Take caution with large values
  *   as recursively expanding a string can be exponentially expensive.
+ * @return {string}
  */
 export function expandTemplate(template, getter, opt_maxIterations) {
   const maxIterations = opt_maxIterations || 1;
@@ -157,4 +158,17 @@ export function trimEnd(str) {
   }
 
   return ('_' + str).trim().slice(1);
+}
+
+/**
+ * Trims any leading whitespace from a string.
+ * @param {string} str  A string to trim.
+ * @return {string} The string, with leading whitespace removed.
+ */
+export function trimStart(str) {
+  if (str.trimStart) {
+    return str.trimStart();
+  }
+
+  return (str + '_').trim().slice(0, -1);
 }

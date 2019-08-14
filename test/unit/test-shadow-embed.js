@@ -27,7 +27,6 @@ import {
   createShadowRoot,
   getShadowRootNode,
   importShadowBody,
-  isShadowRoot,
   scopeShadowCss,
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
@@ -250,46 +249,6 @@ describes.sandboxed('shadow-embed', {}, () => {
       });
     }
   );
-
-  describe('isShadowRoot', () => {
-    it('should yield false for non-nodes', () => {
-      expect(isShadowRoot(null)).to.be.false;
-      expect(isShadowRoot(undefined)).to.be.false;
-      expect(isShadowRoot('')).to.be.false;
-      expect(isShadowRoot(11)).to.be.false;
-    });
-
-    it('should yield false for other types of nodes', () => {
-      expect(isShadowRoot(document.createElement('div'))).to.be.false;
-      expect(isShadowRoot(document.createTextNode('abc'))).to.be.false;
-    });
-
-    it('should yield true for natively-supported createShadowRoot API', () => {
-      const element = document.createElement('div');
-      if (element.createShadowRoot) {
-        const shadowRoot = element.createShadowRoot();
-        expect(isShadowRoot(shadowRoot)).to.be.true;
-      }
-    });
-
-    it('should yield true for natively-supported attachShadow API', () => {
-      const element = document.createElement('div');
-      if (element.attachShadow) {
-        const shadowRoot = element.attachShadow({mode: 'open'});
-        expect(isShadowRoot(shadowRoot)).to.be.true;
-      }
-    });
-
-    it('should yield false for document-fragment non-shadow-root node', () => {
-      const fragment = document.createDocumentFragment();
-      expect(isShadowRoot(fragment)).to.be.false;
-    });
-
-    it('should yield true for polyfill', () => {
-      expect(isShadowRoot(document.createElement('i-amphtml-shadow-root'))).to
-        .be.true;
-    });
-  });
 
   describe('getShadowRootNode', () => {
     let content, host, shadowRoot;

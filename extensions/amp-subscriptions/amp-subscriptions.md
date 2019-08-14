@@ -42,7 +42,7 @@ Implements subscription-style access protocol.
   <tr>
     <td class="col-fourty">
       <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">
+        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
           Supported Layouts
         </a>
       </strong>
@@ -372,6 +372,21 @@ The fallback content is marked up using `subscriptions-section="content-not-gran
 <section subscriptions-section="content-not-granted">
   You are not allowed to currently view this content.
 </section>
+```
+
+## Using Scores to Display Content
+
+The score factors returned by ewach configured service can be used to control the disaplay
+of content within dialogs. For example `factors['subscribe.google.com'].isReadyToPay` would be the "ready to pay" score factor from the `subscribe.google.com` service (also known as `amp-subscriptions-google`). Similarly `factors['local'].isReadyToPay` would be for the local service and `scores['subscribe.google.com'].supporsViewer` would be the score factor for the Google service supporting the current viewer. 
+
+Sample usage:
+
+```html
+    <!-- Shows a Subscribe with Google button if the user is ready to pay -->
+    <button subscriptions-display="factors['subscribe.google.com'].isReadyToPay"
+      subscriptions-action="subscribe"
+      subscriptions-service="subscribe.google.com"
+      subscriptions-decorate>Subscribe with Google</button>
 ```
 
 ## Action markup

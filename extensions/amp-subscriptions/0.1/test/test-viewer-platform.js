@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {Action, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '../../../../src/services';
-import {SubscriptionAnalytics} from '../analytics';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {getWinOrigin} from '../../../../src/url';
 
@@ -44,8 +44,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   const authUrl = 'https://subscribe.google.com/subscription/2/entitlements';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
   const actionMap = {
-    'subscribe': 'https://lipsum.com/subscribe',
-    'login': 'https://lipsum.com/login',
+    [Action.SUBSCRIBE]: 'https://lipsum.com/subscribe',
+    [Action.LOGIN]: 'https://lipsum.com/login',
   };
   const serviceConfig = {
     'serviceId': 'local',

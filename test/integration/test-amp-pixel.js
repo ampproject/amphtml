@@ -45,6 +45,29 @@ describe.configure().run('amp-pixel', function() {
   );
 
   describes.integration(
+    'amp-pixel nested macro with leading spaces',
+    {
+      body: `<amp-pixel src="${RequestBank.getUrl()}?nested=QUERY_PARAM(doesNotExist,  1.QUERY_PARAM(a))">`,
+      params: {
+        a: '1234',
+      },
+    },
+    env => {
+      beforeEach(() => {
+        const browser = new BrowserController(env.win);
+        return browser.waitForElementBuild('amp-pixel');
+      });
+
+      it('should ignore leading spaces and resolve correctly', () => {
+        return RequestBank.withdraw().then(req => {
+          expect(req.url).to.equal('/?nested=1.1234');
+          expect(req.headers.host).to.be.ok;
+        });
+      });
+    }
+  );
+
+  describes.integration(
     'amp-pixel referrer integration test',
     {
       body: `<amp-pixel src="${RequestBank.getUrl()}">`,

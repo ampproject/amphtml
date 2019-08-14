@@ -62,6 +62,7 @@ export class ViewportBindingNatural_ {
       this.scrollObservable_.fire();
     };
 
+    // eslint-disable-next-line jsdoc/require-returns
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 

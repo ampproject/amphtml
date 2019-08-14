@@ -231,6 +231,7 @@ export function isExtensionScriptInNode(ampdoc, extensionId) {
  * installation.
  * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @param {string} extensionId
+ * @return {boolean}
  * @private
  */
 function extensionScriptInNode(head, extensionId) {

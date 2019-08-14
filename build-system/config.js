@@ -78,10 +78,16 @@ const chaiAsPromised = ['test/chai-as-promised/chai-as-promised.js'];
 const unitTestPaths = [
   'test/unit/**/*.js',
   'ads/**/test/test-*.js',
+  'ads/**/test/unit/test-*.js',
   'extensions/**/test/*.js',
+  'extensions/**/test/unit/*.js',
 ];
 
-const unitTestOnSaucePaths = ['test/unit/**/*.js', 'ads/**/test/test-*.js'];
+const unitTestOnSaucePaths = [
+  'test/unit/**/*.js',
+  'ads/**/test/test-*.js',
+  'ads/**/test/unit/test-*.js',
+];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
@@ -91,6 +97,8 @@ const integrationTestPaths = [
 const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/*.js'];
 
 const devDashboardTestPaths = ['build-system/app-index/test/**/*.js'];
+
+const jisonPaths = ['extensions/**/*.jison'];
 
 const lintGlobs = [
   '**/*.js',
@@ -135,6 +143,7 @@ module.exports = {
   e2eTestPaths,
   lintGlobs,
   devDashboardTestPaths,
+  jisonPaths,
   thirdPartyFrames,
   jsonGlobs: [
     '**/*.json',

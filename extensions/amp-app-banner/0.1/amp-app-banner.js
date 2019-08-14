@@ -101,7 +101,10 @@ export class AbstractAppBanner extends AMP.BaseElement {
     );
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {string}
+   */
   getStorageKey_() {
     const elementId = userAssert(
       this.element.id,
@@ -110,7 +113,10 @@ export class AbstractAppBanner extends AMP.BaseElement {
     return 'amp-app-banner:' + elementId;
   }
 
-  /** @protected */
+  /**
+   * @protected
+   * @return {*} TODO(#23582): Specify return type
+   */
   isDismissed() {
     return Services.storageForDoc(this.getAmpDoc())
       .then(storage => storage.get(this.getStorageKey_()))
@@ -136,7 +142,10 @@ export class AbstractAppBanner extends AMP.BaseElement {
     });
   }
 
-  /** @protected */
+  /**
+   * @protected
+   * @return {*} TODO(#23582): Specify return type
+   */
   hide_() {
     return this.getVsync().runPromise(
       {
