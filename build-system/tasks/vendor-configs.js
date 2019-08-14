@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const minimist = require('minimist');
+const argv = minimist(process.argv.slice(2));
 const gulp = require('gulp');
 const gulpif = require('gulp-if');
 const gulpWatch = require('gulp-watch');
@@ -39,8 +41,12 @@ async function vendorConfigs() {
 function compileVendorConfigs(opt_options) {
   const options = opt_options || {};
 
-  const srcPath = 'extensions/amp-analytics/0.1/vendors/*.json';
+  const srcPath = ['extensions/amp-analytics/0.1/vendors/*.json'];
   const destPath = 'dist/v0/analytics-vendors/';
+
+  if (argv.fortesting) {
+    srcPath.push('!extensions/amp-analytics/0.1/vendors/_fake_.json');
+  }
 
   if (options.watch) {
     // Do not set watchers again when we get called by the watcher.
