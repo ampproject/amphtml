@@ -29,6 +29,7 @@ import {
 } from '../layout-rect';
 import {startsWith} from '../string';
 import {toWin} from '../types';
+import {getMode} from '../mode';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -214,10 +215,10 @@ export class Resource {
     this.loadPromiseResolve_ = deferred.resolve;
 
     /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.hostWin, 'layers');
+    this.useLayers_ = (getMode().localDev || getMode().test) && isExperimentOn(this.hostWin, 'layers');
 
     /** @private @const {boolean} */
-    this.useLayersPrioritization_ = isExperimentOn(
+    this.useLayersPrioritization_ = this.useLayers_ && isExperimentOn(
       this.hostWin,
       'layers-prioritization'
     );
@@ -749,7 +750,7 @@ export class Resource {
 
   /** @return {!ViewportRatioDef} */
   getDistanceViewportRatio() {
-    if (this.useLayers_ && this.useLayersPrioritization_) {
+    if (this.useLayersPrioritization_) {
       const {element} = this;
       return {
         distance: element
@@ -811,7 +812,7 @@ export class Resource {
     }
     const {distance, scrollPenalty, viewportHeight} =
       opt_viewportRatio || this.getDistanceViewportRatio();
-    if (this.useLayers_ && this.useLayersPrioritization_) {
+    if (this.useLayersPrioritization_) {
       return dev().assertNumber(distance) < multiplier;
     }
     if (typeof distance == 'boolean') {

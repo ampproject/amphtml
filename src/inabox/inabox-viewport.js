@@ -28,6 +28,7 @@ import {layoutRectLtwh, moveLayoutRect} from '../layout-rect';
 import {px, resetStyles, setImportantStyles} from '../style';
 import {registerServiceBuilderForDoc} from '../service';
 import {throttle} from '../utils/rate-limit';
+import {getMode} from '../mode';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
@@ -152,7 +153,7 @@ export class ViewportBindingInabox {
     );
 
     /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
+    this.useLayers_ = (getMode().localDev || getMode().test) && isExperimentOn(this.win, 'layers');
 
     /** @private {?../../ads/inabox/position-observer.PositionObserver} */
     this.topWindowPositionObserver_ = null;

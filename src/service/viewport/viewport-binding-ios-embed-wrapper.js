@@ -26,6 +26,7 @@ import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
 import {waitForBodyOpen} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
+import {getMode} from '../../mode';
 
 const TAG_ = 'Viewport';
 
@@ -74,7 +75,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 
     /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
+    this.useLayers_ = (getMode().localDev || getMode().test) && isExperimentOn(this.win, 'layers');
 
     /** @private {number} */
     this.paddingTop_ = 0;

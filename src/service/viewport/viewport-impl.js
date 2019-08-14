@@ -139,7 +139,7 @@ export class ViewportImpl {
     this.originalViewportMetaString_ = undefined;
 
     /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(win, 'layers');
+    this.useLayers_ = (getMode().localDev || getMode().test) && isExperimentOn(win, 'layers');
     if (this.useLayers_) {
       installLayersServiceForDoc(
         ampdoc,

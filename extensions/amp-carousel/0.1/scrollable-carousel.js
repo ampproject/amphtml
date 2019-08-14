@@ -23,6 +23,7 @@ import {dev} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
+import {getMode} from '../../../src/mode';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
@@ -48,7 +49,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.scrollTimerId_ = null;
 
     /** @private {boolean} */
-    this.useLayers_ = false;
+    this.useLayersPrioritization_ = false;
   }
 
   /** @override */
@@ -64,12 +65,13 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
     this.element.appendChild(this.container_);
 
-    this.useLayers_ =
+    this.useLayersPrioritization_ =
+      (getMode().localDev || getMode().test) &&
       isExperimentOn(this.win, 'layers') &&
       isExperimentOn(this.win, 'layers-prioritization');
 
     this.cells_.forEach(cell => {
-      if (!this.useLayers_) {
+      if (!this.useLayersPrioritization_) {
         Services.ownersForDoc(this.element).setOwner(cell, this.element);
       }
       cell.classList.add('amp-carousel-slide');
@@ -93,7 +95,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
       ActionTrust.LOW
     );
 
-    if (this.useLayers_) {
+    if (this.useLayersPrioritization_) {
       this.declareLayer(this.container_);
     }
   }
@@ -112,7 +114,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   layoutCallback() {
-    if (!this.useLayers_) {
+    if (!this.useLayersPrioritization_) {
       this.doLayout_(this.pos_);
       this.preloadNext_(this.pos_, 1);
     }
@@ -122,7 +124,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   onViewportCallback(unusedInViewport) {
-    if (!this.useLayers_) {
+    if (!this.useLayersPrioritization_) {
       this.updateInViewport_(this.pos_, this.pos_);
     }
   }
@@ -263,7 +265,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(pos) {
-    if (!this.useLayers_) {
+    if (!this.useLayersPrioritization_) {
       this.updateInViewport_(pos, this.oldPos_);
       this.doLayout_(pos);
       this.preloadNext_(pos, Math.sign(pos - this.oldPos_));

@@ -35,6 +35,7 @@ import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
+import {getMode} from '../mode';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -402,16 +403,16 @@ export class Resources {
     this.queue_ = new TaskQueue();
 
     /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
+    this.useLayers_ = (getMode().localDev || getMode().test) && isExperimentOn(this.win, 'layers');
 
     /** @private @const {boolean} */
-    this.useLayersPrioritization_ = isExperimentOn(
+    this.useLayersPrioritization_ = this.useLayers_ && isExperimentOn(
       this.win,
       'layers-prioritization'
     );
 
     let boundScorer;
-    if (this.useLayers_ && this.useLayersPrioritization_) {
+    if (this.useLayersPrioritization_) {
       boundScorer = this.calcTaskScoreLayers_.bind(this);
     } else {
       boundScorer = this.calcTaskScore_.bind(this);

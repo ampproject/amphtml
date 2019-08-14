@@ -26,6 +26,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
+import {getMode} from '../../../src/mode';
 
 export class AmpImageSlider extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -103,6 +104,12 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     /** @public {boolean} */
     this.isEventRegistered = false; // for test purpose
+
+    /** @private @const {boolean} */
+    this.useLayersPrioritization_ =
+      (getMode().localDev || getMode().test) &&
+      isExperimentOn(this.win, 'layers') &&
+      isExperimentOn(this.win, 'layers-prioritization');
   }
 
   /** @override */
@@ -145,10 +152,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     );
 
     // TODO(kqian): remove this after layer launch
-    if (
-      !isExperimentOn(this.win, 'layers') ||
-      !isExperimentOn(this.win, 'layers-prioritization')
-    ) {
+    if (!this.useLayersPrioritization_) {
       // see comment in layoutCallback
       // When layers not enabled
       const owners = Services.ownersForDoc(this.element);
