@@ -39,10 +39,7 @@ async function vendorConfigs() {
 function compileVendorConfigs(opt_options) {
   const options = opt_options || {};
 
-  const srcPath = [
-    'extensions/amp-analytics/0.1/vendors/*.json',
-    '!extensions/amp-analytics/0.1/vendors/_fake_.json', // ignore test json
-  ];
+  const srcPath = 'extensions/amp-analytics/0.1/vendors/*.json';
   const destPath = 'dist/v0/analytics-vendors/';
 
   if (options.watch) {
