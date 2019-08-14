@@ -156,17 +156,7 @@ class Matcher {
    * @param {!CircularBuffer<!TextPosAndIdxDef>} buf
    */
   constructor(sen, buf) {
-    /**
-     * visibleForTesting is necessary to bypass
-     * https://github.com/ampproject/amphtml/issues/17803#issuecomment-519911664
-     * @visibleForTesting
-     */
     this.sen_ = sen;
-    /**
-     * visibleForTesting is necessary to bypass
-     * https://github.com/ampproject/amphtml/issues/17803#issuecomment-519911664
-     * @visibleForTesting
-     */
     this.buf_ = buf;
     /** @type {!Array<!TextRangeWithIdxDef>} */
     this.matches = [];
