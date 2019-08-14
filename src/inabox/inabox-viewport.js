@@ -17,8 +17,8 @@
 import {MessageType} from '../../src/3p-frame-messaging';
 import {Observable} from '../observable';
 import {Services} from '../services';
-import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
+import {ViewportImpl} from '../service/viewport/viewport-impl';
 import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
@@ -519,7 +519,7 @@ export function installInaboxViewportService(ampdoc) {
     ampdoc,
     'viewport',
     function() {
-      return new Viewport(ampdoc, binding, viewer);
+      return new ViewportImpl(ampdoc, binding, viewer);
     },
     /* opt_instantiate */ true
   );
