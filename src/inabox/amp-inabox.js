@@ -22,6 +22,7 @@ import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {adopt} from '../runtime';
+import {cssText as ampDocCss} from '../../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
 import {deactivateChunking, startupChunk} from '../chunk';
 import {doNotTrackImpression} from '../impression';
@@ -82,10 +83,14 @@ startupChunk(self.document, function initial() {
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
+  const fullCss =
+    (isExperimentOn(self, 'inabox-css-cleanup')
+      ? ampSharedCss
+      : ampDocCss + ampSharedCss) +
+    'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
   installStylesForDoc(
     ampdoc,
-    ampSharedCss +
-      'html.i-amphtml-inabox{width:100%!important;height:100%!important}',
+    fullCss,
     () => {
       startupChunk(self.document, function services() {
         // Core services.
