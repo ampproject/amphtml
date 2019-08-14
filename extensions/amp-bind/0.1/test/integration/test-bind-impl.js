@@ -858,7 +858,10 @@ describe
               return promise.then(() => {
                 expect(history.push).to.be.called;
                 // `data` param should be null on untrusted viewers.
-                expect(history.push).to.be.calledWith(sinon.match.func, null);
+                expect(history.push).to.be.calledWith(
+                  sinon.match.func,
+                  undefined
+                );
               });
             });
           });

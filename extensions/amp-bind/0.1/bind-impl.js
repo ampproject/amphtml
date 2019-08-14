@@ -376,13 +376,7 @@ export class Bind {
           if (!data) {
             return;
           }
-          // Use deep copy of `data` so subsequent modifications won't
-          // affect the stored object reference.
-          const copy = this.copyJsonObject_(data);
-          if (!copy) {
-            return;
-          }
-          this.historyQueue_.push({op: HistoryOp.REPLACE, data: copy});
+          this.historyQueue_.push({op: HistoryOp.REPLACE, data});
           // Debounce flush queue on "replace" to rate limit History.replace.
           this.debouncedFlushHistoryQueue_();
         });
@@ -449,18 +443,21 @@ export class Bind {
    * @return {!Promise<(!JsonObject|undefined)>}
    */
   getDataForHistory_() {
-    const data = dict({
-      'data': dict({'amp-bind': this.state_}),
-      'title': this.localWin_.document.title,
-    });
+    // Copy the state so subsequent changes don't modify the stored object
+    // reference, and don't pay the cost of copying JSON unless we need to.
+    const getData = () => {
+      return dict({
+        'data': dict({'amp-bind': this.copyJsonObject_(this.state_)}),
+        'title': this.localWin_.document.title,
+      });
+    };
     if (!this.viewer_.isEmbedded()) {
-      // CC doesn't recognize !JsonObject as a subtype of (JsonObject|null).
-      return /** @type {!Promise<?JsonObject>} */ (Promise.resolve(data));
+      return Promise.resolve(getData());
     }
     // Only pass state for history updates to trusted viewers, since they
     // may contain user data e.g. form input.
     return this.viewer_.isTrustedViewer().then(trusted => {
-      return trusted ? data : undefined;
+      return trusted ? getData() : undefined;
     });
   }
 
