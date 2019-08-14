@@ -51,38 +51,52 @@ module.exports = function(babel) {
         const {node} = path;
         const {callee} = node;
         const {parenthesized} = node.extra || {};
+
+        const isDirectCallExpression = t.isIdentifier(callee, {
+          name: 'devAssert',
+        });
         const isMemberAndCallExpression =
           t.isMemberExpression(callee) && t.isCallExpression(callee.object);
 
-        if (!isMemberAndCallExpression) {
+        if (!(isDirectCallExpression || isMemberAndCallExpression)) {
           return;
         }
 
-        const logCallee = callee.object.callee;
-        const {property} = callee;
-        const isRemovableDevCall =
-          t.isIdentifier(logCallee, {name: 'dev'}) &&
-          isRemovableMethod(t, property, removableDevAsserts);
+        // `property` here is the identifier we want to evaluate such as the
+        // `devAssert` in a direct call or the `assert` in a `dev().assert()`
+        // call.
+        let property = null;
+        let args = null;
+        // `type` is left null in a direct call expression like `devAssert`
+        let type = null;
 
-        const isRemovableUserCall =
-          t.isIdentifier(logCallee, {name: 'user'}) &&
-          isRemovableMethod(t, property, removableUserAsserts);
+        if (isDirectCallExpression) {
+          property = node.callee;
+          args = node.arguments[0];
+        } else if (isMemberAndCallExpression) {
+          property = callee.property;
 
-        if (!(isRemovableDevCall || isRemovableUserCall)) {
-          return;
+          const logCallee = callee.object.callee;
+          const isRemovableDevCall =
+            t.isIdentifier(logCallee, {name: 'dev'}) &&
+            isRemovableMethod(t, property, removableDevAsserts);
+
+          const isRemovableUserCall =
+            t.isIdentifier(logCallee, {name: 'user'}) &&
+            isRemovableMethod(t, property, removableUserAsserts);
+
+          if (!(isRemovableDevCall || isRemovableUserCall)) {
+            return;
+          }
+          args = path.node.arguments[0];
+          type = typeMap[property.name];
         }
-
-        // We assume the return is always the resolved expression value.
-        // This might not be the case like in assertEnum which we currently
-        // don't remove.
-        const args = path.node.arguments[0];
-        const type = typeMap[property.name];
 
         if (args) {
           if (parenthesized) {
             path.replaceWith(t.parenthesizedExpression(args));
             path.skip();
-            // If is not an assert type, we won't need to do type annotation.
+            // If it is not an assert type, we won't need to do type annotation.
             // If it has no type that we can cast to, then we also won't need to
             // do type annotation.
           } else if (!property.name.startsWith('assert') || !type) {
