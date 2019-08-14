@@ -169,7 +169,7 @@ export class SafeframeHostApi {
     /** @protected {?Promise} */
     this.delay_ = null;
 
-    /** @private {../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = this.baseInstance_.getViewport();
 
     /** @private {boolean} */
