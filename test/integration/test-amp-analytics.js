@@ -239,7 +239,7 @@ describe('amp-analytics', function() {
         return browser.waitForElementLayout('amp-analytics');
       });
 
-      it('should trigger when image being 50% visible for 0.5s', () => {
+      it('should trigger when amp-img is 50% visible for 0.5s', () => {
         let scrollTime = Infinity;
         const reqPromise = RequestBank.withdraw().then(req => {
           const q = parseQueryString(req.url.substr(1));
@@ -309,11 +309,13 @@ describe('amp-analytics', function() {
       let browser;
 
       beforeEach(() => {
+        // delete IntersectionObserver to test polyfill support for non-AMP elements
+        delete env.win.IntersectionObserver;
         browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
       });
 
-      it('should trigger when image being 50% visible for 0.5s', () => {
+      it('should trigger when img is 50% visible for 0.5s', () => {
         let scrollTime = Infinity;
         const reqPromise = RequestBank.withdraw().then(req => {
           const q = parseQueryString(req.url.substr(1));

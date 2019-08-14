@@ -103,7 +103,6 @@ export function getIntersectionChangeEntry(element, owner, hostViewport) {
  * @return {boolean}
  */
 export function nativeIntersectionObserverSupported(win) {
-  // return false;
   return (
     'IntersectionObserver' in win &&
     'IntersectionObserverEntry' in win &&
