@@ -16,15 +16,15 @@
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
+import {ViewportBindingIosEmbedShadowRoot_} from '../../src/service/viewport/viewport-binding-ios-embed-sd';
+import {ViewportBindingIosEmbedWrapper_} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
 import {
-  Viewport,
+  ViewportImpl,
   installViewportServiceForDoc,
   parseViewportMeta,
   stringifyViewportMeta,
   updateViewportMetaString,
 } from '../../src/service/viewport/viewport-impl';
-import {ViewportBindingIosEmbedShadowRoot_} from '../../src/service/viewport/viewport-binding-ios-embed-sd';
-import {ViewportBindingIosEmbedWrapper_} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
 
 import {
   ViewportBindingDef,
@@ -116,7 +116,7 @@ describes.fakeWin('Viewport', {}, env => {
     binding.disconnect = sandbox.spy();
     updatedPaddingTop = undefined;
     binding.updatePaddingTop = paddingTop => (updatedPaddingTop = paddingTop);
-    viewport = new Viewport(ampdoc, binding, viewer);
+    viewport = new ViewportImpl(ampdoc, binding, viewer);
     viewport.fixedLayer_ = {
       enterLightbox: () => {},
       leaveLightbox: () => {},
@@ -172,37 +172,37 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should set singledoc class', () => {
-      new Viewport(ampdoc, binding, viewer);
+      new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.have.class('i-amphtml-singledoc');
     });
 
     it('should not set singledoc class', () => {
       sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
-      new Viewport(ampdoc, binding, viewer);
+      new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.not.have.class('i-amphtml-singledoc');
     });
 
     it('should set standalone class', () => {
-      new Viewport(ampdoc, binding, viewer);
+      new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.have.class('i-amphtml-standalone');
       expect(root).to.not.have.class('i-amphtml-embedded');
     });
 
     it('should set embedded class', () => {
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
-      new Viewport(ampdoc, binding, viewer);
+      new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.have.class('i-amphtml-embedded');
       expect(root).to.not.have.class('i-amphtml-standalone');
     });
 
     it('should not set iframed class', () => {
-      new Viewport(ampdoc, binding, viewer);
+      new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.not.have.class('i-amphtml-iframed');
     });
 
     it('should set iframed class', () => {
       ampdoc.win.parent = {};
-      new Viewport(ampdoc, binding, viewer);
+      new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.have.class('i-amphtml-iframed');
     });
 
@@ -224,19 +224,19 @@ describes.fakeWin('Viewport', {}, env => {
       });
 
       it('should set ios-webview class', () => {
-        new Viewport(ampdoc, binding, viewer);
+        new ViewportImpl(ampdoc, binding, viewer);
         expect(root).to.have.class('i-amphtml-webview');
       });
 
       it('should set ios-webview class even when not on iOS', () => {
         isIos = false;
-        new Viewport(ampdoc, binding, viewer);
+        new ViewportImpl(ampdoc, binding, viewer);
         expect(root).to.have.class('i-amphtml-webview');
       });
 
       it('should not set ios-webview class w/o webview param', () => {
         webviewParam = null;
-        new Viewport(ampdoc, binding, viewer);
+        new ViewportImpl(ampdoc, binding, viewer);
         expect(root).to.not.have.class('i-amphtml-webview');
       });
     });
@@ -359,7 +359,7 @@ describes.fakeWin('Viewport', {}, env => {
     viewer.isVisible = () => false;
     let onVisibilityHandler;
     viewer.onVisibilityChanged = handler => (onVisibilityHandler = handler);
-    viewport = new Viewport(ampdoc, binding, viewer);
+    viewport = new ViewportImpl(ampdoc, binding, viewer);
 
     // Hasn't been called at first.
     expect(binding.connect).to.not.be.called;
@@ -390,7 +390,7 @@ describes.fakeWin('Viewport', {}, env => {
     viewer.isVisible = () => true;
     let onVisibilityHandler;
     viewer.onVisibilityChanged = handler => (onVisibilityHandler = handler);
-    viewport = new Viewport(ampdoc, binding, viewer);
+    viewport = new ViewportImpl(ampdoc, binding, viewer);
 
     // Size has not be initialized yet.
     expect(binding.connect).to.be.calledOnce;
@@ -1062,7 +1062,7 @@ describes.fakeWin('Viewport', {}, env => {
       .skipSafari()
       .run('should not set pan-y when not embedded', () => {
         viewer.isEmbedded = () => false;
-        viewport = new Viewport(ampdoc, binding, viewer);
+        viewport = new ViewportImpl(ampdoc, binding, viewer);
         expect(win.getComputedStyle(root)['touch-action']).to.equal('auto');
       });
 
@@ -1071,7 +1071,7 @@ describes.fakeWin('Viewport', {}, env => {
       .skipSafari()
       .run('should set pan-y with experiment', () => {
         viewer.isEmbedded = () => true;
-        viewport = new Viewport(ampdoc, binding, viewer);
+        viewport = new ViewportImpl(ampdoc, binding, viewer);
         expect(win.getComputedStyle(root)['touch-action']).to.equal('pan-y');
       });
   });
@@ -1085,7 +1085,7 @@ describes.fakeWin('Viewport', {}, env => {
 
     beforeEach(() => {
       ampdoc = new AmpDocSingle(window);
-      viewport = new Viewport(ampdoc, binding, viewer);
+      viewport = new ViewportImpl(ampdoc, binding, viewer);
       bindingMock = sandbox.mock(binding);
       iframe = document.createElement('iframe');
       const html = '<div id="one"></div>';
@@ -1167,7 +1167,7 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should not override scrollTo/pageYOffset if not requested', () => {
-      new Viewport(ampdoc, binding, viewer);
+      new ViewportImpl(ampdoc, binding, viewer);
       expect(windowApi.scrollTo).to.equal(originalScrollTo);
       expect(windowApi.scrollY).to.equal(17);
       expect(windowApi.pageYOffset).to.equal(17);
@@ -1175,7 +1175,7 @@ describes.fakeWin('Viewport', {}, env => {
 
     it('should override scrollTo when requested', () => {
       sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
-      viewport = new Viewport(ampdoc, binding, viewer);
+      viewport = new ViewportImpl(ampdoc, binding, viewer);
       const setScrollTopStub = sandbox.stub(viewport, 'setScrollTop');
       expect(windowApi.scrollTo).to.not.equal(originalScrollTo);
       windowApi.scrollTo(0, 11);
@@ -1184,7 +1184,7 @@ describes.fakeWin('Viewport', {}, env => {
 
     it('should override scrollY/pageYOffset when requested', () => {
       sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
-      viewport = new Viewport(ampdoc, binding, viewer);
+      viewport = new ViewportImpl(ampdoc, binding, viewer);
       const stub = sandbox.stub(viewport, 'getScrollTop').callsFake(() => 19);
       expect(windowApi.scrollY).to.equal(19);
       expect(windowApi.pageYOffset).to.equal(19);
@@ -1198,7 +1198,7 @@ describes.fakeWin('Viewport', {}, env => {
         configurable: false, // make it non-configurable to let it will throw
       });
       sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
-      new Viewport(ampdoc, binding, viewer);
+      new ViewportImpl(ampdoc, binding, viewer);
       expect(windowApi.scrollTo).to.equal(originalScrollTo);
     });
 
@@ -1209,7 +1209,7 @@ describes.fakeWin('Viewport', {}, env => {
         configurable: false, // make it non-configurable to let it will throw
       });
       sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
-      new Viewport(ampdoc, binding, viewer);
+      new ViewportImpl(ampdoc, binding, viewer);
       expect(windowApi.scrollY).to.equal(21);
     });
   });
@@ -1445,7 +1445,7 @@ describe('Viewport META', () => {
       ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
-      viewport = new Viewport(ampdoc, binding, viewer);
+      viewport = new ViewportImpl(ampdoc, binding, viewer);
     });
 
     afterEach(() => {

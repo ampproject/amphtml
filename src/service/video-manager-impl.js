@@ -85,7 +85,7 @@ export class VideoManager {
       installAutoplayStylesForDoc(this.ampdoc)
     );
 
-    /** @private {!../service/viewport/viewport-impl.Viewport} */
+    /** @private {!../service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {?Array<!VideoEntry>} */
@@ -1294,7 +1294,7 @@ export class AutoFullscreenManager {
 }
 
 /**
- * @param {!./viewport/viewport-impl.Viewport} viewport
+ * @param {!./viewport/viewport-interface.ViewportInterface} viewport
  * @param {{top: number, height: number}} rect
  * @return {number}
  */

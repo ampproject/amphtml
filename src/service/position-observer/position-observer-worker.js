@@ -71,7 +71,7 @@ export class PositionObserverWorker {
     /** @type {?PositionInViewportEntryDef} */
     this.prevPosition_ = null;
 
-    /** @private {!../viewport/viewport-impl.Viewport} */
+    /** @private {!../viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
   }
 

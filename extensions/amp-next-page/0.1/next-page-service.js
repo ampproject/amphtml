@@ -90,7 +90,7 @@ export class NextPageService {
     /** @private {?../../../src/service/navigation.Navigation} */
     this.navigation_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */

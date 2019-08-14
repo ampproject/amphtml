@@ -261,7 +261,7 @@ export class VideoDocking {
 
     /**
      * @private
-     * @const {!../../../src/service/viewport/viewport-impl.Viewport}
+     * @const {!../../../src/service/viewport/viewport-interface.ViewportInterface}
      */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
