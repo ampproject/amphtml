@@ -108,6 +108,10 @@
   transition: none !important;
 }
 
+.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
+  margin-top: auto !important;
+}
+
 .i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
   opacity: 1 !important;
 }
