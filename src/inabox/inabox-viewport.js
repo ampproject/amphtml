@@ -42,6 +42,63 @@ const TAG = 'inabox-viewport';
 const MIN_EVENT_INTERVAL = 100;
 
 /**
+ * @param {!Window} win
+ * @param {!Element} bodyElement
+ * @return {!Promise}
+ * @visibleForTesting
+ */
+export function prepareBodyForOverlay(win, bodyElement) {
+  return Services.vsyncFor(win).runPromise(
+    {
+      measure: state => {
+        state.width = win./*OK*/ innerWidth;
+        state.height = win./*OK*/ innerHeight;
+      },
+      mutate: state => {
+        // We need to override runtime-level !important rules
+        setImportantStyles(bodyElement, {
+          'background': 'transparent',
+          'left': '50%',
+          'top': '50%',
+          'right': 'auto',
+          'bottom': 'auto',
+          'position': 'absolute',
+          'height': px(state.height),
+          'width': px(state.width),
+          'margin-top': px(-state.height / 2),
+          'margin-left': px(-state.width / 2),
+        });
+      },
+    },
+    {}
+  );
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element} bodyElement
+ * @return {!Promise}
+ * @visibleForTesting
+ */
+export function resetBodyForOverlay(win, bodyElement) {
+  return Services.vsyncFor(win).mutatePromise(() => {
+    // We're not resetting background here as it's supposed to remain
+    // transparent.
+    resetStyles(bodyElement, [
+      'position',
+      'left',
+      'top',
+      'right',
+      'bottom',
+      'width',
+      'height',
+      'margin-left',
+      'margin-top',
+    ]);
+  });
+}
+
+/**
  * This object represents the viewport. It tracks scroll position, resize
  * and other events and notifies interesting parties when viewport has changed
  * and how.
@@ -805,61 +862,4 @@ function isMoved(newRect, oldRect) {
  */
 function isResized(newRect, oldRect) {
   return newRect.width != oldRect.width || newRect.height != oldRect.height;
-}
-
-/**
- * @param {!Window} win
- * @param {!Element} bodyElement
- * @return {!Promise}
- * @visibleForTesting
- */
-export function prepareBodyForOverlay(win, bodyElement) {
-  return Services.vsyncFor(win).runPromise(
-    {
-      measure: state => {
-        state.width = win./*OK*/ innerWidth;
-        state.height = win./*OK*/ innerHeight;
-      },
-      mutate: state => {
-        // We need to override runtime-level !important rules
-        setImportantStyles(bodyElement, {
-          'background': 'transparent',
-          'left': '50%',
-          'top': '50%',
-          'right': 'auto',
-          'bottom': 'auto',
-          'position': 'absolute',
-          'height': px(state.height),
-          'width': px(state.width),
-          'margin-top': px(-state.height / 2),
-          'margin-left': px(-state.width / 2),
-        });
-      },
-    },
-    {}
-  );
-}
-
-/**
- * @param {!Window} win
- * @param {!Element} bodyElement
- * @return {!Promise}
- * @visibleForTesting
- */
-export function resetBodyForOverlay(win, bodyElement) {
-  return Services.vsyncFor(win).mutatePromise(() => {
-    // We're not resetting background here as it's supposed to remain
-    // transparent.
-    resetStyles(bodyElement, [
-      'position',
-      'left',
-      'top',
-      'right',
-      'bottom',
-      'width',
-      'height',
-      'margin-left',
-      'margin-top',
-    ]);
-  });
 }
