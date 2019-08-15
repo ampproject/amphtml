@@ -92,7 +92,7 @@ export class InaboxMessagingHost {
     /** @private {!NamedObservable} */
     this.msgObservable_ = new NamedObservable();
 
-    /** @private {!FrameOverlayManager} */
+    /** @private {!./frame-overlay-manager.FrameOverlayManager} */
     this.frameOverlayManager_ = getFrameOverlayManager(win);
 
     this.msgObservable_.listen(
