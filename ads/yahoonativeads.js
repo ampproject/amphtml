@@ -21,7 +21,7 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function yahoonativeads(global, data) {
-  validateData(data, ['section']);
+  validateData(data, ['section'], ['module']);
 
   (global.readmo = global.readmo || []).push({
     section: data.section,
@@ -40,5 +40,5 @@ export function yahoonativeads(global, data) {
     });
   });
 
-  loadScript(global, 'https://s.yimg.com/dy/ads/readmo.js');
+  loadScript(global, 'https://s.yimg.com/dy/ads/readmo.js', () => global.context.renderStart());
 }
