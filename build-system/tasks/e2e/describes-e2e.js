@@ -247,10 +247,7 @@ const envPresets = {
     AmpdocEnvironment.VIEWER_DEMO,
     AmpdocEnvironment.SHADOW_DEMO,
   ],
-  'ampdoc-amp4ads-preset': [
-    AmpdocEnvironment.SINGLE,
-    AmpdocEnvironment.VIEWER_DEMO,
-    AmpdocEnvironment.SHADOW_DEMO,
+  'amp4ads-preset': [
     // TODO(lannka): unskip this test. It passes locally but fails on Travis:
     // https://travis-ci.org/ampproject/amphtml/jobs/570977015
     // AmpdocEnvironment.A4A_FIE,
@@ -259,6 +256,9 @@ const envPresets = {
     AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
   ],
 };
+envPresets['ampdoc-amp4ads-preset'] = envPresets['ampdoc-preset'].concat(
+  envPresets['amp4ads-preset']
+);
 
 /**
  * Helper class to skip E2E tests in a specific AMP environment.
