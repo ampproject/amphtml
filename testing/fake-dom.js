@@ -127,7 +127,6 @@ export class FakeWindow {
         this.visibilityState_ = value;
         this.documentHidden_ = value != 'visible';
         this.document.eventListeners.fire({type: 'visibilitychange'});
-        console.log('QQQQ: fakeDom.visibilityState set: ', value);
       },
     });
 
