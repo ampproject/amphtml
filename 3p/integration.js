@@ -259,6 +259,7 @@ import {wpmedia} from '../ads/wpmedia';
 import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
+import {yahoonativeads} from '../ads/yahoonativeads';
 import {yandex} from '../ads/yandex';
 import {yengo} from '../ads/yengo';
 import {yieldbot} from '../ads/yieldbot';
@@ -298,15 +299,16 @@ const AMP_EMBED_ALLOWED = {
   postquare: true,
   pubexchange: true,
   rbinfox: true,
+  runative: true,
   smartclip: true,
   smi2: true,
-  svknative: true,
+  speakol: true,
   strossle: true,
+  svknative: true,
   taboola: true,
+  yahoonativeads: true,
   zen: true,
   zergnet: true,
-  runative: true,
-  speakol: true,
 };
 
 init(window);
@@ -527,6 +529,7 @@ register('wpmedia', wpmedia);
 register('xlift', xlift);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
+register('yahoonativeads', yahoonativeads);
 register('yandex', yandex);
 register('yengo', yengo);
 register('yieldbot', yieldbot);
