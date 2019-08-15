@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>Scrollbound Animation Ad</title>
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
   <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
 
@@ -95,6 +95,7 @@
 <!--
 The animations are implemented using [amp-animation]({{g.doc('/content/amp-dev/documentation/components/reference/amp-animation.md', locale=doc.locale).url.path}}) which is an AMP component that uses [Web Animations API](https://www.w3.org/TR/web-animations/) to support both __time__ and __scroll__ based animations.
 -->
+<div style="height: 200vh"></div>
 <amp-animation id="adAnim" layout="nodisplay">
   <script type="application/json">
     {
@@ -177,5 +178,6 @@ Monitors the position of an element within the viewport as a user scrolls, and d
     </div>
   </div>
 </div>
+<div style="height: 200vh"></div>
 </body>
 </html>
