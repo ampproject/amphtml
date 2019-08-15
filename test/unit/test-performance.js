@@ -905,7 +905,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
   });
 
   describe('should forward first input metrics for performance entries', () => {
-
     let PerformanceObserverConstructorStub, performanceObserver;
     beforeEach(() => {
       // Stub and fake the PerformanceObserver constructor.
@@ -915,10 +914,11 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         performanceObserver = new PerformanceObserverImpl(callback);
         return performanceObserver;
       });
-      PerformanceObserverConstructorStub = env.sandbox
-        .stub(env.win, 'PerformanceObserver');
-        PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
-
+      PerformanceObserverConstructorStub = env.sandbox.stub(
+        env.win,
+        'PerformanceObserver'
+      );
+      PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
     });
     it('created before performance service registered', () => {
       // Pretend that the EventTiming API exists.

@@ -168,9 +168,9 @@ export class Performance {
      * @private {boolean}
      */
     this.supportsEventTimingAPIv76_ =
-    this.win.PerformanceObserver &&
-    this.win.PerformanceObserver.supportedEntryTypes &&
-    this.win.PerformanceObserver.supportedEntryTypes.includes('firstInput');
+      this.win.PerformanceObserver &&
+      this.win.PerformanceObserver.supportedEntryTypes &&
+      this.win.PerformanceObserver.supportedEntryTypes.includes('firstInput');
 
     /**
      * Whether the user agent supports the Event Timing API that shipped
@@ -179,10 +179,9 @@ export class Performance {
      * @private {boolean}
      */
     this.supportsEventTimingAPIv77_ =
-    this.win.PerformanceObserver &&
-    this.win.PerformanceObserver.supportedEntryTypes &&
-    this.win.PerformanceObserver.supportedEntryTypes.includes('first-input');
-
+      this.win.PerformanceObserver &&
+      this.win.PerformanceObserver.supportedEntryTypes &&
+      this.win.PerformanceObserver.supportedEntryTypes.includes('first-input');
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
