@@ -22,9 +22,9 @@ import {
 } from './viewport-binding-def';
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
+import {getMode} from '../../mode';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {getMode} from '../../mode';
 
 const TAG_ = 'Viewport';
 
@@ -68,7 +68,7 @@ export class ViewportBindingNatural_ {
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 
     /** @private @const {boolean} */
-    this.useLayers_ = (getMode().localDev || getMode().test) && isExperimentOn(this.win, 'layers');
+    this.useLayers_ = getMode().localDev && isExperimentOn(this.win, 'layers');
 
     dev().fine(TAG_, 'initialized natural viewport');
   }

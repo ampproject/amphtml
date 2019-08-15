@@ -1037,7 +1037,7 @@ export class BaseElement {
    */
   declareLayer(opt_element) {
     devAssert(
-      (getMode().localDev || getMode().test) && isExperimentOn(this.win, 'layers'),
+      getMode().localDev && isExperimentOn(this.win, 'layers'),
       'Layers must be enabled to declare layer.'
     );
     if (opt_element) {

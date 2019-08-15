@@ -21,6 +21,7 @@ import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {ViewportImpl} from '../service/viewport/viewport-impl';
 import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
+import {getMode} from '../mode';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
@@ -28,7 +29,6 @@ import {layoutRectLtwh, moveLayoutRect} from '../layout-rect';
 import {px, resetStyles, setImportantStyles} from '../style';
 import {registerServiceBuilderForDoc} from '../service';
 import {throttle} from '../utils/rate-limit';
-import {getMode} from '../mode';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
@@ -153,7 +153,7 @@ export class ViewportBindingInabox {
     );
 
     /** @private @const {boolean} */
-    this.useLayers_ = (getMode().localDev || getMode().test) && isExperimentOn(this.win, 'layers');
+    this.useLayers_ = getMode().localDev && isExperimentOn(this.win, 'layers');
 
     /** @private {?../../ads/inabox/position-observer.PositionObserver} */
     this.topWindowPositionObserver_ = null;

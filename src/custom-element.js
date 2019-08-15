@@ -854,7 +854,7 @@ function createBaseCustomElementClass(win) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = Services.resourcesForDoc(this.ampdoc_);
       }
-      if ((getMode().localDev || getMode().test) && isExperimentOn(this.ampdoc_.win, 'layers')) {
+      if (getMode().localDev && isExperimentOn(this.ampdoc_.win, 'layers')) {
         if (!this.layers_) {
           // Resources can now be initialized since the ampdoc is now available.
           this.layers_ = Services.layersForDoc(this.ampdoc_);
@@ -1000,7 +1000,7 @@ function createBaseCustomElementClass(win) {
 
       this.isConnected_ = false;
       this.getResources().remove(this);
-      if ((getMode().localDev || getMode().test) && isExperimentOn(this.ampdoc_.win, 'layers')) {
+      if (getMode().localDev && isExperimentOn(this.ampdoc_.win, 'layers')) {
         this.getLayers().remove(this);
       }
       this.implementation_.detachedCallback();

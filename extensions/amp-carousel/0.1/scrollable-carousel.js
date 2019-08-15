@@ -20,10 +20,10 @@ import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
-import {getMode} from '../../../src/mode';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
@@ -66,7 +66,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.element.appendChild(this.container_);
 
     this.useLayersPrioritization_ =
-      (getMode().localDev || getMode().test) &&
+      getMode().localDev &&
       isExperimentOn(this.win, 'layers') &&
       isExperimentOn(this.win, 'layers-prioritization');
 

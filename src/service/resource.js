@@ -19,6 +19,7 @@ import {Layout} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
+import {getMode} from '../mode';
 import {isBlockedByConsent} from '../error';
 import {isExperimentOn} from '../experiments';
 import {
@@ -29,7 +30,6 @@ import {
 } from '../layout-rect';
 import {startsWith} from '../string';
 import {toWin} from '../types';
-import {getMode} from '../mode';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -215,13 +215,12 @@ export class Resource {
     this.loadPromiseResolve_ = deferred.resolve;
 
     /** @private @const {boolean} */
-    this.useLayers_ = (getMode().localDev || getMode().test) && isExperimentOn(this.hostWin, 'layers');
+    this.useLayers_ =
+      getMode().localDev && isExperimentOn(this.hostWin, 'layers');
 
     /** @private @const {boolean} */
-    this.useLayersPrioritization_ = this.useLayers_ && isExperimentOn(
-      this.hostWin,
-      'layers-prioritization'
-    );
+    this.useLayersPrioritization_ =
+      this.useLayers_ && isExperimentOn(this.hostWin, 'layers-prioritization');
   }
 
   /**

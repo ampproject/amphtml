@@ -27,6 +27,7 @@ import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
 import {dev, devAssert, user} from '../log';
 import {dict, hasOwn} from '../utils/object';
+import {getMode} from '../mode';
 import {getSourceUrl, isProxyOrigin} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isArray} from '../types';
@@ -35,7 +36,6 @@ import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
-import {getMode} from '../mode';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -403,13 +403,11 @@ export class Resources {
     this.queue_ = new TaskQueue();
 
     /** @private @const {boolean} */
-    this.useLayers_ = (getMode().localDev || getMode().test) && isExperimentOn(this.win, 'layers');
+    this.useLayers_ = getMode().localDev && isExperimentOn(this.win, 'layers');
 
     /** @private @const {boolean} */
-    this.useLayersPrioritization_ = this.useLayers_ && isExperimentOn(
-      this.win,
-      'layers-prioritization'
-    );
+    this.useLayersPrioritization_ =
+      this.useLayers_ && isExperimentOn(this.win, 'layers-prioritization');
 
     let boundScorer;
     if (this.useLayersPrioritization_) {

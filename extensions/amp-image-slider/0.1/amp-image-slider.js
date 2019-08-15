@@ -22,11 +22,11 @@ import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
-import {getMode} from '../../../src/mode';
 
 export class AmpImageSlider extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -107,7 +107,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     /** @private @const {boolean} */
     this.useLayersPrioritization_ =
-      (getMode().localDev || getMode().test) &&
+      getMode().localDev &&
       isExperimentOn(this.win, 'layers') &&
       isExperimentOn(this.win, 'layers-prioritization');
   }
