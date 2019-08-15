@@ -39,8 +39,7 @@ import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;
 
-describe('cid', () => {
-  let sandbox;
+describes.sandboxed('cid', {}, () => {
   let clock;
   let fakeWin;
   let ampdoc;
@@ -61,7 +60,6 @@ describe('cid', () => {
 
   beforeEach(() => {
     seed = 1;
-    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
     trustedViewer = true;
@@ -154,7 +152,6 @@ describe('cid', () => {
 
   afterEach(() => {
     window.localStorage.removeItem('amp-cid');
-    sandbox.restore();
   });
 
   describe('with real crypto', () => {
@@ -786,14 +783,12 @@ describes.realWin('cid', {amp: true}, env => {
   let cid;
   let win;
   let ampdoc;
-  let sandbox;
   let clock;
   const hasConsent = Promise.resolve();
 
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    sandbox = env.sandbox;
     clock = lolex.install({
       target: win,
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
