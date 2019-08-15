@@ -424,9 +424,9 @@ export class Bind {
     let enqueue = true;
 
     // Collapse if consecutive "replace" operations.
-    if (task.op === HistoryOp.REPLACE) {
+    if (task.op === HistoryOp.REPLACE && this.historyQueue_.length > 0) {
       const lastTask = this.historyQueue_[this.historyQueue_.length - 1];
-      if (lastTask && lastTask.op === HistoryOp.REPLACE) {
+      if (lastTask.op === HistoryOp.REPLACE) {
         lastTask.data = task.data;
         enqueue = false;
       }
