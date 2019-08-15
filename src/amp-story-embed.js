@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {loadPromise} from './event-helper';
-
 /** @const {string} */
 const SCRIPT_TAG_NAME = 'script';
 
@@ -33,7 +31,7 @@ const LoadStateClass = {
 const CSS = `
   :host { all: initial; display: block; border-radius: 0; width: 405px; height: 720px; }
   main { background: #202125; }
-  iframe { height: 100%; width: 100%; border: 0; opacity: 0; transition: opacity 200ms ease }
+  iframe { height: 100%; width: 100%; border: 0; opacity: 0; transition: opacity 500ms ease }
   .loaded iframe { opacity: 1; }
 `;
 
@@ -118,15 +116,15 @@ export class AmpStoryEmbed extends HTMLElement {
   /** @private  */
   initializeLoadingListeners_() {
     this.rootEl_.classList.add(LoadStateClass.LOADING);
-    loadPromise(this.iframeEl_)
-      .then(() => {
-        this.rootEl_.classList.remove(LoadStateClass.LOADING);
-        this.rootEl_.classList.add(LoadStateClass.LOADED);
-      })
-      .catch(() => {
-        this.rootEl_.classList.remove(LoadStateClass.LOADING);
-        this.rootEl_.classList.add(LoadStateClass.ERROR);
-      });
+
+    this.iframeEl_.onload = () => {
+      this.rootEl_.classList.remove(LoadStateClass.LOADING);
+      this.rootEl_.classList.add(LoadStateClass.LOADED);
+    };
+    this.iframeEl_.onerror = () => {
+      this.rootEl_.classList.remove(LoadStateClass.LOADING);
+      this.rootEl_.classList.add(LoadStateClass.ERROR);
+    };
   }
 }
 
