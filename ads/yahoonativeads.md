@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,3 +29,11 @@ Yahoo Native Ads only requires a configured section code to run. Please work wit
              data-section="1234567">
   </amp-embed>
 ```
+
+### Required parameters
+
+- `data-section` : Unique section id that represents your site and placement
+
+### Optional parameters
+
+- `data-module` : Type of module to render (ex: `end-of-article`, `smart-feed`, `smart-feed-video`, `side-rail`)

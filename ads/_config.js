@@ -1079,7 +1079,9 @@ export const adConfig = {
     preconnect: 'https://yads.yahoo.co.jp',
   },
 
-  'yahoonativeads': {},
+  'yahoonativeads': {
+    renderStartImplemented: true,
+  },
 
   'yandex': {
     prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
