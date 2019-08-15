@@ -29,44 +29,34 @@ describes.endtoend(
     });
 
     it('should animate clock hand while scrolling', async () => {
-      await verifyClockHandRect(controller, {
+      const step = 50;
+      const initPoint = {
         'x': 151,
         'y': 110,
         'width': 53,
         'height': 39,
-      });
-
-      await scrollParentWindowYBy(controller, 50);
-      await verifyClockHandRect(controller, {
+      };
+      const midPoint = {
         'x': 150,
         'y': 111,
         'width': 37,
         'height': 54,
-      });
-
-      await scrollParentWindowYBy(controller, 50);
-      await verifyClockHandRect(controller, {
+      };
+      const endPoint = {
         'x': 150,
         'y': 112,
         'width': 14,
         'height': 60,
-      });
-
-      await scrollParentWindowYBy(controller, -50);
-      await verifyClockHandRect(controller, {
-        'x': 150,
-        'y': 111,
-        'width': 37,
-        'height': 54,
-      });
-
-      await scrollParentWindowYBy(controller, -50);
-      await verifyClockHandRect(controller, {
-        'x': 151,
-        'y': 110,
-        'width': 53,
-        'height': 39,
-      });
+      };
+      await verifyClockHandRect(controller, initPoint);
+      await scrollParentWindowYBy(controller, step);
+      await verifyClockHandRect(controller, midPoint);
+      await scrollParentWindowYBy(controller, step);
+      await verifyClockHandRect(controller, endPoint);
+      await scrollParentWindowYBy(controller, -step);
+      await verifyClockHandRect(controller, midPoint);
+      await scrollParentWindowYBy(controller, -step);
+      await verifyClockHandRect(controller, initPoint);
     });
   }
 );
