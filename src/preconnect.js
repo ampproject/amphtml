@@ -122,7 +122,7 @@ class PreconnectService {
    *    when it is more fully rendered, you already know that the connection
    *    will be used very soon.
    */
-  url(ampdoc, url, opt_alsoConnecting) {//QQQQ: calls
+  url(ampdoc, url, opt_alsoConnecting) {
     ampdoc.whenFirstVisible().then(() => {
       this.url_(ampdoc, url, opt_alsoConnecting);
     });
@@ -197,7 +197,7 @@ class PreconnectService {
    * @param {string} url
    * @param {string=} opt_preloadAs
    */
-  preload(ampdoc, url, opt_preloadAs) {//QQQQ: calls
+  preload(ampdoc, url, opt_preloadAs) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }

@@ -415,18 +415,20 @@ describe
       window.AMP_MODE = {localDev: true};
       preloadBootstrap(window, preconnect);
       // Wait for visible promise.
-      return Services.ampdoc(window.document).whenFirstVisible().then(() => {
-        const fetches = document.querySelectorAll('link[rel=preload]');
-        expect(fetches).to.have.length(2);
-        expect(fetches[0]).to.have.property(
-          'href',
-          'http://ads.localhost:9876/dist.3p/current/frame.max.html'
-        );
-        expect(fetches[1]).to.have.property(
-          'href',
-          'http://ads.localhost:9876/dist.3p/current/integration.js'
-        );
-      });
+      return Services.ampdoc(window.document)
+        .whenFirstVisible()
+        .then(() => {
+          const fetches = document.querySelectorAll('link[rel=preload]');
+          expect(fetches).to.have.length(2);
+          expect(fetches[0]).to.have.property(
+            'href',
+            'http://ads.localhost:9876/dist.3p/current/frame.max.html'
+          );
+          expect(fetches[1]).to.have.property(
+            'href',
+            'http://ads.localhost:9876/dist.3p/current/integration.js'
+          );
+        });
     });
 
     it('should prefetch default bootstrap frame if custom disabled', () => {
@@ -434,14 +436,16 @@ describe
       addCustomBootstrap('http://localhost:9876/boot/remote.html');
       preloadBootstrap(window, preconnect, true);
       // Wait for visible promise.
-      return Services.ampdoc(window.document).whenFirstVisible().then(() => {
-        expect(
-          document.querySelectorAll(
-            'link[rel=preload]' +
-              '[href="http://ads.localhost:9876/dist.3p/current/frame.max.html"]'
-          )
-        ).to.be.ok;
-      });
+      return Services.ampdoc(window.document)
+        .whenFirstVisible()
+        .then(() => {
+          expect(
+            document.querySelectorAll(
+              'link[rel=preload]' +
+                '[href="http://ads.localhost:9876/dist.3p/current/frame.max.html"]'
+            )
+          ).to.be.ok;
+        });
     });
 
     it('should make sub domains (unique)', () => {
