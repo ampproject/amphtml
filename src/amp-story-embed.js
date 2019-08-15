@@ -35,8 +35,19 @@ const CSS = `
   .loaded iframe { opacity: 1; }
 `;
 
-/** @typedef {{src: string}} */
-let AmpStoryEmbedConfig;
+/**
+ * @typedef {{
+ *   src: string
+ * }}
+ */
+let AmpStoryEntryDef;
+
+/**
+ * @typedef {{
+ *   stories: !Array<!AmpStoryEntryDef>
+ * }}
+ */
+let AmpStoryEmbedConfigDef;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -50,13 +61,13 @@ export class AmpStoryEmbed extends HTMLElement {
     /** @private {!Document} */
     this.doc_ = this.ownerDocument;
 
-    /** @private {!AmpStoryEmbedConfig} */
+    /** @private {?AmpStoryEmbedConfigDef} */
     this.config_;
 
-    /** @private {!Element} */
+    /** @private {?Element} */
     this.rootEl_;
 
-    /** @private {!HTMLIframeElement} */
+    /** @private {?HTMLIframeElement} */
     this.iframeEl_;
   }
 
