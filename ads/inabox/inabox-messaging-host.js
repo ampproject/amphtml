@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {FrameOverlayManager} from './frame-overlay-manager';
 import {
   MessageType,
   deserializeMessage,
@@ -24,6 +23,7 @@ import {canInspectWindow} from '../../src/iframe-helper';
 import {dev, devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
+import {getFrameOverlayManager} from './frame-overlay-manager';
 import {getPositionObserver} from './position-observer';
 
 /** @const */
@@ -93,7 +93,7 @@ export class InaboxMessagingHost {
     this.msgObservable_ = new NamedObservable();
 
     /** @private {!FrameOverlayManager} */
-    this.frameOverlayManager_ = new FrameOverlayManager(win);
+    this.frameOverlayManager_ = getFrameOverlayManager(win);
 
     this.msgObservable_.listen(
       MessageType.SEND_POSITIONS,
