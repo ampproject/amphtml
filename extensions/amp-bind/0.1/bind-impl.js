@@ -95,6 +95,15 @@ const HistoryOp = {
 };
 
 /**
+ * @typedef {{
+ *   op: !HistoryOp,
+ *   data: (!JsonObject|undefined),
+ *   onPop: (!Function|undefined)
+ * }}
+ */
+let HistoryTaskDef;
+
+/**
  * A map of tag names to arrays of attributes that do not have non-bind
  * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
  * but does not support a `slide` attribute.
@@ -148,7 +157,7 @@ export class Bind {
      */
     this.actionSequenceIds_ = [];
 
-    /** @const @private {!Function} */
+    /** @const @private {function()} */
     this.eventuallyClearActionSequenceIds_ = debounce(
       this.win_,
       () => {
@@ -235,11 +244,7 @@ export class Bind {
 
     /**
      * A queue of history replace/push to adhere to browser rate-limits.
-     * @private @const {!Array<{
-     *   op: !HistoryOp,
-     *   data: (!JsonObject|undefined),
-     *   onPop: (!Function|undefined)
-     * }>}
+     * @private @const {!Array<!HistoryTaskDef>}
      */
     this.historyQueue_ = [];
 
@@ -373,12 +378,9 @@ export class Bind {
       .then(result => this.setState(result))
       .then(() => {
         return this.getDataForHistory_().then(data => {
-          if (!data) {
-            return;
+          if (data) {
+            this.pushToHistoryQueue_({op: HistoryOp.REPLACE, data});
           }
-          this.historyQueue_.push({op: HistoryOp.REPLACE, data});
-          // Debounce flush queue on "replace" to rate limit History.replace.
-          this.debouncedFlushHistoryQueue_();
         });
       });
     return this.setStatePromise_;
@@ -408,32 +410,53 @@ export class Bind {
       const onPop = () => this.setState(oldState);
       return this.setState(result).then(() => {
         return this.getDataForHistory_().then(data => {
-          this.historyQueue_.push({op: HistoryOp.PUSH, data, onPop});
-          // Immediately flush queue on "push" to avoid adding latency to
-          // the browser "back" functionality.
-          this.flushHistoryQueue_();
+          this.pushToHistoryQueue_({op: HistoryOp.PUSH, data, onPop});
         });
       });
     });
   }
 
   /**
+   * @param {!HistoryTaskDef} task
+   * @private
+   */
+  pushToHistoryQueue_(task) {
+    let enqueue = true;
+
+    // Collapse if consecutive "replace" operations.
+    if (task.op === HistoryOp.REPLACE) {
+      const lastTask = this.historyQueue_[this.historyQueue_.length - 1];
+      if (lastTask && lastTask.op === HistoryOp.REPLACE) {
+        lastTask.data = task.data;
+        enqueue = false;
+      }
+    }
+
+    if (enqueue) {
+      this.historyQueue_.push(task);
+    }
+
+    if (task.op === HistoryOp.PUSH) {
+      // Immediately flush queue on "push" to avoid adding latency to
+      // the browser "back" functionality.
+      this.flushHistoryQueue_();
+    } else {
+      // Debounce flush queue on "replace" to rate limit History.replace.
+      this.debouncedFlushHistoryQueue_();
+    }
+  }
+
+  /**
    * @private
    */
   flushHistoryQueue_() {
-    for (let i = 0; i < this.historyQueue_.length; i++) {
-      const {op, data, onPop} = this.historyQueue_[i];
+    this.historyQueue_.forEach(({op, data, onPop}) => {
       if (op === HistoryOp.REPLACE) {
-        // Skip consecutive "replace" operations.
-        const next = this.historyQueue_[i + 1];
-        if (next && next.op === HistoryOp.REPLACE) {
-          continue;
-        }
         this.history_.replace(data);
       } else if (op === HistoryOp.PUSH) {
         this.history_.push(onPop, data);
       }
-    }
+    });
     this.historyQueue_.length = 0;
   }
 
@@ -443,21 +466,18 @@ export class Bind {
    * @return {!Promise<(!JsonObject|undefined)>}
    */
   getDataForHistory_() {
-    // Copy the state so subsequent changes don't modify the stored object
-    // reference, and don't pay the cost of copying JSON unless we need to.
-    const getData = () => {
-      return dict({
-        'data': dict({'amp-bind': this.copyJsonObject_(this.state_)}),
-        'title': this.localWin_.document.title,
-      });
-    };
+    // Copy so subsequent changes don't modify the stored object reference.
+    const data = dict({
+      'data': dict({'amp-bind': this.copyJsonObject_(this.state_)}),
+      'title': this.localWin_.document.title,
+    });
     if (!this.viewer_.isEmbedded()) {
-      return Promise.resolve(getData());
+      return Promise.resolve(data);
     }
     // Only pass state for history updates to trusted viewers, since they
     // may contain user data e.g. form input.
     return this.viewer_.isTrustedViewer().then(trusted => {
-      return trusted ? getData() : undefined;
+      return trusted ? data : undefined;
     });
   }
 
