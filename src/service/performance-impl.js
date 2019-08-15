@@ -172,7 +172,10 @@ export class Performance {
       this.addEnabledExperiment('canary');
     }
     // Tick document ready event.
-    whenDocumentReady(win.document).then(() => this.tick('dr'));
+    whenDocumentReady(win.document).then(() => {
+      this.tick('dr');
+      this.flush();
+    });
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => this.onload_());
