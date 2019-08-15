@@ -52,7 +52,9 @@ export let AmpDocOptions;
  * @enum {string}
  */
 const AmpDocSignals = {
+  // Signals the document has become visible for the first time.
   FIRST_VISIBLE: '-ampdoc-first-visible',
+  // Signals when the document becomes visible the next time.
   NEXT_VISIBLE: '-ampdoc-next-visible',
 };
 
@@ -527,7 +529,7 @@ export class AmpDoc {
       this.win.document
     );
 
-    // Parent visibility: pick the firts non-visible state.
+    // Parent visibility: pick the first non-visible state.
     let parentVisibilityState = VisibilityState.VISIBLE;
     for (let p = this.parent_; p; p = p.getParent()) {
       if (p.getVisibilityState() != VisibilityState.VISIBLE) {
@@ -541,6 +543,12 @@ export class AmpDoc {
     const visibilityStateOverride =
       this.visibilityStateOverride_ || VisibilityState.VISIBLE;
     if (
+      visibilityStateOverride == VisibilityState.VISIBLE &&
+      parentVisibilityState == VisibilityState.VISIBLE &&
+      naturalVisibilityState == VisibilityState.VISIBLE
+    ) {
+      visibilityState = VisibilityState.VISIBLE;
+    } else if (
       naturalVisibilityState == VisibilityState.HIDDEN &&
       visibilityStateOverride == VisibilityState.PAUSED
     ) {
@@ -562,12 +570,6 @@ export class AmpDoc {
       parentVisibilityState == VisibilityState.PRERENDER
     ) {
       visibilityState = VisibilityState.PRERENDER;
-    } else if (
-      visibilityStateOverride == VisibilityState.VISIBLE &&
-      parentVisibilityState == VisibilityState.VISIBLE &&
-      naturalVisibilityState == VisibilityState.VISIBLE
-    ) {
-      visibilityState = VisibilityState.VISIBLE;
     } else {
       visibilityState = VisibilityState.HIDDEN;
     }
@@ -586,6 +588,8 @@ export class AmpDoc {
   }
 
   /**
+   * Returns a Promise that only ever resolved when the current
+   * AMP document first becomes visible.
    * @return {!Promise}
    */
   whenFirstVisible() {
@@ -595,6 +599,8 @@ export class AmpDoc {
   }
 
   /**
+   * Returns a Promise that resolve when current doc becomes visible.
+   * The promise resolves immediately if doc is already visible.
    * @return {!Promise}
    */
   whenNextVisible() {
@@ -624,6 +630,8 @@ export class AmpDoc {
   }
 
   /**
+   * Returns visibility state configured by the viewer.
+   * See {@link isVisible}.
    * @return {!VisibilityState}
    */
   getVisibilityState() {
@@ -631,6 +639,10 @@ export class AmpDoc {
   }
 
   /**
+   * Whether the AMP document currently visible. The reasons why it might not
+   * be visible include user switching to another tab, browser running the
+   * document in the prerender mode or viewer running the document in the
+   * prerender mode.
    * @return {boolean}
    */
   isVisible() {
@@ -638,6 +650,9 @@ export class AmpDoc {
   }
 
   /**
+   * Adds a "visibilitychange" event listener for viewer events. The
+   * callback can check {@link isVisible} and {@link getPrefetchCount}
+   * methods for more info.
    * @param {function(!VisibilityState)} handler
    * @return {!UnlistenDef}
    */

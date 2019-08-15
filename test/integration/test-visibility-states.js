@@ -115,16 +115,13 @@ t.run('Viewer Visibility State', () => {
         return Services.viewerPromiseForDoc(win.document)
           .then(v => {
             viewer = v;
+
             docHidden = sandbox.stub(win.document, 'hidden').value(false);
             if ('visibilityState' in win.document) {
               docVisibilityState = sandbox
                 .stub(win.document, 'visibilityState')
                 .value('visible');
             }
-            console.log('QQQQ: document: ', {
-              hidden: win.document.hidden,
-              visibilityState: win.document.visibilityState,
-            });
 
             resources = Services.resourcesForDoc(win.document);
             doPass_ = resources.doPass;

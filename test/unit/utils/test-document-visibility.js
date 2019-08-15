@@ -21,7 +21,7 @@ import {
   removeDocumentVisibilityChangeListener,
 } from '../../../src/utils/document-visibility';
 
-describes.sandboxed('document-visibility', {}, () => {
+describes.sandboxed('document-visibility', {}, env => {
   let doc;
 
   beforeEach(() => {
@@ -32,7 +32,7 @@ describes.sandboxed('document-visibility', {}, () => {
   });
 
   function prop(name, value) {
-    Object.defineProperty(doc, name, {value});
+    env.sandbox.defineProperty(doc, name, {value});
   }
 
   it('should be visible when no properties defined', () => {
