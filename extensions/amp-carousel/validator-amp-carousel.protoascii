@@ -55,31 +55,42 @@ attr_lists: {
     name: "loop"
     value: ""
   }
-  attrs: {
+    attrs: {
     name: "slide"
     value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "type"
-    value: "carousel"
-    value: "slides"
   }
   # <amp-bind>
   attrs: { name: "[slide]" }
 }
-# There are 2 variants here depending on the presence of the `lightbox`
-# attribute:
+# There are 4 variants here, due to two independent axis of differences:
+#  1) type=slides vs. type=carousel
+#     - type=slides is the implied default if type is unspecified. This is
+#       encoded in the rules by making type=carousel mandatory, and
+#       type=slides optional.
+#     - slides vs. carousel implies different sets up supported layouts.
+#  2) presence of `lightbox` attribute.
 #     - lightbox is only allowed in AMP html format.
 #     - lightbox implies additional reference_point requirements of the
 #       amp-lightbox children.
-tags: {  # <amp-carousel>
+# The attribute implied rules (different layouts or different children) is not
+# a feature of the validator rules engine. Thus the only supportable ruleset is
+# to implement 1 tagspec for each combination. This produces the desired rules
+# but has undesirable results for some of the error messages, as seen in some
+# of the test cases. The main issue is that since there are two tagspecs with
+# each combination, we cannot use the usual dispatch_key trick for either
+# attribute.
+tags: {  # <amp-carousel type=slides>
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "AMP-CAROUSEL"
-  spec_name: "AMP-CAROUSEL"
+  spec_name: "AMP-CAROUSEL [type=slides]"
   requires_extension: "amp-carousel"
+  attrs: {
+    name: "type"
+    value: "slides"
+  }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-carousel"
@@ -93,16 +104,44 @@ tags: {  # <amp-carousel>
     supported_layouts: RESPONSIVE
   }
 }
-tags: {  # <amp-carousel lightbox>
+tags: {  # <amp-carousel type=carousel>
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  tag_name: "AMP-CAROUSEL"
+  spec_name: "AMP-CAROUSEL [type=carousel]"
+  requires_extension: "amp-carousel"
+  attrs: {
+    name: "type"
+    value: "carousel"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attr_lists: "amp-carousel-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
+  }
+}
+
+tags: {  # <amp-carousel lightbox type=slides>
   html_format: AMP
   tag_name: "AMP-CAROUSEL"
-  spec_name: "AMP-CAROUSEL lightbox"
+  spec_name: "AMP-CAROUSEL [lightbox] [type=slides]"
   requires_extension: "amp-carousel"
   requires_extension: "amp-lightbox-gallery"
   attrs: {
     name: "lightbox"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "slides"
+  }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-carousel"
@@ -114,6 +153,37 @@ tags: {  # <amp-carousel lightbox>
     supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+  }
+  reference_points: {
+    tag_spec_name: "AMP-CAROUSEL lightbox [lightbox-exclude]"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-CAROUSEL lightbox [child]"
+  }
+}
+tags: {  # <amp-carousel lightbox type=carousel>
+  html_format: AMP
+  tag_name: "AMP-CAROUSEL"
+  spec_name: "AMP-CAROUSEL [lightbox] [type=carousel]"
+  requires_extension: "amp-carousel"
+  requires_extension: "amp-lightbox-gallery"
+  attrs: {
+    name: "lightbox"
+    mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "carousel"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attr_lists: "amp-carousel-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
   }
   reference_points: {
     tag_spec_name: "AMP-CAROUSEL lightbox [lightbox-exclude]"
