@@ -73,7 +73,7 @@ export class DocInfo {
     this.ampdoc_ = ampdoc;
     /** @private {?DocumentInfoDef} */
     this.info_ = null;
-    /** @private {string} */
+    /** @private {?Promise<string>} */
     this.pageViewId64_ = null;
   }
 
