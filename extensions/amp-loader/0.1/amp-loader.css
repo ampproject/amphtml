@@ -17,7 +17,12 @@
 
 
 /* Placeholder */
-.i-amphtml-default-placeholder {
+.i-amphtml-loader-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
   background-color: #f8f8f8;
 }
 
@@ -161,7 +166,7 @@
   animation-play-state: paused;
 }
 
-.i-amphtml-new-loader.amp-active * {
+.amp-active > .i-amphtml-new-loader * {
   animation-play-state: running;
 }
 

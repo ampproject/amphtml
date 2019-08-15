@@ -34,13 +34,13 @@ import {setImportantStyles, setStyle} from '../../../src/style';
 const LOADER_APPEAR_TIME = 600;
 
 /**
- * Elements will get a default gray placeholder if they don't already have a
+ * Elements will get a default gray background if they don't already have a
  * placeholder. This list does not include video players which are detected
  * using `isIframeVideoPlayerComponent`
  * @enum {boolean}
  * @private  Visible for testing only!
  */
-const DEFAULT_PLACEHOLDER_WHITELIST_NONE_VIDEO = {
+const LOADER_BACKGROUND_TAGS = {
   'AMP-IMG': true,
   'AMP-ANIM': true,
   'AMP-PINTEREST': true,
@@ -63,16 +63,19 @@ function getLoaderDom(element) {
   if (!loaderDom) {
     const html = htmlFor(element);
     /*
-     * There is an extra inner div here for backward compatibility with
-     * customizing loaders. The common and documented CSS for customizing
-     * loaders includes a style to hide the old three dots via:
-     *  .my-custom-loader .amp-active > div {
+     * The outer div here is needed for two reasons:
+     * 1. Applying a background color when there is no placeholder.
+     * 2. Backwards compatibility with the existing method and documentation
+     *    for customizing loaders, which includes a style to hide the old three
+     *    dots via:
+     *    ```
+     *    .my-custom-loader .amp-active > div {
      *     display: none;
-     *  }
-     * The extra div mimic a similar DOM.
+     *    }
+     *    ```
      */
     loaderDom = html`
-      <div>
+      <div class="i-amphtml-new-loader">
         <div class="i-amphtml-new-loader-shim"></div>
         <div class="i-amphtml-new-loader-logo"></div>
       </div>
@@ -105,14 +108,18 @@ class LoaderBuilder {
 
     /** @private @const  {number} */
     this.layoutHeight_ = elementHeight;
+
+    /** @private {?Element} */
+    this.loaderRoot_ = null;
   }
 
   /**
    * Builds the loader's DOM.
    */
   build() {
-    this.domRoot_.appendChild(getLoaderDom(this.element_));
-    this.maybeAddDefaultPlaceholder_();
+    this.loaderRoot_ = getLoaderDom(this.element_);
+    this.domRoot_.appendChild(this.loaderRoot_);
+    this.maybeAddLoadingBackground_();
     this.maybeAddLoaderAnimation_();
   }
 
@@ -128,7 +135,7 @@ class LoaderBuilder {
 
     this.setSize_();
     if (this.requiresBackgroundShim_()) {
-      this.domRoot_.classList.add('i-amphtml-new-loader-has-shim');
+      this.loaderRoot_.classList.add('i-amphtml-new-loader-has-shim');
     }
     this.addLogo_();
   }
@@ -145,21 +152,21 @@ class LoaderBuilder {
 
     // Ads always get the default spinner regardless of the element size
     if (this.isAd_()) {
-      return this.domRoot_.classList.add(sizeClassDefault);
+      return this.loaderRoot_.classList.add(sizeClassDefault);
     }
 
     // Other than Ads, small spinner is always used if element is small.
     if (this.isSmall_()) {
-      return this.domRoot_.classList.add(sizeClassSmall);
+      return this.loaderRoot_.classList.add(sizeClassSmall);
     }
 
     // If host is not small, default size spinner is normally used
     // unless due to branding guidelines (e.g. Instagram) a larger spinner is
     // required.
     if (this.requiresLargeSpinner_()) {
-      return this.domRoot_.classList.add(sizeClassLarge);
+      return this.loaderRoot_.classList.add(sizeClassLarge);
     }
-    return this.domRoot_.classList.add(sizeClassDefault);
+    return this.loaderRoot_.classList.add(sizeClassDefault);
   }
 
   /**
@@ -169,38 +176,48 @@ class LoaderBuilder {
   addLogo_() {
     const {color, content = this.getDefaultLogo_()} = this.getCustomLogo_();
 
-    this.domRoot_
+    this.loaderRoot_
       .querySelector('.i-amphtml-new-loader-logo')
       .appendChild(content);
 
     if (color) {
-      setStyle(this.domRoot_, 'color', color);
+      setStyle(this.loaderRoot_, 'color', color);
     }
   }
 
   /**
-   * Add a gray default placeholder if there isn't a placeholder already and
-   * other special cases.
+   * @return {boolean} True if the currently loading element has background
+   * content via a placeholder or poster.
    * @private
    */
-  maybeAddDefaultPlaceholder_() {
+  hasBackgroundContent_() {
     const hasPlaceholder = !!this.element_.getPlaceholder();
     const hasPoster = this.element_.hasAttribute('poster');
-    if (hasPlaceholder || hasPoster) {
-      return;
-    }
 
-    // Is it whitelisted for default placeholder?
-    const tagName = this.element_.tagName.toUpperCase();
-    if (
-      DEFAULT_PLACEHOLDER_WHITELIST_NONE_VIDEO[tagName] || // static white list
-      isIframeVideoPlayerComponent(tagName) // regex for various video players
-    ) {
-      const html = htmlFor(this.element_);
-      const defaultPlaceholder = html`
-        <div placeholder class="i-amphtml-default-placeholder"></div>
-      `;
-      this.element_.insertBefore(defaultPlaceholder, this.element_.lastChild);
+    return hasPlaceholder || hasPoster;
+  }
+
+  /**
+   * @return {boolean} True if the loaderBackground should be used for the
+   * element.
+   * @private
+   */
+  tagNeedsBackground_() {
+    const {tagName} = this.element_;
+
+    return (
+      LOADER_BACKGROUND_TAGS[tagName] || isIframeVideoPlayerComponent(tagName)
+    );
+  }
+
+  /**
+   * Add a gray loading background if needed based on the element's content
+   * and tagName.
+   * @private
+   */
+  maybeAddLoadingBackground_() {
+    if (!this.hasBackgroundContent_() && this.tagNeedsBackground_()) {
+      this.domRoot_.classList.add('i-amphtml-loader-background');
     }
   }
 
