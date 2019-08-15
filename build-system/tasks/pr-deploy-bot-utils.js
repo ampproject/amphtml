@@ -23,7 +23,7 @@ const {cyan, green} = require('ansi-colors');
 const {gitCommitHash} = require('../git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../app-utils');
 const {travisBuildNumber} = require('../travis');
-const hostName = `https://storage.googleapis.com/amp-test-website-1/amp_dist_${travisBuildNumber}`;
+const hostName = `https://storage.googleapis.com/amp-test-website-1/amp_dist_${travisBuildNumber()}`;
 
 async function walk(dest) {
   const filelist = [];
