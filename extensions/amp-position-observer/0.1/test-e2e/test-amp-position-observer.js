@@ -15,7 +15,7 @@
  */
 
 describes.endtoend(
-  'amp-position-observer',
+  'amp-position-observer in AMPHTML ad',
   {
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-position-observer/scrollbound-animation.html',
@@ -28,40 +28,59 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should render correctly', async () => {
-      let clockHand = await controller.findElement('.clock-hand');
-
-      await expect(controller.getElementRect(clockHand)).to.deep.equal({
-        'bottom': 149,
-        'height': 39,
-        'left': 151,
-        'right': 204,
-        'top': 110,
-        'width': 53,
+    it('should animate clock hand while scrolling', async () => {
+      await verifyClockHandRect(controller, {
         'x': 151,
         'y': 110,
+        'width': 53,
+        'height': 39,
       });
 
-      // Scroll parent window by 100px
-      await controller.switchToParent();
-      const article = await controller.getDocumentElement();
-      await controller.scrollBy(article, {top: 100});
+      await scrollParentWindowYBy(controller, 50);
+      await verifyClockHandRect(controller, {
+        'x': 150,
+        'y': 111,
+        'width': 37,
+        'height': 54,
+      });
 
-      controller
-        .findElement('iframe')
-        .then(frame => controller.switchToFrame(frame));
-
-      clockHand = await controller.findElement('.clock-hand');
-      await expect(controller.getElementRect(clockHand)).to.deep.equal({
-        'bottom': 172,
-        'height': 60,
-        'left': 150,
-        'right': 164,
-        'top': 112,
-        'width': 14,
+      await scrollParentWindowYBy(controller, 50);
+      await verifyClockHandRect(controller, {
         'x': 150,
         'y': 112,
+        'width': 14,
+        'height': 60,
+      });
+
+      await scrollParentWindowYBy(controller, -50);
+      await verifyClockHandRect(controller, {
+        'x': 150,
+        'y': 111,
+        'width': 37,
+        'height': 54,
+      });
+
+      await scrollParentWindowYBy(controller, -50);
+      await verifyClockHandRect(controller, {
+        'x': 151,
+        'y': 110,
+        'width': 53,
+        'height': 39,
       });
     });
   }
 );
+
+async function scrollParentWindowYBy(controller, px) {
+  await controller.switchToParent();
+  const article = await controller.getDocumentElement();
+  await controller.scrollBy(article, {top: px});
+  await controller
+    .findElement('iframe')
+    .then(frame => controller.switchToFrame(frame));
+}
+
+async function verifyClockHandRect(controller, rect) {
+  const clockHand = await controller.findElement('.clock-hand');
+  await expect(controller.getElementRect(clockHand)).to.include(rect);
+}
