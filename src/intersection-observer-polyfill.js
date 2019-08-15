@@ -20,7 +20,7 @@ import {SubscriptionApi} from './iframe-helper';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
 import {
-  getClientRectRelativeDoc,
+  getRectRelativeDocAsync,
   layoutRectLtwh,
   moveLayoutRect,
   rectIntersection,
@@ -280,6 +280,9 @@ export class IntersectionObserverPolyfill {
 
     /** @private {Pass} */
     this.mutationPass_ = null;
+
+    /** @private {!./service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(self.window);
   }
 
   /**
@@ -313,14 +316,15 @@ export class IntersectionObserverPolyfill {
 
     // Get the new observed element's first changeEntry based on last viewport
     if (this.lastViewportRect_) {
-      const change = this.getValidIntersectionChangeEntry_(
+      this.getValidIntersectionChangeEntry_(
         newState,
         this.lastViewportRect_,
         this.lastIframeRect_
-      );
-      if (change) {
-        this.callback_([change]);
-      }
+      ).then(change => {
+        if (change) {
+          this.callback_([change]);
+        }
+      });
     }
 
     // Add a mutation observer to tick ourself
@@ -387,21 +391,27 @@ export class IntersectionObserverPolyfill {
     this.lastIframeRect_ = opt_iframe;
 
     const changes = [];
+    const changePromises = [];
 
     for (let i = 0; i < this.observeEntries_.length; i++) {
-      const change = this.getValidIntersectionChangeEntry_(
-        this.observeEntries_[i],
-        hostViewport,
-        opt_iframe
+      changePromises.push(
+        this.getValidIntersectionChangeEntry_(
+          this.observeEntries_[i],
+          hostViewport,
+          opt_iframe
+        ).then(change => {
+          if (change) {
+            changes.push(change);
+          }
+        })
       );
-      if (change) {
-        changes.push(change);
-      }
     }
 
-    if (changes.length) {
-      this.callback_(changes);
-    }
+    Promise.all(changePromises).then(() => {
+      if (changes.length) {
+        this.callback_(changes);
+      }
+    });
   }
 
   /**
@@ -416,43 +426,45 @@ export class IntersectionObserverPolyfill {
    *    If opt_iframe is provided, all LayoutRect has position relative to
    *    the iframe. If opt_iframe is not provided,
    *    all LayoutRect has position relative to the host document.
-   * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
+   * @return {Promise<?IntersectionObserverEntry>} A valid change entry or null if ratio
    * @private
    */
   getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
     const {element} = state;
 
-    const elementRect = element.getLayoutBox
-      ? element.getLayoutBox()
-      : getClientRectRelativeDoc(element, hostViewport);
+    const elementRectPromise = element.getLayoutBox
+      ? Promise.resolve(element.getLayoutBox())
+      : getRectRelativeDocAsync(element, hostViewport, this.vsync_);
 
     const owner = element.getOwner && element.getOwner();
     const ownerRect = owner && owner.getLayoutBox();
 
-    // calculate intersectionRect. that the element intersects with hostViewport
-    // and intersects with owner element and container iframe if exists.
-    const intersectionRect =
-      rectIntersection(elementRect, ownerRect, hostViewport, opt_iframe) ||
-      layoutRectLtwh(0, 0, 0, 0);
-    // calculate ratio, call callback based on new ratio value.
-    const ratio = intersectionRatio(intersectionRect, elementRect);
-    const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
+    return elementRectPromise.then(elementRect => {
+      // calculate intersectionRect. that the element intersects with hostViewport
+      // and intersects with owner element and container iframe if exists.
+      const intersectionRect =
+        rectIntersection(elementRect, ownerRect, hostViewport, opt_iframe) ||
+        layoutRectLtwh(0, 0, 0, 0);
+      // calculate ratio, call callback based on new ratio value.
+      const ratio = intersectionRatio(intersectionRect, elementRect);
+      const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
 
-    if (newThresholdSlot == state.currentThresholdSlot) {
-      return null;
-    }
-    state.currentThresholdSlot = newThresholdSlot;
+      if (newThresholdSlot == state.currentThresholdSlot) {
+        return null;
+      }
+      state.currentThresholdSlot = newThresholdSlot;
 
-    // To get same behavior as native IntersectionObserver set hostViewport null
-    // if inside an iframe
-    const changeEntry = calculateChangeEntry(
-      elementRect,
-      opt_iframe ? null : hostViewport,
-      intersectionRect,
-      ratio
-    );
-    changeEntry.target = element;
-    return changeEntry;
+      // To get same behavior as native IntersectionObserver set hostViewport null
+      // if inside an iframe
+      const changeEntry = calculateChangeEntry(
+        elementRect,
+        opt_iframe ? null : hostViewport,
+        intersectionRect,
+        ratio
+      );
+      changeEntry.target = element;
+      return changeEntry;
+    });
   }
 
   /**
