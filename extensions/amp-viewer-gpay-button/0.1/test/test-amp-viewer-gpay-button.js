@@ -16,23 +16,26 @@
 
 import '../amp-viewer-gpay-button';
 
-describes.realWin('amp-viewer-gpay-button', {
-  amp: {
-    extensions: ['amp-viewer-gpay-button'],
+describes.realWin(
+  'amp-viewer-gpay-button',
+  {
+    amp: {
+      extensions: ['amp-viewer-gpay-button'],
+    },
   },
-}, env => {
+  env => {
+    let win;
+    let element;
 
-  let win;
-  let element;
+    beforeEach(() => {
+      win = env.win;
+      element = win.document.createElement('amp-viewer-gpay-button');
+      win.document.body.appendChild(element);
+    });
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-viewer-gpay-button');
-    win.document.body.appendChild(element);
-  });
-
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
-  });
-});
+    it('should have hello world when built', () => {
+      element.build();
+      expect(element.querySelector('div').textContent).to.equal('hello world');
+    });
+  }
+);

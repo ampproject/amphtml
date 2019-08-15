@@ -16,23 +16,26 @@
 
 import '../amp-viewer-gpay-inline';
 
-describes.realWin('amp-viewer-gpay-inline', {
-  amp: {
-    extensions: ['amp-viewer-gpay-inline'],
+describes.realWin(
+  'amp-viewer-gpay-inline',
+  {
+    amp: {
+      extensions: ['amp-viewer-gpay-inline'],
+    },
   },
-}, env => {
+  env => {
+    let win;
+    let element;
 
-  let win;
-  let element;
+    beforeEach(() => {
+      win = env.win;
+      element = win.document.createElement('amp-viewer-gpay-inline');
+      win.document.body.appendChild(element);
+    });
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-viewer-gpay-inline');
-    win.document.body.appendChild(element);
-  });
-
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
-  });
-});
+    it('should have hello world when built', () => {
+      element.build();
+      expect(element.querySelector('div').textContent).to.equal('hello world');
+    });
+  }
+);

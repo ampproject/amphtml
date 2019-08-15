@@ -17,7 +17,6 @@
 import {Layout} from '../../../src/layout';
 
 export class AmpViewerGpayButton extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
