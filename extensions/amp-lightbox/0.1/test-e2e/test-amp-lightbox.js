@@ -19,6 +19,7 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-lightbox/amp-lightbox.html',
+    environments: 'ampdoc-amp4ads-preset',
   },
   async env => {
     let controller;
