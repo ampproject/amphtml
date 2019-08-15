@@ -26,13 +26,13 @@ FAIL
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
-|    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js"></script>
+|    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
 |  </head>
 |  <body>
 |    <!-- Invalid: Wrong delay attribute usage -->
 |    <amp-carousel layout="fixed" width=500 height=500 autoplay delay>
 >>   ^~~~~~~~~
-amp-carousel/0.2/test/validator-amp-carousel.html:32:2 The attribute 'delay' in tag 'AMP-CAROUSEL' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-carousel) [DISALLOWED_HTML]
+amp-carousel/0.1/test/validator-amp-carousel.html:32:2 The attribute 'delay' in tag 'AMP-CAROUSEL [type=slides]' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-carousel) [DISALLOWED_HTML]
 |    </amp-carousel>
 |    <!-- Valid: Correct delay attribute usage -->
 |    <amp-carousel layout="fixed" width=500 height=500 autoplay delay=5000>
