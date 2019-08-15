@@ -111,7 +111,7 @@ function getConfig() {
 /**
  * Configure and launch a Puppeteer instance
  * @param {!PuppeteerConfigDef=} opt_config
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function createPuppeteer(opt_config = {}) {
   const browser = await puppeteer.launch({
@@ -223,13 +223,42 @@ const EnvironmentVariantMap = {
     name: 'Shadow environment',
     value: {environment: 'shadow-demo'},
   },
+  [AmpdocEnvironment.A4A_FIE]: {
+    name: 'AMPHTML ads FIE environment',
+    value: {environment: 'a4a-fie'},
+  },
+  [AmpdocEnvironment.A4A_INABOX]: {
+    name: 'AMPHTML ads inabox environment',
+    value: {environment: 'a4a-inabox'},
+  },
+  [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
+    name: 'AMPHTML ads inabox friendly frame environment',
+    value: {environment: 'a4a-inabox-friendly'},
+  },
+  [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
+    name: 'AMPHTML ads inabox safeframe environment',
+    value: {environment: 'a4a-inabox-safeframe'},
+  },
 };
 
-const defaultEnvironments = [
-  AmpdocEnvironment.SINGLE,
-  AmpdocEnvironment.VIEWER_DEMO,
-  AmpdocEnvironment.SHADOW_DEMO,
-];
+const envPresets = {
+  'ampdoc-preset': [
+    AmpdocEnvironment.SINGLE,
+    AmpdocEnvironment.VIEWER_DEMO,
+    AmpdocEnvironment.SHADOW_DEMO,
+  ],
+  'amp4ads-preset': [
+    // TODO(lannka): unskip this test. It passes locally but fails on Travis:
+    // https://travis-ci.org/ampproject/amphtml/jobs/570977015
+    // AmpdocEnvironment.A4A_FIE,
+    AmpdocEnvironment.A4A_INABOX,
+    AmpdocEnvironment.A4A_INABOX_FRIENDLY,
+    AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
+  ],
+};
+envPresets['ampdoc-amp4ads-preset'] = envPresets['ampdoc-preset'].concat(
+  envPresets['amp4ads-preset']
+);
 
 /**
  * Helper class to skip E2E tests in a specific AMP environment.
@@ -260,6 +289,11 @@ class ItConfig {
     return this;
   }
 
+  skipA4aFie() {
+    this.skip = this.skip ? this.skip : this.env.environment == 'a4a-fie';
+    return this;
+  }
+
   run(name, fn) {
     if (this.skip) {
       return this.it.skip(name, fn);
@@ -276,7 +310,7 @@ class ItConfig {
  * that also sets up the provided fixtures and returns the corresponding
  * environment objects of each fixture to the test method.
  * @param {function(!Object):!Array<?Fixture>} factory
- * @return {*} TODO(#23582): Specify return type
+ * @return {function()}
  */
 function describeEnv(factory) {
   /**
@@ -284,11 +318,17 @@ function describeEnv(factory) {
    * @param {!Object} spec
    * @param {function(!Object)} fn
    * @param {function(string, function())} describeFunc
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   const templateFunc = function(suiteName, spec, fn, describeFunc) {
     const fixture = factory(spec);
-    const environments = spec.environments || defaultEnvironments;
+    let environments = spec.environments || 'ampdoc-preset';
+    if (typeof environments === 'string') {
+      environments = envPresets[environments];
+    }
+    if (!environments) {
+      throw new Error('Invalid environment preset: ' + spec.environments);
+    }
     const variants = Object.create(null);
     environments.forEach(environment => {
       const o = EnvironmentVariantMap[environment];
@@ -390,7 +430,7 @@ function describeEnv(factory) {
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   const mainFunc = function(name, spec, fn) {
     return templateFunc(name, spec, fn, describe);
@@ -400,7 +440,7 @@ function describeEnv(factory) {
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   mainFunc.only = function(name, spec, fn) {
     return templateFunc(name, spec, fn, describe./*OK*/ only);
@@ -459,7 +499,7 @@ class EndToEndFixture {
  * Get the controller object for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
- * @return {*} TODO(#23582): Specify return type
+ * @return {!SeleniumWebDriverController}
  */
 async function getController(
   {engine = 'selenium', headless = false},

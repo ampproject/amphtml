@@ -14,8 +14,190 @@
  * limitations under the License.
  */
 
+import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
+import {
+  AmpScript,
+  AmpScriptService,
+  SanitizerImpl,
+  StorageLocation,
+} from '../../amp-script';
 import {FakeWindow} from '../../../../../testing/fake-dom';
-import {SanitizerImpl} from '../../amp-script';
+import {Services} from '../../../../../src/services';
+
+describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
+  let sandbox;
+  let element;
+  let script;
+  let service;
+  let xhr;
+
+  beforeEach(() => {
+    sandbox = env.sandbox;
+
+    element = document.createElement('amp-script');
+    env.ampdoc.getBody().appendChild(element);
+
+    script = new AmpScript(element);
+    script.getAmpDoc = () => env.ampdoc;
+
+    service = {
+      checkSha384: sandbox.stub(),
+      sizeLimitExceeded: () => false,
+    };
+    script.setService(service);
+
+    xhr = {
+      fetchText: sandbox.stub(),
+    };
+    xhr.fetchText
+      .withArgs(sinon.match(/amp-script-worker-0.1.js/))
+      .resolves({text: () => Promise.resolve('/* noop */')});
+    sandbox.stub(Services, 'xhrFor').returns(xhr);
+
+    // Make @ampproject/worker-dom dependency a no-op for these unit tests.
+    sandbox.stub(WorkerDOM, 'upgrade').resolves();
+  });
+
+  function stubFetch(url, headers, text, responseUrl) {
+    xhr.fetchText.withArgs(url).resolves({
+      headers: {
+        get: h => headers[h],
+      },
+      text: () => Promise.resolve(text),
+      url: responseUrl || url,
+    });
+  }
+
+  it('should require JS content-type for same-origin src', () => {
+    sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    element.setAttribute('src', 'https://foo.example/foo.txt');
+
+    stubFetch(
+      'https://foo.example/foo.txt',
+      {'Content-Type': 'text/plain; charset=UTF-8'}, // Invalid content-type.
+      'alert(1)'
+    );
+
+    return script.layoutCallback().should.be.rejectedWith(/Content-Type/);
+  });
+
+  it('should check sha384(author_js) for cross-origin src', async () => {
+    sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    element.setAttribute('src', 'https://bar.example/bar.js');
+
+    stubFetch(
+      'https://bar.example/bar.js',
+      {'Content-Type': 'application/javascript; charset=UTF-8'},
+      'alert(1)'
+    );
+
+    service.checkSha384.withArgs('alert(1)').resolves();
+    await script.layoutCallback();
+    expect(service.checkSha384).to.be.called;
+  });
+
+  it('should fail on invalid sha384(author_js) for cross-origin src', () => {
+    sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    element.setAttribute('src', 'https://bar.example/bar.js');
+
+    stubFetch(
+      'https://bar.example/bar.js',
+      {'Content-Type': 'application/javascript; charset=UTF-8'},
+      'alert(1)'
+    );
+
+    service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
+    return script.layoutCallback().should.be.rejected;
+  });
+
+  it('should check response URL to handle redirects', () => {
+    sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    element.setAttribute('src', 'https://foo.example/foo.js');
+
+    stubFetch(
+      'https://foo.example/foo.js',
+      {'Content-Type': 'application/javascript; charset=UTF-8'},
+      'alert(1)',
+      'https://bar.example/bar.js' // responseURL !== url
+    );
+
+    service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
+    return script.layoutCallback().should.be.rejected;
+  });
+
+  it('should check sha384(author_js) for local scripts', async () => {
+    element.setAttribute('script', 'myLocalScript');
+
+    const local = document.createElement('script');
+    local.setAttribute('id', 'myLocalScript');
+    local.setAttribute('type', 'text/plain');
+    local.setAttribute('target', 'amp-script');
+    local.textContent = 'alert(1)';
+    env.ampdoc.getBody().appendChild(local);
+
+    service.checkSha384.withArgs('alert(1)').resolves();
+    await script.layoutCallback();
+    expect(service.checkSha384).to.be.called;
+  });
+
+  it('should fail on invalid sha384(author_js) for local scripts', () => {
+    element.setAttribute('script', 'myLocalScript');
+
+    const local = document.createElement('script');
+    local.setAttribute('id', 'myLocalScript');
+    local.setAttribute('type', 'text/plain');
+    local.setAttribute('target', 'amp-script');
+    local.textContent = 'alert(1)';
+    env.ampdoc.getBody().appendChild(local);
+
+    service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
+    return script.layoutCallback().should.be.rejected;
+  });
+});
+
+describes.fakeWin('AmpScriptService', {amp: {runtimeOn: false}}, env => {
+  let crypto;
+  let sandbox;
+  let service;
+
+  beforeEach(() => {
+    sandbox = env.sandbox;
+
+    crypto = {sha384Base64: sandbox.stub()};
+    sandbox.stub(Services, 'cryptoFor').returns(crypto);
+  });
+
+  function createMetaTag(name, content) {
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', name);
+    meta.setAttribute('content', content);
+    env.ampdoc.getHeadNode().appendChild(meta);
+  }
+
+  describe('checkSha384', () => {
+    it('should resolve if hash exists in meta tag', async () => {
+      createMetaTag('amp-script-src', 'sha384-my_fake_hash');
+
+      service = new AmpScriptService(env.ampdoc);
+
+      crypto.sha384Base64.resolves('my_fake_hash');
+
+      const promise = service.checkSha384('alert(1)', 'foo');
+      return promise.should.be.fulfilled;
+    });
+
+    it('should reject if hash does not exist in meta tag', () => {
+      createMetaTag('amp-script-src', 'sha384-another_fake_hash');
+
+      service = new AmpScriptService(env.ampdoc);
+
+      crypto.sha384Base64.resolves('my_fake_hash');
+
+      const promise = service.checkSha384('alert(1)', 'foo');
+      return promise.should.be.rejected;
+    });
+  });
+});
 
 describe('SanitizerImpl', () => {
   let el;
@@ -106,65 +288,65 @@ describe('SanitizerImpl', () => {
   describe('storage', () => {
     it('getStorage()', () => {
       it('should be initially empty', () => {
-        expect(s.getStorage('local')).to.deep.equal({});
-        expect(s.getStorage('session')).to.deep.equal({});
+        expect(s.getStorage(StorageLocation.LOCAL)).to.deep.equal({});
+        expect(s.getStorage(StorageLocation.SESSION)).to.deep.equal({});
       });
 
       it('should return localStorage data', () => {
         win.localStorage.setItem('foo', 'bar');
-        expect(s.getStorage('local')).to.deep.equal({foo: 'bar'});
-        expect(s.getStorage('session')).to.deep.equal({});
+        expect(s.getStorage(StorageLocation.LOCAL)).to.deep.equal({foo: 'bar'});
+        expect(s.getStorage(StorageLocation.SESSION)).to.deep.equal({});
       });
 
       it('should return sessionStorage data', () => {
         win.sessionStorage.setItem('abc', '123');
-        expect(s.getStorage('local')).to.deep.equal({});
-        expect(s.getStorage('session')).to.deep.equal({abc: '123'});
+        expect(s.getStorage(StorageLocation.LOCAL)).to.deep.equal({});
+        expect(s.getStorage(StorageLocation.SESSION)).to.deep.equal({
+          abc: '123',
+        });
       });
 
       it('should filter amp-* keys', () => {
         win.localStorage.setItem('amp-foo', 'bar');
         win.sessionStorage.setItem('amp-baz', 'qux');
-        expect(s.getStorage('local')).to.deep.equal({foo: 'bar'});
-        expect(s.getStorage('session')).to.deep.equal({});
+        expect(s.getStorage(StorageLocation.LOCAL)).to.deep.equal({foo: 'bar'});
+        expect(s.getStorage(StorageLocation.SESSION)).to.deep.equal({});
       });
     });
 
     describe('changeStorage()', () => {
-      // TODO(choumx, #23717): Fix this on Travis.
-      it.skip('should set items', () => {
-        s.changeStorage('local', 'x', '1');
+      it('should set items', () => {
+        s.changeStorage(StorageLocation.LOCAL, 'x', '1');
         expect(win.localStorage.length).to.equal(1);
         expect(win.localStorage.getItem('x')).to.equal('1');
 
-        s.changeStorage('session', 'y', '2');
+        s.changeStorage(StorageLocation.SESSION, 'y', '2');
         expect(win.sessionStorage.length).to.equal(1);
         expect(win.sessionStorage.getItem('y')).to.equal('2');
       });
 
       it('should not set items with amp-* keys', () => {
         allowConsoleError(() => {
-          s.changeStorage('local', 'amp-x', '1');
+          s.changeStorage(StorageLocation.LOCAL, 'amp-x', '1');
         });
         expect(win.localStorage.length).to.equal(0);
         expect(win.localStorage.getItem('amp-x')).to.be.null;
 
         allowConsoleError(() => {
-          s.changeStorage('session', 'amp-y', '2');
+          s.changeStorage(StorageLocation.SESSION, 'amp-y', '2');
         });
         expect(win.sessionStorage.length).to.equal(0);
         expect(win.sessionStorage.getItem('amp-y')).to.be.null;
       });
 
-      // TODO(choumx, #23717): Fix this on Travis.
-      it.skip('should remove items', () => {
+      it('should remove items', () => {
         win.localStorage.setItem('x', '1');
-        s.changeStorage('local', 'x', null);
+        s.changeStorage(StorageLocation.LOCAL, 'x', null);
         expect(win.localStorage.length).to.equal(0);
         expect(win.localStorage.getItem('x')).to.be.null;
 
         win.sessionStorage.setItem('y', '2');
-        s.changeStorage('session', 'y', null);
+        s.changeStorage(StorageLocation.SESSION, 'y', null);
         expect(win.sessionStorage.length).to.equal(0);
         expect(win.sessionStorage.getItem('y')).to.be.null;
       });
@@ -172,14 +354,14 @@ describe('SanitizerImpl', () => {
       it('should not remove items with amp-* keys', () => {
         win.localStorage.setItem('amp-x', '1');
         allowConsoleError(() => {
-          s.changeStorage('local', 'amp-x', null);
+          s.changeStorage(StorageLocation.LOCAL, 'amp-x', null);
         });
         expect(win.localStorage.length).to.equal(1);
         expect(win.localStorage.getItem('amp-x')).to.equal('1');
 
         win.sessionStorage.setItem('amp-y', '2');
         allowConsoleError(() => {
-          s.changeStorage('session', 'amp-y', null);
+          s.changeStorage(StorageLocation.SESSION, 'amp-y', null);
         });
         expect(win.sessionStorage.length).to.equal(1);
         expect(win.sessionStorage.getItem('amp-y')).to.equal('2');
@@ -188,7 +370,7 @@ describe('SanitizerImpl', () => {
       it('should not support Storage.clear()', () => {
         win.localStorage.setItem('x', '1');
         allowConsoleError(() => {
-          s.changeStorage('local', null, null);
+          s.changeStorage(StorageLocation.LOCAL, null, null);
         });
         expect(win.localStorage.length).to.equal(1);
         expect(win.localStorage.getItem('x')).to.equal('1');

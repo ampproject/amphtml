@@ -59,15 +59,14 @@ tags: {  # <amp-script>
   tag_name: "AMP-SCRIPT"
   disallowed_ancestor: "AMP-SCRIPT"
   requires_extension: "amp-script"
-  requires: "amp-experiment-token"
   attrs: { name: "sandbox" }
   attrs: {
     name: "script"
-    mandatory_anyof: "['script', 'src']"
+    mandatory_oneof: "['script', 'src']"
   }
   attrs: {
     name: "src"
-    mandatory_anyof: "['script', 'src']"
+    mandatory_oneof: "['script', 'src']"
     value_url: {
       protocol: "https"
       allow_relative: false
@@ -84,4 +83,14 @@ tags: {  # <amp-script>
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
+}
+# HTML5, 4.8.11 The canvas element.
+tags: {
+  html_format: AMP
+  tag_name: "CANVAS"
+  attrs: { name: "height" }
+  attrs: { name: "width" }
+  mandatory_ancestor: "AMP-SCRIPT"
+  requires_extension: "amp-script"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }

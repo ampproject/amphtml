@@ -107,7 +107,7 @@ export class LaterpayVendor {
     /** @const @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
 
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @const @private {!JsonObject} For shape see LaterpayConfig_0_1_Def */

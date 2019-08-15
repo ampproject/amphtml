@@ -1002,18 +1002,17 @@ describes.realWin(
     let win;
     let extensions;
     let extensionsMock;
-    let ampdocServiceMock;
+    let ampdocService;
 
     beforeEach(() => {
       win = env.win;
       extensions = env.extensions;
       extensionsMock = sandbox.mock(extensions);
-      ampdocServiceMock = sandbox.mock(env.ampdocService);
+      ampdocService = env.ampdocService;
     });
 
     afterEach(() => {
       extensionsMock.verify();
-      ampdocServiceMock.verify();
     });
 
     describe('attachShadowDoc', () => {
@@ -1030,22 +1029,20 @@ describes.realWin(
         hostElement = win.document.createElement('div');
         importDoc = win.document.implementation.createHTMLDocument('');
         importDoc.body.appendChild(win.document.createElement('child'));
-        const shadowRoot = createShadowRoot(hostElement);
-        ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
+        createShadowRoot(hostElement);
+        ampdoc = null;
 
-        ampdocServiceMock
-          .expects('installShadowDoc')
-          .withExactArgs(
-            docUrl,
-            sinon.match(arg => arg == getShadowRoot(hostElement))
-          )
-          .returns(ampdoc)
-          .atLeast(0);
-        ampdocServiceMock
-          .expects('getAmpDoc')
-          .withExactArgs(sinon.match(arg => arg == getShadowRoot(hostElement)))
-          .returns(ampdoc)
-          .atLeast(0);
+        sandbox
+          .stub(ampdocService, 'installShadowDoc')
+          .callsFake((url, shadowRoot, options) => {
+            expect(url).to.equal(docUrl);
+            expect(shadowRoot).to.equal(getShadowRoot(hostElement));
+            return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
+          });
+        sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
+          expect(node).to.equal(getShadowRoot(hostElement));
+          return ampdoc;
+        });
       });
 
       it('should install services and styles', () => {
@@ -1099,7 +1096,7 @@ describes.realWin(
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
           'test1': '12',
         });
-
+        expect(ampdoc.getParam('test1')).to.equal('12');
         const viewer = getServiceForDoc(ampdoc, 'viewer');
         expect(viewer.getParam('test1')).to.equal('12');
       });
@@ -1394,24 +1391,20 @@ describes.realWin(
           deactivateChunking();
           setShadowDomSupportedVersionForTesting(undefined);
           hostElement = win.document.createElement('div');
-          const shadowRoot = createShadowRoot(hostElement);
-          ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
+          createShadowRoot(hostElement);
+          ampdoc = null;
 
-          ampdocServiceMock
-            .expects('installShadowDoc')
-            .withExactArgs(
-              docUrl,
-              sinon.match(arg => arg == getShadowRoot(hostElement))
-            )
-            .returns(ampdoc)
-            .atLeast(0);
-          ampdocServiceMock
-            .expects('getAmpDoc')
-            .withExactArgs(
-              sinon.match(arg => arg == getShadowRoot(hostElement))
-            )
-            .returns(ampdoc)
-            .atLeast(0);
+          sandbox
+            .stub(ampdocService, 'installShadowDoc')
+            .callsFake((url, shadowRoot, options) => {
+              expect(url).to.equal(docUrl);
+              expect(shadowRoot).to.equal(getShadowRoot(hostElement));
+              return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
+            });
+          sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
+            expect(node).to.equal(getShadowRoot(hostElement));
+            return ampdoc;
+          });
         });
 
         it('should install services and styles', () => {
@@ -1789,8 +1782,11 @@ describes.realWin(
       },
       (name, isStubbedDocumentContains) => {
         let doc1, doc2, doc3;
+        let ampdocServiceMock;
 
         beforeEach(() => {
+          ampdocServiceMock = sandbox.mock(env.ampdocService);
+
           if (isStubbedDocumentContains) {
             // Some browsers implement document.contains wrong, and it returns
             // `false` even when this is incorrect. Repeat these tests with the
@@ -1803,6 +1799,10 @@ describes.realWin(
           doc3 = attach('https://example.org/doc3');
         });
 
+        afterEach(() => {
+          ampdocServiceMock.verify();
+        });
+
         function attach(docUrl) {
           const hostElement = win.document.createElement('div');
           win.document.body.appendChild(hostElement);
@@ -1812,7 +1812,7 @@ describes.realWin(
 
           ampdocServiceMock
             .expects('installShadowDoc')
-            .withExactArgs(
+            .withArgs(
               docUrl,
               sinon.match(arg => arg == getShadowRoot(hostElement))
             )

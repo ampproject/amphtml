@@ -293,12 +293,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
   },
   {
-    id: 'amp-list-diffing',
-    name: 'Enables DOM diffing of amp-list renders via set-dom',
-    spec: 'https://github.com/ampproject/amphtml/pull/17000',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
-  },
-  {
     id: 'custom-elements-v1',
     name: 'Enable a new custom elements v1 polyfill',
     spec: 'https://github.com/ampproject/amphtml/pull/17205',
@@ -329,11 +323,6 @@ const EXPERIMENTS = [
     id: 'amp-list-load-more',
     name: 'Enables load-more related functionality in amp-list',
     spec: 'https://github.com/ampproject/amphtml/issues/13575',
-  },
-  {
-    id: 'amp-script',
-    name: 'Enables <amp-script>.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
   },
   {
     id: 'hidden-mutation-observer',

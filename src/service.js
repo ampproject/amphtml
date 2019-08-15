@@ -318,7 +318,7 @@ export function getParentWindow(win) {
  * @return {!Window}
  */
 export function getTopWindow(win) {
-  return win.__AMP_TOP || win;
+  return win.__AMP_TOP || (win.__AMP_TOP = win);
 }
 
 /**

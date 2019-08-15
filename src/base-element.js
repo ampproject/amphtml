@@ -678,8 +678,9 @@ export class BaseElement {
     attributes = isArray(attributes) ? attributes : [attributes];
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i];
-      if (this.element.hasAttribute(attr)) {
-        element.setAttribute(attr, this.element.getAttribute(attr));
+      const val = this.element.getAttribute(attr);
+      if (null !== val) {
+        element.setAttribute(attr, val);
       } else if (opt_removeMissingAttrs) {
         element.removeAttribute(attr);
       }
@@ -821,7 +822,7 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!./service/viewport/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */
   getViewport() {
     return Services.viewportForDoc(this.getAmpDoc());
@@ -898,13 +899,20 @@ export class BaseElement {
    * The promise is resolved if the height is successfully updated.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
+   * @param {?Event=} opt_event
    * @return {!Promise}
    * @public
    */
-  attemptChangeSize(newHeight, newWidth) {
+  attemptChangeSize(newHeight, newWidth, opt_event) {
     return this.element
       .getResources()
-      .attemptChangeSize(this.element, newHeight, newWidth);
+      .attemptChangeSize(
+        this.element,
+        newHeight,
+        newWidth,
+        /* newMargin */ undefined,
+        opt_event
+      );
   }
 
   /**
