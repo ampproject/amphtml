@@ -247,6 +247,12 @@ const envPresets = {
     AmpdocEnvironment.VIEWER_DEMO,
     AmpdocEnvironment.SHADOW_DEMO,
   ],
+  'amp4ads-preset': [
+    // AmpdocEnvironment.A4A_FIE,
+    AmpdocEnvironment.A4A_INABOX,
+    AmpdocEnvironment.A4A_INABOX_FRIENDLY,
+    AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
+  ],
   'ampdoc-amp4ads-preset': [
     AmpdocEnvironment.SINGLE,
     AmpdocEnvironment.VIEWER_DEMO,
