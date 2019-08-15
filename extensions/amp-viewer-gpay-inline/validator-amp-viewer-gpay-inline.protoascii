@@ -14,23 +14,23 @@
 # limitations under the license.
 #
 
-tags: {  # amp-viewer-gpay-inline
-  html_format: AMP
-  tag_name: "SCRIPT"
-  extension_spec: {
-    name: "amp-viewer-gpay-inline"
-    version: "0.1"
-    version: "latest"
-  }
-  attr_lists: "common-extension-attrs"
-}
-tags: {  # <amp-viewer-gpay-inline>
-  html_format: AMP
-  tag_name: "AMP-VIEWER-GPAY-INLINE"
-  requires_extension: "amp-viewer-gpay-inline"
-  attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-viewer-gpay-inline"
-  amp_layout: {
-    supported_layouts: RESPONSIVE
-  }
-}
+#tags: {  # amp-viewer-gpay-inline
+#  html_format: AMP
+#  tag_name: "SCRIPT"
+#  extension_spec: {
+#    name: "amp-viewer-gpay-inline"
+#    version: "0.1"
+#    version: "latest"
+#  }
+#  attr_lists: "common-extension-attrs"
+#}
+#tags: {  # <amp-viewer-gpay-inline>
+#  html_format: AMP
+#  tag_name: "AMP-VIEWER-GPAY-INLINE"
+#  requires_extension: "amp-viewer-gpay-inline"
+#  attr_lists: "extended-amp-global"
+#  spec_url: "https://amp.dev/documentation/components/amp-viewer-gpay-inline"
+#  amp_layout: {
+#    supported_layouts: RESPONSIVE
+#  }
+#}
