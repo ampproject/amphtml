@@ -49,6 +49,9 @@ export class AmpStoryEmbed extends HTMLElement {
   constructor() {
     super();
 
+    /** @private {!Document} */
+    this.doc_ = this.ownerDocument;
+
     /** @private {!AmpStoryEmbedConfig} */
     this.config_;
 
@@ -96,17 +99,17 @@ export class AmpStoryEmbed extends HTMLElement {
     const shadowRoot = this.attachShadow({mode: 'open'});
 
     // Inject default styles
-    const styleEl = document.createElement('style');
+    const styleEl = this.doc_.createElement('style');
     styleEl.textContent = CSS;
     shadowRoot.appendChild(styleEl);
 
-    this.rootEl_ = document.createElement('main');
+    this.rootEl_ = this.doc_.createElement('main');
     shadowRoot.appendChild(this.rootEl_);
   }
 
   /** @private */
   buildIframe_() {
-    this.iframeEl_ = document.createElement('iframe');
+    this.iframeEl_ = this.doc_.createElement('iframe');
     this.iframeEl_.setAttribute('src', this.config_.stories[0].src);
     this.initializeLoadingListeners_();
     this.rootEl_.appendChild(this.iframeEl_);
@@ -127,4 +130,4 @@ export class AmpStoryEmbed extends HTMLElement {
   }
 }
 
-window.customElements.define('amp-story-embed', AmpStoryEmbed);
+customElements.define('amp-story-embed', AmpStoryEmbed);
