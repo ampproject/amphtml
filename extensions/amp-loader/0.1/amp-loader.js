@@ -34,13 +34,13 @@ import {setImportantStyles, setStyle} from '../../../src/style';
 const LOADER_APPEAR_TIME = 600;
 
 /**
- * Elements will get a default gray placeholder if they don't already have a
+ * Elements will get a default gray background if they don't already have a
  * placeholder. This list does not include video players which are detected
  * using `isIframeVideoPlayerComponent`
  * @enum {boolean}
  * @private  Visible for testing only!
  */
-const DEFAULT_LOADING_BACKGROUND_WHITELIST_NON_VIDEO = {
+const LOADER_BACKGROUND_TAGS = {
   'AMP-IMG': true,
   'AMP-ANIM': true,
   'AMP-PINTEREST': true,
@@ -186,27 +186,39 @@ class LoaderBuilder {
   }
 
   /**
-   * Add a gray loading background if there isn't a placeholder already and
-   * other special cases.
+   * @return {boolean} True if the currently loading element has background
+   * content via a placeholder or poster.
+   * @private
+   */
+  hasBackgroundContent_() {
+    const hasPlaceholder = !!this.element_.getPlaceholder();
+    const hasPoster = this.element_.hasAttribute('poster');
+
+    return hasPlaceholder || hasPoster;
+  }
+
+  /**
+   * @return {boolean} True if the loaderBackground should be used for the
+   * element.
+   * @private
+   */
+  tagNeedsBackground_() {
+    const {tagName} = this.element_;
+
+    return (
+      LOADER_BACKGROUND_TAGS[tagName] || isIframeVideoPlayerComponent(tagName)
+    );
+  }
+
+  /**
+   * Add a gray loading background if needed based on the element's content
+   * and tagName.
    * @private
    */
   maybeAddLoadingBackground_() {
-    const hasPlaceholder = !!this.element_.getPlaceholder();
-    const hasPoster = this.element_.hasAttribute('poster');
-    if (hasPlaceholder || hasPoster) {
-      return;
+    if (!this.hasBackgroundContent_() && this.tagNeedsBackground_()) {
+      this.domRoot_.classList.add('i-amphtml-loader-background');
     }
-
-    // Is it whitelisted for default placeholder?
-    const {tagName} = this.element_;
-    if (
-      !DEFAULT_LOADING_BACKGROUND_WHITELIST_NON_VIDEO[tagName] &&
-      !isIframeVideoPlayerComponent(tagName)
-    ) {
-      return;
-    }
-
-    this.domRoot_.classList.add('i-amphtml-loader-background');
   }
 
   /**
