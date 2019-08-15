@@ -87,6 +87,23 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
+ * @enum {number}
+ */
+const HistoryOp = {
+  REPLACE: 0,
+  PUSH: 1,
+};
+
+/**
+ * @typedef {{
+ *   op: !HistoryOp,
+ *   data: (!JsonObject|undefined),
+ *   onPop: (!Function|undefined)
+ * }}
+ */
+let HistoryTaskDef;
+
+/**
  * A map of tag names to arrays of attributes that do not have non-bind
  * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
  * but does not support a `slide` attribute.
@@ -140,7 +157,7 @@ export class Bind {
      */
     this.actionSequenceIds_ = [];
 
-    /** @const @private {!Function} */
+    /** @const @private {function()} */
     this.eventuallyClearActionSequenceIds_ = debounce(
       this.win_,
       () => {
@@ -219,11 +236,24 @@ export class Bind {
     /** @const @private {!Deferred} */
     this.addMacrosDeferred_ = new Deferred();
 
-    /** @private {Promise} */
+    /** @private {?Promise} */
     this.setStatePromise_ = null;
 
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
+
+    /**
+     * A queue of history replace/push to adhere to browser rate-limits.
+     * @private @const {!Array<!HistoryTaskDef>}
+     */
+    this.historyQueue_ = [];
+
+    /** @private @const {!Function} */
+    this.debouncedFlushHistoryQueue_ = debounce(
+      this.win_,
+      () => this.flushHistoryQueue_(),
+      1000
+    );
 
     // Install debug tools.
     const g = self.AMP;
@@ -346,12 +376,12 @@ export class Bind {
     dev().info(TAG, 'setState:', expression);
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
       .then(result => this.setState(result))
-      .then(() => this.getDataForHistory_())
-      .then(data => {
-        // Don't bother calling History.replace with empty data.
-        if (data) {
-          this.history_.replace(data);
-        }
+      .then(() => {
+        return this.getDataForHistory_().then(data => {
+          if (data) {
+            this.pushToHistoryQueue_({op: HistoryOp.REPLACE, data});
+          }
+        });
       });
     return this.setStatePromise_;
   }
@@ -378,32 +408,76 @@ export class Bind {
       });
 
       const onPop = () => this.setState(oldState);
-      return this.setState(result)
-        .then(() => this.getDataForHistory_())
-        .then(data => {
-          this.history_.push(onPop, data);
+      return this.setState(result).then(() => {
+        return this.getDataForHistory_().then(data => {
+          this.pushToHistoryQueue_({op: HistoryOp.PUSH, data, onPop});
         });
+      });
     });
+  }
+
+  /**
+   * @param {!HistoryTaskDef} task
+   * @private
+   */
+  pushToHistoryQueue_(task) {
+    let enqueue = true;
+
+    // Collapse if consecutive "replace" operations.
+    if (task.op === HistoryOp.REPLACE && this.historyQueue_.length > 0) {
+      const lastTask = this.historyQueue_[this.historyQueue_.length - 1];
+      if (lastTask.op === HistoryOp.REPLACE) {
+        lastTask.data = task.data;
+        enqueue = false;
+      }
+    }
+
+    if (enqueue) {
+      this.historyQueue_.push(task);
+    }
+
+    if (task.op === HistoryOp.PUSH) {
+      // Immediately flush queue on "push" to avoid adding latency to
+      // the browser "back" functionality.
+      this.flushHistoryQueue_();
+    } else {
+      // Debounce flush queue on "replace" to rate limit History.replace.
+      this.debouncedFlushHistoryQueue_();
+    }
+  }
+
+  /**
+   * @private
+   */
+  flushHistoryQueue_() {
+    this.historyQueue_.forEach(({op, data, onPop}) => {
+      if (op === HistoryOp.REPLACE) {
+        this.history_.replace(data);
+      } else if (op === HistoryOp.PUSH) {
+        this.history_.push(onPop, data);
+      }
+    });
+    this.historyQueue_.length = 0;
   }
 
   /**
    * Returns data that should be saved in browser history on AMP.setState() or
    * AMP.pushState(). This enables features like restoring browser tabs.
-   * @return {!Promise<?JsonObject>}
+   * @return {!Promise<(!JsonObject|undefined)>}
    */
   getDataForHistory_() {
+    // Copy so subsequent changes don't modify the stored object reference.
     const data = dict({
-      'data': dict({'amp-bind': this.state_}),
+      'data': dict({'amp-bind': this.copyJsonObject_(this.state_)}),
       'title': this.localWin_.document.title,
     });
     if (!this.viewer_.isEmbedded()) {
-      // CC doesn't recognize !JsonObject as a subtype of (JsonObject|null).
-      return /** @type {!Promise<?JsonObject>} */ (Promise.resolve(data));
+      return Promise.resolve(data);
     }
     // Only pass state for history updates to trusted viewers, since they
     // may contain user data e.g. form input.
     return this.viewer_.isTrustedViewer().then(trusted => {
-      return trusted ? data : null;
+      return trusted ? data : undefined;
     });
   }
 
