@@ -43,7 +43,7 @@ def EnsureNodeJsIsInstalled():
 
   try:
     output = subprocess.check_output(['node', '--eval', 'console.log("42")'])
-    if b'42' in output.strip():
+    if b'42' == output.strip():
       return
   except (subprocess.CalledProcessError, OSError):
     pass
