@@ -45,7 +45,7 @@ const WAITFOR_EVENTS = {
 
 /**
  * A list of events on which event they should wait
- * @const {!Object<string, number>}
+ * @const {!Object<string, WAITFOR_EVENTS>}
  */
 const NAV_TIMING_WAITFOR_EVENTS = {
   // ready on viewer first visible
