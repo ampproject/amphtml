@@ -40,5 +40,7 @@ export function yahoonativeads(global, data) {
     });
   });
 
-  loadScript(global, 'https://s.yimg.com/dy/ads/readmo.js', () => global.context.renderStart());
+  loadScript(global, 'https://s.yimg.com/dy/ads/readmo.js', () =>
+    global.context.renderStart()
+  );
 }
