@@ -70,20 +70,14 @@ const AMP_CUSTOM_LINKER_TARGET = '__AMP_CUSTOM_LINKER_TARGET__';
  * @const {!../simple-template.ElementDef}
  */
 const rootTemplate = {
-  tag: 'div',
-  attrs: dict({'class': 'i-amphtml-story-bookend-overflow'}),
+  tag: 'section',
+  attrs: dict({
+    'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset',
+  }),
   children: [
     {
-      tag: 'section',
-      attrs: dict({
-        'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset',
-      }),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({'class': 'i-amphtml-story-bookend-handle'}),
-        },
-      ],
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-bookend-handle'}),
     },
   ],
 };
@@ -207,13 +201,7 @@ export class AmpStoryBookend extends DraggableDrawer {
     this.replayButton_ = null;
 
     /**
-     * Bookend shadow root.
-     * @private {?Element}
-     */
-    this.bookendRoot_ = null;
-
-    /**
-     * Actual bookend. Does not include overflow.
+     * Actual bookend.
      * @private {?Element}
      */
     this.bookendEl_ = null;
@@ -258,12 +246,11 @@ export class AmpStoryBookend extends DraggableDrawer {
 
     this.isBuilt_ = true;
 
-    this.bookendRoot_ = renderAsElement(this.win.document, rootTemplate);
-    this.bookendEl_ = this.bookendRoot_.firstElementChild;
+    this.bookendEl_ = renderAsElement(this.win.document, rootTemplate);
 
     this.shadowHost_ = this.win.document.createElement('div');
 
-    createShadowRootWithStyle(this.shadowHost_, this.bookendRoot_, CSS);
+    createShadowRootWithStyle(this.shadowHost_, this.bookendEl_, CSS);
     this.contentEl_.appendChild(this.shadowHost_);
 
     this.replayButton_ = this.buildReplayButton_();
@@ -301,7 +288,13 @@ export class AmpStoryBookend extends DraggableDrawer {
   initializeListeners_() {
     super.initializeListeners_();
 
-    this.bookendRoot_.addEventListener('click', event => this.onClick_(event));
+    this.element.addEventListener('click', event =>
+      this.onOuterShadowClick_(event)
+    );
+
+    this.getShadowRoot().addEventListener('click', event => {
+      this.onInnerShadowClick_(event);
+    });
 
     this.replayButton_.addEventListener('click', event =>
       this.onReplayButtonClick_(event)
@@ -515,22 +508,26 @@ export class AmpStoryBookend extends DraggableDrawer {
   }
 
   /**
-   * Handles click events on the bookend:
-   *   - Closes bookend if tapping outside usable area
-   *   - Forwards AMP actions
+   * Reacts to clicks outside the shadow root.
    * @param {!Event} event
    * @private
    */
-  onClick_(event) {
+  onOuterShadowClick_(event) {
     const target = dev().assertElement(event.target);
-    if (this.elementOutsideUsableArea_(target)) {
+    if (this.elementOutsideBookend_(target)) {
       event.stopPropagation();
       this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
       return;
     }
+  }
 
-    // Pass custom target so that linker can see it, otherwise it would see
-    // the entire shadow DOM tree and not know what target to choose.
+  /**
+   * Reacts to clicks inside the shadow root.
+   * @param {!Event} event
+   * @private
+   */
+  onInnerShadowClick_(event) {
+    const target = dev().assertElement(event.target);
     event[AMP_CUSTOM_LINKER_TARGET] = target;
 
     if (target.hasAttribute('on')) {
@@ -540,12 +537,13 @@ export class AmpStoryBookend extends DraggableDrawer {
   }
 
   /**
+   * Returns true if element is outside the bookend.
    * @param {!Element} el
    * @return {boolean}
    * @private
    */
-  elementOutsideUsableArea_(el) {
-    return !closest(el, el => el === this.bookendEl_);
+  elementOutsideBookend_(el) {
+    return !closest(el, el => el === this.shadowHost_);
   }
 
   /**
@@ -591,7 +589,10 @@ export class AmpStoryBookend extends DraggableDrawer {
           localizationService
         );
         const container = dev().assertElement(
-          BookendComponent.buildContainer(this.bookendEl_, this.win.document)
+          BookendComponent.buildContainer(
+            this.getShadowRoot(),
+            this.win.document
+          )
         );
         this.mutateElement(() => container.appendChild(bookendEls));
       })
@@ -604,7 +605,7 @@ export class AmpStoryBookend extends DraggableDrawer {
   /** @return {!Element} */
   getShadowRoot() {
     this.assertBuilt_();
-    return dev().assertElement(this.bookendRoot_);
+    return dev().assertElement(this.bookendEl_);
   }
 
   /**

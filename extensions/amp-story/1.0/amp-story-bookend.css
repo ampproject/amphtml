@@ -28,10 +28,6 @@
   z-index: 100001 !important;
 }
 
-.i-amphtml-story-bookend-overflow:not([desktop]) {
-  padding-top: 88px !important;
-}
-
 .i-amphtml-story-bookend-handle {
   height: 4px !important;
   width: 40px !important;
@@ -319,14 +315,14 @@
   color: #FFF !important;
 }
 
-[desktop] .i-amphtml-story-bookend {
+[desktop].i-amphtml-story-bookend {
   box-sizing: border-box !important;
   min-height: 100vh !important;
   padding: 104px 156px 64px !important;
   margin: 0 !important;
 }
 
-[desktop] .i-amphtml-story-bookend .i-amphtml-story-share-widget {
+[desktop].i-amphtml-story-bookend .i-amphtml-story-share-widget {
   /* TODO(alanorozco): Don't render at all when on desktop */
   display: none !important;
 }
