@@ -23,8 +23,7 @@ import {
 } from '../../src/service/storage-impl';
 import {dev} from '../../src/log';
 
-describe('Storage', () => {
-  let sandbox;
+describes.sandboxed('Storage', {}, () => {
   let storage;
   let binding;
   let bindingMock;
@@ -35,8 +34,6 @@ describe('Storage', () => {
   let viewerBroadcastHandler;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-
     viewerBroadcastHandler = undefined;
     viewer = {
       onBroadcast: handler => {
@@ -60,10 +57,6 @@ describe('Storage', () => {
 
     storage = new Storage(ampdoc, viewer, binding);
     storage.start_();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   function expectStorage(keyValues) {
@@ -361,19 +354,13 @@ describe('Storage', () => {
   });
 });
 
-describe('Store', () => {
-  let sandbox;
+describes.sandboxed('Store', {}, () => {
   let clock;
   let store;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     store = new Store({}, 2);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should get undefined with empty store', () => {
@@ -481,14 +468,12 @@ describe('Store', () => {
   });
 });
 
-describe('LocalStorageBinding', () => {
-  let sandbox;
+describes.sandboxed('LocalStorageBinding', {}, () => {
   let windowApi;
   let localStorageMock;
   let binding;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     windowApi = {
       localStorage: {
         getItem: () => {},
@@ -497,10 +482,6 @@ describe('LocalStorageBinding', () => {
     };
     localStorageMock = sandbox.mock(windowApi.localStorage);
     binding = new LocalStorageBinding(windowApi);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should throw if localStorage is not supported', () => {
@@ -641,23 +622,17 @@ describe('LocalStorageBinding', () => {
   });
 });
 
-describe('ViewerStorageBinding', () => {
-  let sandbox;
+describes.sandboxed('ViewerStorageBinding', {}, () => {
   let viewer;
   let viewerMock;
   let binding;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     viewer = {
       sendMessageAwaitResponse: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     binding = new ViewerStorageBinding(viewer);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should load store from viewer', () => {

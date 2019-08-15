@@ -34,7 +34,6 @@ describes.fakeWin(
     },
   },
   env => {
-    let sandbox;
     let clock;
     let bindingMock;
     let onStateUpdated;
@@ -42,7 +41,6 @@ describes.fakeWin(
 
     beforeEach(() => {
       installTimerService(env.win);
-      sandbox = env.sandbox;
       clock = sandbox.useFakeTimers();
 
       const binding = {
@@ -633,9 +631,7 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
   });
 });
 
-describes.sandboxed('HistoryBindingVirtual', {}, env => {
-  let sandbox;
-
+describes.sandboxed('HistoryBindingVirtual', {}, () => {
   let history;
   let viewer;
   let capabilityStub;
@@ -644,7 +640,6 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
   let onHistoryPopped;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
     onStateUpdated = sandbox.spy();
     capabilityStub = sandbox.stub();
     viewer = {
@@ -660,7 +655,6 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
 
   afterEach(() => {
     history.cleanup();
-    sandbox.restore();
   });
 
   it('should initialize correctly', () => {
@@ -936,13 +930,11 @@ describes.fakeWin(
     },
   },
   env => {
-    let sandbox;
     let clock;
     let history;
 
     beforeEach(() => {
       installTimerService(env.win);
-      sandbox = env.sandbox;
       clock = sandbox.useFakeTimers();
     });
 
@@ -1011,14 +1003,12 @@ describes.fakeWin(
   }
 );
 describes.fakeWin('Get and update fragment', {}, env => {
-  let sandbox;
   let history;
   let viewer;
   let viewerMock;
 
   beforeEach(() => {
     installTimerService(env.win);
-    sandbox = env.sandbox;
     viewer = {
       onMessage: () => {
         return () => {};
