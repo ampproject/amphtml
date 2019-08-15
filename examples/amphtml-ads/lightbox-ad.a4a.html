@@ -193,14 +193,7 @@
   </style>
 </head>
 <body>
-
-<!-- ## Banner markup -->
-<!--
-`amp-ad-banner` is a dummy AMP element that is used by the AMP runtime to determine the position of the ad when a lightbox is opened.
-
-Please note that `amp-ad-banner` is still in experimental stages and is likely to change in the future. See [this GitHub issue for tracking.](https://github.com/ampproject/amphtml/issues/8334)
--->
-<amp-ad-banner class="root-container" layout="container">
+<div class="root-container" layout="container">
   <!-- ## Cards -->
   <!--
   AMP has a system in place for [events and actions](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md). It uses a domain-specific language to describe how actions are triggered. In this example, we set the `on` attribute so the lightbox will activate when a card button is tapped.
@@ -219,7 +212,7 @@ Please note that `amp-ad-banner` is still in experimental stages and is likely t
           alt="Ergonomic Leather Seats"></amp-img>
     </div>
   </div>
-</amp-ad-banner>
+</div>
 <!-- ## Lightboxes -->
 <!--
 The amp-lightbox component defines the child elements that will be displayed in a full-viewport overlay. We set a different id for each lightbox so they can be opened and closed by actions on other elements. Its content is normal AMP HTML.
