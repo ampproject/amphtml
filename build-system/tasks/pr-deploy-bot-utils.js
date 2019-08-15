@@ -72,6 +72,7 @@ async function signalDistUpload(result) {
       'to the pr-deploy GitHub App'
     );
   } catch (ex) {
+    log('new check');
     log(ex);
   }
 }
