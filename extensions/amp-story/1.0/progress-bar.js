@@ -103,6 +103,8 @@ export class ProgressBar {
     /** @private {!Element} */
     this.storyEl_ = storyEl;
 
+    this.overflowProgressBarBuilt_ = false;
+
     /**
      * Width of the progress bar in pixels.
      * @private {number}
@@ -179,14 +181,7 @@ export class ProgressBar {
           }
         });
 
-        if (
-          this.segmentCount_ > MAX_SEGMENTS &&
-          this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE
-        ) {
-          this.initializeOverflowProgressBar_();
-        } else {
-          this.setSegmentSize_(this.getSegmentWidth_(0));
-        }
+        this.setSegmentSize_(this.getSegmentWidth_(0));
 
         if (this.isBuilt_) {
           this.updateProgress(
@@ -295,45 +290,61 @@ export class ProgressBar {
       MAX_SEGMENTS +
       Math.min(MAX_SEGMENT_ELLIPSIS - 1, this.segmentCount_ % MAX_SEGMENTS);
 
-    this.ellipsis_.tailIndices = this.shrinkSegments_(
+    this.ellipsis_.headIndices = this.shrinkSegments_(
       MAX_SEGMENTS,
       upperIndexHead
     );
+    this.overflowProgressBarBuilt_ = true;
   }
   /**
    * Checks if an index is past the overlfow limit.
    * @param {number} previousSegmentIndex
    * @param {number} segmentIndex
-   * @param {boolean} force
+   * @param {boolean} pageReload
    */
-  checkIndexForOverflow_(previousSegmentIndex, segmentIndex, force = false) {
-    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType.MOBILE) {
+  checkIndexForOverflow_(
+    previousSegmentIndex,
+    segmentIndex,
+    pageReload = false
+  ) {
+    if (
+      this.segmentCount_ <= MAX_SEGMENTS ||
+      this.storeService_.get(StateProperty.UI_STATE) !== UIType.MOBILE
+    ) {
       return;
     }
 
-    if (force) {
+    if (pageReload && segmentIndex < MAX_SEGMENTS) {
+      segmentIndex = 0;
+    } else if (pageReload) {
       segmentIndex = segmentIndex - (segmentIndex % SEGMENT_INCREMENT);
       previousSegmentIndex = segmentIndex - 1;
     }
+
+    if (segmentIndex === 0 && !this.overflowProgressBarBuilt_) {
+      this.initializeOverflowProgressBar_();
+      return;
+    }
+
     if (
       this.ellipsis_.tailIndices.includes(segmentIndex) ||
       this.ellipsis_.headIndices.includes(segmentIndex) ||
-      force
+      pageReload
     ) {
       const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
       const segs = this.getRoot().querySelectorAll(
         '.i-amphtml-story-page-progress-bar'
       );
-      // grow previous ellipsis
       const ellipses = this.getRoot().querySelectorAll(
         '.i-amphtml-story-progress-ellipsis'
       );
+      // Grow previous ellipses.
       ellipses.forEach(ellipsis =>
         ellipsis.classList.remove('i-amphtml-story-progress-ellipsis')
       );
 
-      const previousTailLength = this.ellipsis_.tailIndices.length;
-      const prevDotsLeft =
+      const previousTailEllipsis = this.ellipsis_.upperIndexTail;
+      const previouslyHadLeftEllipsis =
         findIndex(this.ellipsis_.tailIndices, idx => idx < segmentIndex) >= 0
           ? 1
           : 0;
@@ -371,8 +382,16 @@ export class ProgressBar {
       let translate;
       const translateDirection = rtlState ? 1 : -1;
       if (navigationDirection === 1) {
+        const upperTailToPrevUpper =
+          this.ellipsis_.upperIndexTail - previousTailEllipsis; // less than MAX_SEGMENT_ELLIPSIS when ellipsis overlap.
+        const ellipsisGrownToLeft = Math.min(
+          MAX_SEGMENT_ELLIPSIS,
+          upperTailToPrevUpper
+        );
         const shrinkDiff =
-          prevDotsLeft * previousTailLength * (prevWidth - ELLIPSE_WIDTH_PX);
+          previouslyHadLeftEllipsis *
+          ellipsisGrownToLeft *
+          (segWidth - ELLIPSE_WIDTH_PX);
         const sizeDiff = this.ellipsis_.upperIndexTail * (segWidth - prevWidth);
         const upperIndexTailRect = segs[
           this.ellipsis_.upperIndexTail
@@ -402,7 +421,7 @@ export class ProgressBar {
 
       if (
         navigationDirection === 1 &&
-        segmentIndex + MAX_SEGMENT_ELLIPSIS > this.segmentCount_
+        segmentIndex + enteringSegs > this.segmentCount_
       ) {
         return;
       } else if (
@@ -424,14 +443,16 @@ export class ProgressBar {
   /**
    * Updates the ellipsis at the "head" of the progressbar. The "head" is the
    * the rightmost MAX_SEGMENT_ELLIPSIS when navigating from left to right.
-   * @param {number} segmentIndex
+   * @param {number} prevSegmentIndex
    * @param {number} enteringSegs
    * @param {number} navigationDirection
    * @return {number}
    */
-  updateHeadEllipsis_(segmentIndex, enteringSegs, navigationDirection) {
+  updateHeadEllipsis_(prevSegmentIndex, enteringSegs, navigationDirection) {
     const lowerLimit =
-      segmentIndex + navigationDirection * enteringSegs + navigationDirection;
+      prevSegmentIndex +
+      navigationDirection * enteringSegs +
+      navigationDirection;
     if (
       (navigationDirection === 1 && lowerLimit < this.segmentCount_) ||
       (navigationDirection === -1 && lowerLimit > 0)
@@ -439,6 +460,8 @@ export class ProgressBar {
       this.ellipsis_.upperIndexHead =
         lowerLimit +
         navigationDirection * Math.min(MAX_SEGMENT_ELLIPSIS - 1, enteringSegs);
+      this.ellipsis_.upperIndexHead =
+        this.ellipsis_.upperIndexHead < 0 ? 0 : this.ellipsis_.upperIndexHead;
 
       this.ellipsis_.headIndices = this.shrinkSegments_(
         lowerLimit,
@@ -461,16 +484,10 @@ export class ProgressBar {
    * @return {number}
    */
   updateTailEllipsis_(previousIndex, enteringSegs, navigationDirection) {
-    let lowerIndexForTail =
+    const lowerIndexForTail =
       previousIndex +
       -1 * navigationDirection * MAX_SEGMENTS +
       navigationDirection * enteringSegs;
-
-    // Check boundaries.
-    lowerIndexForTail =
-      lowerIndexForTail >= MAX_SEGMENT_ELLIPSIS
-        ? lowerIndexForTail
-        : MAX_SEGMENT_ELLIPSIS;
 
     this.ellipsis_.upperIndexTail =
       lowerIndexForTail +
@@ -554,13 +571,11 @@ export class ProgressBar {
 
     // We can tell if the page was reloaded if this.activeSegmentIndex_ hasn't
     // yet been updated here.
-    const pageReloadAndPastOverflow =
-      segmentIndex - this.activeSegmentIndex_ > 1 &&
-      segmentIndex >= MAX_SEGMENTS;
+    const pageReload = !this.activeSegmentId_;
     this.checkIndexForOverflow_(
-      pageReloadAndPastOverflow ? segmentIndex - 1 : this.activeSegmentIndex_,
+      pageReload ? segmentIndex - 1 : this.activeSegmentIndex_,
       segmentIndex,
-      pageReloadAndPastOverflow
+      pageReload
     );
 
     this.updateProgressByIndex_(segmentIndex, progress);
