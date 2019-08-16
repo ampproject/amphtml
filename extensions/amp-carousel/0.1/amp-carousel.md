@@ -2,8 +2,8 @@
 $category@: layout
 formats:
   - websites
-  - ads
   - email
+  - ads
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis.
 ---
@@ -25,21 +25,20 @@ limitations under the License.
 
 # amp-carousel
 
-{% call callout('Note', type='note') %}
-The is the documentation for `<amp-carousel>` version 0.2. The documentation for version 0.1 is [available on Github](https://github.com/ampproject/amphtml/tree/master/extensions/amp-carousel/0.1/amp-carousel.md).
-{% endcall %}
-
-A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be flexible and performant.
+A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be highly flexible and performant.
 
 <table>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>
-      fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, and responsive.
+      <ul>
+        <li>carousel: fixed, fixed-height, and nodisplay.</li>
+        <li>slides: fill, fixed, fixed-height, flex-item, nodisplay, and responsive.</li>
+      </ul>
     </td>
   </tr>
   <tr>
@@ -74,6 +73,7 @@ The carousel advances between items if the user swipes or clicks an optional nav
 </amp-carousel>
 ```
 [/example]
+
 
 ### Advancing to a specific slide
 
@@ -133,14 +133,18 @@ In the following example, we have a carousel of three images with preview button
     <td width="40%"><strong>type</strong></td>
     <td>Specifies the display type for the carousel items, which can be:
 <ul>
-  <li><strong><code>carousel</code></strong> (default): All slides are shown and are scrollable horizontally. Each slide may specify a different width using CSS.</li>
-  <li><strong><code>slides</code></strong>: Shows a single slide at a time, with each slide snapping into place as the user swipes.</li>
+  <li>**`carousel`** (default): All slides are shown and are scrollable horizontally. This type supports only the following layouts: `fixed`, `fixed-height`, and `nodisplay`.</li>
+  <li>**`slides`**: Shows a single slide at a time. This type supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.</li>
 </ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>height (required)</strong></td>
+    <td>Specifies the height of the carousel, in pixels.</td>
   </tr>
   <tr>
     <td width="40%"><strong>controls (optional)</strong></td>
     <td>Permanently displays left and right arrows for the user to navigate carousel items on mobile devices.
-By default, navigational arrows disappear after the user swipes to another slide on mobile.
+By default, navigational arrows disappear after a few seconds on mobile.
 The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.</td>
   </tr>
   <tr>
@@ -160,21 +164,24 @@ The visibility of arrows can also be controlled via styling, and a media query c
     <td><p>Advances the slide to the next slide without user interaction.<br>
   If present without a value:</p>
 <ul>
-  <li>By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the <code>delay</code> attribute.</li>
+  <li>By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.</li>
+  <li>Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.</li>
   <li>Requires at least 2 slides for autoplay to occur.</li>
+  <li>Applies only to carousels with `type=slides`.</li>
 </ul>
 <p>If present with a value:</p>
 <ul>
-  <li>Stops autoplaying after the requisite number of loops are made.</li>
+  <li>Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.</li>
+  <li>Removes the `loop` attribute after the requisite number of loops are made.</li>
 </ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>delay (optional)</strong></td>
-    <td>Specifies the duration (in milliseconds) to delay advancing to the next slide when <code>autoplay</code> is enabled.</td>
+    <td>Specifies the duration (in milliseconds) to delay advancing to the next slide when <code>autoplay</code> is enabled. The <code>delay</code> attribute is only applicable to carousels with <code>type=slides</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>loop (optional)</strong></td>
-    <td><p>Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur.</p>
+    <td><p>Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur. The <code>loop</code> attribute is only applicable to carousels with <code>type=slides</code>.</p>
 <p><em>Example: Displays a slides carousel with controls, looping, and delayed autoplay</em></p>
 
 [example preview="inline" playground="true" imports="amp-carousel"]
@@ -200,10 +207,6 @@ The visibility of arrows can also be controlled via styling, and a media query c
 </amp-carousel>
 ```
 [/example]</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>slide (optional)</strong></td>
-    <td>Specifies what index should be shown when the carousel is first rendered. This can be updated with <code><a href="https://amp.dev/documentation/components/amp-bind">amp-bind</a></code> to change which index is shown.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
@@ -235,27 +238,6 @@ The visibility of arrows can also be controlled via styling, and a media query c
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
 }
 ```
-
-- You can position the carousel buttons using align-self and/or relative positioning. Note that the carousel arrows are automatically flipped in RTL, so you should not change their flex order.
-
-```css
-.amp-carousel-button-prev {
-  position: relative;
-  bottom: 20px;
-  align-self: flex-end;
-}
-```
-
-## Differences from `<amp-carousel>` 0.1
-
-- `autoplay` is allowed on `type="carousel"`
-- `loop` is allowed on `type="carousel"`
-
-### Migration Notes
-
-- Update the required script from `amp-carousel-0.1` to `amp-carousel-0.2`.
-- Ensure any CSS for positioning next/previous arrows is still valid. See the [styling](#styling) for more information on arrow positioning.
-- Ensure any CSS used to style the carousel is still valid. The internal DOM structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors targetting internal elements such as `amp-carousel > div`. Any selectors using the `.amp-class-name` format should still work.
 
 ## Validation
 
