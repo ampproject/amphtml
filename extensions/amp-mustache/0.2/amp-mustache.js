@@ -21,20 +21,16 @@ import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
 
-/**
- * @typedef {BaseTemplate$$module$src$service$template_impl}
- */
-AMP.BaseTemplate;
+const BaseTemplate =
+  /** @type {function(new:../../../src/service/template-impl.BaseTemplate)} */ (AMP.BaseTemplate);
 
 /**
  * Implements an AMP template for Mustache.js.
  * See {@link https://github.com/janl/mustache.js/}.
  *
- * @private Visible for testing.
- * @extends {AMP.BaseTemplate}
- * @suppress {checkTypes}
+ * @visibleForTesting
  */
-export class AmpMustache extends AMP.BaseTemplate {
+export class AmpMustache extends BaseTemplate {
   /**
    * @param {!Element} element
    * @param {!Window} win
@@ -129,7 +125,7 @@ export class AmpMustache extends AMP.BaseTemplate {
   /**
    *
    * @param {string} html
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Element}
    * @private
    */
   purifyAndSetHtml_(html) {
