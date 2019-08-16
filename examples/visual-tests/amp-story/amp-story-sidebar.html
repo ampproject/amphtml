@@ -25,6 +25,14 @@
         color: white;
         text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
       }
+      amp-sidebar {
+        font-size: 2rem;
+        background-color: black;
+      }
+      amp-sidebar div {
+        border: 3px solid green;
+        height: 100vh;
+      }
     </style>
   </head>
 
@@ -34,16 +42,18 @@
         poster-portrait-src="/examples/visual-tests/picsum.photos/image981_900x1600.jpg"
         poster-landscape-src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
         poster-square-src="/examples/visual-tests/picsum.photos/image981_1600x1600.jpg">
-      <amp-sidebar id="sidebar1" layout="nodisplay" >
-        <button id="close-button" on="tap:sidebar1.close"> close </button>
-        <ul>
-          <li>Nav item 1</li>
-          <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>
-          <li>Nav item 3</li>
-          <li><a href="#idFour" on="tap:idFour.scrollTo">Nav item 4</a></li>
-          <li>Nav item 5</li>
-          <li>Nav item 6</li>
-        </ul>
+      <amp-sidebar id="sidebar1" layout="nodisplay">
+        <div>
+          <button id="close-button" on="tap:sidebar1.close"> close </button>
+          <ul>
+            <li>Nav item 1</li>
+            <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>
+            <li>Nav item 3</li>
+            <li><a href="#idFour" on="tap:idFour.scrollTo">Nav item 4</a></li>
+            <li>Nav item 5</li>
+            <li>Nav item 6</li>
+          </ul>
+        </div>
       </amp-sidebar>
       <amp-story-page id="cover">
         <amp-story-grid-layer template="fill">
