@@ -27,11 +27,19 @@ describes.realWin(
     const episodeEmbedUrl = 'https://player.megaphone.fm/OSC7749686951/';
     const playlistEmbedUrl = 'https://playlist.megaphone.fm/?p=DEM6640968282';
 
-    let win, doc;
+    let win;
+    let doc;
+    let container;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      container = doc.createElement('div');
+      doc.body.appendChild(container);
+    });
+
+    afterEach(() => {
+      doc.body.removeChild(container);
     });
 
     async function getMegaphone(mediaid, isPlaylist, opt_attrs) {
@@ -47,7 +55,7 @@ describes.realWin(
         mpplayer.setAttribute(attr, opt_attrs[attr]);
       }
 
-      doc.body.appendChild(mpplayer);
+      container.appendChild(mpplayer);
       await mpplayer.build();
       await mpplayer.layoutCallback();
       return mpplayer;
@@ -73,7 +81,7 @@ describes.realWin(
       const mpplayer = await getMegaphone('OSC7749686951', false, {
         layout: 'fixed-height',
       });
-      expect(mpplayer.className).to.match(/i-amphtml-layout-fixed-height/);
+      expect(mpplayer).to.have.class('i-amphtml-layout-fixed-height');
     });
 
     it('renders with optional parameters for an episode', async () => {
@@ -81,15 +89,16 @@ describes.realWin(
         'data-light': true,
         'data-start': '5.4',
         'data-tile': 'true',
-        'data-sharing': 'false',
+        'data-sharing': 'true',
         'data-episodes': '4',
       });
       const iframe = mpplayer.firstChild;
-      expect(iframe.src).to.include('light=true');
-      expect(iframe.src).to.include('start=5.4');
-      expect(iframe.src).to.include('tile=true');
-      expect(iframe.src).to.include('sharing=false');
-      expect(iframe.src).not.to.include('episodes');
+      const {searchParams} = new URL(iframe.src);
+      expect(searchParams.get('light')).to.equal('true');
+      expect(searchParams.get('start')).to.equal('5.4');
+      expect(searchParams.get('tile')).to.equal('true');
+      expect(searchParams.get('sharing')).to.equal('true');
+      expect(searchParams.get('episodes')).to.not.exist;
     });
 
     it('renders with optional parameters for a playlist', async () => {
@@ -97,15 +106,16 @@ describes.realWin(
         'data-light': true,
         'data-start': '5.4',
         'data-tile': 'true',
-        'data-sharing': 'false',
+        'data-sharing': 'true',
         'data-episodes': '4',
       });
       const iframe = mpplayer.firstChild;
-      expect(iframe.src).to.include('light=true');
-      expect(iframe.src).to.include('sharing=false');
-      expect(iframe.src).to.include('episodes=4');
-      expect(iframe.src).not.to.include('start');
-      expect(iframe.src).not.to.include('tile');
+      const {searchParams} = new URL(iframe.src);
+      expect(searchParams.get('light')).to.equal('true');
+      expect(searchParams.get('episodes')).to.equal('4');
+      expect(searchParams.get('sharing')).to.equal('true');
+      expect(searchParams.get('tile')).to.to.not.exist;
+      expect(searchParams.get('start')).to.not.exist;
     });
   }
 );

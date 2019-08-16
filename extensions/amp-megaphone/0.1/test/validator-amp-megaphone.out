@@ -34,14 +34,10 @@ FAIL
 |    <amp-megaphone height=166 data-episode="OSC7749686951"
 |                    layout="fixed-height"></amp-megaphone>
 |    <!-- valid: tile mode -->
-|    <amp-megaphone height=166 data-episode="OSC7749686951" data-tile="true"
->>   ^~~~~~~~~
-amp-megaphone/0.1/test/validator-amp-megaphone.html:36:2 The attribute 'data-tile' in tag 'amp-megaphone [data-episode]' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-megaphone) [DISALLOWED_HTML]
+|    <amp-megaphone height=166 data-episode="OSC7749686951" data-tile
 |                    layout="fixed-height"></amp-megaphone>
 |    <!-- valid: light mode -->
-|    <amp-megaphone height=166 data-episode="OSC7749686951" data-light="true"
->>   ^~~~~~~~~
-amp-megaphone/0.1/test/validator-amp-megaphone.html:39:2 The attribute 'data-light' in tag 'amp-megaphone [data-episode]' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-megaphone) [DISALLOWED_HTML]
+|    <amp-megaphone height=166 data-episode="OSC7749686951" data-light
 |                    layout="fixed-height"></amp-megaphone>
 |    <!-- valid: integer start time -->
 |    <amp-megaphone height=166 data-episode="OSC7749686951" data-start="56"
@@ -54,33 +50,26 @@ amp-megaphone/0.1/test/validator-amp-megaphone.html:39:2 The attribute 'data-lig
 >>   ^~~~~~~~~
 amp-megaphone/0.1/test/validator-amp-megaphone.html:48:2 The attribute 'data-start' in tag 'amp-megaphone [data-episode]' is set to the invalid value '300s'. (see https://amp.dev/documentation/components/amp-megaphone) [DISALLOWED_HTML]
 |                    layout="fixed-height"></amp-megaphone>
-|    <!-- invalid: light mode must be 'true' or 'false'-->
-|    <amp-megaphone height=166 data-trackid="243169232" data-light
->>   ^~~~~~~~~
-amp-megaphone/0.1/test/validator-amp-megaphone.html:51:2 The tag 'amp-megaphone' is disallowed except in specific forms. [GENERIC]
-|                    layout="fixed-height"></amp-megaphone>
 |    <!-- invalid: bad episode id-->
 |    <amp-megaphone height=166 data-episode="mahler_number_6.ogg"
 >>   ^~~~~~~~~
-amp-megaphone/0.1/test/validator-amp-megaphone.html:54:2 The attribute 'data-episode' in tag 'amp-megaphone [data-episode]' is set to the invalid value 'mahler_number_6.ogg'. (see https://amp.dev/documentation/components/amp-megaphone) [DISALLOWED_HTML]
+amp-megaphone/0.1/test/validator-amp-megaphone.html:51:2 The attribute 'data-episode' in tag 'amp-megaphone [data-episode]' is set to the invalid value 'mahler_number_6.ogg'. (see https://amp.dev/documentation/components/amp-megaphone) [DISALLOWED_HTML]
 |                    layout="fixed-height"></amp-megaphone>
 |    <!-- invalid: both episode and playlist specified-->
 |    <amp-megaphone height=166 data-episode="OSC7749686951" data-playlist="DEM6640968282"
 |                    layout="fixed-height"></amp-megaphone>
 |    <!-- invalid: limited episodes without a playlist -->
 |    <amp-megaphone height=166 width=42 data-episode="OSC7749686951"
->>   ^~~~~~~~~
-amp-megaphone/0.1/test/validator-amp-megaphone.html:60:2 The specified layout 'INTRINSIC' is not supported by tag 'amp-megaphone [data-episode]'. (see https://amp.dev/documentation/components/amp-megaphone) [AMP_LAYOUT_PROBLEM]
-|                    layout="intrinsic" data-episodes="3"></amp-megaphone>
+|                   data-episodes="3"></amp-megaphone>
 |    <!-- invalid: responsive layout -->
 |    <amp-megaphone height=166 width=42 data-episode="OSC7749686951"
 >>   ^~~~~~~~~
-amp-megaphone/0.1/test/validator-amp-megaphone.html:63:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-megaphone [data-episode]'. (see https://amp.dev/documentation/components/amp-megaphone) [AMP_LAYOUT_PROBLEM]
+amp-megaphone/0.1/test/validator-amp-megaphone.html:60:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-megaphone [data-episode]'. (see https://amp.dev/documentation/components/amp-megaphone) [AMP_LAYOUT_PROBLEM]
 |                    layout="responsive"></amp-megaphone>
 |    <!-- invalid: intrinsic layout -->
 |    <amp-megaphone height=166 width=42 data-episode="OSC7749686951"
 >>   ^~~~~~~~~
-amp-megaphone/0.1/test/validator-amp-megaphone.html:66:2 The specified layout 'INTRINSIC' is not supported by tag 'amp-megaphone [data-episode]'. (see https://amp.dev/documentation/components/amp-megaphone) [AMP_LAYOUT_PROBLEM]
+amp-megaphone/0.1/test/validator-amp-megaphone.html:63:2 The specified layout 'INTRINSIC' is not supported by tag 'amp-megaphone [data-episode]'. (see https://amp.dev/documentation/components/amp-megaphone) [AMP_LAYOUT_PROBLEM]
 |                    layout="intrinsic"></amp-megaphone>
 |    <!-- valid: fixed layout -->
 |    <amp-megaphone height=166 width=42 data-episode="OSC7749686951"
@@ -89,7 +78,7 @@ amp-megaphone/0.1/test/validator-amp-megaphone.html:66:2 The specified layout 'I
 |    <amp-megaphone height=166 data-playlist="DEM6640968282"
 |                    layout="fixed-height"></amp-megaphone>
 |    <!-- invalid: playlist with tile mode -->
-|    <amp-megaphone height=166 data-playlist="DEM6640968282" data-tile="true"
+|    <amp-megaphone height=166 data-playlist="DEM6640968282" data-tile
 |                    layout="fixed-height"></amp-megaphone>
 |    <!-- invalid: playlist with start time -->
 |    <amp-megaphone height=166 data-playlist="DEM6640968282" data-start="56.4"

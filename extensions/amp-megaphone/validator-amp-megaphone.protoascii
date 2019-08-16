@@ -24,17 +24,9 @@ tags: {  # amp-megaphone
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-megaphone> for playlists
-  html_format: AMP
-  tag_name: "AMP-MEGAPHONE"
-  requires_extension: "amp-megaphone"
-  spec_name: "amp-megaphone [data-playlist]"
-  attrs: {
-    name: "data-playlist"
-    mandatory: true
-    value_regex: "[A-Za-z0-9]+"
-    dispatch_key: NAME_DISPATCH
-  }
+
+attr_lists: {
+  name: "amp-megaphone-common"
   attrs: {
     name: "data-light"
     value: ""
@@ -43,11 +35,27 @@ tags: {  # <amp-megaphone> for playlists
     name: "data-sharing"
     value: ""
   }
+}
+
+tags: {  # <amp-megaphone> for playlists
+  html_format: AMP
+  tag_name: "AMP-MEGAPHONE"
+  requires_extension: "amp-megaphone"
+  spec_name: "amp-megaphone [data-playlist]"
+
+  attrs: {
+    name: "data-playlist"
+    mandatory: true
+    value_regex: "[A-Za-z0-9]+"
+    dispatch_key: NAME_DISPATCH
+  }
+
   attrs: {
     name: "data-episodes"
     value_regex: "[0-9]+"
   }
 
+  attr_lists: "amp-megaphone-common"
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FIXED
@@ -75,15 +83,8 @@ tags: {  # <amp-megaphone> for episodes
     name: "data-tile"
     value: ""
   }
-  attrs: {
-    name: "data-light"
-    value: ""
-  }
-  attrs: {
-    name: "data-sharing"
-    value: ""
-  }
 
+  attr_lists: "amp-megaphone-common"
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FIXED

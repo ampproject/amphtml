@@ -173,7 +173,7 @@ class AmpMegaphone extends AMP.BaseElement {
    * @private
    */
   updateBaseUrl_() {
-    this.isPlaylist_ = !!this.element.hasAttribute('data-playlist');
+    this.isPlaylist_ = this.element.hasAttribute('data-playlist');
     this.baseUrl_ = `https://${
       this.isPlaylist_ ? 'playlist' : 'player'
     }.megaphone.fm`;
