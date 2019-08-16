@@ -1696,29 +1696,6 @@ describes.realWin(
         });
       });
 
-      it('should navigate to the correct previous page after navigating away', () => {
-        createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-
-        return story.layoutCallback().then(() => {
-          const currentLocation = win.location;
-          story
-            .getPageById('cover')
-            .element.setAttribute('advance-to', 'page-3');
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-
-          win.location = 'https://example.com/';
-          win.location = currentLocation;
-
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 0})
-          );
-
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-      });
-
       it('should correctly mark goToPage pages are distance 1', () => {
         createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
         story.buildCallback();
