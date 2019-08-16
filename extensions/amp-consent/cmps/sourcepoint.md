@@ -22,17 +22,16 @@ limitations under the License.
 <amp-consent id='consent' layout='nodisplay' type='SourcePoint'>
   <script type="application/json">
     {
-      "consents": {},
       "postPromptUI": "my-consent-prompt-ui",
       "clientConfig": {
         "accountId": 22,
-        "siteName": "mobile.demo",
-        "siteId": 2372,
-        "privacyManagerId": "5c0e81b7d74b3c30c6852301",
+        "siteName": "amp.demo",
+        "siteId": 4400,
+        "privacyManagerId": "5d566301ab45d123ed973688",
         "stageCampaign": false,
         "authId": "MY-UUID",
         "targetingParams": {
-          "MyPrivacyManager": "false"
+          "foo": "bar"
         }
       }
     }
