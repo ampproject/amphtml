@@ -535,7 +535,7 @@ class AmpFetcher {
 
   /** @override */
   fetch(input, opt_init) {
-    return this.xhr_.fetch(input, opt_init);
+    return this.xhr_.fetch(input, opt_init); //needed to kepp closure happy
   }
 }
 
