@@ -15,11 +15,11 @@
  */
 
 import {Action, StateProperty} from './amp-story-store-service';
+import {AnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './utils';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {getAnalyticsService} from './story-analytics';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
 import {toggle} from '../../../src/style';
