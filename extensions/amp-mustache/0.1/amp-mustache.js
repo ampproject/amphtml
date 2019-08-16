@@ -80,8 +80,11 @@ export class AmpMustache extends BaseTemplate {
   initTemplateString_() {
     const {element} = this;
     if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
-      user().warn(TAG, 'Custom delimiters is only supported in '
-          + 'the more recent version of this extension.');
+      user().warn(
+        TAG,
+        'Custom delimiters is only supported in ' +
+          'the more recent version of this extension.'
+      );
     }
     if (element.tagName == 'TEMPLATE') {
       const content = templateContentClone(element);
