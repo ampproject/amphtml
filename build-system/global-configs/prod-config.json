@@ -37,6 +37,7 @@
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
   "ios-scrollable-iframe": 0,
+  "new-loaders": 0.01,
   "pump-early-frame": 1,
   "version-locking": 1
 }
