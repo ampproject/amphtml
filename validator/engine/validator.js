@@ -1518,7 +1518,7 @@ class TagStack {
   }
 
   /**
-   * Records that tag currently on the stack is using ampdevmode.
+   * Records that tag currently on the stack is using data-ampdevmode.
    */
   setDevMode() {
     this.back_().devMode = true;
@@ -2741,11 +2741,11 @@ class Context {
   }
 
   /**
-   * Returns true iff "ampdevmode" is a type identifier in this document.
+   * Returns true iff "data-ampdevmode" is a type identifier in this document.
    * @return {boolean}
    */
   isDevMode() {
-    return this.typeIdentifiers_.includes('ampdevmode');
+    return this.typeIdentifiers_.includes('data-ampdevmode');
   }
 
   /**
@@ -4252,19 +4252,19 @@ function validateAttrDeclaration(
 
 /**
  * Returns true if errors reported on this tag should be suppressed, due to
- * ampdevmode annotations.
+ * data-ampdevmode annotations.
  * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
  * @param {!Context} context
  * @return {boolean}
  */
 function ShouldSuppressDevModeErrors(encounteredTag, context) {
   if (!context.isDevMode()) return false;
-  // Cannot suppress errors on HTML tag. The "ampdevmode" here is a
+  // Cannot suppress errors on HTML tag. The "data-ampdevmode" here is a
   // type identifier. Suppressing errors here would suppress all errors since
   // HTML is the root of the document.
   if (encounteredTag.upperName() === 'HTML') return false;
   for (const attr of encounteredTag.attrs()) {
-    if (attr.name === 'ampdevmode') return true;
+    if (attr.name === 'data-ampdevmode') return true;
   }
   return context.getTagStack().isDevMode();
 }
@@ -4979,7 +4979,7 @@ class ParsedValidatorRules {
     this.typeIdentifiers_['amp4email'] = 0;
     this.typeIdentifiers_['actions'] = 0;
     this.typeIdentifiers_['transformed'] = 0;
-    this.typeIdentifiers_['ampdevmode'] = 0;
+    this.typeIdentifiers_['data-ampdevmode'] = 0;
 
     /**
      * @type {function(!amp.validator.TagSpec) : boolean}
@@ -5191,7 +5191,7 @@ class ParsedValidatorRules {
           // mandatory unlike other type identifiers.
           if (typeIdentifier !== 'actions' &&
               typeIdentifier !== 'transformed' &&
-              typeIdentifier !== 'ampdevmode') {
+              typeIdentifier !== 'data-ampdevmode') {
             hasMandatoryTypeIdentifier = true;
           }
           // The type identifier "transformed" has restrictions on it's value.
@@ -5209,7 +5209,7 @@ class ParsedValidatorRules {
                   validationResult);
             }
           }
-          if (typeIdentifier === 'ampdevmode') {
+          if (typeIdentifier === 'data-ampdevmode') {
             // https://github.com/ampproject/amphtml/issues/20974
             // We always emit an error for this type identifier, but it
             // suppresses other errors later in the document.
@@ -5248,23 +5248,23 @@ class ParsedValidatorRules {
     switch (this.htmlFormat_) {
       case 'AMP':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡', 'amp', 'transformed', 'ampdevmode'], context,
-            validationResult);
+            htmlTag.attrs(), ['⚡', 'amp', 'transformed', 'data-ampdevmode'],
+            context, validationResult);
         break;
       case 'AMP4ADS':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡4ads', 'amp4ads', 'ampdevmode'], context,
+            htmlTag.attrs(), ['⚡4ads', 'amp4ads', 'data-ampdevmode'], context,
             validationResult);
         break;
       case 'AMP4EMAIL':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡4email', 'amp4email', 'ampdevmode'], context,
-            validationResult);
+            htmlTag.attrs(), ['⚡4email', 'amp4email', 'data-ampdevmode'],
+            context, validationResult);
         break;
       case 'ACTIONS':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡', 'amp', 'actions', 'ampdevmode'], context,
-            validationResult);
+            htmlTag.attrs(), ['⚡', 'amp', 'actions', 'data-ampdevmode'],
+            context,  validationResult);
         if (validationResult.typeIdentifier.indexOf('actions') === -1) {
           context.addError(
               amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
