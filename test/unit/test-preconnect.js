@@ -29,7 +29,7 @@ describe('preconnect', () => {
   let preloadSupported;
   let preconnectSupported;
   let isSafari;
-  let visible;
+  let visiblePromise;
 
   // Factored out to make our linter happy since we don't allow
   // bare javascript URLs.
@@ -55,18 +55,15 @@ describe('preconnect', () => {
       const element = document.createElement('div');
       iframe.win.document.body.appendChild(element);
       preconnect = preconnectForElement(element);
-      preconnect.viewer_ = {
-        whenFirstVisible: () => {},
-      };
-      sandbox.stub(preconnect.viewer_, 'whenFirstVisible').callsFake(() => {
-        return visible;
+      sandbox.stub(preconnect, 'getAmpdoc_').returns({
+        whenFirstVisible: () => visiblePromise,
       });
       return iframe;
     });
   }
 
   beforeEach(() => {
-    visible = Promise.resolve();
+    visiblePromise = Promise.resolve();
     isSafari = undefined;
     // Default mock to not support preload/preconnect - override in cases
     // to test for preload/preconnect support.
@@ -92,7 +89,7 @@ describe('preconnect', () => {
       expect(
         iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
       ).to.have.length(0);
-      return visible.then(() => {
+      return visiblePromise.then(() => {
         expect(
           iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
         ).to.have.length(1);
@@ -129,7 +126,7 @@ describe('preconnect', () => {
       expect(
         iframe.doc.querySelectorAll('link[rel=preconnect]')
       ).to.have.length(0);
-      return visible.then(() => {
+      return visiblePromise.then(() => {
         expect(
           iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
         ).to.have.length(0);
@@ -164,7 +161,7 @@ describe('preconnect', () => {
       expect(
         iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
       ).to.have.length(0);
-      return visible.then(() => {
+      return visiblePromise.then(() => {
         expect(
           iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
         ).to.have.length(1);
@@ -194,7 +191,7 @@ describe('preconnect', () => {
   it('should cleanup', () => {
     return getPreconnectIframe().then(iframe => {
       preconnect.url('https://c.preconnect.com/foo/bar');
-      return visible.then(() => {
+      return visiblePromise.then(() => {
         expect(
           iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
         ).to.have.length(1);
@@ -224,7 +221,7 @@ describe('preconnect', () => {
       preconnect.url('https://d.preconnect.com/foo/bar');
       // Different origin
       preconnect.url('https://e.preconnect.com/other');
-      return visible.then(() => {
+      return visiblePromise.then(() => {
         expect(
           iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
         ).to.have.length(2);
@@ -244,13 +241,13 @@ describe('preconnect', () => {
   it('should timeout preconnects', () => {
     return getPreconnectIframe().then(iframe => {
       preconnect.url('https://x.preconnect.com/foo/bar');
-      return visible.then(() => {
+      return visiblePromise.then(() => {
         expect(
           iframe.doc.querySelectorAll('link[rel=preconnect]')
         ).to.have.length(1);
         iframeClock.tick(9000);
         preconnect.url('https://x.preconnect.com/foo/bar');
-        return visible.then(() => {
+        return visiblePromise.then(() => {
           expect(
             iframe.doc.querySelectorAll('link[rel=preconnect]')
           ).to.have.length(1);
@@ -261,7 +258,7 @@ describe('preconnect', () => {
           // After timeout preconnect creates a new tag.
           clock.tick(10000);
           preconnect.url('https://x.preconnect.com/foo/bar');
-          return visible.then(() => {
+          return visiblePromise.then(() => {
             expect(
               iframe.doc.querySelectorAll('link[rel=preconnect]')
             ).to.have.length(1);
@@ -277,7 +274,7 @@ describe('preconnect', () => {
         'https://y.preconnect.com/foo/bar',
         /* opt_alsoConnecting */ true
       );
-      return visible.then(() => {
+      return visiblePromise.then(() => {
         expect(
           iframe.doc.querySelectorAll('link[rel=preconnect]')
         ).to.have.length(1);
@@ -286,13 +283,13 @@ describe('preconnect', () => {
           iframe.doc.querySelectorAll('link[rel=preconnect]')
         ).to.have.length(0);
         clock.tick(10000);
-        return visible.then(() => {
+        return visiblePromise.then(() => {
           preconnect.url('https://y.preconnect.com/foo/bar');
           expect(
             iframe.doc.querySelectorAll('link[rel=preconnect]')
           ).to.have.length(0);
           clock.tick(180 * 1000);
-          return visible.then(() => {
+          return visiblePromise.then(() => {
             preconnect.url('https://y.preconnect.com/foo/bar');
             expect(
               iframe.doc.querySelectorAll('link[rel=preconnect]')
@@ -317,7 +314,7 @@ describe('preconnect', () => {
         preconnect.preload(javascriptUrlPrefix + ':alert()');
         const fetches = iframe.doc.querySelectorAll('link[rel=preload]');
         expect(fetches).to.have.length(0);
-        return visible.then(() => {
+        return visiblePromise.then(() => {
           expect(
             iframe.doc.querySelectorAll('link[rel=preconnect]')
           ).to.have.length(1);
@@ -340,7 +337,7 @@ describe('preconnect', () => {
       preconnect.preload('https://a.prefetch.com/foo/bar');
       preconnect.preload('https://a.prefetch.com/other', 'style');
       preconnect.preload(javascriptUrlPrefix + ':alert()');
-      return visible.then(() => {
+      return visiblePromise.then(() => {
         // Also preconnects.
         expect(
           iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
