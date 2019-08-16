@@ -19,7 +19,7 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-lightbox/amp-lightbox.html',
-    environments: ['a4a-fie'],
+    environments: 'ampdoc-amp4ads-preset',
     experiments: ['amp-lightbox-a4a-proto'],
   },
   async env => {
