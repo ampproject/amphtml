@@ -16,17 +16,17 @@ FAIL
 |  -->
 |  <!--
 |    Test Description:
-|    This tests the logic for ampdevmode attributes.
+|    This tests the logic for data-ampdevmode attributes.
 |    See https://github.com/ampproject/amphtml/issues/20974 for the
 |    original motivation. The idea is that an author can tag a document with
-|    the ampdevmode type identifier, which will emit an error and make
+|    the data-ampdevmode type identifier, which will emit an error and make
 |    the document invalid. However, any other tags marked with the same
 |    identifier will no longer emit errors, regardless of the error type.
 |  -->
 |  <!doctype html>
-|  <html ⚡ ampdevmode>
+|  <html ⚡ data-ampdevmode>
 >> ^~~~~~~~~
-feature_tests/dev_mode.html:26:0 Tag 'html' marked with attribute 'ampdevmode'. Validator will suppress errors regarding any other tag with this attribute. [GENERIC]
+feature_tests/dev_mode.html:26:0 Tag 'html' marked with attribute 'data-ampdevmode'. Validator will suppress errors regarding any other tag with this attribute. [GENERIC]
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
@@ -45,17 +45,17 @@ feature_tests/dev_mode.html:38:2 The tag 'faketag' is disallowed. [DISALLOWED_HT
 >>   ^~~~~~~~~
 feature_tests/dev_mode.html:39:2 The tag 'anotherfaketag' is disallowed. [DISALLOWED_HTML]
 |
-|    <!-- Tagged with ampdevmode, so errors are suppressed. -->
-|    <faketag ampdevmode></faketag>
+|    <!-- Tagged with data-ampdevmode, so errors are suppressed. -->
+|    <faketag data-ampdevmode></faketag>
 |
 |    <!-- Also suppresses the entire tree. -->
-|    <faketag ampdevmode>
+|    <faketag data-ampdevmode>
 |      <anotherfaketag></anotherfaketag>
 |    </faketag>
 |
 |    <!-- Yet, it does not prevent the tag from satisfying conditions, such as
 |         the amp-autocomplete-0.1.js being used -->
-|    <amp-autocomplete ampdevmode></amp-autocomplete>
+|    <amp-autocomplete data-ampdevmode></amp-autocomplete>
 |
 |  </body>
 |  </html>
