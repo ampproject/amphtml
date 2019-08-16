@@ -17,6 +17,7 @@ import {Services} from '../services';
 import {devAssert} from '../log';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
+import {whenDocumentComplete} from '../document-ready';
 
 /** @typedef {string|number|boolean|undefined|null} */
 export let ResolverReturnDef;
@@ -30,7 +31,46 @@ export let AsyncResolverDef;
 /** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
 let ReplacementDef;
 
-const LOAD_EVENT_END = 'loadEventEnd';
+/**
+ * A list of events that the navTiming needs to wait for.
+ * Sort event in order
+ * @enum {number}
+ */
+const WAITFOR_EVENTS = {
+  VIEWER_FIRST_VISIBLE: 1,
+  DOCUMENT_COMPLETE: 2,
+  LOAD: 3,
+  LOAD_END: 4,
+};
+
+/**
+ * A list of events on which event they should wait
+ * @const {!Object<string, WAITFOR_EVENTS>}
+ */
+const NAV_TIMING_WAITFOR_EVENTS = {
+  // ready on viewer first visible
+  'navigationStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'redirectStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'redirectEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'fetchStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'domainLookupStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'domainLookupEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'connectStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'secureConnectionStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'connectEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'requestStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'responseStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'responseEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  // ready on document complte
+  'domLoading': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  'domInteractive': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  'domContentLoaded': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  'domComplete': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  // ready on load
+  'loadEventStart': WAITFOR_EVENTS.LOAD,
+  // ready on load complete
+  'loadEventEnd': WAITFOR_EVENTS.LOAD_END,
+};
 
 /**
  * Returns navigation timing information based on the start and end events.
@@ -44,15 +84,34 @@ const LOAD_EVENT_END = 'loadEventEnd';
  * @return {!Promise<ResolverReturnDef>}
  */
 export function getTimingDataAsync(win, startEvent, endEvent) {
-  let readyPromise = loadPromise(win);
-  if (startEvent === LOAD_EVENT_END || endEvent === LOAD_EVENT_END) {
+  // Fallback to load event if we don't know what to wait for
+  const startWaitForEvent =
+    NAV_TIMING_WAITFOR_EVENTS[startEvent] || WAITFOR_EVENTS.LOAD;
+  const endWaitForEvent = endEvent
+    ? NAV_TIMING_WAITFOR_EVENTS[endEvent] || WAITFOR_EVENTS.LOAD
+    : startWaitForEvent;
+
+  const waitForEvent = Math.max(startWaitForEvent, endWaitForEvent);
+
+  // set wait for onload to be default
+  let readyPromise;
+  if (waitForEvent === WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE) {
+    readyPromise = Promise.resolve();
+  } else if (waitForEvent === WAITFOR_EVENTS.DOCUMENT_COMPLETE) {
+    readyPromise = whenDocumentComplete(win.document);
+  } else if (waitForEvent === WAITFOR_EVENTS.LOAD) {
+    readyPromise = loadPromise(win);
+  } else if (waitForEvent === WAITFOR_EVENTS.LOAD_END) {
     // performance.timing.loadEventEnd returns 0 before the load event handler
     // has terminated, that's when the load event is completed.
     // To wait for the event handler to terminate, wait 1ms and defer to the
     // event loop.
     const timer = Services.timerFor(win);
-    readyPromise = readyPromise.then(() => timer.promise(1));
+    readyPromise = loadPromise(win).then(() => timer.promise(1));
   }
+
+  devAssert(readyPromise, 'waitForEvent not supported ' + waitForEvent);
+
   return readyPromise.then(() => {
     return getTimingDataSync(win, startEvent, endEvent);
   });
