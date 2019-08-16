@@ -65,7 +65,8 @@ Note: you should use either the basic setup or AST setup. Do not mix types on th
 </amp-ad>
 ```
 
-### AST for lazy loading ads on the page, Include adUnit details only in the amp-ad tag which you want to lazy load
+### AST Infinite scroll ads on the page, Include adUnit details only in the amp-ad tag which you want to lazy load
+Note: You would loose competitive exclusion if you use this setup.
 
 ```html
 <amp-ad width="300" height="250"
@@ -80,7 +81,7 @@ Note: you should use either the basic setup or AST setup. Do not mix types on th
     json='{"pageOpts": {"member": 958},"adUnits": [{"disablePsa": true,"invCode": "ast_guaranteed_prios_1","tagId": 12345,"sizes": [300, 250],"targetId": "apn_ad_40954389058"}, {"invCode": "ast_guaranteed_prios_1","tagId": 456,"sizes": [160, 600],"targetId": "apn_ad_5675675648"}]}'>
 </amp-ad>
 
-By including `apn_ad_3` adUnit details separately it will only be loaded when user scrolls to this tag
+By including `apn_ad_3` adUnit details separately ads for this unit will only be requested when user scrolls to this tag
 <amp-ad width="728" height="90"
     type="appnexus"
     data-target="apn_ad_3"
