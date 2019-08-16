@@ -194,6 +194,9 @@ exports.rules = [
   },
 
   // Rules for extensions.
+  // Note: For the multipass build to correctly include depended on code, you
+  // need to add the depended on code to `CLOSURE_SRC_GLOBS` in
+  // build-system/sources.js.
   {
     // Extensions can't depend on other extensions.
     filesMatching: 'extensions/**/*.js',
