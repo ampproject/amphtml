@@ -120,7 +120,7 @@ const targetMatchers = [
     },
   },
   {
-    targets: ['VALIDATOR', 'RUNTIME'], // Test the runtime for validator changes.
+    targets: ['VALIDATOR'],
     func: file => {
       if (file.startsWith('validator/webui/')) {
         return false;
