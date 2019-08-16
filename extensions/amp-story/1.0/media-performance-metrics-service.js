@@ -136,7 +136,7 @@ export class MediaPerformanceMetricsService {
     // Media must start paused in order to determine the joint latency, and
     // initial buffering, if any.
     if (!media.paused) {
-      dev().error(TAG, 'media must start paused');
+      dev().expectedError(TAG, 'media must start paused');
       return;
     }
 
@@ -191,7 +191,7 @@ export class MediaPerformanceMetricsService {
 
     // If the media errored.
     if (metrics.error !== null) {
-      this.performanceService_.tickDelta('smerr', metrics.error || 0);
+      this.performanceService_.tickDelta('verr', metrics.error || 0);
       this.performanceService_.flush();
       return;
     }
@@ -207,7 +207,7 @@ export class MediaPerformanceMetricsService {
 
     // If the playback did not start.
     if (!metrics.jointLatency) {
-      this.performanceService_.tickDelta('smerr', 5 /* Custom error code */);
+      this.performanceService_.tickDelta('verr', 5 /* Custom error code */);
       this.performanceService_.flush();
       return;
     }
@@ -218,13 +218,13 @@ export class MediaPerformanceMetricsService {
           1000
       ) / 1000;
 
-    this.performanceService_.tickDelta('smjl', metrics.jointLatency);
-    this.performanceService_.tickDelta('smwt', metrics.watchTime);
-    this.performanceService_.tickDelta('smrb', metrics.rebuffers);
-    this.performanceService_.tickDelta('smrbr', rebufferRate);
+    this.performanceService_.tickDelta('vjl', metrics.jointLatency);
+    this.performanceService_.tickDelta('vwt', metrics.watchTime);
+    this.performanceService_.tickDelta('vrb', metrics.rebuffers);
+    this.performanceService_.tickDelta('vrbr', rebufferRate);
     if (metrics.rebuffers) {
       this.performanceService_.tickDelta(
-        'smmtbrb',
+        'vmtbrb',
         Math.round(metrics.watchTime / metrics.rebuffers)
       );
     }

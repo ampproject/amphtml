@@ -109,7 +109,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(200);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledWithExactly('smjl', 100);
+      expect(tickStub).to.have.been.calledWithExactly('vjl', 100);
     });
 
     it('should record joint latency when waiting first', () => {
@@ -121,7 +121,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       video.dispatchEvent(new Event('playing'));
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledWithExactly('smjl', 300);
+      expect(tickStub).to.have.been.calledWithExactly('vjl', 300);
     });
 
     it('should not record joint latency if playback does not start', () => {
@@ -132,7 +132,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(200);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.not.have.been.calledWith('smjl');
+      expect(tickStub).to.not.have.been.calledWith('vjl');
     });
 
     it('should record joint latency for multiple media', () => {
@@ -149,8 +149,8 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       video2.dispatchEvent(new Event('playing'));
       service.stopMeasuring(video2);
 
-      expect(tickStub).to.have.been.calledWithExactly('smjl', 100);
-      expect(tickStub).to.have.been.calledWithExactly('smjl', 600);
+      expect(tickStub).to.have.been.calledWithExactly('vjl', 100);
+      expect(tickStub).to.have.been.calledWithExactly('vjl', 600);
     });
   });
 
@@ -163,7 +163,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(200);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledWithExactly('smwt', 200);
+      expect(tickStub).to.have.been.calledWithExactly('vwt', 200);
     });
 
     it('should record watch time and handle pause events', () => {
@@ -178,7 +178,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(400);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledWithExactly('smwt', 600);
+      expect(tickStub).to.have.been.calledWithExactly('vwt', 600);
     });
 
     it('should record watch time and handle ended events', () => {
@@ -193,7 +193,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(400);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledWithExactly('smwt', 600);
+      expect(tickStub).to.have.been.calledWithExactly('vwt', 600);
     });
 
     it('should record watch time and handle rebuffers', () => {
@@ -208,7 +208,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(400);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledWithExactly('smwt', 600);
+      expect(tickStub).to.have.been.calledWithExactly('vwt', 600);
     });
   });
 
@@ -227,7 +227,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(500);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledWithExactly('smrb', 2);
+      expect(tickStub).to.have.been.calledWithExactly('vrb', 2);
     });
 
     it('should record rebuffer rate', () => {
@@ -246,7 +246,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
 
       // playing: 600; waiting: 800
       // 800 / (600 + 800) ~= 0.571
-      expect(tickStub).to.have.been.calledWithExactly('smrbr', 0.571);
+      expect(tickStub).to.have.been.calledWithExactly('vrbr', 0.571);
     });
 
     it('should record mean time between rebuffers', () => {
@@ -264,7 +264,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       service.stopMeasuring(video);
 
       // 600ms playing divided by 2 rebuffer events.
-      expect(tickStub).to.have.been.calledWithExactly('smmtbrb', 300);
+      expect(tickStub).to.have.been.calledWithExactly('vmtbrb', 300);
     });
 
     it('should count the initial buffering as a rebuffer', () => {
@@ -281,7 +281,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(700);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledWithExactly('smrb', 2);
+      expect(tickStub).to.have.been.calledWithExactly('vrb', 2);
     });
 
     it('should exclude very brief rebuffers', () => {
@@ -296,7 +296,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(300);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledWithExactly('smrb', 0);
+      expect(tickStub).to.have.been.calledWithExactly('vrb', 0);
     });
 
     it('should record rebuffer rate even with no rebuffer events', () => {
@@ -307,7 +307,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(200);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledWithExactly('smrbr', 0);
+      expect(tickStub).to.have.been.calledWithExactly('vrbr', 0);
     });
 
     it('should not send mean time between rebuffers when no rebuffer', () => {
@@ -318,7 +318,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(200);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.not.have.been.calledWith('smmtbrb');
+      expect(tickStub).to.not.have.been.calledWith('vmtbrb');
     });
   });
 
@@ -330,7 +330,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
         service.startMeasuring(video);
         service.stopMeasuring(video);
 
-        expect(tickStub).to.have.been.calledOnceWithExactly('smerr', 4);
+        expect(tickStub).to.have.been.calledOnceWithExactly('verr', 4);
         done();
       };
 
@@ -345,7 +345,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       service.startMeasuring(video);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledOnceWithExactly('smerr', 0);
+      expect(tickStub).to.have.been.calledOnceWithExactly('verr', 0);
     });
 
     it('should detect that the video errors', () => {
@@ -358,7 +358,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(300);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledOnceWithExactly('smerr', 0);
+      expect(tickStub).to.have.been.calledOnceWithExactly('verr', 0);
     });
   });
 });
