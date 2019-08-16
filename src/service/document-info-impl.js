@@ -73,6 +73,8 @@ export class DocInfo {
     this.ampdoc_ = ampdoc;
     /** @private {?DocumentInfoDef} */
     this.info_ = null;
+    /** @private {?Promise<string>} */
+    this.pageViewId64_ = null;
   }
 
   /** @return {!DocumentInfoDef} */
@@ -92,7 +94,6 @@ export class DocInfo {
         : sourceUrl;
     }
     const pageViewId = getPageViewId(ampdoc.win);
-    const pageViewId64 = getRandomString64(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const metaTags = getMetaTags(ampdoc.win.document);
     const replaceParams = getReplaceParams(ampdoc);
@@ -104,7 +105,15 @@ export class DocInfo {
       },
       canonicalUrl,
       pageViewId,
-      pageViewId64,
+      get pageViewId64() {
+        // Must be calculated async since getRandomString64() can load the
+        // amp-crypto-polyfill on some browsers, and extensions service
+        // may not be registered yet.
+        if (!this.pageViewId64_) {
+          this.pageViewId64_ = getRandomString64(ampdoc.win);
+        }
+        return this.pageViewId64_;
+      },
       linkRels,
       metaTags,
       replaceParams,
