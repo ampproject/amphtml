@@ -111,6 +111,7 @@ export class OwnersDef {
 
 /**
  * @implements {OwnersDef}
+ * @visibleForTesting
  */
 export class Owners {
   /**

@@ -21,10 +21,11 @@ import {Resources} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
 import {VisibilityState} from '../../src/visibility-state';
+import {installInputService} from '../../src/input';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {toggleExperiment} from '../../src/experiments';
-import {installPlatformService} from '../../src/service/platform-impl';
 
 /** @type {?Event|undefined} */
 const NO_EVENT = undefined;
@@ -709,6 +710,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
 
+    element.idleRenderOutsideViewport = () => true;
     element.isInViewport = () => false;
     element.getAttribute = () => null;
     element.hasAttribute = () => false;
@@ -752,6 +754,8 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     const viewer = Services.viewerForDoc(env.ampdoc);
     sandbox.stub(viewer, 'isRuntimeOn').returns(true);
     resources = new Resources(env.ampdoc);
+    resources.remeasurePass_.schedule = () => {};
+    resources.pass_.schedule = () => {};
     viewportMock = sandbox.mock(resources.viewport_);
 
     sandbox.stub(env.win, 'getComputedStyle').callsFake(el => {
@@ -1193,6 +1197,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resources.buildAttemptsCount_ = 21; // quota is 20
 
     resource1.element.isBuilt = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
     resource1.prerenderAllowed = () => true;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
@@ -1510,6 +1515,11 @@ describe('Resources changeSize', () => {
       },
     };
     installPlatformService(resources.win);
+    const platform = Services.platformFor(resources.win);
+    sandbox.stub(platform, 'isIe').returns(false);
+
+    installInputService(resources.win);
+
     viewportMock = sandbox.mock(resources.viewport_);
 
     resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));

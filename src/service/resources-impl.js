@@ -269,6 +269,7 @@ export class ResourcesDef extends MutatorsDef {
    * @param {!Resource} parentResource
    * @param {!Array<!Element>} elements
    * @param {function(!Resource)} callback
+   * @package
    */
   findResourcesInElements(parentResource, elements, callback) {}
 
@@ -276,6 +277,7 @@ export class ResourcesDef extends MutatorsDef {
    * @param {!Resource} resource
    * @param {boolean} isPreload
    * @param {number=} opt_parentPriority
+   * @package
    */
   measureAndTryScheduleLayout(resource, isPreload, opt_parentPriority) {}
 
@@ -2250,37 +2252,6 @@ export class Resources {
       this.schedulePass(this.calcTaskTimeout_(task));
     }
     task.resource.layoutScheduled(task.scheduleTime);
-  }
-
-  /**
-   * Updates inViewport state for the specified sub-resources of a resource.
-   * @param {!Resource} parentResource
-   * @param {!Array<!Element>} subElements
-   * @param {boolean} inLocalViewport
-   * @private
-   */
-  updateInViewportForSubresources_(
-    parentResource,
-    subElements,
-    inLocalViewport
-  ) {
-    const inViewport = parentResource.isInViewport() && inLocalViewport;
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.setInViewport(inViewport);
-    });
-  }
-
-  /**
-   * Finds resources within the parent resource's shallow subtree.
-   * @param {!Resource} parentResource
-   * @param {!Array<!Element>} elements
-   * @param {function(!Resource)} callback
-   */
-  discoverResourcesForArray_(parentResource, elements, callback) {
-    elements.forEach(element => {
-      devAssert(parentResource.element.contains(element));
-      this.discoverResourcesForElement_(element, callback);
-    });
   }
 
   /**
