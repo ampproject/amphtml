@@ -43,7 +43,6 @@ const TAG = 'amp-analytics/events';
  * @enum {string}
  */
 export const AnalyticsEventType = {
-  AMP_STORY: 'amp-story',
   CLICK: 'click',
   CUSTOM: 'custom',
   HIDDEN: 'hidden',
