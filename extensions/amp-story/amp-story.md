@@ -148,15 +148,7 @@ The `amp-story` component represents an entire story.  The component itself  imp
 ### Example
 
 ```html
-<amp-story
-    standalone
-    title="My Story"
-    publisher="The AMP Team"
-    publisher-logo-src="https://example.com/logo/1x1.png"
-    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
-    poster-square-src="https://example.com/my-story/poster/1x1.jpg"
-    poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
-    background-audio="my.mp3">
+<amp-story standalone title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
@@ -231,10 +223,7 @@ These guidelines apply to the publisher logo image:
 <table>
   <tr>
     <td>
-      <amp-img alt="Logo with blue text on white background"
-          layout="fixed"
-          width="107" height="112"
-          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" >
+      <amp-img alt="Logo with blue text on white background" layout="fixed" width="107" height="112" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png">
         <noscript>
           <img alt="Logo with blue text on white background" src="img/publisher-logo-1.png" />
         </noscript>
@@ -242,10 +231,7 @@ These guidelines apply to the publisher logo image:
       Preferred
     </td>
     <td>
-      <amp-img alt="Logo with white text on blue background"
-          layout="fixed"
-          width="107" height="101"
-          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-2.png" >
+      <amp-img alt="Logo with white text on blue background" layout="fixed" width="107" height="101" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-2.png">
         <noscript>
           <img alt="Logo with white text on blue background" src="img/publisher-logo-2.png" />
         </noscript>
@@ -253,10 +239,7 @@ These guidelines apply to the publisher logo image:
       Preferred
     </td>
     <td>
-      <amp-img alt="Logo with blue text on blue background"
-          layout="fixed"
-          width="103" height="102"
-          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-3.png" >
+      <amp-img alt="Logo with blue text on blue background" layout="fixed" width="103" height="102" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-3.png" >
         <noscript>
           <img alt="Logo with blue text on blue background" src="img/publisher-logo-3.png" />
         </noscript>
@@ -1200,28 +1183,16 @@ To chain animations in sequence, use the `animate-in-after` attribute. All eleme
 ```html
 <amp-story-page id="my-sequencing-page">
   <amp-story-grid-layer template="vertical">
-    <div class="circle"
-        animate-in="drop-in"
-        animate-in-duration="1.8s">
+    <div class="circle" animate-in="drop-in" animate-in-duration="1.8s">
       1 <!-- will start independently -->
     </div>
-    <div id="rotate-in-left-obj"
-        class="square"
-        animate-in="rotate-in-left"
-        animate-in-after="fade-in-obj"
-        animate-in-delay="0.2s">
+    <div id="rotate-in-left-obj" class="square" animate-in="rotate-in-left" animate-in-after="fade-in-obj" animate-in-delay="0.2s">
       2 <!-- will start after fade-in-obj has finished -->
     </div>
-    <div class="square"
-        animate-in-after="rotate-in-left-obj"
-        animate-in="whoosh-in-right"
-        animate-in-delay="0.2s">
+    <div class="square" animate-in-after="rotate-in-left-obj" animate-in="whoosh-in-right" animate-in-delay="0.2s">
       3 <!-- will start after rotate-in-left-obj has finished -->
     </div>
-    <div id="fade-in-obj"
-        class="circle"
-        animate-in="fade-in"
-        animate-in-duration="2.2s">
+    <div id="fade-in-obj" class="circle" animate-in="fade-in" animate-in-duration="2.2s">
       1 <!-- will start independently -->
     </div>
   </amp-story-grid-layer>
@@ -1323,8 +1294,7 @@ The `heading` component has a `text` field, which can be used to append a title 
 }
 ```
 
-<amp-img alt="Bookend heading component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-heading.png" width="386" height="123">
+<amp-img alt="Bookend heading component" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-heading.png" width="386" height="123">
   <noscript>
     <img alt="Bookend heading component" src="img/amp-story-bookend-component-heading.png" />
   </noscript>
@@ -1344,8 +1314,7 @@ The `small` component can be used to link to related articles. This component re
 }
 ```
 
-<amp-img alt="Bookend small component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-small.png" width="379" height="192">
+<amp-img alt="Bookend small component" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-small.png" width="379" height="192">
   <noscript>
     <img alt="Bookend small component" src="img/amp-story-bookend-component-small.png" />
   </noscript>
@@ -1365,8 +1334,7 @@ The `landscape` component can be used for alternative formats of content, like v
 }
 ```
 
-<amp-img alt="Bookend landscape component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-landscape.png" width="388" height="410">
+<amp-img alt="Bookend landscape component" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-landscape.png" width="388" height="410">
   <noscript>
     <img alt="Bookend landscape component" src="img/amp-story-bookend-component-landscape.png" />
   </noscript>
@@ -1386,8 +1354,7 @@ The `portrait` component can be used to link to other stories. This component re
 }
 ```
 
-<amp-img alt="Bookend portrait component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-portrait.png" width="382" height="522">
+<amp-img alt="Bookend portrait component" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-portrait.png" width="382" height="522">
   <noscript>
     <img alt="Bookend portrait component" src="img/amp-story-bookend-component-portrait.png" />
   </noscript>
@@ -1413,8 +1380,7 @@ The `cta-link` component lets you specify links for call to actions (e.g., `Read
 }
 ```
 
-<amp-img alt="Bookend cta-links component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
+<amp-img alt="Bookend cta-links component" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
   <noscript>
     <img alt="Bookend cta-links component" src="img/amp-story-bookend-component-cta-links.png" />
   </noscript>
@@ -1436,8 +1402,7 @@ The `textbox` component lets you specify text inside the bookend (for example, p
 }
 ```
 
-<amp-img alt="Bookend textbox component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-textbox.png" width="591" height="358">
+<amp-img alt="Bookend textbox component" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-textbox.png" width="591" height="358">
   <noscript>
     <img alt="Bookend textbox component" src="img/amp-story-bookend-component-textbox.png" />
   </noscript>
