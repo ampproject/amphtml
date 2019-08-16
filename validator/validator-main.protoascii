@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 936
+spec_file_revision: 945
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -310,6 +310,7 @@ tags: {
   spec_name: "link rel=stylesheet for fonts"
   named_id: LINK_FONT_STYLESHEET
   mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: { name: "async" }
   attrs: { name: "crossorigin" }  # SRI attribute (https://www.w3.org/TR/SRI/)
   attrs: {
@@ -7348,6 +7349,6 @@ error_formats {
 }
 error_formats {
   code: DEV_MODE_ONLY
-  format: "Tag 'html' marked with attribute 'ampdevmode'. Validator "
+  format: "Tag 'html' marked with attribute 'data-ampdevmode'. Validator "
           "will suppress errors regarding any other tag with this attribute."
 }
