@@ -15,7 +15,10 @@
  */
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {StoryAnalyticsEvent} from '../../../src/analytics';
+import {
+  StoryAnalyticsEvent,
+  triggerAnalyticsEvent,
+} from '../../../src/analytics';
 import {getVariableService} from './variable-service';
 import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
@@ -110,7 +113,11 @@ export class StoryAnalyticsService {
    * @param {!StoryAnalyticsEvent} eventType
    */
   triggerEvent(eventType) {
-    this.element_.dispatchCustomEvent(eventType, this.getDetails_(eventType));
+    triggerAnalyticsEvent(
+      this.element_,
+      eventType,
+      this.getDetails_(eventType)
+    );
   }
 
   /**

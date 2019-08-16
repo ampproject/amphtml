@@ -21,7 +21,6 @@ import {
   PlayingStates,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
-import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
@@ -412,29 +411,29 @@ export class AmpStoryEventTracker extends EventTracker {
   constructor(root) {
     super(root);
 
-    /** @private {?Observable<!Event>} */
-    this.sessionObservable_ = new Observable();
+    /** @const @private {!Object<string, !Observable<!AnalyticsEvent>>} */
+    this.observables_ = {};
 
-    /** @private {?function(!Event)} */
-    this.boundOnSession_ = this.sessionObservable_.fire.bind(
-      this.sessionObservable_
-    );
+    /**
+     * Early events have to be buffered because there's no way to predict
+     * how fast all `amp-analytics` elements will be instrumented.
+     * @private {!Object<string, !Array<!AnalyticsEvent>>|undefined}
+     */
+    this.buffer_ = {};
 
-    Object.keys(StoryAnalyticsEvent).forEach(key => {
-      this.root
-        .getRoot()
-        .addEventListener(StoryAnalyticsEvent[key], this.boundOnSession_);
-    });
+    // Stop buffering of custom events after 10 seconds. Assumption is that all
+    // `amp-analytics` elements will have been instrumented by this time.
+    setTimeout(() => {
+      this.buffer_ = undefined;
+    }, 10000);
   }
 
   /** @override */
   dispose() {
-    const root = this.root.getRoot();
-    Object.keys(StoryAnalyticsEvent).forEach(key => {
-      root.removeEventListener(StoryAnalyticsEvent[key], this.boundOnSession_);
-    });
-    this.boundOnSession_ = null;
-    this.sessionObservable_ = null;
+    this.buffer_ = undefined;
+    for (const k in this.observables_) {
+      this.observables_[k].removeAll();
+    }
   }
 
   /** @override */
@@ -442,24 +441,74 @@ export class AmpStoryEventTracker extends EventTracker {
     const storySpec = config['storySpec'] || {};
     const rootTarget = this.root.getRootElement();
 
+    // Fire buffered events if any.
+    const buffer = this.buffer_ && this.buffer_[eventType];
+    if (buffer) {
+      const bufferLength = buffer.length;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const event = buffer[i];
+        this.fireListener_(event, rootTarget, config, storySpec, listener);
+      }
+    }
+
+    let observables = this.observables_[eventType];
+    if (!observables) {
+      observables = new Observable();
+      this.observables_[eventType] = observables;
+    }
+
+    return this.observables_[eventType].add(event => {
+      this.fireListener_(event, rootTarget, config, storySpec, listener);
+    });
+  }
+
+  /**
+   * Fires listener given the specified configuration.
+   * @param {!AnalyticsEvent} event
+   * @param {!Element} rootTarget
+   * @param {!JsonObject} config
+   * @param {!Object} storySpec
+   * @param {function(!AnalyticsEvent)} listener
+   */
+  fireListener_(event, rootTarget, config, storySpec, listener) {
+    const {type} = event;
+
     const repeat = storySpec['repeat'];
     const on = config['on'];
 
-    return this.sessionObservable_.add(event => {
-      const {type} = event;
+    if (type !== on) {
+      return;
+    }
 
-      if (type !== on) {
-        return;
-      }
-      const details = /** @type {?JsonObject|undefined} */ (getData(event));
-      const detailsForPage = details['detailsForPage'];
+    const vars = event['vars'];
+    const detailsForPage = vars['detailsForPage'];
+    if (repeat === false && detailsForPage['repeated']) {
+      return;
+    }
 
-      if (repeat === false && detailsForPage['repeated']) {
-        return;
-      }
+    listener(new AnalyticsEvent(rootTarget, type, vars));
+  }
 
-      listener(new AnalyticsEvent(rootTarget, type, details));
-    });
+  /**
+   * Triggers a custom event for the associated root, or buffers them if the
+   * observables aren't present yet.
+   * @param {!AnalyticsEvent} event
+   */
+  trigger(event) {
+    const eventType = event['type'];
+    const observables = this.observables_[eventType];
+
+    // If listeners already present - trigger right away.
+    if (observables) {
+      observables.fire(event);
+    }
+
+    // Create buffer and enqueue event if needed.
+    if (this.buffer_) {
+      this.buffer_[eventType] = this.buffer_[eventType] || [];
+      this.buffer_[eventType].push(event);
+    }
   }
 }
 
