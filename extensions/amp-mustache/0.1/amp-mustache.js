@@ -23,7 +23,12 @@ import {
 import {user} from '../../../src/log';
 import mustache from '../../../third_party/mustache/mustache';
 
+/** @const {string} */
 const TAG = 'amp-mustache';
+
+/** @const {string} */
+const CUSTOM_DELIMITERS_ATTR = 'custom-delimiters';
+
 
 /**
  * @typedef {BaseTemplate$$module$src$service$template_impl}
@@ -78,14 +83,19 @@ export class AmpMustache extends AMP.BaseTemplate {
    * @return {string}
    */
   initTemplateString_() {
-    if (this.element.tagName == 'TEMPLATE') {
-      const content = templateContentClone(this.element);
+    const {element} = this;
+    if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
+      user().warn(TAG, 'Custom delimiters is only supported in '
+          + 'the more recent version of this extension.');
+    }
+    if (element.tagName == 'TEMPLATE') {
+      const content = templateContentClone(element);
       this.processNestedTemplates_(content);
-      const container = this.element.ownerDocument.createElement('div');
+      const container = element.ownerDocument.createElement('div');
       container.appendChild(content);
       return container./*OK*/ innerHTML;
-    } else if (this.element.tagName == 'SCRIPT') {
-      return this.element.textContent;
+    } else if (element.tagName == 'SCRIPT') {
+      return element.textContent;
     }
 
     return '';
