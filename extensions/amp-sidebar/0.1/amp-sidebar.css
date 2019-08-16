@@ -15,6 +15,7 @@
  */
 
 amp-sidebar {
+  --story-page-vh: 1vh;
   position: fixed !important;
   top: 0;
   max-height: 100vh !important;
