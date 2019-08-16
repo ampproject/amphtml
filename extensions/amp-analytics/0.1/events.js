@@ -21,7 +21,6 @@ import {
   PlayingStates,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
-import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
@@ -44,7 +43,6 @@ const TAG = 'amp-analytics/events';
  * @enum {string}
  */
 export const AnalyticsEventType = {
-  AMP_STORY: 'amp-story',
   CLICK: 'click',
   CUSTOM: 'custom',
   HIDDEN: 'hidden',
@@ -67,13 +65,6 @@ const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
  *   }>}
  */
 const TRACKER_TYPE = Object.freeze({
-  [AnalyticsEventType.AMP_STORY]: {
-    name: AnalyticsEventType.AMP_STORY,
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
-      return new AmpStoryEventTracker(root);
-    },
-  },
   [AnalyticsEventType.CLICK]: {
     name: AnalyticsEventType.CLICK,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
@@ -155,14 +146,6 @@ function isVideoTriggerType(triggerType) {
  * @param {string} triggerType
  * @return {boolean}
  */
-function isAmpStoryTriggerType(triggerType) {
-  return startsWith(triggerType, 'story');
-}
-
-/**
- * @param {string} triggerType
- * @return {boolean}
- */
 function isReservedTriggerType(triggerType) {
   return isEnumValue(AnalyticsEventType, triggerType);
 }
@@ -174,9 +157,6 @@ function isReservedTriggerType(triggerType) {
 export function getTrackerKeyName(eventType) {
   if (isVideoTriggerType(eventType)) {
     return AnalyticsEventType.VIDEO;
-  }
-  if (isAmpStoryTriggerType(eventType)) {
-    return AnalyticsEventType.AMP_STORY;
   }
   if (!isReservedTriggerType(eventType)) {
     return AnalyticsEventType.CUSTOM;
@@ -402,64 +382,6 @@ export class CustomEventTracker extends EventTracker {
         this.buffer_[eventType].push(event);
       }
     }
-  }
-}
-
-export class AmpStoryEventTracker extends EventTracker {
-  /**
-   * @param {!./analytics-root.AnalyticsRoot} root
-   */
-  constructor(root) {
-    super(root);
-
-    /** @private {?Observable<!Event>} */
-    this.sessionObservable_ = new Observable();
-
-    /** @private {?function(!Event)} */
-    this.boundOnSession_ = this.sessionObservable_.fire.bind(
-      this.sessionObservable_
-    );
-
-    Object.keys(StoryAnalyticsEvent).forEach(key => {
-      this.root
-        .getRoot()
-        .addEventListener(StoryAnalyticsEvent[key], this.boundOnSession_);
-    });
-  }
-
-  /** @override */
-  dispose() {
-    const root = this.root.getRoot();
-    Object.keys(StoryAnalyticsEvent).forEach(key => {
-      root.removeEventListener(StoryAnalyticsEvent[key], this.boundOnSession_);
-    });
-    this.boundOnSession_ = null;
-    this.sessionObservable_ = null;
-  }
-
-  /** @override */
-  add(context, eventType, config, listener) {
-    const storySpec = config['storySpec'] || {};
-    const rootTarget = this.root.getRootElement();
-
-    const repeat = storySpec['repeat'];
-    const on = config['on'];
-
-    return this.sessionObservable_.add(event => {
-      const {type} = event;
-
-      if (type !== on) {
-        return;
-      }
-      const details = /** @type {?JsonObject|undefined} */ (getData(event));
-      const detailsForPage = details['detailsForPage'];
-
-      if (repeat === false && detailsForPage['repeated']) {
-        return;
-      }
-
-      listener(new AnalyticsEvent(rootTarget, type, details));
-    });
   }
 }
 

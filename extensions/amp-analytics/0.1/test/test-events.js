@@ -15,8 +15,8 @@
  */
 
 import * as lolex from 'lolex';
+import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
-  AmpStoryEventTracker,
   AnalyticsEvent,
   AnalyticsEventType,
   ClickEventTracker,
@@ -28,7 +28,6 @@ import {
   VisibilityTracker,
   trackerTypeForTesting,
 } from '../events';
-import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {Deferred} from '../../../../src/utils/promise';
 import {Signals} from '../../../../src/utils/signals';
 import {macroTask} from '../../../../testing/yield';
@@ -413,99 +412,6 @@ describes.realWin('Events', {amp: 1}, env => {
         fn2
       );
       expect(fn2).to.be.calledOnce;
-    });
-  });
-
-  describe('AmpStoryEventTracker', () => {
-    let tracker;
-
-    beforeEach(() => {
-      tracker = root.getTracker('story', AmpStoryEventTracker);
-    });
-
-    it('should initialize', () => {
-      expect(tracker.root).to.equal(root);
-    });
-
-    it('should listen on story events', () => {
-      const analyticsEvent = sandbox.stub();
-
-      const defaultStoryConfig = {
-        'on': 'story-page-visible',
-      };
-
-      const defaultVars = {
-        'storyPageIndex': '0',
-        'storyPageId': 'p4',
-        'storyPageCount': '4',
-      };
-
-      tracker.add(
-        analyticsElement,
-        'story-page-visible',
-        defaultStoryConfig,
-        analyticsEvent
-      );
-
-      const event = new Event('story-page-visible');
-      event.data = defaultVars;
-
-      root.getRoot().dispatchEvent(event);
-
-      expect(analyticsEvent).to.be.calledOnce;
-      expect(analyticsEvent).to.be.calledWith(
-        new AnalyticsEvent(
-          root.getRootElement(),
-          'story-page-visible',
-          defaultVars
-        )
-      );
-    });
-
-    it('should only fire event once when repeat is false', () => {
-      const analyticsEvent = sandbox.stub();
-
-      const defaultStoryConfig = {
-        'on': 'story-page-visible',
-        'storySpec': {
-          'repeat': false,
-        },
-      };
-
-      const defaultVars = {
-        'storyPageIndex': '0',
-        'storyPageId': 'p4',
-        'storyPageCount': '4',
-        'detailsForPage': {'repeated': false},
-      };
-
-      tracker.add(
-        analyticsElement,
-        'story-page-visible',
-        defaultStoryConfig,
-        analyticsEvent
-      );
-
-      const event = new Event('story-page-visible');
-      event.data = defaultVars;
-
-      const rootEl = root.getRoot();
-      rootEl.dispatchEvent(event);
-
-      defaultVars['detailsForPage']['repeated'] = true;
-      event.data = defaultVars;
-
-      // Trigger event second time, with 'repeated'.
-      rootEl.dispatchEvent(event);
-
-      expect(analyticsEvent).to.be.calledOnce;
-      expect(analyticsEvent).to.be.calledWith(
-        new AnalyticsEvent(
-          root.getRootElement(),
-          'story-page-visible',
-          defaultVars
-        )
-      );
     });
   });
 

@@ -53,48 +53,4 @@ describes.fakeWin('amp-story analytics', {}, env => {
 
     expect(trigger).to.have.been.calledWith('story-last-page-visible');
   });
-
-  it('should not mark an event as repeated the first time', () => {
-    analytics.element_.dispatchCustomEvent = () => {};
-    const dispatchStub = sandbox.stub(
-      analytics.element_,
-      'dispatchCustomEvent'
-    );
-
-    storeService.dispatch(Action.CHANGE_PAGE, {
-      id: 'test-page',
-      index: 1,
-    });
-
-    expect(dispatchStub).to.have.been.calledWithMatch('story-page-visible', {
-      'detailsForPage': {},
-    });
-  });
-
-  it('should mark event as repeated', () => {
-    analytics.element_.dispatchCustomEvent = () => {};
-    const dispatchStub = sandbox.stub(
-      analytics.element_,
-      'dispatchCustomEvent'
-    );
-
-    storeService.dispatch(Action.CHANGE_PAGE, {
-      id: 'test-page',
-      index: 1,
-    });
-
-    storeService.dispatch(Action.CHANGE_PAGE, {
-      id: 'test-page2',
-      index: 2,
-    });
-
-    storeService.dispatch(Action.CHANGE_PAGE, {
-      id: 'test-page',
-      index: 1,
-    });
-
-    expect(dispatchStub).to.have.been.calledWithMatch('story-page-visible', {
-      'detailsForPage': {'repeated': true},
-    });
-  });
 });
