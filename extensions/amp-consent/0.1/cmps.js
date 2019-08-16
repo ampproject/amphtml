@@ -43,6 +43,6 @@ CMP_CONFIG['didomi'] = {
 
 CMP_CONFIG['SourcePoint'] = {
   'consentInstanceId': 'SourcePoint',
-  'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/amp',
+  'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',
   'promptUISrc': 'https://amp.pm.sourcepoint.mgr.consensu.org/',
 };
