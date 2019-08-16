@@ -29,7 +29,6 @@
     "prop-types": "15.7.2",
     "react-dates": "15.5.3",
     "rrule": "2.6.2",
-    "terser": "4.0.0",
     "web-activities": "1.13.0",
     "web-animations-js": "2.3.1"
   },
@@ -172,6 +171,7 @@
     "sinon-chai": "3.3.0",
     "sleep-promise": "8.0.1",
     "tempy": "0.3.0",
+    "terser": "4.0.0",
     "text-table": "0.2.0",
     "through2": "3.0.1",
     "topological-sort": "0.3.0",
