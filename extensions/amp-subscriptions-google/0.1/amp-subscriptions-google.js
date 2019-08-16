@@ -532,7 +532,7 @@ class AmpFetcher {
       })
       .then(response => response.json());
   }
-  
+
   /** @override */
   fetch(input, opt_init) {
     return this.xhr_.fetch(input, opt_init);
