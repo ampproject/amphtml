@@ -25,7 +25,7 @@ describe('ResponsiveAttributes', () => {
     matchMediaStub.withArgs('').returns({matches: true});
   });
 
-  it('should choose the first matching media query' , () => {
+  it('should choose the first matching media query', () => {
     matchMediaStub.withArgs('(min-width: 600px)').returns({matches: true});
     matchMediaStub.withArgs('(min-width: 300px)').returns({matches: true});
 
@@ -35,12 +35,14 @@ describe('ResponsiveAttributes', () => {
     });
 
     ra.updateAttribute(
-        'one', '(min-width: 600px) foo, (min-width: 300px) bar, baz');
+      'one',
+      '(min-width: 600px) foo, (min-width: 300px) bar, baz'
+    );
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith('foo');
   });
 
-  it('should pass non-matching media queries' , () => {
+  it('should pass non-matching media queries', () => {
     matchMediaStub.withArgs('(min-width: 300px)').returns({matches: true});
 
     const spy = sandbox.spy();
@@ -49,31 +51,34 @@ describe('ResponsiveAttributes', () => {
     });
 
     ra.updateAttribute(
-        'one', '(min-width: 600px) foo, (min-width: 300px) bar, baz');
+      'one',
+      '(min-width: 600px) foo, (min-width: 300px) bar, baz'
+    );
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith('bar');
   });
 
-  it('should fall back to the default value' , () => {
+  it('should fall back to the default value', () => {
     const spy = sandbox.spy();
     const ra = new ResponsiveAttributes({
       'one': spy,
     });
 
     ra.updateAttribute(
-        'one', '(min-width: 600px) foo, (min-width: 300px) bar, baz');
+      'one',
+      '(min-width: 600px) foo, (min-width: 300px) bar, baz'
+    );
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith('baz');
   });
 
-  it('should handle empty groups' , () => {
+  it('should handle empty groups', () => {
     const spy = sandbox.spy();
     const ra = new ResponsiveAttributes({
       'one': spy,
     });
 
-    ra.updateAttribute(
-        'one', '(min-width: 600px) foo, , baz');
+    ra.updateAttribute('one', '(min-width: 600px) foo, , baz');
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith('baz');
   });
@@ -93,7 +98,7 @@ describe('ResponsiveAttributes', () => {
     expect(spy).to.have.been.calledWith('hello');
   });
 
-  it('should update when the media query triggers onchange', async() => {
+  it('should update when the media query triggers onchange', async () => {
     let callback;
     let matches = false;
 
@@ -124,7 +129,7 @@ describe('ResponsiveAttributes', () => {
     expect(spy).to.have.been.calledWith('foo');
   });
 
-  it('should clear onchange when the attribute value changes', async() => {
+  it('should clear onchange when the attribute value changes', async () => {
     const onchangeSpy = sandbox.spy();
 
     matchMediaStub.withArgs('(min-width: 600px)').returns({
@@ -149,7 +154,7 @@ describe('ResponsiveAttributes', () => {
     expect(onchangeSpy.secondCall).to.have.been.calledWith(null);
   });
 
-  it('should handle number values' , () => {
+  it('should handle number values', () => {
     matchMediaStub.withArgs('(min-width: 600px)').returns({matches: true});
 
     const spy = sandbox.spy();
@@ -157,10 +162,8 @@ describe('ResponsiveAttributes', () => {
       'one': spy,
     });
 
-    ra.updateAttribute(
-        'one', '(min-width: 600px) 4.2, 7');
+    ra.updateAttribute('one', '(min-width: 600px) 4.2, 7');
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith('4.2');
   });
-
 });

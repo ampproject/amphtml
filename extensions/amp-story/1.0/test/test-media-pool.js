@@ -30,10 +30,10 @@ describes.realWin('media-pool', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    sandbox.stub(Services, 'vsyncFor')
-        .callsFake(() => ({mutate: task => task()}));
-    sandbox.stub(Services, 'timerFor')
-        .callsFake(() => ({delay: NOOP}));
+    sandbox
+      .stub(Services, 'vsyncFor')
+      .callsFake(() => ({mutate: task => task()}));
+    sandbox.stub(Services, 'timerFor').callsFake(() => ({delay: NOOP}));
 
     mediaPool = new MediaPool(win, COUNTS, element => {
       return distanceFnStub(element);
@@ -138,26 +138,32 @@ describes.realWin('media-pool', {}, env => {
 
   it.skip('should evict the element with the highest distance first', () => {
     const elements = createMediaElements('video', 3);
-    mediaPool = new MediaPool(win, {'video': 2},
-        arrayOrderDistanceFn(elements));
+    mediaPool = new MediaPool(
+      win,
+      {'video': 2},
+      arrayOrderDistanceFn(elements)
+    );
 
     elements.forEach(element => mediaPool.register(element));
     elements.forEach(element => mediaPool.play(element));
 
     expect(mediaPool.allocated['video'].length).to.equal(2);
-    expect(isElementInPool(mediaPool.allocated['video'], elements[0]))
-        .to.be.true;
-    expect(isElementInPool(mediaPool.allocated['video'], elements[1]))
-        .to.be.true;
-    expect(isElementInPool(mediaPool.allocated['video'], elements[2]))
-        .to.be.false;
+    expect(isElementInPool(mediaPool.allocated['video'], elements[0])).to.be
+      .true;
+    expect(isElementInPool(mediaPool.allocated['video'], elements[1])).to.be
+      .true;
+    expect(isElementInPool(mediaPool.allocated['video'], elements[2])).to.be
+      .false;
   });
 
   it('should be able to play alot of videos', () => {
     const alot = 100;
     const elements = createMediaElements('video', alot);
-    mediaPool = new MediaPool(win, {'video': 2},
-        arrayOrderDistanceFn(elements));
+    mediaPool = new MediaPool(
+      win,
+      {'video': 2},
+      arrayOrderDistanceFn(elements)
+    );
 
     elements.forEach(element => mediaPool.register(element));
 

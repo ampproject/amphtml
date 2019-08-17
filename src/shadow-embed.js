@@ -25,6 +25,7 @@ import {
 import {
   childElementsByTag,
   closestNode,
+  isShadowRoot,
   iterateCursor,
   removeElement,
 } from './dom';
@@ -51,7 +52,6 @@ const CSS_SELECTOR_END_REGEX = /[^\-\_0-9a-zA-Z]/;
  */
 let shadowDomStreamingSupported;
 
-
 /**
  * Creates a shadow root for the specified host and returns it. Polyfills
  * shadow root creation if necessary.
@@ -63,7 +63,7 @@ export function createShadowRoot(hostElement) {
 
   const existingRoot = hostElement.shadowRoot || hostElement.__AMP_SHADOW_ROOT;
   if (existingRoot) {
-    existingRoot./*OK*/innerHTML = '';
+    existingRoot./*OK*/ innerHTML = '';
     return existingRoot;
   }
 
@@ -104,7 +104,6 @@ export function createShadowRoot(hostElement) {
   return shadowRoot;
 }
 
-
 /**
  * Shadow root polyfill.
  * @param {!Element} hostElement
@@ -117,15 +116,15 @@ function createShadowRootPolyfill(hostElement) {
   hostElement.classList.add('i-amphtml-shadow-host-polyfill');
   const hostStyle = doc.createElement('style');
   hostStyle.textContent =
-      '.i-amphtml-shadow-host-polyfill>:not(i-amphtml-shadow-root)'
-      + '{display:none!important}';
+    '.i-amphtml-shadow-host-polyfill>:not(i-amphtml-shadow-root)' +
+    '{display:none!important}';
   hostElement.appendChild(hostStyle);
 
   // Shadow root.
-  const shadowRoot = /** @type {!ShadowRoot} */ (
+  const shadowRoot /** @type {!ShadowRoot} */ =
     // Cast to ShadowRoot even though it is an Element
     // TODO(@dvoytenko) Consider to switch to a type union instead.
-    /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
+    /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root'));
   hostElement.appendChild(shadowRoot);
   hostElement.__AMP_SHADOW_ROOT = shadowRoot;
   Object.defineProperty(hostElement, 'shadowRoot', {
@@ -141,8 +140,9 @@ function createShadowRootPolyfill(hostElement) {
   // `getElementById` is resolved via `querySelector('#id')`.
   shadowRoot.getElementById = function(id) {
     const escapedId = escapeCssSelectorIdent(id);
-    return /** @type {HTMLElement|null} */ (
-      shadowRoot./*OK*/querySelector(`#${escapedId}`));
+    return /** @type {HTMLElement|null} */ (shadowRoot./*OK*/ querySelector(
+      `#${escapedId}`
+    ));
   };
 
   // The styleSheets property should have a list of local styles.
@@ -151,33 +151,14 @@ function createShadowRootPolyfill(hostElement) {
       if (!doc.styleSheets) {
         return [];
       }
-      return toArray(doc.styleSheets).filter(
-          styleSheet => shadowRoot.contains(styleSheet.ownerNode));
+      return toArray(doc.styleSheets).filter(styleSheet =>
+        shadowRoot.contains(styleSheet.ownerNode)
+      );
     },
   });
 
   return shadowRoot;
 }
-
-
-/**
- * Determines if value is actually a `ShadowRoot` node.
- * @param {*} value
- * @return {boolean}
- */
-export function isShadowRoot(value) {
-  if (!value) {
-    return false;
-  }
-  // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
-  // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
-  if (value.tagName == 'I-AMPHTML-SHADOW-ROOT') {
-    return true;
-  }
-  return (value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
-      Object.prototype.toString.call(value) === '[object ShadowRoot]');
-}
-
 
 /**
  * Return shadow root for the specified node.
@@ -185,13 +166,13 @@ export function isShadowRoot(value) {
  * @return {?ShadowRoot}
  */
 export function getShadowRootNode(node) {
+  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
   if (isShadowDomSupported() && Node.prototype.getRootNode) {
     return /** @type {?ShadowRoot} */ (node.getRootNode(UNCOMPOSED_SEARCH));
   }
   // Polyfill shadow root lookup.
   return /** @type {?ShadowRoot} */ (closestNode(node, n => isShadowRoot(n)));
 }
-
 
 /**
  * Imports a body into a shadow root with the workaround for a polyfill case.
@@ -210,7 +191,9 @@ export function importShadowBody(shadowRoot, body, deep) {
     setInitialDisplay(resultBody, 'block');
     for (let i = 0; i < body.attributes.length; i++) {
       resultBody.setAttribute(
-          body.attributes[0].name, body.attributes[0].value);
+        body.attributes[0].name,
+        body.attributes[0].value
+      );
     }
     if (deep) {
       for (let n = body.firstChild; !!n; n = n.nextSibling) {
@@ -224,7 +207,6 @@ export function importShadowBody(shadowRoot, body, deep) {
   return resultBody;
 }
 
-
 /**
  * If necessary, transforms CSS to isolate AMP CSS within the shaodw root and
  * reduce the possibility of high-level conflicts.
@@ -235,7 +217,6 @@ export function importShadowBody(shadowRoot, body, deep) {
 export function transformShadowCss(shadowRoot, css) {
   return scopeShadowCss(shadowRoot, css);
 }
-
 
 /**
  * Transforms CSS to isolate AMP CSS within the shadow root and reduce the
@@ -279,7 +260,6 @@ export function scopeShadowCss(shadowRoot, css) {
   return scopeRules.call(ShadowCSS, rules, `.${id}`, transformRootSelectors);
 }
 
-
 /**
  * Replaces top-level selectors such as `html` and `body` with their polyfill
  * counterparts: `amp-html` and `amp-body`.
@@ -289,7 +269,6 @@ export function scopeShadowCss(shadowRoot, css) {
 function transformRootSelectors(selector) {
   return selector.replace(/(html|body)/g, rootSelectorPrefixer);
 }
-
 
 /**
  * See `transformRootSelectors`.
@@ -303,13 +282,14 @@ function transformRootSelectors(selector) {
 function rootSelectorPrefixer(match, name, pos, selector) {
   const prev = selector.charAt(pos - 1);
   const next = selector.charAt(pos + match.length);
-  if ((!prev || CSS_SELECTOR_BEG_REGEX.test(prev)) &&
-      (!next || CSS_SELECTOR_END_REGEX.test(next))) {
+  if (
+    (!prev || CSS_SELECTOR_BEG_REGEX.test(prev)) &&
+    (!next || CSS_SELECTOR_END_REGEX.test(next))
+  ) {
     return 'amp-' + match;
   }
   return match;
 }
-
 
 /**
  * @param {!Document} doc
@@ -318,7 +298,7 @@ function rootSelectorPrefixer(match, name, pos, selector) {
  */
 function getStylesheetRules(doc, css) {
   const style = doc.createElement('style');
-  style./*OK*/textContent = css;
+  style./*OK*/ textContent = css;
   try {
     (doc.head || doc.documentElement).appendChild(style);
     if (style.sheet) {
@@ -332,7 +312,6 @@ function getStylesheetRules(doc, css) {
   }
 }
 
-
 /**
  * @param {boolean|undefined} val
  * @visibleForTesting
@@ -340,7 +319,6 @@ function getStylesheetRules(doc, css) {
 export function setShadowDomStreamingSupportedForTesting(val) {
   shadowDomStreamingSupported = val;
 }
-
 
 /**
  * Returns `true` if the Shadow DOM streaming is supported.
@@ -354,15 +332,16 @@ export function isShadowDomStreamingSupported(win) {
   return shadowDomStreamingSupported;
 }
 
-
 /**
  * @param {!Window} win
  * @return {boolean}
  */
 function calcShadowDomStreamingSupported(win) {
   // API must be supported.
-  if (!win.document.implementation ||
-      typeof win.document.implementation.createHTMLDocument != 'function') {
+  if (
+    !win.document.implementation ||
+    typeof win.document.implementation.createHTMLDocument != 'function'
+  ) {
     return false;
   }
   // Firefox does not support DOM streaming.
@@ -373,7 +352,6 @@ function calcShadowDomStreamingSupported(win) {
   // Assume full streaming support.
   return true;
 }
-
 
 /**
  * Creates the Shadow DOM writer available on this platform.
@@ -387,7 +365,6 @@ export function createShadowDomWriter(win) {
   return new ShadowDomWriterBulk(win);
 }
 
-
 /**
  * Takes as an input a text stream, parses it and incrementally reconstructs
  * it in the shadow root.
@@ -400,7 +377,6 @@ export function createShadowDomWriter(win) {
  * @visibleForTesting
  */
 export class ShadowDomWriter {
-
   /**
    * Sets the callback that will be called when body has been parsed.
    *
@@ -428,7 +404,6 @@ export class ShadowDomWriter {
    */
   onEnd(unusedCallback) {}
 }
-
 
 /**
  * Takes as an input a text stream, parses it and incrementally reconstructs
@@ -557,7 +532,7 @@ export class ShadowDomWriterStreamer {
 
     // Merge body children.
     if (this.targetBody_) {
-      const inputBody = /** @type !Element */(devAssert(this.parser_.body));
+      const inputBody = dev().assertElement(this.parser_.body);
       const targetBody = devAssert(this.targetBody_);
       let transferCount = 0;
       removeNoScriptElements(inputBody);
@@ -576,7 +551,6 @@ export class ShadowDomWriterStreamer {
     }
   }
 }
-
 
 /**
  * Takes as an input a text stream, aggregates it and parses it in one bulk.

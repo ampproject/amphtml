@@ -42,7 +42,7 @@ Implements subscription-style access protocol.
   <tr>
     <td class="col-fourty">
       <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">
+        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
           Supported Layouts
         </a>
       </strong>
@@ -64,7 +64,7 @@ and in many features builds on top of `amp-access`. However, it's a much more
 specialized version of access/paywall protocol. Some of the key differences are:
 
 1. The `amp-subscriptions` entitlements response is similar to the amp-access
-authorization, but it's striclty defined and standardized.
+authorization, but it's strictly defined and standardized.
 2. The `amp-subscriptions` extension allows multiple services to be configured
 for the page to participate in access/paywall decisions. Services are executed
 concurrently and prioritized based on which service returns the positive response.
@@ -194,7 +194,17 @@ If all configured services fail to get the entitlements, the entitlement configu
 
 ### The "local" service configuration
 
-The "local" service is configured as following:
+Two modes of operation are supported for the local service,
+"remote" and "iframe". 
+
+In the remote mode authorization and pingback requests
+are sent via CORS requests to the specified endpoints. In the
+"iframe" mode authorization and pingback are provided by 
+messaging to a publisher supplied iframe.
+
+The "local" service is configured as following 
+
+remote mode:
 
 ```
 <script type="application/json" id="amp-subscriptions">
@@ -214,10 +224,46 @@ The "local" service is configured as following:
 </script>
 ```
 
-The properties in the "local" service are:
+iframe mode:
+
+```
+<script type="application/json" id="amp-subscriptions">
+{
+  "services": [
+    {
+      "type": "iframe",
+      "iframeSrc": "https://...",
+      "iframeVars": [
+        "READER_ID",
+        "CANONICAL_URL",
+        "AMPDOC_URL",
+        "SOURCE_URL",
+        "DOCUMENT_REFERRER"
+      ],
+      "actions":{
+        "login": "https://...",
+        "subscribe": "https://..."
+      }
+    },
+    ...
+  ]
+}
+</script>
+```
+
+The properties in the "local" service are (remote mode):
+ - "type" - optional type, defaults to "remote"
  - "authorizationUrl" - the authorization endpoint URL.
  - "pingbackUrl" - the pingback endpoint URL.
  - "actions" - a named map of action URLs. At a minimum there must be two actions specified: "login" and "subscribe".
+
+In iframe mode the `authorzationUrl` and `pingbackUrl` are deleted
+and replaced by:
+ - "iframeSrc" - publisher supplied iframe
+ - "iframeVars - AMP variables to be sent to the iframe
+ - "type" - must be "iframe"
+
+See [amp-access-iframe](../amp-access/0.1/iframe-api/README.md) for details of the messaging protocol.
 
 ### The vendor service configuration
 
@@ -326,6 +372,21 @@ The fallback content is marked up using `subscriptions-section="content-not-gran
 <section subscriptions-section="content-not-granted">
   You are not allowed to currently view this content.
 </section>
+```
+
+## Using Scores to Display Content
+
+The score factors returned by ewach configured service can be used to control the disaplay
+of content within dialogs. For example `factors['subscribe.google.com'].isReadyToPay` would be the "ready to pay" score factor from the `subscribe.google.com` service (also known as `amp-subscriptions-google`). Similarly `factors['local'].isReadyToPay` would be for the local service and `scores['subscribe.google.com'].supporsViewer` would be the score factor for the Google service supporting the current viewer. 
+
+Sample usage:
+
+```html
+    <!-- Shows a Subscribe with Google button if the user is ready to pay -->
+    <button subscriptions-display="factors['subscribe.google.com'].isReadyToPay"
+      subscriptions-action="subscribe"
+      subscriptions-service="subscribe.google.com"
+      subscriptions-decorate>Subscribe with Google</button>
 ```
 
 ## Action markup

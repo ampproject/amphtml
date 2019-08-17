@@ -15,11 +15,15 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
+const argv = require('minimist')(process.argv.slice(2), {
+  string: ['rtv_serve_mode'],
+});
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const nodemon = require('nodemon');
+const path = require('path');
+const {createCtrlcHandler} = require('../ctrlcHandler');
+const {isRtvMode} = require('../app-utils');
 
 const host = argv.host || 'localhost';
 const port = argv.port || process.env.PORT || 8000;
@@ -32,6 +36,8 @@ const noCachingExtensions = argv.noCachingExtensions != undefined;
  * Starts a simple http server at the repository root
  */
 function serve() {
+  createCtrlcHandler('serve');
+
   // Get the serve mode
   if (argv.compiled) {
     process.env.SERVE_MODE = 'compiled';
@@ -39,6 +45,14 @@ function serve() {
   } else if (argv.cdn) {
     process.env.SERVE_MODE = 'cdn';
     log(colors.green('Serving current prod js'));
+  } else if (argv.rtv_serve_mode) {
+    const rtv = argv.rtv_serve_mode;
+    if (isRtvMode(rtv)) {
+      process.env.SERVE_MODE = rtv;
+      log(colors.green(`Serving RTV ${rtv} js`));
+    } else {
+      throw new Error(`Invalid rtv_serve_mode: ${rtv}`);
+    }
   } else {
     process.env.SERVE_MODE = 'default';
     log(colors.green('Serving unminified js'));
@@ -50,6 +64,9 @@ function serve() {
       require.resolve('../app.js'),
       require.resolve('../routes/analytics.js'),
       require.resolve('../server.js'),
+
+      // All devdash routes:
+      path.dirname(require.resolve('../app-index')),
     ],
     env: {
       'NODE_ENV': 'development',
@@ -77,29 +94,22 @@ function serve() {
   });
 }
 
-process.on('SIGINT', function() {
-  process.exit();
-});
-
-gulp.task(
-    'serve',
-    'Serves content in root dir over ' + getHost() + '/',
-    serve,
-    {
-      options: {
-        'host': '  Hostname or IP address to bind to (default: localhost)',
-        'port': '  Specifies alternative port (default: 8000)',
-        'https': '  Use HTTPS server (default: false)',
-        'quiet': '  Do not log HTTP requests (default: false)',
-        'cache': '  Make local resources cacheable by the browser ' +
-            '(default: false)',
-        'inspect': '  Run nodemon in `inspect` mode',
-      },
-    }
-);
-
 function getHost() {
   return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
 }
 
-exports.serve = serve;
+module.exports = {
+  serve,
+};
+
+/* eslint "google-camelcase/google-camelcase": 0 */
+
+serve.description = 'Serves content in root dir over ' + getHost() + '/';
+serve.flags = {
+  'host': '  Hostname or IP address to bind to (default: localhost)',
+  'port': '  Specifies alternative port (default: 8000)',
+  'https': '  Use HTTPS server (default: false)',
+  'quiet': '  Do not log HTTP requests (default: false)',
+  'cache': '  Make local resources cacheable by the browser (default: false)',
+  'inspect': '  Run nodemon in `inspect` mode',
+};

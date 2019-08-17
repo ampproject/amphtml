@@ -35,7 +35,7 @@ tags: {  # <amp-ad-exit>
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "SCRIPT"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad-exit"
+  spec_url: "https://amp.dev/documentation/components/amp-ad-exit"
   amp_layout {
     supported_layouts: NODISPLAY
     supported_layouts: CONTAINER  # To allow an unspecified layout (container is default).
@@ -49,14 +49,11 @@ tags: {  # amp-ad-exit config JSON
   requires_extension: "amp-ad-exit"
   mandatory_parent: "AMP-AD-EXIT"
   attrs: {
-    disabled_by: "transformed"
-    name: "nonce"
-  }
-  attrs: {
     name: "type"
     mandatory: true
     value: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad-exit"
+  attr_lists: "nonce-attr"
+  spec_url: "https://amp.dev/documentation/components/amp-ad-exit"
 }

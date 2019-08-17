@@ -188,8 +188,11 @@ export function isValidTypeCombination(fxTypeA, fxTypeB) {
  * @return {boolean}
  */
 export function userAssertIsValidType(type) {
-  return userAssert(validFxTypes.indexOf(type) > -1,
-      'Invalid amp-fx type `%s`', type);
+  return userAssert(
+    validFxTypes.indexOf(type) > -1,
+    'Invalid amp-fx type `%s`',
+    type
+  );
 }
 
 /**
@@ -202,16 +205,16 @@ export function userAssertIsValidType(type) {
  */
 export function getFxTypes(element) {
   devAssert(element.hasAttribute('amp-fx'));
-  const fxTypes = element.getAttribute('amp-fx')
-      .trim()
-      .toLowerCase()
-      .split(/\s+/);
+  const fxTypes = element
+    .getAttribute('amp-fx')
+    .trim()
+    .toLowerCase()
+    .split(/\s+/);
 
   userAssert(fxTypes.length, 'No value provided for `amp-fx` attribute');
 
   return sanitizeFxTypes(fxTypes.filter(userAssertIsValidType));
 }
-
 
 /**
  * Removes the conflicting types from an array of fx types.
@@ -230,9 +233,13 @@ export function sanitizeFxTypes(types) {
     for (let j = i + 1; j < types.length; j++) {
       const fxTypeB = types[j];
       if (!isValidTypeCombination(fxTypeA, fxTypeB)) {
-        user().warn(TAG,
-            '%s preset can\'t be combined with %s preset as the resulting ' +
-            'animation isn\'t valid.', fxTypeA, fxTypeB);
+        user().warn(
+          TAG,
+          "%s preset can't be combined with %s preset as the resulting " +
+            "animation isn't valid.",
+          fxTypeA,
+          fxTypeB
+        );
         types.splice(j--, 1);
       }
     }

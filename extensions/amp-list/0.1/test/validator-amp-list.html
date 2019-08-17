@@ -112,6 +112,15 @@
     <amp-list-load-more load-more-failed></amp-list-load-more>
     <amp-list-load-more load-more-end></amp-list-load-more>
   </amp-list>
+  <!-- Valid amp-list load-more-failed with allowed child -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="manual"
+    load-more-bookmark="next">
+    <amp-list-load-more load-more-failed>
+      <button load-more-clickable>Click me to reload!</button>
+    </amp-list-load-more>
+  </amp-list>
   <!-- Valid amp-list with [is-layout-container] attribute -->
   <amp-list width=10 height=10
     src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -154,5 +163,17 @@
   <div load-more-failed></div>
   <div load-more-end></div>
   <amp-list-load-more></amp-list-load-more>
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="manual"
+    load-more-bookmark="next">
+    <button load-more-clickable></button>
+  </amp-list>
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    load-more="manual"
+    load-more-bookmark="next">
+  <button></button>
+</amp-list>
 </body>
 </html>

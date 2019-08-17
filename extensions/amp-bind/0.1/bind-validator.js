@@ -93,7 +93,7 @@ export class BindValidator {
    * @return {boolean}
    */
   canBind(tag, property) {
-    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
+    return this.rulesForTagAndProperty_(tag, property) !== undefined;
   }
 
   /**
@@ -406,6 +406,9 @@ function createElementRules_() {
       'disabled': null,
       'label': null,
     },
+    'SECTION': {
+      'data-expand': null,
+    },
     'SELECT': {
       'autofocus': null,
       'disabled': null,
@@ -447,6 +450,8 @@ function createElementRules_() {
       'selectionstart': null,
       'spellcheck': null,
       'wrap': null,
+      // Non-standard property.
+      'defaulttext': null,
     },
   };
   return rules;

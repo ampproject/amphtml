@@ -14,37 +14,43 @@
  * limitations under the License.
  */
 
-import {
-  getSlides,
-} from './helpers';
+import {getSlides} from './helpers';
 
 const pageWidth = 800;
 const pageHeight = 600;
 
-describes.endtoend('AMP carousel autoadvance', {
-  testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/autoadvance.amp.html',
-  experiments: ['amp-base-carousel', 'layers'],
-  initialRect: {width: pageWidth, height: pageHeight},
-}, async env => {
-  let controller;
+describes.endtoend(
+  'AMP carousel autoadvance',
+  {
+    testUrl:
+      'http://localhost:8000/test/manual/amp-base-carousel/autoadvance.amp.html',
+    experiments: ['amp-base-carousel', 'layers'],
+    initialRect: {width: pageWidth, height: pageHeight},
+  },
+  async env => {
+    let controller;
 
-  function rect(el) {
-    return controller.getElementRect(el);
+    function rect(el) {
+      return controller.getElementRect(el);
+    }
+
+    beforeEach(async () => {
+      controller = env.controller;
+    });
+
+    // TODO(sparhami): fails on shadow demo
+    it.configure()
+      .skipShadowDemo()
+      .run('should move forwards', async () => {
+        const slides = await getSlides(controller);
+
+        await expect(rect(slides[1])).to.include({x: 0});
+        await expect(rect(slides[2])).to.include({x: 0});
+        await expect(rect(slides[0])).to.include({x: 0});
+      });
+
+    it.skip('should not advance while the user is touching', async () => {
+      // TODO(sparhami) Implement when touch actions are supported.
+    });
   }
-
-  beforeEach(async() => {
-    controller = env.controller;
-  });
-
-  it('should move forwards', async() => {
-    const slides = await getSlides(controller);
-
-    await expect(rect(slides[1])).to.include({x: 0});
-    await expect(rect(slides[2])).to.include({x: 0});
-    await expect(rect(slides[0])).to.include({x: 0});
-  });
-
-  it.skip('should not advance while the user is touching', async() => {
-    // TODO(sparhami) Implement when touch actions are supported.
-  });
-});
+);

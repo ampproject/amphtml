@@ -21,8 +21,8 @@ const childProcess = require('child_process');
 const exec = BBPromise.promisify(childProcess.exec);
 const colors = require('ansi-colors');
 const fs = BBPromise.promisifyAll(require('fs'));
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
+const path = require('path');
 const {isTravisBuild} = require('../../travis');
 
 const {red, cyan} = colors;
@@ -48,7 +48,8 @@ function sanityCheck(str) {
   const numMatches = numConfigs(str);
   if (numMatches != 1) {
     throw new Error(
-        'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!');
+      'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!'
+    );
   }
 }
 
@@ -64,15 +65,14 @@ function checkoutBranchConfigs(filename, opt_localBranch, opt_branch) {
   }
   const branch = opt_branch || 'origin/master';
   // One bad path here will fail the whole operation.
-  return exec(`git checkout ${branch} ${filename}`)
-      .catch(function(e) {
-        // This means the files don't exist in master. Assume that it exists
-        // in the current branch.
-        if (/did not match any file/.test(e.message)) {
-          return;
-        }
-        throw e;
-      });
+  return exec(`git checkout ${branch} ${filename}`).catch(function(e) {
+    // This means the files don't exist in master. Assume that it exists
+    // in the current branch.
+    if (/did not match any file/.test(e.message)) {
+      return;
+    }
+    throw e;
+  });
 }
 
 /**
@@ -81,8 +81,10 @@ function checkoutBranchConfigs(filename, opt_localBranch, opt_branch) {
  * @return {string}
  */
 function prependConfig(configString, fileString) {
-  return `self.AMP_CONFIG||(self.AMP_CONFIG=${configString});` +
-    `/*AMP_CONFIG*/${fileString}`;
+  return (
+    `self.AMP_CONFIG||(self.AMP_CONFIG=${configString});` +
+    `/*AMP_CONFIG*/${fileString}`
+  );
 }
 
 /**
@@ -123,42 +125,54 @@ function valueOrDefault(value, defaultValue) {
  * @return {!Promise}
  */
 function applyConfig(
-  config, target, filename, opt_localDev, opt_localBranch, opt_branch,
-  opt_fortesting) {
+  config,
+  target,
+  filename,
+  opt_localDev,
+  opt_localBranch,
+  opt_branch,
+  opt_fortesting
+) {
   return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
-      .then(() => {
-        return Promise.all([
-          fs.readFileAsync(filename),
-          fs.readFileAsync(target),
-        ]);
-      })
-      .then(files => {
-        let configJson;
-        try {
-          configJson = JSON.parse(files[0].toString());
-        } catch (e) {
-          log(red(`Error parsing config file: ${filename}`));
-          throw e;
-        }
-        if (opt_localDev) {
-          configJson = enableLocalDev(config, target, configJson);
-        }
-        if (opt_fortesting) {
-          configJson = Object.assign({test: true}, configJson);
-        }
-        const targetString = files[1].toString();
-        const configString = JSON.stringify(configJson);
-        return prependConfig(configString, targetString);
-      })
-      .then(fileString => {
-        sanityCheck(fileString);
-        return writeTarget(target, fileString, argv.dryrun);
-      })
-      .then(() => {
-        if (!isTravisBuild()) {
-          log('Wrote', cyan(config), 'AMP config to', cyan(target));
-        }
-      });
+    .then(() => {
+      return Promise.all([
+        fs.readFileAsync(filename),
+        fs.readFileAsync(target),
+      ]);
+    })
+    .then(files => {
+      let configJson;
+      try {
+        configJson = JSON.parse(files[0].toString());
+      } catch (e) {
+        log(red(`Error parsing config file: ${filename}`));
+        throw e;
+      }
+      if (opt_localDev) {
+        configJson = enableLocalDev(config, target, configJson);
+      }
+      if (opt_fortesting) {
+        configJson = Object.assign({test: true}, configJson);
+      }
+      const targetString = files[1].toString();
+      const configString = JSON.stringify(configJson);
+      return prependConfig(configString, targetString);
+    })
+    .then(fileString => {
+      sanityCheck(fileString);
+      return writeTarget(target, fileString, argv.dryrun);
+    })
+    .then(() => {
+      if (!isTravisBuild()) {
+        const details =
+          '(' +
+          cyan(config) +
+          (opt_localDev ? ', ' + cyan('localDev') : '') +
+          (opt_fortesting ? ', ' + cyan('test') : '') +
+          ')';
+        log('Applied AMP config', details, 'to', cyan(path.basename(target)));
+      }
+    });
 }
 
 /**
@@ -169,15 +183,12 @@ function applyConfig(
  */
 function enableLocalDev(config, target, configJson) {
   let LOCAL_DEV_AMP_CONFIG = {localDev: true};
-  if (!isTravisBuild()) {
-    log('Enabled local development mode in', cyan(target));
-  }
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
-    const TESTING_HOST_FULL_URL = TESTING_HOST.match(/^https?:\/\//) ?
-      TESTING_HOST : 'http://' + TESTING_HOST;
-    const TESTING_HOST_NO_PROTOCOL =
-      TESTING_HOST.replace(/^https?:\/\//, '');
+    const TESTING_HOST_FULL_URL = TESTING_HOST.match(/^https?:\/\//)
+      ? TESTING_HOST
+      : 'http://' + TESTING_HOST;
+    const TESTING_HOST_NO_PROTOCOL = TESTING_HOST.replace(/^https?:\/\//, '');
 
     LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, {
       thirdPartyUrl: TESTING_HOST_FULL_URL,
@@ -185,8 +196,14 @@ function enableLocalDev(config, target, configJson) {
       thirdPartyFrameRegex: TESTING_HOST_NO_PROTOCOL,
     });
     if (!isTravisBuild()) {
-      log('Set', cyan('TESTING_HOST'), 'to', cyan(TESTING_HOST),
-          'in', cyan(target));
+      log(
+        'Set',
+        cyan('TESTING_HOST'),
+        'to',
+        cyan(TESTING_HOST),
+        'in',
+        cyan(target)
+      );
     }
   }
   return Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
@@ -197,28 +214,23 @@ function enableLocalDev(config, target, configJson) {
  * @return {!Promise}
  */
 function removeConfig(target) {
-  return fs.readFileAsync(target)
-      .then(file => {
-        let contents = file.toString();
-        if (numConfigs(contents) == 0) {
-          if (!isTravisBuild()) {
-            log('No configs found in', cyan(target));
-          }
-          return Promise.resolve();
-        }
-        sanityCheck(contents);
-        const config =
-        /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
-        contents = contents.replace(config, '');
-        return writeTarget(target, contents, argv.dryrun).then(() => {
-          if (!isTravisBuild()) {
-            log('Removed existing config from', cyan(target));
-          }
-        });
-      });
+  return fs.readFileAsync(target).then(file => {
+    let contents = file.toString();
+    if (numConfigs(contents) == 0) {
+      return Promise.resolve();
+    }
+    sanityCheck(contents);
+    const config = /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
+    contents = contents.replace(config, '');
+    return writeTarget(target, contents, argv.dryrun).then(() => {
+      if (!isTravisBuild()) {
+        log('Removed existing config from', cyan(target));
+      }
+    });
+  });
 }
 
-function main() {
+async function prependGlobal() {
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   const target = argv.target || TESTING_HOST;
 
@@ -241,42 +253,58 @@ function main() {
   // Prod by default.
   const config = argv.canary ? 'canary' : 'prod';
   if (argv.canary) {
-    filename = valueOrDefault(argv.canary,
-        'build-system/global-configs/canary-config.json');
+    filename = valueOrDefault(
+      argv.canary,
+      'build-system/global-configs/canary-config.json'
+    );
   } else {
-    filename = valueOrDefault(argv.prod,
-        'build-system/global-configs/prod-config.json');
+    filename = valueOrDefault(
+      argv.prod,
+      'build-system/global-configs/prod-config.json'
+    );
   }
   return removeConfig(target).then(() => {
     return applyConfig(
-        config, target, filename,
-        argv.local_dev, argv.local_branch, argv.branch, argv.fortesting);
+      config,
+      target,
+      filename,
+      argv.local_dev,
+      argv.local_branch,
+      argv.branch,
+      argv.fortesting
+    );
   });
 }
 
-gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
-  options: {
-    'target': '  The file to prepend the json config to.',
-    'canary': '  Prepend the default canary config. ' +
-        'Takes in an optional value for a custom canary config source.',
-    'prod': '  Prepend the default prod config. ' +
-        'Takes in an optional value for a custom prod config source.',
-    'local_dev': '  Enables runtime to be used for local development.',
-    'branch': '  Switch to a git branch to get config source from. ' +
-        'Uses master by default.',
-    'local_branch': '  Don\'t switch branches and use the config from the ' +
-        'local branch.',
-    'fortesting': '  Force the config to return true for getMode().test',
-    'remove': '  Removes previously prepended json config from the target ' +
-        'file (if present).',
-  },
-});
+module.exports = {
+  applyConfig,
+  checkoutBranchConfigs,
+  numConfigs,
+  prependConfig,
+  prependGlobal,
+  removeConfig,
+  sanityCheck,
+  valueOrDefault,
+  writeTarget,
+};
 
-exports.checkoutBranchConfigs = checkoutBranchConfigs;
-exports.prependConfig = prependConfig;
-exports.writeTarget = writeTarget;
-exports.valueOrDefault = valueOrDefault;
-exports.sanityCheck = sanityCheck;
-exports.numConfigs = numConfigs;
-exports.removeConfig = removeConfig;
-exports.applyConfig = applyConfig;
+prependGlobal.description = 'Prepends a json config to a target file';
+prependGlobal.flags = {
+  'target': '  The file to prepend the json config to.',
+  'canary':
+    '  Prepend the default canary config. ' +
+    'Takes in an optional value for a custom canary config source.',
+  'prod':
+    '  Prepend the default prod config. ' +
+    'Takes in an optional value for a custom prod config source.',
+  'local_dev': '  Enables runtime to be used for local development.',
+  'branch':
+    '  Switch to a git branch to get config source from. ' +
+    'Uses master by default.',
+  'local_branch':
+    "  Don't switch branches and use the config from the local branch.",
+  'fortesting': '  Force the config to return true for getMode().test',
+  'remove':
+    '  Removes previously prepended json config from the target ' +
+    'file (if present).',
+};

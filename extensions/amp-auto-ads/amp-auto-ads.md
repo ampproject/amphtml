@@ -42,7 +42,7 @@ Dynamically injects ads into an AMP page by using a remotely-served configuratio
   <tr>
     <td class="col-fourty">
       <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">
+        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
           Supported Layouts
         </a>
       </strong>
@@ -91,7 +91,7 @@ should be specified on the tag.
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
@@ -207,6 +207,15 @@ The fields to specify in the `placements` configuration object:
       </ul>
     </td>
   </tr>
+  <tr>
+    <td><code>stickyAdAttributes</code></td>
+    <td>Object&lt;string, string&gt;</td>
+    <td>An <em>optional</em> field for a  map from attribute name to value for attributes to apply to all <code>&lt;amp-sticky-ad&gt;</code> elements injected using this placement. Only the following attribute names are allowed:
+      <ul>
+        <li>data-* (i.e. any data attribute)</li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
 #### AnchorObj
@@ -302,6 +311,28 @@ The ENUM values for the `pos` field in the `placements` configuration object:
     <td>AFTER</td>
     <td>4</td>
     <td>Ad should be inserted as sibling immediately after the anchor.</td>
+  </tr>
+</table>
+
+#### AttributesEnum
+
+The ENUM value indicates attributes from configuration object for different ad formats:
+
+<table>
+  <tr>
+    <th class="col-fourty">Name</th>
+    <th class="col-twenty">Value</th>
+    <th class="col-fourty" >Description</th>
+  </tr>
+  <tr>
+    <td>BASE_ATTRIBUTES</td>
+    <td>attributes</td>
+    <td>Indicates the `attributes` field in the configuration object.</td>
+  </tr>
+  <tr>
+    <td>STICKY_AD_ATTRIBUTES</td>
+    <td>stickyAdAttributes</td>
+    <td>Indicates the `stickyAdAttributes` field in the configuration object.</td>
   </tr>
 </table>
 

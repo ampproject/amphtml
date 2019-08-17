@@ -41,4 +41,4 @@ FAIL
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-amp-consent/0.1/test/validator-amp-consent-invalid-no-meta.html:41:6 The tag 'meta name=amp-consent-blocking' is missing or incorrect, but required by 'amp-consent [type]'. (see https://www.ampproject.org/docs/reference/components/amp-consent) [AMP_TAG_PROBLEM]
+amp-consent/0.1/test/validator-amp-consent-invalid-no-meta.html:41:6 The tag 'meta name=amp-consent-blocking' is missing or incorrect, but required by 'amp-consent [type]'. (see https://amp.dev/documentation/components/amp-consent) [AMP_TAG_PROBLEM]

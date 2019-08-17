@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-export const PISTATS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const PISTATS_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://events.pi-stats.com',
-    'basePrefix': '${host}/eventsamp/?' +
-        'e=PageLoad&' +
-        'pid=${property}&' +
-        'url=${ampdocUrl}&' +
-        'cnt=${cntId}&' +
-        'lang=${language}&' +
-        'ref=${documentReferrer}&' +
-        'id=${clientId(piStatsDEVICEID)}&' +
-        'ua=${userAgent}&' +
-        'ctype=web&' +
-        'blang=${browserLanguage}&' +
-        'v=2.0&' +
-        'dist=Javascript',
+    'basePrefix':
+      '${host}/eventsamp/?' +
+      'e=PageLoad&' +
+      'pid=${property}&' +
+      'url=${ampdocUrl}&' +
+      'cnt=${cntId}&' +
+      'lang=${language}&' +
+      'ref=${documentReferrer}&' +
+      'id=${clientId(piStatsDEVICEID)}&' +
+      'ua=${userAgent}&' +
+      'ctype=web&' +
+      'blang=${browserLanguage}&' +
+      'v=2.0&' +
+      'dist=Javascript',
     'pageview': '${basePrefix}&eventtype=pageview',
   },
   'triggers': {
@@ -44,3 +47,5 @@ export const PISTATS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {PISTATS_CONFIG};

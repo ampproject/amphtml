@@ -30,12 +30,12 @@ Embeds the Facebook comments plugin.
     <td><code>&lt;script async custom-element="amp-facebook-comments" src="https://cdn.ampproject.org/v0/amp-facebook-comments-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-facebook-comments/">amp-facebook-comments example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-facebook-comments/">amp-facebook-comments example</a>.</td>
   </tr>
 </table>
 
@@ -66,7 +66,7 @@ You can use the `amp-facebook-comments` component to embed the [Facebook comment
   </tr>
   <tr>
     <td width="40%"><strong>data-numposts (optional)</strong></td>
-    <td>The number of comments to show. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.</td>
+    <td>The number of comments to show. Currently Facebook SDK limits this to max 100. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-order-by (optional)</strong></td>
@@ -78,7 +78,7 @@ You can use the `amp-facebook-comments` component to embed the [Facebook comment
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

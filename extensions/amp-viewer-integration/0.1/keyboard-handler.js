@@ -99,7 +99,10 @@ export class KeyboardHandler {
    */
   forwardEventToViewer_(e) {
     this.messaging_.sendRequest(
-        e.type, getKeyboardEventInit(e), /* awaitResponse */ false);
+      e.type,
+      getKeyboardEventInit(e),
+      /* awaitResponse */ false
+    );
   }
 }
 
@@ -133,8 +136,7 @@ function isHandledByEventTarget(e) {
 
   // Top-level event targets like `window` and `document` are not instance
   // of `Element` and do not have a `hasAttribute` function.
-  return e.target.hasAttribute &&
-      e.target.hasAttribute('contenteditable');
+  return e.target.hasAttribute && e.target.hasAttribute('contenteditable');
 }
 
 /**

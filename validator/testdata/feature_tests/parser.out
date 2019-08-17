@@ -32,52 +32,52 @@ FAIL
 |    <!-- Strangely quoted attributes: -->
 |    <a href="foo.html""></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:32:2 The attribute '"' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:32:2 The attribute '"' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href='foo.html''></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:33:2 The attribute ''' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:33:2 The attribute ''' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href=""foo.html"></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:34:2 The attribute 'foo.html"' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:34:2 The attribute 'foo.html"' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href=''foo.html'></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:35:2 The attribute 'foo.html'' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:35:2 The attribute 'foo.html'' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href=""foo.html""></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:36:2 The attribute 'foo.html""' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:36:2 The attribute 'foo.html""' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href=''foo.html''></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:37:2 The attribute 'foo.html''' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:37:2 The attribute 'foo.html''' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a '></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:38:2 The attribute ''' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:38:2 The attribute ''' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a "></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:39:2 The attribute '"' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:39:2 The attribute '"' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href"foo.html"></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:40:2 The attribute 'href"foo.html"' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:40:2 The attribute 'href"foo.html"' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href'foo.html'></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:41:2 The attribute 'href'foo.html'' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:41:2 The attribute 'href'foo.html'' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href"foo.html""></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:42:2 The attribute 'href"foo.html""' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:42:2 The attribute 'href"foo.html""' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href'foo.html''></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:43:2 The attribute 'href'foo.html''' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:43:2 The attribute 'href'foo.html''' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href""foo.html"></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:44:2 The attribute 'href""foo.html"' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:44:2 The attribute 'href""foo.html"' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href''foo.html'></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:45:2 The attribute 'href''foo.html'' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:45:2 The attribute 'href''foo.html'' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href""foo.html""></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:46:2 The attribute 'href""foo.html""' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:46:2 The attribute 'href""foo.html""' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href''foo.html''></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:47:2 The attribute 'href''foo.html''' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:47:2 The attribute 'href''foo.html''' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |
 |    <!-- Attributes in closing tags: -->
 |    <a></a foo>
@@ -88,16 +88,16 @@ feature_tests/parser.html:47:2 The attribute 'href''foo.html''' may not appear i
 |    <!-- <, / as attributes: -->
 |    <a < ></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:56:2 The attribute '<' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:56:2 The attribute '<' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a / ></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:57:2 The attribute '/' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:57:2 The attribute '/' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a /a></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:58:2 The attribute '/a' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:58:2 The attribute '/a' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a /a ></a>
 >>   ^~~~~~~~~
-feature_tests/parser.html:59:2 The attribute '/a' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/parser.html:59:2 The attribute '/a' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |
 |    <!-- Tags that may be processing instructions: -->
 |    <?php ?>

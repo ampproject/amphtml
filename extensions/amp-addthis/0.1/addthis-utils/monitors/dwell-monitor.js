@@ -41,7 +41,7 @@ export class DwellMonitor {
   listener() {
     if (!this.viewer_.isVisible()) {
       const lastVisibleTime = this.viewer_.getLastVisibleTime() || 0;
-      this.dwellTime_ += (Date.now() - lastVisibleTime);
+      this.dwellTime_ += Date.now() - lastVisibleTime;
     }
   }
 

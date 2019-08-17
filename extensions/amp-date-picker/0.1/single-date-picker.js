@@ -19,19 +19,20 @@ import {dict} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
 import {withDatePickerCommon} from './date-picker-common';
 
-
 /**
  * Create a SingleDatePicker React component
  * @return {function(new:React.Component, !JsonObject)} A single date picker component class
  */
 function createSingleDatePickerBase() {
-  const constants = /** @type {!JsonObject} */ (
-    requireExternal('react-dates/constants'));
+  const constants = /** @type {!JsonObject} */ (requireExternal(
+    'react-dates/constants'
+  ));
 
   const DAY_SIZE = constants['DAY_SIZE'];
   const HORIZONTAL_ORIENTATION = constants['HORIZONTAL_ORIENTATION'];
-  const DayPickerSingleDateController = /** @type {function(new: React.Component, !JsonObject)} */ (
-    requireExternal('react-dates')['DayPickerSingleDateController']);
+  const DayPickerSingleDateController = /** @type {function(new: React.Component, !JsonObject)} */ (requireExternal(
+    'react-dates'
+  )['DayPickerSingleDateController']);
 
   const defaultProps = dict({
     'date': null,
@@ -83,8 +84,9 @@ function createSingleDatePickerBase() {
     'isRTL': false,
   });
 
-  const WrappedDayPickerSingleDateController =
-      withFocusedTrueHack(withDatePickerCommon(DayPickerSingleDateController));
+  const WrappedDayPickerSingleDateController = withFocusedTrueHack(
+    withDatePickerCommon(DayPickerSingleDateController)
+  );
   WrappedDayPickerSingleDateController.defaultProps = defaultProps;
 
   return WrappedDayPickerSingleDateController;
@@ -98,15 +100,27 @@ function createSingleDatePickerBase() {
  * @return {function(new:React.Component, !JsonObject)} A class with a preset focused prop
  */
 function withFocusedTrueHack(WrappedComponent) {
-  const React = requireExternal('react');
+  const react = requireExternal('react');
 
-  class FocusedTrueHack extends React.Component {
-    /** @override */
-    render() {
-      const props = Object.assign({}, this.props, dict({'focused': true}));
-      return React.createElement(WrappedComponent, props);
-    }
+  /**
+   * Creates an instance of FocusedTrueHack.
+   * @param {!JsonObject} props
+   * @struct
+   * @constructor
+   * @extends {React.Component}
+   */
+  function FocusedTrueHack(props) {
+    react.Component.call(this, props);
   }
+
+  FocusedTrueHack.prototype = Object.create(react.Component.prototype);
+  FocusedTrueHack.prototype.constructor = FocusedTrueHack;
+
+  /** @override */
+  FocusedTrueHack.prototype.render = function() {
+    const props = Object.assign({}, this.props, dict({'focused': true}));
+    return react.createElement(WrappedComponent, props);
+  };
 
   return FocusedTrueHack;
 }

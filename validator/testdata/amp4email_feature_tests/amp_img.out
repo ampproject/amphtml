@@ -26,7 +26,7 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:26:2 The attribute 'src' in tag 'amp-anim extension .js script (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-form-0.1.js'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_img.html:26:2 The attribute 'src' in tag 'amp-anim extension .js script (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-form-0.1.js'. (see https://amp.dev/documentation/components/amp-anim) [DISALLOWED_HTML]
 |    <script async custom-template="amp-mustache"
 |        src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 |  </head>
@@ -34,30 +34,30 @@ amp4email_feature_tests/amp_img.html:26:2 The attribute 'src' in tag 'amp-anim e
 |    <!-- URLs must be absolute. -->
 |    <amp-img src="somelink.com">disallowed</amp-img>
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:32:2 Incomplete layout attributes specified for tag 'AMP-IMG (AMP4EMAIL)'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+amp4email_feature_tests/amp_img.html:32:2 Incomplete layout attributes specified for tag 'AMP-IMG (AMP4EMAIL)'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:32:2 The relative URL 'somelink.com' for attribute 'src' in tag 'AMP-IMG (AMP4EMAIL)' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_img.html:32:2 The relative URL 'somelink.com' for attribute 'src' in tag 'AMP-IMG (AMP4EMAIL)' is disallowed. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |
 |    <!-- URLs must be absolute. -->
 |    <amp-img srcset="somelink.com">disallowed</amp-img>
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:35:2 Incomplete layout attributes specified for tag 'AMP-IMG (AMP4EMAIL)'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+amp4email_feature_tests/amp_img.html:35:2 Incomplete layout attributes specified for tag 'AMP-IMG (AMP4EMAIL)'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:35:2 The attribute 'srcset' may not appear in tag 'AMP-IMG (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_img.html:35:2 The attribute 'srcset' may not appear in tag 'AMP-IMG (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |
 |    <!-- The protocol can only be https -->
 |    <amp-img src="http://somelink.com">disallowed</amp-img>
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:38:2 Incomplete layout attributes specified for tag 'AMP-IMG (AMP4EMAIL)'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+amp4email_feature_tests/amp_img.html:38:2 Incomplete layout attributes specified for tag 'AMP-IMG (AMP4EMAIL)'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:38:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'AMP-IMG (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_img.html:38:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'AMP-IMG (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |
 |    <!-- href of anchor is not bindable. -->
 |    <amp-anim [src]="evil">disallowed</amp-anim>
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:41:2 Incomplete layout attributes specified for tag 'AMP-ANIM (AMP4EMAIL)'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_LAYOUT_PROBLEM]
+amp4email_feature_tests/amp_img.html:41:2 Incomplete layout attributes specified for tag 'AMP-ANIM (AMP4EMAIL)'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-anim) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:41:2 The attribute '[src]' may not appear in tag 'AMP-ANIM (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_img.html:41:2 The attribute '[src]' may not appear in tag 'AMP-ANIM (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-anim) [DISALLOWED_HTML]
 |
 |
 |    <!-- This is allowed. -->
@@ -69,7 +69,7 @@ amp4email_feature_tests/amp_img.html:41:2 The attribute '[src]' may not appear i
 |    <template type="amp-mustache">
 |      <amp-anim width="1" height="1" src="{{foo}}{{bar}}">disallowed</amp-anim>
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:51:4 The attribute 'src' in tag 'AMP-ANIM (AMP4EMAIL)' is set to the invalid value '{{foo}}{{bar}}'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_img.html:51:4 The attribute 'src' in tag 'AMP-ANIM (AMP4EMAIL)' is set to the invalid value '{{foo}}{{bar}}'. (see https://amp.dev/documentation/components/amp-anim) [DISALLOWED_HTML]
 |    </template>
 |
 |  </body>

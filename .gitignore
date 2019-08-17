@@ -15,7 +15,7 @@ npm-debug.log
 .vscode
 typings
 typings.json
-build-system/runner/TESTS-TestSuites.xml
+build-system/runner/dist
 /test/manual/amp-ad.adtech.html
 test/coverage
 ./package-lock.json
@@ -27,8 +27,6 @@ chromedriver.log
 sc-*-linux*
 EXTENSIONS_CSS_MAP
 deps.txt
-flags-array.txt
-out/
 firebase
 .firebaserc
 firebase.json

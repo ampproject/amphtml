@@ -28,6 +28,7 @@ import {
   FORM_VERIFY_PARAM,
   getFormVerifier,
 } from './form-verifiers';
+import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
 import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
@@ -51,10 +52,7 @@ import {
   getFormAsObject,
   setFormForElement,
 } from '../../../src/form';
-import {
-  getFormValidator,
-  isCheckValiditySupported,
-} from './form-validators';
+import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {getMode} from '../../../src/mode';
 import {
   getViewerAuthTokenIfAvailable,
@@ -64,21 +62,17 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {toArray, toWin} from '../../../src/types';
+import {isArray, toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-
-/** @type {string} */
+/** @const {string} */
 const TAG = 'amp-form';
-
 
 /**
  * A list of external dependencies that can be included in forms.
- * @type {!Array<string>}
+ * @const {!Array<string>}
  */
-const EXTERNAL_DEPS = [
-  'amp-selector',
-];
+const EXTERNAL_DEPS = ['amp-selector'];
 
 /** @const @enum {string} */
 const FormState = {
@@ -106,10 +100,7 @@ const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
  */
 const SUBMIT_TIMEOUT = 10000;
 
-
-
 export class AmpForm {
-
   /**
    * Adds functionality to the passed form element and listens to submit event.
    * @param {!HTMLFormElement} element
@@ -152,7 +143,7 @@ export class AmpForm {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(this.form_);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
@@ -163,7 +154,10 @@ export class AmpForm {
      * @private
      */
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
-        TAG, this.viewer_, this.templates_);
+      TAG,
+      this.viewer_,
+      this.templates_
+    );
 
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
@@ -194,19 +188,27 @@ export class AmpForm {
     const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
       const {name} = inputs[i];
-      userAssert(name != SOURCE_ORIGIN_PARAM && name != FORM_VERIFY_PARAM,
-          'Illegal input name, %s found: %s', name, inputs[i]);
+      userAssert(
+        name != SOURCE_ORIGIN_PARAM && name != FORM_VERIFY_PARAM,
+        'Illegal input name, %s found: %s',
+        name,
+        inputs[i]
+      );
     }
+
+    /** @const @private {!./form-dirtiness.FormDirtiness} */
+    this.dirtinessHandler_ = new FormDirtiness(this.form_, this.win_);
 
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
     /** @const @private {!./form-verifiers.FormVerifier} */
-    this.verifier_ = getFormVerifier(
-        this.form_, () => this.handleXhrVerify_());
+    this.verifier_ = getFormVerifier(this.form_, () => this.handleXhrVerify_());
 
     this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
+      this.form_,
+      this.actionHandler_.bind(this)
+    );
     this.installEventHandlers_();
     this.installInputMasking_();
 
@@ -216,8 +218,11 @@ export class AmpForm {
     /** @private {?Promise} */
     this.renderTemplatePromise_ = null;
 
-    /** @private {./form-submit-service.FormSubmitService} */
-    this.formSubmitService_ = Services.formSubmitForDoc(element);
+    /** @private {?./form-submit-service.FormSubmitService} */
+    this.formSubmitService_ = null;
+    Services.formSubmitForDoc(element).then(service => {
+      this.formSubmitService_ = service;
+    });
   }
 
   /**
@@ -231,10 +236,12 @@ export class AmpForm {
     if (url) {
       const urlService = Services.urlForDoc(this.form_);
       urlService.assertHttpsUrl(url, this.form_, attribute);
-      userAssert(!urlService.isProxyOrigin(url),
-          'form %s should not be on AMP CDN: %s',
-          attribute,
-          this.form_);
+      userAssert(
+        !urlService.isProxyOrigin(url),
+        'form %s should not be on AMP CDN: %s',
+        attribute,
+        this.form_
+      );
     }
     return url;
   }
@@ -290,8 +297,10 @@ export class AmpForm {
 
     return getViewerAuthTokenIfAvailable(this.form_).then(token => {
       if (token) {
-        userAssert(request.fetchOpt['method'] == 'POST',
-            'Cannot attach auth token with GET request.');
+        userAssert(
+          request.fetchOpt['method'] == 'POST',
+          'Cannot attach auth token with GET request.'
+        );
         body.append('ampViewerAuthToken', token);
       }
       return request;
@@ -313,6 +322,9 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return null;
+    }
     if (invocation.method == 'submit') {
       return this.whenDependenciesReady_().then(() => {
         return this.handleSubmitAction_(invocation);
@@ -334,12 +346,15 @@ export class AmpForm {
     if (this.dependenciesPromise_) {
       return this.dependenciesPromise_;
     }
-    const depElements = this.form_./*OK*/querySelectorAll(
-        EXTERNAL_DEPS.join(','));
+    const depElements = this.form_./*OK*/ querySelectorAll(
+      EXTERNAL_DEPS.join(',')
+    );
     // Wait for an element to be built to make sure it is ready.
     const promises = toArray(depElements).map(el => el.whenBuilt());
-    return this.dependenciesPromise_ = this.waitOnPromisesOrTimeout_(promises,
-        2000);
+    return (this.dependenciesPromise_ = this.waitOnPromisesOrTimeout_(
+      promises,
+      2000
+    ));
   }
 
   /** @private */
@@ -352,16 +367,19 @@ export class AmpForm {
     });
 
     this.form_.addEventListener(
-        'submit',
-        /** @type {function(!Event): (boolean|undefined)|null}*/
-        (this.handleSubmitEvent_.bind(this)),
-        true
+      'submit',
+      this.handleSubmitEvent_.bind(this),
+      true
     );
 
-    this.form_.addEventListener('blur', e => {
-      checkUserValidityAfterInteraction_(dev().assertElement(e.target));
-      this.validator_.onBlur(e);
-    }, true);
+    this.form_.addEventListener(
+      'blur',
+      e => {
+        checkUserValidityAfterInteraction_(dev().assertElement(e.target));
+        this.validator_.onBlur(e);
+      },
+      true
+    );
 
     //  Form verification is not supported when SSRing templates is enabled.
     if (!this.ssrTemplateHelper_.isSupported()) {
@@ -376,11 +394,9 @@ export class AmpForm {
           if (this.state_ === FormState.VERIFYING) {
             if (errors.length) {
               this.setState_(FormState.VERIFY_ERROR);
-              this.renderTemplate_(
-                  /** @type {!JsonObject} */ ({verifyErrors: errors}))
-                  .then(() => {
-                    this.triggerAction_(FormEvents.VERIFY_ERROR, errors);
-                  });
+              this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
+                this.triggerAction_(FormEvents.VERIFY_ERROR, errors);
+              });
             } else {
               this.setState_(FormState.INITIAL);
             }
@@ -452,14 +468,16 @@ export class AmpForm {
     this.form_.classList.remove('user-invalid');
 
     const validityElements = this.form_.querySelectorAll(
-        '.user-valid, .user-invalid');
+      '.user-valid, .user-invalid'
+    );
     iterateCursor(validityElements, element => {
       element.classList.remove('user-valid');
       element.classList.remove('user-invalid');
     });
 
     const messageElements = this.form_.querySelectorAll(
-        '.visible[validation-for]');
+      '.visible[validation-for]'
+    );
     iterateCursor(messageElements, element => {
       element.classList.remove('visible');
     });
@@ -514,16 +532,18 @@ export class AmpForm {
         form: this.form_,
         actionXhrMutator: this.setXhrAction.bind(this),
       };
-      this.formSubmitService_.fire(event);
+      devAssert(this.formSubmitService_).fire(event);
     } catch (e) {
       dev().error(TAG, 'Form submit service failed: %s', e);
     }
 
     // Get our special fields
-    const varSubsFields =
-      this.getVarSubsFields_();
-    const asyncInputs =
-      this.form_.getElementsByClassName(AsyncInputClasses.ASYNC_INPUT);
+    const varSubsFields = this.getVarSubsFields_();
+    const asyncInputs = this.form_.getElementsByClassName(
+      AsyncInputClasses.ASYNC_INPUT
+    );
+
+    this.dirtinessHandler_.onSubmitting();
 
     // Do any assertions we may need to do
     // For NonXhrGET
@@ -535,7 +555,6 @@ export class AmpForm {
 
       // If we have no async inputs, we can just submit synchronously
       if (asyncInputs.length === 0) {
-
         for (let i = 0; i < varSubsFields.length; i++) {
           this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
         }
@@ -547,6 +566,7 @@ export class AmpForm {
         const shouldSubmitFormElement = !event;
 
         this.handleNonXhrGet_(shouldSubmitFormElement);
+        this.dirtinessHandler_.onSubmitSuccess();
         return Promise.resolve();
       }
 
@@ -558,20 +578,48 @@ export class AmpForm {
     // Set ourselves to the SUBMITTING State
     this.setState_(FormState.SUBMITTING);
 
+    // Promises to run before submit without timeout.
+    const requiredActionPromises = [];
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
     iterateCursor(asyncInputs, asyncInput => {
-      presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+      const asyncCall = this.getValueForAsyncInput_(asyncInput);
+      if (
+        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+      ) {
+        requiredActionPromises.push(asyncCall);
+      } else {
+        presubmitPromises.push(asyncCall);
+      }
     });
 
-    return this.waitOnPromisesOrTimeout_(
-        presubmitPromises,
-        SUBMIT_TIMEOUT
-    ).then(
-        () => this.handlePresubmitSuccess_(trust),
-        error => this.handlePresubmitError_(/**@type {!Error}*/(error))
+    return Promise.all(requiredActionPromises).then(
+      () => {
+        return this.waitOnPromisesOrTimeout_(
+          presubmitPromises,
+          SUBMIT_TIMEOUT
+        ).then(
+          () => this.handlePresubmitSuccess_(trust),
+          error => this.handlePresubmitError_(error)
+        );
+      },
+      error => this.handlePresubmitError_(error)
     );
+  }
+
+  /**
+   * @private
+   * Handle form error for presubmit async calls
+   * @param {*} error
+   * @return {Promise}
+   */
+  handlePresubmitError_(error) {
+    const detail = dict();
+    if (error && error.message) {
+      detail['error'] = error.message;
+    }
+    return this.handleSubmitFailure_(error, detail);
   }
 
   /**
@@ -595,27 +643,10 @@ export class AmpForm {
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
-      this.handleNonXhrGet_(/*shouldSubmitFormElement*/true);
+      this.handleNonXhrGet_(/* shouldSubmitFormElement */ true);
     }
-
     return Promise.resolve();
   }
-
-  /**
-   * Handle errors for presubmit tasks
-   * @param {!Error} error
-   */
-  handlePresubmitError_(error) {
-    this.setState_(FormState.SUBMIT_ERROR);
-    dev().error(TAG, 'Form submission failed: %s', error);
-    const errorJsonObject = dict({
-      'error': error.message,
-    });
-    this.renderTemplate_(errorJsonObject).then(() => {
-      this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
-    });
-  }
-
 
   /**
    * Send the verify request and control the VERIFYING state.
@@ -629,8 +660,9 @@ export class AmpForm {
     this.setState_(FormState.VERIFYING);
     this.triggerAction_(FormEvents.VERIFY, null);
 
-    return this.doVarSubs_(this.getVarSubsFields_())
-        .then(() => this.doVerifyXhr_());
+    return this.doVarSubs_(this.getVarSubsFields_()).then(() =>
+      this.doVerifyXhr_()
+    );
   }
 
   /**
@@ -644,17 +676,14 @@ export class AmpForm {
       p = this.handleSsrTemplate_(trust);
     } else {
       this.submittingWithTrust_(trust);
-      p = this.doActionXhr_()
-          .then(response => this.handleXhrSubmitSuccess_(
-              /* {!../../../src/utils/xhr-utils.FetchResponse} */ response),
-          error => {
-            return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
-          });
+      p = this.doActionXhr_().then(
+        response => this.handleXhrSubmitSuccess_(response),
+        error => this.handleXhrSubmitFailure_(error)
+      );
     }
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
     }
-
     return p;
   }
 
@@ -669,25 +698,49 @@ export class AmpForm {
     // Render template for the form submitting state.
     const values = this.getFormAsObject_();
     return this.renderTemplate_(values)
-        .then(() => this.actions_.trigger(
-            this.form_, FormEvents.SUBMIT, /* event */ null, trust))
-        .then(() => this.requestForFormFetch(
-            dev().assertString(this.xhrAction_), this.method_))
-        .then(formRequest => {
-          request = formRequest;
-          request.fetchOpt = setupInit(request.fetchOpt);
-          request.fetchOpt = setupAMPCors(
-              this.win_, request.xhrUrl, request.fetchOpt);
-          request.xhrUrl = setupInput(
-              this.win_, request.xhrUrl, request.fetchOpt);
-          return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-              this.form_,
-              request,
-              this.templatesForSsr_());
-        }).then(
-            resp => this.handleSsrTemplateSuccess_(resp, request),
-            error => this.handleSsrTemplateFailure_(
-                /** @type {!JsonObject} */ (error)));
+      .then(() =>
+        this.actions_.trigger(
+          this.form_,
+          FormEvents.SUBMIT,
+          /* event */ null,
+          trust
+        )
+      )
+      .then(() =>
+        this.requestForFormFetch(
+          dev().assertString(this.xhrAction_),
+          this.method_
+        )
+      )
+      .then(formRequest => {
+        request = formRequest;
+        request.fetchOpt = setupInit(request.fetchOpt);
+        request.fetchOpt = setupAMPCors(
+          this.win_,
+          request.xhrUrl,
+          request.fetchOpt
+        );
+        request.xhrUrl = setupInput(
+          this.win_,
+          request.xhrUrl,
+          request.fetchOpt
+        );
+        return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+          this.form_,
+          request,
+          this.templatesForSsr_()
+        );
+      })
+      .then(
+        response => this.handleSsrTemplateSuccess_(response),
+        error => {
+          const detail = dict();
+          if (error && error.message) {
+            detail['error'] = error.message;
+          }
+          return this.handleSubmitFailure_(error, detail);
+        }
+      );
   }
 
   /**
@@ -698,15 +751,14 @@ export class AmpForm {
    * @private
    */
   templatesForSsr_() {
-    const successContainer =
-        this.form_.querySelector('div[submit-success]');
-    const errorContainer = this.form_.querySelector('div[submit-error]');
     let successTemplate;
-    let errorTemplate;
+    const successContainer = this.form_.querySelector('[submit-success]');
     if (successContainer) {
-      successTemplate =
-          this.templates_.maybeFindTemplate(successContainer);
+      successTemplate = this.templates_.maybeFindTemplate(successContainer);
     }
+
+    let errorTemplate;
+    const errorContainer = this.form_.querySelector('[submit-error]');
     if (errorContainer) {
       errorTemplate = this.templates_.maybeFindTemplate(errorContainer);
     }
@@ -714,17 +766,13 @@ export class AmpForm {
   }
 
   /**
-   * Handles viewer render template failure.
-   * @param {!JsonObject} error
+   * Transition the form to the submit success state.
+   * @param {!JsonObject} response
+   * @return {!Promise}
+   * @private
    */
-  handleSsrTemplateFailure_(error) {
-    this.setState_(FormState.SUBMIT_ERROR);
-    user().error(TAG, 'Form submission failed: %s', error);
-    return tryResolve(() => {
-      this.renderTemplate_(error || {}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
-      });
-    });
+  handleSsrTemplateSuccess_(response) {
+    return this.handleSubmitSuccess_(tryResolve(() => response));
   }
 
   /**
@@ -739,7 +787,11 @@ export class AmpForm {
     // messages with the submitting attribute.
     this.renderTemplate_(values).then(() => {
       this.actions_.trigger(
-          this.form_, FormEvents.SUBMIT, /* event */ null, trust);
+        this.form_,
+        FormEvents.SUBMIT,
+        /* event */ null,
+        trust
+      );
     });
   }
 
@@ -753,7 +805,8 @@ export class AmpForm {
     const varSubPromises = [];
     for (let i = 0; i < varSubsFields.length; i++) {
       varSubPromises.push(
-          this.urlReplacement_.expandInputValueAsync(varSubsFields[i]));
+        this.urlReplacement_.expandInputValueAsync(varSubsFields[i])
+      );
     }
     return this.waitOnPromisesOrTimeout_(varSubPromises, 100);
   }
@@ -766,28 +819,28 @@ export class AmpForm {
    * @private
    */
   getValueForAsyncInput_(asyncInput) {
-    return asyncInput.getImpl()
-        .then(implementation => implementation.getValue())
-        .then(value => {
-          const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
-          let input = this.form_.querySelector(
-              `input[name=${escapeCssSelectorIdent(name)}]`
+    return asyncInput
+      .getImpl()
+      .then(implementation => implementation.getValue())
+      .then(value => {
+        const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
+        let input = this.form_.querySelector(
+          `input[name=${escapeCssSelectorIdent(name)}]`
+        );
+        if (!input) {
+          input = createElementWithAttributes(
+            this.win_.document,
+            'input',
+            dict({
+              'name': asyncInput.getAttribute(AsyncInputAttributes.NAME),
+              'hidden': 'true',
+            })
           );
-          if (!input) {
-            input = createElementWithAttributes(
-                this.win_.document,
-                'input',
-                dict({
-                  'name': asyncInput.getAttribute(AsyncInputAttributes.NAME),
-                  'hidden': 'true',
-                })
-            );
-          }
-          input.setAttribute('value', value);
-          this.form_.appendChild(input);
-        });
+        }
+        input.setAttribute('value', value);
+        this.form_.appendChild(input);
+      });
   }
-
 
   /**
    * Send a request to the form's action endpoint.
@@ -804,13 +857,19 @@ export class AmpForm {
    * @private
    */
   doVerifyXhr_() {
-    const noVerifyFields = toArray(this.form_.querySelectorAll(
-        `[${escapeCssSelectorIdent(FORM_VERIFY_OPTOUT)}]`));
+    const noVerifyFields = toArray(
+      this.form_.querySelectorAll(
+        `[${escapeCssSelectorIdent(FORM_VERIFY_OPTOUT)}]`
+      )
+    );
     const blacklist = noVerifyFields.map(field => field.name || field.id);
 
-    return this.doXhr_(dev().assertString(this.xhrVerify_), this.method_,
-        /**opt_extraFields*/ {[FORM_VERIFY_PARAM]: true},
-        /**opt_fieldBlacklist*/ blacklist);
+    return this.doXhr_(
+      dev().assertString(this.xhrVerify_),
+      this.method_,
+      /**opt_extraFields*/ {[FORM_VERIFY_PARAM]: true},
+      /**opt_fieldBlacklist*/ blacklist
+    );
   }
 
   /**
@@ -825,32 +884,21 @@ export class AmpForm {
   doXhr_(url, method, opt_extraFields, opt_fieldBlacklist) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
     return this.requestForFormFetch(
-        url, method, opt_extraFields, opt_fieldBlacklist)
-        .then(request => this.xhr_.fetch(request.xhrUrl, request.fetchOpt));
+      url,
+      method,
+      opt_extraFields,
+      opt_fieldBlacklist
+    ).then(request => this.xhr_.fetch(request.xhrUrl, request.fetchOpt));
   }
 
   /**
-   * Transition the form to the submit success state.
-   * @param {!JsonObject} response
-   * @param {!FetchRequestDef} request
-   * @return {!Promise}
-   * @private visible for testing
-   */
-  handleSsrTemplateSuccess_(response, request) {
-    // Construct the fetch response to reuse the methods in-place for
-    // amp CORs validation.
-    this.ssrTemplateHelper_.verifySsrResponse(this.win_, response, request);
-    return this.handleSubmitSuccess_(tryResolve(() => response));
-  }
-
-  /**
-   * Transition the form to the submit success state.
    * @param {!Response} response
    * @return {!Promise}
-   * @private visible for testing
+   * @private
    */
   handleXhrSubmitSuccess_(response) {
-    return this.handleSubmitSuccess_(/** @type {!Promise<!JsonObject>}*/(response.json())).then(() => {
+    const json = /** @type {!Promise<!JsonObject>} */ (response.json());
+    return this.handleSubmitSuccess_(json).then(() => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
       this.maybeHandleRedirect_(response);
     });
@@ -863,48 +911,67 @@ export class AmpForm {
    * @private visible for testing
    */
   handleSubmitSuccess_(jsonPromise) {
-    return jsonPromise.then(json => {
-      this.setState_(FormState.SUBMIT_SUCCESS);
-      this.renderTemplate_(json || {}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
-      });
-    }, error => {
-      user().error(TAG, 'Failed to parse response JSON: %s', error);
-    });
+    return jsonPromise.then(
+      json => {
+        this.setState_(FormState.SUBMIT_SUCCESS);
+        this.renderTemplate_(json || {}).then(() => {
+          this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
+          this.dirtinessHandler_.onSubmitSuccess();
+        });
+      },
+      error => {
+        user().error(TAG, 'Failed to parse response JSON: %s', error);
+      }
+    );
   }
 
   /**
-   * Transition the form the the submit error state.
-   * @param {!Error} error
+   * @param {*} e
    * @return {!Promise}
    * @private
    */
-  handleXhrSubmitFailure_(error) {
+  handleXhrSubmitFailure_(e) {
     let promise;
-    if (error && error.response) {
+    if (e && e.response) {
+      const error = /** @type {!Error} */ (e);
       promise = error.response.json().catch(() => null);
     } else {
       promise = Promise.resolve(null);
     }
     return promise.then(responseJson => {
-
       this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
-      this.setState_(FormState.SUBMIT_ERROR);
-      this.renderTemplate_(responseJson || {}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, responseJson);
+      this.handleSubmitFailure_(e, responseJson);
+      this.maybeHandleRedirect_(e.response);
+    });
+  }
+
+  /**
+   * Transition the form the the submit error state.
+   * @param {*} error
+   * @param {!JsonObject} json
+   * @return {!Promise}
+   * @private
+   */
+  handleSubmitFailure_(error, json) {
+    this.setState_(FormState.SUBMIT_ERROR);
+    user().error(TAG, 'Form submission failed: %s', error);
+    return tryResolve(() => {
+      this.renderTemplate_(json).then(() => {
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, json);
+        this.dirtinessHandler_.onSubmitError();
       });
-      this.maybeHandleRedirect_(error.response);
-      user().error(TAG, 'Form submission failed: %s', error);
     });
   }
 
   /** @private */
   handleNonXhrPost_() {
     // non-XHR POST requests are not supported.
-    userAssert(false,
-        'Only XHR based (via action-xhr attribute) submissions are supported ' +
+    userAssert(
+      false,
+      'Only XHR based (via action-xhr attribute) submissions are supported ' +
         'for POST requests. %s',
-        this.form_);
+      this.form_
+    );
   }
 
   /**
@@ -931,7 +998,10 @@ export class AmpForm {
   assertSsrTemplate_(value, msg) {
     const supported = this.ssrTemplateHelper_.isSupported();
     userAssert(
-        supported === value, '[amp-form]: viewerRenderTemplate | %s', msg);
+      supported === value,
+      '[amp-form]: viewerRenderTemplate | %s',
+      msg
+    );
   }
 
   /**
@@ -941,10 +1011,13 @@ export class AmpForm {
    */
   assertNoSensitiveFields_() {
     const fields = this.form_.querySelectorAll(
-        'input[type=password],input[type=file]');
-    userAssert(fields.length == 0,
-        'input[type=password] or input[type=file] ' +
-        'may only appear in form[method=post]');
+      'input[type=password],input[type=file]'
+    );
+    userAssert(
+      fields.length == 0,
+      'input[type=password] or input[type=file] ' +
+        'may only appear in form[method=post]'
+    );
   }
 
   /**
@@ -967,7 +1040,7 @@ export class AmpForm {
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
    * Not applicable if viewer can render templates.
-   * @param {!Response} response
+   * @param {?Response} response
    * @private
    */
   maybeHandleRedirect_(response) {
@@ -977,16 +1050,23 @@ export class AmpForm {
     }
     const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
     if (redirectTo) {
-      userAssert(this.target_ != '_blank',
-          'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
-          'not supported, use target=_top instead. %s', this.form_);
+      userAssert(
+        this.target_ != '_blank',
+        'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
+          'not supported, use target=_top instead. %s',
+        this.form_
+      );
       try {
         const urlService = Services.urlForDoc(this.form_);
         urlService.assertAbsoluteHttpOrHttpsUrl(redirectTo);
         urlService.assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
       } catch (e) {
-        userAssert(false, 'The `AMP-Redirect-To` header value must be an ' +
-            'absolute URL starting with https://. Found %s', redirectTo);
+        userAssert(
+          false,
+          'The `AMP-Redirect-To` header value must be an ' +
+            'absolute URL starting with https://. Found %s',
+          redirectTo
+        );
       }
       const navigator = Services.navigationForDoc(this.form_);
       navigator.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
@@ -996,13 +1076,15 @@ export class AmpForm {
   /**
    * Triggers either a submit-success or submit-error action with response data.
    * @param {!FormEvents} name
-   * @param {?Object} detail
+   * @param {?JsonObject|!Array<{message: string, name: string}>} detail
    * @private
    */
   triggerAction_(name, detail) {
-    const event =
-        createCustomEvent(this.win_, `${TAG}.${name}`,
-            dict({'response': detail}));
+    const event = createCustomEvent(
+      this.win_,
+      `${TAG}.${name}`,
+      dict({'response': detail})
+    );
     this.actions_.trigger(this.form_, name, event, ActionTrust.HIGH);
   }
 
@@ -1014,8 +1096,7 @@ export class AmpForm {
    * @private
    */
   waitOnPromisesOrTimeout_(promises, timeout) {
-    return Promise.race(
-        [Promise.all(promises), this.timer_.promise(timeout)]);
+    return Promise.race([Promise.all(promises), this.timer_.promise(timeout)]);
   }
 
   /**
@@ -1056,7 +1137,14 @@ export class AmpForm {
    * @private
    */
   renderTemplate_(data) {
-    const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
+    if (isArray(data)) {
+      data = dict();
+      user().warn(
+        TAG,
+        `Unexpected data type: ${data}. Expected non JSON array.`
+      );
+    }
+    const container = this.form_./*OK*/ querySelector(`[${this.state_}]`);
     let p = Promise.resolve();
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
@@ -1064,21 +1152,25 @@ export class AmpForm {
       container.setAttribute('aria-labeledby', messageId);
       container.setAttribute('aria-live', 'assertive');
       if (this.templates_.hasTemplate(container)) {
-        p = this.ssrTemplateHelper_.renderTemplate(devAssert(container), data)
-            .then(rendered => {
-              rendered.id = messageId;
-              rendered.setAttribute('i-amphtml-rendered', '');
-              return this.resources_.mutateElement(devAssert(container),
-                  () => {
-                    container.appendChild(rendered);
-                    const renderedEvent = createCustomEvent(
-                        this.win_,
-                        AmpEvents.DOM_UPDATE,
-                        /* detail */ null,
-                        {bubbles: true});
-                    container.dispatchEvent(renderedEvent);
-                  });
-            });
+        p = this.ssrTemplateHelper_
+          .renderTemplate(devAssert(container), data)
+          .then(rendered => {
+            rendered.id = messageId;
+            rendered.setAttribute('i-amphtml-rendered', '');
+            return this.resources_.mutateElement(
+              dev().assertElement(container),
+              () => {
+                container.appendChild(rendered);
+                const renderedEvent = createCustomEvent(
+                  this.win_,
+                  AmpEvents.DOM_UPDATE,
+                  /* detail */ null,
+                  {bubbles: true}
+                );
+                container.dispatchEvent(renderedEvent);
+              }
+            );
+          });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
         // this container are now visible so they get scheduled for layout.
@@ -1101,7 +1193,7 @@ export class AmpForm {
    * @private
    */
   cleanupRenderedTemplate_(state) {
-    const container = this.form_./*OK*/querySelector(`[${state}]`);
+    const container = this.form_./*OK*/ querySelector(`[${state}]`);
     if (!container) {
       return;
     }
@@ -1115,6 +1207,7 @@ export class AmpForm {
    * Returns a promise that resolves when tempalte render finishes. The promise
    * will be null if the template render has not started.
    * @visibleForTesting
+   * @return {*} TODO(#23582): Specify return type
    */
   renderTemplatePromiseForTesting() {
     return this.renderTemplatePromise_;
@@ -1124,12 +1217,12 @@ export class AmpForm {
    * Returns a promise that resolves when xhr submit finishes. The promise
    * will be null if xhr submit has not started.
    * @visibleForTesting
+   * @return {*} TODO(#23582): Specify return type
    */
   xhrSubmitPromiseForTesting() {
     return this.xhrSubmitPromise_;
   }
 }
-
 
 /**
  * Checks user validity for all inputs, fieldsets and the form.
@@ -1141,7 +1234,6 @@ function checkUserValidityOnSubmission(form) {
   iterateCursor(elements, element => checkUserValidity(element));
   return checkUserValidity(form);
 }
-
 
 /**
  * Returns the user validity state of the element.
@@ -1157,7 +1249,6 @@ function getUserValidityStateFor(element) {
 
   return UserValidityState.NONE;
 }
-
 
 /**
  * Updates class names on the element to reflect the active invalid types on it.
@@ -1181,9 +1272,12 @@ function removeValidityStateClasses(form) {
   const dummyInput = document.createElement('input');
   for (const validityState in dummyInput.validity) {
     const elements = form.querySelectorAll(
-        `.${escapeCssSelectorIdent(validityState)}`);
+      `.${escapeCssSelectorIdent(validityState)}`
+    );
     iterateCursor(elements, element => {
-      dev().assertElement(element).classList.remove(validityState);
+      dev()
+        .assertElement(element)
+        .classList.remove(validityState);
     });
   }
 }
@@ -1215,14 +1309,18 @@ function checkUserValidity(element, propagate = false) {
   let shouldPropagate = false;
   const previousValidityState = getUserValidityStateFor(element);
   const isCurrentlyValid = element.checkValidity();
-  if (previousValidityState != UserValidityState.USER_VALID &&
-      isCurrentlyValid) {
+  if (
+    previousValidityState != UserValidityState.USER_VALID &&
+    isCurrentlyValid
+  ) {
     element.classList.add('user-valid');
     element.classList.remove('user-invalid');
     // Don't propagate user-valid unless it was marked invalid before.
     shouldPropagate = previousValidityState == UserValidityState.USER_INVALID;
-  } else if (previousValidityState != UserValidityState.USER_INVALID &&
-      !isCurrentlyValid) {
+  } else if (
+    previousValidityState != UserValidityState.USER_INVALID &&
+    !isCurrentlyValid
+  ) {
     element.classList.add('user-invalid');
     element.classList.remove('user-valid');
     // Always propagate an invalid state change. One invalid input field is
@@ -1246,7 +1344,6 @@ function checkUserValidity(element, propagate = false) {
   return isCurrentlyValid;
 }
 
-
 /**
  * Responds to user interaction with an input by checking user validity of the
  * input and possibly its input-related ancestors (e.g. feildset, form).
@@ -1257,7 +1354,6 @@ export function checkUserValidityAfterInteraction_(input) {
   checkUserValidity(input, /* propagate */ true);
 }
 
-
 /**
  * Bootstraps the amp-form elements
  */
@@ -1267,15 +1363,17 @@ export class AmpFormService {
    */
   constructor(ampdoc) {
     /** @const @private {!Promise} */
-    this.whenInitialized_ = this.installStyles_(ampdoc)
-        .then(() => this.installHandlers_(ampdoc));
+    this.whenInitialized_ = this.installStyles_(ampdoc).then(() =>
+      this.installHandlers_(ampdoc)
+    );
 
     // Dispatch a test-only event for integration tests.
     if (getMode().test) {
       this.whenInitialized_.then(() => {
         const {win} = ampdoc;
-        const event = createCustomEvent(
-            win, FormEvents.SERVICE_INIT, null, {bubbles: true});
+        const event = createCustomEvent(win, FormEvents.SERVICE_INIT, null, {
+          bubbles: true,
+        });
         win.dispatchEvent(event);
       });
     }
@@ -1348,7 +1446,6 @@ export class AmpFormService {
     });
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc('form-submit-service', FormSubmitService);

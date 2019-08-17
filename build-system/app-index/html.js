@@ -16,7 +16,6 @@
 
 const identity = a => a;
 
-
 /**
  * Takes a set of HTML fragments and concatenates them.
  * @param {!Array<T>} fragments
@@ -27,7 +26,6 @@ const identity = a => a;
 const joinFragments = (fragments, renderer = identity) =>
   fragments.map(renderer).join('');
 
-
 /**
  * pass-through for syntax highlighting
  * @param {!Array<string>} strings
@@ -36,6 +34,5 @@ const joinFragments = (fragments, renderer = identity) =>
  */
 const html = (strings, ...values) =>
   joinFragments(strings, (string, i) => string + (values[i] || ''));
-
 
 module.exports = {html, joinFragments};

@@ -31,12 +31,12 @@ FAIL
 |    <!-- This tag is duplicate, but must be unique. -->
 |    <style amp-custom>a { second: style; }</style>
 >>   ^~~~~~~~~
-feature_tests/duplicate_unique_tags_and_wrong_parents.html:31:2 The tag 'style amp-custom' appears more than once in the document. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/duplicate_unique_tags_and_wrong_parents.html:31:2 The tag 'style amp-custom' appears more than once in the document. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </head>
 |  <body>
 |  <!-- Style isn't allowed inside body -->
 |  <style amp-custom>Wrong parent tag.</style>
 >> ^~~~~~~~~
-feature_tests/duplicate_unique_tags_and_wrong_parents.html:35:0 The parent tag of tag 'style amp-custom' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
+feature_tests/duplicate_unique_tags_and_wrong_parents.html:35:0 The parent tag of tag 'style amp-custom' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [DISALLOWED_HTML]
 |  </body>
 |  </html>

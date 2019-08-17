@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for bn strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'সাউন্ড বন্ধ আছে',
   },
@@ -31,75 +31,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'সাউন্ড চালু আছে',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'এখনই আবেদন করুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'বই',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'টিকিট কিনুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'ডাউনলোড করুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'ঘুরে দেখুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'এখনই ডাউনলোড করুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'এখনই ইনস্টল করুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'আরও জানুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'শুনুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'আরও',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'অ্যাপ খুলুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'এখনই অর্ডার করুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'চালান',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'পড়ুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'কিনুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'দেখান',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'শোটাইম',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'সাইন-আপ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'এখনই সাবস্ক্রাইব করুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'অ্যাপ ব্যবহার করুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'দেখুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'দেখুন',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'এপিসোড দেখুন',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'পড়ার জন্য আরও',
@@ -126,10 +57,10 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'এমপি ফলফল সম্পর্কে আরও অনেক কিছু জানুন',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'পরবর্তী\' বোতামে ট্যাপ করুন',
+    string: "'পরবর্তী' বোতামে ট্যাপ করুন",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'ফিরে যান\' বোতামে ট্যাপ করুন',
+    string: "'ফিরে যান' বোতামে ট্যাপ করুন",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'উপরের দিকে সোয়াইপ করুন',
@@ -151,6 +82,9 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
+  },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'লিঙ্ক ডাউনলোড করুন',
@@ -186,8 +120,9 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'এই পরীক্ষা দেখতে আপনার উইন্ডোর সাইজ বড় করুন',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'এই কন্টেন্ট দেখতে আপনাকে এএমপি স্টোরি এক্সপেরিমেন্ট ফিচারটি ' +
-        'চালু করতে হবে।',
+    string:
+      'এই কন্টেন্ট দেখতে আপনাকে এএমপি স্টোরি এক্সপেরিমেন্ট ফিচারটি ' +
+      'চালু করতে হবে।',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'পোর্ট্রেট মোডে পেজটি ভালভাবে দেখা যাবে',
@@ -195,4 +130,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'মনে হচ্ছে আপনার ব্রাউজারে এটি কাজ করবে না',
   },
-});
+};
+
+export default strings;

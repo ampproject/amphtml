@@ -16,53 +16,57 @@
 
 import '../amp-vimeo';
 
-
-describes.realWin('amp-vimeo', {
-  amp: {
-    extensions: ['amp-vimeo'],
+describes.realWin(
+  'amp-vimeo',
+  {
+    amp: {
+      extensions: ['amp-vimeo'],
+    },
   },
-}, env => {
-  let win, doc;
+  env => {
+    let win, doc;
 
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-  });
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+    });
 
-  function getVimeo(videoId, opt_responsive) {
-    const vimeo = doc.createElement('amp-vimeo');
-    vimeo.setAttribute('data-videoid', videoId);
-    vimeo.setAttribute('width', '111');
-    vimeo.setAttribute('height', '222');
-    if (opt_responsive) {
-      vimeo.setAttribute('layout', 'responsive');
-    }
-    doc.body.appendChild(vimeo);
-    return vimeo.build()
+    function getVimeo(videoId, opt_responsive) {
+      const vimeo = doc.createElement('amp-vimeo');
+      vimeo.setAttribute('data-videoid', videoId);
+      vimeo.setAttribute('width', '111');
+      vimeo.setAttribute('height', '222');
+      if (opt_responsive) {
+        vimeo.setAttribute('layout', 'responsive');
+      }
+      doc.body.appendChild(vimeo);
+      return vimeo
+        .build()
         .then(() => vimeo.layoutCallback())
         .then(() => vimeo);
+    }
+
+    it('renders', () => {
+      return getVimeo('123').then(vimeo => {
+        const iframe = vimeo.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal('https://player.vimeo.com/video/123');
+      });
+    });
+
+    it('renders responsively', () => {
+      return getVimeo('234', true).then(vimeo => {
+        const iframe = vimeo.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.className).to.match(/i-amphtml-fill-content/);
+      });
+    });
+
+    it('requires data-videoid', () => {
+      return getVimeo('').should.eventually.be.rejectedWith(
+        /The data-videoid attribute is required for/
+      );
+    });
   }
-
-  it('renders', () => {
-    return getVimeo('123').then(vimeo => {
-      const iframe = vimeo.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://player.vimeo.com/video/123');
-    });
-  });
-
-  it('renders responsively', () => {
-    return getVimeo('234', true).then(vimeo => {
-      const iframe = vimeo.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
-    });
-  });
-
-  it('requires data-videoid', () => {
-    return getVimeo('').should.eventually.be.rejectedWith(
-        /The data-videoid attribute is required for/);
-  });
-});
+);

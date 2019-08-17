@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-export const RETARGETLY_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const RETARGETLY_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://api.retargetly.com',
-    'page': '${host}/api?id=${accountId}&src=${sourceId}&url=${sourceUrl}' +
-    '&n=${title}&ref=${documentReferrer}&ua=${userAgent}' +
-    '&random=${random}&bl=${browserLanguage}&source=amp',
+    'page':
+      '${host}/api?id=${accountId}&src=${sourceId}&url=${sourceUrl}' +
+      '&n=${title}&ref=${documentReferrer}&ua=${userAgent}' +
+      '&random=${random}&bl=${browserLanguage}&source=amp',
   },
   'transport': {
     'beacon': false,
@@ -34,4 +37,4 @@ export const RETARGETLY_CONFIG = /** @type {!JsonObject} */ ({
   },
 });
 
-
+export {RETARGETLY_CONFIG};

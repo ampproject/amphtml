@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-export const INFONLINE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const INFONLINE_CONFIG = jsonLiteral({
   'vars': {
     'sv': 'ke',
     'ap': '1',
   },
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
   'requests': {
-    'pageview': '${url}?st=${st}' +
+    'pageview':
+      '${url}?st=${st}' +
       '&sv=${sv}' +
       '&ap=${ap}' +
       '&co=${co}' +
@@ -37,3 +40,5 @@ export const INFONLINE_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {INFONLINE_CONFIG};

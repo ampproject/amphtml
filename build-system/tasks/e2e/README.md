@@ -1,6 +1,6 @@
 # End-to-end Tests
 
-AMP contibutors embrace testing to maintain confidence that their code is executing correctly during development and maintenance of features and fixes. End-to-end (or E2E) tests aim to closely reproduce how a user would interact with a document as possible.
+AMP contributors embrace testing to maintain confidence that their code is executing correctly during development and maintenance of features and fixes. End-to-end (or E2E) tests aim to closely reproduce how a user would interact with a document as possible.
 
 * [What is an end-to-end test?](#what-is-an-end-to-end-test)
 * [Choosing which features to test](#choosing-which-features-to-test)
@@ -152,7 +152,7 @@ E2E test code runs in `node` and the code under test runs in the browser with th
 ### node inspect
 
 ```sh
-node --inspect-brk $(which gulp) e2e # --nobuild --testnames --files=extensions/amp-foo/0.1/test-e2e/test-amp-foo-basic.js
+node --inspect-brk $(which gulp) e2e --nobuild --testnames --files=extensions/amp-foo/0.1/test-e2e/test-amp-foo-basic.js
 ```
 
 Open Chrome DevTools and click the Node logo in the top left.

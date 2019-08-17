@@ -31,7 +31,7 @@ rating viewer, you'd do this by building an extension.
 
 This document describes how to create a new AMP extension, which is one of the most common ways of adding a new feature to AMP.
 
-Before diving into the details on creating a new AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md).  Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) and finding a reviewer before you start significant development.
+Before diving into the details on creating a new AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md).  Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) and finding a guide before you start significant development.
 
 ## Naming
 
@@ -57,7 +57,7 @@ The directory structure is below:
 ├── validator-amp-my-element.protoascii  # Validator rules (req'd)
 ├── amp-my-element.md                    # Element's main documentation (req'd)
 └── More documentation in .md files (optional)
-└── OWNERS.yaml # Owners file. Primary contact(s) for the extension. More about owners [here](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md) (req'd)
+└── OWNERS.yaml # Owners file. Primary contact(s) for the extension. More about owners [here](https://github.com/ampproject/amphtml/blob/master/contributing/CODE_OWNERSHIP.md) (req'd)
 
 ```
 In most cases you'll only create the required (req'd) files. If your element does not need custom CSS, you don't need to create the CSS file.
@@ -358,7 +358,7 @@ owners.
 this.cells_ = this.getRealChildren();
 
 this.cells_.forEach(cell => {
-  this.setAsOwner(cell);
+  Services.ownersForDoc(this.element).setOwner(cell, this.element);
   cell.style.display = 'inline-block';
   this.container_.appendChild(cell);
 });
@@ -372,12 +372,13 @@ forward/backward in the slides and then calls `scheduleLayout` for the
 current slide when the user moves to it.
 
 ```javascript
-  this.updateInViewport(oldSlide, false);
-  this.updateInViewport(newSlide, true);
-  this.scheduleLayout(newSlide);
+  const owners = Services.ownersForDoc(this.element);
+  owners.updateInViewport(this.element, oldSlide, false);
+  owners.updateInViewport(this.element, newSlide, true);
+  owners.scheduleLayout(this.element, newSlide);
   this.setControlsState();
-  this.schedulePause(oldSlide);
-  this.schedulePreload(nextSlide);
+  owners.schedulePause(this.element, oldSlide);
+  owners.schedulePreload(this.element, nextSlide);
 ```
 
 It's important to understand that the parent/owner element is
@@ -784,7 +785,7 @@ For faster testing during development, consider using --files argument
 to only run your extensions' tests.
 
 ```shell
-$ gulp test --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
+$ gulp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
 ## Type checking

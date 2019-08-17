@@ -23,18 +23,22 @@ import {tryParseJson} from '../json';
  * @return {!../../3p/iframe-messaging-client.IframeMessagingClient}
  */
 export function iframeMessagingClientFor(win) {
-  return /** @type {!../../3p/iframe-messaging-client.IframeMessagingClient} */(
-    getService(win, 'iframeMessagingClient'));
+  return /** @type {!../../3p/iframe-messaging-client.IframeMessagingClient} */ (getService(
+    win,
+    'iframeMessagingClient'
+  ));
 }
 
 /**
  * @param {!Window} win
  */
 export function installIframeMessagingClient(win) {
-  registerServiceBuilder(win,
-      'iframeMessagingClient',
-      createIframeMessagingClient.bind(null, win),
-      /* opt_instantiate */ true);
+  registerServiceBuilder(
+    win,
+    'iframeMessagingClient',
+    createIframeMessagingClient.bind(null, win),
+    /* opt_instantiate */ true
+  );
 }
 
 /**

@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for tr strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Ses kapalı',
   },
@@ -31,75 +31,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'Ses açık',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'Hemen Başvur',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'Kitap',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'Bilet Satın Al',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'İndir',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'Keşfet',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'Hemen Al',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'Şimdi Yükle',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'Daha Fazla Bilgi',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'Dinle',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'Diğer',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Uygulamayı Aç',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'Şimdi Sipariş Et',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'Oynat',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'Oku',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Satın al',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'Göster',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'Gösterim zamanları',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'Kaydol',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'Şimdi Abone Ol',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Uygulama Kullan',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'Göster',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'İzle',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Bölümü İzle',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'Okuyabileceğiniz diğer makaleler',
@@ -126,10 +57,10 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'AMP sonuçları hakkında daha fazla bilgi',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Sonraki\'ye dokunun',
+    string: "Sonraki'ye dokunun",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Geri\'ye dokunun',
+    string: "Geri'ye dokunun",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'Yukarı kaydır',
@@ -151,6 +82,9 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
+  },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Bağlantıyı Al',
@@ -174,21 +108,23 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
-    string: 'Tweet\'i genişlet',
+    string: "Tweet'i genişlet",
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
     string: 'Bu deneyimi görebilmek için pencerenizin yüksekliğini artırın',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Bu deneyimi görebilmek için pencerenizin hem yüksekliğini hem ' +
-        'de genişliğini artırın',
+    string:
+      'Bu deneyimi görebilmek için pencerenizin hem yüksekliğini hem ' +
+      'de genişliğini artırın',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Bu deneyimi görebilmek için pencerenizin genişliğini artırın',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Bu içeriği görebilmek için amp hikayesi deneyimini ' +
-        'etkinleştirmeniz gerekir.',
+    string:
+      'Bu içeriği görebilmek için amp hikayesi deneyimini ' +
+      'etkinleştirmeniz gerekir.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Sayfa en iyi dikey modda görüntülenir',
@@ -196,4 +132,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'Maalesef tarayıcınız bu deneyimi desteklemiyor gibi görünüyor',
   },
-});
+};
+
+export default strings;

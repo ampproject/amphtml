@@ -20,6 +20,7 @@ import {
   endsWith,
   expandTemplate,
   includes,
+  trimEnd,
 } from '../../src/string';
 
 describe('dashToCamelCase', () => {
@@ -66,7 +67,6 @@ describe('includes', () => {
 });
 
 describe('expandTemplate', () => {
-
   const data = {
     'x': 'Test 1',
     'y': 'Test 2',
@@ -112,12 +112,11 @@ describe('expandTemplate', () => {
   it('should handle multiple iterations when asked to.', () => {
     expect(expandTemplate('${tox}', testGetter, 2)).to.equal('Test 1');
     expect(expandTemplate('${toxy}', testGetter, 2)).to.equal('Test 1Test 2');
-    expect(expandTemplate('${totoxy}', testGetter, 2)).to.equal(
-        '${x}${y}');
-    expect(expandTemplate('${totoxy}', testGetter, 3)).to.equal(
-        'Test 1Test 2');
+    expect(expandTemplate('${totoxy}', testGetter, 2)).to.equal('${x}${y}');
+    expect(expandTemplate('${totoxy}', testGetter, 3)).to.equal('Test 1Test 2');
     expect(expandTemplate('${totoxy}', testGetter, 10)).to.equal(
-        'Test 1Test 2');
+      'Test 1Test 2'
+    );
   });
 
   it('should handle circular expansions without hanging', () => {
@@ -138,5 +137,23 @@ describe('camelCaseToDash', () => {
     expect(camelCaseToDash('f00b4rb4z')).to.equal('f00b4rb4z');
     expect(camelCaseToDash('ABC')).to.equal('A-b-c');
     expect(camelCaseToDash('aBC')).to.equal('a-b-c');
+  });
+});
+
+describe('trimEnd', () => {
+  it('remove trailing spaces', () => {
+    expect(trimEnd('abc ')).to.equal('abc');
+  });
+
+  it('remove trailing whitespace characters', () => {
+    expect(trimEnd('abc\n\t')).to.equal('abc');
+  });
+
+  it('should keep leading spaces', () => {
+    expect(trimEnd(' abc')).to.equal(' abc');
+  });
+
+  it('should keep leading whitespace characters', () => {
+    expect(trimEnd('\n\tabc')).to.equal('\n\tabc');
   });
 });

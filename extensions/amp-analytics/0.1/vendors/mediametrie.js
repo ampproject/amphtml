@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-export const MEDIAMETRIE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const MEDIAMETRIE_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://prof.estat.com/m/web',
-    'pageview': '${host}/${serial}?' +
+    'pageview':
+      '${host}/${serial}?' +
       'c=${level1}' +
       '&dom=${ampdocUrl}' +
       '&enc=${documentCharset}' +
@@ -45,3 +48,5 @@ export const MEDIAMETRIE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {MEDIAMETRIE_CONFIG};

@@ -49,8 +49,9 @@ describe('getHtml', () => {
 
   it('should correctly works with attributes array', () => {
     const result = getHtml(window, '#wrapper', ['class', 'id']);
-    const expected = '<div id="wrapper"> ' +
-        '<div class="tmp">Lorem ipsum</div> dolor sit amet </div>';
+    const expected =
+      '<div id="wrapper"> ' +
+      '<div class="tmp">Lorem ipsum</div> dolor sit amet </div>';
     expect(result).to.equal(expected);
   });
 

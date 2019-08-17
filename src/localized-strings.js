@@ -18,13 +18,13 @@ import {parseJson} from './json';
 /**
  * A unique identifier for each localized string.  Localized string IDs should:
  *
- *   - Maintain alphabetical order
+ *   - Maintain alphabetical order, by component
  *   - Be prefixed with the name of the extension that uses the string
  *     (e.g. "AMP_STORY_"), or with "AMP_" if they are general
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 63
+ * Next ID: 66
  *
  * @const @enum {string}
  */
@@ -41,9 +41,11 @@ export const LocalizedStringId = {
   AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL: '27',
   AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL: '25',
   AMP_STORY_DOMAIN_DIALOG_HEADING_LINK: '26',
+  AMP_STORY_HAS_NEW_PAGE_TEXT: '64',
   AMP_STORY_HINT_UI_NEXT_LABEL: '2',
   AMP_STORY_HINT_UI_PREVIOUS_LABEL: '3',
   AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL: '35',
+  AMP_STORY_PAGE_ERROR_VIDEO: '65',
   AMP_STORY_PAGE_PLAY_VIDEO: '34',
   AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: '4',
   AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT: '5',
@@ -51,6 +53,7 @@ export const LocalizedStringId = {
   AMP_STORY_SHARING_PROVIDER_NAME_EMAIL: '6',
   AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK: '7',
   AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS: '8',
+  AMP_STORY_SHARING_PROVIDER_NAME_LINE: '63',
   AMP_STORY_SHARING_PROVIDER_NAME_LINK: '9',
   AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN: '10',
   AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST: '11',
@@ -100,7 +103,6 @@ export const LocalizedStringId = {
   DEPRECATED_AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL: '17',
 };
 
-
 /**
  * @typedef {{
  *   string: string,
@@ -109,12 +111,10 @@ export const LocalizedStringId = {
  */
 export let LocalizedStringDef;
 
-
 /**
  * @typedef {!Object<!LocalizedStringId, !LocalizedStringDef>}
  */
 export let LocalizedStringBundleDef;
-
 
 /**
  * Creates a deep copy of the specified LocalizedStringBundle.
@@ -123,9 +123,9 @@ export let LocalizedStringBundleDef;
  */
 function cloneLocalizedStringBundle(localizedStringBundle) {
   return /** @type {!LocalizedStringBundleDef} */ (parseJson(
-      JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))));
+    JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))
+  ));
 }
-
 
 /**
  * Creates a pseudo locale by applying string transformations (specified by the
@@ -138,16 +138,18 @@ function cloneLocalizedStringBundle(localizedStringBundle) {
  */
 export function createPseudoLocale(localizedStringBundle, localizationFn) {
   /** @type {!LocalizedStringBundleDef} */
-  const pseudoLocaleStringBundle =
-      cloneLocalizedStringBundle(localizedStringBundle);
+  const pseudoLocaleStringBundle = cloneLocalizedStringBundle(
+    localizedStringBundle
+  );
 
   Object.keys(pseudoLocaleStringBundle).forEach(localizedStringIdAsStr => {
-    const localizedStringId =
-    /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
-    pseudoLocaleStringBundle[localizedStringId].string =
-        localizationFn(localizedStringBundle[localizedStringId].string);
-    pseudoLocaleStringBundle[localizedStringId].fallback =
-        localizationFn(localizedStringBundle[localizedStringId].fallback);
+    const localizedStringId = /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
+    pseudoLocaleStringBundle[localizedStringId].string = localizationFn(
+      localizedStringBundle[localizedStringId].string
+    );
+    pseudoLocaleStringBundle[localizedStringId].fallback = localizationFn(
+      localizedStringBundle[localizedStringId].fallback
+    );
   });
 
   return pseudoLocaleStringBundle;

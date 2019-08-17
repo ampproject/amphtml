@@ -16,12 +16,10 @@
 
 import {collapseFrame, expandFrame} from './frame-overlay-helper';
 
-
 /**
  * Inabox host manager for full overlay frames.
  */
 export class FrameOverlayManager {
-
   /**
    * @param {!Window} win
    */
@@ -82,18 +80,23 @@ export class FrameOverlayManager {
     // We know what the collapsed box was. If the viewport has not changed while
     // expanded, we can immediately notify the consumer of the collapsed
     // box rect since it should be the same. Otherwise, we wait for remeasure.
-    collapseFrame(this.win_, iframe, () => {
-      this.isExpanded_ = false;
+    collapseFrame(
+      this.win_,
+      iframe,
+      () => {
+        this.isExpanded_ = false;
 
-      if (!this.viewportChangedSinceExpand_) {
-        callback(this.collapsedRect_);
-      }
-    }, collapsedRect => {
-      this.collapsedRect_ = collapsedRect;
+        if (!this.viewportChangedSinceExpand_) {
+          callback(this.collapsedRect_);
+        }
+      },
+      collapsedRect => {
+        this.collapsedRect_ = collapsedRect;
 
-      if (this.viewportChangedSinceExpand_) {
-        callback(this.collapsedRect_);
+        if (this.viewportChangedSinceExpand_) {
+          callback(this.collapsedRect_);
+        }
       }
-    });
+    );
   }
 }

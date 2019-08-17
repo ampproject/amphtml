@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-export const NAVEGG_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const NAVEGG_CONFIG = jsonLiteral({
   'requests': {
     'pageview':
       'https://amp.navdmp.com/amp?' +
-        'aid=${clientId(navegg_id)}&' +
-        'url=${canonicalUrl}&' +
-        'ref=${documentReferrer}&' +
-        'tit=${title}&' +
-        'lan=${browserLanguage}' +
-        '&acc=${account}&' +
-        'v=7',
+      'aid=${clientId(navegg_id)}&' +
+      'url=${canonicalUrl}&' +
+      'ref=${documentReferrer}&' +
+      'tit=${title}&' +
+      'lan=${browserLanguage}' +
+      '&acc=${account}&' +
+      'v=7',
   },
   'triggers': {
     'trackpageview': {
@@ -38,3 +40,5 @@ export const NAVEGG_CONFIG = /** @type {!JsonObject} */ ({
     'image': {'suppressWarnings': true},
   },
 });
+
+export {NAVEGG_CONFIG};

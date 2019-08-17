@@ -34,7 +34,7 @@ PASS
 |        <amp-story-grid-layer template="vertical">
 |          <h1>fill</h1>
 |        </amp-story-grid-layer>
-|        <amp-story-page-attachment layout="nodisplay">
+|        <amp-story-page-attachment layout="nodisplay" theme="dark">
 |          <h1>Amazing title</h1>
 |          <p>Bacon ipsum dolor cat cat cat.</p>
 |          <amp-youtube

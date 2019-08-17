@@ -17,16 +17,17 @@
 
 const config = require('../config');
 const deglob = require('globs-to-files');
-const gulp = require('gulp-help')(require('gulp'));
 const Mocha = require('mocha');
 const {isTravisBuild} = require('../travis');
 
-
 /**
  * Run all the dev dashboard tests
+ * @return {!Promise}
  */
-function runDevDashboardTests() {
-  const mocha = new Mocha({reporter: isTravisBuild() ? 'dot' : 'spec'});
+async function devDashboardTests() {
+  const mocha = new Mocha({
+    reporter: isTravisBuild() ? 'mocha-silent-reporter' : 'spec',
+  });
 
   // Add our files
   const allDevDashboardTests = deglob.sync(config.devDashboardTestPaths);
@@ -36,18 +37,22 @@ function runDevDashboardTests() {
 
   // Create our deffered
   let resolver;
-  const deferred = new Promise(resolverIn => {resolver = resolverIn;});
+  const deferred = new Promise(resolverIn => {
+    resolver = resolverIn;
+  });
 
   // Run the tests.
   mocha.run(function(failures) {
     if (failures) {
-      process.exit(1);
+      process.exitCode = 1;
     }
     resolver();
   });
   return deferred;
 }
 
+module.exports = {
+  devDashboardTests,
+};
 
-gulp.task('dev-dashboard-tests', 'Runs all the dev dashboard tests',
-    runDevDashboardTests);
+devDashboardTests.description = 'Runs all the dev dashboard tests';

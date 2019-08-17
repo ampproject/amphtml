@@ -42,7 +42,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-access/">Annotated code example for amp-access</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-access/">Annotated code example for amp-access</a></td>
   </tr>
 </table>
 
@@ -53,7 +53,7 @@ similar features to `amp-access`. However, it supports a more specialized access
 paywall protocol. Some notable notable differences are:
 
 1. The `amp-subscriptions` entitlements response is similar to the amp-access
-authorization, but it is striclty defined and standardized.
+authorization, but it is strictly defined and standardized.
 2. The `amp-subscriptions` extension allows multiple services to be configured
 for the page to participate in access/paywall decisions. They are executed
 concurrently and prioritized based on which service returns the positive response.
@@ -504,7 +504,7 @@ The integration with *amp-analytics* is documented in the [amp-access-analytics.
 ## CORS Origin Security
 
 Authorization and Pingback endpoints are CORS endpoints and they must implement the security protocol described in the
-[AMP CORS Security Spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
+[AMP CORS Security Spec](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp).
 
 ## Metering
 

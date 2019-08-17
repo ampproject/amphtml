@@ -40,71 +40,24 @@ class ElementHandle {
    * @package
    */
   getElement() {
-  	return this.element_;
+    return this.element_;
   }
 }
 
 /**
- * Allow expectations to await the expected value. Duck-type a real Promise.
- * This class, and its waitForValue member function, are necessary because
- * to behave like a Promise and to wait for the correct value from the
- * Browser Automation Framework, the onFulfilled chains need to propagate into
- * the new values that come from the browser.
- *
- * @template TYPE
- * @extends {Promise}
+ * Key to send to the FunctionalTestController#type method to trigger
+ * actions instead of text.
+ * @enum {string}
  */
-class ControllerPromise {
-  /**
-   * @param {function(function(?TYPE):void, function(*):void):void|!Promise<TYPE>} executorOrPromise
-   * @param {function(TYPE,function(TYPE): ?TYPE): !Promise=} opt_waitForValue
-   */
-  constructor(executorOrPromise, opt_waitForValue) {
-    this.promise_ = typeof executorOrPromise == 'function' ?
-      new Promise(executorOrPromise) :
-      executorOrPromise;
-
-    /**
-     * Returns a Promise that resolves when the given expected value fulfills
-     * the given condition.
-     * @param {function(TYPE): ?TYPE} condition
-     * @return {!Promise<?TYPE>}
-     */
-    this.waitForValue = opt_waitForValue;
-  }
-
-  /** @override */
-  catch(onRejected) {
-    return new ControllerPromise(
-        this.promise_.catch(onRejected),
-        this.waitForValue);
-  }
-
- 	/** @override */
-  finally(onFinally) {
-    return new ControllerPromise(
-        this.promise_.finally(onFinally),
-        this.waitForValue);
-  }
-
-  /** @override */
-  then(opt_onFulfilled, opt_onRejected) {
-    opt_onFulfilled = opt_onFulfilled || (x => x);
-    // Allow this and future `then`s to update the wait value.
-    let wrappedWait = null;
-    if (this.waitForValue) {
-      wrappedWait = (condition, opt_mutate) => {
-        opt_mutate = opt_mutate || (x => x);
-        return this.waitForValue(condition, value =>
-          opt_mutate(opt_onFulfilled(value)));
-      };
-    }
-
-    return new ControllerPromise(
-        this.promise_.then(opt_onFulfilled, opt_onRejected),
-        wrappedWait);
-  }
-}
+const Key = {
+  'ArrowDown': 'ArrowDown',
+  'ArrowLeft': 'ArrowLeft',
+  'ArrowRight': 'ArrowRight',
+  'ArrowUp': 'ArrowUp',
+  'Enter': 'Enter',
+  'Escape': 'Escape',
+  'Tab': 'Tab',
+};
 
 /** @interface */
 class FunctionalTestController {
@@ -155,7 +108,7 @@ class FunctionalTestController {
   async switchToParent() {}
 
   /**
-   * Selects a subtree inside a ShadowDOM ShadowRoot to use as the current
+   * Selects the body of a subtree inside a ShadowDOM ShadowRoot to use as the current
    * browsing context for subsequent commands.
    * {@link https://github.com/w3c/webdriver/pull/1320}
    * https://github.com/SeleniumHQ/selenium/issues/5869
@@ -164,6 +117,17 @@ class FunctionalTestController {
    * @return {!Promise}
    */
   async switchToShadow(unusedHandle) {}
+
+  /**
+   * Selects a subtree inside a ShadowDOM ShadowRoot to use as the current
+   * browsing context for subsequent commands.
+   * {@link https://github.com/w3c/webdriver/pull/1320}
+   * https://github.com/SeleniumHQ/selenium/issues/5869
+   *
+   * @param {!ElementHandle} unusedHandle
+   * @return {!Promise}
+   */
+  async switchToShadowRoot(unusedHandle) {}
 
   /**
    * Selects the main top-level DOM tree to use as the current
@@ -331,7 +295,8 @@ class FunctionalTestController {
 
   /**
    * The Get Element Rect command returns the dimensions and coordinates of
-   * the given web element.
+   * the given web element. Unlike the webdriver version, this also returns
+   * the left, right, top and bottom properties.
    * {@link https://www.w3.org/TR/webdriver1/#get-element-rect}
    *
    * @param {!ElementHandle} unusedHandle
@@ -395,7 +360,7 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#element-send-keys}
    *
    * @param {?ElementHandle} unusedHandle
-   * @param {string} unusedKeys
+   * @param {string|Key} unusedKeys
    * @return {!Promise}
    */
   async type(unusedHandle, unusedKeys) {}
@@ -429,23 +394,26 @@ class FunctionalTestController {
   async dispose() {}
 }
 
-
 /**
  * @typedef {{
  *   width: number,
  *   height: number
  * }} WindowRectDef
-*/
+ */
 let WindowRectDef;
 
 /**
  * @typedef {{
  *   x: number,
  *   y: number,
+ *   top: number,
+ *   bottom: number,
+ *   left: number,
+ *   right: number,
  *   width: number,
  *   height: number
  * }}
-*/
+ */
 let DOMRectDef;
 
 /** @enum {string} */
@@ -465,8 +433,8 @@ let ScrollToOptionsDef;
 
 module.exports = {
   ElementHandle,
-  ControllerPromise,
   FunctionalTestController,
+  Key,
   WindowRectDef,
   DOMRectDef,
   ScrollToOptionsDef,

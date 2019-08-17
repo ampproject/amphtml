@@ -17,7 +17,6 @@
 import * as PromiseUtils from '../../../src/utils/promise';
 
 describes.sandboxed('PromiseUtils', {}, () => {
-
   function getPromiseObject() {
     let resolve, reject;
     const promise = new Promise((resolve_, reject_) => {
@@ -76,8 +75,10 @@ describes.sandboxed('PromiseUtils', {}, () => {
     it('should support adding initial promises in the constructor', () => {
       const one = getPromiseObject();
       const two = getPromiseObject();
-      const resolver =
-          new PromiseUtils.LastAddedResolver([one.promise, two.promise]);
+      const resolver = new PromiseUtils.LastAddedResolver([
+        one.promise,
+        two.promise,
+      ]);
 
       setTimeout(() => one.resolve('one'), 0);
       setTimeout(() => two.resolve('two'), 10);
@@ -111,18 +112,24 @@ describes.sandboxed('PromiseUtils', {}, () => {
       setTimeout(() => six.reject('six'), 10);
 
       return Promise.all([
-        firstResolver.then(result => {
-          expect(result).to.equal('three');
-        }, unusedError => {
-          // shouldn't run
-          expect(false).to.be.true;
-        }),
-        secondResolver.then(unusedResult => {
-          // shouldn't run
-          expect(false).to.be.true;
-        }, error => {
-          expect(error).to.equal('six');
-        }),
+        firstResolver.then(
+          result => {
+            expect(result).to.equal('three');
+          },
+          unusedError => {
+            // shouldn't run
+            expect(false).to.be.true;
+          }
+        ),
+        secondResolver.then(
+          unusedResult => {
+            // shouldn't run
+            expect(false).to.be.true;
+          },
+          error => {
+            expect(error).to.equal('six');
+          }
+        ),
       ]);
     });
   });

@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../services';
+import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -22,7 +23,7 @@ import {getService, registerServiceBuilder} from '../service';
 import {isCanary} from '../experiments';
 import {layoutRectLtwh} from '../layout-rect';
 import {throttle} from '../utils/rate-limit';
-import {whenDocumentComplete} from '../document-ready';
+import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -48,7 +49,6 @@ const BEFORE_UNLOAD_EVENT = 'beforeunload';
  */
 let TickEventDef;
 
-
 /**
  * Increments the value, else defaults to 0 for the given object key.
  * @param {!Object<string, (string|number|boolean|Array|Object|null)>} obj
@@ -72,7 +72,6 @@ function incOrDef(obj, name) {
  * of tick events to forward to the external `tick` function when it is set.
  */
 export class Performance {
-
   /**
    * @param {!Window} win
    */
@@ -89,7 +88,7 @@ export class Performance {
     /** @private {?./viewer-impl.Viewer} */
     this.viewer_ = null;
 
-    /** @private {?./resources-impl.Resources} */
+    /** @private {?./resources-impl.ResourcesDef} */
     this.resources_ = null;
 
     /** @private {boolean} */
@@ -118,6 +117,13 @@ export class Performance {
     this.jankScoresTicked_ = 0;
 
     /**
+     * How many times a layout shift metric has been ticked.
+     *
+     * @private {number}
+     */
+    this.shiftScoresTicked_ = 0;
+
+    /**
      * The sum of all layout jank fractions triggered on the page from the
      * Layout Jank API.
      *
@@ -125,14 +131,51 @@ export class Performance {
      */
     this.aggregateJankScore_ = 0;
 
+    /**
+     * The sum of all layout shift fractions triggered on the page from the
+     * Layout Instability API.
+     *
+     * @private {number}
+     */
+    this.aggregateShiftScore_ = 0;
+
+    /**
+     * Whether the user agent supports the Layout Instability API that shipped
+     * with Chrome 76.
+     *
+     * @private {boolean}
+     */
+    this.supportsLayoutInstabilityAPIv76_ =
+      this.win.PerformanceObserver &&
+      this.win.PerformanceObserver.supportedEntryTypes &&
+      this.win.PerformanceObserver.supportedEntryTypes.includes('layoutShift');
+
+    /**
+     * Whether the user agent supports the Layout Instability API that shipped
+     * with Chrome 77.
+     *
+     * @private {boolean}
+     */
+    this.supportsLayoutInstabilityAPIv77_ =
+      this.win.PerformanceObserver &&
+      this.win.PerformanceObserver.supportedEntryTypes &&
+      this.win.PerformanceObserver.supportedEntryTypes.includes('layout-shift');
+
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
+    this.boundTickLayoutShiftScore_ = this.tickLayoutShiftScore_.bind(this);
+    this.onViewerVisibilityChange_ = this.onViewerVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
     if (isCanary(this.win)) {
       this.addEnabledExperiment('canary');
     }
+    // Tick document ready event.
+    whenDocumentReady(win.document).then(() => {
+      this.tick('dr');
+      this.flush();
+    });
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => this.onload_());
@@ -149,8 +192,8 @@ export class Performance {
     this.viewer_ = Services.viewerForDoc(documentElement);
     this.resources_ = Services.resourcesForDoc(documentElement);
 
-    this.isPerformanceTrackingOn_ = this.viewer_.isEmbedded() &&
-        this.viewer_.getParam('csi') === '1';
+    this.isPerformanceTrackingOn_ =
+      this.viewer_.isEmbedded() && this.viewer_.getParam('csi') === '1';
 
     // This is for redundancy. Call flush on any visibility change.
     this.viewer_.onVisibilityChanged(this.flush.bind(this));
@@ -171,17 +214,51 @@ export class Performance {
     if (this.win.PerformanceLayoutJank) {
       // Register a handler to record the layout jank metric when the page
       // enters the hidden lifecycle state.
-      this.win.addEventListener(VISIBILITY_CHANGE_EVENT,
-          this.boundOnVisibilityChange_, {capture: true});
+      this.win.addEventListener(
+        VISIBILITY_CHANGE_EVENT,
+        this.boundOnVisibilityChange_,
+        {capture: true}
+      );
 
       // Safari does not reliably fire the `pagehide` or `visibilitychange`
       // events when closing a tab, so we have to use `beforeunload`.
       // See https://bugs.webkit.org/show_bug.cgi?id=151234
       const platform = Services.platformFor(this.win);
       if (platform.isSafari()) {
-        this.win.addEventListener(BEFORE_UNLOAD_EVENT,
-            this.boundTickLayoutJankScore_);
+        // TODO(#23634): Remove, explain or adjust the usage of the unload listener
+        this.win.addEventListener(
+          BEFORE_UNLOAD_EVENT,
+          this.boundTickLayoutJankScore_
+        );
       }
+
+      this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
+    }
+
+    if (
+      this.supportsLayoutInstabilityAPIv76_ ||
+      this.supportsLayoutInstabilityAPIv77_
+    ) {
+      // Register a handler to record the layout shift metric when the page
+      // enters the hidden lifecycle state.
+      this.win.addEventListener(
+        VISIBILITY_CHANGE_EVENT,
+        this.boundOnVisibilityChange_,
+        {capture: true}
+      );
+
+      // Safari does not reliably fire the `pagehide` or `visibilitychange`
+      // events when closing a tab, so we have to use `beforeunload`.
+      // See https://bugs.webkit.org/show_bug.cgi?id=151234
+      const platform = Services.platformFor(this.win);
+      if (platform.isSafari()) {
+        this.win.addEventListener(
+          BEFORE_UNLOAD_EVENT,
+          this.boundTickLayoutShiftScore_
+        );
+      }
+
+      this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
     }
 
     // We don't check `isPerformanceTrackingOn` here since there are some
@@ -234,18 +311,25 @@ export class Performance {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
         this.tickDelta('fp', entry.startTime + entry.duration);
         recordedFirstPaint = true;
-      }
-      else if (entry.name == 'first-contentful-paint'
-          && !recordedFirstContentfulPaint) {
+      } else if (
+        entry.name == 'first-contentful-paint' &&
+        !recordedFirstContentfulPaint
+      ) {
         this.tickDelta('fcp', entry.startTime + entry.duration);
         recordedFirstContentfulPaint = true;
-      }
-      else if (entry.entryType === 'firstInput' && !recordedFirstInputDelay) {
+      } else if (entry.entryType === 'firstInput' && !recordedFirstInputDelay) {
         this.tickDelta('fid', entry.processingStart - entry.startTime);
         recordedFirstInputDelay = true;
-      }
-      else if (entry.entryType === 'layoutJank') {
+      } else if (entry.entryType === 'layoutJank') {
         this.aggregateJankScore_ += entry.fraction;
+      } else if (entry.entryType === 'layoutShift') {
+        this.aggregateShiftScore_ += entry.value;
+      } else if (entry.entryType === 'layout-shift') {
+        // Ignore layout shift that occurs within 500ms of user input, as it is
+        // likely in response to the user's action.
+        if (!entry.hadRecentInput) {
+          this.aggregateShiftScore_ += entry.value;
+        }
       }
     };
 
@@ -274,6 +358,29 @@ export class Performance {
       entryTypesToObserve.push('layoutJank');
     }
 
+    if (this.supportsLayoutInstabilityAPIv76_) {
+      // Programmatically read once as currently PerformanceObserver does not
+      // report past entries as of Chrome 61.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+      this.win.performance
+        .getEntriesByType('layoutShift')
+        .forEach(processEntry);
+      entryTypesToObserve.push('layoutShift');
+    }
+
+    if (this.supportsLayoutInstabilityAPIv77_) {
+      // Layout shift entries are not available from the Performance Timeline
+      // through `getEntriesByType`, so a separate PerformanceObserver is
+      // required for this metric.
+      const layoutInstabilityObserver = new this.win.PerformanceObserver(
+        list => {
+          list.getEntries().forEach(processEntry);
+          this.flush();
+        }
+      );
+      layoutInstabilityObserver.observe({type: 'layout-shift', buffered: true});
+    }
+
     if (entryTypesToObserve.length === 0) {
       return;
     }
@@ -289,7 +396,8 @@ export class Performance {
     try {
       observer.observe({entryTypes: entryTypesToObserve});
     } catch (err) {
-      dev()/*OK*/.warn(err);
+      dev() /*OK*/
+        .warn(err);
     }
   }
 
@@ -313,7 +421,33 @@ export class Performance {
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
-      this.tickLayoutJankScore_();
+      if (this.win.PerformanceLayoutJank) {
+        this.tickLayoutJankScore_();
+      }
+      if (
+        this.supportsLayoutInstabilityAPIv76_ ||
+        this.supportsLayoutInstabilityAPIv77_
+      ) {
+        this.tickLayoutShiftScore_();
+      }
+    }
+  }
+
+  /**
+   * When the viewer visibility state of the document changes to inactive,
+   * send the layout jank score.
+   */
+  onViewerVisibilityChange_() {
+    if (this.viewer_.getVisibilityState() === VisibilityState.INACTIVE) {
+      if (this.win.PerformanceLayoutJank) {
+        this.tickLayoutJankScore_();
+      }
+      if (
+        this.supportsLayoutInstabilityAPIv76_ ||
+        this.supportsLayoutInstabilityAPIv77_
+      ) {
+        this.tickLayoutShiftScore_();
+      }
     }
   }
 
@@ -340,10 +474,50 @@ export class Performance {
       this.jankScoresTicked_ = 2;
 
       // No more work to do, so clean up event listeners.
-      this.win.removeEventListener(VISIBILITY_CHANGE_EVENT,
-          this.boundOnVisibilityChange_, {capture: true});
-      this.win.removeEventListener(BEFORE_UNLOAD_EVENT,
-          this.boundTickLayoutJankScore_);
+      this.win.removeEventListener(
+        VISIBILITY_CHANGE_EVENT,
+        this.boundOnVisibilityChange_,
+        {capture: true}
+      );
+      this.win.removeEventListener(
+        BEFORE_UNLOAD_EVENT,
+        this.boundTickLayoutJankScore_
+      );
+    }
+  }
+
+  /**
+   * Tick the layout shift score metric.
+   *
+   * A value of the metric is recorded in under two names, `cls` and `cls-2`,
+   * for the first two times the page transitions into a hidden lifecycle state
+   * (when the page is navigated a way from, the tab is backgrounded for
+   * another tab, or the user backgrounds the browser application).
+   *
+   * Since we can't reliably detect when a page session finally ends,
+   * recording the value for these first two events should provide a fair
+   * amount of visibility into this metric.
+   */
+  tickLayoutShiftScore_() {
+    if (this.shiftScoresTicked_ === 0) {
+      this.tickDelta('cls', this.aggregateShiftScore_);
+      this.flush();
+      this.shiftScoresTicked_ = 1;
+    } else if (this.shiftScoresTicked_ === 1) {
+      this.tickDelta('cls-2', this.aggregateShiftScore_);
+      this.flush();
+      this.shiftScoresTicked_ = 2;
+
+      // No more work to do, so clean up event listeners.
+      this.win.removeEventListener(
+        VISIBILITY_CHANGE_EVENT,
+        this.boundOnVisibilityChange_,
+        {capture: true}
+      );
+      this.win.removeEventListener(
+        BEFORE_UNLOAD_EVENT,
+        this.boundTickLayoutShiftScore_
+      );
     }
   }
 
@@ -357,11 +531,14 @@ export class Performance {
     // Detect deprecated first pain time API
     // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
     // We'll use this until something better is available.
-    if (!this.win.PerformancePaintTiming
-        && this.win.chrome
-        && typeof this.win.chrome.loadTimes == 'function') {
-      const fpTime = (this.win.chrome.loadTimes()['firstPaintTime'] * 1000)
-          - this.win.performance.timing.navigationStart;
+    if (
+      !this.win.PerformancePaintTiming &&
+      this.win.chrome &&
+      typeof this.win.chrome.loadTimes == 'function'
+    ) {
+      const fpTime =
+        this.win.chrome.loadTimes()['firstPaintTime'] * 1000 -
+        this.win.performance.timing.navigationStart;
       if (fpTime <= 1) {
         // Throw away bad data generated from an apparent Chrome bug
         // that is fixed in later Chrome versions.
@@ -390,10 +567,11 @@ export class Performance {
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
-        const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-          ? (this.win.Date.now() - docVisibleTime)
-          //  Prerender was complete before visibility.
-          : 0;
+        const userPerceivedVisualCompletenesssTime =
+          docVisibleTime > -1
+            ? this.win.Date.now() - docVisibleTime
+            : //  Prerender was complete before visibility.
+              0;
         this.viewer_.whenFirstVisible().then(() => {
           // We only tick this if the page eventually becomes visible,
           // since otherwise we heavily skew the metric towards the
@@ -427,9 +605,9 @@ export class Performance {
     const {documentElement} = this.win.document;
     const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
-    return this.resources_.getResourcesInRect(
-        this.win, rect, /* isInPrerender */ true)
-        .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
+    return this.resources_
+      .getResourcesInRect(this.win, rect, /* isInPrerender */ true)
+      .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
   }
 
   /**
@@ -442,7 +620,7 @@ export class Performance {
    *     this directly.
    */
   tick(label, opt_delta) {
-    const value = (opt_delta == undefined) ? this.win.Date.now() : undefined;
+    const value = opt_delta == undefined ? this.win.Date.now() : undefined;
 
     const data = dict({
       'label': label,
@@ -463,8 +641,9 @@ export class Performance {
 
     // Store certain page visibility metrics to be exposed as analytics
     // variables.
-    const storedVal = Math.round(opt_delta != null ? Math.max(opt_delta, 0)
-				 : value - this.initTime_);
+    const storedVal = Math.round(
+      opt_delta != null ? Math.max(opt_delta, 0) : value - this.initTime_
+    );
     switch (label) {
       case 'fcp':
         this.firstContentfulPaint_ = storedVal;
@@ -485,9 +664,11 @@ export class Performance {
    * @param {string} label
    */
   mark(label) {
-    if (this.win.performance
-        && this.win.performance.mark
-        && arguments.length == 1) {
+    if (
+      this.win.performance &&
+      this.win.performance.mark &&
+      arguments.length == 1
+    ) {
       this.win.performance.mark(label);
     }
   }
@@ -513,15 +694,18 @@ export class Performance {
     this.tickDelta(label, v);
   }
 
-
   /**
    * Ask the viewer to flush the ticks
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.sendMessage('sendCsi', dict({
-        'ampexp': this.ampexp_,
-      }), /* cancelUnsent */true);
+      this.viewer_.sendMessage(
+        'sendCsi',
+        dict({
+          'ampexp': this.ampexp_,
+        }),
+        /* cancelUnsent */ true
+      );
     }
   }
 
@@ -587,8 +771,11 @@ export class Performance {
    */
   prerenderComplete_(value) {
     if (this.viewer_) {
-      this.viewer_.sendMessage('prerenderComplete', dict({'value': value}),
-          /* cancelUnsent */true);
+      this.viewer_.sendMessage(
+        'prerenderComplete',
+        dict({'value': value}),
+        /* cancelUnsent */ true
+      );
     }
   }
 
@@ -623,7 +810,6 @@ export class Performance {
     return this.firstViewportReady_;
   }
 }
-
 
 /**
  * @param {!Window} window

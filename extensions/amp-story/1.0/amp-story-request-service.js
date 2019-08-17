@@ -25,6 +25,9 @@ import {user, userAssert} from '../../../src/log';
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
 
+/** @private const {string} */
+export const BOOKEND_CREDENTIALS_ATTRIBUTE_NAME = 'data-credentials';
+
 /** @private @const {string} */
 const TAG = 'amp-story-request-service';
 
@@ -55,15 +58,20 @@ export class AmpStoryRequestService {
    * @private
    */
   loadBookendConfigImpl_() {
-    const bookendEl = childElementByTag(this.storyElement_,
-        'amp-story-bookend');
+    const bookendEl = childElementByTag(
+      this.storyElement_,
+      'amp-story-bookend'
+    );
     if (!bookendEl) {
       return Promise.resolve(null);
     }
 
     if (bookendEl.hasAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME)) {
       const rawUrl = bookendEl.getAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME);
-      return this.loadJsonFromAttribute_(rawUrl);
+      const credentials = bookendEl.getAttribute(
+        BOOKEND_CREDENTIALS_ATTRIBUTE_NAME
+      );
+      return this.loadJsonFromAttribute_(rawUrl, credentials);
     }
 
     // Fallback. Check for an inline json config.
@@ -77,25 +85,29 @@ export class AmpStoryRequestService {
 
   /**
    * @param {string} rawUrl
+   * @param {string|null} credentials
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    * @private
    */
-  loadJsonFromAttribute_(rawUrl) {
+  loadJsonFromAttribute_(rawUrl, credentials) {
     const opts = {};
-    opts.requireAmpResponseSourceOrigin = false;
 
     if (!isProtocolValid(rawUrl)) {
       user().error(TAG, 'Invalid config url.');
       return Promise.resolve(null);
     }
 
+    if (credentials) {
+      opts.credentials = credentials;
+    }
+
     return Services.urlReplacementsForDoc(this.storyElement_)
-        .expandUrlAsync(user().assertString(rawUrl))
-        .then(url => this.xhr_.fetchJson(url, opts))
-        .then(response => {
-          userAssert(response.ok, 'Invalid HTTP response');
-          return response.json();
-        });
+      .expandUrlAsync(user().assertString(rawUrl))
+      .then(url => this.xhr_.fetchJson(url, opts))
+      .then(response => {
+        userAssert(response.ok, 'Invalid HTTP response');
+        return response.json();
+      });
   }
 }
 

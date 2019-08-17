@@ -31,7 +31,7 @@ Allows users to subscribe to <a href="https://developers.google.com/web/fundamen
     <td><code>&lt;script async custom-element="amp-web-push" src="https://cdn.ampproject.org/v0/amp-web-push-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fixed</td>
   </tr>
   <tr>
@@ -133,6 +133,14 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
       <p>
          If you develop a custom push solution, <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/0.1/amp-web-push.service-worker.js">see this example on how to make your service worker compatible with amp-web-push</a>.
        </p>
+    </td>
+  </tr>
+  <tr>
+    <td><code>service-worker-scope (optional)</code></td>
+    <td>
+      <p>
+        The scope of the service worker to be installed.
+      </p>
     </td>
   </tr>
 </table>

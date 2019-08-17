@@ -40,7 +40,7 @@ tags: {  # <amp-pinterest>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-pinterest"
+  spec_url: "https://amp.dev/documentation/components/amp-pinterest"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

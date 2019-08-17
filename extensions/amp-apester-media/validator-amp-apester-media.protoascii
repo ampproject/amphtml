@@ -49,5 +49,5 @@ tags: {  # <amp-apester-media>
       supported_layouts: NODISPLAY
       supported_layouts: RESPONSIVE
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-apester-media"
+  spec_url: "https://amp.dev/documentation/components/amp-apester-media"
 }

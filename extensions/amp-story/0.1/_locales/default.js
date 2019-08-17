@@ -18,12 +18,11 @@ import {
   LocalizedStringId,
 } from '../../../../src/localized-strings';
 
-
 /**
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
     string: 'Privacy settings',
   },
@@ -58,7 +57,10 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'The page is best viewed in portrait mode',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'We\'re sorry, it looks like your browser doesn\'t support ' +
-        'this experience',
+    string:
+      "We're sorry, it looks like your browser doesn't support " +
+      'this experience',
   },
-});
+};
+
+export default strings;

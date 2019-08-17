@@ -35,10 +35,10 @@ FAIL
 |    <!-- Invalid: unsupported layout value -->
 |    <amp-mathml layout="responsive" width="10px" height="10px" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
 >>   ^~~~~~~~~
-amp-mathml/0.1/test/validator-amp-mathml.html:35:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-mathml'. (see https://www.ampproject.org/docs/reference/components/amp-mathml) [AMP_LAYOUT_PROBLEM]
+amp-mathml/0.1/test/validator-amp-mathml.html:35:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-mathml'. (see https://amp.dev/documentation/components/amp-mathml) [AMP_LAYOUT_PROBLEM]
 |    <!-- Invalid: missing formula -->
 |    <amp-mathml layout="container"></amp-mathml>
 >>   ^~~~~~~~~
-amp-mathml/0.1/test/validator-amp-mathml.html:37:2 The mandatory attribute 'data-formula' is missing in tag 'amp-mathml'. (see https://www.ampproject.org/docs/reference/components/amp-mathml) [AMP_TAG_PROBLEM]
+amp-mathml/0.1/test/validator-amp-mathml.html:37:2 The mandatory attribute 'data-formula' is missing in tag 'amp-mathml'. (see https://amp.dev/documentation/components/amp-mathml) [AMP_TAG_PROBLEM]
 |  </body>
 |  </html>

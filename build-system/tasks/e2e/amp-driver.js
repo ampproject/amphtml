@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-
 /** @enum {string} */
 const AmpdocEnvironment = {
   SINGLE: 'single',
   VIEWER_DEMO: 'viewer-demo',
   SHADOW_DEMO: 'shadow-demo',
+
+  // AMPHTML ads environments
+  A4A_FIE: 'a4a-fie',
+  A4A_INABOX: 'a4a-inabox',
+  A4A_INABOX_FRIENDLY: 'a4a-inabox-friendly',
+  A4A_INABOX_SAFEFRAME: 'a4a-inabox-safeframe',
 };
+
+/** @const {string} */
+const HOST = 'http://localhost:8000';
 
 const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.SINGLE]: {
@@ -35,13 +43,18 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.VIEWER_DEMO]: {
     ready(controller) {
-      return controller.findElement('#AMP_DOC_dynamic[data-loaded]')
-          .then(frame => controller.switchToFrame(frame));
+      return controller
+        .findElement('#AMP_DOC_dynamic[data-loaded]')
+        .then(frame => controller.switchToFrame(frame));
     },
 
     url(url) {
+      const defaultCaps = ['a2a', 'focus-rect', 'foo', 'keyboard', 'swipe'];
       // TODO(estherkim): somehow allow non-8000 port and domain
-      return `http://localhost:8000/examples/viewer.html#href=${url}`;
+      return (
+        `http://localhost:8000/examples/viewer.html#href=${url}` +
+        `&caps=${defaultCaps.join(',')}`
+      );
     },
   },
 
@@ -50,13 +63,62 @@ const EnvironmentBehaviorMap = {
       // TODO(cvializ): this is a HACK
       // There should be a better way to detect that the shadowdoc is ready.
       const shadowHost = await controller.findElement(
-          '.amp-doc-host[style="visibility: visible;"]');
+        '.amp-doc-host[style="visibility: visible;"]'
+      );
       await controller.switchToShadow(shadowHost);
     },
 
     url(url) {
       // TODO(estherkim): somehow allow non-8000 port and domain
       return `http://localhost:8000/pwa#href=${url}`;
+    },
+  },
+
+  [AmpdocEnvironment.A4A_FIE]: {
+    async ready(controller) {
+      return controller
+        .findElement('amp-ad > iframe')
+        .then(frame => controller.switchToFrame(frame));
+    },
+
+    url(url) {
+      return url.replace(HOST, HOST + '/a4a');
+    },
+  },
+
+  [AmpdocEnvironment.A4A_INABOX]: {
+    async ready(controller) {
+      return controller
+        .findElement('#inabox-frame')
+        .then(frame => controller.switchToFrame(frame));
+    },
+
+    url(url) {
+      return url.replace(HOST, HOST + '/inabox');
+    },
+  },
+
+  [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
+    async ready(controller) {
+      return controller
+        .findElement('#inabox-frame')
+        .then(frame => controller.switchToFrame(frame));
+    },
+
+    url(url) {
+      return url.replace(HOST, HOST + '/inabox-friendly');
+    },
+  },
+
+  [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
+    async ready(controller) {
+      return controller
+        .findElement('#inabox-frame')
+        .then(frame => controller.switchToFrame(frame));
+    },
+
+    url(url) {
+      return url.replace(HOST, HOST + '/inabox-safeframe');
     },
   },
 };
@@ -80,11 +142,15 @@ class AmpDriver {
    * @return {!Promise}
    */
   async toggleExperiment(name, toggle) {
-    await this.controller_.evaluate((name, toggle) => {
-      (window.AMP = window.AMP || []).push(AMP => {
-        AMP.toggleExperiment(name, toggle);
-      });
-    }, name, toggle);
+    await this.controller_.evaluate(
+      (name, toggle) => {
+        (window.AMP = window.AMP || []).push(AMP => {
+          AMP.toggleExperiment(name, toggle);
+        });
+      },
+      name,
+      toggle
+    );
   }
 
   /**

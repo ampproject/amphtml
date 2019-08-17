@@ -70,8 +70,10 @@ function getBaseElementForSlide(slide) {
     return figure;
   }
   const allImages = slide.querySelectorAll('amp-img');
-  userAssert(allImages.length == 1,
-      'Found more than one images or none in slide!');
+  userAssert(
+    allImages.length == 1,
+    'Found more than one images or none in slide!'
+  );
   return dev().assertElement(allImages[0]);
 }
 
@@ -93,12 +95,10 @@ export let LightboxThumbnailDataDef;
  *   `lightbox` attribute and possibly an on-tap handler to them
  */
 export class LightboxManager {
-
   /**
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @const @private {!../../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -129,7 +129,6 @@ export class LightboxManager {
      * @private {!Array<!Element>}
      */
     this.seen_ = [];
-
   }
 
   /**
@@ -189,15 +188,16 @@ export class LightboxManager {
    * @param {!Element} carousel
    */
   processLightboxCarousel_(carousel) {
-    const lightboxGroupId = carousel.getAttribute('lightbox') ||
+    const lightboxGroupId =
+      carousel.getAttribute('lightbox') ||
       `carousel${carousel.getAttribute('id') || this.counter_++}`;
 
     this.getSlidesFromCarousel_(carousel).then(slides => {
       slides.forEach(slide => {
         const shouldExcludeSlide =
-            slide.hasAttribute('lightbox-exclude') || (
-              slide.hasAttribute('lightbox')
-                && slide.getAttribute('lightbox') !== lightboxGroupId);
+          slide.hasAttribute('lightbox-exclude') ||
+          (slide.hasAttribute('lightbox') &&
+            slide.getAttribute('lightbox') !== lightboxGroupId);
         if (shouldExcludeSlide) {
           return;
         }
@@ -239,8 +239,10 @@ export class LightboxManager {
   unwrapLightboxedFigure_(figure, lightboxGroupId) {
     // Assume that the lightbox target is whichever element inside the figure
     // that is not the figcaption.
-    const element = childElement(figure,
-        child => child.tagName !== 'FIGCAPTION');
+    const element = childElement(
+      figure,
+      child => child.tagName !== 'FIGCAPTION'
+    );
     if (element) {
       element.setAttribute('lightbox', lightboxGroupId);
     }
@@ -255,16 +257,21 @@ export class LightboxManager {
    */
   processBaseLightboxElement_(element, lightboxGroupId) {
     if (element.tagName == FIGURE_TAG) {
-      const unwrappedFigureElement = this.unwrapLightboxedFigure_(element,
-          lightboxGroupId);
+      const unwrappedFigureElement = this.unwrapLightboxedFigure_(
+        element,
+        lightboxGroupId
+      );
       if (!unwrappedFigureElement) {
         return;
       }
       element = unwrappedFigureElement;
     }
 
-    userAssert(this.baseElementIsSupported_(element),
-        'The element %s isn\'t supported in lightbox yet.', element.tagName);
+    userAssert(
+      this.baseElementIsSupported_(element),
+      "The element %s isn't supported in lightbox yet.",
+      element.tagName
+    );
 
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];
@@ -285,9 +292,12 @@ export class LightboxManager {
    * @private
    */
   getSlidesFromCarousel_(element) {
-    return element.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
-      return toArray(element./*OK*/querySelectorAll(SLIDE_SELECTOR));
-    });
+    return element
+      .signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => {
+        return toArray(element./*OK*/ querySelectorAll(SLIDE_SELECTOR));
+      });
   }
 
   /**
@@ -296,14 +306,15 @@ export class LightboxManager {
    * @return {!Promise<!Array<!Element>>}
    */
   getElementsForLightboxGroup(lightboxGroupId) {
-    return this.maybeInit()
-        .then(() => devAssert(this.lightboxGroups_[lightboxGroupId]));
+    return this.maybeInit().then(() =>
+      devAssert(this.lightboxGroups_[lightboxGroupId])
+    );
   }
 
   /**
    * Get the description for single lightboxed item.
    * @param {!Element} element
-   * @return {?string}
+   * @return {string}
    */
   getDescription(element) {
     // If the element in question is the descendant of a figure element
@@ -312,17 +323,17 @@ export class LightboxManager {
     if (figureParent) {
       const figCaption = elementByTag(figureParent, 'figcaption');
       if (figCaption) {
-        return figCaption./*OK*/innerText;
+        return figCaption./*OK*/ innerText;
       }
     }
     const ariaDescribedBy = element.getAttribute('aria-describedby');
     if (ariaDescribedBy) {
       const descriptionElement = this.ampdoc_.getElementById(ariaDescribedBy);
       if (descriptionElement) {
-        return descriptionElement./*OK*/innerText;
+        return descriptionElement./*OK*/ innerText;
       }
     }
-    return null;
+    return '';
   }
 
   /**
@@ -332,8 +343,8 @@ export class LightboxManager {
    * @private
    */
   getVideoTimestamp_(element) {
-    return VIDEO_TAGS[element.tagName] ?
-      element.getImpl().then(videoPlayer => videoPlayer.getDuration())
+    return VIDEO_TAGS[element.tagName]
+      ? element.getImpl().then(videoPlayer => videoPlayer.getDuration())
       : Promise.resolve();
   }
 
@@ -344,13 +355,12 @@ export class LightboxManager {
    * @return {!Array<!LightboxThumbnailDataDef>}
    */
   getThumbnails(lightboxGroupId) {
-    return this.lightboxGroups_[lightboxGroupId]
-        .map(element => ({
-          srcset: this.getThumbnailSrcset_(dev().assertElement(element)),
-          placeholderSrc: this.getPlaceholderForElementType_(element),
-          element,
-          timestampPromise: this.getVideoTimestamp_(element),
-        }));
+    return this.lightboxGroups_[lightboxGroupId].map(element => ({
+      srcset: this.getThumbnailSrcset_(dev().assertElement(element)),
+      placeholderSrc: this.getPlaceholderForElementType_(element),
+      element,
+      timestampPromise: this.getVideoTimestamp_(element),
+    }));
   }
 
   /**

@@ -17,173 +17,184 @@
 import '../amp-byside-content';
 import {mockServiceForDoc} from '../../../../testing/test-helper';
 
-describes.realWin('amp-byside-content', {
-  amp: {
-    extensions: ['amp-byside-content'],
+describes.realWin(
+  'amp-byside-content',
+  {
+    amp: {
+      extensions: ['amp-byside-content'],
+    },
+    ampAdCss: true,
   },
-  ampAdCss: true,
-}, env => {
-  let win, doc, urlMock;
+  env => {
+    let win, doc, urlMock;
 
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-    urlMock = mockServiceForDoc(sandbox, env.ampdoc, 'url-replace', [
-      'expandUrlAsync',
-    ]);
-  });
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      urlMock = mockServiceForDoc(sandbox, env.ampdoc, 'url-replace', [
+        'expandUrlAsync',
+      ]);
+    });
 
-  function getElement(attributes, opt_responsive, opt_beforeLayoutCallback) {
-    const elem = doc.createElement('amp-byside-content');
+    function getElement(attributes, opt_responsive, opt_beforeLayoutCallback) {
+      const elem = doc.createElement('amp-byside-content');
 
-    for (const key in attributes) {
-      elem.setAttribute(key, attributes[key]);
-    }
-
-    elem.setAttribute('width', '640');
-    elem.setAttribute('height', '360');
-    if (opt_responsive) {
-      elem.setAttribute('layout', 'responsive');
-    }
-
-    doc.body.appendChild(elem);
-    return elem.build().then(() => {
-      urlMock.expandUrlAsync
-          .returns(Promise.resolve(elem.implementation_.baseUrl_))
-          .withArgs(sinon.match.any);
-      if (opt_beforeLayoutCallback) {
-        opt_beforeLayoutCallback(elem);
+      for (const key in attributes) {
+        elem.setAttribute(key, attributes[key]);
       }
 
-      return elem.layoutCallback();
-    }).then(() => elem);
-  }
+      elem.setAttribute('width', '640');
+      elem.setAttribute('height', '360');
+      if (opt_responsive) {
+        elem.setAttribute('layout', 'responsive');
+      }
 
-  function testIframe(elem) {
-    const iframe = elem.querySelector('iframe');
-    expect(iframe).to.not.be.null;
-    expect(iframe.getAttribute('frameborder')).to.equal('0');
-    expect(iframe.className).to.match(/i-amphtml-fill-content/);
-    expect(iframe.fakeSrc).to.satisfy(src => {
-      return src.startsWith(elem.implementation_.baseUrl_);
-    });
-  }
+      doc.body.appendChild(elem);
+      return elem
+        .build()
+        .then(() => {
+          urlMock.expandUrlAsync
+            .returns(Promise.resolve(elem.implementation_.baseUrl_))
+            .withArgs(sinon.match.any);
+          if (opt_beforeLayoutCallback) {
+            opt_beforeLayoutCallback(elem);
+          }
 
-  it('renders', () => {
-    return getElement({
-      'data-webcare-id': 'D6604AE5D0',
-      'data-label': 'amp-simple',
-    }).then(elem => {
-      testIframe(elem);
-    });
-  });
+          return elem.layoutCallback();
+        })
+        .then(() => elem);
+    }
 
-  it('requires data-label', () => {
-    return allowConsoleError(() => { return getElement({
-      'data-webcare-id': 'D6604AE5D0',
-    }).should.eventually.be.rejectedWith(
-        /The data-label attribute is required for/);
-    });
-  });
-
-  it('requires data-webcare-id', () => {
-    return allowConsoleError(() => { return getElement({
-      'data-label': 'placeholder-label',
-    }).should.eventually.be.rejectedWith(
-        /The data-webcare-id attribute is required for/);
-    });
-  });
-
-  it('generates correct default origin', () => {
-    return getElement({
-      'data-webcare-id': 'D6604AE5D0',
-      'data-label': 'placeholder-label',
-    }).then(elem => {
-      expect(elem.implementation_.origin_).to.equal(
-          'https://webcare.byside.com'
-      );
-    });
-  });
-
-  it('generates correct provided webcare zone', () => {
-    const webcareZone = 'sa1';
-
-    return getElement({
-      'data-webcare-id': 'D6604AE5D0',
-      'data-label': 'placeholder-label',
-      'data-webcare-zone': webcareZone,
-    }).then(elem => {
-      expect(elem.implementation_.origin_).to.equal(
-          'https://' + webcareZone + '.byside.com'
-      );
-    });
-  });
-
-  it('should create a loading animation', () => {
-    return getElement({
-      'data-webcare-id': 'D6604AE5D0',
-      'data-label': 'placeholder-label',
-    }).then(elem => {
-      const loader = elem.querySelector(
-          '.i-amphtml-byside-content-loading-animation'
-      );
-      expect(loader).to.not.be.null;
-    });
-  });
-
-  it('builds a placeholder loading animation without inserting iframe', () => {
-    const attributes = {
-      'data-webcare-id': 'D6604AE5D0',
-      'data-label': 'placeholder-label',
-    };
-
-    return getElement(attributes, true, elem => {
-      const placeholder = elem.querySelector('[placeholder]');
+    function testIframe(elem) {
       const iframe = elem.querySelector('iframe');
-      expect(iframe).to.be.null;
-      expect(placeholder).to.not.have.display('none');
-    }).then(elem => {
-      const placeholder = elem.querySelector('[placeholder]');
-      elem.getVsync = () => {
-        return {
-          mutate: fn => fn(),
-        };
-      };
+      expect(iframe).to.not.be.null;
+      expect(iframe.getAttribute('frameborder')).to.equal('0');
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+      expect(iframe.fakeSrc).to.satisfy(src => {
+        return src.startsWith(elem.implementation_.baseUrl_);
+      });
+    }
 
-      // test iframe
-      testIframe(elem);
-
-      // test placeholder too
-      elem.implementation_.iframePromise_.then(() => {
-        expect(placeholder).to.have.display('none');
+    it('renders', () => {
+      return getElement({
+        'data-webcare-id': 'D6604AE5D0',
+        'data-label': 'amp-simple',
+      }).then(elem => {
+        testIframe(elem);
       });
     });
-  });
 
-  it('passes down sandbox attribute to iframe', () => {
-    const sandbox = 'allow-scripts allow-same-origin allow-popups';
-    const attributes = {
-      'data-webcare-id': 'D6604AE5D0',
-      'data-label': 'placeholder-label',
-    };
-
-    return getElement(attributes, false).then(elem => {
-      const iframe = elem.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.getAttribute('sandbox')).to.equal(sandbox);
+    it('requires data-label', () => {
+      return allowConsoleError(() => {
+        return getElement({
+          'data-webcare-id': 'D6604AE5D0',
+        }).should.eventually.be.rejectedWith(
+          /The data-label attribute is required for/
+        );
+      });
     });
-  });
 
-  it('sets scrollable atribute in iframe', () => {
-    const attributes = {
-      'data-webcare-id': 'D6604AE5D0',
-      'data-label': 'placeholder-label',
-    };
-
-    return getElement(attributes, false).then(elem => {
-      const iframe = elem.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.getAttribute('scrolling')).to.equal('no');
+    it('requires data-webcare-id', () => {
+      return allowConsoleError(() => {
+        return getElement({
+          'data-label': 'placeholder-label',
+        }).should.eventually.be.rejectedWith(
+          /The data-webcare-id attribute is required for/
+        );
+      });
     });
-  });
-});
+
+    it('generates correct default origin', () => {
+      return getElement({
+        'data-webcare-id': 'D6604AE5D0',
+        'data-label': 'placeholder-label',
+      }).then(elem => {
+        expect(elem.implementation_.origin_).to.equal(
+          'https://webcare.byside.com'
+        );
+      });
+    });
+
+    it('generates correct provided webcare zone', () => {
+      const webcareZone = 'sa1';
+
+      return getElement({
+        'data-webcare-id': 'D6604AE5D0',
+        'data-label': 'placeholder-label',
+        'data-webcare-zone': webcareZone,
+      }).then(elem => {
+        expect(elem.implementation_.origin_).to.equal(
+          'https://' + webcareZone + '.byside.com'
+        );
+      });
+    });
+
+    it('should create a loading animation', () => {
+      return getElement({
+        'data-webcare-id': 'D6604AE5D0',
+        'data-label': 'placeholder-label',
+      }).then(elem => {
+        const loader = elem.querySelector(
+          '.i-amphtml-byside-content-loading-animation'
+        );
+        expect(loader).to.not.be.null;
+      });
+    });
+
+    it('builds a placeholder loading animation without inserting iframe', () => {
+      const attributes = {
+        'data-webcare-id': 'D6604AE5D0',
+        'data-label': 'placeholder-label',
+      };
+
+      return getElement(attributes, true, elem => {
+        const placeholder = elem.querySelector('[placeholder]');
+        const iframe = elem.querySelector('iframe');
+        expect(iframe).to.be.null;
+        expect(placeholder).to.not.have.display('none');
+      }).then(elem => {
+        const placeholder = elem.querySelector('[placeholder]');
+        elem.getVsync = () => {
+          return {
+            mutate: fn => fn(),
+          };
+        };
+
+        // test iframe
+        testIframe(elem);
+
+        // test placeholder too
+        elem.implementation_.iframePromise_.then(() => {
+          expect(placeholder).to.have.display('none');
+        });
+      });
+    });
+
+    it('passes down sandbox attribute to iframe', () => {
+      const sandbox = 'allow-scripts allow-same-origin allow-popups';
+      const attributes = {
+        'data-webcare-id': 'D6604AE5D0',
+        'data-label': 'placeholder-label',
+      };
+
+      return getElement(attributes, false).then(elem => {
+        const iframe = elem.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.getAttribute('sandbox')).to.equal(sandbox);
+      });
+    });
+
+    it('sets scrollable atribute in iframe', () => {
+      const attributes = {
+        'data-webcare-id': 'D6604AE5D0',
+        'data-label': 'placeholder-label',
+      };
+
+      return getElement(attributes, false).then(elem => {
+        const iframe = elem.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.getAttribute('scrolling')).to.equal('no');
+      });
+    });
+  }
+);

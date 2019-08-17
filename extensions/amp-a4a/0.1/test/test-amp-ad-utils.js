@@ -18,7 +18,6 @@ import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 import {getAmpAdMetadata} from '../amp-ad-utils';
 
 describe('getAmpAdMetadata', () => {
-
   it('should parse metadata successfully', () => {
     const creativeMetadata = getAmpAdMetadata(data.reserialized);
     expect(creativeMetadata).to.be.ok;
@@ -52,8 +51,8 @@ describe('getAmpAdMetadata', () => {
 
   it('should return null -- missing closing script tag', () => {
     const creativeMetadata = getAmpAdMetadata(
-        data.reserializedMissingScriptTag);
+      data.reserializedMissingScriptTag
+    );
     expect(creativeMetadata).to.be.null;
   });
-
 });

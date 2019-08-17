@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-export const PINPOLL_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const PINPOLL_CONFIG = jsonLiteral({
   'requests': {
-    'pageview': '${protocol}://${host}/${version}?' +
+    'pageview':
+      '${protocol}://${host}/${version}?' +
       'url=${sourceUrl}&' +
       'sourceHost=${sourceHost}&' +
       'sourceHostname=${sourceHostname}&' +
@@ -43,3 +46,5 @@ export const PINPOLL_CONFIG = /** @type {!JsonObject} */ ({
     'host': 'pa.pinpoll.com',
   },
 });
+
+export {PINPOLL_CONFIG};

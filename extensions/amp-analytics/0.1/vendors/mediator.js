@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-export const MEDIATOR_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const MEDIATOR_CONFIG = jsonLiteral({
   'requests': {
     'host': '//collector.mediator.media/script/${mediator_id}/amp/',
     'renderstart': '${host}init/?url=${canonicalUrl}',
-    'prefix': '${host}register/?url=${canonicalUrl}' +
-              '&ref=${documentReferrer}&',
+    'prefix': '${host}register/?url=${canonicalUrl}&ref=${documentReferrer}&',
     'suffix': 'vh=${viewportHeight}&sh=${scrollHeight}&st=${scrollTop}',
     'pageview': '${prefix}e=v',
     'timer': '${prefix}e=t&${suffix}',
@@ -43,36 +44,28 @@ export const MEDIATOR_CONFIG = /** @type {!JsonObject} */ ({
     'scrollPing0': {
       'on': 'scroll',
       'scrollSpec': {
-        'verticalBoundaries': [
-          5,
-        ],
+        'verticalBoundaries': [5],
       },
       'request': 's0',
     },
     'scrollPing1': {
       'on': 'scroll',
       'scrollSpec': {
-        'verticalBoundaries': [
-          35,
-        ],
+        'verticalBoundaries': [35],
       },
       'request': 's1',
     },
     'scrollPing2': {
       'on': 'scroll',
       'scrollSpec': {
-        'verticalBoundaries': [
-          65,
-        ],
+        'verticalBoundaries': [65],
       },
       'request': 's2',
     },
     'scrollPing3': {
       'on': 'scroll',
       'scrollSpec': {
-        'verticalBoundaries': [
-          95,
-        ],
+        'verticalBoundaries': [95],
       },
       'request': 's3',
     },
@@ -87,3 +80,5 @@ export const MEDIATOR_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {MEDIATOR_CONFIG};

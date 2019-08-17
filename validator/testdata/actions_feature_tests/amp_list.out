@@ -31,7 +31,7 @@ PASS
 |    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
 |    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 >>   ^~~~~~~~~
-actions_feature_tests/amp_list.html:31:2 The extension 'amp-mustache' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [DEPRECATION]
+actions_feature_tests/amp_list.html:31:2 The extension 'amp-mustache' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://amp.dev/documentation/components/amp-mustache) [DEPRECATION]
 |    <!-- Valid -->
 |    <script id="amp-viewer-assistance" type="application/json">
 |    {
@@ -65,18 +65,6 @@ actions_feature_tests/amp_list.html:31:2 The extension 'amp-mustache' is referen
 |    <!-- Valid: Should allow crossorigin -->
 |    <amp-list width="auto" height="100" layout="fixed-height"
 |      src="https://someserver.json" crossorigin="amp-viewer-auth-token-via-post" credentials="123">
-|      <template type="amp-mustache">
-|        <div class="url-entry">
-|          <a href="https://somelink.com">{{blah}}</a>
-|        </div>
-|      </template>
-|    </amp-list>
-|
-|    <!-- Valid: Should allow cross-origin -->
-|    <amp-list width="auto" height="100" layout="fixed-height"
->>   ^~~~~~~~~
-actions_feature_tests/amp_list.html:73:2 The attribute 'cross-origin' in tag 'AMP-LIST (ACTIONS)' is deprecated - use 'crossorigin' instead. (see https://github.com/ampproject/amphtml/issues/21399) [DEPRECATION]
-|      src="https://someserver.json" cross-origin="amp-viewer-auth-token-via-post" credentials="123">
 |      <template type="amp-mustache">
 |        <div class="url-entry">
 |          <a href="https://somelink.com">{{blah}}</a>

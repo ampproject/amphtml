@@ -23,13 +23,17 @@
  */
 const env = self.AMP_CONFIG || {};
 
-const thirdPartyFrameRegex = typeof env['thirdPartyFrameRegex'] == 'string' ?
-  new RegExp(env['thirdPartyFrameRegex']) : env['thirdPartyFrameRegex'];
+const thirdPartyFrameRegex =
+  typeof env['thirdPartyFrameRegex'] == 'string'
+    ? new RegExp(env['thirdPartyFrameRegex'])
+    : env['thirdPartyFrameRegex'];
 
-const cdnProxyRegex = typeof env['cdnProxyRegex'] == 'string' ?
-  new RegExp(env['cdnProxyRegex']) : env['cdnProxyRegex'];
+const cdnProxyRegex =
+  typeof env['cdnProxyRegex'] == 'string'
+    ? new RegExp(env['cdnProxyRegex'])
+    : env['cdnProxyRegex'];
 
-/** @type {!Object<string, string|boolean|RegExp>} */
+/** @type {!Object<string, string|boolean|RegExp|Array<RegExp>>} */
 export const urls = {
   thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
   thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
@@ -38,12 +42,25 @@ export const urls = {
   /* Note that cdnProxyRegex is only ever checked against origins
    * (proto://host[:port]) so does not need to consider path
    */
-  cdnProxyRegex: cdnProxyRegex ||
-      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/,
+  cdnProxyRegex:
+    cdnProxyRegex || /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/,
   localhostRegex: /^https?:\/\/localhost(:\d+)?$/,
-  errorReporting: env['errorReportingUrl'] ||
-      'https://amp-error-reporting.appspot.com/r',
+  errorReporting:
+    env['errorReportingUrl'] || 'https://amp-error-reporting.appspot.com/r',
   localDev: env['localDev'] || false,
+  /**
+   * These domains are trusted with more sensitive viewer operations such as
+   * propagating the referrer. If you believe your domain should be here,
+   * file the issue on GitHub to discuss. The process will be similar
+   * (but somewhat more stringent) to the one described in the [3p/README.md](
+   * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+   *
+   * {!Array<!RegExp>}
+   */
+  trustedViewerHosts: [
+    /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
+    /(^|\.)gmail\.dev$/,
+  ],
 };
 
 export const config = {

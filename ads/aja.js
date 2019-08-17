@@ -14,30 +14,22 @@
  * limitations under the License.
  */
 
-import {validateData} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function aja(global, data) {
+  validateData(data, ['asi']);
 
-  validateData(data, ['sspCode']);
+  const {document} = global;
+  const asi = data['asi'];
 
-  (global._aja = global._aja || {
-    sspCode: data['sspCode'],
-  });
+  const d = document.createElement('div');
+  d.dataset['ajaAd'] = '';
+  d.dataset['ajaAsi'] = asi;
+  document.getElementById('c').appendChild(d);
 
-  const elStyle = global.document.createElement('iframe');
-  elStyle.setAttribute('id', 'adframe');
-  elStyle.setAttribute('width', data.width);
-  elStyle.setAttribute('height', data.height);
-  elStyle.setAttribute('frameborder', '0');
-  elStyle.setAttribute('marginheight', '0');
-  elStyle.setAttribute('marginwidth', '0');
-  elStyle.setAttribute('allowfullscreen', 'true');
-  elStyle.setAttribute('scrolling', 'no');
-  elStyle.src = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(data['sspCode']);
-  global.document.body.appendChild(elStyle);
-
+  loadScript(global, 'https://cdn.as.amanad.adtdp.com/sdk/asot-amp.js');
 }

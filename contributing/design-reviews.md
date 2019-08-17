@@ -1,6 +1,6 @@
 # Design Reviews
 
-The AMP Project community holds weekly public design reviews via video conference.  We encourage everyone in the community to attend these design reviews to discuss the design challenges being faced by the community.
+The AMP open source community holds weekly public design reviews via video conference.  We encourage everyone to attend these design reviews to discuss the design challenges being faced by the community.
 
 * [Upcoming design reviews](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review)
 * [Past design reviews](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Design+Review%22+is%3Aclosed)
@@ -17,7 +17,7 @@ You can optionally join the [design review Google Group](https://groups.google.c
 
 ## Design reviews are global
 
-Because AMP contributors are located all over the world we rotate the design review times to accomodate people in different time zones.  The time and date for a design review will be specified in that design review's issue.
+Because AMP contributors are located all over the world we rotate the design review times to accommodate people in different time zones.  The time and date for a design review will be specified in that design review's issue.
 
 If none of the design review times are convenient for you and you have a design you would like to discuss please reach out to mrjoro on [Slack](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels).
 
@@ -30,7 +30,7 @@ The process for bringing a design to the design review is:
 * Determine if you need a design document; in many cases a fully detailed Intent-to-implement (I2I) GitHub issue or other GitHub issue describing the problem and proposed solution may be sufficient.  If you have a reviewer work with them to decide what makes sense in your case, otherwise you can ask in the [#design-review Slack channel](https://amphtml.slack.com/messages/design-review/) ([sign up](https://bit.ly/amp-slack-signup)).
 * If you are going to create a design document, create it as a shared Google Document open to public comments:
   * A short design doc is fine as long as it covers your design in sufficient detail to allow for a review by other members of the community.
-  * Take a look at [Design docs - A design doc](https://medium.com/@cramforce/design-docs-a-design-doc-a152f4484c6b) for tips on putting together a good design doc.  [Phone call tracking in AMP](https://docs.google.com/document/d/1UDMYv0f2R9CvMUSBQhxjtkSnC4984t9dJeqwm_8WiAM/edit) and [New AMP Boilerplate](https://docs.google.com/document/d/1gZFaKvcDffceJNaI3bYfuYPtYU5u2y6UhE5wBPTsJ9w/edit) are examples of past AMP Project design docs.
+  * Take a look at [Design docs - A design doc](https://medium.com/@cramforce/design-docs-a-design-doc-a152f4484c6b) for tips on putting together a good design doc.  [Phone call tracking in AMP](https://docs.google.com/document/d/1UDMYv0f2R9CvMUSBQhxjtkSnC4984t9dJeqwm_8WiAM/edit) and [New AMP Boilerplate](https://docs.google.com/document/d/1gZFaKvcDffceJNaI3bYfuYPtYU5u2y6UhE5wBPTsJ9w/edit) are examples of past AMP design docs.
   * Add this license text to the top of your design doc before sharing it with anyone else in the community (updating the year if necessary):
       ```
       Copyright 2019 The AMP HTML Authors. All Rights Reserved.
@@ -52,7 +52,12 @@ The process for bringing a design to the design review is:
   * It can be helpful to present the GitHub issue/design doc during the meeting using the video conference "share your screen" functionality.  (If you have technical trouble doing this, someone else at the meeting can handle it.)
   * You can assume that the people at the meeting have at least skimmed through your design to understand the area being discussed, but they may not be completely familiar with the nuances of your design.
   * It is recommended that you start the discussion with a brief overview of your design.
-  * After the initial overview, lead the attendees through the parts of the design you would like feedback on.  If you have a reviewer, they may suggest particular areas to focus on in the discussion.
+  * After the initial overview, lead the attendees through the parts of the design you would like feedback on. If you have a reviewer, they may suggest particular areas to focus on in the discussion. Potential things to think about:
+    * What are the performance tradeoffs to think about in the proposed approaches?
+    * How does this feature impact accessibility of AMP pages?
+    * Do we need to think about internationalization for this feature?
+    * Do we need to conduct user research before going in to the implementation?
+  * Working Groups will be represented at the Design Review to allow you to gather feedback across their different areas of expertise. 
   * We'll take notes during the design review and post them to the Design Review GitHub issue shortly after the meeting.
 
 * Update your design based on the feedback in the design review and any followup conversations in other channels.  Once your design is finalized, please provide a brief update at the start of a future design review (if you are able to attend).  If you create a design doc submit a PDF version in the [ampproject design-doc](https://github.com/ampproject/design-docs) repository.

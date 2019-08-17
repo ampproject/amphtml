@@ -18,7 +18,6 @@ import {StateChangeType} from './navigation-state';
 import {dev} from '../../../src/log';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-
 /** @enum {string} */
 const Events = {
   PAGE_VISIBLE: 'story-page-visible',
@@ -27,7 +26,6 @@ const Events = {
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
 };
-
 
 /**
  * Intermediate handler for amp-story specific analytics.
@@ -77,12 +75,16 @@ export class AmpStoryAnalytics {
   triggerEvent_(eventType) {
     const variablesPromise = Services.storyVariableServiceForOrNull(this.win_);
     variablesPromise.then(
-        variables => {
-          triggerAnalyticsEvent(this.element_, eventType,
-              /** @type {!JsonObject} */ (variables));
-        },
-        reason => {
-          dev().error('AMP-STORY', 'Could not get analytics variables', reason);
-        });
+      variables => {
+        triggerAnalyticsEvent(
+          this.element_,
+          eventType,
+          /** @type {!JsonObject} */ (variables)
+        );
+      },
+      reason => {
+        dev().error('AMP-STORY', 'Could not get analytics variables', reason);
+      }
+    );
   }
 }

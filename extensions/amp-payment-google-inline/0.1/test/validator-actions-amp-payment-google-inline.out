@@ -64,7 +64,7 @@ FAIL
 |    <!-- Invalid: FORM [method=POST] (ACTIONS) not an ancestor -->
 |    <amp-payment-google-inline data-payment-data-input-id="payment-data">
 >>   ^~~~~~~~~
-amp-payment-google-inline/0.1/test/validator-actions-amp-payment-google-inline.html:64:2 The tag 'amp-payment-google-inline' may only appear as a descendant of tag 'form [method=post] (actions)'. (see https://www.ampproject.org/docs/reference/components/amp-payment-google-inline) [AMP_TAG_PROBLEM]
+amp-payment-google-inline/0.1/test/validator-actions-amp-payment-google-inline.html:64:2 The tag 'amp-payment-google-inline' may only appear as a descendant of tag 'form [method=post] (actions)'. (see https://amp.dev/documentation/components/amp-payment-google-inline) [AMP_TAG_PROBLEM]
 |      <script type="application/json">
 |      {
 |        "apiVersion": 1,
@@ -96,7 +96,7 @@ amp-payment-google-inline/0.1/test/validator-actions-amp-payment-google-inline.h
 |    <form method="post" action-xhr="https://example.com/checkout">
 |      <amp-payment-google-inline>
 >>     ^~~~~~~~~
-amp-payment-google-inline/0.1/test/validator-actions-amp-payment-google-inline.html:94:4 The mandatory attribute 'data-payment-data-input-id' is missing in tag 'amp-payment-google-inline'. (see https://www.ampproject.org/docs/reference/components/amp-payment-google-inline) [AMP_TAG_PROBLEM]
+amp-payment-google-inline/0.1/test/validator-actions-amp-payment-google-inline.html:94:4 The mandatory attribute 'data-payment-data-input-id' is missing in tag 'amp-payment-google-inline'. (see https://amp.dev/documentation/components/amp-payment-google-inline) [AMP_TAG_PROBLEM]
 |        <script type="application/json">
 |        {
 |          "apiVersion": 1,
@@ -129,7 +129,7 @@ amp-payment-google-inline/0.1/test/validator-actions-amp-payment-google-inline.h
 |    <form method="post" action-xhr="https://example.com/checkout">
 |      <amp-payment-google-inline data-payment-data-input-id="payment-data">
 >>     ^~~~~~~~~
-amp-payment-google-inline/0.1/test/validator-actions-amp-payment-google-inline.html:125:4 Tag 'amp-payment-google-inline' must have a minimum of 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-payment-google-inline) [GENERIC]
+amp-payment-google-inline/0.1/test/validator-actions-amp-payment-google-inline.html:125:4 Tag 'amp-payment-google-inline' must have a minimum of 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-payment-google-inline) [GENERIC]
 |      </amp-payment-google-inline>
 |    </form>
 |  </body>

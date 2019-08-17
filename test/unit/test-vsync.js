@@ -19,9 +19,7 @@ import {Services} from '../../src/services';
 import {Vsync} from '../../src/service/vsync-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 
-
-describe('vsync', () => {
-  let sandbox;
+describes.sandboxed('vsync', {}, () => {
   let clock;
   let win;
   let viewer;
@@ -31,15 +29,13 @@ describe('vsync', () => {
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     win = {
       document: {
         nodeType: /* DOCUMENT */ 9,
         body: {},
       },
-      navigator: {
-      },
+      navigator: {},
       services: {},
       setTimeout: (fn, t) => {
         return window.setTimeout(fn, t);
@@ -57,13 +53,14 @@ describe('vsync', () => {
     viewerVisibilityChangedHandler = undefined;
     viewer = {
       isVisible: () => true,
-      onVisibilityChanged: handler => viewerVisibilityChangedHandler = handler,
+      onVisibilityChanged: handler =>
+        (viewerVisibilityChangedHandler = handler),
     };
 
     docVisibilityHandler = undefined;
     docState = {
       isHidden: () => false,
-      onVisibilityChanged: handler => docVisibilityHandler = handler,
+      onVisibilityChanged: handler => (docVisibilityHandler = handler),
     };
     win.services['documentState'] = {obj: docState};
 
@@ -72,10 +69,8 @@ describe('vsync', () => {
   });
 
   afterEach(() => {
-    sandbox.restore();
     document.body.removeChild(contextNode);
   });
-
 
   describe('single-doc', () => {
     let ampdoc;
@@ -83,14 +78,13 @@ describe('vsync', () => {
 
     beforeEach(() => {
       installDocService(win, /* isSingleDoc */ true);
-      ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       win.services['viewer'] = {obj: viewer};
       vsync = new Vsync(win);
       return Services.viewerPromiseForDoc(ampdoc);
     });
 
-    afterEach(() => {
-    });
+    afterEach(() => {});
 
     it('should init correctly', () => {
       expect(vsync.canAnimate(contextNode)).to.be.true;
@@ -99,9 +93,11 @@ describe('vsync', () => {
     });
 
     it('should fail canAnimate without node', () => {
-      allowConsoleError(() => { expect(() => {
-        vsync.canAnimate();
-      }).to.throw(/Assertion failed/); });
+      allowConsoleError(() => {
+        expect(() => {
+          vsync.canAnimate();
+        }).to.throw(/Assertion failed/);
+      });
     });
 
     // TODO(choumx, #12476): Make this test work with sinon 4.0.
@@ -240,31 +236,31 @@ describe('vsync', () => {
     });
 
     // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from runPromise that ' +
-        'executes "run"', () => {
+    it.skip('should return a promise from runPromise that executes "run"', () => {
       const measureSpy = sandbox.spy();
       const mutateSpy = sandbox.spy();
-      return vsync.runPromise({measure: measureSpy, mutate: mutateSpy})
-          .then(() => {
-            expect(mutateSpy).to.be.calledOnce;
-            expect(measureSpy).to.be.calledOnce;
-          });
+      return vsync
+        .runPromise({measure: measureSpy, mutate: mutateSpy})
+        .then(() => {
+          expect(mutateSpy).to.be.calledOnce;
+          expect(measureSpy).to.be.calledOnce;
+        });
     });
 
     // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from measurePromise ' +
-        'that runs measurer', () => {
+    it.skip('should return a promise from measurePromise that runs measurer', () => {
       let measured = false;
-      return vsync.measurePromise(() => {
-        measured = true;
-      }).then(() => {
-        expect(measured).to.be.true;
-      });
+      return vsync
+        .measurePromise(() => {
+          measured = true;
+        })
+        .then(() => {
+          expect(measured).to.be.true;
+        });
     });
 
     // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from mutatePromise' +
-        'that runs mutator', () => {
+    it.skip('should return a promise from mutatePromisethat runs mutator', () => {
       const mutator = sandbox.spy();
       return vsync.mutatePromise(mutator).then(() => {
         expect(mutator).to.be.calledOnce;
@@ -273,7 +269,7 @@ describe('vsync', () => {
 
     it('should schedule via animation frames when doc is visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       viewer.isVisible = () => true;
 
       let result = '';
@@ -299,7 +295,7 @@ describe('vsync', () => {
 
     it('should schedule via timer frames when doc is not visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       viewer.isVisible = () => false;
 
       let result = '';
@@ -358,7 +354,7 @@ describe('vsync', () => {
 
     it('should re-schedule when doc goes invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       viewer.isVisible = () => true;
 
       let result = '';
@@ -389,7 +385,7 @@ describe('vsync', () => {
 
     it('should re-schedule when doc goes visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       viewer.isVisible = () => false;
 
       let result = '';
@@ -419,7 +415,7 @@ describe('vsync', () => {
 
     it('should NOT re-schedule when no tasks pending', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       viewer.isVisible = () => true;
 
       expect(vsync.tasks_).to.have.length(0);
@@ -438,7 +434,7 @@ describe('vsync', () => {
 
     it('should run anim task when visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       viewer.isVisible = () => true;
 
       let result = '';
@@ -458,7 +454,7 @@ describe('vsync', () => {
 
     it('should create and run anim task when visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       viewer.isVisible = () => true;
 
       let result = '';
@@ -479,7 +475,7 @@ describe('vsync', () => {
 
     it('should NOT run anim task when invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       viewer.isVisible = () => false;
 
       let result = ''; // eslint-disable-line no-unused-vars
@@ -496,7 +492,7 @@ describe('vsync', () => {
 
     it('should create but NOT run anim task when invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       viewer.isVisible = () => false;
 
       let result = ''; // eslint-disable-line no-unused-vars
@@ -517,14 +513,19 @@ describe('vsync', () => {
       const mutatorSpy = sandbox.spy();
 
       const promise = vsync.runAnimMutateSeries(contextNode, mutatorSpy);
-      return promise.then(() => {
-        return 'SUCCESS';
-      }, error => {
-        return 'ERROR: ' + error;
-      }).then(response => {
-        expect(response).to.match(/^ERROR/);
-        expect(mutatorSpy).to.have.not.been.called;
-      });
+      return promise
+        .then(
+          () => {
+            return 'SUCCESS';
+          },
+          error => {
+            return 'ERROR: ' + error;
+          }
+        )
+        .then(response => {
+          expect(response).to.match(/^ERROR/);
+          expect(mutatorSpy).to.have.not.been.called;
+        });
     });
 
     describe('RAF polyfill', () => {
@@ -558,7 +559,6 @@ describe('vsync', () => {
     });
   });
 
-
   describe('multi-doc', () => {
     let root;
     let ampdoc;
@@ -587,7 +587,7 @@ describe('vsync', () => {
 
     it('should schedule via animation frames when doc is visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       viewer.isVisible = () => true;
 
       let result = '';
@@ -610,7 +610,7 @@ describe('vsync', () => {
 
     it('should schedule via timer frames when doc is not visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       docState.isHidden = () => true;
 
       let result = '';
@@ -634,7 +634,7 @@ describe('vsync', () => {
 
     it('should re-schedule when doc goes invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       docState.isHidden = () => false;
 
       let result = '';
@@ -665,7 +665,7 @@ describe('vsync', () => {
 
     it('should re-schedule when doc goes visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       docState.isHidden = () => true;
 
       let result = '';
@@ -695,7 +695,7 @@ describe('vsync', () => {
 
     it('should NOT re-schedule when no tasks pending', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       docState.isHidden = () => false;
 
       expect(vsync.tasks_).to.have.length(0);
@@ -714,7 +714,7 @@ describe('vsync', () => {
 
     it('should run anim task when visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       docState.isHidden = () => false;
 
       let result = '';
@@ -734,7 +734,7 @@ describe('vsync', () => {
 
     it('should create and run anim task when visible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       docState.isHidden = () => false;
 
       let result = '';
@@ -755,7 +755,7 @@ describe('vsync', () => {
 
     it('should NOT run anim task when invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       docState.isHidden = () => true;
 
       let result = ''; // eslint-disable-line no-unused-vars
@@ -772,7 +772,7 @@ describe('vsync', () => {
 
     it('should create but NOT run anim task when invisible', () => {
       let rafHandler;
-      vsync.raf_ = handler => rafHandler = handler;
+      vsync.raf_ = handler => (rafHandler = handler);
       docState.isHidden = () => true;
 
       let result = ''; // eslint-disable-line no-unused-vars
@@ -793,14 +793,19 @@ describe('vsync', () => {
       const mutatorSpy = sandbox.spy();
 
       const promise = vsync.runAnimMutateSeries(contextNode, mutatorSpy);
-      return promise.then(() => {
-        return 'SUCCESS';
-      }, error => {
-        return 'ERROR: ' + error;
-      }).then(response => {
-        expect(response).to.match(/^ERROR/);
-        expect(mutatorSpy).to.have.not.been.called;
-      });
+      return promise
+        .then(
+          () => {
+            return 'SUCCESS';
+          },
+          error => {
+            return 'ERROR: ' + error;
+          }
+        )
+        .then(response => {
+          expect(response).to.match(/^ERROR/);
+          expect(mutatorSpy).to.have.not.been.called;
+        });
     });
   });
 });

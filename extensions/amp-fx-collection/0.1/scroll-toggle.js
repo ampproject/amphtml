@@ -35,13 +35,10 @@ export const ANIMATION_THRESHOLD_PX = 80;
 export const ANIMATION_CURVE = 'ease';
 export const ANIMATION_DURATION_MS = 300;
 
-
 /** Dispatches a signal when an element is supposed to be toggled on scroll. */
 export class ScrollToggleDispatch {
-
   /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
-
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -92,13 +89,11 @@ export class ScrollToggleDispatch {
 
     // If we are scrolling in the direction that doesn't change our
     // header status, update the base scroll position.
-    if ((!this.isShown_ && delta > 0) ||
-        (this.isShown_ && delta < 0)) {
+    if ((!this.isShown_ && delta > 0) || (this.isShown_ && delta < 0)) {
       this.baseScrollTop_ = this.lastScrollTop_;
     }
 
-    if (!this.isShown_ &&
-        this.lastScrollTop_ <= HEIGHT_PX) {
+    if (!this.isShown_ && this.lastScrollTop_ <= HEIGHT_PX) {
       // If we reached the top, then we need to immediately animate
       // the target back in irrespective of our current animation
       // state.
@@ -106,15 +101,13 @@ export class ScrollToggleDispatch {
       this.baseScrollTop_ = this.lastScrollTop_;
       return;
     }
-    if (!this.isShown_ &&
-        delta < -RETURN_THRESHOLD_PX) {
+    if (!this.isShown_ && delta < -RETURN_THRESHOLD_PX) {
       // If we scrolled up enough up to show the target again, do so.
       this.toggle_(true);
       this.baseScrollTop_ = this.lastScrollTop_;
       return;
     }
-    if (this.isShown_ &&
-        delta > ANIMATION_THRESHOLD_PX) {
+    if (this.isShown_ && delta > ANIMATION_THRESHOLD_PX) {
       // If we scrolled down enough to animate the target out, do so.
       this.toggle_(false);
       this.baseScrollTop_ = this.lastScrollTop_;
@@ -157,13 +150,12 @@ export function getScrollToggleFloatInOffset(element, isShown, position) {
   if (isShown) {
     return 0;
   }
-  const offset = element./*OK*/getBoundingClientRect().height;
+  const offset = element./*OK*/ getBoundingClientRect().height;
   if (position == ScrollTogglePosition.TOP) {
     return -offset;
   }
   return offset;
 }
-
 
 /**
  * @param {!Element} element
@@ -173,7 +165,8 @@ export function getScrollToggleFloatInOffset(element, isShown, position) {
 export function assertValidScrollToggleElement(element, computedStyle) {
   return (
     assertStyleOrWarn(computedStyle, 'overflow', 'hidden', element) &&
-    assertStyleOrWarn(computedStyle, 'position', 'fixed', element));
+    assertStyleOrWarn(computedStyle, 'position', 'fixed', element)
+  );
 }
 
 /**
@@ -189,8 +182,15 @@ export function getScrollTogglePosition(element, type, computedStyle) {
 
   // naming convention win:
   // position `top` should have `top: 0` and `bottom` should have `bottom: 0`
-  if (!assertStyleOrWarn(
-      computedStyle, position, px(0), element, `amp-fx=${type}`)) {
+  if (
+    !assertStyleOrWarn(
+      computedStyle,
+      position,
+      px(0),
+      element,
+      `amp-fx=${type}`
+    )
+  ) {
     return null;
   }
 
@@ -213,19 +213,18 @@ export function installScrollToggleStyles(element) {
  * @param {string=} opt_suffix
  * @return {boolean}
  */
-function assertStyleOrWarn(
-  computed, prop, expected, element, opt_suffix) {
-
+function assertStyleOrWarn(computed, prop, expected, element, opt_suffix) {
   if (computed[prop] == expected) {
     return true;
   }
   const suffix = opt_suffix ? ` ${opt_suffix}` : '';
   const shorthand = elementShorthand(element);
-  user().warn(TAG,
-      `FX element must have \`${prop}: ${expected}\` [${shorthand}]${suffix}.`);
+  user().warn(
+    TAG,
+    `FX element must have \`${prop}: ${expected}\` [${shorthand}]${suffix}.`
+  );
   return false;
 }
-
 
 /**
  * Creates a human-readable shorthand for an element similar to a CSS selector.

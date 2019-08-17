@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - ads
+teaser:
+  text: Supports interaction with the MRAID host API within Ad webviews in mobile apps
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -21,8 +28,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Supports interaction with the [MRAID](https://www.iab.com/guidelines/mobile-rich-media-ad-interface-definitions-mraid/) host API within Ad webviews in
-        mobile apps.</td>
+    <td>Supports interaction with the <a href="https://www.iab.com/guidelines/mobile-rich-media-ad-interface-definitions-mraid/">MRAID</a> host API within Ad webviews in mobile apps.</td>
   </tr>
   <tr>
     <td><strong>Required Script</strong></td>
@@ -38,6 +44,6 @@ When the `amp-mraid` extension is included in an AMPHTML ad it will load
 
 ## Validation
 The `amp-mraid` extension is intended for [AMPHTML
-ads](https://www.ampproject.org/docs/ads/amphtml_ads).  It is intended to be
+ads](https://amp.dev/documentation/guides-and-tutorials/learn/intro-to-amphtml-ads).  It is intended to be
 injected by the ad network after validation, and as such a creative with
 `amp-mraid` will not validate.

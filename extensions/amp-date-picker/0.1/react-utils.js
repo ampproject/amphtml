@@ -16,7 +16,6 @@
 
 import {requireExternal} from '../../../src/module';
 
-
 /**
  * Create a React component that can render Promises.
  * Note: The nested class cannot be named Deferred, since src/promise.js already
@@ -24,44 +23,52 @@ import {requireExternal} from '../../../src/module';
  * @return {function(new:React.Component, !Object)}
  */
 function createDeferred_() {
-  const React = requireExternal('react');
+  const react = requireExternal('react');
 
-  /** @extends {React.Component} */
-  class DeferredType extends React.Component {
-    /**
-     * @param {!Object} props
-     */
-    constructor(props) {
-      super(props);
-      this.state = {value: this.props.initial};
-    }
-
-    /** @override */
-    componentWillReceiveProps(nextProps) {
-      const promise = nextProps['promise'];
-      if (promise) {
-        promise.then(value => this.setState({value}));
-      }
-    }
-
-    /** @override */
-    shouldComponentUpdate(props, state) {
-      return shallowDiffers(this.props, props) ||
-          shallowDiffers(this.state, state);
-    }
-
-    /** @override */
-    componentDidMount() {
-      this.props.promise.then(value => this.setState({value}));
-    }
-
-    /** @override */
-    render() {
-      return this.props.then(this.state.value);
-    }
+  /**
+   * Creates an instance of DeferredType.
+   * @param {!Object} props
+   * @struct
+   * @constructor
+   * @extends {React.Component}
+   */
+  function DeferredType(props) {
+    react.Component.call(this, props);
+    const self = /** @type {!React.Component} */ (this);
+    self.state = {value: this.props.initial};
   }
 
-  DeferredType.defaultProps = {
+  DeferredType.prototype = Object.create(react.Component.prototype);
+  DeferredType.prototype.constructor = DeferredType;
+
+  /** @override */
+  DeferredType.prototype.componentWillReceiveProps = function(nextProps) {
+    const promise = nextProps['promise'];
+    if (promise) {
+      promise.then(value => this.setState({value}));
+    }
+  };
+
+  /** @override */
+  DeferredType.prototype.shouldComponentUpdate = function(props, state) {
+    const self = /** @type {!React.Component} */ (this);
+    return Boolean(
+      shallowDiffers(this.props, props) || shallowDiffers(self.state, state)
+    );
+  };
+
+  /** @override */
+  DeferredType.prototype.componentDidMount = function() {
+    this.props.promise.then(value => this.setState({value}));
+  };
+
+  /** @override */
+  DeferredType.prototype.render = function() {
+    const self = /** @type {!React.Component} */ (this);
+    return this.props.then(self.state.value);
+  };
+
+  DeferredType['defaultProps'] = {
     initial: '',
   };
 
@@ -74,6 +81,7 @@ function createDeferred_() {
  * Shallow compare a and b.
  * @param {*} a
  * @param {*} b
+ * @return {*} TODO(#23582): Specify return type
  */
 function shallowDiffers(a, b) {
   for (const i in a) {
@@ -102,4 +110,3 @@ export function createDeferred() {
   }
   return DeferredType_;
 }
-
