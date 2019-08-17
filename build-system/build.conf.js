@@ -29,6 +29,7 @@ const defaultPlugins = [
   localPlugin('transform-version-call'),
   getJsonConfigurationPlugin(),
   getReplacePlugin(),
+  localPlugin('transform-inline-constant-class-props'),
 ];
 
 const esmRemovedImports = {
