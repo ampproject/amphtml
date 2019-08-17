@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/** @type {!Element} */
-(element);
-let result =
-/** @type {!Element} */
-(element);
+(function () {
+  throw new Error('static type assertion failure');
+})();
