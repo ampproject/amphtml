@@ -248,9 +248,7 @@ const envPresets = {
     AmpdocEnvironment.SHADOW_DEMO,
   ],
   'amp4ads-preset': [
-    // TODO(lannka): unskip this test. It passes locally but fails on Travis:
-    // https://travis-ci.org/ampproject/amphtml/jobs/570977015
-    // AmpdocEnvironment.A4A_FIE,
+    AmpdocEnvironment.A4A_FIE,
     AmpdocEnvironment.A4A_INABOX,
     AmpdocEnvironment.A4A_INABOX_FRIENDLY,
     AmpdocEnvironment.A4A_INABOX_SAFEFRAME,

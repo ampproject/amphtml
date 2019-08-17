@@ -20,6 +20,7 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-position-observer/scrollbound-animation.html',
     environments: 'amp4ads-preset',
+    initialRect: {width: 800, height: 600},
   },
   async env => {
     let controller;
