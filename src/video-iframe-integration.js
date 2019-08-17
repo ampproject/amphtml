@@ -104,7 +104,7 @@ export class AmpVideoIntegration {
      */
     this.isAmpVideoIntegration_ = true;
 
-    /** @private @const */
+    /** @private */
     this.callCounter_ = 0;
 
     /** @private @const {!Object<number, function()>} */
