@@ -110,8 +110,8 @@ export class AmpAudio extends AMP.BaseElement {
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
 
-    listen(this.audio_, 'play', () => this.analyticsEvent_('audio-play'));
-    listen(this.audio_, 'pause', () => this.analyticsEvent_('audio-pause'));
+    listen(this.audio_, 'play', () => triggerAnalyticsEvent(this.element, 'audio-play'));
+    listen(this.audio_, 'pause', () => triggerAnalyticsEvent(this.element, 'audio-pause'));
   }
 
   /** @override */
@@ -255,13 +255,6 @@ export class AmpAudio extends AMP.BaseElement {
     );
   }
 
-  /**
-   * @param {string} eventType
-   * @private
-   */
-  analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.element, eventType);
-  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {
