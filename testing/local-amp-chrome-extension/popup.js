@@ -32,9 +32,10 @@ document.addEventListener('DOMContentLoaded', function() {
   baseUrlInput.placeholder = background.defaultBaseUrl;
   baseUrlInput.value = background.baseUrl;
   baseUrlInput.addEventListener('input', () => {
-    background.baseUrl = document.getElementById('base-url').value;
-    if ( '/' !== background.baseUrl.substr( -1 ) ) {
-      background.baseUrl += '/';
+    const url = new URL(baseUrlInput.value.trim() || background.defaultBaseUrl);
+    if (!url.pathname.endsWith('/')) {
+      url.pathname += '/';
     }
+    background.baseUrl = url.href;
   });
 });

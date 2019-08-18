@@ -37,7 +37,7 @@ chrome.webRequest.onBeforeRequest.addListener(
       path = path.replace(/\.js$/, '.max.js');
     }
     return {
-      redirectUrl: ( baseUrl || defaultBaseUrl ) + path
+      redirectUrl: baseUrl + path
     };
   },
   {
@@ -62,7 +62,7 @@ chrome.webRequest.onBeforeRequest.addListener(
       path = path.replace(/\/f\.js$/, '/integration.js');
     }
     return {
-      redirectUrl: ( baseUrl || defaultBaseUrl ) + path
+      redirectUrl: baseUrl + path
     };
   },
   {
