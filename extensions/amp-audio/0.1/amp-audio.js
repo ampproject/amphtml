@@ -110,7 +110,7 @@ export class AmpAudio extends AMP.BaseElement {
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
 
-    listen(this.audio_, 'playing', () => this.analyticsEvent_('audio-play'));
+    listen(this.audio_, 'play', () => this.analyticsEvent_('audio-play'));
     listen(this.audio_, 'pause', () => this.analyticsEvent_('audio-pause'));
   }
 
