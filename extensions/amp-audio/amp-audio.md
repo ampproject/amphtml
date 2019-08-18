@@ -132,7 +132,7 @@ Example:
 ```
 
 ## Analytics
-AMP audio analytics gathers data about how users interact with audios in AMP documents. AMP audio extension issues various analytics events during their lifecycle. These events can be reported through the analytics configuration using `audio-*` triggers.
+AMP audio analytics gathers data about how users interact with audios in AMP documents. AMP audio extension issues analytics events during their lifecycle. These events can be reported through the analytics configuration using `audio-*` triggers. `audio-play` and `audio-pause` are the two analytics events supported now.
 
 See [the AMP Analytics component](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
 
