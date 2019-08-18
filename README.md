@@ -33,8 +33,6 @@ Tooling
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg?logo=dependabot&style=flat-square "Renovate")](https://renovateapp.com/)
 </details>
 
-> **The [AMP Contributor Summit 2019](https://amp.dev/events/amp-cs-2019) will be in NYC October 8-10.** This technical summit is an opportunity for the AMP open source community to meet face-to-face to discuss the latest in AMP and where AMP is going.  It consists of a mix of different formats, including talks, breakout sessions and many opportunities for informal conversations.  **[Apply to attend the summit](https://events.withgoogle.com/ampcs2019/registrations/new/) by July 22, 2019!**
-
 [AMP](https://amp.dev) is a web component framework for easily creating user-first websites, stories, ads, emails and more.
 
 AMP is an open source project, and we'd love your help making it better!
