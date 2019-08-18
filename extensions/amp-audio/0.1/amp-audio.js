@@ -200,7 +200,6 @@ export class AmpAudio extends AMP.BaseElement {
       return;
     }
     this.audio_.pause();
-    this.analyticsEvent_('audio-pause');
     this.setPlayingStateForTesting_(false);
   }
 
@@ -212,7 +211,6 @@ export class AmpAudio extends AMP.BaseElement {
       return;
     }
     this.audio_.play();
-    this.analyticsEvent_('audio-play');
     this.setPlayingStateForTesting_(true);
   }
 
