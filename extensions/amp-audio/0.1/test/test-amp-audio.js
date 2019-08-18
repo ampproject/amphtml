@@ -281,6 +281,5 @@ describes.realWin(
         });
       }
     );
-
   }
 );
