@@ -1183,15 +1183,21 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     fie.installExtensionsInChildWindow(extensions, iframeWin, []);
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.exist;
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.not.equal(
       ElementStub
     );
     // Legacy elements are installed as well.
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(ElementStub);
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(ElementStub);
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(
+      ElementStub
+    );
   });
 
   it('should adopt standard services', () => {
@@ -1330,7 +1336,9 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     expect(preinstallCount).to.equal(1);
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
 
     // Resolve the promise.
@@ -1447,15 +1455,21 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
     fie.installExtensionsInFie(extensions, ampdoc, []);
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.exist;
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.not.equal(
       ElementStub
     );
     // Legacy elements are installed as well.
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(ElementStub);
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(ElementStub);
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(
+      ElementStub
+    );
   });
 
   it('should create new standard services', () => {
@@ -1611,7 +1625,9 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
     expect(preinstallCount).to.equal(1);
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
 
     // Resolve the promise.
