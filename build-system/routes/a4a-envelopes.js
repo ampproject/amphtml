@@ -26,24 +26,11 @@ const {SERVE_MODE} = process.env;
 // http://localhost:8000/inabox/examples/animations.amp.html
 // http://localhost:8000/inabox/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/inabox/', (req, res) => {
-  let adUrl = req.url;
-  const templatePath = '/build-system/server-inabox-template.html';
-  const urlPrefix = getUrlPrefix(req);
-  if (
-    !adUrl.startsWith('/proxy') && // Ignore /proxy
-    urlPrefix.includes('//localhost')
-  ) {
-    // This is a special case for testing. `localhost` URLs are transformed to
-    // `ads.localhost` to ensure that the iframe is fully x-origin.
-    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
-  }
-  adUrl = addQueryParam(adUrl, 'inabox', 1);
-  if (req.query.log) {
-    adUrl += '#log=' + req.query.log;
-  }
-  fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
+  const templatePath =
+    process.cwd() + '/build-system/server-inabox-template.html';
+  fs.readFileAsync(templatePath, 'utf8').then(template => {
     template = template.replace(/SOURCE/g, 'AD_URL');
-    res.end(fillTemplate(template, adUrl, req.query));
+    res.end(fillTemplate(template, getInaboxUrl(req), req.query));
   });
 });
 
@@ -52,18 +39,16 @@ app.use('/inabox/', (req, res) => {
 // http://localhost:8000/inabox-friendly/examples/animations.amp.html
 // http://localhost:8000/inabox-friendly/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/inabox-(friendly|safeframe)', (req, res) => {
-  let adUrl = req.url;
-  const urlPrefix = getUrlPrefix(req).replace('localhost', 'ads.localhost');
   const templatePath = '/build-system/server-inabox-template.html';
-  adUrl = addQueryParam(adUrl, 'inabox', 1);
-  if (req.query.log) {
-    adUrl += '#log=' + req.query.log;
-  }
   fs.readFileAsync(process.cwd() + templatePath, 'utf8')
     .then(template => {
       if (req.baseUrl == '/inabox-friendly') {
         template = template.replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"');
       } else {
+        const urlPrefix = getUrlPrefix(req).replace(
+          'localhost',
+          'ads.localhost'
+        );
         template = template
           .replace(
             /NAME/g,
@@ -74,14 +59,10 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
             urlPrefix + '/test/fixtures/served/iframe-safeframe.html'
           );
       }
-      return requestFromUrl(template, urlPrefix + adUrl, req.query);
+      return requestFromUrl(template, getInaboxUrl(req), req.query);
     })
     .then(result => {
-      if (result) {
-        res.end(result);
-      } else {
-        res.redirect(adUrl);
-      }
+      res.end(result);
     });
 });
 
@@ -107,6 +88,27 @@ app.use('/a4a(|-3p)/', (req, res) => {
     res.end(replaceUrls(SERVE_MODE, content));
   });
 });
+
+function getInaboxUrl(req) {
+  let adUrl = req.url;
+  const urlPrefix = getUrlPrefix(req);
+  if (
+    !adUrl.startsWith('/proxy') && // Ignore /proxy
+    urlPrefix.includes('//localhost')
+  ) {
+    // This is a special case for testing. `localhost` URLs are transformed to
+    // `ads.localhost` to ensure that the iframe is fully x-origin.
+    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
+  }
+  adUrl = addQueryParam(adUrl, 'inabox', 1);
+  if (req.query.ampexp) {
+    adUrl = addQueryParam(adUrl, 'ampexp', req.query.ampexp);
+  }
+  if (req.query.log) {
+    adUrl += '#log=' + req.query.log;
+  }
+  return adUrl;
+}
 
 function getUrlPrefix(req) {
   return req.protocol + '://' + req.headers.host;
@@ -160,7 +162,7 @@ function requestFromUrl(template, url, query) {
  * @param {string} template
  * @param {string} url
  * @param {Object} query
- * @param {?string} body
+ * @param {string|undefined} body
  * @return {string}
  */
 function fillTemplate(template, url, query, body) {
