@@ -258,10 +258,9 @@ export class GlobalVariableSource extends VariableSource {
     // Second parameter is an optional default value.
     // For example, if location is 'pub.com/amp.html?x=1#y=2' then
     // FRAGMENT_PARAM(y) returns '2' and FRAGMENT_PARAM(z, 3) returns 3.
-    this.setAsync(
-      'FRAGMENT_PARAM',
-      this.getViewerIntegrationValue_('fragmentParam', 'FRAGMENT_PARAM')
-    );
+    this.set('FRAGMENT_PARAM', (param, defaultValue = '') => {
+      return this.getFragmentParamData_(param, defaultValue);
+    });
 
     // Returns the first item in the ancestorOrigins array, if available.
     this.setAsync(
@@ -795,6 +794,25 @@ export class GlobalVariableSource extends VariableSource {
       return /** @type {string} */ (replaceParams[param]);
     }
     return defaultValue;
+  }
+
+  /**
+   * Return the FRAGMENT_PARAM from the original location href
+   * @param {*} param
+   * @param {string} defaultValue
+   * @return {string}
+   * @private
+   */
+  getFragmentParamData_(param, defaultValue) {
+    userAssert(
+      param,
+      'The first argument to FRAGMENT_PARAM, the fragment string ' +
+        'param is required'
+    );
+    userAssert(typeof param == 'string', 'param should be a string');
+    const hash = this.ampdoc.win.location.originalHash;
+    const params = parseQueryString(hash);
+    return params[param] === undefined ? defaultValue : params[param];
   }
 
   /**
