@@ -1173,22 +1173,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace FRAGMENT_PARAM with 2', () => {
-    return expect(
-      expandUrlAsync(
-        '?sh=FRAGMENT_PARAM(ice_cream)&s',
-        /*opt_bindings*/ undefined,
-        {
-          withViewerIntegrationVariableService: {
-            ancestorOrigin: () => {
-              return 'http://margarine-paradise.com';
-            },
-            fragmentParam: (param, defaultValue) => {
-              return param == 'ice_cream' ? '2' : defaultValue;
-            },
-          },
-        }
-      )
-    ).to.eventually.equal('?sh=2&s');
+    const win = getFakeWindow();
+    win.location = {originalHash: '#margarine=1&ice=2&cream=3'};
+    return Services.urlReplacementsForDoc(win.document.documentElement)
+      .expandUrlAsync('?sh=FRAGMENT_PARAM(ice)&s')
+      .then(res => {
+        expect(res).to.equal('?sh=2&s');
+      });
   });
 
   it.configure()
