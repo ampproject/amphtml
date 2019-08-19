@@ -23,5 +23,6 @@ let str = 'foo';
 let result =
 /** @type {string} */
 ('world');
-let result2 = undefined;
-let result3 = dev().assertString(null);
+let result2 =
+/** @type {string} */
+('');

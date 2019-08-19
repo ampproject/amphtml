@@ -14,111 +14,137 @@
  * limitations under the License.
  */
 
-function isRemovableMethod(t, node, names) {
-  if (!node || !t.isIdentifier(node)) {
-    return false;
-  }
-  return names.some(x => {
-    return t.isIdentifier(node, {name: x});
-  });
-}
-
 const typeMap = {
-  'assertElement': '!Element',
+  'assertElement': 'Element',
   'assertString': 'string',
   'assertNumber': 'number',
   'assertBoolean': 'boolean',
-  'assertArray': '!Array',
+  'assertArray': 'Array',
 };
 
-const removableDevAsserts = [
-  'assert',
-  'fine',
-  'assertElement',
-  'assertString',
-  'assertNumber',
-  'assertBoolean',
-  'assertArray',
-];
-
-const removableUserAsserts = ['fine'];
+const REMOVABLE = {
+  dev: [
+    'assert',
+    'fine',
+    'assertElement',
+    'assertString',
+    'assertNumber',
+    'assertBoolean',
+    'assertArray',
+  ],
+  user: ['fine'],
+};
 
 module.exports = function(babel) {
-  const {types: t} = babel;
+  const {types: t, template} = babel;
+
+  /**
+   * @param {!NodePath} path
+   * @param {!Array<string>} names
+   * @return {boolean}
+   */
+  function isRemovableMethod(path, names) {
+    return names.some(name => {
+      return path.isIdentifier({name});
+    });
+  }
+
+  /**
+   * @param {!NodePath} path
+   * @param {boolean} assertion
+   * @param {string|undefined} type
+   */
+  function eliminate(path, assertion, type) {
+    const argument = path.get('arguments.0');
+    if (!argument) {
+      if (assertion) {
+        throw path.buildCodeFrameError('assertion without a parameter!');
+      }
+
+      // This is to resolve right hand side usage of expression where
+      // no argument is passed in. This bare undefined value is eventually
+      // stripped by Closure Compiler.
+      path.replaceWith(t.identifier('undefined'));
+      return;
+    }
+
+    const arg = argument.node;
+    if (assertion) {
+      const evaluation = argument.evaluate();
+
+      // If we can statically evaluate the value to a falsey expression
+      if (evaluation.confident) {
+        if (type) {
+          if (typeof evaluation.value !== type) {
+            path.replaceWith(template.ast`
+              (function() {
+                throw new Error('static type assertion failure');
+              }());
+            `);
+            return;
+          }
+        } else if (!evaluation.value) {
+          path.replaceWith(template.ast`
+            (function() {
+              throw new Error('static assertion failure');
+            }());
+          `);
+          return;
+        }
+      }
+    }
+
+    path.replaceWith(t.parenthesizedExpression(arg));
+
+    if (type) {
+      // If it starts with a capital, make the type non-nullable.
+      if (/^[A-Z]/.test(type)) {
+        type = '!' + type;
+      }
+      // Add a cast annotation to fix type.
+      path.addComment('leading', `* @type {${type}} `);
+    }
+
+    const {parenthesized} = path.node.extra || {};
+    if (parenthesized) {
+      path.replaceWith(t.parenthesizedExpression(path.node));
+    }
+  }
+
   return {
     visitor: {
       CallExpression(path) {
-        const {node} = path;
-        const {callee} = node;
-        const {parenthesized} = node.extra || {};
+        const callee = path.get('callee');
 
-        const isDirectCallExpression = t.isIdentifier(callee, {
-          name: 'devAssert',
-        });
+        if (callee.isIdentifier({name: 'devAssert'})) {
+          return eliminate(path, true, '');
+        }
+
         const isMemberAndCallExpression =
-          t.isMemberExpression(callee) && t.isCallExpression(callee.object);
+          callee.isMemberExpression() &&
+          callee.get('object').isCallExpression();
 
-        if (!(isDirectCallExpression || isMemberAndCallExpression)) {
+        if (!isMemberAndCallExpression) {
           return;
         }
 
-        // `property` here is the identifier we want to evaluate such as the
-        // `devAssert` in a direct call or the `assert` in a `dev().assert()`
-        // call.
-        let property = null;
-        let args = null;
-        // `type` is left null in a direct call expression like `devAssert`
-        let type = null;
+        const logCallee = callee.get('object.callee');
+        let removable = [];
 
-        if (isDirectCallExpression) {
-          property = node.callee;
-          args = node.arguments[0];
-        } else if (isMemberAndCallExpression) {
-          property = callee.property;
-
-          const logCallee = callee.object.callee;
-          const isRemovableDevCall =
-            t.isIdentifier(logCallee, {name: 'dev'}) &&
-            isRemovableMethod(t, property, removableDevAsserts);
-
-          const isRemovableUserCall =
-            t.isIdentifier(logCallee, {name: 'user'}) &&
-            isRemovableMethod(t, property, removableUserAsserts);
-
-          if (!(isRemovableDevCall || isRemovableUserCall)) {
-            return;
-          }
-          args = path.node.arguments[0];
-          type = typeMap[property.name];
+        if (
+          logCallee.isIdentifier({name: 'dev'}) ||
+          logCallee.isIdentifier({name: 'user'})
+        ) {
+          removable = REMOVABLE[logCallee.node.name];
         }
 
-        if (args) {
-          if (parenthesized) {
-            path.replaceWith(t.parenthesizedExpression(args));
-            path.skip();
-            // If it is not an assert type, we won't need to do type annotation.
-            // If it has no type that we can cast to, then we also won't need to
-            // do type annotation.
-          } else if (!property.name.startsWith('assert') || !type) {
-            path.replaceWith(args);
-          } else {
-            // Special case null value argument since it's mostly used for
-            // interface methods with no implementation which will most likely
-            // get DCE'd by Closure Compiler since they are unused code methods.
-            if (args.type === 'NullLiteral') {
-              return;
-            } else {
-              path.replaceWith(t.parenthesizedExpression(args));
-              // Add a cast annotation to fix type.
-              path.addComment('leading', `* @type {${type}} `);
-            }
-          }
-        } else {
-          // This is to resolve right hand side usage of expression where
-          // no argument is passed in. This bare undefined value is eventually
-          // stripped by Closure Compiler.
-          path.replaceWith(t.identifier('undefined'));
+        const prop = callee.get('property');
+        if (!isRemovableMethod(prop, removable)) {
+          return;
         }
+
+        const method = prop.node.name;
+        eliminate(path, method.startsWith('assert'), typeMap[method]);
       },
     },
   };

@@ -23,4 +23,6 @@ let num = 5;
 let result =
 /** @type {number} */
 (3);
-let result2 = undefined;
+
+/** @type {number} */
+(0);
