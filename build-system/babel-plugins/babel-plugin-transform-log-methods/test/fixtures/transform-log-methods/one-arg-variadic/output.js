@@ -24,4 +24,3 @@ devAssert(a + b, ["0", name]);
 userAssert(true, ["0", name]);
 user().assertElement(element, ["2", element]);
 dev().assertEnumValue(foo, bar, 'Unhandled because this argument is usually small');
-
