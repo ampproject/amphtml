@@ -93,10 +93,10 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
       mutationRecordsAndElements
     );
 
-    // Validate all mutations
+    // Parse and validate all mutations
     mutations.forEach(mutation => {
       userAssert(
-        mutation.validate(),
+        mutation.parseAndValidate(),
         'Mutation %s has an an unsupported value.',
         mutation.toString()
       );
@@ -179,7 +179,7 @@ export function createMutationsFromMutationRecordsAndElements(
       // TODO: Allow for innerHTML mutations
       // Therefore, return a noop mutation.
       mutation = {
-        validate: () => true,
+        parseAndValidate: () => true,
         mutate: () => {},
       };
     }

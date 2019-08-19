@@ -33,7 +33,7 @@ export class CharacterDataMutation {
   }
 
   /** @override */
-  validate() {
+  parseAndValidate() {
     return true;
   }
 
