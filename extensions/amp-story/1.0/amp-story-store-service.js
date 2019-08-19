@@ -83,7 +83,7 @@ export let InteractiveComponentDef;
  *    canShowSystemLayerButtons: boolean,
  *    accessState: boolean,
  *    adState: boolean,
- *    affiliateLinkState: boolean,
+ *    affiliateLinkState: !Element,
  *    bookendState: boolean,
  *    desktopState: boolean,
  *    hasSidebarState: boolean,
@@ -241,7 +241,7 @@ const actions = (state, action, data) => {
     // Expands or collapses the affiliate link.
     case Action.TOGGLE_AFFILIATE_LINK:
       return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.AFFILIATE_LINK_STATE]: !!data,
+        [StateProperty.AFFILIATE_LINK_STATE]: data,
       }));
     // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
@@ -462,7 +462,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
-      [StateProperty.AFFILIATE_LINK_STATE]: false,
+      [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,

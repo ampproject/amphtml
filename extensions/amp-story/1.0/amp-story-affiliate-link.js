@@ -19,29 +19,13 @@
  */
 
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {addAttributesToElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
-import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
-import {user} from '../../../src/log';
 
 /**
  * Links that are affiliate links.
  * @const {string}
  */
-export const AFFILIATE_LINK_SELECTOR = 'a.i-amphtml-story-affiliate-link';
-
-/**
- * Custom property signifying a built link.
- * @const {string}
- */
-export const AFFILIATE_LINK_BUILT = '__AMP_AFFILIATE_LINK_BUILT';
-
-/**
- * Tag
- * @const {string}
- */
-export const TAG = 'amphtml-story-affiliate-link';
+export const AFFILIATE_LINK_SELECTOR = 'a[data-affiliate-link-icon]';
 
 export class AmpStoryAffiliateLink {
   /**
@@ -57,44 +41,49 @@ export class AmpStoryAffiliateLink {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
+
+    /** @private {boolean} */
+    this.isBuilt_ = false;
   }
 
   /**
-   * Builds affiliate link
+   * Builds affiliate link.
    */
   build() {
-    if (this.element_[AFFILIATE_LINK_BUILT]) {
+    if (this.isBuilt_) {
       return;
     }
-
+    this.isBuilt_ = true;
     this.addIconElement_();
     this.addText_();
     this.addPulseElement_();
-    this.validateHref_();
-    this.initializeListeners_();
-    this.element_[AFFILIATE_LINK_BUILT] = true;
+    this.initializeListener_();
   }
 
   /**
+   * Initialize listener to toggle expanded state.
    * @private
    */
-  initializeListeners_() {
+  initializeListener_() {
     this.storeService_.subscribe(
       StateProperty.AFFILIATE_LINK_STATE,
-      toggleExpand => {
-        this.element_.toggleAttribute('expanded', toggleExpand);
+      elementToToggleExpand => {
+        this.element_.toggleAttribute(
+          'expanded',
+          this.element_ === elementToToggleExpand
+        );
       }
     );
   }
 
   /**
-   * Adds icon as a child element of <amp-story-affiliate-link>
+   * Adds icon as a child element of <amp-story-affiliate-link>.
    * @private
    */
   addIconElement_() {
     const iconEl = htmlFor(this.element_)`
       <div class="i-amphtml-story-affiliate-link-circle">
-        <i class="i-amphtml-story-affiliate-link-icon i-amphtml-story-affiliate-link-shopping-cart"></i>
+        <i class="i-amphtml-story-affiliate-link-icon"></i>
         <span class="i-amphtml-story-affiliate-link-text"></span>
         <i class="i-amphtml-story-affiliate-link-launch"></i>
       </div>`;
@@ -102,7 +91,7 @@ export class AmpStoryAffiliateLink {
   }
 
   /**
-   * Adds text from <a> tag to expanded link
+   * Adds text from <a> tag to expanded link.
    * @private
    */
   addText_() {
@@ -113,36 +102,12 @@ export class AmpStoryAffiliateLink {
   }
 
   /**
-   * Adds pulse as a child element of <amp-story-affiliate-link>
+   * Adds pulse as a child element of <amp-story-affiliate-link>.
    * @private
    */
   addPulseElement_() {
     const pulseEl = htmlFor(this.element_)`
       <div class="i-amphtml-story-affiliate-link-pulse"></div>`;
     this.element_.appendChild(pulseEl);
-  }
-
-  /**
-   * @private
-   */
-  validateHref_() {
-    const href = this.getElementHref_(this.element_);
-    addAttributesToElement(this.element_, dict({'href': href}));
-  }
-
-  /**
-   * Gets href from an element containing a url.
-   * @param {!Element} target
-   * @private
-   * @return {string}
-   */
-  getElementHref_(target) {
-    const elUrl = target.getAttribute('href');
-    if (!isProtocolValid(elUrl)) {
-      user().error(TAG, 'The affiliate link url is invalid');
-      return '';
-    }
-
-    return parseUrlDeprecated(elUrl).href;
   }
 }

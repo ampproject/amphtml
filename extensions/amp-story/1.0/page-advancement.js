@@ -486,7 +486,6 @@ class ManualAdvancement extends AdvancementConfig {
   /**
    * For an element to trigger a tooltip it has to be descendant of
    * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
-   * Also it cannot be an affiliate link.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
@@ -498,10 +497,6 @@ class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (this.isInScreenSideEdge_(event, pageRect)) {
-      return false;
-    }
-
-    if (matches(target, AFFILIATE_LINK_SELECTOR)) {
       return false;
     }
 
@@ -561,22 +556,24 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Check if click should be handled by the affiliate link logic
+   * Check if click should be handled by the affiliate link logic.
    * @param {!Element} target
    * @private
    * @return {boolean}
    */
   isHandledByAffiliateLink_(target) {
-    const expanded = this.storeService_.get(StateProperty.AFFILIATE_LINK_STATE);
     const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
 
-    if (expanded) {
-      // do not handle if clicking on expanded affiliate link
-      return !clickedOnLink;
+    // do not handle if clicking on expanded affiliate link
+    if (clickedOnLink && target.hasAttribute('expanded')) {
+      return false;
     }
 
-    // handle if clicking on collapsed affiliate link
-    return clickedOnLink;
+    const expandedElement = this.storeService_.get(
+      StateProperty.AFFILIATE_LINK_STATE
+    );
+
+    return expandedElement != null || clickedOnLink;
   }
 
   /**
@@ -605,10 +602,12 @@ class ManualAdvancement extends AdvancementConfig {
 
     if (this.isHandledByAffiliateLink_(target)) {
       event.preventDefault();
-      const expanded = this.storeService_.get(
-        StateProperty.AFFILIATE_LINK_STATE
-      );
-      this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, !expanded);
+      const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
+      if (clickedOnLink) {
+        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, target);
+      } else {
+        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, null);
+      }
       return;
     }
 
