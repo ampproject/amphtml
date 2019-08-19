@@ -83,20 +83,11 @@ export class Viewer {
     /** @private @const {boolean} */
     this.isIframed_ = isIframed(this.win);
 
-    /** @const {!./document-state.DocumentState} */
-    this.docState_ = Services.globalDocumentStateFor(this.win);
-
     /** @private {boolean} */
     this.isRuntimeOn_ = true;
 
     /** @private {boolean} */
     this.overtakeHistory_ = false;
-
-    /** @private {!VisibilityState} */
-    this.visibilityState_ = VisibilityState.VISIBLE;
-
-    /** @private {string} */
-    this.viewerVisibilityState_ = this.visibilityState_;
 
     /** @private {number} */
     this.prerenderSize_ = 1;
@@ -109,9 +100,6 @@ export class Viewer {
 
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
-
-    /** @private {!Observable} */
-    this.visibilityObservable_ = new Observable();
 
     /** @private {!Observable<!JsonObject>} */
     this.broadcastObservable_ = new Observable();
@@ -143,30 +131,6 @@ export class Viewer {
      */
     this.hashParams_ = map();
 
-    /** @private {?Promise} */
-    this.nextVisiblePromise_ = null;
-
-    /** @private {?function()} */
-    this.nextVisibleResolve_ = null;
-
-    /** @private {?time} */
-    this.firstVisibleTime_ = null;
-
-    /** @private {?time} */
-    this.lastVisibleTime_ = null;
-
-    const deferred = new Deferred();
-    /**
-     * This promise might be resolved right away if the current
-     * document is already visible. See end of this constructor where we call
-     * `this.onVisibilityChange_()`.
-     * @private @const {!Promise}
-     */
-    this.whenFirstVisiblePromise_ = deferred.promise;
-
-    /** @private {?function()} */
-    this.whenFirstVisibleResolve_ = deferred.resolve;
-
     if (ampdoc.isSingleDoc()) {
       Object.assign(this.hashParams_, parseQueryString(this.win.location.hash));
     }
@@ -179,8 +143,7 @@ export class Viewer {
     );
     dev().fine(TAG_, '- history:', this.overtakeHistory_);
 
-    this.setVisibilityState_(ampdoc.getParam('visibilityState'));
-    dev().fine(TAG_, '- visibilityState:', this.getVisibilityState());
+    dev().fine(TAG_, '- visibilityState:', this.ampdoc.getVisibilityState());
 
     this.prerenderSize_ =
       parseInt(ampdoc.getParam('prerenderSize'), 10) || this.prerenderSize_;
@@ -199,12 +162,6 @@ export class Viewer {
     this.isProxyOrigin_ = isProxyOrigin(
       parseUrlDeprecated(this.ampdoc.win.location.href)
     );
-
-    /** @private {boolean} */
-    this.hasBeenVisible_ = this.isVisible();
-
-    // Wait for document to become visible.
-    this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
 
     const messagingDeferred = new Deferred();
     /** @const @private {!Function} */
@@ -301,11 +258,6 @@ export class Viewer {
       }
     }
 
-    // Check if by the time the `Viewer`
-    // instance is constructed, the document is already `visible`.
-    this.recheckVisibilityState_();
-    this.onVisibilityChange_();
-
     // This fragment may get cleared by impression tracking. If so, it will be
     // restored afterward.
     this.whenFirstVisible().then(() => {
@@ -357,24 +309,6 @@ export class Viewer {
         reportError(error);
         throw error;
       });
-  }
-
-  /**
-   * Handler for visibility change.
-   * @private
-   */
-  onVisibilityChange_() {
-    if (this.isVisible()) {
-      const now = Date.now();
-      if (!this.firstVisibleTime_) {
-        this.firstVisibleTime_ = now;
-      }
-      this.lastVisibleTime_ = now;
-      this.hasBeenVisible_ = true;
-      this.whenFirstVisibleResolve_();
-      this.whenNextVisibleResolve_();
-    }
-    this.visibilityObservable_.fire();
   }
 
   /**
@@ -526,15 +460,10 @@ export class Viewer {
    * Returns visibility state configured by the viewer.
    * See {@link isVisible}.
    * @return {!VisibilityState}
-   * TODO(dvoytenko, #5285): Move public API to AmpDoc.
+   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
    */
   getVisibilityState() {
-    return this.visibilityState_;
-  }
-
-  /** @private */
-  recheckVisibilityState_() {
-    this.setVisibilityState_(this.viewerVisibilityState_);
+    return this.ampdoc.getVisibilityState();
   }
 
   /**
@@ -546,7 +475,6 @@ export class Viewer {
     if (!state) {
       return;
     }
-    const oldState = this.visibilityState_;
     state = dev().assertEnumValue(VisibilityState, state, 'VisibilityState');
 
     // The viewer is informing us we are not currently active because we are
@@ -554,27 +482,14 @@ export class Viewer {
     // viewer). Unfortunately, the viewer sends HIDDEN instead of PRERENDER or
     // INACTIVE, though we know better.
     if (state === VisibilityState.HIDDEN) {
-      state = this.hasBeenVisible_
-        ? VisibilityState.INACTIVE
-        : VisibilityState.PRERENDER;
+      state =
+        this.ampdoc.getLastVisibleTime() != null
+          ? VisibilityState.INACTIVE
+          : VisibilityState.PRERENDER;
     }
 
-    this.viewerVisibilityState_ = state;
-
-    if (
-      this.docState_.isHidden() &&
-      (state === VisibilityState.VISIBLE || state === VisibilityState.PAUSED)
-    ) {
-      state = VisibilityState.HIDDEN;
-    }
-
-    this.visibilityState_ = state;
-
+    this.ampdoc.overrideVisibilityState(state);
     dev().fine(TAG_, 'visibilitychange event:', this.getVisibilityState());
-
-    if (oldState !== state) {
-      this.onVisibilityChange_();
-    }
   }
 
   /**
@@ -583,9 +498,10 @@ export class Viewer {
    * document in the prerender mode or viewer running the document in the
    * prerender mode.
    * @return {boolean}
+   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
    */
   isVisible() {
-    return this.getVisibilityState() == VisibilityState.VISIBLE;
+    return this.ampdoc.isVisible();
   }
 
   /**
@@ -593,67 +509,50 @@ export class Viewer {
    * state of a document can be flipped back and forth we sometimes want to know
    * if a document has ever been visible.
    * @return {boolean}
+   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
    */
   hasBeenVisible() {
-    return this.hasBeenVisible_;
+    return this.ampdoc.getLastVisibleTime() != null;
   }
 
   /**
    * Returns a Promise that only ever resolved when the current
    * AMP document first becomes visible.
    * @return {!Promise}
+   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
    */
   whenFirstVisible() {
-    return this.whenFirstVisiblePromise_;
+    return this.ampdoc.whenFirstVisible();
   }
 
   /**
    * Returns a Promise that resolve when current doc becomes visible.
    * The promise resolves immediately if doc is already visible.
    * @return {!Promise}
+   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
    */
   whenNextVisible() {
-    if (this.isVisible()) {
-      return Promise.resolve();
-    }
-
-    if (this.nextVisiblePromise_) {
-      return this.nextVisiblePromise_;
-    }
-
-    const deferred = new Deferred();
-    this.nextVisibleResolve_ = deferred.resolve;
-    return (this.nextVisiblePromise_ = deferred.promise);
-  }
-
-  /**
-   * Helper method to be called on visiblity change
-   * @private
-   */
-  whenNextVisibleResolve_() {
-    if (this.nextVisibleResolve_) {
-      this.nextVisibleResolve_();
-      this.nextVisibleResolve_ = null;
-      this.nextVisiblePromise_ = null;
-    }
+    return this.ampdoc.whenNextVisible();
   }
 
   /**
    * Returns the time when the document has become visible for the first time.
    * If document has not yet become visible, the returned value is `null`.
    * @return {?time}
+   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
    */
   getFirstVisibleTime() {
-    return this.firstVisibleTime_;
+    return this.ampdoc.getFirstVisibleTime();
   }
 
   /**
    * Returns the time when the document has become visible for the last time.
    * If document has not yet become visible, the returned value is `null`.
    * @return {?time}
+   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
    */
   getLastVisibleTime() {
-    return this.lastVisibleTime_;
+    return this.ampdoc.getLastVisibleTime();
   }
 
   /**
@@ -813,9 +712,10 @@ export class Viewer {
    * methods for more info.
    * @param {function()} handler
    * @return {!UnlistenDef}
+   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
    */
   onVisibilityChanged(handler) {
-    return this.visibilityObservable_.add(handler);
+    return this.ampdoc.onVisibilityChanged(handler);
   }
 
   /**
@@ -1099,16 +999,6 @@ function getChannelError(opt_reason) {
     return opt_reason;
   }
   return new Error('No messaging channel: ' + opt_reason);
-}
-
-/**
- * Sets the viewer visibility state. This calls is restricted to runtime only.
- * @param {!Viewer} viewer
- * @param {!VisibilityState} state
- * @restricted
- */
-export function setViewerVisibilityState(viewer, state) {
-  viewer.setVisibilityState_(state);
 }
 
 /**
