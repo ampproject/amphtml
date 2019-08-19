@@ -26,24 +26,21 @@ import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {StoryAdConfig} from './story-ad-config';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {
   createElementWithAttributes,
-  isJsonScriptTag,
   iterateCursor,
   openWindowDialog,
 } from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getA4AMetaTags, getFrameDoc, getUniqueId} from './utils';
-import {isObject} from '../../../src/types';
-import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
-import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
@@ -78,9 +75,6 @@ const TAG = 'amp-story-auto-ads';
 
 /** @const */
 const AD_TAG = 'amp-ad';
-
-/** @const */
-const MUSTACHE_TAG = 'amp-mustache';
 
 /** @const */
 const TIMEOUT_LIMIT = 10000; // 10 seconds
@@ -145,20 +139,6 @@ const AD_STATE = {
   PENDING: 0,
   INSERTED: 1,
   FAILED: 2,
-};
-
-/** @const */
-const ALLOWED_AD_TYPES = map({
-  'custom': true,
-  'doubleclick': true,
-  'fake': true,
-});
-
-/** @enum {boolean} */
-const DISALLOWED_AD_ATTRS = {
-  'height': true,
-  'layout': true,
-  'width': true,
 };
 
 /** @enum {string} */
@@ -240,8 +220,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {boolean} */
     this.isCurrentAdLoaded_ = false;
 
-    /** @private {Object<string, Object>} */
-    this.config_ = {};
+    /** @private {!JsonObject} */
+    this.config_ = dict();
 
     /** @private {Object<number, *>} */
     this.analyticsData_ = {};
@@ -323,7 +303,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const ampdoc = this.getAmpDoc();
       const extensionService = Services.extensionsFor(this.win);
       extensionService./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);
-      extensionService./*OK*/ installExtensionForDoc(ampdoc, MUSTACHE_TAG);
 
       return ampStoryElement.getImpl().then(impl => {
         this.ampStory_ = impl;
@@ -348,7 +327,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       .then(() => {
         this.createAdOverlay_();
         this.initializeListeners_();
-        this.readConfig_();
+        this.config_ = new StoryAdConfig(this.win, this.element).getConfig();
         this.schedulePage_();
       });
   }
@@ -465,22 +444,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
-   * load in config from child <script> element
-   * @private
-   */
-  readConfig_() {
-    const child = this.element.children[0];
-    userAssert(
-      isJsonScriptTag(child),
-      `The <${TAG}> config should ` +
-        'be inside a <script> tag with type="application/json"'
-    );
-
-    this.config_ = parseJson(child.textContent);
-    this.validateConfig_();
-  }
-
-  /**
    * Create a hidden UI that will be shown when ad is displayed
    * @private
    */
@@ -498,25 +461,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adBadgeContainer_.appendChild(badge);
     createShadowRootWithStyle(root, this.adBadgeContainer_, adBadgeCSS);
     this.ampStory_.element.appendChild(root);
-  }
-
-  /**
-   * make sure given JSON config is shaped correctly
-   * @private
-   */
-  validateConfig_() {
-    const adAttributes = this.config_['ad-attributes'];
-    userAssert(
-      adAttributes,
-      `<${TAG}>: Error reading config.` +
-        'Top level JSON should have an "ad-attributes" key'
-    );
-
-    const {type} = adAttributes;
-    userAssert(
-      type,
-      `<${TAG}>: Error reading config.Missing ["ad-attribues"]["type"] key`
-    );
   }
 
   /**
@@ -625,47 +569,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdElement_() {
-    const requiredAttrs = {
-      'class': 'i-amphtml-story-ad',
-      'layout': 'fill',
-      'amp-story': '',
-    };
-
-    const configAttrs = this.config_['ad-attributes'];
-
-    for (const attr in configAttrs) {
-      const value = configAttrs[attr];
-      if (isObject(value)) {
-        configAttrs[attr] = JSON.stringify(value);
-      }
-      if (DISALLOWED_AD_ATTRS[attr]) {
-        user().warn(TAG, 'ad-attribute "%s" is not allowed', attr);
-        delete configAttrs[attr];
-      }
+    if (this.config_['type'] === 'fake') {
+      this.config_['id'] = `i-amphtml-demo-${this.adPagesCreated_}`;
     }
-
-    const {type} = configAttrs;
-    userAssert(
-      !!ALLOWED_AD_TYPES[type],
-      `${TAG}: "${type}" ad type is not supported`
-    );
-
-    if (type === 'fake') {
-      const id = this.element.getAttribute('id');
-      userAssert(
-        id && startsWith(id, 'i-amphtml-demo-'),
-        `${TAG} id must start with i-amphtml-demo- to use fake ads`
-      );
-      configAttrs['id'] = `i-amphtml-demo-${this.adPagesCreated_}`;
-    }
-
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      {},
-      configAttrs,
-      requiredAttrs
-    ));
-
-    return createElementWithAttributes(this.doc_, 'amp-ad', attributes);
+    return createElementWithAttributes(this.doc_, 'amp-ad', this.config_);
   }
 
   /**

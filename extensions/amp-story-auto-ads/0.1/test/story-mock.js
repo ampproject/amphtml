@@ -58,21 +58,33 @@ export class MockStoryImpl extends AMP.BaseElement {
 }
 
 /**
+ * Create amp-story-auto-ads-element with config as a child of the given parent element.
+ * @param {!Document} doc
+ * @param {!Element} parent
+ * @param {Object=} config
+ * @return {!Element}
+ */
+export function createStoryAdElementAndConfig(doc, parent, config) {
+  const autoAdsEl = doc.createElement('amp-story-auto-ads');
+  addStoryAutoAdsConfig(doc, autoAdsEl, config);
+  parent.appendChild(autoAdsEl);
+  return autoAdsEl;
+}
+
+/**
  * Adds a fake config as a child of the given story element.
  * @param {!Document} doc
  * @param {!Element} autoAdsEl
  */
-export function addStoryAutoAdsConfig(doc, autoAdsEl, customConfig) {
+export function addStoryAutoAdsConfig(doc, parent, customConfig) {
   const config = customConfig || {
-    'ad-attributes': {
-      type: 'doubleclick',
-      'data-slot': '/30497360/a4a/fake_ad_unit',
-    },
+    type: 'doubleclick',
+    'data-slot': '/30497360/a4a/fake_ad_unit',
   };
   const child = doc.createElement('script');
   child.setAttribute('type', 'application/json');
-  child./*OK*/ innerText = JSON.stringify(config);
-  autoAdsEl.append(child);
+  child./*OK*/ innerText = `{ "ad-attributes": ${JSON.stringify(config)} }`;
+  parent.append(child);
 }
 
 /**
