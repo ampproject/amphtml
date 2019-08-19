@@ -168,7 +168,9 @@ export class RequestHandler {
         .expandTemplate(
           this.requestOrigin_,
           requestOriginExpansionOpt,
-          this.element_
+          this.element_,
+          bindings,
+          this.whiteList_
         )
         // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
         .then(expandedRequestOrigin => {
