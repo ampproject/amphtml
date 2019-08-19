@@ -19,7 +19,9 @@ import {createIframePromise} from '../../testing/iframe';
 import {
   preconnectForElement,
   setPreconnectFeaturesForTesting,
+  preconnectToOrigin,
 } from '../../src/preconnect';
+import {Services} from '../../src/services';
 
 describe('preconnect', () => {
   let sandbox;
@@ -116,6 +118,21 @@ describe('preconnect', () => {
         expect(open).to.have.not.been.called;
       });
     });
+  });
+
+  it('should preconnect to origins', async function() {
+    isSafari = false;
+    const iframe = await getPreconnectIframe();
+    sandbox.stub(Services, 'documentInfoForDoc').returns({
+      sourceUrl: 'https://sourceurl.com/',
+      canonicalUrl: 'https://canonicalurl.com/',
+    });
+    await preconnectToOrigin(iframe.doc);
+    await visible;
+    const preconnects = iframe.doc.querySelectorAll('link[rel=preconnect]');
+    expect(preconnects).to.have.length(2);
+    expect(preconnects[0].href).to.equal('https://sourceurl.com/');
+    expect(preconnects[1].href).to.equal('https://canonicalurl.com/');
   });
 
   it('should preconnect with known support', () => {
