@@ -183,11 +183,19 @@ export function trimStart(str) {
 export function asyncStringReplace(str, regex, replacer) {
   const stringBuilder = [];
   let lastIndex = 0;
-
-  str.replace(regex, (match, key, matchIndex) => {
+  str.replace(regex, function() {
+    // String.prototype.replace will pass 3 to n number of arguments to the
+    // callback function based on how many capture groups the regex may or may
+    // not contain. We know that the match will always be first, and the
+    // index will always be second to last.
+    const match = arguments[0];
+    const matchIndex = arguments[arguments.length - 2];
     stringBuilder.push(str.slice(lastIndex, matchIndex));
     // Store the promise in it's eventual string position.
-    const replacementPromise = replacer(match, key);
+    const replacementPromise =
+      typeof replacer === 'function'
+        ? replacer.apply(null, arguments)
+        : replacer;
     stringBuilder.push(replacementPromise);
     lastIndex = matchIndex + match.length;
   });
