@@ -15,6 +15,7 @@
  */
 
 import {
+  asyncStringReplace,
   camelCaseToDash,
   dashToCamelCase,
   endsWith,
@@ -155,5 +156,14 @@ describe('trimEnd', () => {
 
   it('should keep leading whitespace characters', () => {
     expect(trimEnd('\n\tabc')).to.equal('\n\tabc');
+  });
+});
+
+describe('asyncStringReplace', () => {
+  it('should replace asynchronously', () => {
+    const result = asyncStringReplace('the quick brown fox', /brown/, () =>
+      Promise.resolve('red')
+    );
+    expect(result).to.eventually.equal('the quick red fox');
   });
 });
