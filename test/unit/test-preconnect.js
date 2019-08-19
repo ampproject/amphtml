@@ -128,6 +128,7 @@ describe('preconnect', () => {
       canonicalUrl: 'https://canonicalurl.com/',
     });
     await preconnectToOrigin(iframe.doc);
+    await visible;
     const preconnects = iframe.doc.querySelectorAll('link[rel=preconnect]');
     expect(preconnects).to.have.length(2);
     expect(preconnects[0].href).to.equal('https://sourceurl.com/');
