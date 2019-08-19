@@ -15,13 +15,13 @@
  */
 
 import * as lolex from 'lolex';
+import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {
   preconnectForElement,
-  setPreconnectFeaturesForTesting,
   preconnectToOrigin,
+  setPreconnectFeaturesForTesting,
 } from '../../src/preconnect';
-import {Services} from '../../src/services';
 
 describe('preconnect', () => {
   let sandbox;
