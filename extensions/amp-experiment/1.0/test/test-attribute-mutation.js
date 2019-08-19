@@ -176,9 +176,7 @@ describes.realWin(
           );
           expect(attributeMutation.parseAndValidate()).to.equal(true);
 
-          attributeMutation = getAttributeMutationDefaultStyle(
-            'color: #a0F'
-          );
+          attributeMutation = getAttributeMutationDefaultStyle('color: #a0F');
           expect(attributeMutation.parseAndValidate()).to.equal(true);
         });
       });
