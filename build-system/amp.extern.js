@@ -200,7 +200,7 @@ window.draw3p;
 // AMP's globals
 window.AMP_TEST;
 window.AMP_TEST_IFRAME;
-window.AMP_TAG;
+window.__AMP_TAG;
 window.AMP = {};
 window.AMP._ = {};
 window.AMP.push;
