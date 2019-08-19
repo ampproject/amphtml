@@ -18,9 +18,10 @@ import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
 import {dict, map} from '../utils/object';
+import {getAmpdoc, getService, registerServiceBuilder} from '../service';
 import {getMode} from '../mode';
-import {getService, registerServiceBuilder} from '../service';
 import {isCanary} from '../experiments';
+import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
 import {throttle} from '../utils/rate-limit';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
@@ -241,18 +242,35 @@ export class Performance {
       return Promise.resolve();
     }
 
-    return channelPromise.then(() => {
-      this.isMessagingReady_ = true;
+    return channelPromise
+      .then(() => {
+        // Tick the "messaging ready" signal.
+        this.tickDelta('msr', this.win.Date.now() - this.initTime_);
 
-      // Tick the "messaging ready" signal.
-      this.tickDelta('msr', this.win.Date.now() - this.initTime_);
+        return this.maybeAddStoryExperimentId_();
+      })
+      .then(() => {
+        this.isMessagingReady_ = true;
 
-      // Forward all queued ticks to the viewer since messaging
-      // is now ready.
-      this.flushQueuedTicks_();
+        // Forward all queued ticks to the viewer since messaging
+        // is now ready.
+        this.flushQueuedTicks_();
 
-      // Send all csi ticks through.
-      this.flush();
+        // Send all csi ticks through.
+        this.flush();
+      });
+  }
+
+  /**
+   * Add a story experiment ID in order to slice the data for amp-story.
+   * @return {!Promise}
+   * @private
+   */
+  maybeAddStoryExperimentId_() {
+    return isStoryDocument(getAmpdoc(this.win.document)).then(isStory => {
+      if (isStory) {
+        this.addEnabledExperiment('story');
+      }
     });
   }
 
