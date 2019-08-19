@@ -33,15 +33,8 @@ import {createShadowRoot} from '../../src/shadow-embed';
 import {setParentWindow} from '../../src/service';
 import {toggleExperiment} from '../../src/experiments';
 
-describe('AmpDocService', () => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox;
-  });
-
+describes.sandboxed('AmpDocService', {}, () => {
   afterEach(() => {
-    sandbox.restore();
     delete window.document['__AMPDOC'];
   });
 
@@ -452,17 +445,387 @@ describe('AmpDocService', () => {
   });
 });
 
-describe('AmpDocSingle', () => {
-  let sandbox;
+describes.sandboxed('AmpDoc.visibilityState', {}, () => {
+  const EMBED_URL = 'https://example.com/embed';
+  let clock;
+  let win, doc;
+  let childWin, childDoc;
+  let top, embedSameWindow, embedOtherWindow, embedChild;
+
+  beforeEach(() => {
+    clock = sandbox.useFakeTimers();
+    clock.tick(1);
+
+    doc = {
+      body: null,
+      visibilityState: 'visible',
+      addEventListener: sandbox.spy(),
+      removeEventListener: sandbox.spy(),
+    };
+    win = {document: doc};
+
+    childDoc = {
+      body: null,
+      visibilityState: 'visible',
+      addEventListener: sandbox.spy(),
+      removeEventListener: sandbox.spy(),
+    };
+    childWin = {document: childDoc};
+
+    top = new AmpDocSingle(win);
+    embedSameWindow = new AmpDocFie(win, EMBED_URL, top);
+    embedOtherWindow = new AmpDocFie(childWin, EMBED_URL, top);
+    embedChild = new AmpDocFie(childWin, EMBED_URL, embedOtherWindow);
+  });
+
+  function updateDocumentVisibility(doc, visibilityState) {
+    doc.visibilityState = visibilityState;
+    if (doc.addEventListener.args.length > 0) {
+      doc.addEventListener.args[0][1]();
+    }
+  }
+
+  it('should set up and destroy listeners', () => {
+    // 1 for top, 1 for embedSameWindow.
+    expect(doc.addEventListener.callCount).to.equal(2);
+    expect(doc.removeEventListener.callCount).to.equal(0);
+    // 1 for embedOtherWindow, 1 for embedChild.
+    expect(childDoc.addEventListener.callCount).to.equal(2);
+    expect(childDoc.removeEventListener.callCount).to.equal(0);
+    // 1 for embedSameWindow, 1 for embedOtherWindow.
+    expect(top.visibilityStateHandlers_.getHandlerCount()).to.equal(2);
+    // No children.
+    expect(embedSameWindow.visibilityStateHandlers_.getHandlerCount()).to.equal(
+      0
+    );
+    // 1 for embedChild.
+    expect(
+      embedOtherWindow.visibilityStateHandlers_.getHandlerCount()
+    ).to.equal(1);
+    // No children.
+    expect(embedChild.visibilityStateHandlers_.getHandlerCount()).to.equal(0);
+
+    // Destroy the nested child.
+    embedChild.dispose();
+    expect(doc.removeEventListener.callCount).to.equal(0);
+    expect(childDoc.removeEventListener.callCount).to.equal(1);
+    expect(top.visibilityStateHandlers_.getHandlerCount()).to.equal(2);
+    expect(
+      embedOtherWindow.visibilityStateHandlers_.getHandlerCount()
+    ).to.equal(0);
+
+    // Destroy the embedOtherWindow.
+    embedOtherWindow.dispose();
+    expect(doc.removeEventListener.callCount).to.equal(0);
+    expect(childDoc.removeEventListener.callCount).to.equal(2);
+    expect(top.visibilityStateHandlers_.getHandlerCount()).to.equal(1);
+
+    // Destroy the embedSameWindow.
+    embedSameWindow.dispose();
+    expect(doc.removeEventListener.callCount).to.equal(1);
+    expect(top.visibilityStateHandlers_.getHandlerCount()).to.equal(0);
+
+    // Destroy the top.
+    top.dispose();
+    expect(doc.removeEventListener.callCount).to.equal(2);
+  });
+
+  it('should be visible by default', () => {
+    expect(top.getVisibilityState()).to.equal('visible');
+    expect(embedSameWindow.getVisibilityState()).to.equal('visible');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('visible');
+    expect(embedChild.getVisibilityState()).to.equal('visible');
+
+    expect(top.isVisible()).to.be.true;
+    expect(embedSameWindow.isVisible()).to.be.true;
+    expect(embedOtherWindow.isVisible()).to.be.true;
+    expect(embedChild.isVisible()).to.be.true;
+
+    expect(top.getFirstVisibleTime()).to.equal(1);
+    expect(embedSameWindow.getFirstVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(1);
+    expect(embedChild.getFirstVisibleTime()).to.equal(1);
+
+    expect(top.getLastVisibleTime()).to.equal(1);
+    expect(embedSameWindow.getLastVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(1);
+    expect(embedChild.getLastVisibleTime()).to.equal(1);
+
+    return Promise.all([
+      top.whenFirstVisible(),
+      embedSameWindow.whenFirstVisible(),
+      embedOtherWindow.whenFirstVisible(),
+      embedChild.whenFirstVisible(),
+    ]).then(() => {
+      return Promise.all([
+        top.whenNextVisible(),
+        embedSameWindow.whenNextVisible(),
+        embedOtherWindow.whenNextVisible(),
+        embedChild.whenNextVisible(),
+      ]);
+    });
+  });
+
+  it('should override at construction time', () => {
+    top = new AmpDocSingle(win, {visibilityState: 'hidden'});
+    embedSameWindow = new AmpDocFie(win, EMBED_URL, top);
+    embedOtherWindow = new AmpDocFie(childWin, EMBED_URL, top);
+    embedChild = new AmpDocFie(childWin, EMBED_URL, embedOtherWindow);
+
+    expect(top.getVisibilityState()).to.equal('hidden');
+    expect(embedSameWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedChild.getVisibilityState()).to.equal('hidden');
+
+    expect(top.isVisible()).to.be.false;
+    expect(embedSameWindow.isVisible()).to.be.false;
+    expect(embedOtherWindow.isVisible()).to.be.false;
+    expect(embedChild.isVisible()).to.be.false;
+
+    expect(top.getFirstVisibleTime()).to.be.null;
+    expect(embedSameWindow.getFirstVisibleTime()).to.be.null;
+    expect(embedOtherWindow.getFirstVisibleTime()).to.be.null;
+    expect(embedChild.getFirstVisibleTime()).to.be.null;
+
+    expect(top.getLastVisibleTime()).to.be.null;
+    expect(embedSameWindow.getLastVisibleTime()).to.be.null;
+    expect(embedOtherWindow.getLastVisibleTime()).to.be.null;
+    expect(embedChild.getLastVisibleTime()).to.be.null;
+  });
+
+  it('should override at construction time via params', () => {
+    top = new AmpDocSingle(win, {
+      params: {'visibilityState': 'hidden'},
+    });
+    embedSameWindow = new AmpDocFie(win, EMBED_URL, top);
+    embedOtherWindow = new AmpDocFie(childWin, EMBED_URL, top);
+    embedChild = new AmpDocFie(childWin, EMBED_URL, embedOtherWindow);
+
+    expect(top.getVisibilityState()).to.equal('hidden');
+    expect(embedSameWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedChild.getVisibilityState()).to.equal('hidden');
+
+    expect(top.isVisible()).to.be.false;
+    expect(embedSameWindow.isVisible()).to.be.false;
+    expect(embedOtherWindow.isVisible()).to.be.false;
+    expect(embedChild.isVisible()).to.be.false;
+
+    expect(top.getFirstVisibleTime()).to.be.null;
+    expect(embedSameWindow.getFirstVisibleTime()).to.be.null;
+    expect(embedOtherWindow.getFirstVisibleTime()).to.be.null;
+    expect(embedChild.getFirstVisibleTime()).to.be.null;
+
+    expect(top.getLastVisibleTime()).to.be.null;
+    expect(embedSameWindow.getLastVisibleTime()).to.be.null;
+    expect(embedOtherWindow.getLastVisibleTime()).to.be.null;
+    expect(embedChild.getLastVisibleTime()).to.be.null;
+  });
+
+  it('should override visibilityState after construction', () => {
+    top = new AmpDocSingle(win, {visibilityState: 'hidden'});
+    embedSameWindow = new AmpDocFie(win, EMBED_URL, top);
+    embedOtherWindow = new AmpDocFie(childWin, EMBED_URL, top);
+    embedChild = new AmpDocFie(childWin, EMBED_URL, embedOtherWindow);
+
+    clock.tick(1);
+    top.overrideVisibilityState('visible');
+
+    expect(top.getVisibilityState()).to.equal('visible');
+    expect(embedSameWindow.getVisibilityState()).to.equal('visible');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('visible');
+    expect(embedChild.getVisibilityState()).to.equal('visible');
+
+    expect(top.isVisible()).to.be.true;
+    expect(embedSameWindow.isVisible()).to.be.true;
+    expect(embedOtherWindow.isVisible()).to.be.true;
+    expect(embedChild.isVisible()).to.be.true;
+
+    expect(top.getFirstVisibleTime()).to.equal(2);
+    expect(embedSameWindow.getFirstVisibleTime()).to.equal(2);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(2);
+    expect(embedChild.getFirstVisibleTime()).to.equal(2);
+
+    expect(top.getLastVisibleTime()).to.equal(2);
+    expect(embedSameWindow.getLastVisibleTime()).to.equal(2);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(2);
+    expect(embedChild.getLastVisibleTime()).to.equal(2);
+
+    return Promise.all([
+      top.whenFirstVisible(),
+      embedSameWindow.whenFirstVisible(),
+      embedOtherWindow.whenFirstVisible(),
+      embedChild.whenFirstVisible(),
+    ]).then(() => {
+      return Promise.all([
+        top.whenNextVisible(),
+        embedSameWindow.whenNextVisible(),
+        embedOtherWindow.whenNextVisible(),
+        embedChild.whenNextVisible(),
+      ]);
+    });
+  });
+
+  it('should update last visibility after construction', () => {
+    expect(top.getFirstVisibleTime()).to.equal(1);
+    expect(top.getLastVisibleTime()).to.equal(1);
+
+    clock.tick(1);
+    top.overrideVisibilityState('hidden');
+
+    expect(top.getVisibilityState()).to.equal('hidden');
+    expect(embedSameWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedChild.getVisibilityState()).to.equal('hidden');
+
+    expect(top.getFirstVisibleTime()).to.equal(1);
+    expect(top.getLastVisibleTime()).to.equal(1);
+
+    clock.tick(1);
+    top.overrideVisibilityState('visible');
+
+    expect(top.getVisibilityState()).to.equal('visible');
+    expect(embedSameWindow.getVisibilityState()).to.equal('visible');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('visible');
+    expect(embedChild.getVisibilityState()).to.equal('visible');
+
+    expect(top.getFirstVisibleTime()).to.equal(1);
+    expect(top.getLastVisibleTime()).to.equal(3);
+  });
+
+  it('should update visibility in children', () => {
+    clock.tick(1);
+    embedOtherWindow.overrideVisibilityState('hidden');
+
+    expect(top.getVisibilityState()).to.equal('visible');
+    expect(embedSameWindow.getVisibilityState()).to.equal('visible');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedChild.getVisibilityState()).to.equal('hidden');
+
+    expect(top.getFirstVisibleTime()).to.equal(1);
+    expect(top.getLastVisibleTime()).to.equal(1);
+    expect(embedSameWindow.getFirstVisibleTime()).to.equal(1);
+    expect(embedSameWindow.getLastVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(1);
+    expect(embedChild.getFirstVisibleTime()).to.equal(1);
+    expect(embedChild.getLastVisibleTime()).to.equal(1);
+
+    clock.tick(1);
+    embedOtherWindow.overrideVisibilityState('visible');
+
+    expect(embedOtherWindow.getVisibilityState()).to.equal('visible');
+    expect(embedChild.getVisibilityState()).to.equal('visible');
+
+    expect(top.getFirstVisibleTime()).to.equal(1);
+    expect(top.getLastVisibleTime()).to.equal(1);
+    expect(embedSameWindow.getFirstVisibleTime()).to.equal(1);
+    expect(embedSameWindow.getLastVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(3);
+    expect(embedChild.getFirstVisibleTime()).to.equal(1);
+    expect(embedChild.getLastVisibleTime()).to.equal(3);
+  });
+
+  it('should update when document visibility changes', () => {
+    clock.tick(1);
+    updateDocumentVisibility(doc, 'hidden');
+
+    expect(top.getVisibilityState()).to.equal('hidden');
+    expect(embedSameWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedChild.getVisibilityState()).to.equal('hidden');
+
+    clock.tick(1);
+    updateDocumentVisibility(doc, 'visible');
+
+    expect(top.getVisibilityState()).to.equal('visible');
+    expect(embedSameWindow.getVisibilityState()).to.equal('visible');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('visible');
+    expect(embedChild.getVisibilityState()).to.equal('visible');
+  });
+
+  it('should update embed document visibility', () => {
+    clock.tick(1);
+    updateDocumentVisibility(childDoc, 'hidden');
+
+    expect(top.getVisibilityState()).to.equal('visible');
+    expect(embedSameWindow.getVisibilityState()).to.equal('visible');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedChild.getVisibilityState()).to.equal('hidden');
+
+    clock.tick(1);
+    updateDocumentVisibility(childDoc, 'visible');
+
+    expect(top.getVisibilityState()).to.equal('visible');
+    expect(embedSameWindow.getVisibilityState()).to.equal('visible');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('visible');
+    expect(embedChild.getVisibilityState()).to.equal('visible');
+  });
+
+  it('should override to prerender/inactive/paused', () => {
+    top.overrideVisibilityState('prerender');
+    expect(top.getVisibilityState()).to.equal('prerender');
+    expect(embedSameWindow.getVisibilityState()).to.equal('prerender');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('prerender');
+    expect(embedChild.getVisibilityState()).to.equal('prerender');
+
+    top.overrideVisibilityState('inactive');
+    expect(top.getVisibilityState()).to.equal('inactive');
+    expect(embedSameWindow.getVisibilityState()).to.equal('inactive');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('inactive');
+    expect(embedChild.getVisibilityState()).to.equal('inactive');
+
+    top.overrideVisibilityState('paused');
+    expect(top.getVisibilityState()).to.equal('paused');
+    expect(embedSameWindow.getVisibilityState()).to.equal('paused');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('paused');
+    expect(embedChild.getVisibilityState()).to.equal('paused');
+  });
+
+  it('should prioritize document hidden for paused', () => {
+    updateDocumentVisibility(doc, 'hidden');
+    top.overrideVisibilityState('paused');
+    expect(top.getVisibilityState()).to.equal('hidden');
+    expect(embedSameWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedChild.getVisibilityState()).to.equal('hidden');
+  });
+
+  it('should configure visibilityState for prerender', () => {
+    top = new AmpDocSingle(win, {
+      params: {
+        'visibilityState': 'prerender',
+        'prerenderSize': '3',
+      },
+    });
+    expect(top.getVisibilityState()).to.equal('prerender');
+    expect(top.isVisible()).to.equal(false);
+    expect(top.getParam('prerenderSize')).to.equal('3');
+  });
+
+  it('should be hidden when the browser document is unknown state', () => {
+    updateDocumentVisibility(doc, 'what is this');
+    expect(top.getVisibilityState()).to.equal('hidden');
+    expect(embedSameWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedOtherWindow.getVisibilityState()).to.equal('hidden');
+    expect(embedChild.getVisibilityState()).to.equal('hidden');
+  });
+
+  it('should yield undefined for whenVisible methods', () => {
+    return Promise.all([top.whenFirstVisible(), top.whenNextVisible()]).then(
+      results => {
+        expect(results).to.deep.equal([undefined, undefined]);
+      }
+    );
+  });
+});
+
+describes.sandboxed('AmpDocSingle', {}, () => {
   let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     ampdoc = new AmpDocSingle(window);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should return window', () => {
@@ -499,7 +862,11 @@ describe('AmpDocSingle', () => {
   });
 
   it('should wait for body and ready state', () => {
-    const doc = {body: null};
+    const doc = {
+      body: null,
+      addEventListener: function() {},
+      removeEventListener: function() {},
+    };
     const win = {document: doc};
 
     let bodyCallback;
@@ -568,24 +935,18 @@ describe('AmpDocSingle', () => {
   });
 });
 
-describe('AmpDocShadow', () => {
+describes.sandboxed('AmpDocShadow', {}, () => {
   const URL = 'https://example.org/document';
 
-  let sandbox;
   let content, host, shadowRoot;
   let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     content = document.createElement('div');
     host = document.createElement('div');
     shadowRoot = createShadowRoot(host);
     shadowRoot.appendChild(content);
     ampdoc = new AmpDocShadow(window, URL, shadowRoot);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should return window', () => {

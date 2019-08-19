@@ -16,15 +16,13 @@
 
 import {DocumentState} from '../../src/service/document-state';
 
-describe('DocumentState', () => {
-  let sandbox;
+describes.sandboxed('DocumentState', {}, () => {
   let eventListeners;
   let testDoc;
   let windowApi;
   let docState;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     eventListeners = {};
     testDoc = {
       readyState: 'complete',
@@ -43,39 +41,26 @@ describe('DocumentState', () => {
     docState = new DocumentState(windowApi);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('resolve non-vendor properties', () => {
-    expect(docState.hiddenProp_).to.equal('hidden');
-    expect(docState.visibilityStateProp_).to.equal('visibilityState');
-    expect(docState.visibilityChangeEvent_).to.equal('visibilitychange');
-    expect(eventListeners['visibilitychange']).to.not.equal(undefined);
+    expect(docState.isHidden()).to.be.false;
+    expect(docState.getVisibilityState()).to.equal('visible');
+    expect(eventListeners['visibilitychange']).to.be.ok;
   });
 
   it('resolve vendor-prefixed properties', () => {
+    const otherEventListeners = {};
     const otherDoc = {
       webkitHidden: false,
       webkitVisibilityState: 'visible',
-      addEventListener: (unusedEventType, unusedHandler) => {},
+      addEventListener: (eventType, handler) => {
+        otherEventListeners[eventType] = handler;
+      },
       removeEventListener: (unusedEventType, unusedHandler) => {},
     };
     const other = new DocumentState({document: otherDoc});
-    expect(other.hiddenProp_).to.equal('webkitHidden');
-    expect(other.visibilityStateProp_).to.equal('webkitVisibilityState');
-    expect(other.visibilityChangeEvent_).to.equal('webkitVisibilitychange');
-  });
-
-  it('resolve no properties', () => {
-    const otherDoc = {
-      addEventListener: (unusedEventType, unusedHandler) => {},
-      removeEventListener: (unusedEventType, unusedHandler) => {},
-    };
-    const other = new DocumentState({document: otherDoc});
-    expect(other.hiddenProp_).to.equal(null);
-    expect(other.visibilityStateProp_).to.equal(null);
-    expect(other.visibilityChangeEvent_).to.equal(null);
+    expect(other.isHidden()).to.be.false;
+    expect(other.getVisibilityState()).to.equal('visible');
+    expect(otherEventListeners['webkitVisibilitychange']).to.be.ok;
   });
 
   it('should default hidden and visibilityState if unknown', () => {
@@ -84,7 +69,7 @@ describe('DocumentState', () => {
       removeEventListener: (unusedEventType, unusedHandler) => {},
     };
     const other = new DocumentState({document: otherDoc});
-    expect(other.isHidden()).to.equal(false);
+    expect(other.isHidden()).to.be.false;
     expect(other.getVisibilityState()).to.equal('visible');
   });
 

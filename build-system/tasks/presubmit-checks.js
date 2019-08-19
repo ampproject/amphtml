@@ -274,14 +274,6 @@ const forbiddenTerms = {
       'src/service/viewer-impl.js',
     ],
   },
-  'setViewerVisibilityState': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/runtime.js',
-      'src/service/core-services.js',
-      'src/service/viewer-impl.js',
-    ],
-  },
   'installViewportServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
@@ -605,6 +597,14 @@ const forbiddenTerms = {
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'src/base-element.js',
       'src/service/resources-impl.js',
+    ],
+  },
+  'overrideVisibilityState': {
+    message: 'overrideVisibilityState is a restricted API.',
+    whitelist: [
+      'src/runtime.js',
+      'src/service/ampdoc-impl.js',
+      'src/service/viewer-impl.js',
     ],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
