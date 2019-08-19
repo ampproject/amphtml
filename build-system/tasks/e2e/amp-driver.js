@@ -162,7 +162,18 @@ class AmpDriver {
   async navigateToEnvironment(environment, url) {
     const ampEnv = EnvironmentBehaviorMap[environment];
     await this.controller_.navigateTo(ampEnv.url(url));
-    await ampEnv.ready(this.controller_);
+
+    try {
+      await ampEnv.ready(this.controller_);
+    } catch (e) {
+      // Take a snapshot of current DOM for debugging.
+      const documentElement = await this.controller_.getDocumentElement();
+      const html = await this.controller_.getElementProperty(
+        documentElement,
+        'innerHTML'
+      );
+      throw new Error(e.message + '\n' + html);
+    }
   }
 }
 
