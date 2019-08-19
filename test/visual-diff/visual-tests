@@ -33,6 +33,7 @@
   "asset_globs": [
     "examples/visual-tests/**",
     "examples/amphtml-ads/ads-tag-integration.js"
+    "test/fixtures/e2e/amphtml-ads/**",
   ],
 
   /**
