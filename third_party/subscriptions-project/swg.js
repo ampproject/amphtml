@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.63 */
+/** Version: 0.1.22.64 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -39,6 +39,9 @@ const AnalyticsEvent = {
   IMPRESSION_SUBSCRIBE_BUTTON: 4,
   IMPRESSION_SMARTBOX: 5,
   IMPRESSION_SWG_BUTTON: 6,
+  IMPRESSION_CLICK_TO_SHOW_OFFERS: 7,
+  IMPRESSION_CLICK_TO_SHOW_OFFERS_OR_ALREADY_SUBSCRIBED: 8,
+  IMPRESSION_SUBSCRIPTION_COMPLETE: 9,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -47,6 +50,8 @@ const AnalyticsEvent = {
   ACTION_PAYMENT_FLOW_STARTED: 1005,
   ACTION_OFFER_SELECTED: 1006,
   ACTION_SWG_BUTTON_CLICK: 1007,
+  ACTION_VIEW_OFFERS: 1008,
+  ACTION_ALREADY_SUBSCRIBED: 1009,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_SUBSCRIPTION_STATE: 4000,
@@ -60,6 +65,71 @@ const EventOriginator = {
   SWG_SERVER: 4,
   PUBLISHER_CLIENT: 5,
 };
+
+/**
+ * @implements {Message}
+ */
+class AlreadySubscribedResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.subscriberOrMember_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?boolean} */
+    this.linkRequested_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getSubscriberOrMember() {
+    return this.subscriberOrMember_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setSubscriberOrMember(value) {
+    this.subscriberOrMember_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getLinkRequested() {
+    return this.linkRequested_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setLinkRequested(value) {
+    this.linkRequested_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.subscriberOrMember_,  // field 1 - subscriber_or_member
+      this.linkRequested_,  // field 2 - link_requested
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AlreadySubscribedResponse';
+  }
+}
 
 /**
  * @implements {Message}
@@ -471,6 +541,53 @@ class EventParams {
 /**
  * @implements {Message}
  */
+class SkuSelectedResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.sku_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.sku_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSku(value) {
+    this.sku_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.sku_,  // field 1 - sku
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'SkuSelectedResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
 class SmartBoxMessage {
  /**
   * @param {!Array=} data
@@ -515,12 +632,110 @@ class SmartBoxMessage {
   }
 }
 
+/**
+ * @implements {Message}
+ */
+class SubscribeResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.subscribe_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getSubscribe() {
+    return this.subscribe_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setSubscribe(value) {
+    this.subscribe_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.subscribe_,  // field 1 - subscribe
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'SubscribeResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class ViewSubscriptionsResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.native_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getNative() {
+    return this.native_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setNative(value) {
+    this.native_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.native_,  // field 1 - native
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'ViewSubscriptionsResponse';
+  }
+}
+
 const PROTO_MAP = {
+  'AlreadySubscribedResponse': AlreadySubscribedResponse,
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
   'EventParams': EventParams,
+  'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
+  'SubscribeResponse': SubscribeResponse,
+  'ViewSubscriptionsResponse': ViewSubscriptionsResponse,
 };
 
 /**
@@ -3565,7 +3780,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.63',
+    '_client': 'SwG 0.1.22.64',
   });
 }
 
@@ -5142,7 +5357,7 @@ class UserData {
 
 /**
  */
-class SubscribeResponse {
+class SubscribeResponse$1 {
 
   /**
    * @param {string} raw
@@ -5172,7 +5387,7 @@ class SubscribeResponse {
    * @return {!SubscribeResponse}
    */
   clone() {
-    return new SubscribeResponse(
+    return new SubscribeResponse$1(
         this.raw,
         this.purchaseData,
         this.userData,
@@ -5634,6 +5849,7 @@ function defaultConfig() {
   return {
     windowOpenMode: WindowOpenMode.AUTO,
     analyticsMode: AnalyticsMode.DEFAULT,
+    enableSwgAnalytics: false,
   };
 }
 
@@ -5976,7 +6192,7 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
     throw new Error('unexpected payment response');
   }
   raw = JSON.stringify(/** @type {!JsonObject} */ (swgData));
-  return new SubscribeResponse(
+  return new SubscribeResponse$1(
     raw,
     parsePurchaseData(swgData),
     parseUserData(swgData),
@@ -6281,7 +6497,7 @@ class DeferredAccountFlow {
 
     // Start the "sync" flow.
     creatingFlow.start(
-      new SubscribeResponse(
+      new SubscribeResponse$1(
         '', // raw field doesn't matter in this case
         purchaseDataList[0],
         userData,
@@ -7722,31 +7938,11 @@ class EntitlementsManager {
   }
 
   /**
-   * @private
-   */
-  logPaywallImpression_() {
-    // Sends event to logging service asynchronously
-    this.deps_
-      .eventManager()
-      .logSwgEvent(AnalyticsEvent.IMPRESSION_PAYWALL, false, null);
-  }
-
-  /**
    * @return {string}
    * @private
    */
   getQueryString_() {
     return this.win_.location.search;
-  }
-
-  /**
-   * @private
-   * @return boolean true if UTM source is google
-   */
-  isGoogleUtmSource_() {
-    // TODO(sohanirao): b/120294106
-    const utmParams = parseQueryString$1(this.getQueryString_());
-    return utmParams['utm_source'] == 'google';
   }
 
   /**
@@ -7762,12 +7958,6 @@ class EntitlementsManager {
     return this.responsePromise_.then(response => {
       if (response.isReadyToPay != null) {
         this.analyticsService_.setReadyToPay(response.isReadyToPay);
-      }
-      if (
-        this.config_.analyticsMode == AnalyticsMode.IMPRESSIONS ||
-        this.isGoogleUtmSource_()
-      ) {
-        this.logPaywallImpression_();
       }
       return response;
     });
@@ -13018,6 +13208,9 @@ class OffersFlow {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
+    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+
     let isClosable = options && options.isClosable;
     if (isClosable == undefined) {
       isClosable = false; // Default is to hide Close button.
@@ -13072,6 +13265,8 @@ class OffersFlow {
         return;
       }
     });
+
+    this.eventManager_.logSwgEvent(AnalyticsEvent.IMPRESSION_OFFERS);
 
     return this.dialogManager_.openView(this.activityIframeView_);
   }
@@ -13494,6 +13689,240 @@ function uuidFast() {
 }
 
 /**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number}  */
+const FilterResult = {
+  /** The event is allowed to proceed to the listeners. */
+  PROCESS_EVENT: 0,
+  /** The event is canceled and the listeners are not informed about it. */
+  CANCEL_EVENT: 1,
+};
+
+/**
+ * Defines a client event in SwG
+ * Properties:
+ * - eventType: Required. The AnalyticsEvent type that occurred.
+ * - eventOriginator: Required.  The codebase that initiated the event.
+ * - isFromUserAction: Optional.  True if the user took an action to generate
+ *   the event.
+ * - additionalParameters: Optional.  A JSON object to store generic data.
+ *
+ *  @typedef {{
+ *    eventType: !AnalyticsEvent,
+ *    eventOriginator: !EventOriginator,
+ *    isFromUserAction: ?boolean,
+ *    additionalParameters: ?Object,
+ * }}
+ */
+let ClientEvent;
+
+/**
+ * @interface
+ */
+class ClientEventManagerApi {
+  /**
+   * Call this function to log an event. The registered listeners will be
+   * invoked unless the event is filtered.
+   * @param {!function(!ClientEvent)} listener
+   */
+  registerEventListener(listener) { }
+
+  /**
+   * Register a filterer for events if you need to potentially prevent the
+   * listeners from hearing about it.  A filterer should return
+   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
+   * event.
+   * @param {!function(!ClientEvent):FilterResult} filterer
+   */
+  registerEventFilterer(filterer) { }
+
+  /**
+   * Call this function to log an event.  It will immediately throw an error if
+   * the event is invalid.  It will then asynchronously call the filterers and
+   * stop the event if a filterer cancels it.  After that, it will call each
+   * listener asynchronously.
+   * @param {!ClientEvent} event
+   */
+  logEvent(event) { }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Helper function to describe an issue with an event object
+ * @param {!string} valueName
+ * @param {?*} value
+ * @returns {!string}
+ */
+function createEventErrorMessage(valueName, value) {
+  return 'Event has an invalid ' + valueName + '(' + value + ')';
+}
+
+/**
+ * Throws an error if the event is invalid.
+ * @param {!../api/client-event-manager-api.ClientEvent} event
+ */
+function validateEvent(event) {
+  if (!isObject(event)) {
+    throw new Error('Event must be a valid object');
+  }
+
+  if (!isEnumValue(AnalyticsEvent, event.eventType)) {
+    throw new Error(createEventErrorMessage('eventType', event.eventType));
+  }
+
+  if (!isEnumValue(EventOriginator, event.eventOriginator)) {
+    throw new Error(
+      createEventErrorMessage('eventOriginator', event.eventOriginator)
+    );
+  }
+
+  if (
+    !isObject(event.additionalParameters) &&
+    event.additionalParameters != null
+  ) {
+    throw new Error(
+      createEventErrorMessage(
+        'additionalParameters',
+        event.additionalParameters
+      )
+    );
+  }
+
+  if (event.isFromUserAction != null && !isBoolean(event.isFromUserAction)) {
+    throw new Error(
+      createEventErrorMessage('isFromUserAction', event.isFromUserAction)
+    );
+  }
+}
+
+/** @implements {../api/client-event-manager-api.ClientEventManagerApi} */
+class ClientEventManager {
+  /**
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   * @return {boolean}
+   */
+  static isPublisherEvent(event) {
+    return (
+      event.eventOriginator === EventOriginator.PROPENSITY_CLIENT ||
+      event.eventOriginator === EventOriginator.PUBLISHER_CLIENT ||
+      event.eventOriginator === EventOriginator.AMP_CLIENT
+    );
+  }
+
+  /**
+   *
+   * @param {!Promise} configuredPromise
+   */
+  constructor(configuredPromise) {
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent)>} */
+    this.listeners_ = [];
+
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent):!FilterResult>} */
+    this.filterers_ = [];
+
+    /** @private {?Promise} */
+    this.lastAction_ = null;
+
+    /** @private @const {!Promise} */
+    this.isReadyPromise_ = configuredPromise;
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventListener(listener) {
+    if (!isFunction(listener)) {
+      throw new Error('Event manager listeners must be a function');
+    }
+    this.listeners_.push(listener);
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventFilterer(filterer) {
+    if (!isFunction(filterer)) {
+      throw new Error('Event manager filterers must be a function');
+    }
+    this.filterers_.push(filterer);
+  }
+
+  /**
+   * @overrides
+   */
+  logEvent(event) {
+    validateEvent(event);
+    this.lastAction_ = this.isReadyPromise_.then(() => {
+      for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
+        try {
+          if (this.filterers_[filterer](event) === FilterResult.CANCEL_EVENT) {
+            return Promise.resolve();
+          }
+        } catch (e) {
+          log(e);
+        }
+      }
+      for (let listener = 0; listener < this.listeners_.length; listener++) {
+        try {
+          this.listeners_[listener](event);
+        } catch (e) {
+          log(e);
+        }
+      }
+      return Promise.resolve();
+    });
+  }
+
+  /**
+   * Creates an event with the arguments provided and calls logEvent.
+   * @param {!AnalyticsEvent} eventType
+   * @param {?boolean=} isFromUserAction
+   * @param {?Object=} additionalParameters
+   */
+  logSwgEvent(
+    eventType,
+    isFromUserAction = false,
+    additionalParameters = null
+  ) {
+    this.logEvent({
+      eventType,
+      eventOriginator: EventOriginator.SWG_CLIENT,
+      isFromUserAction,
+      additionalParameters,
+    });
+  }
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13521,6 +13950,9 @@ class AnalyticsService {
   constructor(deps) {
     /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
 
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -13557,7 +13989,7 @@ class AnalyticsService {
     /** @private {?Promise} */
     this.lastAction_ = null;
 
-    /** @private @const {!../api/client-event-manager-api.ClientEventManagerApi} */
+    /** @private @const {!ClientEventManager} */
     this.eventManager_ = deps.eventManager();
     this.eventManager_.registerEventListener(
       this.handleClientEvent_.bind(this)
@@ -13568,9 +14000,6 @@ class AnalyticsService {
       deps.win(),
       ExperimentFlags.LOG_PROPENSITY_TO_SWG
     );
-
-    /** @private {!boolean} */
-    this.logPropensityConfig_ = false;
   }
 
   /**
@@ -13716,26 +14145,6 @@ class AnalyticsService {
   }
 
   /**
-   * This function can be used to log a buy-flow event from SwG.
-   * It exists as a helper and to ensure backwards compatability,
-   * you have additional parameters available if you call eventManager.logEvent
-   * directly.
-   * @param {!../proto/api_messages.AnalyticsEvent} eventTypeIn
-   * @param {!boolean=} isFromUserActionIn
-   */
-  logEvent(eventTypeIn, isFromUserActionIn) {
-    this.eventManager_.logEvent({
-      eventType: eventTypeIn,
-      eventOriginator: EventOriginator.SWG_CLIENT,
-      /** @type {?boolean} */
-      isFromUserAction: (isBoolean(isFromUserActionIn)
-        ? !!isFromUserActionIn
-        : null),
-      additionalParameters: null,
-    });
-  }
-
-  /**
    * Handles the message received by the port.
    * @param {function(!Object<string, string|boolean>)} callback
    */
@@ -13746,13 +14155,22 @@ class AnalyticsService {
   }
 
   /**
+   * @return {boolean}
+   */
+  shouldLogPublisherEvents_() {
+    return (
+      this.logPropensityExperiment_ && this.deps_.config().enableSwgAnalytics
+    );
+  }
+
+  /**
    *  Listens for new events from the events manager and handles logging
    * @param {!../api/client-event-manager-api.ClientEvent} event
    */
   handleClientEvent_(event) {
     if (
-      !(this.logPropensityExperiment_ && this.logPropensityConfig_) &&
-      event.eventOriginator === EventOriginator.PROPENSITY_CLIENT
+      ClientEventManager.isPublisherEvent(event) &&
+      !this.shouldLogPublisherEvents_()
     ) {
       return;
     }
@@ -13760,10 +14178,6 @@ class AnalyticsService {
       const request = this.createLogRequest_(event);
       port.execute(request);
     });
-  }
-
-  enableLoggingForPropensity() {
-    this.logPropensityConfig_ = true;
   }
 }
 
@@ -14224,228 +14638,6 @@ class Propensity {
  * limitations under the License.
  */
 
-/** @enum {number}  */
-const FilterResult = {
-  /** The event is allowed to proceed to the listeners. */
-  PROCESS_EVENT: 0,
-  /** The event is canceled and the listeners are not informed about it. */
-  CANCEL_EVENT: 1,
-};
-
-/**
- * Defines a client event in SwG
- * Properties:
- * - eventType: Required. The AnalyticsEvent type that occurred.
- * - eventOriginator: Required.  The codebase that initiated the event.
- * - isFromUserAction: Optional.  True if the user took an action to generate
- *   the event.
- * - additionalParameters: Optional.  A JSON object to store generic data.
- *
- *  @typedef {{
- *    eventType: !AnalyticsEvent,
- *    eventOriginator: !EventOriginator,
- *    isFromUserAction: ?boolean,
- *    additionalParameters: ?Object,
- * }}
- */
-let ClientEvent;
-
-/**
- * @interface
- */
-class ClientEventManagerApi {
-  /**
-   * Call this function to log an event. The registered listeners will be
-   * invoked unless the event is filtered.
-   * @param {!function(!ClientEvent)} listener
-   */
-  registerEventListener(listener) { }
-
-  /**
-   * Register a filterer for events if you need to potentially prevent the
-   * listeners from hearing about it.  A filterer should return
-   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
-   * event.
-   * @param {!function(!ClientEvent):FilterResult} filterer
-   */
-  registerEventFilterer(filterer) { }
-
-  /**
-   * Call this function to log an event.  It will immediately throw an error if
-   * the event is invalid.  It will then asynchronously call the filterers and
-   * stop the event if a filterer cancels it.  After that, it will call each
-   * listener asynchronously.
-   * @param {!ClientEvent} event
-   */
-  logEvent(event) { }
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Helper function to describe an issue with an event object
- * @param {!string} valueName
- * @param {?*} value
- * @returns {!string}
- */
-function createEventErrorMessage(valueName, value) {
-  return 'Event has an invalid ' + valueName + '(' + value + ')';
-}
-
-/**
- * Throws an error if the event is invalid.
- * @param {!../api/client-event-manager-api.ClientEvent} event
- */
-function validateEvent(event) {
-  if (!isObject(event)) {
-    throw new Error('Event must be a valid object');
-  }
-
-  if (!isEnumValue(AnalyticsEvent, event.eventType)) {
-    throw new Error(createEventErrorMessage('eventType', event.eventType));
-  }
-
-  if (!isEnumValue(EventOriginator, event.eventOriginator)) {
-    throw new Error(
-      createEventErrorMessage('eventOriginator', event.eventOriginator)
-    );
-  }
-
-  if (
-    !isObject(event.additionalParameters) &&
-    event.additionalParameters != null
-  ) {
-    throw new Error(
-      createEventErrorMessage(
-        'additionalParameters',
-        event.additionalParameters
-      )
-    );
-  }
-
-  if (event.isFromUserAction != null && !isBoolean(event.isFromUserAction)) {
-    throw new Error(
-      createEventErrorMessage('isFromUserAction', event.isFromUserAction)
-    );
-  }
-}
-
-/** @implements {../api/client-event-manager-api.ClientEventManagerApi} */
-class ClientEventManager {
-  /**
-   *
-   * @param {!Promise} configuredPromise
-   */
-  constructor(configuredPromise) {
-    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent)>} */
-    this.listeners_ = [];
-
-    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent):!FilterResult>} */
-    this.filterers_ = [];
-
-    /** @private {?Promise} */
-    this.lastAction_ = null;
-
-    /** @private @const {!Promise} */
-    this.isReadyPromise_ = configuredPromise;
-  }
-
-  /**
-   * @overrides
-   */
-  registerEventListener(listener) {
-    if (!isFunction(listener)) {
-      throw new Error('Event manager listeners must be a function');
-    }
-    this.listeners_.push(listener);
-  }
-
-  /**
-   * @overrides
-   */
-  registerEventFilterer(filterer) {
-    if (!isFunction(filterer)) {
-      throw new Error('Event manager filterers must be a function');
-    }
-    this.filterers_.push(filterer);
-  }
-
-  /**
-   * @overrides
-   */
-  logEvent(event) {
-    validateEvent(event);
-    this.lastAction_ = this.isReadyPromise_.then(() => {
-      for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
-        try {
-          if (this.filterers_[filterer](event) === FilterResult.CANCEL_EVENT) {
-            return Promise.resolve();
-          }
-        } catch (e) {
-          log(e);
-        }
-      }
-      for (let listener = 0; listener < this.listeners_.length; listener++) {
-        try {
-          this.listeners_[listener](event);
-        } catch (e) {
-          log(e);
-        }
-      }
-      return Promise.resolve();
-    });
-  }
-
-  /**
-   * Creates an event with the arguments provided and calls logEvent.
-   * @param {!AnalyticsEvent} eventType
-   * @param {?boolean=} isFromUserAction
-   * @param {?Object=} additionalParameters
-   */
-  logSwgEvent(
-    eventType,
-    isFromUserAction = false,
-    additionalParameters = null
-  ) {
-    this.logEvent({
-      eventType,
-      eventOriginator: EventOriginator.SWG_CLIENT,
-      isFromUserAction,
-      additionalParameters,
-    });
-  }
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /**
  * @implements {../api/logger-api.LoggerApi}
  */
@@ -14657,7 +14849,10 @@ class ConfiguredRuntime {
     // Report redirect errors if any.
     this.activityPorts_.onRedirectError(error => {
       this.analyticsService_.addLabels(['redirect']);
-      this.analyticsService_.logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
+      this.eventManager_.logSwgEvent(
+        AnalyticsEvent.EVENT_PAYMENT_FAILED,
+        false
+      );
       this.jserror_.error('Redirect error', error);
     });
   }
@@ -14746,6 +14941,10 @@ class ConfiguredRuntime {
       } else if (k == 'analyticsMode') {
         if (v != AnalyticsMode.DEFAULT && v != AnalyticsMode.IMPRESSIONS) {
           error = 'Unknown analytics mode: ' + v;
+        }
+      } else if (k == 'enableSwgAnalytics') {
+        if (!isBoolean(v)) {
+          error = 'Unknown enableSwgAnalytics value: ' + v;
         }
       } else {
         error = 'Unknown config property: ' + k;
@@ -15006,7 +15205,7 @@ export {
   Entitlements,
   Entitlement,
   Fetcher,
-  SubscribeResponse,
+  SubscribeResponse: SubscribeResponse$1,
   ClientEventManagerApi,
   ClientEvent,
   FilterResult,
