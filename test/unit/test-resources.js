@@ -656,12 +656,12 @@ describes.fakeWin(
         .whenReady()
         .then(() => {
           expect(resources.relayoutAll_).to.be.false;
-          expect(schedulePassStub).to.not.be.called;
+          expect(schedulePassStub).to.have.callCount(1);
           clock.tick(3100);
         })
         .then(() => {
           expect(resources.relayoutAll_).to.be.true;
-          expect(schedulePassStub).to.have.been.called;
+          expect(schedulePassStub).to.have.callCount(2);
         });
     });
 
@@ -685,7 +685,7 @@ describes.fakeWin(
         .then(() => {
           expect(resources.relayoutAll_).to.be.true;
           // Remeasure on doc-ready and fonts-ready.
-          expect(schedulePassStub).to.have.been.calledTwice;
+          expect(schedulePassStub).to.have.callCount(3);
         });
     });
 
@@ -709,7 +709,7 @@ describes.fakeWin(
         .then(() => {
           expect(resources.relayoutAll_).to.be.false;
           // Only remeasure on doc-ready.
-          expect(schedulePassStub).to.have.been.calledOnce;
+          expect(schedulePassStub).to.have.callCount(2);
         });
     });
 
