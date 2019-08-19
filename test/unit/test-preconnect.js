@@ -15,13 +15,13 @@
  */
 
 import * as lolex from 'lolex';
-import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {
   preconnectForElement,
-  preconnectToOrigin,
   setPreconnectFeaturesForTesting,
+  preconnectToOrigin,
 } from '../../src/preconnect';
+import {Services} from '../../src/services';
 
 describe('preconnect', () => {
   let sandbox;
@@ -128,7 +128,6 @@ describe('preconnect', () => {
       canonicalUrl: 'https://canonicalurl.com/',
     });
     await preconnectToOrigin(iframe.doc);
-    await visible;
     const preconnects = iframe.doc.querySelectorAll('link[rel=preconnect]');
     expect(preconnects).to.have.length(2);
     expect(preconnects[0].href).to.equal('https://sourceurl.com/');
