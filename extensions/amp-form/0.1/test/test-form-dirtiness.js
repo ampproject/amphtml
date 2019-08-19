@@ -454,4 +454,26 @@ describes.realWin('form-dirtiness', {}, env => {
       expect(eventDispatched).to.not.exist;
     });
   });
+
+  describe('initial dirtiness', () => {
+    let newForm, input;
+
+    beforeEach(() => {
+      newForm = getForm(doc);
+      input = createElement(doc, 'input', {type: 'text', name: 'text'});
+      newForm.appendChild(input);
+    });
+
+    it('adds the dirtiness class if the form already has dirty fields', () => {
+      changeInput(input, 'changed');
+      dirtinessHandler = new FormDirtiness(newForm, env.win);
+
+      expect(newForm).to.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('does not add the dirtiness class if the form does not have dirty fields', () => {
+      dirtinessHandler = new FormDirtiness(newForm, env.win);
+      expect(newForm).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+  });
 });
