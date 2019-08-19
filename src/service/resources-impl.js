@@ -465,7 +465,6 @@ export class Resources {
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.viewer_.getVisibilityState()
     );
-    this.setupVisibilityStateMachine_(this.visibilityStateMachine_);
 
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged(event => {
@@ -510,11 +509,12 @@ export class Resources {
       this.checkPendingChangeSize_(element);
     });
 
+    // Schedule initial passes. This must happen in a startup task
+    // to avoid blocking body visible.
     startupChunk(this.win.document, () => {
-      console.info('Schedule First pass');
+      this.setupVisibilityStateMachine_(this.visibilityStateMachine_);
       this.schedulePass(0);
     });
-    //this.schedulePass(1);
 
     this.rebuildDomWhenReady_();
   }
