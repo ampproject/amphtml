@@ -922,7 +922,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
     });
     it('created before performance service registered', () => {
       // Pretend that the EventTiming API exists.
-      env.win.PerformanceEventTiming = true;
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['firstInput'];
 
       const entries = [
         {
