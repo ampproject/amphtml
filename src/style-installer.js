@@ -262,6 +262,7 @@ export function makeBodyVisible(doc) {
       return [];
     })
     .then(services => {
+      console.log('mbv');
       bodyMadeVisible = true;
       setBodyVisibleStyles(doc);
       const ampdoc = getAmpdoc(doc);

@@ -36,6 +36,7 @@ import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
+import {startupChunk} from '../chunk';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -509,7 +510,11 @@ export class Resources {
       this.checkPendingChangeSize_(element);
     });
 
-    this.schedulePass(1);
+    startupChunk(this.win.document, () => {
+      console.info('Schedule First pass');
+      this.schedulePass(0);
+    });
+    //this.schedulePass(1);
 
     this.rebuildDomWhenReady_();
   }
