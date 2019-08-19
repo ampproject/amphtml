@@ -95,7 +95,7 @@ describe('Activity getTotalEngagedTime', () => {
     fakeDoc.head.defaultView = fakeWin;
 
     ampdoc = new AmpDocSingle(fakeWin);
-    fakeWin.services['ampdoc'] = {
+    fakeWin.__AMP_SERVICES['ampdoc'] = {
       obj: {
         getAmpDoc: () => ampdoc,
         isSingleDoc: () => true,
@@ -317,7 +317,7 @@ describe('Activity getIncrementalEngagedTime', () => {
     fakeDoc.head.defaultView = fakeWin;
 
     ampdoc = new AmpDocSingle(fakeWin);
-    fakeWin.services['ampdoc'] = {
+    fakeWin.__AMP_SERVICES['ampdoc'] = {
       obj: {
         getAmpDoc: () => ampdoc,
         isSingleDoc: () => true,

@@ -269,7 +269,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(win.ampExtendedElements && win.ampExtendedElements['amp-test-sub'])
         .to.be.undefined;
       expect(win.customElements.elements['amp-test']).to.not.exist;
-      expect(win.services['amp-test']).to.not.exist;
+      expect(win.__AMP_SERVICES['amp-test']).to.not.exist;
 
       // Resolve the promise.
       extensions.registerExtension(
@@ -283,7 +283,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(win.ampExtendedElements['amp-test']).to.equal(AmpTest);
       expect(win.ampExtendedElements['amp-test-sub']).to.equal(AmpTestSub);
       expect(win.customElements.elements['amp-test']).to.exist;
-      expect(win.services['amp-test']).to.exist;
+      expect(win.__AMP_SERVICES['amp-test']).to.exist;
     });
 
     it('should install non-auto declared elements for single-doc', () => {

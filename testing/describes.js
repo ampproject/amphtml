@@ -717,7 +717,7 @@ class AmpFixture {
     installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {
-      win.services.vsync.obj.runScheduledTasks_();
+      win.__AMP_SERVICES.vsync.obj.runScheduledTasks_();
     };
     if (singleDoc) {
       // Install AMP CSS for main runtime, if it hasn't been installed yet.
