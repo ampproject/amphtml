@@ -46,6 +46,7 @@ t.run('Viewer Visibility State', () => {
       let pauseCallback;
       let resumeCallback;
       let docHidden;
+      let docVisibilityState;
       let unselect;
       let prerenderAllowed;
 
@@ -61,8 +62,12 @@ t.run('Viewer Visibility State', () => {
         }
         return hiddenName.substr(0, index) + 'Visibilitychange';
       }
+
       function changeVisibility(vis) {
-        docHidden.returns(vis === 'hidden');
+        if (docVisibilityState) {
+          docVisibilityState.value(vis);
+        }
+        docHidden.value(vis === 'hidden');
         win.document.dispatchEvent(
           createCustomEvent(win, visChangeEventName(), /* detail */ null)
         );
@@ -110,8 +115,13 @@ t.run('Viewer Visibility State', () => {
         return Services.viewerPromiseForDoc(win.document)
           .then(v => {
             viewer = v;
-            const docState = Services.globalDocumentStateFor(win);
-            docHidden = sandbox.stub(docState, 'isHidden').returns(false);
+
+            docHidden = sandbox.stub(win.document, 'hidden').value(false);
+            if ('visibilityState' in win.document) {
+              docVisibilityState = sandbox
+                .stub(win.document, 'visibilityState')
+                .value('visible');
+            }
 
             resources = Services.resourcesForDoc(win.document);
             doPass_ = resources.doPass;

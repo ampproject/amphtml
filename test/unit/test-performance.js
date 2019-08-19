@@ -281,7 +281,10 @@ describes.realWin('performance', {amp: true}, env => {
           expect(flushSpy).to.have.callCount(1);
           expect(perf.events_.length).to.equal(2);
 
-          return perf.coreServicesAvailable().then(() => {
+          return Promise.all([
+            perf.coreServicesAvailable(),
+            viewer.whenFirstVisible(),
+          ]).then(() => {
             expect(flushSpy).to.have.callCount(4);
             expect(perf.isMessagingReady_).to.be.false;
             const count = 5;
@@ -476,6 +479,9 @@ describes.realWin('performance', {amp: true}, env => {
         });
 
         it('should call the flush callback', () => {
+          // Make sure "first visible" arrives after "channel ready".
+          const firstVisiblePromise = new Promise(() => {});
+          sandbox.stub(viewer, 'whenFirstVisible').returns(firstVisiblePromise);
           expect(viewerSendMessageStub.withArgs('sendCsi')).to.have.callCount(
             0
           );

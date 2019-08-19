@@ -26,7 +26,6 @@ import {Services} from '../../../../src/services';
 import {adConfig} from '../../../../ads/_config';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
-import {stubService} from '../../../../testing/test-helper';
 import {user} from '../../../../src/log';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
@@ -79,9 +78,7 @@ describes.realWin(
       win.document.body.appendChild(ad3p.element);
       ad3p.buildCallback();
       // Turn the doc to visible so prefetch will be proceeded.
-      stubService(sandbox, win, 'viewer', 'whenFirstVisible').returns(
-        whenFirstVisible
-      );
+      sandbox.stub(env.ampdoc, 'whenFirstVisible').returns(whenFirstVisible);
     });
 
     afterEach(() => {
