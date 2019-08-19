@@ -378,7 +378,7 @@ function preventAsyncErrorThrows() {
     rethrowAsyncSandbox = sinon.createSandbox();
     rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
       const error = log.createErrorVargs.apply(null, args);
-      self.reportError(error);
+      self.__AMP_REPORT_ERROR(error);
       throw error;
     });
   };
