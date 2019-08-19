@@ -620,7 +620,8 @@ describe('service', () => {
         expect(fromGrandchildNode).to.not.equal(topService);
 
         // The service is NOT also registered on the embed window.
-        expect(childWin.__AMP_SERVICES && childWin.__AMP_SERVICES['c']).to.not.exist;
+        expect(childWin.__AMP_SERVICES && childWin.__AMP_SERVICES['c']).to.not
+          .exist;
       });
 
       it('should return overriden service', () => {
