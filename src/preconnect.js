@@ -26,6 +26,7 @@ import {htmlFor} from './static-template';
 import {parseUrlDeprecated} from './url';
 import {startsWith} from './string';
 import {toWin} from './types';
+import {whenDocumentComplete} from './document-ready';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
@@ -382,4 +383,21 @@ export function preconnectForElement(element) {
   registerServiceBuilder(serviceHolder, 'preconnect', PreconnectService);
   const preconnectService = getService(serviceHolder, 'preconnect');
   return new Preconnect(preconnectService, element);
+}
+
+/**
+ * Preconnects to the source URL and canonical domains to make sure
+ * outbound navigations are quick. Waits for onload to avoid blocking
+ * more high priority loads.
+ * @param {!Document} document
+ * @return {Promise} When work is done.
+ */
+export function preconnectToOrigin(document) {
+  return whenDocumentComplete(document).then(() => {
+    const element = document.documentElement;
+    const preconnect = preconnectForElement(element);
+    const info = Services.documentInfoForDoc(element);
+    preconnect.url(info.sourceUrl);
+    preconnect.url(info.canonicalUrl);
+  });
 }
