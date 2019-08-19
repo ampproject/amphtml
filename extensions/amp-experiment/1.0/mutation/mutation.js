@@ -25,10 +25,10 @@ import {userAssert} from '../../../../src/log';
  */
 export class Mutation {
   /**
-   * Called to validate the value of a mutation
+   * Called to parse and validate the value of a mutation
    * @return {boolean}
    */
-  validate() {}
+  parseAndValidate() {}
 
   /**
    * Called to apply the changes to the selected

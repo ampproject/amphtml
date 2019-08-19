@@ -33,7 +33,7 @@ export class AttributeMutationDefaultClass {
   }
 
   /** @override */
-  validate() {
+  parseAndValidate() {
     const value = this.mutationRecord_['value'];
 
     // Don't allow the .i-amphtml class
