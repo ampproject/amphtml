@@ -77,7 +77,7 @@ tags: {
   }
   attrs: {
     name: "custom-delimiters"
-    value_regex: "#-,-#"
+    value_regex: "#- -#"
   }
   attr_lists: "nonce-attr"
   cdata: {
@@ -151,7 +151,7 @@ tags: {
   }
   attrs: {
     name: "custom-delimiters"
-    value_regex: "#-,-#"
+    value_regex: "#- -#"
   }
 }
 tags: {

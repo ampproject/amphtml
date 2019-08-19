@@ -274,16 +274,16 @@ amp-mustache/0.2/test/validator-amp-mustache.html:123:0 The tag 'template' requi
 |  </template>
 |
 |  <!-- Template with allowed custom delimiters -->
-|  <template type="amp-mustache" custom-delimiters="#-,-#">
+|  <template type="amp-mustache" custom-delimiters="#- -#">
 >> ^~~~~~~~~
 amp-mustache/0.2/test/validator-amp-mustache.html:128:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    Hello #-name-#
 |  </template>
 |
 |  <!-- Template with unsupported custom delimiters -->
-|  <template type="amp-mustache" custom-delimiters="<%,%>">
+|  <template type="amp-mustache" custom-delimiters="<% %>">
 >> ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:133:0 The attribute 'custom-delimiters' in tag 'template' is set to the invalid value '<%,%>'. (see https://amp.dev/documentation/components/amp-mustache) [DISALLOWED_HTML]
+amp-mustache/0.2/test/validator-amp-mustache.html:133:0 The attribute 'custom-delimiters' in tag 'template' is set to the invalid value '<% %>'. (see https://amp.dev/documentation/components/amp-mustache) [DISALLOWED_HTML]
 >> ^~~~~~~~~
 amp-mustache/0.2/test/validator-amp-mustache.html:133:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      Hello #-name-#
@@ -376,15 +376,15 @@ amp-mustache/0.2/test/validator-amp-mustache.html:211:0 The tag 'SCRIPT type=tex
 |  </script>
 |
 |  <!-- Script template with allowed custom delimiters -->
-|  <script type="text/plain" template="amp-mustache" custom-delimiters="#-,-#">
+|  <script type="text/plain" template="amp-mustache" custom-delimiters="#- -#">
 >> ^~~~~~~~~
 amp-mustache/0.2/test/validator-amp-mustache.html:216:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    Hello #-name-#
 |  </script>
 |  <!-- Script template with unsupported custom delimiters -->
-|  <script type="text/plain" template="amp-mustache" custom-delimiters="(&,&)">
+|  <script type="text/plain" template="amp-mustache" custom-delimiters="(& &)">
 >> ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:220:0 The attribute 'custom-delimiters' in tag 'SCRIPT type=text/plain' is set to the invalid value '(&,&)'. (see https://amp.dev/documentation/components/amp-mustache) [DISALLOWED_HTML]
+amp-mustache/0.2/test/validator-amp-mustache.html:220:0 The attribute 'custom-delimiters' in tag 'SCRIPT type=text/plain' is set to the invalid value '(& &)'. (see https://amp.dev/documentation/components/amp-mustache) [DISALLOWED_HTML]
 >> ^~~~~~~~~
 amp-mustache/0.2/test/validator-amp-mustache.html:220:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    Hello #-name-#

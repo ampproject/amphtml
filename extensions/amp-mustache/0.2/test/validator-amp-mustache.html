@@ -125,12 +125,12 @@
 </template>
 
 <!-- Template with allowed custom delimiters -->
-<template type="amp-mustache" custom-delimiters="#-,-#">
+<template type="amp-mustache" custom-delimiters="#- -#">
   Hello #-name-#
 </template>
 
 <!-- Template with unsupported custom delimiters -->
-<template type="amp-mustache" custom-delimiters="<%,%>">
+<template type="amp-mustache" custom-delimiters="<% %>">
     Hello #-name-#
 </template>
 
@@ -213,11 +213,11 @@
 </script>
 
 <!-- Script template with allowed custom delimiters -->
-<script type="text/plain" template="amp-mustache" custom-delimiters="#-,-#">
+<script type="text/plain" template="amp-mustache" custom-delimiters="#- -#">
   Hello #-name-#
 </script>
 <!-- Script template with unsupported custom delimiters -->
-<script type="text/plain" template="amp-mustache" custom-delimiters="(&,&)">
+<script type="text/plain" template="amp-mustache" custom-delimiters="(& &)">
   Hello #-name-#
 </script>
 
