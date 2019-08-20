@@ -81,7 +81,7 @@ export function addStoryAutoAdsConfig(parent, customConfig) {
     type: 'doubleclick',
     'data-slot': '/30497360/a4a/fake_ad_unit',
   };
-  parent.innerHTML = `
+  parent./*OK*/ innerHTML = `
     <script type="application/json">
       { "ad-attributes": ${JSON.stringify(config)} }
     </script>
