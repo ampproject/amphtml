@@ -179,7 +179,7 @@
     "try-net-connect": "3.0.2",
     "tsickle": "0.36.0",
     "typescript": "3.5.3",
-    "uglifyify": "5.0.1",
+    "uglifyify": "5.0.2",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "3.11.1"
