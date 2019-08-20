@@ -33,6 +33,7 @@ import {
 } from './story-mock';
 import {Services} from '../../../../src/services';
 import {macroTask} from '../../../../testing/yield';
+import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
 
@@ -57,6 +58,9 @@ describes.realWin(
       doc = win.document;
       const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+      registerServiceBuilder(win, 'performance', () => ({
+        isPerformanceTrackingOn: () => false,
+      }));
       adElement = win.document.createElement('amp-story-auto-ads');
       storyElement = win.document.createElement('amp-story');
       win.document.body.appendChild(storyElement);

@@ -21,6 +21,7 @@ import {CommonSignals} from '../../../../src/common-signals';
 import {LiveStoryManager} from '../live-story-manager';
 import {Services} from '../../../../src/services';
 import {addAttributesToElement} from '../../../../src/dom';
+import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
   'LiveStoryManager',
@@ -61,6 +62,10 @@ describes.realWin(
       const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       sandbox.stub(win.history, 'replaceState');
+
+      registerServiceBuilder(win, 'performance', () => ({
+        isPerformanceTrackingOn: () => false,
+      }));
 
       storyEl = win.document.createElement('amp-story');
       win.document.body.appendChild(storyEl);

@@ -28,9 +28,11 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   let element;
   let gridLayerEl;
   let page;
+  let isPerformanceTrackingOn;
 
   beforeEach(() => {
     win = env.win;
+    isPerformanceTrackingOn = false;
 
     const mediaPoolRoot = {
       getElement: () => win.document.createElement('div'),
@@ -45,6 +47,10 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
     const localizationService = new LocalizationService(win);
     registerServiceBuilder(win, 'localization', () => localizationService);
+
+    registerServiceBuilder(win, 'performance', () => ({
+      isPerformanceTrackingOn: () => isPerformanceTrackingOn,
+    }));
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
@@ -446,6 +452,73 @@ describes.realWin('amp-story-page', {amp: true}, env => {
         '.i-amphtml-story-page-open-attachment-label'
       );
       expect(openAttachmentLabelEl.textContent).to.equal('Custom label');
+    });
+  });
+
+  it('should start tracking media performance when entering the page', () => {
+    sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+    isPerformanceTrackingOn = true;
+    const startMeasuringStub = sandbox.stub(
+      page.mediaPerformanceMetricsService_,
+      'startMeasuring'
+    );
+
+    const videoEl = win.document.createElement('video');
+    videoEl.setAttribute('src', 'https://example.com/video.mp3');
+    gridLayerEl.appendChild(videoEl);
+
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      page.setState(PageState.PLAYING);
+
+      expect(startMeasuringStub).to.have.been.calledOnceWithExactly(videoEl);
+    });
+  });
+
+  it('should stop tracking media performance when leaving the page', () => {
+    sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+    isPerformanceTrackingOn = true;
+    const stopMeasuringStub = sandbox.stub(
+      page.mediaPerformanceMetricsService_,
+      'stopMeasuring'
+    );
+
+    const videoEl = win.document.createElement('video');
+    videoEl.setAttribute('src', 'https://example.com/video.mp3');
+    gridLayerEl.appendChild(videoEl);
+
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      page.setState(PageState.PLAYING);
+      page.setState(PageState.NOT_ACTIVE);
+
+      expect(stopMeasuringStub).to.have.been.calledOnceWithExactly(videoEl);
+    });
+  });
+
+  it('should not start tracking media performance if tracking is off', () => {
+    sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+    isPerformanceTrackingOn = false;
+    const startMeasuringStub = sandbox.stub(
+      page.mediaPerformanceMetricsService_,
+      'startMeasuring'
+    );
+
+    const videoEl = win.document.createElement('video');
+    videoEl.setAttribute('src', 'https://example.com/video.mp3');
+    gridLayerEl.appendChild(videoEl);
+
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      page.setState(PageState.PLAYING);
+
+      expect(startMeasuringStub).to.not.have.been.called;
     });
   });
 });

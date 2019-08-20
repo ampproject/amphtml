@@ -67,6 +67,7 @@ import {getAmpdoc} from '../../../src/service';
 import {getData, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getLogEntries} from './logging';
+import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
@@ -246,6 +247,14 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     const deferred = new Deferred();
 
+    /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
+    this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsService(
+      this.win
+    );
+
+    /** @private {!Array<!HTMLMediaElement>} */
+    this.performanceTrackedVideos_ = [];
+
     /** @private @const {!Promise<!MediaPool>} */
     this.mediaPoolPromise_ = deferred.promise;
 
@@ -422,6 +431,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   pauseCallback() {
     this.advancement_.stop();
 
+    this.stopMeasuringVideoPerformance_();
     this.stopListeningToVideoEvents_();
     this.toggleErrorMessage_(false);
     this.togglePlayMessage_(false);
@@ -455,6 +465,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.checkPageHasAudio_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
+      this.startMeasuringVideoPerformance_();
       this.preloadAllMedia_()
         .then(() => this.startListeningToVideoEvents_())
         .then(() => this.playAllMedia_());
@@ -1256,6 +1267,41 @@ export class AmpStoryPage extends AMP.BaseElement {
         {bubbles: true}
       );
     });
+  }
+
+  /**
+   * Starts measuring video performance metrics, if performance tracking is on.
+   * Has to be called directly before playing the video.
+   * @private
+   */
+  startMeasuringVideoPerformance_() {
+    if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
+      return;
+    }
+
+    this.performanceTrackedVideos_ = /** @type {!Array<!HTMLMediaElement>} */ (this.getAllVideos_());
+    for (let i = 0; i < this.performanceTrackedVideos_.length; i++) {
+      this.mediaPerformanceMetricsService_.startMeasuring(
+        this.performanceTrackedVideos_[i]
+      );
+    }
+  }
+
+  /**
+   * Stops measuring video performance metrics, if performance tracking is on.
+   * Computes and sends the metrics.
+   * @private
+   */
+  stopMeasuringVideoPerformance_() {
+    if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
+      return;
+    }
+
+    for (let i = 0; i < this.performanceTrackedVideos_.length; i++) {
+      this.mediaPerformanceMetricsService_.stopMeasuring(
+        this.performanceTrackedVideos_[i]
+      );
+    }
   }
 
   /**
