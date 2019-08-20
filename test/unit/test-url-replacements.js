@@ -209,6 +209,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     };
     installDocService(win, /* isSingleDoc */ true);
     const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
+    win.services.documentInfo = null;
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     installUrlReplacementsServiceForDoc(ampdoc);
