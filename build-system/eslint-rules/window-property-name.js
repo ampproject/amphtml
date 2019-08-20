@@ -39,7 +39,7 @@ module.exports = function(context) {
   return {
     AssignmentExpression(node) {
       const filePath = context.getFilename();
-      // Only check select paths.
+      // Only check source paths.
       if (!PATHS_TO_INCLUDE.some(path => filePath.includes(path))) {
         return;
       }
@@ -60,6 +60,14 @@ module.exports = function(context) {
       // The member object must be window-like.
       const object = left.object.name;
       if (!object || !WINDOW_PROPERTY.includes(object.toLowerCase())) {
+        return;
+      }
+      // Disallow computed property names so we can enforce property naming.
+      if (left.computed) {
+        context.report({
+          left,
+          message: 'Computed property names are not allowed on window.',
+        });
         return;
       }
       // The window property must be prefixed with "__AMP_".
