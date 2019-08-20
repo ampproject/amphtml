@@ -2579,7 +2579,7 @@ describe('amp-a4a', () => {
     });
 
     it('should create an error if needed', () => {
-      window.AMP_MODE = {development: true};
+      window.__AMP_MODE = {development: true};
       a4a.promiseErrorHandler_('intentional');
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
@@ -2588,7 +2588,7 @@ describe('amp-a4a', () => {
     });
 
     it('should configure ignoreStack when specified', () => {
-      window.AMP_MODE = {development: true};
+      window.__AMP_MODE = {development: true};
       a4a.promiseErrorHandler_('intentional', /* ignoreStack */ true);
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
@@ -2598,7 +2598,7 @@ describe('amp-a4a', () => {
 
     it('should route error to user.error in dev mode', () => {
       const error = new Error('intentional');
-      window.AMP_MODE = {development: true};
+      window.__AMP_MODE = {development: true};
       a4a.promiseErrorHandler_(error);
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.be.equal(error);
@@ -2609,7 +2609,7 @@ describe('amp-a4a', () => {
 
     it('should route error to user.warn in prod mode', () => {
       const error = new Error('intentional');
-      window.AMP_MODE = {development: false};
+      window.__AMP_MODE = {development: false};
       a4a.promiseErrorHandler_(error);
       expect(userWarnStub).to.be.calledOnce;
       expect(userWarnStub.args[0][1]).to.be.equal(error);
@@ -2620,7 +2620,7 @@ describe('amp-a4a', () => {
     it('should send an expected error in prod mode with sampling', () => {
       const error = new Error('intentional');
       sandbox.stub(Math, 'random').callsFake(() => 0.005);
-      window.AMP_MODE = {development: false};
+      window.__AMP_MODE = {development: false};
       a4a.promiseErrorHandler_(error);
       expect(devExpectedErrorStub).to.be.calledOnce;
       expect(devExpectedErrorStub.args[0][1]).to.be.equal(error);
@@ -2631,7 +2631,7 @@ describe('amp-a4a', () => {
     it('should NOT send an expected error in prod mode with sampling', () => {
       const error = new Error('intentional');
       sandbox.stub(Math, 'random').callsFake(() => 0.011);
-      window.AMP_MODE = {development: false};
+      window.__AMP_MODE = {development: false};
       a4a.promiseErrorHandler_(error);
       expect(devExpectedErrorStub).to.not.be.called;
     });
@@ -2932,7 +2932,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
   beforeEach(() => {
     sandbox = env.sandbox;
     // ensures window location == AMP cache passes
-    env.win.AMP_MODE.test = true;
+    env.win.__AMP_MODE.test = true;
     const doc = env.win.document;
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
       'width': '200',

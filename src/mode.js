@@ -49,10 +49,10 @@ let rtvVersion = '';
  */
 export function getMode(opt_win) {
   const win = opt_win || self;
-  if (win.AMP_MODE) {
-    return win.AMP_MODE;
+  if (win.__AMP_MODE) {
+    return win.__AMP_MODE;
   }
-  return (win.AMP_MODE = getMode_(win));
+  return (win.__AMP_MODE = getMode_(win));
 }
 
 /**

@@ -414,7 +414,7 @@ beforeEach(function() {
 
 function beforeTest() {
   activateChunkingForTesting();
-  window.AMP_MODE = undefined;
+  window.__AMP_MODE = undefined;
   window.context = undefined;
   window.AMP_CONFIG = {
     canary: 'testSentinel',
@@ -456,7 +456,7 @@ afterEach(function() {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
-  window.AMP_MODE = undefined;
+  window.__AMP_MODE = undefined;
   delete window.document['__AMPDOC'];
 
   if (windowState.length != initialWindowState.length) {

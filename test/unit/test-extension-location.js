@@ -33,7 +33,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with local mode', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -50,7 +50,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with remote mode', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -67,7 +67,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('should allow no versions', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -84,7 +84,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('should handles single pass experiment', () => {
-      window.AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
+      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -125,7 +125,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with remote mode', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -139,7 +139,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with remote mode & rtv', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -154,7 +154,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('should handle single pass experiment', () => {
-      window.AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
+      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',

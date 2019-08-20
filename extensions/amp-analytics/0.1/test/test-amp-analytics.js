@@ -1785,7 +1785,7 @@ describes.realWin(
       }
 
       it('does send a hit when parentPostMessage is provided inabox', function() {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         const analytics = getAnalyticsTag({
           'requests': {'foo': 'https://example.com/bar'},
           'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
@@ -1813,7 +1813,7 @@ describes.realWin(
       });
 
       it('not send when request and parentPostMessage are not provided', function() {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         expectAsyncConsoleError(onAndRequestAttributesInaboxError);
         const analytics = getAnalyticsTag({
           'requests': {'foo': 'https://example.com/bar'},
@@ -1826,7 +1826,7 @@ describes.realWin(
       });
 
       it('send when request and parentPostMessage are provided', function() {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         const analytics = getAnalyticsTag({
           'requests': {'foo': 'https://example.com/bar'},
           'triggers': [
@@ -1868,7 +1868,7 @@ describes.realWin(
       });
 
       it('is 0 for inabox', () => {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
           LayoutPriority.CONTENT
         );

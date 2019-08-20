@@ -150,7 +150,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   });
 
   it('should resolve root layout box for in-a-box', () => {
-    win.AMP_MODE = {runtime: 'inabox'};
+    win.__AMP_MODE = {runtime: 'inabox'};
     root = new VisibilityManagerForDoc(ampdoc);
     const rootElement = win.document.documentElement;
     sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
@@ -186,7 +186,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   });
 
   it('should switch visibility for in-a-box', () => {
-    win.AMP_MODE = {runtime: 'inabox'};
+    win.__AMP_MODE = {runtime: 'inabox'};
     root = new VisibilityManagerForDoc(ampdoc);
 
     // Check observer is correctly set.

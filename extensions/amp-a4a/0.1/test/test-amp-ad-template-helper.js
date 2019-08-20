@@ -30,7 +30,7 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    win.AMP_MODE = {localDev: false};
+    win.__AMP_MODE = {localDev: false};
     doc = win.document;
     fetchTextMock = sandbox.stub(Xhr.prototype, 'fetchText');
     ampAdTemplateHelper = new AmpAdTemplateHelper(win);

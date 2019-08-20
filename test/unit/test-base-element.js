@@ -191,7 +191,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
   it('should return true for inabox experiment renderOutsideViewport', () => {
     expect(element.renderOutsideViewport()).to.eql(3);
     // Should be true with inabox
-    env.win.AMP_MODE.runtime = 'inabox';
+    env.win.__AMP_MODE.runtime = 'inabox';
     expect(element.renderOutsideViewport()).to.be.true;
   });
 

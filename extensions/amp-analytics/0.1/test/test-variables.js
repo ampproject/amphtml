@@ -387,7 +387,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('COOKIE resolves to empty string when inabox', async () => {
       doc.cookie = 'test=123';
-      env.win.AMP_MODE.runtime = 'inabox';
+      env.win.__AMP_MODE.runtime = 'inabox';
       await check('COOKIE(test)', '');
       doc.cookie = '';
     });

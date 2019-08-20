@@ -566,7 +566,7 @@ function init(win) {
   const config = getAmpConfig();
 
   // Overriding to short-circuit src/mode#getMode()
-  win.AMP_MODE = config.mode;
+  win.__AMP_MODE = config.mode;
 
   setReportError(console.error.bind(console));
 
