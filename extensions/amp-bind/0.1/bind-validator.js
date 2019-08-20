@@ -313,6 +313,9 @@ function createElementRules_() {
       'datetime': null,
       'title': null,
     },
+    'AMP-TWITTER': {
+      'data-tweetid': null,
+    },
     'AMP-VIDEO': {
       'alt': null,
       'attribution': null,

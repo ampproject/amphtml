@@ -128,6 +128,18 @@ describes.realWin(
       });
     });
 
+    it('should replace iframe after tweetid mutation', () => {
+      const newTweetId = '638793490521001985';
+      return getAmpTwitter(tweetId).then(ampTwitter => {
+        const spy = sandbox.spy(ampTwitter.implementation_, 'toggleLoading');
+        const iframe = ampTwitter.querySelector('iframe');
+        ampTwitter.setAttribute('data-tweetid', newTweetId);
+        ampTwitter.mutatedAttributesCallback({'data-tweetid': newTweetId});
+        expect(spy).to.be.calledWith(true);
+        expect(ampTwitter.querySelector('iframe')).to.not.equal(iframe);
+      });
+    });
+
     describe('cleanupTweetId_', () => {
       it('does not affect valid tweet ids', () => {
         const good = '585110598171631616';
