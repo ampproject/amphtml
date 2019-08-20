@@ -167,6 +167,13 @@ describe('chunk2', () => {
             return true;
           });
         });
+
+        it('should execute a chunk with an ampdoc', done => {
+          startupChunk(env.ampdoc, unusedIdleDeadline => {
+            done();
+          });
+        });
+
         basicTests(env);
       });
 
@@ -403,6 +410,8 @@ describe('long tasks', () => {
         };
 
         progress = '';
+
+        return Promise.resolve();
       });
 
       it('should not run macro tasks with invisible bodys', done => {
@@ -415,7 +424,7 @@ describe('long tasks', () => {
         });
       });
 
-      it('should execute chunks after long task in a macro task', done => {
+      it.only('should execute chunks after long task in a macro task', done => {
         startupChunk(env.win.document, complete('1', true));
         startupChunk(env.win.document, complete('2', false));
         startupChunk(

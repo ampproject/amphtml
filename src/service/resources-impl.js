@@ -511,7 +511,7 @@ export class Resources {
 
     // Schedule initial passes. This must happen in a startup task
     // to avoid blocking body visible.
-    startupChunk(this.win.document, () => {
+    startupChunk(this.ampdoc, () => {
       this.setupVisibilityStateMachine_(this.visibilityStateMachine_);
       this.schedulePass(0);
     });
