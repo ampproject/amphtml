@@ -85,6 +85,7 @@ jobs:
       name: "End to End Tests"
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
+      after_script:
         - ps -ef
     - stage: experiment
       name: "Experiment A Tests"
