@@ -52,17 +52,17 @@ module.exports = function(context) {
       if (/^(test-(\w|-)+|(\w|-)+-testing)\.js$/.test(filename)) {
         return;
       }
-      // LHS of assignment must be a member expression e.g. foo.bar.
+      // We only care if LHS of assignment is a member expression e.g. foo.bar.
       const {left} = node;
       if (left.type !== 'MemberExpression') {
         return;
       }
-      // The member object must be window-like.
+      // We only care if member object looks like a window.
       const object = left.object.name;
       if (!object || !WINDOW_PROPERTY.includes(object.toLowerCase())) {
         return;
       }
-      // Disallow computed property names so we can enforce property naming.
+      // Disallow computed property names on window so we can enforce naming.
       if (left.computed) {
         context.report({
           left,
@@ -70,7 +70,7 @@ module.exports = function(context) {
         });
         return;
       }
-      // The window property must be prefixed with "__AMP_".
+      // In general, window property names must be prefixed with "__AMP_".
       const prop = left.property.name;
       if (!prop || prop.startsWith('__AMP_') || isAllowedWindowProp(prop)) {
         return;
