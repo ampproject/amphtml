@@ -3374,7 +3374,7 @@ let cache;
 function parseUrl$1(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = Object.create(null));
+    cache = self.UrlCache || (self.UrlCache = Object.create(null));
   }
 
   const fromCache = cache[url];
@@ -10766,7 +10766,7 @@ class PaymentsWebActivityDelegate {
              opt_activities, opt_redirectKey) {
     this.environment_ = environment;
     /** @private @const {boolean} */
-
+    
     /** @const {!ActivityPorts} */
     this.activities = opt_activities || new activityPorts_1(window);
     /** @const @private {!Graypane} */
