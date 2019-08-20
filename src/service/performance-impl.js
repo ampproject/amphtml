@@ -372,13 +372,16 @@ export class Performance {
     }
 
     if (this.supportsEventTimingAPIv77_) {
-      // Programmatically read once as currently PerformanceObserver does not
-      // report past entries as of Chrome 61.
-      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
-      this.win.performance
-        .getEntriesByType('first-input')
-        .forEach(processEntry);
-      entryTypesToObserve.push('first-input');
+      // Layout shift entries are not available from the Performance Timeline
+      // through `getEntriesByType`, so a separate PerformanceObserver is
+      // required for this metric.
+      const firstInputObserver = new this.win.PerformanceObserver(
+        list => {
+          list.getEntries().forEach(processEntry);
+          this.flush();
+        }
+      );
+      firstInputObserver.observe({type: 'first-input', buffered: true});
     }
 
     if (this.win.PerformanceLayoutJank) {
