@@ -41,7 +41,7 @@ export class AttributeMutationDefaultUrl {
   }
 
   /** @override */
-  validate() {
+  parseAndValidate() {
     for (let i = 0; i < this.elements_.length; i++) {
       const element = this.elements_[i];
       if (SUPPORTED_TAG_NAMES.indexOf(element.tagName) < 0) {

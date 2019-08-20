@@ -46,7 +46,7 @@ describe('Logging', () => {
     sandbox = sinon.sandbox;
 
     mode = {};
-    window.AMP_MODE = mode;
+    window.__AMP_MODE = mode;
 
     logSpy = sandbox.spy();
     timeoutSpy = sandbox.spy();
@@ -64,7 +64,7 @@ describe('Logging', () => {
   afterEach(() => {
     sandbox.restore();
     sandbox = null;
-    window.AMP_MODE = undefined;
+    window.__AMP_MODE = undefined;
   });
 
   describe('Level', () => {

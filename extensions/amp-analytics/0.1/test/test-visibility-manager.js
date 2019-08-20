@@ -81,7 +81,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     viewer = win.services.viewer.obj;
     sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => 1);
     viewport = win.services.viewport.obj;
-    startVisibilityHandlerCount = viewer.visibilityObservable_.getHandlerCount();
+    startVisibilityHandlerCount = getVisibilityHandlerCount();
 
     root = new VisibilityManagerForDoc(ampdoc);
 
@@ -93,6 +93,10 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       eventResolver = resolve;
     });
   });
+
+  function getVisibilityHandlerCount() {
+    return ampdoc.visibilityStateHandlers_.getHandlerCount();
+  }
 
   it('should initialize correctly backgrounded', () => {
     viewer.setVisibilityState_(VisibilityState.HIDDEN);
@@ -146,7 +150,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   });
 
   it('should resolve root layout box for in-a-box', () => {
-    win.AMP_MODE = {runtime: 'inabox'};
+    win.__AMP_MODE = {runtime: 'inabox'};
     root = new VisibilityManagerForDoc(ampdoc);
     const rootElement = win.document.documentElement;
     sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
@@ -164,9 +168,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   });
 
   it('should switch visibility based on viewer for main doc', () => {
-    expect(viewer.visibilityObservable_.getHandlerCount()).equal(
-      startVisibilityHandlerCount + 1
-    );
+    expect(getVisibilityHandlerCount()).equal(startVisibilityHandlerCount + 1);
     expect(root.getRootVisibility()).to.equal(1);
 
     // Go prerender.
@@ -184,7 +186,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   });
 
   it('should switch visibility for in-a-box', () => {
-    win.AMP_MODE = {runtime: 'inabox'};
+    win.__AMP_MODE = {runtime: 'inabox'};
     root = new VisibilityManagerForDoc(ampdoc);
 
     // Check observer is correctly set.
@@ -338,9 +340,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(otherUnsubscribes.callCount).to.equal(2);
 
     // Viewer and viewport have been unsubscribed.
-    expect(viewer.visibilityObservable_.getHandlerCount()).equal(
-      startVisibilityHandlerCount
-    );
+    expect(getVisibilityHandlerCount()).equal(startVisibilityHandlerCount);
 
     // Intersection observer disconnected.
     expect(inOb.disconnected).to.be.true;
@@ -841,7 +841,7 @@ describes.realWin(
       expect(root.getRootVisibility()).to.equal(0);
     });
 
-    it('should initialize correctly foregrounded', () => {
+    it('should initialize correctly in foreground', () => {
       expect(root.parent).to.equal(parentRoot);
       expect(root.ampdoc).to.equal(ampdoc);
       expect(root.getStartTime()).to.equal(embed.getStartTime());

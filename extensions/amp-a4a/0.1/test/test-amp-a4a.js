@@ -36,6 +36,11 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
+import {
+  AmpDoc,
+  installDocService,
+  updateFieModeForTesting,
+} from '../../../../src/service/ampdoc-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
@@ -49,7 +54,6 @@ import {
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
-import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -59,10 +63,7 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
-import {
-  installDocService,
-  updateFieModeForTesting,
-} from '../../../../src/service/ampdoc-impl';
+
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
@@ -84,7 +85,7 @@ describe('amp-a4a', () => {
   let sandbox;
   let fetchMock;
   let getSigningServiceNamesMock;
-  let viewerWhenVisibleMock;
+  let whenVisibleMock;
   let adResponse;
   let onCreativeRenderSpy;
   let getResourceStub;
@@ -98,8 +99,8 @@ describe('amp-a4a', () => {
     );
     onCreativeRenderSpy = sandbox.spy(AmpA4A.prototype, 'onCreativeRender');
     getSigningServiceNamesMock.returns(['google']);
-    viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
-    viewerWhenVisibleMock.returns(Promise.resolve());
+    whenVisibleMock = sandbox.stub(AmpDoc.prototype, 'whenFirstVisible');
+    whenVisibleMock.returns(Promise.resolve());
     getResourceStub = sandbox.stub(AmpA4A.prototype, 'getResource');
     getResourceStub.returns({
       getUpgradeDelayMs: () => 12345,
@@ -2322,7 +2323,7 @@ describe('amp-a4a', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         let whenFirstVisibleResolve = null;
-        viewerWhenVisibleMock.returns(
+        whenVisibleMock.returns(
           new Promise(resolve => {
             whenFirstVisibleResolve = resolve;
           })
@@ -2578,7 +2579,7 @@ describe('amp-a4a', () => {
     });
 
     it('should create an error if needed', () => {
-      window.AMP_MODE = {development: true};
+      window.__AMP_MODE = {development: true};
       a4a.promiseErrorHandler_('intentional');
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
@@ -2587,7 +2588,7 @@ describe('amp-a4a', () => {
     });
 
     it('should configure ignoreStack when specified', () => {
-      window.AMP_MODE = {development: true};
+      window.__AMP_MODE = {development: true};
       a4a.promiseErrorHandler_('intentional', /* ignoreStack */ true);
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.be.instanceOf(Error);
@@ -2597,7 +2598,7 @@ describe('amp-a4a', () => {
 
     it('should route error to user.error in dev mode', () => {
       const error = new Error('intentional');
-      window.AMP_MODE = {development: true};
+      window.__AMP_MODE = {development: true};
       a4a.promiseErrorHandler_(error);
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.be.equal(error);
@@ -2608,7 +2609,7 @@ describe('amp-a4a', () => {
 
     it('should route error to user.warn in prod mode', () => {
       const error = new Error('intentional');
-      window.AMP_MODE = {development: false};
+      window.__AMP_MODE = {development: false};
       a4a.promiseErrorHandler_(error);
       expect(userWarnStub).to.be.calledOnce;
       expect(userWarnStub.args[0][1]).to.be.equal(error);
@@ -2619,7 +2620,7 @@ describe('amp-a4a', () => {
     it('should send an expected error in prod mode with sampling', () => {
       const error = new Error('intentional');
       sandbox.stub(Math, 'random').callsFake(() => 0.005);
-      window.AMP_MODE = {development: false};
+      window.__AMP_MODE = {development: false};
       a4a.promiseErrorHandler_(error);
       expect(devExpectedErrorStub).to.be.calledOnce;
       expect(devExpectedErrorStub.args[0][1]).to.be.equal(error);
@@ -2630,7 +2631,7 @@ describe('amp-a4a', () => {
     it('should NOT send an expected error in prod mode with sampling', () => {
       const error = new Error('intentional');
       sandbox.stub(Math, 'random').callsFake(() => 0.011);
-      window.AMP_MODE = {development: false};
+      window.__AMP_MODE = {development: false};
       a4a.promiseErrorHandler_(error);
       expect(devExpectedErrorStub).to.not.be.called;
     });
@@ -2931,7 +2932,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
   beforeEach(() => {
     sandbox = env.sandbox;
     // ensures window location == AMP cache passes
-    env.win.AMP_MODE.test = true;
+    env.win.__AMP_MODE.test = true;
     const doc = env.win.document;
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
       'width': '200',

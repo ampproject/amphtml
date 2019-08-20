@@ -426,8 +426,8 @@ describes.realWin(
       });
 
       it('initialize iframe transport when used with inabox', () => {
-        win.AMP_MODE = win.AMP_MODE || {};
-        win.AMP_MODE.runtime = 'inabox';
+        win.__AMP_MODE = win.__AMP_MODE || {};
+        win.__AMP_MODE.runtime = 'inabox';
         expect(getMode(win).runtime).to.equal('inabox');
 
         const transport = new Transport(win, {
