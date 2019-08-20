@@ -18,8 +18,8 @@ import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
 import {dict, map} from '../utils/object';
-import {getAmpdoc, getService, registerServiceBuilder} from '../service';
 import {getMode} from '../mode';
+import {getService, registerServiceBuilder} from '../service';
 import {isCanary} from '../experiments';
 import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
@@ -267,7 +267,8 @@ export class Performance {
    * @private
    */
   maybeAddStoryExperimentId_() {
-    return isStoryDocument(getAmpdoc(this.win.document)).then(isStory => {
+    const ampdoc = Services.ampdocServiceFor(this.win).getSingleDoc();
+    return isStoryDocument(ampdoc).then(isStory => {
       if (isStory) {
         this.addEnabledExperiment('story');
       }

@@ -432,7 +432,7 @@ describes.realWin('performance', {amp: true}, env => {
               value: 1,
             });
             expect(
-              viewerSendMessageStub.withArgs('tick').getCall(5).args[1]
+              viewerSendMessageStub.withArgs('tick').getCall(4).args[1]
             ).to.be.jsonEqual({
               label: 'msr',
               delta: 1,
