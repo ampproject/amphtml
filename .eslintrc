@@ -98,6 +98,7 @@
     "local/prefer-destructuring": 2,
     "local/private-prop-names": 2,
     "local/query-selector": 2,
+    "local/split-single-pass-comment": 2,
     "local/todo-format": 0,
     "local/unused-private-field": 2,
     "local/vsync": 0,

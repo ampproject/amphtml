@@ -2299,8 +2299,9 @@ tags: {
     mandatory: true
     value_url: {
       protocol: "data"
+      protocol: "http" # For parity with amp-img's mandatory-src-or-srcset.
       protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
+      allow_relative: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }

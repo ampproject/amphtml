@@ -132,8 +132,8 @@ export function createCustomElementClass(win, name) {
  * @return {function(new:HTMLElement)}
  */
 function createBaseCustomElementClass(win) {
-  if (win.BaseCustomElementClass) {
-    return win.BaseCustomElementClass;
+  if (win.__AMP_BaseCustomElementClass) {
+    return win.__AMP_BaseCustomElementClass;
   }
   const htmlElement =
     /** @type {function(new:HTMLElement)} */ (win.HTMLElement);
@@ -261,7 +261,8 @@ function createBaseCustomElementClass(win) {
 
       // `opt_implementationClass` is only used for tests.
       let Ctor =
-        win.ampExtendedElements && win.ampExtendedElements[this.elementName()];
+        win.__AMP_EXTENDED_ELEMENTS &&
+        win.__AMP_EXTENDED_ELEMENTS[this.elementName()];
       if (getMode().test && nonStructThis['implementationClassForTesting']) {
         Ctor = nonStructThis['implementationClassForTesting'];
       }
@@ -1891,8 +1892,8 @@ function createBaseCustomElementClass(win) {
       }
     }
   }
-  win.BaseCustomElementClass = BaseCustomElement;
-  return /** @type {function(new:HTMLElement)} */ (win.BaseCustomElementClass);
+  win.__AMP_BaseCustomElementClass = BaseCustomElement; // eslint-disable-line google-camelcase/google-camelcase
+  return /** @type {function(new:HTMLElement)} */ (win.__AMP_BaseCustomElementClass);
 }
 
 /**
