@@ -104,7 +104,7 @@ export class FetchMock {
    * @return {!Promise<!Response>}
    * @private
    */
-  fetch_(input, init) {
+  async fetch_(input, init) {
     const {url} = new Request(input, init);
     const route = this.routes_[url];
     if (!route) {
@@ -114,19 +114,18 @@ export class FetchMock {
       throw new Error('route called twice for ' + url);
     }
     route.called = true;
-    return Promise.resolve(
+    const data = await Promise.resolve(
       typeof route.response == 'function' ? route.response() : route.response
-    ).then(data => {
-      if (data === null || typeof data == 'string') {
-        return new Response(data);
-      } else {
-        const {body, status, headers} = data;
-        return new Response(
-          body,
-          /** @type {!ResponseInit} */ ({status, headers})
-        );
-      }
-    });
+    );
+    if (data === null || typeof data == 'string') {
+      return new Response(data);
+    } else {
+      const {body, status, headers} = data;
+      return new Response(
+        body,
+        /** @type {!ResponseInit} */ ({status, headers})
+      );
+    }
   }
 }
 
