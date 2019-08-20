@@ -74,10 +74,10 @@ export function getElementServiceIfAvailable(win, id, extension, opt_element) {
  */
 function isElementScheduled(win, elementName) {
   // Set in custom-element.js
-  if (!win.ampExtendedElements) {
+  if (!win.__AMP_EXTENDED_ELEMENTS) {
     return false;
   }
-  return !!win.ampExtendedElements[elementName];
+  return !!win.__AMP_EXTENDED_ELEMENTS[elementName];
 }
 
 /**

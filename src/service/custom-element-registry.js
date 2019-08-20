@@ -25,10 +25,10 @@ import {userAssert} from '../log';
  * @return {!Object<string, function(new:../base-element.BaseElement, !Element)>}
  */
 function getExtendedElements(win) {
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
+  if (!win.__AMP_EXTENDED_ELEMENTS) {
+    win.__AMP_EXTENDED_ELEMENTS = {};
   }
-  return win.ampExtendedElements;
+  return win.__AMP_EXTENDED_ELEMENTS;
 }
 
 /**
@@ -174,8 +174,8 @@ export function markElementScheduledForTesting(win, elementName) {
  * @visibleForTesting
  */
 export function resetScheduledElementForTesting(win, elementName) {
-  if (win.ampExtendedElements) {
-    delete win.ampExtendedElements[elementName];
+  if (win.__AMP_EXTENDED_ELEMENTS) {
+    delete win.__AMP_EXTENDED_ELEMENTS[elementName];
   }
 }
 
@@ -187,6 +187,6 @@ export function resetScheduledElementForTesting(win, elementName) {
  * @visibleForTesting
  */
 export function getElementClassForTesting(win, elementName) {
-  const knownElements = win.ampExtendedElements;
+  const knownElements = win.__AMP_EXTENDED_ELEMENTS;
   return (knownElements && knownElements[elementName]) || null;
 }

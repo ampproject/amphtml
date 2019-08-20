@@ -261,7 +261,8 @@ function createBaseCustomElementClass(win) {
 
       // `opt_implementationClass` is only used for tests.
       let Ctor =
-        win.ampExtendedElements && win.ampExtendedElements[this.elementName()];
+        win.__AMP_EXTENDED_ELEMENTS &&
+        win.__AMP_EXTENDED_ELEMENTS[this.elementName()];
       if (getMode().test && nonStructThis['implementationClassForTesting']) {
         Ctor = nonStructThis['implementationClassForTesting'];
       }
