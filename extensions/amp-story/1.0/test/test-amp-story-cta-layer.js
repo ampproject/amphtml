@@ -15,6 +15,7 @@
  */
 
 import {AmpStoryCtaLayer} from '../amp-story-cta-layer';
+import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
   'amp-story-cta-layer',
@@ -30,6 +31,9 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+      registerServiceBuilder(win, 'performance', () => ({
+        isPerformanceTrackingOn: () => false,
+      }));
       const ampStoryCtaLayerEl = win.document.createElement(
         'amp-story-cta-layer'
       );
