@@ -21,12 +21,15 @@ Provide a brief description of the feature/change you are planning on implementi
 -->
 Link to Product Requirements Document (PRD): 
 <!--
-Add a link to the PRD (make sure it is accessible by anyone) here.
+Add a link to the Product Requirements Document (PRD) (make sure it is accessible by anyone) here.
+A PRD is a document that highlights all the requirements for a product. It highglights what needs the component is trying to solve, the API it should offer and other details relevant to getting the implementation right. See here for an example: bit.ly/amp-autocomplete-prd
 -->
 
 ## Design documents
 <!--
-Provide a link to your design document once you have one. You do not need a design document to file this I2I.
+Provide a link to your design documents once you have them. You do not need a design document to file this I2I.
+A technical design document highlights the different design considerations being considered when designing a new AMP component or feature. An example is as follows: bit.ly/amp-carousel-dd
+UX Interaction Specs map out the different variants and states of an AMP component. It also maps the users flow through the different stages of a component. See here for an example: bit.ly/amp-autocomplete-ux
 -->
 - Technical Design Document
 - UX Interaction Specs
@@ -46,8 +49,10 @@ Add any other information that may help people understand your I2I.
 ## Technical Reviews
 <!--
 This sections links to the relevant reviews that the launch of this change is gated on. 
-If one of these reviews is not needed, please state the reasoning here instead.
+These documents should highlight the important considerations that you are taking in each of these spheres. For e.g in an Internationalization Review you should discuss the need to translate all strings that are being used by the component. 
+If one of these reviews is not needed, please state the reasoning here.
 If linking to documents please make sure that they are accessible by anyone.
+//TODO: (nainar) Link to example reviews. 
 -->
 - Accessibility review
 - Security review
