@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * We intentionally break with HTML5's default [hidden] styling to apply
+ * !important.
+ */
+[hidden] {
+  /* This must be !important, else the toggle helper system would break down
+     due to specificity */
+  display: none !important;
+}
+
 .i-amphtml-element {
   display: inline-block;
 }
-
 
 .i-amphtml-blurry-placeholder {
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
@@ -485,6 +494,13 @@ html.i-amphtml-fie > amp-analytics {
 form [submitting],
 form [submit-success],
 form [submit-error] {
+  display: none;
+}
+
+/**
+ * amp-list error messaging container should be hidden at first.
+ */
+amp-list [fetch-error] {
   display: none;
 }
 

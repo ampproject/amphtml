@@ -50,7 +50,7 @@ describes.realWin(
         const numberOfChildren = config.count || 3;
         let selectedCount = config.selectedCount || 0;
         let disabledCount = config.disabledCount || 0;
-
+        const rectArray = [];
         for (let i = 0; i < numberOfChildren; i++) {
           const child = win.document.createElement('div');
           child.setAttribute('width', '10');
@@ -75,7 +75,7 @@ describes.realWin(
               disabledCount--;
             }
           }
-
+          rectArray.push({width: 10, height: 10});
           const childAttributes = options.optionAttributes || {};
           Object.keys(childAttributes).forEach(key => {
             child.setAttribute(key, childAttributes[key]);
@@ -83,6 +83,9 @@ describes.realWin(
 
           ampSelector.appendChild(child);
         }
+        sandbox
+          .stub(ampSelector.implementation_, 'getElementsSizes_')
+          .resolves(rectArray);
         win.document.body.appendChild(ampSelector);
         return ampSelector;
       }
@@ -94,7 +97,7 @@ describes.realWin(
           preventDefault: () => {},
           target: opt_target,
         };
-        impl.keyDownHandler_(event);
+        return impl.keyDownHandler_(event);
       }
 
       it('should build properly', function*() {
@@ -719,7 +722,7 @@ describes.realWin(
       it(
         'should trigger `toggle` action even when no `value` argument is' +
           ' provided to the function',
-        () => {
+        async () => {
           const ampSelector = getSelector({
             config: {
               count: 5,
@@ -734,8 +737,9 @@ describes.realWin(
 
           // Test the case where the element to be `selected` and the currently
           // selected element are different
+
           let args = {'index': 2};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -746,11 +750,12 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are the same
           args = {'index': 2};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
           });
+
           expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
         }
       );
@@ -758,7 +763,7 @@ describes.realWin(
       it(
         'should trigger `toggle` action even with specified `value`' +
           ' argument',
-        () => {
+        async () => {
           const ampSelector = getSelector({
             config: {
               count: 5,
@@ -774,7 +779,7 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are different
           let args = {'index': 2, 'value': true};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -785,7 +790,7 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are the same
           args = {'index': 2, 'value': true};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -795,7 +800,7 @@ describes.realWin(
           // Test the case where the element to be removed as `selected` and
           // the currently selected element are the same
           args = {'index': 2, 'value': false};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -808,7 +813,7 @@ describes.realWin(
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
 
           args = {'index': 2, 'value': false};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -842,7 +847,7 @@ describes.realWin(
         expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
       });
 
-      it('should trigger "select" event when an item is toggled', () => {
+      it('should trigger "select" event when an item is toggled', async () => {
         const ampSelector = getSelector({
           config: {
             count: 5,
@@ -855,7 +860,7 @@ describes.realWin(
 
         const triggerSpy = sandbox.spy(impl.action_, 'trigger');
         const args = {'index': 3, 'value': true};
-        impl.executeAction({
+        await impl.executeAction({
           method: 'toggle',
           args,
           satisfiesTrust: () => true,
@@ -1144,14 +1149,69 @@ describes.realWin(
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
-            keyPress(ampSelector, Keys.LEFT_ARROW);
+            return keyPress(ampSelector, Keys.LEFT_ARROW)
+              .then(() => {
+                expect(ampSelector.children[0].tabIndex).to.equal(-1);
+                expect(ampSelector.children[1].tabIndex).to.equal(-1);
+                expect(ampSelector.children[2].tabIndex).to.equal(0);
+                return keyPress(ampSelector, Keys.RIGHT_ARROW);
+              })
+              .then(() => {
+                expect(ampSelector.children[0].tabIndex).to.equal(0);
+                expect(ampSelector.children[1].tabIndex).to.equal(-1);
+                expect(ampSelector.children[2].tabIndex).to.equal(-1);
+              });
+          }
+        );
+
+        it(
+          'should update focus when the user presses the home key when ' +
+            'keyboard-select-mode is enabled',
+          () => {
+            const ampSelector = getSelector({
+              attributes: {
+                'keyboard-select-mode': 'focus',
+              },
+              config: {
+                count: 3,
+              },
+            });
+            ampSelector.children[2].setAttribute('selected', '');
+            ampSelector.children[0].setAttribute('hidden', '');
+            ampSelector.build();
             expect(ampSelector.children[0].tabIndex).to.equal(-1);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(0);
-            keyPress(ampSelector, Keys.RIGHT_ARROW);
+            return keyPress(ampSelector, Keys.HOME).then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            });
+          }
+        );
+
+        it(
+          'should update focus when the user presses the end key when ' +
+            'keyboard-select-mode is enabled',
+          () => {
+            const ampSelector = getSelector({
+              attributes: {
+                'keyboard-select-mode': 'focus',
+              },
+              config: {
+                count: 3,
+              },
+            });
+            ampSelector.children[2].setAttribute('hidden', '');
+            ampSelector.build();
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            return keyPress(ampSelector, Keys.END).then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            });
           }
         );
 
@@ -1211,14 +1271,24 @@ describes.realWin(
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-          keyPress(ampSelector, Keys.DOWN_ARROW);
-          expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
-          expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
-          expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-          keyPress(ampSelector, Keys.UP_ARROW);
-          expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
-          expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
-          expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+          return keyPress(ampSelector, Keys.DOWN_ARROW)
+            .then(() => {
+              expect(ampSelector.children[0].hasAttribute('selected')).to.be
+                .false;
+              expect(ampSelector.children[1].hasAttribute('selected')).to.be
+                .true;
+              expect(ampSelector.children[2].hasAttribute('selected')).to.be
+                .false;
+              return keyPress(ampSelector, Keys.UP_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].hasAttribute('selected')).to.be
+                .true;
+              expect(ampSelector.children[1].hasAttribute('selected')).to.be
+                .false;
+              expect(ampSelector.children[2].hasAttribute('selected')).to.be
+                .false;
+            });
         });
       });
 
@@ -1306,29 +1376,35 @@ describes.realWin(
           expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
           // Note that the newly added third child is ignored.
-          keyPress(ampSelector, Keys.LEFT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(0);
-          expect(ampSelector.children[2].tabIndex).to.equal(-1);
+          keyPress(ampSelector, Keys.LEFT_ARROW)
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
-          const e = new CustomEvent(AmpEvents.DOM_UPDATE, {bubbles: true});
-          newChild.dispatchEvent(e);
+              const e = new CustomEvent(AmpEvents.DOM_UPDATE, {bubbles: true});
+              newChild.dispatchEvent(e);
 
-          // `newChild` should be focused since it has the 'selected' attribute.
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(-1);
-          expect(ampSelector.children[2].tabIndex).to.equal(0);
+              // `newChild` should be focused since it has the 'selected' attribute.
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(-1);
+              expect(ampSelector.children[2].tabIndex).to.equal(0);
 
-          // Tabbing between children now works for `newChild`.
-          keyPress(ampSelector, Keys.LEFT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(0);
-          expect(ampSelector.children[2].tabIndex).to.equal(-1);
+              // Tabbing between children now works for `newChild`.
+              return keyPress(ampSelector, Keys.LEFT_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
-          keyPress(ampSelector, Keys.RIGHT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(-1);
-          expect(ampSelector.children[2].tabIndex).to.equal(0);
+              return keyPress(ampSelector, Keys.RIGHT_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(-1);
+              expect(ampSelector.children[2].tabIndex).to.equal(0);
+            });
         });
       });
     });

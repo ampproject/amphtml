@@ -41,7 +41,9 @@ const DIST_OUTPUT_FILE = isTravisBuild()
   ? `amp_dist_${travisBuildNumber()}.zip`
   : '';
 
-const OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
+const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
+const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
+
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
 const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
@@ -61,8 +63,8 @@ function printChangeSummary(fileName) {
 
   if (isTravisBuild()) {
     console.log(
-      `${fileLogPrefix} ${colors.cyan('origin/master')} is currently at ` +
-        `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
+      `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
+        `in this build: ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
     );
     commitSha = travisPullRequestSha();
   } else {
@@ -241,6 +243,7 @@ function timedExecOrDie(cmd, fileName = 'utils.js') {
 function downloadOutput_(functionName, outputFileName, outputDirs) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   const buildOutputDownloadUrl = `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
+  const dirsToUnzip = outputDirs.split(' ');
 
   console.log(
     `${fileLogPrefix} Downloading build output from ` +
@@ -256,7 +259,9 @@ function downloadOutput_(functionName, outputFileName, outputDirs) {
     `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...'
   );
   exec('echo travis_fold:start:unzip_results && echo');
-  execOrDie(`unzip -o ${outputFileName}`);
+  dirsToUnzip.forEach(dir => {
+    execOrDie(`unzip ${outputFileName} '${dir.replace('/', '/*')}'`);
+  });
   exec('echo travis_fold:end:unzip_results');
 
   console.log(fileLogPrefix, 'Verifying extracted files...');
@@ -316,7 +321,7 @@ function authenticateWithStorageLocation_() {
  * @param {string} functionName
  */
 function downloadBuildOutput(functionName) {
-  downloadOutput_(functionName, BUILD_OUTPUT_FILE, OUTPUT_DIRS);
+  downloadOutput_(functionName, BUILD_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
@@ -324,17 +329,7 @@ function downloadBuildOutput(functionName) {
  * @param {string} functionName
  */
 function downloadDistOutput(functionName) {
-  downloadOutput_(functionName, DIST_OUTPUT_FILE, OUTPUT_DIRS);
-}
-
-/**
- * Downloads and unzips dist experiment output from storage
- * @param {string} functionName
- * @param {string} experiment
- */
-function downloadDistExperimentOutput(functionName, experiment) {
-  const outputFile = DIST_OUTPUT_FILE.replace('.zip', `_${experiment}.zip`);
-  downloadOutput_(functionName, outputFile, OUTPUT_DIRS);
+  downloadOutput_(functionName, DIST_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
@@ -342,7 +337,7 @@ function downloadDistExperimentOutput(functionName, experiment) {
  * @param {string} functionName
  */
 function uploadBuildOutput(functionName) {
-  uploadOutput_(functionName, BUILD_OUTPUT_FILE, OUTPUT_DIRS);
+  uploadOutput_(functionName, BUILD_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
@@ -350,27 +345,8 @@ function uploadBuildOutput(functionName) {
  * @param {string} functionName
  */
 function uploadDistOutput(functionName) {
-  uploadOutput_(functionName, DIST_OUTPUT_FILE, OUTPUT_DIRS);
-}
-
-/**
- * Zips and uploads the dist experiment output to a remote storage location
- * @param {string} functionName
- * @param {string} experiment
- */
-function uploadDistExperimentOutput(functionName, experiment) {
-  const outputFile = DIST_OUTPUT_FILE.replace('.zip', `_${experiment}.zip`);
-  uploadOutput_(functionName, outputFile, OUTPUT_DIRS);
-}
-
-/**
- * Zips and uploads the dist output to a remote storage location
- * @param {string} functionName
- */
-function uploadDistOutputWithExamples(functionName) {
-  const outputDirsWithExamples =
-    OUTPUT_DIRS + ' dist.tools/ examples/ test/manual/';
-  uploadOutput_(functionName, DIST_OUTPUT_FILE, outputDirsWithExamples);
+  const distOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
+  uploadOutput_(functionName, DIST_OUTPUT_FILE, distOutputDirs);
 }
 
 /**
@@ -381,7 +357,7 @@ function uploadDistOutputWithExamples(functionName) {
 async function processAndUploadDistOutput(functionName) {
   await replaceUrls('test/manual');
   await replaceUrls('examples');
-  uploadDistOutputWithExamples(functionName);
+  uploadDistOutput(functionName);
   await signalDistUpload('success');
 }
 
@@ -400,7 +376,6 @@ function decryptTravisKey_() {
 
 module.exports = {
   downloadBuildOutput,
-  downloadDistExperimentOutput,
   downloadDistOutput,
   printChangeSummary,
   processAndUploadDistOutput,
@@ -413,6 +388,5 @@ module.exports = {
   timedExecOrDie,
   timedExecWithError,
   uploadBuildOutput,
-  uploadDistExperimentOutput,
   uploadDistOutput,
 };

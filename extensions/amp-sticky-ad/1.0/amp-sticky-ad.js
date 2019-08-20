@@ -37,7 +37,7 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @private {?Element} */
     this.ad_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {boolean} */
@@ -64,7 +64,7 @@ class AmpStickyAd extends AMP.BaseElement {
     );
 
     this.ad_ = children[0];
-    this.setAsOwner(this.ad_);
+    Services.ownersForDoc(this.element).setOwner(this.ad_, this.element);
 
     this.adReadyPromise_ = whenUpgradedToCustomElement(
       dev().assertElement(this.ad_)
@@ -97,12 +97,13 @@ class AmpStickyAd extends AMP.BaseElement {
       toggle(this.element, true);
       const borderBottom = this.element./*OK*/ offsetHeight;
       this.viewport_.updatePaddingBottom(borderBottom);
-      Services.ownersForDoc(this.element).updateInViewport(
+      const owners = Services.ownersForDoc(this.element);
+      owners.updateInViewport(
         this.element,
         dev().assertElement(this.ad_),
         true
       );
-      this.scheduleLayout(dev().assertElement(this.ad_));
+      owners.scheduleLayout(this.element, dev().assertElement(this.ad_));
     }
     return Promise.resolve();
   }
@@ -197,12 +198,9 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   layoutAd_() {
     const ad = dev().assertElement(this.ad_);
-    Services.ownersForDoc(this.element).updateInViewport(
-      this.element,
-      ad,
-      true
-    );
-    this.scheduleLayout(ad);
+    const owners = Services.ownersForDoc(this.element);
+    owners.updateInViewport(this.element, ad, true);
+    owners.scheduleLayout(this.element, ad);
     // Wait for the earliest: `render-start` or `load-end` signals.
     // `render-start` is expected to arrive first, but it's not emitted by
     // all types of ads.

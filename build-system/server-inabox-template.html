@@ -9,9 +9,6 @@
     body {
       margin: 0;
     }
-    iframe {
-      border: 1px solid gray;
-    }
   </style>
 </head>
 <body>
@@ -22,8 +19,10 @@
   <div style="background: #eee; overflow: hidden;; height: OFFSET;">scroll down to see the ad</div>
 
   <iframe
-      name="inabox-atf"
-      src="AD_URL"
+      id="inabox-frame"
+      name="NAME"
+      src="SOURCE"
+      SRCDOC_ATTRIBUTE
       width="AD_WIDTH" height="AD_HEIGHT"
       scrolling="no"
       marginwidth="0"

@@ -61,6 +61,7 @@ const forbiddenTerms = {
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
       'extensions/amp-pinterest/0.1/save-button.js',
+      'validator/engine/validator_test.js',
     ],
   },
   '(^i-amp-|\\Wi-amp-)': {
@@ -271,14 +272,6 @@ const forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/inabox/inabox-services.js',
-      'src/service/core-services.js',
-      'src/service/viewer-impl.js',
-    ],
-  },
-  'setViewerVisibilityState': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/runtime.js',
       'src/service/core-services.js',
       'src/service/viewer-impl.js',
     ],
@@ -608,6 +601,14 @@ const forbiddenTerms = {
       'src/service/resources-impl.js',
     ],
   },
+  'overrideVisibilityState': {
+    message: 'overrideVisibilityState is a restricted API.',
+    whitelist: [
+      'src/runtime.js',
+      'src/service/ampdoc-impl.js',
+      'src/service/viewer-impl.js',
+    ],
+  },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use dom.openWindowDialog',
     whitelist: ['src/dom.js'],
@@ -632,6 +633,7 @@ const forbiddenTerms = {
       'src/chunk.js',
       'src/inabox/amp-inabox.js',
       'src/runtime.js',
+      'src/custom-element.js',
     ],
   },
   'AMP_CONFIG': {
@@ -838,6 +840,7 @@ const forbiddenTermsSrcInclusive = {
       'src/service/viewport/viewport-binding-ios-embed-wrapper.js',
       'src/service/viewport/viewport-binding-natural.js',
       'src/service/viewport/viewport-impl.js',
+      'src/service/viewport/viewport-interface.js',
     ],
   },
   'preloadExtension': {
@@ -876,11 +879,6 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Always supply a reason in rejections. ' +
       'error.cancellation() may be applicable.',
-    whitelist: [
-      'extensions/amp-access/0.1/access-expr-impl.js',
-      'extensions/amp-animation/0.1/parsers/css-expr-impl.js',
-      'extensions/amp-bind/0.1/bind-expr-impl.js',
-    ],
   },
   '[^.]loadPromise': {
     message: 'Most users should use BaseElement…loadPromise.',
@@ -956,6 +954,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/app-index/amphtml-helpers.js',
       'build-system/app-video-testbench.js',
       'build-system/app.js',
+      'build-system/app-utils.js',
       'build-system/shadow-viewer.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
@@ -1036,7 +1035,7 @@ function isInBuildSystemFixtureFolder(filePath) {
 /**
  * Strip Comments
  * @param {string} contents
- * @return {*} TODO(#23582): Specify return type
+ * @return {string}
  */
 function stripComments(contents) {
   // Multi-line comments
@@ -1214,7 +1213,7 @@ function isMissingTerms(file) {
 /**
  * Check a file for all the required terms and
  * any forbidden terms and log any errors found.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function presubmit() {
   let forbiddenFound = false;

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {jsonConfiguration} from '../src/json';
+
 /**
  * @typedef {{
  *   prefetch: (string|undefined),
@@ -61,9 +63,9 @@ let AdNetworkConfigDef;
  *   fullWidthHeightRatio: number
  * }
  *
- * @const {!Object<string, !AdNetworkConfigDef>}}
+ * @const {!Object<string, !JsonObject>}
  */
-export const adConfig = {
+const adConfig = jsonConfiguration({
   '_ping_': {
     renderStartImplemented: true,
     clientIdScope: '_PING_',
@@ -305,6 +307,11 @@ export const adConfig = {
   },
 
   'bidtellect': {},
+
+  'blade': {
+    prefetch: 'https://sdk.streamrail.com/blade/sr.blade.js',
+    renderStartImplemented: true,
+  },
 
   'brainy': {},
 
@@ -935,11 +942,6 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  'streamrail': {
-    prefetch: 'https://sdk.streamrail.com/blade/sr.blade.js',
-    renderStartImplemented: true,
-  },
-
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',
@@ -1013,10 +1015,7 @@ export const adConfig = {
 
   'valuecommerce': {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
-    preconnect: [
-      'https://ad.jp.ap.valuecommerce.com',
-      'https://ad.omks.valuecommerce.com',
-    ],
+    preconnect: ['https://ad.jp.ap.valuecommerce.com'],
     renderStartImplemented: true,
   },
 
@@ -1082,6 +1081,10 @@ export const adConfig = {
     preconnect: 'https://yads.yahoo.co.jp',
   },
 
+  'yahoonativeads': {
+    renderStartImplemented: true,
+  },
+
   'yandex': {
     prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
     renderStartImplemented: true,
@@ -1140,4 +1143,6 @@ export const adConfig = {
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
     renderStartImplemented: true,
   },
-};
+});
+
+export {adConfig};

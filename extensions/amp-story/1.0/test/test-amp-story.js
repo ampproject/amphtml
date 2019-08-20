@@ -367,24 +367,6 @@ describes.realWin(
       });
     });
 
-    it('should update bookend status in browser history', () => {
-      const pageCount = 1;
-      createPages(story.element, pageCount, ['last-page']);
-
-      sandbox.stub(AmpStoryBookend.prototype, 'build');
-
-      story.buildCallback();
-
-      return story.layoutCallback().then(() => {
-        story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
-
-        return expect(replaceStateStub).to.have.been.calledWith(
-          {ampStoryBookendActive: true},
-          ''
-        );
-      });
-    });
-
     it('should not block layoutCallback when bookend xhr fails', () => {
       createPages(story.element, 1, ['page-1']);
       sandbox.stub(AmpStoryBookend.prototype, 'build');
@@ -1711,29 +1693,6 @@ describes.realWin(
           return expect(replaceStateStub).to.have.been.calledWith({
             ampStoryNavigationPath: ['cover', 'page-1'],
           });
-        });
-      });
-
-      it('should navigate to the correct previous page after navigating away', () => {
-        createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-
-        return story.layoutCallback().then(() => {
-          const currentLocation = win.location;
-          story
-            .getPageById('cover')
-            .element.setAttribute('advance-to', 'page-3');
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-
-          win.location = 'https://example.com/';
-          win.location = currentLocation;
-
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 0})
-          );
-
-          expect(story.activePage_.element.id).to.equal('cover');
         });
       });
 
