@@ -19,6 +19,10 @@ If you haven't already done so, sign the Contributor License Agreement (CLA) as 
 <!--
 Provide a brief description of the feature/change you are planning on implementing.
 -->
+Link to PRD: 
+<!--
+Add a link to the PRD (make sure it is accessible by anyone) here.
+-->
 
 ## Design document
 <!--
@@ -36,6 +40,17 @@ A clear and concise description of any alternative solutions or features you've 
 <!--
 Add any other information that may help people understand your I2I.
 -->
+
+## Technical Reviews
+<!--
+This sections links to the relevant reviews that the launch of this change is gated on. 
+If one of these reviews is not needed, please state the reasoning here instead.
+If linking to documents please make sure that they are accessible by anyone.
+-->
+- Accessibility review
+- Security review
+- Privacy review
+- Internationalization review
 
 
 <!--
