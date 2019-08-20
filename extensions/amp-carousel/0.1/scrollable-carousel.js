@@ -48,8 +48,11 @@ export class AmpScrollableCarousel extends BaseCarousel {
     /** @private {?number} */
     this.scrollTimerId_ = null;
 
-    /** @private {boolean} */
-    this.useLayersPrioritization_ = false;
+    /** @private @const {boolean} */
+    this.useLayersPrioritization_ =
+      getMode().localDev &&
+      isExperimentOn(this.win, 'layers') &&
+      isExperimentOn(this.win, 'layers-prioritization');
   }
 
   /** @override */
@@ -64,11 +67,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
     this.element.appendChild(this.container_);
-
-    this.useLayersPrioritization_ =
-      getMode().localDev &&
-      isExperimentOn(this.win, 'layers') &&
-      isExperimentOn(this.win, 'layers-prioritization');
 
     this.cells_.forEach(cell => {
       if (!this.useLayersPrioritization_) {
