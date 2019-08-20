@@ -16,15 +16,35 @@
 
 import {assertAttributeMutationFormat} from './mutation';
 import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
-import {dev} from '../../../../src/log';
+import {dev, user} from '../../../../src/log';
 import {dict, hasOwn} from '../../../../src/utils/object';
+import {isAmpElement} from '../../../../src/dom';
 
+/** @const {Object<string, RegExp>} */
 const SUPPORTED_STYLE_VALUE = {
-  'color': /#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/,
+  'color': /.*/,
   'background-color': /.*/,
+  'visibility': /^hidden$/,
+  'display': /^none$/,
+  'position': /^(static|relative|absolute|initial|inherit)$/,
+  'font-size': /.*/,
+  'background-image': /.*/,
+  'border-width': /.*/,
+  'border-style': /.*/,
+  'border-color': /.*/,
 };
 
+/** @const {Object<string, RegExp>} */
+const SUPPORTE_NON_AMP_STYLE_VALUE = {
+  'width': /.*/,
+  'height': /.*/,
+};
+
+/** @const {RegExp} */
 const NON_SPACE_REGEX = /\S/;
+
+/** @const {string} */
+const TAG = 'amp-experiment/style';
 
 /**
  * Mutation for attribute (style) mutations on unspecified elements.
@@ -46,6 +66,9 @@ export class AttributeMutationDefaultStyle {
     /** @private {!JsonObject} */
     this.styles_ = dict({});
 
+    /** @private {boolean} */
+    this.hasAmpElement_ = false;
+
     assertAttributeMutationFormat(this.mutationRecord_);
   }
 
@@ -55,6 +78,14 @@ export class AttributeMutationDefaultStyle {
     // First check for !important and <;
     if (value.match(/(!\s*important|<)/)) {
       return false;
+    }
+
+    // Look for AMP Elements. Different validation rules apply
+    for (let i = 0; i < this.elements_.length; i++) {
+      if (isAmpElement(dev().assertElement(this.elements_[i]))) {
+        this.hasAmpElement_ = true;
+        break;
+      }
     }
 
     // Then seperate the style values to pairs in the format "name : value;"
@@ -76,6 +107,12 @@ export class AttributeMutationDefaultStyle {
       const key = pair[0].trim();
       const value = pair[1].trim();
       if (!this.validateStylePair_(key, value)) {
+        user().error(
+          TAG,
+          'Unsupported style mutation property: %s, value: %s',
+          key,
+          value
+        );
         return false;
       }
       this.styles_[key] = value;
@@ -101,6 +138,12 @@ export class AttributeMutationDefaultStyle {
    * @return {boolean}
    */
   validateStylePair_(key, value) {
+    if (!this.hasAmpElement_ && hasOwn(SUPPORTE_NON_AMP_STYLE_VALUE, key)) {
+      if (value.match(SUPPORTE_NON_AMP_STYLE_VALUE[key])) {
+        return true;
+      }
+    }
+
     if (!hasOwn(SUPPORTED_STYLE_VALUE, key)) {
       return false;
     }
