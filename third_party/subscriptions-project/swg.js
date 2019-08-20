@@ -15205,7 +15205,7 @@ export {
   Entitlements,
   Entitlement,
   Fetcher,
-  SubscribeResponse: SubscribeResponse$1,
+  SubscribeResponse$1 as SubscribeResponse,
   ClientEventManagerApi,
   ClientEvent,
   FilterResult,
