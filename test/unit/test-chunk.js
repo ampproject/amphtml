@@ -365,7 +365,7 @@ describe('long tasks', () => {
   describes.fakeWin(
     'long chunk tasks force a macro task between work',
     {
-      amp: true,
+      amp: false,
     },
     env => {
       let subscriptions;
@@ -393,6 +393,7 @@ describe('long tasks', () => {
         postMessageCalls = 0;
         subscriptions = {};
         clock = sandbox.useFakeTimers();
+        installDocService(env.win, /* isSingleDoc */ true);
         toggleExperiment(env.win, 'macro-after-long-task', true);
 
         env.win.addEventListener = function(type, handler) {
@@ -410,8 +411,9 @@ describe('long tasks', () => {
         };
 
         progress = '';
-
-        return Promise.resolve();
+        chunkInstanceForTesting(
+          env.win.document.documentElement
+        ).macroAfterLongTask_ = true;
       });
 
       it('should not run macro tasks with invisible bodys', done => {
@@ -424,7 +426,7 @@ describe('long tasks', () => {
         });
       });
 
-      it.only('should execute chunks after long task in a macro task', done => {
+      it('should execute chunks after long task in a macro task', done => {
         startupChunk(env.win.document, complete('1', true));
         startupChunk(env.win.document, complete('2', false));
         startupChunk(
