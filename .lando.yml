@@ -27,8 +27,9 @@ name: amphtml
 services:
   appserver:
     type: node
-    build_as_root:
+    install_dependencies_as_root:
       - curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
+      - apt-get update && apt-get install -y openjdk-8-jdk && apt-get install -y ant && apt-get clean
     build:
       - yarn global add gulp-cli
       - yarn
