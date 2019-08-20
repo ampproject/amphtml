@@ -512,7 +512,7 @@ function getServicePromiseOrNullInternal(holder, id) {
  * @return {!Object<string,!ServiceHolderDef>}
  */
 function getServices(holder) {
-  let {services} = holder;
+  let services = holder.__AMP_SERVICES;
   if (!services) {
     services = holder.__AMP_SERVICES = {};
   }
