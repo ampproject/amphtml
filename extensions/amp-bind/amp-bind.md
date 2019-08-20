@@ -489,6 +489,11 @@ Only binding to the following components and attributes are allowed:
     <td>Fetches JSON from the new URL and merges it into the existing state. <em>Note the following update will ignore <code>&lt;amp-state&gt;</code> elements to prevent cycles.</em></td>
   </tr>
   <tr>
+    <td><code>&lt;amp-twitter&gt;</code></td>
+    <td><code>[data-tweetid]</code></td>
+    <td>Changes the displayed Tweet.</td>
+  </tr>
+  <tr>
     <td><code>&lt;amp-video&gt;</code></td>
     <td><code>[alt]</code><br><code>[attribution]</code><br><code>[controls]</code><br><code>[loop]</code><br><code>[poster]</code><br><code>[preload]</code><br><code>[src]</code></td>
     <td>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-video#attributes">amp-video attributes</a>.</td>
