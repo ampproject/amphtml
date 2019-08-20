@@ -8,7 +8,7 @@
   <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
 
   <meta name="amp-cta-type" content="INSTALL">
-  <meta name="amp-cta-url" content="https://www.amp.dev">
+  <meta name="amp-cta-url" content="https://www.example.com">
   <meta name="amp4ads-vars-attribution-icon" content="https://tpc.googlesyndication.com/pagead/images/adchoices/icon.png">
   <meta name="amp4ads-vars-attribution-url" content="https://www.amp.dev">
 
@@ -99,5 +99,16 @@
       </amp-img>
     </div>
   </div>
+  <amp-ad-exit id="exit-api">
+    <script type="application/json">
+    {
+      "targets": {
+        "url_0": {
+          "finalUrl": "https://www.amp.dev"
+        }
+      }
+    }
+    </script>
+  </amp-ad-exit>
 </body>
 </html>
