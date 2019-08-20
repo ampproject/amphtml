@@ -17,6 +17,8 @@
 
 const path = require('path');
 
+const WINDOW_PROPERTY = ['win', 'window', 'global', 'self'];
+
 module.exports = function(context) {
   function isAllowedWindowProp(prop) {
     return prop === 'AMP' || prop.startsWith('on');
@@ -25,13 +27,16 @@ module.exports = function(context) {
   return {
     AssignmentExpression(node) {
       const filePath = context.getFilename();
-      const filename = path.basename(filePath);
-      // Ignore tests.
-      if (/^(test-(\w|-)+|(\w|-)+-testing)\.js$/.test(filename)) {
+      // Ignore polyfills and third-party code.
+      if (
+        filePath.includes('src/polyfills/') ||
+        filePath.includes('third_party/')
+      ) {
         return;
       }
-      // Ignore polyfills.
-      if (filePath.includes('src/polyfills')) {
+      // Ignore tests.
+      const filename = path.basename(filePath);
+      if (/^(test-(\w|-)+|(\w|-)+-testing)\.js$/.test(filename)) {
         return;
       }
       // LHS of assignment must be a member expression e.g. foo.bar.
@@ -41,7 +46,7 @@ module.exports = function(context) {
       }
       // The member object must be window-like.
       const object = left.object.name;
-      if (!object || !['win', 'window'].includes(object.toLowerCase())) {
+      if (!object || !WINDOW_PROPERTY.includes(object.toLowerCase())) {
         return;
       }
       const prop = left.property.name;
