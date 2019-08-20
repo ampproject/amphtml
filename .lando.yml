@@ -26,7 +26,7 @@ name: amphtml
 
 services:
   appserver:
-    type: node:10
+    type: node
     build_as_root:
       - curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
     build:
