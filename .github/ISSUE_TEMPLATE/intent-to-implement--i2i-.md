@@ -19,7 +19,7 @@ If you haven't already done so, sign the Contributor License Agreement (CLA) as 
 <!--
 Provide a brief description of the feature/change you are planning on implementing.
 -->
-Link to PRD: 
+Link to Product Requirements Document (PRD): 
 <!--
 Add a link to the PRD (make sure it is accessible by anyone) here.
 -->
