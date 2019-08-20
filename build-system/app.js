@@ -1260,7 +1260,7 @@ app.use('/shadow/', (req, res) => {
     : `${path.dirname(url)}/`;
 
   const viewerHtml = renderShadowViewer({
-    src: req.url.replace(/^\//, ''),
+    src: '//' + req.hostname + '/' + req.url.replace(/^\//, ''),
     baseHref,
   });
 
@@ -1304,7 +1304,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
 }
 
 function getUrlPrefix(req) {
-  return req.protocol + '://' + req.headers.host;
+  return '//' + req.headers.host;
 }
 
 function generateInfo(filePath) {
