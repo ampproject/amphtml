@@ -24,8 +24,10 @@ export class ScrollComponent {
     /** @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.doc_ = doc;
 
-    /** @protected @property {?function} */
+    /** @protected @property {?function(Window):undefined} */
     this.setWindow_ = null;
+    /** @protected {?HTMLIFrameElement} */
+    this.frame_ = null;
 
     /** @type {Promise<Window>} */
     this.window = new Promise(resolve => {

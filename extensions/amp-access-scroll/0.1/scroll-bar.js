@@ -142,7 +142,7 @@ export class ScrollUserBar extends Bar {
 export class ActivateBar extends Bar {
   /** @override */
   makeIframe_() {
-    Bar.prototype.makeIframe_.call(this);
+    const frame = Bar.prototype.makeIframe_.call(this);
 
     this.accessSource_
       .buildUrl(
@@ -155,8 +155,8 @@ export class ActivateBar extends Bar {
         false
       )
       .then(url => {
-        this.frame_.setAttribute('src', url);
+        frame.setAttribute('src', url);
       });
-    return this.frame_;
+    return frame;
   }
 }
