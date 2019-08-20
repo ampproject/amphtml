@@ -17,48 +17,65 @@
 
 /**
  * @fileoverview
- * This script runs remote experiments tests.
+ * This script builds an experiment binary and runs local tests.
  * This is run during the CI stage = test; job = experiments tests.
  */
 
+const colors = require('ansi-colors');
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const {
-  downloadDistExperimentOutput,
   startTimer,
-  startSauceConnect,
   stopTimer,
-  stopSauceConnect,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
-const {isTravisPullRequestBuild} = require('../travis');
-
-const FILENAME = 'experiment-tests.js';
+const {experiment} = require('minimist')(process.argv.slice(2));
+const FILENAME = `${experiment}-tests.js`;
+const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
-async function runExperimentTests_() {
-  await startSauceConnect(FILENAME);
-  Object.keys(experimentsConfig).forEach(experiment => {
-    const config = experimentsConfig[experiment];
-    if (config.command) {
-      timedExecOrDie('gulp clean');
-      downloadDistExperimentOutput(FILENAME, experiment);
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
-      timedExecOrDie('gulp e2e --nobuild --headless');
-    }
-  });
-  stopSauceConnect(FILENAME);
+function getConfig_() {
+  const config = experimentsConfig[experiment];
+
+  if (!config) {
+    return;
+  }
+
+  if (!config.name || !config.command) {
+    return;
+  }
+
+  if (new Date(config.expirationDateUTC) < Date.now) {
+    return;
+  }
+
+  return config;
 }
 
-async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
+function build_(config) {
+  const command = config.command.replace('gulp dist', 'gulp dist --fortesting');
+  timedExecOrDie('gulp clean');
+  timedExecOrDie('gulp update-packages');
+  timedExecOrDie(command);
+}
 
-  if (!isTravisPullRequestBuild()) {
-    await runExperimentTests_();
+function test_() {
+  timedExecOrDie('gulp integration --nobuild --compiled --headless');
+  timedExecOrDie('gulp e2e --nobuild --headless');
+}
+
+function main() {
+  const startTime = startTimer(FILENAME, FILENAME);
+  const config = getConfig_();
+  if (config) {
+    build_(config);
+    test_();
   } else {
-    //TODO(estherkim): remove this before merging
-    await runExperimentTests_();
+    console.log(
+      `${FILELOGPREFIX} Skipping`,
+      colors.cyan(`${experiment} Tests`),
+      `because ${experiment} is expired or does not exist.`
+    );
   }
   stopTimer(FILENAME, FILENAME, startTime);
 }

@@ -60,11 +60,6 @@ jobs:
       name: "Dist, Bundle Size"
       script:
         - unbuffer node build-system/pr-check/dist-bundle-size.js
-    - stage: build
-      name: "Dist For Experiments"
-      script:
-        - unbuffer node build-system/pr-check/dist-experiment.js
-      if: type = pull_request # change to type = push before merging
     - stage: test
       name: "Single Pass Tests"
       script:
@@ -92,17 +87,17 @@ jobs:
     - stage: test
       name: "Experiment A Tests"
       script:
-        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=A
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentA
       if: type = pull_request # change to type = push before merging
     - stage: test
       name: "Experiment B Tests"
       script:
-        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=B
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentB
       if: type = pull_request # change to type = push before merging
     - stage: test
       name: "Experiment C Tests"
       script:
-        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=C
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
       if: type = pull_request # change to type = push before merging          
 cache:
   directories:
