@@ -109,13 +109,19 @@ async function generateRunner(subDir) {
   const runnerJarDir = `${runnerDistDir}/${subDir}`;
   writeGeneratedAtCommitFile(runnerJarDir);
   const result = getOutput(generateCmd);
-  if (result.stderr) {
+  if (0 !== result.status) {
     log(
       red('ERROR:'),
       'Could not generate custom closure compiler',
       cyan(`${runnerJarDir}/runner.jar`)
     );
-    console.error(red(result.stdout), red(result.stderr));
+    console.error(
+      red(result.stdout),
+      red(result.stderr),
+      red(
+        'See instructions for setting up Java at https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#building-amp-and-starting-a-local-server'
+      )
+    );
     const reason = new Error('Compiler generation failed');
     reason.showStack = false;
     return Promise.reject(reason);
