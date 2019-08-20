@@ -78,7 +78,7 @@ describe('Activity getTotalEngagedTime', () => {
     };
 
     fakeWin = {
-      services: {},
+      __AMP_SERVICES: {},
       document: fakeDoc,
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
@@ -300,7 +300,7 @@ describe('Activity getIncrementalEngagedTime', () => {
     };
 
     fakeWin = {
-      services: {},
+      __AMP_SERVICES: {},
       document: fakeDoc,
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',

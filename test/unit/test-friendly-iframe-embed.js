@@ -798,7 +798,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
 
       polls = [];
       win = {
-        services: {
+        __AMP_SERVICES: {
           'extensions': {
             obj: {
               preloadExtension: () => {},

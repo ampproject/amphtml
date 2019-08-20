@@ -40,7 +40,7 @@ import {whenCalled} from '../../testing/test-helper.js';
 function actionService() {
   const win = {
     document: {body: {}},
-    services: {
+    __AMP_SERVICES: {
       vsync: {obj: {}},
     },
   };

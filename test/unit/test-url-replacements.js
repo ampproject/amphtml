@@ -187,7 +187,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           array[15] = 15;
         },
       },
-      services: {
+      __AMP_SERVICES: {
         'viewport': {obj: {}},
         'cid': {
           promise: Promise.resolve({

@@ -36,7 +36,7 @@ describes.sandboxed('vsync', {}, () => {
         body: {},
       },
       navigator: {},
-      services: {},
+      __AMP_SERVICES: {},
       setTimeout: (fn, t) => {
         return window.setTimeout(fn, t);
       },
