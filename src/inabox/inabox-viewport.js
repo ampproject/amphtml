@@ -143,6 +143,7 @@ class InaboxViewportImpl {
       );
     }
 
+    this.binding_.connect();
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
 
