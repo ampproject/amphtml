@@ -279,7 +279,7 @@ export class Viewer {
   initMessagingChannel_(messagingPromise) {
     const isEmbedded = !!(
       (this.isIframed_ &&
-        !this.win.AMP_TEST_IFRAME &&
+        !this.win.__AMP_TEST_IFRAME &&
         // Checking param "origin", as we expect all viewers to provide it.
         // See https://github.com/ampproject/amphtml/issues/4183
         // There appears to be a bug under investigation where the
