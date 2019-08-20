@@ -61,7 +61,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {boolean} */

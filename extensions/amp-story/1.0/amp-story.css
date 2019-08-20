@@ -40,6 +40,14 @@ amp-consent {
   z-index: initial !important;
 }
 
+/**
+ * amp-hidden uses visiblity: hidden that does not propagate to shadow trees
+ * because of amp-story-shadow-reset.css. Use display: none instead.
+ */
+amp-consent.amp-hidden {
+  display: none !important;
+}
+
 .i-amphtml-story-system-reset,
 .i-amphtml-story-system-reset * {
   border: none !important;

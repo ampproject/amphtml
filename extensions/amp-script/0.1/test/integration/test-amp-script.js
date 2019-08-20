@@ -47,7 +47,6 @@ describe
     `,
         /* eslint-enable max-len */
         extensions: ['amp-script'],
-        experiments: ['amp-script'],
       },
       env => {
         beforeEach(() => {
@@ -127,7 +126,6 @@ describe
     `,
         /* eslint-enable max-len */
         extensions: ['amp-script'],
-        experiments: ['amp-script'],
       },
       env => {
         beforeEach(() => {
@@ -192,7 +190,6 @@ describe
     `,
         /* eslint-enable max-len */
         extensions: ['amp-script'],
-        experiments: ['amp-script'],
       },
       env => {
         beforeEach(() => {
@@ -232,7 +229,6 @@ describe
     `,
         /* eslint-enable max-len */
         extensions: ['amp-script'],
-        experiments: ['amp-script'],
       },
       env => {
         beforeEach(() => {

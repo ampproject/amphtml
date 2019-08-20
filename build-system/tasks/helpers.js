@@ -88,8 +88,8 @@ const BABELIFY_GLOBAL_TRANSFORM = {
   ignore: devDependencies(), // Ignore devDependencies
 };
 
-const BABELIFY_REPLACE_PLUGIN = {
-  plugins: [conf.getReplacePlugin()],
+const BABELIFY_PLUGINS = {
+  plugins: [conf.getReplacePlugin(), conf.getJsonConfigurationPlugin()],
 };
 
 const hostname = argv.hostname || 'cdn.ampproject.org';
@@ -437,7 +437,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const babelifyOptions = Object.assign(
     {},
     BABELIFY_GLOBAL_TRANSFORM,
-    BABELIFY_REPLACE_PLUGIN
+    BABELIFY_PLUGINS
   );
 
   let bundler = browserify(browserifyOptions).transform(
@@ -773,7 +773,7 @@ function toPromise(readable) {
 
 module.exports = {
   BABELIFY_GLOBAL_TRANSFORM,
-  BABELIFY_REPLACE_PLUGIN,
+  BABELIFY_PLUGINS,
   WEB_PUSH_PUBLISHER_FILES,
   WEB_PUSH_PUBLISHER_VERSIONS,
   buildAlp,

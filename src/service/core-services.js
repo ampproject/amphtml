@@ -76,10 +76,9 @@ export function installRuntimeServices(global) {
 /**
  * Install ampdoc-level services.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!Object<string, string>=} opt_initParams
  * @restricted
  */
-export function installAmpdocServices(ampdoc, opt_initParams) {
+export function installAmpdocServices(ampdoc) {
   const isEmbedded = !!ampdoc.getParent();
 
   // When making changes to this method:
@@ -95,7 +94,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
     : installCidService(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'viewer')
-    : installViewerServiceForDoc(ampdoc, opt_initParams);
+    : installViewerServiceForDoc(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'viewport')
     : installViewportServiceForDoc(ampdoc);

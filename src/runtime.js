@@ -58,7 +58,6 @@ import {isExperimentOn, toggleExperiment} from './experiments';
 import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
 import {setStyle} from './style';
-import {setViewerVisibilityState} from './service/viewer-impl';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 
@@ -418,13 +417,14 @@ export class MultidocManager {
    * Attaches the shadow root and calls the supplied DOM builder.
    * @param {!Element} hostElement
    * @param {string} url
-   * @param {!Object<string, string>|undefined} initParams
+   * @param {!Object<string, string>|undefined} params
    * @param {function(!Object, !ShadowRoot,
    * !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
    * @return {!Object}
    * @private
    */
-  attachShadowDoc_(hostElement, url, initParams, builder) {
+  attachShadowDoc_(hostElement, url, params, builder) {
+    params = params || Object.create(null);
     this.purgeShadowRoots_();
 
     setStyle(hostElement, 'visibility', 'hidden');
@@ -440,7 +440,9 @@ export class MultidocManager {
     amp.url = url;
     const {origin} = parseUrlDeprecated(url);
 
-    const ampdoc = this.ampdocService_.installShadowDoc(url, shadowRoot);
+    const ampdoc = this.ampdocService_.installShadowDoc(url, shadowRoot, {
+      params,
+    });
     /** @const {!./service/ampdoc-impl.AmpDocShadow} */
     amp.ampdoc = ampdoc;
     dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
@@ -453,7 +455,7 @@ export class MultidocManager {
       /* opt_isRuntimeCss */ true
     );
     // Instal doc services.
-    installAmpdocServices(ampdoc, initParams || Object.create(null));
+    installAmpdocServices(ampdoc);
 
     const viewer = Services.viewerForDoc(ampdoc);
 
@@ -462,7 +464,7 @@ export class MultidocManager {
      * @param {!VisibilityState} state
      */
     amp['setVisibilityState'] = function(state) {
-      setViewerVisibilityState(viewer, state);
+      ampdoc.overrideVisibilityState(state);
     };
 
     // Messaging pipe.
@@ -809,10 +811,7 @@ export class MultidocManager {
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const {ampdoc} = amp;
-    setViewerVisibilityState(
-      Services.viewerForDoc(ampdoc),
-      VisibilityState.INACTIVE
-    );
+    ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
   }
 

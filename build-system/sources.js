@@ -77,6 +77,7 @@ const CLOSURE_SRC_GLOBS = [
   'build/fake-module/**/*.js',
   'build/patched-module/**/*.js',
   'build/experiments/**/*.js',
+  'build/parsers/**/*.js',
   // A4A has these cross extension deps.
   'extensions/amp-ad-network*/**/*-config.js',
   'extensions/amp-ad/**/*.js',
@@ -86,6 +87,8 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-analytics/**/*.js',
   // Needed for WebAnimationService
   'extensions/amp-animation/**/*.js',
+  // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
+  'extensions/amp-base-carousel/**/*.js',
   // For amp-bind in the web worker (ww.js).
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions

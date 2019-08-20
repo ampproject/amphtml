@@ -194,6 +194,9 @@ exports.rules = [
   },
 
   // Rules for extensions.
+  // Note: For the multipass build to correctly include depended on code, you
+  // need to add the depended on code to `CLOSURE_SRC_GLOBS` in
+  // build-system/sources.js.
   {
     // Extensions can't depend on other extensions.
     filesMatching: 'extensions/**/*.js',
@@ -241,10 +244,9 @@ exports.rules = [
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
 
       // Facebook components
-      'extensions/amp-facebook/0.1/amp-facebook.js->extensions/amp-facebook/facebook-loader.js',
-      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
-      'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/facebook-loader.js',
-      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
       // Amp geo in group enum
       'extensions/amp-consent/0.1/amp-consent.js->extensions/amp-geo/0.1/amp-geo-in-group.js',

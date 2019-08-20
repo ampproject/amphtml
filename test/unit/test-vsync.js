@@ -19,8 +19,7 @@ import {Services} from '../../src/services';
 import {Vsync} from '../../src/service/vsync-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 
-describe('vsync', () => {
-  let sandbox;
+describes.sandboxed('vsync', {}, () => {
   let clock;
   let win;
   let viewer;
@@ -30,7 +29,6 @@ describe('vsync', () => {
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     win = {
       document: {
@@ -71,7 +69,6 @@ describe('vsync', () => {
   });
 
   afterEach(() => {
-    sandbox.restore();
     document.body.removeChild(contextNode);
   });
 

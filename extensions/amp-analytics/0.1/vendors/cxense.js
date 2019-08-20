@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const CXENSE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const CXENSE_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://scomcluster.cxense.com',
     'base': '${host}/Repo/rep.gif',
@@ -37,3 +39,5 @@ export const CXENSE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {CXENSE_CONFIG};
