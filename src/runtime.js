@@ -58,7 +58,6 @@ import {isExperimentOn, toggleExperiment} from './experiments';
 import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
 import {setStyle} from './style';
-import {setViewerVisibilityState} from './service/viewer-impl';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 
@@ -77,10 +76,10 @@ const TAG = 'runtime';
  */
 function adoptShared(global, callback) {
   // Tests can adopt the same window twice. sigh.
-  if (global.AMP_TAG) {
+  if (global.__AMP_TAG) {
     return Promise.resolve();
   }
-  global.AMP_TAG = true;
+  global.__AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
   /** @const {!Array<function(!Object)|!ExtensionPayload>} */
@@ -465,7 +464,7 @@ export class MultidocManager {
      * @param {!VisibilityState} state
      */
     amp['setVisibilityState'] = function(state) {
-      setViewerVisibilityState(viewer, state);
+      ampdoc.overrideVisibilityState(state);
     };
 
     // Messaging pipe.
@@ -812,10 +811,7 @@ export class MultidocManager {
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const {ampdoc} = amp;
-    setViewerVisibilityState(
-      Services.viewerForDoc(ampdoc),
-      VisibilityState.INACTIVE
-    );
+    ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
   }
 

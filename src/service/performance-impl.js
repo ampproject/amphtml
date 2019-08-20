@@ -23,7 +23,7 @@ import {getService, registerServiceBuilder} from '../service';
 import {isCanary} from '../experiments';
 import {layoutRectLtwh} from '../layout-rect';
 import {throttle} from '../utils/rate-limit';
-import {whenDocumentComplete} from '../document-ready';
+import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -171,6 +171,11 @@ export class Performance {
     if (isCanary(this.win)) {
       this.addEnabledExperiment('canary');
     }
+    // Tick document ready event.
+    whenDocumentReady(win.document).then(() => {
+      this.tick('dr');
+      this.flush();
+    });
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => this.onload_());

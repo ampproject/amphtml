@@ -255,7 +255,7 @@ describes.realWin('performance', {amp: true}, env => {
               label: 'msr',
               delta: 1,
             });
-            expect(flushSpy).to.have.callCount(4);
+            expect(flushSpy).to.have.callCount(5);
             expect(perf.events_.length).to.equal(0);
           });
         });
@@ -281,10 +281,13 @@ describes.realWin('performance', {amp: true}, env => {
           expect(flushSpy).to.have.callCount(1);
           expect(perf.events_.length).to.equal(2);
 
-          return perf.coreServicesAvailable().then(() => {
-            expect(flushSpy).to.have.callCount(3);
+          return Promise.all([
+            perf.coreServicesAvailable(),
+            viewer.whenFirstVisible(),
+          ]).then(() => {
+            expect(flushSpy).to.have.callCount(4);
             expect(perf.isMessagingReady_).to.be.false;
-            const count = 4;
+            const count = 5;
             expect(perf.events_.length).to.equal(count);
           });
         });
@@ -476,6 +479,9 @@ describes.realWin('performance', {amp: true}, env => {
         });
 
         it('should call the flush callback', () => {
+          // Make sure "first visible" arrives after "channel ready".
+          const firstVisiblePromise = new Promise(() => {});
+          sandbox.stub(viewer, 'whenFirstVisible').returns(firstVisiblePromise);
           expect(viewerSendMessageStub.withArgs('sendCsi')).to.have.callCount(
             0
           );
@@ -602,6 +608,7 @@ describes.realWin('performance', {amp: true}, env => {
             ).to.equal(400);
 
             expect(getPerformanceMarks()).to.have.members([
+              'dr',
               'ol',
               'visible',
               'ofv',
@@ -636,16 +643,16 @@ describes.realWin('performance', {amp: true}, env => {
         () => {
           clock.tick(100);
           whenFirstVisibleResolve();
-          expect(tickSpy).to.have.callCount(2);
+          expect(tickSpy).to.have.callCount(3);
           return viewer.whenFirstVisible().then(() => {
             clock.tick(400);
-            expect(tickSpy).to.have.callCount(3);
+            expect(tickSpy).to.have.callCount(4);
             whenViewportLayoutCompleteResolve();
             return perf.whenViewportLayoutComplete_().then(() => {
-              expect(tickSpy).to.have.callCount(3);
+              expect(tickSpy).to.have.callCount(4);
               expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
               return whenFirstVisiblePromise.then(() => {
-                expect(tickSpy).to.have.callCount(4);
+                expect(tickSpy).to.have.callCount(5);
                 expect(tickSpy.withArgs('pc')).to.be.calledOnce;
                 expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
               });
@@ -668,6 +675,7 @@ describes.realWin('performance', {amp: true}, env => {
               expect(tickSpy.withArgs('pc')).to.be.calledOnce;
               expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
               expect(getPerformanceMarks()).to.have.members([
+                'dr',
                 'ol',
                 'pc',
                 'visible',
@@ -698,7 +706,7 @@ describes.realWin('performance', {amp: true}, env => {
             viewerSendMessageStub.withArgs('prerenderComplete').firstCall
               .args[1].value
           ).to.equal(300);
-          expect(getPerformanceMarks()).to.deep.equal(['ol', 'pc']);
+          expect(getPerformanceMarks()).to.deep.equal(['dr', 'ol', 'pc']);
         });
       });
 
@@ -712,7 +720,7 @@ describes.realWin('performance', {amp: true}, env => {
             expect(tickSpy.withArgs('ol')).to.be.calledOnce;
             expect(tickSpy.withArgs('pc')).to.be.calledOnce;
             expect(tickSpy.withArgs('pc').args[0][2]).to.be.undefined;
-            expect(getPerformanceMarks()).to.deep.equal(['ol', 'pc']);
+            expect(getPerformanceMarks()).to.deep.equal(['dr', 'ol', 'pc']);
           });
         }
       );
