@@ -330,6 +330,48 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     }
   );
 
+  it('should forward the correct target when clicking on an element', () => {
+    const userJson = {
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
+        'email',
+        {'provider': 'facebook', 'app_id': '254325784911610'},
+        'whatsapp',
+      ],
+      'components': [
+        {
+          'type': 'cta-link',
+          'links': [
+            {
+              'text': 'buttonA',
+              'url': 'google.com',
+              'amphtml': true,
+            },
+          ],
+        },
+      ],
+    };
+
+    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    const clickSpy = sandbox.spy();
+    win.document.addEventListener('click', clickSpy);
+
+    bookend.build();
+    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+      const ctaLinks = bookend.bookendEl_.querySelector(
+        '.i-amphtml-story-bookend-cta-link-wrapper'
+      );
+      ctaLinks.children[0].onclick = function(e) {
+        e.preventDefault(); // Make the test not actually navigate.
+      };
+      ctaLinks.children[0].click();
+
+      expect(clickSpy.getCall(0).args[0]).to.contain({
+        '__AMP_CUSTOM_LINKER_TARGET__': ctaLinks.children[0],
+      });
+    });
+  });
+
   it(
     'should not add amp-to-amp linking to cta links when not ' +
       'specified in the JSON config',

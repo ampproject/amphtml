@@ -288,7 +288,13 @@ export class AmpStoryBookend extends DraggableDrawer {
   initializeListeners_() {
     super.initializeListeners_();
 
-    this.element.addEventListener('click', event => this.onClick_(event));
+    this.element.addEventListener('click', event =>
+      this.onOuterShadowClick_(event)
+    );
+
+    this.getShadowRoot().addEventListener('click', event => {
+      this.onInnerShadowClick_(event);
+    });
 
     this.replayButton_.addEventListener('click', event =>
       this.onReplayButtonClick_(event)
@@ -502,22 +508,26 @@ export class AmpStoryBookend extends DraggableDrawer {
   }
 
   /**
-   * Handles click events on the bookend:
-   *   - Closes bookend if tapping outside usable area
-   *   - Forwards AMP actions
+   * Reacts to clicks outside the shadow root.
    * @param {!Event} event
    * @private
    */
-  onClick_(event) {
+  onOuterShadowClick_(event) {
     const target = dev().assertElement(event.target);
-    if (this.elementOutsideUsableArea_(target)) {
+    if (this.elementOutsideBookend_(target)) {
       event.stopPropagation();
       this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
       return;
     }
+  }
 
-    // Pass custom target so that linker can see it, otherwise it would see
-    // the entire shadow DOM tree and not know what target to choose.
+  /**
+   * Reacts to clicks inside the shadow root.
+   * @param {!Event} event
+   * @private
+   */
+  onInnerShadowClick_(event) {
+    const target = dev().assertElement(event.target);
     event[AMP_CUSTOM_LINKER_TARGET] = target;
 
     if (target.hasAttribute('on')) {
@@ -527,11 +537,12 @@ export class AmpStoryBookend extends DraggableDrawer {
   }
 
   /**
+   * Returns true if element is outside the bookend.
    * @param {!Element} el
    * @return {boolean}
    * @private
    */
-  elementOutsideUsableArea_(el) {
+  elementOutsideBookend_(el) {
     return !closest(el, el => el === this.shadowHost_);
   }
 
