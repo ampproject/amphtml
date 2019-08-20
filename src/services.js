@@ -524,6 +524,17 @@ export class Services {
 
   /**
    * @param {!Window} win
+   * @return {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService}
+   */
+  static mediaPerformanceMetricsService(win) {
+    return (
+      /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
+      (getExistingServiceOrNull(win, 'media-performance-metrics'))
+    );
+  }
+
+  /**
+   * @param {!Window} win
    * @return {!Promise<?./service/localization.LocalizationService>}
    */
   static localizationServiceForOrNull(win) {

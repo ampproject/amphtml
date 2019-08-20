@@ -112,6 +112,10 @@ describes.realWin(
         .returns(hasSwipeCapability);
       sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
+      registerServiceBuilder(win, 'performance', () => ({
+        isPerformanceTrackingOn: () => false,
+      }));
+
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);
 
