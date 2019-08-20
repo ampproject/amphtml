@@ -21,6 +21,27 @@ tooling:
   watch:
     service: appserver
     cmd: "yarn gulp watch"
+    description: "Watches for changes in files, re-builds when detected"
+  check-types:
+    service: appserver
+    cmd: "yarn gulp check-types"
+    description: "Check source code for JS type errors"
+  dist:
+    service: appserver
+    cmd: "yarn gulp dist"
+    description: "Build production binaries"
+  unit:
+    service: appserver
+    cmd: "yarn gulp unit"
+    description: "Run unit tests"
+  integration:
+    service: appserver
+    cmd: "yarn gulp integration"
+    description: "Run integration tests"
+  e2e:
+    service: appserver
+    cmd: "yarn gulp e2e"
+    description: "Runs e2e tests"
 
 proxy:
   appserver:
