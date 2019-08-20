@@ -16,6 +16,10 @@
 
 var disabled = false;
 
+var defaultBaseUrl = 'http://localhost:8000/';
+
+var baseUrl = defaultBaseUrl;
+
 // Rewrite cdn.ampproject.org
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
@@ -33,7 +37,7 @@ chrome.webRequest.onBeforeRequest.addListener(
       path = path.replace(/\.js$/, '.max.js');
     }
     return {
-      redirectUrl: 'http://localhost:8000/' + path
+      redirectUrl: baseUrl + path
     };
   },
   {
@@ -58,7 +62,7 @@ chrome.webRequest.onBeforeRequest.addListener(
       path = path.replace(/\/f\.js$/, '/integration.js');
     }
     return {
-      redirectUrl: 'http://localhost:8000/' + path
+      redirectUrl: baseUrl + path
     };
   },
   {

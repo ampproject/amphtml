@@ -1,6 +1,6 @@
 {
   "name": "Local AMP",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "manifest_version": 2,
   "description": "Run prod AMP pages with the local AMP runtime.",
   "homepage_url": "https://www.ampproject.org",
