@@ -27,7 +27,8 @@ const runnerDir = 'build-system/runner';
 const buildFile = `${runnerDir}/build.xml`;
 const runnerDistDir = `${runnerDir}/dist`;
 const generatedAtCommitFile = 'GENERATED_AT_COMMIT';
-const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#building-amp-and-starting-a-local-server';
+const setupInstructionsUrl =
+  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#building-amp-and-starting-a-local-server';
 
 /**
  * Determines if runner.jar needs to be regenerated
