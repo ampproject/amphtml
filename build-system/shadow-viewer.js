@@ -144,7 +144,7 @@ const SCRIPT = `
 };
 `;
 
-const renderShadowViewer = ({src, baseHref, port = 8000}) =>
+const renderShadowViewer = ({src, baseHref}) =>
   html`
     <!DOCTYPE html>
     <html>
@@ -156,7 +156,7 @@ const renderShadowViewer = ({src, baseHref, port = 8000}) =>
         </script>
       </head>
       <body style="padding: 0; margin: 0">
-        <amp-viewer src="http://localhost:${port}/${src}"></amp-viewer>
+        <amp-viewer src="${src}"></amp-viewer>
       </body>
     </html>
   `;
