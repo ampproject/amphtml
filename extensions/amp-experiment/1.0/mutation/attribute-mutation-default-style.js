@@ -20,28 +20,31 @@ import {dev, user} from '../../../../src/log';
 import {dict, hasOwn} from '../../../../src/utils/object';
 import {isAmpElement} from '../../../../src/dom';
 
+/** @const {RegExp} */
+const NON_SPACE_REGEX = /\S/;
+
+/** @const {RegExp} */
+const ALL_VALUE_REGEX = /.*/;
+
 /** @const {Object<string, RegExp>} */
 const SUPPORTED_STYLE_VALUE = {
-  'color': /.*/,
-  'background-color': /.*/,
+  'color': ALL_VALUE_REGEX,
+  'background-color': ALL_VALUE_REGEX,
   'visibility': /^hidden$/,
   'display': /^none$/,
   'position': /^(static|relative|absolute|initial|inherit)$/,
-  'font-size': /.*/,
-  'background-image': /.*/,
-  'border-width': /.*/,
-  'border-style': /.*/,
-  'border-color': /.*/,
+  'font-size': ALL_VALUE_REGEX,
+  'background-image': ALL_VALUE_REGEX,
+  'border-width': ALL_VALUE_REGEX,
+  'border-style': ALL_VALUE_REGEX,
+  'border-color': ALL_VALUE_REGEX,
 };
 
 /** @const {Object<string, RegExp>} */
 const SUPPORTE_NON_AMP_STYLE_VALUE = {
-  'width': /.*/,
-  'height': /.*/,
+  'width': ALL_VALUE_REGEX,
+  'height': ALL_VALUE_REGEX,
 };
-
-/** @const {RegExp} */
-const NON_SPACE_REGEX = /\S/;
 
 /** @const {string} */
 const TAG = 'amp-experiment/style';
