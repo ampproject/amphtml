@@ -24,10 +24,12 @@ Link to PRD:
 Add a link to the PRD (make sure it is accessible by anyone) here.
 -->
 
-## Design document
+## Design documents
 <!--
 Provide a link to your design document once you have one. You do not need a design document to file this I2I.
 -->
+- Technical Design Document
+- UX Interaction Specs
 
 ## Motivation
 <!--
@@ -51,7 +53,6 @@ If linking to documents please make sure that they are accessible by anyone.
 - Security review
 - Privacy review
 - Internationalization review
-
 
 <!--
 Add anyone to this cc line that you want to notify about this I2I, including a reviewer once you have found one. See https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md for help in finding a reviewer.
