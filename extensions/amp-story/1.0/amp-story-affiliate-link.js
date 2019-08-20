@@ -27,6 +27,12 @@ import {htmlFor} from '../../../src/static-template';
  */
 export const AFFILIATE_LINK_SELECTOR = 'a[data-affiliate-link-icon]';
 
+/**
+ * Custom property signifying a built link.
+ * @const {string}
+ */
+export const AFFILIATE_LINK_BUILT = '__AMP_AFFILIATE_LINK_BUILT';
+
 export class AmpStoryAffiliateLink {
   /**
    * @param {!Window} win
@@ -39,25 +45,30 @@ export class AmpStoryAffiliateLink {
     /** @private {!Element} */
     this.element_ = element;
 
+    /** @private {!Element} */
+    this.textEl_ = null;
+
+    /** @private {!Element} */
+    this.launchEl_ = null;
+
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
-
-    /** @private {boolean} */
-    this.isBuilt_ = false;
   }
 
   /**
    * Builds affiliate link.
    */
   build() {
-    if (this.isBuilt_) {
+    if (this.element_[AFFILIATE_LINK_BUILT]) {
       return;
     }
-    this.isBuilt_ = true;
+
+    this.addPulseElement_();
     this.addIconElement_();
     this.addText_();
-    this.addPulseElement_();
+    this.addLaunchElement_();
     this.initializeListener_();
+    this.element_[AFFILIATE_LINK_BUILT] = true;
   }
 
   /**
@@ -68,10 +79,10 @@ export class AmpStoryAffiliateLink {
     this.storeService_.subscribe(
       StateProperty.AFFILIATE_LINK_STATE,
       elementToToggleExpand => {
-        this.element_.toggleAttribute(
-          'expanded',
-          this.element_ === elementToToggleExpand
-        );
+        const expand = this.element_ === elementToToggleExpand;
+        this.element_.toggleAttribute('expanded', expand);
+        this.textEl_.toggleAttribute('hidden', !expand);
+        this.launchEl_.toggleAttribute('hidden', !expand);
       }
     );
   }
@@ -84,8 +95,10 @@ export class AmpStoryAffiliateLink {
     const iconEl = htmlFor(this.element_)`
       <div class="i-amphtml-story-affiliate-link-circle">
         <i class="i-amphtml-story-affiliate-link-icon"></i>
-        <span class="i-amphtml-story-affiliate-link-text"></span>
-        <i class="i-amphtml-story-affiliate-link-launch"></i>
+        <div class="i-amphtml-story-reset i-amphtml-hidden">
+          <span class="i-amphtml-story-affiliate-link-text" hidden></span>
+          <i class="i-amphtml-story-affiliate-link-launch" hidden></i>
+        </div>        
       </div>`;
     this.element_.appendChild(iconEl);
   }
@@ -95,10 +108,24 @@ export class AmpStoryAffiliateLink {
    * @private
    */
   addText_() {
-    const textEl = this.element_.querySelector(
+    this.textEl_ = this.element_.querySelector(
       '.i-amphtml-story-affiliate-link-text'
     );
-    textEl.textContent = this.element_.textContent;
+
+    this.textEl_.textContent = this.element_.textContent;
+    this.textEl_.toggleAttribute('hidden', true);
+  }
+
+  /**
+   * Adds launch arrow to expanded link.
+   * @private
+   */
+  addLaunchElement_() {
+    this.launchEl_ = this.element_.querySelector(
+      '.i-amphtml-story-affiliate-link-launch'
+    );
+
+    this.launchEl_.toggleAttribute('hidden', true);
   }
 
   /**
