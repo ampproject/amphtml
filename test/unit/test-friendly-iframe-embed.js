@@ -381,7 +381,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       }
     );
     return embedPromise.then(embed => {
-      expect(embed.win.services['c'].obj).to.equal(embedService);
+      expect(embed.win.__AMP_SERVICES['c'].obj).to.equal(embedService);
       expect(disposeSpy).to.not.be.called;
       embed.destroy();
       expect(disposeSpy).to.be.calledOnce;
@@ -798,7 +798,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
 
       polls = [];
       win = {
-        services: {
+        __AMP_SERVICES: {
           'extensions': {
             obj: {
               preloadExtension: () => {},
