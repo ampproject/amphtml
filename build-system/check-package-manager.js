@@ -35,6 +35,15 @@ const yarnExecutable = 'npx yarn';
 const gulpExecutable = 'npx gulp';
 const pythonExecutable = 'python';
 
+const wrongGulpPaths = [
+  '/bin/',
+  '/sbin/',
+  '/usr/bin/',
+  '/usr/sbin/',
+  '/usr/local/bin/',
+  '/usr/local/sbin/',
+];
+
 const warningDelaySecs = 10;
 
 const updatesNeeded = new Set();
@@ -232,13 +241,12 @@ function runGulpChecks() {
   const firstInstall = !fs.existsSync('node_modules');
   const globalPackages = getStdout(yarnExecutable + ' global list').trim();
   const globalGulp = globalPackages.match(/"gulp@.*" has binaries/);
-  const globalGulpCli = globalPackages.match(/"gulp-cli@.*" has binaries/);
   const defaultGulpPath = getStdout('which gulp', {
     'env': {'PATH': getParentShellPath()},
   }).trim();
-  const wrongGulp =
-    !defaultGulpPath.includes('yarn') &&
-    !defaultGulpPath.includes('amphtml/node_modules');
+  const wrongGulp = wrongGulpPaths.some(path =>
+    defaultGulpPath.startsWith(path)
+  );
   if (globalGulp) {
     console.log(
       yellow('WARNING: Detected a global install of'),
@@ -258,32 +266,13 @@ function runGulpChecks() {
       yellow('for more information.')
     );
     updatesNeeded.add('gulp');
-  } else if (!globalGulpCli) {
-    console.log(
-      yellow('WARNING: Could not find'),
-      cyan('gulp-cli') + yellow('.')
-    );
-    console.log(
-      yellow('⤷ To install it, run'),
-      cyan('"yarn global add gulp-cli"') + yellow('.')
-    );
-    console.log(
-      yellow('⤷ See'),
-      cyan(gulpHelpUrl),
-      yellow('for more information.')
-    );
-    updatesNeeded.add('gulp-cli');
   }
   if (wrongGulp) {
     console.log(
       yellow('WARNING: Found'),
       cyan('gulp'),
       yellow('in an unexpected location:'),
-      cyan(defaultGulpPath) + yellow('. (The location usually contains'),
-      cyan('yarn'),
-      yellow('or'),
-      cyan('amphtml/node_modules'),
-      yellow('in the path.)')
+      cyan(defaultGulpPath) + yellow('.')
     );
     console.log(
       yellow('⤷ To fix this, consider removing'),
