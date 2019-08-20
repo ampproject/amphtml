@@ -43,7 +43,7 @@ stages:
   - name: build
   - name: test
   - name: experiment
-    if: type = pull_request # change to type = push before merging
+    if: type = push # change to type = push before merging
 jobs:
   include:
     - stage: build
@@ -98,10 +98,6 @@ jobs:
       name: "Experiment C Tests"
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
-  allow_failures:
-      - stage: experiment
-matrix:
-    fast_finish: true
 cache:
   directories:
     - node_modules
