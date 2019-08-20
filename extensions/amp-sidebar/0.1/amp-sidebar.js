@@ -381,6 +381,7 @@ export class AmpSidebar extends AMP.BaseElement {
       tryFocus(devAssert(this.closeButton_));
     }
     this.triggerEvent_(SidebarEvents.OPEN);
+    this.element.setAttribute('i-amphtml-sidebar-opened', '');
   }
 
   /**
@@ -388,15 +389,12 @@ export class AmpSidebar extends AMP.BaseElement {
    * @param {boolean} immediate
    */
   updateForClosing_(immediate) {
-    // Immediately hide the sidebar so that animation does not play.
-    if (immediate) {
-      toggle(this.element, /* display */ false);
-    }
     this.closeMask_();
     this.mutateElement(() => {
       setModalAsClosed(this.element);
     });
     this.element.removeAttribute('open');
+    this.element.removeAttribute('i-amphtml-sidebar-opened');
     this.element.setAttribute('aria-hidden', 'true');
     this.setUpdateFn_(
       () => this.updateForClosed_(),
@@ -457,6 +455,11 @@ export class AmpSidebar extends AMP.BaseElement {
       this.initialScrollTop_ == this.viewport_.getScrollTop();
     const sidebarIsActive = this.element.contains(this.document_.activeElement);
     this.setUpdateFn_(() => this.updateForClosing_(immediate));
+    // Immediately hide the sidebar so that animation does not play.
+    if (immediate) {
+      this.closeMask_();
+      toggle(this.element, /* display */ false);
+    }
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
       this.historyId_ = -1;

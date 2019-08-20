@@ -51,9 +51,9 @@ amp-sidebar[side="right"][open] {
   animation-name: i-amphtml-sidebar-slide-in-right;
 }
 
-amp-sidebar[side][i-amphtml-scale-animation] {
+amp-sidebar[side][i-amphtml-sidebar-opened] {
   transform: none;
-  animation-fill-mode: none;
+  animation: none;
 }
 
 amp-sidebar[side] {

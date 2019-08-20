@@ -37,7 +37,7 @@ const SWIPE_TO_CLOSE_VELOCITY_TO_DISTANCE_FACTOR = 22.5;
  * How much time to spend, based on the distance to travel, when moving to the
  * final location of a swipe (after the user has released).
  */
-const SWIPE_TO_CLOSE_DISTANCE_TO_TIME_FACTOR = 0.5;
+const SWIPE_TO_CLOSE_DISTANCE_TO_TIME_FACTOR = 0.75;
 /**
  * How much time to spend, based on the distance to travel, when snapping back
  * after an cancelled swipe to close gesture.
@@ -123,8 +123,8 @@ export class SwipeToDismiss {
    */
   getSwipeElementLength_() {
     return this.orientation_ == Orientation.HORIZONTAL
-      ? this.swipeElement_.offsetWidth
-      : this.swipeElement_.offsetHeight;
+      ? this.swipeElement_./*OK*/ offsetWidth
+      : this.swipeElement_./*OK*/ offsetHeight;
   }
 
   /**
