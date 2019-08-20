@@ -153,7 +153,7 @@ describes.realWin(
           expect(attributeMutation.parseAndValidate()).to.equal(true);
         });
 
-        it('background-color mutation', () => {
+        it('allow all mutations', () => {
           let attributeMutation = getAttributeMutationDefaultStyle(
             'background-color: #o7FogD'
           );
@@ -170,14 +170,61 @@ describes.realWin(
           expect(attributeMutation.parseAndValidate()).to.equal(true);
         });
 
-        it('color mutations', () => {
+        it('visibility mutations', () => {
           let attributeMutation = getAttributeMutationDefaultStyle(
-            'color: #000000'
+            'visibility: hidden'
           );
           expect(attributeMutation.parseAndValidate()).to.equal(true);
 
-          attributeMutation = getAttributeMutationDefaultStyle('color: #a0F');
+          attributeMutation = getAttributeMutationDefaultStyle(
+            'visibility: visible'
+          );
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
+
+          attributeMutation = getAttributeMutationDefaultStyle(
+            'visibility: hiddenhidden'
+          );
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
+
+          attributeMutation = getAttributeMutationDefaultStyle('visibility: ');
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
+        });
+
+        it('display mutations', () => {
+          let attributeMutation = getAttributeMutationDefaultStyle(
+            'display: none'
+          );
           expect(attributeMutation.parseAndValidate()).to.equal(true);
+
+          attributeMutation = getAttributeMutationDefaultStyle(
+            'display: nonehidden'
+          );
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
+        });
+
+        it('position mutations', () => {
+          let attributeMutation = getAttributeMutationDefaultStyle(
+            'position: absolute'
+          );
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
+
+          attributeMutation = getAttributeMutationDefaultStyle(
+            'position: fixed'
+          );
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
+        });
+
+        it('width height mutations', () => {
+          let attributeMutation = getAttributeMutationDefaultStyle(
+            'width: 100; height: inherit'
+          );
+          expect(attributeMutation.parseAndValidate()).to.equal(true);
+
+          elements = [doc.createElement('amp-foo')];
+          attributeMutation = getAttributeMutationDefaultStyle(
+            'width: 100; height: inherit'
+          );
+          expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
       });
 
