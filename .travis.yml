@@ -40,8 +40,10 @@ addons:
     # but should not resolve in tests.
     - fonts.googleapis.com
 stages:
-  - build
-  - test
+  - name: build
+  - name: test
+  - name: experiment
+    if: type = pull_request # change to type = push before merging
 jobs:
   include:
     - stage: build
@@ -84,21 +86,22 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
         - ps -ef
-    - stage: test
+    - stage: experiment
       name: "Experiment A Tests"
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentA
-      if: type = pull_request # change to type = push before merging
-    - stage: test
+    - stage: experiment
       name: "Experiment B Tests"
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentB
-      if: type = pull_request # change to type = push before merging
-    - stage: test
+    - stage: experiment
       name: "Experiment C Tests"
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
-      if: type = pull_request # change to type = push before merging          
+  allow_failures:
+      - stage: experiment
+matrix:
+    fast_finish: true
 cache:
   directories:
     - node_modules
