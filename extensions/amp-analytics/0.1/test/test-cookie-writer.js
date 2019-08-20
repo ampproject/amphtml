@@ -115,7 +115,7 @@ describes.realWin(
       });
 
       it('Resolve when in inabox ad', () => {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         const config = dict({
           'cookies': {
             'testId': {

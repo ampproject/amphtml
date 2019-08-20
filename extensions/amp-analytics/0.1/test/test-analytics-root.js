@@ -119,7 +119,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   });
 
   it('should provide the correct rect for ini-load for inabox', () => {
-    win.AMP_MODE = {runtime: 'inabox'};
+    win.__AMP_MODE = {runtime: 'inabox'};
     sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == win.document.documentElement) {
         return {left: 10, top: 11, width: 100, height: 200};

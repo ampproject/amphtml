@@ -84,7 +84,7 @@ describe('getRtvVersion', () => {
   });
 
   function getFreshMode(win) {
-    delete win.AMP_MODE;
+    delete win.__AMP_MODE;
     return getMode(win);
   }
 

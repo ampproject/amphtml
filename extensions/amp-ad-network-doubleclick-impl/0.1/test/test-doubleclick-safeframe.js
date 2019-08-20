@@ -58,7 +58,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    env.win.AMP_MODE.test = true;
+    env.win.__AMP_MODE.test = true;
     doc = env.win.document;
     setup(ampAdHeight, ampAdWidth, ampAdHeight, ampAdWidth);
   });

@@ -137,7 +137,7 @@ describe
 
     // TODO(bradfrizzell) break this out into a test-iframe-attributes
     it('should create an iframe', () => {
-      window.AMP_MODE = {
+      window.__AMP_MODE = {
         localDev: true,
         development: false,
         minified: false,
@@ -324,33 +324,33 @@ describe
     });
 
     it('should pick the right bootstrap url for local-dev mode', () => {
-      window.AMP_MODE = {localDev: true};
+      window.__AMP_MODE = {localDev: true};
       expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html'
       );
     });
 
     it('should pick the right bootstrap url for testing mode', () => {
-      window.AMP_MODE = {test: true};
+      window.__AMP_MODE = {test: true};
       expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html'
       );
     });
 
     it('should pick the right bootstrap unique url (prod)', () => {
-      window.AMP_MODE = {};
+      window.__AMP_MODE = {};
       expect(getBootstrapBaseUrl(window)).to.match(
         /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/
       );
     });
 
     it('should return a stable URL in getBootstrapBaseUrl', () => {
-      window.AMP_MODE = {};
+      window.__AMP_MODE = {};
       expect(getBootstrapBaseUrl(window)).to.equal(getBootstrapBaseUrl(window));
     });
 
     it('should return a stable URL in getDefaultBootstrapBaseUrl', () => {
-      window.AMP_MODE = {};
+      window.__AMP_MODE = {};
       expect(getDefaultBootstrapBaseUrl(window)).to.equal(
         getDefaultBootstrapBaseUrl(window)
       );
@@ -364,7 +364,7 @@ describe
     });
 
     it('should return different values for different file names', () => {
-      window.AMP_MODE = {};
+      window.__AMP_MODE = {};
       let match = /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/.exec(
         getDefaultBootstrapBaseUrl(window)
       );
@@ -412,7 +412,7 @@ describe
     });
 
     it('should prefetch bootstrap frame and JS', () => {
-      window.AMP_MODE = {localDev: true};
+      window.__AMP_MODE = {localDev: true};
       preloadBootstrap(window, preconnect);
       // Wait for visible promise.
       return Services.ampdoc(window.document)
@@ -432,7 +432,7 @@ describe
     });
 
     it('should prefetch default bootstrap frame if custom disabled', () => {
-      window.AMP_MODE = {localDev: true};
+      window.__AMP_MODE = {localDev: true};
       addCustomBootstrap('http://localhost:9876/boot/remote.html');
       preloadBootstrap(window, preconnect, true);
       // Wait for visible promise.
@@ -490,7 +490,7 @@ describe
         .returns('http://acme.org/')
         .twice();
 
-      window.AMP_MODE = {};
+      window.__AMP_MODE = {};
       const link = document.createElement('link');
       link.setAttribute('rel', 'canonical');
       link.setAttribute('href', 'https://foo.bar/baz');

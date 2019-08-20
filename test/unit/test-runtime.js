@@ -536,7 +536,7 @@ describes.fakeWin(
     });
 
     it('should load correct extension version', function*() {
-      self.AMP_MODE = {
+      self.__AMP_MODE = {
         rtvVersion: 'test-version',
       };
       toggleExperiment(win, 'version-locking', true);
