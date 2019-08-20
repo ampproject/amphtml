@@ -126,7 +126,6 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
       this.win,
-      this.element,
       cb => this.mutateElement(cb),
       // The sidebar is already animated by swipe to dismiss, so skip animation.
       () => this.close_(true)
@@ -445,7 +444,7 @@ export class AmpSidebar extends AMP.BaseElement {
    *     to "hidden".
    * @private
    */
-  close_(immediate) {
+  close_(immediate = false) {
     if (!this.opened_) {
       return false;
     }

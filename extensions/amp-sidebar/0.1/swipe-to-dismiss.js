@@ -73,16 +73,12 @@ export const Orientation = {
 export class SwipeToDismiss {
   /**
    * @param {!Window} win
-   * @param {!Element} element
    * @param {function(function())} mutateElement
    * @param {function()} onclose
    */
-  constructor(win, element, mutateElement, onclose) {
+  constructor(win, mutateElement, onclose) {
     /** @private @const */
     this.win_ = win;
-
-    /** @private @const */
-    this.element_ = element;
 
     /** @private @const */
     this.mutateElement_ = mutateElement;
@@ -90,10 +86,10 @@ export class SwipeToDismiss {
     /** @private @const */
     this.onclose_ = onclose;
 
-    /** @private @const */
+    /** @private {!Direction} */
     this.direction_ = Direction.BACKWARD;
 
-    /** @private @const */
+    /** @private {!Orientation} */
     this.orientation_ = Orientation.HORIZONTAL;
 
     /**
@@ -304,7 +300,6 @@ export class SwipeToDismiss {
   /**
    * Handles the start of a swipe to dimiss gesture:
    *  - Prevents a scroll event from the element during the swipe.
-   *  - Hides the source element on the page.
    * This should be called in a mutate context.
    * @private
    */
@@ -319,7 +314,6 @@ export class SwipeToDismiss {
         capture: true,
       }
     );
-    this.element_.setAttribute('i-amphtml-scale-animation', '');
   }
 
   /**
@@ -329,7 +323,6 @@ export class SwipeToDismiss {
    */
   endSwipeToDismiss_() {
     this.preventScrollUnlistener_();
-    this.element_.removeAttribute('i-amphtml-scale-animation');
   }
 
   /**
