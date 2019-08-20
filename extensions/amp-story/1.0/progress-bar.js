@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
-import {
-  StateProperty,
-  UIType,
-  getStoreService,
-} from './amp-story-store-service';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '../../../src/css';
-import {findIndex} from '../../../src/utils/array';
 import {hasOwn, map} from '../../../src/utils/object';
 import {removeChildren, scopedQuerySelector} from '../../../src/dom';
-import {scale, setImportantStyles, setStyle} from '../../../src/style';
+import {scale, setImportantStyles} from '../../../src/style';
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the
@@ -41,18 +37,10 @@ const TRANSITION_LINEAR = `transform ${POLL_INTERVAL_MS}ms linear`;
 const TRANSITION_EASE = 'transform 200ms ease';
 
 /**
- * Maximum number of segments that can be shown at a time before collapsing
- * into ellipsis.
+ * Size in pixels of a segment ellipse.
  * @const {number}
  */
-const MAX_SEGMENTS = 20;
-
-/**
- * Maximum number of segments that can be transformed into ellipsis on each
- * side.
- * @const {number}
- */
-const MAX_SEGMENT_ELLIPSIS = 3;
+const ELLIPSE_WIDTH_PX = 3;
 
 /**
  * Size in pixels of the total side margins of a segment.
@@ -61,23 +49,18 @@ const MAX_SEGMENT_ELLIPSIS = 3;
 const SEGMENTS_MARGIN_PX = 4;
 
 /**
- * Size in pixels of a segment ellipse.
+ * Maximum number of segments that can be shown at a time before collapsing
+ * into ellipsis.
  * @const {number}
  */
-const ELLIPSE_WIDTH_PX = 3;
+const MAX_SEGMENTS = 20;
 
 /**
- * Max number of segments we introduce to the bar as we pass an overflow point
+ * Number of segments we introduce to the bar as we pass an overflow point
  * (when user reaches ellipsis).
  * @const {number}
  */
-const MAX_SEGMENT_INCREMENT = 5;
-
-/** @enum {number} */
-const DIRECTION = {
-  LEFT: -1,
-  RIGHT: 1,
-};
+const SEGMENT_INCREMENT = 5;
 
 /**
  * Progress bar for <amp-story>.
@@ -106,37 +89,6 @@ export class ProgressBar {
     /** @private {number} */
     this.activeSegmentProgress_ = 1;
 
-    /** @private {!Element} */
-    this.storyEl_ = storyEl;
-
-    /** @private {boolean} */
-    this.overflowProgressBarBuilt_ = false;
-
-    /**
-     * Width of the progress bar in pixels.
-     * @private {number}
-     */
-    this.barWidthPx_ = 0;
-
-    /**
-     * Translate applied to a progress bar when the overflow point is passed.
-     * @private {number}
-     */
-    this.barTranslateX_ = 0;
-
-    /**
-     * Ellipsis are applied when a story contains more pages than MAX_SEGMENTS.
-     * Tail corresponds to the ellipsis on the opposite direction of navigation.
-     * Head corresponds to the ellipsis towards the side of navigation.
-     * @private {!Object}
-     */
-    this.ellipsis_ = {
-      upperIndexTail: 0, // Index furthest from the active index in the tail ellipsis.
-      upperIndexHead: 0, // Index furthest from the active index in the head ellipsis.
-      headIndices: [],
-      tailIndices: [],
-    };
-
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
 
@@ -148,12 +100,37 @@ export class ProgressBar {
 
     /** @private {string} */
     this.activeSegmentId_ = '';
+
+    /** @private {!Array<!Element>} */
+    this.segments_ = [];
+
+    /**
+     * Index next to first ellipse (if any) for stories with segments >
+     * MAX_SEGMENTS.
+     * @private {number}
+     */
+    this.progressBarIndex_ = 0;
+
+    /**
+     * Width of the progress bar in pixels.
+     * @private {number}
+     */
+    this.barWidthPx_ = 0;
+
+    /** @private {number} */
+    this.increment_ = 0;
+
+    /** @private {!Element} */
+    this.storyEl_ = storyEl;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win_);
   }
 
   /**
    * @param {!Window} win
    * @param {!Element} storyEl
-   * @return {ProgressBar}
+   * @return {!ProgressBar}
    */
   static create(win, storyEl) {
     return new ProgressBar(win, storyEl);
@@ -171,9 +148,9 @@ export class ProgressBar {
 
     this.root_ = this.win_.document.createElement('ol');
     this.root_.classList.add('i-amphtml-story-progress-bar');
-    this.barWidthPx_ = this.storyEl_
-      .querySelector('amp-story-page')
-      .getBoundingClientRect().width;
+    this.storyEl_.addEventListener(EventType.REPLAY, () => {
+      this.replay_();
+    });
 
     this.storeService_.subscribe(
       StateProperty.PAGE_IDS,
@@ -187,8 +164,6 @@ export class ProgressBar {
             this.addSegment_(id);
           }
         });
-
-        this.setSegmentSize_(this.getSegmentWidth_(0));
 
         if (this.isBuilt_) {
           this.updateProgress(
@@ -209,8 +184,133 @@ export class ProgressBar {
       true /** callToInitialize */
     );
 
+    this.barWidthPx_ = this.storyEl_
+      .querySelector('amp-story-page')
+      .getBoundingClientRect().width;
+
+    // Don't animate the progress bar in pageload.
+    this.timer_.delay(() => {
+      this.root_.classList.add('i-amphtml-animate-progress');
+    }, 1);
+
     this.isBuilt_ = true;
     return this.getRoot();
+  }
+
+  /**
+   * Reacts to story replay.
+   * @private
+   */
+  replay_() {
+    this.progressBarIndex_ = 0;
+    this.render_();
+  }
+
+  /**
+   * Renders the segments by setting their corresponding width and translate.
+   * @private
+   */
+  render_() {
+    const segmentWidth = this.getSegmentWidth_();
+    let translateX =
+      -(this.progressBarIndex_ - this.getPrevEllipsisCount_()) *
+      (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
+
+    for (let index = 0; index < this.segmentCount_; index++) {
+      const width =
+        index >= this.progressBarIndex_ &&
+        index < this.progressBarIndex_ + MAX_SEGMENTS
+          ? segmentWidth
+          : ELLIPSE_WIDTH_PX;
+      this.transform_(this.segments_[index], translateX, width);
+      translateX += width + SEGMENTS_MARGIN_PX;
+    }
+  }
+
+  /**
+   * Applies transform to a segment.
+   * @param {!Element} segment
+   * @param {number} translateX
+   * @param {number} width
+   * @private
+   */
+  transform_(segment, translateX, width) {
+    if (this.storeService_.get(StateProperty.RTL_STATE)) {
+      translateX *= -1;
+    }
+    segment.setAttribute(
+      'style',
+      `transform: translate3d(${translateX}px, 0, 0) scaleX(${width /
+        ELLIPSE_WIDTH_PX});`
+    );
+  }
+
+  /**
+   * Gets the individual segment width.
+   * @return {number}
+   * @private
+   */
+  getSegmentWidth_() {
+    const nextEllipsisCount = this.getNextEllipsisCount_();
+    const prevEllipsisCount = this.getPrevEllipsisCount_();
+    const totalEllipsisWidth =
+      (nextEllipsisCount + prevEllipsisCount) *
+      (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
+    const totalSegmentsWidth = this.barWidthPx_ - totalEllipsisWidth;
+
+    return (
+      totalSegmentsWidth / Math.min(this.segmentCount_, MAX_SEGMENTS) -
+      SEGMENTS_MARGIN_PX
+    );
+  }
+
+  /**
+   * Gets the count of ellipsis to the right (in LTR).
+   * @return {number}
+   * @private
+   */
+  getNextEllipsisCount_() {
+    const nextPagesCount =
+      this.segmentCount_ - (this.progressBarIndex_ + MAX_SEGMENTS);
+    return nextPagesCount > 3 ? 3 : Math.max(nextPagesCount, 0);
+  }
+
+  /**
+   * Gets the count of ellipsis to the left (in LTR).
+   * @return {number}
+   * @private
+   */
+  getPrevEllipsisCount_() {
+    return this.progressBarIndex_ > 3
+      ? 3
+      : Math.min(this.increment_, this.progressBarIndex_);
+  }
+
+  /**
+   * Checks if an index is past the MAX_SEGMENTS limit and updates the progress
+   * bar accordingly.
+   * @private
+   */
+  checkIndexForOverflow_() {
+    if (this.activeSegmentIndex_ >= this.progressBarIndex_ + MAX_SEGMENTS) {
+      const nextLimit =
+        this.progressBarIndex_ + MAX_SEGMENTS + SEGMENT_INCREMENT - 1;
+      this.increment_ =
+        nextLimit < this.segmentCount_
+          ? SEGMENT_INCREMENT
+          : this.segmentCount_ - (this.progressBarIndex_ + MAX_SEGMENTS);
+      this.progressBarIndex_ += this.increment_;
+
+      this.render_();
+    } else if (this.activeSegmentIndex_ < this.progressBarIndex_) {
+      this.increment_ =
+        this.progressBarIndex_ - SEGMENT_INCREMENT < 0
+          ? this.progressBarIndex_
+          : SEGMENT_INCREMENT;
+      this.progressBarIndex_ -= this.increment_;
+
+      this.render_();
+    }
   }
 
   /**
@@ -238,6 +338,7 @@ export class ProgressBar {
     segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
     segmentProgressBar.appendChild(segmentProgressValue);
     this.root_.appendChild(segmentProgressBar);
+    this.segments_.push(segmentProgressBar);
   }
 
   /**
@@ -283,375 +384,6 @@ export class ProgressBar {
   }
 
   /**
-   * Sets progress bar and ellipsis for the initial set of pages. It only
-   * happens once and only in segments < MAX_SEGMENTS because logic is a bit
-   * different than the general case.
-   * @private
-   */
-  setInitialStateForOverflow_() {
-    const ellipsisCount =
-      this.segmentCount_ >= MAX_SEGMENTS + MAX_SEGMENT_ELLIPSIS
-        ? MAX_SEGMENT_ELLIPSIS
-        : this.segmentCount_ % MAX_SEGMENTS;
-
-    this.setSegmentSize_(this.getSegmentWidth_(ellipsisCount));
-
-    const upperIndex =
-      MAX_SEGMENTS +
-      Math.min(MAX_SEGMENT_ELLIPSIS - 1, this.segmentCount_ % MAX_SEGMENTS);
-
-    const segmentEls = this.getRoot().querySelectorAll(
-      '.i-amphtml-story-page-progress-bar'
-    );
-    this.ellipsis_.headIndices = this.shrinkSegments_(
-      MAX_SEGMENTS,
-      upperIndex,
-      segmentEls
-    );
-    this.overflowProgressBarBuilt_ = true;
-  }
-
-  /**
-   * Checks if an index is past the overflow limit and updates the progress bar
-   * accordingly.
-   * @param {number} previousSegmentIndex
-   * @param {number} segmentIndex
-   * @param {boolean} pageReload
-   * @private
-   */
-  checkIndexForOverflow_(
-    previousSegmentIndex,
-    segmentIndex,
-    pageReload = false
-  ) {
-    if (
-      this.segmentCount_ <= MAX_SEGMENTS ||
-      this.storeService_.get(StateProperty.UI_STATE) !== UIType.MOBILE
-    ) {
-      return;
-    }
-
-    // If there was a page reload, snap the ellipsis to the position they would
-    // have had when navigating through the story normally.
-    if (pageReload && segmentIndex < MAX_SEGMENTS) {
-      segmentIndex = 0;
-    } else if (pageReload) {
-      segmentIndex = segmentIndex - (segmentIndex % MAX_SEGMENT_INCREMENT);
-      previousSegmentIndex = segmentIndex - 1;
-    }
-
-    // First time building overflow progress bar before hitting the overflow.
-    if (segmentIndex === 0 && !this.overflowProgressBarBuilt_) {
-      this.setInitialStateForOverflow_();
-      return;
-    }
-
-    // Moving from a normal segment to an ellipse, update new ellipsis and
-    // animate progress bar.
-    if (
-      this.ellipsis_.tailIndices.includes(segmentIndex) ||
-      this.ellipsis_.headIndices.includes(segmentIndex) ||
-      pageReload
-    ) {
-      const segmentEls = this.getRoot().querySelectorAll(
-        '.i-amphtml-story-page-progress-bar'
-      );
-      this.growPreviousEllipsis_(segmentEls);
-
-      const previous = {};
-      previous.upperIndexTail = this.ellipsis_.upperIndexTail;
-      previous.ellipsisToLeft =
-        findIndex(this.ellipsis_.tailIndices, idx => idx < segmentIndex) >= 0
-          ? 1
-          : 0;
-
-      const current = {};
-      current.navigationDirection =
-        segmentIndex > previousSegmentIndex ? DIRECTION.RIGHT : DIRECTION.LEFT;
-      const nextIndexLimit =
-        current.navigationDirection === DIRECTION.RIGHT
-          ? Math.min(
-              previousSegmentIndex + MAX_SEGMENT_INCREMENT,
-              this.segmentCount_ - 1
-            )
-          : Math.max(previousSegmentIndex - MAX_SEGMENT_INCREMENT, 0);
-
-      current.enteringSegmentsCount =
-        current.navigationDirection === DIRECTION.RIGHT
-          ? nextIndexLimit - previousSegmentIndex
-          : previousSegmentIndex - nextIndexLimit;
-
-      let ellipsisCount = this.updateTailEllipsis_(
-        previousSegmentIndex,
-        current,
-        segmentEls
-      );
-
-      ellipsisCount += this.updateHeadEllipsis_(
-        previousSegmentIndex,
-        current,
-        segmentEls
-      );
-
-      previous.segmentWidth = segmentEls[0].getBoundingClientRect().width;
-      current.segmentWidth = this.getSegmentWidth_(ellipsisCount);
-      current.segmentIndex = segmentIndex;
-
-      this.setSegmentSize_(current.segmentWidth);
-      this.slideProgressBar_(previous, current, segmentEls);
-    }
-  }
-
-  /**
-   * Grow segments that were previously ellipses.
-   * @param {!Array<!Element>} segmentEls
-   * @private
-   */
-  growPreviousEllipsis_(segmentEls) {
-    this.ellipsis_.tailIndices.forEach(index =>
-      segmentEls[index].classList.remove('i-amphtml-story-progress-ellipsis')
-    );
-    this.ellipsis_.headIndices.forEach(index =>
-      segmentEls[index].classList.remove('i-amphtml-story-progress-ellipsis')
-    );
-  }
-
-  /**
-   * Calculates and applies transform to the progress bar for the sliding
-   * animation.
-   * @param {!Object} previous
-   * @param {!Object} current
-   * @param {!Array<!Element>} segmentEls
-   * @private
-   */
-  slideProgressBar_(previous, current, segmentEls) {
-    let translate;
-    if (current.navigationDirection === DIRECTION.RIGHT) {
-      translate = this.getForwardTranslate_(previous, current, segmentEls);
-    } else {
-      translate = this.getBackwardTranslate_(previous, current, segmentEls);
-    }
-
-    if (
-      current.navigationDirection === DIRECTION.RIGHT &&
-      current.segmentIndex + current.enteringSegmentsCount > this.segmentCount_
-    ) {
-      return;
-    } else if (
-      current.navigationDirection === DIRECTION.LEFT &&
-      current.segmentIndex - MAX_SEGMENT_ELLIPSIS < 0
-    ) {
-      return;
-    }
-
-    this.barTranslateX_ += translate;
-    setStyle(
-      this.root_,
-      'transform',
-      `translate3d(${this.barTranslateX_}px, 0, 0)`
-    );
-  }
-
-  /**
-   * Calculates translate to be applied when navigating backwards on a
-   * story and hitting the overflow ellipsis.
-   * @param {!Object} previous
-   * @param {!Object} current
-   * @param {!Array<!Element>} segmentEls
-   * @return {number}
-   * @private
-   */
-  getBackwardTranslate_(previous, current, segmentEls) {
-    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
-    const translateDirection = rtlState ? DIRECTION.RIGHT : DIRECTION.LEFT;
-
-    const upperIndexHeadRect = segmentEls[
-      this.ellipsis_.upperIndexHead
-    ].getBoundingClientRect();
-    const sizeDiff =
-      this.ellipsis_.upperIndexHead *
-      (current.segmentWidth - previous.segmentWidth);
-    const distanceFromOrigin = rtlState
-      ? upperIndexHeadRect.right - this.barWidthPx_
-      : Math.abs(upperIndexHeadRect.left);
-
-    return (
-      (distanceFromOrigin - sizeDiff + SEGMENTS_MARGIN_PX / 2) *
-      (translateDirection * -1)
-    );
-  }
-
-  /**
-   * Calculates translate to be applied when navigating forwards on a
-   * story and hitting the overflow ellipsis.
-   * @param {!Object} previous
-   * @param {!Object} current
-   * @param {!Array<!Element>} segmentEls
-   * @return {number}
-   * @private
-   */
-  getForwardTranslate_(previous, current, segmentEls) {
-    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
-    const translateDirection = rtlState ? DIRECTION.RIGHT : DIRECTION.LEFT;
-
-    const upperIndexTailDifference =
-      this.ellipsis_.upperIndexTail - previous.upperIndexTail;
-
-    // Only take into consideration ellipsis to the left of the new
-    // upperIndexTail.
-    const ellipsisGrownToLeft = Math.min(
-      MAX_SEGMENT_ELLIPSIS,
-      upperIndexTailDifference
-    );
-
-    // Since ellipsis growing to the left push the current segment to the
-    // right, we have to take that into consideration when sliding the
-    // progressbar.
-    const ellipseToNormalSizeDiff =
-      previous.ellipsisToLeft *
-      ellipsisGrownToLeft *
-      (current.segmentWidth - ELLIPSE_WIDTH_PX);
-    const sizeDiff =
-      this.ellipsis_.upperIndexTail *
-      (current.segmentWidth - previous.segmentWidth);
-    const upperIndexTailRect = segmentEls[
-      this.ellipsis_.upperIndexTail
-    ].getBoundingClientRect();
-
-    const distanceFromOrigin = rtlState
-      ? this.barWidthPx_ - upperIndexTailRect.right
-      : upperIndexTailRect.left;
-
-    return (
-      translateDirection *
-        (ellipseToNormalSizeDiff +
-          distanceFromOrigin -
-          SEGMENTS_MARGIN_PX / 2) +
-      translateDirection * sizeDiff
-    );
-  }
-
-  /**
-   * Updates the ellipsis at the "head" of the progressbar. The "head" is the
-   * the rightmost MAX_SEGMENT_ELLIPSIS when navigating from left to right.
-   * @param {number} prevSegmentIndex
-   * @param {!Object} current
-   * @param {!Array<!Element>} segmentEls
-   * @return {number}
-   */
-  updateHeadEllipsis_(prevSegmentIndex, current, segmentEls) {
-    const lowerLimit =
-      prevSegmentIndex +
-      current.navigationDirection * current.enteringSegmentsCount +
-      current.navigationDirection;
-    if (
-      (current.navigationDirection === DIRECTION.RIGHT &&
-        lowerLimit < this.segmentCount_) ||
-      (current.navigationDirection === DIRECTION.LEFT && lowerLimit > 0)
-    ) {
-      this.ellipsis_.upperIndexHead =
-        lowerLimit +
-        current.navigationDirection *
-          Math.min(MAX_SEGMENT_ELLIPSIS - 1, current.enteringSegmentsCount);
-      this.ellipsis_.upperIndexHead =
-        this.ellipsis_.upperIndexHead < 0 ? 0 : this.ellipsis_.upperIndexHead;
-
-      this.ellipsis_.headIndices = this.shrinkSegments_(
-        lowerLimit,
-        this.ellipsis_.upperIndexHead,
-        segmentEls
-      );
-
-      return this.ellipsis_.headIndices.length;
-    }
-    // Clear the head ellipsis since we reached a point were there are none.
-    this.ellipsis_.upperIndexHead = 0;
-    this.ellipsis_.headIndices = [];
-    return 0;
-  }
-
-  /**
-   * Updates the ellipsis at the "tail" of the progressbar. The "head" is the
-   * leftmost MAX_SEGMENT_ELLIPSIS when navigating from left to right.
-   * @param {number} previousIndex
-   * @param {!Object} current
-   * @param {!Array<!Element>} segmentEls
-   * @return {number}
-   */
-  updateTailEllipsis_(previousIndex, current, segmentEls) {
-    const lowerIndexForTail =
-      previousIndex +
-      -1 * current.navigationDirection * MAX_SEGMENTS +
-      current.navigationDirection * current.enteringSegmentsCount;
-
-    this.ellipsis_.upperIndexTail =
-      lowerIndexForTail +
-      -1 *
-        current.navigationDirection *
-        Math.min(MAX_SEGMENT_ELLIPSIS - 1, current.enteringSegmentsCount);
-
-    this.ellipsis_.upperIndexTail =
-      this.ellipsis_.upperIndexTail >= 0 ? this.ellipsis_.upperIndexTail : 0;
-    this.ellipsis_.tailIndices = this.shrinkSegments_(
-      lowerIndexForTail,
-      this.ellipsis_.upperIndexTail,
-      segmentEls
-    );
-    return this.ellipsis_.tailIndices.length;
-  }
-
-  /**
-   * Shrinks segments to become ellipse size.
-   * @param {number} firstEllipsis
-   * @param {number} secondEllipsis
-   * @param {!Array<!Element>} segmentEls
-   * @return {number}
-   * @private
-   */
-  shrinkSegments_(firstEllipsis, secondEllipsis, segmentEls) {
-    const ellipsisIndices = [];
-    const upper = Math.max(firstEllipsis, secondEllipsis);
-    const lower = Math.min(firstEllipsis, secondEllipsis);
-    for (let i = lower; i < this.segmentCount_ && i <= upper; i++) {
-      segmentEls[i].classList.add('i-amphtml-story-progress-ellipsis');
-      ellipsisIndices.push(i);
-    }
-    return ellipsisIndices;
-  }
-
-  /**
-   * @param {number} ellipsisCount
-   * @return {number}
-   * @private
-   */
-  getSegmentWidth_(ellipsisCount) {
-    const ellipseSize = ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX;
-
-    const segmentCount =
-      this.segmentCount_ > MAX_SEGMENTS ? MAX_SEGMENTS : this.segmentCount_;
-
-    return (
-      (this.barWidthPx_ -
-        segmentCount * SEGMENTS_MARGIN_PX -
-        ellipsisCount * ellipseSize) /
-      segmentCount
-    );
-  }
-
-  /**
-   * Sets size for the segments.
-   * @param {?number} width
-   */
-  setSegmentSize_(width) {
-    const segmentWidth = width ? width + 'px' : '100%';
-    this.win_.document.documentElement.setAttribute(
-      'style',
-      this.win_.document.documentElement.getAttribute('style') +
-        `--segment-width: ${segmentWidth};`
-    );
-  }
-
-  /**
    * Updates a segment with its corresponding progress.
    *
    * @param {string} segmentId the id of the segment whos progress to change.
@@ -663,16 +395,13 @@ export class ProgressBar {
     this.assertVaildSegmentId_(segmentId);
     const segmentIndex = this.segmentIdMap_[segmentId];
 
-    // We can tell if the page was reloaded if this.activeSegmentIndex_ hasn't
-    // yet been updated here.
-    const pageReload = !this.activeSegmentId_;
-    this.checkIndexForOverflow_(
-      pageReload ? segmentIndex - 1 : this.activeSegmentIndex_,
-      segmentIndex,
-      pageReload
-    );
-
     this.updateProgressByIndex_(segmentIndex, progress);
+
+    // If story was reloaded.
+    if (!this.activeSegmentIndex_) {
+      this.updateValuesForReload_(segmentIndex);
+      this.render_();
+    }
 
     // If updating progress for a new segment, update all the other progress
     // bar segments.
@@ -688,6 +417,22 @@ export class ProgressBar {
     this.activeSegmentProgress_ = progress;
     this.activeSegmentIndex_ = segmentIndex;
     this.activeSegmentId_ = segmentId;
+    this.checkIndexForOverflow_(segmentIndex);
+  }
+
+  /**
+   * Snap the progressBarIndex to its most appropiate place after reload.
+   * @param {number} segmentIndex
+   */
+  updateValuesForReload_(segmentIndex) {
+    if (
+      segmentIndex > MAX_SEGMENTS &&
+      segmentIndex + MAX_SEGMENTS < this.segmentCount_
+    ) {
+      this.progressBarIndex_ = segmentIndex - (segmentIndex % MAX_SEGMENTS);
+    } else if (segmentIndex > MAX_SEGMENTS) {
+      this.progressBarIndex_ = this.segmentCount_ - MAX_SEGMENTS;
+    }
   }
 
   /**

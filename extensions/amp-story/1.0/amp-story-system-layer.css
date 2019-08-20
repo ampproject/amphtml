@@ -82,6 +82,10 @@
   float: left !important;
 }
 
+ol.i-amphtml-animate-progress li {
+  transition: transform 1s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
 .i-amphtml-story-progress-bar {
   border: 0 !important;
   display: flex !important;
@@ -91,12 +95,7 @@
   position: absolute !important;
   top: 0 !important;
   visibility: visible !important;
-  transition: transform 1.5s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   z-index: 100001 !important;
-}
-
-.i-amphtml-story-progress-ellipsis {
-  width: 3px !important;
 }
 
 [ad-showing] .i-amphtml-story-progress-bar {
@@ -107,11 +106,16 @@
   background: rgba(255, 255, 255, 0.4) !important;
   border-radius: 1px !important;
   height: 100% !important;
-  list-style-type: none !important;
+  list-style: none !important;
   margin: 0 2px !important;
   overflow: hidden !important;
-  width: var(--segment-width);
-  transition: width 1.5s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  width: 3px !important;
+  position: absolute !important;
+  transform-origin: left !important;
+}
+
+[dir=rtl] .i-amphtml-story-page-progress-bar {
+  transform-origin: right !important;
 }
 
 .i-amphtml-story-page-progress-value {
