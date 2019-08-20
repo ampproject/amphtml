@@ -52,7 +52,7 @@ describe('preconnect', () => {
       const platform = {
         isSafari: () => !!isSafari,
       };
-      iframe.win.services['platform'] = {obj: platform};
+      iframe.win.__AMP_SERVICES['platform'] = {obj: platform};
 
       const element = document.createElement('div');
       iframe.win.document.body.appendChild(element);

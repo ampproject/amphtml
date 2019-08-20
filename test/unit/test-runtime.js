@@ -62,7 +62,7 @@ describes.fakeWin(
       };
       ampdocServiceMock = sandbox.mock(ampdocService);
       win.AMP = [];
-      win.services = {
+      win.__AMP_SERVICES = {
         ampdoc: {obj: ampdocService},
       };
       const ampdoc = new AmpDocSingle(win);
@@ -1066,10 +1066,10 @@ describes.realWin(
         expect(shadowRoot.querySelector('style[amp-runtime]')).to.exist;
 
         // Doc services have been installed.
-        expect(ampdoc.services.action).to.exist;
-        expect(ampdoc.services.action.obj).to.exist;
-        expect(ampdoc.services.viewer).to.exist;
-        expect(ampdoc.services.viewer.obj).to.exist;
+        expect(ampdoc.__AMP_SERVICES.action).to.exist;
+        expect(ampdoc.__AMP_SERVICES.action.obj).to.exist;
+        expect(ampdoc.__AMP_SERVICES.viewer).to.exist;
+        expect(ampdoc.__AMP_SERVICES.viewer.obj).to.exist;
 
         // Single-doc bidings have been installed.
         expect(ret.ampdoc).to.equal(ampdoc);
@@ -1428,10 +1428,10 @@ describes.realWin(
           expect(shadowRoot.querySelector('style[amp-runtime]')).to.exist;
 
           // Doc services have been installed.
-          expect(ampdoc.services.action).to.exist;
-          expect(ampdoc.services.action.obj).to.exist;
-          expect(ampdoc.services.viewer).to.exist;
-          expect(ampdoc.services.viewer.obj).to.exist;
+          expect(ampdoc.__AMP_SERVICES.action).to.exist;
+          expect(ampdoc.__AMP_SERVICES.action.obj).to.exist;
+          expect(ampdoc.__AMP_SERVICES.viewer).to.exist;
+          expect(ampdoc.__AMP_SERVICES.viewer.obj).to.exist;
 
           // Single-doc bidings have been installed.
           expect(shadowDoc.ampdoc).to.equal(ampdoc);
