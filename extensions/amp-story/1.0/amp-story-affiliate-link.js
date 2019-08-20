@@ -45,10 +45,10 @@ export class AmpStoryAffiliateLink {
     /** @private {!Element} */
     this.element_ = element;
 
-    /** @private {!Element} */
+    /** @private {?Element} */
     this.textEl_ = null;
 
-    /** @private {!Element} */
+    /** @private {?Element} */
     this.launchEl_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
