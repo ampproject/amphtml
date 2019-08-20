@@ -27,6 +27,7 @@ import {
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
+import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {
@@ -670,14 +671,26 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Validate ad-server response has requirements to build outlink
    * @param {!Element} adPageElement
-   * @param {!Object} a4aVars
-   * @return {*} TODO(#23582): Specify return type
+   * @return {boolean}
    */
-  maybeCreateCtaLayer_(adPageElement, a4aVars) {
-    // if making a CTA layer we need a button name & outlink url
+  maybeCreateCtaLayer_(adPageElement) {
+    let a4aVars = {};
+    let ampAdExitOutlink = null;
+
+    const {iframe} = this.lastCreatedAdImpl_;
+    // No iframe for custom ad.
+    if (iframe) {
+      const iframeDoc = getFrameDoc(iframe);
+      ampAdExitOutlink = this.readAmpAdExit_(iframeDoc);
+      a4aVars = this.extractA4AVars_(iframeDoc);
+    }
+
+    // If making a CTA layer we need a button name & outlink url.
     const ctaUrl =
+      ampAdExitOutlink ||
       a4aVars[A4AVarNames.CTA_URL] ||
       this.lastCreatedAdElement_.getAttribute(DataAttrs.CTA_URL);
+
     const ctaType =
       a4aVars[A4AVarNames.CTA_TYPE] ||
       this.lastCreatedAdElement_.getAttribute(DataAttrs.CTA_TYPE);
@@ -701,6 +714,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       user().error(TAG, 'invalid "CTA Type" in ad response');
       return false;
     }
+
+    this.maybeCreateAttribution_(adPageElement, a4aVars);
 
     return this.createCtaLayer_(
       adPageElement,
@@ -949,18 +964,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.PENDING;
     }
 
-    const a4aVars = this.extractA4AVars_();
-
     const ctaCreated = this.maybeCreateCtaLayer_(
-      dev().assertElement(nextAdPageEl),
-      a4aVars
+      dev().assertElement(nextAdPageEl)
     );
     if (!ctaCreated) {
       // failed on ad-server response format
       return AD_STATE.FAILED;
     }
-
-    this.maybeCreateAttribution_(nextAdPageEl, a4aVars);
 
     this.ampStory_.insertPage(pageBeforeAdId, nextAdPageEl.id);
 
@@ -977,11 +987,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * Find all `amp4ads-vars-` prefixed meta tags and return all kv pairs
    * in a single object.
    * @private
+   * @param {!Document} iframeDoc
    * @return {!Object}
    */
-  extractA4AVars_() {
-    const {iframe} = this.lastCreatedAdImpl_;
-    const iframeDoc = getFrameDoc(iframe);
+  extractA4AVars_(iframeDoc) {
     const tags = getA4AMetaTags(iframeDoc);
     const vars = {};
     iterateCursor(tags, tag => {
@@ -990,6 +999,44 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       vars[name] = content;
     });
     return vars;
+  }
+
+  /**
+   * TODO(#24080) Remove this when story ads have full ad network support.
+   * This in intended to be a temporary hack so we can can support
+   * ad serving pipelines that are reliant on using amp-ad-exit for
+   * outlinks.
+   * Reads amp-ad-exit config and tries to extract a suitable outlink.
+   * If there are multiple exits present, behavior is unpredictable due to
+   * JSON parse.
+   * @private
+   * @param {!Document} iframeDoc
+   * @return {?string}
+   */
+  readAmpAdExit_(iframeDoc) {
+    const ampAdExit = iframeDoc.querySelector('amp-ad-exit');
+    if (!ampAdExit) {
+      return null;
+    }
+    try {
+      const {children} = ampAdExit;
+      userAssert(
+        children.length == 1,
+        'The tag should contain exactly one <script> child.'
+      );
+      const child = children[0];
+      userAssert(
+        isJsonScriptTag(child),
+        'The amp-ad-exit config should ' +
+          'be inside a <script> tag with type="application/json"'
+      );
+      const config = assertConfig(parseJson(child.textContent));
+      const target = config['targets'][Object.keys(config['targets'])[0]];
+      return target['finalUrl'];
+    } catch (e) {
+      dev().error(TAG, e);
+      return null;
+    }
   }
 
   /**
