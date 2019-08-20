@@ -419,7 +419,7 @@ function beforeTest() {
   window.AMP_CONFIG = {
     canary: 'testSentinel',
   };
-  window.AMP_TEST = true;
+  window.__AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
   const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
   installRuntimeServices(window);
