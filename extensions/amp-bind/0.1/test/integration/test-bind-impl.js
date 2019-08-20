@@ -510,7 +510,7 @@ describe
         });
 
         it('should verify class bindings in dev mode', () => {
-          window.AMP_MODE = {development: true, test: true};
+          window.__AMP_MODE = {development: true, test: true};
           createElement(env, container, '[class]="\'foo\'" class="foo"');
           createElement(env, container, '[class]="\'foo\'" class=" foo "');
           createElement(env, container, '[class]="\'\'"');
@@ -523,7 +523,7 @@ describe
         });
 
         it('should verify string attribute bindings in dev mode', () => {
-          window.AMP_MODE = {development: true, test: true};
+          window.__AMP_MODE = {development: true, test: true};
           // Only the initial value for [a] binding does not match.
           createElement(
             env,
@@ -538,7 +538,7 @@ describe
         });
 
         it('should verify boolean attribute bindings in dev mode', () => {
-          window.AMP_MODE = {development: true, test: true};
+          window.__AMP_MODE = {development: true, test: true};
           createElement(env, container, '[disabled]="true" disabled', 'button');
           createElement(env, container, '[disabled]="false"', 'button');
           createElement(env, container, '[disabled]="true"', 'button'); // Mismatch.
