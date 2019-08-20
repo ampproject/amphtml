@@ -32,3 +32,7 @@ For more information, please [see the Directadvert FAQ](https://www.directadvert
 ### Required parameters
 
 - `data-block-id`
+
+### Optional parameters
+
+- `data-server-name`
