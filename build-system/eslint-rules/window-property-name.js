@@ -65,7 +65,7 @@ module.exports = function(context) {
       // Disallow computed property names on window so we can enforce naming.
       if (left.computed) {
         context.report({
-          left,
+          node,
           message: 'Computed property names are not allowed on window.',
         });
         return;
