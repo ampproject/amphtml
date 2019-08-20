@@ -614,7 +614,7 @@ class RealWinFixture {
         env.win = win;
 
         // Flag as being a test window.
-        win.AMP_TEST_IFRAME = true;
+        win.__AMP_TEST_IFRAME = true;
         // Set the testLocation on iframe to parent's location since location of
         // the test iframe is about:srcdoc.
         // Unfortunately location object is not configurable, so we have to
@@ -881,7 +881,7 @@ class AmpFixture {
  * @param {!Window} win
  */
 function configureAmpTestMode(win) {
-  win.AMP_TEST = true;
+  win.__AMP_TEST = true;
 }
 
 /**

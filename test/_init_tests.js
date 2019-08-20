@@ -378,7 +378,7 @@ function preventAsyncErrorThrows() {
     rethrowAsyncSandbox = sinon.createSandbox();
     rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
       const error = log.createErrorVargs.apply(null, args);
-      self.reportError(error);
+      self.__AMP_REPORT_ERROR(error);
       throw error;
     });
   };
@@ -419,7 +419,7 @@ function beforeTest() {
   window.AMP_CONFIG = {
     canary: 'testSentinel',
   };
-  window.AMP_TEST = true;
+  window.__AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
   const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
   installRuntimeServices(window);
