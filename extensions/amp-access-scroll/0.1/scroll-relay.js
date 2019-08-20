@@ -42,9 +42,9 @@ export class Relay {
    * @private
    */
   onMessage_(e) {
-    const data = /** @type {!JsonObject} */ (getData(e));
+    const data = /** @type {JsonObject} */ (getData(e));
     const fromScrollOrigin = e.origin === this.origin_;
-    const isScrollAmpMessage = '_scramp' in data;
+    const isScrollAmpMessage = typeof data === 'object' && '_scramp' in data;
     const fromFrameInRelay = this.frames_.indexOf(e.source) > -1;
     if (!fromScrollOrigin || !fromFrameInRelay || !isScrollAmpMessage) {
       return;
