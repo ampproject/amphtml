@@ -13,9 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @fileoverview
+ * Checks that custom properties set on the window are prefixed with '__AMP_'.
+ * The prefix is invalid in `id` attributes which prevents DOM clobbering.
+ */
+
 'use strict';
 
 const path = require('path');
+
+// TODO(choumx): Fix extensions code and add 'extensions/' here.
+const PATHS_TO_INCLUDE = ['src/'];
+
+const PATHS_TO_IGNORE = ['src/polyfills', 'test/'];
 
 const WINDOW_PROPERTY = ['win', 'window', 'global', 'self'];
 
@@ -27,14 +39,15 @@ module.exports = function(context) {
   return {
     AssignmentExpression(node) {
       const filePath = context.getFilename();
-      // Ignore polyfills and third-party code.
-      if (
-        filePath.includes('src/polyfills/') ||
-        filePath.includes('third_party/')
-      ) {
+      // Only check select paths.
+      if (!PATHS_TO_INCLUDE.some(path => filePath.includes(path))) {
         return;
       }
-      // Ignore tests.
+      // Ignore polyfills etc.
+      if (PATHS_TO_IGNORE.some(path => filePath.includes(path))) {
+        return;
+      }
+      // Ignore test files.
       const filename = path.basename(filePath);
       if (/^(test-(\w|-)+|(\w|-)+-testing)\.js$/.test(filename)) {
         return;
@@ -49,6 +62,7 @@ module.exports = function(context) {
       if (!object || !WINDOW_PROPERTY.includes(object.toLowerCase())) {
         return;
       }
+      // The window property must be prefixed with "__AMP_".
       const prop = left.property.name;
       if (!prop || prop.startsWith('__AMP_') || isAllowedWindowProp(prop)) {
         return;
