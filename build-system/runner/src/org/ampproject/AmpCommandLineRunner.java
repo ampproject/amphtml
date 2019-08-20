@@ -75,7 +75,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     // might override a method. In the future this might be doable
     // with using a more complete extern file instead.
     options.setRemoveUnusedPrototypeProperties(false);
-    options.setInlineProperties(false);
     options.setComputeFunctionSideEffects(false);
     // Property renaming. Relies on AmpCodingConvention to be safe.
     options.setRenamingPolicy(VariableRenamingPolicy.ALL,
