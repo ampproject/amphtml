@@ -33,6 +33,7 @@ import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {
   createElementWithAttributes,
+  isJsonScriptTag,
   iterateCursor,
   openWindowDialog,
 } from '../../../src/dom';
@@ -40,6 +41,7 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getA4AMetaTags, getFrameDoc, getUniqueId} from './utils';
+import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import LocalizedStringsAr from './_locales/ar';
@@ -70,16 +72,19 @@ const FIRST_AD_MIN = 7;
 /** @const {number} */
 const MIN_INTERVAL = 7;
 
-/** @const */
+/** @const {string} */
 const TAG = 'amp-story-auto-ads';
 
-/** @const */
+/** @const {string} */
 const AD_TAG = 'amp-ad';
 
-/** @const */
+/** @const {string} */
+const MUSTACHE_TAG = 'amp-mustache';
+
+/** @const {number} */
 const TIMEOUT_LIMIT = 10000; // 10 seconds
 
-/** @const */
+/** @const {string} */
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
 /** @enum {string} */
@@ -325,9 +330,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       .signals()
       .whenSignal(CommonSignals.INI_LOAD)
       .then(() => {
+        this.handleConfig_();
         this.createAdOverlay_();
         this.initializeListeners_();
-        this.config_ = new StoryAdConfig(this.win, this.element).getConfig();
         this.schedulePage_();
       });
   }
@@ -341,6 +346,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   forceRender(pageBeforeAdId) {
     this.isCurrentAdLoaded_ = true;
     this.tryToPlaceAdAfterPage_(pageBeforeAdId);
+  }
+
+  /**
+   * Sets config and installs additional extensions if necessary.
+   * @private
+   */
+  handleConfig_() {
+    this.config_ = new StoryAdConfig(this.element).getConfig();
+    if (this.config_['type'] === 'custom') {
+      Services.extensionsFor(this.win)./*OK*/ installExtensionForDoc(
+        this.element.getAmpDoc(),
+        MUSTACHE_TAG
+      );
+    }
   }
 
   /**

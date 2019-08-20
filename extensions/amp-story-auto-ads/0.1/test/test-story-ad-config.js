@@ -38,7 +38,7 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
         doc.body, // Parent.
         config
       );
-      const result = new StoryAdConfig(win, storyAdEl).getConfig();
+      const result = new StoryAdConfig(storyAdEl).getConfig();
       expect(result).to.eql({
         'amp-story': '',
         class: 'i-amphtml-story-ad',
@@ -64,7 +64,7 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
         doc.body, // Parent.
         config
       );
-      const result = new StoryAdConfig(win, storyAdEl).getConfig();
+      const result = new StoryAdConfig(storyAdEl).getConfig();
       expect(result['rtc-config']).to.equal(
         '{"vendors":{"vendor1":{"SLOT_ID":1},"vendor2":{"PAGE_ID":"abc"}}}'
       );
@@ -75,7 +75,7 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
       doc.body.appendChild(storyAdEl);
       allowConsoleError(() => {
         expect(() => {
-          new StoryAdConfig(win, storyAdEl).getConfig();
+          new StoryAdConfig(storyAdEl).getConfig();
         }).to.throw(
           /The amp-story-auto-ads:config should be inside a <script> tag with type=\"application\/json\"​​​/
         );
@@ -92,7 +92,7 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
       doc.body.appendChild(storyAdEl);
       allowConsoleError(() => {
         expect(() => {
-          new StoryAdConfig(win, storyAdEl).getConfig();
+          new StoryAdConfig(storyAdEl).getConfig();
         }).to.throw(
           /amp-story-auto-ads:config Error reading config\. Top level JSON should have an \"ad-attributes\" key​​​/
         );
@@ -112,7 +112,7 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
         doc.body, // Parent.
         config
       );
-      const result = new StoryAdConfig(win, storyAdEl).getConfig();
+      const result = new StoryAdConfig(storyAdEl).getConfig();
       expect(result).to.eql({
         'amp-story': '',
         class: 'i-amphtml-story-ad',
@@ -134,7 +134,7 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
       );
       allowConsoleError(() => {
         expect(() => {
-          new StoryAdConfig(win, storyAdEl).getConfig();
+          new StoryAdConfig(storyAdEl).getConfig();
         }).to.throw(
           /amp-story-auto-ads:config \"unsupported\" ad type is missing or not supported/
         );
@@ -154,7 +154,7 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
       );
       allowConsoleError(() => {
         expect(() => {
-          new StoryAdConfig(win, storyAdEl).getConfig();
+          new StoryAdConfig(storyAdEl).getConfig();
         }).to.throw(
           /amp-story-auto-ads:config id must start with i-amphtml-demo- to use fake ads/
         );
@@ -174,7 +174,7 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
       );
       storyAdEl.id = 'i-amphtml-demo-foo';
 
-      const result = new StoryAdConfig(win, storyAdEl).getConfig();
+      const result = new StoryAdConfig(storyAdEl).getConfig();
       expect(result).to.eql({
         type: 'fake',
         src: '/examples/amp-story/ads/app-install.html',
@@ -183,31 +183,6 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
         layout: 'fill',
         'amp-story': '',
       });
-    });
-
-    it('installs amp-mustache for custom ads', () => {
-      const installExtensionForDocStub = sandbox.spy();
-      sandbox
-        .stub(Services.extensionsFor(win), 'installExtensionForDoc')
-        .callsFake(installExtensionForDocStub);
-
-      const config = {
-        type: 'custom',
-        'data-url': './amp-story-auto-ads-payload.json',
-      };
-
-      const storyAdEl = createStoryAdElementAndConfig(
-        doc,
-        doc.body, // Parent.
-        config
-      );
-      storyAdEl.getAmpDoc = () => env.ampdoc;
-
-      new StoryAdConfig(win, storyAdEl).getConfig();
-      expect(installExtensionForDocStub).calledWithExactly(
-        env.ampdoc,
-        'amp-mustache'
-      );
     });
   });
 });

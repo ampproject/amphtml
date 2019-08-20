@@ -69,10 +69,50 @@ describes.realWin(
       autoAds = new AmpStoryAutoAds(adElement);
     });
 
+    describe('service installation', () => {
+      let installExtensionForDocStub;
+      beforeEach(() => {
+        installExtensionForDocStub = sandbox.spy();
+        sandbox
+          .stub(Services.extensionsFor(win), 'installExtensionForDoc')
+          .callsFake(installExtensionForDocStub);
+        new MockStoryImpl(storyElement);
+      });
+
+      it('should install amp-mustache when type="custom"', async () => {
+        const config = {
+          type: 'custom',
+          'data-url': '/some/fake/path',
+        };
+        addStoryAutoAdsConfig(adElement, config);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        expect(installExtensionForDocStub).to.be.calledWithExactly(
+          env.ampdoc,
+          'amp-mustache'
+        );
+      });
+
+      it('should not install amp-mustache when type!="custom"', async () => {
+        const config = {
+          type: 'doubleclick',
+          'data-slot': '/300200/foo',
+        };
+        new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(adElement, config);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        expect(installExtensionForDocStub).not.to.be.calledWithExactly(
+          env.ampdoc,
+          'amp-mustache'
+        );
+      });
+    });
+
     describe('glass pane', () => {
       beforeEach(async () => {
         new MockStoryImpl(storyElement);
-        addStoryAutoAdsConfig(doc, adElement);
+        addStoryAutoAdsConfig(adElement);
         await autoAds.buildCallback();
         autoAds.layoutCallback();
       });
@@ -128,7 +168,7 @@ describes.realWin(
       beforeEach(async () => {
         // Force sync mutateElement.
         sandbox.stub(autoAds, 'mutateElement').callsArg(0);
-        addStoryAutoAdsConfig(win.document, adElement);
+        addStoryAutoAdsConfig(adElement);
         storeService = getStoreService(win);
         await story.buildCallback();
         // Fire these events so that story ads thinks the parent story is ready.
@@ -170,7 +210,7 @@ describes.realWin(
 
     describe('CTA button', () => {
       beforeEach(async () => {
-        addStoryAutoAdsConfig(doc, adElement);
+        addStoryAutoAdsConfig(adElement);
         const storyImpl = new MockStoryImpl(storyElement);
         storyElement.getImpl = () => Promise.resolve(storyImpl);
         await addStoryPages(doc, storyImpl);
@@ -204,7 +244,7 @@ describes.realWin(
 
     describe('ad choices', () => {
       beforeEach(async () => {
-        addStoryAutoAdsConfig(doc, adElement);
+        addStoryAutoAdsConfig(adElement);
         const storyImpl = new MockStoryImpl(storyElement);
         storyElement.getImpl = () => Promise.resolve(storyImpl);
         await addStoryPages(doc, storyImpl);

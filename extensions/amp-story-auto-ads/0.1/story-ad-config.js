@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {isJsonScriptTag} from '../../../src/dom';
 import {isObject} from 'util';
 import {parseJson} from '../../../src/json';
@@ -23,9 +22,6 @@ import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:config';
-
-/** @const {string} */
-const MUSTACHE_TAG = 'amp-mustache';
 
 /** @enum {boolean} */
 const DisallowedAdAttributes = {
@@ -43,11 +39,10 @@ const AllowedAdTypes = {
 
 export class StoryAdConfig {
   /**
-   * @param {!Window} win
-   * @param {!Element} element
+   * @param {!Element} element amp-story-auto-ads element.
    */
-  constructor(win, element) {
-    this.win_ = win;
+  constructor(element) {
+    /** @private {!Element} amp-story-auto ads element. */
     this.element_ = element;
   }
 
@@ -113,11 +108,6 @@ export class StoryAdConfig {
       userAssert(
         id && startsWith(id, 'i-amphtml-demo-'),
         `${TAG} id must start with i-amphtml-demo- to use fake ads`
-      );
-    } else if (type === 'custom') {
-      Services.extensionsFor(this.win_)./*OK*/ installExtensionForDoc(
-        this.element_.getAmpDoc(),
-        MUSTACHE_TAG
       );
     }
   }
