@@ -56,7 +56,7 @@ describes.realWin(
       setStyle(element, 'marginTop', '10000px');
       element.getAmpDoc = () => ampdoc;
       element.getFallback = () => null;
-      element.getResources = () => win.services.resources.obj;
+      element.getResources = () => win.__AMP_SERVICES.resources.obj;
 
       doc.body.appendChild(element);
       nextPage = new AmpNextPage(element);

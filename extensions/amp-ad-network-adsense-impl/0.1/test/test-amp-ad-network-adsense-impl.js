@@ -72,7 +72,7 @@ describes.realWin(
         .callsFake(() => {
           return ['google'];
         });
-      viewer = win.services.viewer.obj;
+      viewer = win.__AMP_SERVICES.viewer.obj;
       sandbox
         .stub(viewer, 'getReferrerUrl')
         .callsFake(() => Promise.resolve('https://acme.org/'));

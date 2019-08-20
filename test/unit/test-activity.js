@@ -78,7 +78,7 @@ describe('Activity getTotalEngagedTime', () => {
     };
 
     fakeWin = {
-      services: {},
+      __AMP_SERVICES: {},
       document: fakeDoc,
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
@@ -95,7 +95,7 @@ describe('Activity getTotalEngagedTime', () => {
     fakeDoc.head.defaultView = fakeWin;
 
     ampdoc = new AmpDocSingle(fakeWin);
-    fakeWin.services['ampdoc'] = {
+    fakeWin.__AMP_SERVICES['ampdoc'] = {
       obj: {
         getAmpDoc: () => ampdoc,
         isSingleDoc: () => true,
@@ -300,7 +300,7 @@ describe('Activity getIncrementalEngagedTime', () => {
     };
 
     fakeWin = {
-      services: {},
+      __AMP_SERVICES: {},
       document: fakeDoc,
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
@@ -317,7 +317,7 @@ describe('Activity getIncrementalEngagedTime', () => {
     fakeDoc.head.defaultView = fakeWin;
 
     ampdoc = new AmpDocSingle(fakeWin);
-    fakeWin.services['ampdoc'] = {
+    fakeWin.__AMP_SERVICES['ampdoc'] = {
       obj: {
         getAmpDoc: () => ampdoc,
         isSingleDoc: () => true,

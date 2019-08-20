@@ -43,7 +43,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
     };
 
     windowApi = {
-      services: {
+      __AMP_SERVICES: {
         'viewer': {obj: viewer},
       },
       screen: {width: 1000, height: 1000},
@@ -174,7 +174,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
       getResolvedViewerUrl: () => 'http://localhost:8000/test-login-dialog',
     };
     const windowObj = {
-      services: {
+      __AMP_SERVICES: {
         'viewer': {obj: viewer},
       },
       open: () => {},

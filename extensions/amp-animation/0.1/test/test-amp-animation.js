@@ -60,7 +60,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
       beforeEach(() => {
         win = env.win;
-        viewer = win.services.viewer.obj;
+        viewer = win.__AMP_SERVICES.viewer.obj;
         viewer.setVisibilityState_('hidden');
         runner = new NativeWebAnimationRunner([]);
         runnerMock = sandbox.mock(runner);
@@ -329,7 +329,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       it('should resize from ampdoc viewport', function*() {
         const anim = yield createAnim({}, {duration: 1001});
         const stub = sandbox.stub(anim, 'onResize_');
-        const viewport = win.services.viewport.obj;
+        const viewport = win.__AMP_SERVICES.viewport.obj;
 
         // No size changes.
         viewport.resizeObservable_.fire({relayoutAll: false});

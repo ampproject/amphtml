@@ -1661,7 +1661,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      resources = win.services.resources.obj;
+      resources = win.__AMP_SERVICES.resources.obj;
       viewerSendMessageStub = sandbox.stub(resources.viewer_, 'sendMessage');
       viewportContentHeightChangedStub = sandbox.stub(
         resources.viewport_,

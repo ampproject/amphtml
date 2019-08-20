@@ -559,7 +559,7 @@ describes.realWin(
         }
 
         beforeEach(() => {
-          viewer = win.services.viewer.obj;
+          viewer = win.__AMP_SERVICES.viewer.obj;
           viewer.toggleRuntime(); // Turn runtime on for these tests.
         });
 

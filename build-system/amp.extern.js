@@ -184,7 +184,7 @@ window.context.tagName;
 
 
 // Service Holder
-window.services;
+window.__AMP_SERVICES;
 
 // Safeframe
 // TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.

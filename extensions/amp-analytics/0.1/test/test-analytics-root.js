@@ -36,8 +36,8 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    resources = win.services.resources.obj;
-    viewport = win.services.viewport.obj;
+    resources = win.__AMP_SERVICES.resources.obj;
+    viewport = win.__AMP_SERVICES.viewport.obj;
     root = new AmpdocAnalyticsRoot(ampdoc);
     body = win.document.body;
 

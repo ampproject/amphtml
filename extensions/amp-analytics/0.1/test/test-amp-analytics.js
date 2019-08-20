@@ -127,7 +127,7 @@ describes.realWin(
       link.setAttribute('href', './test-canonical.html');
       doc.head.appendChild(link);
       cidServiceForDocForTesting(ampdoc);
-      viewer = win.services.viewer.obj;
+      viewer = win.__AMP_SERVICES.viewer.obj;
       ins = instrumentationServiceForDocForTesting(ampdoc);
       installUserNotificationManagerForTesting(ampdoc);
 
