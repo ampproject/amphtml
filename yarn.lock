@@ -9286,10 +9286,12 @@ karma-edge-launcher@0.4.2:
   dependencies:
     edge-launcher "1.2.2"
 
-karma-firefox-launcher@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/karma-firefox-launcher/-/karma-firefox-launcher-1.1.0.tgz#2c47030452f04531eb7d13d4fc7669630bb93339"
-  integrity sha512-LbZ5/XlIXLeQ3cqnCbYLn+rOVhuMIK9aZwlP6eOLGzWdo1UVp7t6CN3DP4SafiRLjexKwHeKHDm0c38Mtd3VxA==
+karma-firefox-launcher@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/karma-firefox-launcher/-/karma-firefox-launcher-1.2.0.tgz#64fe03dd10300f9754d48f9ebfbf31f6c94a200c"
+  integrity sha512-j9Zp8M8+VLq1nI/5xZGfzeaEPtGQ/vk3G+Y8vpmFWLvKLNZ2TDjD6cu2dUu7lDbu1HXNgatsAX4jgCZTkR9qhQ==
+  dependencies:
+    is-wsl "^2.1.0"
 
 karma-fixture@0.2.6:
   version "0.2.6"
