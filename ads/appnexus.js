@@ -120,7 +120,7 @@ function appnexusAst(global, data) {
 
   if (!context.isMaster && data.adUnits) {
     const newAddUnits = data.adUnits.filter(adUnit => {
-      return !context.master.adUnitTargetIds.includes(adUnit.targetId);
+      return context.master.adUnitTargetIds.indexOf(adUnit.targetId) === -1;
     });
     if (newAddUnits.length) {
       apntag.anq.push(() => {
