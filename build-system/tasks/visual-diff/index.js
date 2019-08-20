@@ -244,7 +244,8 @@ async function newPage(browser, viewport = null) {
     );
 
     if (
-      requestUrl.hostname == HOST ||
+      requestUrl.protocol === 'data:' ||
+      requestUrl.hostname === HOST ||
       requestUrl.hostname.endsWith(`.${HOST}`)
     ) {
       return interceptedRequest.continue();
