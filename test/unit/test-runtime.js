@@ -103,25 +103,25 @@ describes.fakeWin(
     });
 
     it('should install legacy stubs in single-doc', () => {
-      const initial = win.ampExtendedElements || {};
+      const initial = win.__AMP_EXTENDED_ELEMENTS || {};
       expect(initial['amp-ad']).to.be.undefined;
       expect(initial['amp-embed']).to.be.undefined;
       expect(initial['amp-video']).to.be.undefined;
       adopt(win);
-      expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-video']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(ElementStub);
     });
 
     it('should install legacy stubs in shadow-doc', () => {
-      const initial = win.ampExtendedElements || {};
+      const initial = win.__AMP_EXTENDED_ELEMENTS || {};
       expect(initial['amp-ad']).to.be.undefined;
       expect(initial['amp-embed']).to.be.undefined;
       expect(initial['amp-video']).to.be.undefined;
       adoptShadowMode(win);
-      expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-video']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(ElementStub);
     });
 
     it('should NOT set cursor:pointer on document element on non-IOS', () => {
@@ -727,7 +727,9 @@ describes.fakeWin(
         expect(installStylesStub).to.have.not.been.called;
 
         // Register is called immediately as well.
-        expect(win.ampExtendedElements['amp-ext']).to.equal(AMP.BaseElement);
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.equal(
+          AMP.BaseElement
+        );
 
         // Service and extensions are resolved.
         yield Promise.all([
@@ -774,9 +776,11 @@ describes.fakeWin(
         );
 
         // Element resistration is not done until callback.
-        expect(win.ampExtendedElements['amp-ext']).to.be.undefined;
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.be.undefined;
         installStylesCallback();
-        expect(win.ampExtendedElements['amp-ext']).to.equal(AMP.BaseElement);
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.equal(
+          AMP.BaseElement
+        );
 
         // Service and extensions are resolved.
         yield Promise.all([
@@ -893,14 +897,16 @@ describes.fakeWin(
         // No installStyles calls and no factories.
         expect(installStylesStub).to.not.be.called;
         expect(extHolder.docFactories).to.have.length(1);
-        expect(win.ampExtendedElements['amp-ext']).to.be.undefined;
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.be.undefined;
 
         // Execute factory to install style.
         const shadowRoot = document.createDocumentFragment();
         const ampdoc = new AmpDocShadow(win, 'https://acme.org/', shadowRoot);
         extHolder.docFactories[0](ampdoc);
         expect(installStylesStub).to.not.be.called;
-        expect(win.ampExtendedElements['amp-ext']).to.equal(AMP.BaseElement);
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.equal(
+          AMP.BaseElement
+        );
 
         // Service and extensions are resolved.
         yield Promise.all([
@@ -937,7 +943,7 @@ describes.fakeWin(
         expect(ext.elements['amp-ext'].css).to.equal('a{}');
         // No installations yet, but there's a factory.
         expect(extHolder.docFactories).to.have.length(1);
-        expect(win.ampExtendedElements['amp-ext']).to.be.undefined;
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.be.undefined;
         expect(installStylesStub).to.have.not.been.called;
 
         // Execute factory to install style.
@@ -955,7 +961,9 @@ describes.fakeWin(
 
         // Run install.
         installStylesCallback();
-        expect(win.ampExtendedElements['amp-ext']).to.equal(AMP.BaseElement);
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.equal(
+          AMP.BaseElement
+        );
 
         // Service and extensions are resolved.
         yield Promise.all([
