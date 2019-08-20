@@ -1002,6 +1002,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
+   * TODO(#24080) Remove this when story ads have full ad network support.
    * This in intended to be a temporary hack so we can can support
    * ad serving pipelines that are reliant on using amp-ad-exit for
    * outlinks.
