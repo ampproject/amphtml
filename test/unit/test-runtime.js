@@ -92,14 +92,14 @@ describes.fakeWin(
       expect(win.AMP.push).to.equal([].push);
       adopt(win);
       expect(win.AMP.push).to.not.equal([].push);
-      expect(win.AMP_TAG).to.be.true;
+      expect(win.__AMP_TAG).to.be.true;
     });
 
     it('should convert AMP from array to AMP object in shadow-doc', () => {
       expect(win.AMP.push).to.equal([].push);
       adoptShadowMode(win);
       expect(win.AMP.push).to.not.equal([].push);
-      expect(win.AMP_TAG).to.be.true;
+      expect(win.__AMP_TAG).to.be.true;
     });
 
     it('should install legacy stubs in single-doc', () => {

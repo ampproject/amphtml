@@ -56,9 +56,9 @@ describe('Logging', () => {
       },
       location: {hash: ''},
       setTimeout: timeoutSpy,
-      reportError: error => error,
+      __AMP_REPORT_ERROR: error => error,
     };
-    sandbox.stub(self, 'reportError').callsFake(error => error);
+    sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake(error => error);
   });
 
   afterEach(() => {

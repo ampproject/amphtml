@@ -95,8 +95,8 @@ export function createFixtureIframe(
     // on that window.
     window.beforeLoad = function(win) {
       // Flag as being a test window.
-      win.AMP_TEST_IFRAME = true;
-      win.AMP_TEST = true;
+      win.__AMP_TEST_IFRAME = true;
+      win.__AMP_TEST = true;
       // Set the testLocation on iframe to parent's location since location of
       // the test iframe is about:srcdoc.
       // Unfortunately location object is not configurable, so we have to define
@@ -225,7 +225,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     iframe.srcdoc = '<!doctype><html><head><body><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
-      iframe.contentWindow.AMP_TEST_IFRAME = true;
+      iframe.contentWindow.__AMP_TEST_IFRAME = true;
       iframe.contentWindow.testLocation = new FakeLocation(
         window.location.href,
         iframe.contentWindow
@@ -298,8 +298,8 @@ export function createServedIframe(src) {
     iframe.src = src;
     iframe.onload = function() {
       const win = iframe.contentWindow;
-      win.AMP_TEST_IFRAME = true;
-      win.AMP_TEST = true;
+      win.__AMP_TEST_IFRAME = true;
+      win.__AMP_TEST = true;
       installRuntimeServices(win);
       resolve({
         win,

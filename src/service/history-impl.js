@@ -1113,7 +1113,7 @@ function createHistory(ampdoc) {
   if (
     viewer.isOvertakeHistory() ||
     getMode(ampdoc.win).test ||
-    ampdoc.win.AMP_TEST_IFRAME
+    ampdoc.win.__AMP_TEST_IFRAME
   ) {
     binding = new HistoryBindingVirtual_(ampdoc.win, viewer);
   } else {
