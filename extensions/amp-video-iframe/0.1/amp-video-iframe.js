@@ -385,14 +385,14 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postMessage_(message) {
-    if (!this.iframe_ || !this.iframe_.contentWindow) {
-      return;
-    }
     const {promise} = this.readyDeferred_;
     if (!promise) {
       return;
     }
     promise.then(() => {
+      if (!this.iframe_ || !this.iframe_.contentWindow) {
+        return;
+      }
       this.iframe_.contentWindow./*OK*/ postMessage(
         JSON.stringify(message),
         '*'
