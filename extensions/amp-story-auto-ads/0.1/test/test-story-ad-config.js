@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../src/services';
 import {StoryAdConfig} from '../story-ad-config';
 import {createStoryAdElementAndConfig} from './story-mock';
 
