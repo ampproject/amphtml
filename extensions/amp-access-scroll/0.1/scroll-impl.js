@@ -17,13 +17,17 @@
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 import {ActivateBar, ScrollUserBar} from './scroll-bar';
 import {Audio} from './scroll-audio';
+import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {ReadDepthTracker} from './read-depth-tracker.js';
 import {Relay} from './scroll-relay';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {parseQueryString} from '../../../src/url';
+
+const TAG = 'amp-access-scroll-elt';
 /**
  * @param {string} baseUrl
  * @return {!JsonObject}
@@ -130,6 +134,9 @@ export class ScrollAccessVendor extends AccessClientAdapter {
       buildUrl: accessSource.buildUrl.bind(accessSource),
       collectUrlVars: accessSource.collectUrlVars.bind(accessSource),
     });
+
+    // Install styles
+    installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
     /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;

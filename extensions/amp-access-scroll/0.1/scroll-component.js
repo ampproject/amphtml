@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-const TAG = 'amp-access-scroll-elt';
-import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {installStylesForDoc} from '../../../src/style-installer';
-
-let init = false;
 
 /** @abstract */
 export class ScrollComponent {
   /** @param {!../../../src/service/ampdoc-impl.AmpDoc} doc */
   constructor(doc) {
-    if (!init) {
-      installStylesForDoc(doc, CSS, () => {}, false, TAG);
-      init = true;
-    }
     /** @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.doc_ = doc;
 
