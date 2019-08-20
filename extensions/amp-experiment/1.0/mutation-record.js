@@ -79,7 +79,7 @@ export function getElementsFromMutationRecordSelector(
   const selector = mutationRecord['target'];
   // Do not support selecting `i-amphtml` elements
   userAssert(
-    selector.match(/(^|\\W)i-amphtml-/),
+    !selector.match(/(^|\\W)i-amphtml-/),
     'target %s cannot select i-amphtml-',
     selector
   );
