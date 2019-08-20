@@ -40,7 +40,7 @@ import {whenCalled} from '../../testing/test-helper.js';
 function actionService() {
   const win = {
     document: {body: {}},
-    services: {
+    __AMP_SERVICES: {
       vsync: {obj: {}},
     },
   };
@@ -528,7 +528,7 @@ describes.sandboxed('Action adoptEmbedWindow', {}, () => {
   it('should create embedded action service', () => {
     ActionService.installInEmbedWindow(embedWin, action.ampdoc);
     const embedService =
-      embedWin.services.action && embedWin.services.action.obj;
+      embedWin.__AMP_SERVICES.action && embedWin.__AMP_SERVICES.action.obj;
     expect(embedService).to.exist;
     expect(embedService.ampdoc).to.equal(action.ampdoc);
     expect(embedService.root_).to.equal(embedWin.document);

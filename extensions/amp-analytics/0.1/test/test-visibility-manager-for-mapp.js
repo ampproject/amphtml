@@ -61,7 +61,7 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
     clock = sandbox.useFakeTimers();
     clock.tick(1);
 
-    viewer = win.services.viewer.obj;
+    viewer = win.__AMP_SERVICES.viewer.obj;
     sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => 1);
     visibilityInterface = new MockVisibilityInterface();
     root = new VisibilityManagerForMApp(ampdoc, visibilityInterface);

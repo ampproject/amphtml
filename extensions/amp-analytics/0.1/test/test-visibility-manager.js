@@ -78,9 +78,9 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     clock = sandbox.useFakeTimers();
     clock.tick(1);
 
-    viewer = win.services.viewer.obj;
+    viewer = win.__AMP_SERVICES.viewer.obj;
     sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => 1);
-    viewport = win.services.viewport.obj;
+    viewport = win.__AMP_SERVICES.viewport.obj;
     startVisibilityHandlerCount = getVisibilityHandlerCount();
 
     root = new VisibilityManagerForDoc(ampdoc);
@@ -732,7 +732,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
         return {top: 10, left: 11, width: 110, height: 111};
       },
     };
-    const resources = win.services.resources.obj;
+    const resources = win.__AMP_SERVICES.resources.obj;
     sandbox
       .stub(resources, 'getResourceForElementOptional')
       .callsFake(() => resource);
@@ -790,8 +790,8 @@ describes.realWin(
       clock = sandbox.useFakeTimers();
       clock.tick(1);
 
-      viewport = parentWin.services.viewport.obj;
-      viewer = parentWin.services.viewer.obj;
+      viewport = parentWin.__AMP_SERVICES.viewport.obj;
+      viewer = parentWin.__AMP_SERVICES.viewer.obj;
       sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => 1);
 
       parentRoot = new VisibilityManagerForDoc(ampdoc);
@@ -1019,8 +1019,8 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    viewer = win.services.viewer.obj;
-    resources = win.services.resources.obj;
+    viewer = win.__AMP_SERVICES.viewer.obj;
+    resources = win.__AMP_SERVICES.resources.obj;
 
     observeSpy = sandbox.stub();
     unobserveSpy = sandbox.stub();

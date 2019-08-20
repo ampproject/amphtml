@@ -306,7 +306,7 @@ describes.sandboxed('History install', {}, () => {
 
     installTimerService(window);
     win = {
-      services: {
+      __AMP_SERVICES: {
         'viewer': {obj: viewer},
         'timer': {obj: Services.timerFor(window)},
       },
@@ -329,9 +329,9 @@ describes.sandboxed('History install', {}, () => {
   it('should create natural binding and make it singleton', () => {
     const history = Services.historyForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
-    expect(win.services.history.obj).to.equal(history);
+    expect(win.__AMP_SERVICES.history.obj).to.equal(history);
     // Ensure that binding is installed as a singleton.
-    expect(win.services['global-history-binding'].obj).to.equal(
+    expect(win.__AMP_SERVICES['global-history-binding'].obj).to.equal(
       history.binding_
     );
   });
@@ -340,9 +340,9 @@ describes.sandboxed('History install', {}, () => {
     viewer.isOvertakeHistory = () => true;
     const history = Services.historyForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingVirtual_);
-    expect(win.services.history.obj).to.equal(history);
+    expect(win.__AMP_SERVICES.history.obj).to.equal(history);
     // Ensure that the global singleton has not been created.
-    expect(win.services['global-history-binding']).to.not.exist;
+    expect(win.__AMP_SERVICES['global-history-binding']).to.not.exist;
   });
 });
 

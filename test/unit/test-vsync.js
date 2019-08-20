@@ -36,7 +36,7 @@ describes.sandboxed('vsync', {}, () => {
         body: {},
       },
       navigator: {},
-      services: {},
+      __AMP_SERVICES: {},
       setTimeout: (fn, t) => {
         return window.setTimeout(fn, t);
       },
@@ -62,7 +62,7 @@ describes.sandboxed('vsync', {}, () => {
       isHidden: () => false,
       onVisibilityChanged: handler => (docVisibilityHandler = handler),
     };
-    win.services['documentState'] = {obj: docState};
+    win.__AMP_SERVICES['documentState'] = {obj: docState};
 
     contextNode = document.createElement('div');
     document.body.appendChild(contextNode);
@@ -79,7 +79,7 @@ describes.sandboxed('vsync', {}, () => {
     beforeEach(() => {
       installDocService(win, /* isSingleDoc */ true);
       ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      win.services['viewer'] = {obj: viewer};
+      win.__AMP_SERVICES['viewer'] = {obj: viewer};
       vsync = new Vsync(win);
       return Services.viewerPromiseForDoc(ampdoc);
     });
@@ -569,8 +569,8 @@ describes.sandboxed('vsync', {}, () => {
       root = document.createElement('i-amphtml-shadow-root');
       document.body.appendChild(root);
       ampdoc = new AmpDocShadow(win, 'https://acme.org/', root);
-      ampdoc.services = {};
-      ampdoc.services['viewer'] = {obj: viewer};
+      ampdoc.__AMP_SERVICES = {};
+      ampdoc.__AMP_SERVICES['viewer'] = {obj: viewer};
       contextNode.ampdoc_ = ampdoc;
       vsync = new Vsync(win);
     });

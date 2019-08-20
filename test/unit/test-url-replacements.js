@@ -187,7 +187,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           array[15] = 15;
         },
       },
-      services: {
+      __AMP_SERVICES: {
         'viewport': {obj: {}},
         'cid': {
           promise: Promise.resolve({
@@ -921,7 +921,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 0', () => {
     const win = getFakeWindow();
-    win.services.viewer = {
+    win.__AMP_SERVICES.viewer = {
       obj: {isVisible: () => true},
     };
     return Services.urlReplacementsForDoc(win.document.documentElement)
@@ -933,7 +933,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 1', () => {
     const win = getFakeWindow();
-    win.services.viewer = {
+    win.__AMP_SERVICES.viewer = {
       obj: {isVisible: () => false},
     };
     return Services.urlReplacementsForDoc(win.document.documentElement)

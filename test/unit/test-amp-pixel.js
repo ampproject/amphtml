@@ -25,7 +25,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    const viewer = win.services.viewer.obj;
+    const viewer = win.__AMP_SERVICES.viewer.obj;
     whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolver = resolve;
     });
@@ -173,7 +173,7 @@ describes.realWin(
       win = env.win;
       parentWin = env.parentWin;
 
-      const viewer = parentWin.services.viewer.obj;
+      const viewer = parentWin.__AMP_SERVICES.viewer.obj;
       whenFirstVisiblePromise = new Promise(resolve => {
         whenFirstVisibleResolver = resolve;
       });
