@@ -72,4 +72,13 @@ export class ScrollComponent {
     this.doc_.getBody().appendChild(el);
     Services.viewportForDoc(this.doc_).addToFixedLayer(el);
   }
+
+  /**
+   * Enqueues a DOM mutation managed by the window's Vsync
+   * @param {function():undefined} mutator
+   * @protected
+   */
+  mutate_(mutator) {
+    Services.vsyncFor(this.doc_.win).mutate(mutator);
+  }
 }

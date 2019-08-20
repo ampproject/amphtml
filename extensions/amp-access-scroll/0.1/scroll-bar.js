@@ -43,12 +43,12 @@ class Bar extends ScrollComponent {
 
   /** @private */
   render_() {
-    setTimeout(() => {
+    this.mutate_(() => {
       if (!this.frame_) {
         this.frame_ = this.makeIframe_();
         this.setWindow_(this.frame_.contentWindow);
       }
-    }, 0);
+    });
   }
 
   /**

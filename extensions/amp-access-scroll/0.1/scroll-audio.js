@@ -50,7 +50,7 @@ export class Audio extends ScrollComponent {
    * @private
    */
   render_(state) {
-    setTimeout(() => {
+    this.mutate_(() => {
       if (!this.frame_) {
         this.frame_ = this.makeIframe_();
         this.setWindow_(this.frame_.contentWindow);
@@ -60,7 +60,7 @@ export class Audio extends ScrollComponent {
         this.frame_.setAttribute('src', state.url);
       }
       toggle(this.frame_, state.open);
-    }, 0);
+    });
   }
 
   /**
