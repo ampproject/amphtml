@@ -375,12 +375,10 @@ export class Performance {
       // Layout shift entries are not available from the Performance Timeline
       // through `getEntriesByType`, so a separate PerformanceObserver is
       // required for this metric.
-      const firstInputObserver = new this.win.PerformanceObserver(
-        list => {
-          list.getEntries().forEach(processEntry);
-          this.flush();
-        }
-      );
+      const firstInputObserver = new this.win.PerformanceObserver(list => {
+        list.getEntries().forEach(processEntry);
+        this.flush();
+      });
       firstInputObserver.observe({type: 'first-input', buffered: true});
     }
 

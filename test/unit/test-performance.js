@@ -1007,7 +1007,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
               startTime: 100,
             },
           ];
-        }
+        },
       });
 
       expect(perf.events_.length).to.equal(1);
