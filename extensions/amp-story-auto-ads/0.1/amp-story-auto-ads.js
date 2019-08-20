@@ -1018,20 +1018,25 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     if (!ampAdExit) {
       return null;
     }
-    const {children} = ampAdExit;
-    userAssert(
-      children.length == 1,
-      'The tag should contain exactly one <script> child.'
-    );
-    const child = children[0];
-    userAssert(
-      isJsonScriptTag(child),
-      'The amp-ad-exit config should ' +
-        'be inside a <script> tag with type="application/json"'
-    );
-    const config = assertConfig(parseJson(child.textContent));
-    const target = config['targets'][Object.keys(config['targets'])[0]];
-    return target['finalUrl'];
+    try {
+      const {children} = ampAdExit;
+      userAssert(
+        children.length == 1,
+        'The tag should contain exactly one <script> child.'
+      );
+      const child = children[0];
+      userAssert(
+        isJsonScriptTag(child),
+        'The amp-ad-exit config should ' +
+          'be inside a <script> tag with type="application/json"'
+      );
+      const config = assertConfig(parseJson(child.textContent));
+      const target = config['targets'][Object.keys(config['targets'])[0]];
+      return target['finalUrl'];
+    } catch (e) {
+      dev().error(TAG, e);
+      return null;
+    }
   }
 
   /**
