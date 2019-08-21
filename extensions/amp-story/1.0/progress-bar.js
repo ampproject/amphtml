@@ -17,6 +17,7 @@ import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
+import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '../../../src/css';
 import {hasOwn, map} from '../../../src/utils/object';
@@ -184,14 +185,21 @@ export class ProgressBar {
       true /** callToInitialize */
     );
 
+    const ampdoc = Services.ampdocServiceFor(this.win_).getSingleDoc();
+    Services.viewportForDoc(ampdoc).onResize(
+      debounce(this.win_, () => this.onResize_(), 300)
+    );
+
     this.barWidthPx_ = this.storyEl_
       .querySelector('amp-story-page')
       .getBoundingClientRect().width;
 
-    // Don't animate the progress bar in pageload.
-    this.timer_.delay(() => {
-      this.root_.classList.add('i-amphtml-animate-progress');
-    }, 1);
+    this.vsync_.mutate(() => {
+      // Don't animate the progress bar in pageload.
+      this.timer_.delay(() => {
+        this.root_.classList.add('i-amphtml-animate-progress');
+      }, 60);
+    });
 
     this.isBuilt_ = true;
     return this.getRoot();
@@ -238,12 +246,15 @@ export class ProgressBar {
     if (this.storeService_.get(StateProperty.RTL_STATE)) {
       translateX *= -1;
     }
-    // Do not remove translateZ(0.00001px) as it prevents an iOS repaint issue.
-    segment.setAttribute(
-      'style',
-      `transform: translate3d(${translateX}px, 0px, 0.00001px) scaleX(${width /
-        ELLIPSE_WIDTH_PX});`
-    );
+    this.vsync_.mutate(() => {
+      // Do not remove translateZ(0.00001px) as it prevents an iOS repaint issue.
+      // http://mir.aculo.us/2011/12/07/the-case-of-the-disappearing-element/
+      segment.setAttribute(
+        'style',
+        `transform: translate3d(${translateX}px, 0px, 0.00001px) scaleX(${width /
+          ELLIPSE_WIDTH_PX});`
+      );
+    });
   }
 
   /**
@@ -324,6 +335,19 @@ export class ProgressBar {
       rtlState
         ? this.getRoot().setAttribute('dir', 'rtl')
         : this.getRoot().removeAttribute('dir');
+    });
+  }
+
+  /**
+   * Handles resize events.
+   * @private
+   */
+  onResize_() {
+    this.vsync_.mutate(() => {
+      this.barWidthPx_ = this.storyEl_
+        .querySelector('amp-story-page')
+        .getBoundingClientRect().width;
+      this.render_();
     });
   }
 
