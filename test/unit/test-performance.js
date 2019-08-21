@@ -1167,38 +1167,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       expect(perf.events_.length).to.equal(2);
     });
 
-    it("for browsers that don't support the visibilitychange event", () => {
-      // Specify an iPhone Safari user agent, which does not support
-      // the visibilitychange event.
-      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(true);
-
-      // Document should be initially visible.
-      expect(fakeWin.document.visibilityState).to.equal('visible');
-
-      // Fake layoutJank that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType
-        .withArgs('layoutJank')
-        .returns([
-          {entryType: 'layoutJank', fraction: 0.25},
-          {entryType: 'layoutJank', fraction: 0.3},
-        ]);
-
-      const perf = getPerformance();
-      // visibilitychange/beforeunload listeners are now added.
-      perf.coreServicesAvailable();
-
-      // The document has become hidden, e.g. via the user switching tabs.
-      // Note: Don't fire visibilitychange (not supported in this case).
-      fakeWin.document.visibilityState = 'hidden';
-      fireEvent('beforeunload');
-
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'lj',
-        delta: 0.55,
-      });
-    });
-
     it('forwards layout jank metric on viewer visibility change to inactive', () => {
       // Specify an Android Chrome user agent.
       sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
@@ -1441,43 +1409,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
 
       toggleVisibility(fakeWin, false);
       expect(perf.events_.length).to.equal(2);
-    });
-
-    it("for browsers that don't support the visibilitychange event", () => {
-      // Specify an iPhone Safari user agent, which does not support
-      // the visibilitychange event.
-      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(true);
-
-      // Fake the Performance API.
-      fakeWin.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
-
-      // Document should be initially visible.
-      expect(fakeWin.document.visibilityState).to.equal('visible');
-
-      const perf = getPerformance();
-      // visibilitychange/beforeunload listeners are now added.
-      perf.coreServicesAvailable();
-
-      // Fake layout-shift that occured before the Performance service is started.
-      performanceObserver.triggerCallback({
-        getEntries() {
-          return [
-            {entryType: 'layout-shift', value: 0.25, hadRecentInput: false},
-            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
-          ];
-        },
-      });
-
-      // The document has become hidden, e.g. via the user switching tabs.
-      // Note: Don't fire visibilitychange (not supported in this case).
-      fakeWin.document.visibilityState = 'hidden';
-      fireEvent('beforeunload');
-
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'cls',
-        delta: 0.55,
-      });
     });
 
     it('when the viewer visibility changes to inactive', () => {
