@@ -54,18 +54,18 @@ function chunkServiceForDoc(elementOrAmpDoc) {
  * time to do other things) and may even be further delayed until
  * there is time.
  *
- * @param {!Document} document
+ * @param {!Document|!./service/ampdoc-impl.AmpDoc} doc
  * @param {function(?IdleDeadline)} fn
  * @param {boolean=} opt_makesBodyVisible Pass true if this service makes
  *     the body visible. This is relevant because it may influence the
  *     task scheduling strategy.
  */
-export function startupChunk(document, fn, opt_makesBodyVisible) {
+export function startupChunk(doc, fn, opt_makesBodyVisible) {
   if (deactivated) {
     resolved.then(fn);
     return;
   }
-  const service = chunkServiceForDoc(document.documentElement);
+  const service = chunkServiceForDoc(doc.documentElement || doc);
   service.runForStartup(fn);
   if (opt_makesBodyVisible) {
     service.runForStartup(() => {
