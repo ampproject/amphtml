@@ -422,20 +422,20 @@ describes.realWin('performance', {amp: true}, env => {
             expect(
               viewerSendMessageStub.withArgs('tick').getCall(0).args[1]
             ).to.be.jsonEqual({
-              label: 'msr',
-              delta: 1,
-            });
-            expect(
-              viewerSendMessageStub.withArgs('tick').getCall(1).args[1]
-            ).to.be.jsonEqual({
               label: 'start0',
               value: 0,
             });
             expect(
-              viewerSendMessageStub.withArgs('tick').getCall(2).args[1]
+              viewerSendMessageStub.withArgs('tick').getCall(1).args[1]
             ).to.be.jsonEqual({
               label: 'start1',
               value: 1,
+            });
+            expect(
+              viewerSendMessageStub.withArgs('tick').getCall(4).args[1]
+            ).to.be.jsonEqual({
+              label: 'msr',
+              delta: 1,
             });
           });
         });
@@ -498,6 +498,21 @@ describes.realWin('performance', {amp: true}, env => {
             expect(viewerSendMessageStub.withArgs('sendCsi')).to.have.callCount(
               3
             );
+          });
+        });
+
+        it('should flush with the story experiment enabled', () => {
+          const storyEl = win.document.createElement('amp-story');
+          const bodyEl = win.document.body;
+          bodyEl.insertBefore(storyEl, bodyEl.firstElementChild || null);
+
+          return perf.coreServicesAvailable().then(() => {
+            expect(viewerSendMessageStub.withArgs('sendCsi')).to.have.callCount(
+              1
+            );
+            const call = viewerSendMessageStub.withArgs('sendCsi').getCall(0);
+            expect(call.args[1]).to.have.property('ampexp');
+            expect(call.args[1].ampexp).to.contain('story');
           });
         });
       });
