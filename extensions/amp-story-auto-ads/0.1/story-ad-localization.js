@@ -74,8 +74,28 @@ export class StoryAdLocalization {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private @const {!LocalizationService} */
-    this.localizationService_ = new LocalizationService(win);
+    /** @private @const {!Window} win */
+    this.win_ = win;
+    /** @private {?LocalizationService} */
+    this.localizationService_ = null;
+  }
+
+  /**
+   * @param {!../../../src/localized-strings.LocalizedStringId} id
+   * @return {string|null}
+   */
+  getLocalizedString(id) {
+    if (!this.localizationService_) {
+      this.init_();
+    }
+    return this.localizationService_.getLocalizedString(id);
+  }
+
+  /**
+   * Create localization service and register all bundles.
+   */
+  init_() {
+    this.localizationService_ = new LocalizationService(this.win_);
 
     const enXaPseudoLocaleBundle = createPseudoLocale(
       LocalizedStringsEn,
@@ -106,13 +126,5 @@ export class StoryAdLocalization {
       .registerLocalizedStringBundle('zh-cn', LocalizedStringsZhCn)
       .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw)
       .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
-  }
-
-  /**
-   * @param {!../../../src/localized-strings.LocalizedStringId} id
-   * @return {string|null}
-   */
-  getLocalizedString(id) {
-    return this.localizationService_.getLocalizedString(id);
   }
 }
