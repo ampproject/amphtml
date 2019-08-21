@@ -47,7 +47,7 @@ t.run('Viewer Visibility State', () => {
       let resumeCallback;
       let docHidden;
       let docVisibilityState;
-      let unselect;
+      //let unselect;
       let prerenderAllowed;
 
       function visChangeEventName() {
@@ -98,7 +98,7 @@ t.run('Viewer Visibility State', () => {
         unlayoutCallback.reset();
         pauseCallback.reset();
         resumeCallback.reset();
-        unselect.reset();
+        //unselect.reset();
       }
 
       beforeEach(() => {
@@ -126,7 +126,8 @@ t.run('Viewer Visibility State', () => {
             resources = Services.resourcesForDoc(win.document);
             doPass_ = resources.doPass;
             sandbox.stub(resources, 'doPass').callsFake(doPass);
-            unselect = sandbox.stub(resources, 'unselectText_');
+            // TODO(jridgewell@): Do not stub private method
+            //unselect = sandbox.stub(resources, 'unselectText_');
 
             const img = win.document.createElement('amp-img');
             img.setAttribute('width', 100);
@@ -336,7 +337,7 @@ t.run('Viewer Visibility State', () => {
             expect(unlayoutCallback).to.have.been.called;
             expect(pauseCallback).to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
-            expect(unselect).to.have.been.called;
+            //expect(unselect).to.have.been.called;
           });
         });
 
@@ -394,7 +395,7 @@ t.run('Viewer Visibility State', () => {
             expect(unlayoutCallback).to.have.been.called;
             expect(pauseCallback).to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
-            expect(unselect).to.have.been.called;
+            //expect(unselect).to.have.been.called;
           });
         });
 
@@ -521,7 +522,7 @@ t.run('Viewer Visibility State', () => {
             expect(unlayoutCallback).to.have.been.called;
             expect(pauseCallback).not.to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
-            expect(unselect).to.have.been.called;
+            //expect(unselect).to.have.been.called;
           });
         });
 
