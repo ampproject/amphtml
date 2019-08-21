@@ -261,6 +261,54 @@ describes.realWin(
       });
     });
 
+    describe.only('pause/resume', () => {
+      describe('before layout', () => {
+        it('should require unlayout before initialization', () => {
+          expect(ad3p.unlayoutOnPause()).to.be.true;
+        });
+
+        it('should noop pause', () => {
+          expect(() => ad3p.pauseCallback()).to.not.throw;
+        });
+
+        it('should noop resume', () => {
+          expect(() => ad3p.resumeCallback()).to.not.throw;
+        });
+      });
+
+      describe('after layout', () => {
+        let xOriginIframeHandler;
+
+        beforeEach(() => {
+          return ad3p.layoutCallback().then(() => {
+            xOriginIframeHandler = ad3p.xOriginIframeHandler_;
+          });
+        });
+
+        it('should require unlayout if iframe is not pausable', () => {
+          sandbox.stub(xOriginIframeHandler, 'isPausable').returns(false);
+          expect(ad3p.unlayoutOnPause()).to.be.true;
+        });
+
+        it('should NOT require unlayout if iframe is pausable', () => {
+          sandbox.stub(xOriginIframeHandler, 'isPausable').returns(true);
+          expect(ad3p.unlayoutOnPause()).to.be.false;
+        });
+
+        it('should pause iframe', () => {
+          const stub = sandbox.stub(xOriginIframeHandler, 'setPaused');
+          ad3p.pauseCallback();
+          expect(stub).to.be.calledOnce.calledWith(true);
+        });
+
+        it('should resume iframe', () => {
+          const stub = sandbox.stub(xOriginIframeHandler, 'setPaused');
+          ad3p.resumeCallback();
+          expect(stub).to.be.calledOnce.calledWith(false);
+        });
+      });
+    });
+
     describe('preconnectCallback', () => {
       it('should add preconnect and prefetch to DOM header', () => {
         ad3p.buildCallback();
