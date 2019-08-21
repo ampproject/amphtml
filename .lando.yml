@@ -47,6 +47,10 @@ tooling:
     service: appserver
     cmd: "yarn gulp watch"
     description: "Watches for changes in files, re-builds when detected"
+  lint:
+    service: appserver
+    cmd: "yarn gulp lint"
+    description: "Validates against Google Closure Linter"
   check-types:
     service: appserver
     cmd: "yarn gulp check-types"
