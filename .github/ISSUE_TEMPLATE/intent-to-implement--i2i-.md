@@ -20,16 +20,18 @@ If you haven't already done so, sign the Contributor License Agreement (CLA) as 
 Provide a brief description of the feature/change you are planning on implementing.
 -->
 Link to Product Requirements Document (PRD): 
+Link to User Research: 
 <!--
 Add a link to the Product Requirements Document (PRD) (make sure it is accessible by anyone) here.
-A PRD is a document that highlights all the requirements for a product. It highglights what needs the component is trying to solve, the API it should offer and other details relevant to getting the implementation right. See here for an example: bit.ly/amp-autocomplete-prd
+A PRD is a document that highlights all the requirements for a product. It highlights what needs the component is trying to solve, the API it should offer and other details relevant to getting the implementation right. See here for an example: bit.ly/amp-autocomplete-prd
+User Research highlights the research conducted with users to validate the requirements in the PRD above. See here for an example: bit.ly/baymard-install-research
 -->
 
 ## Design documents
 <!--
 Provide a link to your design documents once you have them. You do not need a design document to file this I2I.
-A technical design document highlights the different design considerations being considered when designing a new AMP component or feature. An example is as follows: bit.ly/amp-carousel-dd
-UX Interaction Specs map out the different variants and states of an AMP component. It also maps the users flow through the different stages of a component. See here for an example: bit.ly/amp-autocomplete-ux
+A technical design document highlights the different design considerations being considered when designing a new AMP component or feature. Here is an example for a design document hosted on GitHub: bit.ly/amp-carousel-dd, an other example of a Blink design document: bit.ly/blink-lazy-load
+UX Interaction Specs map out the different variants and states of an AMP component. It also maps the users flow through the different stages of a component. See here for an example: bit.ly/autocomplete-ux
 -->
 - Technical Design Document
 - UX Interaction Specs
