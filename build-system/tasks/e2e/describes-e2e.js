@@ -476,12 +476,19 @@ class EndToEndFixture {
     } = this.spec;
     const {environment} = env;
 
-    await toggleExperiments(ampDriver, testUrl, experiments);
+    const url = new URL(testUrl);
+    if (environment.includes('inabox')) {
+      // inabox experiments are toggled at server side using <meta> tag
+      url.searchParams.set('exp', experiments.join(','));
+    } else {
+      // AMP doc experiments are toggled via cookies
+      await toggleExperiments(ampDriver, url.href, experiments);
+    }
 
     const {width, height} = initialRect;
     await controller.setWindowRect({width, height});
 
-    await ampDriver.navigateToEnvironment(environment, testUrl);
+    await ampDriver.navigateToEnvironment(environment, url.href);
   }
 
   async teardown(env) {
