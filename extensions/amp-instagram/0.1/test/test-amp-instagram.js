@@ -146,24 +146,26 @@ describes.realWin(
     });
 
     it('builds a placeholder image without inserting iframe', async () => {
-      const ins = await getIns('fBwFP', true, ins => {
+      return getIns('fBwFP', true, ins => {
         const placeholder = ins.querySelector('[placeholder]');
         const iframe = ins.querySelector('iframe');
         expect(iframe).to.be.null;
         expect(placeholder).to.not.have.display('');
         testImage(placeholder.querySelector('img'));
-      });
-      const placeholder = ins.querySelector('[placeholder]');
-      const iframe = ins.querySelector('iframe');
-      ins.getVsync = () => {
-        return {
-          mutate: fn => fn(),
+      }).then(ins => {
+        const placeholder = ins.querySelector('[placeholder]');
+        const iframe = ins.querySelector('iframe');
+        ins.getVsync = () => {
+          return {
+            mutate: fn => fn(),
+          };
         };
-      };
-      testIframe(iframe);
-      testImage(placeholder.querySelector('img'));
-      await ins.implementation_.iframePromise_;
-      expect(placeholder).to.be.have.display('none');
+        testIframe(iframe);
+        testImage(placeholder.querySelector('img'));
+        ins.implementation_.iframePromise_.then(() => {
+          expect(placeholder).to.be.have.display('none');
+        });
+      });
     });
 
     it('removes iframe after unlayoutCallback', async () => {
