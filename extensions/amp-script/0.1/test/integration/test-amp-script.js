@@ -56,7 +56,7 @@ describe
           element = doc.querySelector('amp-script');
         });
 
-        it.skip('should say "hello world"', function*() {
+        it('should say "hello world"', function*() {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
