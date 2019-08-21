@@ -156,10 +156,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.fixIosElasticScrollLeak_();
     }
 
-    // The element is always closed by default, so update the aria state to
-    // match.
-    element.setAttribute('aria-hidden', 'true');
-
     if (!element.hasAttribute('role')) {
       element.setAttribute('role', 'menu');
     }
@@ -344,7 +340,6 @@ export class AmpSidebar extends AMP.BaseElement {
     this.element./*OK*/ scrollTop = 1;
     this.openMask_();
     this.element.setAttribute('open', '');
-    this.element.setAttribute('aria-hidden', 'false');
     this.setUpdateFn_(() => this.updateForOpened_(), ANIMATION_TIMEOUT);
     handleAutoscroll(this.getAmpDoc(), this.element);
   }
@@ -378,7 +373,6 @@ export class AmpSidebar extends AMP.BaseElement {
       setModalAsClosed(this.element);
     });
     this.element.removeAttribute('open');
-    this.element.setAttribute('aria-hidden', 'true');
     this.setUpdateFn_(() => this.updateForClosed_(), ANIMATION_TIMEOUT);
   }
 
