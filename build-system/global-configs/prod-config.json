@@ -9,6 +9,7 @@
   "allow-url-opt-in": [
     "ios-scrollable-iframe",
     "pump-early-frame",
+    "macro-after-long-task",
     "twitter-default-placeholder",
     "twitter-default-placeholder-fade",
     "twitter-default-placeholder-pulse"
@@ -37,6 +38,7 @@
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
   "ios-scrollable-iframe": 0,
+  "macro-after-long-task": 0,
   "new-loaders": 0.1,
   "pump-early-frame": 1,
   "version-locking": 1
