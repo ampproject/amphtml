@@ -1,0 +1,54 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.2.js"></script>
+  <script src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+
+  <style amp-custom>
+
+  amp-sidebar {
+    background-color: rgb(0,0,0,0.1);
+  }
+
+  [heading] {
+    background-color: rgb(0,0,0,0.5);
+    display: inline-block;
+  }
+
+  [dropdown] {
+    position: fixed;
+    height: 200px;
+    width: 100vw;
+    background-color: rgb(190, 192, 244);
+  }
+  </style>
+</head>
+<body>
+<amp-sidebar layout="fixed" height="100" width="1000">
+  <h1 heading role="button">
+    Cat
+    <div dropdown hidden >
+      <h2>Tabby Cat</h2>
+      <h3>Kitten</h3>
+      <h3>Adult Cat</h3>
+      <h2>Persian Cat</h2>
+      <h2>Ragdoll Cat</h2>
+      <h2>Bengal Cat</h2>
+      <h2>Norweigian Forest Cat</h2>
+    </div>
+  </h1>
+  <h1 heading role="button">
+    Dog
+    <div dropdown hidden>
+      <h2>Bulldog</h2>
+      <h2>Golden Retriever</h2>
+    </div>
+  </h1>
+</amp-sidebar>
+
+</body>

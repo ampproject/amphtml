@@ -615,8 +615,15 @@ exports.extensionBundles = [
   {
     name: 'amp-sidebar',
     version: '0.1',
-    latestVersion: '0.1',
+    latestVersion: '0.2',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-sidebar',
+    version: '0.2',
+    latestVersion: '0.2',
+    options: {hasCss: false},
     type: TYPES.MISC,
   },
   {
