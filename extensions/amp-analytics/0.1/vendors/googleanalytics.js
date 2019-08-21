@@ -111,9 +111,9 @@ const GOOGLEANALYTICS_CONFIG = jsonLiteral({
       'enabled': false,
       'request': 'event',
       'vars': {
-          'eventAction': 'story_progress',
-          'eventCategory': '${title}',
-          'eventLabel': '${storyPageId}',
+        'eventAction': 'story_progress',
+        'eventCategory': '${title}',
+        'eventLabel': '${storyPageId}',
       },
     },
     'storyEnd': {
@@ -121,8 +121,8 @@ const GOOGLEANALYTICS_CONFIG = jsonLiteral({
       'enabled': false,
       'request': 'event',
       'vars': {
-          'eventAction': 'story_complete',
-          'eventCategory': '${title}',
+        'eventAction': 'story_complete',
+        'eventCategory': '${title}',
       },
     },
   },
