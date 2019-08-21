@@ -552,10 +552,6 @@ describes.realWin('performance', {amp: true}, env => {
       )
       .returns(Promise.resolve([res1, res2]))
       .once();
-    resourcesMock
-      .expects('whenFirstPass')
-      .returns(Promise.resolve())
-      .once();
 
     return perf.whenViewportLayoutComplete_().then(() => {
       expect(res1.loadedComplete).to.be.true;
@@ -1108,7 +1104,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       });
       sandbox.stub(Services, 'resourcesForDoc').returns({
         getResourcesInRect: () => unresolvedPromise,
-        whenFirstPass: () => Promise.resolve(),
       });
       sandbox.stub(Services, 'viewportForDoc').returns({
         getSize: () => viewportSize,
@@ -1273,7 +1268,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       });
       sandbox.stub(Services, 'resourcesForDoc').returns({
         getResourcesInRect: () => unresolvedPromise,
-        whenFirstPass: () => Promise.resolve(),
       });
       sandbox.stub(Services, 'viewportForDoc').returns({
         getSize: () => viewportSize,
