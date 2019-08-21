@@ -542,6 +542,7 @@ export class ConsentUI {
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
     this.ui_.removeAttribute('name');
+    toggle(dev().assertElement(this.placeholder_), false);
     removeElement(dev().assertElement(this.ui_));
   }
 
