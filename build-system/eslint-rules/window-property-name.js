@@ -32,6 +32,33 @@ const PATHS_TO_IGNORE = ['src/polyfills', 'test/'];
 const WINDOW_PROPERTY = ['win', 'window', 'global', 'self'];
 
 module.exports = function(context) {
+  function getProperty(node) {
+    const property = node.property.name;
+    if (node.computed) {
+      // Look up computed properties with const variables literals.
+      // E.g. window[FOO] where FOO = 'abc'.
+      if (node.property.type === 'Identifier') {
+        const sourceCode = context.getSourceCode();
+        const {text} = sourceCode;
+
+        let index = -1;
+        while (true) {
+          index = text.indexOf(property, index + 1);
+          if (index < 0) {
+            break;
+          }
+          const n = sourceCode.getNodeByRangeIndex(index);
+          const p = n.parent;
+          if (p.type === 'VariableDeclarator' && p.init.type === 'Literal') {
+            return p.init.value;
+          }
+        }
+      }
+      return null;
+    }
+    return property;
+  }
+
   function isAllowedWindowProp(prop) {
     return prop === 'AMP' || prop.startsWith('on');
   }
@@ -63,7 +90,8 @@ module.exports = function(context) {
         return;
       }
       // Disallow computed property names on window so we can enforce naming.
-      if (left.computed) {
+      const prop = getProperty(left);
+      if (!prop) {
         context.report({
           node,
           message: 'Computed property names are not allowed on window.',
@@ -71,8 +99,7 @@ module.exports = function(context) {
         return;
       }
       // In general, window property names must be prefixed with "__AMP_".
-      const prop = left.property.name;
-      if (!prop || prop.startsWith('__AMP_') || isAllowedWindowProp(prop)) {
+      if (prop.startsWith('__AMP_') || isAllowedWindowProp(prop)) {
         return;
       }
       context.report({
