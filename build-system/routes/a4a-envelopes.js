@@ -84,10 +84,10 @@ app.use('/a4a(|-3p)/', (req, res) => {
 
 /**
  * @param {Request} req
- * @param {string|undefined} extraExperiments
+ * @param {string|undefined} extraExperiment
  * @return {!URL}
  */
-function getInaboxUrl(req, extraExperiments) {
+function getInaboxUrl(req, extraExperiment) {
   const urlStr = req.protocol + '://' + req.get('host') + req.url;
   const url = new URL(urlStr);
   // make it a cross domain URL
@@ -104,12 +104,12 @@ function getInaboxUrl(req, extraExperiments) {
   }
 
   // turn on extra experiment
-  if (extraExperiments) {
+  if (extraExperiment) {
     const exp = url.searchParams.get('exp');
     if (exp) {
-      extraExperiments += ',' + exp;
+      extraExperiment += ',' + exp;
     }
-    url.searchParams.set('exp', extraExperiments);
+    url.searchParams.set('exp', extraExperiment);
   }
   return url;
 }
