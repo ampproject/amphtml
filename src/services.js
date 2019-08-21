@@ -352,17 +352,6 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/layers-impl.LayoutLayers}
-   */
-  static layersForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/layers-impl.LayoutLayers} */ (getServiceForDoc(
-      elementOrAmpDoc,
-      'layers'
-    ));
-  }
-
-  /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/owners-impl.Owners}
    */
   static ownersForDoc(elementOrAmpDoc) {
@@ -519,6 +508,17 @@ export class Services {
     return (
       /** @type {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
       (getExistingServiceOrNull(win, 'story-request'))
+    );
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService}
+   */
+  static mediaPerformanceMetricsService(win) {
+    return (
+      /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
+      (getExistingServiceOrNull(win, 'media-performance-metrics'))
     );
   }
 

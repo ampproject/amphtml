@@ -60,7 +60,7 @@ if (!singlePassDest.endsWith('/')) {
   singlePassDest = `${singlePassDest}/`;
 }
 
-const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
+const SPLIT_MARKER = `/** SPLIT_SINGLE_PASS */`;
 
 // Used to store transforms and compile v0.js
 const transformDir = tempy.directory();

@@ -46,6 +46,7 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
+import {preconnectToOrigin} from './preconnect';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 
@@ -132,6 +133,7 @@ if (shouldMainBootstrapRun) {
             installStandaloneExtension(ampdoc);
             maybeValidate(self);
             makeBodyVisible(self.document);
+            preconnectToOrigin(self.document);
           },
           /* makes the body visible */ true
         );

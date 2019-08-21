@@ -26,7 +26,7 @@ import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
 import {dev, devAssert, user} from '../log';
-import {dict, hasOwn} from '../utils/object';
+import {dict} from '../utils/object';
 import {getSourceUrl, isProxyOrigin} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isArray} from '../types';
@@ -401,23 +401,8 @@ export class Resources {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
-
-    /** @private @const {boolean} */
-    this.useLayersPrioritization_ = isExperimentOn(
-      this.win,
-      'layers-prioritization'
-    );
-
-    let boundScorer;
-    if (this.useLayers_ && this.useLayersPrioritization_) {
-      boundScorer = this.calcTaskScoreLayers_.bind(this);
-    } else {
-      boundScorer = this.calcTaskScore_.bind(this);
-    }
     /** @const {!function(./task-queue.TaskDef, !Object<string, *>):number} */
-    this.boundTaskScorer_ = boundScorer;
+    this.boundTaskScorer_ = this.calcTaskScore_.bind(this);
 
     /**
      * @private {!Array<!ChangeSizeRequestDef>}
@@ -470,16 +455,6 @@ export class Resources {
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = Date.now();
     });
-
-    if (this.useLayers_) {
-      const layers = Services.layersForDoc(this.ampdoc);
-
-      /** @private @const {!./layers-impl.LayoutLayers} */
-      this.layers_ = layers;
-
-      /** @private @const {function((number|undefined), !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
-      this.boundCalcLayoutScore_ = this.calcLayoutScore_.bind(this);
-    }
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
@@ -996,11 +971,7 @@ export class Resources {
 
   /** @override */
   measureMutateElement(element, measurer, mutator) {
-    if (this.useLayers_) {
-      return this.measureMutateElementLayers_(element, measurer, mutator);
-    } else {
-      return this.measureMutateElementResources_(element, measurer, mutator);
-    }
+    return this.measureMutateElementResources_(element, measurer, mutator);
   }
 
   /**
@@ -1060,27 +1031,6 @@ export class Resources {
   }
 
   /**
-   * Handles element mutation (and measurement) APIs in the Layers system.
-   *
-   * @param {!Element} element
-   * @param {?function()} measurer
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
-  measureMutateElementLayers_(element, measurer, mutator) {
-    return this.vsync_.runPromise({
-      measure: measurer || undefined,
-      mutate: () => {
-        // TODO(jridgewell): Audit this system. Did this cause a layer
-        // invalidation (new layer, or removal of old layer)? Right now, we're
-        // only dirtying the measurements.
-        mutator();
-        this.dirtyElement(element);
-      },
-    });
-  }
-
-  /**
    * Dirties the cached element measurements after a mutation occurs.
    *
    * TODO(jridgewell): This API needs to be audited. Common practice is
@@ -1094,29 +1044,12 @@ export class Resources {
    */
   dirtyElement(element) {
     let relayoutAll = false;
-    if (this.useLayers_) {
-      this.layers_.dirty(element);
-      // Bust the Resource's cached measure state, which is independent of
-      // Layers's measurements.
-      if (element.classList.contains('i-amphtml-element')) {
-        const r = Resource.forElement(element);
-        r.requestMeasure();
-      }
-      const ampElements = element.getElementsByClassName('i-amphtml-element');
-      for (let i = 0; i < ampElements.length; i++) {
-        const r = Resource.forElement(ampElements[i]);
-        r.requestMeasure();
-      }
-      // Remeasures can result in a doc height change.
-      this.maybeChangeHeight_ = true;
+    const isAmpElement = element.classList.contains('i-amphtml-element');
+    if (isAmpElement) {
+      const r = Resource.forElement(element);
+      this.setRelayoutTop_(r.getLayoutBox().top);
     } else {
-      const isAmpElement = element.classList.contains('i-amphtml-element');
-      if (isAmpElement) {
-        const r = Resource.forElement(element);
-        this.setRelayoutTop_(r.getLayoutBox().top);
-      } else {
-        relayoutAll = true;
-      }
+      relayoutAll = true;
     }
     this.schedulePass(FOUR_FRAME_DELAY_, relayoutAll);
   }
@@ -1149,10 +1082,7 @@ export class Resources {
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
-      if (
-        isExperimentOn(this.win, 'dirty-collapse-element') ||
-        this.useLayers_
-      ) {
+      if (isExperimentOn(this.win, 'dirty-collapse-element')) {
         this.dirtyElement(element);
       } else {
         this.setRelayoutTop_(box.top);
@@ -1317,15 +1247,6 @@ export class Resources {
    * @private
    */
   mutateWork_() {
-    if (this.useLayers_) {
-      this.mutateWorkViaLayers_();
-    } else {
-      this.mutateWorkViaResources_();
-    }
-  }
-
-  /** @private */
-  mutateWorkViaResources_() {
     // Read all necessary data before mutates.
     // The height changing depends largely on the target element's position
     // in the active viewport. When not in prerendering, we also consider the
@@ -1360,7 +1281,6 @@ export class Resources {
       // Find minimum top position and run all mutates.
       let minTop = -1;
       const scrollAdjSet = [];
-      const dirtySet = [];
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
@@ -1512,9 +1432,6 @@ export class Resources {
           if (box.top >= 0) {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
-          if (this.useLayers_) {
-            dirtySet.push(request.resource.element);
-          }
           request.resource./*OK*/ changeSize(
             request.newHeight,
             request.newWidth,
@@ -1534,11 +1451,7 @@ export class Resources {
         }
       }
 
-      if (this.useLayers_) {
-        dirtySet.forEach(element => {
-          this.dirtyElement(element);
-        });
-      } else if (minTop != -1) {
+      if (minTop != -1) {
         this.setRelayoutTop_(minTop);
       }
 
@@ -1566,11 +1479,7 @@ export class Resources {
                   request.callback(/* hasSizeChanged */ true);
                 }
               });
-              if (this.useLayers_) {
-                scrollAdjSet.forEach(request => {
-                  this.dirtyElement(request.resource.element);
-                });
-              } else if (minTop != -1) {
+              if (minTop != -1) {
                 this.setRelayoutTop_(minTop);
               }
               // Sync is necessary here to avoid UI jump in the next frame.
@@ -1612,15 +1521,6 @@ export class Resources {
   }
 
   /**
-   * TODO(jridgewell): This will be Layer's bread and butter for speed
-   * optimizations.
-   * @private
-   */
-  mutateWorkViaLayers_() {
-    this.mutateWorkViaResources_();
-  }
-
-  /**
    * Returns true if element is within 15% and 1000px of document bottom.
    * Caller can provide current/initial layout boxes as an optimization.
    * @param {!./resource.Resource} resource
@@ -1643,9 +1543,7 @@ export class Resources {
    * @private
    */
   setRelayoutTop_(relayoutTop) {
-    if (this.useLayers_) {
-      this.relayoutAll_ = true;
-    } else if (this.relayoutTop_ == -1) {
+    if (this.relayoutTop_ == -1) {
       this.relayoutTop_ = relayoutTop;
     } else {
       this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
@@ -2004,55 +1902,6 @@ export class Resources {
     }
     posPriority = Math.abs(posPriority);
     return task.priority * PRIORITY_BASE_ + posPriority;
-  }
-
-  /**
-   * Calculates the task's score using the Layers service. A task with the
-   * lowest score will be dequeued from the queue the first.
-   *
-   * Refer to {@link calcTaskScore_} for basic explanation.
-   *
-   * Viewport priority is a function of the distance of the element from the
-   * currently visible viewports. The elements in the visible viewport get
-   * higher priority and further away from the viewport get lower priority.
-   *
-   * @param {!./task-queue.TaskDef} task
-   * @param {!Object<string, *>} cache
-   * @return {number}
-   * @private
-   */
-  calcTaskScoreLayers_(task, cache) {
-    const layerScore = this.layers_.iterateAncestry(
-      task.resource.element,
-      this.boundCalcLayoutScore_,
-      cache
-    );
-    return task.priority * PRIORITY_BASE_ + layerScore;
-  }
-
-  /**
-   * Calculates the layout's distance from viewport score, using an iterative
-   * (and cacheable) calculation based on tree depth and distance.
-   *
-   * @param {number|undefined} currentScore
-   * @param {!./layers-impl.LayoutElement} layout
-   * @param {number} depth
-   * @param {!Object<string, *>} cache
-   * @return {number}
-   */
-  calcLayoutScore_(currentScore, layout, depth, cache) {
-    const id = layout.getId();
-    if (hasOwn(cache, id)) {
-      return dev().assertNumber(cache[id]);
-    }
-
-    const score = currentScore || 0;
-    const depthPenalty = 1 + depth / 10;
-    const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
-    const distance =
-      layout.getHorizontalDistanceFromParent() +
-      layout.getVerticalDistanceFromParent();
-    return (cache[id] = score + nonActivePenalty * depthPenalty * distance);
   }
 
   /**
