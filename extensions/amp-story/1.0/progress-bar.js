@@ -238,9 +238,10 @@ export class ProgressBar {
     if (this.storeService_.get(StateProperty.RTL_STATE)) {
       translateX *= -1;
     }
+    // Do not remove translateZ(0.00001px) as it prevents an iOS repaint issue.
     segment.setAttribute(
       'style',
-      `transform: translate3d(${translateX}px, 0, 0) scaleX(${width /
+      `transform: translate3d(${translateX}px, 0px, 0.00001px) scaleX(${width /
         ELLIPSE_WIDTH_PX});`
     );
   }

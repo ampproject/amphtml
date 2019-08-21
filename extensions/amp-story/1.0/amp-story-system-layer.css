@@ -83,7 +83,7 @@
 }
 
 ol.i-amphtml-animate-progress li {
-  transition: transform 1s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-progress-bar {
