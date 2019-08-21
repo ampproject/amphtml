@@ -633,6 +633,7 @@ const forbiddenTerms = {
       'src/inabox/amp-inabox.js',
       'src/runtime.js',
       'src/custom-element.js',
+      'src/service/resources-impl.js',
     ],
   },
   'AMP_CONFIG': {
