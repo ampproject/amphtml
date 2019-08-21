@@ -84,18 +84,18 @@ describes.realWin(
       const nexxtv = await getNexxtv('71QQG852413DU7J', '761');
       const iframe = nexxtv.querySelector('iframe');
       await Promise.resolve();
-      const p = listenOncePromise(nexxtv, VideoEvents.PLAYING);
+      const p1 = listenOncePromise(nexxtv, VideoEvents.PLAYING);
       sendFakeMessage(nexxtv, iframe, {event: 'play'});
-      p;
-      const p_1 = listenOncePromise(nexxtv, VideoEvents.MUTED);
+      await p1;
+      const p2 = listenOncePromise(nexxtv, VideoEvents.MUTED);
       sendFakeMessage(nexxtv, iframe, {event: 'mute'});
-      p_1;
-      const p_2 = listenOncePromise(nexxtv, VideoEvents.PAUSE);
+      await p2;
+      const p3 = listenOncePromise(nexxtv, VideoEvents.PAUSE);
       sendFakeMessage(nexxtv, iframe, {event: 'pause'});
-      p_2;
-      const p_3 = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
+      await p3;
+      const p4 = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
       sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
-      return p_3;
+      return p4;
     });
 
     function sendFakeMessage(nexxtv, iframe, command) {

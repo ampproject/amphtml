@@ -74,16 +74,19 @@ describes.realWin(
       const player = await get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
       const iframe = player.querySelector('iframe');
       await Promise.resolve();
-      await listenOncePromise(player, VideoEvents.MUTED);
+      const p1 = listenOncePromise(player, VideoEvents.MUTED);
       sendFakeMessage(player, iframe, 'muted');
-      await listenOncePromise(player, VideoEvents.PLAYING);
+      await p1;
+      const p2 = listenOncePromise(player, VideoEvents.PLAYING);
       sendFakeMessage(player, iframe, 'playing');
-      await listenOncePromise(player, VideoEvents.PAUSE);
+      await p2;
+      const p3 = listenOncePromise(player, VideoEvents.PAUSE);
       sendFakeMessage(player, iframe, 'paused');
-      const p = listenOncePromise(player, VideoEvents.UNMUTED);
+      await p3;
+      const p4 = listenOncePromise(player, VideoEvents.UNMUTED);
       sendFakeMessage(player, iframe, 'unmuted');
       const successTimeout = timer.promise(10);
-      return Promise.race([p, successTimeout]);
+      return Promise.race([p4, successTimeout]);
     });
 
     function sendFakeMessage(player, iframe, command) {
