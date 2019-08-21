@@ -182,6 +182,11 @@ function maybePrintCoverageMessage() {
   opn(url, {wait: false});
 }
 
+function karmaBrowserStart(browser) {
+  console./*OK*/ log('\n');
+  log(`${browser.name}: ${green('STARTED')}`);
+}
+
 function karmaBrowserComplete(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
@@ -389,6 +394,7 @@ async function createKarmaServer(
   karmaServer
     .on('run_start', () => karmaRunStart())
     .on('browsers_ready', () => karmaBrowsersReady())
+    .on('browser_start', browser => karmaBrowserStart(browser))
     .on('browser_complete', browser => karmaBrowserComplete(browser))
     .on('run_complete', runCompleteFn);
 
