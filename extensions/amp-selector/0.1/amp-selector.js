@@ -417,7 +417,6 @@ export class AmpSelector extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    // TODO(wassgha, #23820): Add an e2e test to catch race conditions here
     // There is a change of the `selected` attribute for the element
     return this.mutateElement(() => {
       if (selectedIndex !== index) {
@@ -498,7 +497,9 @@ export class AmpSelector extends AMP.BaseElement {
       case Keys.LEFT_ARROW: /* fallthrough */
       case Keys.UP_ARROW: /* fallthrough */
       case Keys.RIGHT_ARROW: /* fallthrough */
-      case Keys.DOWN_ARROW:
+      case Keys.DOWN_ARROW: /* fallthrough */
+      case Keys.HOME: /* fallthrough */
+      case Keys.END:
         if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
           return this.navigationKeyDownHandler_(event);
         }
@@ -538,6 +539,14 @@ export class AmpSelector extends AMP.BaseElement {
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
+      case Keys.HOME:
+        // Home looks for first nonhidden element, in 'next' direction.
+        dir = 1;
+        break;
+      case Keys.END:
+        // End looks for last nonhidden element, in 'previous' direction.
+        dir = -1;
+        break;
       default:
         return Promise.resolve();
     }
@@ -548,6 +557,17 @@ export class AmpSelector extends AMP.BaseElement {
 
     return this.getElementsSizes_().then(sizes => {
       const originalIndex = this.focusedIndex_;
+
+      // For Home/End keys, start at end/beginning respectively and wrap around
+      switch (event.key) {
+        case Keys.HOME:
+          this.focusedIndex_ = this.elements_.length - 1;
+          break;
+        case Keys.END:
+          this.focusedIndex_ = 0;
+          break;
+      }
+
       do {
         // Change the focus to the next element in the specified direction.
         // The selection should loop around if the user attempts to go one

@@ -17,8 +17,8 @@
 import {MessageType} from '../../src/3p-frame-messaging';
 import {Observable} from '../observable';
 import {Services} from '../services';
-import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
+import {ViewportImpl} from '../service/viewport/viewport-impl';
 import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
@@ -151,9 +151,6 @@ export class ViewportBindingInabox {
       MIN_EVENT_INTERVAL
     );
 
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
-
     /** @private {?../../ads/inabox/position-observer.PositionObserver} */
     this.topWindowPositionObserver_ = null;
 
@@ -234,11 +231,7 @@ export class ViewportBindingInabox {
   /** @override */
   getLayoutRect(el) {
     const b = el./*OK*/ getBoundingClientRect();
-    let {left, top} = b;
-    if (this.useLayers_) {
-      left -= this.viewportRect_.left;
-      top -= this.viewportRect_.top;
-    }
+    const {left, top} = b;
     return layoutRectLtwh(
       Math.round(left + this.boxRect_.left),
       Math.round(top + this.boxRect_.top),
@@ -519,7 +512,7 @@ export function installInaboxViewportService(ampdoc) {
     ampdoc,
     'viewport',
     function() {
-      return new Viewport(ampdoc, binding, viewer);
+      return new ViewportImpl(ampdoc, binding, viewer);
     },
     /* opt_instantiate */ true
   );

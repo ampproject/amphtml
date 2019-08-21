@@ -198,9 +198,13 @@ export class RequestBank {
         credentials: 'omit',
       })
       .catch(err => {
-        return err.response.text().then(msg => {
-          throw new Error(err.message + ': ' + msg);
-        });
+        if (err.response != null) {
+          return err.response.text().then(msg => {
+            throw new Error(err.message + ': ' + msg);
+          });
+        } else {
+          throw err;
+        }
       });
   }
 }

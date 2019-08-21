@@ -614,7 +614,7 @@ class RealWinFixture {
         env.win = win;
 
         // Flag as being a test window.
-        win.AMP_TEST_IFRAME = true;
+        win.__AMP_TEST_IFRAME = true;
         // Set the testLocation on iframe to parent's location since location of
         // the test iframe is about:srcdoc.
         // Unfortunately location object is not configurable, so we have to
@@ -709,7 +709,7 @@ class AmpFixture {
     }
     const ampdocType = spec.ampdoc || 'single';
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
-    installDocService(win, singleDoc);
+    installDocService(win, singleDoc, spec.params);
     const ampdocService = Services.ampdocServiceFor(win);
     env.ampdocService = ampdocService;
     installExtensionsService(win);
@@ -717,14 +717,14 @@ class AmpFixture {
     installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {
-      win.services.vsync.obj.runScheduledTasks_();
+      win.__AMP_SERVICES.vsync.obj.runScheduledTasks_();
     };
     if (singleDoc) {
       // Install AMP CSS for main runtime, if it hasn't been installed yet.
       completePromise = installRuntimeStylesPromise(win);
       const ampdoc = ampdocService.getAmpDoc(win.document);
       env.ampdoc = ampdoc;
-      installAmpdocServices(ampdoc, spec.params);
+      installAmpdocServices(ampdoc);
       adopt(win);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
     } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
@@ -881,7 +881,7 @@ class AmpFixture {
  * @param {!Window} win
  */
 function configureAmpTestMode(win) {
-  win.AMP_TEST = true;
+  win.__AMP_TEST = true;
 }
 
 /**

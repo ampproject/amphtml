@@ -62,11 +62,11 @@ tags: {  # <amp-script>
   attrs: { name: "sandbox" }
   attrs: {
     name: "script"
-    mandatory_anyof: "['script', 'src']"
+    mandatory_oneof: "['script', 'src']"
   }
   attrs: {
     name: "src"
-    mandatory_anyof: "['script', 'src']"
+    mandatory_oneof: "['script', 'src']"
     value_url: {
       protocol: "https"
       allow_relative: false

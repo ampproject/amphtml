@@ -46,7 +46,7 @@ describe('Logging', () => {
     sandbox = sinon.sandbox;
 
     mode = {};
-    window.AMP_MODE = mode;
+    window.__AMP_MODE = mode;
 
     logSpy = sandbox.spy();
     timeoutSpy = sandbox.spy();
@@ -56,15 +56,15 @@ describe('Logging', () => {
       },
       location: {hash: ''},
       setTimeout: timeoutSpy,
-      reportError: error => error,
+      __AMP_REPORT_ERROR: error => error,
     };
-    sandbox.stub(self, 'reportError').callsFake(error => error);
+    sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake(error => error);
   });
 
   afterEach(() => {
     sandbox.restore();
     sandbox = null;
-    window.AMP_MODE = undefined;
+    window.__AMP_MODE = undefined;
   });
 
   describe('Level', () => {
