@@ -116,6 +116,7 @@ const forbiddenTerms = {
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
       'build-system/pr-check/dist-bundle-size.js',
+      'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
       'build-system/pr-check/remote-tests.js',
@@ -270,14 +271,6 @@ const forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/inabox/inabox-services.js',
-      'src/service/core-services.js',
-      'src/service/viewer-impl.js',
-    ],
-  },
-  'setViewerVisibilityState': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/runtime.js',
       'src/service/core-services.js',
       'src/service/viewer-impl.js',
     ],
@@ -605,6 +598,14 @@ const forbiddenTerms = {
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'src/base-element.js',
       'src/service/resources-impl.js',
+    ],
+  },
+  'overrideVisibilityState': {
+    message: 'overrideVisibilityState is a restricted API.',
+    whitelist: [
+      'src/runtime.js',
+      'src/service/ampdoc-impl.js',
+      'src/service/viewer-impl.js',
     ],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
