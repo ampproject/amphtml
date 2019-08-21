@@ -372,9 +372,9 @@ export class Performance {
     }
 
     if (this.supportsEventTimingAPIv77_) {
-      // Layout shift entries are not available from the Performance Timeline
-      // through `getEntriesByType`, so a separate PerformanceObserver is
-      // required for this metric.
+      // It's preferred to read first input delay entries that already occurred
+      // through the `buffered: true` flag, so create a separate
+      // PerformanceObserver to read this metric.
       const firstInputObserver = new this.win.PerformanceObserver(list => {
         list.getEntries().forEach(processEntry);
         this.flush();
