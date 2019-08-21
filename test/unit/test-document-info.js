@@ -63,7 +63,6 @@ describe
         const {win} = iframe;
         installDocService(win, /* isSingleDoc */ true);
         sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
-        win.services.documentInfo = null;
         installDocumentInfoServiceForDoc(win.document);
         return iframe.win;
       });

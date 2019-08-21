@@ -652,17 +652,16 @@ describes.fakeWin(
     it('should run a full reload pass on fonts timeout', () => {
       win.readyState = 'complete';
       win.document.eventListeners.fire({type: 'readystatechange'});
-      let basePassCount = 0;
       return resources.ampdoc
         .whenReady()
         .then(() => {
           expect(resources.relayoutAll_).to.be.false;
-          basePassCount = schedulePassStub.callCount;
+          expect(schedulePassStub).to.not.be.called;
           clock.tick(3100);
         })
         .then(() => {
           expect(resources.relayoutAll_).to.be.true;
-          expect(schedulePassStub).to.have.callCount(basePassCount + 1);
+          expect(schedulePassStub).to.have.been.called;
         });
     });
 
@@ -670,7 +669,6 @@ describes.fakeWin(
       win.readyState = 'interactive';
       win.document.eventListeners.fire({type: 'readystatechange'});
       win.document.fonts.status = 'loading';
-      let basePassCount = 0;
       return resources.ampdoc
         .whenReady()
         .then(() => {})
@@ -678,7 +676,6 @@ describes.fakeWin(
           // This is the regular remeasure on doc-ready.
           expect(resources.relayoutAll_).to.be.true;
           resources.relayoutAll_ = false;
-          basePassCount = schedulePassStub.callCount;
           return win.document.fonts.ready;
         })
         .then(() => {
@@ -688,7 +685,7 @@ describes.fakeWin(
         .then(() => {
           expect(resources.relayoutAll_).to.be.true;
           // Remeasure on doc-ready and fonts-ready.
-          expect(schedulePassStub).to.have.callCount(basePassCount + 1);
+          expect(schedulePassStub).to.have.been.calledTwice;
         });
     });
 
@@ -696,7 +693,6 @@ describes.fakeWin(
       win.readyState = 'interactive';
       win.document.eventListeners.fire({type: 'readystatechange'});
       win.document.fonts.status = 'loaded';
-      let basePassCount = 0;
       return resources.ampdoc
         .whenReady()
         .then(() => {})
@@ -704,7 +700,6 @@ describes.fakeWin(
           // This is the regular remeasure on doc-ready.
           expect(resources.relayoutAll_).to.be.true;
           resources.relayoutAll_ = false;
-          basePassCount = schedulePassStub.callCount;
           return win.document.fonts.ready;
         })
         .then(() => {
@@ -714,7 +709,7 @@ describes.fakeWin(
         .then(() => {
           expect(resources.relayoutAll_).to.be.false;
           // Only remeasure on doc-ready.
-          expect(schedulePassStub).to.have.callCount(basePassCount);
+          expect(schedulePassStub).to.have.been.calledOnce;
         });
     });
 
