@@ -47,8 +47,10 @@ addons:
     # but should not resolve in tests.
     - fonts.googleapis.com
 stages:
-  - build
-  - test
+  - name: build
+  - name: test
+  - name: experiment
+    if: type = push
 jobs:
   include:
     - stage: build
@@ -91,7 +93,19 @@ jobs:
       before_install: sudo safaridriver --enable
       os: osx
       script:
-        - unbuffer node build-system/pr-check/e2e-tests.js      
+        - unbuffer node build-system/pr-check/e2e-tests.js
+    - stage: experiment
+      name: "Experiment A Tests"
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentA
+    - stage: experiment
+      name: "Experiment B Tests"
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentB
+    - stage: experiment
+      name: "Experiment C Tests"
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
 cache:
   directories:
     - node_modules

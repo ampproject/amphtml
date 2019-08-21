@@ -116,7 +116,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       };
       viewerForDoc = sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       win = {
-        AMP_MODE: {
+        __AMP_MODE: {
           localDev: false,
         },
         location: {
@@ -148,7 +148,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       init = {
         bypassInterceptorForDev: true,
       };
-      win.AMP_MODE = {
+      win.__AMP_MODE = {
         localDev: true,
       };
 
