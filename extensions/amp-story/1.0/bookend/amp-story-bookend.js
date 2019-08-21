@@ -581,6 +581,10 @@ export class AmpStoryBookend extends DraggableDrawer {
   renderComponents_(components) {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
 
+    if (!components.length) {
+      return Promise.resolve();
+    }
+
     return Services.localizationServiceForOrNull(this.win)
       .then(localizationService => {
         const bookendEls = BookendComponent.buildElements(
