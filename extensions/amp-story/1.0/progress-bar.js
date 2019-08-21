@@ -192,7 +192,7 @@ export class ProgressBar {
 
     this.barWidthPx_ = this.storyEl_
       .querySelector('amp-story-page')
-      .getBoundingClientRect().width;
+      .getBoundingClientRect()./*OK*/ width;
 
     this.vsync_.mutate(() => {
       // Don't animate the progress bar in pageload.
@@ -346,7 +346,7 @@ export class ProgressBar {
     this.vsync_.mutate(() => {
       this.barWidthPx_ = this.storyEl_
         .querySelector('amp-story-page')
-        .getBoundingClientRect().width;
+        .getBoundingClientRect()./*OK*/ width;
       this.render_();
     });
   }
@@ -442,7 +442,7 @@ export class ProgressBar {
     this.activeSegmentProgress_ = progress;
     this.activeSegmentIndex_ = segmentIndex;
     this.activeSegmentId_ = segmentId;
-    this.checkIndexForOverflow_(segmentIndex);
+    this.checkIndexForOverflow_();
   }
 
   /**
