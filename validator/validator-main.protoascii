@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 945
+spec_file_revision: 946
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -1115,6 +1115,40 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     }
   }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+}
+# This variant of <style amp-custom> is designed to help developers see how
+# close they are to the byte limit, even if the page is passing. By changing
+# the attribute to <style amp-custom-length-check>, this tagspec will be used
+# to match errors. It cannot pass however as it has a cdata.max_bytes set to
+# -1. As a result, it will always fail and report the length found in the
+# tag's cdata. This is a small hack, and may be deleted in the future if there
+# are problems maintaining it. Deleting this tagspec will of course never
+# break any valid AMP documents as if it matches, the page will be invalid.
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  disabled_by: "transformed"
+  tag_name: "STYLE"
+  spec_name: "style amp-custom-length-check"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom-length-check"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  attrs: {  # This is a default, but it doesn't hurt.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    # This will always cause the tagspec matching to fail.
+    max_bytes: -1
+  }
 }
 # For transformed AMP non-data URLs are not counted against the total byte
 # limit for <style amp-custom>. This is done by setting url_bytes_included
