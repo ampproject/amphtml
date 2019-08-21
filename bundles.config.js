@@ -483,6 +483,13 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-intaker-chat-widget',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-izlesene',
     version: '0.1',
     latestVersion: '0.1',
