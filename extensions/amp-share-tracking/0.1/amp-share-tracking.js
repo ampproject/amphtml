@@ -55,7 +55,7 @@ export class AmpShareTracking extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return [Layout.NODISPLAY, Layout.CONTAINER].includes(layout);
+    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
   }
 
   /** @override */

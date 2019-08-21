@@ -251,7 +251,11 @@ export class AmpVk extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return [Layout.RESPONSIVE, Layout.FLEX_ITEM, Layout.FIXED].includes(layout);
+    return (
+      layout === Layout.RESPONSIVE ||
+      layout === Layout.FLEX_ITEM ||
+      layout === Layout.FIXED
+    );
   }
 
   /** @override */

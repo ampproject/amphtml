@@ -131,7 +131,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return [Layout.RESPONSIVE, Layout.FIXED_HEIGHT].includes(layout);
+    return layout === Layout.RESPONSIVE || layout === Layout.FIXED_HEIGHT;
   }
 
   /** @override */
