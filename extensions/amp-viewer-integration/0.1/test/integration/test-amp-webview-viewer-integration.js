@@ -45,7 +45,7 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
     });
 
     it('should handle unload correctly', () => {
-      return viewer.waitForDocumentLoaded().then(() => {
+      viewer.waitForDocumentLoaded().then(() => {
         const stub = sandbox.stub(viewer, 'handleUnload_');
         window.eventListeners.fire({type: 'unload'});
         expect(stub).to.be.calledOnce;
@@ -67,7 +67,6 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
       let integr;
 
       beforeEach(() => {
-        env.sandbox.useFakeTimers();
         integr = new AmpViewerIntegration(env.win);
       });
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Owners} from './owners-impl';
@@ -36,7 +35,6 @@ import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
-import {startupChunk} from '../chunk';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -281,11 +279,6 @@ export class ResourcesDef extends MutatorsAndOwnersDef {
   onNextPass(callback) {}
 
   /**
-   * @return {!Promise} when first pass executed.
-   */
-  whenFirstPass() {}
-
-  /**
    * Called when main AMP binary is fully initialized.
    * May never be called in Shadow Mode.
    */
@@ -443,13 +436,11 @@ export class Resources {
     /** @const @private {!Array<function()>} */
     this.passCallbacks_ = [];
 
-    /** @const @private {!Deferred} */
-    this.firstPassDone_ = new Deferred();
-
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.viewer_.getVisibilityState()
     );
+    this.setupVisibilityStateMachine_(this.visibilityStateMachine_);
 
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged(event => {
@@ -484,12 +475,7 @@ export class Resources {
       this.checkPendingChangeSize_(element);
     });
 
-    // Schedule initial passes. This must happen in a startup task
-    // to avoid blocking body visible.
-    startupChunk(this.ampdoc, () => {
-      this.setupVisibilityStateMachine_(this.visibilityStateMachine_);
-      this.schedulePass(0);
-    });
+    this.schedulePass();
 
     this.rebuildDomWhenReady_();
   }
@@ -2392,13 +2378,6 @@ export class Resources {
   }
 
   /**
-   * @return {!Promise} when first pass executed.
-   */
-  whenFirstPass() {
-    return this.firstPassDone_.promise;
-  }
-
-  /**
    * Calls iterator on each sub-resource
    * @param {!FiniteStateMachine<!VisibilityState>} vsm
    */
@@ -2432,7 +2411,6 @@ export class Resources {
         } else {
           dev().fine(TAG_, 'document is not visible: no scheduling');
         }
-        this.firstPassDone_.resolve();
       }
     };
     const noop = () => {};
