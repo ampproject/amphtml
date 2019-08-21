@@ -29,6 +29,10 @@ addons:
       - google-cloud-sdk
       - openssl
       - protobuf-compiler
+  homebrew:
+    packages:
+      - expect
+      - google-cloud-sdk   
   chrome: stable
   firefox: latest # for osx
   hosts:
@@ -85,7 +89,7 @@ jobs:
       before_install: sudo safaridriver --enable
       os: osx
       script:
-        - node build-system/pr-check/e2e-tests.js      
+        - unbuffer node build-system/pr-check/e2e-tests.js      
 cache:
   directories:
     - node_modules
