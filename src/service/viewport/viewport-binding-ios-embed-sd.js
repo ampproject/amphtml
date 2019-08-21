@@ -29,7 +29,6 @@ import {
 } from '../../style';
 import {dev} from '../../log';
 import {htmlFor} from '../../static-template';
-import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
 import {waitForBodyOpen} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
@@ -168,9 +167,6 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
     /** @const {function()} */
     this.boundResizeEventListener_ = this.onResized_.bind(this);
-
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     /** @private {boolean} */
     this.bodySyncScheduled_ = false;
@@ -436,10 +432,6 @@ export class ViewportBindingIosEmbedShadowRoot_ {
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
     const b = el./*OK*/ getBoundingClientRect();
-    if (this.useLayers_) {
-      return layoutRectLtwh(b.left, b.top, b.width, b.height);
-    }
-
     const scrollTop =
       opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
     const scrollLeft =

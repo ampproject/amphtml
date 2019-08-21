@@ -352,17 +352,6 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/layers-impl.LayoutLayers}
-   */
-  static layersForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/layers-impl.LayoutLayers} */ (getServiceForDoc(
-      elementOrAmpDoc,
-      'layers'
-    ));
-  }
-
-  /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/owners-impl.Owners}
    */
   static ownersForDoc(elementOrAmpDoc) {

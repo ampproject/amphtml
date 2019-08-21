@@ -21,7 +21,6 @@ import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
-import {isExperimentOn} from './experiments';
 import {preconnectForElement} from './preconnect';
 
 /**
@@ -1028,21 +1027,5 @@ export class BaseElement {
    */
   user() {
     return user(this.element);
-  }
-
-  /**
-   * Declares a child element (or ourselves) as a Layer
-   * @param {!Element=} opt_element
-   * @return {undefined}
-   */
-  declareLayer(opt_element) {
-    devAssert(
-      isExperimentOn(this.win, 'layers'),
-      'Layers must be enabled to declare layer.'
-    );
-    if (opt_element) {
-      devAssert(this.element.contains(opt_element));
-    }
-    return this.element.getLayers().declareLayer(opt_element || this.element);
   }
 }

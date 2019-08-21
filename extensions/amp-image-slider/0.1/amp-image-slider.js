@@ -22,7 +22,6 @@ import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user, userAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
@@ -144,17 +143,11 @@ export class AmpImageSlider extends AMP.BaseElement {
       '2 <amp-img>s must be provided for comparison'
     );
 
-    // TODO(kqian): remove this after layer launch
-    if (
-      !isExperimentOn(this.win, 'layers') ||
-      !isExperimentOn(this.win, 'layers-prioritization')
-    ) {
-      // see comment in layoutCallback
-      // When layers not enabled
-      const owners = Services.ownersForDoc(this.element);
-      owners.setOwner(dev().assertElement(this.leftAmpImage_), this.element);
-      owners.setOwner(dev().assertElement(this.rightAmpImage_), this.element);
-    }
+    // see comment in layoutCallback
+    // When layers not enabled
+    const owners = Services.ownersForDoc(this.element);
+    owners.setOwner(dev().assertElement(this.leftAmpImage_), this.element);
+    owners.setOwner(dev().assertElement(this.rightAmpImage_), this.element);
 
     this.container_ = this.doc_.createElement('div');
     this.container_.classList.add('i-amphtml-image-slider-container');
