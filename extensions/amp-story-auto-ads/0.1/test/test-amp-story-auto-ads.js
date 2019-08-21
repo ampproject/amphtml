@@ -168,6 +168,40 @@ describes.realWin(
       });
     });
 
+    describe('CTA button', () => {
+      beforeEach(async () => {
+        addStoryAutoAdsConfig(doc, adElement);
+        const storyImpl = new MockStoryImpl(storyElement);
+        storyElement.getImpl = () => Promise.resolve(storyImpl);
+        await addStoryPages(doc, storyImpl);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        fireBuildSignals(doc);
+        return Promise.resolve();
+      });
+
+      it('reads value from amp-ad-exit over meta tags', async () => {
+        const iframeContent = `
+          <amp-ad-exit id="exit-api">
+            <script type="application/json">
+            {
+              "targets": {
+                "url_0": {
+                  "finalUrl": "https://amp.dev/"
+                }
+              }
+            }
+            </script>
+          </amp-ad-exit>
+        `;
+        addCtaValues(autoAds, 'SHOP', 'https://example.com'); // This url should be ignored.
+        await insertAdContent(autoAds, iframeContent);
+        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        const cta = doc.querySelector('.i-amphtml-story-ad-link');
+        expect(cta.href).to.equal('https://amp.dev/');
+      });
+    });
+
     describe('ad choices', () => {
       beforeEach(async () => {
         addStoryAutoAdsConfig(doc, adElement);

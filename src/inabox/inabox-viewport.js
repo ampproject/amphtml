@@ -465,9 +465,6 @@ export class ViewportBindingInabox {
       MIN_EVENT_INTERVAL
     );
 
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
-
     /** @private {?../../ads/inabox/position-observer.PositionObserver} */
     this.topWindowPositionObserver_ = null;
 
@@ -548,11 +545,7 @@ export class ViewportBindingInabox {
   /** @override */
   getLayoutRect(el) {
     const b = el./*OK*/ getBoundingClientRect();
-    let {left, top} = b;
-    if (this.useLayers_) {
-      left -= this.viewportRect_.left;
-      top -= this.viewportRect_.top;
-    }
+    const {left, top} = b;
     return layoutRectLtwh(
       Math.round(left + this.boxRect_.left),
       Math.round(top + this.boxRect_.top),

@@ -39,7 +39,6 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../../service';
-import {installLayersServiceForDoc} from '../layers-impl';
 import {isExperimentOn} from '../../experiments';
 import {
   layoutRectFromDomRect,
@@ -138,16 +137,6 @@ export class ViewportImpl {
 
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
-
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(win, 'layers');
-    if (this.useLayers_) {
-      installLayersServiceForDoc(
-        ampdoc,
-        this.binding_.getScrollingElement(),
-        this.binding_.getScrollingElementScrollsLikeViewport()
-      );
-    }
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
@@ -332,12 +321,8 @@ export class ViewportImpl {
   /** @override */
   getRect() {
     if (this.rect_ == null) {
-      let scrollTop = 0;
-      let scrollLeft = 0;
-      if (!this.useLayers_) {
-        scrollTop = this.getScrollTop();
-        scrollLeft = this.getScrollLeft();
-      }
+      const scrollTop = this.getScrollTop();
+      const scrollLeft = this.getScrollLeft();
       const size = this.getSize();
       this.rect_ = layoutRectLtwh(
         scrollLeft,
@@ -376,13 +361,6 @@ export class ViewportImpl {
 
   /** @override */
   getClientRectAsync(el) {
-    // TODO(@zhouyx): We may need to return info on the intersectionRect.
-    if (this.useLayers_) {
-      return this.vsync_.measurePromise(() => {
-        return this.getLayoutRect(el);
-      });
-    }
-
     const local = this.vsync_.measurePromise(() => {
       return el./*OK*/ getBoundingClientRect();
     });
@@ -428,12 +406,9 @@ export class ViewportImpl {
    */
   scrollIntoViewInternal_(element, parent) {
     const elementTop = this.binding_.getLayoutRect(element).top;
-
-    const newScrollTopPromise = this.useLayers_
-      ? this.getElementScrollTop_(parent).then(
-          scrollTop => elementTop + scrollTop
-        )
-      : tryResolve(() => Math.max(0, elementTop - this.paddingTop_));
+    const newScrollTopPromise = tryResolve(() =>
+      Math.max(0, elementTop - this.paddingTop_)
+    );
 
     newScrollTopPromise.then(newScrollTop =>
       this.setElementScrollTop_(parent, newScrollTop)
@@ -485,13 +460,8 @@ export class ViewportImpl {
     }
 
     return this.getElementScrollTop_(parent).then(curScrollTop => {
-      let newScrollTop;
-      if (this.useLayers_) {
-        newScrollTop = Math.max(0, elementRect.top + offset + curScrollTop);
-      } else {
-        const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
-        newScrollTop = Math.max(0, calculatedScrollTop);
-      }
+      const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
+      const newScrollTop = Math.max(0, calculatedScrollTop);
       if (newScrollTop == curScrollTop) {
         return;
       }
