@@ -128,7 +128,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.win,
       cb => this.mutateElement(cb),
       // The sidebar is already animated by swipe to dismiss, so skip animation.
-      () => this.close_(true)
+      () => this.dismiss_(true)
     );
   }
 
@@ -438,13 +438,23 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Hides the sidebar.
+   * @return {boolean} Whether the sidebar actually transitioned from "visible"
+   *     to "hidden".
+   * @private
+   */
+  close_() {
+    this.dismiss_(false);
+  }
+
+  /**
+   * Dismisses the sidebar.
    * @param {boolean} immediate Whether sidebar should close immediately,
    *     without animation.
    * @return {boolean} Whether the sidebar actually transitioned from "visible"
    *     to "hidden".
    * @private
    */
-  close_(immediate = false) {
+  dismiss_(immediate) {
     if (!this.opened_) {
       return false;
     }
@@ -480,7 +490,7 @@ export class AmpSidebar extends AMP.BaseElement {
   setupGestures_(element) {
     const gestures = Gestures.get(dev().assertElement(element));
     gestures.onGesture(SwipeXRecognizer, ({data}) => {
-      this.swipeGesture_(data);
+      this.handleSwipe_(data);
     });
   }
 
@@ -488,7 +498,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * Handles a swipe gesture, updating the current swipe to dismiss state.
    * @param {!SwipeDef} data
    */
-  swipeGesture_(data) {
+  handleSwipe_(data) {
     if (data.first) {
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.element),
