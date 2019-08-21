@@ -66,7 +66,7 @@ Note: you should use either the basic setup or AST setup. Do not mix types on th
 ```
 
 ### AST Infinite scroll ads on the page, Include adUnit details only in the amp-ad tag which you want to lazy load
-Note: You would loose competitive exclusion if you use this setup.
+Note: You would lose competitive exclusion if you use this setup.
 
 ```html
 <amp-ad width="300" height="250"
