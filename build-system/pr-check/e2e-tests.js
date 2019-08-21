@@ -52,10 +52,9 @@ async function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('E2E_TEST')
     ) {
+      downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie(
-        'gulp e2e --headless --files=extensions/amp-base-carousel/0.1/test-e2e/test-arrows.js'
-      );
+      timedExecOrDie('gulp e2e --nobuild --headless');
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,
