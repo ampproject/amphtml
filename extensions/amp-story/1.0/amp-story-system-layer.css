@@ -104,7 +104,6 @@ ol.i-amphtml-animate-progress li {
 
 .i-amphtml-story-page-progress-bar {
   background: rgba(255, 255, 255, 0.4) !important;
-  border-radius: 1px !important;
   height: 100% !important;
   list-style: none !important;
   margin: 0 2px !important;
