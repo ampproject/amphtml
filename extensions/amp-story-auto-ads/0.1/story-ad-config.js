@@ -15,7 +15,7 @@
  */
 
 import {isJsonScriptTag} from '../../../src/dom';
-import {isObject} from 'util';
+import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {startsWith} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
