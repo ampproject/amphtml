@@ -496,4 +496,54 @@ describe('Gestures', () => {
       expect(event.stopPropagation).to.have.not.been.called;
     });
   });
+
+  describe('Gestures - with shouldStopPropagation', () => {
+    let sandbox;
+    let element;
+    let recognizer;
+    let recognizerMock;
+    let gestures;
+    let eventListeners;
+    let onGesture;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox;
+
+      eventListeners = {};
+      element = {
+        addEventListener: (eventType, handler) => {
+          eventListeners[eventType] = handler;
+        },
+        ownerDocument: {
+          defaultView: window,
+        },
+      };
+
+      onGesture = sandbox.spy();
+
+      gestures = Gestures.get(
+        element,
+        undefined,
+        /* shouldStopPropagation */ true
+      );
+      gestures.onGesture(TestRecognizer, onGesture);
+      expect(gestures.recognizers_.length).to.equal(1);
+      recognizer = gestures.recognizers_[0];
+      recognizerMock = sandbox.mock(recognizer);
+    });
+
+    afterEach(() => {
+      recognizerMock.verify();
+      sandbox.restore();
+    });
+
+    it('should stop event from propagating', () => {
+      const event = {
+        type: 'touchend',
+        stopPropagation: sandbox.spy(),
+      };
+      eventListeners[event.type](event);
+      expect(event.stopPropagation).to.have.be.calledOnce;
+    });
+  });
 });
