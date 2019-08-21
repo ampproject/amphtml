@@ -488,7 +488,12 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   setupGestures_(element) {
-    const gestures = Gestures.get(dev().assertElement(element));
+    // stop propagation of swipe event inside amp-viewer
+    const gestures = Gestures.get(
+      dev().assertElement(element),
+      /* shouldNotPreventDefault */ false,
+      /* shouldStopPropagation */ true
+    );
     gestures.onGesture(SwipeXRecognizer, ({data}) => {
       this.handleSwipe_(data);
     });

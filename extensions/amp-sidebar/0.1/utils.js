@@ -28,6 +28,8 @@ import {Services} from '../../../src/services';
  * @return {!Promise} A Promise that resolves after the specified duration.
  */
 export function delayAfterDeferringToEventLoop(win, duration) {
+  // TODO(spaharmi): generalize this to work outside requestAnimationFrame
+  // and move function to src/timer-impl.js
   const timer = Services.timerFor(win);
   // Timer.promise does not defer to event loop for 0.
   const eventLoopDelay = 1;
