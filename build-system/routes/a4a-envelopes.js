@@ -101,9 +101,6 @@ function getInaboxUrl(req) {
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
   }
   adUrl = addQueryParam(adUrl, 'inabox', 1);
-  if (req.query.ampexp) {
-    adUrl = addQueryParam(adUrl, 'ampexp', req.query.ampexp);
-  }
   if (req.query.log) {
     adUrl += '#log=' + req.query.log;
   }
