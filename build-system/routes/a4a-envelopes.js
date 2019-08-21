@@ -30,7 +30,8 @@ app.use('/inabox/', (req, res) => {
     process.cwd() + '/build-system/server-inabox-template.html';
   fs.readFileAsync(templatePath, 'utf8').then(template => {
     template = template.replace(/SOURCE/g, 'AD_URL');
-    res.end(fillTemplate(template, getInaboxUrl(req), req.query));
+    const url = getInaboxUrl(req);
+    res.end(fillTemplate(template, url.href, req.query));
   });
 });
 
@@ -42,13 +43,12 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
   const templatePath = '/build-system/server-inabox-template.html';
   fs.readFileAsync(process.cwd() + templatePath, 'utf8')
     .then(template => {
+      let url;
       if (req.baseUrl == '/inabox-friendly') {
+        url = getInaboxUrl(req, 'inabox-viewport-friendly');
         template = template.replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"');
       } else {
-        const urlPrefix = getUrlPrefix(req).replace(
-          'localhost',
-          'ads.localhost'
-        );
+        url = getInaboxUrl(req);
         template = template
           .replace(
             /NAME/g,
@@ -56,10 +56,10 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
           )
           .replace(
             /SOURCE/g,
-            urlPrefix + '/test/fixtures/served/iframe-safeframe.html'
+            url.origin + '/test/fixtures/served/iframe-safeframe.html'
           );
       }
-      return requestFromUrl(template, getInaboxUrl(req), req.query);
+      return requestFromUrl(template, url.href, req.query);
     })
     .then(result => {
       res.end(result);
@@ -72,58 +72,44 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
 // http://localhost:8000/a4a[-3p]/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/a4a(|-3p)/', (req, res) => {
   const force3p = req.baseUrl.startsWith('/a4a-3p');
-  let adUrl = req.url;
   const templatePath = '/build-system/server-a4a-template.html';
-  const urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/proxy') && urlPrefix.includes('//localhost')) {
-    // This is a special case for testing. `localhost` URLs are transformed to
-    // `ads.localhost` to ensure that the iframe is fully x-origin.
-    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
-  }
-  adUrl = addQueryParam(adUrl, 'inabox', 1);
+  const url = getInaboxUrl(req);
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
-    const content = fillTemplate(template, adUrl, req.query)
+    const content = fillTemplate(template, url.href, req.query)
       .replace(/CHECKSIG/g, force3p || '')
       .replace(/DISABLE3PFALLBACK/g, !force3p);
     res.end(replaceUrls(SERVE_MODE, content));
   });
 });
 
-function getInaboxUrl(req) {
-  let adUrl = req.url;
-  const urlPrefix = getUrlPrefix(req);
-  if (
-    !adUrl.startsWith('/proxy') && // Ignore /proxy
-    urlPrefix.includes('//localhost')
-  ) {
-    // This is a special case for testing. `localhost` URLs are transformed to
-    // `ads.localhost` to ensure that the iframe is fully x-origin.
-    adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
-  }
-  adUrl = addQueryParam(adUrl, 'inabox', 1);
-  if (req.query.log) {
-    adUrl += '#log=' + req.query.log;
-  }
-  return adUrl;
-}
-
-function getUrlPrefix(req) {
-  return req.protocol + '://' + req.headers.host;
-}
-
 /**
- * @param {string} url
- * @param {string} param
- * @param {*} value
- * @return {string}
+ * @param {Request} req
+ * @param {string|undefined} extraExperiments
+ * @return {!URL}
  */
-function addQueryParam(url, param, value) {
-  const paramValue =
-    encodeURIComponent(param) + '=' + encodeURIComponent(value);
-  if (!url.includes('?')) {
-    url += '?' + paramValue;
-  } else {
-    url += '&' + paramValue;
+function getInaboxUrl(req, extraExperiments) {
+  const urlStr = req.protocol + '://' + req.get('host') + req.url;
+  const url = new URL(urlStr);
+  // make it a cross domain URL
+  if (url.hostname === 'localhost') {
+    url.hostname = 'ads.localhost';
+  }
+  // this tells local server to convert the AMP document to AMP4ADS spec
+  url.searchParams.set('inabox', '1');
+  // turn on more logs if requested
+  const logLevel = url.searchParams.get('log');
+  if (logLevel) {
+    url.searchParams.delete('log');
+    url.hash = '#log=' + logLevel;
+  }
+
+  // turn on extra experiment
+  if (extraExperiments) {
+    const exp = url.searchParams.get('exp');
+    if (exp) {
+      extraExperiments += ',' + exp;
+    }
+    url.searchParams.set('exp', extraExperiments);
   }
   return url;
 }

@@ -862,7 +862,7 @@ app.get(
           file = replaceUrls(mode, file, '', inabox);
         }
 
-        const ampExperimentsOptIn = req.query['ampexp'];
+        const ampExperimentsOptIn = req.query['exp'];
         if (ampExperimentsOptIn) {
           file = file.replace(
             '<head>',
