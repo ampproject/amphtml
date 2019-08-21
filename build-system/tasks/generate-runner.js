@@ -17,7 +17,7 @@
 
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const {cyan, red} = require('ansi-colors');
+const {cyan, green, red} = require('ansi-colors');
 const {getOutput} = require('../exec');
 const {gitCommitHash, gitDiffPath} = require('../git');
 const {isTravisBuild} = require('../travis');
@@ -27,6 +27,8 @@ const runnerDir = 'build-system/runner';
 const buildFile = `${runnerDir}/build.xml`;
 const runnerDistDir = `${runnerDir}/dist`;
 const generatedAtCommitFile = 'GENERATED_AT_COMMIT';
+const setupInstructionsUrl =
+  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#building-amp-and-starting-a-local-server';
 
 /**
  * Determines if runner.jar needs to be regenerated
@@ -109,13 +111,18 @@ async function generateRunner(subDir) {
   const runnerJarDir = `${runnerDistDir}/${subDir}`;
   writeGeneratedAtCommitFile(runnerJarDir);
   const result = getOutput(generateCmd);
-  if (result.stderr) {
+  if (0 !== result.status) {
     log(
       red('ERROR:'),
       'Could not generate custom closure compiler',
       cyan(`${runnerJarDir}/runner.jar`)
     );
     console.error(red(result.stdout), red(result.stderr));
+    log(
+      green('INFO:'),
+      'If the errors above are in java execution, see',
+      cyan(`${setupInstructionsUrl}`)
+    );
     const reason = new Error('Compiler generation failed');
     reason.showStack = false;
     return Promise.reject(reason);
