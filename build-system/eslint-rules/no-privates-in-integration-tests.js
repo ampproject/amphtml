@@ -16,8 +16,7 @@
 
 /**
  * @fileoverview
- * Checks that custom properties set on the window are prefixed with '__AMP_'.
- * The prefix is invalid in `id` attributes which prevents DOM clobbering.
+ * Forbids any property access that ends with "_" in integration test files.
  */
 
 'use strict';
