@@ -32,3 +32,29 @@
   border-bottom: 1px solid #eee;
   box-sizing: border-box;
 }
+
+.amp-access-scroll-audio {
+  position: fixed;
+  background-color: #fff;
+  position: fixed;
+  z-index: 2147483647;
+  display: block;
+
+  /* mobile */
+  bottom: 44px;
+  height: 100px;
+  left: 0;
+  width: 100%;
+  border-top: 1px solid #e1e6e5; /* gray2 */
+  border-bottom: 1px solid transparent;
+}
+@media (min-width: 600px) {
+  .amp-access-scroll-audio {
+    bottom: 63px;
+    height: 56px;
+    left: auto;
+    right: 16px;
+    width: 475px;
+    border: 1px solid #e1e6e5; /* gray2 */
+  }
+}
