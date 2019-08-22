@@ -23,8 +23,7 @@ import {whenUpgradedToCustomElement} from '../../src/dom';
 const t = describe
   .configure()
   .skipIfPropertiesObfuscated()
-  .ifChrome()
-  .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+  .ifChrome();
 
 t.run('Viewer Visibility State', () => {
   function noop() {}

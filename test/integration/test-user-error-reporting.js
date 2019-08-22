@@ -19,8 +19,7 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 const t = describe
   .configure()
   .skipSafari() // TODO(zhouyx, #11459): Unskip the test on safari.
-  .skipEdge()
-  .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+  .skipEdge();
 
 t.run('user-error', function() {
   describes.integration(
