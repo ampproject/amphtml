@@ -19,6 +19,9 @@ import {getScrollingElement, getSlide, waitForCarouselImg} from './helpers';
 const pageWidth = 800;
 const pageHeight = 600;
 
+/** Increase timeout for looping tests that take ~1700ms each */
+const testTimeout = 5000;
+
 describes.endtoend(
   'AMP carousel',
   {
@@ -136,8 +139,9 @@ describes.endtoend(
       });
     });
 
-    describe('looping', () => {
-      it('should show the last slide when looping', async () => {
+    describe('looping', function() {
+      it('should show the last slide when looping', async function() {
+        this.timeout(testTimeout);
         const el = await getScrollingElement(controller);
         const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
 
@@ -155,7 +159,8 @@ describes.endtoend(
         await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
       });
 
-      it('should show the first slide when looping', async () => {
+      it('should show the first slide when looping', async function() {
+        this.timeout(testTimeout);
         const el = await getScrollingElement(controller);
         const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
 
@@ -182,7 +187,8 @@ describes.endtoend(
       // When resting the last few slides should be translated to the left.
       // Make sure we can move all the way forwards to the last slide and that it
       // is in the right place.
-      it('should display slides correctly when moving forwards', async () => {
+      it('should display slides correctly when moving forwards', async function() {
+        this.timeout(testTimeout);
         const el = await getScrollingElement(controller);
         const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
 
@@ -207,7 +213,8 @@ describes.endtoend(
       // When resting the first few slides should be translated to the right.
       // Make sure we can move all the way backwards to the second slide and that
       // it is in the right place.
-      it('should display slides correctly when moving backwards', async () => {
+      it('should display slides correctly when moving backwards', async function() {
+        this.timeout(testTimeout);
         const el = await getScrollingElement(controller);
         const secondSlide = await getSlide(controller, 1);
 

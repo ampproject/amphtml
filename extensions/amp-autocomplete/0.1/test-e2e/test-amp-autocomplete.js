@@ -24,6 +24,7 @@ describes.endtoend(
     environments: ['single', 'viewer-demo'],
     experiments: ['amp-autocomplete'],
     initialRect: {width: 800, height: 800},
+    browsers: ['chrome', 'firefox', 'safari'],
   },
   env => {
     let controller;
