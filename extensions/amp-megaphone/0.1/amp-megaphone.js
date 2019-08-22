@@ -27,10 +27,10 @@
  * </amp-megaphone>
  */
 
-import {Layout} from '../../../src/layout';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
+import {isLayoutSizeFixed} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
 import {startsWith} from '../../../src/string';
@@ -70,20 +70,7 @@ class AmpMegaphone extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return this.isLayoutFixedSize_(layout);
-  }
-
-  /**
-   * @param {!Layout} layout
-   * @return {boolean}
-   * @private
-   */
-  isLayoutFixedSize_(layout) {
-    return (
-      layout == Layout.FIXED ||
-      layout == Layout.FIXED_HEIGHT ||
-      layout == Layout.NODISPLAY
-    );
+    return isLayoutSizeFixed(layout);
   }
 
   /** @override */

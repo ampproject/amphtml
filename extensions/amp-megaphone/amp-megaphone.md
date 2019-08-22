@@ -33,7 +33,7 @@ Displays a <a href="https://megaphone.fm/">Megaphone.fm</a> podcast episode or p
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, nodisplay</td>
+    <td>fixed, fixed-height</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>

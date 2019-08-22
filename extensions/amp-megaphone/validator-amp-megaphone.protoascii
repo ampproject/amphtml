@@ -60,7 +60,6 @@ tags: {  # <amp-megaphone> for playlists
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
   }
 }
 
@@ -89,6 +88,5 @@ tags: {  # <amp-megaphone> for episodes
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
   }
 }
