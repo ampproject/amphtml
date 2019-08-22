@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,11 @@
  */
 
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
+import {ActivateBar, ScrollUserBar} from './scroll-bar';
+import {Audio} from './scroll-audio';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {ReadDepthTracker} from './read-depth-tracker.js';
+import {Relay} from './scroll-relay';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
@@ -25,23 +28,22 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {parseQueryString} from '../../../src/url';
 
 const TAG = 'amp-access-scroll-elt';
-
 /**
- * @param {string} connectHostname
+ * @param {string} baseUrl
  * @return {!JsonObject}
  */
-const accessConfig = connectHostname => {
+const accessConfig = baseUrl => {
   /** @const {!JsonObject} */
   const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
     'authorization':
-      `${connectHostname}/amp/access` +
+      `${baseUrl}/amp/access` +
       '?rid=READER_ID' +
       '&cid=CLIENT_ID(scroll1)' +
       '&c=CANONICAL_URL' +
       '&o=AMPDOC_URL' +
       '&x=QUERY_PARAM(scrollx)',
     'pingback':
-      `${connectHostname}/amp/pingback` +
+      `${baseUrl}/amp/pingback` +
       '?rid=READER_ID' +
       '&cid=CLIENT_ID(scroll1)' +
       '&c=CANONICAL_URL' +
@@ -56,14 +58,14 @@ const accessConfig = connectHostname => {
 };
 
 /**
- * @param {string} connectHostname
+ * @param {string} baseUrl
  * @return {!JsonObject}
  */
-const analyticsConfig = connectHostname => {
+const analyticsConfig = baseUrl => {
   const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'requests': {
       'scroll':
-        `${connectHostname}/amp/analytics` +
+        `${baseUrl}/amp/analytics` +
         '?rid=ACCESS_READER_ID' +
         '&cid=CLIENT_ID(scroll1)' +
         '&c=CANONICAL_URL' +
@@ -127,13 +129,19 @@ export class ScrollAccessVendor extends AccessClientAdapter {
    */
   constructor(ampdoc, accessSource) {
     const scrollConfig = accessSource.getAdapterConfig();
-    super(ampdoc, accessConfig(connectHostname(scrollConfig)), {
+    const baseUrl = connectHostname(scrollConfig);
+    super(ampdoc, accessConfig(baseUrl), {
       buildUrl: accessSource.buildUrl.bind(accessSource),
       collectUrlVars: accessSource.collectUrlVars.bind(accessSource),
     });
 
+    // Install styles
+    installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
+
     /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
+    /** @private */
+    this.baseUrl_ = baseUrl;
   }
 
   /** @override */
@@ -143,13 +151,26 @@ export class ScrollAccessVendor extends AccessClientAdapter {
       const isStory = this.ampdoc
         .getRootNode()
         .querySelector('amp-story[standalone]');
+
       if (response && response['scroll']) {
         if (!isStory) {
-          const config = this.accessSource_.getAdapterConfig();
-          new ScrollElement(this.ampdoc).handleScrollUser(
+          // Display Scrollbar and set up features
+          const bar = new ScrollUserBar(
+            this.ampdoc,
             this.accessSource_,
-            config
+            this.baseUrl_
           );
+          const audio = new Audio(this.ampdoc);
+
+          const relay = new Relay(this.baseUrl_);
+          relay.register(audio.window, message => {
+            if (message['_scramp'] === 'au') {
+              audio.update(message);
+            }
+          });
+          relay.register(bar.window);
+
+          const config = this.accessSource_.getAdapterConfig();
           addAnalytics(this.ampdoc, config);
           if (response['features'] && response['features']['readDepth']) {
             new ReadDepthTracker(
@@ -211,9 +232,10 @@ class ScrollContentBlocker {
           // TODO(dbow): Ideally we would automatically redirect to the page
           // here, but for now we are adding a button so we redirect on user
           // action.
-          new ScrollElement(this.ampdoc_).addActivateButton(
+          new ActivateBar(
+            this.ampdoc_,
             this.accessSource_,
-            this.accessSource_.getAdapterConfig()
+            connectHostname(this.accessSource_.getAdapterConfig())
           );
         }
       });
@@ -234,110 +256,6 @@ class ScrollContentBlocker {
           'Resource blocked by content blocker'
       ) === 0
     );
-  }
-}
-
-/**
- * UI for Scroll users.
- *
- * Presents a fixed bar at the bottom of the screen with Scroll content.
- */
-class ScrollElement {
-  /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   */
-  constructor(ampdoc) {
-    installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
-
-    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
-    /** @const {!Element} */
-    this.scrollBar_ = document.createElement('div');
-    this.scrollBar_.classList.add('amp-access-scroll-bar');
-
-    /** @const {!Element} */
-    this.iframe_ = document.createElement('iframe');
-    this.iframe_.setAttribute('scrolling', 'no');
-    this.iframe_.setAttribute('frameborder', '0');
-    this.iframe_.setAttribute('allowtransparency', 'true');
-    this.iframe_.setAttribute('title', 'Scroll');
-    this.iframe_.setAttribute('width', '100%');
-    this.iframe_.setAttribute('height', '100%');
-    this.iframe_.setAttribute(
-      'sandbox',
-      'allow-scripts allow-same-origin ' +
-        'allow-top-navigation allow-popups ' +
-        'allow-popups-to-escape-sandbox'
-    );
-    this.scrollBar_.appendChild(this.iframe_);
-    ampdoc.getBody().appendChild(this.scrollBar_);
-
-    // Promote to fixed layer.
-    Services.viewportForDoc(ampdoc).addToFixedLayer(this.scrollBar_);
-  }
-
-  /**
-   * Add a scrollbar placeholder and then load the scrollbar URL in the iframe.
-   *
-   * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
-   * @param {!JsonObject} vendorConfig
-   */
-  handleScrollUser(accessSource, vendorConfig) {
-    // Add a placeholder element to display while scrollbar iframe loads.
-    const placeholder = document.createElement('div');
-    placeholder.classList.add('amp-access-scroll-bar');
-    placeholder.classList.add('amp-access-scroll-placeholder');
-    const img = document.createElement('img');
-    img.setAttribute(
-      'src',
-      'https://static.scroll.com/assets/icn-scroll-logo32-9f4ceef399905139bbd26b87bfe94542.svg'
-    );
-    img.setAttribute('layout', 'fixed');
-    img.setAttribute('width', 32);
-    img.setAttribute('height', 32);
-    placeholder.appendChild(img);
-    this.ampdoc_.getBody().appendChild(placeholder);
-
-    // Set iframe to scrollbar URL.
-    accessSource
-      .buildUrl(
-        `${connectHostname(vendorConfig)}/amp/scrollbar` +
-          '?rid=READER_ID' +
-          '&cid=CLIENT_ID(scroll1)' +
-          '&c=CANONICAL_URL' +
-          '&o=AMPDOC_URL',
-        false
-      )
-      .then(scrollbarUrl => {
-        this.iframe_.onload = () => {
-          // On iframe load, remove placeholder element.
-          this.ampdoc_.getBody().removeChild(placeholder);
-        };
-        this.iframe_.setAttribute('src', scrollbarUrl);
-      });
-  }
-
-  /**
-   * Add link to the Scroll App connect page.
-   *
-   * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
-   * @param {!JsonObject} vendorConfig
-   */
-  addActivateButton(accessSource, vendorConfig) {
-    accessSource
-      .buildUrl(
-        `${connectHostname(vendorConfig)}/html/amp/activate` +
-          '?rid=READER_ID' +
-          '&cid=CLIENT_ID(scroll1)' +
-          '&c=CANONICAL_URL' +
-          '&o=AMPDOC_URL' +
-          '&x=QUERY_PARAM(scrollx)',
-        false
-      )
-      .then(url => {
-        this.iframe_.setAttribute('src', url);
-      });
   }
 }
 
