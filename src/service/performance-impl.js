@@ -21,6 +21,7 @@ import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isCanary} from '../experiments';
+import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
 import {throttle} from '../utils/rate-limit';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
@@ -34,9 +35,6 @@ const QUEUE_LIMIT = 50;
 
 /** @const {string} */
 const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
-
-/** @const {string} */
-const BEFORE_UNLOAD_EVENT = 'beforeunload';
 
 /**
  * Fields:
@@ -162,8 +160,6 @@ export class Performance {
       this.win.PerformanceObserver.supportedEntryTypes.includes('layout-shift');
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
-    this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
-    this.boundTickLayoutShiftScore_ = this.tickLayoutShiftScore_.bind(this);
     this.onViewerVisibilityChange_ = this.onViewerVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
@@ -220,18 +216,6 @@ export class Performance {
         {capture: true}
       );
 
-      // Safari does not reliably fire the `pagehide` or `visibilitychange`
-      // events when closing a tab, so we have to use `beforeunload`.
-      // See https://bugs.webkit.org/show_bug.cgi?id=151234
-      const platform = Services.platformFor(this.win);
-      if (platform.isSafari()) {
-        // TODO(#23634): Remove, explain or adjust the usage of the unload listener
-        this.win.addEventListener(
-          BEFORE_UNLOAD_EVENT,
-          this.boundTickLayoutJankScore_
-        );
-      }
-
       this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
     }
 
@@ -247,17 +231,6 @@ export class Performance {
         {capture: true}
       );
 
-      // Safari does not reliably fire the `pagehide` or `visibilitychange`
-      // events when closing a tab, so we have to use `beforeunload`.
-      // See https://bugs.webkit.org/show_bug.cgi?id=151234
-      const platform = Services.platformFor(this.win);
-      if (platform.isSafari()) {
-        this.win.addEventListener(
-          BEFORE_UNLOAD_EVENT,
-          this.boundTickLayoutShiftScore_
-        );
-      }
-
       this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
     }
 
@@ -269,18 +242,36 @@ export class Performance {
       return Promise.resolve();
     }
 
-    return channelPromise.then(() => {
-      this.isMessagingReady_ = true;
+    return channelPromise
+      .then(() => {
+        // Tick the "messaging ready" signal.
+        this.tickDelta('msr', this.win.Date.now() - this.initTime_);
 
-      // Tick the "messaging ready" signal.
-      this.tickDelta('msr', this.win.Date.now() - this.initTime_);
+        return this.maybeAddStoryExperimentId_();
+      })
+      .then(() => {
+        this.isMessagingReady_ = true;
 
-      // Forward all queued ticks to the viewer since messaging
-      // is now ready.
-      this.flushQueuedTicks_();
+        // Forward all queued ticks to the viewer since messaging
+        // is now ready.
+        this.flushQueuedTicks_();
 
-      // Send all csi ticks through.
-      this.flush();
+        // Send all csi ticks through.
+        this.flush();
+      });
+  }
+
+  /**
+   * Add a story experiment ID in order to slice the data for amp-story.
+   * @return {!Promise}
+   * @private
+   */
+  maybeAddStoryExperimentId_() {
+    const ampdoc = Services.ampdocServiceFor(this.win).getSingleDoc();
+    return isStoryDocument(ampdoc).then(isStory => {
+      if (isStory) {
+        this.addEnabledExperiment('story');
+      }
     });
   }
 
@@ -479,10 +470,6 @@ export class Performance {
         this.boundOnVisibilityChange_,
         {capture: true}
       );
-      this.win.removeEventListener(
-        BEFORE_UNLOAD_EVENT,
-        this.boundTickLayoutJankScore_
-      );
     }
   }
 
@@ -513,10 +500,6 @@ export class Performance {
         VISIBILITY_CHANGE_EVENT,
         this.boundOnVisibilityChange_,
         {capture: true}
-      );
-      this.win.removeEventListener(
-        BEFORE_UNLOAD_EVENT,
-        this.boundTickLayoutShiftScore_
       );
     }
   }
