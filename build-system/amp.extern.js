@@ -861,3 +861,39 @@ var ampInaboxPositionObserver;
 ampInaboxPositionObserver.observe;
 ampInaboxPositionObserver.getTargetRect;
 ampInaboxPositionObserver.getViewportRect;
+
+
+/**
+ * TODO(dvoytenko): remove FeaturePolicy once it's added in Closure externs.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/FeaturePolicy.
+ * @interface
+ */
+class FeaturePolicy {
+  /**
+   * @return {!Array<string>}
+   */
+  features() {}
+
+  /**
+   * @return {!Array<string>}
+   */
+  allowedFeatures() {}
+
+  /**
+   * @param {string} feature
+   * @param {string=} opt_origin
+   * @return {boolean}
+   */
+  allowsFeature(feature, opt_origin) {}
+
+  /**
+   * @param {string} feature
+   * @return {!Array<string>}
+   */
+  getAllowlistForFeature(feature) {}
+}
+
+/**
+ * @type {?FeaturePolicy}
+ */
+HTMLIFrameElement.prototype.featurePolicy;

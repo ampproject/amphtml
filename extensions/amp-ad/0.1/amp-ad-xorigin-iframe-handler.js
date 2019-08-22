@@ -60,7 +60,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?./amp-ad-ui.AmpAdUIHandler} */
     this.uiHandler_ = baseInstance.uiHandler;
 
-    /** @type {?Element} iframe instance */
+    /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
 
     /** @private {?IntersectionObserver} */
@@ -90,7 +90,7 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
-   * @param {!Element} iframe
+   * @param {!HTMLIFrameElement} iframe
    * @param {boolean=} opt_isA4A when true do not listen to ad response
    * @param {boolean=} opt_letCreativeTriggerRenderStart Whether to wait for
    *    render start from the creative, or simply trigger it in here.
@@ -604,7 +604,7 @@ export class AmpAdXOriginIframeHandler {
   isPausable() {
     return (
       isExperimentOn(this.win_, 'pausable-iframe') &&
-      this.iframe &&
+      !!this.iframe &&
       isPausable(this.iframe)
     );
   }
