@@ -160,10 +160,6 @@ class TestConfig {
     });
   }
 
-  skipWindows() {
-    return this.skip(() => this.platform.isWindows());
-  }
-
   enableIe() {
     this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
     return this;
