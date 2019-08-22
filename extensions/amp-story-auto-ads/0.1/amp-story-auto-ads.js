@@ -16,16 +16,13 @@
 
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
-import {LocalizationService} from '../../../src/service/localization';
-import {
-  LocalizedStringId,
-  createPseudoLocale,
-} from '../../../src/localized-strings';
+import {CtaTypes, StoryAdLocalization} from './story-ad-localization';
 import {Services} from '../../../src/services';
 import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {StoryAdConfig} from './story-ad-config';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {assertHttpsUrl} from '../../../src/url';
@@ -38,34 +35,11 @@ import {
 } from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getA4AMetaTags, getFrameDoc, getUniqueId} from './utils';
-import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
-import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import LocalizedStringsAr from './_locales/ar';
-import LocalizedStringsDe from './_locales/de';
-import LocalizedStringsEn from './_locales/en';
-import LocalizedStringsEnGb from './_locales/en-GB';
-import LocalizedStringsEs from './_locales/es';
-import LocalizedStringsEs419 from './_locales/es-419';
-import LocalizedStringsFr from './_locales/fr';
-import LocalizedStringsHi from './_locales/hi';
-import LocalizedStringsId from './_locales/id';
-import LocalizedStringsIt from './_locales/it';
-import LocalizedStringsJa from './_locales/ja';
-import LocalizedStringsKo from './_locales/ko';
-import LocalizedStringsNl from './_locales/nl';
-import LocalizedStringsNo from './_locales/no';
-import LocalizedStringsPtBr from './_locales/pt-BR';
-import LocalizedStringsPtPt from './_locales/pt-PT';
-import LocalizedStringsRu from './_locales/ru';
-import LocalizedStringsTr from './_locales/tr';
-import LocalizedStringsVi from './_locales/vi';
-import LocalizedStringsZhCn from './_locales/zh-CN';
-import LocalizedStringsZhTw from './_locales/zh-TW';
 
 /** @const {number} */
 const FIRST_AD_MIN = 7;
@@ -73,19 +47,19 @@ const FIRST_AD_MIN = 7;
 /** @const {number} */
 const MIN_INTERVAL = 7;
 
-/** @const */
+/** @const {string} */
 const TAG = 'amp-story-auto-ads';
 
-/** @const */
+/** @const {string} */
 const AD_TAG = 'amp-ad';
 
-/** @const */
+/** @const {string} */
 const MUSTACHE_TAG = 'amp-mustache';
 
-/** @const */
+/** @const {number} */
 const TIMEOUT_LIMIT = 10000; // 10 seconds
 
-/** @const */
+/** @const {string} */
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
 /** @enum {string} */
@@ -113,52 +87,10 @@ const A4AVarNames = {
 };
 
 /** @const */
-const CTA_TYPES = {
-  APPLY_NOW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW,
-  BOOK_NOW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW,
-  BUY_TICKETS: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS,
-  DOWNLOAD: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD,
-  EXPLORE: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE,
-  GET_NOW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW,
-  INSTALL: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL,
-  LEARN_MORE: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE,
-  LISTEN: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN,
-  MORE: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE,
-  OPEN_APP: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP,
-  ORDER_NOW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW,
-  PLAY: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY,
-  READ: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ,
-  SHOP: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP,
-  SHOW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW,
-  SHOWTIMES: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES,
-  SIGN_UP: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP,
-  SUBSCRIBE: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE,
-  USE_APP: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP,
-  VIEW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW,
-  WATCH: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH,
-  WATCH_EPISODE:
-    LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE,
-};
-
-/** @const */
 const AD_STATE = {
   PENDING: 0,
   INSERTED: 1,
   FAILED: 2,
-};
-
-/** @const */
-const ALLOWED_AD_TYPES = map({
-  'custom': true,
-  'doubleclick': true,
-  'fake': true,
-});
-
-/** @enum {boolean} */
-const DISALLOWED_AD_ATTRS = {
-  'height': true,
-  'layout': true,
-  'width': true,
 };
 
 /** @enum {string} */
@@ -240,8 +172,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {boolean} */
     this.isCurrentAdLoaded_ = false;
 
-    /** @private {Object<string, Object>} */
-    this.config_ = {};
+    /** @private {!JsonObject} */
+    this.config_ = dict();
 
     /** @private {Object<number, *>} */
     this.analyticsData_ = {};
@@ -268,40 +200,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
      */
     this.storeService_ = null;
 
-    /** @private @const {!LocalizationService} */
-    this.localizationService_ = new LocalizationService(this.win);
-    this.localizationService_
-      .registerLocalizedStringBundle('default', LocalizedStringsEn)
-      .registerLocalizedStringBundle('ar', LocalizedStringsAr)
-      .registerLocalizedStringBundle('de', LocalizedStringsDe)
-      .registerLocalizedStringBundle('en', LocalizedStringsEn)
-      .registerLocalizedStringBundle('en-GB', LocalizedStringsEnGb)
-      .registerLocalizedStringBundle('es', LocalizedStringsEs)
-      .registerLocalizedStringBundle('es-419', LocalizedStringsEs419)
-      .registerLocalizedStringBundle('fr', LocalizedStringsFr)
-      .registerLocalizedStringBundle('hi', LocalizedStringsHi)
-      .registerLocalizedStringBundle('id', LocalizedStringsId)
-      .registerLocalizedStringBundle('it', LocalizedStringsIt)
-      .registerLocalizedStringBundle('ja', LocalizedStringsJa)
-      .registerLocalizedStringBundle('ko', LocalizedStringsKo)
-      .registerLocalizedStringBundle('nl', LocalizedStringsNl)
-      .registerLocalizedStringBundle('no', LocalizedStringsNo)
-      .registerLocalizedStringBundle('pt-PT', LocalizedStringsPtPt)
-      .registerLocalizedStringBundle('pt-BR', LocalizedStringsPtBr)
-      .registerLocalizedStringBundle('ru', LocalizedStringsRu)
-      .registerLocalizedStringBundle('tr', LocalizedStringsTr)
-      .registerLocalizedStringBundle('vi', LocalizedStringsVi)
-      .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
-      .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw);
-
-    const enXaPseudoLocaleBundle = createPseudoLocale(
-      LocalizedStringsEn,
-      s => `[${s} one two]`
-    );
-    this.localizationService_.registerLocalizedStringBundle(
-      'en-xa',
-      enXaPseudoLocaleBundle
-    );
+    /** @private {!./story-ad-localization.StoryAdLocalization} */
+    this.localizationService_ = new StoryAdLocalization(this.win);
   }
 
   /** @override */
@@ -323,7 +223,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const ampdoc = this.getAmpDoc();
       const extensionService = Services.extensionsFor(this.win);
       extensionService./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);
-      extensionService./*OK*/ installExtensionForDoc(ampdoc, MUSTACHE_TAG);
 
       return ampStoryElement.getImpl().then(impl => {
         this.ampStory_ = impl;
@@ -346,9 +245,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       .signals()
       .whenSignal(CommonSignals.INI_LOAD)
       .then(() => {
+        this.handleConfig_();
         this.createAdOverlay_();
         this.initializeListeners_();
-        this.readConfig_();
         this.schedulePage_();
       });
   }
@@ -362,6 +261,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   forceRender(pageBeforeAdId) {
     this.isCurrentAdLoaded_ = true;
     this.tryToPlaceAdAfterPage_(pageBeforeAdId);
+  }
+
+  /**
+   * Sets config and installs additional extensions if necessary.
+   * @private
+   */
+  handleConfig_() {
+    this.config_ = new StoryAdConfig(this.element).getConfig();
+    if (this.config_['type'] === 'custom') {
+      Services.extensionsFor(this.win)./*OK*/ installExtensionForDoc(
+        this.element.getAmpDoc(),
+        MUSTACHE_TAG
+      );
+    }
   }
 
   /**
@@ -465,22 +378,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
-   * load in config from child <script> element
-   * @private
-   */
-  readConfig_() {
-    const child = this.element.children[0];
-    userAssert(
-      isJsonScriptTag(child),
-      `The <${TAG}> config should ` +
-        'be inside a <script> tag with type="application/json"'
-    );
-
-    this.config_ = parseJson(child.textContent);
-    this.validateConfig_();
-  }
-
-  /**
    * Create a hidden UI that will be shown when ad is displayed
    * @private
    */
@@ -498,25 +395,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adBadgeContainer_.appendChild(badge);
     createShadowRootWithStyle(root, this.adBadgeContainer_, adBadgeCSS);
     this.ampStory_.element.appendChild(root);
-  }
-
-  /**
-   * make sure given JSON config is shaped correctly
-   * @private
-   */
-  validateConfig_() {
-    const adAttributes = this.config_['ad-attributes'];
-    userAssert(
-      adAttributes,
-      `<${TAG}>: Error reading config.` +
-        'Top level JSON should have an "ad-attributes" key'
-    );
-
-    const {type} = adAttributes;
-    userAssert(
-      type,
-      `<${TAG}>: Error reading config.Missing ["ad-attribues"]["type"] key`
-    );
   }
 
   /**
@@ -625,47 +503,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdElement_() {
-    const requiredAttrs = {
-      'class': 'i-amphtml-story-ad',
-      'layout': 'fill',
-      'amp-story': '',
-    };
-
-    const configAttrs = this.config_['ad-attributes'];
-
-    for (const attr in configAttrs) {
-      const value = configAttrs[attr];
-      if (isObject(value)) {
-        configAttrs[attr] = JSON.stringify(value);
-      }
-      if (DISALLOWED_AD_ATTRS[attr]) {
-        user().warn(TAG, 'ad-attribute "%s" is not allowed', attr);
-        delete configAttrs[attr];
-      }
+    if (this.config_['type'] === 'fake') {
+      this.config_['id'] = `i-amphtml-demo-${this.adPagesCreated_}`;
     }
-
-    const {type} = configAttrs;
-    userAssert(
-      !!ALLOWED_AD_TYPES[type],
-      `${TAG}: "${type}" ad type is not supported`
-    );
-
-    if (type === 'fake') {
-      const id = this.element.getAttribute('id');
-      userAssert(
-        id && startsWith(id, 'i-amphtml-demo-'),
-        `${TAG} id must start with i-amphtml-demo- to use fake ads`
-      );
-      configAttrs['id'] = `i-amphtml-demo-${this.adPagesCreated_}`;
-    }
-
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      {},
-      configAttrs,
-      requiredAttrs
-    ));
-
-    return createElementWithAttributes(this.doc_, 'amp-ad', attributes);
+    return createElementWithAttributes(this.doc_, 'amp-ad', this.config_);
   }
 
   /**
@@ -706,7 +547,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // Store the cta-type as an accesible var for any further pings.
     this.analyticsData_[this.adPagesCreated_][Vars.CTA_TYPE] = ctaType;
 
-    const ctaLocalizedStringId = CTA_TYPES[ctaType];
+    const ctaLocalizedStringId = CtaTypes[ctaType];
     const ctaText = this.localizationService_.getLocalizedString(
       ctaLocalizedStringId
     );

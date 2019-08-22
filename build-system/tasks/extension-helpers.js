@@ -26,9 +26,9 @@ const {
   verifyExtensionAliasBundles,
 } = require('../../bundles.config');
 const {compileJs, mkdirSync} = require('./helpers');
-const {compileVendorConfigs} = require('./vendor-configs');
 const {isTravisBuild} = require('../travis');
 const {jsifyCssAsync} = require('./jsify-css');
+const {vendorConfigs} = require('./vendor-configs');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -73,6 +73,12 @@ const INABOX_EXTENSION_SET = [
   'amp-position-observer',
   'amp-social-share',
   'amp-video',
+
+  // the following extensions are not supported in AMPHTML ads spec
+  // but commonly used in AMPHTML ads related debugging.
+  'amp-ad',
+  'amp-ad-network-fake-impl',
+  'amp-auto-lightbox', // auto installed by amp.js
 ];
 
 /**
@@ -214,8 +220,9 @@ function getExtensionsToBuild() {
  * and prints a helpful message that lets the developer know how to build the
  * runtime with a list of extensions, all the extensions used by a test file,
  * or no extensions at all.
+ * @param {boolean} defaultTask
  */
-function parseExtensionFlags() {
+function parseExtensionFlags(defaultTask) {
   if (!isTravisBuild()) {
     const noExtensionsMessage =
       green('⤷ Use ') +
@@ -240,6 +247,13 @@ function parseExtensionFlags() {
       green('⤷ Use ') +
       cyan('--extensions_from=examples/foo.amp.html ') +
       green('to build extensions from example docs.');
+    if (defaultTask) {
+      const defaultTaskMessage =
+        green('Running the default ') +
+        cyan('gulp ') +
+        green('task. (Extensions will be built after server startup.)');
+      log(defaultTaskMessage);
+    }
     if (argv.extensions) {
       if (typeof argv.extensions !== 'string') {
         log(red('ERROR:'), 'Missing list of extensions.');
@@ -421,18 +435,20 @@ function buildExtension(
     promises.push(buildCssPromise);
   }
 
-  // minify and copy vendor configs for amp-analytics component
-  if (name === 'amp-analytics') {
-    promises.push(compileVendorConfigs(options));
-  }
-
-  return Promise.all(promises).then(() => {
-    if (argv.single_pass) {
-      return Promise.resolve();
-    } else {
-      return buildExtensionJs(path, name, version, latestVersion, options);
-    }
-  });
+  return Promise.all(promises)
+    .then(() => {
+      if (argv.single_pass) {
+        return Promise.resolve();
+      } else {
+        return buildExtensionJs(path, name, version, latestVersion, options);
+      }
+    })
+    .then(() => {
+      // minify and copy vendor configs for amp-analytics component
+      if (name === 'amp-analytics') {
+        return vendorConfigs(options);
+      }
+    });
 }
 
 /**
