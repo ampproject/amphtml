@@ -261,7 +261,7 @@ describes.realWin(
       });
     });
 
-    describe.only('pause/resume', () => {
+    describe('pause/resume', () => {
       describe('before layout', () => {
         it('should require unlayout before initialization', () => {
           expect(ad3p.unlayoutOnPause()).to.be.true;
