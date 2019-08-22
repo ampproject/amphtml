@@ -16,7 +16,11 @@
 import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
+import {
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '../../../src/css';
@@ -41,7 +45,7 @@ const TRANSITION_EASE = 'transform 200ms ease';
  * Size in pixels of a segment ellipse.
  * @const {number}
  */
-const ELLIPSE_WIDTH_PX = 2;
+let ELLIPSE_WIDTH_PX = 2;
 
 /**
  * Size in pixels of the total side margins of a segment.
@@ -50,17 +54,11 @@ const ELLIPSE_WIDTH_PX = 2;
 const SEGMENTS_MARGIN_PX = 2;
 
 /**
- * Padding on the sides of the progress bar.
- * @const {number}
- */
-const PROGRESS_BAR_PADDING_PX = 4;
-
-/**
  * Maximum number of segments that can be shown at a time before collapsing
  * into ellipsis.
- * @const {number}
+ * @type {number}
  */
-const MAX_SEGMENTS = 20;
+let MAX_SEGMENTS = 20;
 
 /**
  * Number of segments we introduce to the bar as we pass an overflow point
@@ -188,16 +186,26 @@ export class ProgressBar {
       true /** callToInitialize */
     );
 
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      uiState => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
+    );
+
     Services.viewportForDoc(this.ampdoc_).onResize(
       debounce(this.win_, () => this.onResize_(), 300)
     );
 
-    this.resources_.measureElement(() => {
-      this.barWidthPx_ =
-        this.storyEl_
-          .querySelector('amp-story-page')
-          ./*OK*/ getBoundingClientRect().width - PROGRESS_BAR_PADDING_PX;
-    });
+    this.getRoot().classList.toggle(
+      'i-amphtml-progress-bar-overflow',
+      this.segmentCount_ > MAX_SEGMENTS
+    );
+
+    this.barWidthPx_ = this.storyEl_
+      .querySelector('amp-story-page')
+      ./*OK*/ getBoundingClientRect().width;
 
     this.isBuilt_ = true;
     return this.getRoot();
@@ -208,8 +216,10 @@ export class ProgressBar {
    * @private
    */
   replay_() {
-    this.firstExpandedSegmentIndex_ = 0;
-    this.render_(false /** shouldAnimate */);
+    if (this.segmentCount_ > MAX_SEGMENTS) {
+      this.firstExpandedSegmentIndex_ = 0;
+      this.render_(false /** shouldAnimate */);
+    }
   }
 
   /**
@@ -223,24 +233,22 @@ export class ProgressBar {
       -(this.firstExpandedSegmentIndex_ - this.getPrevEllipsisCount_()) *
       (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
 
-    this.resources_
-      .mutateElement(this.root_, () => {
-        for (let index = 0; index < this.segmentCount_; index++) {
-          const width =
-            index >= this.firstExpandedSegmentIndex_ &&
-            index < this.firstExpandedSegmentIndex_ + MAX_SEGMENTS
-              ? segmentWidth
-              : ELLIPSE_WIDTH_PX;
-          this.transform_(this.segments_[index], translateX, width);
-          translateX += width + SEGMENTS_MARGIN_PX;
-        }
-      })
-      .then(() => {
-        this.root_.classList.toggle(
-          'i-amphtml-animate-progress',
-          shouldAnimate
-        );
-      });
+    this.resources_.mutateElement(this.getRoot(), () => {
+      this.getRoot().classList.toggle(
+        'i-amphtml-animate-progress',
+        shouldAnimate
+      );
+
+      for (let index = 0; index < this.segmentCount_; index++) {
+        const width =
+          index >= this.firstExpandedSegmentIndex_ &&
+          index < this.firstExpandedSegmentIndex_ + MAX_SEGMENTS
+            ? segmentWidth
+            : ELLIPSE_WIDTH_PX;
+        this.transform_(this.segments_[index], translateX, width);
+        translateX += width + SEGMENTS_MARGIN_PX;
+      }
+    });
   }
 
   /**
@@ -284,8 +292,8 @@ export class ProgressBar {
   }
 
   /**
-   * Gets the number of ellipsis that should appear to the right (in LTR) of the
-   * expanded segments.
+   * Gets the number of ellipsis that should appear to the "next" position of
+   * the expanded segments.
    * @return {number}
    * @private
    */
@@ -296,8 +304,8 @@ export class ProgressBar {
   }
 
   /**
-   * Gets the number of ellipsis that should appear to the left (in LTR) of the
-   * expanded segments.
+   * Gets the number of ellipsis that should appear to the "previous" position
+   * of the expanded segments.
    * @return {number}
    * @private
    */
@@ -311,7 +319,7 @@ export class ProgressBar {
    * @private
    */
   checkIndexForOverflow_() {
-    // Touching an ellipsis on the right (LTR).
+    // Touching an ellipse on the "next" position of the expanded segments.
     if (
       this.activeSegmentIndex_ >=
       this.firstExpandedSegmentIndex_ + MAX_SEGMENTS
@@ -327,7 +335,7 @@ export class ProgressBar {
 
       this.render_();
     }
-    // Touching an ellipsis on the left (LTR).
+    // Touching an ellipse on the "previous" position of the expanded segments.
     else if (this.activeSegmentIndex_ < this.firstExpandedSegmentIndex_) {
       this.firstExpandedSegmentIndex_ -=
         this.firstExpandedSegmentIndex_ - SEGMENT_INCREMENT < 0
@@ -356,13 +364,36 @@ export class ProgressBar {
    * @private
    */
   onResize_() {
-    this.resources_.measureElement(() => {
-      this.barWidthPx_ =
-        this.storyEl_
-          .querySelector('amp-story-page')
-          ./*OK*/ getBoundingClientRect().width - PROGRESS_BAR_PADDING_PX;
+    if (this.segmentCount_ > MAX_SEGMENTS) {
+      this.barWidthPx_ = this.storyEl_
+        .querySelector('amp-story-page')
+        ./*OK*/ getBoundingClientRect().width;
       this.render_(false /** shouldAnimate */);
-    });
+    }
+  }
+
+  /**
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    switch (uiState) {
+      case UIType.DESKTOP_FULLBLEED:
+        MAX_SEGMENTS = 70;
+        ELLIPSE_WIDTH_PX = 3;
+        break;
+      case UIType.MOBILE:
+        MAX_SEGMENTS = 20;
+        ELLIPSE_WIDTH_PX = 2;
+        break;
+      case UIType.DESKTOP_PANELS:
+        MAX_SEGMENTS = 20;
+        ELLIPSE_WIDTH_PX = 3;
+        break;
+      default:
+        MAX_SEGMENTS = 20;
+    }
   }
 
   /**
@@ -376,7 +407,7 @@ export class ProgressBar {
     const segmentProgressValue = this.win_.document.createElement('div');
     segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
     segmentProgressBar.appendChild(segmentProgressValue);
-    this.root_.appendChild(segmentProgressBar);
+    this.getRoot().appendChild(segmentProgressBar);
     this.segments_.push(segmentProgressBar);
   }
 
@@ -436,7 +467,7 @@ export class ProgressBar {
 
     this.updateProgressByIndex_(segmentIndex, progress);
 
-    if (!this.activeSegmentIndex_) {
+    if (!this.activeSegmentIndex_ && this.segmentCount_ > MAX_SEGMENTS) {
       this.getInitialFirstExpandedSegmentIndex_(segmentIndex);
       this.render_(false /** shouldAnimate */);
     }
@@ -455,7 +486,10 @@ export class ProgressBar {
     this.activeSegmentProgress_ = progress;
     this.activeSegmentIndex_ = segmentIndex;
     this.activeSegmentId_ = segmentId;
-    this.checkIndexForOverflow_();
+
+    if (this.segmentCount_ > MAX_SEGMENTS) {
+      this.checkIndexForOverflow_();
+    }
   }
 
   /**
@@ -550,7 +584,7 @@ export class ProgressBar {
         nthChildIndex
       )}) .i-amphtml-story-page-progress-value`
     );
-    this.resources_.mutateElement(progressEl, () => {
+    this.resources_.mutateElement(devAssert(progressEl), () => {
       let transition = 'none';
       if (withTransition) {
         // Using an eased transition only if filling the bar to 0 or 1.
@@ -559,7 +593,7 @@ export class ProgressBar {
             ? TRANSITION_EASE
             : TRANSITION_LINEAR;
       }
-      setImportantStyles(dev().assertElement(progressEl), {
+      setImportantStyles(devAssert(progressEl), {
         'transform': scale(`${progress},1`),
         'transition': transition,
       });

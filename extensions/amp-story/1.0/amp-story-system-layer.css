@@ -90,9 +90,11 @@
   border: 0 !important;
   display: flex !important;
   height: 2px !important;
+  left: 0 !important;
   margin: 4px 0 0 !important;
-  padding: 0px 2px !important;
+  padding: 0 2px !important;
   position: absolute !important;
+  right: 0 !important;
   top: 0 !important;
   visibility: visible !important;
   z-index: 100001 !important;
@@ -106,16 +108,10 @@
   background: rgba(255, 255, 255, 0.4) !important;
   border-radius: 1px !important;
   height: 100% !important;
-  list-style: none !important;
-  margin: 0 1px !important;
+  list-style-type: none !important;
+  margin: 0 2px !important;
   overflow: hidden !important;
-  width: 2px !important;
-  position: absolute !important;
-  transform-origin: left !important;
-}
-
-[dir=rtl] .i-amphtml-story-page-progress-bar {
-  transform-origin: right !important;
+  width: 100% !important;
 }
 
 .i-amphtml-story-page-progress-value {
@@ -323,19 +319,43 @@
   flex-direction: row-reverse !important;
 }
 
+.i-amphtml-progress-bar-overflow.i-amphtml-story-progress-bar {
+  left: auto !important;
+  right: auto !important;
+  margin: 4px 0 0 !important;
+  padding: 0 !important;
+}
+
 .i-amphtml-story-desktop-panels .i-amphtml-story-progress-bar {
   position: relative !important;
   height: 3px !important;
-  width: calc(100vw / 3) !important;
+  width: 100vw !important;
+  max-width: calc(3/5 * 75vh) !important;
+  min-width: 320px !important;
   margin: 0 24px !important;
+  overflow: hidden !important;
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-progress-bar {
   height: 3px !important;
 }
 
-.i-amphtml-story-desktop-panels .i-amphtml-story-page-progress-bar {
-  border-radius: 100px !important;
+.i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
+  border-radius: 0px !important;
+  list-style: none !important;
+  margin: 0 1px !important;
+  width: 2px !important;
+  position: absolute !important;
+  transform-origin: left !important;
+}
+
+[dir=rtl].i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
+  transform-origin: right !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar,
+.i-amphtml-story-desktop-fullbleed .i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
+  width: 3px !important;
 }
 
 .i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
