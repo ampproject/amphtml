@@ -63,6 +63,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       link.setAttribute('href', 'https://pinterest.com:8080/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
+      iframe.win.__AMP_SERVICES.documentInfo = null;
       installDocumentInfoServiceForDoc(iframe.ampdoc);
       resetScheduledElementForTesting(iframe.win, 'amp-analytics');
       resetScheduledElementForTesting(iframe.win, 'amp-experiment');
@@ -209,6 +210,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     };
     installDocService(win, /* isSingleDoc */ true);
     const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
+    win.__AMP_SERVICES.documentInfo = null;
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     installUrlReplacementsServiceForDoc(ampdoc);
