@@ -18,12 +18,12 @@ import {MessageType} from '../../src/3p-frame-messaging';
 import {Observable} from '../observable';
 import {Services} from '../services';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
+import {ViewportImpl} from '../service/viewport/viewport-impl';
 import {ViewportInterface} from '../service/viewport/viewport-interface';
 import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {installLayersServiceForDoc} from '../service/layers-impl';
 import {isExperimentOn} from '../experiments';
 import {isIframed} from '../dom';
 import {
@@ -133,16 +133,6 @@ class InaboxViewportImpl {
     /** @private @const {!Observable<!../service/viewport/viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(win, 'layers');
-    if (this.useLayers_) {
-      installLayersServiceForDoc(
-        ampdoc,
-        this.binding_.getScrollingElement(),
-        true
-      );
-    }
-
     this.binding_.connect();
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
@@ -221,19 +211,8 @@ class InaboxViewportImpl {
   /** @override */
   getRect() {
     if (this.rect_ == null) {
-      let scrollTop = 0;
-      let scrollLeft = 0;
-      if (!this.useLayers_) {
-        scrollTop = this.getScrollTop();
-        scrollLeft = this.getScrollLeft();
-      }
       const size = this.getSize();
-      this.rect_ = layoutRectLtwh(
-        scrollLeft,
-        scrollTop,
-        size.width,
-        size.height
-      );
+      this.rect_ = layoutRectLtwh(0, 0, size.width, size.height);
     }
     return this.rect_;
   }
@@ -825,7 +804,9 @@ export function installInaboxViewportService(ampdoc) {
     ampdoc,
     'viewport',
     function() {
-      return new InaboxViewportImpl(ampdoc, binding);
+      return isExperimentOn(ampdoc.win, 'inabox-viewport-lite')
+        ? new InaboxViewportImpl(ampdoc, binding)
+        : new ViewportImpl(ampdoc, binding, Services.viewerForDoc(ampdoc));
     },
     /* opt_instantiate */ true
   );

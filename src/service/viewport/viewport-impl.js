@@ -56,7 +56,6 @@ const TAG_ = 'Viewport';
  * and how.
  *
  * @implements {ViewportInterface}
- * @visibleForTesting
  */
 export class ViewportImpl {
   /**
