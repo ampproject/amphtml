@@ -252,7 +252,8 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   }
   // Ensure same sub-domain is used despite potentially different file.
   parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN = // eslint-disable-line google-camelcase/google-camelcase
-    parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN || getSubDomain(parentWindow);
+    parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN ||
+    getSubDomain(parentWindow);
   return (
     'https://' +
     parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN +

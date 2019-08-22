@@ -345,7 +345,9 @@ export function randomlySelectUnsetExperiments(win, experiments) {
       isExperimentOn(win, /*OK*/ experimentName)
     ) {
       const {branches} = experiments[experimentName];
-      win.__AMP_EXPERIMENT_BRANCHES[experimentName] = selectRandomItem(branches);
+      win.__AMP_EXPERIMENT_BRANCHES[experimentName] = selectRandomItem(
+        branches
+      );
       selectedExperiments[experimentName] =
         win.__AMP_EXPERIMENT_BRANCHES[experimentName];
     }
@@ -363,7 +365,9 @@ export function randomlySelectUnsetExperiments(win, experiments) {
  *     null if experimentName has been tested but no branch was enabled).
  */
 export function getExperimentBranch(win, experimentName) {
-  return win.__AMP_EXPERIMENT_BRANCHES ? win.__AMP_EXPERIMENT_BRANCHES[experimentName] : null;
+  return win.__AMP_EXPERIMENT_BRANCHES
+    ? win.__AMP_EXPERIMENT_BRANCHES[experimentName]
+    : null;
 }
 
 /**
