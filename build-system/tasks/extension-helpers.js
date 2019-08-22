@@ -193,7 +193,7 @@ function getExtensionsToBuild() {
     return extensionsToBuild;
   }
 
-  extensionsToBuild = [];
+  extensionsToBuild = DEFAULT_EXTENSION_SET;
 
   if (!!argv.extensions) {
     if (argv.extensions === 'minimal_set') {
@@ -201,15 +201,14 @@ function getExtensionsToBuild() {
     } else if (argv.extensions === 'inabox') {
       argv.extensions = INABOX_EXTENSION_SET.join(',');
     }
-    extensionsToBuild = argv.extensions.split(',');
+    const explicitExtensions = argv.extensions.split(',');
+    extensionsToBuild = dedupe(extensionsToBuild.concat(explicitExtensions));
   }
 
   if (!!argv.extensions_from) {
     const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
-
-  extensionsToBuild = dedupe(extensionsToBuild.concat(DEFAULT_EXTENSION_SET));
 
   return extensionsToBuild;
 }
