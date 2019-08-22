@@ -109,7 +109,7 @@ describes.endtoend(
     });
 
     it('<amp-autocomplete> should select an item', async function() {
-      this.timeout(testTimeout);
+      this.timeout(testTimeout * 2);
       const renderedResults = await controller.findElement(
         '.i-amphtml-autocomplete-results'
       );
