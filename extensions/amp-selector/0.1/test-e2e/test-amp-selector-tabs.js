@@ -20,7 +20,7 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-selector/amp-selector-tabs.html',
     environments: ['single', 'viewer-demo'],
-    browsers: ['chrome', 'firefox', 'safari'],
+    browsers: ['chrome', 'firefox'],
   },
   async env => {
     let controller;

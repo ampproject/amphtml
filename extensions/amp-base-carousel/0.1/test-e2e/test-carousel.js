@@ -45,11 +45,12 @@ describes.endtoend(
       return controller.getElementProperty(el, name);
     }
 
-    beforeEach(async () => {
+    beforeEach(async function() {
       controller = env.controller;
     });
 
-    it('should render correctly', async () => {
+    it('should render correctly', async function() {
+      this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
 
       // We should have space for SLIDE_COUNT - 1 on either side + 1 for the
@@ -60,14 +61,16 @@ describes.endtoend(
       await waitForCarouselImg(controller, 0);
     });
 
-    it('should layout the two adjacent slides', async () => {
+    it('should layout the two adjacent slides', async function() {
+      this.timeout(testTimeout);
       // TODO(sparhami) Verify this is on the right of the 0th slide
       await waitForCarouselImg(controller, 1);
       // TODO(sparhami) Verify this is on the left of the 0th slide
       await waitForCarouselImg(controller, SLIDE_COUNT - 1);
     });
 
-    it('should snap when scrolling', async () => {
+    it('should snap when scrolling', async function() {
+      this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
       const firstSlide = await getSlide(controller, 0);
 
@@ -86,7 +89,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
     });
 
-    it('should reset the window after scroll', async () => {
+    it('should reset the window after scroll', async function() {
+      this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
       const firstSlide = await getSlide(controller, 0);
 
@@ -109,7 +113,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(scrollLeft);
     });
 
-    it('should have the correct scroll position when resizing', async () => {
+    it('should have the correct scroll position when resizing', async function() {
+      this.timeout(testTimeout);
       // Note: 513 seems to be the smallest settable width.
       await controller.setWindowRect({
         width: 800,

@@ -115,4 +115,5 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
+    - $HOME/Library/Caches/Homebrew
   yarn: true
