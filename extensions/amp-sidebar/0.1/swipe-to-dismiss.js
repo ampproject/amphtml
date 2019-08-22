@@ -17,7 +17,6 @@
 import {SwipeDef} from '../../../src/gesture-recognizers';
 import {delayAfterDeferringToEventLoop} from './utils';
 import {dev} from '../../../src/log';
-import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 
 /**
@@ -103,14 +102,6 @@ export class SwipeToDismiss {
      * @private {?Element}
      */
     this.mask_ = null;
-
-    /**
-     * A listener is set up to prevent scrolling on the swipe element when
-     * doing a swipe to dismiss gesture. This is used to clean up the listener
-     * when no longer needed.
-     * @private {?function()}
-     */
-    this.preventScrollUnlistener_ = null;
   }
 
   /**
@@ -143,9 +134,12 @@ export class SwipeToDismiss {
    * @return {string}
    */
   translateBy_(value, unit = '') {
-    return `translate${
-      this.orientation_ == Orientation.HORIZONTAL ? 'X' : 'Y'
-    }(${this.direction_ == Direction.BACKWARD ? -value : value}${unit})`;
+    const distance = this.direction_ == Direction.BACKWARD ? -value : value;
+    const x =
+      this.orientation_ == Orientation.HORIZONTAL ? `${distance}${unit}` : 0;
+    const y =
+      this.orientation_ == Orientation.HORIZONTAL ? 0 : `${distance}${unit}`;
+    return `translate(${x}, ${y})`;
   }
 
   /**
@@ -160,10 +154,6 @@ export class SwipeToDismiss {
     this.mask_ = mask;
     this.direction_ = direction;
     this.orientation_ = orientation;
-
-    this.mutateElement_(() => {
-      this.startSwipeToDismiss_();
-    });
   }
 
   /**
@@ -226,6 +216,31 @@ export class SwipeToDismiss {
   }
 
   /**
+   * Animate element to close position, with the duration based on the distance
+   * that needs to be travelled.
+   * @param {number} finalDistance
+   * @return {!Promise} A Promise that resolves once dismissal has completed.
+   * @private
+   */
+  dismissFromSwipe_(finalDistance) {
+    const remainingDistance = this.getSwipeElementLength_() - finalDistance;
+    const duration = remainingDistance * SWIPE_TO_CLOSE_DISTANCE_TO_TIME_FACTOR;
+
+    return this.mutateElement_(() => {
+      setStyles(dev().assertElement(this.swipeElement_), {
+        transform: this.translateBy_(100, '%'),
+        transition: `${duration}ms transform ease-out`,
+      });
+      setStyles(dev().assertElement(this.mask_), {
+        opacity: 0,
+        transition: `${duration}ms opacity ease-out`,
+      });
+    })
+      .then(() => delayAfterDeferringToEventLoop(this.win_, duration))
+      .then(() => this.onclose_());
+  }
+
+  /**
    * Adjusts the UI elements for the current swipe position in a swipe to
    * dismiss gesture. This should be called in a mutate context.
    * @param {string} swipeElementTransform How to transform the swiping
@@ -280,49 +295,7 @@ export class SwipeToDismiss {
       );
     }
 
-    const remainingDistance = this.getSwipeElementLength_() - finalDistance;
-    const duration = remainingDistance * SWIPE_TO_CLOSE_DISTANCE_TO_TIME_FACTOR;
-
-    return this.mutateElement_(() => {
-      setStyles(dev().assertElement(this.swipeElement_), {
-        transform: this.translateBy_(100, '%'),
-        transition: `${duration}ms transform ease-out`,
-      });
-      setStyles(dev().assertElement(this.mask_), {
-        opacity: 0,
-        transition: `${duration}ms opacity ease-out`,
-      });
-    })
-      .then(() => delayAfterDeferringToEventLoop(this.win_, duration))
-      .then(() => this.onclose_());
-  }
-
-  /**
-   * Handles the start of a swipe to dimiss gesture:
-   *  - Prevents a scroll event from the element during the swipe.
-   * This should be called in a mutate context.
-   * @private
-   */
-  startSwipeToDismiss_() {
-    this.preventScrollUnlistener_ = listen(
-      dev().assertElement(this.swipeElement_),
-      'scroll',
-      event => {
-        event.stopPropagation();
-      },
-      {
-        capture: true,
-      }
-    );
-  }
-
-  /**
-   * Ends a drag swipe, cleaning up the effects from `startSwipeToDismiss_`.
-   * This should be called in a mutate context.
-   * @private
-   */
-  endSwipeToDismiss_() {
-    this.preventScrollUnlistener_();
+    return this.dismissFromSwipe_(finalDistance);
   }
 
   /**
@@ -337,7 +310,6 @@ export class SwipeToDismiss {
       if (isLast) {
         this.releaseSwipe_(velocityX, velocityY, deltaX, deltaY).then(() => {
           this.adjustForSwipePosition_();
-          this.endSwipeToDismiss_();
         });
         return;
       }
