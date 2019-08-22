@@ -58,7 +58,7 @@ export class StoryAdConfig {
         'be inside a <script> tag with type="application/json"'
     );
 
-    const dirtyConfig = parseJson(child.textContent);
+    const jsonConfig = parseJson(child.textContent);
 
     const requiredAttrs = {
       class: 'i-amphtml-story-ad',
@@ -66,14 +66,14 @@ export class StoryAdConfig {
       'amp-story': '',
     };
 
-    const adAttributes = dirtyConfig['ad-attributes'];
+    const adAttributes = jsonConfig['ad-attributes'];
     userAssert(
       adAttributes,
       `${TAG} Error reading config. ` +
         'Top level JSON should have an "ad-attributes" key'
     );
 
-    this.handleType_(adAttributes['type']);
+    this.validateType_(adAttributes['type']);
 
     for (const attr in adAttributes) {
       const value = adAttributes[attr];
@@ -97,7 +97,7 @@ export class StoryAdConfig {
    * Logic specific to each ad type.
    * @param {string} type
    */
-  handleType_(type) {
+  validateType_(type) {
     userAssert(
       !!AllowedAdTypes[type],
       `${TAG} "${type}" ad type is missing or not supported`
