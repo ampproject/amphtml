@@ -61,6 +61,8 @@ AMP.extension('amp-react-img', '0.1', AMP => {
      */
     constructor(props) {
       super(props);
+
+      this.state = {prerender: true};
     }
 
     /**
@@ -68,11 +70,7 @@ AMP.extension('amp-react-img', '0.1', AMP => {
      */
     render() {
       const props = pick(this.props, ATTRIBUTES_TO_PROPAGATE);
-      const {
-        id,
-        'i-amphtml-ssr': ssr,
-        'i-amphtml-prerender': prerender,
-      } = this.props;
+      const {id, 'i-amphtml-ssr': ssr} = this.props;
       if (ssr) {
         // TODO: Figure out SSR children
       }
@@ -83,6 +81,7 @@ AMP.extension('amp-react-img', '0.1', AMP => {
       props['decoding'] = 'async';
 
       // amp-img is always allowed to render, but we want to make this interesting...
+      const {prerender} = this.state;
       if (prerender) {
         delete props['src'];
         delete props['srcset'];
@@ -112,6 +111,9 @@ AMP.extension('amp-react-img', '0.1', AMP => {
       /** @param {!AmpElement} element */
       constructor(element) {
         super(element);
+
+        /** @private {?Component} */
+        this.el_ = null;
       }
 
       /**
@@ -129,34 +131,29 @@ AMP.extension('amp-react-img', '0.1', AMP => {
 
       /** @override */
       buildCallback() {
-        const el = react.createElement(
-          Component,
-          this.attributes_(/* prerender */ true)
-        );
-        render(el, this.element);
+        const el = react.createElement(Component, this.attributes_());
+        this.el_ = render(el, this.element);
       }
 
       /** @override */
       layoutCallback() {
-        const el = react.createElement(
-          Component,
-          this.attributes_(/* prerender */ false)
-        );
-        render(el, this.element);
+        const el = devAssert(this.el_);
+        el.setState({prerender: false});
+
+        const rerender = react.createElement(Component, this.attributes_());
+        render(rerender, this.element);
       }
 
       /**
-       * @param {boolean} prerender
        * @return {!Object<string, string>}
        */
-      attributes_(prerender) {
+      attributes_() {
         const out = {};
         const {attributes} = this.element;
         for (let i = 0, l = attributes.length; i < l; i++) {
           const attr = attributes[i];
           out[attr.name] = attr.value;
         }
-        out['i-amphtml-prerender'] = prerender;
         return out;
       }
     };
