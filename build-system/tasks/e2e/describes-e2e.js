@@ -370,6 +370,11 @@ function describeEnv(factory) {
         return result;
       }
 
+      if (process.platform !== 'darwin' && allowedBrowsers.has('safari')) {
+        // silently skip safari tests
+        allowedBrowsers.delete('safari');
+      }
+
       return allowedBrowsers;
     }
 
