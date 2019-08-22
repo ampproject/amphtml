@@ -68,6 +68,7 @@ exports.rules = [
     whitelist: [
       'extensions/amp-date-picker/0.1/**->src/module.js',
       'extensions/amp-inputmask/0.1/**->src/module.js',
+      'extensions/amp-react-img/0.1/**->src/module.js',
     ],
   },
   {

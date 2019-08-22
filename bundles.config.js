@@ -752,6 +752,12 @@ exports.extensionBundles = [
     postPrepend: ['third_party/react-dates/bundle.js'],
   },
   {
+    name: 'amp-react-img',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-image-viewer',
     version: '0.1',
     latestVersion: '0.1',

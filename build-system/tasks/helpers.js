@@ -263,7 +263,10 @@ function appendToCompiledFile(srcFilename, destFilePath) {
   if (bundleFiles) {
     const newSource = concatFilesToString(bundleFiles.concat([destFilePath]));
     fs.writeFileSync(destFilePath, newSource, 'utf8');
-  } else if (srcFilename == 'amp-date-picker.js') {
+  } else if (
+    srcFilename == 'amp-date-picker.js' ||
+    srcFilename == 'amp-react-img.js'
+  ) {
     // For amp-date-picker, we inject the react-dates bundle after compile
     // to avoid CC from messing with browserify's module boilerplate.
     const file = fs.readFileSync(destFilePath, 'utf8');
