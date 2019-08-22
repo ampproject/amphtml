@@ -167,6 +167,13 @@ describe('chunk2', () => {
             return true;
           });
         });
+
+        it('should execute a chunk with an ampdoc', done => {
+          startupChunk(env.ampdoc, unusedIdleDeadline => {
+            done();
+          });
+        });
+
         basicTests(env);
       });
 
@@ -358,7 +365,7 @@ describe('long tasks', () => {
   describes.fakeWin(
     'long chunk tasks force a macro task between work',
     {
-      amp: true,
+      amp: false,
     },
     env => {
       let subscriptions;
@@ -386,6 +393,7 @@ describe('long tasks', () => {
         postMessageCalls = 0;
         subscriptions = {};
         clock = sandbox.useFakeTimers();
+        installDocService(env.win, /* isSingleDoc */ true);
         toggleExperiment(env.win, 'macro-after-long-task', true);
 
         env.win.addEventListener = function(type, handler) {
@@ -403,6 +411,9 @@ describe('long tasks', () => {
         };
 
         progress = '';
+        chunkInstanceForTesting(
+          env.win.document.documentElement
+        ).macroAfterLongTask_ = true;
       });
 
       it('should not run macro tasks with invisible bodys', done => {
