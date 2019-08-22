@@ -477,14 +477,14 @@ class EndToEndFixture {
     const {environment} = env;
 
     const url = new URL(testUrl);
-    if (environment.includes('inabox')) {
-      if (experiments.length > 0) {
+    if (experiments.length > 0) {
+      if (environment.includes('inabox')) {
         // inabox experiments are toggled at server side using <meta> tag
         url.searchParams.set('exp', experiments.join(','));
+      } else {
+        // AMP doc experiments are toggled via cookies
+        await toggleExperiments(ampDriver, url.href, experiments);
       }
-    } else {
-      // AMP doc experiments are toggled via cookies
-      await toggleExperiments(ampDriver, url.href, experiments);
     }
 
     const {width, height} = initialRect;
@@ -531,10 +531,6 @@ async function getController(
  * @return {!Promise}
  */
 async function toggleExperiments(ampDriver, testUrl, experiments) {
-  if (!experiments.length) {
-    return;
-  }
-
   await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
 
   for (const experiment of experiments) {
