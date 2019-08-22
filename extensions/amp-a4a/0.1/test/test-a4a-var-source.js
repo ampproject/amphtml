@@ -28,6 +28,7 @@ describe('A4AVariableSource', () => {
       link.setAttribute('href', 'https://pinterest.com:8080/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
+      iframe.win.__AMP_SERVICES.documentInfo = null;
       installDocumentInfoServiceForDoc(iframe.ampdoc);
       varSource = new A4AVariableSource(iframe.ampdoc, iframe.win);
     });
