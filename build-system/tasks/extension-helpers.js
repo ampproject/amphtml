@@ -26,9 +26,9 @@ const {
   verifyExtensionAliasBundles,
 } = require('../../bundles.config');
 const {compileJs, mkdirSync} = require('./helpers');
-const {compileVendorConfigs} = require('./vendor-configs');
 const {isTravisBuild} = require('../travis');
 const {jsifyCssAsync} = require('./jsify-css');
+const {vendorConfigs} = require('./vendor-configs');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -435,18 +435,20 @@ function buildExtension(
     promises.push(buildCssPromise);
   }
 
-  // minify and copy vendor configs for amp-analytics component
-  if (name === 'amp-analytics') {
-    promises.push(compileVendorConfigs(options));
-  }
-
-  return Promise.all(promises).then(() => {
-    if (argv.single_pass) {
-      return Promise.resolve();
-    } else {
-      return buildExtensionJs(path, name, version, latestVersion, options);
-    }
-  });
+  return Promise.all(promises)
+    .then(() => {
+      if (argv.single_pass) {
+        return Promise.resolve();
+      } else {
+        return buildExtensionJs(path, name, version, latestVersion, options);
+      }
+    })
+    .then(() => {
+      // minify and copy vendor configs for amp-analytics component
+      if (name === 'amp-analytics') {
+        return vendorConfigs(options);
+      }
+    });
 }
 
 /**
