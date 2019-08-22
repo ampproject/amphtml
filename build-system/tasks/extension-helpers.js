@@ -73,6 +73,12 @@ const INABOX_EXTENSION_SET = [
   'amp-position-observer',
   'amp-social-share',
   'amp-video',
+
+  // the following extensions are not supported in AMPHTML ads spec
+  // but commonly used in AMPHTML ads related debugging.
+  'amp-ad',
+  'amp-ad-network-fake-impl',
+  'amp-auto-lightbox', // auto installed by amp.js
 ];
 
 /**
