@@ -184,7 +184,7 @@ window.context.tagName;
 
 
 // Service Holder
-window.services;
+window.__AMP_SERVICES;
 
 // Safeframe
 // TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
@@ -198,9 +198,11 @@ window.sf_.cfg;
 window.draw3p;
 
 // AMP's globals
-window.AMP_TEST;
-window.AMP_TEST_IFRAME;
-window.AMP_TAG;
+window.__AMP_TEST;
+window.__AMP_TEST_IFRAME;
+window.__AMP_TAG;
+window.__AMP_TOP;
+window.__AMP_PARENT;
 window.AMP = {};
 window.AMP._ = {};
 window.AMP.push;
@@ -226,9 +228,6 @@ window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
 window.AMP.attachShadowDoc;
 window.AMP.attachShadowDocAsStream;
-
-window.__AMP_TOP;
-window.__AMP_PARENT;
 
 /** @constructor */
 function AmpConfigType() {}
