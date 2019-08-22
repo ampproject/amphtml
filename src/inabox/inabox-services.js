@@ -32,10 +32,8 @@ import {installStandardActionsForDoc} from '../service/standard-actions-impl';
 import {installUrlForDoc} from '../service/url-impl';
 import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {isExperimentOn} from '../experiments';
 import {rejectServicePromiseForDoc} from '../service';
-
-// TODO: change this to an RTV experiment flag
-const INABOX_LITE_RESOURCES = true;
 
 /**
  * Install ampdoc-level services.
@@ -51,7 +49,7 @@ export function installAmpdocServicesForInabox(ampdoc) {
   installInaboxViewportService(ampdoc);
   installHiddenObserverForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
-  if (INABOX_LITE_RESOURCES) {
+  if (isExperimentOn(ampdoc.win, 'inabox-resources-lite')) {
     installInaboxResourcesServiceForDoc(ampdoc);
   } else {
     installResourcesServiceForDoc(ampdoc);
