@@ -19,8 +19,7 @@ import {Services} from '../../src/services';
 import {Vsync} from '../../src/service/vsync-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 
-describe('vsync', () => {
-  let sandbox;
+describes.sandboxed('vsync', {}, () => {
   let clock;
   let win;
   let viewer;
@@ -30,7 +29,6 @@ describe('vsync', () => {
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     win = {
       document: {
@@ -38,7 +36,7 @@ describe('vsync', () => {
         body: {},
       },
       navigator: {},
-      services: {},
+      __AMP_SERVICES: {},
       setTimeout: (fn, t) => {
         return window.setTimeout(fn, t);
       },
@@ -64,14 +62,13 @@ describe('vsync', () => {
       isHidden: () => false,
       onVisibilityChanged: handler => (docVisibilityHandler = handler),
     };
-    win.services['documentState'] = {obj: docState};
+    win.__AMP_SERVICES['documentState'] = {obj: docState};
 
     contextNode = document.createElement('div');
     document.body.appendChild(contextNode);
   });
 
   afterEach(() => {
-    sandbox.restore();
     document.body.removeChild(contextNode);
   });
 
@@ -82,7 +79,7 @@ describe('vsync', () => {
     beforeEach(() => {
       installDocService(win, /* isSingleDoc */ true);
       ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      win.services['viewer'] = {obj: viewer};
+      win.__AMP_SERVICES['viewer'] = {obj: viewer};
       vsync = new Vsync(win);
       return Services.viewerPromiseForDoc(ampdoc);
     });
@@ -572,8 +569,8 @@ describe('vsync', () => {
       root = document.createElement('i-amphtml-shadow-root');
       document.body.appendChild(root);
       ampdoc = new AmpDocShadow(win, 'https://acme.org/', root);
-      ampdoc.services = {};
-      ampdoc.services['viewer'] = {obj: viewer};
+      ampdoc.__AMP_SERVICES = {};
+      ampdoc.__AMP_SERVICES['viewer'] = {obj: viewer};
       contextNode.ampdoc_ = ampdoc;
       vsync = new Vsync(win);
     });

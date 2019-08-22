@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const PRESSBOARD_CONFIG = jsonLiteral({
   'vars': {
     'mediaId': '',
     'campaignId': '',
@@ -76,3 +78,5 @@ export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {PRESSBOARD_CONFIG};

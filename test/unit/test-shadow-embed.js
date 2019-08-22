@@ -331,7 +331,7 @@ describes.sandboxed('shadow-embed', {}, () => {
             },
           },
         },
-        services: {
+        __AMP_SERVICES: {
           'platform': {obj: platform},
           'vsync': {obj: {}},
         },

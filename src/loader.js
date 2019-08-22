@@ -91,7 +91,6 @@ export function createNewLoaderElement(
   // synchronously. We create the actually element with animations when the
   // service is ready.
   const loaderRoot = element.ownerDocument.createElement('div');
-  loaderRoot.className = 'i-amphtml-new-loader';
 
   getLoaderServicePromise(ampDoc, element).then(loaderService => {
     const endTime = Date.now();

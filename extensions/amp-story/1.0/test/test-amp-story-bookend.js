@@ -143,7 +143,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
   });
 
-  it('should build the users json', () => {
+  it('should build the users json', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
@@ -208,16 +208,13 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
-      config.components.forEach((currentComponent, index) => {
-        return expect(currentComponent).to.deep.equal(
-          expectedComponents[index]
-        );
-      });
+    const config = await bookend.loadConfigAndMaybeRenderBookend();
+    config.components.forEach((currentComponent, index) => {
+      expect(currentComponent).to.deep.equal(expectedComponents[index]);
     });
   });
 
-  it('should build the users json with share providers alternative', () => {
+  it('should build the users json with share providers alternative', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
@@ -283,19 +280,16 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
-      config.components.forEach((currentComponent, index) => {
-        return expect(currentComponent).to.deep.equal(
-          expectedComponents[index]
-        );
-      });
+    const config = await bookend.loadConfigAndMaybeRenderBookend();
+    config.components.forEach((currentComponent, index) => {
+      expect(currentComponent).to.deep.equal(expectedComponents[index]);
     });
   });
 
   it(
     'should add amp-to-amp linking to individual cta links when ' +
       'specified in the JSON config',
-    () => {
+    async () => {
       const userJson = {
         'bookendVersion': 'v1.0',
         'shareProviders': [
@@ -320,20 +314,61 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
-      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-        const ctaLinks = bookend.bookendEl_.querySelector(
-          '.i-amphtml-story-bookend-cta-link-wrapper'
-        );
-        expect(ctaLinks.children[0]).to.have.attribute('rel');
-        expect(ctaLinks.children[0].getAttribute('rel')).to.equal('amphtml');
-      });
+      await bookend.loadConfigAndMaybeRenderBookend();
+      const ctaLinks = bookend.bookendEl_.querySelector(
+        '.i-amphtml-story-bookend-cta-link-wrapper'
+      );
+      expect(ctaLinks.children[0]).to.have.attribute('rel');
+      expect(ctaLinks.children[0].getAttribute('rel')).to.equal('amphtml');
     }
   );
+
+  it('should forward the correct target when clicking on an element', () => {
+    const userJson = {
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
+        'email',
+        {'provider': 'facebook', 'app_id': '254325784911610'},
+        'whatsapp',
+      ],
+      'components': [
+        {
+          'type': 'cta-link',
+          'links': [
+            {
+              'text': 'buttonA',
+              'url': 'google.com',
+              'amphtml': true,
+            },
+          ],
+        },
+      ],
+    };
+
+    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    const clickSpy = sandbox.spy();
+    win.document.addEventListener('click', clickSpy);
+
+    bookend.build();
+    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+      const ctaLinks = bookend.bookendEl_.querySelector(
+        '.i-amphtml-story-bookend-cta-link-wrapper'
+      );
+      ctaLinks.children[0].onclick = function(e) {
+        e.preventDefault(); // Make the test not actually navigate.
+      };
+      ctaLinks.children[0].click();
+
+      expect(clickSpy.getCall(0).args[0]).to.contain({
+        '__AMP_CUSTOM_LINKER_TARGET__': ctaLinks.children[0],
+      });
+    });
+  });
 
   it(
     'should not add amp-to-amp linking to cta links when not ' +
       'specified in the JSON config',
-    () => {
+    async () => {
       const userJson = {
         'bookendVersion': 'v1.0',
         'shareProviders': [
@@ -363,20 +398,19 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
-      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-        const ctaLinks = bookend.bookendEl_.querySelector(
-          '.i-amphtml-story-bookend-cta-link-wrapper'
-        );
-        expect(ctaLinks.children[0]).to.not.have.attribute('rel');
-        expect(ctaLinks.children[1]).to.not.have.attribute('rel');
-      });
+      await bookend.loadConfigAndMaybeRenderBookend();
+      const ctaLinks = bookend.bookendEl_.querySelector(
+        '.i-amphtml-story-bookend-cta-link-wrapper'
+      );
+      expect(ctaLinks.children[0]).to.not.have.attribute('rel');
+      expect(ctaLinks.children[1]).to.not.have.attribute('rel');
     }
   );
 
   it(
     'should add amp-to-amp linking to small articles when specified ' +
       'in the JSON config',
-    () => {
+    async () => {
       const userJson = {
         'bookendVersion': 'v1.0',
         'shareProviders': [
@@ -398,20 +432,19 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
-      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-        const articles = bookend.bookendEl_.querySelectorAll(
-          '.i-amphtml-story-bookend-article'
-        );
-        expect(articles[0]).to.have.attribute('rel');
-        expect(articles[0].getAttribute('rel')).to.equal('amphtml');
-      });
+      await bookend.loadConfigAndMaybeRenderBookend();
+      const articles = bookend.bookendEl_.querySelectorAll(
+        '.i-amphtml-story-bookend-article'
+      );
+      expect(articles[0]).to.have.attribute('rel');
+      expect(articles[0].getAttribute('rel')).to.equal('amphtml');
     }
   );
 
   it(
     'should not add amp-to-amp linking to small articles when not ' +
       'specified in the JSON config',
-    () => {
+    async () => {
       const userJson = {
         'bookendVersion': 'v1.0',
         'shareProviders': [
@@ -439,20 +472,19 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
-      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-        const articles = bookend.bookendEl_.querySelectorAll(
-          '.i-amphtml-story-bookend-article'
-        );
-        expect(articles[0]).to.not.have.attribute('rel');
-        expect(articles[1]).to.not.have.attribute('rel');
-      });
+      await bookend.loadConfigAndMaybeRenderBookend();
+      const articles = bookend.bookendEl_.querySelectorAll(
+        '.i-amphtml-story-bookend-article'
+      );
+      expect(articles[0]).to.not.have.attribute('rel');
+      expect(articles[1]).to.not.have.attribute('rel');
     }
   );
 
   it(
     'should add amp-to-amp linking to portrait articles when specified ' +
       'in the JSON config',
-    () => {
+    async () => {
       const userJson = {
         'bookendVersion': 'v1.0',
         'shareProviders': [
@@ -475,20 +507,19 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
-      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-        const articles = bookend.bookendEl_.querySelectorAll(
-          '.i-amphtml-story-bookend-portrait'
-        );
-        expect(articles[0]).to.have.attribute('rel');
-        expect(articles[0].getAttribute('rel')).to.equal('amphtml');
-      });
+      await bookend.loadConfigAndMaybeRenderBookend();
+      const articles = bookend.bookendEl_.querySelectorAll(
+        '.i-amphtml-story-bookend-portrait'
+      );
+      expect(articles[0]).to.have.attribute('rel');
+      expect(articles[0].getAttribute('rel')).to.equal('amphtml');
     }
   );
 
   it(
     'should not add amp-to-amp linking to portrait articles when not ' +
       'specified in the JSON config',
-    () => {
+    async () => {
       const userJson = {
         'bookendVersion': 'v1.0',
         'shareProviders': [
@@ -518,20 +549,19 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
-      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-        const articles = bookend.bookendEl_.querySelectorAll(
-          '.i-amphtml-story-bookend-portrait'
-        );
-        expect(articles[0]).to.not.have.attribute('rel');
-        expect(articles[1]).to.not.have.attribute('rel');
-      });
+      await bookend.loadConfigAndMaybeRenderBookend();
+      const articles = bookend.bookendEl_.querySelectorAll(
+        '.i-amphtml-story-bookend-portrait'
+      );
+      expect(articles[0]).to.not.have.attribute('rel');
+      expect(articles[1]).to.not.have.attribute('rel');
     }
   );
 
   it(
     'should add amp-to-amp linking to landscape articles when ' +
       'specified in the JSON config',
-    () => {
+    async () => {
       const userJson = {
         'bookendVersion': 'v1.0',
         'shareProviders': [
@@ -554,20 +584,19 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
-      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-        const articles = bookend.bookendEl_.querySelectorAll(
-          '.i-amphtml-story-bookend-landscape'
-        );
-        expect(articles[0]).to.have.attribute('rel');
-        expect(articles[0].getAttribute('rel')).to.equal('amphtml');
-      });
+      await bookend.loadConfigAndMaybeRenderBookend();
+      const articles = bookend.bookendEl_.querySelectorAll(
+        '.i-amphtml-story-bookend-landscape'
+      );
+      expect(articles[0]).to.have.attribute('rel');
+      expect(articles[0].getAttribute('rel')).to.equal('amphtml');
     }
   );
 
   it(
     'should not add amp-to-amp linking to landscape articles when not' +
       ' specified in the JSON config',
-    () => {
+    async () => {
       const userJson = {
         'bookendVersion': 'v1.0',
         'shareProviders': [
@@ -597,17 +626,16 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
-      return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-        const articles = bookend.bookendEl_.querySelectorAll(
-          '.i-amphtml-story-bookend-landscape'
-        );
-        expect(articles[0]).to.not.have.attribute('rel');
-        expect(articles[1]).to.not.have.attribute('rel');
-      });
+      await bookend.loadConfigAndMaybeRenderBookend();
+      const articles = bookend.bookendEl_.querySelectorAll(
+        '.i-amphtml-story-bookend-landscape'
+      );
+      expect(articles[0]).to.not.have.attribute('rel');
+      expect(articles[1]).to.not.have.attribute('rel');
     }
   );
 
-  it('should build the users share providers', () => {
+  it('should build the users share providers', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
@@ -650,16 +678,13 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
-      config['shareProviders'].forEach((currProvider, index) => {
-        return expect(currProvider).to.deep.equal(
-          expectedShareProviders[index]
-        );
-      });
+    const config = await bookend.loadConfigAndMaybeRenderBookend();
+    config['shareProviders'].forEach((currProvider, index) => {
+      expect(currProvider).to.deep.equal(expectedShareProviders[index]);
     });
   });
 
-  it('should ignore empty share providers', () => {
+  it('should ignore empty share providers', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [],
@@ -680,12 +705,11 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
-      return expect(config['shareProviders']).to.deep.equal([]);
-    });
+    const config = await bookend.loadConfigAndMaybeRenderBookend();
+    expect(config['shareProviders']).to.deep.equal([]);
   });
 
-  it('should warn when trying to use system sharing', () => {
+  it('should warn when trying to use system sharing', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': ['system'],
@@ -708,14 +732,13 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      expect(userWarnStub).to.be.calledOnce;
-      expect(userWarnStub.args[0][1]).to.be.equal(
-        '`system` is not a valid ' +
-          'share provider type. Native sharing is ' +
-          'enabled by default and cannot be turned off.'
-      );
-    });
+    await bookend.loadConfigAndMaybeRenderBookend();
+    expect(userWarnStub).to.be.calledOnce;
+    expect(userWarnStub.args[0][1]).to.be.equal(
+      '`system` is not a valid ' +
+        'share provider type. Native sharing is ' +
+        'enabled by default and cannot be turned off.'
+    );
   });
 
   it('should reject invalid user json for article', () => {
@@ -904,7 +927,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     expect(promptButtonEl).to.be.null;
   });
 
-  it('should skip invalid component name and continue building', () => {
+  it('should skip invalid component name and continue building', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
@@ -934,12 +957,29 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       /[Component `invalid-type` is not supported. Skipping invalid]/
     );
 
-    return bookend.loadConfigAndMaybeRenderBookend().then(config => {
-      // Still builds rest of valid components.
+    const config = await bookend.loadConfigAndMaybeRenderBookend();
+    // Still builds rest of valid components.
 
-      // We use config.components[1] because config.components[0] is a heading
-      // that we prepend when there is no heading present in the user config.
-      expect(config.components[1]).to.deep.equal(userJson.components[1]);
-    });
+    // We use config.components[1] because config.components[0] is a heading
+    // that we prepend when there is no heading present in the user config.
+    expect(config.components[1]).to.deep.equal(userJson.components[1]);
+  });
+
+  it('should not add a heading component when there are no components', async () => {
+    const userJson = {
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
+        'email',
+        {'provider': 'facebook', 'app_id': '254325784911610'},
+        'whatsapp',
+      ],
+      'components': [],
+    };
+
+    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+
+    bookend.build();
+    const config = await bookend.loadConfigAndMaybeRenderBookend();
+    expect(config.components.length).to.equal(0);
   });
 });

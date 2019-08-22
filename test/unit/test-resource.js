@@ -142,7 +142,7 @@ describes.realWin('Resource', {amp: true}, env => {
     );
   });
 
-  it('should mark as ready for layout if already measured', () => {
+  it('should mark as not ready for layout even if already measured', () => {
     const box = layoutRectLtwh(0, 0, 100, 200);
     elementMock
       .expects('isUpgraded')
@@ -152,15 +152,9 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('build')
       .returns(Promise.resolve())
       .once();
-    elementMock
-      .expects('updateLayoutBox')
-      .withExactArgs(box, true)
-      .once();
-    const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
     resource.layoutBox_ = box;
     return resource.build().then(() => {
-      expect(stub).to.be.calledOnce;
-      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
     });
   });
 
@@ -173,9 +167,7 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('build')
       .returns(Promise.resolve())
       .once();
-    const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(false);
     return resource.build().then(() => {
-      expect(stub.calledOnce).to.be.true;
       expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
     });
   });
