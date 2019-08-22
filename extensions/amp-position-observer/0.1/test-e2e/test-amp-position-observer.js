@@ -32,22 +32,22 @@ describes.endtoend(
     it('should animate clock hand while scrolling', async () => {
       const step = 50;
       const initPoint = {
-        'x': 151,
-        'y': 110,
         'width': 53,
         'height': 39,
+        'x': 151,
+        'y': 110,
       };
       const midPoint = {
-        'x': 150,
-        'y': 111,
         'width': 37,
         'height': 54,
+        'x': 150,
+        'y': 111,
       };
       const endPoint = {
-        'x': 150,
-        'y': 112,
         'width': 14,
         'height': 60,
+        'x': 150,
+        'y': 112,
       };
       await verifyClockHandRect(controller, initPoint);
       await scrollParentWindowYBy(controller, step);
