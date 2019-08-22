@@ -30,7 +30,6 @@ describe
   .configure()
   .skipSafari()
   .skipSinglePass()
-  .skipWindows()
   .skip('amp-script', function() {
     this.timeout(TIMEOUT);
 
