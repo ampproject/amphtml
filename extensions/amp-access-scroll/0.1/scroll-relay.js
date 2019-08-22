@@ -56,7 +56,7 @@ export class Relay {
     this.frames_
       .filter(f => f !== e.source)
       .forEach(f => {
-        f./* REVIEW */ postMessage(data, this.origin_);
+        f./* OK */ postMessage(data, this.origin_);
       });
   }
 
