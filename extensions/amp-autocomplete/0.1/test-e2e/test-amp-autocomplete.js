@@ -1,5 +1,3 @@
-import {timeout} from 'q';
-
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
