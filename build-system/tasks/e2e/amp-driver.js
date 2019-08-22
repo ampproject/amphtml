@@ -106,8 +106,7 @@ const EnvironmentBehaviorMap = {
     },
 
     url(url) {
-      const envelopeUrl = url.replace(HOST, HOST + '/inabox-friendly');
-      return enableInaboxExperiments(envelopeUrl, 'inabox-viewport-friendly');
+      return url.replace(HOST, HOST + '/inabox-friendly');
     },
   },
 
@@ -176,19 +175,6 @@ class AmpDriver {
       throw new Error(e.message + '\n' + html);
     }
   }
-}
-
-function enableInaboxExperiments(urlStr, experiments) {
-  if (!Array.isArray(experiments)) {
-    experiments = [experiments];
-  }
-  const url = new URL(urlStr);
-  const enabledExp = url.searchParams.get('ampexp');
-  if (enabledExp) {
-    experiments = experiments.concat(enabledExp.split(','));
-  }
-  url.searchParams.set('ampexp', experiments.join(','));
-  return url.href;
 }
 
 module.exports = {
