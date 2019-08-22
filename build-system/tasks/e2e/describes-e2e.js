@@ -478,8 +478,10 @@ class EndToEndFixture {
 
     const url = new URL(testUrl);
     if (environment.includes('inabox')) {
-      // inabox experiments are toggled at server side using <meta> tag
-      url.searchParams.set('exp', experiments.join(','));
+      if (experiments.length > 0) {
+        // inabox experiments are toggled at server side using <meta> tag
+        url.searchParams.set('exp', experiments.join(','));
+      }
     } else {
       // AMP doc experiments are toggled via cookies
       await toggleExperiments(ampDriver, url.href, experiments);
