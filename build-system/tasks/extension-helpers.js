@@ -35,7 +35,6 @@ const argv = require('minimist')(process.argv.slice(2));
 
 /**
  * Extensions to build when `--extensions=minimal_set`.
- * @private @const {!Array<string>}
  */
 const MINIMAL_EXTENSION_SET = [
   'amp-ad',
@@ -52,8 +51,6 @@ const MINIMAL_EXTENSION_SET = [
  * Extensions to build when `--extensions=inabox`.
  * See AMPHTML ads spec for supported extensions:
  * https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/
- *
- * @private @const {!Array<string>}
  */
 const INABOX_EXTENSION_SET = [
   'amp-accordion',
@@ -73,6 +70,15 @@ const INABOX_EXTENSION_SET = [
   'amp-position-observer',
   'amp-social-share',
   'amp-video',
+];
+
+/**
+ * Default extensions that should always be built. These are always or almost
+ * always loaded by runtime.
+ */
+const DEFAULT_EXTENSION_SET = [
+  'amp-loader',
+  'amp-auto-lightbox',
 ];
 
 /**
@@ -205,6 +211,8 @@ function getExtensionsToBuild() {
     const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
+
+  extensionsToBuild = dedupe(extensionsToBuild.concat(DEFAULT_EXTENSION_SET));
 
   return extensionsToBuild;
 }
