@@ -75,7 +75,6 @@ const INABOX_EXTENSION_SET = [
   // but commonly used in AMPHTML ads related debugging.
   'amp-ad',
   'amp-ad-network-fake-impl',
-  'amp-auto-lightbox', // auto installed by amp.js
 ];
 
 /**
