@@ -188,7 +188,7 @@ class AmpAccordion extends AMP.BaseElement {
       this.headers_.push(header);
 
       userAssert(
-        this.action_.hasAction(header, 'tap') == false,
+        this.action_.hasAction(header, 'tap', section) == false,
         'amp-accordion headings should not have tap actions registered.'
       );
 
