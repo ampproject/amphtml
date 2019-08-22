@@ -9,11 +9,19 @@
     body {
       margin: 0;
     }
+    .url {
+      /*
+       * This is to make sure the URL div does not grow in height and causes issues
+       * to scrolling related tests
+       */
+      white-space: nowrap;
+      overflow: hidden;
+    }
   </style>
 </head>
 <body>
   <h1>In-a-box Envelope</h1>
-  <div>url: AD_URL</div>
+  <div class="url">url: AD_URL</div>
   <div>size: AD_WIDTHxAD_HEIGHT</div>
 
   <div style="background: #eee; overflow: hidden;; height: OFFSET;">scroll down to see the ad</div>
