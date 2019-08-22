@@ -352,8 +352,8 @@ export class ViewportBindingInabox {
           MessageType.POSITION,
           data => {
             this.requestPositionPromise_ = null;
-            devAssert(data.targetRect, 'Host should send targetRect');
-            resolve(data.targetRect);
+            devAssert(data['targetRect'], 'Host should send targetRect');
+            resolve(data['targetRect']);
           }
         );
       });
