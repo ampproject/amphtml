@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const IPLABEL_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const IPLABEL_CONFIG = jsonLiteral({
   'requests': {
     'collectorUrl': 'm.col.ip-label.net',
     'endpoint': 'https://${collectorUrl}/coll/',
@@ -67,3 +69,5 @@ export const IPLABEL_CONFIG = /** @type {!JsonObject} */ ({
     'urlgroup': '',
   },
 });
+
+export {IPLABEL_CONFIG};

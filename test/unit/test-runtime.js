@@ -62,7 +62,7 @@ describes.fakeWin(
       };
       ampdocServiceMock = sandbox.mock(ampdocService);
       win.AMP = [];
-      win.services = {
+      win.__AMP_SERVICES = {
         ampdoc: {obj: ampdocService},
       };
       const ampdoc = new AmpDocSingle(win);
@@ -92,36 +92,36 @@ describes.fakeWin(
       expect(win.AMP.push).to.equal([].push);
       adopt(win);
       expect(win.AMP.push).to.not.equal([].push);
-      expect(win.AMP_TAG).to.be.true;
+      expect(win.__AMP_TAG).to.be.true;
     });
 
     it('should convert AMP from array to AMP object in shadow-doc', () => {
       expect(win.AMP.push).to.equal([].push);
       adoptShadowMode(win);
       expect(win.AMP.push).to.not.equal([].push);
-      expect(win.AMP_TAG).to.be.true;
+      expect(win.__AMP_TAG).to.be.true;
     });
 
     it('should install legacy stubs in single-doc', () => {
-      const initial = win.ampExtendedElements || {};
+      const initial = win.__AMP_EXTENDED_ELEMENTS || {};
       expect(initial['amp-ad']).to.be.undefined;
       expect(initial['amp-embed']).to.be.undefined;
       expect(initial['amp-video']).to.be.undefined;
       adopt(win);
-      expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-video']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(ElementStub);
     });
 
     it('should install legacy stubs in shadow-doc', () => {
-      const initial = win.ampExtendedElements || {};
+      const initial = win.__AMP_EXTENDED_ELEMENTS || {};
       expect(initial['amp-ad']).to.be.undefined;
       expect(initial['amp-embed']).to.be.undefined;
       expect(initial['amp-video']).to.be.undefined;
       adoptShadowMode(win);
-      expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-video']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(ElementStub);
     });
 
     it('should NOT set cursor:pointer on document element on non-IOS', () => {
@@ -536,7 +536,7 @@ describes.fakeWin(
     });
 
     it('should load correct extension version', function*() {
-      self.AMP_MODE = {
+      self.__AMP_MODE = {
         rtvVersion: 'test-version',
       };
       toggleExperiment(win, 'version-locking', true);
@@ -727,7 +727,9 @@ describes.fakeWin(
         expect(installStylesStub).to.have.not.been.called;
 
         // Register is called immediately as well.
-        expect(win.ampExtendedElements['amp-ext']).to.equal(AMP.BaseElement);
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.equal(
+          AMP.BaseElement
+        );
 
         // Service and extensions are resolved.
         yield Promise.all([
@@ -774,9 +776,11 @@ describes.fakeWin(
         );
 
         // Element resistration is not done until callback.
-        expect(win.ampExtendedElements['amp-ext']).to.be.undefined;
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.be.undefined;
         installStylesCallback();
-        expect(win.ampExtendedElements['amp-ext']).to.equal(AMP.BaseElement);
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.equal(
+          AMP.BaseElement
+        );
 
         // Service and extensions are resolved.
         yield Promise.all([
@@ -893,14 +897,16 @@ describes.fakeWin(
         // No installStyles calls and no factories.
         expect(installStylesStub).to.not.be.called;
         expect(extHolder.docFactories).to.have.length(1);
-        expect(win.ampExtendedElements['amp-ext']).to.be.undefined;
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.be.undefined;
 
         // Execute factory to install style.
         const shadowRoot = document.createDocumentFragment();
         const ampdoc = new AmpDocShadow(win, 'https://acme.org/', shadowRoot);
         extHolder.docFactories[0](ampdoc);
         expect(installStylesStub).to.not.be.called;
-        expect(win.ampExtendedElements['amp-ext']).to.equal(AMP.BaseElement);
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.equal(
+          AMP.BaseElement
+        );
 
         // Service and extensions are resolved.
         yield Promise.all([
@@ -937,7 +943,7 @@ describes.fakeWin(
         expect(ext.elements['amp-ext'].css).to.equal('a{}');
         // No installations yet, but there's a factory.
         expect(extHolder.docFactories).to.have.length(1);
-        expect(win.ampExtendedElements['amp-ext']).to.be.undefined;
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.be.undefined;
         expect(installStylesStub).to.have.not.been.called;
 
         // Execute factory to install style.
@@ -955,7 +961,9 @@ describes.fakeWin(
 
         // Run install.
         installStylesCallback();
-        expect(win.ampExtendedElements['amp-ext']).to.equal(AMP.BaseElement);
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-ext']).to.equal(
+          AMP.BaseElement
+        );
 
         // Service and extensions are resolved.
         yield Promise.all([
@@ -1002,18 +1010,17 @@ describes.realWin(
     let win;
     let extensions;
     let extensionsMock;
-    let ampdocServiceMock;
+    let ampdocService;
 
     beforeEach(() => {
       win = env.win;
       extensions = env.extensions;
       extensionsMock = sandbox.mock(extensions);
-      ampdocServiceMock = sandbox.mock(env.ampdocService);
+      ampdocService = env.ampdocService;
     });
 
     afterEach(() => {
       extensionsMock.verify();
-      ampdocServiceMock.verify();
     });
 
     describe('attachShadowDoc', () => {
@@ -1030,22 +1037,20 @@ describes.realWin(
         hostElement = win.document.createElement('div');
         importDoc = win.document.implementation.createHTMLDocument('');
         importDoc.body.appendChild(win.document.createElement('child'));
-        const shadowRoot = createShadowRoot(hostElement);
-        ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
+        createShadowRoot(hostElement);
+        ampdoc = null;
 
-        ampdocServiceMock
-          .expects('installShadowDoc')
-          .withExactArgs(
-            docUrl,
-            sinon.match(arg => arg == getShadowRoot(hostElement))
-          )
-          .returns(ampdoc)
-          .atLeast(0);
-        ampdocServiceMock
-          .expects('getAmpDoc')
-          .withExactArgs(sinon.match(arg => arg == getShadowRoot(hostElement)))
-          .returns(ampdoc)
-          .atLeast(0);
+        sandbox
+          .stub(ampdocService, 'installShadowDoc')
+          .callsFake((url, shadowRoot, options) => {
+            expect(url).to.equal(docUrl);
+            expect(shadowRoot).to.equal(getShadowRoot(hostElement));
+            return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
+          });
+        sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
+          expect(node).to.equal(getShadowRoot(hostElement));
+          return ampdoc;
+        });
       });
 
       it('should install services and styles', () => {
@@ -1061,10 +1066,10 @@ describes.realWin(
         expect(shadowRoot.querySelector('style[amp-runtime]')).to.exist;
 
         // Doc services have been installed.
-        expect(ampdoc.services.action).to.exist;
-        expect(ampdoc.services.action.obj).to.exist;
-        expect(ampdoc.services.viewer).to.exist;
-        expect(ampdoc.services.viewer.obj).to.exist;
+        expect(ampdoc.__AMP_SERVICES.action).to.exist;
+        expect(ampdoc.__AMP_SERVICES.action.obj).to.exist;
+        expect(ampdoc.__AMP_SERVICES.viewer).to.exist;
+        expect(ampdoc.__AMP_SERVICES.viewer.obj).to.exist;
 
         // Single-doc bidings have been installed.
         expect(ret.ampdoc).to.equal(ampdoc);
@@ -1099,7 +1104,7 @@ describes.realWin(
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
           'test1': '12',
         });
-
+        expect(ampdoc.getParam('test1')).to.equal('12');
         const viewer = getServiceForDoc(ampdoc, 'viewer');
         expect(viewer.getParam('test1')).to.equal('12');
       });
@@ -1394,24 +1399,20 @@ describes.realWin(
           deactivateChunking();
           setShadowDomSupportedVersionForTesting(undefined);
           hostElement = win.document.createElement('div');
-          const shadowRoot = createShadowRoot(hostElement);
-          ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
+          createShadowRoot(hostElement);
+          ampdoc = null;
 
-          ampdocServiceMock
-            .expects('installShadowDoc')
-            .withExactArgs(
-              docUrl,
-              sinon.match(arg => arg == getShadowRoot(hostElement))
-            )
-            .returns(ampdoc)
-            .atLeast(0);
-          ampdocServiceMock
-            .expects('getAmpDoc')
-            .withExactArgs(
-              sinon.match(arg => arg == getShadowRoot(hostElement))
-            )
-            .returns(ampdoc)
-            .atLeast(0);
+          sandbox
+            .stub(ampdocService, 'installShadowDoc')
+            .callsFake((url, shadowRoot, options) => {
+              expect(url).to.equal(docUrl);
+              expect(shadowRoot).to.equal(getShadowRoot(hostElement));
+              return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
+            });
+          sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
+            expect(node).to.equal(getShadowRoot(hostElement));
+            return ampdoc;
+          });
         });
 
         it('should install services and styles', () => {
@@ -1427,10 +1428,10 @@ describes.realWin(
           expect(shadowRoot.querySelector('style[amp-runtime]')).to.exist;
 
           // Doc services have been installed.
-          expect(ampdoc.services.action).to.exist;
-          expect(ampdoc.services.action.obj).to.exist;
-          expect(ampdoc.services.viewer).to.exist;
-          expect(ampdoc.services.viewer.obj).to.exist;
+          expect(ampdoc.__AMP_SERVICES.action).to.exist;
+          expect(ampdoc.__AMP_SERVICES.action.obj).to.exist;
+          expect(ampdoc.__AMP_SERVICES.viewer).to.exist;
+          expect(ampdoc.__AMP_SERVICES.viewer.obj).to.exist;
 
           // Single-doc bidings have been installed.
           expect(shadowDoc.ampdoc).to.equal(ampdoc);
@@ -1789,8 +1790,11 @@ describes.realWin(
       },
       (name, isStubbedDocumentContains) => {
         let doc1, doc2, doc3;
+        let ampdocServiceMock;
 
         beforeEach(() => {
+          ampdocServiceMock = sandbox.mock(env.ampdocService);
+
           if (isStubbedDocumentContains) {
             // Some browsers implement document.contains wrong, and it returns
             // `false` even when this is incorrect. Repeat these tests with the
@@ -1803,6 +1807,10 @@ describes.realWin(
           doc3 = attach('https://example.org/doc3');
         });
 
+        afterEach(() => {
+          ampdocServiceMock.verify();
+        });
+
         function attach(docUrl) {
           const hostElement = win.document.createElement('div');
           win.document.body.appendChild(hostElement);
@@ -1812,7 +1820,7 @@ describes.realWin(
 
           ampdocServiceMock
             .expects('installShadowDoc')
-            .withExactArgs(
+            .withArgs(
               docUrl,
               sinon.match(arg => arg == getShadowRoot(hostElement))
             )

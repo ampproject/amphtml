@@ -83,7 +83,7 @@ export function allocateVariant(ampdoc, experimentName, config) {
   const viewer = Services.viewerForDoc(ampdoc);
   const override = viewer.getParam(ATTR_PREFIX + experimentName);
   if (override && hasOwn(config['variants'], override)) {
-    return Promise.resolve(/** @type {?string} */ (override));
+    return Promise.resolve(override);
   }
 
   const sticky = config['sticky'] !== false;

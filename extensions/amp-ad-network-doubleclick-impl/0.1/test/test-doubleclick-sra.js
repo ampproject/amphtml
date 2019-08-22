@@ -71,7 +71,7 @@ describes.realWin('Doubleclick SRA', config, env => {
     doc = env.win.document;
     sandbox = env.sandbox;
     // ensures window location == AMP cache passes
-    env.win.AMP_MODE.test = true;
+    env.win.__AMP_MODE.test = true;
   });
 
   function createAndAppendAdElement(opt_attributes, opt_type, opt_domElement) {

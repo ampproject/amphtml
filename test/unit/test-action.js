@@ -40,7 +40,7 @@ import {whenCalled} from '../../testing/test-helper.js';
 function actionService() {
   const win = {
     document: {body: {}},
-    services: {
+    __AMP_SERVICES: {
       vsync: {obj: {}},
     },
   };
@@ -528,24 +528,18 @@ describes.sandboxed('Action adoptEmbedWindow', {}, () => {
   it('should create embedded action service', () => {
     ActionService.installInEmbedWindow(embedWin, action.ampdoc);
     const embedService =
-      embedWin.services.action && embedWin.services.action.obj;
+      embedWin.__AMP_SERVICES.action && embedWin.__AMP_SERVICES.action.obj;
     expect(embedService).to.exist;
     expect(embedService.ampdoc).to.equal(action.ampdoc);
     expect(embedService.root_).to.equal(embedWin.document);
   });
 });
 
-describe('Action findAction', () => {
-  let sandbox;
+describes.sandboxed('Action findAction', {}, () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     action = actionService();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should create action map in getActionMap_', () => {
@@ -626,17 +620,11 @@ describe('Action findAction', () => {
   });
 });
 
-describe('Action hasAction', () => {
-  let sandbox;
+describes.sandboxed('Action hasAction', {}, () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     action = actionService();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('returns true if the target element has the target action', () => {
@@ -727,8 +715,7 @@ describes.fakeWin('Action hasResolvableAction', {amp: true}, env => {
   });
 });
 
-describe('Action method', () => {
-  let sandbox;
+describes.sandboxed('Action method', {}, () => {
   let action;
   let getDefaultActionAlias;
   let id;
@@ -736,7 +723,6 @@ describe('Action method', () => {
   let targetElement, parent, child, execElement;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue = sandbox.spy();
     getDefaultActionAlias = sandbox.spy();
@@ -755,7 +741,6 @@ describe('Action method', () => {
 
   afterEach(() => {
     document.body.removeChild(parent);
-    sandbox.restore();
   });
 
   it('should invoke on the AMP element', () => {
@@ -914,17 +899,11 @@ describe('Action method', () => {
   });
 });
 
-describe('installActionHandler', () => {
-  let sandbox;
+describes.sandboxed('installActionHandler', {}, () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     action = actionService();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should invoke on non-AMP but whitelisted element', () => {
@@ -976,15 +955,13 @@ describe('installActionHandler', () => {
   });
 });
 
-describe('Multiple handlers action method', () => {
-  let sandbox;
+describes.sandboxed('Multiple handlers action method', {}, () => {
   let action;
   let getDefaultActionAlias;
   let onEnqueue1, onEnqueue2;
   let targetElement, parent, child, execElement1, execElement2;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
@@ -1006,7 +983,6 @@ describe('Multiple handlers action method', () => {
 
   afterEach(() => {
     document.body.removeChild(parent);
-    sandbox.restore();
   });
 
   it('should trigger event', () => {
@@ -1081,22 +1057,16 @@ describe('Multiple handlers action method', () => {
   });
 });
 
-describe('Action interceptor', () => {
-  let sandbox;
+describes.sandboxed('Action interceptor', {}, () => {
   let clock;
   let action;
   let target;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     action = actionService();
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   function getQueue() {
@@ -1223,22 +1193,16 @@ describe('Action interceptor', () => {
   });
 });
 
-describe('Action common handler', () => {
-  let sandbox;
+describes.sandboxed('Action common handler', {}, () => {
   let action;
   let target;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     action = actionService();
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
 
     action.vsync_ = {mutate: callback => callback()};
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should execute actions registered', () => {
@@ -1371,7 +1335,6 @@ describes.sandboxed('Action global target', {}, () => {
 });
 
 describes.fakeWin('Core events', {amp: true}, env => {
-  let sandbox;
   let window;
   let document;
   let action;
@@ -1380,7 +1343,6 @@ describes.fakeWin('Core events', {amp: true}, env => {
   beforeEach(() => {
     window = env.win;
     document = window.document;
-    sandbox = env.sandbox;
     sandbox.stub(window.document, 'addEventListener');
     const {ampdoc} = env;
     action = new ActionService(ampdoc, document);

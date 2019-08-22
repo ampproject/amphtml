@@ -116,6 +116,7 @@ const forbiddenTerms = {
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
       'build-system/pr-check/dist-bundle-size.js',
+      'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
       'build-system/pr-check/remote-tests.js',
@@ -270,14 +271,6 @@ const forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/inabox/inabox-services.js',
-      'src/service/core-services.js',
-      'src/service/viewer-impl.js',
-    ],
-  },
-  'setViewerVisibilityState': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/runtime.js',
       'src/service/core-services.js',
       'src/service/viewer-impl.js',
     ],
@@ -607,6 +600,14 @@ const forbiddenTerms = {
       'src/service/resources-impl.js',
     ],
   },
+  'overrideVisibilityState': {
+    message: 'overrideVisibilityState is a restricted API.',
+    whitelist: [
+      'src/runtime.js',
+      'src/service/ampdoc-impl.js',
+      'src/service/viewer-impl.js',
+    ],
+  },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use dom.openWindowDialog',
     whitelist: ['src/dom.js'],
@@ -838,6 +839,7 @@ const forbiddenTermsSrcInclusive = {
       'src/service/viewport/viewport-binding-ios-embed-wrapper.js',
       'src/service/viewport/viewport-binding-natural.js',
       'src/service/viewport/viewport-impl.js',
+      'src/service/viewport/viewport-interface.js',
     ],
   },
   'preloadExtension': {

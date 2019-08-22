@@ -26,13 +26,13 @@ import {dev} from '../src/log';
  */
 export function getAdCid(adElement) {
   const config = adConfig[adElement.element.getAttribute('type')];
-  if (!config || !config.clientIdScope) {
+  if (!config || !config['clientIdScope']) {
     return Promise.resolve();
   }
   return getOrCreateAdCid(
     adElement.getAmpDoc(),
-    config.clientIdScope,
-    config.clientIdCookieName
+    config['clientIdScope'],
+    config['clientIdCookieName']
   );
 }
 

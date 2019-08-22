@@ -144,7 +144,7 @@ export class HighlightHandler {
     this.ampdoc_ = ampdoc;
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @private {?Array<!Element>} */

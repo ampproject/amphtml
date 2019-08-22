@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const KENSHOO_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const KENSHOO_CONFIG = jsonLiteral({
   'vars': {
     'clientId': 'CLIENT_ID(ken_amp_id)',
     'channelClickId': 'QUERY_PARAM(gclid)',
@@ -56,3 +58,5 @@ export const KENSHOO_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {KENSHOO_CONFIG};

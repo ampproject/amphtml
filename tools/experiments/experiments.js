@@ -281,12 +281,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'layers',
-    name: 'Enables the new Layers position/measurement system',
-    spec: 'https://github.com/ampproject/amphtml/issues/3434',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
-  },
-  {
     id: 'blurry-placeholder',
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
@@ -343,6 +337,14 @@ const EXPERIMENTS = [
     name:
       'Experiment to prevent regression after a major CSS clean up' +
       ' for AMPHTML Ads in FIE rendering mode',
+    spec: 'https://github.com/ampproject/amphtml/issues/22418',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
+  },
+  {
+    id: 'inabox-css-cleanup',
+    name:
+      'Experiment to prevent regression after a major CSS clean up' +
+      ' for AMPHTML Ads in inabox rendering mode',
     spec: 'https://github.com/ampproject/amphtml/issues/22418',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },

@@ -128,8 +128,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
         win.customElements.define('amp-test', ElementClass);
         win.customElements.define('amp-stub', StubElementClass);
 
-        win.ampExtendedElements['amp-test'] = TestElement;
-        win.ampExtendedElements['amp-stub'] = ElementStub;
+        win.__AMP_EXTENDED_ELEMENTS['amp-test'] = TestElement;
+        win.__AMP_EXTENDED_ELEMENTS['amp-stub'] = ElementStub;
         ampdoc.declareExtension('amp-stub');
 
         testElementCreatedCallback = sandbox.spy();
@@ -1829,7 +1829,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
           TestElement
         );
         win.customElements.define('amp-test-loader', ElementClass);
-        win.ampExtendedElements['amp-test-loader'] = TestElement;
+        win.__AMP_EXTENDED_ELEMENTS['amp-test-loader'] = TestElement;
         LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
         resources = Services.resourcesForDoc(doc);
         resources.isBuildOn_ = true;

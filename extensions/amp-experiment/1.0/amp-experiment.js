@@ -72,7 +72,7 @@ export class AmpExperiment extends AMP.BaseElement {
         const override = viewer.getParam(
           ATTR_PREFIX + 'disable-all-experiments'
         );
-        if (override !== undefined) {
+        if (override != null) {
           variantsService.init(
             Promise.resolve(this.getEmptyExperimentToVariant_(config))
           );

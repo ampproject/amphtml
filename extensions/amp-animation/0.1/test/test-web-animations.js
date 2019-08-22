@@ -54,11 +54,11 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
     warnStub = sandbox.stub(user(), 'warn');
 
-    vsync = win.services.vsync.obj;
+    vsync = win.__AMP_SERVICES.vsync.obj;
     sandbox.stub(vsync, 'measurePromise').callsFake(callback => {
       return Promise.resolve(callback());
     });
-    resources = win.services.resources.obj;
+    resources = win.__AMP_SERVICES.resources.obj;
     requireLayoutSpy = sandbox.spy(resources, 'requireLayout');
 
     target1 = doc.createElement('div');
