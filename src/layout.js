@@ -155,6 +155,15 @@ export function isLayoutSizeDefined(layout) {
 }
 
 /**
+ * Whether an element with this layout has a fixed dimension.
+ * @param {!Layout} layout
+ * @return {boolean}
+ */
+export function isLayoutSizeFixed(layout) {
+  return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+}
+
+/**
  * Whether the tag is an internal (service) AMP tag.
  * @param {!Node|string} tag
  * @return {boolean}
