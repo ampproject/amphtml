@@ -35,6 +35,7 @@ function fakeTouchEvent(type) {
     changedTouches: [
       {'clientX': 20, 'clientY': 30, 'screenX': 10, 'screenY': 20},
     ],
+    cancelable: true,
     preventDefault() {},
   };
 }
@@ -138,6 +139,18 @@ describes.fakeWin('TouchHandler', {}, env => {
       expect(unlistenCount).to.equal(6);
       expect(listeners).to.have.length(9);
       expect(listeners[7].options.passive).to.be.true;
+    });
+
+    it('should only cancel touch event when cancelable', () => {
+      const fakeEvent = fakeTouchEvent('touchstart');
+      fakeEvent.cancelable = false;
+      const preventDefaultStub = sandbox.stub(fakeEvent, 'preventDefault');
+      sandbox.stub(touchHandler, 'copyTouchEvent_');
+
+      touchHandler.scrollLockHandler_('some type', /*lock*/ true, false);
+      touchHandler.forwardEvent_(fakeEvent);
+      expect(messages).to.have.length(1);
+      expect(preventDefaultStub).to.not.have.been.called;
     });
 
     it('should copy events correctly', () => {
