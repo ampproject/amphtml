@@ -4,7 +4,8 @@
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
     "inabox-css-cleanup",
-    "inabox-no-chunking"
+    "inabox-no-chunking",
+    "inabox-viewport-lite"
   ],
   "allow-url-opt-in": [
     "ios-scrollable-iframe",

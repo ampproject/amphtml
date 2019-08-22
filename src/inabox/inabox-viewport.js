@@ -19,12 +19,18 @@ import {Observable} from '../observable';
 import {Services} from '../services';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {ViewportImpl} from '../service/viewport/viewport-impl';
+import {ViewportInterface} from '../service/viewport/viewport-interface';
 import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
-import {layoutRectLtwh, moveLayoutRect} from '../layout-rect';
+import {isIframed} from '../dom';
+import {
+  layoutRectFromDomRect,
+  layoutRectLtwh,
+  moveLayoutRect,
+} from '../layout-rect';
 import {px, resetStyles, setImportantStyles} from '../style';
 import {registerServiceBuilderForDoc} from '../service';
 import {throttle} from '../utils/rate-limit';
@@ -90,6 +96,293 @@ export function resetBodyForOverlay(win, bodyElement) {
       'margin-top',
     ]);
   });
+}
+
+/**
+ * This object represents the viewport. It tracks scroll position, resize
+ * and other events and notifies interesting parties when viewport has changed
+ * and how.
+ * @implements {ViewportInterface}
+ */
+class InaboxViewportImpl {
+  /**
+   * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!ViewportBindingDef} binding
+   */
+  constructor(ampdoc, binding) {
+    const {win} = ampdoc;
+
+    /** @const {!../service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
+    /** @const {!ViewportBindingDef} */
+    this.binding_ = binding;
+
+    /**
+     * Used to cache the rect of the viewport.
+     * @private {?../layout-rect.LayoutRectDef}
+     */
+    this.rect_ = null;
+
+    /** @private @const {!Observable<!../service/viewport/viewport-interface.ViewportChangedEventDef>} */
+    this.changeObservable_ = new Observable();
+
+    /** @private @const {!Observable} */
+    this.scrollObservable_ = new Observable();
+
+    /** @private @const {!Observable<!../service/viewport/viewport-interface.ViewportResizedEventDef>} */
+    this.resizeObservable_ = new Observable();
+
+    this.binding_.connect();
+    this.binding_.onScroll(this.scroll_.bind(this));
+    this.binding_.onResize(this.resize_.bind(this));
+
+    // Top-level mode classes.
+    const docElement = win.document.documentElement;
+    docElement.classList.add('i-amphtml-singledoc');
+    docElement.classList.add('i-amphtml-standalone');
+    if (isIframed(win)) {
+      docElement.classList.add('i-amphtml-iframed');
+    }
+  }
+
+  /** @override */
+  dispose() {
+    this.binding_.disconnect();
+  }
+
+  /** @override */
+  ensureReadyForElements() {}
+
+  /** @override */
+  getPaddingTop() {
+    return 0;
+  }
+
+  /** @override */
+  getScrollTop() {
+    return this.binding_.getScrollTop();
+  }
+
+  /** @override */
+  getScrollLeft() {
+    return this.binding_.getScrollLeft();
+  }
+
+  /** @override */
+  setScrollTop(unusedScrollPos) {}
+
+  /** @override */
+  updatePaddingBottom(unusedPaddingBottom) {}
+
+  /** @override */
+  getSize() {
+    return this.binding_.getSize();
+  }
+
+  /** @override */
+  getHeight() {
+    return this.getSize().height;
+  }
+
+  /** @override */
+  getWidth() {
+    return this.getSize().width;
+  }
+
+  /** @override */
+  getScrollWidth() {
+    return this.binding_.getScrollWidth();
+  }
+
+  /** @override */
+  getScrollHeight() {
+    return this.binding_.getScrollHeight();
+  }
+
+  /** @override */
+  getContentHeight() {
+    return this.binding_.getContentHeight();
+  }
+
+  /** @override */
+  contentHeightChanged() {}
+
+  /** @override */
+  getRect() {
+    if (this.rect_ == null) {
+      const size = this.getSize();
+      this.rect_ = layoutRectLtwh(0, 0, size.width, size.height);
+    }
+    return this.rect_;
+  }
+
+  /** @override */
+  getLayoutRect(el) {
+    return this.binding_.getLayoutRect(el);
+  }
+
+  /**
+   * @override
+   * Note: This method does not taking intersection into account.
+   * TODO(@zhouyx): We may need to return info on the intersectionRect.
+   */
+  getClientRectAsync(el) {
+    const local = el./*OK*/ getBoundingClientRect();
+    return this.binding_.getRootClientRectAsync().then(root => {
+      if (!root) {
+        return layoutRectFromDomRect(local);
+      }
+      return moveLayoutRect(local, root.left, root.top);
+    });
+  }
+
+  /** @override */
+  supportsPositionFixed() {
+    return false;
+  }
+
+  /** @override */
+  isDeclaredFixed(unusedElement) {
+    return false;
+  }
+
+  /** @override */
+  scrollIntoView(unusedElement) {
+    return Promise.resolve();
+  }
+
+  /** @override */
+  animateScrollIntoView(unusedElement, unusedPos, opt_duration, opt_curve) {
+    return Promise.resolve();
+  }
+
+  /** @override */
+  animateScrollWithinParent(
+    unusedElement,
+    unusedParent,
+    unusedPos,
+    opt_duration,
+    opt_curve
+  ) {
+    return Promise.resolve();
+  }
+
+  /** @override */
+  getScrollingElement() {
+    return this.binding_.getScrollingElement();
+  }
+
+  /** @override */
+  onChanged(handler) {
+    return this.changeObservable_.add(handler);
+  }
+
+  /** @override */
+  onScroll(handler) {
+    return this.scrollObservable_.add(handler);
+  }
+
+  /** @override */
+  onResize(handler) {
+    return this.resizeObservable_.add(handler);
+  }
+
+  /** @override */
+  enterLightboxMode(opt_requestingElement, opt_onComplete) {
+    this.enterOverlayMode();
+    return this.binding_.updateLightboxMode(true);
+  }
+
+  /** @override */
+  leaveLightboxMode(opt_requestingElement) {
+    this.leaveOverlayMode();
+    return this.binding_.updateLightboxMode(false);
+  }
+
+  /** @override */
+  enterOverlayMode() {
+    this.disableTouchZoom();
+    this.disableScroll();
+  }
+
+  /** @override */
+  leaveOverlayMode() {
+    this.resetScroll();
+    this.restoreOriginalTouchZoom();
+  }
+
+  /** @override */
+  disableScroll() {}
+
+  /** @override */
+  resetScroll() {}
+
+  /** @override */
+  resetTouchZoom() {}
+
+  /** @override */
+  disableTouchZoom() {
+    return false;
+  }
+
+  /** @override */
+  restoreOriginalTouchZoom() {
+    return false;
+  }
+
+  /** @override */
+  updateFixedLayer() {}
+
+  /** @override */
+  addToFixedLayer(unusedElement, opt_forceTransfer) {
+    return Promise.resolve();
+  }
+
+  /** @override */
+  removeFromFixedLayer(unusedElement) {}
+
+  /**
+   * @private
+   */
+  changed_() {
+    const size = this.getSize();
+    const scrollTop = this.getScrollTop();
+    const scrollLeft = this.getScrollLeft();
+    this.changeObservable_.fire({
+      relayoutAll: false,
+      top: scrollTop,
+      left: scrollLeft,
+      width: size.width,
+      height: size.height,
+      velocity: 0,
+    });
+  }
+
+  /** @private */
+  scroll_() {
+    this.rect_ = null;
+    if (this.binding_.getScrollTop() < 0) {
+      // iOS and some other browsers use negative values of scrollTop for
+      // overscroll. Overscroll does not affect the viewport and thus should
+      // be ignored here.
+      return;
+    }
+    this.changed_();
+    this.scrollObservable_.fire();
+  }
+
+  /** @private */
+  resize_() {
+    this.rect_ = null;
+    const newSize = this.getSize();
+    this.changed_();
+    this.resizeObservable_.fire({
+      relayoutAll: false,
+      width: newSize.width,
+      height: newSize.height,
+    });
+  }
 }
 
 /**
@@ -507,12 +800,13 @@ export class ViewportBindingInabox {
  */
 export function installInaboxViewportService(ampdoc) {
   const binding = new ViewportBindingInabox(ampdoc.win);
-  const viewer = Services.viewerForDoc(ampdoc);
   registerServiceBuilderForDoc(
     ampdoc,
     'viewport',
     function() {
-      return new ViewportImpl(ampdoc, binding, viewer);
+      return isExperimentOn(ampdoc.win, 'inabox-viewport-lite')
+        ? new InaboxViewportImpl(ampdoc, binding)
+        : new ViewportImpl(ampdoc, binding, Services.viewerForDoc(ampdoc));
     },
     /* opt_instantiate */ true
   );
