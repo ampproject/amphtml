@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const gulp = require('gulp');
+const log = require('fancy-log');
 const {
   buildAlp,
   buildExaminer,
@@ -28,6 +28,7 @@ const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {cyan, green} = require('ansi-colors');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
@@ -35,12 +36,13 @@ const {serve} = require('./serve');
 
 /**
  * Enables watching for file changes in css, extensions.
+ * @param {boolean} defaultTask
  * @return {!Promise}
  */
-async function watch() {
+async function watch(defaultTask) {
   maybeUpdatePackages();
   createCtrlcHandler('watch');
-  return performBuild(true);
+  return performBuild(/** watch */ true, /** defaultTask */ defaultTask);
 }
 
 /**
@@ -55,15 +57,16 @@ async function build() {
 }
 
 /**
- * Performs the build steps for gulp build and gulp watch
+ * Performs the build steps for gulp, gulp build, and gulp watch
  * @param {boolean} watch
+ * @param {boolean} defaultTask
  * @return {!Promise}
  */
-async function performBuild(watch) {
+async function performBuild(watch, defaultTask) {
   process.env.NODE_ENV = 'development';
   printNobuildHelp();
-  printConfigHelp(watch ? 'gulp watch' : 'gulp build');
-  parseExtensionFlags();
+  printConfigHelp(defaultTask ? 'gulp' : watch ? 'gulp watch' : 'gulp build');
+  parseExtensionFlags(defaultTask);
   return Promise.all([compileCss(watch), compileJison()])
     .then(() => {
       return Promise.all([
@@ -71,7 +74,7 @@ async function performBuild(watch) {
         buildAlp({watch}),
         buildExaminer({watch}),
         buildWebWorker({watch}),
-        buildExtensions({watch}),
+        defaultTask ? Promise.resolve() : buildExtensions({watch}),
         compileAllUnminifiedTargets(watch),
       ]);
     })
@@ -94,7 +97,12 @@ function polyfillsForTests() {
 /**
  * The default task run when `gulp` is executed
  */
-const defaultTask = gulp.series(watch, serve);
+async function defaultTask() {
+  await watch(/** defaultTask */ true);
+  serve();
+  log(green('Started'), cyan('gulp'), green('server. Building extensions...'));
+  await buildExtensions({watch: true});
+}
 
 module.exports = {
   build,
