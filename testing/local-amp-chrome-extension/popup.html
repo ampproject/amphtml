@@ -18,7 +18,7 @@
       font-size: 12px;
     }
 
-    #copyright {
+    .notice {
       color: lightgray;
       font-size: 10px;
     }
@@ -96,7 +96,7 @@
       transform: translateX(18px);
     }
 
-    #base-url-holder, #switch-holder, #copyright, #desc {
+    #base-url-holder, #switch-holder, .notice, .desc {
       display: flex;
       flex-direction: column;
       margin-top: 24px;
@@ -124,7 +124,7 @@
   </head>
   <body>
     <img id = "logo" src="logo.svg" />
-    <p id = "desc">Switch between using a local distribution of AMP HTML or the online
+    <p class="desc">Switch between using a local distribution of AMP HTML or the online
     distribution hosted at https://cdn.ampproject.org/</p>
     <div id="switch-holder">
       <label for="switch">Local AMP Serving</label>
@@ -145,7 +145,7 @@
       <label for="base-url">Base URL</label>
       <input id="base-url" type="url">
     </div>
-    <span id="copyright">
+    <span class="notice">
       &copy; Copyright 2017 The AMP HTML Authors. All Rights Reserved.
     </span>
   </body>
