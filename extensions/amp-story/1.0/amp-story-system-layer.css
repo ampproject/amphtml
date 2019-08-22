@@ -82,8 +82,8 @@
   float: left !important;
 }
 
-ol.i-amphtml-animate-progress li {
-  transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+.i-amphtml-animate-progress li {
+  transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-progress-bar {
@@ -91,7 +91,7 @@ ol.i-amphtml-animate-progress li {
   display: flex !important;
   height: 2px !important;
   margin: 4px 0 0 !important;
-  padding: 0 !important;
+  padding: 0px 2px !important;
   position: absolute !important;
   top: 0 !important;
   visibility: visible !important;
@@ -104,11 +104,12 @@ ol.i-amphtml-animate-progress li {
 
 .i-amphtml-story-page-progress-bar {
   background: rgba(255, 255, 255, 0.4) !important;
+  border-radius: 1px !important;
   height: 100% !important;
   list-style: none !important;
-  margin: 0 2px !important;
+  margin: 0 1px !important;
   overflow: hidden !important;
-  width: 3px !important;
+  width: 2px !important;
   position: absolute !important;
   transform-origin: left !important;
 }
