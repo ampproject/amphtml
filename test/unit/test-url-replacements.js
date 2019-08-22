@@ -63,6 +63,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       link.setAttribute('href', 'https://pinterest.com:8080/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
+      iframe.win.__AMP_SERVICES.documentInfo = null;
       installDocumentInfoServiceForDoc(iframe.ampdoc);
       resetScheduledElementForTesting(iframe.win, 'amp-analytics');
       resetScheduledElementForTesting(iframe.win, 'amp-experiment');
@@ -187,7 +188,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           array[15] = 15;
         },
       },
-      services: {
+      __AMP_SERVICES: {
         'viewport': {obj: {}},
         'cid': {
           promise: Promise.resolve({
@@ -209,6 +210,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     };
     installDocService(win, /* isSingleDoc */ true);
     const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
+    win.__AMP_SERVICES.documentInfo = null;
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     installUrlReplacementsServiceForDoc(ampdoc);
@@ -921,7 +923,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 0', () => {
     const win = getFakeWindow();
-    win.services.viewer = {
+    win.__AMP_SERVICES.viewer = {
       obj: {isVisible: () => true},
     };
     return Services.urlReplacementsForDoc(win.document.documentElement)
@@ -933,7 +935,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 1', () => {
     const win = getFakeWindow();
-    win.services.viewer = {
+    win.__AMP_SERVICES.viewer = {
       obj: {isVisible: () => false},
     };
     return Services.urlReplacementsForDoc(win.document.documentElement)
@@ -1173,22 +1175,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace FRAGMENT_PARAM with 2', () => {
-    return expect(
-      expandUrlAsync(
-        '?sh=FRAGMENT_PARAM(ice_cream)&s',
-        /*opt_bindings*/ undefined,
-        {
-          withViewerIntegrationVariableService: {
-            ancestorOrigin: () => {
-              return 'http://margarine-paradise.com';
-            },
-            fragmentParam: (param, defaultValue) => {
-              return param == 'ice_cream' ? '2' : defaultValue;
-            },
-          },
-        }
-      )
-    ).to.eventually.equal('?sh=2&s');
+    const win = getFakeWindow();
+    win.location = {originalHash: '#margarine=1&ice=2&cream=3'};
+    return Services.urlReplacementsForDoc(win.document.documentElement)
+      .expandUrlAsync('?sh=FRAGMENT_PARAM(ice)&s')
+      .then(res => {
+        expect(res).to.equal('?sh=2&s');
+      });
   });
 
   it.configure()

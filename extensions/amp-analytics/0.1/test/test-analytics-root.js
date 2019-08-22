@@ -36,8 +36,8 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    resources = win.services.resources.obj;
-    viewport = win.services.viewport.obj;
+    resources = win.__AMP_SERVICES.resources.obj;
+    viewport = win.__AMP_SERVICES.viewport.obj;
     root = new AmpdocAnalyticsRoot(ampdoc);
     body = win.document.body;
 
@@ -119,7 +119,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   });
 
   it('should provide the correct rect for ini-load for inabox', () => {
-    win.AMP_MODE = {runtime: 'inabox'};
+    win.__AMP_MODE = {runtime: 'inabox'};
     sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == win.document.documentElement) {
         return {left: 10, top: 11, width: 100, height: 200};

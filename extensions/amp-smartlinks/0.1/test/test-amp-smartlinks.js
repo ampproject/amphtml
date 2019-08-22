@@ -114,9 +114,15 @@ describes.fakeWin(
         env.sandbox.spy(ampSmartlinks, 'getLinkmateOptions_');
         env.sandbox.stub(xhr, 'fetchJson');
 
-        return ampSmartlinks.buildCallback().then(() => {
-          expect(ampSmartlinks.getLinkmateOptions_.calledOnce).to.be.true;
-        });
+        return (
+          ampSmartlinks
+            .buildCallback()
+            // Skip microtask.
+            .then(() => Promise.resolve())
+            .then(() => {
+              expect(ampSmartlinks.getLinkmateOptions_.calledOnce).to.be.true;
+            })
+        );
       });
     });
 
