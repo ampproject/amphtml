@@ -43,7 +43,7 @@ const TRANSITION_EASE = 'transform 200ms ease';
 
 /**
  * Size in pixels of a segment ellipse.
- * @const {number}
+ * @type {number}
  */
 let ELLIPSE_WIDTH_PX = 2;
 

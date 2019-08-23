@@ -82,10 +82,6 @@
   float: left !important;
 }
 
-.i-amphtml-animate-progress li {
-  transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-}
-
 .i-amphtml-story-progress-bar {
   border: 0 !important;
   display: flex !important;
@@ -317,6 +313,10 @@
   align-items: center !important;
   justify-content: center !important;
   flex-direction: row-reverse !important;
+}
+
+.i-amphtml-animate-progress li {
+  transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-progress-bar-overflow.i-amphtml-story-progress-bar {
