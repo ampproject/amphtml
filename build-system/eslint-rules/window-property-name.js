@@ -85,7 +85,7 @@ module.exports = function(context) {
       }
       // Ignore test files.
       const filename = path.basename(filePath);
-      if (/^(test-(\w|-)+|(\w|-)+-testing)\.js$/.test(filename)) {
+      if (/^(test-[\w-]+|[\w-]+-testing)\.js$/.test(filename)) {
         return;
       }
       // We only care if LHS of assignment is a member expression e.g. foo.bar.
@@ -107,7 +107,8 @@ module.exports = function(context) {
       if (!prop) {
         context.report({
           node,
-          message: 'Computed property names are not allowed on window.',
+          message: 'Computed property names are not allowed on window, except '
+            + 'references to local constants.',
         });
         return;
       }
