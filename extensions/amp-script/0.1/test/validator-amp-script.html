@@ -50,6 +50,14 @@
     <canvas id="myCanvas" width="100px" height="100px"></canvas>
   </amp-script>
 
+  <!-- Valid: script tag with target of amp-script -->
+  <script id="hello-world" type="text/plain" target="amp-script">
+    const btn = document.querySelector('button');
+    btn.addEventListener('click', () => {
+      document.body.textContent += 'Hello World!';
+    });
+  </script>
+
   <!-- Invalid: <canvas> element outside of amp-script tag. -->
   <canvas id="myCanvas" width="100px" height="100px"></canvas>
 
