@@ -28,10 +28,13 @@
   <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
 </head>
 <body>
-  <!-- Valid: With 'script' attribute. -->
+  <!-- Valid: With 'script' tag and target. -->
   <amp-script layout=container script=hello></amp-script>
   <script type=text/plain target=amp-script id=hello>
-    document.body.textContent = "Hello world!";
+    const btn = document.querySelector('button');
+    btn.addEventListener('click', () => {
+      document.body.textContent += 'Hello World!';
+    });
   </script>
 
   <!-- Valid: With 'src' attribute. -->
@@ -49,14 +52,6 @@
   <amp-script layout=container src="https://example.com/foo.js">
     <canvas id="myCanvas" width="100px" height="100px"></canvas>
   </amp-script>
-
-  <!-- Valid: script tag with target of amp-script -->
-  <script id="hello-world" type="text/plain" target="amp-script">
-    const btn = document.querySelector('button');
-    btn.addEventListener('click', () => {
-      document.body.textContent += 'Hello World!';
-    });
-  </script>
 
   <!-- Invalid: <canvas> element outside of amp-script tag. -->
   <canvas id="myCanvas" width="100px" height="100px"></canvas>
