@@ -34,8 +34,9 @@ const noCachingExtensions = argv.noCachingExtensions != undefined;
 
 /**
  * Starts a simple http server at the repository root
+ * @param {boolean} lazyBuildExtensions
  */
-function serve() {
+function serve(lazyBuildExtensions) {
   createCtrlcHandler('serve');
 
   // Get the serve mode
@@ -77,6 +78,7 @@ function serve() {
       'SERVE_QUIET': quiet,
       'SERVE_CACHING_HEADERS': sendCachingHeaders,
       'SERVE_EXTENSIONS_WITHOUT_CACHING': noCachingExtensions,
+      'LAZY_BUILD_EXTENSIONS': lazyBuildExtensions,
     },
     stdout: !quiet,
   };

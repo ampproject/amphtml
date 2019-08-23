@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const {
   buildAlp,
@@ -42,7 +43,7 @@ const {serve} = require('./serve');
 async function watch(defaultTask) {
   maybeUpdatePackages();
   createCtrlcHandler('watch');
-  return performBuild(/** watch */ true, /** defaultTask */ defaultTask);
+  return performBuild(/* watch */ true, defaultTask);
 }
 
 /**
@@ -98,10 +99,20 @@ function polyfillsForTests() {
  * The default task run when `gulp` is executed
  */
 async function defaultTask() {
-  await watch(/** defaultTask */ true);
-  serve();
-  log(green('Started'), cyan('gulp'), green('server. Building extensions...'));
-  await buildExtensions({watch: true});
+  await watch(/* defaultTask */ true);
+  serve(argv.lazy_build_extensions);
+  const startedMessage = green('Started ') + cyan('gulp ') + green('server. ');
+  if (argv.lazy_build_extensions) {
+    log(
+      startedMessage +
+        green(
+          'Extensions will be lazily built when requested from the server...'
+        )
+    );
+  } else {
+    log(startedMessage + green('Building extensions...'));
+    await buildExtensions({watch: true});
+  }
 }
 
 module.exports = {
@@ -138,6 +149,8 @@ defaultTask.flags = {
   with_shadow: '  Also watch and build the amp-shadow.js binary.',
   with_video_iframe_integration:
     '  Also watch and build the video-iframe-integration.js binary.',
+  lazy_build_extensions:
+    '  Lazily builds extensions when they are requested from the server',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
