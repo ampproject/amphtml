@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* eslint-disable local/window-property-name */
 
 import {dict} from '../src/utils/object';
 import {getData, listen} from '../src/event-helper';
