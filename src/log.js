@@ -711,13 +711,13 @@ export function rethrowAsync(var_args) {
  * on Log and closure literally can't even.
  * @type {{user: ?Log, dev: ?Log, userForEmbed: ?Log}}
  */
-self.log = self.log || {
+self.__AMP_LOG = self.__AMP_LOG || {
   user: null,
   dev: null,
   userForEmbed: null,
 };
 
-const logs = self.log;
+const logs = self.__AMP_LOG;
 
 /**
  * Eventually holds a constructor for Log objects. Lazily initialized, so we

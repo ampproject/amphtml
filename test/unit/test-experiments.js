@@ -617,7 +617,7 @@ describe('experiment branch tests', () => {
         isExperimentOn(sandbox.win, 'testExperimentId'),
         'experiment is on'
       ).to.be.false;
-      expect(sandbox.win.experimentBranches).to.be.empty;
+      expect(sandbox.win.__AMP_EXPERIMENT_BRANCHES).to.be.empty;
     });
 
     it('handles experiment not diverted path', () => {

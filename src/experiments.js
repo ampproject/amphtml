@@ -305,7 +305,7 @@ function selectRandomItem(arr) {
  *
  * Check whether a given experiment is set using isExperimentOn(win,
  * experimentName) and, if it is on, look for which branch is selected in
- * win.experimentBranches[experimentName].
+ * win.__AMP_EXPERIMENT_BRANCHES[experimentName].
  *
  * @param {!Window} win Window context on which to save experiment
  *     selection state.
@@ -315,7 +315,7 @@ function selectRandomItem(arr) {
  *     branches.
  */
 export function randomlySelectUnsetExperiments(win, experiments) {
-  win.experimentBranches = win.experimentBranches || {};
+  win.__AMP_EXPERIMENT_BRANCHES = win.__AMP_EXPERIMENT_BRANCHES || {};
   const selectedExperiments = {};
   for (const experimentName in experiments) {
     // Skip experimentName if it is not a key of experiments object or if it
@@ -323,9 +323,9 @@ export function randomlySelectUnsetExperiments(win, experiments) {
     if (!hasOwn(experiments, experimentName)) {
       continue;
     }
-    if (hasOwn(win.experimentBranches, experimentName)) {
+    if (hasOwn(win.__AMP_EXPERIMENT_BRANCHES, experimentName)) {
       selectedExperiments[experimentName] =
-        win.experimentBranches[experimentName];
+        win.__AMP_EXPERIMENT_BRANCHES[experimentName];
       continue;
     }
 
@@ -333,7 +333,7 @@ export function randomlySelectUnsetExperiments(win, experiments) {
       !experiments[experimentName].isTrafficEligible ||
       !experiments[experimentName].isTrafficEligible(win)
     ) {
-      win.experimentBranches[experimentName] = null;
+      win.__AMP_EXPERIMENT_BRANCHES[experimentName] = null;
       continue;
     }
 
@@ -341,13 +341,15 @@ export function randomlySelectUnsetExperiments(win, experiments) {
     // experiment branch (e.g., via a test setup), then randomize the branch
     // choice.
     if (
-      !win.experimentBranches[experimentName] &&
+      !win.__AMP_EXPERIMENT_BRANCHES[experimentName] &&
       isExperimentOn(win, /*OK*/ experimentName)
     ) {
       const {branches} = experiments[experimentName];
-      win.experimentBranches[experimentName] = selectRandomItem(branches);
+      win.__AMP_EXPERIMENT_BRANCHES[experimentName] = selectRandomItem(
+        branches
+      );
       selectedExperiments[experimentName] =
-        win.experimentBranches[experimentName];
+        win.__AMP_EXPERIMENT_BRANCHES[experimentName];
     }
   }
   return selectedExperiments;
@@ -363,7 +365,9 @@ export function randomlySelectUnsetExperiments(win, experiments) {
  *     null if experimentName has been tested but no branch was enabled).
  */
 export function getExperimentBranch(win, experimentName) {
-  return win.experimentBranches ? win.experimentBranches[experimentName] : null;
+  return win.__AMP_EXPERIMENT_BRANCHES
+    ? win.__AMP_EXPERIMENT_BRANCHES[experimentName]
+    : null;
 }
 
 /**
@@ -377,7 +381,7 @@ export function getExperimentBranch(win, experimentName) {
  * @visibleForTesting
  */
 export function forceExperimentBranch(win, experimentName, branchId) {
-  win.experimentBranches = win.experimentBranches || {};
+  win.__AMP_EXPERIMENT_BRANCHES = win.__AMP_EXPERIMENT_BRANCHES || {};
   toggleExperiment(win, experimentName, !!branchId, true);
-  win.experimentBranches[experimentName] = branchId;
+  win.__AMP_EXPERIMENT_BRANCHES[experimentName] = branchId;
 }
