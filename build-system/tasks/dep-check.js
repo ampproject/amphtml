@@ -27,11 +27,13 @@ const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
 const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
+const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {css} = require('./css');
 const {cyan, red, yellow} = require('ansi-colors');
 const {isTravisBuild} = require('../travis');
+const {maybeUpdatePackages} = require('./update-packages');
+const {printNobuildHelp} = require('./helpers');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
@@ -299,7 +301,9 @@ function runRules(modules) {
 
 async function depCheck() {
   const handlerProcess = createCtrlcHandler('dep-check');
-  await css();
+  maybeUpdatePackages();
+  printNobuildHelp();
+  await compileCss(false /* watch */, true /* opt_compileAll */);
   await compileJison();
   if (!isTravisBuild()) {
     log('Checking dependencies...');

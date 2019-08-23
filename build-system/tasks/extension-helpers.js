@@ -349,30 +349,23 @@ function buildExtensions(options) {
     return Promise.resolve();
   }
 
-  const extensionsToBuild = options.compileAll ? [] : getExtensionsToBuild();
+  const requestedExtensions = getExtensionsToBuild();
+  const results = Object.values(extensions)
+    .filter(extension => {
+      return options.compileAll || requestedExtensions.includes(extension.name);
+    })
+    .map(extension => {
+      const buildOptions = Object.assign({}, options, extension);
+      return buildExtension(
+        extension.name,
+        extension.version,
+        extension.latestVersion,
+        extension.hasCss,
+        buildOptions,
+        extension.extraGlobs
+      );
+    });
 
-  const results = [];
-  for (const key in extensions) {
-    if (
-      extensionsToBuild.length > 0 &&
-      extensionsToBuild.indexOf(extensions[key].name) == -1
-    ) {
-      continue;
-    }
-    const e = extensions[key];
-    let o = Object.assign({}, options);
-    o = Object.assign(o, e);
-    results.push(
-      buildExtension(
-        e.name,
-        e.version,
-        e.latestVersion,
-        e.hasCss,
-        o,
-        e.extraGlobs
-      )
-    );
-  }
   return Promise.all(results);
 }
 
