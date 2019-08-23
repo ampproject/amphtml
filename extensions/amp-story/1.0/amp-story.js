@@ -87,6 +87,7 @@ import {
   childElements,
   childNodes,
   closest,
+  closestAncestorElementBySelector,
   createElementWithAttributes,
   isRTL,
   scopedQuerySelectorAll,
@@ -112,6 +113,7 @@ import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
+import {startsWith} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
@@ -439,13 +441,35 @@ export class AmpStory extends AMP.BaseElement {
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', invocation => {
-        const {args} = invocation;
+        const {args, caller} = invocation;
+
         if (args) {
           this.storeService_.dispatch(
             Action.SET_ADVANCEMENT_MODE,
             AdvancementMode.GO_TO_PAGE
           );
-          this.switchTo_(args['id'], NavigationDirection.NEXT);
+
+          if (
+            closestAncestorElementBySelector(
+              dev().assertElement(caller),
+              'AMP-SIDEBAR'
+            )
+          ) {
+            const pageId = args['id'];
+            Services.historyForDoc(this.getAmpDoc())
+              .goBack()
+              .then(() => {
+                this.win.requestAnimationFrame(() => {
+                  if (this.isActualPage_(pageId)) {
+                    this.switchTo_(pageId, NavigationDirection.NEXT).then(() =>
+                      this.closeOpacityMask_()
+                    );
+                  }
+                });
+              });
+          } else {
+            this.switchTo_(args['id'], NavigationDirection.NEXT);
+          }
         }
       });
     }
@@ -789,6 +813,24 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
+
+    if (isExperimentOn(this.win, 'amp-story-branching')) {
+      this.win.addEventListener('hashchange', () => {
+        const maybePageId = parseQueryString(this.win.location.hash)['page'];
+        if (this.isActualPage_(maybePageId)) {
+          this.switchTo_(maybePageId, NavigationDirection.NEXT).then(() => {
+            this.closeOpacityMask_();
+          });
+          // Remove the fragment parameter from the URL
+          const {history} = this.win;
+          history.pushState(
+            /* data */ '',
+            /* title */ this.win.document.title,
+            /* URL */ this.win.location.pathname
+          );
+        }
+      });
+    }
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
@@ -2525,6 +2567,29 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+    if (isExperimentOn(this.win, 'amp-story-branching')) {
+      const linkEls = Array.prototype.slice.call(
+        this.sidebar_.querySelectorAll('a')
+      );
+
+      linkEls.forEach(linkEl => {
+        const url = linkEl.getAttribute('href');
+        // Handles both anchor links (#page=someId) and absolute links; click
+        // handler should not be added to absolute links from same domain but
+        // different story.
+        if (
+          url.indexOf('#page=') >= 0 &&
+          (startsWith(url, '#') || url.indexOf(this.win.location.pathname) >= 0)
+        ) {
+          linkEl.addEventListener('click', () => {
+            // Do not prevent default; in safari, preventing default and
+            // appending a hash to a URL without a preceding slash fails.
+            this.win.location.hash = url.slice(url.search('#(.*)'));
+          });
+        }
+      });
+    }
+
     this.mutateElement(() => {
       this.sidebar_.classList.add(SIDEBAR_CLASS_NAME);
     });
@@ -2532,12 +2597,15 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeOpacityMask_();
     this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR, !!this.sidebar_);
 
-    const actions = [
+    const sidebarActions = [
       {tagOrTarget: 'AMP-SIDEBAR', method: 'open'},
       {tagOrTarget: 'AMP-SIDEBAR', method: 'close'},
       {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
     ];
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
+    this.storeService_.dispatch(
+      Action.ADD_TO_ACTIONS_WHITELIST,
+      sidebarActions
+    );
   }
 
   /**
