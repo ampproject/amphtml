@@ -32,35 +32,44 @@ const PATHS_TO_IGNORE = ['src/polyfills', 'test/'];
 const WINDOW_PROPERTY = ['win', 'window', 'global', 'self'];
 
 module.exports = function(context) {
-  function getProperty(node) {
-    const property = node.property.name;
-    if (node.computed) {
-      // Look up computed properties with const variables literals.
-      // E.g. window[FOO] where FOO = 'abc'.
-      if (node.property.type === 'Identifier') {
-        const sourceCode = context.getSourceCode();
-        const {text} = sourceCode;
+  /**
+   * Looks up value of an identifier property.
+   * E.g. given `window[FOO]`, finds `FOO = 'abc'` in code and returns `'abc'`.
+   * @param {!Node} property
+   * @return {string}
+   */
+  function findPropertyValue(property) {
+    const {name, type} = property;
+    if (type === 'Identifier') {
+      const sourceCode = context.getSourceCode();
+      const {text} = sourceCode;
 
-        let index = -1;
-        while (true) {
-          index = text.indexOf(property, index + 1);
-          if (index < 0) {
-            break;
-          }
-          const n = sourceCode.getNodeByRangeIndex(index);
-          const p = n.parent;
-          if (p.type === 'VariableDeclarator' && p.init.type === 'Literal') {
-            return p.init.value;
-          }
+      // Look through source code to find where the variable is assigned to a
+      // literal value (if any), and then return that value.
+      let index = -1;
+      while (true) {
+        index = text.indexOf(name, index + 1);
+        if (index < 0) {
+          break;
+        }
+        const n = sourceCode.getNodeByRangeIndex(index);
+        const p = n.parent;
+        if (p.type === 'VariableDeclarator' && p.init.type === 'Literal') {
+          return p.init.value;
         }
       }
-      return null;
     }
-    return property;
+    return null;
   }
 
-  function isAllowedWindowProp(prop) {
-    return prop === 'AMP' || prop.startsWith('on');
+  /**
+   * @param {string} prop
+   * @return {boolean}
+   */
+  function isWindowPropertyClobberProof(prop) {
+    // The AMP Validator forbids "__AMP_*" and "AMP" in `id` attribute values,
+    // which prevents them from being clobbered.
+    return prop.startsWith('__AMP_') || prop === 'AMP' || prop.startsWith('on');
   }
 
   return {
@@ -89,8 +98,12 @@ module.exports = function(context) {
       if (!object || !WINDOW_PROPERTY.includes(object.toLowerCase())) {
         return;
       }
-      // Disallow computed property names on window so we can enforce naming.
-      const prop = getProperty(left);
+      // Attempt to look up computed property value so we can enforce naming
+      // convention on window properties. E.g. "foo" in window.foo is easy,
+      // but window[foo] requires finding the value of `foo`.
+      const prop = left.computed
+        ? findPropertyValue(left.property)
+        : left.property.name;
       if (!prop) {
         context.report({
           node,
@@ -98,8 +111,8 @@ module.exports = function(context) {
         });
         return;
       }
-      // In general, window property names must be prefixed with "__AMP_".
-      if (prop.startsWith('__AMP_') || isAllowedWindowProp(prop)) {
+      // Disallow properties on window that are subject to DOM clobbering.
+      if (isWindowPropertyClobberProof(prop)) {
         return;
       }
       context.report({
