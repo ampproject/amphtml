@@ -19,9 +19,7 @@ FAIL
 |    Tests amp-script as part of Transformed AMP.
 |  -->
 |  <!doctype html>
-|  <html ⚡ transformed=self>
->> ^~~~~~~~~
-transformed_feature_tests/amp_script.html:21:0 The attribute 'transformed' in tag 'html' is set to the invalid value 'self'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
+|  <html ⚡ transformed="google;v=1">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
