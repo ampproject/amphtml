@@ -45,6 +45,7 @@
   height: calc(100% - 40px) !important;
   background: rgba(255, 255, 255, 1) !important;
   overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
   transition: background 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
