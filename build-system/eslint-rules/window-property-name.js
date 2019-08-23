@@ -25,7 +25,7 @@
 const path = require('path');
 
 // TODO(choumx): Fix extensions code and add 'extensions/' here.
-const PATHS_TO_INCLUDE = ['src/'];
+const PATHS_TO_INCLUDE = ['src/', 'builtins/'];
 
 const PATHS_TO_IGNORE = ['src/polyfills', 'test/'];
 

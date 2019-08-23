@@ -67,9 +67,9 @@ const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
  * Collects error messages, so they can be included in subsequent reports.
  * That allows identifying errors that might be caused by previous errors.
  */
-let accumulatedErrorMessages = self.__AMP_Errors || [];
+let accumulatedErrorMessages = self.__AMP_ERRORS || [];
 // Use a true global, to avoid multi-module inclusion issues.
-self.__AMP_Errors = accumulatedErrorMessages; // eslint-disable-line google-camelcase/google-camelcase
+self.__AMP_ERRORS = accumulatedErrorMessages;
 
 /**
  * Pushes element into array, keeping at most the most recent limit elements

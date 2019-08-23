@@ -182,10 +182,6 @@ window.context.sourceUrl;
 window.context.startTime;
 window.context.tagName;
 
-
-// Service Holder
-window.__AMP_SERVICES;
-
 // Safeframe
 // TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
 /* @type {?Object} */
@@ -198,6 +194,7 @@ window.sf_.cfg;
 window.draw3p;
 
 // AMP's globals
+window.__AMP_SERVICES;
 window.__AMP_TEST;
 window.__AMP_TEST_IFRAME;
 window.__AMP_TAG;
