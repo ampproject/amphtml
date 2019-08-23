@@ -27,6 +27,7 @@ import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 const TAG = 'amp-audio';
 
@@ -109,6 +110,13 @@ export class AmpAudio extends AMP.BaseElement {
     this.audio_ = audio;
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
+
+    listen(this.audio_, 'play', () =>
+      triggerAnalyticsEvent(this.element, 'audio-play')
+    );
+    listen(this.audio_, 'pause', () =>
+      triggerAnalyticsEvent(this.element, 'audio-pause')
+    );
   }
 
   /** @override */
