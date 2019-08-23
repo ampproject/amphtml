@@ -15,7 +15,6 @@
  */
 
 import {ViewerInterface} from '../service/viewer-interface';
-import {VisibilityState} from '../visibility-state';
 import {registerServiceBuilderForDoc} from '../service';
 
 /**
