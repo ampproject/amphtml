@@ -293,22 +293,18 @@ function copyAliasExtensions() {
     return Promise.resolve();
   }
 
-  const extensionsToBuild = getExtensionsToBuild();
+  const {extensionsToBuild, explicitExtensions} = getExtensionsToBuild();
+  const promises = Object.entries(extensionAliasFilePath)
+    .filter(entry => {
+      return (
+        !explicitExtensions || extensionsToBuild.indexOf(entry[1]['name']) >= 0
+      );
+    })
+    .map(entry => {
+      return fs.copy(`dist/v0/${entry[1]['file']}`, `dist/v0/${entry[0]}`);
+    });
 
-  for (const key in extensionAliasFilePath) {
-    if (
-      extensionsToBuild.length > 0 &&
-      extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1
-    ) {
-      continue;
-    }
-    fs.copySync(
-      'dist/v0/' + extensionAliasFilePath[key]['file'],
-      'dist/v0/' + key
-    );
-  }
-
-  return Promise.resolve();
+  return Promise.all(promises);
 }
 
 /**

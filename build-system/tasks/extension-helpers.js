@@ -99,8 +99,14 @@ const ExtensionOption = {}; // eslint-disable-line no-unused-vars
 const extensions = {};
 const extensionAliasFilePath = {};
 
-// All extensions to build
-let extensionsToBuild = null;
+/**
+ * Information about the extensions that were requested to be built.
+ * @return {{
+ *  extensions: !Array<string>,
+ *  explicitExtensions: boolean,
+ * }}
+ */
+let extensionsToBuildInfo = null;
 
 // All a4a extensions.
 const adVendors = [];
@@ -190,15 +196,19 @@ function declareExtensionVersionAlias(name, version, latestVersion, options) {
 
 /**
  * Process the command line arguments --extensions and --extensions_from
- * and return a list of the referenced extensions.
- * @return {!Array<string>}
+ * and return information about the extensions to build and if any extensions
+ * were explicitly requested.
+ * @return {{
+ *  extensionsToBuild: !Array<string>,
+ *  explicitExtensions: boolean,
+ * }}
  */
 function getExtensionsToBuild() {
-  if (extensionsToBuild) {
-    return extensionsToBuild;
+  if (extensionsToBuildInfo) {
+    return extensionsToBuildInfo;
   }
 
-  extensionsToBuild = DEFAULT_EXTENSION_SET;
+  let extensionsToBuild = DEFAULT_EXTENSION_SET;
 
   if (!!argv.extensions) {
     if (argv.extensions === 'minimal_set') {
@@ -206,8 +216,8 @@ function getExtensionsToBuild() {
     } else if (argv.extensions === 'inabox') {
       argv.extensions = INABOX_EXTENSION_SET.join(',');
     }
-    const explicitExtensions = argv.extensions.split(',');
-    extensionsToBuild = dedupe(extensionsToBuild.concat(explicitExtensions));
+    const extensionsSpecified = argv.extensions.split(',');
+    extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsSpecified));
   }
 
   if (!!argv.extensions_from) {
@@ -215,7 +225,12 @@ function getExtensionsToBuild() {
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
 
-  return extensionsToBuild;
+  extensionsToBuildInfo = {
+    extensionsToBuild,
+    explicitExtensions: argv.extensions || argv.extensions_from,
+  };
+
+  return extensionsToBuildInfo;
 }
 
 /**
@@ -271,10 +286,8 @@ function parseExtensionFlags(defaultTask) {
     }
 
     if (argv.extensions || argv.extensions_from) {
-      log(
-        green('Building extension(s):'),
-        cyan(getExtensionsToBuild().join(', '))
-      );
+      const {extensionsToBuild} = getExtensionsToBuild();
+      log(green('Building extension(s):'), cyan(extensionsToBuild.join(', ')));
     } else if (argv.noextensions) {
       log(green('Not building any AMP extensions.'));
     } else {
@@ -349,10 +362,14 @@ function buildExtensions(options) {
     return Promise.resolve();
   }
 
-  const requestedExtensions = getExtensionsToBuild();
+  const {extensionsToBuild, explicitExtensions} = getExtensionsToBuild();
   const results = Object.values(extensions)
     .filter(extension => {
-      return options.compileAll || requestedExtensions.includes(extension.name);
+      return (
+        options.compileAll ||
+        !explicitExtensions ||
+        extensionsToBuild.indexOf(extension.name) >= 0
+      );
     })
     .map(extension => {
       const buildOptions = Object.assign({}, options, extension);
