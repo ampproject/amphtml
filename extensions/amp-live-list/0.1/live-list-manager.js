@@ -53,7 +53,7 @@ export class LiveListManager {
     /** @private @const {!Object<string, !./amp-live-list.AmpLiveList>} */
     this.liveLists_ = Object.create(null);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     /** @private @const {!../../../src/service/extensions-impl.Extensions} */

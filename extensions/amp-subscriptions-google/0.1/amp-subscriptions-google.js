@@ -414,7 +414,7 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
    * @private
    */
   resolveGoogleViewer_(viewer) {

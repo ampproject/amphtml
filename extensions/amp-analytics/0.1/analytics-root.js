@@ -130,7 +130,7 @@ export class AnalyticsRoot {
 
   /**
    * The viewer of analytics root
-   * @return {!../../../src/service/viewer-impl.Viewer}
+   * @return {!../../../src/service/viewer-interface.ViewerInterface}
    */
   getViewer() {
     return Services.viewerForDoc(this.ampdoc);

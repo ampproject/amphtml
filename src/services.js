@@ -793,10 +793,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/viewer-impl.Viewer}
+   * @return {!./service/viewer-interface.ViewerInterface}
    */
   static viewerForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/viewer-impl.Viewer} */ (getServiceForDoc(
+    return /** @type {!./service/viewer-interface.ViewerInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
       'viewer'
     ));
@@ -807,10 +807,10 @@ export class Services {
    * for services that need reference to the viewer before it has been
    * initialized. Most of the code, however, just should use `viewerForDoc`.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/viewer-impl.Viewer>}
+   * @return {!Promise<!./service/viewer-interface.ViewerInterface>}
    */
   static viewerPromiseForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/viewer-impl.Viewer>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/viewer-interface.ViewerInterface>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'viewer'
     ));

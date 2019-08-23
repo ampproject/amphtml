@@ -189,7 +189,7 @@ export class Activity {
     /** @private @const {!ActivityHistory} */
     this.activityHistory_ = new ActivityHistory();
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */

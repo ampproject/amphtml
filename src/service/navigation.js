@@ -107,7 +107,7 @@ export class Navigation {
     /** @private @const {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
-    /** @private @const {!./viewer-impl.Viewer} */
+    /** @private @const {!./viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     /** @private @const {!./history-impl.History} */

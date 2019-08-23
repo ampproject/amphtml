@@ -40,14 +40,14 @@ const MAX_VALUES_PER_ORIGIN = 8;
 export class Storage {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../service/viewer-impl.Viewer} viewer
+   * @param {!../service/viewer-interface.ViewerInterface} viewer
    * @param {!StorageBindingDef} binding
    */
   constructor(ampdoc, viewer, binding) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @private @const {!../service/viewer-impl.Viewer} */
+    /** @private @const {!../service/viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
 
     /** @private @const {!StorageBindingDef} */
@@ -384,10 +384,10 @@ export class LocalStorageBinding {
  */
 export class ViewerStorageBinding {
   /**
-   * @param {!../service/viewer-impl.Viewer} viewer
+   * @param {!../service/viewer-interface.ViewerInterface} viewer
    */
   constructor(viewer) {
-    /** @private @const {!../service/viewer-impl.Viewer} */
+    /** @private @const {!../service/viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
   }
 
