@@ -286,6 +286,20 @@ function createElementRules_() {
         'alternativeName': 'src',
       },
     },
+    'AMP-REACT-IMG': {
+      'alt': null,
+      'attribution': null,
+      'src': {
+        'allowedProtocols': {
+          'data': true,
+          'http': true,
+          'https': true,
+        },
+      },
+      'srcset': {
+        'alternativeName': 'src',
+      },
+    },
     'AMP-LIGHTBOX': {
       'open': null,
     },

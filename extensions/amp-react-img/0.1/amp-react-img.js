@@ -139,12 +139,39 @@ AMP.extension('amp-react-img', '0.1', AMP => {
       layoutCallback() {
         const el = devAssert(this.el_);
         el.setState({prerender: false});
+        this.rerender_();
+      }
 
-        const rerender = react.createElement(Component, this.attributes_());
-        render(rerender, this.element);
+      /** @override */
+      mutatedAttributesCallback(mutations) {
+        if (!this.el_) {
+          return;
+        }
+
+        // Mutating src should override existing srcset, so remove the latter.
+        if (
+          mutations['src'] &&
+          !mutations['srcset'] &&
+          this.element.hasAttribute('srcset')
+        ) {
+          this.element.removeAttribute('srcset');
+        }
+        this.rerender_();
       }
 
       /**
+       * @private
+       */
+      rerender_() {
+        // While this "creates" a new element, React's diffing will not create
+        // a second instance of Component. Instead, the existing one already
+        // rendered into this element will be reusued.
+        const el = react.createElement(Component, this.attributes_());
+        render(el, this.element);
+      }
+
+      /**
+       * @private
        * @return {!Object<string, string>}
        */
       attributes_() {
