@@ -108,16 +108,28 @@ const adVendors = [];
  * @param {string|!Array<string>} version E.g. 0.1 or [0.1, 0.2]
  * @param {string} latestVersion E.g. 0.1
  * @param {!ExtensionOption} options extension options object.
+ * @param {!Object} extensionsObject
+ * @param {boolean} includeLatest
  */
-function declareExtension(name, version, latestVersion, options) {
+function declareExtension(
+  name,
+  version,
+  latestVersion,
+  options,
+  extensionsObject,
+  includeLatest
+) {
   const defaultOptions = {hasCss: false};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach(v => {
-    extensions[`${name}-${v}`] = Object.assign(
+    extensionsObject[`${name}-${v}`] = Object.assign(
       {name, version: v, latestVersion},
       defaultOptions,
       options
     );
+    if (includeLatest && v == latestVersion) {
+      extensionsObject[`${name}-latest`] = extensionsObject[`${name}-${v}`];
+    }
   });
   if (name.startsWith('amp-ad-network-')) {
     // Get the ad network name. All ad network extensions are named
@@ -128,13 +140,26 @@ function declareExtension(name, version, latestVersion, options) {
 }
 
 /**
- * Initializes all extensions from bundles.config.js if not already done.
+ * Initializes all extensions from bundles.config.js if not already done and
+ * populates the given extensions object.
+ * @param {?Object} extensionsObject
+ * @param {?boolean} includeLatest
  */
-function maybeInitializeExtensions() {
-  if (Object.keys(extensions).length === 0) {
+function maybeInitializeExtensions(
+  extensionsObject = extensions,
+  includeLatest = false
+) {
+  if (Object.keys(extensionsObject).length === 0) {
     verifyExtensionBundles();
     extensionBundles.forEach(c => {
-      declareExtension(c.name, c.version, c.latestVersion, c.options);
+      declareExtension(
+        c.name,
+        c.version,
+        c.latestVersion,
+        c.options,
+        extensionsObject,
+        includeLatest
+      );
     });
   }
 
@@ -247,12 +272,22 @@ function parseExtensionFlags(defaultTask) {
       green('⤷ Use ') +
       cyan('--extensions_from=examples/foo.amp.html ') +
       green('to build extensions from example docs.');
+    const defaultTaskMessage =
+      green('Running the default ') +
+      cyan('gulp ') +
+      green('task. (Extensions will be ') +
+      green(
+        argv.lazy_build_extensions
+          ? 'lazily built when requested from the server.)'
+          : 'built after server startup.)'
+      );
+    const lazyBuildExtensionsMessage =
+      green('⤷ Use ') +
+      cyan('--lazy_build_extensions ') +
+      green('to lazily build extensions when requested from the server.');
     if (defaultTask) {
-      const defaultTaskMessage =
-        green('Running the default ') +
-        cyan('gulp ') +
-        green('task. (Extensions will be built after server startup.)');
       log(defaultTaskMessage);
+      log(lazyBuildExtensionsMessage);
     }
     if (argv.extensions) {
       if (typeof argv.extensions !== 'string') {
@@ -341,7 +376,7 @@ function dedupe(arr) {
  * @return {!Promise}
  */
 function buildExtensions(options) {
-  maybeInitializeExtensions();
+  maybeInitializeExtensions(extensions, /* includeLatest */ false);
   if (!!argv.noextensions && !options.compileAll) {
     return Promise.resolve();
   }
@@ -349,28 +384,37 @@ function buildExtensions(options) {
   const extensionsToBuild = options.compileAll ? [] : getExtensionsToBuild();
 
   const results = [];
-  for (const key in extensions) {
+  for (const extension in extensions) {
     if (
       extensionsToBuild.length > 0 &&
-      extensionsToBuild.indexOf(extensions[key].name) == -1
+      extensionsToBuild.indexOf(extensions[extension].name) == -1
     ) {
       continue;
     }
-    const e = extensions[key];
-    let o = Object.assign({}, options);
-    o = Object.assign(o, e);
-    results.push(
-      buildExtension(
-        e.name,
-        e.version,
-        e.latestVersion,
-        e.hasCss,
-        o,
-        e.extraGlobs
-      )
-    );
+    results.push(doBuildExtension(extensions, extension, options));
   }
   return Promise.all(results);
+}
+
+/**
+ * Builds a single extension after extracting its settings.
+ * @param {!Object} extensions
+ * @param {string} extension
+ * @param {!Object} options
+ * @return {!Promise}
+ */
+function doBuildExtension(extensions, extension, options) {
+  const e = extensions[extension];
+  let o = Object.assign({}, options);
+  o = Object.assign(o, e);
+  return buildExtension(
+    e.name,
+    e.version,
+    e.latestVersion,
+    e.hasCss,
+    o,
+    e.extraGlobs
+  );
 }
 
 /**
@@ -537,6 +581,7 @@ function buildExtensionJs(path, name, version, latestVersion, options) {
 
 module.exports = {
   buildExtensions,
+  doBuildExtension,
   extensions,
   extensionAliasFilePath,
   getExtensionsToBuild,
