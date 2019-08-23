@@ -297,7 +297,7 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Frame in which the creative renders (friendly if validated AMP, xdomain
      * otherwise).
-     * {?HTMLIframeElement}
+     * @type {?HTMLIFrameElement}
      */
     this.iframe = null;
 
@@ -1560,14 +1560,14 @@ export class AmpA4A extends AMP.BaseElement {
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
     mergedAttributes['allow'] = "sync-xhr 'none';";
-    this.iframe = createElementWithAttributes(
+    this.iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
       /** @type {!Document} */ (this.element.ownerDocument),
       'iframe',
       /** @type {!JsonObject} */ (Object.assign(
         mergedAttributes,
         SHARED_IFRAME_PROPERTIES
       ))
-    );
+    ));
     if (this.sandboxHTMLCreativeFrame()) {
       applySandbox(this.iframe);
     }

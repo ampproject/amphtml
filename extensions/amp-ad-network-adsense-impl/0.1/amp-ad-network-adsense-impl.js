@@ -521,7 +521,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       devAssert(this.iframe);
       Navigation.installAnchorClickInterceptor(
         this.getAmpDoc(),
-        this.iframe.contentWindow
+        devAssert(this.iframe.contentWindow)
       );
     }
     if (this.ampAnalyticsConfig_) {
