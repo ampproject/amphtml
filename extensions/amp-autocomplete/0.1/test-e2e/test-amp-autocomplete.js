@@ -15,7 +15,7 @@
  */
 
 /** Increase timeout from default of 2000ms */
-const testTimeout = 5000;
+const testTimeout = 10000;
 
 describes.endtoend(
   'amp-autocomplete',
@@ -109,7 +109,7 @@ describes.endtoend(
     });
 
     it('<amp-autocomplete> should select an item', async function() {
-      this.timeout(testTimeout * 2);
+      this.timeout(testTimeout);
       const renderedResults = await controller.findElement(
         '.i-amphtml-autocomplete-results'
       );

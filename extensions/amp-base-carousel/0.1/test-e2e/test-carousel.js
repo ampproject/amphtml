@@ -20,7 +20,7 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 /** Increase timeout for looping tests that take ~1700ms each */
-const testTimeout = 5000;
+const testTimeout = 10000;
 
 describes.endtoend(
   'AMP carousel',
