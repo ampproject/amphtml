@@ -102,6 +102,7 @@
     "local/todo-format": 0,
     "local/unused-private-field": 2,
     "local/vsync": 0,
+    "local/window-property-name": 2,
     "no-alert": 2,
     "no-cond-assign": 2,
     "no-debugger": 2,
