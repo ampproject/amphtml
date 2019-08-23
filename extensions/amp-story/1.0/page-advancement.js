@@ -602,6 +602,7 @@ class ManualAdvancement extends AdvancementConfig {
 
     if (this.isHandledByAffiliateLink_(target)) {
       event.preventDefault();
+      event.stopPropagation();
       const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
       if (clickedOnLink) {
         this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, target);

@@ -18,14 +18,16 @@
  * @fileoverview Affiliate link component that expands when clicked.
  */
 
+import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
+import {getAmpdoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
 
 /**
  * Links that are affiliate links.
  * @const {string}
  */
-export const AFFILIATE_LINK_SELECTOR = 'a[data-affiliate-link-icon]';
+export const AFFILIATE_LINK_SELECTOR = 'a[affiliate-link-icon]';
 
 /**
  * Custom property signifying a built link.
@@ -53,6 +55,12 @@ export class AmpStoryAffiliateLink {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
+
+    /** @private {string} */
+    this.text_ = this.element_.textContent;
+
+    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
+    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
   }
 
   /**
@@ -63,10 +71,15 @@ export class AmpStoryAffiliateLink {
       return;
     }
 
-    this.addPulseElement_();
-    this.addIconElement_();
-    this.addText_();
-    this.addLaunchElement_();
+    this.resources_.mutateElement(this.element_, () => {
+      this.element_.textContent = '';
+      this.element_.toggleAttribute('pristine', true);
+      this.addPulseElement_();
+      this.addIconElement_();
+      this.addText_();
+      this.addLaunchElement_();
+    });
+
     this.initializeListener_();
     this.element_[AFFILIATE_LINK_BUILT] = true;
   }
@@ -83,6 +96,9 @@ export class AmpStoryAffiliateLink {
         this.element_.toggleAttribute('expanded', expand);
         this.textEl_.toggleAttribute('hidden', !expand);
         this.launchEl_.toggleAttribute('hidden', !expand);
+        if (expand) {
+          this.element_.toggleAttribute('pristine', false);
+        }
       }
     );
   }
@@ -112,7 +128,7 @@ export class AmpStoryAffiliateLink {
       '.i-amphtml-story-affiliate-link-text'
     );
 
-    this.textEl_.textContent = this.element_.textContent;
+    this.textEl_.textContent = this.text_;
     this.textEl_.toggleAttribute('hidden', true);
   }
 
