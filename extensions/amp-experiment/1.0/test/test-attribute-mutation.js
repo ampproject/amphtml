@@ -76,7 +76,7 @@ describes.realWin(
     }
 
     function getAttributeMutationDefaultUrl(value) {
-      elements = [doc.createElement('a')];
+      elements = elements;
       const paramsObject = getAttributeMutationParamsObject('href', value);
       return new AttributeMutationDefaultUrl(
         paramsObject.mutationRecord,
@@ -230,6 +230,7 @@ describes.realWin(
 
       describe('default url', () => {
         it('should allow valid mutations', () => {
+          elements = [document.createElement('a')];
           const attributeMutation = getAttributeMutationDefaultUrl(
             'https://amp.dev/'
           );
@@ -309,6 +310,13 @@ describes.realWin(
       });
 
       it('should mutate default url mutations', () => {
+        const element1 = document.createElement('amp-img');
+        const element2 = document.createElement('a');
+        elements = [element1, element2];
+        const mutatedAttributesCallbackSpy = sandbox.spy();
+        element1.mutatedAttributesCallback = () => {
+          mutatedAttributesCallbackSpy();
+        };
         const attributeMutation = getAttributeMutationDefaultUrl(
           'https://amp.dev/'
         );
@@ -319,6 +327,7 @@ describes.realWin(
         attributeMutation.elements_.forEach(element => {
           expect(element.getAttribute(attributeName)).to.equal(value);
         });
+        expect(mutatedAttributesCallbackSpy).to.be.calledOnce;
       });
     });
   }
