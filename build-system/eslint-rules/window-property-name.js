@@ -29,7 +29,7 @@ const PATHS_TO_INCLUDE = ['src/'];
 
 const PATHS_TO_IGNORE = ['src/polyfills', 'test/'];
 
-const WINDOW_PROPERTY = ['win', 'window', 'global', 'self'];
+const WINDOW_PROPERTIES = ['win', 'window', 'global', 'self'];
 
 module.exports = function(context) {
   /**
@@ -95,7 +95,7 @@ module.exports = function(context) {
       }
       // We only care if member object looks like a window.
       const object = left.object.name;
-      if (!object || !WINDOW_PROPERTY.includes(object.toLowerCase())) {
+      if (!object || !WINDOW_PROPERTIES.includes(object.toLowerCase())) {
         return;
       }
       // Attempt to look up computed property value so we can enforce naming
