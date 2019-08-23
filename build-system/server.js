@@ -96,11 +96,11 @@ if (noCachingExtensions) {
 if (lazyBuildExtensions) {
   maybeInitializeExtensions(extensions, /* includeLatest */ true);
   middleware.push(function(req, res, next) {
-    const extensionUrlMatcher = /\/dist\/v0\/(amp-.*)\.max\.js/;
+    const extensionUrlMatcher = /\/dist\/v0\/(.*)\.max\.js/;
     const extensionMatch = req.url.match(extensionUrlMatcher);
     if (extensionMatch && extensionMatch.length == 2) {
       const extension = extensionMatch[1];
-      if (!extension.startsWith('amp-script-worker')) {
+      if (extensions[extension]) {
         return doBuildExtension(extensions, extension).then(() => {
           next();
         });
