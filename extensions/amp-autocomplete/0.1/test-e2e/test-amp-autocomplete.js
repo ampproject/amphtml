@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/** Increase timeout from default of 2000ms */
-const testTimeout = 10000;
-
 describes.endtoend(
   'amp-autocomplete',
   {
@@ -27,7 +24,6 @@ describes.endtoend(
     environments: ['single', 'viewer-demo'],
     experiments: ['amp-autocomplete'],
     initialRect: {width: 800, height: 800},
-    browsers: ['chrome', 'firefox', 'safari'],
   },
   env => {
     let controller;
@@ -36,8 +32,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('<amp-autocomplete> should render', async function() {
-      this.timeout(testTimeout);
+    it('<amp-autocomplete> should render', async () => {
       const autocomplete = await controller.findElement('#autocomplete');
       await expect(
         controller.getElementProperty(autocomplete, 'children')
@@ -63,8 +58,7 @@ describes.endtoend(
         .not.to.be.null;
     });
 
-    it('<amp-autocomplete> should display results on focus', async function() {
-      this.timeout(testTimeout);
+    it('<amp-autocomplete> should display results on focus', async () => {
       const renderedResults = await controller.findElement(
         '.i-amphtml-autocomplete-results'
       );
@@ -81,8 +75,7 @@ describes.endtoend(
         .be.null;
     });
 
-    it('<amp-autocomplete> should narrow suggestions to input', async function() {
-      this.timeout(testTimeout);
+    it('<amp-autocomplete> should narrow suggestions to input', async () => {
       const renderedResults = await controller.findElement(
         '.i-amphtml-autocomplete-results'
       );
@@ -108,8 +101,7 @@ describes.endtoend(
       ).to.have.length(2);
     });
 
-    it('<amp-autocomplete> should select an item', async function() {
-      this.timeout(testTimeout);
+    it('<amp-autocomplete> should select an item', async () => {
       const renderedResults = await controller.findElement(
         '.i-amphtml-autocomplete-results'
       );
