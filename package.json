@@ -64,7 +64,7 @@
     "commander": "3.0.0",
     "connect-header": "0.0.5",
     "cssnano": "4.1.10",
-    "del": "5.0.0",
+    "del": "5.1.0",
     "derequire": "2.0.6",
     "dev-null": "0.1.1",
     "doctrine": "3.0.0",
