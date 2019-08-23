@@ -222,7 +222,10 @@ export class AmpViewerIntegration {
 
     viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging), origin);
 
-    // TODO(#23634): Remove, explain or adjust the usage of the unload listener
+    // Unloading inside a viewer is considered an error so the viewer must be notified
+    // in order to display an error message.
+    // Note: This does not affect the BFCache since it is only installed for pages running
+    // within a viewer (which do no support B/F anyway).
     listenOnce(
       this.win,
       /*OK*/ 'unload',
