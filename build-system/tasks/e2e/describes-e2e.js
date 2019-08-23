@@ -33,7 +33,7 @@ const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
-const TEST_TIMEOUT = 20000;
+const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);

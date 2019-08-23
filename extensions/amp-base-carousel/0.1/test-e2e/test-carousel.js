@@ -19,8 +19,8 @@ import {getScrollingElement, getSlide, waitForCarouselImg} from './helpers';
 const pageWidth = 800;
 const pageHeight = 600;
 
-/** Increase timeout for looping tests that take ~1700ms each */
-const testTimeout = 10000;
+/** Increase timeout for running on Travis macOS **/
+const testTimeout = 20000;
 
 describes.endtoend(
   'AMP carousel',
