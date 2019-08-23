@@ -931,10 +931,20 @@ export class Bind {
     return new Promise(resolve => {
       const chunktion = idleDeadline => {
         let completed = false;
-        // If `requestIdleCallback` is available, scan elements until
-        // idle time runs out.
-        if (idleDeadline && !idleDeadline.didTimeout) {
-          while (idleDeadline.timeRemaining() > 1 && !completed) {
+        if (idleDeadline) {
+          // If `requestIdleCallback` is available, scan elements until idle
+          // time runs out. Or if we're already timed out (2s), then just scan
+          // the rest immediately to avoid bloating time-to-interactive.
+          let minimumTime = 1;
+          if (idleDeadline.didTimeout) {
+            minimumTime = -1;
+            user().warn(
+              TAG,
+              'requestIdleCallback timed out (2s). Forcing immediate scan of ' +
+                'remainder of page.'
+            );
+          }
+          while (!completed && idleDeadline.timeRemaining() > minimumTime) {
             completed = scanNextNode_();
           }
         } else {
