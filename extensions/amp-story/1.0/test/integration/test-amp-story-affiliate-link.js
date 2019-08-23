@@ -19,11 +19,10 @@ import {
   RequestBank,
 } from '../../../../../testing/test-helper';
 
-describe('amp-story-affiliate-link', function() {
-  describes.integration(
-    'analytics on click',
-    {
-      body: `
+describes.integration(
+  'amp-story-affiliate-link analytics on click',
+  {
+    body: `
       <amp-story standalone>
         <amp-story-page id="page-1">
           <amp-story-grid-layer template="vertical">            
@@ -50,34 +49,33 @@ describe('amp-story-affiliate-link', function() {
         }
         </script>
       </amp-analytics>`,
-      extensions: ['amp-story', 'amp-analytics'],
-    },
-    env => {
-      let browser;
+    extensions: ['amp-story', 'amp-analytics'],
+  },
+  env => {
+    let browser;
 
-      beforeEach(() => {
-        browser = new BrowserController(env.win);
-        return browser.waitForElementLayout('amp-analytics');
-      });
+    beforeEach(() => {
+      browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
 
-      it('should not send any analytics event on expand', async () => {
-        browser.click('#blink-1');
-        browser.click('h1');
-        expect(RequestBank.withdraw()).to.throw;
-      });
+    it('should not send any analytics event on expand', async () => {
+      browser.click('#blink-1');
+      browser.click('h1');
+      expect(RequestBank.withdraw()).to.throw;
+    });
 
-      it('should not send any analytics event on collapse', () => {
-        browser.click('#blink-1');
-        browser.click('h1');
-        expect(RequestBank.withdraw()).to.throw;
-      });
+    it('should not send any analytics event on collapse', () => {
+      browser.click('#blink-1');
+      browser.click('h1');
+      expect(RequestBank.withdraw()).to.throw;
+    });
 
-      it('should send analytics event on external click', async () => {
-        browser.click('#blink-1');
-        browser.click('#blink-1');
-        const req = await RequestBank.withdraw();
-        expect(req.url).to.equal('/');
-      });
-    }
-  );
-});
+    it('should send analytics event on external click', async () => {
+      browser.click('#blink-1');
+      browser.click('#blink-1');
+      const req = await RequestBank.withdraw();
+      expect(req.url).to.equal('/');
+    });
+  }
+);
