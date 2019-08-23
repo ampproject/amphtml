@@ -212,11 +212,9 @@ export class MediaPerformanceMetricsService {
       return;
     }
 
-    const rebufferRate =
-      Math.round(
-        (metrics.rebufferTime / (metrics.rebufferTime + metrics.watchTime)) *
-          1000
-      ) / 1000;
+    const rebufferRate = Math.round(
+      (metrics.rebufferTime / (metrics.rebufferTime + metrics.watchTime)) * 100
+    );
 
     this.performanceService_.tickDelta('vjl', metrics.jointLatency);
     this.performanceService_.tickDelta('vwt', metrics.watchTime);
