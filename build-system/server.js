@@ -100,10 +100,13 @@ if (lazyBuildExtensions) {
     const extensionMatch = req.url.match(extensionUrlMatcher);
     if (extensionMatch && extensionMatch.length == 2) {
       const extension = extensionMatch[1];
-      if (extensions[extension]) {
-        return doBuildExtension(extensions, extension).then(() => {
-          next();
-        });
+      if (extensions[extension] && !extensions[extension].watched) {
+        return doBuildExtension(extensions, extension, {watch: true}).then(
+          () => {
+            extensions[extension].watched = true;
+            next();
+          }
+        );
       }
     }
     next();
