@@ -932,11 +932,11 @@ export class Bind {
       const chunktion = idleDeadline => {
         let completed = false;
         if (idleDeadline) {
-          // If `requestIdleCallback` is available, scan elements until idle
-          // time runs out. Or if we're already timed out (2s), then just scan
-          // the rest immediately to avoid bloating time-to-interactive.
-          let minimumTime = 1;
+          // If rIC is available, scan elements until idle time runs out.
+          let minimumTime = 0;
           if (idleDeadline.didTimeout) {
+            // ...but if we're already timed out (2s), then just scan the rest
+            // immediately to avoid bloating time-to-interactive.
             minimumTime = -1;
             user().warn(
               TAG,
@@ -948,9 +948,10 @@ export class Bind {
             completed = scanNextNode_();
           }
         } else {
-          // If `requestIdleCallback` isn't available, scan elements in buckets.
+          // If rIC isn't available, scan elements in buckets.
           // Bucket size is a magic number that fits within a single frame.
-          const bucketSize = 250;
+          // In tests, use a bucket size of 1 to ensure that rescheduling works.
+          const bucketSize = getMode().test ? 1 : 250;
           for (let i = 0; i < bucketSize && !completed; i++) {
             completed = scanNextNode_();
           }

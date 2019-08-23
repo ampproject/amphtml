@@ -172,8 +172,8 @@ describe
         let hostWindow;
 
         beforeEach(() => {
-          // Make sure we have a chunk instance for testing.
-          chunkInstanceForTesting(env.ampdoc);
+          const chunk = chunkInstanceForTesting(env.ampdoc);
+          sandbox.stub(chunk, 'run').callsFake(f => f());
 
           fieWindow = env.embed.win;
           fieBind = new Bind(env.ampdoc, fieWindow);
@@ -264,8 +264,8 @@ describe
         let container;
 
         beforeEach(() => {
-          // Make sure we have a chunk instance for testing.
-          chunkInstanceForTesting(env.ampdoc);
+          const chunk = chunkInstanceForTesting(env.ampdoc);
+          sandbox.stub(chunk, 'run').callsFake(f => f());
 
           bind = new Bind(env.ampdoc);
           container = env.ampdoc.getBody();
@@ -308,6 +308,7 @@ describe
       },
       env => {
         let bind;
+        let chunk;
         let clock;
         let container;
         let history;
@@ -318,8 +319,8 @@ describe
           const {ampdoc, win} = env;
           sandbox = env.sandbox;
 
-          // Make sure we have a chunk instance for testing.
-          chunkInstanceForTesting(ampdoc);
+          chunk = chunkInstanceForTesting(ampdoc);
+          sandbox.stub(chunk, 'run').callsFake(f => f());
 
           viewer = Services.viewerForDoc(ampdoc);
           sandbox.stub(viewer, 'sendMessage');
@@ -368,6 +369,26 @@ describe
           expect(bind.numberOfBindings()).to.equal(0);
           return onBindReady(env, bind).then(() => {
             expect(bind.numberOfBindings()).to.equal(1);
+          });
+        });
+
+        it('should scan immediately if rIC times out', () => {
+          chunk.run.callsFake(fn =>
+            fn({
+              didTimeout: true,
+              timeRemaining: () => 0,
+            })
+          );
+
+          createElement(env, container, '[text]="1"');
+          createElement(env, container, '[text]="2"');
+          createElement(env, container, '[text]="3"');
+
+          return onBindReady(env, bind).then(() => {
+            // When timed out, a single chunk.run() call should scan all
+            // remaining elements.
+            expect(chunk.run).to.be.calledOnce;
+            expect(bind.numberOfBindings()).to.equal(3);
           });
         });
 
