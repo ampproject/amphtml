@@ -192,8 +192,6 @@ Additionally, the following query parameters can be provided:
 
 If you are working on AMP In-a-box Ads, you can use the local in-a-box envelope for testing local and production AMP documents with the local JS version.
 
-Make sure to run gulp with `--with_inabox` flag.
-
 The following forms are supported:
 
 - local document: http://localhost:8000/inabox/examples/animations.amp.html

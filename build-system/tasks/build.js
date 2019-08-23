@@ -122,8 +122,6 @@ build.flags = {
 
 watch.description = 'Watches for changes in files, re-builds when detected';
 watch.flags = {
-  with_inabox: '  Also watch and build the amp-inabox.js binary.',
-  with_shadow: '  Also watch and build the amp-shadow.js binary.',
   with_video_iframe_integration:
     '  Also watch and build the video-iframe-integration.js binary.',
   extensions: '  Watches and builds only the listed extensions.',
@@ -134,8 +132,6 @@ watch.flags = {
 
 defaultTask.description = 'Runs "watch" and then "serve"';
 defaultTask.flags = {
-  with_inabox: '  Also watch and build the amp-inabox.js binary.',
-  with_shadow: '  Also watch and build the amp-shadow.js binary.',
   with_video_iframe_integration:
     '  Also watch and build the video-iframe-integration.js binary.',
   extensions: '  Watches and builds only the listed extensions.',
