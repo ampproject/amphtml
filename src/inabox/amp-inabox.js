@@ -22,7 +22,6 @@ import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {adopt} from '../runtime';
-import {cssText as ampDocCss} from '../../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
 import {deactivateChunking, startupChunk} from '../chunk';
 import {doNotTrackImpression} from '../impression';
@@ -30,18 +29,11 @@ import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
 import {installAmpdocServicesForInabox} from './inabox-services';
-import {
-  installBuiltinElements,
-  installRuntimeServices,
-} from '../service/core-services';
+import {installBuiltinElements, installRuntimeServices,} from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installPerformanceService} from '../service/performance-impl';
-import {
-  installStylesForDoc,
-  makeBodyVisible,
-  makeBodyVisibleRecovery,
-} from '../style-installer';
+import {installStylesForDoc, makeBodyVisible, makeBodyVisibleRecovery,} from '../style-installer';
 import {internalRuntimeVersion} from '../internal-version';
 import {isExperimentOn} from '../experiments';
 import {maybeValidate} from '../validator-integration';
@@ -83,14 +75,10 @@ startupChunk(self.document, function initial() {
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
-  const fullCss =
-    (isExperimentOn(self, 'inabox-css-cleanup')
-      ? ampSharedCss
-      : ampDocCss + ampSharedCss) +
-    'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
   installStylesForDoc(
     ampdoc,
-    fullCss,
+    ampSharedCss +
+      'html.i-amphtml-inabox{width:100%!important;height:100%!important}',
     () => {
       startupChunk(self.document, function services() {
         // Core services.
