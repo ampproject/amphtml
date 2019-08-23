@@ -862,11 +862,11 @@ app.get(
           file = replaceUrls(mode, file, '', inabox);
         }
 
-        if (inabox) {
-          // TODO: remove this when inabox-viewport-friendly is fully launched.
+        const ampExperimentsOptIn = req.query['exp'];
+        if (ampExperimentsOptIn) {
           file = file.replace(
             '<head>',
-            '<head><meta name="amp-experiments-opt-in" content="inabox-viewport-friendly">'
+            `<head><meta name="amp-experiments-opt-in" content="${ampExperimentsOptIn}">`
           );
         }
 

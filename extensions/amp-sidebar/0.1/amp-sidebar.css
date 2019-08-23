@@ -81,10 +81,9 @@ amp-sidebar[side] {
   left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  opacity: 0.2;
   /* Prevent someone from making this a full-sceen image */
   background-image: none !important;
-  background-color: #000;
+  background-color: rgba(0, 0, 0, 0.2);
   z-index: 2147483646;
 }
 

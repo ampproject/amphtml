@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-custom>
     body {
       max-width: 527px;
@@ -24,9 +25,36 @@
 </head>
 <body>
   <h1>amp #0</h1>
-  <amp-audio width="500" controls>
+  <amp-audio id="audio1" width="500" controls>
     <source src="/examples/av/audio.mp3" type="audio/mpeg">
     Your browser does not support the audio tag.
   </amp-audio>
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "requests": {
+          "event": "https://foo.com/event?type=${eventType}"
+        },
+        "triggers": {
+          "audioPlay": {
+            "on": "audio-play",
+            "request": "event",
+            "selector": "#audio1",
+            "vars": {
+              "eventType": "audio-play"
+            }
+          },
+          "audioPause": {
+            "on": "audio-pause",
+            "request": "event",
+            "selector": "#audio1",
+            "vars": {
+              "eventType": "audio-pause"
+            }
+          }
+        }
+      }
+      </script>
+  </amp-analytics>
 </body>
 </html>
