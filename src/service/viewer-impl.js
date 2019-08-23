@@ -17,6 +17,7 @@
 import {Deferred, tryResolve} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
+import {ViewerInterface} from './viewer-interface';
 import {VisibilityState} from '../visibility-state';
 import {dev, devAssert, duplicateErrorIfNecessary} from '../log';
 import {findIndex} from '../utils/array';
@@ -58,18 +59,14 @@ const VIEWER_ORIGIN_TIMEOUT_ = 1000;
 const TRIM_ORIGIN_PATTERN_ = /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
- * @typedef {function(!JsonObject):(!Promise|undefined)}
- */
-let RequestResponderDef;
-
-/**
  * An AMP representation of the Viewer. This class doesn't do any work itself
  * but instead delegates everything to the actual viewer. This class and the
  * actual Viewer are connected via "AMP.viewer" using three methods:
  * {@link getParam}, {@link receiveMessage} and {@link setMessageDeliverer}.
+ * @implements {ViewerInterface}
  * @package Visible for type.
  */
-export class Viewer {
+export class ViewerImpl {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
@@ -95,7 +92,7 @@ export class Viewer {
     /** @private {!Object<string, !Observable<!JsonObject>>} */
     this.messageObservables_ = map();
 
-    /** @private {!Object<string, !RequestResponderDef>} */
+    /** @private {!Object<string, !./viewer-interface.RequestResponderDef>} */
     this.messageResponders_ = map();
 
     /** @private {!Observable<boolean>} */
@@ -311,23 +308,17 @@ export class Viewer {
       });
   }
 
-  /**
-   * Returns the value of a viewer's startup parameter with the specified
-   * name or "undefined" if the parameter wasn't defined at startup time.
-   * @param {string} name
-   * @return {?string}
-   * @export
-   */
+  /** @override */
+  getAmpDoc() {
+    return this.ampdoc;
+  }
+
+  /** @override */
   getParam(name) {
     return this.ampdoc.getParam(name);
   }
 
-  /**
-   * Viewers can communicate their "capabilities" and this method allows
-   * checking them.
-   * @param {string} name Of the capability.
-   * @return {boolean}
-   */
+  /** @override */
   hasCapability(name) {
     const capabilities = this.ampdoc.getParam('cap');
     if (!capabilities) {
@@ -337,26 +328,17 @@ export class Viewer {
     return capabilities.split(',').indexOf(name) != -1;
   }
 
-  /**
-   * Whether the document is embedded in a viewer.
-   * @return {boolean}
-   */
+  /** @override */
   isEmbedded() {
     return !!this.messagingReadyPromise_;
   }
 
-  /**
-   * Whether the document is embedded in a webview.
-   * @return {boolean}
-   */
+  /** @override */
   isWebviewEmbedded() {
     return !this.isIframed_ && this.ampdoc.getParam('webview') == '1';
   }
 
-  /**
-   * Whether the document is embedded in a Chrome Custom Tab.
-   * @return {boolean}
-   */
+  /** @override */
   isCctEmbedded() {
     if (this.isCctEmbedded_ != null) {
       return this.isCctEmbedded_;
@@ -371,18 +353,12 @@ export class Viewer {
     return this.isCctEmbedded_;
   }
 
-  /**
-   * Whether the document was served by a proxy.
-   * @return {boolean}
-   */
+  /** @override */
   isProxyOrigin() {
     return this.isProxyOrigin_;
   }
 
-  /**
-   * Update the URL fragment with data needed to support custom tabs. This will
-   * not clear query string parameters, but will clear the fragment.
-   */
+  /** @override */
   maybeUpdateFragmentForCct() {
     if (!this.isCctEmbedded()) {
       return;
@@ -423,45 +399,29 @@ export class Viewer {
     return trimOrigin(first) == trimOrigin(second);
   }
 
-  /**
-   * @return {boolean}
-   */
+  /** @override */
   isRuntimeOn() {
     return this.isRuntimeOn_;
   }
 
-  /**
-   */
+  /** @override */
   toggleRuntime() {
     this.isRuntimeOn_ = !this.isRuntimeOn_;
     dev().fine(TAG_, 'Runtime state:', this.isRuntimeOn_);
     this.runtimeOnObservable_.fire(this.isRuntimeOn_);
   }
 
-  /**
-   * @param {function(boolean)} handler
-   * @return {!UnlistenDef}
-   */
+  /** @override */
   onRuntimeState(handler) {
     return this.runtimeOnObservable_.add(handler);
   }
 
-  /**
-   * Whether the viewer overtakes the history for AMP document. If yes,
-   * the viewer must implement history messages "pushHistory" and "popHistory"
-   * and emit message "historyPopped"
-   * @return {boolean}
-   */
+  /** @override */
   isOvertakeHistory() {
     return this.overtakeHistory_;
   }
 
-  /**
-   * Returns visibility state configured by the viewer.
-   * See {@link isVisible}.
-   * @return {!VisibilityState}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
+  /** @override */
   getVisibilityState() {
     return this.ampdoc.getVisibilityState();
   }
@@ -492,83 +452,42 @@ export class Viewer {
     dev().fine(TAG_, 'visibilitychange event:', this.getVisibilityState());
   }
 
-  /**
-   * Whether the AMP document currently visible. The reasons why it might not
-   * be visible include user switching to another tab, browser running the
-   * document in the prerender mode or viewer running the document in the
-   * prerender mode.
-   * @return {boolean}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
+  /** @override */
   isVisible() {
     return this.ampdoc.isVisible();
   }
 
-  /**
-   * Whether the AMP document has been ever visible before. Since the visiblity
-   * state of a document can be flipped back and forth we sometimes want to know
-   * if a document has ever been visible.
-   * @return {boolean}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
+  /** @override */
   hasBeenVisible() {
     return this.ampdoc.getLastVisibleTime() != null;
   }
 
-  /**
-   * Returns a Promise that only ever resolved when the current
-   * AMP document first becomes visible.
-   * @return {!Promise}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
+  /** @override */
   whenFirstVisible() {
     return this.ampdoc.whenFirstVisible();
   }
 
-  /**
-   * Returns a Promise that resolve when current doc becomes visible.
-   * The promise resolves immediately if doc is already visible.
-   * @return {!Promise}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
+  /** @override */
   whenNextVisible() {
     return this.ampdoc.whenNextVisible();
   }
 
-  /**
-   * Returns the time when the document has become visible for the first time.
-   * If document has not yet become visible, the returned value is `null`.
-   * @return {?time}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
+  /** @override */
   getFirstVisibleTime() {
     return this.ampdoc.getFirstVisibleTime();
   }
 
-  /**
-   * Returns the time when the document has become visible for the last time.
-   * If document has not yet become visible, the returned value is `null`.
-   * @return {?time}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
+  /** @override */
   getLastVisibleTime() {
     return this.ampdoc.getLastVisibleTime();
   }
 
-  /**
-   * How much the viewer has requested the runtime to prerender the document.
-   * The values are in number of screens.
-   * @return {number}
-   */
+  /** @override */
   getPrerenderSize() {
     return this.prerenderSize_;
   }
 
-  /**
-   * Returns the resolved viewer URL value. It's by default the current page's
-   * URL. The trusted viewers are allowed to override this value.
-   * @return {string}
-   */
+  /** @override */
   getResolvedViewerUrl() {
     return this.resolvedViewerUrl_;
   }
@@ -584,40 +503,22 @@ export class Viewer {
     return this.viewerUrl_;
   }
 
-  /**
-   * Possibly return the messaging origin if set. This would be the origin
-   * of the parent viewer.
-   * @return {?string}
-   */
+  /** @override */
   maybeGetMessagingOrigin() {
     return this.messagingOrigin_;
   }
 
-  /**
-   * Returns an unconfirmed "referrer" URL that can be optionally customized by
-   * the viewer. Consider using `getReferrerUrl()` instead, which returns the
-   * promise that will yield the confirmed "referrer" URL.
-   * @return {string}
-   */
+  /** @override */
   getUnconfirmedReferrerUrl() {
     return this.unconfirmedReferrerUrl_;
   }
 
-  /**
-   * Returns the promise that will yield the confirmed "referrer" URL. This
-   * URL can be optionally customized by the viewer, but viewer is required
-   * to be a trusted viewer.
-   * @return {!Promise<string>}
-   */
+  /** @override */
   getReferrerUrl() {
     return this.referrerUrl_;
   }
 
-  /**
-   * Whether the viewer has been whitelisted for more sensitive operations
-   * such as customizing referrer.
-   * @return {!Promise<boolean>}
-   */
+  /** @override */
   isTrustedViewer() {
     if (!this.isTrustedViewer_) {
       const isTrustedAncestorOrigins = this.isTrustedAncestorOrigins_();
@@ -655,12 +556,7 @@ export class Viewer {
     }
   }
 
-  /**
-   * Returns the promise that resolves to URL representing the origin of the
-   * viewer. If the document is not embedded or if a viewer origin can't be
-   * found, empty string is returned.
-   * @return {!Promise<string>}
-   */
+  /** @override */
   getViewerOrigin() {
     if (!this.viewerOrigin_) {
       let origin;
@@ -706,24 +602,12 @@ export class Viewer {
     return urls.trustedViewerHosts.some(th => th.test(url.hostname));
   }
 
-  /**
-   * Adds a "visibilitychange" event listener for viewer events. The
-   * callback can check {@link isVisible} and {@link getPrefetchCount}
-   * methods for more info.
-   * @param {function()} handler
-   * @return {!UnlistenDef}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
+  /** @override */
   onVisibilityChanged(handler) {
     return this.ampdoc.onVisibilityChanged(handler);
   }
 
-  /**
-   * Adds a eventType listener for viewer events.
-   * @param {string} eventType
-   * @param {function(!JsonObject)} handler
-   * @return {!UnlistenDef}
-   */
+  /** @override */
   onMessage(eventType, handler) {
     let observable = this.messageObservables_[eventType];
     if (!observable) {
@@ -733,12 +617,7 @@ export class Viewer {
     return observable.add(handler);
   }
 
-  /**
-   * Adds a eventType listener for viewer events.
-   * @param {string} eventType
-   * @param {!RequestResponderDef} responder
-   * @return {!UnlistenDef}
-   */
+  /** @override */
   onMessageRespond(eventType, responder) {
     this.messageResponders_[eventType] = responder;
     return () => {
@@ -748,14 +627,7 @@ export class Viewer {
     };
   }
 
-  /**
-   * Requests AMP document to receive a message from Viewer.
-   * @param {string} eventType
-   * @param {!JsonObject} data
-   * @param {boolean} unusedAwaitResponse
-   * @return {(!Promise<*>|undefined)}
-   * @export
-   */
+  /** @override */
   receiveMessage(eventType, data, unusedAwaitResponse) {
     if (eventType == 'visibilitychange') {
       if (data['prerenderSize'] !== undefined) {
@@ -785,14 +657,7 @@ export class Viewer {
     return undefined;
   }
 
-  /**
-   * Provides a message delivery mechanism by which AMP document can send
-   * messages to the viewer.
-   * @param {function(string, (?JsonObject|string|undefined), boolean):
-   *     (!Promise<*>|undefined)} deliverer
-   * @param {string} origin
-   * @export
-   */
+  /** @override */
   setMessageDeliverer(deliverer, origin) {
     if (this.messageDeliverer_) {
       throw new Error('message channel can only be initialized once');
@@ -822,33 +687,12 @@ export class Viewer {
     }
   }
 
-  /**
-   * Sends the message to the viewer without waiting for any response.
-   * If cancelUnsent is true, the previous message of the same message type will
-   * be canceled.
-   *
-   * This is a restricted API.
-   *
-   * @param {string} eventType
-   * @param {?JsonObject|string|undefined} data
-   * @param {boolean=} cancelUnsent
-   */
+  /** @override */
   sendMessage(eventType, data, cancelUnsent = false) {
     this.sendMessageInternal_(eventType, data, cancelUnsent, false);
   }
 
-  /**
-   * Sends the message to the viewer and wait for response.
-   * If cancelUnsent is true, the previous message of the same message type will
-   * be canceled.
-   *
-   * This is a restricted API.
-   *
-   * @param {string} eventType
-   * @param {?JsonObject|string|undefined} data
-   * @param {boolean=} cancelUnsent
-   * @return {!Promise<(?JsonObject|string|undefined)>} the response promise
-   */
+  /** @override */
   sendMessageAwaitResponse(eventType, data, cancelUnsent = false) {
     return this.sendMessageInternal_(eventType, data, cancelUnsent, true);
   }
@@ -914,14 +758,7 @@ export class Viewer {
     return message.responsePromise;
   }
 
-  /**
-   * Broadcasts a message to all other AMP documents under the same viewer. It
-   * will attempt to deliver messages when the messaging channel has been
-   * established, but it will not fail if the channel is timed out.
-   *
-   * @param {!JsonObject} message
-   * @return {!Promise<boolean>} a Promise of success or not
-   */
+  /** @override */
   broadcast(message) {
     if (!this.messagingReadyPromise_) {
       // Messaging is not expected.
@@ -934,30 +771,17 @@ export class Viewer {
     );
   }
 
-  /**
-   * Registers receiver for the broadcast events.
-   * @param {function(!JsonObject)} handler
-   * @return {!UnlistenDef}
-   */
+  /** @override */
   onBroadcast(handler) {
     return this.broadcastObservable_.add(handler);
   }
 
-  /**
-   * Resolves when there is a messaging channel established with the viewer.
-   * Will be null if no messaging is needed like in an non-embedded document.
-   * Deprecated: do not use. sendMessage and sendMessageAwaitResponse already
-   *             wait for messaging channel ready.
-   * @return {?Promise}
-   */
+  /** @override */
   whenMessagingReady() {
     return this.messagingReadyPromise_;
   }
 
-  /**
-   * Replace the document url with the viewer provided new replaceUrl.
-   * @param {?string} newUrl
-   */
+  /** @override */
   replaceUrl(newUrl) {
     if (
       !newUrl ||
@@ -1008,7 +832,7 @@ export function installViewerServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
     ampdoc,
     'viewer',
-    Viewer,
+    ViewerImpl,
     /* opt_instantiate */ true
   );
 }

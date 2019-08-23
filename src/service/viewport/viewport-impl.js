@@ -61,7 +61,7 @@ export class ViewportImpl {
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @param {!ViewportBindingDef} binding
-   * @param {!../viewer-impl.Viewer} viewer
+   * @param {!../viewer-interface.ViewerInterface} viewer
    */
   constructor(ampdoc, binding, viewer) {
     const {win} = ampdoc;
@@ -78,7 +78,7 @@ export class ViewportImpl {
     /** @const {!ViewportBindingDef} */
     this.binding_ = binding;
 
-    /** @const {!../viewer-impl.Viewer} */
+    /** @const {!../viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
 
     /**
@@ -128,7 +128,7 @@ export class ViewportImpl {
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
 
-    /** @private @const {!Observable} */
+    /** @private @const {!Observable<!./viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
     /** @private {?Element|undefined} */
@@ -1167,7 +1167,7 @@ const ViewportType = {
 
 /**
  * @param {!Window} win
- * @param {!../viewer-impl.Viewer} viewer
+ * @param {!../viewer-interface.ViewerInterface} viewer
  * @return {string}
  */
 function getViewportType(win, viewer) {
