@@ -92,37 +92,42 @@ class InaboxViewer {
 
   /** @override */
   getVisibilityState() {
-    return VisibilityState.VISIBLE;
+    return this.ampdoc_.getVisibilityState();
+  }
+
+  /** @override */
+  onVisibilityChanged(handler) {
+    return this.ampdoc_.onVisibilityChanged(handler);
   }
 
   /** @override */
   isVisible() {
-    return true;
+    return this.ampdoc_.isVisible();
   }
 
   /** @override */
   hasBeenVisible() {
-    return true;
+    return this.ampdoc_.getLastVisibleTime() != null;
   }
 
   /** @override */
   whenFirstVisible() {
-    return Promise.resolve();
+    return this.ampdoc_.whenFirstVisible();
   }
 
   /** @override */
   whenNextVisible() {
-    return Promise.resolve();
+    return this.ampdoc_.whenNextVisible();
   }
 
   /** @override */
   getFirstVisibleTime() {
-    return 0;
+    return this.ampdoc_.getFirstVisibleTime();
   }
 
   /** @override */
   getLastVisibleTime() {
-    return 0;
+    return this.ampdoc_.getLastVisibleTime();
   }
 
   /** @override */
@@ -132,7 +137,7 @@ class InaboxViewer {
 
   /** @override */
   getResolvedViewerUrl() {
-    return '';
+    return this.ampdoc_.win.location.href;
   }
 
   /** @override */
@@ -142,12 +147,12 @@ class InaboxViewer {
 
   /** @override */
   getUnconfirmedReferrerUrl() {
-    return '';
+    return this.ampdoc_.win.document.referrer;
   }
 
   /** @override */
   getReferrerUrl() {
-    return Promise.resolve('');
+    return Promise.resolve(this.getUnconfirmedReferrerUrl());
   }
 
   /** @override */
@@ -158,11 +163,6 @@ class InaboxViewer {
   /** @override */
   getViewerOrigin() {
     return Promise.resolve('');
-  }
-
-  /** @override */
-  onVisibilityChanged() {
-    return () => {};
   }
 
   /** @override */
