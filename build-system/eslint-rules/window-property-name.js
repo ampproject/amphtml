@@ -107,8 +107,9 @@ module.exports = function(context) {
       if (!prop) {
         context.report({
           node,
-          message: 'Computed property names are not allowed on window, except '
-            + 'references to local constants.',
+          message:
+            'Computed property names are not allowed on window, except ' +
+            'references to local constants.',
         });
         return;
       }
