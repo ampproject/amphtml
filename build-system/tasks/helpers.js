@@ -194,6 +194,19 @@ function compile(watch, shouldMinify) {
         minify: shouldMinify,
       }
     ),
+    compileJs('./src/', 'video-iframe-integration.js', './dist', {
+      minifiedName: 'video-iframe-integration-v0.js',
+      includePolyfills: false,
+      watch,
+      minify: shouldMinify,
+    }),
+    compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
+      toName: 'amp-inabox-host.js',
+      minifiedName: 'amp4ads-host-v0.js',
+      includePolyfills: false,
+      watch,
+      minify: shouldMinify,
+    }),
   ];
 
   if (!argv.single_pass) {
@@ -205,20 +218,6 @@ function compile(watch, shouldMinify) {
         minify: shouldMinify,
       })
     );
-  }
-
-  if (!watch || argv.with_video_iframe_integration) {
-    promises.push(
-      compileJs('./src/', 'video-iframe-integration.js', './dist', {
-        minifiedName: 'video-iframe-integration-v0.js',
-        includePolyfills: false,
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
-
-  if (!argv.single_pass) {
     promises.push(
       // Entry point for inabox runtime.
       compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
@@ -231,16 +230,6 @@ function compile(watch, shouldMinify) {
       })
     );
   }
-  promises.push(
-    // inabox-host
-    compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
-      toName: 'amp-inabox-host.js',
-      minifiedName: 'amp4ads-host-v0.js',
-      includePolyfills: false,
-      watch,
-      minify: shouldMinify,
-    })
-  );
 
   thirdPartyFrames.forEach(frameObject => {
     promises.push(

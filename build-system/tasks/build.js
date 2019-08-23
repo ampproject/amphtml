@@ -122,8 +122,6 @@ build.flags = {
 
 watch.description = 'Watches for changes in files, re-builds when detected';
 watch.flags = {
-  with_video_iframe_integration:
-    '  Also watch and build the video-iframe-integration.js binary.',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
@@ -132,8 +130,6 @@ watch.flags = {
 
 defaultTask.description = 'Runs "watch" and then "serve"';
 defaultTask.flags = {
-  with_video_iframe_integration:
-    '  Also watch and build the video-iframe-integration.js binary.',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
