@@ -325,7 +325,7 @@ export class Resources {
     /** @const {!Window} */
     this.win = ampdoc.win;
 
-    /** @const @private {!./viewer-impl.Viewer} */
+    /** @const @private {!./viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private {boolean} */

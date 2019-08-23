@@ -335,9 +335,9 @@ class Chunks {
       }
     });
 
-    /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
+    /** @private @const {!Promise<!./service/viewer-interface.ViewerInterface>} */
     this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
-    /**  @protected {?./service/viewer-impl.Viewer} */
+    /**  @protected {?./service/viewer-interface.ViewerInterface} */
     this.viewer = null;
     this.viewerPromise_.then(viewer => {
       this.viewer = viewer;

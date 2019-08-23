@@ -855,13 +855,13 @@ export class HistoryBindingNatural_ {
 export class HistoryBindingVirtual_ {
   /**
    * @param {!Window} win
-   * @param {!./viewer-impl.Viewer} viewer
+   * @param {!./viewer-interface.ViewerInterface} viewer
    */
   constructor(win, viewer) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {!./viewer-impl.Viewer} */
+    /** @private @const {!./viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
 
     /** @private {number} */

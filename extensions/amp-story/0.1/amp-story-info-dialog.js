@@ -69,7 +69,7 @@ export class InfoDialog {
     /** @private {?Element} */
     this.moreInfoLinkEl_ = null;
 
-    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    /** @const @private {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.parentEl_);
   }
 

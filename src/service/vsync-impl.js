@@ -132,7 +132,7 @@ export class Vsync {
       FRAME_TIME * 2.5
     );
 
-    /** @private {?./viewer-impl.Viewer} */
+    /** @private {?./viewer-interface.ViewerInterface} */
     this.singleDocViewer_ = null;
 
     // When the document changes visibility, vsync has to reschedule the queue

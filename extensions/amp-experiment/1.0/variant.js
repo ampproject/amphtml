@@ -71,7 +71,7 @@ export class Variants {
  * Allocates the current page view to an experiment variant based on the given
  * experiment from the config.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!../../../src/service/viewer-impl.Viewer} viewer
+ * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
  * @param {string} experimentName
  * @param {!JsonObject} experimentObject
  * @return {!Promise<?string>}

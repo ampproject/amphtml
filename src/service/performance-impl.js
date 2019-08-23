@@ -83,7 +83,7 @@ export class Performance {
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
 
-    /** @private {?./viewer-impl.Viewer} */
+    /** @private {?./viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
     /** @private {?./resources-impl.ResourcesDef} */

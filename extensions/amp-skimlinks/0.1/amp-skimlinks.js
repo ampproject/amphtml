@@ -44,7 +44,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     /** @private {?../../../src/service/document-info-impl.DocumentInfoDef} */
     this.docInfo_ = null;
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
     /** @private {?./link-rewriter/link-rewriter-manager.LinkRewriterManager} */

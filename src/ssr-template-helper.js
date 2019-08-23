@@ -33,7 +33,7 @@ export let SsrTemplateDef;
 export class SsrTemplateHelper {
   /**
    * @param {string} sourceComponent
-   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {!./service/viewer-interface.ViewerInterface} viewer
    * @param {!./service/template-impl.Templates} templates
    */
   constructor(sourceComponent, viewer, templates) {
@@ -54,7 +54,7 @@ export class SsrTemplateHelper {
    * @return {boolean}
    */
   isSupported() {
-    const {ampdoc} = this.viewer_;
+    const ampdoc = this.viewer_.getAmpDoc();
     if (ampdoc.isSingleDoc()) {
       const htmlElement = ampdoc.getRootNode().documentElement;
       if (htmlElement.hasAttribute('allow-viewer-render-template')) {

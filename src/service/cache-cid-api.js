@@ -52,7 +52,7 @@ export class CacheCidApi {
     /** @private {!./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!./viewer-impl.Viewer} */
+    /** @private {!./viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
     /** @private {?Promise<?string>} */
