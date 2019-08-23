@@ -5,7 +5,8 @@
     "inabox-viewport-friendly",
     "inabox-css-cleanup",
     "inabox-no-chunking",
-    "inabox-viewport-lite"
+    "inabox-viewport-lite",
+    "inabox-viewer-lite"
   ],
   "allow-url-opt-in": [
     "ios-scrollable-iframe",
