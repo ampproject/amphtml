@@ -197,7 +197,10 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     it('should substitute macros', () => {
       impl.buildCallback();
       impl.baseRequestUrl_ = 'https://foo.com?location=CANONICAL_URL';
-      expect(impl.getRequestUrl()).to.equal('');
+      expect(impl.getRequestUrl()).to.equal(
+        'https://foo.com?location=' +
+          'http%3A%2F%2Flocalhost%3A9876%2Fcontext.html'
+      );
     });
   });
 
