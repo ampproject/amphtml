@@ -207,29 +207,21 @@ function compile(watch, shouldMinify) {
       watch,
       minify: shouldMinify,
     }),
+    compileJs('./src/', 'amp-shadow.js', './dist', {
+      minifiedName: 'shadow-v0.js',
+      includePolyfills: true,
+      watch,
+      minify: shouldMinify,
+    }),
+    compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+      toName: 'amp-inabox.js',
+      minifiedName: 'amp4ads-v0.js',
+      includePolyfills: true,
+      extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+      watch,
+      minify: shouldMinify,
+    }),
   ];
-
-  if (!argv.single_pass) {
-    promises.push(
-      compileJs('./src/', 'amp-shadow.js', './dist', {
-        minifiedName: 'shadow-v0.js',
-        includePolyfills: true,
-        watch,
-        minify: shouldMinify,
-      })
-    );
-    promises.push(
-      // Entry point for inabox runtime.
-      compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
-        toName: 'amp-inabox.js',
-        minifiedName: 'amp4ads-v0.js',
-        includePolyfills: true,
-        extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
 
   thirdPartyFrames.forEach(frameObject => {
     promises.push(
