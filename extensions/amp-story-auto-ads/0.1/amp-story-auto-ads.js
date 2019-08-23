@@ -17,7 +17,7 @@
 import {
   AnalyticsEvents,
   AnalyticsVars,
-  STORY_AD_ANALYTICS_ID,
+  STORY_AD_ANALYTICS,
   StoryAdAnalytics,
 } from './story-ad-analytics';
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
@@ -143,8 +143,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {!JsonObject} */
     this.config_ = dict();
 
-    /** @private @const {!Promise<./story-ad-analytics.StoryAdAnalytics>}*/
-    this.analytics_ = getServicePromiseForDoc(element, STORY_AD_ANALYTICS_ID);
+    /** @private {?Promise<./story-ad-analytics.StoryAdAnalytics>}*/
+    this.analytics_ = null;
 
     /** @private {Object<string, number>} */
     this.adPageIds_ = {};
@@ -214,6 +214,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       .whenSignal(CommonSignals.INI_LOAD)
       .then(() => {
         this.handleConfig_();
+        this.analytics_ = getServicePromiseForDoc(
+          this.element,
+          STORY_AD_ANALYTICS
+        );
         this.createAdOverlay_();
         this.initializeListeners_();
         this.schedulePage_();
@@ -952,14 +956,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   analyticsEvent_(eventType, vars) {
-    const adIndex = vars['adIndex'];
     this.analytics_.then(analytics =>
-      analytics.fireEvent(adIndex, eventType, vars)
+      analytics.fireEvent(this.element, vars['adIndex'], eventType, vars)
     );
   }
 }
 
 AMP.extension('amp-story-auto-ads', '0.1', AMP => {
   AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds, CSS);
-  AMP.registerServiceForDoc(STORY_AD_ANALYTICS_ID, StoryAdAnalytics);
+  AMP.registerServiceForDoc(STORY_AD_ANALYTICS, StoryAdAnalytics);
 });

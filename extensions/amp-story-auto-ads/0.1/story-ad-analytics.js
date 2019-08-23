@@ -18,7 +18,7 @@ import {getUniqueId} from './utils';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
-export const STORY_AD_ANALYTICS_ID = 'story-ad-analytics';
+export const STORY_AD_ANALYTICS = 'story-ad-analytics';
 
 /** @enum {string} */
 export const AnalyticsEvents = {
@@ -65,24 +65,22 @@ export class StoryAdAnalytics {
   constructor(ampdoc) {
     /** @const @private {!Window} */
     this.win_ = ampdoc.win;
-    /** @const @private {!Element} */
-    this.element_ = ampdoc.getRootNode().querySelector('amp-story-auto-ads');
     /** @const @private {!Object} */
     this.data_ = {};
   }
 
   /**
    * Construct an analytics event and trigger it.
+   * @param {!Element} element amp-story-page element containing ad.
    * @param {number} adIndex
    * @param {string} eventType
    * @param {!Object<string, number>} vars A map of vars and their values.
    */
-  fireEvent(adIndex, eventType, vars) {
+  fireEvent(element, adIndex, eventType, vars) {
     this.ensurePageTrackingInitialized_(adIndex);
-
     Object.assign(this.data_[adIndex], vars);
     triggerAnalyticsEvent(
-      this.element_,
+      element,
       eventType,
       /** @type {!JsonObject} */ (this.data_[adIndex])
     );

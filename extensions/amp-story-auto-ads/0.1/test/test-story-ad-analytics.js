@@ -26,12 +26,16 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
   let win;
   let analytics;
   let triggerStub;
+  let ampStoryAutoAdsEl;
 
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
     analytics = new StoryAdAnalytics(ampdoc);
     triggerStub = sandbox.stub(analyticsSrc, 'triggerAnalyticsEvent');
+    const doc = win.document;
+    ampStoryAutoAdsEl = doc.createElement('amp-story-auto-ads');
+    doc.body.appendChild(ampStoryAutoAdsEl);
   });
 
   describe('fireEvent', () => {
@@ -39,10 +43,14 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
       const adIndex = 1;
       const loadTime = 1565731560523; // Arbitrary timestamp.
       const vars = {[AnalyticsVars.AD_LOADED]: loadTime};
-      analytics.fireEvent(adIndex, AnalyticsEvents.AD_LOADED, vars);
-
+      analytics.fireEvent(
+        ampStoryAutoAdsEl,
+        adIndex,
+        AnalyticsEvents.AD_LOADED,
+        vars
+      );
       expect(triggerStub).to.be.calledWithExactly(
-        win.document.body,
+        ampStoryAutoAdsEl,
         AnalyticsEvents.AD_LOADED,
         {
           [AnalyticsVars.AD_INDEX]: 1,
@@ -56,16 +64,26 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
       const loadTime = 1565731560523; // Arbitrary timestamp.
       const insertTime = 1565731560555; // Arbitrary timestamp.
 
-      analytics.fireEvent(/* adIndex */ 2, AnalyticsEvents.AD_LOADED, {
-        [AnalyticsVars.AD_LOADED]: loadTime,
-      });
-      analytics.fireEvent(/* adIndex */ 2, AnalyticsEvents.AD_INSERTED, {
-        [AnalyticsVars.AD_INSERTED]: insertTime,
-      });
+      analytics.fireEvent(
+        ampStoryAutoAdsEl,
+        2, // adIndex
+        AnalyticsEvents.AD_LOADED,
+        {
+          [AnalyticsVars.AD_LOADED]: loadTime,
+        }
+      );
+      analytics.fireEvent(
+        ampStoryAutoAdsEl,
+        2, // adIndex
+        AnalyticsEvents.AD_INSERTED,
+        {
+          [AnalyticsVars.AD_INSERTED]: insertTime,
+        }
+      );
 
       expect(triggerStub).to.be.calledTwice;
       expect(triggerStub.lastCall).to.be.calledWithExactly(
-        win.document.body,
+        ampStoryAutoAdsEl,
         AnalyticsEvents.AD_INSERTED,
         {
           [AnalyticsVars.AD_INDEX]: 2,
@@ -85,12 +103,17 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
       analytics.setVar(/* adIndex */ 2, AnalyticsVars.CTA_TYPE, 'LEARN');
       analytics.setVar(/* adIndex */ 2, AnalyticsVars.POSITION, 14);
 
-      analytics.fireEvent(/* adIndex */ 2, AnalyticsEvents.AD_VIEWED, {
-        [AnalyticsVars.AD_VIEWED]: 12345,
-      });
+      analytics.fireEvent(
+        ampStoryAutoAdsEl,
+        2, // adIndex
+        AnalyticsEvents.AD_VIEWED,
+        {
+          [AnalyticsVars.AD_VIEWED]: 12345,
+        }
+      );
 
       expect(triggerStub).to.be.calledWithExactly(
-        win.document.body,
+        ampStoryAutoAdsEl,
         AnalyticsEvents.AD_VIEWED,
         {
           [AnalyticsVars.AD_INDEX]: 2,
@@ -101,12 +124,17 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
         }
       );
 
-      analytics.fireEvent(/* adIndex */ 1, AnalyticsEvents.AD_EXITED, {
-        [AnalyticsVars.AD_EXITED]: 56789,
-      });
+      analytics.fireEvent(
+        ampStoryAutoAdsEl,
+        1, // adIndex
+        AnalyticsEvents.AD_EXITED,
+        {
+          [AnalyticsVars.AD_EXITED]: 56789,
+        }
+      );
 
       expect(triggerStub.lastCall).to.be.calledWithExactly(
-        win.document.body,
+        ampStoryAutoAdsEl,
         AnalyticsEvents.AD_EXITED,
         {
           [AnalyticsVars.AD_INDEX]: 1,
