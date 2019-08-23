@@ -829,6 +829,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'readmo': {
+    renderStartImplemented: true,
+  },
+
   'realclick': {
     renderStartImplemented: true,
   },
