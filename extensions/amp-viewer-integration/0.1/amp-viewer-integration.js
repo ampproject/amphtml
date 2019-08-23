@@ -178,7 +178,7 @@ export class AmpViewerIntegration {
   }
 
   /**
-   * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} origin
    * @param {!Messaging} messaging
@@ -206,7 +206,7 @@ export class AmpViewerIntegration {
 
   /**
    * @param {!Messaging} messaging
-   * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
    * @param {string} origin
    * @return {Promise<*>|undefined}
    * @private
