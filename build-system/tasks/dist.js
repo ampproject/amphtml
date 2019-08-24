@@ -125,7 +125,7 @@ async function dist() {
   } else {
     parseExtensionFlags();
   }
-  await compileCss(/* watch */ undefined, /* opt_compileAll */ true);
+  await compileCss();
   await compileJison();
   await startNailgunServer(distNailgunPort, /* detached */ false);
 
@@ -296,16 +296,12 @@ function copyAliasExtensions() {
   const extensionsToBuild = getExtensionsToBuild();
 
   for (const key in extensionAliasFilePath) {
-    if (
-      extensionsToBuild.length > 0 &&
-      extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1
-    ) {
-      continue;
+    if (extensionsToBuild.includes(extensionAliasFilePath[key].name)) {
+      fs.copySync(
+        'dist/v0/' + extensionAliasFilePath[key].file,
+        'dist/v0/' + key
+      );
     }
-    fs.copySync(
-      'dist/v0/' + extensionAliasFilePath[key]['file'],
-      'dist/v0/' + key
-    );
   }
 
   return Promise.resolve();
