@@ -35,7 +35,6 @@ const argv = require('minimist')(process.argv.slice(2));
 
 /**
  * Extensions to build when `--extensions=minimal_set`.
- * @private @const {!Array<string>}
  */
 const MINIMAL_EXTENSION_SET = [
   'amp-ad',
@@ -52,8 +51,6 @@ const MINIMAL_EXTENSION_SET = [
  * Extensions to build when `--extensions=inabox`.
  * See AMPHTML ads spec for supported extensions:
  * https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/
- *
- * @private @const {!Array<string>}
  */
 const INABOX_EXTENSION_SET = [
   'amp-accordion',
@@ -78,8 +75,13 @@ const INABOX_EXTENSION_SET = [
   // but commonly used in AMPHTML ads related debugging.
   'amp-ad',
   'amp-ad-network-fake-impl',
-  'amp-auto-lightbox', // auto installed by amp.js
 ];
+
+/**
+ * Default extensions that should always be built. These are always or almost
+ * always loaded by runtime.
+ */
+const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
 
 /**
  * @typedef {{
@@ -88,7 +90,7 @@ const INABOX_EXTENSION_SET = [
  *   hasCss: ?boolean,
  *   loadPriority: ?string,
  *   cssBinaries: ?Array<string>,
- *   extraGlobs?Array<string>,
+ *   extraGlobs: ?Array<string>,
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
@@ -212,8 +214,8 @@ function declareExtensionVersionAlias(name, version, latestVersion, options) {
 }
 
 /**
- * Process the command line arguments --extensions and --extensions_from
- * and return a list of the referenced extensions.
+ * Process the command line arguments --noextensions, --extensions, and
+ * --extensions_from and return a list of the referenced extensions.
  * @return {!Array<string>}
  */
 function getExtensionsToBuild() {
@@ -221,7 +223,7 @@ function getExtensionsToBuild() {
     return extensionsToBuild;
   }
 
-  extensionsToBuild = [];
+  extensionsToBuild = DEFAULT_EXTENSION_SET;
 
   if (!!argv.extensions) {
     if (argv.extensions === 'minimal_set') {
@@ -229,12 +231,17 @@ function getExtensionsToBuild() {
     } else if (argv.extensions === 'inabox') {
       argv.extensions = INABOX_EXTENSION_SET.join(',');
     }
-    extensionsToBuild = argv.extensions.split(',');
-  }
-
-  if (!!argv.extensions_from) {
+    const explicitExtensions = argv.extensions.split(',');
+    extensionsToBuild = dedupe(extensionsToBuild.concat(explicitExtensions));
+  } else if (!!argv.extensions_from) {
     const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
+  } else if (!argv.noextensions) {
+    const allExtensions = [];
+    for (const extension in extensions) {
+      allExtensions.push(extensions[extension].name);
+    }
+    extensionsToBuild = dedupe(extensionsToBuild.concat(allExtensions));
   }
 
   return extensionsToBuild;
@@ -377,21 +384,15 @@ function dedupe(arr) {
  */
 function buildExtensions(options) {
   maybeInitializeExtensions(extensions, /* includeLatest */ false);
-  if (!!argv.noextensions && !options.compileAll) {
-    return Promise.resolve();
-  }
-
-  const extensionsToBuild = options.compileAll ? [] : getExtensionsToBuild();
-
+  const extensionsToBuild = getExtensionsToBuild();
   const results = [];
   for (const extension in extensions) {
     if (
-      extensionsToBuild.length > 0 &&
-      extensionsToBuild.indexOf(extensions[extension].name) == -1
+      options.compileOnlyCss ||
+      extensionsToBuild.includes(extensions[extension].name)
     ) {
-      continue;
+      results.push(doBuildExtension(extensions, extension, options));
     }
-    results.push(doBuildExtension(extensions, extension, options));
   }
   return Promise.all(results);
 }
