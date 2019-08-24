@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {devAssert} from '../../../src/log';
 import {requireExternal} from '../../../src/module';
 
@@ -33,6 +35,28 @@ function pick(props, keys) {
   }
 
   return out;
+}
+
+/**
+ * @return {boolean}
+ */
+function testSrcsetSupport() {
+  const support = 'srcset' in new Image();
+  testSrcsetSupport = () => support;
+  return support;
+}
+
+/**
+ * @param {string|undefined} src
+ * @param {string|undefined} srcset
+ * @return {string|undefined}
+ */
+function guaranteeSrcForSrcsetUnsupportedBrowsers(src, srcset) {
+  if (src !== undefined || testSrcsetSupport()) {
+    return src;
+  }
+  const match = /\S+/.exec(srcset);
+  return match ? match[0] : undefined;
 }
 
 const ATTRIBUTES_TO_PROPAGATE = [
@@ -62,7 +86,21 @@ AMP.extension('amp-react-img', '0.1', AMP => {
     constructor(props) {
       super(props);
 
-      this.state = {prerender: true};
+      this.state = {
+        prerender: true,
+        element: props['i-amphtml-element'],
+        layoutWidth: 0,
+      };
+      delete props['i-amphtml-element'];
+
+      /** @private {boolean} */
+      this.prerenderAllowed_ = !!props['noprerender'];
+
+      /** @private {number} */
+      this.currentSizesWidth_ = 0;
+
+      /** @private {string|undefined} */
+      this.currentSizes_ = undefined;
     }
 
     /**
@@ -70,24 +108,102 @@ AMP.extension('amp-react-img', '0.1', AMP => {
      */
     render() {
       const props = pick(this.props, ATTRIBUTES_TO_PROPAGATE);
-      const {id, 'i-amphtml-ssr': ssr} = this.props;
-      if (ssr) {
-        // TODO: Figure out SSR children
-      }
 
+      const {id} = this.props;
       if (id) {
         props['amp-img-id'] = id;
       }
+      props['src'] = guaranteeSrcForSrcsetUnsupportedBrowsers(
+        props['src'],
+        props['srcset']
+      );
+      props['sizes'] = this.maybeGenerateSizes_(props['sizes']);
       props['decoding'] = 'async';
 
-      // amp-img is always allowed to render, but we want to make this interesting...
       const {prerender} = this.state;
-      if (prerender) {
+      if (prerender && !this.prerenderAllowed_) {
         delete props['src'];
         delete props['srcset'];
       }
 
       return react.createElement('img', props);
+    }
+
+    /**
+     * @param {boolean} onLayout
+     * @param {!../../../src/preconnect.Preconnect} preconnect
+     */
+    ampPreconnectCallback(onLayout, preconnect) {
+      const {src, srcset} = this.props;
+      if (src) {
+        preconnect.url(src, onLayout);
+      } else if (srcset) {
+        // We try to find the first url in the srcset
+        const srcseturl = /\S+/.exec(srcset);
+        // Connect to the first url if it exists
+        if (srcseturl) {
+          preconnect.url(srcseturl[0], onLayout);
+        }
+      }
+    }
+
+    /**
+     * @param {!../../../src/layout.Layout} layout
+     * @return {boolean}
+     */
+    ampIsLayoutSupported(layout) {
+      return isLayoutSizeDefined(layout);
+    }
+
+    /**
+     * @param {string|undefined} sizes
+     * @return {string|undefined}
+     * @private
+     */
+    maybeGenerateSizes_(sizes) {
+      if (sizes) {
+        return sizes;
+      }
+      const {'i-amphtml-layout': layout, srcset} = this.props;
+      if (layout === Layout.INTRINSIC) {
+        return;
+      }
+
+      if (!srcset || /[0-9]+x(?:,|$)/.test(srcset)) {
+        return;
+      }
+
+      const {layoutWidth} = this.state;
+      if (layoutWidth <= this.currentSizesWidth_) {
+        return this.currentSizes_;
+      }
+      this.currentSizesWidth_ = layoutWidth;
+
+      const viewportWidth = this.ampGetViewport().getWidth();
+
+      const entry = `(max-width: ${viewportWidth}px) ${layoutWidth}px, `;
+      let defaultSize = layoutWidth + 'px';
+
+      if (layout !== Layout.FIXED) {
+        const ratio = Math.round((layoutWidth * 100) / viewportWidth);
+        defaultSize = Math.max(ratio, 100) + 'vw';
+      }
+
+      return (this.currentSizes_ = entry + defaultSize);
+    }
+
+    /**
+     * @return {!../../../src/service/viewport/viewport-interface.ViewportInterface}
+     */
+    ampGetViewport() {
+      return Services.viewportForDoc(this.ampGetAmpDoc());
+    }
+
+    /**
+     * @return {!../../../src/service/ampdoc-impl.AmpDoc}
+     */
+    ampGetAmpDoc() {
+      return this.state.element.getAmpDoc();
     }
   }
 
@@ -131,8 +247,10 @@ AMP.extension('amp-react-img', '0.1', AMP => {
 
       /** @override */
       buildCallback() {
-        const el = react.createElement(Component, this.attributes_());
-        this.el_ = render(el, this.element);
+        const el = render(react.createElement(Component, this.attributes_()), this.element);
+        this.el_ = el;
+        el.setState({layoutWidth: this.getLayoutWidth()});
+        this.rerender_();
       }
 
       /** @override */
@@ -159,6 +277,19 @@ AMP.extension('amp-react-img', '0.1', AMP => {
         this.rerender_();
       }
 
+      /** @override */
+      preconnectCallback(onLayout) {
+        const el = devAssert(this.el_);
+        el.ampPreconnectCallback(onLayout, this.preconnect);
+      }
+
+      /** @override */
+      onMeasureChanged() {
+        const el = devAssert(this.el_);
+        el.setState({layoutWidth: this.getLayoutWidth()});
+        this.rerender_();
+      }
+
       /**
        * @private
        */
@@ -181,6 +312,7 @@ AMP.extension('amp-react-img', '0.1', AMP => {
           const attr = attributes[i];
           out[attr.name] = attr.value;
         }
+        out['i-amphtml-element'] = this.element;
         return out;
       }
     };
