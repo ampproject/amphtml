@@ -17,11 +17,9 @@
 const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const {
-  buildAlp,
-  buildExaminer,
-  buildWebWorker,
-  compileAllUnminifiedTargets,
-  compileJs,
+  bootstrapThirdPartyFrames,
+  compileUnminifiedRuntimeTargets,
+  compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
 } = require('./helpers');
@@ -58,6 +56,29 @@ async function build() {
 }
 
 /**
+ * Prints a useful help message prior to the default gulp task
+ */
+function printDefaultTaskHelp() {
+  log(green('Running the default ') + cyan('gulp ') + green('task.'));
+  const defaultTaskMessage =
+    green('⤷ Runtime targets and extensions will be ') +
+    green(
+      argv.lazy_build
+        ? 'lazily built when requested from the server.'
+        : 'built after server startup.'
+    );
+  log(defaultTaskMessage);
+  if (!argv.lazy_build) {
+    const lazyBuildMessage =
+      green('⤷ Use ') +
+      cyan('--lazy_build ') +
+      green('to lazily build runtime targets and extensions ') +
+      green('when requested from the server.');
+    log(lazyBuildMessage);
+  }
+}
+
+/**
  * Performs the build steps for gulp, gulp build, and gulp watch
  * @param {boolean} watch
  * @param {boolean} defaultTask
@@ -67,32 +88,25 @@ async function performBuild(watch, defaultTask) {
   process.env.NODE_ENV = 'development';
   printNobuildHelp();
   printConfigHelp(defaultTask ? 'gulp' : watch ? 'gulp watch' : 'gulp build');
-  parseExtensionFlags(defaultTask);
-  return Promise.all([compileCss(watch), compileJison()])
-    .then(() => {
-      return Promise.all([
-        polyfillsForTests(),
-        buildAlp({watch}),
-        buildExaminer({watch}),
-        buildWebWorker({watch}),
-        defaultTask ? Promise.resolve() : buildExtensions({watch}),
-        compileAllUnminifiedTargets(watch),
-      ]);
-    })
-    .then(() => {
-      if (isTravisBuild()) {
-        // New line after all the compilation progress dots on Travis.
-        console.log('\n');
-      }
-    });
-}
-
-/**
- * Compile the polyfills script and drop it in the build folder
- * @return {!Promise}
- */
-function polyfillsForTests() {
-  return compileJs('./src/', 'polyfills.js', './build/');
+  if (defaultTask) {
+    printDefaultTaskHelp();
+  }
+  if (!argv.lazy_build) {
+    parseExtensionFlags();
+  }
+  await Promise.all([compileCss(watch), compileJison()]);
+  await Promise.all([
+    bootstrapThirdPartyFrames(watch),
+    compileCoreRuntime(watch),
+  ]);
+  if (!defaultTask) {
+    await compileUnminifiedRuntimeTargets(watch);
+    await buildExtensions({watch});
+  }
+  if (isTravisBuild()) {
+    // New line after all the compilation progress dots on Travis.
+    console.log('\n');
+  }
 }
 
 /**
@@ -100,17 +114,17 @@ function polyfillsForTests() {
  */
 async function defaultTask() {
   await watch(/* defaultTask */ true);
-  serve(argv.lazy_build_extensions);
-  const startedMessage = green('Started ') + cyan('gulp ') + green('server. ');
-  if (argv.lazy_build_extensions) {
+  serve(argv.lazy_build);
+  log(green('Started ') + cyan('gulp ') + green('server. '));
+  if (argv.lazy_build) {
     log(
-      startedMessage +
-        green(
-          'Extensions will be lazily built when requested from the server...'
-        )
+      green(
+        'Runtime targets and extensions will be lazily built when requested...'
+      )
     );
   } else {
-    log(startedMessage + green('Building extensions...'));
+    log(green('Building runtime targets and extensions...'));
+    await compileUnminifiedRuntimeTargets(watch);
     await buildExtensions({watch: true});
   }
 }
@@ -133,6 +147,7 @@ build.flags = {
 
 watch.description = 'Watches for changes in files, re-builds when detected';
 watch.flags = {
+  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
@@ -141,8 +156,9 @@ watch.flags = {
 
 defaultTask.description = 'Runs "watch" and then "serve"';
 defaultTask.flags = {
-  lazy_build_extensions:
-    '  Lazily builds extensions when they are requested from the server',
+  lazy_build:
+    '  Lazily builds runtime targets and extensions when they are requested from the server',
+  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
