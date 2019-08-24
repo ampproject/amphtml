@@ -68,10 +68,10 @@ function getAdTypes() {
     weborama: ['weborama-display'],
   };
 
-  // Start with Google ad types
-  const adTypes = ['adsense'];
+  const adTypes = [];
 
-  // Add all other ad types
+  // Add ad types (google networks not included as they full support native
+  // implementations).
   const files = fs.readdirSync('./ads/');
   for (let i = 0; i < files.length; i++) {
     if (
@@ -180,6 +180,11 @@ function maybePrintCoverageMessage() {
   const url = 'file://' + path.resolve('test/coverage/index.html');
   log(green('INFO:'), 'Generated code coverage report at', cyan(url));
   opn(url, {wait: false});
+}
+
+function karmaBrowserStart(browser) {
+  console./*OK*/ log('\n');
+  log(`${browser.name}: ${green('STARTED')}`);
 }
 
 function karmaBrowserComplete(browser) {
@@ -389,6 +394,7 @@ async function createKarmaServer(
   karmaServer
     .on('run_start', () => karmaRunStart())
     .on('browsers_ready', () => karmaBrowsersReady())
+    .on('browser_start', browser => karmaBrowserStart(browser))
     .on('browser_complete', browser => karmaBrowserComplete(browser))
     .on('run_complete', runCompleteFn);
 

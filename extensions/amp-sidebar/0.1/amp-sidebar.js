@@ -16,8 +16,11 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
+import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
 import {
   closestAncestorElementBySelector,
@@ -29,6 +32,7 @@ import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
+import {isExperimentOn} from '../../../src/experiments';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/style';
@@ -51,10 +55,10 @@ const Side = {
  * end of the sidebar is cut off.
  * Currently Safari is the only browser with a nav bar on the bottom
  * so we set the width of this block to the width of Safari's nav bar.
- * Source for value: https://github.com/WebKit/webkit/blob/de9875e914c8fda3f46247cd482ce4f849ddad0a/Source/WebInspectorUI/UserInterface/Views/Variables.css#L119
+ * Source for value: https://github.com/WebKit/webkit/blob/5b431bdc276d45bc956b222666beaca44813444f/Source/WebInspectorUI/UserInterface/Views/Toolbar.css
  */
 /** @private @const {string} */
-const IOS_SAFARI_BOTTOMBAR_HEIGHT = '29px';
+const IOS_SAFARI_BOTTOMBAR_HEIGHT = '54px';
 
 /**  @enum {string} */
 const SidebarEvents = {
@@ -70,7 +74,7 @@ export class AmpSidebar extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
@@ -116,6 +120,17 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {number} */
     this.initialScrollTop_ = 0;
+
+    /** @private {boolean} */
+    this.opened_ = false;
+
+    /** @private @const */
+    this.swipeToDismiss_ = new SwipeToDismiss(
+      this.win,
+      cb => this.mutateElement(cb),
+      // The sidebar is already animated by swipe to dismiss, so skip animation.
+      () => this.dismiss_(true)
+    );
   }
 
   /** @override */
@@ -153,11 +168,9 @@ export class AmpSidebar extends AMP.BaseElement {
       this.fixIosElasticScrollLeak_();
     }
 
-    if (this.isOpen_()) {
-      this.open_();
-    } else {
-      element.setAttribute('aria-hidden', 'true');
-    }
+    // The element is always closed by default, so update the aria state to
+    // match.
+    element.setAttribute('aria-hidden', 'true');
 
     if (!element.hasAttribute('role')) {
       element.setAttribute('role', 'menu');
@@ -215,6 +228,8 @@ export class AmpSidebar extends AMP.BaseElement {
       },
       true
     );
+
+    this.setupGestures_(this.element);
   }
 
   /**
@@ -288,21 +303,12 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if the sidebar is opened.
-   * @return {boolean}
-   * @private
-   */
-  isOpen_() {
-    return this.element.hasAttribute('open');
-  }
-
-  /**
    * Toggles the open/close state of the sidebar.
    * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @private
    */
   toggle_(opt_invocation) {
-    if (this.isOpen_()) {
+    if (this.opened_) {
       this.close_();
     } else {
       this.open_(opt_invocation);
@@ -363,8 +369,9 @@ export class AmpSidebar extends AMP.BaseElement {
   updateForOpened_() {
     // On open sidebar
     const children = this.getRealChildren();
-    this.scheduleLayout(children);
-    this.scheduleResume(children);
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(this.element, children);
+    owners.scheduleResume(this.element, children);
     // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
     if (!this.isIosWebView_()) {
       // For iOS, we cannot focus the Element itself, since VoiceOver will not
@@ -374,19 +381,25 @@ export class AmpSidebar extends AMP.BaseElement {
       tryFocus(devAssert(this.closeButton_));
     }
     this.triggerEvent_(SidebarEvents.OPEN);
+    this.element.setAttribute('i-amphtml-sidebar-opened', '');
   }
 
   /**
    * Updates the sidebar for when it is animating to the closed state.
+   * @param {boolean} immediate
    */
-  updateForClosing_() {
+  updateForClosing_(immediate) {
     this.closeMask_();
     this.mutateElement(() => {
       setModalAsClosed(this.element);
     });
     this.element.removeAttribute('open');
+    this.element.removeAttribute('i-amphtml-sidebar-opened');
     this.element.setAttribute('aria-hidden', 'true');
-    this.setUpdateFn_(() => this.updateForClosed_(), ANIMATION_TIMEOUT);
+    this.setUpdateFn_(
+      () => this.updateForClosed_(),
+      immediate ? 0 : ANIMATION_TIMEOUT
+    );
   }
 
   /**
@@ -394,7 +407,10 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForClosed_() {
     toggle(this.element, /* display */ false);
-    this.schedulePause(this.getRealChildren());
+    Services.ownersForDoc(this.element).schedulePause(
+      this.element,
+      this.getRealChildren()
+    );
     this.triggerEvent_(SidebarEvents.CLOSE);
   }
 
@@ -404,9 +420,10 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   open_(opt_invocation) {
-    if (this.isOpen_()) {
+    if (this.opened_) {
       return;
     }
+    this.opened_ = true;
     this.viewport_.enterOverlayMode();
     this.setUpdateFn_(() => this.updateForOpening_());
     this.getHistory_()
@@ -427,14 +444,32 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   close_() {
-    if (!this.isOpen_()) {
+    this.dismiss_(false);
+  }
+
+  /**
+   * Dismisses the sidebar.
+   * @param {boolean} immediate Whether sidebar should close immediately,
+   *     without animation.
+   * @return {boolean} Whether the sidebar actually transitioned from "visible"
+   *     to "hidden".
+   * @private
+   */
+  dismiss_(immediate) {
+    if (!this.opened_) {
       return false;
     }
+    this.opened_ = false;
     this.viewport_.leaveOverlayMode();
     const scrollDidNotChange =
       this.initialScrollTop_ == this.viewport_.getScrollTop();
     const sidebarIsActive = this.element.contains(this.document_.activeElement);
-    this.setUpdateFn_(() => this.updateForClosing_());
+    this.setUpdateFn_(() => this.updateForClosing_(immediate));
+    // Immediately hide the sidebar so that animation does not play.
+    if (immediate) {
+      this.closeMask_();
+      toggle(this.element, /* display */ false);
+    }
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
       this.historyId_ = -1;
@@ -447,6 +482,51 @@ export class AmpSidebar extends AMP.BaseElement {
     }
     return true;
   }
+
+  /**
+   * Set up gestures for the specified element.
+   * @param {!Element} element
+   * @private
+   */
+  setupGestures_(element) {
+    if (!isExperimentOn(this.win, 'amp-sidebar-swipe-to-dismiss')) {
+      return;
+    }
+    // stop propagation of swipe event inside amp-viewer
+    const gestures = Gestures.get(
+      dev().assertElement(element),
+      /* shouldNotPreventDefault */ false,
+      /* shouldStopPropagation */ true
+    );
+    gestures.onGesture(SwipeXRecognizer, ({data}) => {
+      this.handleSwipe_(data);
+    });
+  }
+
+  /**
+   * Handles a swipe gesture, updating the current swipe to dismiss state.
+   * @param {!SwipeDef} data
+   */
+  handleSwipe_(data) {
+    if (data.first) {
+      this.swipeToDismiss_.startSwipe({
+        swipeElement: dev().assertElement(this.element),
+        mask: dev().assertElement(this.maskElement_),
+        direction:
+          this.side_ == Side.LEFT ? Direction.BACKWARD : Direction.FORWARD,
+        orientation: Orientation.HORIZONTAL,
+      });
+      return;
+    }
+
+    if (data.last) {
+      this.swipeToDismiss_.endSwipe(data);
+      return;
+    }
+
+    this.swipeToDismiss_.swipeMove(data);
+  }
+
   /**
    * Sidebars within <amp-story> should be 'flipped'.
    * @param {!Side} side
@@ -476,6 +556,7 @@ export class AmpSidebar extends AMP.BaseElement {
       mask.addEventListener('touchmove', e => {
         e.preventDefault();
       });
+      this.setupGestures_(mask);
       this.maskElement_ = mask;
     }
     this.maskElement_.classList.toggle('i-amphtml-ghost', false);
@@ -495,7 +576,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   fixIosElasticScrollLeak_() {
     this.element.addEventListener('scroll', e => {
-      if (this.isOpen_()) {
+      if (this.opened_) {
         if (this.element./*OK*/ scrollTop < 1) {
           this.element./*OK*/ scrollTop = 1;
           e.preventDefault();

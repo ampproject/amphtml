@@ -15,12 +15,19 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
+
 // Global cache of typedefName: typedefLocation.
 const typedefs = new Map();
 
 module.exports = function(context) {
   return {
     VariableDeclaration(node) {
+      // This rule does not work with per-file on-the-fly linting done by IDEs.
+      if (!argv._.includes('lint')) {
+        return;
+      }
+
       if (!node.leadingComments) {
         return;
       }
@@ -33,9 +40,9 @@ module.exports = function(context) {
         return;
       }
 
-      // We can assume theres only 1 variable declaration  when a typedef
+      // We can assume theres only 1 variable declaration when a typedef
       // annotation is found. This is because Closure Compiler does not allow
-      // declaration of multiple variable with a shared type information.
+      // declaration of multiple variables with a shared type information.
       const typedefName = node.declarations[0].id.name;
 
       const typedefLocation = typedefs.get(typedefName);

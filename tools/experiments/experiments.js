@@ -281,22 +281,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'layers',
-    name: 'Enables the new Layers position/measurement system',
-    spec: 'https://github.com/ampproject/amphtml/issues/3434',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
-  },
-  {
     id: 'blurry-placeholder',
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
-  },
-  {
-    id: 'amp-list-diffing',
-    name: 'Enables DOM diffing of amp-list renders via set-dom',
-    spec: 'https://github.com/ampproject/amphtml/pull/17000',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
   },
   {
     id: 'custom-elements-v1',
@@ -329,11 +317,6 @@ const EXPERIMENTS = [
     id: 'amp-list-load-more',
     name: 'Enables load-more related functionality in amp-list',
     spec: 'https://github.com/ampproject/amphtml/issues/13575',
-  },
-  {
-    id: 'amp-script',
-    name: 'Enables <amp-script>.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
   },
   {
     id: 'hidden-mutation-observer',
@@ -399,6 +382,12 @@ const EXPERIMENTS = [
       'If applicable, convert remaining micro tasks to the next macro ' +
       ' tasks if a previous micro task execution took too long',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
+  },
+  {
+    id: 'pausable-iframe',
+    name: 'Use iframe freezing instead of recreating iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24110',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
   },
 ];
 

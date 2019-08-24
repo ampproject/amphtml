@@ -19,14 +19,58 @@ import {isAmp4Email} from './format';
 import {isUrlAttribute} from './url-rewrite';
 import {startsWith} from './string';
 
-/** @private @const {string} */
+/** @const {string} */
 export const BIND_PREFIX = 'data-amp-bind-';
+
+/** @const {string} */
+export const DIFF_KEY = 'i-amphtml-key';
+
+/** @const {string} */
+export const DIFF_IGNORE = 'i-amphtml-ignore';
+
+/**
+ * Map of AMP element tag name to attributes that, if changed, require
+ * replacement of the original element.
+ * @const {!Object<string, !Array<string>>}
+ */
+export const DIFFABLE_AMP_ELEMENTS = {
+  'AMP-IMG': ['src', 'srcset', 'layout', 'width', 'height'],
+};
+
+/**
+ * Most AMP elements don't support ad hoc mutation and should be replaced
+ * instead of DOM diff'ed. Some AMP elements can be manually diff'ed.
+ *
+ * Both of these cases require a special attribute to enable special handling in
+ * the diffing algorithm. This function sets the appropriate attribute.
+ *
+ * @param {!Element} element
+ * @param {function(): string} generateKey
+ */
+export function markElementForDiffing(element, generateKey) {
+  const isAmpElement = startsWith(element.tagName, 'AMP-');
+  // Don't DOM diff nodes with bindings because amp-bind scans newly rendered
+  // elements and discards _all_ old elements _before_ diffing, so preserving
+  // old elements would cause loss of functionality.
+  const hasBinding = element.hasAttribute('i-amphtml-binding');
+
+  if (!hasBinding && DIFFABLE_AMP_ELEMENTS[element.tagName]) {
+    // Nodes marked with "ignore" will not be touched (old element stays).
+    // We want this to allow manual diffing afterwards.
+    element.setAttribute(DIFF_IGNORE, '');
+  } else if (hasBinding || isAmpElement) {
+    // Diff'ed node pairs with unique "key" will always be replaced.
+    if (!element.hasAttribute(DIFF_KEY)) {
+      element.setAttribute(DIFF_KEY, generateKey());
+    }
+  }
+}
 
 /**
  * @const {!Object<string, boolean>}
- * See https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
+ * @see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
  */
-const BLACKLISTED_TAGS = Object.freeze({
+export const BLACKLISTED_TAGS = {
   'applet': true,
   'audio': true,
   'base': true,
@@ -40,29 +84,28 @@ const BLACKLISTED_TAGS = Object.freeze({
   'object': true,
   'style': true,
   'video': true,
-});
+};
 
 /**
- * Rules in addition to BLACKLISTED_TAGS for AMP4EMAIL.
+ * AMP elements allowed in AMP4EMAIL, modulo:
+ * - amp-list, which cannot be nested.
+ * - amp-lightbox and amp-image-lightbox, which are deprecated.
  * @const {!Object<string, boolean>}
+ * @see https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-components.md
  */
-const EMAIL_BLACKLISTED_TAGS = Object.freeze({
-  // See disallowed_ancestor in validator-amp-list.protoascii.
-  'amp-list': true,
-});
-
-/**
- *
- * @param {!Document} doc
- * @return {!Object<string, boolean>}
- */
-export function blacklistedTags(doc) {
-  return Object.assign(
-    map(),
-    BLACKLISTED_TAGS,
-    isAmp4Email(doc) ? EMAIL_BLACKLISTED_TAGS : {}
-  );
-}
+export const EMAIL_WHITELISTED_AMP_TAGS = {
+  'amp-accordion': true,
+  'amp-anim': true,
+  'amp-bind-macro': true,
+  'amp-carousel': true,
+  'amp-fit-text': true,
+  'amp-img': true,
+  'amp-layout': true,
+  'amp-selector': true,
+  'amp-sidebar': true,
+  'amp-state': true,
+  'amp-timeago': true,
+};
 
 /**
  * Whitelist of tags allowed in triple mustache e.g. {{{name}}}.
@@ -141,6 +184,9 @@ export const WHITELISTED_ATTRS = [
   'subscriptions-display',
   'subscriptions-section',
   'subscriptions-service',
+  // A global attribute used for structured data.
+  // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemprop
+  'itemprop',
 ];
 
 /**

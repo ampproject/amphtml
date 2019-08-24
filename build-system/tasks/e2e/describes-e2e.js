@@ -18,6 +18,8 @@
 require('chromedriver'); // eslint-disable-line no-unused-vars
 require('geckodriver'); // eslint-disable-line no-unused-vars
 
+const chrome = require('selenium-webdriver/chrome');
+const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
 const {
   SeleniumWebDriverController,
@@ -109,7 +111,7 @@ function getConfig() {
 /**
  * Configure and launch a Puppeteer instance
  * @param {!PuppeteerConfigDef=} opt_config
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function createPuppeteer(opt_config = {}) {
   const browser = await puppeteer.launch({
@@ -143,6 +145,17 @@ async function createDriver(browserName, args) {
   const capabilities = Capabilities[browserName]();
   capabilities.set(capabilitiesKeys[browserName], {'args': args});
   const builder = new Builder().withCapabilities(capabilities);
+  switch (browserName) {
+    case 'firefox':
+      const options = new firefox.Options();
+      // for some reason firefox.Options().addArguments() doesn't like arrays
+      args.forEach(arg => {
+        options.addArguments(arg);
+      });
+      builder.setFirefoxOptions(options);
+    case 'chrome':
+      builder.setChromeOptions(new chrome.Options().addArguments(args));
+  }
   const driver = await builder.build();
   return driver;
 }
@@ -174,7 +187,7 @@ function getFirefoxArgs(config) {
   const args = [];
 
   if (config.headless) {
-    args.push('-headless');
+    args.push('--headless');
   }
   return args;
 }
@@ -210,13 +223,40 @@ const EnvironmentVariantMap = {
     name: 'Shadow environment',
     value: {environment: 'shadow-demo'},
   },
+  [AmpdocEnvironment.A4A_FIE]: {
+    name: 'AMPHTML ads FIE environment',
+    value: {environment: 'a4a-fie'},
+  },
+  [AmpdocEnvironment.A4A_INABOX]: {
+    name: 'AMPHTML ads inabox environment',
+    value: {environment: 'a4a-inabox'},
+  },
+  [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
+    name: 'AMPHTML ads inabox friendly frame environment',
+    value: {environment: 'a4a-inabox-friendly'},
+  },
+  [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
+    name: 'AMPHTML ads inabox safeframe environment',
+    value: {environment: 'a4a-inabox-safeframe'},
+  },
 };
 
-const defaultEnvironments = [
-  AmpdocEnvironment.SINGLE,
-  AmpdocEnvironment.VIEWER_DEMO,
-  AmpdocEnvironment.SHADOW_DEMO,
-];
+const envPresets = {
+  'ampdoc-preset': [
+    AmpdocEnvironment.SINGLE,
+    AmpdocEnvironment.VIEWER_DEMO,
+    AmpdocEnvironment.SHADOW_DEMO,
+  ],
+  'amp4ads-preset': [
+    AmpdocEnvironment.A4A_FIE,
+    AmpdocEnvironment.A4A_INABOX,
+    AmpdocEnvironment.A4A_INABOX_FRIENDLY,
+    AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
+  ],
+};
+envPresets['ampdoc-amp4ads-preset'] = envPresets['ampdoc-preset'].concat(
+  envPresets['amp4ads-preset']
+);
 
 /**
  * Helper class to skip E2E tests in a specific AMP environment.
@@ -247,6 +287,11 @@ class ItConfig {
     return this;
   }
 
+  skipA4aFie() {
+    this.skip = this.skip ? this.skip : this.env.environment == 'a4a-fie';
+    return this;
+  }
+
   run(name, fn) {
     if (this.skip) {
       return this.it.skip(name, fn);
@@ -263,7 +308,7 @@ class ItConfig {
  * that also sets up the provided fixtures and returns the corresponding
  * environment objects of each fixture to the test method.
  * @param {function(!Object):!Array<?Fixture>} factory
- * @return {*} TODO(#23582): Specify return type
+ * @return {function()}
  */
 function describeEnv(factory) {
   /**
@@ -271,11 +316,17 @@ function describeEnv(factory) {
    * @param {!Object} spec
    * @param {function(!Object)} fn
    * @param {function(string, function())} describeFunc
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   const templateFunc = function(suiteName, spec, fn, describeFunc) {
     const fixture = factory(spec);
-    const environments = spec.environments || defaultEnvironments;
+    let environments = spec.environments || 'ampdoc-preset';
+    if (typeof environments === 'string') {
+      environments = envPresets[environments];
+    }
+    if (!environments) {
+      throw new Error('Invalid environment preset: ' + spec.environments);
+    }
     const variants = Object.create(null);
     environments.forEach(environment => {
       const o = EnvironmentVariantMap[environment];
@@ -377,7 +428,7 @@ function describeEnv(factory) {
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   const mainFunc = function(name, spec, fn) {
     return templateFunc(name, spec, fn, describe);
@@ -387,7 +438,7 @@ function describeEnv(factory) {
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   mainFunc.only = function(name, spec, fn) {
     return templateFunc(name, spec, fn, describe./*OK*/ only);
@@ -425,12 +476,21 @@ class EndToEndFixture {
     } = this.spec;
     const {environment} = env;
 
-    await toggleExperiments(ampDriver, testUrl, experiments);
+    const url = new URL(testUrl);
+    if (experiments.length > 0) {
+      if (environment.includes('inabox')) {
+        // inabox experiments are toggled at server side using <meta> tag
+        url.searchParams.set('exp', experiments.join(','));
+      } else {
+        // AMP doc experiments are toggled via cookies
+        await toggleExperiments(ampDriver, url.href, experiments);
+      }
+    }
 
     const {width, height} = initialRect;
     await controller.setWindowRect({width, height});
 
-    await ampDriver.navigateToEnvironment(environment, testUrl);
+    await ampDriver.navigateToEnvironment(environment, url.href);
   }
 
   async teardown(env) {
@@ -446,7 +506,7 @@ class EndToEndFixture {
  * Get the controller object for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
- * @return {*} TODO(#23582): Specify return type
+ * @return {!SeleniumWebDriverController}
  */
 async function getController(
   {engine = 'selenium', headless = false},
@@ -471,10 +531,6 @@ async function getController(
  * @return {!Promise}
  */
 async function toggleExperiments(ampDriver, testUrl, experiments) {
-  if (!experiments.length) {
-    return;
-  }
-
   await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
 
   for (const experiment of experiments) {

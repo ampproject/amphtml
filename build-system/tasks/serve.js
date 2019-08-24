@@ -15,12 +15,15 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
+const argv = require('minimist')(process.argv.slice(2), {
+  string: ['rtv_serve_mode'],
+});
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 const nodemon = require('nodemon');
 const path = require('path');
 const {createCtrlcHandler} = require('../ctrlcHandler');
+const {isRtvMode} = require('../app-utils');
 
 const host = argv.host || 'localhost';
 const port = argv.port || process.env.PORT || 8000;
@@ -31,8 +34,9 @@ const noCachingExtensions = argv.noCachingExtensions != undefined;
 
 /**
  * Starts a simple http server at the repository root
+ * @param {boolean} lazyBuildExtensions
  */
-function serve() {
+function serve(lazyBuildExtensions) {
   createCtrlcHandler('serve');
 
   // Get the serve mode
@@ -42,6 +46,14 @@ function serve() {
   } else if (argv.cdn) {
     process.env.SERVE_MODE = 'cdn';
     log(colors.green('Serving current prod js'));
+  } else if (argv.rtv_serve_mode) {
+    const rtv = argv.rtv_serve_mode;
+    if (isRtvMode(rtv)) {
+      process.env.SERVE_MODE = rtv;
+      log(colors.green(`Serving RTV ${rtv} js`));
+    } else {
+      throw new Error(`Invalid rtv_serve_mode: ${rtv}`);
+    }
   } else {
     process.env.SERVE_MODE = 'default';
     log(colors.green('Serving unminified js'));
@@ -66,6 +78,7 @@ function serve() {
       'SERVE_QUIET': quiet,
       'SERVE_CACHING_HEADERS': sendCachingHeaders,
       'SERVE_EXTENSIONS_WITHOUT_CACHING': noCachingExtensions,
+      'LAZY_BUILD_EXTENSIONS': lazyBuildExtensions,
     },
     stdout: !quiet,
   };

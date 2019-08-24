@@ -16,11 +16,11 @@
 
 import {CSS} from '../../../build/amp-loader-0.1.css';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {htmlFor, htmlRefs, svgFor} from '../../../src/static-template';
+import {createSpinnerDom} from './spinner';
+import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isIframeVideoPlayerComponent} from '../../../src/layout';
-import {setImportantStyles} from '../../../src/style';
+import {setImportantStyles, setStyle} from '../../../src/style';
 
 /**
  * @fileoverview This file implements the new AMP loader as an extension. This
@@ -29,20 +29,18 @@ import {setImportantStyles} from '../../../src/style';
  *    the amount of time it took to load the extension.
  */
 
-const DEFAULT_LOGO_SPINNER_COLOR = '#aaaaaa';
-
 // How long before the loader appears, in milliseconds. This matches the
 // minimum animation delay specified in the CSS.
 const LOADER_APPEAR_TIME = 600;
 
 /**
- * Elements will get a default gray placeholder if they don't already have a
+ * Elements will get a default gray background if they don't already have a
  * placeholder. This list does not include video players which are detected
  * using `isIframeVideoPlayerComponent`
  * @enum {boolean}
  * @private  Visible for testing only!
  */
-const DEFAULT_PLACEHOLDER_WHITELIST_NONE_VIDEO = {
+const LOADER_BACKGROUND_TAGS = {
   'AMP-IMG': true,
   'AMP-ANIM': true,
   'AMP-PINTEREST': true,
@@ -51,8 +49,45 @@ const DEFAULT_PLACEHOLDER_WHITELIST_NONE_VIDEO = {
 };
 
 /**
+ * Used to cache the loader DOM once created, so we do not need to recreate it
+ * each time.
+ * @type {?Element}
+ */
+let loaderDom = null;
+
+/**
+ * @param {!AmpElement} element Used to get a document to build HTML with.
+ * @return {!Element} The loader DOM.
+ */
+function getLoaderDom(element) {
+  if (!loaderDom) {
+    const html = htmlFor(element);
+    /*
+     * The outer div here is needed for two reasons:
+     * 1. Applying a background color when there is no placeholder.
+     * 2. Backwards compatibility with the existing method and documentation
+     *    for customizing loaders, which includes a style to hide the old three
+     *    dots via:
+     *    ```
+     *    .my-custom-loader .amp-active > div {
+     *     display: none;
+     *    }
+     *    ```
+     */
+    loaderDom = html`
+      <div class="i-amphtml-new-loader">
+        <div class="i-amphtml-new-loader-shim"></div>
+        <div class="i-amphtml-new-loader-logo"></div>
+      </div>
+    `;
+    loaderDom.appendChild(createSpinnerDom(html));
+  }
+
+  return loaderDom.cloneNode(true);
+}
+
+/**
  * Helper class to build the new loader's DOM.
- * TODO(sparham) Refactor to move more logic into CSS>
  */
 class LoaderBuilder {
   /**
@@ -75,44 +110,17 @@ class LoaderBuilder {
     this.layoutHeight_ = elementHeight;
 
     /** @private {?Element} */
-    this.svgRoot_;
+    this.loaderRoot_ = null;
   }
 
   /**
    * Builds the loader's DOM.
    */
   build() {
-    this.buildContainers_();
-    this.maybeAddDefaultPlaceholder_();
+    this.loaderRoot_ = getLoaderDom(this.element_);
+    this.domRoot_.appendChild(this.loaderRoot_);
+    this.maybeAddLoadingBackground_();
     this.maybeAddLoaderAnimation_();
-  }
-
-  /**
-   * Builds the wrappers for the loader.
-   * @private
-   */
-  buildContainers_() {
-    const html = htmlFor(this.element_);
-    this.domRoot_.appendChild(html`
-      <div>
-        <svg
-          ref="svgRoot"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="24 24 72 72"
-        ></svg>
-      </div>
-    `);
-
-    /**
-     * There is an extra inner div here for backward compatibility with
-     * customizing loaders. The common and documented CSS for customizing
-     * loaders includes a style to hide the old three dots via:
-     *  .my-custom-loader .amp-active > div {
-     *     display: none;
-     *  }
-     * The extra div mimic a similar DOM.
-     */
-    this.svgRoot_ = dev().assertElement(htmlRefs(this.domRoot_)['svgRoot']);
   }
 
   /**
@@ -126,8 +134,10 @@ class LoaderBuilder {
     }
 
     this.setSize_();
-    this.maybeAddBackgroundShim_();
-    this.addSpinnerAndLogo_();
+    if (this.requiresBackgroundShim_()) {
+      this.loaderRoot_.classList.add('i-amphtml-new-loader-has-shim');
+    }
+    this.addLogo_();
   }
 
   /**
@@ -142,207 +152,167 @@ class LoaderBuilder {
 
     // Ads always get the default spinner regardless of the element size
     if (this.isAd_()) {
-      return this.domRoot_.classList.add(sizeClassDefault);
+      return this.loaderRoot_.classList.add(sizeClassDefault);
     }
 
     // Other than Ads, small spinner is always used if element is small.
     if (this.isSmall_()) {
-      return this.domRoot_.classList.add(sizeClassSmall);
+      return this.loaderRoot_.classList.add(sizeClassSmall);
     }
 
     // If host is not small, default size spinner is normally used
     // unless due to branding guidelines (e.g. Instagram) a larger spinner is
     // required.
     if (this.requiresLargeSpinner_()) {
-      return this.domRoot_.classList.add(sizeClassLarge);
+      return this.loaderRoot_.classList.add(sizeClassLarge);
     }
-    return this.domRoot_.classList.add(sizeClassDefault);
-  }
-
-  /**
-   * Adds the background shim under the loader for cases where loader is on
-   * top of an image.
-   * @private
-   */
-  maybeAddBackgroundShim_() {
-    if (!this.requiresBackgroundShim_()) {
-      return;
-    }
-
-    const svg = svgFor(this.element_);
-    const shimNode = svg`
-      <circle
-        class="i-amphtml-new-loader-shim"
-        cx="60"
-        cy="60"
-      >
-      </circle>
-    `;
-
-    // Note that logo colors gets overwritten when logo is on top of the
-    // background shim (when there is image placeholder).
-    // This is done in CSS. See `i-amphtml-new-loader-has-shim` CSS for details.
-    this.domRoot_.classList.add('i-amphtml-new-loader-has-shim');
-    this.svgRoot_.appendChild(shimNode);
+    return this.loaderRoot_.classList.add(sizeClassDefault);
   }
 
   /**
    * Adds the spinner.
    * @private
    */
-  addSpinnerAndLogo_() {
-    const logo = this.getLogo_();
-    const color = logo ? logo.color : DEFAULT_LOGO_SPINNER_COLOR;
-    const spinner = this.getSpinner_(color);
+  addLogo_() {
+    const {color, content = this.getDefaultLogo_()} = this.getCustomLogo_();
 
-    if (logo) {
-      const svg = svgFor(this.element_);
-      const logoWrapper = svg`<g class="i-amphtml-new-loader-logo"></g>`;
-      if (logo.isDefault) {
-        // default logo is special because it fades away.
-        logoWrapper.classList.add('i-amphtml-new-loader-logo-default');
-      }
-      logoWrapper.appendChild(logo.svg);
-      this.svgRoot_.appendChild(logoWrapper);
+    this.loaderRoot_
+      .querySelector('.i-amphtml-new-loader-logo')
+      .appendChild(content);
+
+    if (color) {
+      setStyle(this.loaderRoot_, 'color', color);
     }
-
-    this.svgRoot_.appendChild(spinner);
   }
 
   /**
-   * @param {string} color
-   * @return {!Node}
-   */
-  getSpinner_(color) {
-    const svg = svgFor(this.element_);
-    const spinnerWrapper = svg`
-      <g class="i-amphtml-new-loader-spinner">
-    `;
-    for (let i = 0; i < 4; i++) {
-      const spinnerSegment = svg`
-        <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60">
-        </circle>
-      `;
-      spinnerSegment.setAttribute('stroke', color);
-      spinnerWrapper.appendChild(spinnerSegment);
-    }
-
-    return spinnerWrapper;
-  }
-
-  /**
-   * Adds the default or branded logo.
-   * @private
-   * @return {*} TODO(#23582): Specify return type
-   */
-  getLogo_() {
-    const customLogo = this.getCustomLogo_();
-    const useDefaultLogo = !customLogo;
-    const logo = customLogo || this.getDefaultLogo_();
-
-    // Ads always get the logo regardless of size
-    if (this.isAd_()) {
-      return logo;
-    }
-
-    // Small hosts do not get a logo
-    if (this.isSmall_()) {
-      return;
-    }
-
-    // If element requires a background shim but logo is the default logo,
-    // we don't show the logo.
-    if (this.requiresBackgroundShim_() && useDefaultLogo) {
-      return;
-    }
-
-    return {
-      svg: logo,
-      color: logo.getAttribute('fill') || DEFAULT_LOGO_SPINNER_COLOR,
-      isDefault: useDefaultLogo,
-    };
-  }
-
-  /**
-   * Add a gray default placeholder if there isn't a placeholder already and
-   * other special cases.
+   * @return {boolean} True if the currently loading element has background
+   * content via a placeholder or poster.
    * @private
    */
-  maybeAddDefaultPlaceholder_() {
+  hasBackgroundContent_() {
     const hasPlaceholder = !!this.element_.getPlaceholder();
     const hasPoster = this.element_.hasAttribute('poster');
-    if (hasPlaceholder || hasPoster) {
-      return;
-    }
 
-    // Is it whitelisted for default placeholder?
-    const tagName = this.element_.tagName.toUpperCase();
-    if (
-      DEFAULT_PLACEHOLDER_WHITELIST_NONE_VIDEO[tagName] || // static white list
-      isIframeVideoPlayerComponent(tagName) // regex for various video players
-    ) {
-      const html = htmlFor(this.element_);
-      const defaultPlaceholder = html`
-        <div placeholder class="i-amphtml-default-placeholder"></div>
-      `;
-      this.element_.insertBefore(defaultPlaceholder, this.element_.lastChild);
+    return hasPlaceholder || hasPoster;
+  }
+
+  /**
+   * @return {boolean} True if the loaderBackground should be used for the
+   * element.
+   * @private
+   */
+  tagNeedsBackground_() {
+    const {tagName} = this.element_;
+
+    return (
+      LOADER_BACKGROUND_TAGS[tagName] || isIframeVideoPlayerComponent(tagName)
+    );
+  }
+
+  /**
+   * Add a gray loading background if needed based on the element's content
+   * and tagName.
+   * @private
+   */
+  maybeAddLoadingBackground_() {
+    if (!this.hasBackgroundContent_() && this.tagNeedsBackground_()) {
+      this.domRoot_.classList.add('i-amphtml-loader-background');
     }
   }
 
   /**
    * Returns the custom logo for the element if there is one.
    * @private
-   * @return {?Element}
+   * @return {{
+   *  content: (!Element|undefined),
+   *  color: (string|undefined),
+   * }}
    */
   getCustomLogo_() {
+    if (this.isAd_()) {
+      return {
+        content: this.getAdsLogo_(),
+      };
+    }
+
+    if (isIframeVideoPlayerComponent(this.element_.tagName)) {
+      return {
+        content: this.getVideoPlayerLogo_(),
+      };
+    }
+
+    return this.element_.createLoaderLogo();
+  }
+
+  /**
+   * @return {!Element} The logo for video players
+   * @private
+   */
+  getVideoPlayerLogo_() {
     // Keeping the video logo here short term.
     // This is because there is no single CSS for all players, there is
     // video-interface but not all players implement it. Also the SVG is not
-    // that big. We may still want to move this out eventually.
-    if (isIframeVideoPlayerComponent(this.element_.tagName)) {
-      const svg = svgFor(this.element_);
-      const color = DEFAULT_LOGO_SPINNER_COLOR;
-      const svgNode = svg`
+    // that big.
+    // TODO(sparhami) Figure out how to move this out of amp-loader.
+    const html = htmlFor(this.element_);
+    return html`
+      <svg viewBox="0 0 72 72">
         <path
           class="i-amphtml-new-loader-white-on-shim"
-          d="M65,58.5V55c0-0.5-0.4-1-1-1H51c-0.5,0-1,0.5-1,1v10c0,0.6,0.5,1,1,1h13c0.6,0,1-0.4,1-1v-3.5l5,4v-11L65,58.5z"
-        ></path>
-      `;
-      svgNode.setAttribute('fill', color);
-      return svgNode;
-    }
-
-    const customLogo = this.element_.createLoaderLogo();
-    return customLogo || null;
+          fill="currentColor"
+          d="M41,34.5V31c0-0.5-0.4-1-1-1H27c-0.5,0-1,0.5-1,1v10c0,0.6,0.5,1,1,1h13c0.6,0,1-0.4,1-1v-3.5l5,4v-11L41,34.5z"
+        />
+      </svg>
+    `;
   }
 
   /**
    * Returns the default logo.
-   * @private
    * @return {!Element}
+   * @private
    */
   getDefaultLogo_() {
-    const svg = svgFor(this.element_);
-    const svgNode = svg`
-      <circle
-        cx="60"
-        cy="60"
-        r="12"
-      >
-      </circle>
+    const html = htmlFor(this.element_);
+    return html`
+      <svg class="i-amphtml-new-loader-logo-default" viewBox="0 0 72 72">
+        <circle cx="36" cy="36" r="12"></circle>
+      </svg>
     `;
-    svgNode.setAttribute('fill', DEFAULT_LOGO_SPINNER_COLOR);
-    return svgNode;
   }
 
   /**
-   * Whether the element is an Ad.
+   * `<amp-ad>s` have several different classes, so putting the code here for
+   * now since it is the safest way to make sure that they all get the correct
+   * loader.
+   *
+   * Since the implementation may have a delay before loading, we would need to
+   * make sure the ads loader is present, even if the implementation has not
+   * yet downloaded.
+   *
+   * TODO(sparhami) Move this out of amp-loader into something common for ads.
+   * @return {!Element}
+   * @private
+   */
+  getAdsLogo_() {
+    const html = htmlFor(this.element_);
+    return html`
+      <div class="i-amphtml-new-loader-ad-logo">
+        <span class="i-amphtml-new-loader-ad-label">
+          Ad
+        </span>
+      </div>
+    `;
+  }
+
+  /**
+   * Whether the element is an Ad. Note that this does not cover amp-embed
+   * currently.
    * @private
    * @return {boolean}
    */
   isAd_() {
-    // Not Implemented
-    return false;
+    return this.element_.tagName == 'AMP-AD';
   }
 
   /**

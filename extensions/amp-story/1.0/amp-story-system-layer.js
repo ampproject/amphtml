@@ -175,7 +175,7 @@ const TEMPLATE = {
           ],
         },
         {
-          tag: 'div',
+          tag: 'a',
           attrs: dict({
             'role': 'button',
             'class': SHARE_CLASS + ' i-amphtml-story-button',
@@ -268,6 +268,12 @@ export class SystemLayer {
 
     this.root_ = this.win_.document.createElement('div');
     this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
+    // Make the share button link to the current document to make sure
+    // embedded STAMPs always have a back-link to themselves, and to make
+    // gestures like right-clicks work.
+    this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-share-control'
+    ).href = Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
@@ -342,7 +348,7 @@ export class SystemLayer {
       } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onAudioIconClick_(false);
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
-        this.onShareClick_();
+        this.onShareClick_(event);
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
         this.onInfoClick_();
       } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
@@ -665,9 +671,11 @@ export class SystemLayer {
 
   /**
    * Handles click events on the share button and toggles the share menu.
+   * @param {!Event} event
    * @private
    */
-  onShareClick_() {
+  onShareClick_(event) {
+    event.preventDefault();
     const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
   }

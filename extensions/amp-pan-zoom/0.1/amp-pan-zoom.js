@@ -219,7 +219,10 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.createZoomButton_();
-    this.scheduleLayout(dev().assertElement(this.content_));
+    Services.ownersForDoc(this.element).scheduleLayout(
+      this.element,
+      dev().assertElement(this.content_)
+    );
     return this.resetContentDimensions_().then(this.setupEvents_());
   }
 
@@ -231,7 +234,10 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   resumeCallback() {
     if (this.content_) {
-      this.scheduleLayout(this.content_);
+      Services.ownersForDoc(this.element).scheduleLayout(
+        this.element,
+        this.content_
+      );
     }
     this.setupEvents_();
   }

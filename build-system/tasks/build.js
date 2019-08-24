@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-const gulp = require('gulp');
+const argv = require('minimist')(process.argv.slice(2));
+const log = require('fancy-log');
 const {
   buildAlp,
   buildExaminer,
@@ -26,7 +27,9 @@ const {
 } = require('./helpers');
 const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
+const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {cyan, green} = require('ansi-colors');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
@@ -34,12 +37,13 @@ const {serve} = require('./serve');
 
 /**
  * Enables watching for file changes in css, extensions.
+ * @param {boolean} defaultTask
  * @return {!Promise}
  */
-async function watch() {
+async function watch(defaultTask) {
   maybeUpdatePackages();
   createCtrlcHandler('watch');
-  return performBuild(true);
+  return performBuild(/* watch */ true, defaultTask);
 }
 
 /**
@@ -54,23 +58,24 @@ async function build() {
 }
 
 /**
- * Performs the build steps for gulp build and gulp watch
+ * Performs the build steps for gulp, gulp build, and gulp watch
  * @param {boolean} watch
+ * @param {boolean} defaultTask
  * @return {!Promise}
  */
-async function performBuild(watch) {
+async function performBuild(watch, defaultTask) {
   process.env.NODE_ENV = 'development';
   printNobuildHelp();
-  printConfigHelp(watch ? 'gulp watch' : 'gulp build');
-  parseExtensionFlags();
-  return compileCss(watch)
+  printConfigHelp(defaultTask ? 'gulp' : watch ? 'gulp watch' : 'gulp build');
+  parseExtensionFlags(defaultTask);
+  return Promise.all([compileCss(watch), compileJison()])
     .then(() => {
       return Promise.all([
         polyfillsForTests(),
         buildAlp({watch}),
         buildExaminer({watch}),
         buildWebWorker({watch}),
-        buildExtensions({watch}),
+        defaultTask ? Promise.resolve() : buildExtensions({watch}),
         compileAllUnminifiedTargets(watch),
       ]);
     })
@@ -93,7 +98,22 @@ function polyfillsForTests() {
 /**
  * The default task run when `gulp` is executed
  */
-const defaultTask = gulp.series(watch, serve);
+async function defaultTask() {
+  await watch(/* defaultTask */ true);
+  serve(argv.lazy_build_extensions);
+  const startedMessage = green('Started ') + cyan('gulp ') + green('server. ');
+  if (argv.lazy_build_extensions) {
+    log(
+      startedMessage +
+        green(
+          'Extensions will be lazily built when requested from the server...'
+        )
+    );
+  } else {
+    log(startedMessage + green('Building extensions...'));
+    await buildExtensions({watch: true});
+  }
+}
 
 module.exports = {
   build,
@@ -113,10 +133,6 @@ build.flags = {
 
 watch.description = 'Watches for changes in files, re-builds when detected';
 watch.flags = {
-  with_inabox: '  Also watch and build the amp-inabox.js binary.',
-  with_shadow: '  Also watch and build the amp-shadow.js binary.',
-  with_video_iframe_integration:
-    '  Also watch and build the video-iframe-integration.js binary.',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
@@ -125,10 +141,8 @@ watch.flags = {
 
 defaultTask.description = 'Runs "watch" and then "serve"';
 defaultTask.flags = {
-  with_inabox: '  Also watch and build the amp-inabox.js binary.',
-  with_shadow: '  Also watch and build the amp-shadow.js binary.',
-  with_video_iframe_integration:
-    '  Also watch and build the video-iframe-integration.js binary.',
+  lazy_build_extensions:
+    '  Lazily builds extensions when they are requested from the server',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',

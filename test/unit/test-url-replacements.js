@@ -15,18 +15,11 @@
  */
 
 import * as trackPromise from '../../src/impression';
-import {Observable} from '../../src/observable';
-import {Services} from '../../src/services';
-import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
-import {createIframePromise} from '../../testing/iframe';
+
 import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
-import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {installCryptoService} from '../../src/service/crypto-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
@@ -35,6 +28,15 @@ import {
   mockWindowInterface,
   stubServiceForDoc,
 } from '../../testing/test-helper';
+
+import {Observable} from '../../src/observable';
+import {Services} from '../../src/services';
+import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
+import {createIframePromise} from '../../testing/iframe';
+import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
+import {installCryptoService} from '../../src/service/crypto-impl';
+import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
 import {parseUrlDeprecated} from '../../src/url';
 import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
@@ -61,6 +63,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       link.setAttribute('href', 'https://pinterest.com:8080/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
+      iframe.win.__AMP_SERVICES.documentInfo = null;
       installDocumentInfoServiceForDoc(iframe.ampdoc);
       resetScheduledElementForTesting(iframe.win, 'amp-analytics');
       resetScheduledElementForTesting(iframe.win, 'amp-experiment');
@@ -177,7 +180,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
       Math: {
         random: () => 0.1234,
       },
-      services: {
+      crypto: {
+        getRandomValues: array => {
+          array[0] = 1;
+          array[1] = 2;
+          array[2] = 3;
+          array[15] = 15;
+        },
+      },
+      __AMP_SERVICES: {
         'viewport': {obj: {}},
         'cid': {
           promise: Promise.resolve({
@@ -199,6 +210,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     };
     installDocService(win, /* isSingleDoc */ true);
     const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
+    win.__AMP_SERVICES.documentInfo = null;
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     installUrlReplacementsServiceForDoc(ampdoc);
@@ -214,7 +226,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       // Restrict the number of replacement params to globalVaraibleSource
       // Please consider adding the logic to amp-analytics instead.
       // Please contact @lannka or @zhouyx if the test fail.
-      expect(variables.length).to.equal(71);
+      expect(variables.length).to.equal(72);
     });
   });
 
@@ -595,6 +607,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace PAGE_VIEW_ID_64', () => {
+    return expandUrlAsync('?pid=PAGE_VIEW_ID_64').then(res => {
+      expect(res).to.match(/pid=([a-zA-Z0-9_-]+){10,}/);
+    });
+  });
+
   it('should replace CLIENT_ID', () => {
     setCookie(window, 'url-abc', 'cid-for-abc');
     // Make sure cookie does not exist
@@ -905,7 +923,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 0', () => {
     const win = getFakeWindow();
-    win.services.viewer = {
+    win.__AMP_SERVICES.viewer = {
       obj: {isVisible: () => true},
     };
     return Services.urlReplacementsForDoc(win.document.documentElement)
@@ -917,7 +935,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 1', () => {
     const win = getFakeWindow();
-    win.services.viewer = {
+    win.__AMP_SERVICES.viewer = {
       obj: {isVisible: () => false},
     };
     return Services.urlReplacementsForDoc(win.document.documentElement)
@@ -1157,22 +1175,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace FRAGMENT_PARAM with 2', () => {
-    return expect(
-      expandUrlAsync(
-        '?sh=FRAGMENT_PARAM(ice_cream)&s',
-        /*opt_bindings*/ undefined,
-        {
-          withViewerIntegrationVariableService: {
-            ancestorOrigin: () => {
-              return 'http://margarine-paradise.com';
-            },
-            fragmentParam: (param, defaultValue) => {
-              return param == 'ice_cream' ? '2' : defaultValue;
-            },
-          },
-        }
-      )
-    ).to.eventually.equal('?sh=2&s');
+    const win = getFakeWindow();
+    win.location = {originalHash: '#margarine=1&ice=2&cream=3'};
+    return Services.urlReplacementsForDoc(win.document.documentElement)
+      .expandUrlAsync('?sh=FRAGMENT_PARAM(ice)&s')
+      .then(res => {
+        expect(res).to.equal('?sh=2&s');
+      });
   });
 
   it.configure()

@@ -91,7 +91,6 @@ export function createNewLoaderElement(
   // synchronously. We create the actually element with animations when the
   // service is ready.
   const loaderRoot = element.ownerDocument.createElement('div');
-  loaderRoot.className = 'i-amphtml-new-loader';
 
   getLoaderServicePromise(ampDoc, element).then(loaderService => {
     const endTime = Date.now();
@@ -115,11 +114,6 @@ export function createNewLoaderElement(
  * @return {boolean}
  */
 export function isNewLoaderExperimentEnabled(element) {
-  // TODO(sparhami): Implement loader for Ads
-  // Temporarily excluding the amp-ads from this experiment
-  if (element.tagName == 'AMP-AD' || element.tagName == 'AMP-EMBED') {
-    return false;
-  }
   const win = toWin(element.ownerDocument.defaultView);
   return isExperimentOn(win, 'new-loaders');
 }

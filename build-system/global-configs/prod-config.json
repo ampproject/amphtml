@@ -4,11 +4,13 @@
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
     "inabox-css-cleanup",
-    "inabox-no-chunking"
+    "inabox-no-chunking",
+    "inabox-viewport-lite"
   ],
   "allow-url-opt-in": [
     "ios-scrollable-iframe",
     "pump-early-frame",
+    "macro-after-long-task",
     "twitter-default-placeholder",
     "twitter-default-placeholder-fade",
     "twitter-default-placeholder-pulse"
@@ -32,14 +34,13 @@
   "chunked-amp": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
-  "expAdsenseA4A": 0.01,
-  "expAdsenseCanonical": 0.05,
-  "expAdsenseUnconditionedCanonical": 0.05,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
   "ios-scrollable-iframe": 0,
+  "macro-after-long-task": 0,
+  "new-loaders": 0.1,
   "pump-early-frame": 1,
   "version-locking": 1
 }

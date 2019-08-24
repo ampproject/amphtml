@@ -19,7 +19,7 @@ import {devAssert, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
-import {bindParser as parser} from './bind-expr-impl';
+import {bindParser as parser} from '../../../build/parsers/bind-expr-impl';
 
 const TAG = 'amp-bind';
 
@@ -243,7 +243,7 @@ export class BindExpression {
 
   /**
    * Evaluates the expression given a scope.
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @throws {Error} On illegal function invocation.
    * @return {BindExpressionResultDef}
    */
@@ -326,7 +326,7 @@ export class BindExpression {
   /**
    * Recursively evaluates and returns value of `node` and its children.
    * @param {./bind-expr-defines.AstNode} node
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @throws {Error}
    * @return {BindExpressionResultDef}
    * @private

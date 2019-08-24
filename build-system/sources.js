@@ -25,23 +25,23 @@ const tempy = require('tempy');
 const SRC_TEMP_DIR = tempy.directory();
 
 const COMMON_GLOBS = [
+  'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/caja/html-sanitizer.js',
   'third_party/closure-library/sha384-generated.js',
   'third_party/css-escape/css-escape.js',
+  'third_party/d3/**/*.js',
   'third_party/fuzzysearch/index.js',
+  'third_party/inputmask/**/*.js',
   'third_party/mustache/**/*.js',
+  'third_party/react-dates/bundle.js',
+  'third_party/set-dom/set-dom.js',
+  'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
   'third_party/vega/**/*.js',
-  'third_party/d3/**/*.js',
-  'third_party/subscriptions-project/*.js',
   'third_party/webcomponentsjs/ShadowCSS.js',
-  'third_party/react-dates/bundle.js',
-  'third_party/amp-toolbox-cache-url/**/*.js',
-  'third_party/inputmask/**/*.js',
   'node_modules/dompurify/dist/purify.es.js',
   'node_modules/promise-pjs/promise.mjs',
   'node_modules/rrule/dist/esm/src/index.js',
-  'node_modules/set-dom/dist/set-dom.js',
   'node_modules/web-animations-js/web-animations.install.js',
   'node_modules/web-activities/activity-ports.js',
   'node_modules/@ampproject/animations/dist/animations.mjs',
@@ -77,15 +77,21 @@ const CLOSURE_SRC_GLOBS = [
   'build/fake-module/**/*.js',
   'build/patched-module/**/*.js',
   'build/experiments/**/*.js',
+  'build/parsers/**/*.js',
   // A4A has these cross extension deps.
   'extensions/amp-ad-network*/**/*-config.js',
   'extensions/amp-ad/**/*.js',
   'extensions/amp-a4a/**/*.js',
+  // TODO(#24080) Remove this when story ads have full ad network support.
+  // Needed for amp-story-auto-ads to validate amp-ad-exit config.
+  'extensions/amp-ad-exit/0.1/config.js',
   // Currently needed for crypto.js and visibility.js.
   // Should consider refactoring.
   'extensions/amp-analytics/**/*.js',
   // Needed for WebAnimationService
   'extensions/amp-animation/**/*.js',
+  // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
+  'extensions/amp-base-carousel/**/*.js',
   // For amp-bind in the web worker (ww.js).
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions

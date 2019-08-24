@@ -24,6 +24,8 @@ const {gitCommitHash} = require('../git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../app-utils');
 const {travisBuildNumber} = require('../travis');
 
+const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
+
 async function walk(dest) {
   const filelist = [];
   const files = await fs.readdir(dest);
@@ -41,10 +43,16 @@ async function walk(dest) {
 
 async function replace(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
-
+  const hostName = `${hostNamePrefix}/amp_dist_${travisBuildNumber()}`;
   const inabox = false;
   const storyV1 = true;
-  const result = replaceUrlsAppUtil('compiled', data, '', inabox, storyV1);
+  const result = replaceUrlsAppUtil(
+    'compiled',
+    data,
+    hostName,
+    inabox,
+    storyV1
+  );
 
   await fs.writeFile(filePath, result, 'utf8');
 }
