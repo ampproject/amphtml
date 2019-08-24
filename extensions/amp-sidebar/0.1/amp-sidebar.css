@@ -51,6 +51,11 @@ amp-sidebar[side="right"][open] {
   animation-name: i-amphtml-sidebar-slide-in-right;
 }
 
+amp-sidebar[side][i-amphtml-sidebar-opened] {
+  transform: none;
+  animation: none;
+}
+
 amp-sidebar[side] {
   /*
    * Note: This uses animations (instead of transitions) to make sure the
