@@ -20,6 +20,7 @@ import {
   endsWith,
   expandTemplate,
   includes,
+  padStart,
   trimEnd,
 } from '../../src/string';
 
@@ -155,5 +156,22 @@ describe('trimEnd', () => {
 
   it('should keep leading whitespace characters', () => {
     expect(trimEnd('\n\tabc')).to.equal('\n\tabc');
+  });
+});
+
+describe('padStart', () => {
+  it('should pad string to target length', () => {
+    expect(padStart('abc', 4, ' ')).to.equal(' abc');
+    expect(padStart('abc', 8, ' ')).to.equal('     abc');
+  });
+
+  it('should trim padString if necessary to fit target length', () => {
+    expect(padStart('abc', 4, 'xy')).to.equal('xabc');
+    expect(padStart('abc', 6, 'xy')).to.equal('xyxabc');
+  });
+
+  it('should return original string if equal or greater than target length', () => {
+    expect(padStart('abc', 3, ' ')).to.equal('abc');
+    expect(padStart('abc', 0, ' ')).to.equal('abc');
   });
 });
