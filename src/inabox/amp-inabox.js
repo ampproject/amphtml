@@ -29,11 +29,18 @@ import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
 import {installAmpdocServicesForInabox} from './inabox-services';
-import {installBuiltinElements, installRuntimeServices,} from '../service/core-services';
+import {
+  installBuiltinElements,
+  installRuntimeServices,
+} from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installPerformanceService} from '../service/performance-impl';
-import {installStylesForDoc, makeBodyVisible, makeBodyVisibleRecovery,} from '../style-installer';
+import {
+  installStylesForDoc,
+  makeBodyVisible,
+  makeBodyVisibleRecovery,
+} from '../style-installer';
 import {internalRuntimeVersion} from '../internal-version';
 import {isExperimentOn} from '../experiments';
 import {maybeValidate} from '../validator-integration';
