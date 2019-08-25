@@ -317,7 +317,7 @@ Pingback is an endpoint provided by in the "local" service configuration and cal
 
 Pingback is optional. It's only enabled when the "pingbackUrl" property is specified.
 
-As the body, pingback POST request receives the entitlement object returned by the "winning" authorization endpoint.
+By default, as the body, pingback POST request receives the entitlement object returned by the "winning" authorization endpoint.  However if the config for the "local" service contains `pingbackAllEntitlements: true` the body will contain an array of all the entitlments received, from all services, including those which do not grant access.
 
 **Important:** The pingback JSON object is sent with `Content-type: text/plain`.  This is intentional as it removes the need for a CORS preflight check.
 

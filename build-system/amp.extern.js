@@ -182,10 +182,6 @@ window.context.sourceUrl;
 window.context.startTime;
 window.context.tagName;
 
-
-// Service Holder
-window.__AMP_SERVICES;
-
 // Safeframe
 // TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
 /* @type {?Object} */
@@ -198,6 +194,7 @@ window.sf_.cfg;
 window.draw3p;
 
 // AMP's globals
+window.__AMP_SERVICES;
 window.__AMP_TEST;
 window.__AMP_TEST_IFRAME;
 window.__AMP_TAG;
@@ -861,3 +858,39 @@ var ampInaboxPositionObserver;
 ampInaboxPositionObserver.observe;
 ampInaboxPositionObserver.getTargetRect;
 ampInaboxPositionObserver.getViewportRect;
+
+
+/**
+ * TODO(dvoytenko): remove FeaturePolicy once it's added in Closure externs.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/FeaturePolicy.
+ * @interface
+ */
+class FeaturePolicy {
+  /**
+   * @return {!Array<string>}
+   */
+  features() {}
+
+  /**
+   * @return {!Array<string>}
+   */
+  allowedFeatures() {}
+
+  /**
+   * @param {string} feature
+   * @param {string=} opt_origin
+   * @return {boolean}
+   */
+  allowsFeature(feature, opt_origin) {}
+
+  /**
+   * @param {string} feature
+   * @return {!Array<string>}
+   */
+  getAllowlistForFeature(feature) {}
+}
+
+/**
+ * @type {?FeaturePolicy}
+ */
+HTMLIFrameElement.prototype.featurePolicy;
