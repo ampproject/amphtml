@@ -111,7 +111,7 @@
       box-sizing: border-box;
     }
 
-    label[for="base-url"], #switch-label {
+    .section-header {
       margin-bottom: 16px;
       text-align: left;
       display: block;
@@ -127,7 +127,7 @@
     <p class="desc">Switch between using a local distribution of AMP HTML or the online
     distribution hosted at https://cdn.ampproject.org/</p>
     <div id="switch-holder">
-      <label id="switch-label" for="enabled">Local AMP Serving</label>
+      <label class="section-header" for="enabled">Local AMP Serving</label>
       <div id="switch-wrapper">
         <span id="left">
           Online CDN
@@ -142,7 +142,7 @@
       </div>
     </div>
     <div id="base-url-holder">
-      <label for="base-url">Base URL</label>
+      <label for="base-url" class="section-header">Base URL</label>
       <input id="base-url" type="url">
     </div>
     <span class="notice">
