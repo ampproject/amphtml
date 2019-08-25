@@ -51,6 +51,7 @@ describes.realWin(
 
     it('renders', async () => {
       const dailymotion = await getDailymotion('x2m8jpp');
+
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');

@@ -61,6 +61,7 @@ describes.realWin(
       }
       try {
         await v.layoutCallback();
+        return v;
       } catch (e) {
         // Ignore failed to load errors since sources are fake.
         if (e.toString().indexOf('Failed to load') > -1) {
@@ -140,16 +141,14 @@ describes.realWin(
       const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(mediatypes.length);
-      for (let i_1 = 0; i_1 < mediatypes.length; i_1++) {
-        const mediatype_1 = mediatypes[i_1];
-        expect(video.children.item(i_1).tagName).to.equal('SOURCE');
-        expect(video.children.item(i_1).hasAttribute('src')).to.be.true;
-        expect(video.children.item(i_1).getAttribute('src')).to.equal(
-          getFooVideoSrc(mediatype_1)
+      for (let i = 0; i < mediatypes.length; i++) {
+        const mediatype = mediatypes[i];
+        expect(video.children.item(i).tagName).to.equal('SOURCE');
+        expect(video.children.item(i).hasAttribute('src')).to.be.true;
+        expect(video.children.item(i).getAttribute('src')).to.equal(
+          getFooVideoSrc(mediatype)
         );
-        expect(video.children.item(i_1).getAttribute('type')).to.equal(
-          mediatype_1
-        );
+        expect(video.children.item(i).getAttribute('type')).to.equal(mediatype);
       }
     });
 
@@ -182,17 +181,15 @@ describes.realWin(
       const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(tracktypes.length);
-      for (let i_1 = 0; i_1 < tracktypes.length; i_1++) {
-        const tracktype_1 = tracktypes[i_1];
-        expect(video.children.item(i_1).tagName).to.equal('TRACK');
-        expect(video.children.item(i_1).hasAttribute('src')).to.be.true;
-        expect(video.children.item(i_1).getAttribute('src')).to.equal(
-          getFooVideoSrc(tracktype_1)
+      for (let i = 0; i < tracktypes.length; i++) {
+        const tracktype = tracktypes[i];
+        expect(video.children.item(i).tagName).to.equal('TRACK');
+        expect(video.children.item(i).hasAttribute('src')).to.be.true;
+        expect(video.children.item(i).getAttribute('src')).to.equal(
+          getFooVideoSrc(tracktype)
         );
-        expect(video.children.item(i_1).getAttribute('type')).to.equal(
-          tracktype_1
-        );
-        expect(video.children.item(i_1).getAttribute('srclang')).to.equal('en');
+        expect(video.children.item(i).getAttribute('type')).to.equal(tracktype);
+        expect(video.children.item(i).getAttribute('srclang')).to.equal('en');
       }
     });
 
@@ -266,11 +263,11 @@ describes.realWin(
         }
       );
       // Same attributes should still be present in layoutCallback.
-      const video_1 = v.querySelector('video');
-      expect(video_1.tagName).to.equal('VIDEO');
-      expect(video_1.getAttribute('poster')).to.equal('img.png');
-      expect(video_1.getAttribute('controls')).to.exist;
-      expect(video_1.getAttribute('controlsList')).to.equal(
+      const video = v.querySelector('video');
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.getAttribute('poster')).to.equal('img.png');
+      expect(video.getAttribute('controls')).to.exist;
+      expect(video.getAttribute('controlsList')).to.equal(
         'nofullscreen nodownload noremoteplayback'
       );
     });
@@ -293,10 +290,10 @@ describes.realWin(
         }
       );
       // Should set appropriate attributes in layoutCallback.
-      const video_1 = v.querySelector('video');
-      expect(video_1.tagName).to.equal('VIDEO');
-      expect(video_1.getAttribute('preload')).to.equal('auto');
-      expect(video_1.getAttribute('poster')).to.equal('img.png');
+      const video = v.querySelector('video');
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.getAttribute('preload')).to.equal('auto');
+      expect(video.getAttribute('poster')).to.equal('img.png');
     });
 
     it('should remove preload attribute when not provided', async () => {
@@ -316,10 +313,10 @@ describes.realWin(
         }
       );
       // Should set appropriate attributes in layoutCallback.
-      const video_1 = v.querySelector('video');
-      expect(video_1.tagName).to.equal('VIDEO');
-      expect(video_1.hasAttribute('preload')).to.be.false;
-      expect(video_1.getAttribute('poster')).to.equal('img.png');
+      const video = v.querySelector('video');
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.hasAttribute('preload')).to.be.false;
+      expect(video.getAttribute('poster')).to.equal('img.png');
     });
 
     it('should not load a video with source children in prerender mode', async () => {
@@ -349,19 +346,17 @@ describes.realWin(
         }
       );
       // Should add attributes and source children in layoutCallback.
-      const video_1 = v.querySelector('video');
+      const video = v.querySelector('video');
       // check that the source tags were propogated
-      expect(video_1.children.length).to.equal(mediatypes.length);
-      for (let i_1 = 0; i_1 < mediatypes.length; i_1++) {
-        const mediatype_1 = mediatypes[i_1];
-        expect(video_1.children.item(i_1).tagName).to.equal('SOURCE');
-        expect(video_1.children.item(i_1).hasAttribute('src')).to.be.true;
-        expect(video_1.children.item(i_1).getAttribute('src')).to.equal(
-          getFooVideoSrc(mediatype_1)
+      expect(video.children.length).to.equal(mediatypes.length);
+      for (let i = 0; i < mediatypes.length; i++) {
+        const mediatype = mediatypes[i];
+        expect(video.children.item(i).tagName).to.equal('SOURCE');
+        expect(video.children.item(i).hasAttribute('src')).to.be.true;
+        expect(video.children.item(i).getAttribute('src')).to.equal(
+          getFooVideoSrc(mediatype)
         );
-        expect(video_1.children.item(i_1).getAttribute('type')).to.equal(
-          mediatype_1
-        );
+        expect(video.children.item(i).getAttribute('type')).to.equal(mediatype);
       }
     });
 
@@ -382,10 +377,10 @@ describes.realWin(
           expect(video.hasAttribute('src')).to.be.false;
         }
       );
-      const video_1 = v.querySelector('video');
-      expect(video_1.tagName).to.equal('VIDEO');
-      expect(video_1.getAttribute('preload')).to.equal('auto');
-      expect(video_1.getAttribute('poster')).to.equal('img.png');
+      const video = v.querySelector('video');
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.getAttribute('preload')).to.equal('auto');
+      expect(video.getAttribute('poster')).to.equal('img.png');
     });
 
     it('should pause the video when document inactive', async () => {
@@ -905,12 +900,11 @@ describes.realWin(
 
       describe.skip('after visible', () => {
         it('should add original source after cache one - single src', async () => {
-          let ampVideoElement;
           const v = await getVideo({
             'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
             'amp-orig-src': 'https://example.com/video.mp4',
           });
-          ampVideoElement = v;
+          const ampVideoElement = v;
           video = v.querySelector('video');
           makeVisible();
           visiblePromise;

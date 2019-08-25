@@ -236,28 +236,26 @@ describes.realWin(
     });
 
     it('adds an img placeholder in prerender mode if source is videoid', async () => {
-      const yt_1 = await getYt(
-        {'data-videoid': EXAMPLE_VIDEOID},
-        true,
-        function(yt) {
-          const iframe = yt.querySelector('iframe');
-          expect(iframe).to.be.null;
-          const imgPlaceholder = yt.querySelector('img[placeholder]');
-          expect(imgPlaceholder).to.not.be.null;
-          expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
-          expect(imgPlaceholder.src).to.be.equal(
-            `https://i.ytimg.com/vi/${EXAMPLE_VIDEOID}/sddefault.jpg#404_is_fine`
-          );
-          expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
-            'origin'
-          );
-          expect(imgPlaceholder.getAttribute('alt')).to.equal('Loading video');
-        }
-      );
-      const iframe_1 = yt_1.querySelector('iframe');
-      expect(iframe_1).to.not.be.null;
-      const imgPlaceholder_1 = yt_1.querySelector('img[placeholder]');
-      expect(imgPlaceholder_1.className).to.match(/amp-hidden/);
+      const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function(
+        yt
+      ) {
+        const iframe = yt.querySelector('iframe');
+        expect(iframe).to.be.null;
+        const imgPlaceholder = yt.querySelector('img[placeholder]');
+        expect(imgPlaceholder).to.not.be.null;
+        expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+        expect(imgPlaceholder.src).to.be.equal(
+          `https://i.ytimg.com/vi/${EXAMPLE_VIDEOID}/sddefault.jpg#404_is_fine`
+        );
+        expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
+          'origin'
+        );
+        expect(imgPlaceholder.getAttribute('alt')).to.equal('Loading video');
+      });
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const imgPlaceholder = yt.querySelector('img[placeholder]');
+      expect(imgPlaceholder.className).to.match(/amp-hidden/);
     });
 
     it('propagates aria-label to img placeholder', () => {
@@ -283,28 +281,24 @@ describes.realWin(
     });
 
     it('loads only sddefault when it exists if source is videoid', async () => {
-      const yt_1 = await getYt(
-        {'data-videoid': EXAMPLE_VIDEOID},
-        true,
-        function(yt) {
-          const iframe = yt.querySelector('iframe');
-          expect(iframe).to.be.null;
-          const imgPlaceholder = yt.querySelector('img[placeholder]');
-          expect(imgPlaceholder).to.not.be.null;
-          expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
-          expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
-            'origin'
-          );
-        }
-      );
-      const iframe_1 = yt_1.querySelector('iframe');
-      expect(iframe_1).to.not.be.null;
-      const imgPlaceholder_1 = yt_1.querySelector('img[placeholder]');
-      expect(imgPlaceholder_1.className).to.match(/amp-hidden/);
-      expect(imgPlaceholder_1.getAttribute('referrerpolicy')).to.equal(
-        'origin'
-      );
-      expect(imgPlaceholder_1.src).to.equal(
+      const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function(
+        yt
+      ) {
+        const iframe = yt.querySelector('iframe');
+        expect(iframe).to.be.null;
+        const imgPlaceholder = yt.querySelector('img[placeholder]');
+        expect(imgPlaceholder).to.not.be.null;
+        expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+        expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
+          'origin'
+        );
+      });
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const imgPlaceholder = yt.querySelector('img[placeholder]');
+      expect(imgPlaceholder.className).to.match(/amp-hidden/);
+      expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal('origin');
+      expect(imgPlaceholder.src).to.equal(
         'https://i.ytimg.com/vi/mGENRKrdoGY/sddefault.jpg#404_is_fine'
       );
     });

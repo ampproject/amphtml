@@ -358,8 +358,7 @@ describe('amp-a4a', () => {
     let a4a;
     let fixture;
     beforeEach(async () => {
-      const f = await createIframePromise();
-      fixture = f;
+      fixture = await createIframePromise();
       setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
@@ -385,7 +384,6 @@ describe('amp-a4a', () => {
       );
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
-
       const child = a4aElement.querySelector('iframe[name]');
       expect(child).to.be.ok;
       expect(child).to.be.visible;
@@ -407,7 +405,6 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
-
       const child = a4aElement.querySelector('iframe[name]');
       expect(child).to.be.ok;
       expect(child).to.be.visible;
@@ -421,7 +418,6 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
-
       const child = a4aElement.querySelector('iframe[src]');
       expect(child).to.be.ok;
       expect(child).to.be.visible;
@@ -432,7 +428,6 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
-
       const child = a4aElement.querySelector('iframe[srcdoc]');
       expect(child).to.be.ok;
       expect(
@@ -445,7 +440,6 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
-
       const child = a4aElement.querySelector('iframe[srcdoc]');
       expect(child).to.be.ok;
       expect(child).to.be.visible;
@@ -463,7 +457,6 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
-
       a4a.detachedCallback();
       expect(fieDestroySpy).to.be.called;
       expect(a4aElement.querySelector('iframe')).to.not.be.ok;
@@ -479,11 +472,9 @@ describe('amp-a4a', () => {
         .callsFake(() => {
           return new Promise(() => {});
         });
-
       const creativeString = buildCreativeString();
       const metaData = a4a.getAmpAdMetadata(creativeString);
       await a4a.renderAmpCreative_(metaData);
-
       expect(a4a.friendlyIframeEmbed_).to.exist;
       expect(a4a.friendlyIframeEmbed_.host).to.equal(a4a.element);
     });
@@ -506,7 +497,6 @@ describe('amp-a4a', () => {
       expect(whenIniLoadedStub).to.not.be.called;
       iniLoadResolver();
       await layoutPromise;
-
       verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
     });
 
@@ -515,7 +505,6 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
-
       expect(a4a.friendlyIframeEmbed_).to.exist;
       expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.false;
 
@@ -536,7 +525,6 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
-
       const child = a4aElement.querySelector('iframe[src]');
       expect(child).to.be.ok;
       expect(child).to.be.visible;
@@ -554,7 +542,6 @@ describe('amp-a4a', () => {
         ./*OK*/ stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
         .callsFake(() => Promise.resolve());
       await a4a.layoutCallback();
-
       verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
     });
 
@@ -570,11 +557,10 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
-
       expect(triggerAnalyticsEventSpy).to.not.be.called;
     });
 
-    it('should insert an amp-analytics element', () => {
+    it('should insert an amp-analytics element', async () => {
       sandbox
         .stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig')
         .callsFake(() => ({'foo': 'bar'}));
@@ -583,7 +569,7 @@ describe('amp-a4a', () => {
         analyticsExtension,
         'insertAnalyticsElement'
       );
-      a4a.buildCallback();
+      await a4a.buildCallback();
       expect(insertAnalyticsElementSpy).to.be.calledWith(
         a4a.element,
         {'foo': 'bar'},
@@ -610,7 +596,8 @@ describe('amp-a4a', () => {
     let a4a;
     let fixture;
     beforeEach(async () => {
-      const fixture = await createIframePromise();
+      fixture = await createIframePromise();
+
       setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
@@ -704,7 +691,6 @@ describe('amp-a4a', () => {
 
       it('should attach a client cached iframe when set', async () => {
         await a4a.layoutCallback();
-
         verifyCachedContentIframeRender(a4aElement, TEST_URL);
         expect(fetchMock.called('ad')).to.be.true;
       });
@@ -713,7 +699,6 @@ describe('amp-a4a', () => {
         a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
-
         verifyCachedContentIframeRender(
           a4aElement,
           TEST_URL,
@@ -726,7 +711,6 @@ describe('amp-a4a', () => {
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
-
         verifyCachedContentIframeRender(
           a4aElement,
           TEST_URL,
@@ -735,13 +719,12 @@ describe('amp-a4a', () => {
         expect(fetchMock.called('ad')).to.be.true;
       });
 
-      it('should set feature policy for sync-xhr', () => {
+      it('should set feature policy for sync-xhr', async () => {
         a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
-        return a4a.layoutCallback().then(() => {
-          verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-          expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
-        });
+        await a4a.layoutCallback();
+        verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
       });
     });
 
@@ -755,25 +738,24 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
       });
 
-      it('should render via cached iframe', () => {
+      it('should render via cached iframe', async () => {
         const triggerAnalyticsEventSpy = sandbox.spy(
           analytics,
           'triggerAnalyticsEvent'
         );
-        return a4a.layoutCallback().then(() => {
-          verifyCachedContentIframeRender(a4aElement, TEST_URL);
-          // Should have reported an error.
-          expect(devErrLogStub).to.be.calledOnce;
-          expect(devErrLogStub.getCall(0).args[1]).to.have.string(
-            'random illegal value'
-          );
-          expect(fetchMock.called('ad')).to.be.true;
-          verifyA4aAnalyticsTriggersWereFired(
-            a4a,
-            triggerAnalyticsEventSpy,
-            'ad-iframe-loaded'
-          );
-        });
+        await a4a.layoutCallback();
+        verifyCachedContentIframeRender(a4aElement, TEST_URL);
+        // Should have reported an error.
+        expect(devErrLogStub).to.be.calledOnce;
+        expect(devErrLogStub.getCall(0).args[1]).to.have.string(
+          'random illegal value'
+        );
+        expect(fetchMock.called('ad')).to.be.true;
+        verifyA4aAnalyticsTriggersWereFired(
+          a4a,
+          triggerAnalyticsEventSpy,
+          'ad-iframe-loaded'
+        );
       });
 
       it('should fire amp-analytics triggers for illegal render modes', async () => {
@@ -782,8 +764,7 @@ describe('amp-a4a', () => {
           'triggerAnalyticsEvent'
         );
         await a4a.layoutCallback();
-
-        verifyA4aAnalyticsTriggersWereFired(
+        return verifyA4aAnalyticsTriggersWereFired(
           a4a,
           triggerAnalyticsEventSpy,
           'ad-iframe-loaded'
@@ -800,7 +781,6 @@ describe('amp-a4a', () => {
 
       it('should attach a NameFrame when header is set', async () => {
         await a4a.layoutCallback();
-
         verifyNameFrameRender(a4aElement);
         expect(fetchMock.called('ad')).to.be.true;
       });
@@ -823,7 +803,6 @@ describe('amp-a4a', () => {
         a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
-
         verifyNameFrameRender(a4aElement, true /* shouldSandbox */);
         expect(fetchMock.called('ad')).to.be.true;
       });
@@ -832,7 +811,6 @@ describe('amp-a4a', () => {
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
-
         verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
         expect(fetchMock.called('ad')).to.be.true;
       });
@@ -850,7 +828,6 @@ describe('amp-a4a', () => {
             adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
             a4a.onLayoutMeasure();
             await a4a.layoutCallback();
-
             if (headerVal == 'some_random_thing') {
               expect(
                 devStub.withArgs(
@@ -956,7 +933,6 @@ describe('amp-a4a', () => {
             adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
             a4a.onLayoutMeasure();
             await a4a.layoutCallback();
-
             if (headerVal == 'some_random_thing') {
               expect(
                 devStub.withArgs(
@@ -1001,8 +977,7 @@ describe('amp-a4a', () => {
           'triggerAnalyticsEvent'
         );
         await a4a.layoutCallback();
-        return;
-        verifyA4aAnalyticsTriggersWereFired(
+        return verifyA4aAnalyticsTriggersWereFired(
           a4a,
           triggerAnalyticsEventSpy,
           'ad-iframe-loaded'
@@ -1025,6 +1000,7 @@ describe('amp-a4a', () => {
       const {doc} = fixture;
       a4aElement = createA4aElement(doc);
       a4a = new MockA4AImpl(a4aElement);
+      return fixture;
     });
     afterEach(() => {
       expect(fetchMock.called('ad')).to.be.true;
@@ -1036,8 +1012,7 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
-
-        return verifyA4ARender(a4aElement);
+        verifyA4ARender(a4aElement);
       });
 
       it(
@@ -1051,7 +1026,6 @@ describe('amp-a4a', () => {
           a4a.onLayoutMeasure();
           a4a.onLayoutMeasure();
           await a4a.layoutCallback();
-
           const safeChild = a4aElement.querySelector('iframe[name]');
           expect(safeChild).to.not.be.ok;
           const crossDomainChild = a4aElement.querySelector('iframe[src]');
@@ -1071,14 +1045,14 @@ describe('amp-a4a', () => {
     delete adResponse.headers['AMP-Fast-Fetch-Signature'];
     delete adResponse.headers[AMP_SIGNATURE_HEADER];
     adResponse.headers['X-CreativeSize'] = '320x50';
-    const iframePromise = await createIframePromise();
-    setupForAdTesting(iframePromise);
+    const fixture = await createIframePromise();
+    setupForAdTesting(fixture);
     fetchMock.getOnce(
       TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
       () => adResponse,
       {name: 'ad'}
     );
-    const {doc} = iframePromise;
+    const {doc} = fixture;
     const a4aElement = createA4aElement(doc);
     a4aElement.setAttribute('width', 480);
     a4aElement.setAttribute('height', 75);
@@ -1087,7 +1061,12 @@ describe('amp-a4a', () => {
     doc.body.appendChild(a4aElement);
     a4a.buildCallback();
     a4a.onLayoutMeasure();
-    await a4a.layoutCallback();
+    const renderPromise = a4a.layoutCallback();
+    await renderPromise;
+    const child = a4aElement.querySelector('iframe[name]');
+    expect(child).to.be.ok;
+    expect(child.getAttribute('width')).to.equal('320');
+    expect(child.getAttribute('height')).to.equal('50');
   });
 
   describe('#onLayoutMeasure', () => {
@@ -1095,14 +1074,14 @@ describe('amp-a4a', () => {
       // Force non-FIE
       delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const s = doc.createElement('style');
       s.textContent = '.fixed {position:fixed;}';
@@ -1112,16 +1091,30 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.be.ok;
+      await a4a.layoutCallback();
+      expect(
+        renderNonAmpCreativeSpy.calledOnce,
+        'renderNonAmpCreative called exactly once'
+      ).to.be.true;
+      a4a.unlayoutCallback();
+      getResourceStub.returns({
+        'hasBeenMeasured': () => true,
+        'isMeasureRequested': () => false,
+      });
+      const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
+      a4a.resumeCallback();
+      expect(onLayoutMeasureSpy).to.be.calledOnce;
+      expect(a4a.fromResumeCallback).to.be.true;
     });
     it('resumeCallback does not call onLayoutMeasure for FIE', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const s = doc.createElement('style');
       s.textContent = '.fixed {position:fixed;}';
@@ -1131,19 +1124,29 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.be.ok;
+      await a4a.layoutCallback();
+      expect(
+        renderAmpCreativeSpy.calledOnce,
+        'renderAmpCreative_ called exactly once'
+      ).to.be.true;
+      sandbox.stub(a4a, 'unlayoutCallback').callsFake(() => false);
+      const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
+      a4a.resumeCallback();
+      expect(onLayoutMeasureSpy).to.not.be.called;
+      expect(a4a.fromResumeCallback).to.be.false;
     });
     it('resumeCallback w/ measure required no onLayoutMeasure', async () => {
       // Force non-FIE
       delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const s = doc.createElement('style');
       s.textContent = '.fixed {position:fixed;}';
@@ -1153,16 +1156,27 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.be.ok;
+      await a4a.layoutCallback();
+      expect(
+        renderNonAmpCreativeSpy.calledOnce,
+        'renderNonAmpCreative called exactly once'
+      ).to.be.true;
+      a4a.unlayoutCallback();
+      const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
+      getResourceStub.returns({'hasBeenMeasured': () => false});
+      a4a.resumeCallback();
+      expect(onLayoutMeasureSpy).to.not.be.called;
+      expect(a4a.fromResumeCallback).to.be.true;
     });
     it('should run end-to-end and render in friendly iframe', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.releaseType_ = '0';
@@ -1193,6 +1207,61 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.be.instanceof(Promise);
+      const promiseResult = await a4a.adPromise_;
+      expect(promiseResult).to.be.ok;
+      expect(promiseResult.minifiedCreative).to.be.ok;
+      expect(a4a.isVerifiedAmpCreative()).to.be.true;
+      expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
+      expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
+      expect(maybeExecuteRealTimeConfigStub.calledWith({}, null)).to.be.true;
+      expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
+      expect(getAdUrlSpy.calledWith(null, rtcResponse)).to.be.true;
+      expect(fetchMock.called('ad')).to.be.true;
+      expect(preloadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
+      expect(
+        doc.querySelector(
+          'link[rel=preload]' +
+            '[href="https://fonts.googleapis.com/css?family=Questrial"]'
+        )
+      ).to.be.ok;
+      await a4a.layoutCallback();
+      expect(
+        renderAmpCreativeSpy.calledOnce,
+        'renderAmpCreative_ called exactly once'
+      ).to.be.true;
+      expect(a4aElement.getElementsByTagName('iframe').length).to.equal(1);
+      const friendlyIframe = a4aElement.querySelector('iframe[srcdoc]');
+      expect(friendlyIframe).to.not.be.null;
+      expect(friendlyIframe.getAttribute('src')).to.be.null;
+      const expectedAttributes = {
+        'frameborder': '0',
+        'allowfullscreen': '',
+        'allowtransparency': '',
+        'scrolling': 'no',
+      };
+      Object.keys(expectedAttributes).forEach(key => {
+        expect(friendlyIframe.getAttribute(key)).to.equal(
+          expectedAttributes[key]
+        );
+      });
+      // Should not contain v0.js, any extensions, or amp-boilerplate.
+      const iframeDoc = friendlyIframe.contentDocument;
+      expect(iframeDoc.querySelector('script[src]')).to.not.be.ok;
+      expect(iframeDoc.querySelector('script[custom-element]')).to.not.be.ok;
+      expect(iframeDoc.querySelector('style[amp-boilerplate]')).to.not.be.ok;
+      expect(iframeDoc.querySelector('noscript')).to.not.be.ok;
+      // Should contain font link and extension in main document.
+      expect(
+        iframeDoc.querySelector(
+          'link[href="https://fonts.googleapis.com/css?family=Questrial"]'
+        )
+      ).to.be.ok;
+      expect(doc.querySelector('script[src*="amp-font-0.1"]')).to.be.ok;
+      expect(onCreativeRenderSpy.withArgs(sinon.match.object)).to.be.calledOnce;
+      expect(updateLayoutPriorityStub).to.be.calledOnce;
+      expect(updateLayoutPriorityStub.args[0][0]).to.equal(
+        LayoutPriority.CONTENT
+      );
     });
     it('should update priority for non AMP if in experiment', async () => {
       const fixture = await createIframePromise();
@@ -1217,18 +1286,27 @@ describe('amp-a4a', () => {
       const renderNonAmpCreativeSpy = sandbox.spy(a4a, 'renderNonAmpCreative');
       sandbox.stub(a4a, 'maybeValidateAmpCreative').returns(Promise.resolve());
       a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      expect(
+        renderNonAmpCreativeSpy.calledOnce,
+        'renderNonAmpCreative_ called exactly once'
+      ).to.be.true;
+      expect(updateLayoutPriorityStub.args[0][0]).to.equal(
+        LayoutPriority.CONTENT
+      );
+      expect(is3pThrottled(a4a.win)).to.be.false;
     });
     // TODO (keithwrightbos) - move into above e2e once signed creative with
     // image within creative can be regenerated.
     it('should prefetch amp images', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       sandbox.stub(a4a, 'getAmpAdMetadata').callsFake(creative => {
@@ -1242,16 +1320,32 @@ describe('amp-a4a', () => {
       });
       a4a.buildCallback();
       a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      expect(
+        doc.querySelector(
+          'link[rel=preload][href="https://prefetch.me.com?a=b"]'
+        )
+      ).to.be.ok;
+      expect(
+        doc.querySelector(
+          'link[rel=preload][href="https://prefetch.metoo.com?e=f"]'
+        )
+      ).to.be.ok;
+      expect(
+        doc.querySelector(
+          'link[rel=preload][href="http://do.not.prefetch.me.com?c=d"]'
+        )
+      ).to.not.be.ok;
     });
     it('must not be position:fixed', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const s = doc.createElement('style');
       s.textContent = '.fixed {position:fixed;}';
@@ -1262,14 +1356,14 @@ describe('amp-a4a', () => {
       expect(a4a.adPromise_).to.not.be.ok;
     });
     it('does not initialize promise chain 0 height/width', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const rect = layoutRectLtwh(0, 0, 200, 0);
       const a4aElement = createA4aElement(doc, rect);
       const a4a = new MockA4AImpl(a4aElement);
@@ -1296,14 +1390,14 @@ describe('amp-a4a', () => {
       isValidCreative,
       opt_failAmpRender
     ) {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
@@ -1324,6 +1418,37 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.be.instanceof(Promise);
+      const promiseResult = await a4a.adPromise_;
+      expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
+      expect(fetchMock.called('ad')).to.be.true;
+      expect(a4a.isVerifiedAmpCreative()).to.equal(isValidCreative);
+      if (isValidCreative) {
+        expect(promiseResult).to.be.ok;
+        expect(promiseResult.minifiedCreative).to.be.ok;
+      } else {
+        expect(promiseResult).to.not.be.ok;
+      }
+      await a4a.layoutCallback();
+      expect(a4aElement.getElementsByTagName('iframe').length).to.not.equal(0);
+      const iframe = a4aElement.getElementsByTagName('iframe')[0];
+      if (isValidCreative && !opt_failAmpRender) {
+        expect(iframe.getAttribute('src')).to.be.null;
+        expect(onCreativeRenderSpy.withArgs(sinon.match.object)).to.be
+          .calledOnce;
+        expect(updateLayoutPriorityStub).to.be.calledOnce;
+        expect(updateLayoutPriorityStub.args[0][0]).to.equal(
+          LayoutPriority.CONTENT
+        );
+      } else {
+        expect(iframe.getAttribute('srcdoc')).to.be.null;
+        expect(iframe.src, 'verify iframe src w/ origin').to.equal(
+          TEST_URL + '&__amp_source_origin=about%3Asrcdoc'
+        );
+        expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
+        if (!opt_failAmpRender) {
+          expect(updateLayoutPriorityStub).to.not.be.called;
+        }
+      }
     }
     it('#layoutCallback valid AMP', () => {
       return executeLayoutCallbackTest(true);
@@ -1335,14 +1460,14 @@ describe('amp-a4a', () => {
       return executeLayoutCallbackTest(true, true);
     });
     it('should run end-to-end in the presence of an XHR error', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         Promise.reject(networkFailure()),
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
@@ -1350,16 +1475,26 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.be.instanceof(Promise);
+      await a4a.layoutCallback();
+      expect(getAdUrlSpy, 'getAdUrl called exactly once').to.be.calledOnce;
+      expect(onNetworkFailureSpy, 'onNetworkFailureSpy called exactly once').to
+        .be.calledOnce;
+      // Verify iframe presence and lack of visibility hidden
+      const iframe = a4aElement.querySelector('iframe[src]');
+      expect(iframe).to.be.ok;
+      expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
+      expect(iframe).to.be.visible;
+      expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
     });
     it('should use adUrl from onNetworkFailure', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         Promise.reject(networkFailure()),
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
@@ -1376,16 +1511,25 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.be.instanceof(Promise);
+      await a4a.layoutCallback();
+      expect(getAdUrlSpy, 'getAdUrl called exactly once').to.be.calledOnce;
+      // Verify iframe presence and lack of visibility hidden
+      const iframe = a4aElement.querySelector('iframe[src]');
+      expect(iframe).to.be.ok;
+      expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
+      expect(/&err=true/.test(iframe.src), iframe.src).to.be.true;
+      expect(iframe).to.be.visible;
+      expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
     });
     it('should not execute frame GET if disabled via onNetworkFailure', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         Promise.reject(networkFailure()),
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.promiseErrorHandler_ = () => {};
@@ -1402,24 +1546,36 @@ describe('amp-a4a', () => {
         .returns({frameGetDisabled: true});
       a4a.buildCallback();
       a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      expect(getAdUrlSpy, 'getAdUrl called exactly once').to.be.calledOnce;
+      const iframe = a4aElement.querySelector('iframe');
+      expect(iframe).to.not.be.ok;
     });
     it('should handle XHR error when resolves before layoutCallback', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         Promise.reject(networkFailure()),
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.buildCallback();
       a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      await a4a.layoutCallback();
+      // Verify iframe presence and lack of visibility hidden
+      expect(a4aElement.querySelectorAll('iframe').length).to.equal(1);
+      const iframe = a4aElement.querySelectorAll('iframe')[0];
+      expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
+      expect(iframe).to.be.visible;
+      expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
     });
     it('should handle XHR error when resolves after layoutCallback', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       let rejectXhr;
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
@@ -1428,13 +1584,20 @@ describe('amp-a4a', () => {
         }),
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       const layoutCallbackPromise = a4a.layoutCallback();
       rejectXhr(networkFailure());
+      await layoutCallbackPromise;
+      // Verify iframe presence and lack of visibility hidden
+      expect(a4aElement.querySelectorAll('iframe').length).to.equal(1);
+      const iframe = a4aElement.querySelectorAll('iframe')[0];
+      expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
+      expect(iframe).to.be.visible;
+      expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
     });
 
     [
@@ -1464,15 +1627,15 @@ describe('amp-a4a', () => {
       },
     ].forEach(test => {
       it(`should collapse ${test.name}`, async () => {
-        const iframePromise = await createIframePromise();
-        setupForAdTesting(iframePromise);
+        const fixture = await createIframePromise();
+        setupForAdTesting(fixture);
         test.fn();
         fetchMock.getOnce(
           TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
           adResponse,
           {name: 'ad'}
         );
-        const {doc} = iframePromise;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
@@ -1490,6 +1653,31 @@ describe('amp-a4a', () => {
         sandbox.stub(a4a, 'getLayoutBox').returns({width: 123, height: 456});
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
+        await a4a.adPromise_;
+        expect(forceCollapseSpy).to.be.calledOnce;
+        expect(noContentUISpy).to.be.calledOnce;
+        await a4a.layoutCallback();
+        // should have no iframe.
+        expect(a4aElement.querySelector('iframe')).to.not.be.ok;
+        expect(onCreativeRenderSpy).to.not.be.called;
+        // call unlayout callback & verify it attempts to revert size
+        expect(a4a.originalSlotSize_).to.deep.equal({
+          width: 123,
+          height: 456,
+        });
+        let attemptChangeSizeResolver;
+        const attemptChangeSizePromise = new Promise(resolve => {
+          attemptChangeSizeResolver = resolve;
+        });
+        sandbox
+          .stub(AMP.BaseElement.prototype, 'attemptChangeSize')
+          .returns(attemptChangeSizePromise);
+        a4a.unlayoutCallback();
+        expect(unlayoutUISpy).to.be.calledOnce;
+        expect(a4a.originalSlotSize_).to.be.ok;
+        attemptChangeSizeResolver();
+        await Services.timerFor(a4a.win).promise(1);
+        expect(a4a.originalSlotSize_).to.not.be.ok;
       });
     });
 
@@ -1498,37 +1686,49 @@ describe('amp-a4a', () => {
       adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
       delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.buildCallback();
       a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      expect(fetchMock.called('ad')).to.be.true;
+      await a4a.layoutCallback();
+      verifySafeFrameRender(a4aElement, '1-2-3');
+      // Verify preload to safeframe with header version.
+      expect(
+        doc.querySelector(
+          'link[rel=preload]' +
+            '[href="https://tpc.googlesyndication.com/safeframe/' +
+            '1-2-3/html/container.html"]'
+        )
+      ).to.be.ok;
     });
 
     describe('delay request experiment', () => {
       let getAdUrlSpy;
       let a4a;
       beforeEach(async () => {
-        const iframePromise = await createIframePromise();
-        setupForAdTesting(iframePromise);
+        const fixture = await createIframePromise();
+        setupForAdTesting(fixture);
         fetchMock.getOnce(
           TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
           () => adResponse,
           {name: 'ad'}
         );
-        const {doc} = iframePromise;
+        const {doc} = fixture;
         const a4aElement = createA4aElement(doc);
         a4a = new MockA4AImpl(a4aElement);
         getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
       });
-      it('should delay request until within renderOutsideViewport', () => {
+      it('should delay request until within renderOutsideViewport', async () => {
         sandbox.stub(a4a, 'delayAdRequestEnabled').returns(true);
         let whenWithinViewportResolve;
         getResourceStub.returns({
@@ -1545,17 +1745,13 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         // Delay to all getAdUrl to potentially execute.
-        return Services.timerFor(a4a.win)
-          .promise(1)
-          .then(() => {
-            expect(getAdUrlSpy).to.not.be.called;
-            whenWithinViewportResolve();
-            return a4a.adPromise_.then(() => {
-              expect(getAdUrlSpy).to.be.calledOnce;
-            });
-          });
+        await Services.timerFor(a4a.win).promise(1);
+        expect(getAdUrlSpy).to.not.be.called;
+        whenWithinViewportResolve();
+        await a4a.adPromise_;
+        return expect(getAdUrlSpy).to.be.calledOnce;
       });
-      it('should delay request until numeric value', () => {
+      it('should delay request until numeric value', async () => {
         sandbox.stub(a4a, 'delayAdRequestEnabled').returns(6);
         let whenWithinViewportResolve;
         getResourceStub.returns({
@@ -1572,15 +1768,11 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         // Delay to all getAdUrl to potentially execute.
-        return Services.timerFor(a4a.win)
-          .promise(1)
-          .then(() => {
-            expect(getAdUrlSpy).to.not.be.called;
-            whenWithinViewportResolve();
-            return a4a.adPromise_.then(() => {
-              expect(getAdUrlSpy).to.be.calledOnce;
-            });
-          });
+        await Services.timerFor(a4a.win).promise(1);
+        expect(getAdUrlSpy).to.not.be.called;
+        whenWithinViewportResolve();
+        await a4a.adPromise_;
+        return expect(getAdUrlSpy).to.be.calledOnce;
       });
     });
     it('should ignore invalid safeframe version header', async () => {
@@ -1588,18 +1780,22 @@ describe('amp-a4a', () => {
       adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
       delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.buildCallback();
       a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      expect(fetchMock.called('ad')).to.be.true;
+      await a4a.layoutCallback();
+      verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
     });
     // TODO(tdrl): Go through case analysis in amp-a4a.js#onLayoutMeasure and
     // add one test for each case / ensure that all cases are covered.
@@ -1607,9 +1803,9 @@ describe('amp-a4a', () => {
 
   describe('#preconnectCallback', () => {
     it('validate', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
-      const {doc} = iframePromise;
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       //a4a.config = {};
@@ -1783,20 +1979,21 @@ describe('amp-a4a', () => {
       return fixture;
     });
 
-    it('should pass verification with story ad', () => {
+    it('should pass verification with story ad', async () => {
       a4a.isSinglePageStoryAd = true;
       verifier.verify = () => Promise.resolve(VerificationStatus.OK);
-      return a4a.maybeValidateAmpCreative(/* bytes */ 'foo').then(result => {
-        expect(result).to.equal('foo');
-      });
+      const result = await a4a.maybeValidateAmpCreative(/* bytes */ 'foo');
+      expect(result).to.equal('foo');
     });
 
-    it('should throw due to invalid AMP creative with story ad', () => {
+    it('should throw due to invalid AMP creative with story ad', async () => {
       a4a.isSinglePageStoryAd = true;
       verifier.verify = () => Promise.resolve(VerificationStatus.UNVERIFIED);
-      return a4a.maybeValidateAmpCreative().catch(error => {
+      try {
+        await a4a.maybeValidateAmpCreative();
+      } catch (error) {
         expect(error.message).to.equal(INVALID_SPSA_RESPONSE);
-      });
+      }
     });
   });
 
@@ -1805,9 +2002,8 @@ describe('amp-a4a', () => {
     let a4a;
     let fixture;
     beforeEach(async () => {
-      const f = await createIframePromise();
-      setupForAdTesting(f);
-      fixture = f;
+      fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       a4aElement = createA4aElement(fixture.doc);
       a4a = new MockA4AImpl(a4aElement);
       a4a.buildCallback();
@@ -1838,9 +2034,9 @@ describe('amp-a4a', () => {
     let a4aElement;
     let a4a;
     beforeEach(async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
-      const {doc} = iframePromise;
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
+      const {doc} = fixture;
       a4aElement = createA4aElement(doc);
       a4a = new AmpA4A(a4aElement);
       sandbox.stub(a4a, 'getFallback').callsFake(() => {
@@ -1849,61 +2045,59 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.adUrl_ = 'https://nowhere.org';
     });
-    it('should render correctly', () => {
+    it('should render correctly', async () => {
       // TODO(#22733): remove this test once ampdoc-fie is launched.
       const parentWin = a4aElement.ownerDocument.defaultView;
-      return a4a.renderAmpCreative_(metaData).then(() => {
-        // Verify iframe presence.
-        expect(a4aElement.children.length).to.equal(1);
-        const friendlyIframe = a4aElement.children[0];
-        expect(friendlyIframe.tagName).to.equal('IFRAME');
-        expect(friendlyIframe.src).to.not.be.ok;
-        expect(friendlyIframe.srcdoc).to.be.ok;
-        const frameDoc = friendlyIframe.contentDocument;
-        const styles = frameDoc.querySelectorAll('style[amp-custom]');
-        expect(
-          Array.prototype.some.call(styles, s => {
-            return s.innerHTML == 'p { background: green }';
-          }),
-          'Some style is "background: green"'
-        ).to.be.true;
-        expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
-        expect(
-          Services.urlReplacementsForDoc(frameDoc.documentElement)
-        ).to.not.equal(Services.urlReplacementsForDoc(a4aElement));
-        expect(
-          Services.urlReplacementsForDoc(frameDoc.documentElement).ampdoc.win
-        ).to.equal(parentWin);
-      });
+      await a4a.renderAmpCreative_(metaData);
+      // Verify iframe presence.
+      expect(a4aElement.children.length).to.equal(1);
+      const friendlyIframe = a4aElement.children[0];
+      expect(friendlyIframe.tagName).to.equal('IFRAME');
+      expect(friendlyIframe.src).to.not.be.ok;
+      expect(friendlyIframe.srcdoc).to.be.ok;
+      const frameDoc = friendlyIframe.contentDocument;
+      const styles = frameDoc.querySelectorAll('style[amp-custom]');
+      expect(
+        Array.prototype.some.call(styles, s => {
+          return s.innerHTML == 'p { background: green }';
+        }),
+        'Some style is "background: green"'
+      ).to.be.true;
+      expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
+      expect(
+        Services.urlReplacementsForDoc(frameDoc.documentElement)
+      ).to.not.equal(Services.urlReplacementsForDoc(a4aElement));
+      expect(
+        Services.urlReplacementsForDoc(frameDoc.documentElement).ampdoc.win
+      ).to.equal(parentWin);
     });
-    it('should render correctly in ampdoc-fie mode', () => {
+    it('should render correctly in ampdoc-fie mode', async () => {
       const parentWin = a4aElement.ownerDocument.defaultView;
       const ampdocService = Services.ampdocServiceFor(parentWin);
       toggleExperiment(parentWin, 'ampdoc-fie', true);
       updateFieModeForTesting(ampdocService, true);
-      return a4a.renderAmpCreative_(metaData).then(() => {
-        // Verify iframe presence.
-        expect(a4aElement.children.length).to.equal(1);
-        const friendlyIframe = a4aElement.children[0];
-        expect(friendlyIframe.tagName).to.equal('IFRAME');
-        expect(friendlyIframe.src).to.not.be.ok;
-        expect(friendlyIframe.srcdoc).to.be.ok;
-        const frameDoc = friendlyIframe.contentDocument;
-        const styles = frameDoc.querySelectorAll('style[amp-custom]');
-        expect(
-          Array.prototype.some.call(styles, s => {
-            return s.innerHTML == 'p { background: green }';
-          }),
-          'Some style is "background: green"'
-        ).to.be.true;
-        expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
-        expect(
-          Services.urlReplacementsForDoc(frameDoc.documentElement)
-        ).to.not.equal(Services.urlReplacementsForDoc(a4aElement));
-        expect(
-          Services.urlReplacementsForDoc(frameDoc.documentElement).ampdoc.win
-        ).to.equal(frameDoc.defaultView);
-      });
+      await a4a.renderAmpCreative_(metaData);
+      // Verify iframe presence.
+      expect(a4aElement.children.length).to.equal(1);
+      const friendlyIframe = a4aElement.children[0];
+      expect(friendlyIframe.tagName).to.equal('IFRAME');
+      expect(friendlyIframe.src).to.not.be.ok;
+      expect(friendlyIframe.srcdoc).to.be.ok;
+      const frameDoc = friendlyIframe.contentDocument;
+      const styles = frameDoc.querySelectorAll('style[amp-custom]');
+      expect(
+        Array.prototype.some.call(styles, s => {
+          return s.innerHTML == 'p { background: green }';
+        }),
+        'Some style is "background: green"'
+      ).to.be.true;
+      expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
+      expect(
+        Services.urlReplacementsForDoc(frameDoc.documentElement)
+      ).to.not.equal(Services.urlReplacementsForDoc(a4aElement));
+      expect(
+        Services.urlReplacementsForDoc(frameDoc.documentElement).ampdoc.win
+      ).to.equal(frameDoc.defaultView);
     });
   });
 
@@ -1945,14 +2139,14 @@ describe('amp-a4a', () => {
 
   describe('#unlayoutCallback', () => {
     it('verify state reset', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.buildCallback();
@@ -1963,14 +2157,14 @@ describe('amp-a4a', () => {
     });
 
     it('attemptChangeSize reverts', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
         () => adResponse,
         {name: 'ad'}
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.buildCallback();
@@ -1990,15 +2184,15 @@ describe('amp-a4a', () => {
     });
 
     it('verify cancelled promise', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
       let whenFirstVisibleResolve = null;
       whenVisibleMock.returns(
         new Promise(resolve => {
           whenFirstVisibleResolve = resolve;
         })
       );
-      const {doc} = iframePromise;
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
       const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
@@ -2010,27 +2204,33 @@ describe('amp-a4a', () => {
       a4a.uiHandler.state = 0;
       a4a.unlayoutCallback();
       whenFirstVisibleResolve();
+      try {
+        await adPromise;
+        assert.fail('cancelled ad promise should not succeed');
+      } catch (reason) {
+        expect(getAdUrlSpy.called, 'getAdUrl never called').to.be.false;
+        expect(reason.message).to.equal(cancellation().message);
+        expect(errorHandlerSpy).to.be.calledOnce;
+      }
     });
 
     describe('consent integration', () => {
       let fixture, a4aElement, a4a, consentString;
-      beforeEach(() =>
-        createIframePromise().then(f => {
-          fixture = f;
-          setupForAdTesting(fixture);
-          fetchMock.getOnce(
-            TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
-            () => adResponse,
-            {name: 'ad'}
-          );
-          a4aElement = createA4aElement(fixture.doc);
-          a4a = new MockA4AImpl(a4aElement);
-          consentString = 'test-consent-string';
-          return fixture;
-        })
-      );
+      beforeEach(async () => {
+        fixture = await createIframePromise();
+        setupForAdTesting(fixture);
+        fetchMock.getOnce(
+          TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+          () => adResponse,
+          {name: 'ad'}
+        );
+        a4aElement = createA4aElement(fixture.doc);
+        a4a = new MockA4AImpl(a4aElement);
+        consentString = 'test-consent-string';
+        return fixture;
+      });
 
-      it('should delay ad url by getConsentPolicyState', () => {
+      it('should delay ad url by getConsentPolicyState', async () => {
         sandbox
           .stub(AMP.BaseElement.prototype, 'getConsentPolicy')
           .returns('default');
@@ -2052,25 +2252,21 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         // allow ad promise to start execution, unfortunately timer is only way.
-        return Services.timerFor(a4a.win)
-          .promise(50)
-          .then(() => {
-            expect(getAdUrlSpy).to.not.be.called;
-            inResolver(CONSENT_POLICY_STATE.SUFFICIENT);
-            return a4a.layoutCallback().then(() => {
-              expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
-                .calledOnce;
-              expect(
-                tryExecuteRealTimeConfigSpy.withArgs(
-                  CONSENT_POLICY_STATE.SUFFICIENT,
-                  consentString
-                )
-              ).calledOnce;
-            });
-          });
+        await Services.timerFor(a4a.win).promise(50);
+        expect(getAdUrlSpy).to.not.be.called;
+        inResolver(CONSENT_POLICY_STATE.SUFFICIENT);
+        await a4a.layoutCallback();
+        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
+          .calledOnce;
+        expect(
+          tryExecuteRealTimeConfigSpy.withArgs(
+            CONSENT_POLICY_STATE.SUFFICIENT,
+            consentString
+          )
+        ).calledOnce;
       });
 
-      it('should not wait on consent if no policy', () => {
+      it('should not wait on consent if no policy', async () => {
         sandbox
           .stub(AMP.BaseElement.prototype, 'getConsentPolicy')
           .returns(null);
@@ -2080,12 +2276,11 @@ describe('amp-a4a', () => {
         );
         a4a.buildCallback();
         a4a.onLayoutMeasure();
-        return a4a
-          .layoutCallback()
-          .then(() => expect(consentServiceSpy).to.not.be.called);
+        await a4a.layoutCallback();
+        expect(consentServiceSpy).to.not.be.called;
       });
 
-      it('should pass consent state to getAdUrl', () => {
+      it('should pass consent state to getAdUrl', async () => {
         sandbox
           .stub(AMP.BaseElement.prototype, 'getConsentPolicy')
           .returns('default');
@@ -2105,19 +2300,18 @@ describe('amp-a4a', () => {
 
         a4a.buildCallback();
         a4a.onLayoutMeasure();
-        return a4a.layoutCallback().then(() => {
-          expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
-            .calledOnce;
-          expect(
-            tryExecuteRealTimeConfigSpy.withArgs(
-              CONSENT_POLICY_STATE.SUFFICIENT,
-              consentString
-            )
-          ).calledOnce;
-        });
+        await a4a.layoutCallback();
+        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
+          .calledOnce;
+        expect(
+          tryExecuteRealTimeConfigSpy.withArgs(
+            CONSENT_POLICY_STATE.SUFFICIENT,
+            consentString
+          )
+        ).calledOnce;
       });
 
-      it('should return UNKNOWN if consent exception', () => {
+      it('should return UNKNOWN if consent exception', async () => {
         expectAsyncConsoleError(/Error determining consent state.*consent err/);
         sandbox
           .stub(AMP.BaseElement.prototype, 'getConsentPolicy')
@@ -2141,15 +2335,14 @@ describe('amp-a4a', () => {
 
         a4a.buildCallback();
         a4a.onLayoutMeasure();
-        return a4a.layoutCallback().then(() => {
-          expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.UNKNOWN)).calledOnce;
-          expect(
-            tryExecuteRealTimeConfigSpy.withArgs(
-              CONSENT_POLICY_STATE.UNKNOWN,
-              null
-            )
-          ).calledOnce;
-        });
+        await a4a.layoutCallback();
+        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.UNKNOWN)).calledOnce;
+        expect(
+          tryExecuteRealTimeConfigSpy.withArgs(
+            CONSENT_POLICY_STATE.UNKNOWN,
+            null
+          )
+        ).calledOnce;
       });
     });
 
@@ -2223,9 +2416,9 @@ describe('amp-a4a', () => {
       userErrorStub = sandbox.stub(user(), 'error');
       userWarnStub = sandbox.stub(user(), 'warn');
       devExpectedErrorStub = sandbox.stub(dev(), 'expectedError');
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
-      const {doc} = iframePromise;
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
+      const {doc} = fixture;
       a4aElement = createA4aElement(doc);
       a4a = new MockA4AImpl(a4aElement);
       a4a.adUrl_ = 'https://acme.org?query';
@@ -2346,8 +2539,7 @@ describe('amp-a4a', () => {
     });
 
     it('should effectively reset the slot and invoke given callback', async () => {
-      const f = await createIframePromise();
-      const fixture = f;
+      const fixture = await createIframePromise();
       setupForAdTesting(fixture);
       const a4aElement = createA4aElement(fixture.doc);
       const a4a = new MockA4AImpl(a4aElement);
@@ -2360,6 +2552,7 @@ describe('amp-a4a', () => {
       };
       a4a.mutateElement = func => func();
       a4a.togglePlaceholder = sandbox.spy();
+
       // We don't really care about the behavior of the following methods, so
       // long as they're called the appropriate number of times. We stub them
       // out here because they would otherwise throw errors unrelated to the
@@ -2374,6 +2567,7 @@ describe('amp-a4a', () => {
       const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
       destroyFrameMock.returns(undefined);
       sandbox.stub(analytics, 'triggerAnalyticsEvent');
+
       expect(a4a.isRefreshing).to.be.false;
       await a4a.refresh(() => {});
       expect(initiateAdRequestMock).to.be.calledOnce;
@@ -2384,8 +2578,7 @@ describe('amp-a4a', () => {
     });
 
     it('should fire an analytics event when refreshing', async () => {
-      const f = await createIframePromise();
-      const fixture = f;
+      const fixture = await createIframePromise();
       setupForAdTesting(fixture);
       const a4aElement = createA4aElement(fixture.doc);
       const a4a = new MockA4AImpl(a4aElement);
@@ -2398,6 +2591,7 @@ describe('amp-a4a', () => {
       };
       a4a.mutateElement = func => func();
       a4a.togglePlaceholder = sandbox.spy();
+
       // We don't really care about the behavior of the following methods, so
       // long as they're called the appropriate number of times. We stub them
       // out here because they would otherwise throw errors unrelated to the
@@ -2411,18 +2605,19 @@ describe('amp-a4a', () => {
       tearDownSlotMock.returns(undefined);
       const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
       destroyFrameMock.returns(undefined);
+
       const triggerAnalyticsEventStub = sandbox.stub(
         analytics,
         'triggerAnalyticsEvent'
       );
+
       expect(a4a.isRefreshing).to.be.false;
       await a4a.refresh(() => {});
       expect(triggerAnalyticsEventStub).calledWith(a4a.element, 'ad-refresh');
     });
 
     it('should fail gracefully if race conditions nullify adPromise', async () => {
-      const f = await createIframePromise();
-      const fixture = f;
+      const fixture = await createIframePromise();
       setupForAdTesting(fixture);
       const a4aElement = createA4aElement(fixture.doc);
       const a4a = new MockA4AImpl(a4aElement);
@@ -2435,6 +2630,7 @@ describe('amp-a4a', () => {
       };
       a4a.mutateElement = func => func();
       a4a.togglePlaceholder = sandbox.spy();
+
       sandbox.stub(AmpA4A.prototype, 'initiateAdRequest').returns(undefined);
       sandbox.stub(AmpA4A.prototype, 'tearDownSlot').returns(undefined);
       const callback = sandbox.spy();
@@ -2477,38 +2673,35 @@ describe('amp-a4a', () => {
       let a4aElement;
       let a4a;
       let fixture;
-      beforeEach(() =>
-        createIframePromise().then(f => {
-          fixture = f;
-          setupForAdTesting(fixture);
-          fetchMock.getOnce(
-            TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
-            () => adResponse,
-            {name: 'ad'}
-          );
-          a4aElement = createA4aElement(fixture.doc);
-          a4a = new MockA4AImpl(a4aElement);
-          a4a.releaseType_ = '0';
-          return fixture;
-        })
-      );
+      beforeEach(async () => {
+        fixture = await createIframePromise();
+        setupForAdTesting(fixture);
+        fetchMock.getOnce(
+          TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+          () => adResponse,
+          {name: 'ad'}
+        );
+        a4aElement = createA4aElement(fixture.doc);
+        a4a = new MockA4AImpl(a4aElement);
+        a4a.releaseType_ = '0';
+        return fixture;
+      });
 
-      it('by default not allowed if crypto signature present but no SSL', () => {
+      it('by default not allowed if crypto signature present but no SSL', async () => {
         sandbox
           .stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
           .returns(false);
         a4a.buildCallback();
         a4a.onLayoutMeasure();
-        return a4a.layoutCallback().then(() => {
-          expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
-          expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
-        });
+        await a4a.layoutCallback();
+        expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
+        expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
       });
 
       it(
         'allowed if crypto signature present, no SSL, and overrided' +
           ' shouldPreferentialRenderWithoutCrypto',
-        () => {
+        async () => {
           sandbox
             .stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
             .returns(false);
@@ -2517,13 +2710,12 @@ describe('amp-a4a', () => {
             .callsFake(() => true);
           a4a.buildCallback();
           a4a.onLayoutMeasure();
-          return a4a.layoutCallback().then(() => {
-            verifyA4ARender(a4aElement);
-          });
+          await a4a.layoutCallback();
+          verifyA4ARender(a4aElement);
         }
       );
 
-      it('not allowed if no crypto signature present', () => {
+      it('not allowed if no crypto signature present', async () => {
         delete adResponse.headers['AMP-Fast-Fetch-Signature'];
         delete adResponse.headers[AMP_SIGNATURE_HEADER];
         sandbox
@@ -2531,17 +2723,16 @@ describe('amp-a4a', () => {
           .callsFake(() => true);
         a4a.buildCallback();
         a4a.onLayoutMeasure();
-        return a4a.layoutCallback().then(() => {
-          expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
-          expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
-        });
+        await a4a.layoutCallback();
+        expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
+        expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
       });
     });
 
     it('shouldPreferentialRenderWithoutCrypto returns false by default', async () => {
-      const iframePromise = await createIframePromise();
-      setupForAdTesting(iframePromise);
-      const {doc} = iframePromise;
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
+      const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new AmpA4A(a4aElement);
       expect(a4a.shouldPreferentialRenderWithoutCrypto()).to.be.false;
