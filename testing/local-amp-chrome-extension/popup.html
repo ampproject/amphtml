@@ -111,7 +111,7 @@
       box-sizing: border-box;
     }
 
-    label[for="base-url"], label[for="switch"] {
+    .section-header {
       margin-bottom: 16px;
       text-align: left;
       display: block;
@@ -123,26 +123,26 @@
     <script src="popup.js"></script>
   </head>
   <body>
-    <img id = "logo" src="logo.svg" />
+    <img id="logo" src="logo.svg" />
     <p class="desc">Switch between using a local distribution of AMP HTML or the online
     distribution hosted at https://cdn.ampproject.org/</p>
     <div id="switch-holder">
-      <label for="switch">Local AMP Serving</label>
-      <div id = "switch-wrapper">
-        <span id = "left">
+      <label class="section-header" for="enabled">Local AMP Serving</label>
+      <div id="switch-wrapper">
+        <span id="left">
           Online CDN
         </span>
         <div id="switch-container">
-          <input type="checkbox">
-          <div id="switch"></div>
+          <input type="checkbox" id="enabled">
+          <label id="switch" for="enabled"></label>
         </div>
-        <span id = "right">
+        <span id="right">
           Local AMP
         </span>
       </div>
     </div>
     <div id="base-url-holder">
-      <label for="base-url">Base URL</label>
+      <label for="base-url" class="section-header">Base URL</label>
       <input id="base-url" type="url">
     </div>
     <span class="notice">
