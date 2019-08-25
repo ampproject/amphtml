@@ -26,10 +26,7 @@ const isRunning = require('is-running');
 const log = require('fancy-log');
 const morgan = require('morgan');
 const webserver = require('gulp-webserver');
-const {
-  doBuildExtension,
-  maybeInitializeExtensions,
-} = require('./tasks/extension-helpers');
+const {lazyBuildExtensions, lazyBuildJs} = require('./lazy-build');
 
 const {
   SERVE_HOST: host,
@@ -42,10 +39,8 @@ const quiet = process.env.SERVE_QUIET == 'true';
 const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
 const noCachingExtensions =
   process.env.SERVE_EXTENSIONS_WITHOUT_CACHING == 'true';
-const lazyBuildExtensions = process.env.LAZY_BUILD_EXTENSIONS == 'true';
+const lazyBuild = process.env.LAZY_BUILD == 'true';
 const header = require('connect-header');
-
-const extensions = {};
 
 // Exit if the port is in use.
 process.on('uncaughtException', function(err) {
@@ -93,24 +88,9 @@ if (noCachingExtensions) {
   });
 }
 
-if (lazyBuildExtensions) {
-  maybeInitializeExtensions(extensions, /* includeLatest */ true);
-  middleware.push(function(req, res, next) {
-    const extensionUrlMatcher = /\/dist\/v0\/(.*)\.max\.js/;
-    const extensionMatch = req.url.match(extensionUrlMatcher);
-    if (extensionMatch && extensionMatch.length == 2) {
-      const extension = extensionMatch[1];
-      if (extensions[extension] && !extensions[extension].watched) {
-        return doBuildExtension(extensions, extension, {watch: true}).then(
-          () => {
-            extensions[extension].watched = true;
-            next();
-          }
-        );
-      }
-    }
-    next();
-  });
+if (lazyBuild) {
+  middleware.push(lazyBuildExtensions);
+  middleware.push(lazyBuildJs);
 }
 
 // Start gulp webserver

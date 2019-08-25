@@ -252,9 +252,8 @@ function getExtensionsToBuild() {
  * and prints a helpful message that lets the developer know how to build the
  * runtime with a list of extensions, all the extensions used by a test file,
  * or no extensions at all.
- * @param {boolean} defaultTask
  */
-function parseExtensionFlags(defaultTask) {
+function parseExtensionFlags() {
   if (!isTravisBuild()) {
     const noExtensionsMessage =
       green('⤷ Use ') +
@@ -279,23 +278,6 @@ function parseExtensionFlags(defaultTask) {
       green('⤷ Use ') +
       cyan('--extensions_from=examples/foo.amp.html ') +
       green('to build extensions from example docs.');
-    const defaultTaskMessage =
-      green('Running the default ') +
-      cyan('gulp ') +
-      green('task. (Extensions will be ') +
-      green(
-        argv.lazy_build_extensions
-          ? 'lazily built when requested from the server.)'
-          : 'built after server startup.)'
-      );
-    const lazyBuildExtensionsMessage =
-      green('⤷ Use ') +
-      cyan('--lazy_build_extensions ') +
-      green('to lazily build extensions when requested from the server.');
-    if (defaultTask) {
-      log(defaultTaskMessage);
-      log(lazyBuildExtensionsMessage);
-    }
     if (argv.extensions) {
       if (typeof argv.extensions !== 'string') {
         log(red('ERROR:'), 'Missing list of extensions.');
